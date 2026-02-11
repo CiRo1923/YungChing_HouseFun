@@ -1,0 +1,13 @@
+:root {
+  --orange-e646: #ea6846;
+  --white: #fff;
+  --white-rgb: hexToRgb(#fff);
+  --gray-ed: #ededed;
+  --gray-e5: #e5e5e5;
+  --gray-ccce: #c3c8ce;
+  --gray-999: #999;
+  --gray-666: #666;
+  --gray-333: #333;
+  --black: #000;
+  --black-rgb: hexToRgb(#000);
+}

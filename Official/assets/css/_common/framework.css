@@ -1,0 +1,19 @@
+html,
+body {
+  font-family: 'Noto Sans TC', '微軟正黑體', 'Microsoft JhengHei', 'Heiti TC',
+    '黑體', Arial, Helvetica, sans-serif;
+  text-size-adjust: none;
+
+  @apply font-normal leading-[1.44] text-[var(--black)];
+}
+
+html {
+  height: -webkit-fill-available;
+}
+
+body {
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+
+  @apply flex flex-col bg-[var(--gray-f1)];
+}

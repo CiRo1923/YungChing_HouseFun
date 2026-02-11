@@ -1,0 +1,6 @@
+:root {
+  --white: #fff;
+  --white-rgb: hexToRgb(#fff);
+  --black: #000;
+  --black-rgb: hexToRgb(#000);
+}

@@ -1,0 +1,114 @@
+html,
+body {
+  font-family: 'Noto Sans TC', '微軟正黑體', 'Microsoft JhengHei', 'Heiti TC',
+    '黑體', Arial, Helvetica, sans-serif;
+  text-size-adjust: none;
+
+  @apply font-normal leading-[1.56] text-[--black];
+}
+
+html {
+  height: -webkit-fill-available;
+}
+
+body {
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+
+  @apply flex flex-col bg-[--gray-ed];
+}
+
+#__nuxt {
+  @apply flex flex-grow flex-col;
+}
+
+* {
+  @apply max-h-[999999px];
+}
+
+a {
+  @apply no-underline;
+}
+
+button {
+  @apply text-[inherit];
+
+  &:not(.overflow-hidden) {
+    @apply overflow-visible;
+  }
+
+  @apply bg-transparent;
+}
+
+b,
+strong {
+  @apply font-bold;
+}
+
+a,
+button,
+input,
+textarea,
+select {
+  outline: 0;
+
+  @apply appearance-none;
+
+  &:focus {
+    outline: 0;
+  }
+
+  &::-ms-expand {
+    @apply hidden;
+  }
+}
+
+small {
+  @apply text-[100%] leading-[inherit];
+}
+
+em,
+i {
+  @apply not-italic;
+}
+
+input[type='search'] {
+  &::-webkit-search-cancel-button {
+    @apply hidden;
+  }
+}
+
+@screen pMax {
+  html,
+  body {
+    @apply text-[16px];
+  }
+}
+
+@screen pMin {
+  html,
+  body {
+    @apply text-vmp;
+  }
+}
+
+@screen t {
+  html,
+  body {
+    @apply text-vmt;
+  }
+}
+
+@screen m {
+  html,
+  body {
+    @apply text-vmm;
+  }
+}
+
+@screen mLandscape {
+  html,
+  body {
+    @apply text-vmmls;
+  }
+}
