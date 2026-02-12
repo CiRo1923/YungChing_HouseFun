@@ -1,0 +1,36 @@
+.m-card {
+  &.\-\-bg-white {
+    @apply bg-[--white];
+  }
+}
+
+@screen p {
+  .m-card {
+    &.\-\-rounded-15,
+    &.p\:\-\-rounded-15,
+    &.pt\:\-\-rounded-15 {
+      @apply rounded-[15px];
+    }
+  }
+}
+
+@screen t {
+  .m-card {
+    &.\-\-rounded-15,
+    &.pt\:\-\-rounded-15,
+    &.tm\:\-\-rounded-15,
+    &.t\:\-\-rounded-15 {
+      @apply rounded-[15px];
+    }
+  }
+}
+
+@screen m {
+  .m-card {
+    &.\-\-rounded-15,
+    &.tm\:\-\-rounded-15,
+    &.m\:\-\-rounded-15 {
+      @apply rounded-[15px];
+    }
+  }
+}

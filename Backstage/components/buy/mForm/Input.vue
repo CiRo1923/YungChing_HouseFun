@@ -257,4 +257,4 @@ watch(
     </ErrorMessage>
   </div>
 </template>
-<style src="@css/_modules/mForm.css"></style>
+<style src="@css/_modules/buy/mForm.css"></style>

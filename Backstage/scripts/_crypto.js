@@ -8,7 +8,7 @@ const enString = (string) => {
 const deString = (string) => {
   return string.replace(/^'|'$/g, '')
 }
-export const enCrypto = (string, type) => {
+export const enCrypto = (string) => {
   const content =
     typeof string !== 'string'
       ? typeof string === 'number' || typeof string === 'boolean'

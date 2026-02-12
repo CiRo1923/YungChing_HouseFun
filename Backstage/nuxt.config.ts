@@ -2,11 +2,9 @@
 
 import CONFIG from './config.js'
 import POSTCSSFUNCTIONS from './postcss.function.js'
-import env from './env.config.js'
 
 import { resolve } from 'path'
 
-import type { NuxtConfig } from 'nuxt/schema'
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
 import { fileURLToPath } from 'url'
 
@@ -15,7 +13,9 @@ export default defineNuxtConfig({
     enabled: true,
   },
   runtimeConfig: {
-    public: env,
+    public: Object.fromEntries(
+      Object.entries(process.env).filter(([k]) => k.startsWith('NUXT_PUBLIC_'))
+    ),
   },
   imports: {
     autoImport: true,
@@ -51,7 +51,7 @@ export default defineNuxtConfig({
   },
   vite: {
     esbuild: {
-      drop: ['console'],
+      drop: process.env.NODE_ENV === 'production' ? ['console'] : [],
     },
     build: {
       rollupOptions: {
@@ -79,7 +79,7 @@ export default defineNuxtConfig({
       createSvgIconsPlugin({
         iconDirs: [resolve(process.cwd(), `${CONFIG.svg}`)],
         symbolId: '[name]',
-      }) as any,
+      }) as never,
     ],
     server: {
       proxy: CONFIG.proxy,
@@ -134,4 +134,7 @@ export default defineNuxtConfig({
     port: CONFIG.port,
     host: '0.0.0.0',
   },
+  // nitro: {
+  //   devProxy: CONFIG.proxy,
+  // },
 })

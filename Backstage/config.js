@@ -12,8 +12,9 @@ module.exports = {
   svg: '_svg',
   proxy: {
     '/api': {
-      target: process.env.VITE_API_PATH,
+      target: process.env.NUXT_PUBLIC_API_PATH,
       changeOrigin: true,
+      secure: false,
     },
   },
 }

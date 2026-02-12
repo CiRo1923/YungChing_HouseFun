@@ -555,6 +555,7 @@ export const replaceSymbolToTag = (content, symbol, tag) => {
 // 判斷特殊字元長度
 export const unicodLength = (text) => {
   const regexUnicode =
+    // eslint-disable-next-line no-misleading-character-class
     /\ud83c[\udffb-\udfff](?=\ud83c[\udffb-\udfff])|(?:[^\ud800-\udfff][\u0300-\u036f\ufe20-\ufe2f\u20d0-\u20ff\u1ab0-\u1aff\u1dc0-\u1dff]?|[\u0300-\u036f\ufe20-\ufe2f\u20d0-\u20ff\u1ab0-\u1aff\u1dc0-\u1dff]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff]|[\ud800-\udfff])[\ufe0e\ufe0f]?(?:[\u0300-\u036f\ufe20-\ufe2f\u20d0-\u20ff\u1ab0-\u1aff\u1dc0-\u1dff]|\ud83c[\udffb-\udfff])?(?:\u200d(?:[^\ud800-\udfff]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff])[\ufe0e\ufe0f]?(?:[\u0300-\u036f\ufe20-\ufe2f\u20d0-\u20ff\u1ab0-\u1aff\u1dc0-\u1dff]|\ud83c[\udffb-\udfff])?)*/g
 
   return text ? text.match(regexUnicode).length : 0
@@ -661,10 +662,10 @@ export const onUUID = () => {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
     let random = Math.random() * 16
     if (timestamp > 0) {
-      random = (timestamp + random) % 16 | 0
+      random = ((timestamp + random) % 16) | 0
       timestamp = Math.floor(timestamp / 16)
     } else {
-      random = (perforNow + random) % 16 | 0
+      random = ((perforNow + random) % 16) | 0
       perforNow = Math.floor(perforNow / 16)
     }
     return (c === 'x' ? random : (random & 0x3) | 0x8).toString(16)
@@ -762,7 +763,7 @@ export const timeFormat = {
 
     // 拆成 h/m/s（用於組合輸出）
     const hh = Math.floor(totalSec / 3600)
-    const ss = totalSec % 60
+    // const ss = totalSec % 60
 
     // ---- 單位輸出（小數/整數）----
     // EX：300s -> 5m -> 0.083h

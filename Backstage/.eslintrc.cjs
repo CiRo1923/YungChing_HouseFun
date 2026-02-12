@@ -20,5 +20,12 @@ module.exports = {
     'vue/multi-word-component-names': 'off',
     'vue/no-v-html': 'off',
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
+    'vue/attributes-order': [
+      'error',
+      {
+        alphabetical: true,
+        sortLineLength: true,
+      },
+    ],
   },
 }
