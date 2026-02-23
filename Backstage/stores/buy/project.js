@@ -131,6 +131,8 @@ export const useBuyProjectStore = defineStore('buyProject', () => {
 
     if (status === 200) {
       options.value.floor = data || []
+      apiData.value.floorFromToken = data[0].value
+      apiData.value.floorToToken = data[0].value
     }
 
     return { config, status, data }
