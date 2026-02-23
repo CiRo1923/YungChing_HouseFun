@@ -103,7 +103,7 @@ export default defineNuxtConfig({
         {
           rel: 'shortcut icon',
           type: 'image/x-icon',
-          href: `${process.env.VITE_PATH}/favicon.ico`,
+          href: `${process.env.NUXT_PUBLIC_PATH}/favicon.ico`,
         },
         {
           rel: 'stylesheet',
@@ -134,7 +134,7 @@ export default defineNuxtConfig({
     port: CONFIG.port,
     host: '0.0.0.0',
   },
-  // nitro: {
-  //   devProxy: CONFIG.proxy,
-  // },
+  nitro: {
+    preset: 'node-server',
+  },
 })

@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue'
 
 export default {
-  name: 'm-item-container',
+  name: 'MItemContainer',
 }
 </script>
 
@@ -98,8 +98,8 @@ defineExpose({
       v-for="(item, index) in props.data.items"
       :key="`m_item_${index}`"
     >
-      <p class="flex-grow" v-html="item.item" v-if="!item.children" />
-      <div class="flex-grow" v-else>
+      <p class="grow" v-html="item.item" v-if="!item.children" />
+      <div class="grow" v-else>
         <p v-html="item.item" />
         <m-item-container
           :data="item.children"
@@ -146,7 +146,7 @@ defineExpose({
   counter-increment: item;
 
   &:before {
-    @apply pointer-events-none flex-shrink-0;
+    @apply pointer-events-none shrink-0;
   }
 
   &[data-label] {

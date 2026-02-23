@@ -1,6 +1,13 @@
 <script setup>
+import FormLabel from '@components/buy/mForm/Label.vue'
+import FormInput from '@components/buy/mForm/Input.vue'
+import Anchor from '@components/buy/mAnchor.vue'
+
 import TabItem from '@pages/buy/_components/basic/TabItem.vue'
 
+import { Form } from 'vee-validate'
+
+const url = ref(null)
 const items = readonly({
   label: 'disc',
   items: [
@@ -15,10 +22,63 @@ const items = readonly({
     },
   ],
 })
+
+const onClick = async (validate) => {
+  const { valid } = await validate()
+
+  if (valid) {
+    console.log('url Import')
+  }
+}
 </script>
 
 <template>
-  <TabItem :data="items" />
+  <Form as="div" v-slot="{ validate }">
+    <div class="p:flex p:gap-x-[16px]">
+      <FormLabel
+        label="網址匯入"
+        :config="{
+          isRequired: false,
+        }"
+        :setClass="{
+          main: 'shrink-0 p:ml-[12px] p:flex p:h-[40px] p:items-center',
+        }"
+      />
+      <FormInput
+        name="URL"
+        v-model="url"
+        :config="{
+          placeholder: '請輸入',
+        }"
+        :rules="{
+          custom: {
+            valid: /^http/,
+            errorMessage: '請輸入正確網址格式',
+          },
+        }"
+        :setClass="{
+          main: '--height-40 --px-12 --py-8 grow',
+        }"
+      />
+      <Anchor
+        text="匯入資料"
+        :config="{
+          isDisabled: !url,
+        }"
+        :setClass="{
+          main: '--oval --height-40 --px-20 --py-5 --bg-green-6a2d --text-white shrink-0',
+          text: 'font-semibold',
+        }"
+        @click="onClick(validate)"
+      />
+    </div>
+    <TabItem
+      :data="items"
+      :setClass="{
+        main: 'mt-[16px]',
+      }"
+    />
+  </Form>
 </template>
 
 <style></style>

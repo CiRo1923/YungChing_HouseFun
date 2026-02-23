@@ -1,0 +1,160 @@
+.m-form-element {
+  &:not(label) {
+    @apply flex items-center gap-x-[8px] overflow-hidden rounded-[5px] border-[1px] transition-colors duration-300;
+
+    &:not(:disabled):not(.\-\-disabled) {
+      .m-form-type {
+        @apply text-[--gray-666];
+
+        &::placeholder,
+        &.\-\-placeholder {
+          @apply text-[--gray-999];
+        }
+      }
+    }
+
+    &:not(.\-\-error) {
+      @apply border-[--gray-e5];
+    }
+
+    &:disabled,
+    &.\-\-disabled {
+      @apply cursor-not-allowed bg-[--gray-f2];
+
+      .m-form-type {
+        @apply pointer-events-none;
+
+        &,
+        &::placeholder,
+        &.\-\-placeholder {
+          @apply text-[--gray-ccce];
+        }
+      }
+    }
+
+    &.\-\-error {
+      @apply border-[--orange-e646];
+
+      .m-form-length,
+      .m-form-assist {
+        @apply text-[--orange-e646];
+      }
+    }
+  }
+}
+
+.m-form-type {
+  @apply h-full bg-transparent text-[16px];
+}
+
+.m-form-clear-button {
+  @apply transition-opacitys duration-300;
+
+  &:not(.\-\-show) {
+    @apply pointer-events-none invisible opacity-0;
+  }
+
+  &.\-\-show {
+    @apply visible opacity-100;
+  }
+}
+
+.m-form-clear-icon {
+  @apply h-[18px] w-[18px] p-[4px] text-[--gray-999];
+}
+
+.m-form-length,
+.m-form-assist {
+  @apply transition-colors duration-300;
+}
+
+.m-form-error {
+  @apply mt-[4px] text-[14px];
+}
+
+@screen p {
+  .m-form {
+    &.\-\-px-12,
+    &.p\:\-\-px-12,
+    &.pt\:\-\-px-12 {
+      .m-form-element {
+        @apply px-[12px];
+      }
+    }
+
+    &.\-\-py-8,
+    &.p\:\-\-py-8,
+    &.pt\:\-\-py-8 {
+      .m-form-element {
+        @apply py-[8px];
+      }
+    }
+
+    &.\-\-height-40,
+    &.p\:\-\-height-40,
+    &.pt\:\-\-height-40 {
+      .m-form-element {
+        @apply h-[40px];
+      }
+    }
+  }
+}
+
+@screen t {
+  .m-form {
+    &.\-\-px-12,
+    &.pt\:\-\-px-12,
+    &.tm\:\-\-px-12,
+    &.t\:\-\-px-12 {
+      .m-form-element {
+        @apply px-[12px];
+      }
+    }
+
+    &.\-\-py-8,
+    &.pt\:\-\-py-8,
+    &.tm\:\-\-py-8,
+    &.t\:\-\-py-8 {
+      .m-form-element {
+        @apply py-[8px];
+      }
+    }
+
+    &.\-\-height-40,
+    &.pt\:\-\-height-40,
+    &.tm\:\-\-height-40,
+    &.t\:\-\-height-40 {
+      .m-form-element {
+        @apply h-[40px];
+      }
+    }
+  }
+}
+
+@screen m {
+  .m-form {
+    &.\-\-px-12,
+    &.tm\:\-\-px-12,
+    &.m\:\-\-px-12 {
+      .m-form-element {
+        @apply px-[12px];
+      }
+    }
+
+    &.\-\-py-8,
+    &.tm\:\-\-py-8,
+    &.m\:\-\-py-8 {
+      .m-form-element {
+        @apply py-[8px];
+      }
+    }
+
+    &.\-\-height-40,
+    &.tm\:\-\-height-40,
+    &.m\:\-\-height-40 {
+      .m-form-element {
+        @apply h-[40px];
+      }
+    }
+  }
+}

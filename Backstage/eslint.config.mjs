@@ -8,10 +8,15 @@ export default withNuxt({
       'error',
       'never',
       {
+        autofix: true,
+      },
+      {
         ignore: [],
         ignoreTags: [],
       },
     ],
+    'vue/no-v-html': 'off',
+    'vue/no-multiple-template-root': 'off',
     'vue/html-self-closing': [
       'error',
       {

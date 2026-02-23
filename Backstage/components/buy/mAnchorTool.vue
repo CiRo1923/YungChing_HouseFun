@@ -43,7 +43,7 @@ onUnmounted(() => {
   <div class="m-toolbar">
     <ul class="p:flex p:items-center p:gap-x-[16px]">
       <!-- device 預設值先給 p 平板、手機 先用 css 隱藏；畫面不會跳閃 -->
-      <li class="tm:hidden p:flex-shrink-0" v-if="isDeviceP">
+      <li class="tm:hidden p:shrink-0" v-if="isDeviceP">
         <Anchor
           :text="anchor.text"
           :to="anchor.to"
@@ -59,9 +59,7 @@ onUnmounted(() => {
           @click="anchor.onClick"
         />
       </li>
-      <li
-        class="flex h-[30px] flex-col justify-center rounded-full bg-[--white] px-[20px] p:flex-grow"
-      >
+      <li class="flex h-[30px] flex-col justify-center rounded-full bg-[--white] px-[20px] p:grow">
         <slot />
       </li>
     </ul>

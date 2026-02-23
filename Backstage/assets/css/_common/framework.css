@@ -1,7 +1,8 @@
 html,
 body {
-  font-family: 'Noto Sans TC', '微軟正黑體', 'Microsoft JhengHei', 'Heiti TC',
-    '黑體', Arial, Helvetica, sans-serif;
+  font-family:
+    'Noto Sans TC', '微軟正黑體', 'Microsoft JhengHei', 'Heiti TC', '黑體', Arial, Helvetica,
+    sans-serif;
   text-size-adjust: none;
 
   @apply font-normal leading-[1.56] text-[--black];
@@ -19,7 +20,7 @@ body {
 }
 
 #__nuxt {
-  @apply flex flex-grow flex-col;
+  @apply flex grow flex-col;
 }
 
 * {

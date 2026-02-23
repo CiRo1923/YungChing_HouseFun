@@ -1,4 +1,5 @@
 <script setup>
+import SvgIcon from '@components/common/SvgIcon.vue'
 import ErrorMessageElem from '@components/buy/mErrorMessageElem.vue'
 
 import { deepMerge, numberComma } from '@js/_prototype.js'
@@ -37,7 +38,7 @@ const props = defineProps({
     default: null,
   },
   rules: {
-    type: [String, Object],
+    type: Object,
     default: null,
   },
   config: {
@@ -59,10 +60,12 @@ const config = computed(() => {
       length: null,
       minlength: null,
       maxlength: null,
+      formatLength: null,
       isReadonly: false,
       isDisabled: false,
       isError: false,
       inputMode: null,
+      isExistClose: true, // 輸入後開啟 X 清除
       inputChinese: true, // 開啟關閉輸入中文
       comma: false, // 啟用千分位功能
       checkNotIsZero: false, // 輸入欄位致不能為 0
@@ -72,6 +75,15 @@ const config = computed(() => {
   )
 })
 const isNumeric = computed(() => config.value.inputMode === 'numeric')
+const formatLength = computed(() => {
+  const { formatLength, maxlength } = config.value
+
+  return formatLength && maxlength
+    ? formatLength.replace(/\{\s*(length|maxlength)\s*\}/g, (_, key) => {
+        return key === 'length' ? (model.value ? String(model.value.length) : 0) : String(maxlength)
+      })
+    : null
+})
 const setClass = computed(() => {
   return {
     ...{
@@ -79,6 +91,7 @@ const setClass = computed(() => {
       container: '',
       element: '',
       type: '',
+      formatLength: '',
       frontAssist: '',
       rearAssist: '',
       suffix: '',
@@ -178,6 +191,10 @@ const onWatchModel = (value) => {
   model.value = isComma ? numberComma.add(value, false) : value
 }
 
+const onClear = () => {
+  model.value = null
+}
+
 watch(
   () => props.modelValue,
   (value) => {
@@ -198,7 +215,7 @@ watch(
       :rules="props.rules"
       v-slot="{ field, errorMessage }"
     >
-      <div class="m-form-container flex">
+      <div class="m-form-container" :class="setClass.container">
         <div
           class="m-form-element"
           :class="[
@@ -210,7 +227,7 @@ watch(
           ]"
         >
           <div
-            class="m-form-assist flex-shrink-0"
+            class="m-form-assist shrink-0"
             :class="setClass.frontAssist"
             v-if="$slots.frontAssist"
           >
@@ -219,9 +236,10 @@ watch(
           <input
             :id="props.name"
             :type="props.type"
-            class="m-form-type min-w-0 flex-grow"
+            class="m-form-type min-w-0 grow"
             :class="setClass.type"
             v-bind="onBind(field)"
+            :inputMode="config.inputMode"
             :minlength="config.minlength || config.length"
             :maxlength="config.maxlength || config.length"
             :placeholder="config.placeholder"
@@ -233,16 +251,30 @@ watch(
             @input="onInput($event)"
             @keydown.enter="onEnter($event)"
           />
-          <div
-            class="m-form-assist flex-shrink-0"
-            :class="setClass.rearAssist"
-            v-if="$slots.rearAssist"
+          <button
+            type="button"
+            class="m-form-clear-button"
+            :class="{
+              '--show': model,
+            }"
+            @click="onClear"
+            v-if="config.isExistClose && !config.isDisabled"
           >
+            <SvgIcon icon="icon_xmark" class="m-form-clear-icon" />
+          </button>
+          <span class="m-form-length shrink-0" :class="setClass.length" v-if="formatLength">
+            {{ formatLength }}
+          </span>
+          <div class="m-form-assist shrink-0" :class="setClass.rearAssist" v-if="$slots.rearAssist">
             <slot name="rearAssist" />
           </div>
         </div>
-        <small class="m-form-suffix" :class="setClass.suffix" v-if="$slots.suffix">
-          <slot name="suffix" />
+        <small class="m-form-suffix shrink-0" :class="setClass.suffix" v-if="$slots.suffix">
+          <slot
+            name="suffix"
+            :maxlength="config.length || config.maxlength"
+            :length="model ? model.length : 0"
+          />
         </small>
       </div>
     </Field>

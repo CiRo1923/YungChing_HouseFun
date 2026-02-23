@@ -1,6 +1,7 @@
 <script setup>
 import SvgIcon from '@components/common/SvgIcon.vue'
 
+const emits = defineEmits(['click'])
 const props = defineProps({
   text: {
     type: String,
@@ -90,7 +91,8 @@ const setClass = computed(() => {
 })
 
 const onClick = (e) => {
-  if (props.isDisabled) {
+  const { isDisabled } = config.value
+  if (isDisabled) {
     e.preventDefault()
   } else {
     emits('click', e)
@@ -101,10 +103,11 @@ const onClick = (e) => {
 <template>
   <component
     :is="as"
-    class="m-anchor relative inline-flex items-center justify-center gap-x-[5px] transition-colors duration-300"
+    class="m-anchor relative inline-flex items-center justify-center gap-x-[5px] tracking-[0.06em] transition-colors duration-300"
     :class="setClass.main"
     v-bind="bind"
     :disabled="config.isDisabled"
+    @click="onClick"
   >
     <slot>
       <SvgIcon
@@ -112,9 +115,9 @@ const onClick = (e) => {
         :class="setClass.icon"
         v-if="icon.position === 'left' && icon.name"
       />
-      <em class="m-anchor-text" :class="setClass.text">
+      <b class="m-anchor-text" :class="setClass.text">
         {{ props.text }}
-      </em>
+      </b>
       <SvgIcon
         :icon="icon.name"
         :class="setClass.icon"
@@ -126,69 +129,98 @@ const onClick = (e) => {
 
 <style lang="postcss">
 .m-anchor {
-  &.\-\-oval {
-    @apply rounded-full;
-  }
-
-  &.\-\-bg-white {
-    @apply bg-[--white];
-  }
-
   &[class*='--border'] {
     @apply border-[1px];
   }
 
-  &.\-\-border-gray-e5 {
-    @apply border-[--gray-e5];
+  &.\-\-oval {
+    @apply rounded-full;
+  }
+
+  &:not(:disabled) {
+    &.\-\-text-white {
+      @apply text-[--white];
+    }
+
+    &.\-\-bg-green-6a2d {
+      @apply bg-[--green-6a2d];
+    }
+
+    &.\-\-border-gray-e5 {
+      @apply border-[--gray-e5];
+    }
+  }
+
+  &:disabled {
+    @apply cursor-not-allowed bg-[--gray-e5] text-[--white];
   }
 }
 
 @screen p {
   .m-anchor {
-    &.\-\-px-15,
-    &.p\:\-\-px-15,
-    &.pt\:\-\-px-15 {
-      @apply px-[15px];
+    &.\-\-px-20,
+    &.p\:\-\-px-20,
+    &.pt\:\-\-px-20 {
+      @apply px-[20px];
     }
 
-    &.\-\-height-30,
-    &.p\:\-\-height-30,
-    &.pt\:\-\-height-30 {
-      @apply h-[30px];
+    &.\-\-py-5,
+    &.p\:\-\-py-5,
+    &.pt\:\-\-py-5 {
+      @apply py-[5px];
+    }
+
+    &.\-\-height-40,
+    &.p\:\-\-height-40,
+    &.pt\:\-\-height-40 {
+      @apply h-[40px];
     }
   }
 }
 
 @screen t {
   .m-anchor {
-    &.\-\-px-15,
-    &.pt\:\-\-px-15,
-    &.tm\:\-\-px-15,
-    &.t\:\-\-px-15 {
-      @apply px-[15px];
+    &.\-\-px-20,
+    &.pt\:\-\-px-20,
+    &.tm\:\-\-px-20,
+    &.t\:\-\-px-20 {
+      @apply px-[20px];
     }
 
-    &.\-\-height-30,
-    &.pt\:\-\-height-30,
-    &.tm\:\-\-height-30,
-    &.t\:\-\-height-30 {
-      @apply h-[30px];
+    &.\-\-py-5,
+    &.pt\:\-\-py-5,
+    &.tm\:\-\-py-5,
+    &.t\:\-\-py-5 {
+      @apply py-[5px];
+    }
+
+    &.\-\-height-40,
+    &.pt\:\-\-height-40,
+    &.tm\:\-\-height-40,
+    &.t\:\-\-height-40 {
+      @apply h-[40px];
     }
   }
 }
 
 @screen m {
   .m-anchor {
-    &.\-\-px-15,
-    &.tm\:\-\-px-15,
-    &.m\:\-\-px-15 {
-      @apply px-[15px];
+    &.\-\-px-20,
+    &.tm\:\-\-px-20,
+    &.m\:\-\-px-20 {
+      @apply px-[20px];
     }
 
-    &.\-\-height-30,
-    &.tm\:\-\-height-30,
-    &.m\:\-\-height-30 {
-      @apply h-[30px];
+    &.\-\-py-5,
+    &.tm\:\-\-py-5,
+    &.m\:\-\-py-5 {
+      @apply py-[5px];
+    }
+
+    &.\-\-height-40,
+    &.tm\:\-\-height-40,
+    &.m\:\-\-height-40 {
+      @apply h-[40px];
     }
   }
 }

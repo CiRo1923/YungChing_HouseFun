@@ -1,4 +1,14 @@
-import { apiGETEealEstatePurposeCheckOptions, apiGETCitySelectOptions } from '@js/buy/_api/index.js'
+import {
+  apiGETRealEstatePurposeCheckOptions,
+  apiGETCitySelectOptions,
+  apiGETDistrictSelectOptions,
+  apiGETRealEstateTypeSelectOptions,
+  apiGETRealEstateLegalUsageSelectOptions,
+  apiGETRealEstateZoingCheckOptions,
+  apiGETRealEstateZoingCitySelectOptions,
+  apiGETRealEstateZoingLandSelectOptions,
+  apiGETRealEstateFloorSelectOptions,
+} from '@js/buy/_api/index.js'
 import { defineStore } from 'pinia'
 
 export const useBuyProjectStore = defineStore('buyProject', () => {
@@ -6,11 +16,43 @@ export const useBuyProjectStore = defineStore('buyProject', () => {
   const options = ref({
     casePurpose: null,
     city: null,
+    area: null,
+    caseType: null,
+    caseUsage: null,
+    caseZoing: null,
+    zoingCity: null,
+    zoingLand: null,
+    floor: null,
   })
-  const onApiGETEealEstatePurposeCheckOptions = async () => {
+  const apiData = ref({
+    casePurposeToken: '',
+    caseTitle: '',
+    cityID: '',
+    districtID: '',
+    road: '',
+    lane: '',
+    alley: '',
+    addrNum: '',
+    addrNumOf: '',
+    floor: '',
+    addrNumOfFloor: '',
+    caseTypeToken: '',
+    caseUsageToken: '',
+    caseZoingToken: '',
+    caseZoingTypeToken: '',
+    caseZoingTypeOther: '',
+    caseLandNo: '',
+    isSingleFloor: true,
+    floorFromToken: '',
+    caseFloorFrom: '',
+    floorToToken: '',
+    caseFloorTo: '',
+    caseFloorTotal: '',
+  })
+  const onApiGETRealEstatePurposeCheckOptions = async () => {
     // const { public: env } = useRuntimeConfig()
     // const hfID = env.NUXT_PUBLIC_HFID_DEFAULT
-    const { config, status, data } = await apiGETEealEstatePurposeCheckOptions()
+    const { config, status, data } = await apiGETRealEstatePurposeCheckOptions()
 
     if (status === 200) {
       options.value.casePurpose = data || []
@@ -27,11 +69,85 @@ export const useBuyProjectStore = defineStore('buyProject', () => {
 
     return { config, status, data }
   }
+  const onApiGETDistrictSelectOptions = async (cityID) => {
+    const { config, status, data } = await apiGETDistrictSelectOptions({
+      cityCode: cityID,
+    })
+
+    // if (status === 200) {
+    //   console.log(data)
+    // }
+
+    return { config, status, data }
+  }
+  const onApiGETRealEstateTypeSelectOptions = async () => {
+    const { config, status, data } = await apiGETRealEstateTypeSelectOptions()
+
+    if (status === 200) {
+      options.value.caseType = data || []
+    }
+
+    return { config, status, data }
+  }
+  const onApiGETRealEstateLegalUsageSelectOptions = async () => {
+    const { config, status, data } = await apiGETRealEstateLegalUsageSelectOptions()
+
+    if (status === 200) {
+      options.value.caseUsage = data || []
+    }
+
+    return { config, status, data }
+  }
+  const onApiGETRealEstateZoingCheckOptions = async () => {
+    const { config, status, data } = await apiGETRealEstateZoingCheckOptions()
+
+    if (status === 200) {
+      options.value.caseZoing = data || []
+      apiData.value.caseZoingToken = data[0].code
+    }
+
+    return { config, status, data }
+  }
+  const onApiGETRealEstateZoingCitySelectOptions = async () => {
+    const { config, status, data } = await apiGETRealEstateZoingCitySelectOptions()
+
+    if (status === 200) {
+      options.value.zoingCity = data || []
+    }
+
+    return { config, status, data }
+  }
+  const onApiGETRealEstateZoingLandSelectOptions = async () => {
+    const { config, status, data } = await apiGETRealEstateZoingLandSelectOptions()
+
+    if (status === 200) {
+      options.value.zoingLand = data || []
+    }
+
+    return { config, status, data }
+  }
+  const onApiGETRealEstateFloorSelectOptions = async () => {
+    const { config, status, data } = await apiGETRealEstateFloorSelectOptions()
+
+    if (status === 200) {
+      options.value.floor = data || []
+    }
+
+    return { config, status, data }
+  }
 
   return {
     NAME,
     options,
-    onApiGETEealEstatePurposeCheckOptions,
+    apiData,
+    onApiGETRealEstatePurposeCheckOptions,
     onApiGETCitySelectOptions,
+    onApiGETDistrictSelectOptions,
+    onApiGETRealEstateTypeSelectOptions,
+    onApiGETRealEstateLegalUsageSelectOptions,
+    onApiGETRealEstateZoingCheckOptions,
+    onApiGETRealEstateZoingCitySelectOptions,
+    onApiGETRealEstateZoingLandSelectOptions,
+    onApiGETRealEstateFloorSelectOptions,
   }
 })

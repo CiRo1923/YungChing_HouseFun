@@ -18,14 +18,17 @@ definePageMeta({
 })
 
 const buyProject = useBuyProjectStore()
-// const { options } = storeToRefs(buyProject)
+const { options, apiData } = storeToRefs(buyProject)
 await awaitAllPromise([
-  useAsyncData('purpose-options', () => buyProject.onApiGETEealEstatePurposeCheckOptions()),
+  useAsyncData('purpose-options', () => buyProject.onApiGETRealEstatePurposeCheckOptions()),
   useAsyncData('city-options', () => buyProject.onApiGETCitySelectOptions()),
+  useAsyncData('type-options', () => buyProject.onApiGETRealEstateTypeSelectOptions()),
+  useAsyncData('usage-options', () => buyProject.onApiGETRealEstateLegalUsageSelectOptions()),
+  useAsyncData('zoing-options', () => buyProject.onApiGETRealEstateZoingCheckOptions()),
+  useAsyncData('zoingCity-options', () => buyProject.onApiGETRealEstateZoingCitySelectOptions()),
+  useAsyncData('zoingLand-options', () => buyProject.onApiGETRealEstateZoingLandSelectOptions()),
+  useAsyncData('floor-options', () => buyProject.onApiGETRealEstateFloorSelectOptions()),
 ])
-
-// useAsyncData(() => buyProject.onApiGETEealEstatePurposeCheckOptions())
-// useAsyncData(() => buyProject.onApiGETCitySelectOptions())
 
 const onSubmit = async (validate) => {
   const { valid } = await validate()
@@ -46,18 +49,17 @@ const onSubmit = async (validate) => {
       <BackStep :active="0" />
     </template>
     <TabCheck />
-    <Form
-      as="ul"
-      class="tm:mt-[32px] tm:space-y-[24px] p:mt-[32px] p:space-y-[32px]"
-      v-slot="{ validate }"
-    >
-      <li>
-        <!-- 基本資料 -->
-        <CardFilterInfo />
-      </li>
-      <li>
+    <Form as="div" class="tm:mt-[24px] p:mt-[32px]" v-slot="{ validate }">
+      <pre>{{ apiData }}</pre>
+      <ul class="tm:space-y-[24px] p:space-y-[32px]">
+        <li>
+          <!-- 基本資料 -->
+          <CardFilterInfo />
+        </li>
+      </ul>
+      <div class="tm:mt-[24px] p:mt-[32px]">
         <button type="button" @click="onSubmit(validate)">next</button>
-      </li>
+      </div>
     </Form>
     <NuxtLink
       :to="{

@@ -1,25 +1,27 @@
 <script setup>
+import SvgIcon from '@components/common/SvgIcon.vue'
 import ErrorMessageElem from '@components/buy/mErrorMessageElem.vue'
 
 import '@js/_validation.js'
 
 import { Field, ErrorMessage } from 'vee-validate'
 
+const emits = defineEmits(['update:modelValue', 'change'])
 const props = defineProps({
   name: {
     type: String,
-    default: null,
+    default: '',
   },
   options: {
     type: Array,
     default: () => [],
   },
   modelValue: {
-    type: [String, Number],
+    type: [String, Number, Boolean, Array],
     default: null,
   },
   rules: {
-    type: [String, Object],
+    type: Object,
     default: null,
   },
   config: {
@@ -31,12 +33,21 @@ const props = defineProps({
     default: () => {},
   },
 })
-const model = ref(null)
+const selected = ref(null)
+const model = computed({
+  get() {
+    return props.modelValue
+  },
+  set(value) {
+    emits('update:modelValue', value)
+  },
+})
 const config = computed(() => {
   return {
-    isReadonly: false,
-    isDisabled: false,
-    isError: false,
+    modelMode: 'value',
+    // isReadonly: false,
+    // isDisabled: false,
+    // isError: false,
     schema: {
       label: 'label',
       value: 'value',
@@ -49,45 +60,77 @@ const setClass = computed(() => {
     ...{
       main: '',
       radios: '',
-      item: '',
+      container: '',
+      element: '',
+      type: '',
       error: '',
     },
     ...props.setClass,
   }
 })
+const onSelected = () => {
+  const { schema } = config.value
+  const isModelData = typeof model.value === 'object'
+
+  selected.value = model.value ? (isModelData ? model.value[schema.value] : model.value) : ''
+}
+const onChange = (item) => {
+  const { modelMode, schema } = config.value
+  const isModelModeData = modelMode === 'data'
+
+  model.value = isModelModeData ? item : item[schema.value]
+  emits('change', item)
+}
+
+onSelected()
 </script>
 
 <template>
   <div class="m-form --radios-oval overflow-hidden" :class="setClass.main">
     <ul
-      class="m-form-radios inline-flex overflow-hidden tm:flex-wrap tm:gap-x-[8px] tm:gap-y-[12px] p:rounded-[5px] p:bg-[--gray-f2]"
+      class="m-form-radios inline-flex overflow-hidden tm:flex-wrap tm:gap-x-[9px] tm:gap-y-[12px] p:rounded-[5px] p:bg-[--gray-f2]"
       :class="setClass.radios"
     >
       <li
-        class="m-form-container tm:h-[50px] tm:rounded-[5px] tm:bg-[--gray-f2] p:h-[35px]"
-        :class="setClass.item"
+        class="m-form-container overflow-hidden tm:h-[50px] tm:rounded-[5px] tm:bg-[--gray-f2] p:h-[35px]"
+        :class="setClass.container"
         v-for="(item, index) in props.options"
         :key="`${item[config.schema.label]}_${index}`"
       >
         <label
-          class="m-form-element flex h-full w-full cursor-pointer items-center justify-center transition-colors duration-300 tm:px-[5px] p:px-[12px]"
-          :class="{
-            '--checked': item[config.schema.value] === model,
-          }"
+          class="m-form-element flex h-full w-full cursor-pointer items-center justify-center text-[--gray-666] transition-colors duration-300 tm:gap-x-[3px] tm:px-[10px] p:gap-x-[5px] p:px-[12px]"
+          :class="[
+            {
+              '--checked': item[config.schema.value] === selected,
+            },
+            setClass.element,
+          ]"
         >
           <input
             type="radio"
             :name="props.name"
-            class="m-form-type absolute left-[-99999px]"
+            v-model="selected"
             :value="item[config.schema.value]"
-            v-model="model"
+            class="m-form-type absolute left-[-99999px]"
+            :class="setClass.type"
+            @change="onChange(item)"
           />
-          <em>{{ item[config.schema.label] }}</em>
+          <SvgIcon
+            icon="icon_check_solid"
+            class="m-form-icon h-[16px] w-[16px] text-[--orange-e646]"
+            v-if="item[config.schema.value] === selected"
+          />
+          <em class="m-form-label text-[16px]">{{ item[config.schema.label] }}</em>
         </label>
       </li>
     </ul>
-    <Field :name="`${props.name}_radios`" v-model="model" :rules="props.rules">
-      <input type="hidden" :name="`${props.name}_radios`" :id="`${props.name}_radios`" />
+    <Field
+      :name="`${props.name}_radios`"
+      v-model="selected"
+      :rules="props.rules"
+      v-slot="{ field }"
+    >
+      <input type="hidden" :id="`${props.name}_radios`" v-bind="field" />
     </Field>
     <ErrorMessage
       as="span"
@@ -112,6 +155,34 @@ const setClass = computed(() => {
 
       &.\-\-checked {
         @apply bg-[--orange-feea];
+
+        .m-form-label {
+          @apply font-semibold;
+        }
+      }
+    }
+  }
+}
+
+@screen p {
+  .m-form {
+    &.\-\-radios-oval {
+      .m-form-element {
+        &:not(&.\-\-checked) {
+          @apply px-[25px];
+        }
+      }
+    }
+  }
+}
+
+@screen tm {
+  .m-form {
+    &.\-\-radios-oval {
+      .m-form-element {
+        &:not(&.\-\-checked) {
+          @apply pl-[19px] pr-[20px];
+        }
       }
     }
   }

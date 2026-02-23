@@ -48,7 +48,7 @@ export const fetchApi = async (method, path, data) => {
   try {
     const res = await $fetch.raw(reqPath, { ...opts, baseURL, headers })
 
-    // ✅ 只回傳可序列化的 config（避免 FormData/URLSearchParams）
+    // 只回傳可序列化的 config（避免 FormData/URLSearchParams）
     const safeConfig = {
       method: m,
       baseURL: baseURL ?? '',
@@ -65,7 +65,7 @@ export const fetchApi = async (method, path, data) => {
       data: res._data,
     }
   } catch (error) {
-    // ✅ 不要把原始 error 直接 throw（裡面常含 non-POJO）
+    // 不要把原始 error 直接 throw（裡面常含 non-POJO）
     const status = error?.response?.status
     const payload = error?.response?._data
 
@@ -79,8 +79,29 @@ export const fetchApi = async (method, path, data) => {
 export const apiGETRealEstate = async (data) =>
   await fetchApi('get', 'api/v1/buy/realEstate/{hfid}', data)
 
-export const apiGETEealEstatePurposeCheckOptions = async (data) =>
+export const apiGETRealEstatePurposeCheckOptions = async (data) =>
   await fetchApi('get', 'api/v1/buy/realEstatePurpose/check-options', data)
 
 export const apiGETCitySelectOptions = async (data) =>
   await fetchApi('get', 'api/v1/buy/city/select-options', data)
+
+export const apiGETDistrictSelectOptions = async (data) =>
+  await fetchApi('get', 'api/v1/buy/{cityCode}/district/select-options', data)
+
+export const apiGETRealEstateTypeSelectOptions = async (data) =>
+  await fetchApi('get', 'api/v1/buy/realEstateType/select-options', data)
+
+export const apiGETRealEstateLegalUsageSelectOptions = async (data) =>
+  await fetchApi('get', 'api/v1/buy/realEstateLegalUsage/select-options', data)
+
+export const apiGETRealEstateZoingCheckOptions = async (data) =>
+  await fetchApi('get', 'api/v1/buy/realEstateZoing/check-options', data)
+
+export const apiGETRealEstateZoingCitySelectOptions = async (data) =>
+  await fetchApi('get', 'api/v1/buy/realEstateZoingCity/select-options', data)
+
+export const apiGETRealEstateZoingLandSelectOptions = async (data) =>
+  await fetchApi('get', 'api/v1/buy/realEstateZoingLand/select-options', data)
+
+export const apiGETRealEstateFloorSelectOptions = async (data) =>
+  await fetchApi('get', 'api/v1/buy/realEstateFloor/select-options', data)

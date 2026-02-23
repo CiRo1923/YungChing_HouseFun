@@ -169,9 +169,9 @@ onUnmounted(() => {
       v-if="props.label || hasMatchDevice"
       @click="onAnchorClick"
     >
-      <p class="flex-grow">{{ props.label }}</p>
+      <p class="grow">{{ props.label }}</p>
       <i
-        class="m-switch-item-icon relative flex h-[16px] w-[16px] flex-shrink-0 items-center justify-center"
+        class="m-switch-item-icon relative flex h-[16px] w-[16px] shrink-0 items-center justify-center"
         :class="{ '--active': isActive }"
         v-if="hasMatchDevice"
       />

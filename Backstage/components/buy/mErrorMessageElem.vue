@@ -8,7 +8,7 @@ const props = defineProps({
 </script>
 
 <template>
-  <small class="m-error-message block">
+  <small class="m-error-message block text-[--orange-e646]">
     {{ props.message }}
   </small>
 </template>

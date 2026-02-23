@@ -24,7 +24,7 @@ onUnmounted(() => {
   <div
     class="m-header mx-auto flex items-center tm:h-[50px] tm:px-[15px] p:h-[60px] p:max-w-[1920px] p:px-[50px]"
   >
-    <div class="m-header-logo flex flex-shrink-0 items-center">
+    <div class="m-header-logo flex shrink-0 items-center">
       <ImgSrc
         src="buy/logo_text.svg"
         :setClass="{

@@ -18,10 +18,10 @@ const setClass = computed(() => {
 <template>
   <div class="m-container mx-auto tm:pt-[32px] p:max-w-[1200px] p:pt-[40px]" :class="setClass.main">
     <header class="m-container-header p:flex p:items-center">
-      <h2 class="text-[--gray-333] tm:text-center tm:text-[24px] p:flex-grow p:text-[30px]">
+      <h2 class="text-[--gray-333] tm:text-center tm:text-[24px] p:grow p:text-[30px]">
         <strong class="font-semibold">{{ route.meta.title }}</strong>
       </h2>
-      <div class="m-container-header-tools p:flex-shrink-0" v-if="$slots.header_tools">
+      <div class="m-container-header-tools p:shrink-0" v-if="$slots.header_tools">
         <slot name="header_tools" />
       </div>
     </header>

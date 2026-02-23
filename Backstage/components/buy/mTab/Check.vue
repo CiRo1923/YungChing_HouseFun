@@ -47,7 +47,7 @@ const onHeaderAs = (item) => {
   return href ? 'a' : to ? 'router-link' : 'button'
 }
 
-const onHeaderBind = (item, index) => {
+const onHeaderBind = (item) => {
   const as = onHeaderAs(item)
   const { to, href, target } = item
 
@@ -179,7 +179,7 @@ onMounted(() => {
         >
           <template v-for="(item, index) in props.options" :key="`tab_body_${item.label}_${index}`">
             <li
-              class="m-tab-body-item w-1/2 flex-shrink-0"
+              class="m-tab-body-item w-1/2 shrink-0"
               v-if="!item.href && (index === activeIndex || (isShowItem && index === prevIndex))"
             >
               <slot :name="`content_${index}`" :index="index" />
