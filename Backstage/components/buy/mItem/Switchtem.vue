@@ -196,7 +196,7 @@ onUnmounted(() => {
 .m-switch-item-icon {
   &:before,
   &:after {
-    @apply absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-[var(--white)] content-default;
+    @apply absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-[--white] content-default;
   }
 
   &:before {

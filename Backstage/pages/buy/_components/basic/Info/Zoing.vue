@@ -3,6 +3,8 @@ import FormRadiosOval from '@components/buy/mForm/RadiosOval.vue'
 import FormSelect from '@components/buy/mForm/Select.vue'
 import FormInput from '@components/buy/mForm/Input.vue'
 
+import RadiosOval from '@pages/buy/_container/RadiosOval.vue'
+
 import { useBuyProjectStore } from '@stores/buy/project.js'
 
 const buyProject = useBuyProjectStore()
@@ -20,7 +22,7 @@ const onCaseZoingTypeChange = (props) => {
 </script>
 
 <template>
-  <div class="grow m:space-y-[12px] pt:space-y-[8px]">
+  <RadiosOval>
     <FormRadiosOval
       name="caseZoingToken"
       v-model="apiData.caseZoingToken"
@@ -93,7 +95,7 @@ const onCaseZoingTypeChange = (props) => {
         v-if="isCaseZoingOtherShow"
       />
     </div>
-  </div>
+  </RadiosOval>
 </template>
 
 <style></style>

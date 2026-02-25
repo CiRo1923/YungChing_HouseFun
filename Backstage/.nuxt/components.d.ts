@@ -17,9 +17,11 @@ type LazyComponent<T> = DefineComponent<HydrationStrategies, {}, {}, {}, {}, {},
 export const BuyMAddress: typeof import("../components/buy/mAddress.vue")['default']
 export const BuyMAnchor: typeof import("../components/buy/mAnchor.vue")['default']
 export const BuyMAnchorTool: typeof import("../components/buy/mAnchorTool.vue")['default']
+export const BuyMAutoComplete: typeof import("../components/buy/mAutoComplete.vue")['default']
 export const BuyMCardFilter: typeof import("../components/buy/mCard/Filter.vue")['default']
 export const BuyMContainer: typeof import("../components/buy/mContainer.vue")['default']
 export const BuyMErrorMessageElem: typeof import("../components/buy/mErrorMessageElem.vue")['default']
+export const BuyMFormCheckBox: typeof import("../components/buy/mForm/CheckBox.vue")['default']
 export const BuyMFormInput: typeof import("../components/buy/mForm/Input.vue")['default']
 export const BuyMFormLabel: typeof import("../components/buy/mForm/Label.vue")['default']
 export const BuyMFormRadiosOval: typeof import("../components/buy/mForm/RadiosOval.vue")['default']
@@ -44,6 +46,10 @@ export const NuxtTime: typeof import("../node_modules/nuxt/dist/app/components/n
 export const NuxtRouteAnnouncer: typeof import("../node_modules/nuxt/dist/app/components/nuxt-route-announcer")['default']
 export const NuxtImg: typeof import("../node_modules/nuxt/dist/app/components/nuxt-stubs")['NuxtImg']
 export const NuxtPicture: typeof import("../node_modules/nuxt/dist/app/components/nuxt-stubs")['NuxtPicture']
+export const ErrorMessage: typeof import("vee-validate")['ErrorMessage']
+export const Field: typeof import("vee-validate")['Field']
+export const FieldArray: typeof import("vee-validate")['FieldArray']
+export const Form: typeof import("vee-validate")['Form']
 export const NuxtPage: typeof import("../node_modules/nuxt/dist/pages/runtime/page")['default']
 export const NoScript: typeof import("../node_modules/nuxt/dist/head/runtime/components")['NoScript']
 export const Link: typeof import("../node_modules/nuxt/dist/head/runtime/components")['Link']
@@ -58,9 +64,11 @@ export const NuxtIsland: typeof import("../node_modules/nuxt/dist/app/components
 export const LazyBuyMAddress: LazyComponent<typeof import("../components/buy/mAddress.vue")['default']>
 export const LazyBuyMAnchor: LazyComponent<typeof import("../components/buy/mAnchor.vue")['default']>
 export const LazyBuyMAnchorTool: LazyComponent<typeof import("../components/buy/mAnchorTool.vue")['default']>
+export const LazyBuyMAutoComplete: LazyComponent<typeof import("../components/buy/mAutoComplete.vue")['default']>
 export const LazyBuyMCardFilter: LazyComponent<typeof import("../components/buy/mCard/Filter.vue")['default']>
 export const LazyBuyMContainer: LazyComponent<typeof import("../components/buy/mContainer.vue")['default']>
 export const LazyBuyMErrorMessageElem: LazyComponent<typeof import("../components/buy/mErrorMessageElem.vue")['default']>
+export const LazyBuyMFormCheckBox: LazyComponent<typeof import("../components/buy/mForm/CheckBox.vue")['default']>
 export const LazyBuyMFormInput: LazyComponent<typeof import("../components/buy/mForm/Input.vue")['default']>
 export const LazyBuyMFormLabel: LazyComponent<typeof import("../components/buy/mForm/Label.vue")['default']>
 export const LazyBuyMFormRadiosOval: LazyComponent<typeof import("../components/buy/mForm/RadiosOval.vue")['default']>
@@ -85,6 +93,10 @@ export const LazyNuxtTime: LazyComponent<typeof import("../node_modules/nuxt/dis
 export const LazyNuxtRouteAnnouncer: LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/nuxt-route-announcer")['default']>
 export const LazyNuxtImg: LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/nuxt-stubs")['NuxtImg']>
 export const LazyNuxtPicture: LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/nuxt-stubs")['NuxtPicture']>
+export const LazyErrorMessage: LazyComponent<typeof import("vee-validate")['ErrorMessage']>
+export const LazyField: LazyComponent<typeof import("vee-validate")['Field']>
+export const LazyFieldArray: LazyComponent<typeof import("vee-validate")['FieldArray']>
+export const LazyForm: LazyComponent<typeof import("vee-validate")['Form']>
 export const LazyNuxtPage: LazyComponent<typeof import("../node_modules/nuxt/dist/pages/runtime/page")['default']>
 export const LazyNoScript: LazyComponent<typeof import("../node_modules/nuxt/dist/head/runtime/components")['NoScript']>
 export const LazyLink: LazyComponent<typeof import("../node_modules/nuxt/dist/head/runtime/components")['Link']>

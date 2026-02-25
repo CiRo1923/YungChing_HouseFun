@@ -17,9 +17,11 @@ interface _GlobalComponents {
   BuyMAddress: typeof import("../../components/buy/mAddress.vue")['default']
   BuyMAnchor: typeof import("../../components/buy/mAnchor.vue")['default']
   BuyMAnchorTool: typeof import("../../components/buy/mAnchorTool.vue")['default']
+  BuyMAutoComplete: typeof import("../../components/buy/mAutoComplete.vue")['default']
   BuyMCardFilter: typeof import("../../components/buy/mCard/Filter.vue")['default']
   BuyMContainer: typeof import("../../components/buy/mContainer.vue")['default']
   BuyMErrorMessageElem: typeof import("../../components/buy/mErrorMessageElem.vue")['default']
+  BuyMFormCheckBox: typeof import("../../components/buy/mForm/CheckBox.vue")['default']
   BuyMFormInput: typeof import("../../components/buy/mForm/Input.vue")['default']
   BuyMFormLabel: typeof import("../../components/buy/mForm/Label.vue")['default']
   BuyMFormRadiosOval: typeof import("../../components/buy/mForm/RadiosOval.vue")['default']
@@ -44,6 +46,10 @@ interface _GlobalComponents {
   NuxtRouteAnnouncer: typeof import("../../node_modules/nuxt/dist/app/components/nuxt-route-announcer")['default']
   NuxtImg: typeof import("../../node_modules/nuxt/dist/app/components/nuxt-stubs")['NuxtImg']
   NuxtPicture: typeof import("../../node_modules/nuxt/dist/app/components/nuxt-stubs")['NuxtPicture']
+  ErrorMessage: typeof import("vee-validate")['ErrorMessage']
+  Field: typeof import("vee-validate")['Field']
+  FieldArray: typeof import("vee-validate")['FieldArray']
+  Form: typeof import("vee-validate")['Form']
   NuxtPage: typeof import("../../node_modules/nuxt/dist/pages/runtime/page")['default']
   NoScript: typeof import("../../node_modules/nuxt/dist/head/runtime/components")['NoScript']
   Link: typeof import("../../node_modules/nuxt/dist/head/runtime/components")['Link']
@@ -58,9 +64,11 @@ interface _GlobalComponents {
   LazyBuyMAddress: LazyComponent<typeof import("../../components/buy/mAddress.vue")['default']>
   LazyBuyMAnchor: LazyComponent<typeof import("../../components/buy/mAnchor.vue")['default']>
   LazyBuyMAnchorTool: LazyComponent<typeof import("../../components/buy/mAnchorTool.vue")['default']>
+  LazyBuyMAutoComplete: LazyComponent<typeof import("../../components/buy/mAutoComplete.vue")['default']>
   LazyBuyMCardFilter: LazyComponent<typeof import("../../components/buy/mCard/Filter.vue")['default']>
   LazyBuyMContainer: LazyComponent<typeof import("../../components/buy/mContainer.vue")['default']>
   LazyBuyMErrorMessageElem: LazyComponent<typeof import("../../components/buy/mErrorMessageElem.vue")['default']>
+  LazyBuyMFormCheckBox: LazyComponent<typeof import("../../components/buy/mForm/CheckBox.vue")['default']>
   LazyBuyMFormInput: LazyComponent<typeof import("../../components/buy/mForm/Input.vue")['default']>
   LazyBuyMFormLabel: LazyComponent<typeof import("../../components/buy/mForm/Label.vue")['default']>
   LazyBuyMFormRadiosOval: LazyComponent<typeof import("../../components/buy/mForm/RadiosOval.vue")['default']>
@@ -85,6 +93,10 @@ interface _GlobalComponents {
   LazyNuxtRouteAnnouncer: LazyComponent<typeof import("../../node_modules/nuxt/dist/app/components/nuxt-route-announcer")['default']>
   LazyNuxtImg: LazyComponent<typeof import("../../node_modules/nuxt/dist/app/components/nuxt-stubs")['NuxtImg']>
   LazyNuxtPicture: LazyComponent<typeof import("../../node_modules/nuxt/dist/app/components/nuxt-stubs")['NuxtPicture']>
+  LazyErrorMessage: LazyComponent<typeof import("vee-validate")['ErrorMessage']>
+  LazyField: LazyComponent<typeof import("vee-validate")['Field']>
+  LazyFieldArray: LazyComponent<typeof import("vee-validate")['FieldArray']>
+  LazyForm: LazyComponent<typeof import("vee-validate")['Form']>
   LazyNuxtPage: LazyComponent<typeof import("../../node_modules/nuxt/dist/pages/runtime/page")['default']>
   LazyNoScript: LazyComponent<typeof import("../../node_modules/nuxt/dist/head/runtime/components")['NoScript']>
   LazyLink: LazyComponent<typeof import("../../node_modules/nuxt/dist/head/runtime/components")['Link']>

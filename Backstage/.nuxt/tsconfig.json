@@ -154,6 +154,9 @@
       "vue-demi": [
         "../node_modules/nuxt/dist/app/compat/vue-demi"
       ],
+      "vee-validate": [
+        "../node_modules/vee-validate/dist/vee-validate"
+      ],
       "#vue-router": [
         "../node_modules/vue-router"
       ],

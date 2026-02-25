@@ -72,7 +72,8 @@ const onSelected = () => {
   const { schema } = config.value
   const isModelData = typeof model.value === 'object'
 
-  selected.value = model.value ? (isModelData ? model.value[schema.value] : model.value) : ''
+  selected.value =
+    model.value !== undefined ? (isModelData ? model.value[schema.value] : model.value) : ''
 }
 const onChange = (item) => {
   const { modelMode, schema } = config.value

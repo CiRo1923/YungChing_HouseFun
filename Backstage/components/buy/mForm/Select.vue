@@ -460,13 +460,13 @@ onUnmounted(() => {
 
     &:not(:disabled) {
       .m-form-icon {
-        @apply text-[var(--gray-999)];
+        @apply text-[--gray-999];
       }
     }
 
     &:disabled {
       .m-form-icon {
-        @apply text-[var(--gray-ccce)];
+        @apply text-[--gray-ccce];
       }
     }
   }
@@ -474,7 +474,7 @@ onUnmounted(() => {
 
 .m-form-icon-arrow {
   &:before {
-    @apply block h-0 w-0 border-x-[3px] border-t-[5px] border-transparent border-t-[var(--gray-222)] transition-transform duration-300 content-default;
+    @apply block h-0 w-0 border-x-[3px] border-t-[5px] border-transparent border-t-[--gray-222] transition-transform duration-300 content-default;
   }
 }
 
@@ -487,16 +487,16 @@ onUnmounted(() => {
 .m-select-dropdown-button {
   &:not(:disabled) {
     &:not(.\-\-active) {
-      @apply text-[var(--gray-222)];
+      @apply text-[--gray-222];
     }
 
     &.\-\-active {
-      @apply bg-[var(--major-red)] text-[var(--white)];
+      @apply bg-[--major-red] text-[--white];
     }
   }
 
   &:disabled {
-    @apply text-[var(--gray-222)] text-opacity-30;
+    @apply text-[--gray-222] text-opacity-30;
   }
 }
 
@@ -504,7 +504,7 @@ onUnmounted(() => {
   &:not(:last-child) {
     .m-select-dropdown-button {
       &:after {
-        @apply block h-[1px] w-full bg-[var(--gray-222)] opacity-30 content-default;
+        @apply block h-[1px] w-full bg-[--gray-222] opacity-30 content-default;
       }
     }
   }

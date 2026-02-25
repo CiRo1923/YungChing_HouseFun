@@ -48,6 +48,12 @@ export const useBuyProjectStore = defineStore('buyProject', () => {
     floorToToken: '',
     caseFloorTo: '',
     caseFloorTotal: '',
+    caseAge: '',
+    caseCompletedYear: '',
+    caseCompletedMonth: '',
+    isCaseUnknownAge: false,
+    isCasePreSale: false,
+    isCaseCommunity: false,
   })
   const onApiGETRealEstatePurposeCheckOptions = async () => {
     // const { public: env } = useRuntimeConfig()

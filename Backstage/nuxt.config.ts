@@ -21,7 +21,7 @@ export default defineNuxtConfig({
     autoImport: true,
   },
   css: [
-    `@/${CONFIG.css}/_tailwind.css`,
+    `@/${CONFIG.css}/tailwind.css`,
     `@/${CONFIG.css}/_common/framework.css`,
     `@/${CONFIG.css}/_common/color.css`,
   ],
@@ -103,7 +103,8 @@ export default defineNuxtConfig({
         {
           rel: 'shortcut icon',
           type: 'image/x-icon',
-          href: `${process.env.NUXT_PUBLIC_PATH}/favicon.ico`,
+          // href: `${process.env.NUXT_PUBLIC_PATH}/favicon.ico`,
+          href: '//s1.hfcdn.com/s1-news/system/i/icon/favicon_16x16.ico',
         },
         {
           rel: 'stylesheet',
@@ -112,7 +113,7 @@ export default defineNuxtConfig({
       ],
     },
   },
-  modules: ['@pinia/nuxt', '@nuxt/eslint'],
+  modules: ['@pinia/nuxt', '@vee-validate/nuxt', '@nuxtjs/tailwindcss'],
   // plugins: ['@/app/router.beforeEach.js'],
   // veeValidate: {
   //   autoImports: true,

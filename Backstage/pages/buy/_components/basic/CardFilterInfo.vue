@@ -10,11 +10,9 @@ import CaseUsage from '@pages/buy/_components/basic/Info/CaseUsage.vue'
 import Zoing from '@pages/buy/_components/basic/Info/Zoing.vue'
 import CaseLandNo from '@pages/buy/_components/basic/Info/CaseLandNo.vue'
 import Floor from '@pages/buy/_components/basic/Info/Floor.vue'
-
-import { useBuyProjectStore } from '@stores/buy/project.js'
-
-const buyProject = useBuyProjectStore()
-const { options, apiData } = storeToRefs(buyProject)
+import TotalFloor from '@pages/buy/_components/basic/Info/TotalFloor.vue'
+import BuildingAge from '@pages/buy/_components/basic/Info/BuildingAge.vue'
+import Community from '@pages/buy/_components/basic/Info/Community.vue'
 
 const items = shallowReadonly([
   {
@@ -65,6 +63,24 @@ const items = shallowReadonly([
     class: 'p:h-[35px]',
     component: Floor,
   },
+  {
+    id: 'totalFloor',
+    label: '總樓高',
+    class: 'p:h-[40px]',
+    component: TotalFloor,
+  },
+  {
+    id: 'buildingAge',
+    label: '屋齡',
+    class: 'p:h-[35px]',
+    component: BuildingAge,
+  },
+  {
+    id: 'community',
+    label: '社區',
+    class: 'p:h-[35px]',
+    component: Community,
+  },
 ])
 </script>
 
@@ -86,30 +102,7 @@ const items = shallowReadonly([
         />
         <component :is="item.component" />
       </li>
-      <!-- <li class="p:flex">
-        <FormLabel
-          label="總樓高"
-          :setClass="{
-            main: 'shrink-0 p:w-[100px]',
-          }"
-        />
-      </li>
-      <li class="p:flex">
-        <FormLabel
-          label="屋齡"
-          :setClass="{
-            main: 'shrink-0 p:w-[100px]',
-          }"
-        />
-      </li>
-      <li class="p:flex">
-        <FormLabel
-          label="社區"
-          :setClass="{
-            main: 'shrink-0 p:w-[100px]',
-          }"
-        />
-      </li>
+      <!-- 
       <li class="p:flex">
         <FormLabel
           label="格局"

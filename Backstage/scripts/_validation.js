@@ -8,7 +8,7 @@ const replaceMessage = (elem, object) => {
   if (object.value !== null && object.value !== undefined) {
     const regex = /{\s?.*\s?}/
 
-    message = message.replace(regex, object.value)
+    message = message ? message.replace(regex, object.value) : message
   } else {
     const attributes = document.querySelector(`[name="${elem.name}"]`).attributes
 
@@ -16,7 +16,7 @@ const replaceMessage = (elem, object) => {
       const { nodeName, nodeValue } = attributes[i]
       const regex = new RegExp(`{\\s?${nodeName}\\s?}`)
 
-      message = message.replace(regex, nodeValue)
+      message = message ? message.replace(regex, nodeValue) : message
     }
   }
 
@@ -29,11 +29,11 @@ Object.keys(rules).forEach((rule) => {
 
 // 必填
 defineRule('required', (value, object, elem) => {
-  return value === null || value === undefined || value.length === 0
-    ? replaceMessage(elem, object)
-    : object.type && object.type === 'boolean' && value !== true
-      ? object.errorMessage
-      : true
+  const isArray = Array.isArray(object)
+  const hasValue = value?.length > 0
+  const valid = hasValue || (!isArray && !object.valid)
+
+  return !valid ? replaceMessage(elem, object) : true
 })
 
 // 最大字元長度

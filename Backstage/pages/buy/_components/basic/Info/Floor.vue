@@ -1,12 +1,15 @@
 <script setup>
 import FormRadiosOval from '@components/buy/mForm/RadiosOval.vue'
 import FormSelect from '@components/buy/mForm/Select.vue'
+import FormInput from '@components/buy/mForm/Input.vue'
+
+import RadiosOval from '@pages/buy/_container/RadiosOval.vue'
 
 import { useBuyProjectStore } from '@stores/buy/project.js'
 
 const buyProject = useBuyProjectStore()
 const { options, apiData } = storeToRefs(buyProject)
-const floorOPtion = readonly([
+const floorOptions = readonly([
   {
     label: '單層',
     value: true,
@@ -16,21 +19,27 @@ const floorOPtion = readonly([
     value: false,
   },
 ])
+
+const onIsSingleFloorChange = () => {
+  apiData.value.floorToToken = '1'
+  apiData.value.caseFloorTo = ''
+}
 </script>
 
 <template>
-  <div class="grow m:space-y-[12px] pt:space-y-[8px]">
+  <RadiosOval>
     <FormRadiosOval
       name="isSingleFloor"
       v-model="apiData.isSingleFloor"
-      :options="floorOPtion"
+      :options="floorOptions"
       :setClass="{
         radios: 'm:w-full',
         container: 'm:flex-1',
       }"
+      @change="onIsSingleFloorChange"
     />
-    <ul class="pt:flex">
-      <li>
+    <ul class="pt:flex pt:gap-x-[8px]">
+      <li class="pt:flex pt:shrink-0 pt:gap-x-[8px]">
         <FormSelect
           name="floorFromToken"
           v-model="apiData.floorFromToken"
@@ -43,15 +52,72 @@ const floorOPtion = readonly([
             },
           }"
           :rules="{
-            required: '請選擇法定用途',
+            required: '請選擇出售樓層',
           }"
           :setClass="{
-            main: '--height-40 --px-12 --py-8 grow',
+            main: '--height-40 --px-12 --py-8',
           }"
         />
+        <FormInput
+          name="caseFloorFrom"
+          v-model="apiData.caseFloorFrom"
+          :config="{
+            isExistClose: false,
+          }"
+          :rules="{
+            required: '請輸入樓層',
+          }"
+          :setClass="{
+            main: '--height-40 --px-12 --py-8 p:w-[299px]',
+            element: 'grow',
+            rearAssist: 'text-[14px] text-[--gray-999]',
+          }"
+        >
+          <template #rearAssist>樓</template>
+        </FormInput>
+      </li>
+      <li class="pt:grow" v-if="!apiData.isSingleFloor">
+        <span class="text-[--gray-666] pt:flex pt:items-center p:h-[40px] p:text-[16px]">~</span>
+      </li>
+      <li class="pt:flex pt:shrink-0 pt:gap-x-[8px]" v-if="!apiData.isSingleFloor">
+        <FormSelect
+          name="floorToToken"
+          v-model="apiData.floorToToken"
+          :options="options.floor"
+          :config="{
+            placeholder: '請選擇',
+            schema: {
+              label: 'text',
+              value: 'value',
+            },
+          }"
+          :rules="{
+            required: '請選擇出售樓層',
+          }"
+          :setClass="{
+            main: '--height-40 --px-12 --py-8',
+          }"
+        />
+        <FormInput
+          name="caseFloorTo"
+          v-model="apiData.caseFloorTo"
+          :config="{
+            isExistClose: false,
+          }"
+          :rules="{
+            required: '請輸入樓層',
+          }"
+          :setClass="{
+            main: '--height-40 --px-12 --py-8 p:w-[299px]',
+            element: 'grow',
+            rearAssist: 'text-[14px] text-[--gray-999]',
+          }"
+        >
+          <template #rearAssist>樓</template>
+        </FormInput>
       </li>
     </ul>
-  </div>
+  </RadiosOval>
 </template>
 
 <style></style>
