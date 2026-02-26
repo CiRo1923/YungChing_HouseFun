@@ -6,6 +6,7 @@ import Unit from '@pages/buy/_components/basic/Ping/Unit.vue'
 import CaseBuildSq from '@pages/buy/_components/basic/Ping/CaseBuildSq.vue'
 import CaseParkingSq from '@pages/buy/_components/basic/Ping/CaseParkingSq.vue'
 import CaseMainSq from '@pages/buy/_components/basic/Ping/CaseMainSq.vue'
+import CaseAffiliatedSq from '@pages/buy/_components/basic/Ping/CaseAffiliatedSq.vue'
 
 import { useBuyBasicStore } from '@stores/buy/basic.js'
 
@@ -47,13 +48,20 @@ const items = shallowReadonly([
     class: 'p:h-[40px]',
     component: CaseMainSq,
   },
+  {
+    id: 'caseAffiliatedSq',
+    isRequired: false,
+    label: '附屬建物',
+    class: 'p:h-[40px]',
+    component: CaseAffiliatedSq,
+  },
 ])
 </script>
 
 <template>
-  <pre>
+  <!-- <pre>
     {{ pingData }}
-  </pre>
+  </pre> -->
   <CardFilter :title="props.title">
     <ul class="tm:space-y-[40px] p:space-y-[24px]">
       <li

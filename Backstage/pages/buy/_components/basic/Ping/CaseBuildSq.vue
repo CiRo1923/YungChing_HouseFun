@@ -4,9 +4,11 @@ import FormCheckBox from '@components/buy/mForm/CheckBox.vue'
 
 import { useBuyProjectStore } from '@stores/buy/project.js'
 import { useBuyBasicStore } from '@stores/buy/basic.js'
+import useStores from '@stores/buy/_composables/useStores.js'
 
 const buyProject = useBuyProjectStore()
 const buyBasic = useBuyBasicStore()
+const { basic } = useStores()
 const { apiData } = storeToRefs(buyProject)
 const { pingData, pingUnitLabel } = storeToRefs(buyBasic)
 </script>
@@ -30,6 +32,7 @@ const { pingData, pingUnitLabel } = storeToRefs(buyBasic)
           element: 'grow',
           rearAssist: 'text-[14px] text-[--gray-999]',
         }"
+        @blur="basic.onPinSqMetersConvert('caseBuildSq')"
       >
         <template #rearAssist>{{ pingUnitLabel }}</template>
       </FormInput>

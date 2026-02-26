@@ -2,8 +2,10 @@
 import FormRadiosOval from '@components/buy/mForm/RadiosOval.vue'
 
 import { useBuyBasicStore } from '@stores/buy/basic.js'
+import useStores from '@stores/buy/_composables/useStores.js'
 
 const buyBasic = useBuyBasicStore()
+const { basic } = useStores()
 const { pingUnit } = storeToRefs(buyBasic)
 </script>
 
@@ -16,7 +18,7 @@ const { pingUnit } = storeToRefs(buyBasic)
       radios: 'm:w-full',
       container: 'm:flex-1',
     }"
-    @change="buyBasic.onPingUnitChange"
+    @change="basic.onPingUnitChange"
   />
 </template>
 

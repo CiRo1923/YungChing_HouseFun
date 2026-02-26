@@ -11,6 +11,7 @@ import CardFilterManage from '@pages/buy/_components/basic/CardFilterManage.vue'
 import { awaitAllPromise } from '@js/_prototype.js'
 
 import { useBuyProjectStore } from '@stores/buy/project.js'
+import useStores from '@stores/buy/_composables/useStores.js'
 
 import { Form } from 'vee-validate'
 
@@ -21,6 +22,7 @@ definePageMeta({
 })
 
 const buyProject = useBuyProjectStore()
+const { project } = useStores()
 const { options, apiData } = storeToRefs(buyProject)
 
 const datas = shallowReadonly([
@@ -55,21 +57,21 @@ const onSubmit = async (validate) => {
 }
 
 await awaitAllPromise([
-  useAsyncData('purpose-options', () => buyProject.onApiGETRealEstatePurposeCheckOptions()),
-  useAsyncData('city-options', () => buyProject.onApiGETCitySelectOptions()),
-  useAsyncData('type-options', () => buyProject.onApiGETRealEstateTypeSelectOptions()),
-  useAsyncData('usage-options', () => buyProject.onApiGETRealEstateLegalUsageSelectOptions()),
-  useAsyncData('zoing-options', () => buyProject.onApiGETRealEstateZoingCheckOptions()),
-  useAsyncData('zoingCity-options', () => buyProject.onApiGETRealEstateZoingCitySelectOptions()),
-  useAsyncData('zoingLand-options', () => buyProject.onApiGETRealEstateZoingLandSelectOptions()),
-  useAsyncData('floor-options', () => buyProject.onApiGETRealEstateFloorSelectOptions()),
-  useAsyncData('face-options', () => buyProject.onApiGETRealEstateFaceSelectOptions()),
-  useAsyncData('structure-options', () => buyProject.onApiGETRealEstateStructionSelectOptions()),
-  useAsyncData('barrierFree-options', () => buyProject.onApiGETRealEstateBarrierFreeCheckOptions()),
-  useAsyncData('manageType-options', () => buyProject.onApiGETRealEstateManageTypeSelectOpstions()),
-  useAsyncData('manageDuty-options', () => buyProject.onApiGETRealEstateManageDutySelectOpstions()),
+  useAsyncData('purpose-options', () => project.onApiGETRealEstatePurposeCheckOptions()),
+  useAsyncData('city-options', () => project.onApiGETCitySelectOptions()),
+  useAsyncData('type-options', () => project.onApiGETRealEstateTypeSelectOptions()),
+  useAsyncData('usage-options', () => project.onApiGETRealEstateLegalUsageSelectOptions()),
+  useAsyncData('zoing-options', () => project.onApiGETRealEstateZoingCheckOptions()),
+  useAsyncData('zoingCity-options', () => project.onApiGETRealEstateZoingCitySelectOptions()),
+  useAsyncData('zoingLand-options', () => project.onApiGETRealEstateZoingLandSelectOptions()),
+  useAsyncData('floor-options', () => project.onApiGETRealEstateFloorSelectOptions()),
+  useAsyncData('face-options', () => project.onApiGETRealEstateFaceSelectOptions()),
+  useAsyncData('structure-options', () => project.onApiGETRealEstateStructionSelectOptions()),
+  useAsyncData('barrierFree-options', () => project.onApiGETRealEstateBarrierFreeCheckOptions()),
+  useAsyncData('manageType-options', () => project.onApiGETRealEstateManageTypeSelectOpstions()),
+  useAsyncData('manageDuty-options', () => project.onApiGETRealEstateManageDutySelectOpstions()),
   useAsyncData('managePay-options', () =>
-    buyProject.onApiGETRealEstateManagePayPeriodSelectOpstions()
+    project.onApiGETRealEstateManagePayPeriodSelectOpstions()
   ),
 ])
 </script>

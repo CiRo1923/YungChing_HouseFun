@@ -7,6 +7,44 @@ import { useBuyProjectStore } from '@stores/buy/project.js'
 const buyProject = useBuyProjectStore()
 const { apiData } = storeToRefs(buyProject)
 const isAutoCalc = ref(true)
+
+const onIsAutoCalc = () => {
+  const {
+    casePrice, // 寵價
+    caseParkingPrice, // 車位價
+    caseBuildSqPin, // 登記坪數
+    caseParkingSqPin, // 車位坪數
+    isCasePriceIncludeParking, // 總價含車位
+    isCasePricePerPinDeductParking, // 扣除車位價
+    isCaseBuildSqIncludeParking, // 登記坪數含車位
+  } = apiData.value
+  if (isAutoCalc.value && casePrice && caseBuildSqPin) {
+    const price =
+      isCasePriceIncludeParking && isCasePricePerPinDeductParking && caseParkingPrice
+        ? Number(casePrice) - Number(caseParkingPrice)
+        : Number(casePrice)
+    const buildSq =
+      isCaseBuildSqIncludeParking && caseParkingSqPin
+        ? Number(caseBuildSqPin) - Number(caseParkingSqPin)
+        : Number(caseBuildSqPin)
+
+    apiData.value.casePriceUnit = price / buildSq
+  }
+}
+
+watch(
+  () => [
+    apiData.value.casePrice,
+    apiData.value.caseBuildSqPin,
+    apiData.value.caseParkingSqPin,
+    apiData.value.isCasePriceIncludeParking,
+    apiData.value.isCasePricePerPinDeductParking,
+    apiData.value.isCaseBuildSqIncludeParking,
+  ],
+  () => {
+    onIsAutoCalc()
+  }
+)
 </script>
 
 <template>
