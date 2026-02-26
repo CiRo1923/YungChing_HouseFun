@@ -64,13 +64,26 @@ const onClick = async (validate) => {
         v-model:ofNumber="apiData.ofNumber"
         v-model:floor="apiData.floor"
         :config="{
-          options: {
-            city: options.city,
-            area: areas,
+          city: {
+            options: options.city,
+            schema: {
+              label: 'text',
+              value: 'value',
+            },
           },
-          schema: {
-            label: 'text',
-            value: 'value',
+          area: {
+            options: areas,
+            schema: {
+              label: 'text',
+              value: 'value',
+            },
+          },
+          road: {
+            options: roads,
+            schema: {
+              label: 'roadName',
+              value: 'roadID',
+            },
           },
         }"
         :setClass="{

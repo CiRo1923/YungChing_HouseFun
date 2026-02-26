@@ -1,6 +1,7 @@
 <script setup>
 import FormSelect from '@components/buy/mForm/Select.vue'
 import FormInput from '@components/buy/mForm/Input.vue'
+import AutoComplete from '@components/buy/mAutoComplete.vue'
 
 const emits = defineEmits([
   'update:city',
@@ -140,13 +141,26 @@ const modelOfFloor = computed({
 
 const config = computed(() => {
   return {
-    options: {
-      city: null,
-      area: null,
+    city: {
+      options: null,
+      schema: {
+        label: 'label',
+        value: 'value',
+      },
     },
-    schema: {
-      label: 'label',
-      value: 'value',
+    area: {
+      options: null,
+      schema: {
+        label: 'label',
+        value: 'value',
+      },
+    },
+    road: {
+      options: null,
+      schema: {
+        label: 'label',
+        value: 'value',
+      },
     },
     ...props.config,
   }
@@ -175,6 +189,10 @@ const setClass = computed(() => {
 const onCityChange = () => {
   emits('change:city')
 }
+
+const onAreaChange = () => {
+  emits('change:area')
+}
 </script>
 
 <template>
@@ -185,14 +203,13 @@ const onCityChange = () => {
     <FormSelect
       :name="`${props.name}_address_city`"
       v-model="modelCity"
-      :options="config.options.city"
+      :options="config.city.options"
       :config="{
         placeholder: '選擇縣市',
-        schema: schema.city,
+        schema: config.city.schema,
       }"
       :setClass="{
-        main: '--height-40 --px-12 --py-8 m:w-full',
-        container: setClass.city,
+        main: ['--height-40 --px-12 --py-8 m:w-full', setClass.city],
       }"
       @change="onCityChange()"
       v-if="props.city !== null"
@@ -200,28 +217,29 @@ const onCityChange = () => {
     <FormSelect
       :name="`${props.name}_address_area`"
       v-model="modelArea"
-      :options="config.options.area"
+      :options="config.area.options"
       :config="{
         placeholder: '選擇區域',
-        schema: schema.area,
+        schema: config.area.schema,
         isDisabled: !modelCity,
       }"
       :setClass="{
-        main: '--height-40 --px-12 --py-8 m:w-full',
-        container: setClass.area,
+        main: ['--height-40 --px-12 --py-8 m:w-full', setClass.area],
       }"
       @change="onAreaChange()"
       v-if="props.area !== null"
     />
-    <FormInput
+    <AutoComplete
       :name="`${props.name}_address_road`"
       v-model="modelRoad"
+      :options="config.road.options"
       :config="{
         placeholder: '請選擇路段',
+        schema: config.road.schema,
+        noMatchClearLabel: false,
       }"
       :setClass="{
-        main: '--height-40 --px-12 --py-8 m:w-full',
-        container: setClass.road,
+        main: ['--height-40 --px-12 --py-8 m:w-full', setClass.road],
       }"
       v-if="props.road !== null"
     />
@@ -232,8 +250,7 @@ const onCityChange = () => {
         isExistClose: false,
       }"
       :setClass="{
-        main: '--height-40 --px-12 --py-8',
-        container: setClass.lane,
+        main: ['--height-40 --px-12 --py-8', setClass.lane],
         rearAssist: 'text-[14px] text-[--gray-999]',
       }"
       v-if="props.lane !== null"
@@ -247,8 +264,7 @@ const onCityChange = () => {
         isExistClose: false,
       }"
       :setClass="{
-        main: '--height-40 --px-12 --py-8',
-        container: setClass.alley,
+        main: ['--height-40 --px-12 --py-8', setClass.alley],
         rearAssist: 'text-[14px] text-[--gray-999]',
       }"
       v-if="props.alley !== null"
@@ -262,8 +278,7 @@ const onCityChange = () => {
         isExistClose: false,
       }"
       :setClass="{
-        main: '--height-40 --px-12 --py-8',
-        container: setClass.number,
+        main: ['--height-40 --px-12 --py-8', setClass.number],
         rearAssist: 'text-[14px] text-[--gray-999]',
       }"
       v-if="props.number !== null"
@@ -279,8 +294,7 @@ const onCityChange = () => {
           isExistClose: false,
         }"
         :setClass="{
-          main: '--height-40 --px-12 --py-8',
-          container: setClass.ofNumber,
+          main: ['--height-40 --px-12 --py-8', setClass.ofNumber],
           rearAssist: 'text-[14px] text-[--gray-999]',
         }"
       />
@@ -292,8 +306,7 @@ const onCityChange = () => {
         isExistClose: false,
       }"
       :setClass="{
-        main: '--height-40 --px-12 --py-8',
-        container: setClass.floor,
+        main: ['--height-40 --px-12 --py-8', setClass.floor],
         rearAssist: 'text-[14px] text-[--gray-999]',
       }"
       v-if="props.floor !== null"
@@ -309,8 +322,7 @@ const onCityChange = () => {
           isExistClose: false,
         }"
         :setClass="{
-          main: '--height-40 --px-12 --py-8',
-          container: setClass.ofFloor,
+          main: ['--height-40 --px-12 --py-8', setClass.ofFloor],
           rearAssist: 'text-[14px] text-[--gray-999]',
         }"
       />

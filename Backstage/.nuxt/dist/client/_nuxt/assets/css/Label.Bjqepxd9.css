@@ -1,1 +1,0 @@
-.m-label[data-required]:not([data-required=""]):before{color:var(--orange-e646);margin-left:.125rem;--tw-content:attr(data-required);content:var(--tw-content)}

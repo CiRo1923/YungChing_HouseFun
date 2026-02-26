@@ -9,7 +9,7 @@ import { useBuyProjectStore } from '@stores/buy/project.js'
 
 const buyProject = useBuyProjectStore()
 const { options, apiData } = storeToRefs(buyProject)
-const floorOptions = readonly([
+const radioOptions = readonly([
   {
     label: '單層',
     value: true,
@@ -31,7 +31,7 @@ const onIsSingleFloorChange = () => {
     <FormRadiosOval
       name="isSingleFloor"
       v-model="apiData.isSingleFloor"
-      :options="floorOptions"
+      :options="radioOptions"
       :setClass="{
         radios: 'm:w-full',
         container: 'm:flex-1',

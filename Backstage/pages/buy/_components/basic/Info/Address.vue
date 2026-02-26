@@ -6,13 +6,33 @@ import { useBuyProjectStore } from '@stores/buy/project.js'
 const buyProject = useBuyProjectStore()
 const { options, apiData } = storeToRefs(buyProject)
 
-const areas = ref(null)
+const areas = ref([])
+const roads = ref([])
 
 const onCityChange = async () => {
-  const { status, data } = await buyProject.onApiGETDistrictSelectOptions(apiData.value.cityID)
+  const { cityID } = apiData.value
+  apiData.value.districtID = ''
+  apiData.value.road = ''
+  areas.value = []
+  roads.value = []
+
+  const { status, data } = await buyProject.onApiGETDistrictSelectOptions(cityID)
 
   if (status === 200) {
     areas.value = data
+  }
+}
+
+const onAreaChange = async () => {
+  const { cityID, districtID } = apiData.value
+
+  apiData.value.road = ''
+  roads.value = []
+
+  const { status, data } = await buyProject.onApiGETRoad(cityID, districtID)
+
+  if (status === 200) {
+    roads.value = data
   }
 }
 </script>
@@ -30,20 +50,33 @@ const onCityChange = async () => {
     v-model:floor="apiData.floor"
     v-model:ofFloor="apiData.addrNumOfFloor"
     :config="{
-      options: {
-        city: options.city,
-        area: areas,
+      city: {
+        options: options.city,
+        schema: {
+          label: 'text',
+          value: 'value',
+        },
       },
-      schema: {
-        label: 'text',
-        value: 'value',
+      area: {
+        options: areas,
+        schema: {
+          label: 'text',
+          value: 'value',
+        },
+      },
+      road: {
+        options: roads,
+        schema: {
+          label: 'roadName',
+          value: 'roadID',
+        },
       },
     }"
     :setClass="{
       main: 'grow',
       city: 'pt:w-[260px]',
       area: 'pt:w-[260px]',
-      road: 'pt:w-[263px]',
+      road: 'pt:w-[262px]',
       lane: 'm:w-[98px] pt:w-[86px]',
       alley: 'm:w-[98px] pt:w-[86px]',
       number: 'm:w-[98px] pt:w-[86px]',
@@ -52,6 +85,7 @@ const onCityChange = async () => {
       ofFloor: 'm:w-[74px] pt:w-[45px]',
     }"
     @change:city="onCityChange"
+    @change:area="onAreaChange"
   />
 </template>
 

@@ -2,12 +2,19 @@ import {
   apiGETRealEstatePurposeCheckOptions,
   apiGETCitySelectOptions,
   apiGETDistrictSelectOptions,
+  apiGETRoad,
   apiGETRealEstateTypeSelectOptions,
   apiGETRealEstateLegalUsageSelectOptions,
   apiGETRealEstateZoingCheckOptions,
   apiGETRealEstateZoingCitySelectOptions,
   apiGETRealEstateZoingLandSelectOptions,
   apiGETRealEstateFloorSelectOptions,
+  apiGETRealEstateFaceSelectOptions,
+  apiGETRealEstateStructionSelectOptions,
+  apiGETRealEstateBarrierFreeCheckOptions,
+  apiGETRealEstateManageTypeSelectOpstions,
+  apiGETRealEstateManageDutySelectOpstions,
+  apiGETRealEstateManagePayPeriodSelectOpstions,
 } from '@js/buy/_api/index.js'
 import { defineStore } from 'pinia'
 
@@ -23,6 +30,12 @@ export const useBuyProjectStore = defineStore('buyProject', () => {
     zoingCity: null,
     zoingLand: null,
     floor: null,
+    face: null,
+    structure: null,
+    barrierFree: null,
+    manageType: null,
+    manageDuty: null,
+    managePay: null,
   })
   const apiData = ref({
     casePurposeToken: '',
@@ -54,6 +67,60 @@ export const useBuyProjectStore = defineStore('buyProject', () => {
     isCaseUnknownAge: false,
     isCasePreSale: false,
     isCaseCommunity: false,
+    caseCommunityID: '',
+    caseCommunityName: '',
+    caseRoom: '',
+    caseLivingRoom: '',
+    caseBathroom: '',
+    caseBalcony: '',
+    isCaseOpenConcept: false,
+    isCaseAddtion: false,
+    caseAddRoom: '',
+    caseAddLivingRoom: '',
+    caseAddBathroom: '',
+    caseAddBalcony: '',
+    isCaseHasElevator: true,
+    caseElevatorCount: '',
+    caseFaceToken: '',
+    caseStructureToken: '',
+    caseBarrierfreeToken: [],
+    casePrice: '',
+    isCasePriceIncludeParking: false,
+    caseParkingPrice: '',
+    casePriceUnit: '',
+    isCasePricePerPinDeductParking: false,
+    caseBuildSqPin: '',
+    caseBuildSqM: '',
+    isCaseBuildSqIncludeParking: false,
+    caseParkingSqPin: '',
+    caseParkingSqM: '',
+    caseMainSqPin: '',
+    caseMainSqM: '',
+    caseAffiliatedSqPin: '',
+    caseAffiliatedSqM: '',
+    isCaseAttachedSqAutoCalculate: false,
+    caseBalconySqPin: '',
+    caseBalconySqM: '',
+    casePlatformSqPin: '',
+    casePlatformSqM: '',
+    caseTerraceSqPin: '',
+    caseTerraceSqM: '',
+    caseStairwellSqPin: '',
+    caseStairwellSqM: '',
+    caseMezzanineSqPin: '',
+    caseMezzanineSqM: '',
+    caseBasementSqPin: '',
+    caseBasementSqM: '',
+    caseOtherSqPin: '',
+    caseOtherSqM: '',
+    caseAmenitieSqPin: '',
+    caseAmenitieSqM: '',
+    caseLandSqPin: '',
+    caseLandSqM: '',
+    caseManageTypeToken: '',
+    caseManageDutyToken: '',
+    caseManageFeePeriodToken: '',
+    caseManageFee: '',
   })
   const onApiGETRealEstatePurposeCheckOptions = async () => {
     // const { public: env } = useRuntimeConfig()
@@ -86,6 +153,19 @@ export const useBuyProjectStore = defineStore('buyProject', () => {
 
     return { config, status, data }
   }
+  const onApiGETRoad = async (cityID, AreaID) => {
+    const { config, status, data } = await apiGETRoad({
+      cityCode: cityID,
+      districtCode: AreaID,
+    })
+
+    // if (status === 200) {
+    //   console.log(data)
+    // }
+
+    return { config, status, data }
+  }
+
   const onApiGETRealEstateTypeSelectOptions = async () => {
     const { config, status, data } = await apiGETRealEstateTypeSelectOptions()
 
@@ -143,6 +223,60 @@ export const useBuyProjectStore = defineStore('buyProject', () => {
 
     return { config, status, data }
   }
+  const onApiGETRealEstateFaceSelectOptions = async () => {
+    const { config, status, data } = await apiGETRealEstateFaceSelectOptions()
+
+    if (status === 200) {
+      options.value.face = data || []
+    }
+
+    return { config, status, data }
+  }
+  const onApiGETRealEstateStructionSelectOptions = async () => {
+    const { config, status, data } = await apiGETRealEstateStructionSelectOptions()
+
+    if (status === 200) {
+      options.value.structure = data || []
+    }
+
+    return { config, status, data }
+  }
+  const onApiGETRealEstateBarrierFreeCheckOptions = async () => {
+    const { config, status, data } = await apiGETRealEstateBarrierFreeCheckOptions()
+
+    if (status === 200) {
+      options.value.barrierFree = data || []
+    }
+
+    return { config, status, data }
+  }
+  const onApiGETRealEstateManageTypeSelectOpstions = async () => {
+    const { config, status, data } = await apiGETRealEstateManageTypeSelectOpstions()
+
+    if (status === 200) {
+      options.value.manageType = data || []
+    }
+
+    return { config, status, data }
+  }
+  const onApiGETRealEstateManageDutySelectOpstions = async () => {
+    const { config, status, data } = await apiGETRealEstateManageDutySelectOpstions()
+
+    if (status === 200) {
+      options.value.manageDuty = data || []
+    }
+
+    return { config, status, data }
+  }
+  const onApiGETRealEstateManagePayPeriodSelectOpstions = async () => {
+    const { config, status, data } = await apiGETRealEstateManagePayPeriodSelectOpstions()
+
+    if (status === 200) {
+      options.value.managePay = data || []
+    }
+
+    return { config, status, data }
+  }
 
   return {
     NAME,
@@ -151,11 +285,18 @@ export const useBuyProjectStore = defineStore('buyProject', () => {
     onApiGETRealEstatePurposeCheckOptions,
     onApiGETCitySelectOptions,
     onApiGETDistrictSelectOptions,
+    onApiGETRoad,
     onApiGETRealEstateTypeSelectOptions,
     onApiGETRealEstateLegalUsageSelectOptions,
     onApiGETRealEstateZoingCheckOptions,
     onApiGETRealEstateZoingCitySelectOptions,
     onApiGETRealEstateZoingLandSelectOptions,
     onApiGETRealEstateFloorSelectOptions,
+    onApiGETRealEstateFaceSelectOptions,
+    onApiGETRealEstateStructionSelectOptions,
+    onApiGETRealEstateBarrierFreeCheckOptions,
+    onApiGETRealEstateManageTypeSelectOpstions,
+    onApiGETRealEstateManageDutySelectOpstions,
+    onApiGETRealEstateManagePayPeriodSelectOpstions,
   }
 })

@@ -88,6 +88,9 @@ export const apiGETCitySelectOptions = async (data) =>
 export const apiGETDistrictSelectOptions = async (data) =>
   await fetchApi('get', 'api/v1/buy/{cityCode}/district/select-options', data)
 
+export const apiGETRoad = async (data) =>
+  await fetchApi('get', 'api/v1/buy/{cityCode}/{districtCode}/Road', data)
+
 export const apiGETRealEstateTypeSelectOptions = async (data) =>
   await fetchApi('get', 'api/v1/buy/realEstateType/select-options', data)
 
@@ -105,3 +108,24 @@ export const apiGETRealEstateZoingLandSelectOptions = async (data) =>
 
 export const apiGETRealEstateFloorSelectOptions = async (data) =>
   await fetchApi('get', 'api/v1/buy/realEstateFloor/select-options', data)
+
+export const apiGETCommunities = async (data) =>
+  await fetchApi('get', 'api/v1/buy/communities', data)
+
+export const apiGETRealEstateFaceSelectOptions = async (data) =>
+  await fetchApi('get', 'api/v1/buy/realEstateFace/select-options', data)
+
+export const apiGETRealEstateStructionSelectOptions = async (data) =>
+  await fetchApi('get', 'api/v1/buy/realEstateStruction/select-options', data)
+
+export const apiGETRealEstateBarrierFreeCheckOptions = async (data) =>
+  await fetchApi('get', 'api/v1/buy/realEstateBarrierfree/check-options', data)
+
+export const apiGETRealEstateManageTypeSelectOpstions = async (data) =>
+  await fetchApi('get', 'api/v1/buy/realEstateManageType/select-opstions', data)
+
+export const apiGETRealEstateManageDutySelectOpstions = async (data) =>
+  await fetchApi('get', 'api/v1/buy/realEstateManageDuty/select-opstions', data)
+
+export const apiGETRealEstateManagePayPeriodSelectOpstions = async (data) =>
+  await fetchApi('get', 'api/v1/buy/realEstateManagePayPeriod/select-opstions', data)

@@ -29,6 +29,10 @@ Object.keys(rules).forEach((rule) => {
 
 // 必填
 defineRule('required', (value, object, elem) => {
+  const el = document.querySelector(`[name="${elem.name}"]`)
+
+  if (el.disabled) return true
+
   const isArray = Array.isArray(object)
   const hasValue = value?.length > 0
   const valid = hasValue || (!isArray && !object.valid)
@@ -88,5 +92,11 @@ defineRule('email', (value, message) => {
 defineRule('custom', (value, object) => {
   const { valid, errorMessage } = object
 
-  return value && typeof valid === 'boolean' ? valid : !valid.test(value) ? errorMessage : true
+  return value
+    ? typeof valid === 'boolean'
+      ? valid
+      : !valid.test(value)
+        ? errorMessage
+        : true
+    : true
 })

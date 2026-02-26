@@ -169,16 +169,73 @@ const onEvent = (e, errorMessage) => {
   }
 
   if (isBlur) {
+    let raw = model.value
+
+    // 如果有 comma 顯示，先用「去逗號後」的值來判斷
+    const plain = isComma ? numberComma.remove(raw, false) : raw
+
     if (isNumeric.value) {
-      model.value =
-        checkNotIsZero && /^0\.$/.test(model.value) ? model.value.replace(/^0\.$/, '') : model.value
+      const { integer, checkNotIsZero } = config.value
+
+      // 1) 先把暫態輸入修正：'.' -> ''、'0.' -> '0'（或 ''，看你規則）
+      //    你需求是 checkNotIsZero 時不能是 0，所以 '0.' 這種 blur 最後也不能留下
+      let normalized = String(plain ?? '').trim()
+
+      // 空值直接送出
+      if (normalized === '') {
+        emits('update:modelValue', '')
+        model.value = isComma ? numberComma.add('', false) : ''
+        emits(type, e, isError)
+        return
+      }
+
+      // 只打一個 '.' 的狀況
+      if (normalized === '.') normalized = ''
+
+      // 2) 若 integer：禁止小數點（blur 時直接砍掉小數部分）
+      //    例：'12.34' -> '12'
+      if (integer && normalized.includes('.')) {
+        normalized = normalized.split('.')[0]
+      }
+
+      // 3) 去掉前導 0（但小數模式要保留 0.x 的 0）
+      if (normalized) {
+        if (integer) {
+          normalized = normalized.replace(/^0+/, '')
+        } else {
+          // 非整數：保留 "0.xxx"
+          if (!normalized.startsWith('0.')) {
+            normalized = normalized.replace(/^0+/, '')
+            if (normalized.startsWith('.')) normalized = '0' + normalized
+          }
+        }
+      }
+
+      // 4) checkNotIsZero：最終值不能是 0
+      //    這裡用 Number 判斷，比正則安全（0.0、0.00 都會變 0）
+      if (checkNotIsZero) {
+        const n = Number(normalized)
+
+        // normalized 可能變成 ''，或是 '0.'（如果你前面沒清掉），這裡一起處理
+        const isTransient = normalized === '' || normalized === '0.' || normalized === '.'
+        if (!isTransient && Number.isFinite(n) && n === 0) {
+          normalized = '' // 你也可以改成 '1' 或回復成上一個值
+        }
+
+        // 你原本特例：'0.' blur 時清掉
+        if (/^0\.$/.test(normalized)) normalized = ''
+      }
+
+      // 5) 最終送出（注意：送出要送「無逗號」值）
+      emits('update:modelValue', normalized)
+
+      // 顯示用的 model.value 再套 comma
+      model.value = isComma ? numberComma.add(normalized, false) : normalized
+    } else {
+      // 非 numeric 就照舊：送出 plain（有 comma 的話也去逗號）
+      emits('update:modelValue', plain)
+      model.value = isComma ? numberComma.add(plain, false) : plain
     }
-
-    const value = isComma ? numberComma.remove(model.value, false) : model.value
-
-    emits('update:modelValue', value)
-
-    model.value = isComma ? numberComma.add(model.value, false) : model.value
   }
 
   emits(type, e, isError)
@@ -212,7 +269,7 @@ watch(
       :name="props.name"
       :type="props.type"
       v-model="model"
-      :rules="props.rules"
+      :rules="config.isDisabled ? '' : props.rules"
       v-slot="{ field, errorMessage }"
     >
       <div class="m-form-container" :class="setClass.container">

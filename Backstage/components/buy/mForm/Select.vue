@@ -339,7 +339,12 @@ onUnmounted(() => {
 
 <template>
   <div class="m-form" :class="setClass.main">
-    <Field :name="props.name" :rules="props.rules" v-model="model" v-slot="{ field, errorMessage }">
+    <Field
+      :name="props.name"
+      v-model="model"
+      :rules="config.isDisabled ? '' : props.rules"
+      v-slot="{ field, errorMessage }"
+    >
       <input type="hidden" :id="props.name" v-bind="field" />
       <div class="m-form-container flex" :class="setClass.container">
         <button
@@ -362,7 +367,7 @@ onUnmounted(() => {
             :class="[
               setClass.type,
               {
-                '--placeholder': !label,
+                '--placeholder': !label || !model,
               },
             ]"
             ref="selectRef"
@@ -409,7 +414,7 @@ onUnmounted(() => {
         v-if="isActive && options && options.length !== 0 && !config.isDisabled"
       >
         <ul
-          class="m-select-dropdown-container max-h-full bg-[#fff]"
+          class="m-select-dropdown-container max-h-full bg-[--white]"
           :class="setClass.dropdownContainer"
           ref="dropdownContainerRef"
         >
@@ -486,17 +491,18 @@ onUnmounted(() => {
 
 .m-select-dropdown-button {
   &:not(:disabled) {
-    &:not(.\-\-active) {
-      @apply text-[--gray-222];
-    }
+    @apply text-[--gray-333];
+
+    /* &:not(.\-\-active) {
+    } */
 
     &.\-\-active {
-      @apply bg-[--major-red] text-[--white];
+      @apply bg-[--orange-feea];
     }
   }
 
   &:disabled {
-    @apply text-[--gray-222] text-opacity-30;
+    @apply text-[--gray-3334d];
   }
 }
 
@@ -504,7 +510,7 @@ onUnmounted(() => {
   &:not(:last-child) {
     .m-select-dropdown-button {
       &:after {
-        @apply block h-[1px] w-full bg-[--gray-222] opacity-30 content-default;
+        @apply block h-[1px] w-full bg-[--gray-e5] opacity-30 content-default;
       }
     }
   }

@@ -8,7 +8,7 @@ import { useBuyProjectStore } from '@stores/buy/project.js'
 const buyProject = useBuyProjectStore()
 const { apiData } = storeToRefs(buyProject)
 
-const communityOptions = readonly([
+const radioOptions = readonly([
   {
     label: '非社區 / 建案',
     value: false,
@@ -25,7 +25,7 @@ const communityOptions = readonly([
     <FormRadiosOval
       name="isCaseCommunity"
       v-model="apiData.isCaseCommunity"
-      :options="communityOptions"
+      :options="radioOptions"
       :setClass="{
         radios: 'm:w-full',
         container: 'm:flex-1',

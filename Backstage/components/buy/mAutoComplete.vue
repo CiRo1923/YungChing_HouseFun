@@ -41,6 +41,7 @@ const dropdownContainerRef = ref(null)
 const dropdownItemRef = ref(null)
 const isActive = ref(false)
 const isFocus = ref(false)
+const isComposing = ref(false)
 const inputLabel = ref(null)
 const selected = ref({
   index: null,
@@ -60,6 +61,7 @@ const config = computed(() => {
     noMatchClearLabel: true,
     noResult: '無任何選項。',
     isDisabled: false,
+    isExistClose: true,
     isError: false,
     position: 'auto',
     schema: {
@@ -117,9 +119,11 @@ const onGetInputLabel = () => {
 }
 
 const onResetDropdownItems = () => {
-  dropdownItems.value = props.options
+  dropdownItems.value = props.options.length !== 0 ? props.options : null
+}
 
-  console.log(dropdownItems.value)
+const onIsComposingChange = (boolean) => {
+  isComposing.value = boolean
 }
 
 const onFocus = async () => {
@@ -130,12 +134,26 @@ const onFocus = async () => {
   onDropdownOpen()
 }
 
-const onKeyup = async () => {
+const onInput = async () => {
+  if (isComposing.value) return
   onFilter()
-
   await nextTick()
   onDropdownOpen()
 }
+
+const onCompositionEnd = async () => {
+  onIsComposingChange(false)
+  onFilter()
+  await nextTick()
+  onDropdownOpen()
+}
+
+// const onKeyup = async () => {
+//   onFilter()
+
+//   await nextTick()
+//   onDropdownOpen()
+// }
 
 const onBlur = () => {
   const { noMatchClearLabel } = config.value
@@ -221,14 +239,14 @@ const onDropdownOpen = () => {
 
   if ($elenemt && $dropdown) {
     if ($dropdownContainer) {
-      const hasItemsThanMax = maxItems <= dropdownItemRef.value.length
+      const hasItemsThanMax = dropdownItemRef.value.length > maxItems
 
       if (hasItemsThanMax) {
         $dropdownContainer.style.overflowY = 'auto'
       }
 
-      const index = !hasItemsThanMax ? dropdownItemRef.value.length - 1 : maxItems
-      const $item = dropdownItemRef.value ? dropdownItemRef.value[index] : null
+      const index = hasItemsThanMax ? maxItems - 1 : dropdownItemRef.value.length - 1
+      const $item = dropdownItemRef.value[index]
       const dropdown = {
         rect: dropdownRef.value.getBoundingClientRect(),
       }
@@ -318,8 +336,8 @@ const onDropdownItemClick = (item) => {
   emits('change', item)
 }
 
-const onClearClick = () => {
-  model.value = null
+const onClear = () => {
+  model.value = ''
   inputLabel.value = null
   selected.value.index = null
 }
@@ -368,7 +386,7 @@ onUnmounted(() => {
 
 <template>
   <div class="m-autocomplete" :class="setClass.main">
-    <div class="m-autocomplete-container" :class="setClass.container">
+    <div class="m-autocomplete-container overflow-hidden" :class="setClass.container">
       <Field
         :name="props.name"
         :rules="props.rules"
@@ -377,7 +395,7 @@ onUnmounted(() => {
       >
         <input type="hidden" v-bind="field" />
         <div
-          class="m-autocomplete-element jFormValid relative flex items-center gap-x-[8px] border-[1px] border-[--autocomplete-border-color] bg-[--autocomplete-bg-color] px-[10px] transition-colors duration-300"
+          class="m-autocomplete-element jFormValid relative flex items-center gap-x-[8px] rounded-[5px] border-[1px] border-[--autocomplete-border-color] bg-[--autocomplete-bg-color] px-[10px] transition-colors duration-300"
           :class="[
             setClass.element,
             { '--focus': isFocus },
@@ -386,40 +404,38 @@ onUnmounted(() => {
           ]"
           ref="elenemtRef"
         >
-          <SvgIcon
-            icon="icon_search"
-            class="pointer-events-none h-[20px] w-[20px] shrink-0 p-[2px] text-[--autocomplete-icon-color] transition-colors duration-300"
-          />
           <input
+            :name="`${props.name}_type`"
             type="text"
             v-model="inputLabel"
-            class="m-autocomplete-type h-full grow bg-transparent text-[--autocomplete-text-color] placeholder:text-[--color-gray-major]"
+            class="m-autocomplete-type min-w-0 grow"
             autocomplete="off"
             :placeholder="config.placeholder"
             :disabled="config.isDisabled"
             @focus="onFocus"
-            @keyup="onKeyup"
+            @input="onInput"
             @blur="onBlur"
+            @compositionstart="onIsComposingChange(true)"
+            @compositionend="onCompositionEnd"
+          />
+          <button
+            type="button"
+            class="m-autocomplete-clear-button flex h-[18px] w-[18px] shrink-0 items-center p-[4px] text-[--gray-999] transition-opacitys duration-300"
+            :class="{
+              '--show': inputLabel,
+            }"
+            @click="onClear"
+            v-if="config.isExistClose && !config.isDisabled"
+          >
+            <SvgIcon icon="icon_xmark" class="m-autocomplete-clear-icon" />
+          </button>
+          <SvgIcon
+            icon="icon_search"
+            class="pointer-events-none h-[18px] w-[18px] shrink-0 text-[--autocomplete-icon-color] transition-colors duration-300"
           />
           <!-- @keydown.up="onArrow($event)" -->
           <!-- @keydown.down="onArrow($event)" -->
           <!-- @keypress.enter="onEnter" -->
-          <div
-            class="m-autocomplete-clear flex shrink-0 items-center transition-opacitys duration-300"
-            :class="{
-              '--hide': model === null || model === '',
-            }"
-          >
-            <Anchor
-              :config="{
-                icon: 'icon_circle_x_mark',
-              }"
-              :setClass="{
-                main: '--gray h-[20px] w-[20px] p-[1px]',
-              }"
-              @click="onClearClick"
-            />
-          </div>
         </div>
       </Field>
     </div>
@@ -436,20 +452,20 @@ onUnmounted(() => {
   <Teleport to="body">
     <Transition name="autocomplete" @afterLeave="onCloseDropdown" appear>
       <div
-        class="m-autocomplete-dropdown theme absolute z-[5] overflow-hidden"
+        class="m-autocomplete-dropdown absolute z-[5] mt-[3px] overflow-hidden"
         :class="setClass.dropdown"
         ref="dropdownRef"
         v-if="isActive && dropdownItems && !config.isDisabled"
       >
         <div
-          class="m-autocomplete-dropdown-no-data bg-[--modules-select-bgColor]"
+          class="m-autocomplete-dropdown-no-data bg-[--white] p-[8px] text-[14px] text-[--gray-333]"
           v-if="dropdownItems.length === 0"
           ref="dropdownNoDataRef"
         >
           <p>{{ config.noResult }}</p>
         </div>
         <ul
-          class="m-autocomplete-dropdown-container max-h-full bg-[--modules-select-bgColor]"
+          class="m-autocomplete-dropdown-container max-h-full bg-[--white]"
           :class="setClass.dropdownContainer"
           ref="dropdownContainerRef"
           v-else
@@ -462,15 +478,17 @@ onUnmounted(() => {
           >
             <button
               type="button"
-              class="m-autocomplete-dropdown-button flex w-full items-center bg-[--autocomplete-dropdown-button-bg-color] text-left text-[--autocomplete-dropdown-button-text-color] transition-colors duration-300 p:hover:bg-[--selected-bgColor]"
+              class="m-autocomplete-dropdown-button block w-full px-[8px] text-left transition-colors duration-300"
               :class="{
                 '--active': index === selected.index,
               }"
               @click="onDropdownItemClick(item)"
             >
-              <slot name="option" :item="item">
-                {{ item[config.schema.label] }}
-              </slot>
+              <em class="m-autocomplete-dropdown-label relative block grow py-[8px] text-[14px]">
+                <slot name="option" :item="item">
+                  {{ item[config.schema.label] }}
+                </slot>
+              </em>
             </button>
           </li>
         </ul>
@@ -479,13 +497,11 @@ onUnmounted(() => {
   </Teleport>
 </template>
 
-<style src="@css/_modules/vueTransition.css"></style>
+<style src="@css/_common/vueTransition.css"></style>
 <style lang="postcss">
 .m-autocomplete-element {
   &.\-\-disabled {
-    --autocomplete-bg-color: var(--color-disabled);
-    --autocomplete-border-color: transparent;
-    --autocomplete-icon-color: var(--color-gray-major);
+    --autocomplete-bg-color: var(--gray-f2);
 
     &,
     .m-autocomplete-type {
@@ -496,15 +512,23 @@ onUnmounted(() => {
   &:not(.\-\-disabled) {
     --autocomplete-bg-color: var(--modules-bgColor);
     --autocomplete-text-color: var(--textColor-title);
-    --autocomplete-icon-color: var(--textColor-major);
 
-    &:not(.\-\-focus):not(.\-\-error) {
-      --autocomplete-border-color: var(--modules-borderColor);
+    .m-autocomplete-type {
+      @apply text-[--gray-666];
+
+      &::placeholder {
+        @apply text-[--gray-999];
+      }
     }
 
-    &.\-\-focus {
+    /* &.\-\-focus {
       --autocomplete-border-color: var(--color-blue-major);
-    }
+    } */
+  }
+
+  &:not(.\-\-error) {
+    --autocomplete-icon-color: var(--gray-ccce);
+    --autocomplete-border-color: var(--gray-e5);
   }
 
   /* &:not(.\-\-required):not(.\-\-focus):not(.\-\-error) {
@@ -524,12 +548,12 @@ onUnmounted(() => {
   } */
 }
 
-.m-autocomplete-clear {
-  &.\-\-hide {
+.m-autocomplete-clear-button {
+  &:not(.\-\-show) {
     @apply pointer-events-none invisible opacity-0;
   }
 
-  &:not(.\-\-hide) {
+  &.\-\-show {
     @apply visible opacity-100;
   }
 }
@@ -544,41 +568,40 @@ onUnmounted(() => {
     0 2px 16px -8px #02041633;
 }
 
+.m-autocomplete-dropdown-item {
+  &:not(:last-child) {
+    .m-autocomplete-dropdown-button {
+      &:after {
+        @apply block h-[1px] w-full bg-[--gray-e5] opacity-30 content-default;
+      }
+    }
+  }
+}
+
 .m-autocomplete-dropdown-button {
-  &:not(.\-\-active) {
-    --autocomplete-dropdown-button-bg-color: transparent;
-    --autocomplete-dropdown-button-text-color: var(--textColor-title);
+  &:not(:disabled) {
+    @apply text-[--gray-333];
+
+    /* &:not(.\-\-active) {
+    } */
+
+    &.\-\-active {
+      @apply bg-[--orange-feea];
+    }
   }
 
-  &.\-\-active {
-    --autocomplete-dropdown-button-bg-color: var(--selected-bgColor);
-    --autocomplete-dropdown-button-text-color: var(--color-blue-major);
+  &:disabled {
+    @apply text-[--gray-3334d];
   }
 }
 
 @screen p {
   .m-autocomplete {
-    &.\-\-rounded-12,
-    &.p\:\-\-rounded-12,
-    &.pt\:\-\-rounded-12 {
+    &.\-\-px-12,
+    &.p\:\-\-px-12,
+    &.pt\:\-\-px-12 {
       .m-autocomplete-element {
-        @apply rounded-[12px];
-      }
-    }
-
-    &.\-\-padding-16,
-    &.p\:\-\-padding-16,
-    &.pt\:\-\-padding-16 {
-      .m-autocomplete-element {
-        @apply p-[16px];
-      }
-    }
-
-    &.\-\-padding-x-16,
-    &.p\:\-\-padding-x-16,
-    &.pt\:\-\-padding-x-16 {
-      .m-autocomplete-element {
-        @apply px-[16px];
+        @apply px-[12px];
       }
     }
 
@@ -590,11 +613,11 @@ onUnmounted(() => {
       }
     }
 
-    &.\-\-height-52,
-    &.p\:\-\-height-52,
-    &.pt\:\-\-height-52 {
+    &.\-\-height-40,
+    &.p\:\-\-height-40,
+    &.pt\:\-\-height-40 {
       .m-autocomplete-element {
-        @apply h-[52px];
+        @apply h-[40px];
       }
     }
 
@@ -698,30 +721,12 @@ onUnmounted(() => {
 
 @screen t {
   .m-autocomplete {
-    &.\-\-rounded-12,
-    &.pt\:\-\-rounded-12,
-    &.tm\:\-\-rounded-12,
-    &.t\:\-\-rounded-12 {
+    &.\-\-px-12,
+    &.pt\:\-\-px-12,
+    &.tm\:\-\-px-12,
+    &.t\:\-\-px-12 {
       .m-autocomplete-element {
-        @apply rounded-[12px];
-      }
-    }
-
-    &.\-\-padding-16,
-    &.pt\:\-\-padding-16,
-    &.tm\:\-\-padding-16,
-    &.t\:\-\-padding-16 {
-      .m-autocomplete-element {
-        @apply p-[16px];
-      }
-    }
-
-    &.\-\-padding-x-16,
-    &.pt\:\-\-padding-x-16,
-    &.tm\:\-\-padding-x-16,
-    &.t\:\-\-padding-x-16 {
-      .m-autocomplete-element {
-        @apply px-[16px];
+        @apply px-[12px];
       }
     }
 
@@ -734,12 +739,12 @@ onUnmounted(() => {
       }
     }
 
-    &.\-\-height-52,
-    &.pt\:\-\-height-52,
-    &.tm\:\-\-height-52,
-    &.t\:\-\-height-52 {
+    &.\-\-height-40,
+    &.pt\:\-\-height-40,
+    &.tm\:\-\-height-40,
+    &.t\:\-\-height-40 {
       .m-autocomplete-element {
-        @apply h-[52px];
+        @apply h-[40px];
       }
     }
 
@@ -854,27 +859,11 @@ onUnmounted(() => {
 
 @screen m {
   .m-autocomplete {
-    &.\-\-rounded-12,
-    &.tm\:\-\-rounded-12,
-    &.m\:\-\-rounded-12 {
+    &.\-\-px-12,
+    &.tm\:\-\-px-12,
+    &.m\:\-\-px-12 {
       .m-autocomplete-element {
-        @apply rounded-[12px];
-      }
-    }
-
-    &.\-\-padding-16,
-    &.tm\:\-\-padding-16,
-    &.m\:\-\-padding-16 {
-      .m-autocomplete-element {
-        @apply p-[16px];
-      }
-    }
-
-    &.\-\-padding-x-16,
-    &.tm\:\-\-padding-x-16,
-    &.m\:\-\-padding-x-16 {
-      .m-autocomplete-element {
-        @apply px-[16px];
+        @apply px-[12px];
       }
     }
 
@@ -886,11 +875,11 @@ onUnmounted(() => {
       }
     }
 
-    &.\-\-height-52,
-    &.tm\:\-\-height-52,
-    &.m\:\-\-height-52 {
+    &.\-\-height-40,
+    &.tm\:\-\-height-40,
+    &.m\:\-\-height-40 {
       .m-autocomplete-element {
-        @apply h-[52px];
+        @apply h-[40px];
       }
     }
 

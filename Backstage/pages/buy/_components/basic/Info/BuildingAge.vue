@@ -11,7 +11,7 @@ const buyProject = useBuyProjectStore()
 const { apiData } = storeToRefs(buyProject)
 const optionsModel = ref('age')
 const isOptionsModelAge = computed(() => optionsModel.value === 'age')
-const ageOptions = readonly([
+const radioOptions = readonly([
   {
     label: '屋齡',
     value: 'age',
@@ -48,7 +48,7 @@ const onReset = () => {
     <FormRadiosOval
       name="buildingAge"
       v-model="optionsModel"
-      :options="ageOptions"
+      :options="radioOptions"
       :setClass="{
         radios: 'm:w-full',
         container: 'm:flex-1',

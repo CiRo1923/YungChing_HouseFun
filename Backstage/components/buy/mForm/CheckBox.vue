@@ -94,12 +94,12 @@ const onChange = () => {
       :name="props.name"
       type="checkbox"
       v-model="model"
-      :rules="props.rules"
+      :rules="config.isDisabled ? '' : props.rules"
       v-slot="{ field, errorMessage }"
     >
       <div class="m-form-container" :class="setClass.container">
         <label
-          class="m-form-element --checkbox inline-flex gap-x-[8px] text-[--gray-999]"
+          class="m-form-element --checkbox relative inline-flex gap-x-[8px] text-[--gray-999]"
           :class="[
             config.align === 'top' ? 'items-baseline' : 'items-center',
             config.isDisabled ? 'cursor-not-allowed' : 'cursor-pointer',
@@ -111,7 +111,7 @@ const onChange = () => {
             type="checkbox"
             v-model="model"
             v-bind="bind"
-            class="m-form-type jFormValid absolute left-[-99999px]"
+            class="m-form-type jFormValid sr-only"
             :class="{
               '--error': errorMessage,
             }"

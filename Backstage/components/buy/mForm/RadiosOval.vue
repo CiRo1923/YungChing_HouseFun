@@ -99,7 +99,7 @@ onSelected()
         :key="`${item[config.schema.label]}_${index}`"
       >
         <label
-          class="m-form-element flex h-full w-full cursor-pointer items-center justify-center text-[--gray-666] transition-colors duration-300 tm:gap-x-[3px] tm:px-[10px] p:gap-x-[5px] p:px-[12px]"
+          class="m-form-element relative flex h-full w-full cursor-pointer items-center justify-center text-[--gray-666] transition-colors duration-300 tm:gap-x-[3px] tm:px-[10px] p:gap-x-[5px] p:px-[12px]"
           :class="[
             {
               '--checked': item[config.schema.value] === selected,
@@ -112,7 +112,7 @@ onSelected()
             :name="props.name"
             v-model="selected"
             :value="item[config.schema.value]"
-            class="m-form-type absolute left-[-99999px]"
+            class="m-form-type sr-only"
             :class="setClass.type"
             @change="onChange(item)"
           />
