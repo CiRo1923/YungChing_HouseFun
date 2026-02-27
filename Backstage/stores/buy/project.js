@@ -18,6 +18,8 @@ export const useBuyProjectStore = defineStore('buyProject', () => {
     manageType: null,
     manageDuty: null,
     managePay: null,
+    videoType: null,
+    feature: null,
   })
   const apiData = ref({
     casePurposeToken: '',
@@ -65,7 +67,7 @@ export const useBuyProjectStore = defineStore('buyProject', () => {
     caseElevatorCount: '',
     caseFaceToken: '',
     caseStructureToken: '',
-    caseBarrierfreeToken: [],
+    caseBarrierfreeToken: '',
     casePrice: '',
     isCasePriceIncludeParking: false,
     caseParkingPrice: '',
@@ -107,7 +109,7 @@ export const useBuyProjectStore = defineStore('buyProject', () => {
     caseFeatureToken: '',
     listCasePicUrl: [],
     caseVideoTypeToken: '',
-    caseVideoTypeToken: '',
+    caseVideoUrl: '',
     caseFloorplanUrl: '',
     posterInfo: {
       agentID: '',

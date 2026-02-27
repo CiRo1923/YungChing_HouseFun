@@ -55,7 +55,7 @@ const onCaseZoingTypeChange = (props) => {
           required: '請選擇都市土地',
         }"
         :setClass="{
-          main: '--height-40 --px-12 --py-8 pt:flex-1',
+          main: '--h-40 --px-12 --py-8 pt:flex-1',
         }"
         @change="onCaseZoingTypeChange"
         v-if="apiData.caseZoingToken === '1'"
@@ -75,7 +75,7 @@ const onCaseZoingTypeChange = (props) => {
           required: '請選擇非都市土地',
         }"
         :setClass="{
-          main: '--height-40 --px-12 --py-8 pt:flex-1',
+          main: '--h-40 --px-12 --py-8 pt:flex-1',
         }"
         @change="onCaseZoingTypeChange"
         v-if="apiData.caseZoingToken === '2'"
@@ -90,7 +90,7 @@ const onCaseZoingTypeChange = (props) => {
           required: '請填寫',
         }"
         :setClass="{
-          main: '--height-40 --px-12 --py-8 pt:flex-1',
+          main: '--h-40 --px-12 --py-8 pt:flex-1',
         }"
         v-if="isCaseZoingOtherShow"
       />

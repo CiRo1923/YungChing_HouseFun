@@ -64,7 +64,7 @@ watch(
           isDisabled: isAutoCalc,
         }"
         :setClass="{
-          main: '--height-40 --px-12 --py-8 p:w-[270px]',
+          main: '--h-40 --px-12 --py-8 p:w-[270px]',
           element: 'grow',
           rearAssist: 'text-[14px] text-[--gray-999]',
           suffix: 'text-[14px] text-[--gray-999]',
@@ -81,11 +81,8 @@ watch(
             name="isAutoCalc"
             v-model="isAutoCalc"
             :config="{
+              mode: 'boolean',
               label: '自動計算',
-              value: {
-                true: true,
-                false: false,
-              },
             }"
             :setClass="{
               label: 'text-[16px]',
@@ -97,11 +94,8 @@ watch(
             name="isCasePricePerPinDeductParking"
             v-model="apiData.isCasePricePerPinDeductParking"
             :config="{
+              mode: 'boolean',
               label: '扣除車位價',
-              value: {
-                true: true,
-                false: false,
-              },
             }"
             :setClass="{
               label: 'text-[16px]',

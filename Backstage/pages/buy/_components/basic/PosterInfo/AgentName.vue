@@ -24,7 +24,7 @@ const { posterInfoImport } = storeToRefs(buyBasic)
           required: '請輸入姓名',
         }"
         :setClass="{
-          main: '--height-40 --px-12 --py-8 m:w-[172px] t:w-[220px] p:w-[270px]',
+          main: '--h-40 --px-12 --py-8 m:w-[172px] t:w-[220px] p:w-[270px]',
           element: 'grow',
         }"
       />
@@ -34,11 +34,8 @@ const { posterInfoImport } = storeToRefs(buyBasic)
         name="isShowNickname"
         v-model="apiData.posterInfo.isShowNickname"
         :config="{
+          mode: 'boolean',
           label: '同時顯示暱稱',
-          value: {
-            true: true,
-            false: false,
-          },
         }"
         :setClass="{
           label: 'text-[16px]',

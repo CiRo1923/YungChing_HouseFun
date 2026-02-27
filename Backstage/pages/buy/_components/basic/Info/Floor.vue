@@ -55,7 +55,7 @@ const onIsSingleFloorChange = () => {
             required: '請選擇出售樓層',
           }"
           :setClass="{
-            main: '--height-40 --px-12 --py-8',
+            main: '--h-40 --px-12 --py-8',
           }"
         />
         <FormInput
@@ -68,7 +68,7 @@ const onIsSingleFloorChange = () => {
             required: '請輸入樓層',
           }"
           :setClass="{
-            main: '--height-40 --px-12 --py-8 p:w-[299px]',
+            main: '--h-40 --px-12 --py-8 p:w-[299px]',
             element: 'grow',
             rearAssist: 'text-[14px] text-[--gray-999]',
           }"
@@ -95,7 +95,7 @@ const onIsSingleFloorChange = () => {
             required: '請選擇出售樓層',
           }"
           :setClass="{
-            main: '--height-40 --px-12 --py-8',
+            main: '--h-40 --px-12 --py-8',
           }"
         />
         <FormInput
@@ -108,7 +108,7 @@ const onIsSingleFloorChange = () => {
             required: '請輸入樓層',
           }"
           :setClass="{
-            main: '--height-40 --px-12 --py-8 p:w-[299px]',
+            main: '--h-40 --px-12 --py-8 p:w-[299px]',
             element: 'grow',
             rearAssist: 'text-[14px] text-[--gray-999]',
           }"

@@ -5,6 +5,10 @@ body {
 }
 
 html {
+  font-family:
+    'Noto Sans TC', '微軟正黑體', 'Microsoft JhengHei', 'Heiti TC', '黑體', Arial, Helvetica,
+    sans-serif;
+  text-size-adjust: none;
   padding: 0;
 }
 

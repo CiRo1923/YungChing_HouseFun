@@ -60,7 +60,7 @@ const items = shallowReadonly([
             required: '請輸入登記坪數',
           }"
           :setClass="{
-            main: '--height-40 --px-12 --py-8 tm:w-[205px] pt:w-[270px]',
+            main: '--h-40 --px-12 --py-8 tm:w-[205px] pt:w-[270px]',
             element: 'grow',
             rearAssist: 'text-[14px] text-[--gray-999]',
           }"
@@ -74,11 +74,8 @@ const items = shallowReadonly([
           name="isCaseAttachedSqAutoCalculate"
           v-model="apiData.isCaseAttachedSqAutoCalculate"
           :config="{
+            mode: 'boolean',
             label: '自動加總',
-            value: {
-              true: true,
-              false: false,
-            },
           }"
           :setClass="{
             label: 'text-[16px]',
@@ -109,7 +106,7 @@ const items = shallowReadonly([
             isExistClose: false,
           }"
           :setClass="{
-            main: '--height-40 --px-12 --py-8 pt:grow',
+            main: '--h-40 --px-12 --py-8 pt:grow',
             element: 'grow',
             rearAssist: 'text-[14px] text-[--gray-999]',
           }"

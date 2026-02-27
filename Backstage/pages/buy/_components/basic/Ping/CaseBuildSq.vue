@@ -28,7 +28,7 @@ const { pingData, pingUnitLabel } = storeToRefs(buyBasic)
           required: '請輸入登記坪數',
         }"
         :setClass="{
-          main: '--height-40 --px-12 --py-8 tm:w-[228px] p:w-[270px]',
+          main: '--h-40 --px-12 --py-8 tm:w-[228px] p:w-[270px]',
           element: 'grow',
           rearAssist: 'text-[14px] text-[--gray-999]',
         }"
@@ -42,11 +42,8 @@ const { pingData, pingUnitLabel } = storeToRefs(buyBasic)
         name="isCaseBuildSqIncludeParking"
         v-model="apiData.isCaseBuildSqIncludeParking"
         :config="{
+          mode: 'boolean',
           label: '含車位',
-          value: {
-            true: true,
-            false: false,
-          },
         }"
         :setClass="{
           label: 'text-[16px]',

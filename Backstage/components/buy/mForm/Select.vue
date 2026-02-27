@@ -6,7 +6,6 @@ import { onDevice, deepMerge, deepClone, emptyData } from '@js/_prototype.js'
 
 import '@js/_validation.js'
 
-import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { Field, ErrorMessage } from 'vee-validate'
 
 const emits = defineEmits(['update:modelValue', 'change'])

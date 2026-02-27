@@ -33,7 +33,7 @@ const onIsCaseAddtionChange = () => {
               required: '請輸入房數',
             }"
             :setClass="{
-              main: '--height-40 --px-12 --py-8 tm:w-[151px] p:w-[100px]',
+              main: '--h-40 --px-12 --py-8 tm:w-[151px] p:w-[100px]',
               element: 'grow',
               rearAssist: 'text-[14px] text-[--gray-999]',
             }"
@@ -53,7 +53,7 @@ const onIsCaseAddtionChange = () => {
               required: '請輸入廳數',
             }"
             :setClass="{
-              main: '--height-40 --px-12 --py-8 tm:w-[151px] p:w-[100px]',
+              main: '--h-40 --px-12 --py-8 tm:w-[151px] p:w-[100px]',
               element: 'grow',
               rearAssist: 'text-[14px] text-[--gray-999]',
             }"
@@ -73,7 +73,7 @@ const onIsCaseAddtionChange = () => {
               required: '請輸入衛浴數',
             }"
             :setClass="{
-              main: '--height-40 --px-12 --py-8 tm:w-[151px] p:w-[100px]',
+              main: '--h-40 --px-12 --py-8 tm:w-[151px] p:w-[100px]',
               element: 'grow',
               rearAssist: 'text-[14px] text-[--gray-999]',
             }"
@@ -93,7 +93,7 @@ const onIsCaseAddtionChange = () => {
               required: '請輸入衛浴數',
             }"
             :setClass="{
-              main: '--height-40 --px-12 --py-8 tm:w-[151px] p:w-[110px]',
+              main: '--h-40 --px-12 --py-8 tm:w-[151px] p:w-[110px]',
               element: 'grow',
               rearAssist: 'text-[14px] text-[--gray-999]',
             }"
@@ -108,11 +108,8 @@ const onIsCaseAddtionChange = () => {
         name="isCaseOpenConcept"
         v-model="apiData.isCaseOpenConcept"
         :config="{
+          mode: 'boolean',
           label: '開放式格局',
-          value: {
-            true: true,
-            false: false,
-          },
         }"
         :setClass="{
           label: 'text-[16px]',
@@ -124,11 +121,8 @@ const onIsCaseAddtionChange = () => {
         name="isCaseAddtion"
         v-model="apiData.isCaseAddtion"
         :config="{
+          mode: 'boolean',
           label: '有加蓋',
-          value: {
-            true: true,
-            false: false,
-          },
         }"
         :setClass="{
           label: 'text-[16px]',

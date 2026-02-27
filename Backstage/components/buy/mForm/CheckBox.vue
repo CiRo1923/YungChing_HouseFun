@@ -5,7 +5,6 @@ import ErrorMessageElem from '@components/buy/mErrorMessageElem.vue'
 import { deepMerge } from '@js/_prototype.js'
 
 import { Field, ErrorMessage } from 'vee-validate'
-import { computed } from 'vue'
 
 const emits = defineEmits(['update:modelValue', 'change'])
 const props = defineProps({
@@ -15,7 +14,7 @@ const props = defineProps({
   },
   modelValue: {
     type: [Boolean, String, Array],
-    default: false,
+    default: undefined,
   },
   rules: {
     type: Object,
@@ -33,49 +32,102 @@ const props = defineProps({
 
 const model = computed({
   get() {
-    return props.modelValue
+    const { mode } = config.value
+    // value/boolean：完全不要轉 array
+    if (mode !== 'group') return props.modelValue
+
+    // group：input 端永遠 array
+    const sep = joinSep.value
+
+    if (Array.isArray(props.modelValue)) return props.modelValue
+
+    // join 模式才從字串切回 array
+    if (sep && typeof props.modelValue === 'string') {
+      return props.modelValue
+        ? props.modelValue
+            .split(sep)
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : []
+    }
+
+    // group 但外部給了字串（例如 '1'/'10'）→ 你要嘛當成單選 group，就包成 array
+    if (typeof props.modelValue === 'string') return [props.modelValue]
+
+    return []
   },
-  set(value) {
-    emits('update:modelValue', value)
+
+  set(val) {
+    const { mode } = config.value
+    // value/boolean：原樣吐回（或由 true/false-value 控制）
+    if (mode !== 'group') {
+      emits('update:modelValue', val)
+      return
+    }
+
+    // group：可 join 才 join
+    const sep = joinSep.value
+    if (sep && Array.isArray(val)) {
+      emits('update:modelValue', val.join(sep))
+      return
+    }
+
+    emits('update:modelValue', val)
   },
 })
 
 const config = computed(() => {
   return deepMerge(
     {
+      mode: 'group', // 'boolean' | 'group' | 'value'
       label: null,
       value: null,
       align: 'top',
       isDisabled: false,
-      schema: {
-        key: 'key',
-        value: 'value',
-      },
+      isJoin: null,
     },
     props.config
   )
 })
 
-const bind = computed(() => {
-  const { value } = config.value
-  const isTrueFalseValue = !Array.isArray(props.modelValue) && typeof value === 'object'
+const joinSep = computed(() => {
+  const { mode, isJoin } = config.value
+  if (mode !== 'group') return null
 
-  return isTrueFalseValue
-    ? {
-        'true-value': value.true,
-        'false-value': value.false,
-      }
-    : {
-        value,
-      }
+  if (isJoin === true) return ','
+  if (typeof isJoin === 'string' && isJoin.length) return isJoin
+  return null
+})
+
+const bind = computed(() => {
+  const { mode, value } = config.value
+
+  // value / boolean：用 true-value/false-value 才不會變 boolean
+  if (mode === 'value') {
+    return {
+      'true-value': value?.true, // 勾選回傳 '1' / '10'
+      'false-value': value?.false, // 取消回傳 ''（你要 null 也可以）
+    }
+  }
+
+  if (mode === 'boolean') {
+    return {
+      'true-value': true,
+      'false-value': false,
+    }
+  }
+
+  // group：用 value 做 array 比對
+  return { value }
 })
 
 const setClass = computed(() => {
   return {
     ...{
       main: '',
-      elem: '',
       content: '',
+      element: '',
+      icon: '',
       label: '',
       error: '',
     },

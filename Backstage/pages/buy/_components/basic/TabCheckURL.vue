@@ -57,7 +57,7 @@ const onClick = async (validate) => {
           },
         }"
         :setClass="{
-          main: '--height-40 --px-12 --py-8 grow',
+          main: '--h-40 --px-12 --py-8 grow',
         }"
       />
       <Anchor
@@ -66,7 +66,7 @@ const onClick = async (validate) => {
           isDisabled: !url,
         }"
         :setClass="{
-          main: '--oval --height-40 --px-20 --py-5 --bg-green-6a2d --text-white shrink-0',
+          main: '--oval --h-40 --px-20 --py-5 --bg-green-6a2d --text-white shrink-0',
           text: 'font-semibold',
         }"
         @click="onClick(validate)"

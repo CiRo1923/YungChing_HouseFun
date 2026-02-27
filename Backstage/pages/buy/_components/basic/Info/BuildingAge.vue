@@ -71,7 +71,7 @@ const onReset = () => {
             },
           }"
           :setClass="{
-            main: '--height-40 --px-12 --py-8 tm:w-[130px] p:w-[100px]',
+            main: '--h-40 --px-12 --py-8 tm:w-[130px] p:w-[100px]',
             element: 'grow',
             rearAssist: 'text-[14px] text-[--gray-999]',
           }"
@@ -97,7 +97,7 @@ const onReset = () => {
                 },
               }"
               :setClass="{
-                main: '--height-40 --px-12 --py-8 tm:w-[152px] p:w-[120px]',
+                main: '--h-40 --px-12 --py-8 tm:w-[152px] p:w-[120px]',
                 element: 'grow',
                 frontAssist: 'text-[14px] text-[--gray-999]',
                 rearAssist: 'text-[14px] text-[--gray-999]',
@@ -123,7 +123,7 @@ const onReset = () => {
                 },
               }"
               :setClass="{
-                main: '--height-40 --px-12 --py-8 tm:w-[151px] p:w-[100px]',
+                main: '--h-40 --px-12 --py-8 tm:w-[151px] p:w-[100px]',
                 element: 'grow',
                 rearAssist: 'text-[14px] text-[--gray-999]',
               }"
@@ -139,11 +139,8 @@ const onReset = () => {
           name="isCaseUnknownAge"
           v-model="apiData.isCaseUnknownAge"
           :config="{
+            mode: 'boolean',
             label: '屋齡不詳',
-            value: {
-              true: true,
-              false: false,
-            },
           }"
           :setClass="{
             label: 'text-[16px]',
@@ -156,11 +153,8 @@ const onReset = () => {
           name="isCasePreSale"
           v-model="apiData.isCasePreSale"
           :config="{
+            mode: 'boolean',
             label: '預售屋',
-            value: {
-              true: true,
-              false: false,
-            },
           }"
           :setClass="{
             label: 'text-[16px]',

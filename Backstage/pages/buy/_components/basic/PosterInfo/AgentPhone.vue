@@ -27,7 +27,7 @@ const { posterInfoImport } = storeToRefs(buyBasic)
           phone: '行動電話格式錯誤',
         }"
         :setClass="{
-          main: '--height-40 --px-12 --py-8 t:w-[220px] p:w-[270px]',
+          main: '--h-40 --px-12 --py-8 t:w-[220px] p:w-[270px]',
           element: 'grow',
         }"
       />
@@ -37,11 +37,8 @@ const { posterInfoImport } = storeToRefs(buyBasic)
         name="isAgentDND"
         v-model="apiData.posterInfo.isAgentDND"
         :config="{
+          mode: 'boolean',
           label: '屋主聲明，請仲介勿擾！',
-          value: {
-            true: true,
-            false: false,
-          },
         }"
         :setClass="{
           label: 'text-[16px]',

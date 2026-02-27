@@ -1,9 +1,9 @@
 <script setup>
 import CardFilter from '@pages/buy/_containers/CardFilter.vue'
 
-// import CaseManageType from '@pages/buy/_components/basic/Feature/CaseManageType.vue'
+import Warning from '@pages/buy/_components/basic/Feature/Warning.vue'
 import CaseDescription from '@pages/buy/_components/basic/Feature/CaseDescription.vue'
-// import CaseManagePay from '@pages/buy/_components/basic/Feature/CaseManagePay.vue'
+import CaseFeature from '@pages/buy/_components/basic/Feature/CaseFeature.vue'
 
 const props = defineProps({
   title: {
@@ -13,23 +13,18 @@ const props = defineProps({
 })
 const items = shallowReadonly([
   {
+    id: 'warning',
+    component: Warning,
+    hiddenDevice: 'm',
+  },
+  {
     id: 'caseDescription',
     component: CaseDescription,
   },
-  // {
-  //   id: 'caseManageDuty',
-  //   isRequired: false,
-  //   label: '管理時段',
-  //   class: 'p:h-[40px]',
-  //   component: CaseManageDuty,
-  // },
-  // {
-  //   id: 'caseManagePay',
-  //   isRequired: false,
-  //   label: '管理費',
-  //   class: 'p:h-[40px]',
-  //   component: CaseManagePay,
-  // },
+  {
+    id: 'caseFeature',
+    component: CaseFeature,
+  },
 ])
 </script>
 

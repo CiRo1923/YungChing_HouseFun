@@ -613,9 +613,9 @@ onUnmounted(() => {
       }
     }
 
-    &.\-\-height-40,
-    &.p\:\-\-height-40,
-    &.pt\:\-\-height-40 {
+    &.\-\-h-40,
+    &.p\:\-\-h-40,
+    &.pt\:\-\-h-40 {
       .m-autocomplete-element {
         @apply h-[40px];
       }
@@ -739,10 +739,10 @@ onUnmounted(() => {
       }
     }
 
-    &.\-\-height-40,
-    &.pt\:\-\-height-40,
-    &.tm\:\-\-height-40,
-    &.t\:\-\-height-40 {
+    &.\-\-h-40,
+    &.pt\:\-\-h-40,
+    &.tm\:\-\-h-40,
+    &.t\:\-\-h-40 {
       .m-autocomplete-element {
         @apply h-[40px];
       }
@@ -875,9 +875,9 @@ onUnmounted(() => {
       }
     }
 
-    &.\-\-height-40,
-    &.tm\:\-\-height-40,
-    &.m\:\-\-height-40 {
+    &.\-\-h-40,
+    &.tm\:\-\-h-40,
+    &.m\:\-\-h-40 {
       .m-autocomplete-element {
         @apply h-[40px];
       }

@@ -27,7 +27,7 @@ const onIsCaseAddtionChange = () => {
       comma: true,
     }"
     :setClass="{
-      main: '--height-40 --px-12 --py-8 p:w-[270px]',
+      main: '--h-40 --px-12 --py-8 p:w-[270px]',
       element: 'grow',
       rearAssist: 'text-[14px] text-[--gray-999]',
     }"

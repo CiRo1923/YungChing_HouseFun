@@ -19,7 +19,7 @@ const { apiData } = storeToRefs(buyProject)
           isDisabled: !apiData.isCaseAddtion,
         }"
         :setClass="{
-          main: '--height-40 --px-12 --py-8 tm:w-[151px] p:w-[100px]',
+          main: '--h-40 --px-12 --py-8 tm:w-[151px] p:w-[100px]',
           element: 'grow',
           rearAssist: 'text-[14px] text-[--gray-999]',
         }"
@@ -37,7 +37,7 @@ const { apiData } = storeToRefs(buyProject)
           isDisabled: !apiData.isCaseAddtion,
         }"
         :setClass="{
-          main: '--height-40 --px-12 --py-8 tm:w-[151px] p:w-[100px]',
+          main: '--h-40 --px-12 --py-8 tm:w-[151px] p:w-[100px]',
           element: 'grow',
           rearAssist: 'text-[14px] text-[--gray-999]',
         }"
@@ -55,7 +55,7 @@ const { apiData } = storeToRefs(buyProject)
           isDisabled: !apiData.isCaseAddtion,
         }"
         :setClass="{
-          main: '--height-40 --px-12 --py-8 tm:w-[151px] p:w-[100px]',
+          main: '--h-40 --px-12 --py-8 tm:w-[151px] p:w-[100px]',
           element: 'grow',
           rearAssist: 'text-[14px] text-[--gray-999]',
         }"
@@ -73,7 +73,7 @@ const { apiData } = storeToRefs(buyProject)
           isDisabled: !apiData.isCaseAddtion,
         }"
         :setClass="{
-          main: '--height-40 --px-12 --py-8 tm:w-[151px] p:w-[110px]',
+          main: '--h-40 --px-12 --py-8 tm:w-[151px] p:w-[110px]',
           element: 'grow',
           rearAssist: 'text-[14px] text-[--gray-999]',
         }"

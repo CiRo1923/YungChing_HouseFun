@@ -1,5 +1,5 @@
 <script setup>
-import FormCheckBox from '@components/buy/mForm/CheckBox.vue'
+import TagCheckBox from '@components/buy/mTag/CheckBox.vue'
 
 import { useBuyProjectStore } from '@stores/buy/project.js'
 
@@ -8,18 +8,19 @@ const { options, apiData } = storeToRefs(buyProject)
 </script>
 
 <template>
-  <ul class="m:space-y-[16px] pt:flex pt:flex-wrap pt:gap-x-[24px] pt:gap-y-[16px]">
-    <li v-for="(item, index) in options.barrierFree" :key="`${item.code}_${index}`">
-      <FormCheckBox
-        :name="`caseBarrierfreeToken[${index}]`"
-        v-model="apiData.caseBarrierfreeToken"
+  <ul class="flex flex-wrap m:gap-[12px] pt:gap-[8px]">
+    <li v-for="(item, index) in options.feature" :key="`${item.code}_${index}`">
+      <TagCheckBox
+        :name="`caseFeatureToken[${index}]`"
+        v-model="apiData.caseFeatureToken"
         :config="{
           label: item.text,
           value: item.code,
+          assist: '#',
           isJoin: true,
         }"
         :setClass="{
-          label: 'text-[16px]',
+          main: 'pt:--h-30 m:--h-35 --px-15 --py-5',
         }"
       />
     </li>

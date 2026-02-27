@@ -33,7 +33,7 @@ const onIsCaseAddtionChange = () => {
           required: '請輸入總價',
         }"
         :setClass="{
-          main: '--height-40 --px-12 --py-8 tm:w-[228px] p:w-[270px]',
+          main: '--h-40 --px-12 --py-8 tm:w-[228px] p:w-[270px]',
           element: 'grow',
           rearAssist: 'text-[14px] text-[--gray-999]',
         }"
@@ -46,11 +46,8 @@ const onIsCaseAddtionChange = () => {
         name="isCasePriceIncludeParking"
         v-model="apiData.isCasePriceIncludeParking"
         :config="{
+          mode: 'boolean',
           label: '含車位',
-          value: {
-            true: true,
-            false: false,
-          },
         }"
         :setClass="{
           label: 'text-[16px]',

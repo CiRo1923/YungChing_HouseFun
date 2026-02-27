@@ -209,7 +209,7 @@ const onAreaChange = () => {
         schema: config.city.schema,
       }"
       :setClass="{
-        main: ['--height-40 --px-12 --py-8 m:w-full', setClass.city],
+        main: ['--h-40 --px-12 --py-8 m:w-full', setClass.city],
       }"
       @change="onCityChange()"
       v-if="props.city !== null"
@@ -224,7 +224,7 @@ const onAreaChange = () => {
         isDisabled: !modelCity,
       }"
       :setClass="{
-        main: ['--height-40 --px-12 --py-8 m:w-full', setClass.area],
+        main: ['--h-40 --px-12 --py-8 m:w-full', setClass.area],
       }"
       @change="onAreaChange()"
       v-if="props.area !== null"
@@ -239,7 +239,7 @@ const onAreaChange = () => {
         noMatchClearLabel: false,
       }"
       :setClass="{
-        main: ['--height-40 --px-12 --py-8 m:w-full', setClass.road],
+        main: ['--h-40 --px-12 --py-8 m:w-full', setClass.road],
       }"
       v-if="props.road !== null"
     />
@@ -250,7 +250,7 @@ const onAreaChange = () => {
         isExistClose: false,
       }"
       :setClass="{
-        main: ['--height-40 --px-12 --py-8', setClass.lane],
+        main: ['--h-40 --px-12 --py-8', setClass.lane],
         rearAssist: 'text-[14px] text-[--gray-999]',
       }"
       v-if="props.lane !== null"
@@ -264,7 +264,7 @@ const onAreaChange = () => {
         isExistClose: false,
       }"
       :setClass="{
-        main: ['--height-40 --px-12 --py-8', setClass.alley],
+        main: ['--h-40 --px-12 --py-8', setClass.alley],
         rearAssist: 'text-[14px] text-[--gray-999]',
       }"
       v-if="props.alley !== null"
@@ -278,7 +278,7 @@ const onAreaChange = () => {
         isExistClose: false,
       }"
       :setClass="{
-        main: ['--height-40 --px-12 --py-8', setClass.number],
+        main: ['--h-40 --px-12 --py-8', setClass.number],
         rearAssist: 'text-[14px] text-[--gray-999]',
       }"
       v-if="props.number !== null"
@@ -294,7 +294,7 @@ const onAreaChange = () => {
           isExistClose: false,
         }"
         :setClass="{
-          main: ['--height-40 --px-12 --py-8', setClass.ofNumber],
+          main: ['--h-40 --px-12 --py-8', setClass.ofNumber],
           rearAssist: 'text-[14px] text-[--gray-999]',
         }"
       />
@@ -306,7 +306,7 @@ const onAreaChange = () => {
         isExistClose: false,
       }"
       :setClass="{
-        main: ['--height-40 --px-12 --py-8', setClass.floor],
+        main: ['--h-40 --px-12 --py-8', setClass.floor],
         rearAssist: 'text-[14px] text-[--gray-999]',
       }"
       v-if="props.floor !== null"
@@ -322,7 +322,7 @@ const onAreaChange = () => {
           isExistClose: false,
         }"
         :setClass="{
-          main: ['--height-40 --px-12 --py-8', setClass.ofFloor],
+          main: ['--h-40 --px-12 --py-8', setClass.ofFloor],
           rearAssist: 'text-[14px] text-[--gray-999]',
         }"
       />

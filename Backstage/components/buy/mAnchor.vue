@@ -146,6 +146,10 @@ const onClick = (e) => {
       @apply text-[--gray-666];
     }
 
+    &.\-\-text-green-6a2d {
+      @apply text-[--green-6a2d];
+    }
+
     &.\-\-bg-white {
       @apply bg-[--white];
     }
@@ -196,21 +200,21 @@ const onClick = (e) => {
       @apply py-[5px];
     }
 
-    &.\-\-height-45,
-    &.p\:\-\-height-45,
-    &.pt\:\-\-height-45 {
+    &.\-\-h-45,
+    &.p\:\-\-h-45,
+    &.pt\:\-\-h-45 {
       @apply h-[45px];
     }
 
-    &.\-\-height-40,
-    &.p\:\-\-height-40,
-    &.pt\:\-\-height-40 {
+    &.\-\-h-40,
+    &.p\:\-\-h-40,
+    &.pt\:\-\-h-40 {
       @apply h-[40px];
     }
 
-    &.\-\-height-30,
-    &.p\:\-\-height-30,
-    &.pt\:\-\-height-30 {
+    &.\-\-h-30,
+    &.p\:\-\-h-30,
+    &.pt\:\-\-h-30 {
       @apply h-[30px];
     }
   }
@@ -253,24 +257,24 @@ const onClick = (e) => {
       @apply py-[5px];
     }
 
-    &.\-\-height-45,
-    &.pt\:\-\-height-45,
-    &.tm\:\-\-height-45,
-    &.t\:\-\-height-45 {
+    &.\-\-h-45,
+    &.pt\:\-\-h-45,
+    &.tm\:\-\-h-45,
+    &.t\:\-\-h-45 {
       @apply h-[45px];
     }
 
-    &.\-\-height-40,
-    &.pt\:\-\-height-40,
-    &.tm\:\-\-height-40,
-    &.t\:\-\-height-40 {
+    &.\-\-h-40,
+    &.pt\:\-\-h-40,
+    &.tm\:\-\-h-40,
+    &.t\:\-\-h-40 {
       @apply h-[40px];
     }
 
-    &.\-\-height-30,
-    &.pt\:\-\-height-30,
-    &.tm\:\-\-height-30,
-    &.t\:\-\-height-30 {
+    &.\-\-h-30,
+    &.pt\:\-\-h-30,
+    &.tm\:\-\-h-30,
+    &.t\:\-\-h-30 {
       @apply h-[30px];
     }
   }
@@ -308,21 +312,21 @@ const onClick = (e) => {
       @apply py-[5px];
     }
 
-    &.\-\-height-45,
-    &.tm\:\-\-height-45,
-    &.m\:\-\-height-45 {
+    &.\-\-h-45,
+    &.tm\:\-\-h-45,
+    &.m\:\-\-h-45 {
       @apply h-[45px];
     }
 
-    &.\-\-height-40,
-    &.tm\:\-\-height-40,
-    &.m\:\-\-height-40 {
+    &.\-\-h-40,
+    &.tm\:\-\-h-40,
+    &.m\:\-\-h-40 {
       @apply h-[40px];
     }
 
-    &.\-\-height-30,
-    &.tm\:\-\-height-30,
-    &.m\:\-\-height-30 {
+    &.\-\-h-30,
+    &.tm\:\-\-h-30,
+    &.m\:\-\-h-30 {
       @apply h-[30px];
     }
   }

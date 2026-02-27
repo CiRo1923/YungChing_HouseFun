@@ -85,6 +85,7 @@ const model = computed({
 })
 const config = computed(() => {
   return {
+    loadMessage: null,
     height: 150,
     toolbar: null,
     placeholder: '',
@@ -277,7 +278,7 @@ const setClass = computed(() => {
 
 <template>
   <div class="m-ckeditor4" :class="setClass.main">
-    <ClientOnly fallback="Loading editor...">
+    <ClientOnly :fallback="config.loadMessage">
       <ckeditor
         v-model="model"
         :config="editorConfig"

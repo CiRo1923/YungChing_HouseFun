@@ -10,6 +10,7 @@ import CardFilterPrice from '@pages/buy/_components/basic/CardFilterPrice.vue'
 import CardFilterPing from '@pages/buy/_components/basic/CardFilterPing.vue'
 import CardFilterManage from '@pages/buy/_components/basic/CardFilterManage.vue'
 import CardFilterFeature from '@pages/buy/_components/basic/CardFilterFeature.vue'
+import CardFilterMedia from '@pages/buy/_components/basic/CardFilterMedia.vue'
 import CardFilterPosterInfo from '@pages/buy/_components/basic/CardFilterPosterInfo.vue'
 import CardFilterTerms from '@pages/buy/_components/basic/CardFilterTerms.vue'
 
@@ -56,6 +57,11 @@ const datas = shallowReadonly([
     label: '特色描述',
     component: CardFilterFeature,
   },
+  // {
+  //   id: 'cardFilterMedia',
+  //   label: '影音設定',
+  //   component: CardFilterMedia,
+  // },
   {
     id: 'cardFilterPosterInfo',
     label: '聯絡資訊',
@@ -93,6 +99,8 @@ await awaitAllPromise([
   useAsyncData('managePay-options', () =>
     project.onApiGETRealEstateManagePayPeriodSelectOpstions()
   ),
+  useAsyncData('videoType-options', () => project.onApiGETRealEstateVideoTypeSelectOpstions()),
+  useAsyncData('feature-options', () => project.onApiGETRealEstateFeatureCheckOptions()),
 ])
 </script>
 
@@ -123,7 +131,7 @@ await awaitAllPromise([
             <Anchor
               text="取消"
               :setClass="{
-                main: ' --border-gray-e5 --bg-white --oval --height-45 --px-30 --py-8 --text-gray-666 shrink-0',
+                main: ' --border-gray-e5 --bg-white --oval --h-45 --px-30 --py-8 --text-gray-666 shrink-0',
                 text: 'font-semibold',
               }"
             />
@@ -132,7 +140,7 @@ await awaitAllPromise([
             <Anchor
               text="存成草稿"
               :setClass="{
-                main: ' --border-gray-e5 --bg-white --oval --height-45 --px-30 --py-8 --text-gray-666 shrink-0',
+                main: ' --border-gray-e5 --bg-white --oval --h-45 --px-30 --py-8 --text-gray-666 shrink-0',
                 text: 'font-semibold',
               }"
             />
@@ -141,7 +149,7 @@ await awaitAllPromise([
             <Anchor
               text="儲存，選擇刊登額度"
               :setClass="{
-                main: '  --bg-green-6a2d --oval --height-45 --px-30 --py-8 --text-white shrink-0',
+                main: '  --bg-green-6a2d --oval --h-45 --px-30 --py-8 --text-white shrink-0',
                 text: 'font-semibold',
               }"
               @click="onSubmit(validate)"

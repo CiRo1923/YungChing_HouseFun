@@ -9,10 +9,7 @@ const isAgree = ref(false)
     name="isAgree"
     v-model="isAgree"
     :config="{
-      value: {
-        true: true,
-        false: false,
-      },
+      mode: 'boolean',
     }"
     :rules="{
       required: {

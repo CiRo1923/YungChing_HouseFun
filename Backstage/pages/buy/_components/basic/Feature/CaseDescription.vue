@@ -16,6 +16,7 @@ const onHighQualityWordCount = (length) => {
   <CkEditor4
     v-model="apiData.caseDescription"
     :config="{
+      loadMessage: '編輯器建置中...',
       placeholder: '請輸入物件特色說明',
       maxlength: 2500,
       toolbar:

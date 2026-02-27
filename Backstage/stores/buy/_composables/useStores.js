@@ -15,6 +15,8 @@ import {
   apiGETRealEstateManageTypeSelectOpstions,
   apiGETRealEstateManageDutySelectOpstions,
   apiGETRealEstateManagePayPeriodSelectOpstions,
+  apiGETRealEstateVideoTypeSelectOpstions,
+  apiGETRealEstateFeatureCheckOptions,
 } from '@js/buy/_api/index.js'
 
 import { toFixed } from '@js/_prototype.js'
@@ -178,6 +180,24 @@ const useStores = () => {
 
       if (status === 200) {
         projectOptions.value.managePay = data || []
+      }
+
+      return { config, status, data }
+    },
+    onApiGETRealEstateVideoTypeSelectOpstions: async () => {
+      const { config, status, data } = await apiGETRealEstateVideoTypeSelectOpstions()
+
+      if (status === 200) {
+        projectOptions.value.videoType = data || []
+      }
+
+      return { config, status, data }
+    },
+    onApiGETRealEstateFeatureCheckOptions: async () => {
+      const { config, status, data } = await apiGETRealEstateFeatureCheckOptions()
+
+      if (status === 200) {
+        projectOptions.value.feature = data || []
       }
 
       return { config, status, data }

@@ -1,0 +1,91 @@
+.m-tag {
+  @apply inline-flex items-center gap-x-[3px] overflow-hidden rounded-full text-[--gray-666] transition-colors duration-300;
+}
+
+@screen p {
+  .m-tag {
+    &.\-\-px-15,
+    &.p\:\-\-px-15,
+    &.pt\:\-\-px-15 {
+      @apply px-[15px];
+    }
+
+    &.\-\-py-5,
+    &.p\:\-\-py-5,
+    &.pt\:\-\-py-5 {
+      @apply py-[5px];
+    }
+
+    &.\-\-h-35,
+    &.p\:\-\-h-35,
+    &.pt\:\-\-h-35 {
+      @apply h-[35px];
+    }
+
+    &.\-\-h-30,
+    &.p\:\-\-h-30,
+    &.pt\:\-\-h-30 {
+      @apply h-[30px];
+    }
+  }
+}
+
+@screen t {
+  .m-tag {
+    &.\-\-px-15,
+    &.pt\:\-\-px-15,
+    &.tm\:\-\-px-15,
+    &.t\:\-\-px-15 {
+      @apply px-[15px];
+    }
+
+    &.\-\-py-5,
+    &.pt\:\-\-py-5,
+    &.tm\:\-\-py-5,
+    &.t\:\-\-py-5 {
+      @apply py-[5px];
+    }
+
+    &.\-\-h-35,
+    &.pt\:\-\-h-35,
+    &.tm\:\-\-h-35,
+    &.t\:\-\-h-35 {
+      @apply h-[35px];
+    }
+
+    &.\-\-h-30,
+    &.pt\:\-\-h-30,
+    &.tm\:\-\-h-30,
+    &.t\:\-\-h-30 {
+      @apply h-[30px];
+    }
+  }
+}
+
+@screen m {
+  .m-tag {
+    &.\-\-px-15,
+    &.tm\:\-\-px-15,
+    &.m\:\-\-px-15 {
+      @apply px-[15px];
+    }
+
+    &.\-\-py-5,
+    &.tm\:\-\-py-5,
+    &.m\:\-\-py-5 {
+      @apply py-[5px];
+    }
+
+    &.\-\-h-35,
+    &.tm\:\-\-h-35,
+    &.m\:\-\-h-35 {
+      @apply h-[35px];
+    }
+
+    &.\-\-h-30,
+    &.tm\:\-\-h-30,
+    &.m\:\-\-h-30 {
+      @apply h-[30px];
+    }
+  }
+}

@@ -7,7 +7,6 @@ import { deepMerge, numberComma, toFixed } from '@js/_prototype.js'
 import '@js/_validation.js'
 // import { userStore } from '@store/user.js'
 
-import { computed, nextTick, ref, watch } from 'vue'
 import { Field, ErrorMessage } from 'vee-validate'
 
 // const user = userStore()

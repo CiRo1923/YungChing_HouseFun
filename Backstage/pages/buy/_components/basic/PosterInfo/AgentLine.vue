@@ -25,7 +25,7 @@ const { posterInfoImport } = storeToRefs(buyBasic)
       },
     }"
     :setClass="{
-      main: '--height-40 --px-12 --py-8',
+      main: '--h-40 --px-12 --py-8',
       element: 'grow',
     }"
   />

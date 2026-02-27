@@ -52,7 +52,7 @@ onUnmounted(() => {
             icon: anchor.icon,
           }"
           :setClass="{
-            main: '--border-gray-e5 --bg-white --oval --height-30 --px-15 --text-gray-666',
+            main: '--border-gray-e5 --bg-white --oval --h-30 --px-15 --text-gray-666',
             icon: 'text-[--gray-999] p:h-[16px] p:w-[16px]',
           }"
           @click="anchor.onClick"

@@ -46,9 +46,9 @@
     "minimatch": "10.2.3",
     "svg-baker": {
       "postcss": "8.4.32"
+    },
+    "engines": {
+      "node": "20.x"
     }
-  },
-  "engines": {
-    "node": "20.x"
   }
 }
