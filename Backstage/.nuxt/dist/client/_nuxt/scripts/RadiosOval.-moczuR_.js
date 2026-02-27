@@ -1,0 +1,1 @@
+import{_ as s,c as o,B as c,o as t}from"./entry.BKKcR4L7.js";const a={},r={class:"grow m:space-y-[12px] pt:space-y-[8px]"};function n(e,_){return t(),o("div",r,[c(e.$slots,"default")])}const p=s(a,[["render",n]]);export{p as default};

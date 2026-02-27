@@ -5,10 +5,12 @@ import Anchor from '@components/buy/mAnchor.vue'
 import TabItem from '@pages/buy/_components/basic/TabItem.vue'
 
 import { useBuyProjectStore } from '@stores/buy/project.js'
+import useStores from '@stores/buy/_composables/useStores.js'
 
 import { Form } from 'vee-validate'
 
 const buyProject = useBuyProjectStore()
+const { project } = useStores()
 const { options } = storeToRefs(buyProject)
 const apiData = ref({
   cityID: '',
@@ -20,7 +22,8 @@ const apiData = ref({
   ofNumber: '',
   floor: '',
 })
-const areas = ref(null)
+const areas = ref([])
+const roads = ref([])
 const items = readonly({
   label: 'disc',
   items: [
@@ -34,10 +37,25 @@ const items = readonly({
 })
 
 const onCityChange = async () => {
-  const { status, data } = await buyProject.onApiGETDistrictSelectOptions(apiData.value.cityID)
+  const { status, data } = await project.onApiGETDistrictSelectOptions(apiData.value.cityID)
+
+  areas.value = []
+  roads.value = []
 
   if (status === 200) {
     areas.value = data
+  }
+}
+
+const onAreaChange = async () => {
+  const { cityID, districtID } = apiData.value
+
+  roads.value = []
+
+  const { status, data } = await project.onApiGETRoad(cityID, districtID)
+
+  if (status === 200) {
+    roads.value = data
   }
 }
 
@@ -88,16 +106,17 @@ const onClick = async (validate) => {
         }"
         :setClass="{
           main: 'grow',
-          city: 'pt:w-[173px]',
-          area: 'pt:w-[173px]',
-          road: 'pt:w-[173px]',
+          city: 'pt:w-[182px]',
+          area: 'pt:w-[182px]',
+          road: 'pt:w-[182px]',
           lane: 'm:w-[98px] pt:w-[80px]',
           alley: 'm:w-[98px] pt:w-[80px]',
           number: 'm:w-[98px] pt:w-[80px]',
-          ofNumber: 'm:w-[74px] pt:w-[46px]',
+          ofNumber: 'm:w-[74px] pt:w-[50px]',
           floor: 'm:w-[98px] pt:w-[80px]',
         }"
         @change:city="onCityChange"
+        @change:area="onAreaChange"
       />
       <Anchor
         text="匯入資料"

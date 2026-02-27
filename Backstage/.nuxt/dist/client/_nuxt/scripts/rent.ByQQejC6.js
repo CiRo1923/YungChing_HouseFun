@@ -1,0 +1,1 @@
+import{_ as t,o,c as a,a as r,d as n,B as c}from"./entry.BKKcR4L7.js";const d={},l={class:"l-wrap"},_={class:"l-body"};function f(s,e){return o(),a("div",l,[r("main",_,[e[0]||(e[0]=n(" RENT ",-1)),c(s.$slots,"default")])])}const m=t(d,[["render",f]]);export{m as default};

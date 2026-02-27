@@ -238,7 +238,7 @@ const onEvent = (e, errorMessage) => {
     }
   }
 
-  console.log(type)
+  // console.log(type)
   emits(type, e, isError)
 }
 

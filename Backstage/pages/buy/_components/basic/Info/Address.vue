@@ -2,8 +2,10 @@
 import Address from '@components/buy/mAddress.vue'
 
 import { useBuyProjectStore } from '@stores/buy/project.js'
+import useStores from '@stores/buy/_composables/useStores.js'
 
 const buyProject = useBuyProjectStore()
+const { project } = useStores()
 const { options, apiData } = storeToRefs(buyProject)
 
 const areas = ref([])
@@ -16,7 +18,7 @@ const onCityChange = async () => {
   areas.value = []
   roads.value = []
 
-  const { status, data } = await buyProject.onApiGETDistrictSelectOptions(cityID)
+  const { status, data } = await project.onApiGETDistrictSelectOptions(cityID)
 
   if (status === 200) {
     areas.value = data
@@ -29,7 +31,7 @@ const onAreaChange = async () => {
   apiData.value.road = ''
   roads.value = []
 
-  const { status, data } = await buyProject.onApiGETRoad(cityID, districtID)
+  const { status, data } = await project.onApiGETRoad(cityID, districtID)
 
   if (status === 200) {
     roads.value = data

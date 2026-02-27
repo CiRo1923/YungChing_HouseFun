@@ -33,6 +33,17 @@ export const useBuyBasicStore = defineStore('buyBasic', () => {
     caseAmenitieSq: '',
     caseLandSq: '',
   })
+  const posterInfoOptions = readonly([
+    {
+      label: '同會員資料',
+      value: 'same',
+    },
+    {
+      label: '自行輸入',
+      value: 'self',
+    },
+  ])
+  const posterInfoImport = ref('same')
   const pingUnitLabel = computed(
     () => options.unit.find((item) => item.value === pingUnit.value).label
   )
@@ -42,6 +53,8 @@ export const useBuyBasicStore = defineStore('buyBasic', () => {
     pingUnit,
     options,
     pingData,
+    posterInfoOptions,
+    posterInfoImport,
     pingUnitLabel,
     currentUnit,
   }

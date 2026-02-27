@@ -89,14 +89,14 @@ defineRule('email', (value, message) => {
 })
 
 // 自定義驗證
-defineRule('custom', (value, object) => {
-  const { valid, errorMessage } = object
+defineRule('custom', (value, object, elem) => {
+  const el = document.querySelector(`[name="${elem.name}"]`)
 
-  return value
-    ? typeof valid === 'boolean'
-      ? valid
-      : !valid.test(value)
-        ? errorMessage
-        : true
-    : true
+  if (el.disabled) return true
+
+  const isArray = Array.isArray(object)
+  const hasValue = value?.length > 0
+  const valid = hasValue && !isArray && object.valid
+
+  return !valid ? replaceMessage(elem, object) : true
 })

@@ -1,5 +1,6 @@
 <script setup>
 import Header from '@components/buy/mHeader.vue'
+import Footer from '@components/buy/mFooter.vue'
 
 import { useBuyProjectStore } from '@stores/buy/project.js'
 
@@ -15,6 +16,9 @@ const project = useBuyProjectStore()
     <main class="l-body">
       <slot />
     </main>
+    <footer class="l-footer">
+      <Footer />
+    </footer>
   </div>
 </template>
 

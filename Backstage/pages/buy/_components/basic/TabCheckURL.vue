@@ -52,7 +52,7 @@ const onClick = async (validate) => {
         }"
         :rules="{
           custom: {
-            valid: /^http/,
+            valid: /^http/.test(url),
             errorMessage: '請輸入正確網址格式',
           },
         }"

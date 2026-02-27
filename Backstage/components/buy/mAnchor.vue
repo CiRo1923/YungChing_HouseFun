@@ -142,6 +142,14 @@ const onClick = (e) => {
       @apply text-[--white];
     }
 
+    &.\-\-text-gray-666 {
+      @apply text-[--gray-666];
+    }
+
+    &.\-\-bg-white {
+      @apply bg-[--white];
+    }
+
     &.\-\-bg-green-6a2d {
       @apply bg-[--green-6a2d];
     }
@@ -158,10 +166,28 @@ const onClick = (e) => {
 
 @screen p {
   .m-anchor {
+    &.\-\-px-30,
+    &.p\:\-\-px-30,
+    &.pt\:\-\-px-30 {
+      @apply px-[30px];
+    }
+
     &.\-\-px-20,
     &.p\:\-\-px-20,
     &.pt\:\-\-px-20 {
       @apply px-[20px];
+    }
+
+    &.\-\-px-15,
+    &.p\:\-\-px-15,
+    &.pt\:\-\-px-15 {
+      @apply px-[15px];
+    }
+
+    &.\-\-py-8,
+    &.p\:\-\-py-8,
+    &.pt\:\-\-py-8 {
+      @apply py-[8px];
     }
 
     &.\-\-py-5,
@@ -170,21 +196,54 @@ const onClick = (e) => {
       @apply py-[5px];
     }
 
+    &.\-\-height-45,
+    &.p\:\-\-height-45,
+    &.pt\:\-\-height-45 {
+      @apply h-[45px];
+    }
+
     &.\-\-height-40,
     &.p\:\-\-height-40,
     &.pt\:\-\-height-40 {
       @apply h-[40px];
+    }
+
+    &.\-\-height-30,
+    &.p\:\-\-height-30,
+    &.pt\:\-\-height-30 {
+      @apply h-[30px];
     }
   }
 }
 
 @screen t {
   .m-anchor {
+    &.\-\-px-30,
+    &.pt\:\-\-px-30,
+    &.tm\:\-\-px-30,
+    &.t\:\-\-px-30 {
+      @apply px-[30px];
+    }
+
     &.\-\-px-20,
     &.pt\:\-\-px-20,
     &.tm\:\-\-px-20,
     &.t\:\-\-px-20 {
       @apply px-[20px];
+    }
+
+    &.\-\-px-15,
+    &.pt\:\-\-px-15,
+    &.tm\:\-\-px-15,
+    &.t\:\-\-px-15 {
+      @apply px-[15px];
+    }
+
+    &.\-\-py-8,
+    &.pt\:\-\-py-8,
+    &.tm\:\-\-py-8,
+    &.t\:\-\-py-8 {
+      @apply py-[8px];
     }
 
     &.\-\-py-5,
@@ -194,21 +253,53 @@ const onClick = (e) => {
       @apply py-[5px];
     }
 
+    &.\-\-height-45,
+    &.pt\:\-\-height-45,
+    &.tm\:\-\-height-45,
+    &.t\:\-\-height-45 {
+      @apply h-[45px];
+    }
+
     &.\-\-height-40,
     &.pt\:\-\-height-40,
     &.tm\:\-\-height-40,
     &.t\:\-\-height-40 {
       @apply h-[40px];
     }
+
+    &.\-\-height-30,
+    &.pt\:\-\-height-30,
+    &.tm\:\-\-height-30,
+    &.t\:\-\-height-30 {
+      @apply h-[30px];
+    }
   }
 }
 
 @screen m {
   .m-anchor {
+    &.\-\-px-30,
+    &.tm\:\-\-px-30,
+    &.m\:\-\-px-30 {
+      @apply px-[30px];
+    }
+
     &.\-\-px-20,
     &.tm\:\-\-px-20,
     &.m\:\-\-px-20 {
       @apply px-[20px];
+    }
+
+    &.\-\-px-15,
+    &.tm\:\-\-px-15,
+    &.m\:\-\-px-15 {
+      @apply px-[15px];
+    }
+
+    &.\-\-py-8,
+    &.tm\:\-\-py-8,
+    &.m\:\-\-py-8 {
+      @apply py-[8px];
     }
 
     &.\-\-py-5,
@@ -217,10 +308,22 @@ const onClick = (e) => {
       @apply py-[5px];
     }
 
+    &.\-\-height-45,
+    &.tm\:\-\-height-45,
+    &.m\:\-\-height-45 {
+      @apply h-[45px];
+    }
+
     &.\-\-height-40,
     &.tm\:\-\-height-40,
     &.m\:\-\-height-40 {
       @apply h-[40px];
+    }
+
+    &.\-\-height-30,
+    &.tm\:\-\-height-30,
+    &.m\:\-\-height-30 {
+      @apply h-[30px];
     }
   }
 }

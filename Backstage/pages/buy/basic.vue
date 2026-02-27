@@ -1,5 +1,7 @@
 <script setup>
 import Container from '@components/buy/mContainer.vue'
+import CardDefault from '@components/buy/mCard/Default.vue'
+import Anchor from '@components/buy/mAnchor.vue'
 
 import BackStep from '@pages/buy/_components/basic/BackStep.vue'
 import TabCheck from '@pages/buy/_components/basic/TabCheck.vue'
@@ -7,6 +9,8 @@ import CardFilterInfo from '@pages/buy/_components/basic/CardFilterInfo.vue'
 import CardFilterPrice from '@pages/buy/_components/basic/CardFilterPrice.vue'
 import CardFilterPing from '@pages/buy/_components/basic/CardFilterPing.vue'
 import CardFilterManage from '@pages/buy/_components/basic/CardFilterManage.vue'
+import CardFilterPosterInfo from '@pages/buy/_components/basic/CardFilterPosterInfo.vue'
+import CardFilterTerms from '@pages/buy/_components/basic/CardFilterTerms.vue'
 
 import { awaitAllPromise } from '@js/_prototype.js'
 
@@ -45,6 +49,16 @@ const datas = shallowReadonly([
     id: 'cardFilterManage',
     label: '管理資訊',
     component: CardFilterManage,
+  },
+  {
+    id: 'cardFilterPosterInfo',
+    label: '聯絡資訊',
+    component: CardFilterPosterInfo,
+  },
+  {
+    id: 'cardFilterTerms',
+    label: '使用條款',
+    component: CardFilterTerms,
   },
 ])
 
@@ -86,24 +100,57 @@ await awaitAllPromise([
       <BackStep :active="0" />
     </template>
     <TabCheck />
-    <Form as="div" class="tm:mt-[24px] p:mt-[32px]" v-slot="{ validate }">
+    <Form
+      as="div"
+      class="tm:mt-[24px] tm:space-y-[24px] p:mt-[32px] p:space-y-[32px]"
+      v-slot="{ validate }"
+    >
       <!-- <pre>{{ apiData }}</pre> -->
       <ul class="tm:space-y-[24px] p:space-y-[32px]">
         <li v-for="(item, index) in datas" :key="`${item.id}_${index}`">
           <component :title="item.label" :is="item.component" />
         </li>
       </ul>
-      <div class="tm:mt-[24px] p:mt-[32px]">
-        <button type="button" @click="onSubmit(validate)">next</button>
-      </div>
+      <CardDefault class="text-center">
+        <ul class="inline-flex m:flex-col-reverse m:gap-y-[24px] pt:items-center pt:gap-x-[24px]">
+          <li>
+            <Anchor
+              text="取消"
+              :setClass="{
+                main: ' --border-gray-e5 --bg-white --oval --height-45 --px-30 --py-8 --text-gray-666 shrink-0',
+                text: 'font-semibold',
+              }"
+            />
+          </li>
+          <li>
+            <Anchor
+              text="存成草稿"
+              :setClass="{
+                main: ' --border-gray-e5 --bg-white --oval --height-45 --px-30 --py-8 --text-gray-666 shrink-0',
+                text: 'font-semibold',
+              }"
+            />
+          </li>
+          <li>
+            <Anchor
+              text="儲存，選擇刊登額度"
+              :setClass="{
+                main: '  --bg-green-6a2d --oval --height-45 --px-30 --py-8 --text-white shrink-0',
+                text: 'font-semibold',
+              }"
+              @click="onSubmit(validate)"
+            />
+          </li>
+        </ul>
+      </CardDefault>
     </Form>
-    <NuxtLink
+    <!-- <NuxtLink
       :to="{
         name: 'buy-parking',
       }"
     >
       parking
-    </NuxtLink>
+    </NuxtLink> -->
 
     <!-- <pre>
       {{ options }}

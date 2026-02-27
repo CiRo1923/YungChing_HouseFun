@@ -18,9 +18,11 @@ interface _GlobalComponents {
   BuyMAnchor: typeof import("../../components/buy/mAnchor.vue")['default']
   BuyMAnchorTool: typeof import("../../components/buy/mAnchorTool.vue")['default']
   BuyMAutoComplete: typeof import("../../components/buy/mAutoComplete.vue")['default']
+  BuyMCardDefault: typeof import("../../components/buy/mCard/Default.vue")['default']
   BuyMCardFilter: typeof import("../../components/buy/mCard/Filter.vue")['default']
   BuyMContainer: typeof import("../../components/buy/mContainer.vue")['default']
   BuyMErrorMessageElem: typeof import("../../components/buy/mErrorMessageElem.vue")['default']
+  BuyMFooter: typeof import("../../components/buy/mFooter.vue")['default']
   BuyMFormCheckBox: typeof import("../../components/buy/mForm/CheckBox.vue")['default']
   BuyMFormInput: typeof import("../../components/buy/mForm/Input.vue")['default']
   BuyMFormLabel: typeof import("../../components/buy/mForm/Label.vue")['default']
@@ -65,9 +67,11 @@ interface _GlobalComponents {
   LazyBuyMAnchor: LazyComponent<typeof import("../../components/buy/mAnchor.vue")['default']>
   LazyBuyMAnchorTool: LazyComponent<typeof import("../../components/buy/mAnchorTool.vue")['default']>
   LazyBuyMAutoComplete: LazyComponent<typeof import("../../components/buy/mAutoComplete.vue")['default']>
+  LazyBuyMCardDefault: LazyComponent<typeof import("../../components/buy/mCard/Default.vue")['default']>
   LazyBuyMCardFilter: LazyComponent<typeof import("../../components/buy/mCard/Filter.vue")['default']>
   LazyBuyMContainer: LazyComponent<typeof import("../../components/buy/mContainer.vue")['default']>
   LazyBuyMErrorMessageElem: LazyComponent<typeof import("../../components/buy/mErrorMessageElem.vue")['default']>
+  LazyBuyMFooter: LazyComponent<typeof import("../../components/buy/mFooter.vue")['default']>
   LazyBuyMFormCheckBox: LazyComponent<typeof import("../../components/buy/mForm/CheckBox.vue")['default']>
   LazyBuyMFormInput: LazyComponent<typeof import("../../components/buy/mForm/Input.vue")['default']>
   LazyBuyMFormLabel: LazyComponent<typeof import("../../components/buy/mForm/Label.vue")['default']>

@@ -18,9 +18,11 @@ export const BuyMAddress: typeof import("../components/buy/mAddress.vue")['defau
 export const BuyMAnchor: typeof import("../components/buy/mAnchor.vue")['default']
 export const BuyMAnchorTool: typeof import("../components/buy/mAnchorTool.vue")['default']
 export const BuyMAutoComplete: typeof import("../components/buy/mAutoComplete.vue")['default']
+export const BuyMCardDefault: typeof import("../components/buy/mCard/Default.vue")['default']
 export const BuyMCardFilter: typeof import("../components/buy/mCard/Filter.vue")['default']
 export const BuyMContainer: typeof import("../components/buy/mContainer.vue")['default']
 export const BuyMErrorMessageElem: typeof import("../components/buy/mErrorMessageElem.vue")['default']
+export const BuyMFooter: typeof import("../components/buy/mFooter.vue")['default']
 export const BuyMFormCheckBox: typeof import("../components/buy/mForm/CheckBox.vue")['default']
 export const BuyMFormInput: typeof import("../components/buy/mForm/Input.vue")['default']
 export const BuyMFormLabel: typeof import("../components/buy/mForm/Label.vue")['default']
@@ -65,9 +67,11 @@ export const LazyBuyMAddress: LazyComponent<typeof import("../components/buy/mAd
 export const LazyBuyMAnchor: LazyComponent<typeof import("../components/buy/mAnchor.vue")['default']>
 export const LazyBuyMAnchorTool: LazyComponent<typeof import("../components/buy/mAnchorTool.vue")['default']>
 export const LazyBuyMAutoComplete: LazyComponent<typeof import("../components/buy/mAutoComplete.vue")['default']>
+export const LazyBuyMCardDefault: LazyComponent<typeof import("../components/buy/mCard/Default.vue")['default']>
 export const LazyBuyMCardFilter: LazyComponent<typeof import("../components/buy/mCard/Filter.vue")['default']>
 export const LazyBuyMContainer: LazyComponent<typeof import("../components/buy/mContainer.vue")['default']>
 export const LazyBuyMErrorMessageElem: LazyComponent<typeof import("../components/buy/mErrorMessageElem.vue")['default']>
+export const LazyBuyMFooter: LazyComponent<typeof import("../components/buy/mFooter.vue")['default']>
 export const LazyBuyMFormCheckBox: LazyComponent<typeof import("../components/buy/mForm/CheckBox.vue")['default']>
 export const LazyBuyMFormInput: LazyComponent<typeof import("../components/buy/mForm/Input.vue")['default']>
 export const LazyBuyMFormLabel: LazyComponent<typeof import("../components/buy/mForm/Label.vue")['default']>

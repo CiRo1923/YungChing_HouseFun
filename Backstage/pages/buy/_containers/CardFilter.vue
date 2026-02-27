@@ -30,6 +30,7 @@ const props = defineProps({
           :setClass="{
             main: ['pt:flex pt:w-[100px] pt:shrink-0 pt:items-center', item.class],
           }"
+          v-if="item.label"
         />
         <div class="pt:grow">
           <component :is="item.component" />
