@@ -29,7 +29,7 @@ const publicRatio = ref(null)
               checkNotIsZero: true,
             }"
             :setClass="{
-              main: '--height-40 --px-12 --py-8 tm:w-[228px] p:w-[270px]',
+              main: '--height-40 --px-12 --py-8 t:w-[228px] p:w-[270px]',
               element: 'grow',
               rearAssist: 'text-[14px] text-[--gray-999]',
             }"
@@ -50,7 +50,7 @@ const publicRatio = ref(null)
               isDisabled: isAutoCalc,
             }"
             :setClass="{
-              main: '--height-40 --px-12 --py-8 tm:w-[228px] p:w-[270px]',
+              main: '--height-40 --px-12 --py-8 t:w-[228px] p:w-[270px]',
               element: 'grow',
               rearAssist: 'text-[14px] text-[--gray-999]',
             }"
@@ -60,7 +60,7 @@ const publicRatio = ref(null)
         </li>
       </ul>
     </li>
-    <li class="flex h-[40px] items-center">
+    <li class="flex items-center pt:h-[40px]">
       <FormCheckBox
         name="isAutoCalc"
         v-model="isAutoCalc"

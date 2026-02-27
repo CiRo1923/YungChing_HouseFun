@@ -103,6 +103,12 @@ export const useBuyProjectStore = defineStore('buyProject', () => {
     caseManageDutyToken: '',
     caseManageFeePeriodToken: '',
     caseManageFee: '',
+    caseDescription: '',
+    caseFeatureToken: '',
+    listCasePicUrl: [],
+    caseVideoTypeToken: '',
+    caseVideoTypeToken: '',
+    caseFloorplanUrl: '',
     posterInfo: {
       agentID: '',
       agentName: '',

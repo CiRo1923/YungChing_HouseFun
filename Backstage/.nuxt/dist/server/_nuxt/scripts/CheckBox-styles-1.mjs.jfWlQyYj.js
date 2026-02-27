@@ -1,5 +1,0 @@
-const CheckBox_vue_vue_type_style_index_1_lang = ".m-form-element.--checkbox .m-form-type:not(:checked)+.m-form-icon{border-color:var(--gray-ccce)}.m-form-element.--checkbox .m-form-type:checked+.m-form-icon{border-color:transparent}.m-form-element.--checkbox .m-form-type:checked+.m-form-icon>use{opacity:1}.m-form-element.--checkbox .m-form-icon>use{opacity:0;transition-duration:.3s;transition-property:opacity;transition-timing-function:cubic-bezier(.4,0,.2,1)}";
-export {
-  CheckBox_vue_vue_type_style_index_1_lang as default
-};
-//# sourceMappingURL=CheckBox-styles-1.mjs.jfWlQyYj.js.map

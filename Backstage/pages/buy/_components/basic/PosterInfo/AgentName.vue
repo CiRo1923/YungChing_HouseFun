@@ -12,7 +12,7 @@ const { posterInfoImport } = storeToRefs(buyBasic)
 </script>
 
 <template>
-  <ul class="flex flex-wrap tm:gap-x-[8px] p:gap-x-[24px]">
+  <ul class="flex flex-wrap tm:gap-x-[16px] p:gap-x-[24px]">
     <li>
       <FormInput
         name="agentName"
@@ -24,7 +24,7 @@ const { posterInfoImport } = storeToRefs(buyBasic)
           required: '請輸入姓名',
         }"
         :setClass="{
-          main: '--height-40 --px-12 --py-8 tm:w-[228px] p:w-[270px]',
+          main: '--height-40 --px-12 --py-8 m:w-[172px] t:w-[220px] p:w-[270px]',
           element: 'grow',
         }"
       />

@@ -9,7 +9,7 @@ const { options, apiData } = storeToRefs(buyProject)
 </script>
 
 <template>
-  <ul class="pt:flex pt:gap-x-[8px]">
+  <ul class="m:space-y-[12px] pt:flex pt:gap-x-[8px]">
     <li>
       <FormSelect
         name="caseManageFeePeriodToken"

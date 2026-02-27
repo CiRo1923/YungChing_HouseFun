@@ -1,0 +1,17 @@
+/* reset style */
+html,
+body {
+  margin: 0;
+}
+
+html {
+  padding: 0;
+}
+
+body {
+  padding: 10px;
+}
+
+p {
+  margin: 0;
+}

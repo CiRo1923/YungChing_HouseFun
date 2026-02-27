@@ -9,6 +9,7 @@ import CardFilterInfo from '@pages/buy/_components/basic/CardFilterInfo.vue'
 import CardFilterPrice from '@pages/buy/_components/basic/CardFilterPrice.vue'
 import CardFilterPing from '@pages/buy/_components/basic/CardFilterPing.vue'
 import CardFilterManage from '@pages/buy/_components/basic/CardFilterManage.vue'
+import CardFilterFeature from '@pages/buy/_components/basic/CardFilterFeature.vue'
 import CardFilterPosterInfo from '@pages/buy/_components/basic/CardFilterPosterInfo.vue'
 import CardFilterTerms from '@pages/buy/_components/basic/CardFilterTerms.vue'
 
@@ -49,6 +50,11 @@ const datas = shallowReadonly([
     id: 'cardFilterManage',
     label: '管理資訊',
     component: CardFilterManage,
+  },
+  {
+    id: 'cardFilterFeature',
+    label: '特色描述',
+    component: CardFilterFeature,
   },
   {
     id: 'cardFilterPosterInfo',

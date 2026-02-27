@@ -39,13 +39,14 @@ const items = shallowReadonly([
   {
     id: 'caseOtherSq',
     label: '其他',
+    class: 'm:col-span-2',
   },
 ])
 </script>
 
 <template>
   <div class="m:space-y-[16px] pt:space-y-[8px]">
-    <ul class="flex flex-wrap tm:gap-x-[8px] p:gap-x-[24px]">
+    <ul class="flex flex-wrap tm:gap-x-[16px] p:gap-x-[24px]">
       <li>
         <FormInput
           name="caseAffiliatedSqPin"
@@ -59,7 +60,7 @@ const items = shallowReadonly([
             required: '請輸入登記坪數',
           }"
           :setClass="{
-            main: '--height-40 --px-12 --py-8 tm:w-[228px] pt:w-[270px]',
+            main: '--height-40 --px-12 --py-8 tm:w-[205px] pt:w-[270px]',
             element: 'grow',
             rearAssist: 'text-[14px] text-[--gray-999]',
           }"
@@ -90,6 +91,7 @@ const items = shallowReadonly([
     >
       <li
         class="m:space-y-[12px] pt:flex pt:gap-x-[8px]"
+        :class="item.class"
         v-for="(item, index) in items"
         :key="`${item.id}_${index}`"
       >

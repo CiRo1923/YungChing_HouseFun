@@ -12,7 +12,7 @@ const { posterInfoImport } = storeToRefs(buyBasic)
 </script>
 
 <template>
-  <ul class="flex flex-wrap tm:gap-x-[8px] p:gap-x-[24px]">
+  <ul class="m:space-y-[12px] t:gap-x-[16px] pt:flex p:gap-x-[24px]">
     <li>
       <FormInput
         name="agentPhone"
@@ -27,12 +27,12 @@ const { posterInfoImport } = storeToRefs(buyBasic)
           phone: '行動電話格式錯誤',
         }"
         :setClass="{
-          main: '--height-40 --px-12 --py-8 tm:w-[228px] p:w-[270px]',
+          main: '--height-40 --px-12 --py-8 t:w-[220px] p:w-[270px]',
           element: 'grow',
         }"
       />
     </li>
-    <li class="flex h-[40px] items-center">
+    <li class="flex items-center pt:h-[40px]">
       <FormCheckBox
         name="isAgentDND"
         v-model="apiData.posterInfo.isAgentDND"

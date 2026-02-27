@@ -64,7 +64,7 @@ watch(
           isDisabled: isAutoCalc,
         }"
         :setClass="{
-          main: '--height-40 --px-12 --py-8 tm:w-[228px] p:w-[270px]',
+          main: '--height-40 --px-12 --py-8 p:w-[270px]',
           element: 'grow',
           rearAssist: 'text-[14px] text-[--gray-999]',
           suffix: 'text-[14px] text-[--gray-999]',
@@ -75,36 +75,40 @@ watch(
       </FormInput>
     </li>
     <li class="flex h-[40px] items-center">
-      <FormCheckBox
-        name="isAutoCalc"
-        v-model="isAutoCalc"
-        :config="{
-          label: '自動計算',
-          value: {
-            true: true,
-            false: false,
-          },
-        }"
-        :setClass="{
-          label: 'text-[16px]',
-        }"
-      />
-    </li>
-    <li class="flex h-[40px] items-center">
-      <FormCheckBox
-        name="isCasePricePerPinDeductParking"
-        v-model="apiData.isCasePricePerPinDeductParking"
-        :config="{
-          label: '扣除車位價',
-          value: {
-            true: true,
-            false: false,
-          },
-        }"
-        :setClass="{
-          label: 'text-[16px]',
-        }"
-      />
+      <ul class="flex tm:gap-x-[16px] p:gap-x-[24px]">
+        <li class="flex h-[40px] items-center">
+          <FormCheckBox
+            name="isAutoCalc"
+            v-model="isAutoCalc"
+            :config="{
+              label: '自動計算',
+              value: {
+                true: true,
+                false: false,
+              },
+            }"
+            :setClass="{
+              label: 'text-[16px]',
+            }"
+          />
+        </li>
+        <li class="flex h-[40px] items-center">
+          <FormCheckBox
+            name="isCasePricePerPinDeductParking"
+            v-model="apiData.isCasePricePerPinDeductParking"
+            :config="{
+              label: '扣除車位價',
+              value: {
+                true: true,
+                false: false,
+              },
+            }"
+            :setClass="{
+              label: 'text-[16px]',
+            }"
+          />
+        </li>
+      </ul>
     </li>
   </ul>
 </template>

@@ -10,27 +10,23 @@ const { pingData, pingUnitLabel } = storeToRefs(buyBasic)
 </script>
 
 <template>
-  <ul class="flex flex-wrap tm:gap-x-[8px] p:gap-x-[24px]">
-    <li>
-      <FormInput
-        name="caseMainSq"
-        v-model="pingData.caseMainSq"
-        :config="{
-          inputMode: 'numeric',
-          inputChinese: false,
-          checkNotIsZero: true,
-        }"
-        :setClass="{
-          main: '--height-40 --px-12 --py-8 p:w-[270px]',
-          element: 'grow',
-          rearAssist: 'text-[14px] text-[--gray-999]',
-        }"
-        @blur="basic.onPinSqMetersConvert('caseMainSq')"
-      >
-        <template #rearAssist>{{ pingUnitLabel }}</template>
-      </FormInput>
-    </li>
-  </ul>
+  <FormInput
+    name="caseMainSq"
+    v-model="pingData.caseMainSq"
+    :config="{
+      inputMode: 'numeric',
+      inputChinese: false,
+      checkNotIsZero: true,
+    }"
+    :setClass="{
+      main: '--height-40 --px-12 --py-8 p:w-[270px]',
+      element: 'grow',
+      rearAssist: 'text-[14px] text-[--gray-999]',
+    }"
+    @blur="basic.onPinSqMetersConvert('caseMainSq')"
+  >
+    <template #rearAssist>{{ pingUnitLabel }}</template>
+  </FormInput>
 </template>
 
 <style></style>

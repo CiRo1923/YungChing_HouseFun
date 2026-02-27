@@ -13,7 +13,8 @@ const { posterInfoImport } = storeToRefs(buyBasic)
     v-model="posterInfoImport"
     :options="buyBasic.posterInfoOptions"
     :setClass="{
-      main: 'grow',
+      radios: 'm:w-full',
+      container: 'm:flex-1',
     }"
   />
 </template>
