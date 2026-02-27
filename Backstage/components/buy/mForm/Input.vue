@@ -2,7 +2,7 @@
 import SvgIcon from '@components/common/SvgIcon.vue'
 import ErrorMessageElem from '@components/buy/mErrorMessageElem.vue'
 
-import { deepMerge, numberComma } from '@js/_prototype.js'
+import { deepMerge, numberComma, toFixed } from '@js/_prototype.js'
 
 import '@js/_validation.js'
 // import { userStore } from '@store/user.js'
@@ -70,6 +70,7 @@ const config = computed(() => {
       comma: false, // 啟用千分位功能
       checkNotIsZero: false, // 輸入欄位致不能為 0
       integer: false, // 整數功能 (不可使用小數點)
+      toFixed: null, // 取得小數點第幾位
     },
     props.config
   )
@@ -153,7 +154,7 @@ const onEnter = (e) => {
 }
 
 const onEvent = (e, errorMessage) => {
-  const { comma, checkNotIsZero } = config.value
+  const { comma, integer, checkNotIsZero } = config.value
   const { type } = e
   const isError = !!errorMessage
   const isFocusIn = type === 'focusin'
@@ -175,8 +176,6 @@ const onEvent = (e, errorMessage) => {
     const plain = isComma ? numberComma.remove(raw, false) : raw
 
     if (isNumeric.value) {
-      const { integer, checkNotIsZero } = config.value
-
       // 1) 先把暫態輸入修正：'.' -> ''、'0.' -> '0'（或 ''，看你規則）
       //    你需求是 checkNotIsZero 時不能是 0，所以 '0.' 這種 blur 最後也不能留下
       let normalized = String(plain ?? '').trim()
@@ -222,11 +221,19 @@ const onEvent = (e, errorMessage) => {
           normalized = '' // 你也可以改成 '1' 或回復成上一個值
         }
 
-        // 你原本特例：'0.' blur 時清掉
+        // '0.' blur 時清掉
         if (/^0\.$/.test(normalized)) normalized = ''
       }
 
-      // 5) 最終送出（注意：送出要送「無逗號」值）
+      // 5) toFixed
+      if (!integer && config.value.toFixed != null && config.value.toFixed !== '') {
+        const d = Number(config.value.toFixed)
+        if (Number.isFinite(d) && normalized !== '') {
+          normalized = String(Number(toFixed(Number(normalized), d)))
+        }
+      }
+
+      // 6) 最終送出（注意：送出要送「無逗號」值）
       emits('update:modelValue', normalized)
 
       // 顯示用的 model.value 再套 comma

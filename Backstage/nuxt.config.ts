@@ -9,6 +9,9 @@ import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
 import { fileURLToPath } from 'url'
 
 export default defineNuxtConfig({
+  experimental: {
+    appManifest: false,
+  },
   devtools: {
     enabled: true,
   },

@@ -1,1 +1,0 @@
-import t from"./TabItem.DsESHqj_.js";import{E as e,x as o,o as r,a6 as s}from"./entry.BKKcR4L7.js";import"./Main.CWLhjrE_.js";import"./_prototype.6FgksIwr.js";const f={__name:"TabCheckID",setup(c){const a=s({label:"disc",items:[{item:"若無法匯入資訊，您可繼續手動填寫地址及其他資訊，完成刊登。"}]});return(m,n)=>(r(),e(t,{data:o(a)},null,8,["data"]))}};export{f as default};

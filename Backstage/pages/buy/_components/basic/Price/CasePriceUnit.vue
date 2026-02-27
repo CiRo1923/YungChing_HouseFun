@@ -2,6 +2,8 @@
 import FormInput from '@components/buy/mForm/Input.vue'
 import FormCheckBox from '@components/buy/mForm/CheckBox.vue'
 
+import { toFixed } from '@js/_prototype.js'
+
 import { useBuyProjectStore } from '@stores/buy/project.js'
 
 const buyProject = useBuyProjectStore()
@@ -28,7 +30,7 @@ const onIsAutoCalc = () => {
         ? Number(caseBuildSqPin) - Number(caseParkingSqPin)
         : Number(caseBuildSqPin)
 
-    apiData.value.casePriceUnit = price / buildSq
+    apiData.value.casePriceUnit = toFixed(price / buildSq, 2)
   }
 }
 
@@ -58,6 +60,7 @@ watch(
           inputChinese: false,
           checkNotIsZero: true,
           comma: true,
+          toFixed: 2,
           isDisabled: isAutoCalc,
         }"
         :setClass="{

@@ -431,7 +431,7 @@ const _routes = [
     name: "buy-basic",
     path: "/buy/basic",
     meta: __nuxt_page_meta$1 || {},
-    component: () => import("./_nuxt/scripts/basic.DhVeY4xQ.js")
+    component: () => import("./_nuxt/scripts/basic.6wluRUm-.js")
   },
   {
     name: "home",
@@ -462,7 +462,7 @@ const _routes = [
   {
     name: "buy-_components-basic-TabItem",
     path: "/buy/_components/basic/TabItem",
-    component: () => import("./_nuxt/scripts/TabItem.DazqB-gY.js")
+    component: () => import("./_nuxt/scripts/TabItem.BbPthwK4.js")
   },
   {
     name: "buy-_components-basic-BackStep",
@@ -472,232 +472,232 @@ const _routes = [
   {
     name: "buy-_components-basic-TabCheck",
     path: "/buy/_components/basic/TabCheck",
-    component: () => import("./_nuxt/scripts/TabCheck.CbbEFW_4.js")
+    component: () => import("./_nuxt/scripts/TabCheck.VUERMj8x.js")
   },
   {
     name: "buy-_components-basic-Info-Face",
     path: "/buy/_components/basic/Info/Face",
-    component: () => import("./_nuxt/scripts/Face.tGYHUew8.js")
+    component: () => import("./_nuxt/scripts/Face.DKuVUDtK.js")
   },
   {
     name: "buy-_components-basic-Ping-Unit",
     path: "/buy/_components/basic/Ping/Unit",
-    component: () => import("./_nuxt/scripts/Unit.DGsNrkJg.js")
+    component: () => import("./_nuxt/scripts/Unit.BLokDMvd.js")
   },
   {
     name: "buy-_components-basic-Info-Floor",
     path: "/buy/_components/basic/Info/Floor",
-    component: () => import("./_nuxt/scripts/Floor.D0wdvBsO.js")
+    component: () => import("./_nuxt/scripts/Floor._D2Sn_fv.js")
   },
   {
     name: "buy-_components-basic-Info-Zoing",
     path: "/buy/_components/basic/Info/Zoing",
-    component: () => import("./_nuxt/scripts/Zoing.Dt0omGwz.js")
+    component: () => import("./_nuxt/scripts/Zoing.SBYRqLlE.js")
   },
   {
     name: "buy-_components-basic-TabCheckID",
     path: "/buy/_components/basic/TabCheckID",
-    component: () => import("./_nuxt/scripts/TabCheckID.DgsgGwRh.js")
+    component: () => import("./_nuxt/scripts/TabCheckID.Bx45FmOs.js")
   },
   {
     name: "buy-_components-basic-TabCheckURL",
     path: "/buy/_components/basic/TabCheckURL",
-    component: () => import("./_nuxt/scripts/TabCheckURL.4rLOAqIc.js")
+    component: () => import("./_nuxt/scripts/TabCheckURL.sAws4KFS.js")
   },
   {
     name: "buy-_components-basic-Terms-Agree",
     path: "/buy/_components/basic/Terms/Agree",
-    component: () => import("./_nuxt/scripts/Agree.4T62UWId.js")
+    component: () => import("./_nuxt/scripts/Agree.Q9Ruo_9z.js")
   },
   {
     name: "buy-_components-basic-Terms-Terms",
     path: "/buy/_components/basic/Terms/Terms",
-    component: () => import("./_nuxt/scripts/Terms.D5sV9wlY.js")
+    component: () => import("./_nuxt/scripts/Terms.CBnnTzIk.js")
   },
   {
     name: "buy-_components-basic-Info-Address",
     path: "/buy/_components/basic/Info/Address",
-    component: () => import("./_nuxt/scripts/Address.BjySqDv0.js")
+    component: () => import("./_nuxt/scripts/Address.B1h5T5CQ.js")
   },
   {
     name: "buy-_components-basic-Info-CaseType",
     path: "/buy/_components/basic/Info/CaseType",
-    component: () => import("./_nuxt/scripts/CaseType.q3o81DDG.js")
+    component: () => import("./_nuxt/scripts/CaseType.BhBolYWE.js")
   },
   {
     name: "buy-_components-basic-Info-Elevator",
     path: "/buy/_components/basic/Info/Elevator",
-    component: () => import("./_nuxt/scripts/Elevator.Dk2mLNJR.js")
+    component: () => import("./_nuxt/scripts/Elevator.O7r5cR6k.js")
   },
   {
     name: "buy-_components-basic-CardFilterInfo",
     path: "/buy/_components/basic/CardFilterInfo",
-    component: () => import("./_nuxt/scripts/CardFilterInfo.DlQAbcW0.js")
+    component: () => import("./_nuxt/scripts/CardFilterInfo.hiA5rXhr.js")
   },
   {
     name: "buy-_components-basic-CardFilterPing",
     path: "/buy/_components/basic/CardFilterPing",
-    component: () => import("./_nuxt/scripts/CardFilterPing.DoDB4F92.js")
+    component: () => import("./_nuxt/scripts/CardFilterPing.ByX4h6qN.js")
   },
   {
     name: "buy-_components-basic-Info-CaseTitle",
     path: "/buy/_components/basic/Info/CaseTitle",
-    component: () => import("./_nuxt/scripts/CaseTitle.BsxxYezF.js")
+    component: () => import("./_nuxt/scripts/CaseTitle.Dbpm4RNU.js")
   },
   {
     name: "buy-_components-basic-Info-CaseUsage",
     path: "/buy/_components/basic/Info/CaseUsage",
-    component: () => import("./_nuxt/scripts/CaseUsage.VrE8IW01.js")
+    component: () => import("./_nuxt/scripts/CaseUsage.COoU_rDd.js")
   },
   {
     name: "buy-_components-basic-Info-Community",
     path: "/buy/_components/basic/Info/Community",
-    component: () => import("./_nuxt/scripts/Community.CTUtfrBJ.js")
+    component: () => import("./_nuxt/scripts/Community.DUTJ4vsB.js")
   },
   {
     name: "buy-_components-basic-Info-Structure",
     path: "/buy/_components/basic/Info/Structure",
-    component: () => import("./_nuxt/scripts/Structure.BZJKtkNp.js")
+    component: () => import("./_nuxt/scripts/Structure.Bl1cfo__.js")
   },
   {
     name: "buy-_components-basic-CardFilterPrice",
     path: "/buy/_components/basic/CardFilterPrice",
-    component: () => import("./_nuxt/scripts/CardFilterPrice.Bt7wS9I4.js")
+    component: () => import("./_nuxt/scripts/CardFilterPrice.DvEueNnB.js")
   },
   {
     name: "buy-_components-basic-CardFilterTerms",
     path: "/buy/_components/basic/CardFilterTerms",
-    component: () => import("./_nuxt/scripts/CardFilterTerms.BItxEcBH.js")
+    component: () => import("./_nuxt/scripts/CardFilterTerms.DcCPtLkR.js")
   },
   {
     name: "buy-_components-basic-Info-CaseLandNo",
     path: "/buy/_components/basic/Info/CaseLandNo",
-    component: () => import("./_nuxt/scripts/CaseLandNo.CYAFur-V.js")
+    component: () => import("./_nuxt/scripts/CaseLandNo.xoh85eui.js")
   },
   {
     name: "buy-_components-basic-Info-TotalFloor",
     path: "/buy/_components/basic/Info/TotalFloor",
-    component: () => import("./_nuxt/scripts/TotalFloor.nLAVd_ZJ.js")
+    component: () => import("./_nuxt/scripts/TotalFloor.BTEwse9U.js")
   },
   {
     name: "buy-_components-basic-Ping-CaseLandSq",
     path: "/buy/_components/basic/Ping/CaseLandSq",
-    component: () => import("./_nuxt/scripts/CaseLandSq.D_6HxGUt.js")
+    component: () => import("./_nuxt/scripts/CaseLandSq.BYBG9CmF.js")
   },
   {
     name: "buy-_components-basic-Ping-CaseMainSq",
     path: "/buy/_components/basic/Ping/CaseMainSq",
-    component: () => import("./_nuxt/scripts/CaseMainSq.C0eZcl9g.js")
+    component: () => import("./_nuxt/scripts/CaseMainSq.DjtW258-.js")
   },
   {
     name: "buy-_components-basic-Price-CasePrice",
     path: "/buy/_components/basic/Price/CasePrice",
-    component: () => import("./_nuxt/scripts/CasePrice.CMUBxqhd.js")
+    component: () => import("./_nuxt/scripts/CasePrice.DdlBK6Dr.js")
   },
   {
     name: "buy-_components-basic-TabCheckAddress",
     path: "/buy/_components/basic/TabCheckAddress",
-    component: () => import("./_nuxt/scripts/TabCheckAddress.fv7AMu7n.js")
+    component: () => import("./_nuxt/scripts/TabCheckAddress.Dhqw7klf.js")
   },
   {
     name: "buy-_components-basic-CardFilterManage",
     path: "/buy/_components/basic/CardFilterManage",
-    component: () => import("./_nuxt/scripts/CardFilterManage.DRutiPGM.js")
+    component: () => import("./_nuxt/scripts/CardFilterManage.lLA1rdqq.js")
   },
   {
     name: "buy-_components-basic-Info-BarrierFree",
     path: "/buy/_components/basic/Info/BarrierFree",
-    component: () => import("./_nuxt/scripts/BarrierFree.Dtf2HTff.js")
+    component: () => import("./_nuxt/scripts/BarrierFree.D6M24rH7.js")
   },
   {
     name: "buy-_components-basic-Info-BuildingAge",
     path: "/buy/_components/basic/Info/BuildingAge",
-    component: () => import("./_nuxt/scripts/BuildingAge.ChTqM3gT.js")
+    component: () => import("./_nuxt/scripts/BuildingAge.BQQcNZ64.js")
   },
   {
     name: "buy-_components-basic-Info-CasePurpose",
     path: "/buy/_components/basic/Info/CasePurpose",
-    component: () => import("./_nuxt/scripts/CasePurpose.BQzOFLrZ.js")
+    component: () => import("./_nuxt/scripts/CasePurpose.C4t0Pi-R.js")
   },
   {
     name: "buy-_components-basic-Info-HouseLayout",
     path: "/buy/_components/basic/Info/HouseLayout",
-    component: () => import("./_nuxt/scripts/HouseLayout.BthTozck.js")
+    component: () => import("./_nuxt/scripts/HouseLayout.uR7qMy8D.js")
   },
   {
     name: "buy-_components-basic-Ping-CaseBuildSq",
     path: "/buy/_components/basic/Ping/CaseBuildSq",
-    component: () => import("./_nuxt/scripts/CaseBuildSq.CRE5GrP-.js")
+    component: () => import("./_nuxt/scripts/CaseBuildSq.p7mALtpi.js")
   },
   {
     name: "buy-_components-basic-Ping-CaseParkingSq",
     path: "/buy/_components/basic/Ping/CaseParkingSq",
-    component: () => import("./_nuxt/scripts/CaseParkingSq.BbLX9qd5.js")
+    component: () => import("./_nuxt/scripts/CaseParkingSq.Dwf1oXne.js")
   },
   {
     name: "buy-_components-basic-Info-HouseAddLayout",
     path: "/buy/_components/basic/Info/HouseAddLayout",
-    component: () => import("./_nuxt/scripts/HouseAddLayout.MsK_EeUz.js")
+    component: () => import("./_nuxt/scripts/HouseAddLayout.DFiLr1hQ.js")
   },
   {
     name: "buy-_components-basic-Ping-CaseAmenitieSq",
     path: "/buy/_components/basic/Ping/CaseAmenitieSq",
-    component: () => import("./_nuxt/scripts/CaseAmenitieSq.B_BEoHg4.js")
+    component: () => import("./_nuxt/scripts/CaseAmenitieSq.fHowMVls.js")
   },
   {
     name: "buy-_components-basic-Price-CasePriceUnit",
     path: "/buy/_components/basic/Price/CasePriceUnit",
-    component: () => import("./_nuxt/scripts/CasePriceUnit.DFguvDxw.js")
+    component: () => import("./_nuxt/scripts/CasePriceUnit.R8ZQ_l4T.js")
   },
   {
     name: "buy-_components-basic-CardFilterPosterInfo",
     path: "/buy/_components/basic/CardFilterPosterInfo",
-    component: () => import("./_nuxt/scripts/CardFilterPosterInfo.C3jDV46p.js")
+    component: () => import("./_nuxt/scripts/CardFilterPosterInfo.B39xb5gM.js")
   },
   {
     name: "buy-_components-basic-Manage-CaseManagePay",
     path: "/buy/_components/basic/Manage/CaseManagePay",
-    component: () => import("./_nuxt/scripts/CaseManagePay.CiM1kFsV.js")
+    component: () => import("./_nuxt/scripts/CaseManagePay.CVW6sWJ9.js")
   },
   {
     name: "buy-_components-basic-PosterInfo-AgentLine",
     path: "/buy/_components/basic/PosterInfo/AgentLine",
-    component: () => import("./_nuxt/scripts/AgentLine.CY3xArAq.js")
+    component: () => import("./_nuxt/scripts/AgentLine.b9OgjIFg.js")
   },
   {
     name: "buy-_components-basic-PosterInfo-AgentName",
     path: "/buy/_components/basic/PosterInfo/AgentName",
-    component: () => import("./_nuxt/scripts/AgentName.SvLasZhq.js")
+    component: () => import("./_nuxt/scripts/AgentName.DYPOVqRy.js")
   },
   {
     name: "buy-_components-basic-Manage-CaseManageDuty",
     path: "/buy/_components/basic/Manage/CaseManageDuty",
-    component: () => import("./_nuxt/scripts/CaseManageDuty.8pbPdxxm.js")
+    component: () => import("./_nuxt/scripts/CaseManageDuty.D0YbkKQG.js")
   },
   {
     name: "buy-_components-basic-Manage-CaseManageType",
     path: "/buy/_components/basic/Manage/CaseManageType",
-    component: () => import("./_nuxt/scripts/CaseManageType.Qc3RmhUu.js")
+    component: () => import("./_nuxt/scripts/CaseManageType.nr4fgC88.js")
   },
   {
     name: "buy-_components-basic-Ping-CaseAffiliatedSq",
     path: "/buy/_components/basic/Ping/CaseAffiliatedSq",
-    component: () => import("./_nuxt/scripts/CaseAffiliatedSq.BD3lh8Vp.js")
+    component: () => import("./_nuxt/scripts/CaseAffiliatedSq.BBjb6IUX.js")
   },
   {
     name: "buy-_components-basic-PosterInfo-AgentPhone",
     path: "/buy/_components/basic/PosterInfo/AgentPhone",
-    component: () => import("./_nuxt/scripts/AgentPhone.CDsBC7E1.js")
+    component: () => import("./_nuxt/scripts/AgentPhone.DywCLVZL.js")
   },
   {
     name: "buy-_components-basic-PosterInfo-InfoImport",
     path: "/buy/_components/basic/PosterInfo/InfoImport",
-    component: () => import("./_nuxt/scripts/InfoImport.CDfi5Idj.js")
+    component: () => import("./_nuxt/scripts/InfoImport.zCaBDGMn.js")
   },
   {
     name: "buy-_components-basic-Price-CaseParkingPrice",
     path: "/buy/_components/basic/Price/CaseParkingPrice",
-    component: () => import("./_nuxt/scripts/CaseParkingPrice.D0pIg4It.js")
+    component: () => import("./_nuxt/scripts/CaseParkingPrice.WRrAPYpJ.js")
   }
 ];
 const _wrapInTransition = (props, children) => {

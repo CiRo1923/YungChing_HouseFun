@@ -172,18 +172,24 @@ export const toFixed = (number, fixed) => {
 
 // 千分位設定
 export const numberComma = {
-  add(number, isReturnZero) {
-    const isZero = isReturnZero !== undefined ? isReturnZero : true
-    const amount = number ? (typeof number === 'number' ? number + '' : number) : isZero ? '0' : ''
-    const regex = /\B(?=(\d{3})+(?!\d))/g
+  add(number, isReturnZero = true) {
+    if (number === null || number === undefined || number === '') {
+      return isReturnZero ? '0' : ''
+    }
 
-    return amount ? amount.replace(regex, ',') : ''
+    const str = typeof number === 'number' ? String(number) : number
+    const [integer, decimal] = str.split('.')
+    const integerWithComma = integer.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+
+    return decimal !== undefined ? `${integerWithComma}.${decimal}` : integerWithComma
   },
-  remove(number, isReturnZero) {
-    const isZero = isReturnZero !== undefined ? isReturnZero : true
-    const amount = number ? (typeof number === 'number' ? number + '' : number) : isZero ? '0' : ''
 
-    return amount ? amount.replace(/,/g, '') : ''
+  remove(number, isReturnZero = true) {
+    if (number === null || number === undefined || number === '') {
+      return isReturnZero ? '0' : ''
+    }
+
+    return String(number).replace(/,/g, '')
   },
 }
 

@@ -70,7 +70,7 @@ const items = shallowReadonly([
       </li>
       <li class="flex h-[40px] items-center">
         <FormCheckBox
-          name="isCaseBuildSqIncludeParking"
+          name="isCaseAttachedSqAutoCalculate"
           v-model="apiData.isCaseAttachedSqAutoCalculate"
           :config="{
             label: '自動加總',

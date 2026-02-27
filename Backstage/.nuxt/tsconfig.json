@@ -167,7 +167,7 @@
         "./imports"
       ],
       "#app-manifest": [
-        "./manifest/meta/fb4fe0fd-24a0-479b-8ce4-4ff3dda928c2.json"
+        "../node_modules/mocked-exports/lib/proxy"
       ],
       "#components": [
         "./components"
