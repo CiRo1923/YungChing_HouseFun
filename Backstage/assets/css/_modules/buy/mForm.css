@@ -1,6 +1,6 @@
 .m-form-element {
   &:not(label) {
-    @apply flex items-center gap-x-[8px] overflow-hidden rounded-[5px] border-[1px] transition-colors duration-300;
+    @apply flex items-center gap-x-[8px] overflow-hidden rounded-[5px] border-[1px] bg-[--white] transition-colors duration-300;
 
     &:not(:disabled):not(.\-\-disabled) {
       .m-form-type {

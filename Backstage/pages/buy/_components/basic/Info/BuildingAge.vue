@@ -3,7 +3,7 @@ import FormRadiosOval from '@components/buy/mForm/RadiosOval.vue'
 import FormInput from '@components/buy/mForm/Input.vue'
 import FormCheckBox from '@components/buy/mForm/CheckBox.vue'
 
-import RadiosOval from '@pages/buy/_container/RadiosOval.vue'
+import RadiosOval from '@pages/buy/_containers/RadiosOval.vue'
 
 import { useBuyProjectStore } from '@stores/buy/project.js'
 

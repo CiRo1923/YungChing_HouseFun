@@ -1,7 +1,7 @@
 <script setup>
 import FormRadiosOval from '@components/buy/mForm/RadiosOval.vue'
 
-import RadiosOval from '@pages/buy/_container/RadiosOval.vue'
+import RadiosOval from '@pages/buy/_containers/RadiosOval.vue'
 
 import { useBuyProjectStore } from '@stores/buy/project.js'
 

@@ -1,6 +1,5 @@
 <script setup>
-import CardFilter from '@components/buy/mCard/Filter.vue'
-import FormLabel from '@components/buy/mForm/Label.vue'
+import CardFilter from '@pages/buy/_containers/CardFilter.vue'
 
 import CasePrice from '@pages/buy/_components/basic/Price/CasePrice.vue'
 import CaseParkingPrice from '@pages/buy/_components/basic/Price/CaseParkingPrice.vue'
@@ -38,26 +37,7 @@ const items = shallowReadonly([
 </script>
 
 <template>
-  <CardFilter :title="props.title">
-    <ul class="tm:space-y-[40px] p:space-y-[24px]">
-      <li
-        class="tm:space-y-[12px] p:flex p:gap-x-[8px]"
-        v-for="(item, index) in items"
-        :key="`${item.id}_${index}`"
-      >
-        <FormLabel
-          :label="item.label"
-          :config="{
-            isRequired: item.isRequired,
-          }"
-          :setClass="{
-            main: ['shrink-0 p:flex p:w-[100px] p:items-center', item.class],
-          }"
-        />
-        <component :is="item.component" />
-      </li>
-    </ul>
-  </CardFilter>
+  <CardFilter :title="props.title" :items="items" />
 </template>
 
 <style></style>

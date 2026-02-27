@@ -1,5 +1,5 @@
 <script setup>
-import BackStep from '@pages/buy/_container/BackStep.vue'
+import BackStep from '@pages/buy/_containers/BackStep.vue'
 const props = defineProps({
   active: {
     type: Number,

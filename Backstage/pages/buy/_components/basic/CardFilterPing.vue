@@ -1,12 +1,12 @@
 <script setup>
-import CardFilter from '@components/buy/mCard/Filter.vue'
-import FormLabel from '@components/buy/mForm/Label.vue'
+import CardFilter from '@pages/buy/_containers/CardFilter.vue'
 
 import Unit from '@pages/buy/_components/basic/Ping/Unit.vue'
 import CaseBuildSq from '@pages/buy/_components/basic/Ping/CaseBuildSq.vue'
 import CaseParkingSq from '@pages/buy/_components/basic/Ping/CaseParkingSq.vue'
 import CaseMainSq from '@pages/buy/_components/basic/Ping/CaseMainSq.vue'
 import CaseAffiliatedSq from '@pages/buy/_components/basic/Ping/CaseAffiliatedSq.vue'
+import CaseLandSq from '@pages/buy/_components/basic/Ping/CaseLandSq.vue'
 
 import { useBuyBasicStore } from '@stores/buy/basic.js'
 
@@ -55,33 +55,21 @@ const items = shallowReadonly([
     class: 'p:h-[40px]',
     component: CaseAffiliatedSq,
   },
+  {
+    id: 'caseLandSq',
+    isRequired: false,
+    label: '土地坪數',
+    class: 'p:h-[40px]',
+    component: CaseLandSq,
+  },
 ])
 </script>
 
 <template>
-  <!-- <pre>
+  <pre>
     {{ pingData }}
-  </pre> -->
-  <CardFilter :title="props.title">
-    <ul class="tm:space-y-[40px] p:space-y-[24px]">
-      <li
-        class="tm:space-y-[12px] p:flex p:gap-x-[8px]"
-        v-for="(item, index) in items"
-        :key="`${item.id}_${index}`"
-      >
-        <FormLabel
-          :label="item.label"
-          :config="{
-            isRequired: item.isRequired,
-          }"
-          :setClass="{
-            main: ['shrink-0 p:flex p:w-[100px] p:items-center', item.class],
-          }"
-        />
-        <component :is="item.component" />
-      </li>
-    </ul>
-  </CardFilter>
+  </pre>
+  <CardFilter :title="props.title" :items="items" />
 </template>
 
 <style></style>
