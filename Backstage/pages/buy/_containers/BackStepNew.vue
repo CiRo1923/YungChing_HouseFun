@@ -1,6 +1,6 @@
 <script setup>
 import AnchorTool from '@components/buy/mAnchorTool.vue'
-import StepArrow from '~/components/buy/mStep/Arrow.vue'
+import StepArrow from '@components/buy/mStep/Arrow.vue'
 
 const props = defineProps({
   anchor: {

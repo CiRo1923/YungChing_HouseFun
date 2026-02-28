@@ -73,7 +73,11 @@ const onSelected = () => {
   const isModelData = typeof model.value === 'object'
 
   selected.value =
-    model.value !== undefined ? (isModelData ? model.value[schema.value] : model.value) : ''
+    model.value != null // != 同時包含 undefined 和 null
+      ? isModelData
+        ? model.value[schema.value]
+        : model.value
+      : ''
 }
 const onChange = (item) => {
   const { modelMode, schema } = config.value

@@ -1,4 +1,6 @@
 import {
+  apiGETRealEstate,
+  apiPOSTRealEstateDraft,
   apiGETRealEstatePurposeCheckOptions,
   apiGETCitySelectOptions,
   apiGETDistrictSelectOptions,
@@ -34,7 +36,7 @@ const useStores = () => {
   const { apiData, options: projectOptions } = storeToRefs(projectStores)
   const { pingData, currentUnit } = storeToRefs(basicStores)
   const project = {
-    onApiGETRealEstatePurposeCheckOptions: async () => {
+    async onApiGETRealEstatePurposeCheckOptions() {
       // const { public: env } = useRuntimeConfig()
       // const hfID = env.NUXT_PUBLIC_HFID_DEFAULT
       const { config, status, data } = await apiGETRealEstatePurposeCheckOptions()
@@ -45,7 +47,7 @@ const useStores = () => {
 
       return { config, status, data }
     },
-    onApiGETCitySelectOptions: async () => {
+    async onApiGETCitySelectOptions() {
       const { config, status, data } = await apiGETCitySelectOptions()
 
       if (status === 200) {
@@ -77,7 +79,7 @@ const useStores = () => {
 
       return { config, status, data }
     },
-    onApiGETRealEstateTypeSelectOptions: async () => {
+    async onApiGETRealEstateTypeSelectOptions() {
       const { config, status, data } = await apiGETRealEstateTypeSelectOptions()
 
       if (status === 200) {
@@ -86,7 +88,7 @@ const useStores = () => {
 
       return { config, status, data }
     },
-    onApiGETRealEstateLegalUsageSelectOptions: async () => {
+    async onApiGETRealEstateLegalUsageSelectOptions() {
       const { config, status, data } = await apiGETRealEstateLegalUsageSelectOptions()
 
       if (status === 200) {
@@ -95,7 +97,7 @@ const useStores = () => {
 
       return { config, status, data }
     },
-    onApiGETRealEstateZoingCheckOptions: async () => {
+    async onApiGETRealEstateZoingCheckOptions() {
       const { config, status, data } = await apiGETRealEstateZoingCheckOptions()
 
       if (status === 200) {
@@ -105,7 +107,7 @@ const useStores = () => {
 
       return { config, status, data }
     },
-    onApiGETRealEstateZoingCitySelectOptions: async () => {
+    async onApiGETRealEstateZoingCitySelectOptions() {
       const { config, status, data } = await apiGETRealEstateZoingCitySelectOptions()
 
       if (status === 200) {
@@ -114,7 +116,7 @@ const useStores = () => {
 
       return { config, status, data }
     },
-    onApiGETRealEstateZoingLandSelectOptions: async () => {
+    async onApiGETRealEstateZoingLandSelectOptions() {
       const { config, status, data } = await apiGETRealEstateZoingLandSelectOptions()
 
       if (status === 200) {
@@ -123,7 +125,7 @@ const useStores = () => {
 
       return { config, status, data }
     },
-    onApiGETRealEstateFloorSelectOptions: async () => {
+    async onApiGETRealEstateFloorSelectOptions() {
       const { config, status, data } = await apiGETRealEstateFloorSelectOptions()
 
       if (status === 200) {
@@ -134,7 +136,7 @@ const useStores = () => {
 
       return { config, status, data }
     },
-    onApiGETRealEstateFaceSelectOptions: async () => {
+    async onApiGETRealEstateFaceSelectOptions() {
       const { config, status, data } = await apiGETRealEstateFaceSelectOptions()
 
       if (status === 200) {
@@ -143,7 +145,7 @@ const useStores = () => {
 
       return { config, status, data }
     },
-    onApiGETRealEstateStructionSelectOptions: async () => {
+    async onApiGETRealEstateStructionSelectOptions() {
       const { config, status, data } = await apiGETRealEstateStructionSelectOptions()
 
       if (status === 200) {
@@ -152,7 +154,7 @@ const useStores = () => {
 
       return { config, status, data }
     },
-    onApiGETRealEstateBarrierFreeCheckOptions: async () => {
+    async onApiGETRealEstateBarrierFreeCheckOptions() {
       const { config, status, data } = await apiGETRealEstateBarrierFreeCheckOptions()
 
       if (status === 200) {
@@ -161,7 +163,7 @@ const useStores = () => {
 
       return { config, status, data }
     },
-    onApiGETRealEstateManageTypeSelectOpstions: async () => {
+    async onApiGETRealEstateManageTypeSelectOpstions() {
       const { config, status, data } = await apiGETRealEstateManageTypeSelectOpstions()
 
       if (status === 200) {
@@ -170,7 +172,7 @@ const useStores = () => {
 
       return { config, status, data }
     },
-    onApiGETRealEstateManageDutySelectOpstions: async () => {
+    async onApiGETRealEstateManageDutySelectOpstions() {
       const { config, status, data } = await apiGETRealEstateManageDutySelectOpstions()
 
       if (status === 200) {
@@ -179,7 +181,7 @@ const useStores = () => {
 
       return { config, status, data }
     },
-    onApiGETRealEstateManagePayPeriodSelectOpstions: async () => {
+    async onApiGETRealEstateManagePayPeriodSelectOpstions() {
       const { config, status, data } = await apiGETRealEstateManagePayPeriodSelectOpstions()
 
       if (status === 200) {
@@ -188,7 +190,7 @@ const useStores = () => {
 
       return { config, status, data }
     },
-    onApiGETRealEstateParkingModeSelectOptions: async () => {
+    async onApiGETRealEstateParkingModeSelectOptions() {
       const { config, status, data } = await apiGETRealEstateParkingModeSelectOptions()
 
       if (status === 200) {
@@ -197,7 +199,7 @@ const useStores = () => {
 
       return { config, status, data }
     },
-    onApiGETRealEstateParkingTypeSelectOpstions: async () => {
+    async onApiGETRealEstateParkingTypeSelectOpstions() {
       const { config, status, data } = await apiGETRealEstateParkingTypeSelectOpstions()
 
       if (status === 200) {
@@ -206,7 +208,7 @@ const useStores = () => {
 
       return { config, status, data }
     },
-    onApiGETRealEstateParkingRegSelectOpstions: async () => {
+    async onApiGETRealEstateParkingRegSelectOpstions() {
       const { config, status, data } = await apiGETRealEstateParkingRegSelectOpstions()
 
       if (status === 200) {
@@ -215,7 +217,7 @@ const useStores = () => {
 
       return { config, status, data }
     },
-    onApiGETRealEstateParkingPayPeriodSelectOpstions: async () => {
+    async onApiGETRealEstateParkingPayPeriodSelectOpstions() {
       const { config, status, data } = await apiGETRealEstateParkingPayPeriodSelectOpstions()
 
       if (status === 200) {
@@ -224,7 +226,7 @@ const useStores = () => {
 
       return { config, status, data }
     },
-    onApiGETRealEstateVideoTypeSelectOpstions: async () => {
+    async onApiGETRealEstateVideoTypeSelectOpstions() {
       const { config, status, data } = await apiGETRealEstateVideoTypeSelectOpstions()
 
       if (status === 200) {
@@ -233,7 +235,7 @@ const useStores = () => {
 
       return { config, status, data }
     },
-    onApiGETRealEstateFeatureCheckOptions: async () => {
+    async onApiGETRealEstateFeatureCheckOptions() {
       const { config, status, data } = await apiGETRealEstateFeatureCheckOptions()
 
       if (status === 200) {
@@ -284,8 +286,41 @@ const useStores = () => {
       apiData.value[pinKey] = isPin ? val : onConvert(val, pinConf)
       apiData.value[mKey] = isSqMeters ? val : onConvert(val, mConf)
 
-      console.log(apiData.value[pinKey])
-      console.log(apiData.value[mKey])
+      // console.log(apiData.value[pinKey])
+      // console.log(apiData.value[mKey])
+    },
+    async onApiGETRealEstate(hfid) {
+      const { config, status, data } = await apiGETRealEstate({
+        hfid: hfid,
+      })
+
+      if (status === 200) {
+        const { caseInfo } = data
+
+        apiData.value = caseInfo
+      }
+
+      return { config, status, data }
+    },
+    async onApiPOSTRealEstateDraft(hfid) {
+      const { config, status, data } = await apiPOSTRealEstateDraft({
+        hfid: hfid,
+      })
+
+      if (status === 200) {
+      }
+
+      return { config, status, data }
+    },
+    async onApiPOSTRealEstate(hfid) {
+      const { config, status, data } = await apiPOSTRealEstate({
+        hfid: hfid,
+      })
+
+      if (status === 200) {
+      }
+
+      return { config, status, data }
     },
   }
 

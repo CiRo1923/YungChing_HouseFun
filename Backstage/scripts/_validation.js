@@ -5,7 +5,7 @@ import { all as rules } from '@vee-validate/rules'
 const replaceMessage = (elem, object) => {
   let message = object.errorMessage || object[0]
 
-  if (object.value !== null && object.value !== undefined) {
+  if (object.value != null) {
     const regex = /{\s?.*\s?}/
 
     message = message ? message.replace(regex, object.value) : message

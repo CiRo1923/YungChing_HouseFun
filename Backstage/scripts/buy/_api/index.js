@@ -79,6 +79,12 @@ export const fetchApi = async (method, path, data) => {
 export const apiGETRealEstate = async (data) =>
   await fetchApi('get', 'api/v1/buy/realEstate/{hfid}', data)
 
+export const apiPOSTRealEstate = async (data) =>
+  await fetchApi('post', 'api/v1/buy/realEstate/{hfid}', data)
+
+export const apiPOSTRealEstateDraft = async (data) =>
+  await fetchApi('post', 'api/v1/buy/realEstateDraft/{hfid}', data)
+
 export const apiGETRealEstatePurposeCheckOptions = async (data) =>
   await fetchApi('get', 'api/v1/buy/realEstatePurpose/check-options', data)
 

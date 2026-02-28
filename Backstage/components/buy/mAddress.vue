@@ -23,39 +23,39 @@ const props = defineProps({
   },
   city: {
     type: [String, Number],
-    default: null,
+    default: undefined,
   },
   area: {
     type: [String, Number],
-    default: null,
+    default: undefined,
   },
   road: {
     type: [String, Number],
-    default: null,
+    default: undefined,
   },
   lane: {
     type: [String, Number],
-    default: null,
+    default: undefined,
   },
   alley: {
     type: [String, Number],
-    default: null,
+    default: undefined,
   },
   number: {
     type: [String, Number],
-    default: null,
+    default: undefined,
   },
   ofNumber: {
     type: [String, Number],
-    default: null,
+    default: undefined,
   },
   floor: {
     type: [String, Number],
-    default: null,
+    default: undefined,
   },
   ofFloor: {
     type: [String, Number],
-    default: null,
+    default: undefined,
   },
   config: {
     type: Object,
@@ -212,7 +212,7 @@ const onAreaChange = () => {
         main: ['--h-40 --px-12 --py-8 m:w-full', setClass.city],
       }"
       @change="onCityChange()"
-      v-if="props.city !== null"
+      v-if="props.city !== undefined"
     />
     <FormSelect
       :name="`${props.name}_address_area`"
@@ -227,7 +227,7 @@ const onAreaChange = () => {
         main: ['--h-40 --px-12 --py-8 m:w-full', setClass.area],
       }"
       @change="onAreaChange()"
-      v-if="props.area !== null"
+      v-if="props.area !== undefined"
     />
     <AutoComplete
       :name="`${props.name}_address_road`"
@@ -241,7 +241,7 @@ const onAreaChange = () => {
       :setClass="{
         main: ['--h-40 --px-12 --py-8 m:w-full', setClass.road],
       }"
-      v-if="props.road !== null"
+      v-if="props.road !== undefined"
     />
     <FormInput
       :name="`${props.name}_address_lane`"
@@ -253,7 +253,7 @@ const onAreaChange = () => {
         main: ['--h-40 --px-12 --py-8', setClass.lane],
         rearAssist: 'text-[14px] text-[--gray-999]',
       }"
-      v-if="props.lane !== null"
+      v-if="props.lane !== undefined"
     >
       <template #rearAssist>巷</template>
     </FormInput>
@@ -267,7 +267,7 @@ const onAreaChange = () => {
         main: ['--h-40 --px-12 --py-8', setClass.alley],
         rearAssist: 'text-[14px] text-[--gray-999]',
       }"
-      v-if="props.alley !== null"
+      v-if="props.alley !== undefined"
     >
       <template #rearAssist>弄</template>
     </FormInput>
@@ -281,11 +281,11 @@ const onAreaChange = () => {
         main: ['--h-40 --px-12 --py-8', setClass.number],
         rearAssist: 'text-[14px] text-[--gray-999]',
       }"
-      v-if="props.number !== null"
+      v-if="props.number !== undefined"
     >
       <template #rearAssist>號</template>
     </FormInput>
-    <template v-if="props.ofNumber !== null">
+    <template v-if="props.ofNumber !== undefined">
       <span class="h-40px flex items-center text-[16px] text-[--gray-666]">之</span>
       <FormInput
         :name="`${props.name}_address_of_number`"
@@ -309,11 +309,11 @@ const onAreaChange = () => {
         main: ['--h-40 --px-12 --py-8', setClass.floor],
         rearAssist: 'text-[14px] text-[--gray-999]',
       }"
-      v-if="props.floor !== null"
+      v-if="props.floor !== undefined"
     >
       <template #rearAssist>樓</template>
     </FormInput>
-    <template v-if="props.ofFloor !== null">
+    <template v-if="props.ofFloor !== undefined">
       <span class="h-40px flex items-center text-[16px] text-[--gray-666]">之</span>
       <FormInput
         :name="`${props.name}_address_of_floor`"

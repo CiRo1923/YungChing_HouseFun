@@ -38,36 +38,36 @@ const maskHeight = computed(() => {
 const mask = computed(() => {
   const { hasMask } = props.config || {}
   const defaultValue = false
-  const isObject = !!(hasMask !== undefined && typeof hasMask === 'object')
+  const isObject = !!(hasMask != undefined && typeof hasMask === 'object')
 
   return {
     p: !isObject
-      ? hasMask !== undefined
+      ? hasMask != undefined
         ? hasMask
         : defaultValue
-      : hasMask.pt !== undefined
+      : hasMask.pt != undefined
         ? hasMask.pt
-        : hasMask.p !== undefined
+        : hasMask.p != undefined
           ? hasMask.p
           : defaultValue,
     t: !isObject
-      ? hasMask !== undefined
+      ? hasMask != undefined
         ? hasMask
         : defaultValue
-      : hasMask.pt !== undefined
+      : hasMask.pt != undefined
         ? hasMask.pt
-        : hasMask.tm !== undefined
+        : hasMask.tm != undefined
           ? hasMask.tm
-          : hasMask.t !== undefined
+          : hasMask.t != undefined
             ? hasMask.t
             : defaultValue,
     m: !isObject
-      ? hasMask !== undefined
+      ? hasMask != undefined
         ? hasMask
         : defaultValue
-      : hasMask.tm !== undefined
+      : hasMask.tm != undefined
         ? hasMask.tm
-        : hasMask.m !== undefined
+        : hasMask.m != undefined
           ? hasMask.m
           : defaultValue,
   }
