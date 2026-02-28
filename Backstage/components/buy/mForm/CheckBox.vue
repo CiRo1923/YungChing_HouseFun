@@ -151,7 +151,7 @@ const onChange = () => {
     >
       <div class="m-form-container" :class="setClass.container">
         <label
-          class="m-form-element --checkbox relative inline-flex gap-x-[8px] text-[--gray-999]"
+          class="m-form-element --checkbox relative inline-flex gap-x-[8px] leading-[1.35] text-[--gray-999]"
           :class="[
             config.align === 'top' ? 'items-baseline' : 'items-center',
             config.isDisabled ? 'cursor-not-allowed' : 'cursor-pointer',
@@ -170,12 +170,9 @@ const onChange = () => {
             :disabled="config.isDisabled"
             @change="onChange"
           />
-          <!-- <i
-            class="m-form-icon relative mt-[2px] h-[20px] w-[20px] shrink-0 self-start rounded-[2px] border-[1px] border-[--gray-ccce]"
-          /> -->
           <SvgIcon
             icon="icon_check_solid"
-            class="m-form-icon relative mt-[3px] h-[18px] w-[18px] shrink-0 self-start rounded-[2px] border-[1px] p-[1px] text-[--orange-e646] transition-colors duration-300"
+            class="m-form-icon relative mt-[2px] h-[18px] w-[18px] shrink-0 self-start rounded-[2px] border-[1px] p-[1px] text-[--orange-e646] transition-colors duration-300"
             :class="setClass.icon"
           />
           <slot>

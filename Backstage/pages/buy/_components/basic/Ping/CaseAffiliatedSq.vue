@@ -42,6 +42,51 @@ const items = shallowReadonly([
     class: 'm:col-span-2',
   },
 ])
+
+watch(
+  () => [
+    apiData.value.isCaseAttachedSqAutoCalculate,
+    pingData.value.caseBalconySq,
+    pingData.value.casePlatformSq,
+    pingData.value.caseTerraceSq,
+    pingData.value.caseStairwellSq,
+    pingData.value.caseMezzanineSq,
+    pingData.value.caseBasementSq,
+    pingData.value.caseOtherSq,
+  ],
+  () => {
+    const { isCaseAttachedSqAutoCalculate } = apiData.value
+    const {
+      caseBalconySq,
+      casePlatformSq,
+      caseTerraceSq,
+      caseStairwellSq,
+      caseMezzanineSq,
+      caseBasementSq,
+      caseOtherSq,
+    } = pingData.value
+
+    if (isCaseAttachedSqAutoCalculate) {
+      const caseBalconySqNumber = caseBalconySq ? Number(caseBalconySq) : 0
+      const casePlatformSqNumber = casePlatformSq ? Number(casePlatformSq) : 0
+      const caseTerraceSqNumber = caseTerraceSq ? Number(caseTerraceSq) : 0
+      const caseStairwellSqNumber = caseStairwellSq ? Number(caseStairwellSq) : 0
+      const caseMezzanineSqNumber = caseMezzanineSq ? Number(caseMezzanineSq) : 0
+      const caseBasementSqNumber = caseBasementSq ? Number(caseBasementSq) : 0
+      const caseOtherSqNumber = caseOtherSq ? Number(caseOtherSq) : 0
+      const total =
+        caseBalconySqNumber +
+        casePlatformSqNumber +
+        caseTerraceSqNumber +
+        caseStairwellSqNumber +
+        caseMezzanineSqNumber +
+        caseBasementSqNumber +
+        caseOtherSqNumber
+
+      pingData.value.caseAffiliatedSq = total || null
+    }
+  }
+)
 </script>
 
 <template>
@@ -55,9 +100,7 @@ const items = shallowReadonly([
             inputMode: 'numeric',
             inputChinese: false,
             checkNotIsZero: true,
-          }"
-          :rules="{
-            required: '請輸入登記坪數',
+            isDisabled: apiData.isCaseAttachedSqAutoCalculate,
           }"
           :setClass="{
             main: '--h-40 --px-12 --py-8',

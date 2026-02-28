@@ -247,6 +247,10 @@ const onAreaChange = () => {
       :name="`${props.name}_address_lane`"
       v-model="modelLane"
       :config="{
+        inputMode: 'numeric',
+        inputChinese: false,
+        checkNotIsZero: true,
+        integer: true,
         isExistClose: false,
       }"
       :setClass="{
@@ -261,6 +265,10 @@ const onAreaChange = () => {
       :name="`${props.name}_address_alley`"
       v-model="modelAlley"
       :config="{
+        inputMode: 'numeric',
+        inputChinese: false,
+        checkNotIsZero: true,
+        integer: true,
         isExistClose: false,
       }"
       :setClass="{
@@ -275,6 +283,10 @@ const onAreaChange = () => {
       :name="`${props.name}_address_number`"
       v-model="modelNumber"
       :config="{
+        inputMode: 'numeric',
+        inputChinese: false,
+        checkNotIsZero: true,
+        integer: true,
         isExistClose: false,
       }"
       :setClass="{
@@ -291,6 +303,10 @@ const onAreaChange = () => {
         :name="`${props.name}_address_of_number`"
         v-model="modelOfNumber"
         :config="{
+          inputMode: 'numeric',
+          inputChinese: false,
+          checkNotIsZero: true,
+          integer: true,
           isExistClose: false,
         }"
         :setClass="{
@@ -303,6 +319,10 @@ const onAreaChange = () => {
       :name="`${props.name}_address_floor`"
       v-model="modelFloor"
       :config="{
+        inputMode: 'numeric',
+        inputChinese: false,
+        checkNotIsZero: true,
+        integer: true,
         isExistClose: false,
       }"
       :setClass="{
@@ -319,6 +339,10 @@ const onAreaChange = () => {
         :name="`${props.name}_address_of_floor`"
         v-model="modelOfFloor"
         :config="{
+          inputMode: 'numeric',
+          inputChinese: false,
+          checkNotIsZero: true,
+          integer: true,
           isExistClose: false,
         }"
         :setClass="{

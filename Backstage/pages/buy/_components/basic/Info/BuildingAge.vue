@@ -61,8 +61,12 @@ const onReset = () => {
           name="caseAge"
           v-model="apiData.caseAge"
           :config="{
-            isExistClose: false,
+            inputMode: 'numeric',
+            inputChinese: false,
+            checkNotIsZero: true,
+            integer: true,
             maxlength: 3,
+            isExistClose: false,
           }"
           :rules="{
             required: {
@@ -87,8 +91,12 @@ const onReset = () => {
               name="caseCompletedYear"
               v-model="apiData.caseCompletedYear"
               :config="{
-                isExistClose: false,
+                inputMode: 'numeric',
+                inputChinese: false,
+                checkNotIsZero: true,
+                integer: true,
                 maxlength: 3,
+                isExistClose: false,
               }"
               :rules="{
                 required: {
@@ -113,8 +121,12 @@ const onReset = () => {
               name="caseCompletedMonth"
               v-model="apiData.caseCompletedMonth"
               :config="{
-                isExistClose: false,
+                inputMode: 'numeric',
+                inputChinese: false,
+                checkNotIsZero: true,
+                integer: true,
                 maxlength: 2,
+                isExistClose: false,
               }"
               :rules="{
                 required: {

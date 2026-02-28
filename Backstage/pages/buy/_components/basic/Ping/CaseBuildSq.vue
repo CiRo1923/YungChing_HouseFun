@@ -26,6 +26,12 @@ const { pingData, pingUnitLabel } = storeToRefs(buyBasic)
         }"
         :rules="{
           required: '請輸入登記坪數',
+          custom: {
+            valid: basic.onPingVaild(),
+            errorMessage: apiData.isCaseBuildSqIncludeParking
+              ? '登記坪數 (含車位) 不得小於主建物坪數'
+              : '登記坪數不得小於主建物坪數',
+          },
         }"
         :setClass="{
           main: '--h-40 --px-12 --py-8',

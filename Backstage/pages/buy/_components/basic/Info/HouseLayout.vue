@@ -61,8 +61,12 @@ const onIsCaseAddtionChange = () => {
             :name="item.id"
             v-model="apiData[item.id]"
             :config="{
-              isExistClose: false,
+              inputMode: 'numeric',
+              inputChinese: false,
+              checkNotIsZero: true,
+              integer: true,
               maxlength: 2,
+              isExistClose: false,
             }"
             :rules="item.rules"
             :setClass="{

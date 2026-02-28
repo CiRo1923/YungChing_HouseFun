@@ -45,8 +45,12 @@ const onIsCaseHasElevatorChnage = () => {
           name="caseElevatorCount"
           v-model="apiData.caseElevatorCount"
           :config="{
-            isExistClose: false,
+            inputMode: 'numeric',
+            inputChinese: false,
+            checkNotIsZero: true,
+            integer: true,
             maxlength: 3,
+            isExistClose: false,
             isDisabled: !apiData.isCaseHasElevator,
           }"
           :rules="{

@@ -56,7 +56,7 @@ const useStores = () => {
 
       return { config, status, data }
     },
-    onApiGETDistrictSelectOptions: async (cityID) => {
+    async onApiGETDistrictSelectOptions(cityID) {
       const { config, status, data } = await apiGETDistrictSelectOptions({
         cityCode: cityID,
       })
@@ -67,7 +67,7 @@ const useStores = () => {
 
       return { config, status, data }
     },
-    onApiGETRoad: async (cityID, AreaID) => {
+    async onApiGETRoad(cityID, AreaID) {
       const { config, status, data } = await apiGETRoad({
         cityCode: cityID,
         districtCode: AreaID,
@@ -246,7 +246,20 @@ const useStores = () => {
     },
   }
   const basic = {
-    onPingUnitChange: () => {
+    onPingVaild() {
+      const { isCaseBuildSqIncludeParking } = apiData.value
+      const { caseBuildSq, caseParkingSq, caseMainSq } = pingData.value
+      const caseBuildSqNumber = caseBuildSq ? Number(caseBuildSq) : 0
+      const caseParkingSqNumber = caseParkingSq ? Number(caseParkingSq) : 0
+      const caseMainSqNumber = caseMainSq ? Number(caseMainSq) : 0
+      const build = isCaseBuildSqIncludeParking
+        ? caseBuildSqNumber - caseParkingSqNumber
+        : caseBuildSqNumber
+
+      // 登記坪數
+      return build >= caseMainSqNumber
+    },
+    onPingUnitChange() {
       const unit = currentUnit.value
       const isPin = unit.value === 'pin'
       const isSqMeters = unit.value === 'sqMeters'
@@ -267,7 +280,7 @@ const useStores = () => {
         }
       })
     },
-    onPinSqMetersConvert: (key) => {
+    onPinSqMetersConvert(key) {
       const val = pingData.value[key]
       const unit = currentUnit.value
       if (!unit || !val) return

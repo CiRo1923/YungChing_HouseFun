@@ -62,6 +62,10 @@ const onIsSingleFloorChange = () => {
           name="caseFloorFrom"
           v-model="apiData.caseFloorFrom"
           :config="{
+            inputMode: 'numeric',
+            inputChinese: false,
+            checkNotIsZero: true,
+            integer: true,
             isExistClose: false,
           }"
           :rules="{
@@ -102,6 +106,10 @@ const onIsSingleFloorChange = () => {
           name="caseFloorTo"
           v-model="apiData.caseFloorTo"
           :config="{
+            inputMode: 'numeric',
+            inputChinese: false,
+            checkNotIsZero: true,
+            integer: true,
             isExistClose: false,
           }"
           :rules="{

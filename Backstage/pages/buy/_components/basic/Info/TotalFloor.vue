@@ -12,6 +12,10 @@ const { apiData } = storeToRefs(buyProject)
     name="caseFloorTotal"
     v-model="apiData.caseFloorTotal"
     :config="{
+      inputMode: 'numeric',
+      inputChinese: false,
+      checkNotIsZero: true,
+      integer: true,
       isExistClose: false,
     }"
     :rules="{
