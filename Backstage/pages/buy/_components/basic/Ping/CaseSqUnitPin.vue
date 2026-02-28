@@ -1,18 +1,20 @@
 <script setup>
 import FormRadiosOval from '@components/buy/mForm/RadiosOval.vue'
 
+import { useBuyProjectStore } from '@stores/buy/project.js'
 import { useBuyBasicStore } from '@stores/buy/basic.js'
 import useStores from '@stores/buy/_composables/useStores.js'
 
+const buyProject = useBuyProjectStore()
 const buyBasic = useBuyBasicStore()
+const { apiData } = storeToRefs(buyProject)
 const { basic } = useStores()
-const { pingUnit } = storeToRefs(buyBasic)
 </script>
 
 <template>
   <FormRadiosOval
-    name="pingUnit"
-    v-model="pingUnit"
+    name="isCaseSqUnitPin"
+    v-model="apiData.isCaseSqUnitPin"
     :options="buyBasic.options.unit"
     :setClass="{
       radios: 'm:w-full',

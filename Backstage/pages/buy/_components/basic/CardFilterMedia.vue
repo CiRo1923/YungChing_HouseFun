@@ -2,7 +2,7 @@
 import CardFilter from '@pages/buy/_containers/CardFilter.vue'
 
 import Video from '@pages/buy/_components/basic/Media/Video.vue'
-import Orientation from '@pages/buy/_components/basic/Media/Orientation.vue'
+import CaseVideoDisplay from '@pages/buy/_components/basic/Media/CaseVideoDisplay.vue'
 import Note from '@pages/buy/_components/basic/Media/Note.vue'
 
 const props = defineProps({
@@ -17,8 +17,8 @@ const items = shallowReadonly([
     component: Video,
   },
   {
-    id: 'orientation',
-    component: Orientation,
+    id: 'caseVideoDisplay',
+    component: CaseVideoDisplay,
   },
   {
     id: 'note',

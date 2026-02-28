@@ -6,7 +6,7 @@ import useStores from '@stores/buy/_composables/useStores.js'
 
 const buyBasic = useBuyBasicStore()
 const { basic } = useStores()
-const { pingData, pingUnitLabel } = storeToRefs(buyBasic)
+const { pingData } = storeToRefs(buyBasic)
 </script>
 
 <template>
@@ -25,7 +25,7 @@ const { pingData, pingUnitLabel } = storeToRefs(buyBasic)
     }"
     @blur="basic.onPinSqMetersConvert('caseLandSq')"
   >
-    <template #rearAssist>{{ pingUnitLabel }}</template>
+    <template #rearAssist>{{ basic.pingUnitLabel }}</template>
   </FormInput>
 </template>
 

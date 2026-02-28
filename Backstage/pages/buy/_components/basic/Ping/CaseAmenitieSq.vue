@@ -10,9 +10,7 @@ const buyProject = useBuyProjectStore()
 const buyBasic = useBuyBasicStore()
 const { basic } = useStores()
 const { apiData } = storeToRefs(buyProject)
-const { pingData, pingUnitLabel } = storeToRefs(buyBasic)
-const isAutoCalc = ref(true)
-const publicRatio = ref(null)
+const { pingData } = storeToRefs(buyBasic)
 </script>
 
 <template>
@@ -35,19 +33,19 @@ const publicRatio = ref(null)
             }"
             @blur="basic.onPinSqMetersConvert('caseAmenitieSq')"
           >
-            <template #rearAssist>{{ pingUnitLabel }}</template>
+            <template #rearAssist>{{ basic.pingUnitLabel }}</template>
           </FormInput>
         </li>
         <li class="t:w-[228px] p:w-[270px]">
           <FormInput
-            name="publicRatio"
-            v-model="publicRatio"
+            name="caseAmenitieSqRqtio"
+            v-model="apiData.caseAmenitieSqRqtio"
             :config="{
               placeholder: '公設比',
               inputMode: 'numeric',
               inputChinese: false,
               checkNotIsZero: true,
-              isDisabled: isAutoCalc,
+              isDisabled: apiData.isCaseAmenitieSqRqtioAuto,
             }"
             :setClass="{
               main: '--h-40 --px-12 --py-8',
@@ -62,8 +60,8 @@ const publicRatio = ref(null)
     </li>
     <li class="flex items-center pt:h-[40px]">
       <FormCheckBox
-        name="isAutoCalc"
-        v-model="isAutoCalc"
+        name="isCaseAmenitieSqRqtioAuto"
+        v-model="apiData.isCaseAmenitieSqRqtioAuto"
         :config="{
           mode: 'boolean',
           label: '自動計算',

@@ -1,7 +1,7 @@
 <script setup>
 import CardFilter from '@pages/buy/_containers/CardFilter.vue'
 
-import InfoImport from '@pages/buy/_components/basic/PosterInfo/InfoImport.vue'
+import PosterDataSource from '@pages/buy/_components/basic/PosterInfo/PosterDataSource.vue'
 import AgentName from '@pages/buy/_components/basic/PosterInfo/AgentName.vue'
 import AgentPhone from '@pages/buy/_components/basic/PosterInfo/AgentPhone.vue'
 import AgentLine from '@pages/buy/_components/basic/PosterInfo/AgentLine.vue'
@@ -14,11 +14,11 @@ const props = defineProps({
 })
 const items = shallowReadonly([
   {
-    id: 'infoImport',
+    id: 'posterDataSource',
     isRequired: false,
     label: '匯入資訊',
     class: 'p:h-[35px]',
-    component: InfoImport,
+    component: PosterDataSource,
   },
   {
     id: 'agentName',

@@ -1,19 +1,22 @@
 <script setup>
 import FormCheckBox from '@components/buy/mForm/CheckBox.vue'
 
-const isAgree = ref(false)
+import { useBuyProjectStore } from '@stores/buy/project.js'
+
+const buyProject = useBuyProjectStore()
+const { apiData } = storeToRefs(buyProject)
 </script>
 
 <template>
   <FormCheckBox
-    name="isAgree"
-    v-model="isAgree"
+    name="isAgreeUserTerm"
+    v-model="apiData.isAgreeUserTerm"
     :config="{
       mode: 'boolean',
     }"
     :rules="{
       required: {
-        valid: isAgree === false,
+        valid: apiData.isAgreeUserTerm === false,
         errorMessage: '請勾選並同意好房會員服務使用條款',
       },
     }"

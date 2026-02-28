@@ -8,22 +8,11 @@ import RadiosOval from '@pages/buy/_containers/RadiosOval.vue'
 import { useBuyProjectStore } from '@stores/buy/project.js'
 
 const buyProject = useBuyProjectStore()
-const { apiData } = storeToRefs(buyProject)
-const optionsModel = ref('age')
-const isOptionsModelAge = computed(() => optionsModel.value === 'age')
-const radioOptions = readonly([
-  {
-    label: '屋齡',
-    value: 'age',
-  },
-  {
-    label: '完工日期',
-    value: 'date',
-  },
-])
+const { apiData, options } = storeToRefs(buyProject)
+const isModelAge = computed(() => apiData.value.caseAgeIdentifyToken === '1')
 
-const onBuildingAgeChange = () => {
-  if (isOptionsModelAge.value) {
+const onCaseAgeIdentifyChange = () => {
+  if (isModelAge.value) {
     apiData.value.caseCompletedYear = ''
     apiData.value.caseCompletedMonth = ''
   } else {
@@ -46,17 +35,23 @@ const onReset = () => {
 <template>
   <RadiosOval>
     <FormRadiosOval
-      name="buildingAge"
-      v-model="optionsModel"
-      :options="radioOptions"
+      name="caseAgeIdentifyToken"
+      v-model="apiData.caseAgeIdentifyToken"
+      :options="options.ageIdentify"
+      :config="{
+        schema: {
+          label: 'text',
+          value: 'value',
+        },
+      }"
       :setClass="{
         radios: 'm:w-full',
         container: 'm:flex-1',
       }"
-      @change="onBuildingAgeChange"
+      @change="onCaseAgeIdentifyChange"
     />
     <ul class="flex flex-wrap tm:gap-x-[8px] p:gap-x-[24px]">
-      <li class="tm:w-[130px] p:w-[100px]" v-if="isOptionsModelAge">
+      <li class="tm:w-[130px] p:w-[100px]" v-if="isModelAge">
         <FormInput
           name="caseAge"
           v-model="apiData.caseAge"

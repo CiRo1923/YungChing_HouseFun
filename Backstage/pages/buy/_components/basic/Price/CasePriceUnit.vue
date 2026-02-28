@@ -8,11 +8,11 @@ import { useBuyProjectStore } from '@stores/buy/project.js'
 
 const buyProject = useBuyProjectStore()
 const { apiData } = storeToRefs(buyProject)
-const isAutoCalc = ref(true)
 
-const onIsAutoCalc = () => {
+const onIsCasePriceUnitAuto = () => {
   const {
-    casePrice, // 寵價
+    isCasePriceUnitAuto, // 自動計算
+    casePrice, // 總價
     caseParkingPrice, // 車位價
     caseBuildSqPin, // 登記坪數
     caseParkingSqPin, // 車位坪數
@@ -20,7 +20,7 @@ const onIsAutoCalc = () => {
     isCasePricePerPinDeductParking, // 扣除車位價
     isCaseBuildSqIncludeParking, // 登記坪數含車位
   } = apiData.value
-  if (isAutoCalc.value && casePrice && caseBuildSqPin) {
+  if (isCasePriceUnitAuto && casePrice && caseBuildSqPin) {
     const price =
       isCasePriceIncludeParking && isCasePricePerPinDeductParking && caseParkingPrice
         ? Number(casePrice) - Number(caseParkingPrice)
@@ -44,7 +44,7 @@ watch(
     apiData.value.isCaseBuildSqIncludeParking,
   ],
   () => {
-    onIsAutoCalc()
+    onIsCasePriceUnitAuto()
   }
 )
 </script>
@@ -61,7 +61,7 @@ watch(
           checkNotIsZero: true,
           comma: true,
           toFixed: 2,
-          isDisabled: isAutoCalc,
+          isDisabled: apiData.isCasePriceUnitAuto,
         }"
         :setClass="{
           main: '--h-40 --px-12 --py-8 p:w-[270px]',
@@ -78,8 +78,8 @@ watch(
       <ul class="flex tm:gap-x-[16px] p:gap-x-[24px]">
         <li class="flex h-[40px] items-center">
           <FormCheckBox
-            name="isAutoCalc"
-            v-model="isAutoCalc"
+            name="isCasePriceUnitAuto"
+            v-model="apiData.isCasePriceUnitAuto"
             :config="{
               mode: 'boolean',
               label: '自動計算',

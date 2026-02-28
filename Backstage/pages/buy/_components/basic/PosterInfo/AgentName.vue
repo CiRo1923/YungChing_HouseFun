@@ -3,12 +3,9 @@ import FormInput from '@components/buy/mForm/Input.vue'
 import FormCheckBox from '@components/buy/mForm/CheckBox.vue'
 
 import { useBuyProjectStore } from '@stores/buy/project.js'
-import { useBuyBasicStore } from '@stores/buy/basic.js'
 
 const buyProject = useBuyProjectStore()
-const buyBasic = useBuyBasicStore()
 const { apiData } = storeToRefs(buyProject)
-const { posterInfoImport } = storeToRefs(buyBasic)
 </script>
 
 <template>
@@ -18,7 +15,7 @@ const { posterInfoImport } = storeToRefs(buyBasic)
         name="agentName"
         v-model="apiData.posterInfo.agentName"
         :config="{
-          isDisabled: posterInfoImport === 'same',
+          isDisabled: apiData.posterDataSourceToken === '1',
         }"
         :rules="{
           required: '請輸入姓名',

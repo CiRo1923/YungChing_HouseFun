@@ -10,19 +10,22 @@ import {
   apiGETRealEstateZoingCheckOptions,
   apiGETRealEstateZoingCitySelectOptions,
   apiGETRealEstateZoingLandSelectOptions,
+  apiGETRealEstateAgeIdentifySelectOptions,
   apiGETRealEstateFloorSelectOptions,
   apiGETRealEstateFaceSelectOptions,
   apiGETRealEstateStructionSelectOptions,
   apiGETRealEstateBarrierFreeCheckOptions,
-  apiGETRealEstateManageTypeSelectOpstions,
-  apiGETRealEstateManageDutySelectOpstions,
-  apiGETRealEstateManagePayPeriodSelectOpstions,
+  apiGETRealEstateManageTypeSelectOptions,
+  apiGETRealEstateManageDutySelectOptions,
+  apiGETRealEstateManagePayPeriodSelectOptions,
   apiGETRealEstateParkingModeSelectOptions,
-  apiGETRealEstateParkingTypeSelectOpstions,
-  apiGETRealEstateParkingRegSelectOpstions,
-  apiGETRealEstateParkingPayPeriodSelectOpstions,
-  apiGETRealEstateVideoTypeSelectOpstions,
+  apiGETRealEstateParkingTypeSelectOptions,
+  apiGETRealEstateParkingRegSelectOptions,
+  apiGETRealEstateParkingPayPeriodSelectOptions,
+  apiGETRealEstateVideoDisplaySelectOptions,
+  apiGETRealEstateVideoTypeSelectOptions,
   apiGETRealEstateFeatureCheckOptions,
+  apiGETRealEstatePosterDataSourceSelectOptions,
 } from '@js/buy/_api/index.js'
 
 import { toFixed } from '@js/_prototype.js'
@@ -34,7 +37,8 @@ const useStores = () => {
   const projectStores = useBuyProjectStore()
   const basicStores = useBuyBasicStore()
   const { apiData, options: projectOptions } = storeToRefs(projectStores)
-  const { pingData, currentUnit } = storeToRefs(basicStores)
+  const { pingData } = storeToRefs(basicStores)
+
   const project = {
     async onApiGETRealEstatePurposeCheckOptions() {
       // const { public: env } = useRuntimeConfig()
@@ -125,6 +129,16 @@ const useStores = () => {
 
       return { config, status, data }
     },
+    async onApiGETRealEstateAgeIdentifySelectOptions() {
+      const { config, status, data } = await apiGETRealEstateAgeIdentifySelectOptions()
+
+      if (status === 200) {
+        projectOptions.value.ageIdentify = data || []
+        apiData.value.caseAgeIdentifyToken = data[0].value
+      }
+
+      return { config, status, data }
+    },
     async onApiGETRealEstateFloorSelectOptions() {
       const { config, status, data } = await apiGETRealEstateFloorSelectOptions()
 
@@ -163,8 +177,8 @@ const useStores = () => {
 
       return { config, status, data }
     },
-    async onApiGETRealEstateManageTypeSelectOpstions() {
-      const { config, status, data } = await apiGETRealEstateManageTypeSelectOpstions()
+    async onApiGETRealEstateManageTypeSelectOptions() {
+      const { config, status, data } = await apiGETRealEstateManageTypeSelectOptions()
 
       if (status === 200) {
         projectOptions.value.manageType = data || []
@@ -172,8 +186,8 @@ const useStores = () => {
 
       return { config, status, data }
     },
-    async onApiGETRealEstateManageDutySelectOpstions() {
-      const { config, status, data } = await apiGETRealEstateManageDutySelectOpstions()
+    async onApiGETRealEstateManageDutySelectOptions() {
+      const { config, status, data } = await apiGETRealEstateManageDutySelectOptions()
 
       if (status === 200) {
         projectOptions.value.manageDuty = data || []
@@ -181,8 +195,8 @@ const useStores = () => {
 
       return { config, status, data }
     },
-    async onApiGETRealEstateManagePayPeriodSelectOpstions() {
-      const { config, status, data } = await apiGETRealEstateManagePayPeriodSelectOpstions()
+    async onApiGETRealEstateManagePayPeriodSelectOptions() {
+      const { config, status, data } = await apiGETRealEstateManagePayPeriodSelectOptions()
 
       if (status === 200) {
         projectOptions.value.managePay = data || []
@@ -199,8 +213,8 @@ const useStores = () => {
 
       return { config, status, data }
     },
-    async onApiGETRealEstateParkingTypeSelectOpstions() {
-      const { config, status, data } = await apiGETRealEstateParkingTypeSelectOpstions()
+    async onApiGETRealEstateParkingTypeSelectOptions() {
+      const { config, status, data } = await apiGETRealEstateParkingTypeSelectOptions()
 
       if (status === 200) {
         projectOptions.value.parkingType = data || []
@@ -208,8 +222,8 @@ const useStores = () => {
 
       return { config, status, data }
     },
-    async onApiGETRealEstateParkingRegSelectOpstions() {
-      const { config, status, data } = await apiGETRealEstateParkingRegSelectOpstions()
+    async onApiGETRealEstateParkingRegSelectOptions() {
+      const { config, status, data } = await apiGETRealEstateParkingRegSelectOptions()
 
       if (status === 200) {
         projectOptions.value.parkingReg = data || []
@@ -217,8 +231,8 @@ const useStores = () => {
 
       return { config, status, data }
     },
-    async onApiGETRealEstateParkingPayPeriodSelectOpstions() {
-      const { config, status, data } = await apiGETRealEstateParkingPayPeriodSelectOpstions()
+    async onApiGETRealEstateParkingPayPeriodSelectOptions() {
+      const { config, status, data } = await apiGETRealEstateParkingPayPeriodSelectOptions()
 
       if (status === 200) {
         projectOptions.value.parkingPayPeriod = data || []
@@ -226,8 +240,18 @@ const useStores = () => {
 
       return { config, status, data }
     },
-    async onApiGETRealEstateVideoTypeSelectOpstions() {
-      const { config, status, data } = await apiGETRealEstateVideoTypeSelectOpstions()
+    async onApiGETRealEstateVideoDisplaySelectOptions() {
+      const { config, status, data } = await apiGETRealEstateVideoDisplaySelectOptions()
+
+      if (status === 200) {
+        projectOptions.value.videoDisplay = data || []
+        apiData.value.caseVideoDisplayToken = data[0].value
+      }
+
+      return { config, status, data }
+    },
+    async onApiGETRealEstateVideoTypeSelectOptions() {
+      const { config, status, data } = await apiGETRealEstateVideoTypeSelectOptions()
 
       if (status === 200) {
         projectOptions.value.videoType = data || []
@@ -244,8 +268,25 @@ const useStores = () => {
 
       return { config, status, data }
     },
+    async onApiGETRealEstatePosterDataSourceSelectOptions() {
+      const { config, status, data } = await apiGETRealEstatePosterDataSourceSelectOptions()
+
+      if (status === 200) {
+        projectOptions.value.posterDataSource = data || []
+        apiData.value.posterDataSourceToken = data[0].value
+      }
+
+      return { config, status, data }
+    },
   }
   const basic = {
+    currentUnit: computed(() =>
+      basicStores.options.unit.find((item) => item.value === apiData.value.isCaseSqUnitPin)
+    ),
+    pingUnitLabel: computed(
+      () =>
+        basicStores.options.unit.find((item) => item.value === apiData.value.isCaseSqUnitPin).label
+    ),
     onPingVaild() {
       const { isCaseBuildSqIncludeParking } = apiData.value
       const { caseBuildSq, caseParkingSq, caseMainSq } = pingData.value
@@ -260,9 +301,9 @@ const useStores = () => {
       return build >= caseMainSqNumber
     },
     onPingUnitChange() {
-      const unit = currentUnit.value
-      const isPin = unit.value === 'pin'
-      const isSqMeters = unit.value === 'sqMeters'
+      const unit = basic.currentUnit.value
+      const isPin = unit.id === 'pin'
+      const isSqMeters = unit.id === 'sqMeters'
 
       if (!unit) return
 
@@ -282,15 +323,15 @@ const useStores = () => {
     },
     onPinSqMetersConvert(key) {
       const val = pingData.value[key]
-      const unit = currentUnit.value
+      const unit = basic.currentUnit.value
       if (!unit || !val) return
 
       const pinKey = `${key}Pin`
       const mKey = `${key}M`
-      const isPin = unit.value === 'pin'
-      const isSqMeters = unit.value === 'sqMeters'
-      const pinConf = basicStores.options.unit.find((u) => u.value === 'pin')
-      const mConf = basicStores.options.unit.find((u) => u.value === 'sqMeters')
+      const isPin = unit.id === 'pin'
+      const isSqMeters = unit.id === 'sqMeters'
+      const pinConf = basicStores.options.unit.find((u) => u.id === 'pin')
+      const mConf = basicStores.options.unit.find((u) => u.id === 'sqMeters')
       const onConvert = (value, conf) =>
         String(Number(toFixed(Number(value) * conf.convert, conf.toFixed)))
 
@@ -299,12 +340,13 @@ const useStores = () => {
       apiData.value[pinKey] = isPin ? val : onConvert(val, pinConf)
       apiData.value[mKey] = isSqMeters ? val : onConvert(val, mConf)
 
-      // console.log(apiData.value[pinKey])
-      // console.log(apiData.value[mKey])
+      console.log(apiData.value[pinKey])
+      console.log(apiData.value[mKey])
     },
     async onApiGETRealEstate(hfid) {
       const { config, status, data } = await apiGETRealEstate({
         hfid: hfid,
+        caseInfo: apiData.value,
       })
 
       if (status === 200) {
@@ -318,6 +360,7 @@ const useStores = () => {
     async onApiPOSTRealEstateDraft(hfid) {
       const { config, status, data } = await apiPOSTRealEstateDraft({
         hfid: hfid,
+        caseInfo: apiData.value,
       })
 
       if (status === 200) {
@@ -328,6 +371,7 @@ const useStores = () => {
     async onApiPOSTRealEstate(hfid) {
       const { config, status, data } = await apiPOSTRealEstate({
         hfid: hfid,
+        caseInfo: apiData.value,
       })
 
       if (status === 200) {

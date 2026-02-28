@@ -10,7 +10,7 @@ import Zoing from '@pages/buy/_components/basic/Info/Zoing.vue'
 import CaseLandNo from '@pages/buy/_components/basic/Info/CaseLandNo.vue'
 import Floor from '@pages/buy/_components/basic/Info/Floor.vue'
 import TotalFloor from '@pages/buy/_components/basic/Info/TotalFloor.vue'
-import BuildingAge from '@pages/buy/_components/basic/Info/BuildingAge.vue'
+import CaseAgeIdentify from '~/pages/buy/_components/basic/Info/CaseAgeIdentify.vue'
 import Community from '@pages/buy/_components/basic/Info/Community.vue'
 import HouseLayout from '@pages/buy/_components/basic/Info/HouseLayout.vue'
 import HouseAddLayout from '@pages/buy/_components/basic/Info/HouseAddLayout.vue'
@@ -90,11 +90,11 @@ const items = shallowReadonly([
     component: TotalFloor,
   },
   {
-    id: 'buildingAge',
+    id: 'caseAgeIdentify',
     isRequired: true,
     label: '屋齡',
     class: 'p:h-[35px]',
-    component: BuildingAge,
+    component: CaseAgeIdentify,
   },
   {
     id: 'community',

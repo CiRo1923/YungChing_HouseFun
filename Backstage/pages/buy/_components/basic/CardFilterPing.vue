@@ -1,7 +1,7 @@
 <script setup>
 import CardFilter from '@pages/buy/_containers/CardFilter.vue'
 
-import Unit from '@pages/buy/_components/basic/Ping/Unit.vue'
+import CaseSqUnitPin from '@pages/buy/_components/basic/Ping/CaseSqUnitPin.vue'
 import CaseBuildSq from '@pages/buy/_components/basic/Ping/CaseBuildSq.vue'
 import CaseParkingSq from '@pages/buy/_components/basic/Ping/CaseParkingSq.vue'
 import CaseMainSq from '@pages/buy/_components/basic/Ping/CaseMainSq.vue'
@@ -22,11 +22,11 @@ const props = defineProps({
 })
 const items = shallowReadonly([
   {
-    id: 'unit',
+    id: 'caseSqUnitPin',
     isRequired: false,
     label: '顯示單位',
     class: 'p:h-[35px]',
-    component: Unit,
+    component: CaseSqUnitPin,
   },
   {
     id: 'caseBuildSq',

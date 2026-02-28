@@ -74,24 +74,30 @@ export const useBuyBasicAllPromise = () => {
     useAsyncData('zoing-options', () => project.onApiGETRealEstateZoingCheckOptions()),
     useAsyncData('zoingCity-options', () => project.onApiGETRealEstateZoingCitySelectOptions()),
     useAsyncData('zoingLand-options', () => project.onApiGETRealEstateZoingLandSelectOptions()),
+    useAsyncData('ageIdentify-options', () => project.onApiGETRealEstateAgeIdentifySelectOptions()),
     useAsyncData('floor-options', () => project.onApiGETRealEstateFloorSelectOptions()),
     useAsyncData('face-options', () => project.onApiGETRealEstateFaceSelectOptions()),
     useAsyncData('structure-options', () => project.onApiGETRealEstateStructionSelectOptions()),
     useAsyncData('barrierFree-options', () => project.onApiGETRealEstateBarrierFreeCheckOptions()),
-    useAsyncData('manageType-options', () => project.onApiGETRealEstateManageTypeSelectOpstions()),
-    useAsyncData('manageDuty-options', () => project.onApiGETRealEstateManageDutySelectOpstions()),
+    useAsyncData('manageType-options', () => project.onApiGETRealEstateManageTypeSelectOptions()),
+    useAsyncData('manageDuty-options', () => project.onApiGETRealEstateManageDutySelectOptions()),
     useAsyncData('managePay-options', () =>
-      project.onApiGETRealEstateManagePayPeriodSelectOpstions()
+      project.onApiGETRealEstateManagePayPeriodSelectOptions()
     ),
     useAsyncData('parkingMode-options', () => project.onApiGETRealEstateParkingModeSelectOptions()),
-    useAsyncData('parkingType-options', () =>
-      project.onApiGETRealEstateParkingTypeSelectOpstions()
-    ),
-    useAsyncData('parkingReg-options', () => project.onApiGETRealEstateParkingRegSelectOpstions()),
+    useAsyncData('parkingType-options', () => project.onApiGETRealEstateParkingTypeSelectOptions()),
+    useAsyncData('parkingReg-options', () => project.onApiGETRealEstateParkingRegSelectOptions()),
     useAsyncData('parkingPayPeriod-options', () =>
-      project.onApiGETRealEstateParkingPayPeriodSelectOpstions()
+      project.onApiGETRealEstateParkingPayPeriodSelectOptions()
     ),
-    useAsyncData('videoType-options', () => project.onApiGETRealEstateVideoTypeSelectOpstions()),
+
+    useAsyncData('videoDisplay-options', () =>
+      project.onApiGETRealEstateVideoDisplaySelectOptions()
+    ),
+    useAsyncData('videoType-options', () => project.onApiGETRealEstateVideoTypeSelectOptions()),
     useAsyncData('feature-options', () => project.onApiGETRealEstateFeatureCheckOptions()),
+    useAsyncData('posterDataSource-options', () =>
+      project.onApiGETRealEstatePosterDataSourceSelectOptions()
+    ),
   ]
 }

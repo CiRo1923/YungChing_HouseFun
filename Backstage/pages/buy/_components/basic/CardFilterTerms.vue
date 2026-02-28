@@ -2,7 +2,7 @@
 import CardFilter from '@pages/buy/_containers/CardFilter.vue'
 
 import Terms from '@pages/buy/_components/basic/Terms/Terms.vue'
-import Agree from '@pages/buy/_components/basic/Terms/Agree.vue'
+import AgreeUserTerm from '~/pages/buy/_components/basic/Terms/AgreeUserTerm.vue'
 
 const props = defineProps({
   title: {
@@ -16,8 +16,8 @@ const items = shallowReadonly([
     component: Terms,
   },
   {
-    id: 'agree',
-    component: Agree,
+    id: 'agreeUserTerm',
+    component: AgreeUserTerm,
   },
 ])
 </script>

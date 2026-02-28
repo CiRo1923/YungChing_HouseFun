@@ -9,18 +9,7 @@ import { onGetYouTubeID } from '@js/_prototype.js'
 import { useBuyProjectStore } from '@stores/buy/project.js'
 
 const buyProject = useBuyProjectStore()
-const { apiData } = storeToRefs(buyProject)
-const optionsModel = ref('landscape')
-const radioOptions = readonly([
-  {
-    label: '橫式',
-    value: 'landscape',
-  },
-  {
-    label: '直式',
-    value: 'portrait',
-  },
-])
+const { apiData, options } = storeToRefs(buyProject)
 const videoPicture = computed(() => {
   const { caseVideoUrl } = apiData.value
   const youtubeID = /youtube/.test(caseVideoUrl) ? onGetYouTubeID(caseVideoUrl) : null
@@ -29,25 +18,28 @@ const videoPicture = computed(() => {
 
   return ''
 })
-
-const onOrientationChange = () => {}
 </script>
 
 <template>
   <RadiosOval>
     <FormRadiosOval
-      name="orientation"
-      v-model="optionsModel"
-      :options="radioOptions"
+      name="caseVideoDisplayToken"
+      v-model="apiData.caseVideoDisplayToken"
+      :options="options.videoDisplay"
+      :config="{
+        schema: {
+          label: 'text',
+          value: 'value',
+        },
+      }"
       :setClass="{
         radios: 'm:w-full',
         container: 'm:flex-1',
       }"
-      @change="onOrientationChange"
     />
     <div
       class="flex items-center justify-center overflow-hidden rounded-[10px] bg-[--gray-f7] font-semibold leading-[1.5] text-[--gray-666] tm:h-[175px] tm:w-[311px] p:h-[163px] p:w-[290px] p:text-[30px]"
-      v-if="optionsModel === 'landscape'"
+      v-if="apiData.caseVideoDisplayToken === '1'"
     >
       <template v-if="!videoPicture">
         <b class="text-center tm:hidden">Video<br />290 x 163</b>

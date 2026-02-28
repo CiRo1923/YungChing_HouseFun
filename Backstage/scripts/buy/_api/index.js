@@ -112,6 +112,9 @@ export const apiGETRealEstateZoingCitySelectOptions = async (data) =>
 export const apiGETRealEstateZoingLandSelectOptions = async (data) =>
   await fetchApi('get', 'api/v1/buy/realEstateZoingLand/select-options', data)
 
+export const apiGETRealEstateAgeIdentifySelectOptions = async (data) =>
+  await fetchApi('get', 'api/v1/buy/realEstateAgeIdentify/select-options', data)
+
 export const apiGETRealEstateFloorSelectOptions = async (data) =>
   await fetchApi('get', 'api/v1/buy/realEstateFloor/select-options', data)
 
@@ -127,29 +130,35 @@ export const apiGETRealEstateStructionSelectOptions = async (data) =>
 export const apiGETRealEstateBarrierFreeCheckOptions = async (data) =>
   await fetchApi('get', 'api/v1/buy/realEstateBarrierfree/check-options', data)
 
-export const apiGETRealEstateManageTypeSelectOpstions = async (data) =>
-  await fetchApi('get', 'api/v1/buy/realEstateManageType/select-opstions', data)
+export const apiGETRealEstateManageTypeSelectOptions = async (data) =>
+  await fetchApi('get', 'api/v1/buy/realEstateManageType/select-options', data)
 
-export const apiGETRealEstateManageDutySelectOpstions = async (data) =>
-  await fetchApi('get', 'api/v1/buy/realEstateManageDuty/select-opstions', data)
+export const apiGETRealEstateManageDutySelectOptions = async (data) =>
+  await fetchApi('get', 'api/v1/buy/realEstateManageDuty/select-options', data)
 
-export const apiGETRealEstateManagePayPeriodSelectOpstions = async (data) =>
-  await fetchApi('get', 'api/v1/buy/realEstateManagePayPeriod/select-opstions', data)
+export const apiGETRealEstateManagePayPeriodSelectOptions = async (data) =>
+  await fetchApi('get', 'api/v1/buy/realEstateManagePayPeriod/select-options', data)
 
 export const apiGETRealEstateParkingModeSelectOptions = async (data) =>
   await fetchApi('get', 'api/v1/buy/realEstateParkingMode/select-options', data)
 
-export const apiGETRealEstateParkingTypeSelectOpstions = async (data) =>
-  await fetchApi('get', 'api/v1/buy/realEstateParkingType/select-opstions', data)
+export const apiGETRealEstateParkingTypeSelectOptions = async (data) =>
+  await fetchApi('get', 'api/v1/buy/realEstateParkingType/select-options', data)
 
-export const apiGETRealEstateParkingRegSelectOpstions = async (data) =>
-  await fetchApi('get', 'api/v1/buy/realEstateParkingReg/select-opstions', data)
+export const apiGETRealEstateParkingRegSelectOptions = async (data) =>
+  await fetchApi('get', 'api/v1/buy/realEstateParkingReg/select-options', data)
 
-export const apiGETRealEstateParkingPayPeriodSelectOpstions = async (data) =>
-  await fetchApi('get', 'api/v1/buy/realEstateParkingPayPeriod/select-opstions', data)
+export const apiGETRealEstateParkingPayPeriodSelectOptions = async (data) =>
+  await fetchApi('get', 'api/v1/buy/realEstateParkingPayPeriod/select-options', data)
 
-export const apiGETRealEstateVideoTypeSelectOpstions = async (data) =>
-  await fetchApi('get', 'api/v1/buy/realEstateVideoType/select-opstions', data)
+export const apiGETRealEstateVideoDisplaySelectOptions = async (data) =>
+  await fetchApi('get', 'api/v1/buy/realEstateVideoDisplay/select-options', data)
+
+export const apiGETRealEstateVideoTypeSelectOptions = async (data) =>
+  await fetchApi('get', 'api/v1/buy/realEstateVideoType/select-options', data)
 
 export const apiGETRealEstateFeatureCheckOptions = async (data) =>
   await fetchApi('get', 'api/v1/buy/realEstateFeature/check-options', data)
+
+export const apiGETRealEstatePosterDataSourceSelectOptions = async (data) =>
+  await fetchApi('get', 'api/v1/buy/realEstatePosterDataSource/select-options', data)

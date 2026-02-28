@@ -10,7 +10,7 @@ const buyProject = useBuyProjectStore()
 const buyBasic = useBuyBasicStore()
 const { basic } = useStores()
 const { apiData } = storeToRefs(buyProject)
-const { pingData, pingUnitLabel } = storeToRefs(buyBasic)
+const { pingData } = storeToRefs(buyBasic)
 </script>
 
 <template>
@@ -40,7 +40,7 @@ const { pingData, pingUnitLabel } = storeToRefs(buyBasic)
         }"
         @blur="basic.onPinSqMetersConvert('caseBuildSq')"
       >
-        <template #rearAssist>{{ pingUnitLabel }}</template>
+        <template #rearAssist>{{ basic.pingUnitLabel }}</template>
       </FormInput>
     </li>
     <li class="flex h-[40px] items-center m:shrink-0">
