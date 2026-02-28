@@ -18,7 +18,7 @@ const { apiData } = storeToRefs(buyProject)
       required: '請輸入地號',
     }"
     :setClass="{
-      main: '--h-40 --px-12 --py-8 grow',
+      main: '--h-40 --px-12 --py-8',
     }"
   />
 </template>

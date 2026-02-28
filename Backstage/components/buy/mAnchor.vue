@@ -103,7 +103,7 @@ const onClick = (e) => {
 <template>
   <component
     :is="as"
-    class="m-anchor relative inline-flex items-center justify-center gap-x-[5px] tracking-[0.06em] transition-colors duration-300"
+    class="m-anchor relative inline-flex items-center justify-center gap-x-[3px] tracking-[0.06em] transition-colors duration-300"
     :class="setClass.main"
     v-bind="bind"
     :disabled="config.isDisabled"

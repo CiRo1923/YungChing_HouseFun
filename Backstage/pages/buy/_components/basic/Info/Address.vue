@@ -75,7 +75,6 @@ const onAreaChange = async () => {
       },
     }"
     :setClass="{
-      main: 'grow',
       city: 'pt:w-[260px]',
       area: 'pt:w-[260px]',
       road: 'pt:w-[262px]',

@@ -2,7 +2,7 @@
 import SvgIcon from '@components/common/SvgIcon.vue'
 import ErrorMessageElem from '@components/buy/mErrorMessageElem.vue'
 
-import { onDevice, deepMerge, deepClone, emptyData } from '@js/_prototype.js'
+import { onDevice, onDeepMerge, onDeepClone, emptyData } from '@js/_prototype.js'
 
 import '@js/_validation.js'
 
@@ -71,7 +71,7 @@ const config = computed(() => {
     maxItems: 5,
   }
 
-  return deepMerge(defaultConfig, props.config)
+  return onDeepMerge(defaultConfig, props.config)
 })
 
 const setClass = computed(() => {
@@ -105,8 +105,8 @@ const placeholder = computed(() => {
 const options = computed(() => {
   const { schema } = config.value
   const { value, isToOption } = placeholder.value
-  const options = props.options ? deepClone(props.options) : []
-  const placeholderItem = emptyData(deepClone(options[0]))
+  const options = props.options ? onDeepClone(props.options) : []
+  const placeholderItem = emptyData(onDeepClone(options[0]))
 
   if (isToOption) {
     placeholderItem[schema.label] = value
@@ -362,7 +362,7 @@ onUnmounted(() => {
           @keypress.enter="onDropdownEnter"
         >
           <div
-            class="m-form-type w-full cursor-pointer truncate"
+            class="m-form-type w-full cursor-pointer truncate leading-[1.33]"
             :class="[
               setClass.type,
               {

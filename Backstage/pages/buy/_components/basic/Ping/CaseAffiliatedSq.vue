@@ -46,8 +46,8 @@ const items = shallowReadonly([
 
 <template>
   <div class="m:space-y-[16px] pt:space-y-[8px]">
-    <ul class="flex flex-wrap tm:gap-x-[16px] p:gap-x-[24px]">
-      <li>
+    <ul class="flex overflow-hidden tm:gap-x-[16px] p:gap-x-[24px]">
+      <li class="m:min-w-0 m:grow t:w-[220px] pt:w-[270px]">
         <FormInput
           name="caseAffiliatedSqPin"
           v-model="pingData.caseAffiliatedSq"
@@ -60,7 +60,7 @@ const items = shallowReadonly([
             required: '請輸入登記坪數',
           }"
           :setClass="{
-            main: '--h-40 --px-12 --py-8 tm:w-[205px] pt:w-[270px]',
+            main: '--h-40 --px-12 --py-8',
             element: 'grow',
             rearAssist: 'text-[14px] text-[--gray-999]',
           }"
@@ -69,7 +69,7 @@ const items = shallowReadonly([
           <template #rearAssist>{{ pingUnitLabel }}</template>
         </FormInput>
       </li>
-      <li class="flex h-[40px] items-center">
+      <li class="flex h-[40px] items-center m:shrink-0">
         <FormCheckBox
           name="isCaseAttachedSqAutoCalculate"
           v-model="apiData.isCaseAttachedSqAutoCalculate"

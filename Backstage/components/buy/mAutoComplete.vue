@@ -2,7 +2,7 @@
 import SvgIcon from '@components/common/SvgIcon.vue'
 import ErrorMessageElem from '@components/buy/mErrorMessageElem.vue'
 
-import { deepMerge } from '@js/_prototype.js'
+import { onDeepMerge } from '@js/_prototype.js'
 
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { Field, ErrorMessage } from 'vee-validate'
@@ -72,7 +72,7 @@ const config = computed(() => {
     maxItems: 5,
   }
 
-  return deepMerge(defaultConfig, props.config)
+  return onDeepMerge(defaultConfig, props.config)
 })
 
 const setClass = computed(() => {

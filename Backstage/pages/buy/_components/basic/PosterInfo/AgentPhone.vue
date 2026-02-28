@@ -13,7 +13,7 @@ const { posterInfoImport } = storeToRefs(buyBasic)
 
 <template>
   <ul class="m:space-y-[12px] t:gap-x-[16px] pt:flex p:gap-x-[24px]">
-    <li>
+    <li class="t:w-[220px] p:w-[270px]">
       <FormInput
         name="agentPhone"
         v-model="apiData.posterInfo.agentPhone"
@@ -27,7 +27,7 @@ const { posterInfoImport } = storeToRefs(buyBasic)
           phone: '行動電話格式錯誤',
         }"
         :setClass="{
-          main: '--h-40 --px-12 --py-8 t:w-[220px] p:w-[270px]',
+          main: '--h-40 --px-12 --py-8',
           element: 'grow',
         }"
       />

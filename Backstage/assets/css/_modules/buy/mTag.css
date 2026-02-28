@@ -4,6 +4,8 @@
 
 @screen p {
   .m-tag {
+    @apply text-[14px];
+
     &.\-\-px-15,
     &.p\:\-\-px-15,
     &.pt\:\-\-px-15 {
@@ -27,6 +29,12 @@
     &.pt\:\-\-h-30 {
       @apply h-[30px];
     }
+  }
+}
+
+@screen tm {
+  .m-tag {
+    @apply text-[16px];
   }
 }
 

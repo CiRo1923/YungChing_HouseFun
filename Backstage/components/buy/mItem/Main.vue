@@ -1,7 +1,7 @@
 <script setup>
 import ItemContainer from '@components/buy/mItem/Container.vue'
 
-import { deepMerge } from '@js/_prototype.js'
+import { onDeepMerge } from '@js/_prototype.js'
 
 import { computed, ref } from 'vue'
 
@@ -32,7 +32,7 @@ const config = computed(() => {
     childrenUseRootClass: false,
   }
 
-  return deepMerge(defaultConfig, props.config)
+  return onDeepMerge(defaultConfig, props.config)
 })
 
 const setClass = computed(() => {

@@ -2,7 +2,7 @@
 import SvgIcon from '@components/common/SvgIcon.vue'
 import ErrorMessageElem from '@components/buy/mErrorMessageElem.vue'
 
-import { deepMerge, numberComma, toFixed } from '@js/_prototype.js'
+import { onDeepMerge, numberComma, toFixed } from '@js/_prototype.js'
 
 import '@js/_validation.js'
 // import { userStore } from '@store/user.js'
@@ -53,7 +53,7 @@ const props = defineProps({
 const model = ref(null)
 const isFocus = ref(false)
 const config = computed(() => {
-  return deepMerge(
+  return onDeepMerge(
     {
       placeholder: '',
       length: null,

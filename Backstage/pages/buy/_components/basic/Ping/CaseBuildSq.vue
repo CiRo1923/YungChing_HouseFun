@@ -14,8 +14,8 @@ const { pingData, pingUnitLabel } = storeToRefs(buyBasic)
 </script>
 
 <template>
-  <ul class="flex flex-wrap tm:gap-x-[8px] p:gap-x-[24px]">
-    <li>
+  <ul class="flex overflow-hidden tm:gap-x-[16px] p:gap-x-[24px]">
+    <li class="m:min-w-0 m:grow t:w-[220px] p:w-[270px]">
       <FormInput
         name="caseBuildSq"
         v-model="pingData.caseBuildSq"
@@ -28,7 +28,7 @@ const { pingData, pingUnitLabel } = storeToRefs(buyBasic)
           required: '請輸入登記坪數',
         }"
         :setClass="{
-          main: '--h-40 --px-12 --py-8 tm:w-[228px] p:w-[270px]',
+          main: '--h-40 --px-12 --py-8',
           element: 'grow',
           rearAssist: 'text-[14px] text-[--gray-999]',
         }"
@@ -37,7 +37,7 @@ const { pingData, pingUnitLabel } = storeToRefs(buyBasic)
         <template #rearAssist>{{ pingUnitLabel }}</template>
       </FormInput>
     </li>
-    <li class="flex h-[40px] items-center">
+    <li class="flex h-[40px] items-center m:shrink-0">
       <FormCheckBox
         name="isCaseBuildSqIncludeParking"
         v-model="apiData.isCaseBuildSqIncludeParking"

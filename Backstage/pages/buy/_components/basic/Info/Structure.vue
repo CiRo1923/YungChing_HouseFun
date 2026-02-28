@@ -23,7 +23,7 @@ const { options, apiData } = storeToRefs(buyProject)
       },
     }"
     :setClass="{
-      main: '--h-40 --px-12 --py-8 grow',
+      main: '--h-40 --px-12 --py-8',
     }"
   />
 </template>

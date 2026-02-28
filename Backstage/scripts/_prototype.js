@@ -55,7 +55,7 @@ export const recursive = (obj, key, exec, finish) => {
 }
 
 // 深度複製
-export const deepClone = (obj, callback) => {
+export const onDeepClone = (obj, callback) => {
   let object = null
 
   if (obj == null || typeof obj !== 'object') return obj
@@ -73,7 +73,7 @@ export const deepClone = (obj, callback) => {
   object = object || new obj.constructor()
 
   for (const name in obj) {
-    object[name] = typeof object[name] === 'undefined' ? deepClone(obj[name]) : object[name]
+    object[name] = typeof object[name] === 'undefined' ? onDeepClone(obj[name]) : object[name]
   }
 
   if (callback) {
@@ -84,7 +84,7 @@ export const deepClone = (obj, callback) => {
 }
 
 // 深度合併
-export const deepMerge = (target, ...sources) => {
+export const onDeepMerge = (target, ...sources) => {
   if (!sources.length) return target
   const source = sources.shift()
   const isObject = (item) => {
@@ -103,28 +103,28 @@ export const deepMerge = (target, ...sources) => {
         // console.log('------------------')
 
         if (!target[key]) Object.assign(target, { [key]: {} })
-        // Object.assign(target, { [key]: source[key].map((item, index) => deepMerge(target[key][index] || item, item)) });
+        // Object.assign(target, { [key]: source[key].map((item, index) => onDeepMerge(target[key][index] || item, item)) });
 
-        deepMerge(target[key], source[key])
+        onDeepMerge(target[key], source[key])
       } else {
         if (isShallow(source[key])) {
           Object.assign(target, { [key]: source[key] })
         } else {
           if (!target[key]) Object.assign(target, { [key]: [] })
           Object.assign(target, {
-            [key]: source[key].map((item, index) => deepMerge(target[key][index] || item, item)),
+            [key]: source[key].map((item, index) => onDeepMerge(target[key][index] || item, item)),
           })
         }
       }
     }
   }
 
-  return deepMerge(target, ...sources)
+  return onDeepMerge(target, ...sources)
 }
 
 // 清空物件資料
 export const emptyData = (obj) => {
-  return deepClone(obj, (data) => {
+  return onDeepClone(obj, (data) => {
     for (const key in obj) {
       if (data[key]) {
         if (typeof data[key] === 'string') {
@@ -1189,6 +1189,14 @@ export const countdown = {
       data,
     }
   },
+}
+
+// 取得 YouTube 縮圖
+export const onGetYouTubeID = (url) => {
+  const regex =
+    /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts|live)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i
+  const match = url.match(regex)
+  return match ? match[1] : null
 }
 
 /**

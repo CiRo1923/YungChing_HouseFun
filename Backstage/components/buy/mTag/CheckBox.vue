@@ -1,7 +1,7 @@
 <script setup>
 import SvgIcon from '@components/common/SvgIcon.vue'
 
-import { deepMerge } from '@js/_prototype.js'
+import { onDeepMerge } from '@js/_prototype.js'
 
 const emits = defineEmits(['update:modelValue', 'change'])
 const props = defineProps({
@@ -62,7 +62,7 @@ const model = computed({
 })
 
 const config = computed(() => {
-  return deepMerge(
+  return onDeepMerge(
     {
       label: null,
       value: null,

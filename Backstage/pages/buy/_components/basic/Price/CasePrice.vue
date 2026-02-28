@@ -19,7 +19,7 @@ const onIsCaseAddtionChange = () => {
 
 <template>
   <ul class="flex flex-wrap tm:gap-x-[8px] p:gap-x-[24px]">
-    <li>
+    <li class="tm:w-[228px] p:w-[270px]">
       <FormInput
         name="casePrice"
         v-model="apiData.casePrice"
@@ -33,7 +33,7 @@ const onIsCaseAddtionChange = () => {
           required: '請輸入總價',
         }"
         :setClass="{
-          main: '--h-40 --px-12 --py-8 tm:w-[228px] p:w-[270px]',
+          main: '--h-40 --px-12 --py-8',
           element: 'grow',
           rearAssist: 'text-[14px] text-[--gray-999]',
         }"

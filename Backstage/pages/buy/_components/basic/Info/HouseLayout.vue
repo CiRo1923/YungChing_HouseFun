@@ -7,6 +7,37 @@ import { useBuyProjectStore } from '@stores/buy/project.js'
 const buyProject = useBuyProjectStore()
 const { apiData } = storeToRefs(buyProject)
 
+const items = shallowReadonly([
+  {
+    id: 'caseRoom',
+    label: '房',
+    rules: {
+      required: '請輸入房數',
+    },
+  },
+  {
+    id: 'caseLivingRoom',
+    label: '廳',
+    rules: {
+      required: '請輸入廳數',
+    },
+  },
+  {
+    id: 'caseBathroom',
+    label: '衛',
+    rules: {
+      required: '請輸入衛浴數',
+    },
+  },
+  {
+    id: 'caseBalcony',
+    label: '陽台',
+    rules: {
+      required: '請輸入陽台數',
+    },
+  },
+])
+
 const onIsCaseAddtionChange = () => {
   if (!apiData.value.isCaseAddtion) {
     apiData.value.caseAddRoom = ''
@@ -21,84 +52,26 @@ const onIsCaseAddtionChange = () => {
   <ul class="flex flex-wrap tm:gap-x-[8px] p:gap-x-[24px]">
     <li>
       <ul class="flex flex-wrap gap-x-[8px] gap-y-[12px]">
-        <li>
+        <li
+          class="tm:w-[151px] p:w-[100px]"
+          v-for="(item, index) in items"
+          :key="`${item.id}_${index}`"
+        >
           <FormInput
-            name="caseRoom"
-            v-model="apiData.caseRoom"
+            :name="item.id"
+            v-model="apiData[item.id]"
             :config="{
               isExistClose: false,
               maxlength: 2,
             }"
-            :rules="{
-              required: '請輸入房數',
-            }"
+            :rules="item.rules"
             :setClass="{
-              main: '--h-40 --px-12 --py-8 tm:w-[151px] p:w-[100px]',
+              main: '--h-40 --px-12 --py-8',
               element: 'grow',
               rearAssist: 'text-[14px] text-[--gray-999]',
             }"
           >
-            <template #rearAssist>房</template>
-          </FormInput>
-        </li>
-        <li>
-          <FormInput
-            name="caseLivingRoom"
-            v-model="apiData.caseLivingRoom"
-            :config="{
-              isExistClose: false,
-              maxlength: 2,
-            }"
-            :rules="{
-              required: '請輸入廳數',
-            }"
-            :setClass="{
-              main: '--h-40 --px-12 --py-8 tm:w-[151px] p:w-[100px]',
-              element: 'grow',
-              rearAssist: 'text-[14px] text-[--gray-999]',
-            }"
-          >
-            <template #rearAssist>廳</template>
-          </FormInput>
-        </li>
-        <li>
-          <FormInput
-            name="caseBathroom"
-            v-model="apiData.caseBathroom"
-            :config="{
-              isExistClose: false,
-              maxlength: 2,
-            }"
-            :rules="{
-              required: '請輸入衛浴數',
-            }"
-            :setClass="{
-              main: '--h-40 --px-12 --py-8 tm:w-[151px] p:w-[100px]',
-              element: 'grow',
-              rearAssist: 'text-[14px] text-[--gray-999]',
-            }"
-          >
-            <template #rearAssist>衛</template>
-          </FormInput>
-        </li>
-        <li>
-          <FormInput
-            name="caseBalcony"
-            v-model="apiData.caseBalcony"
-            :config="{
-              isExistClose: false,
-              maxlength: 2,
-            }"
-            :rules="{
-              required: '請輸入衛浴數',
-            }"
-            :setClass="{
-              main: '--h-40 --px-12 --py-8 tm:w-[151px] p:w-[110px]',
-              element: 'grow',
-              rearAssist: 'text-[14px] text-[--gray-999]',
-            }"
-          >
-            <template #rearAssist>陽台</template>
+            <template #rearAssist>{{ item.label }}</template>
           </FormInput>
         </li>
       </ul>

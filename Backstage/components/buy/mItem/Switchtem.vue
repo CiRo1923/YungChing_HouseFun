@@ -1,7 +1,7 @@
 <script setup>
 import Item from '@components/buy/mItem/Main.vue'
 
-import { onDevice, deepMerge } from '@js/_prototype.js'
+import { onDevice, onDeepMerge } from '@js/_prototype.js'
 
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 
@@ -89,7 +89,7 @@ const config = computed(() => {
     return result
   }
 
-  return deepMerge(defaultConfig, propsConfig(), {
+  return onDeepMerge(defaultConfig, propsConfig(), {
     hasMask: mask.value,
   })
 })

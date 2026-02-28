@@ -19,7 +19,7 @@ const publicRatio = ref(null)
   <ul class="m:space-y-[12px] t:gap-x-[8px] pt:flex pt:flex-wrap p:gap-x-[24px]">
     <li>
       <ul class="m:space-y-[12px] pt:flex pt:gap-x-[8px]">
-        <li>
+        <li class="t:w-[228px] p:w-[270px]">
           <FormInput
             name="caseAmenitieSq"
             v-model="pingData.caseAmenitieSq"
@@ -29,7 +29,7 @@ const publicRatio = ref(null)
               checkNotIsZero: true,
             }"
             :setClass="{
-              main: '--h-40 --px-12 --py-8 t:w-[228px] p:w-[270px]',
+              main: '--h-40 --px-12 --py-8',
               element: 'grow',
               rearAssist: 'text-[14px] text-[--gray-999]',
             }"
@@ -38,7 +38,7 @@ const publicRatio = ref(null)
             <template #rearAssist>{{ pingUnitLabel }}</template>
           </FormInput>
         </li>
-        <li>
+        <li class="t:w-[228px] p:w-[270px]">
           <FormInput
             name="publicRatio"
             v-model="publicRatio"
@@ -50,7 +50,7 @@ const publicRatio = ref(null)
               isDisabled: isAutoCalc,
             }"
             :setClass="{
-              main: '--h-40 --px-12 --py-8 t:w-[228px] p:w-[270px]',
+              main: '--h-40 --px-12 --py-8',
               element: 'grow',
               rearAssist: 'text-[14px] text-[--gray-999]',
             }"

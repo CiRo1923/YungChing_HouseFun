@@ -11,6 +11,7 @@ import CardFilterPing from '@pages/buy/_components/basic/CardFilterPing.vue'
 import CardFilterManage from '@pages/buy/_components/basic/CardFilterManage.vue'
 import CardFilterFeature from '@pages/buy/_components/basic/CardFilterFeature.vue'
 import CardFilterMedia from '@pages/buy/_components/basic/CardFilterMedia.vue'
+import CardFilterParking from '@pages/buy/_components/basic/CardFilterParking.vue'
 import CardFilterPosterInfo from '@pages/buy/_components/basic/CardFilterPosterInfo.vue'
 import CardFilterTerms from '@pages/buy/_components/basic/CardFilterTerms.vue'
 
@@ -53,15 +54,20 @@ const datas = shallowReadonly([
     component: CardFilterManage,
   },
   {
+    id: 'cardFilterParking',
+    label: '車位資訊',
+    component: CardFilterParking,
+  },
+  {
     id: 'cardFilterFeature',
     label: '特色描述',
     component: CardFilterFeature,
   },
-  // {
-  //   id: 'cardFilterMedia',
-  //   label: '影音設定',
-  //   component: CardFilterMedia,
-  // },
+  {
+    id: 'cardFilterMedia',
+    label: '影音設定',
+    component: CardFilterMedia,
+  },
   {
     id: 'cardFilterPosterInfo',
     label: '聯絡資訊',
@@ -98,6 +104,12 @@ await awaitAllPromise([
   useAsyncData('manageDuty-options', () => project.onApiGETRealEstateManageDutySelectOpstions()),
   useAsyncData('managePay-options', () =>
     project.onApiGETRealEstateManagePayPeriodSelectOpstions()
+  ),
+  useAsyncData('parkingMode-options', () => project.onApiGETRealEstateParkingModeSelectOptions()),
+  useAsyncData('parkingType-options', () => project.onApiGETRealEstateParkingTypeSelectOpstions()),
+  useAsyncData('parkingReg-options', () => project.onApiGETRealEstateParkingRegSelectOpstions()),
+  useAsyncData('parkingPayPeriod-options', () =>
+    project.onApiGETRealEstateParkingPayPeriodSelectOpstions()
   ),
   useAsyncData('videoType-options', () => project.onApiGETRealEstateVideoTypeSelectOpstions()),
   useAsyncData('feature-options', () => project.onApiGETRealEstateFeatureCheckOptions()),

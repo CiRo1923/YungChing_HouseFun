@@ -21,9 +21,6 @@ const { options, apiData } = storeToRefs(buyProject)
     :rules="{
       required: '請選擇現況',
     }"
-    :setClass="{
-      main: 'grow',
-    }"
   />
 </template>
 

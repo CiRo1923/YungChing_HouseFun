@@ -15,6 +15,10 @@ import {
   apiGETRealEstateManageTypeSelectOpstions,
   apiGETRealEstateManageDutySelectOpstions,
   apiGETRealEstateManagePayPeriodSelectOpstions,
+  apiGETRealEstateParkingModeSelectOptions,
+  apiGETRealEstateParkingTypeSelectOpstions,
+  apiGETRealEstateParkingRegSelectOpstions,
+  apiGETRealEstateParkingPayPeriodSelectOpstions,
   apiGETRealEstateVideoTypeSelectOpstions,
   apiGETRealEstateFeatureCheckOptions,
 } from '@js/buy/_api/index.js'
@@ -180,6 +184,42 @@ const useStores = () => {
 
       if (status === 200) {
         projectOptions.value.managePay = data || []
+      }
+
+      return { config, status, data }
+    },
+    onApiGETRealEstateParkingModeSelectOptions: async () => {
+      const { config, status, data } = await apiGETRealEstateParkingModeSelectOptions()
+
+      if (status === 200) {
+        projectOptions.value.parkingMode = data || []
+      }
+
+      return { config, status, data }
+    },
+    onApiGETRealEstateParkingTypeSelectOpstions: async () => {
+      const { config, status, data } = await apiGETRealEstateParkingTypeSelectOpstions()
+
+      if (status === 200) {
+        projectOptions.value.parkingType = data || []
+      }
+
+      return { config, status, data }
+    },
+    onApiGETRealEstateParkingRegSelectOpstions: async () => {
+      const { config, status, data } = await apiGETRealEstateParkingRegSelectOpstions()
+
+      if (status === 200) {
+        projectOptions.value.parkingReg = data || []
+      }
+
+      return { config, status, data }
+    },
+    onApiGETRealEstateParkingPayPeriodSelectOpstions: async () => {
+      const { config, status, data } = await apiGETRealEstateParkingPayPeriodSelectOpstions()
+
+      if (status === 200) {
+        projectOptions.value.parkingPayPeriod = data || []
       }
 
       return { config, status, data }

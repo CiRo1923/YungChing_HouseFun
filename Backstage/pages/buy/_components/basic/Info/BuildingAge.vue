@@ -56,7 +56,7 @@ const onReset = () => {
       @change="onBuildingAgeChange"
     />
     <ul class="flex flex-wrap tm:gap-x-[8px] p:gap-x-[24px]">
-      <li v-if="isOptionsModelAge">
+      <li class="tm:w-[130px] p:w-[100px]" v-if="isOptionsModelAge">
         <FormInput
           name="caseAge"
           v-model="apiData.caseAge"
@@ -71,7 +71,7 @@ const onReset = () => {
             },
           }"
           :setClass="{
-            main: '--h-40 --px-12 --py-8 tm:w-[130px] p:w-[100px]',
+            main: '--h-40 --px-12 --py-8',
             element: 'grow',
             rearAssist: 'text-[14px] text-[--gray-999]',
           }"
@@ -81,8 +81,8 @@ const onReset = () => {
         </FormInput>
       </li>
       <li v-else>
-        <ul class="flex gap-x-[8px]">
-          <li>
+        <ul class="gap-x-[8px] m:grid m:grid-cols-2 pt:flex">
+          <li class="pt:w-[120px]">
             <FormInput
               name="caseCompletedYear"
               v-model="apiData.caseCompletedYear"
@@ -97,7 +97,7 @@ const onReset = () => {
                 },
               }"
               :setClass="{
-                main: '--h-40 --px-12 --py-8 tm:w-[152px] p:w-[120px]',
+                main: '--h-40 --px-12 --py-8',
                 element: 'grow',
                 frontAssist: 'text-[14px] text-[--gray-999]',
                 rearAssist: 'text-[14px] text-[--gray-999]',
@@ -108,7 +108,7 @@ const onReset = () => {
               <template #rearAssist>年</template>
             </FormInput>
           </li>
-          <li>
+          <li class="pt:w-[100px]">
             <FormInput
               name="caseCompletedMonth"
               v-model="apiData.caseCompletedMonth"
@@ -123,7 +123,7 @@ const onReset = () => {
                 },
               }"
               :setClass="{
-                main: '--h-40 --px-12 --py-8 tm:w-[151px] p:w-[100px]',
+                main: '--h-40 --px-12 --py-8',
                 element: 'grow',
                 rearAssist: 'text-[14px] text-[--gray-999]',
               }"

@@ -18,6 +18,10 @@ export const useBuyProjectStore = defineStore('buyProject', () => {
     manageType: null,
     manageDuty: null,
     managePay: null,
+    parkingMode: null,
+    parkingType: null,
+    parkingReg: null,
+    parkingPayPeriod: null,
     videoType: null,
     feature: null,
   })
@@ -105,6 +109,8 @@ export const useBuyProjectStore = defineStore('buyProject', () => {
     caseManageDutyToken: '',
     caseManageFeePeriodToken: '',
     caseManageFee: '',
+    isCaseParking: true,
+    parkingInfos: [],
     caseDescription: '',
     caseFeatureToken: '',
     listCasePicUrl: [],
@@ -120,10 +126,21 @@ export const useBuyProjectStore = defineStore('buyProject', () => {
       agentLine: '',
     },
   })
+  const parkingInfo = readonly({
+    parkingID: '',
+    caseParkingModeToken: '',
+    caseParkingCount: '',
+    caseParkingTypeToken: '',
+    caseParkingRegToken: '',
+    caseParkingFeePayTypeToken: '',
+    caseParkingFee: '',
+    isCaseParkingFeeInclude: true,
+  })
 
   return {
     NAME,
     options,
     apiData,
+    parkingInfo,
   }
 })

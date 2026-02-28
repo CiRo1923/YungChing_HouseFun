@@ -5,80 +5,49 @@ import { useBuyProjectStore } from '@stores/buy/project.js'
 
 const buyProject = useBuyProjectStore()
 const { apiData } = storeToRefs(buyProject)
+
+const items = shallowReadonly([
+  {
+    id: 'caseAddRoom',
+    label: '房',
+  },
+  {
+    id: 'caseAddLivingRoom',
+    label: '廳',
+  },
+  {
+    id: 'caseAddBathroom',
+    label: '衛',
+  },
+  {
+    id: 'caseAddBalcony',
+    label: '陽台',
+  },
+])
 </script>
 
 <template>
   <ul class="flex flex-wrap gap-x-[8px] gap-y-[12px]">
-    <li>
+    <li
+      class="tm:w-[151px] p:w-[100px]"
+      v-for="(item, index) in items"
+      :key="`${item.id}_${index}`"
+    >
       <FormInput
-        name="caseAddRoom"
-        v-model="apiData.caseAddRoom"
+        :name="item.id"
+        v-model="apiData[item.id]"
         :config="{
           isExistClose: false,
           maxlength: 2,
           isDisabled: !apiData.isCaseAddtion,
         }"
         :setClass="{
-          main: '--h-40 --px-12 --py-8 tm:w-[151px] p:w-[100px]',
+          main: '--h-40 --px-12 --py-8',
           element: 'grow',
           rearAssist: 'text-[14px] text-[--gray-999]',
         }"
       >
-        <template #rearAssist>房</template>
-      </FormInput>
-    </li>
-    <li>
-      <FormInput
-        name="caseAddLivingRoom"
-        v-model="apiData.caseAddLivingRoom"
-        :config="{
-          isExistClose: false,
-          maxlength: 2,
-          isDisabled: !apiData.isCaseAddtion,
-        }"
-        :setClass="{
-          main: '--h-40 --px-12 --py-8 tm:w-[151px] p:w-[100px]',
-          element: 'grow',
-          rearAssist: 'text-[14px] text-[--gray-999]',
-        }"
-      >
-        <template #rearAssist>廳</template>
-      </FormInput>
-    </li>
-    <li>
-      <FormInput
-        name="caseAddBathroom"
-        v-model="apiData.caseAddBathroom"
-        :config="{
-          isExistClose: false,
-          maxlength: 2,
-          isDisabled: !apiData.isCaseAddtion,
-        }"
-        :setClass="{
-          main: '--h-40 --px-12 --py-8 tm:w-[151px] p:w-[100px]',
-          element: 'grow',
-          rearAssist: 'text-[14px] text-[--gray-999]',
-        }"
-      >
-        <template #rearAssist>衛</template>
-      </FormInput>
-    </li>
-    <li>
-      <FormInput
-        name="caseAddBalcony"
-        v-model="apiData.caseAddBalcony"
-        :config="{
-          isExistClose: false,
-          maxlength: 2,
-          isDisabled: !apiData.isCaseAddtion,
-        }"
-        :setClass="{
-          main: '--h-40 --px-12 --py-8 tm:w-[151px] p:w-[110px]',
-          element: 'grow',
-          rearAssist: 'text-[14px] text-[--gray-999]',
-        }"
-      >
-        <template #rearAssist>陽台</template>
+        <template #rearAssist>{{ item.label }}</template>
       </FormInput>
     </li>
   </ul>

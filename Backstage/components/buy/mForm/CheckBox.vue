@@ -2,7 +2,7 @@
 import SvgIcon from '@components/common/SvgIcon.vue'
 import ErrorMessageElem from '@components/buy/mErrorMessageElem.vue'
 
-import { deepMerge } from '@js/_prototype.js'
+import { onDeepMerge } from '@js/_prototype.js'
 
 import { Field, ErrorMessage } from 'vee-validate'
 
@@ -77,7 +77,7 @@ const model = computed({
 })
 
 const config = computed(() => {
-  return deepMerge(
+  return onDeepMerge(
     {
       mode: 'group', // 'boolean' | 'group' | 'value'
       label: null,
