@@ -19,7 +19,7 @@ const onIsCaseAddtionChange = () => {
 <template>
   <FormInput
     name="caseParkingPrice"
-    v-model="apiData.caseParkingPrice"
+    v-model.number="apiData.caseParkingPrice"
     :config="{
       inputMode: 'numeric',
       inputChinese: false,

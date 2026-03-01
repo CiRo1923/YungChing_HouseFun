@@ -106,7 +106,6 @@ const useStores = () => {
 
       if (status === 200) {
         projectOptions.value.caseZoing = data || []
-        apiData.value.caseZoingToken = data[0].code
       }
 
       return { config, status, data }
@@ -134,7 +133,6 @@ const useStores = () => {
 
       if (status === 200) {
         projectOptions.value.ageIdentify = data || []
-        apiData.value.caseAgeIdentifyToken = data[0].value
       }
 
       return { config, status, data }
@@ -144,8 +142,6 @@ const useStores = () => {
 
       if (status === 200) {
         projectOptions.value.floor = data || []
-        apiData.value.floorFromToken = data[0].value
-        apiData.value.floorToToken = data[0].value
       }
 
       return { config, status, data }
@@ -245,7 +241,6 @@ const useStores = () => {
 
       if (status === 200) {
         projectOptions.value.videoDisplay = data || []
-        apiData.value.caseVideoDisplayToken = data[0].value
       }
 
       return { config, status, data }
@@ -273,7 +268,6 @@ const useStores = () => {
 
       if (status === 200) {
         projectOptions.value.posterDataSource = data || []
-        apiData.value.posterDataSourceToken = data[0].value
       }
 
       return { config, status, data }
@@ -290,9 +284,9 @@ const useStores = () => {
     onPingVaild() {
       const { isCaseBuildSqIncludeParking } = apiData.value
       const { caseBuildSq, caseParkingSq, caseMainSq } = pingData.value
-      const caseBuildSqNumber = caseBuildSq ? Number(caseBuildSq) : 0
-      const caseParkingSqNumber = caseParkingSq ? Number(caseParkingSq) : 0
-      const caseMainSqNumber = caseMainSq ? Number(caseMainSq) : 0
+      const caseBuildSqNumber = caseBuildSq || 0
+      const caseParkingSqNumber = caseParkingSq || 0
+      const caseMainSqNumber = caseMainSq || 0
       const build = isCaseBuildSqIncludeParking
         ? caseBuildSqNumber - caseParkingSqNumber
         : caseBuildSqNumber
@@ -332,13 +326,12 @@ const useStores = () => {
       const isSqMeters = unit.id === 'sqMeters'
       const pinConf = basicStores.options.unit.find((u) => u.id === 'pin')
       const mConf = basicStores.options.unit.find((u) => u.id === 'sqMeters')
-      const onConvert = (value, conf) =>
-        String(Number(toFixed(Number(value) * conf.convert, conf.toFixed)))
+      const onConvert = (value, conf) => Number(toFixed(Number(value) * conf.convert, conf.toFixed))
 
       if (!pinConf || !mConf) return
 
-      apiData.value[pinKey] = isPin ? val : onConvert(val, pinConf)
-      apiData.value[mKey] = isSqMeters ? val : onConvert(val, mConf)
+      apiData.value[pinKey] = isPin ? Number(val) : onConvert(val, pinConf)
+      apiData.value[mKey] = isSqMeters ? Number(val) : onConvert(val, mConf)
 
       console.log(apiData.value[pinKey])
       console.log(apiData.value[mKey])

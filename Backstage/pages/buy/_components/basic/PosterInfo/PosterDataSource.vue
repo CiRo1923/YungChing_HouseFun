@@ -10,7 +10,7 @@ const { apiData, options } = storeToRefs(buyProject)
 <template>
   <FormRadiosOval
     name="posterDataSourceToken"
-    v-model="apiData.posterDataSourceToken"
+    v-model.number="apiData.posterDataSourceToken"
     :options="options.posterDataSource"
     :config="{
       schema: {

@@ -25,37 +25,73 @@ const props = defineProps({
     type: [String, Number],
     default: undefined,
   },
+  cityModifiers: {
+    type: Object,
+    default: () => ({}),
+  },
   area: {
     type: [String, Number],
     default: undefined,
+  },
+  areaModifiers: {
+    type: Object,
+    default: () => ({}),
   },
   road: {
     type: [String, Number],
     default: undefined,
   },
+  roadModifiers: {
+    type: Object,
+    default: () => ({}),
+  },
   lane: {
     type: [String, Number],
     default: undefined,
+  },
+  laneModifiers: {
+    type: Object,
+    default: () => ({}),
   },
   alley: {
     type: [String, Number],
     default: undefined,
   },
+  alleyModifiers: {
+    type: Object,
+    default: () => ({}),
+  },
   number: {
     type: [String, Number],
     default: undefined,
+  },
+  numberModifiers: {
+    type: Object,
+    default: () => ({}),
   },
   ofNumber: {
     type: [String, Number],
     default: undefined,
   },
+  ofNumberModifiers: {
+    type: Object,
+    default: () => ({}),
+  },
   floor: {
     type: [String, Number],
     default: undefined,
   },
+  floorModifiers: {
+    type: Object,
+    default: () => ({}),
+  },
   ofFloor: {
     type: [String, Number],
     default: undefined,
+  },
+  ofFloorModifiers: {
+    type: Object,
+    default: () => ({}),
   },
   config: {
     type: Object,
@@ -67,75 +103,111 @@ const props = defineProps({
   },
 })
 const modelCity = computed({
-  get() {
-    return props.city
-  },
-  set(value) {
-    emits('update:city', value)
+  get: () => props.city,
+  set: (value) => {
+    let result = value
+
+    if (props.cityModifiers?.number) {
+      result = value === '' ? null : Number(value)
+    }
+
+    emits('update:city', result)
   },
 })
 const modelArea = computed({
-  get() {
-    return props.area
-  },
-  set(value) {
-    emits('update:area', value)
+  get: () => props.area,
+  set: (value) => {
+    let result = value
+
+    if (props.areaModifiers?.number) {
+      result = value === '' ? null : Number(value)
+    }
+
+    emits('update:area', result)
   },
 })
 const modelRoad = computed({
-  get() {
-    return props.road
-  },
-  set(value) {
-    emits('update:road', value)
+  get: () => props.road,
+  set: (value) => {
+    let result = value
+
+    if (props.roadModifiers?.number) {
+      result = value === '' ? null : Number(value)
+    }
+
+    emits('update:road', result)
   },
 })
 const modelLane = computed({
-  get() {
-    return props.lane
-  },
+  get: () => props.lane,
   set(value) {
-    emits('update:lane', value)
+    let result = value
+
+    if (props.laneModifiers?.number) {
+      result = value === '' ? null : Number(value)
+    }
+
+    emits('update:lane', result)
   },
 })
 const modelAlley = computed({
-  get() {
-    return props.alley
-  },
-  set(value) {
-    emits('update:alley', value)
+  get: () => props.alley,
+  set: (value) => {
+    let result = value
+
+    if (props.alleyModifiers?.number) {
+      result = value === '' ? null : Number(value)
+    }
+
+    emits('update:alley', result)
   },
 })
 const modelNumber = computed({
-  get() {
-    return props.number
-  },
-  set(value) {
-    emits('update:number', value)
+  get: () => props.number,
+  set: (value) => {
+    let result = value
+
+    if (props.numberModifiers?.number) {
+      result = value === '' ? null : Number(value)
+    }
+
+    emits('update:number', result)
   },
 })
 const modelOfNumber = computed({
-  get() {
-    return props.ofNumber
-  },
-  set(value) {
-    emits('update:ofNumber', value)
+  get: () => props.ofNumber,
+  set: (value) => {
+    let result = value
+
+    if (props.ofNumberModifiers?.number) {
+      result = value === '' ? null : Number(value)
+    }
+
+    emits('update:ofNumber', result)
   },
 })
 const modelFloor = computed({
-  get() {
-    return props.floor
-  },
-  set(value) {
-    emits('update:floor', value)
+  get: () => props.floor,
+  set: (value) => {
+    let result = value
+
+    if (props.floorModifiers?.number) {
+      result = value === '' ? null : Number(value)
+    }
+
+    emits('update:floor', result)
   },
 })
 const modelOfFloor = computed({
-  get() {
-    return props.ofFloor
-  },
+  get: () => props.ofFloor,
   set(value) {
-    emits('update:ofFloor', value)
+    let result = value
+
+    if (props.ofFloorModifiers?.number) {
+      result = value === '' ? null : Number(value)
+    }
+
+    emits('update:ofFloor', result)
   },
 })
 
@@ -163,17 +235,6 @@ const config = computed(() => {
       },
     },
     ...props.config,
-  }
-})
-
-const schema = computed(() => {
-  const { schema } = config.value
-  const hasCity = !!schema.city
-  const hasArea = !!schema.area
-
-  return {
-    city: hasCity ? schema.city : schema,
-    area: hasArea ? schema.area : schema,
   }
 })
 

@@ -102,11 +102,12 @@ onSelected()
         v-for="(item, index) in props.options"
         :key="`${item[config.schema.label]}_${index}`"
       >
+        <!-- '--checked': item[config.schema.value] == selected 用 == 會有形態別問題 '1' (string) !== 1 (int) -->
         <label
           class="m-form-element relative flex h-full w-full cursor-pointer items-center justify-center text-[--gray-666] transition-colors duration-300 tm:gap-x-[3px] tm:px-[10px] p:gap-x-[5px] p:px-[12px]"
           :class="[
             {
-              '--checked': item[config.schema.value] === selected,
+              '--checked': item[config.schema.value] == selected,
             },
             setClass.element,
           ]"
@@ -120,10 +121,11 @@ onSelected()
             :class="setClass.type"
             @change="onChange(item)"
           />
+          <!-- v-if="item[config.schema.value] == selected" 用 == 會有形態別問題 '1' (string) !== 1 (int) -->
           <SvgIcon
             icon="icon_check_solid"
             class="m-form-icon h-[16px] w-[16px] text-[--orange-e646]"
-            v-if="item[config.schema.value] === selected"
+            v-if="item[config.schema.value] == selected"
           />
           <em class="m-form-label text-[16px]">{{ item[config.schema.label] }}</em>
         </label>

@@ -22,7 +22,7 @@ const onIsCaseAddtionChange = () => {
     <li class="tm:w-[228px] p:w-[270px]">
       <FormInput
         name="casePrice"
-        v-model="apiData.casePrice"
+        v-model.number="apiData.casePrice"
         :config="{
           inputMode: 'numeric',
           inputChinese: false,

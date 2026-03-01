@@ -13,7 +13,7 @@ const { options, apiData } = storeToRefs(buyProject)
     <li class="t:w-[220px] p:w-[270px]">
       <FormSelect
         name="caseManageFeePeriodToken"
-        v-model="apiData.caseManageFeePeriodToken"
+        v-model.number="apiData.caseManageFeePeriodToken"
         :options="options.managePay"
         :config="{
           placeholder: {
@@ -33,7 +33,7 @@ const { options, apiData } = storeToRefs(buyProject)
     <li class="t:w-[220px] p:w-[270px]">
       <FormInput
         name="caseManageFee"
-        v-model="apiData.caseManageFee"
+        v-model.number="apiData.caseManageFee"
         :config="{
           isDisabled: !apiData.caseManageFeePeriodToken,
         }"

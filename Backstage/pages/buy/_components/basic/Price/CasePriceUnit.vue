@@ -30,7 +30,7 @@ const onIsCasePriceUnitAuto = () => {
         ? Number(caseBuildSqPin) - Number(caseParkingSqPin)
         : Number(caseBuildSqPin)
 
-    apiData.value.casePriceUnit = toFixed(price / buildSq, 2)
+    apiData.value.casePriceUnit = Number(toFixed(price / buildSq, 2))
   }
 }
 
@@ -54,7 +54,7 @@ watch(
     <li>
       <FormInput
         name="casePriceUnit"
-        v-model="apiData.casePriceUnit"
+        v-model.number="apiData.casePriceUnit"
         :config="{
           inputMode: 'numeric',
           inputChinese: false,

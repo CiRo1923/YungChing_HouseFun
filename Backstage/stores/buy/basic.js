@@ -20,19 +20,19 @@ export const useBuyBasicStore = defineStore('buyBasic', () => {
     ],
   })
   const pingData = ref({
-    caseBuildSq: '',
-    caseParkingSq: '',
-    caseMainSq: '',
-    caseAffiliatedSq: '',
-    caseBalconySq: '',
-    casePlatformSq: '',
-    caseTerraceSq: '',
-    caseStairwellSq: '',
-    caseMezzanineSq: '',
-    caseBasementSq: '',
-    caseOtherSq: '',
-    caseAmenitieSq: '',
-    caseLandSq: '',
+    caseBuildSq: null,
+    caseParkingSq: null,
+    caseMainSq: null,
+    caseAffiliatedSq: null,
+    caseBalconySq: null,
+    casePlatformSq: null,
+    caseTerraceSq: null,
+    caseStairwellSq: null,
+    caseMezzanineSq: null,
+    caseBasementSq: null,
+    caseOtherSq: null,
+    caseAmenitieSq: null,
+    caseLandSq: null,
   })
 
   return {

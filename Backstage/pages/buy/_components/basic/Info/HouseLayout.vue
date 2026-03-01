@@ -40,10 +40,10 @@ const items = shallowReadonly([
 
 const onIsCaseAddtionChange = () => {
   if (!apiData.value.isCaseAddtion) {
-    apiData.value.caseAddRoom = ''
-    apiData.value.caseAddLivingRoom = ''
-    apiData.value.caseAddBathroom = ''
-    apiData.value.caseAddBalcony = ''
+    apiData.value.caseAddRoom = null
+    apiData.value.caseAddLivingRoom = null
+    apiData.value.caseAddBathroom = null
+    apiData.value.caseAddBalcony = null
   }
 }
 </script>
@@ -59,7 +59,7 @@ const onIsCaseAddtionChange = () => {
         >
           <FormInput
             :name="item.id"
-            v-model="apiData[item.id]"
+            v-model.number="apiData[item.id]"
             :config="{
               inputMode: 'numeric',
               inputChinese: false,

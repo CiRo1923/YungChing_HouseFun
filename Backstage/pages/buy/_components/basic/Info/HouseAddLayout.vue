@@ -35,7 +35,7 @@ const items = shallowReadonly([
     >
       <FormInput
         :name="item.id"
-        v-model="apiData[item.id]"
+        v-model.number="apiData[item.id]"
         :config="{
           inputMode: 'numeric',
           inputChinese: false,

@@ -21,8 +21,8 @@ const radioOptions = readonly([
 ])
 
 const onIsSingleFloorChange = () => {
-  apiData.value.floorToToken = '1'
-  apiData.value.caseFloorTo = ''
+  apiData.value.floorToToken = 1
+  apiData.value.caseFloorTo = null
 }
 </script>
 
@@ -42,7 +42,7 @@ const onIsSingleFloorChange = () => {
       <li class="pt:flex pt:grow pt:gap-x-[8px]">
         <FormSelect
           name="floorFromToken"
-          v-model="apiData.floorFromToken"
+          v-model.number="apiData.floorFromToken"
           :options="options.floor"
           :config="{
             placeholder: '請選擇',
@@ -51,16 +51,13 @@ const onIsSingleFloorChange = () => {
               value: 'value',
             },
           }"
-          :rules="{
-            required: '請選擇出售樓層',
-          }"
           :setClass="{
             main: '--h-40 --px-12 --py-8 pt:shrink-0',
           }"
         />
         <FormInput
           name="caseFloorFrom"
-          v-model="apiData.caseFloorFrom"
+          v-model.number="apiData.caseFloorFrom"
           :config="{
             inputMode: 'numeric',
             inputChinese: false,
@@ -86,7 +83,7 @@ const onIsSingleFloorChange = () => {
       <li class="pt:flex pt:grow pt:gap-x-[8px]" v-if="!apiData.isSingleFloor">
         <FormSelect
           name="floorToToken"
-          v-model="apiData.floorToToken"
+          v-model.number="apiData.floorToToken"
           :options="options.floor"
           :config="{
             placeholder: '請選擇',
@@ -95,16 +92,13 @@ const onIsSingleFloorChange = () => {
               value: 'value',
             },
           }"
-          :rules="{
-            required: '請選擇出售樓層',
-          }"
           :setClass="{
             main: '--h-40 --px-12 --py-8 pt:shrink-0',
           }"
         />
         <FormInput
           name="caseFloorTo"
-          v-model="apiData.caseFloorTo"
+          v-model.number="apiData.caseFloorTo"
           :config="{
             inputMode: 'numeric',
             inputChinese: false,

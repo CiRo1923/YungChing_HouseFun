@@ -10,7 +10,7 @@ const { options, apiData } = storeToRefs(buyProject)
 <template>
   <FormRadiosOval
     name="casePurposeToken"
-    v-model="apiData.casePurposeToken"
+    v-model.number="apiData.casePurposeToken"
     :options="options.casePurpose"
     :config="{
       schema: {

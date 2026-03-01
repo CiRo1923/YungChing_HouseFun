@@ -112,7 +112,7 @@ const onCloseDropdown = () => {
 const onGetInputLabel = () => {
   const hasModel = model.value !== null && model.value !== ''
   const matchData = hasModel
-    ? props.options.find((item) => item[config.value.schema.value] === model.value)
+    ? props.options.find((item) => item[config.value.schema.value] == model.value)
     : null
 
   inputLabel.value = matchData ? matchData[config.value.schema.label] : ''

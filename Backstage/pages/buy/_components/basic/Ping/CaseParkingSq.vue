@@ -12,7 +12,7 @@ const { pingData } = storeToRefs(buyBasic)
 <template>
   <FormInput
     name="caseParkingSq"
-    v-model="pingData.caseParkingSq"
+    v-model.number="pingData.caseParkingSq"
     :config="{
       inputMode: 'numeric',
       inputChinese: false,

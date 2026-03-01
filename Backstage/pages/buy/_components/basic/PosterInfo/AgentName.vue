@@ -15,7 +15,7 @@ const { apiData } = storeToRefs(buyProject)
         name="agentName"
         v-model="apiData.posterInfo.agentName"
         :config="{
-          isDisabled: apiData.posterDataSourceToken === '1',
+          isDisabled: apiData.posterDataSourceToken === 1,
         }"
         :rules="{
           required: '請輸入姓名',

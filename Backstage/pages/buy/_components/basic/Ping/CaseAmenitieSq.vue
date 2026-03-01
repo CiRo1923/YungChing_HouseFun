@@ -20,7 +20,7 @@ const { pingData } = storeToRefs(buyBasic)
         <li class="t:w-[228px] p:w-[270px]">
           <FormInput
             name="caseAmenitieSq"
-            v-model="pingData.caseAmenitieSq"
+            v-model.number="pingData.caseAmenitieSq"
             :config="{
               inputMode: 'numeric',
               inputChinese: false,
@@ -39,7 +39,7 @@ const { pingData } = storeToRefs(buyBasic)
         <li class="t:w-[228px] p:w-[270px]">
           <FormInput
             name="caseAmenitieSqRqtio"
-            v-model="apiData.caseAmenitieSqRqtio"
+            v-model.number="apiData.caseAmenitieSqRqtio"
             :config="{
               placeholder: '公設比',
               inputMode: 'numeric',

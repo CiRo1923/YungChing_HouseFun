@@ -22,7 +22,7 @@ const radioOptions = readonly([
 
 const onIsCaseHasElevatorChnage = () => {
   if (!apiData.value.isCaseHasElevator) {
-    apiData.value.caseElevatorCount = ''
+    apiData.value.caseElevatorCount = null
   }
 }
 </script>
@@ -43,7 +43,7 @@ const onIsCaseHasElevatorChnage = () => {
       <li class="p:w-[100px]">
         <FormInput
           name="caseElevatorCount"
-          v-model="apiData.caseElevatorCount"
+          v-model.number="apiData.caseElevatorCount"
           :config="{
             inputMode: 'numeric',
             inputChinese: false,

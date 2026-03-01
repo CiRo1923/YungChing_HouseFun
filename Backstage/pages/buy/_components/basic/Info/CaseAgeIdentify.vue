@@ -9,14 +9,14 @@ import { useBuyProjectStore } from '@stores/buy/project.js'
 
 const buyProject = useBuyProjectStore()
 const { apiData, options } = storeToRefs(buyProject)
-const isModelAge = computed(() => apiData.value.caseAgeIdentifyToken === '1')
+const isModelAge = computed(() => apiData.value.caseAgeIdentifyToken === 1)
 
 const onCaseAgeIdentifyChange = () => {
   if (isModelAge.value) {
-    apiData.value.caseCompletedYear = ''
-    apiData.value.caseCompletedMonth = ''
+    apiData.value.caseCompletedYear = null
+    apiData.value.caseCompletedMonth = null
   } else {
-    apiData.value.caseAge = ''
+    apiData.value.caseAge = null
   }
 }
 
@@ -26,9 +26,9 @@ const onClearCheckbox = () => {
 }
 
 const onReset = () => {
-  apiData.value.caseAge = ''
-  apiData.value.caseCompletedYear = ''
-  apiData.value.caseCompletedMonth = ''
+  apiData.value.caseAge = null
+  apiData.value.caseCompletedYear = null
+  apiData.value.caseCompletedMonth = null
 }
 </script>
 
@@ -36,7 +36,7 @@ const onReset = () => {
   <RadiosOval>
     <FormRadiosOval
       name="caseAgeIdentifyToken"
-      v-model="apiData.caseAgeIdentifyToken"
+      v-model.number="apiData.caseAgeIdentifyToken"
       :options="options.ageIdentify"
       :config="{
         schema: {
@@ -54,7 +54,7 @@ const onReset = () => {
       <li class="tm:w-[130px] p:w-[100px]" v-if="isModelAge">
         <FormInput
           name="caseAge"
-          v-model="apiData.caseAge"
+          v-model.number="apiData.caseAge"
           :config="{
             inputMode: 'numeric',
             inputChinese: false,
@@ -84,7 +84,7 @@ const onReset = () => {
           <li class="pt:w-[120px]">
             <FormInput
               name="caseCompletedYear"
-              v-model="apiData.caseCompletedYear"
+              v-model.number="apiData.caseCompletedYear"
               :config="{
                 inputMode: 'numeric',
                 inputChinese: false,
@@ -114,7 +114,7 @@ const onReset = () => {
           <li class="pt:w-[100px]">
             <FormInput
               name="caseCompletedMonth"
-              v-model="apiData.caseCompletedMonth"
+              v-model.number="apiData.caseCompletedMonth"
               :config="{
                 inputMode: 'numeric',
                 inputChinese: false,

@@ -95,7 +95,7 @@ watch(
       <li class="m:min-w-0 m:grow t:w-[220px] pt:w-[270px]">
         <FormInput
           name="caseAffiliatedSqPin"
-          v-model="pingData.caseAffiliatedSq"
+          v-model.number="pingData.caseAffiliatedSq"
           :config="{
             inputMode: 'numeric',
             inputChinese: false,
@@ -141,7 +141,7 @@ watch(
         />
         <FormInput
           :name="item.id"
-          v-model="pingData[item.id]"
+          v-model.number="pingData[item.id]"
           :config="{
             inputMode: 'numeric',
             inputChinese: false,

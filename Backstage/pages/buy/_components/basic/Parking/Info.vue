@@ -219,7 +219,7 @@ onInit()
             >
               <FormSelect
                 :name="`${value.id}[${index}]`"
-                v-model="data[value.id]"
+                v-model.number="data[value.id]"
                 :options="value.options"
                 :config="value.config"
                 :rules="value.rules"
@@ -230,7 +230,7 @@ onInit()
               />
               <FormInput
                 :name="`${value.id}[${index}]`"
-                v-model="data[value.id]"
+                v-model.number="data[value.id]"
                 :config="value.config"
                 :rules="value.rules"
                 :setClass="{

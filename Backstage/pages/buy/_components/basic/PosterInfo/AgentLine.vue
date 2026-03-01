@@ -13,7 +13,7 @@ const { apiData } = storeToRefs(buyProject)
     v-model="apiData.posterInfo.agentLine"
     :config="{
       inputChinese: false,
-      isDisabled: apiData.posterDataSourceToken === '1',
+      isDisabled: apiData.posterDataSourceToken === 1,
     }"
     :rules="{
       custom: {

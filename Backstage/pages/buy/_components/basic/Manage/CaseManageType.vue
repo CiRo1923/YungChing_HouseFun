@@ -10,7 +10,7 @@ const { options, apiData } = storeToRefs(buyProject)
 <template>
   <FormSelect
     name="caseManageTypeToken"
-    v-model="apiData.caseManageTypeToken"
+    v-model.number="apiData.caseManageTypeToken"
     :options="options.manageType"
     :config="{
       placeholder: {

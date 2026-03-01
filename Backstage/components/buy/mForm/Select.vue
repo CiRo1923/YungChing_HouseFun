@@ -18,6 +18,10 @@ const props = defineProps({
     type: [String, Number, Boolean, Object],
     default: null,
   },
+  modelModifiers: {
+    type: Object,
+    default: () => ({}),
+  },
   options: {
     type: [Array, Object],
     default: null,
@@ -47,11 +51,15 @@ const isActive = ref(false)
 const selectedIndex = ref(-1)
 const label = ref(null)
 const model = computed({
-  get() {
-    return props.modelValue
-  },
-  set(value) {
-    emits('update:modelValue', value)
+  get: () => props.modelValue,
+  set: (value) => {
+    let result = value
+
+    if (props.cityModifiers?.number) {
+      result = value === '' ? null : Number(value)
+    }
+
+    emits('update:modelValue', result)
   },
 })
 const config = computed(() => {
@@ -124,9 +132,11 @@ const onSetSelectedIndex = () => {
 
   if (options.value) {
     if (startOption) {
-      index = options.value.findIndex((item) => item.value === startOption)
+      // item.value == startOption 用 == 會有形態別問題 '1' (string) !== 1 (int)
+      index = options.value.findIndex((item) => item.value == startOption)
     } else {
-      index = options.value.findIndex((item) => item[config.value.schema.value] === model.value)
+      // item[config.value.schema.value] == model.value 用 == 會有形態別問題 '1' (string) !== 1 (int)
+      index = options.value.findIndex((item) => item[config.value.schema.value] == model.value)
     }
 
     // index = index === -1 ? 0 : index
@@ -205,12 +215,24 @@ const onDropdownOpen = () => {
     // if (config.value.dropdownWidth !== 'auto') {
     //   $dropdown.style.maxWidth = `${config.value.dropdownWidth}px`
     // }
+
+    console.log(selectedIndex.value)
+
     if (model.value !== null && model.value !== '') {
-      selectedIndex.value = options.value.findIndex(
-        (item) => item[config.value.schema.value] === model.value
+      const idx = options.value.findIndex(
+        (item) => item?.[config.value.schema.value] == model.value
       )
 
-      const $selectedItem = dropdownItemRef.value[selectedIndex.value]
+      // 沒找到就不要往下做
+      if (idx < 0) return
+
+      // refs 還沒就緒也不要做
+      const items = dropdownItemRef.value
+      const $selectedItem = items?.[idx]
+      if (!$selectedItem) return
+
+      selectedIndex.value = idx
+
       const selectedItem = {
         rect: $selectedItem.getBoundingClientRect(),
       }
@@ -372,7 +394,7 @@ onUnmounted(() => {
             ref="selectRef"
           >
             <template v-if="label">
-              {{ options[selectedIndex][config.schema.label] }}
+              {{ label }}
             </template>
             <template v-else-if="!label && placeholder.value">
               {{ placeholder.value }}

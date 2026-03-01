@@ -17,7 +17,7 @@ const { apiData } = storeToRefs(buyProject)
         :config="{
           inputMode: 'tel',
           inputChinese: false,
-          isDisabled: apiData.posterDataSourceToken === '1',
+          isDisabled: apiData.posterDataSourceToken === 1,
         }"
         :rules="{
           required: '請輸入行動電話',

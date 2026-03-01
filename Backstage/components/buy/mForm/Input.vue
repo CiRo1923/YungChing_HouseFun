@@ -32,6 +32,10 @@ const props = defineProps({
     type: [String, Number],
     default: null,
   },
+  modelModifiers: {
+    type: Object,
+    default: () => ({}),
+  },
   value: {
     type: [String, Number],
     default: null,
@@ -228,7 +232,9 @@ const onEvent = (e, errorMessage) => {
       if (!integer && config.value.toFixed != null && config.value.toFixed !== '') {
         const d = Number(config.value.toFixed)
         if (Number.isFinite(d) && normalized !== '') {
-          normalized = String(Number(toFixed(Number(normalized), d)))
+          normalized = props.modelModifiers.number
+            ? Number(toFixed(Number(normalized), d))
+            : String(Number(toFixed(Number(normalized), d)))
         }
       }
 

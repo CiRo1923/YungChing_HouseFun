@@ -24,7 +24,7 @@ const videoPicture = computed(() => {
   <RadiosOval>
     <FormRadiosOval
       name="caseVideoDisplayToken"
-      v-model="apiData.caseVideoDisplayToken"
+      v-model.number="apiData.caseVideoDisplayToken"
       :options="options.videoDisplay"
       :config="{
         schema: {
@@ -39,7 +39,7 @@ const videoPicture = computed(() => {
     />
     <div
       class="flex items-center justify-center overflow-hidden rounded-[10px] bg-[--gray-f7] font-semibold leading-[1.5] text-[--gray-666] tm:h-[175px] tm:w-[311px] p:h-[163px] p:w-[290px] p:text-[30px]"
-      v-if="apiData.caseVideoDisplayToken === '1'"
+      v-if="apiData.caseVideoDisplayToken === 1"
     >
       <template v-if="!videoPicture">
         <b class="text-center tm:hidden">Video<br />290 x 163</b>

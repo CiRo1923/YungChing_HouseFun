@@ -59,7 +59,7 @@ await awaitAllPromise(useBuyBasicAllPromise())
     >
       <!-- <pre>{{ apiData }}</pre> -->
       <DataComponents />
-      <SubmitButtons @click:draft="onDraftSubmit" @click:save="onSaveSubmit(validate)" />
+      <SubmitButtons @click:draft="onDraftSubmit" @click:save="() => onSaveSubmit(validate)" />
     </Form>
   </Container>
 </template>

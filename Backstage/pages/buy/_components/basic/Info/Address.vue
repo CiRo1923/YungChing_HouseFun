@@ -42,15 +42,15 @@ const onAreaChange = async () => {
 <template>
   <Address
     name="info"
-    v-model:city="apiData.cityID"
-    v-model:area="apiData.districtID"
-    v-model:road="apiData.road"
-    v-model:lane="apiData.lane"
-    v-model:alley="apiData.alley"
-    v-model:number="apiData.addrNum"
-    v-model:ofNumber="apiData.addrNumOf"
-    v-model:floor="apiData.floor"
-    v-model:ofFloor="apiData.addrNumOfFloor"
+    v-model:city.number="apiData.cityID"
+    v-model:area.number="apiData.districtID"
+    v-model:road.number="apiData.road"
+    v-model:lane.number="apiData.lane"
+    v-model:alley.number="apiData.alley"
+    v-model:number.number="apiData.addrNum"
+    v-model:ofNumber.number="apiData.addrNumOf"
+    v-model:floor.number="apiData.floor"
+    v-model:ofFloor.number="apiData.addrNumOfFloor"
     :config="{
       city: {
         options: options.city,

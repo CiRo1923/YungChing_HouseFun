@@ -34,7 +34,8 @@ defineRule('required', (value, object, elem) => {
   if (el.disabled) return true
 
   const isArray = Array.isArray(object)
-  const hasValue = value?.length > 0
+  const result = value != null && typeof value === 'number' ? String(value) : value
+  const hasValue = result?.length > 0
   const valid = hasValue || (!isArray && !object.valid)
 
   return !valid ? replaceMessage(elem, object) : true
@@ -95,7 +96,8 @@ defineRule('custom', (value, object, elem) => {
   if (el.disabled) return true
 
   const isArray = Array.isArray(object)
-  const hasValue = value?.length > 0
+  const result = value != null && typeof value === 'number' ? String(value) : value
+  const hasValue = result?.length > 0
   const valid = hasValue && !isArray && object.valid
 
   return !valid ? replaceMessage(elem, object) : true

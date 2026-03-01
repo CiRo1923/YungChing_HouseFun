@@ -13,7 +13,7 @@ const { options, apiData } = storeToRefs(buyProject)
     <li class="pt:w-[160px] pt:shrink-0">
       <FormSelect
         name="caseVideoTypeToken"
-        v-model="apiData.caseVideoTypeToken"
+        v-model.number="apiData.caseVideoTypeToken"
         :options="options.videoType"
         :config="{
           placeholder: {
