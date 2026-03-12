@@ -1,4 +1,3 @@
 import { defineStore } from 'pinia'
 
-export const commonStore = defineStore('common', () => {
-})
+export const useCommonStore = defineStore('common', () => {})

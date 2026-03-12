@@ -1,0 +1,15 @@
+.l-wrap {
+  @apply flex grow flex-col;
+}
+
+.l-header {
+  @apply shrink-0;
+}
+
+.l-body {
+  @apply grow;
+}
+
+.l-footer {
+  @apply shrink-0;
+}

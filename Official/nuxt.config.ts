@@ -2,7 +2,6 @@
 
 import CONFIG from './config.js'
 import POSTCSSFUNCTIONS from './postcss.function.js'
-import env from './env.config.js'
 
 import { resolve } from 'path'
 
@@ -10,15 +9,24 @@ import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
 import { fileURLToPath } from 'url'
 
 export default defineNuxtConfig({
+  experimental: {
+    appManifest: false,
+  },
   devtools: {
-    enabled: true
+    enabled: true,
   },
   runtimeConfig: {
-    public: env
+    public: Object.fromEntries(
+      Object.entries(process.env).filter(([k]) => k.startsWith('NUXT_PUBLIC_'))
+    ),
+  },
+  imports: {
+    autoImport: true,
   },
   css: [
-    `@/${CONFIG.css}/_tailwind.css`,
+    `@/${CONFIG.css}/tailwind.css`,
     `@/${CONFIG.css}/_common/framework.css`,
+    `@/${CONFIG.css}/_common/layout.css`,
     `@/${CONFIG.css}/_common/color.css`,
   ],
   postcss: {
@@ -26,28 +34,29 @@ export default defineNuxtConfig({
       'tailwindcss/nesting': {},
       tailwindcss: {},
       'postcss-functions': {
-        functions: POSTCSSFUNCTIONS
+        functions: POSTCSSFUNCTIONS,
       },
       'postcss-calc': {},
       'postcss-pxtorem': {
         propList: ['*', '!box-shadow', '!z-index', '!border-width'],
-        minPixelValue: 2
+        minPixelValue: 2,
       },
-      autoprefixer: {}
-    }
+      autoprefixer: {},
+    },
   },
   alias: {
     '@stores': fileURLToPath(new URL('./stores', import.meta.url)),
     '@components': fileURLToPath(new URL('./components', import.meta.url)),
+    '@composable': fileURLToPath(new URL('./composable', import.meta.url)),
     '@container': fileURLToPath(new URL('./container', import.meta.url)),
     '@pages': fileURLToPath(new URL('./pages', import.meta.url)),
     '@imgs': fileURLToPath(new URL(`./${CONFIG.imgs}`, import.meta.url)),
     '@css': fileURLToPath(new URL(`./${CONFIG.css}`, import.meta.url)),
-    '@js': fileURLToPath(new URL(`./${CONFIG.js}`, import.meta.url))
+    '@js': fileURLToPath(new URL(`./${CONFIG.js}`, import.meta.url)),
   },
   vite: {
     esbuild: {
-      drop: ['console']
+      drop: process.env.NODE_ENV === 'production' ? ['console'] : [],
     },
     build: {
       rollupOptions: {
@@ -55,8 +64,9 @@ export default defineNuxtConfig({
           chunkFileNames: `_nuxt/${CONFIG.js}/[name].[hash].js`,
           entryFileNames: `_nuxt/${CONFIG.js}/[name].[hash].js`,
           assetFileNames: (assetInfo) => {
-            const { name } = assetInfo
+            const name = assetInfo.name ?? ''
             let path = '[name][extname]'
+
             if (name.endsWith('.css')) {
               path = `_nuxt/${CONFIG.css}/[name].[hash][extname]`
             } else if (/\.(png|jpe?g|gif|svg|webp)$/i.test(name)) {
@@ -66,19 +76,19 @@ export default defineNuxtConfig({
             }
 
             return path
-          }
-        }
-      }
+          },
+        },
+      },
     },
     plugins: [
       createSvgIconsPlugin({
         iconDirs: [resolve(process.cwd(), `${CONFIG.svg}`)],
-        symbolId: '[name]'
-      })
+        symbolId: '[name]',
+      }) as never,
     ],
     server: {
-      proxy: CONFIG.proxy
-    }
+      proxy: CONFIG.proxy,
+    },
   },
   app: {
     head: {
@@ -89,25 +99,33 @@ export default defineNuxtConfig({
         { name: 'mobile-web-app-capable', content: 'yes' },
         { name: 'format-detection', content: 'telephone=no' },
         { name: 'SKYPE_TOOLBAR', content: 'SKYPE_TOOLBAR_PARSER_COMPATIBLE' },
+        {
+          name: 'google-site-verification',
+          content: 's-Hthc_Rri_3PpkSWfRAuDwlBAdt-kuahs6Z-IzgoOE',
+        },
+        // { name: 'robots', content: 'index,follow' },
+        { name: 'fb:app_id', content: '178822192295568' },
+        { name: 'og:locale', content: 'zh_TW' },
         { property: 'og:type', content: 'website' },
         { property: 'og:image:type', content: 'image/jpeg' },
         { property: 'og:image:width', content: '1200' },
-        { property: 'og:image:height', content: '630' }
+        { property: 'og:image:height', content: '630' },
       ],
       link: [
         {
           rel: 'shortcut icon',
           type: 'image/x-icon',
-          href: `${process.env.VITE_PATH}/favicon.ico`
+          // href: `${process.env.NUXT_PUBLIC_PATH}/favicon.ico`,
+          href: '//s1.hfcdn.com/s1-news/system/i/icon/favicon_16x16.ico',
         },
         {
           rel: 'stylesheet',
-          href: 'https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@200;300;400;500;700;900&display=swap'
-        }
-      ]
-    }
+          href: 'https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@200;300;400;500;600;700;900&display=swap',
+        },
+      ],
+    },
   },
-  modules: ['@pinia/nuxt'],
+  modules: ['@pinia/nuxt', '@vee-validate/nuxt', '@nuxtjs/tailwindcss'],
   // plugins: ['@/app/router.beforeEach.js'],
   // veeValidate: {
   //   autoImports: true,
@@ -121,12 +139,15 @@ export default defineNuxtConfig({
   router: {
     options: {
       linkActiveClass: 'active',
-      linkExactActiveClass: 'exact-active'
-    }
+      linkExactActiveClass: 'exact-active',
+    },
   },
   devServer: {
     https: CONFIG.https,
     port: CONFIG.port,
-    host: '0.0.0.0'
-  }
+    host: '0.0.0.0',
+  },
+  nitro: {
+    preset: 'node-server',
+  },
 })

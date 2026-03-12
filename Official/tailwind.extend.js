@@ -1,11 +1,11 @@
-export const dropShadow = {
-  text: '0 8px 3px #0000008c'
+export const boxShadow = {
+  'black-y2-b4': '0 2px 4px #00000033',
 }
 
 export const letterSpacing = {
-  default: '0.1em'
+  default: '0.05rem',
 }
 
 export const lineHeight = {
-  '1em': '1em'
+  '1em': '1em',
 }

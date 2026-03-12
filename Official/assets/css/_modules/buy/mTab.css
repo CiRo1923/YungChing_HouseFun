@@ -1,0 +1,111 @@
+@screen p {
+  .m-tab {
+    &.\-\-anchor-height-40,
+    &.\-\-p\:anchor-height-40,
+    &.\-\-pt\:anchor-height-40 {
+      .m-tab-anchor {
+        @apply min-h-[40px];
+      }
+    }
+
+    &.\-\-body-px-40,
+    &.p\:\-\-body-px-40,
+    &.pt\:\-\-body-px-40 {
+      .m-table-body-content {
+        @apply border-x-[40px];
+      }
+    }
+
+    &.\-\-body-px-16,
+    &.p\:\-\-body-px-16,
+    &.pt\:\-\-body-px-16 {
+      .m-table-body-content {
+        @apply border-x-[16px];
+      }
+    }
+
+    &.\-\-body-py-32,
+    &.p\:\-\-body-py-32,
+    &.pt\:\-\-body-py-32 {
+      .m-table-body-content {
+        @apply border-y-[32px];
+      }
+    }
+  }
+}
+
+@screen t {
+  .m-tab {
+    &.\-\-anchor-height-40,
+    &.\-\-pt\:anchor-height-40,
+    &.\-\-tm\:anchor-height-40,
+    &.\-\-t\:anchor-height-40 {
+      .m-tab-anchor {
+        @apply min-h-[40px];
+      }
+    }
+
+    &.\-\-body-px-40,
+    &.pt\:\-\-body-px-40,
+    &.tm\:\-\-body-px-40,
+    &.t\:\-\-body-px-40 {
+      .m-table-body-content {
+        @apply border-x-[40px];
+      }
+    }
+
+    &.\-\-body-px-16,
+    &.pt\:\-\-body-px-16,
+    &.tm\:\-\-body-px-16,
+    &.t\:\-\-body-px-16 {
+      .m-table-body-content {
+        @apply border-x-[16px];
+      }
+    }
+
+    &.\-\-body-py-32,
+    &.pt\:\-\-body-py-32,
+    &.tm\:\-\-body-py-32,
+    &.t\:\-\-body-py-32 {
+      .m-table-body-content {
+        @apply border-y-[32px];
+      }
+    }
+  }
+}
+
+@screen m {
+  .m-tab {
+    &.\-\-anchor-height-40,
+    &.\-\-tm\:anchor-height-40,
+    &.\-\-m\:anchor-height-40 {
+      .m-tab-anchor {
+        @apply min-h-[40px];
+      }
+    }
+
+    &.\-\-body-px-40,
+    &.tm\:\-\-body-px-40,
+    &.m\:\-\-body-px-40 {
+      .m-table-body-content {
+        @apply border-x-[40px];
+      }
+    }
+
+    &.\-\-body-px-16,
+    &.tm\:\-\-body-px-16,
+    &.m\:\-\-body-px-16 {
+      .m-table-body-content {
+        @apply border-x-[16px];
+      }
+    }
+
+    &.\-\-body-py-32,
+    &.tm\:\-\-body-py-32,
+    &.m\:\-\-body-py-32 {
+      .m-table-body-content {
+        @apply border-y-[32px];
+      }
+    }
+  }
+}

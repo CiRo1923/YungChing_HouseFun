@@ -2,9 +2,11 @@
 /** @type {import('@nuxt/schema').RouterConfig} */
 
 export default {
+  linkActiveClass: '--active',
+  linkExactActiveClass: '--exact-active',
   routes: (routes) => {
-    const homeRoute = routes.find((r) =>
-      typeof r.path === 'string' && r.path.toLowerCase() === '/home'
+    const homeRoute = routes.find(
+      (r) => typeof r.path === 'string' && r.path.toLowerCase() === '/home'
     )
 
     if (homeRoute) {

@@ -1,6 +1,16 @@
 :root {
+  --red-e56a: #e8536a;
+  --orange-e646: #ea6846;
+  --yellow-feea: #f1ecea;
+  --green-8b0d: #87b90d;
   --white: #fff;
   --white-rgb: hexToRgb(#fff);
+  --gray-f7: #f7f7f7;
+  --gray-e5: #e5e5e5;
+  --gray-feea: #f1ecea;
+  --gray-999: #999;
+  --gray-666: #666;
+  --gray-333: #333;
   --black: #000;
   --black-rgb: hexToRgb(#000);
 }

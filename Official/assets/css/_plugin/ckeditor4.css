@@ -1,0 +1,22 @@
+.cke {
+  @apply overflow-hidden rounded-[8px] !border-[--gray-e5];
+}
+
+.cke_top {
+  @apply !border-b-[--gray-e5] !bg-[--gray-f2] !pb-[5px] !pt-[10px];
+}
+
+.cke_bottom {
+  @apply !hidden;
+}
+
+/* icon */
+.cke_button__transformtexttouppercase_icon {
+  background-image: url(@imgs/buy/plugin/ckeditor4/icon_uppercase.svg) !important;
+  background-size: 16px 16px;
+}
+
+.cke_button__transformtexttolowercase_icon {
+  background-image: url(@imgs/buy/plugin/ckeditor4/icon_lowercase.svg) !important;
+  background-size: 16px 16px;
+}

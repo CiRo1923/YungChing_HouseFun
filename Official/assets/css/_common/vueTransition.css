@@ -1,0 +1,57 @@
+.select-overlay-enter-active,
+.select-overlay-leave-active,
+.datepicker-fixed-overlay-enter-active,
+.datepicker-fixed-overlay-leave-active {
+  @apply transition-opacitys duration-150;
+}
+
+.select-overlay-enter-from,
+.select-overlay-leave-to,
+.datepicker-fixed-overlay-enter-from,
+.datepicker-fixed-overlay-leave-to {
+  @apply opacity-0;
+}
+
+.select-overlay-leave-from,
+.select-overlay-enter-to,
+.datepicker-fixed-overlay-leave-from,
+.datepicker-fixed-overlay-enter-to {
+  @apply opacity-100;
+}
+
+.select-dropdown-enter-active,
+.select-dropdown-leave-active,
+.autocomplete-enter-active,
+.autocomplete-leave-active {
+  will-change: height;
+
+  @apply overflow-hidden transition-heights duration-300;
+}
+
+.select-dropdown-enter-from,
+.select-dropdown-leave-to,
+.autocomplete-enter-from,
+.autocomplete-leave-to {
+  @apply !h-0;
+}
+
+.select-fixed-enter-active,
+.select-fixed-leave-active,
+.datepicker-range-quickly-fixed-enter-active,
+.datepicker-range-quickly-fixed-leave-active {
+  @apply transition-transform duration-200;
+}
+
+.select-fixed-enter-from,
+.select-fixed-leave-to,
+.datepicker-range-quickly-fixed-enter-from,
+.datepicker-range-quickly-fixed-leave-to {
+  @apply translate-y-full;
+}
+
+.select-fixed-enter-to,
+.select-fixed-leave-from,
+.datepicker-range-quickly-fixed-enter-to,
+.datepicker-range-quickly-fixed-leave-from {
+  @apply translate-y-0;
+}

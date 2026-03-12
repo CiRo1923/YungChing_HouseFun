@@ -1,0 +1,21 @@
+/* reset style */
+html,
+body {
+  margin: 0;
+}
+
+html {
+  font-family:
+    'Noto Sans TC', '微軟正黑體', 'Microsoft JhengHei', 'Heiti TC', '黑體', Arial, Helvetica,
+    sans-serif;
+  text-size-adjust: none;
+  padding: 0;
+}
+
+body {
+  padding: 10px;
+}
+
+p {
+  margin: 0;
+}
