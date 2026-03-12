@@ -53,12 +53,21 @@ export default defineNuxtConfig({
     '@stores': fileURLToPath(new URL('./stores', import.meta.url)),
     '@components': fileURLToPath(new URL('./components', import.meta.url)),
     '@container': fileURLToPath(new URL('./container', import.meta.url)),
+    '@composable': fileURLToPath(new URL('./composable', import.meta.url)),
     '@pages': fileURLToPath(new URL('./pages', import.meta.url)),
     '@imgs': fileURLToPath(new URL(`./${CONFIG.imgs}`, import.meta.url)),
     '@css': fileURLToPath(new URL(`./${CONFIG.css}`, import.meta.url)),
     '@js': fileURLToPath(new URL(`./${CONFIG.js}`, import.meta.url)),
   },
   vite: {
+    optimizeDeps: {
+      include: [
+        '@vue/devtools-core',
+        '@vue/devtools-kit',
+        '@mayasabha/ckeditor4-vue3',
+        'crypto-js',
+      ],
+    },
     esbuild: {
       drop: process.env['NODE_ENV'] === 'production' ? ['console'] : [],
     },
