@@ -60,6 +60,14 @@ export default defineNuxtConfig({
     '@js': fileURLToPath(new URL(`./${CONFIG.js}`, import.meta.url)),
   },
   vite: {
+    optimizeDeps: {
+      include: [
+        '@vue/devtools-core',
+        '@vue/devtools-kit',
+        '@mayasabha/ckeditor4-vue3',
+        'crypto-js',
+      ],
+    },
     esbuild: {
       drop: process.env['NODE_ENV'] === 'production' ? ['console'] : [],
     },
