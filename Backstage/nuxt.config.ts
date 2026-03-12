@@ -4,7 +4,12 @@ import CONFIG from './config.js'
 import POSTCSSFUNCTIONS from './postcss.function.js'
 
 import VitePluginSvgSpritemap from '@spiriit/vite-plugin-svg-spritemap'
+import { ViteImageOptimizer } from 'vite-plugin-image-optimizer'
 import { fileURLToPath } from 'node:url'
+
+const imageAssetInclude = new RegExp(
+  CONFIG.imgs.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\\/g, '/')
+)
 
 export default defineNuxtConfig({
   experimental: {
@@ -55,7 +60,7 @@ export default defineNuxtConfig({
   },
   vite: {
     esbuild: {
-      drop: process.env.NODE_ENV === 'production' ? ['console'] : [],
+      drop: process.env['NODE_ENV'] === 'production' ? ['console'] : [],
     },
     build: {
       rollupOptions: {
@@ -88,6 +93,38 @@ export default defineNuxtConfig({
           name: 'spritemap',
           view: false,
           use: true,
+        },
+      }) as never,
+      ViteImageOptimizer({
+        include: imageAssetInclude,
+        includePublic: false,
+        logStats: true,
+        cache: true,
+        cacheLocation: '.cache/image-optimizer',
+        svg: {
+          multipass: true,
+          plugins: [
+            {
+              name: 'preset-default',
+              params: {
+                overrides: {
+                  cleanupNumericValues: false,
+                  cleanupIds: {
+                    minify: false,
+                    remove: false,
+                  },
+                  convertPathData: false,
+                },
+              },
+            },
+            'sortAttrs',
+            {
+              name: 'addAttributesToSVGElement',
+              params: {
+                attributes: [{ xmlns: 'http://www.w3.org/2000/svg' }],
+              },
+            },
+          ],
         },
       }) as never,
     ],
