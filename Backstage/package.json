@@ -6,11 +6,11 @@
     "node": "20.x"
   },
   "scripts": {
-    "compress:public": "node ./scripts/compress-public-images.mjs",
+    "compress:public": "node ./scripts/nuxt/compress-public-images.mjs",
     "start": "node .output/server/index.mjs",
     "dev": "nuxt dev --dotenv .env.dev",
-    "deploy": "npm run compress:public && nuxt build --dotenv .env.deploy",
-    "build": "npm run compress:public && nuxt build --dotenv .env.build",
+    "deploy": "node ./scripts/nuxt/run-nuxt-build-with-public-image-copy.mjs .env.deploy",
+    "build": "node ./scripts/nuxt/run-nuxt-build-with-public-image-copy.mjs .env.build",
     "generate": "nuxt generate",
     "preview": "nuxt preview"
   },
