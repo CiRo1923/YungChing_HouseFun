@@ -31,7 +31,7 @@ const onAnchorBind = (item) => {
   const as = onAnchorAs(item)
   const { to, href, target, children } = item
   // 手機板 直接抓 children submenu 的第一個選單
-  const returnTo = !isDevicePT.value && children ? children.submemu[0].to : to
+  const returnTo = !isDevicePT.value ? children?.submenu?.[0]?.to || to : to
 
   if (as === 'router-link') {
     return {
@@ -64,10 +64,7 @@ const onAnchorActive = (item) => {
 }
 
 const onGetChildernHeight = () => {
-  // const {} =
-
   for (let i = 0; i < itemRef.value.length; i += 1) {
-    const itemElem = itemRef.value[i]
     const submenuElem = submenuRef.value[i]
 
     if (submenuElem) {
@@ -124,7 +121,7 @@ onUnmounted(() => {
             ref="childernRef"
             v-if="isDevicePT && item.children"
           >
-            <ul class="p:py-[25px]" ref="submenuRef"></ul>
+            <ul class="p:py-[25px]" ref="submenuRef" />
           </div>
         </li>
       </ul>

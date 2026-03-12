@@ -21,16 +21,18 @@ const setClass = computed(() => {
 
 <template>
   <ul class="m-separator" :class="setClass.main">
-    <li
-      class="m-separator-item relative"
-      :class="setClass.item"
-      v-for="(item, index) in items"
-      :key="`${item.id}_${index}`"
-    >
-      <slot>
-        {{ item.value }}
-      </slot>
-    </li>
+    <template v-for="(item, index) in items">
+      <li
+        v-if="item.value"
+        :key="`${item.id}_${index}`"
+        class="m-separator-item relative"
+        :class="setClass.item"
+      >
+        <slot>
+          {{ item.value }}
+        </slot>
+      </li>
+    </template>
   </ul>
 </template>
 

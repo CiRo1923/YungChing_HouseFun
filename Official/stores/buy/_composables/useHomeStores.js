@@ -1,7 +1,5 @@
 import { apiBuyList } from '@js/buy/_api/basic.js'
 
-import { toFixed } from '@js/_prototype.js'
-
 import { useHomeStore } from '@stores/buy/home.js'
 
 const useHomeStores = () => {

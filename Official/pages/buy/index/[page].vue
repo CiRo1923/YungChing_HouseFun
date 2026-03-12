@@ -78,7 +78,7 @@ await awaitAllPromise([
       />
     </Content>
   </Container>
-  <div></div>
+  <div />
 </template>
 
 <style></style>

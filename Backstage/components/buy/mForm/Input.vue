@@ -173,7 +173,7 @@ const onEvent = (e, errorMessage) => {
   }
 
   if (isBlur) {
-    let raw = model.value
+    const raw = model.value
 
     // 如果有 comma 顯示，先用「去逗號後」的值來判斷
     const plain = isComma ? numberComma.remove(raw, false) : raw

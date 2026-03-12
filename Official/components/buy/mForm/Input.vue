@@ -2,7 +2,7 @@
 import SvgIcon from '@components/common/SvgIcon.vue'
 import ErrorMessageElem from '@components/buy/mErrorMessageElem.vue'
 
-import { onDeepMerge, numberComma, toFixed } from '@js/_prototype.js'
+import { onDeepMerge, numberComma, onToFixed } from '@js/_prototype.js'
 
 import '@js/_validation.js'
 // import { userStore } from '@store/user.js'
@@ -173,7 +173,7 @@ const onEvent = (e, errorMessage) => {
   }
 
   if (isBlur) {
-    let raw = model.value
+    const raw = model.value
 
     // 如果有 comma 顯示，先用「去逗號後」的值來判斷
     const plain = isComma ? numberComma.remove(raw, false) : raw
@@ -233,8 +233,8 @@ const onEvent = (e, errorMessage) => {
         const d = Number(config.value.toFixed)
         if (Number.isFinite(d) && normalized !== '') {
           normalized = props.modelModifiers.number
-            ? Number(toFixed(Number(normalized), d))
-            : String(Number(toFixed(Number(normalized), d)))
+            ? Number(onToFixed(Number(normalized), d))
+            : String(Number(onToFixed(Number(normalized), d)))
         }
       }
 
@@ -279,11 +279,11 @@ watch(
 <template>
   <div class="m-form overflow-hidden" :class="setClass.main">
     <Field
+      v-slot="{ field, errorMessage }"
+      v-model="model"
       :name="props.name"
       :type="props.type"
-      v-model="model"
       :rules="config.isDisabled ? '' : props.rules"
-      v-slot="{ field, errorMessage }"
     >
       <div class="m-form-container" :class="setClass.container">
         <div
@@ -297,9 +297,9 @@ watch(
           ]"
         >
           <div
+            v-if="$slots.frontAssist"
             class="m-form-assist shrink-0"
             :class="setClass.frontAssist"
-            v-if="$slots.frontAssist"
           >
             <slot name="frontAssist" />
           </div>
@@ -320,26 +320,26 @@ watch(
             @blur="onEvent($event, errorMessage)"
             @input="onInput($event)"
             @keydown.enter="onEnter($event)"
-          />
+          >
           <button
+            v-if="config.isExistClose && !config.isDisabled"
             type="button"
             class="m-form-clear-button"
             :class="{
               '--show': model,
             }"
             @click="onClear"
-            v-if="config.isExistClose && !config.isDisabled"
           >
             <SvgIcon icon="icon_xmark" class="m-form-clear-icon" />
           </button>
-          <span class="m-form-length shrink-0" :class="setClass.length" v-if="formatLength">
+          <span v-if="formatLength" class="m-form-length shrink-0" :class="setClass.length">
             {{ formatLength }}
           </span>
-          <div class="m-form-assist shrink-0" :class="setClass.rearAssist" v-if="$slots.rearAssist">
+          <div v-if="$slots.rearAssist" class="m-form-assist shrink-0" :class="setClass.rearAssist">
             <slot name="rearAssist" />
           </div>
         </div>
-        <small class="m-form-suffix shrink-0" :class="setClass.suffix" v-if="$slots.suffix">
+        <small v-if="$slots.suffix" class="m-form-suffix shrink-0" :class="setClass.suffix">
           <slot
             name="suffix"
             :maxlength="config.length || config.maxlength"
@@ -349,11 +349,11 @@ watch(
       </div>
     </Field>
     <ErrorMessage
+      v-slot="{ message }"
       as="span"
       :name="props.name"
       class="m-form-error"
       :class="setClass.error"
-      v-slot="{ message }"
     >
       <ErrorMessageElem :message="message" />
     </ErrorMessage>

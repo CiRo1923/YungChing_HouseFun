@@ -2,9 +2,11 @@
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.codeActionsOnSave": {
-    "source.fixAll": "explicit",
-    "source.fixAll.eslint": "explicit"
+    "source.fixAll": "always",
+    "source.fixAll.eslint": "always"
   },
+  "eslint.format.enable": true,
+  "eslint.validate": ["javascript", "vue"],
   "vetur.format.options.tabSize": 2,
   "vetur.validation.template": false,
   "eslint.workingDirectories": [
@@ -13,7 +15,8 @@
     }
   ],
   "[vue]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
   },
   "[css]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"

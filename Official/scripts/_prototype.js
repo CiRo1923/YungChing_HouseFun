@@ -144,10 +144,17 @@ export const emptyData = (obj) => {
 }
 
 // 小數點設定
-export const toFixed = (number, fixed) => {
-  const length = number && /\./.test(number) ? (number + '').split('.')[1].length : 0
+export const onToFixed = (number, fixed) => {
+  const values = Array.isArray(number) ? number : [number]
+  const onDecimalLength = (value) => {
+    const [, decimal = ''] = String(value ?? '').split('.')
+
+    return decimal.length
+  }
+  const total = values.reduce((sum, value) => sum + Number(value || 0), 0)
+  const length = Math.max(0, ...values.map((value) => onDecimalLength(value)))
   const fix = fixed !== undefined ? fixed : length
-  let result = +(Math.round(number + `e+${fix}`) + `e-${fix}`) || 0
+  let result = +(Math.round(total + `e+${fix}`) + `e-${fix}`) || 0
   const pointNumber = /\./.test(result) ? result.toString().split('.')[1] : []
 
   if (fix && pointNumber.length < fix) {

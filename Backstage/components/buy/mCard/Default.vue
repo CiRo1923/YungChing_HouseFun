@@ -1,11 +1,4 @@
-<script setup>
-const props = defineProps({
-  title: {
-    type: String,
-    default: null,
-  },
-})
-</script>
+<script setup></script>
 
 <template>
   <div class="m-card --default --bg-white --rounded-15 tm:px-[16px] tm:py-[32px] p:p-[40px]">

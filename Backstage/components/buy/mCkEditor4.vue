@@ -282,7 +282,7 @@ const setClass = computed(() => {
       <ckeditor
         v-model="model"
         :config="editorConfig"
-        editor-url="/scripts/plugins/ckeditor/ckeditor.js"
+        editorUrl="/scripts/plugins/ckeditor/ckeditor.js"
       />
       <div class="m-ckeditor4-suffix" :class="setClass.suffix" v-if="$slots.suffix">
         <slot name="suffix" :maxlength="config.maxlength" :length="editorLength" />
