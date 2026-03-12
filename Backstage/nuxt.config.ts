@@ -3,10 +3,8 @@
 import CONFIG from './config.js'
 import POSTCSSFUNCTIONS from './postcss.function.js'
 
-import { resolve } from 'path'
-
-import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
-import { fileURLToPath } from 'url'
+import VitePluginSvgSpritemap from '@spiriit/vite-plugin-svg-spritemap'
+import { fileURLToPath } from 'node:url'
 
 export default defineNuxtConfig({
   experimental: {
@@ -16,9 +14,12 @@ export default defineNuxtConfig({
     enabled: true,
   },
   runtimeConfig: {
-    public: Object.fromEntries(
-      Object.entries(process.env).filter(([k]) => k.startsWith('NUXT_PUBLIC_'))
-    ),
+    public: {
+      ...Object.fromEntries(
+        Object.entries(process.env).filter(([k]) => k.startsWith('NUXT_PUBLIC_'))
+      ),
+      spritePath: `${CONFIG.imgs}/svg/spritemap.svg`,
+    },
   },
   imports: {
     autoImport: true,
@@ -79,9 +80,15 @@ export default defineNuxtConfig({
       },
     },
     plugins: [
-      createSvgIconsPlugin({
-        iconDirs: [resolve(process.cwd(), `${CONFIG.svg}`)],
-        symbolId: '[name]',
+      VitePluginSvgSpritemap(`${CONFIG.svg}/*.svg`, {
+        prefix: false,
+        route: `_nuxt/${CONFIG.imgs}/svg/spritemap.svg`,
+        output: {
+          filename: `${CONFIG.imgs}/svg/spritemap.svg`,
+          name: 'spritemap',
+          view: false,
+          use: true,
+        },
       }) as never,
     ],
     server: {
