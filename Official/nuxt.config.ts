@@ -3,10 +3,13 @@
 import CONFIG from './config.js'
 import POSTCSSFUNCTIONS from './postcss.function.js'
 
-import { resolve } from 'path'
+import VitePluginSvgSpritemap from '@spiriit/vite-plugin-svg-spritemap'
+import { ViteImageOptimizer } from 'vite-plugin-image-optimizer'
+import { fileURLToPath } from 'node:url'
 
-import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
-import { fileURLToPath } from 'url'
+const imageAssetInclude = new RegExp(
+  CONFIG.imgs.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\\/g, '/')
+)
 
 export default defineNuxtConfig({
   experimental: {
@@ -16,9 +19,12 @@ export default defineNuxtConfig({
     enabled: true,
   },
   runtimeConfig: {
-    public: Object.fromEntries(
-      Object.entries(process.env).filter(([k]) => k.startsWith('NUXT_PUBLIC_'))
-    ),
+    public: {
+      ...Object.fromEntries(
+        Object.entries(process.env).filter(([k]) => k.startsWith('NUXT_PUBLIC_'))
+      ),
+      spritePath: `${CONFIG.imgs}/svg/spritemap.svg`,
+    },
   },
   imports: {
     autoImport: true,
@@ -26,7 +32,6 @@ export default defineNuxtConfig({
   css: [
     `@/${CONFIG.css}/tailwind.css`,
     `@/${CONFIG.css}/_common/framework.css`,
-    `@/${CONFIG.css}/_common/layout.css`,
     `@/${CONFIG.css}/_common/color.css`,
   ],
   postcss: {
@@ -47,8 +52,8 @@ export default defineNuxtConfig({
   alias: {
     '@stores': fileURLToPath(new URL('./stores', import.meta.url)),
     '@components': fileURLToPath(new URL('./components', import.meta.url)),
-    '@composable': fileURLToPath(new URL('./composable', import.meta.url)),
     '@container': fileURLToPath(new URL('./container', import.meta.url)),
+    '@composable': fileURLToPath(new URL('./composable', import.meta.url)),
     '@pages': fileURLToPath(new URL('./pages', import.meta.url)),
     '@imgs': fileURLToPath(new URL(`./${CONFIG.imgs}`, import.meta.url)),
     '@css': fileURLToPath(new URL(`./${CONFIG.css}`, import.meta.url)),
@@ -56,7 +61,7 @@ export default defineNuxtConfig({
   },
   vite: {
     esbuild: {
-      drop: process.env.NODE_ENV === 'production' ? ['console'] : [],
+      drop: process.env['NODE_ENV'] === 'production' ? ['console'] : [],
     },
     build: {
       rollupOptions: {
@@ -81,9 +86,47 @@ export default defineNuxtConfig({
       },
     },
     plugins: [
-      createSvgIconsPlugin({
-        iconDirs: [resolve(process.cwd(), `${CONFIG.svg}`)],
-        symbolId: '[name]',
+      VitePluginSvgSpritemap(`${CONFIG.svg}/*.svg`, {
+        prefix: false,
+        route: `_nuxt/${CONFIG.imgs}/svg/spritemap.svg`,
+        output: {
+          filename: `${CONFIG.imgs}/svg/spritemap.svg`,
+          name: 'spritemap',
+          view: false,
+          use: true,
+        },
+      }) as never,
+      ViteImageOptimizer({
+        include: imageAssetInclude,
+        includePublic: false,
+        logStats: true,
+        cache: true,
+        cacheLocation: '.cache/image-optimizer',
+        svg: {
+          multipass: true,
+          plugins: [
+            {
+              name: 'preset-default',
+              params: {
+                overrides: {
+                  cleanupNumericValues: false,
+                  cleanupIds: {
+                    minify: false,
+                    remove: false,
+                  },
+                  convertPathData: false,
+                },
+              },
+            },
+            'sortAttrs',
+            {
+              name: 'addAttributesToSVGElement',
+              params: {
+                attributes: [{ xmlns: 'http://www.w3.org/2000/svg' }],
+              },
+            },
+          ],
+        },
       }) as never,
     ],
     server: {
@@ -99,13 +142,6 @@ export default defineNuxtConfig({
         { name: 'mobile-web-app-capable', content: 'yes' },
         { name: 'format-detection', content: 'telephone=no' },
         { name: 'SKYPE_TOOLBAR', content: 'SKYPE_TOOLBAR_PARSER_COMPATIBLE' },
-        {
-          name: 'google-site-verification',
-          content: 's-Hthc_Rri_3PpkSWfRAuDwlBAdt-kuahs6Z-IzgoOE',
-        },
-        // { name: 'robots', content: 'index,follow' },
-        { name: 'fb:app_id', content: '178822192295568' },
-        { name: 'og:locale', content: 'zh_TW' },
         { property: 'og:type', content: 'website' },
         { property: 'og:image:type', content: 'image/jpeg' },
         { property: 'og:image:width', content: '1200' },

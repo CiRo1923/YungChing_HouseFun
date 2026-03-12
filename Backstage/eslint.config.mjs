@@ -2,7 +2,6 @@ import withNuxt from './.nuxt/eslint.config.mjs'
 
 export default withNuxt({
   rules: {
-    // 你不想管屬性順序就直接關掉
     'vue/attributes-order': 'off',
     'vue/attribute-hyphenation': [
       'error',
