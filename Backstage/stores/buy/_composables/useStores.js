@@ -1,5 +1,6 @@
 import {
   apiGETRealEstate,
+  apiPOSTRealEstate,
   apiPOSTRealEstateDraft,
   apiGETRealEstatePurposeCheckOptions,
   apiGETCitySelectOptions,
@@ -339,7 +340,6 @@ const useStores = () => {
     async onApiGETRealEstate(hfid) {
       const { config, status, data } = await apiGETRealEstate({
         hfid: hfid,
-        caseInfo: apiData.value,
       })
 
       if (status === 200) {
@@ -357,6 +357,7 @@ const useStores = () => {
       })
 
       if (status === 200) {
+        console.log(data)
       }
 
       return { config, status, data }
@@ -368,6 +369,7 @@ const useStores = () => {
       })
 
       if (status === 200) {
+        console.log(data)
       }
 
       return { config, status, data }

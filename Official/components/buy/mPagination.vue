@@ -112,11 +112,11 @@ const onBind = (index) => {
 
 <template>
   <div class="m-pagination text-center" :class="setClass.main">
-    <ol class="inline-flex items-center p:gap-x-[8px]">
+    <ol class="inline-flex items-center tm:gap-x-[5px] p:gap-x-[8px]">
       <li v-for="(page, index) in visiblePages" :key="`${page}_${index}`">
         <component
           :is="as"
-          class="m-pagination-anchor flex items-center justify-center rounded-[3px] transition-colors duration-300 p:h-[28px] p:w-[28px]"
+          class="m-pagination-anchor flex h-[30px] w-[30px] items-center justify-center rounded-[3px] transition-colors duration-300"
           :class="{
             '--active': page === config.nowPage,
           }"

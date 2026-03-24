@@ -1,13 +1,13 @@
 <script setup>
 import CardFilter from '@pages/buy/_containers/CardFilter.vue'
 
-import CaseSqUnitPin from '@pages/buy/_components/basic/Ping/CaseSqUnitPin.vue'
-import CaseBuildSq from '@pages/buy/_components/basic/Ping/CaseBuildSq.vue'
-import CaseParkingSq from '@pages/buy/_components/basic/Ping/CaseParkingSq.vue'
-import CaseMainSq from '@pages/buy/_components/basic/Ping/CaseMainSq.vue'
-import CaseAffiliatedSq from '@pages/buy/_components/basic/Ping/CaseAffiliatedSq.vue'
-import CaseLandSq from '@pages/buy/_components/basic/Ping/CaseLandSq.vue'
-import CaseAmenitieSq from '@pages/buy/_components/basic/Ping/CaseAmenitieSq.vue'
+import CaseSqUnitPin from '@pages/buy/_components/basic/ping/CaseSqUnitPin.vue'
+import CaseBuildSq from '@pages/buy/_components/basic/ping/CaseBuildSq.vue'
+import CaseParkingSq from '@pages/buy/_components/basic/ping/CaseParkingSq.vue'
+import CaseMainSq from '@pages/buy/_components/basic/ping/CaseMainSq.vue'
+import CaseAffiliatedSq from '@pages/buy/_components/basic/ping/CaseAffiliatedSq.vue'
+import CaseLandSq from '@pages/buy/_components/basic/ping/CaseLandSq.vue'
+import CaseAmenitieSq from '@pages/buy/_components/basic/ping/CaseAmenitieSq.vue'
 
 import { useBuyBasicStore } from '@stores/buy/basic.js'
 

@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   port: 26031,
   https: true,
   ieVersion: 11,
@@ -12,6 +12,11 @@ module.exports = {
   svg: '_svg',
   proxy: {
     '/api/v1/buy/list': {
+      target: process.env.NUXT_PUBLIC_API_PATH,
+      changeOrigin: true,
+      secure: false,
+    },
+    '/api/v1/buy/house': {
       target: process.env.NUXT_PUBLIC_API_PATH,
       changeOrigin: true,
       secure: false,

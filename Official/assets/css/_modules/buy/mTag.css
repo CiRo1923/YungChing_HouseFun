@@ -1,40 +1,72 @@
 .m-tag {
-  @apply inline-flex items-center gap-x-[3px] overflow-hidden rounded-full text-[--gray-666] transition-colors duration-300;
+  @apply inline-flex items-center overflow-hidden rounded-full;
+
+  &.\-\-bg {
+    &.\-\-orange-e646 {
+      @apply bg-[--orange-e646];
+    }
+
+    &.\-\-orange-feea {
+      @apply bg-[--orange-feea];
+    }
+  }
 }
 
 @screen p {
   .m-tag {
-    @apply text-[14px];
-
     &.\-\-px-15,
     &.p\:\-\-px-15,
     &.pt\:\-\-px-15 {
       @apply px-[15px];
     }
 
-    &.\-\-py-5,
-    &.p\:\-\-py-5,
-    &.pt\:\-\-py-5 {
-      @apply py-[5px];
+    &.\-\-px-12,
+    &.p\:\-\-px-12,
+    &.pt\:\-\-px-12 {
+      @apply px-[12px];
     }
 
-    &.\-\-h-35,
+    &.\-\-px-8,
+    &.p\:\-\-px-8,
+    &.pt\:\-\-px-8 {
+      @apply px-[8px];
+    }
+
+    &.\-\-px-5,
+    &.p\:\-\-px-5,
+    &.pt\:\-\-px-5 {
+      @apply px-[5px];
+    }
+
+    &.\-\-py-3,
+    &.p\:\-\-py-3,
+    &.pt\:\-\-py-3 {
+      @apply py-[3px];
+    }
+
+    /* &.\-\-h-35,
     &.p\:\-\-h-35,
     &.pt\:\-\-h-35 {
       @apply h-[35px];
-    }
+    } */
 
-    &.\-\-h-30,
+    /* &.\-\-h-30,
     &.p\:\-\-h-30,
     &.pt\:\-\-h-30 {
       @apply h-[30px];
-    }
-  }
-}
+    } */
 
-@screen tm {
-  .m-tag {
-    @apply text-[16px];
+    &.\-\-h-20,
+    &.p\:\-\-h-20,
+    &.pt\:\-\-h-20 {
+      @apply h-[20px];
+    }
+
+    &.\-\-h-16,
+    &.p\:\-\-h-16,
+    &.pt\:\-\-h-16 {
+      @apply h-[16px];
+    }
   }
 }
 
@@ -47,25 +79,60 @@
       @apply px-[15px];
     }
 
-    &.\-\-py-5,
-    &.pt\:\-\-py-5,
-    &.tm\:\-\-py-5,
-    &.t\:\-\-py-5 {
-      @apply py-[5px];
+    &.\-\-px-12,
+    &.pt\:\-\-px-12,
+    &.tm\:\-\-px-12,
+    &.t\:\-\-px-12 {
+      @apply px-[12px];
     }
 
-    &.\-\-h-35,
+    &.\-\-px-8,
+    &.pt\:\-\-px-8,
+    &.tm\:\-\-px-8,
+    &.t\:\-\-px-8 {
+      @apply px-[8px];
+    }
+
+    &.\-\-px-5,
+    &.pt\:\-\-px-5,
+    &.tm\:\-\-px-5,
+    &.t\:\-\-px-5 {
+      @apply px-[5px];
+    }
+
+    &.\-\-py-3,
+    &.pt\:\-\-py-3,
+    &.tm\:\-\-py-3,
+    &.t\:\-\-py-3 {
+      @apply py-[3px];
+    }
+
+    /* &.\-\-h-35,
     &.pt\:\-\-h-35,
     &.tm\:\-\-h-35,
     &.t\:\-\-h-35 {
       @apply h-[35px];
-    }
+    } */
 
-    &.\-\-h-30,
+    /* &.\-\-h-30,
     &.pt\:\-\-h-30,
     &.tm\:\-\-h-30,
     &.t\:\-\-h-30 {
       @apply h-[30px];
+    } */
+
+    &.\-\-h-20,
+    &.pt\:\-\-h-20,
+    &.tm\:\-\-h-20,
+    &.t\:\-\-h-20 {
+      @apply h-[20px];
+    }
+
+    &.\-\-h-16,
+    &.pt\:\-\-h-16,
+    &.tm\:\-\-h-16,
+    &.t\:\-\-h-16 {
+      @apply h-[16px];
     }
   }
 }
@@ -78,22 +145,52 @@
       @apply px-[15px];
     }
 
-    &.\-\-py-5,
-    &.tm\:\-\-py-5,
-    &.m\:\-\-py-5 {
-      @apply py-[5px];
+    &.\-\-px-12,
+    &.tm\:\-\-px-12,
+    &.m\:\-\-px-12 {
+      @apply px-[12px];
     }
 
-    &.\-\-h-35,
+    &.\-\-px-8,
+    &.tm\:\-\-px-8,
+    &.m\:\-\-px-8 {
+      @apply px-[8px];
+    }
+
+    &.\-\-px-5,
+    &.tm\:\-\-px-5,
+    &.m\:\-\-px-5 {
+      @apply px-[5px];
+    }
+
+    &.\-\-py-3,
+    &.tm\:\-\-py-3,
+    &.m\:\-\-py-3 {
+      @apply py-[3px];
+    }
+
+    /* &.\-\-h-35,
     &.tm\:\-\-h-35,
     &.m\:\-\-h-35 {
       @apply h-[35px];
-    }
+    } */
 
-    &.\-\-h-30,
+    /* &.\-\-h-30,
     &.tm\:\-\-h-30,
     &.m\:\-\-h-30 {
       @apply h-[30px];
+    } */
+
+    &.\-\-h-20,
+    &.tm\:\-\-h-20,
+    &.m\:\-\-h-20 {
+      @apply h-[20px];
+    }
+
+    &.\-\-h-16,
+    &.tm\:\-\-h-16,
+    &.m\:\-\-h-16 {
+      @apply h-[16px];
     }
   }
 }

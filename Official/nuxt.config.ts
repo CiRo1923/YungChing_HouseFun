@@ -1,7 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 
 import CONFIG from './config.js'
-import POSTCSSFUNCTIONS from './postcss.function.js'
+import * as POSTCSSFUNCTIONS from './postcss.function.js'
 
 import VitePluginSvgSpritemap from '@spiriit/vite-plugin-svg-spritemap'
 import { ViteImageOptimizer } from 'vite-plugin-image-optimizer'
@@ -37,6 +37,7 @@ export default defineNuxtConfig({
   postcss: {
     plugins: {
       'tailwindcss/nesting': {},
+      'postcss-each': {},
       tailwindcss: {},
       'postcss-functions': {
         functions: POSTCSSFUNCTIONS,

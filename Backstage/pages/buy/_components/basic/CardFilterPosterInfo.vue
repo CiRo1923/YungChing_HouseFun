@@ -1,10 +1,10 @@
 <script setup>
 import CardFilter from '@pages/buy/_containers/CardFilter.vue'
 
-import PosterDataSource from '@pages/buy/_components/basic/PosterInfo/PosterDataSource.vue'
-import AgentName from '@pages/buy/_components/basic/PosterInfo/AgentName.vue'
-import AgentPhone from '@pages/buy/_components/basic/PosterInfo/AgentPhone.vue'
-import AgentLine from '@pages/buy/_components/basic/PosterInfo/AgentLine.vue'
+import PosterDataSource from '@pages/buy/_components/basic/posterInfo/PosterDataSource.vue'
+import AgentName from '@pages/buy/_components/basic/posterInfo/AgentName.vue'
+import AgentPhone from '@pages/buy/_components/basic/posterInfo/AgentPhone.vue'
+import AgentLine from '@pages/buy/_components/basic/posterInfo/AgentLine.vue'
 
 const props = defineProps({
   title: {

@@ -1,9 +1,9 @@
 <script setup>
 import CardFilter from '@pages/buy/_containers/CardFilter.vue'
 
-import Warning from '@pages/buy/_components/basic/Feature/Warning.vue'
-import CaseDescription from '@pages/buy/_components/basic/Feature/CaseDescription.vue'
-import CaseFeature from '@pages/buy/_components/basic/Feature/CaseFeature.vue'
+import Warning from '@pages/buy/_components/basic/feature/Warning.vue'
+import CaseDescription from '@pages/buy/_components/basic/feature/CaseDescription.vue'
+import CaseFeature from '@pages/buy/_components/basic/feature/CaseFeature.vue'
 
 const props = defineProps({
   title: {

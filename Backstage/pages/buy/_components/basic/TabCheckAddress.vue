@@ -37,6 +37,12 @@ const items = readonly({
 })
 
 const onCityChange = async () => {
+  if (!apiData.value.cityID) {
+    areas.value = []
+    roads.value = []
+    return
+  }
+
   const { status, data } = await project.onApiGETDistrictSelectOptions(apiData.value.cityID)
 
   areas.value = []
@@ -51,6 +57,8 @@ const onAreaChange = async () => {
   const { cityID, districtID } = apiData.value
 
   roads.value = []
+
+  if (!cityID || !districtID) return
 
   const { status, data } = await project.onApiGETRoad(cityID, districtID)
 

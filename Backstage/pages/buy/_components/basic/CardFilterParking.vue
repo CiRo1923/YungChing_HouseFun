@@ -1,7 +1,7 @@
 <script setup>
 import CardFilter from '@pages/buy/_containers/CardFilter.vue'
 
-import Info from '@pages/buy/_components/basic/Parking/Info.vue'
+import Info from '@pages/buy/_components/basic/parking/Info.vue'
 
 const props = defineProps({
   title: {

@@ -1,9 +1,9 @@
 <script setup>
 import CardFilter from '@pages/buy/_containers/CardFilter.vue'
 
-import CasePrice from '@pages/buy/_components/basic/Price/CasePrice.vue'
-import CaseParkingPrice from '@pages/buy/_components/basic/Price/CaseParkingPrice.vue'
-import CasePriceUnit from '@pages/buy/_components/basic/Price/CasePriceUnit.vue'
+import CasePrice from '@pages/buy/_components/basic/price/CasePrice.vue'
+import CaseParkingPrice from '@pages/buy/_components/basic/price/CaseParkingPrice.vue'
+import CasePriceUnit from '@pages/buy/_components/basic/price/CasePriceUnit.vue'
 
 const props = defineProps({
   title: {

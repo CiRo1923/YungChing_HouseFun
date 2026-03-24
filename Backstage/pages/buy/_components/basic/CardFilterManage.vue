@@ -1,9 +1,9 @@
 <script setup>
 import CardFilter from '@pages/buy/_containers/CardFilter.vue'
 
-import CaseManageType from '@pages/buy/_components/basic/Manage/CaseManageType.vue'
-import CaseManageDuty from '@pages/buy/_components/basic/Manage/CaseManageDuty.vue'
-import CaseManagePay from '@pages/buy/_components/basic/Manage/CaseManagePay.vue'
+import CaseManageType from '@pages/buy/_components/basic/manage/CaseManageType.vue'
+import CaseManageDuty from '@pages/buy/_components/basic/manage/CaseManageDuty.vue'
+import CaseManagePay from '@pages/buy/_components/basic/manage/CaseManagePay.vue'
 
 const props = defineProps({
   title: {

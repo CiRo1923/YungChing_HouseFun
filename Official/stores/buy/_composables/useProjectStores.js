@@ -26,11 +26,13 @@ import {
   // apiGETRealEstatePosterDataSourceSelectOptions,
 } from '@js/buy/_api/manage.js'
 
+import { onDevice } from '@js/_prototype.js'
+
 import { useProjectStore } from '@stores/buy/project.js'
 
 const useProjectStores = () => {
   const projectStores = useProjectStore()
-  const { options } = storeToRefs(projectStores)
+  const { device, options } = storeToRefs(projectStores)
 
   const onApiGETCitySelectOptions = async () => {
     const { config, status, data } = await apiGETCitySelectOptions()
@@ -294,7 +296,27 @@ const useProjectStores = () => {
   const onValueGetText = (optionName, value) => {
     const currOptions = options.value[optionName] || []
 
+    console.log(optionName)
+    console.log(currOptions)
+
     return currOptions.find((item) => item.value === value + '')?.text ?? null
+  }
+
+  const onResize = (type) => {
+    const isAdd = type === 'add'
+    const isRemove = type === 'remove'
+    const resize = () => {
+      device.value = onDevice()
+    }
+
+    if (isAdd) {
+      resize()
+      window.addEventListener('resize', resize)
+    }
+
+    if (isRemove) {
+      window.removeEventListener('resize', resize)
+    }
   }
 
   return {
@@ -324,6 +346,7 @@ const useProjectStores = () => {
     // onApiGETRealEstateFeatureCheckOptions,
     // onApiGETRealEstatePosterDataSourceSelectOptions,
     onValueGetText,
+    onResize,
   }
 }
 

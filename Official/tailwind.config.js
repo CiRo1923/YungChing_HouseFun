@@ -1,8 +1,9 @@
-const CONFIG = require('./config.js')
-const plugin = require('tailwindcss/plugin')
-const { boxShadow, letterSpacing, lineHeight } = require('./tailwind.extend.js')
+import CONFIG from './config.js'
+import plugin from 'tailwindcss/plugin.js'
+import { boxShadow, letterSpacing, lineHeight } from './tailwind.extend.js'
+import { onSetWidth } from './postcss.function.js'
 
-module.exports = {
+export default {
   content: [
     './components/**/*.{js,vue,ts}',
     './layouts/**/*.vue',
@@ -66,6 +67,7 @@ module.exports = {
       content: {
         default: "''",
       },
+      width: onSetWidth(),
       boxShadow: {
         ...boxShadow,
       },

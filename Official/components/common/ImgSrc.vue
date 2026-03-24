@@ -40,7 +40,6 @@ const props = defineProps({
   src: {
     type: [String, Object],
     default: null,
-    required: true,
   },
   alt: {
     type: String,

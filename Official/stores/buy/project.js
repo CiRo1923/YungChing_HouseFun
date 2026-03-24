@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 
 export const useProjectStore = defineStore('project', () => {
   const NAME = '好房網 買屋'
+  const device = ref('p')
   const options = ref({
     casePurpose: null,
     city: null,
@@ -155,6 +156,7 @@ export const useProjectStore = defineStore('project', () => {
 
   return {
     NAME,
+    device,
     options,
     apiData,
     parkingInfo,

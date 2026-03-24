@@ -1,7 +1,7 @@
 <script setup>
 import Container from '@components/buy/mContainer.vue'
 
-import BackStepEdit from '~/pages/buy/_components/basic/BackStepEdit.vue'
+import BackStepEdit from '@pages/buy/_components/basic/BackStepEdit.vue'
 import DataComponents from '@pages/buy/_containers/basic/DataComponents.vue'
 import SubmitButtons from '@pages/buy/_containers/basic/SubmitButtons.vue'
 
@@ -40,7 +40,7 @@ const onSaveSubmit = async (validate) => {
   }
 }
 
-await Promise.all([...useBuyBasicAllPromise(), detailAsync])
+await awaitAllPromise([...useBuyBasicAllPromise(), detailAsync])
 </script>
 
 <template>
@@ -50,7 +50,16 @@ await Promise.all([...useBuyBasicAllPromise(), detailAsync])
     }"
   >
     <template #tools>
-      <BackStepEdit />
+      <BackStepEdit
+        :anchor="{
+          to: {
+            name: 'buy-parking-id',
+            params: {
+              id: hfID,
+            },
+          },
+        }"
+      />
     </template>
     <Form
       as="div"

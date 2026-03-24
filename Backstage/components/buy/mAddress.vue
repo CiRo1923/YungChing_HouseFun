@@ -254,6 +254,20 @@ const onCityChange = () => {
 const onAreaChange = () => {
   emits('change:area')
 }
+
+const onInit = () => {
+  if (modelCity.value) {
+    onCityChange()
+  }
+
+  if (modelCity.value && modelArea.value) {
+    onAreaChange()
+  }
+}
+
+onMounted(() => {
+  onInit()
+})
 </script>
 
 <template>

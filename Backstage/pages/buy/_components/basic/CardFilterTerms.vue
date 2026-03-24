@@ -1,8 +1,8 @@
 <script setup>
 import CardFilter from '@pages/buy/_containers/CardFilter.vue'
 
-import Terms from '@pages/buy/_components/basic/Terms/Terms.vue'
-import AgreeUserTerm from '~/pages/buy/_components/basic/Terms/AgreeUserTerm.vue'
+import Terms from '@pages/buy/_components/basic/terms/Terms.vue'
+import AgreeUserTerm from '~/pages/buy/_components/basic/terms/AgreeUserTerm.vue'
 
 const props = defineProps({
   title: {

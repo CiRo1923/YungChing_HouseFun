@@ -1,7 +1,7 @@
 <script setup>
 import Container from '@components/buy/mContainer.vue'
 
-import BackStepNew from '~/pages/buy/_components/basic/BackStepNew.vue'
+import BackStepNew from '@pages/buy/_components/basic/BackStepNew.vue'
 import TabCheck from '@pages/buy/_components/basic/TabCheck.vue'
 import DataComponents from '@pages/buy/_containers/basic/DataComponents.vue'
 import SubmitButtons from '@pages/buy/_containers/basic/SubmitButtons.vue'

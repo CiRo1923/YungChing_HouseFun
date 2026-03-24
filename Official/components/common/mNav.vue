@@ -76,8 +76,9 @@ const onGetChildernHeight = () => {
   }
 }
 
-const onResize = () => {
+const onResize = async () => {
   device.value = onDevice()
+  await nextTick()
   onGetChildernHeight()
 }
 
@@ -95,8 +96,8 @@ onUnmounted(() => {
   <!-- <pre>
     {{ route.name }}
   </pre> -->
-  <nav class="m-nav ml-auto shrink-0">
-    <div class="m-nav-container flex pt:h-full">
+  <nav class="m-nav ml-auto shrink-0 m:absolute">
+    <div class="m-nav-container flex overflow-hidden m:max-h-0 pt:h-full">
       <ul class="m-nav-menu tracking-default t:gap-x-[15px] pt:flex pt:h-full p:gap-x-[30px]">
         <li
           class="m-nav-item pt:h-full"

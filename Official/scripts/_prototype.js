@@ -560,7 +560,7 @@ export const onValueToDateRange = (today, date, format) => {
 }
 
 // 轉換 html tag
-export const replaceSymbolToTag = (content, symbol, tag) => {
+export const onReplaceSymbolToTag = (content, symbol, tag) => {
   return content.replace(new RegExp(`\\${symbol}`, 'g'), tag)
   // return ''
 }
@@ -599,7 +599,7 @@ export const onDevice = () => {
 }
 
 // 取得裝置
-export const getOS = () => {
+export const onGetOS = () => {
   let userAgent = navigator.userAgent.toLocaleLowerCase()
   let osName = null
 
@@ -619,7 +619,7 @@ export const getOS = () => {
 }
 
 // 取得瀏覽器
-export const getBrowser = () => {
+export const onGetBrowser = () => {
   let userAgent = navigator.userAgent.toLocaleLowerCase()
   let browserName = null
 
@@ -1201,7 +1201,7 @@ export const countdown = {
 // 取得 YouTube 縮圖
 export const onGetYouTubeID = (url) => {
   const regex =
-    /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts|live)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i
+    /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?|shorts|live)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/i
   const match = url.match(regex)
   return match ? match[1] : null
 }

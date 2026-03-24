@@ -1,9 +1,9 @@
 <script setup>
 import CardFilter from '@pages/buy/_containers/CardFilter.vue'
 
-import Video from '@pages/buy/_components/basic/Media/Video.vue'
-import CaseVideoDisplay from '@pages/buy/_components/basic/Media/CaseVideoDisplay.vue'
-import Note from '@pages/buy/_components/basic/Media/Note.vue'
+import Video from '@pages/buy/_components/basic/media/Video.vue'
+import CaseVideoDisplay from '@pages/buy/_components/basic/media/CaseVideoDisplay.vue'
+import Note from '@pages/buy/_components/basic/media/Note.vue'
 
 const props = defineProps({
   title: {
