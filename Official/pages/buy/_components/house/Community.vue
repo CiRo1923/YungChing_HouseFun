@@ -4,9 +4,9 @@ import Content from '@pages/buy/_components/house/_Content.vue'
 
 <template>
   <Content
-    title="物件焦點"
+    title="社區資訊"
     :config="{
-      icon: 'icon_certification',
+      icon: 'icon_community',
     }"
   />
 </template>

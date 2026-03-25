@@ -296,9 +296,6 @@ const useProjectStores = () => {
   const onValueGetText = (optionName, value) => {
     const currOptions = options.value[optionName] || []
 
-    console.log(optionName)
-    console.log(currOptions)
-
     return currOptions.find((item) => item.value === value + '')?.text ?? null
   }
 

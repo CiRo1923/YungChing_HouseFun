@@ -91,6 +91,7 @@ const pinParkingInfo = computed(() => {
       id: 'parkingType',
       label: '停車方式',
       value: onValueGetText('parkingType', type),
+      isHidden: !type,
     },
   ]
 })

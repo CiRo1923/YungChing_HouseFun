@@ -4,9 +4,9 @@ import Content from '@pages/buy/_components/house/_Content.vue'
 
 <template>
   <Content
-    title="物件焦點"
+    title="我們發現，這些物件也很適合你"
     :config="{
-      icon: 'icon_certification',
+      icon: 'icon_house_recommend',
     }"
   />
 </template>

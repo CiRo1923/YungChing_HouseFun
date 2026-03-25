@@ -1,5 +1,5 @@
 <script setup>
-import ListItem from '@pages/buy/_components/ListItem.vue'
+import ListItem from '@pages/buy/_components/_ListItem.vue'
 
 // import { useProjectStore } from '@stores/buy/project.js'
 import { useHomeStore } from '@stores/buy/home.js'

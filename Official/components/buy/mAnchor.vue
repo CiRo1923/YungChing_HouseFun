@@ -150,6 +150,10 @@ const onClick = (e) => {
       @apply text-[--green-6a2d];
     }
 
+    &.\-\-text-orange-e646 {
+      @apply text-[--orange-e646];
+    }
+
     &.\-\-bg-white {
       @apply bg-[--white];
     }

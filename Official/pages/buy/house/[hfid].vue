@@ -4,6 +4,15 @@ import Container from '@components/common/mContainer.vue'
 import Basic from '@pages/buy/_components/house/Basic.vue'
 import Focus from '@pages/buy/_components/house/Focus.vue'
 import Information from '@pages/buy/_components/house/Information.vue'
+import Features from '@pages/buy/_components/house/Features.vue'
+import Environment from '@pages/buy/_components/house/Environment.vue'
+import Community from '@pages/buy/_components/house/Community.vue'
+import HousePrice from '@pages/buy/_components/house/HousePrice.vue'
+import ActualPrice from '@pages/buy/_components/house/ActualPrice.vue'
+import SocialLife from '@pages/buy/_components/house/SocialLife.vue'
+import Selections from '@pages/buy/_components/house/Selections.vue'
+import Recommend from '@pages/buy/_components/house/Recommend.vue'
+import Construction from '@pages/buy/_components/house/Construction.vue'
 
 import { useMeta } from '@composable/useMeta.js'
 
@@ -51,6 +60,15 @@ useMeta({
     <Basic />
     <Focus />
     <Information />
+    <Features />
+    <Environment />
+    <Community />
+    <HousePrice />
+    <ActualPrice />
+    <SocialLife />
+    <Selections />
+    <Recommend />
+    <Construction />
   </Container>
 </template>
 

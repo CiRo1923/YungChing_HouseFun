@@ -7,7 +7,7 @@ import Tools from '@pages/buy/_components/Tools.vue'
 import SearChMode from '@pages/buy/_components/SearChMode.vue'
 // import Card from '@pages/buy/_components/Region/Card.vue'
 import List from '@pages/buy/_components/List.vue'
-import Filter from '@pages/buy/_components/Region/Filter/Index.vue'
+import Filter from '@pages/buy/_components/region/filter/Index.vue'
 
 import { useMeta } from '@composable/useMeta.js'
 
