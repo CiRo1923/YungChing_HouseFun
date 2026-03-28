@@ -11,6 +11,15 @@ const props = defineProps({
     default: () => [],
   },
 })
+
+const onAnchorBind = (item) => {
+  const { to, href, onClick } = item
+
+  if (to) return { to, onClick }
+  if (href) return { href, onClick }
+
+  return { onClick }
+}
 </script>
 
 <template>
@@ -25,13 +34,14 @@ const props = defineProps({
           <span class="block text-[--gray-999] pt:shrink-0 p:w-[135px]">{{ item.label }}</span>
           <ul class="pt:grow" v-if="item.values && item.values.length !== 0">
             <li
-              class="flex p:gap-x-[15px]"
+              :class="[value.isFlex ? 'flex p:gap-x-[15px]' : 'p:space-y-[6px]']"
               v-for="(value, i) in item.values"
               :key="`${props.name}_values_${item.id}_${i}`"
             >
               <p>{{ value.content }}</p>
               <Anchor
                 :text="value.button.text"
+                v-bind="onAnchorBind(value.button)"
                 :config="{
                   icon: {
                     name: value.button.icon,
@@ -39,9 +49,9 @@ const props = defineProps({
                   },
                 }"
                 :setClass="{
-                  main: '--text-orange-e646 p:text-[14px]',
-                  text: 'font-normal underline',
-                  icon: 'h-[18px] w-[18px]',
+                  main: value.button.class?.main,
+                  text: ['font-normal underline', value.button.class?.text],
+                  icon: ['h-[18px] w-[18px]', value.button.class?.icon],
                 }"
                 v-if="value.button"
               />

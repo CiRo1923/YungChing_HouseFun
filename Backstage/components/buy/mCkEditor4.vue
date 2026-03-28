@@ -251,7 +251,7 @@ const editorConfig = computed(() => {
 
           if (!editable) return
 
-          editable.on('input', (evt) => {
+          editable.on('input', () => {
             if (rollingBack) return
             if (getLen() <= max) return
             rollingBack = true

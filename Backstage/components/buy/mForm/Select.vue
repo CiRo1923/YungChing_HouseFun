@@ -114,7 +114,9 @@ const options = computed(() => {
   const { schema } = config.value
   const { value, isToOption } = placeholder.value
   const options = props.options ? onDeepClone(props.options) : []
-  const placeholderItem = emptyData(onDeepClone(options[0]))
+  // When API fails or returns empty options, keep placeholder construction safe.
+  const placeholderBase = options[0] ? onDeepClone(options[0]) : {}
+  const placeholderItem = emptyData(placeholderBase) || {}
 
   if (isToOption) {
     placeholderItem[schema.label] = value

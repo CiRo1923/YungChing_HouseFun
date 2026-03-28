@@ -427,7 +427,7 @@ onUnmounted(() => {
     </ErrorMessage>
   </div>
   <Teleport to="body">
-    <Transition name="select-dropdown" @afterLeave="onCloseDropdown" appear>
+    <Transition name="select-dropdown" @after-leave="onCloseDropdown" appear>
       <div
         class="m-select-dropdown absolute z-[5] mt-[3px] overflow-hidden"
         :class="setClass.dropdown"

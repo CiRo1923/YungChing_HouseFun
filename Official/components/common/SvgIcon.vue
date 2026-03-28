@@ -23,7 +23,9 @@ const spriteHref = computed(() => {
   const buildAssetsDir = runtimeConfig.app.buildAssetsDir.replace(/^\/*/, '/')
   const spritePath = String(runtimeConfig.public.spritePath || '').replace(/^\/*/, '')
   const spriteBase = `${baseURL}${buildAssetsDir}${spritePath}`
-  const spriteURL = import.meta.dev ? `${spriteBase}?v=${spritemapVersion.value}` : spriteBase
+  const prodVersion = String(runtimeConfig.public.spriteVersion || '').trim()
+  const version = import.meta.dev ? String(spritemapVersion.value) : prodVersion
+  const spriteURL = version ? `${spriteBase}?v=${encodeURIComponent(version)}` : spriteBase
 
   return `${spriteURL}#${props.icon}`
 })

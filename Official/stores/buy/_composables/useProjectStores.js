@@ -24,7 +24,7 @@ import {
   // apiGETRealEstateVideoTypeSelectOptions,
   // apiGETRealEstateFeatureCheckOptions,
   // apiGETRealEstatePosterDataSourceSelectOptions,
-} from '@js/buy/_api/manage.js'
+} from '@js/_api/buy/manage.js'
 
 import { onDevice } from '@js/_prototype.js'
 
@@ -50,9 +50,15 @@ const useProjectStores = () => {
     const { config, status, data } = await apiGETRealEstatePurposeCheckOptions()
 
     if (status === 200) {
-      console.log(data)
-
-      options.value.casePurpose = data || []
+      options.value.casePurpose = data
+        ? [
+            {
+              text: '不限',
+              code: '',
+            },
+            ...data,
+          ]
+        : []
     }
 
     return { config, status, data }

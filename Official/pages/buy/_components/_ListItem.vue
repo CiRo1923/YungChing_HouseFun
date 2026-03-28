@@ -24,22 +24,28 @@ const props = defineProps({
 
 const device = ref('p')
 const isDeviceP = computed(() => device.value === 'p')
-const addressInfo = readonly([
-  {
-    key: 'address',
-    icon: {
-      name: 'icon_loaction',
-      color: 'text-[--gray-999]',
+const addressInfo = computed(() => {
+  const { address, community } = props.item
+  const { name } = community || {}
+  return [
+    {
+      id: 'address',
+      value: address,
+      icon: {
+        name: 'icon_loaction',
+        color: 'text-[--gray-999]',
+      },
     },
-  },
-  {
-    key: 'community',
-    icon: {
-      name: 'icon_community',
-      color: 'text-[--gray-666]',
+    {
+      id: 'community',
+      value: name,
+      icon: {
+        name: 'icon_community',
+        color: 'text-[--gray-666]',
+      },
     },
-  },
-])
+  ]
+})
 
 const basicInfo = computed(() => {
   const { caseType, buildAge, floor, layout } = props.item
@@ -137,7 +143,7 @@ onMounted(() => {
         <div class="grow text-[14px] leading-[1.64]">
           <ul class="flex items-center p:gap-x-[12px]">
             <template v-for="(data, idx) in addressInfo">
-              <li v-if="props.item[data.key]" :key="`${data.key}_${idx}`">
+              <li v-if="data.value" :key="`${data.id}_${idx}`">
                 <p class="flex items-center">
                   <SvgIcon
                     v-if="isDeviceP"
@@ -145,7 +151,7 @@ onMounted(() => {
                     class="p:h-[20px] p:w-[20px] p:p-[1px]"
                     :class="['tm:hidden', data.icon.color]"
                   />
-                  <em>{{ props.item[data.key] }}</em>
+                  <em>{{ data.value }}</em>
                 </p>
               </li>
             </template>

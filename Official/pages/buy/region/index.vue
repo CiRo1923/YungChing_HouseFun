@@ -1,13 +1,13 @@
-<script setup>
+﻿<script setup>
 import Container from '@components/common/mContainer.vue'
 import Content from '@components/common/mContent.vue'
 import Pagination from '@components/buy/mPagination.vue'
 
 import Tools from '@pages/buy/_components/Tools.vue'
-import SearChMode from '@pages/buy/_components/SearChMode.vue'
+import SearchMode from '@pages/buy/_components/SearchMode.vue'
 // import Card from '@pages/buy/_components/Region/Card.vue'
+import Filter from '@pages/buy/_components/Filter.vue'
 import List from '@pages/buy/_components/List.vue'
-import Filter from '@pages/buy/_components/region/filter/Index.vue'
 
 import { useMeta } from '@composable/useMeta.js'
 
@@ -19,8 +19,8 @@ import useHomeStores from '@stores/buy/_composables/useHomeStores.js'
 
 definePageMeta({
   layout: 'common',
-  title: '捷運找房',
-  channel: 'mrt',
+  title: '區域找房',
+  channel: 'region',
   requiresAuth: false,
 })
 
@@ -28,23 +28,51 @@ const common = useCommonStore()
 const project = useProjectStore()
 const home = useHomeStore()
 const route = useRoute()
-const page = computed(() => route.params.page)
 const { options } = storeToRefs(project)
 const { pagination } = storeToRefs(home)
 const { onWithLoadingAll } = common
 const {
-  onApiGETCitySelectOptions,
+  // onApiGETCitySelectOptions,
+  onApiGETRealEstatePurposeCheckOptions,
   onApiGETRealEstateTypeSelectOptions,
   onApiGETRealEstateParkingTypeSelectOptions,
 } = useProjectStores()
-const { onApiBuyList } = useHomeStores()
+const { onApiRegion, onApiBuyList } = useHomeStores()
+
+const onSearch = async () => {
+  common.onIsLoading(true)
+
+  await onApiBuyList({
+    region: '',
+  })
+
+  common.onIsLoading(false)
+}
 
 await onWithLoadingAll([
-  useAsyncData('city-options', () => onApiGETCitySelectOptions()),
+  // useAsyncData('city-options', () => onApiGETCitySelectOptions()),
+  useAsyncData('region-options', () => onApiRegion()),
+  useAsyncData('purpose-options', () => onApiGETRealEstatePurposeCheckOptions()),
   useAsyncData('type-options', () => onApiGETRealEstateTypeSelectOptions()),
-  useAsyncData('parking-yype-options', () => onApiGETRealEstateParkingTypeSelectOptions()),
-  useAsyncData(`buy-list-${page.value}`, () => onApiBuyList()),
+  useAsyncData('parking-type-options', () => onApiGETRealEstateParkingTypeSelectOptions()),
+  useAsyncData('buy-list-region', () => onApiBuyList()),
 ])
+
+watch(
+  () => route.query.pg,
+  async (value, prev) => {
+    if (value === prev) return
+
+    await onSearch()
+
+    if (import.meta.client) {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      })
+    }
+  }
+)
 
 useMeta({
   title: '買屋、購屋、買房子 | 好房網買屋',
@@ -64,11 +92,11 @@ useMeta({
     </pre>
   </div> -->
   <Tools>
-    <SearChMode />
+    <SearchMode @search="onSearch" />
   </Tools>
   <Container class="--inner p:mt-[20px]">
     <Content class="pt:--rounded-20 p:--py-20">
-      <Filter @info-click="onApiBuyList" />
+      <Filter @info-click="onSearch" />
       <!-- <Card /> -->
       <!-- <pre>
         {{ options.caseType }}
@@ -76,8 +104,8 @@ useMeta({
       <List />
       <Pagination
         :route="{
-          name: 'buy-region-page',
-          paramsKey: 'page',
+          name: 'buy-region',
+          queryKey: 'pg',
         }"
         :config="{
           nowPage: pagination.page,

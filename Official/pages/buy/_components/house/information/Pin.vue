@@ -4,17 +4,21 @@ import Container from '@pages/buy/_components/house/information/_Container.vue'
 import { onToFixed } from '@js/_prototype.js'
 
 import { useHouseStore } from '@stores/buy/house.js'
+import useProjectStores from '@stores/buy/_composables/useProjectStores.js'
 
 const house = useHouseStore()
-const { pin } = storeToRefs(house)
+const { onValueGetText } = useProjectStores()
+const { basic, pin } = storeToRefs(house)
 
 const items = computed(() => {
   const unit = '坪'
+  const { caseAmenitieSq, caseZoingCity } = basic.value
   const {
     build,
     main,
     balcony,
     totalAttached,
+    platform,
     terrace,
     stairwell,
     mezzanine,
@@ -70,15 +74,17 @@ const items = computed(() => {
                 content: `${balcony} ${unit}`,
               },
             ],
+            isHidden: isHidden(balcony),
           },
           {
             id: 'platform',
             label: '平台',
             values: [
               {
-                content: ``,
+                content: `${platform}  ${unit}`,
               },
             ],
+            isHidden: isHidden(platform),
           },
           {
             id: 'terrace',
@@ -135,7 +141,11 @@ const items = computed(() => {
       {
         id: 'common',
         label: '共用坪數',
-        values: [],
+        values: [
+          {
+            content: '',
+          },
+        ],
       },
     ],
     [
@@ -151,12 +161,20 @@ const items = computed(() => {
       {
         id: 'zoingCity',
         label: '土地使用分區',
-        values: [],
+        values: [
+          {
+            content: onValueGetText('zoingCity', caseZoingCity),
+          },
+        ],
       },
       {
         id: 'amenitieSq',
         label: '公設比',
-        values: [],
+        values: [
+          {
+            content: `${caseAmenitieSq} %`,
+          },
+        ],
       },
     ],
   ]

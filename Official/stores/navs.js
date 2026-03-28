@@ -10,9 +10,9 @@ export const useNavStore = defineStore('nav', () => {
           {
             label: '區域找房',
             to: {
-              name: 'buy-region-page',
-              params: {
-                page: 1,
+              name: 'buy-region',
+              query: {
+                pg: 1,
               },
             },
           },

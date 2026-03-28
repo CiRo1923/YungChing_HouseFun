@@ -73,19 +73,19 @@ const setClass = computed(() => {
   }
 })
 
-const onBind = (index) => {
+const onBind = (page) => {
   const { route } = props
   const params = route.paramsKey
     ? {
         params: {
-          [route.paramsKey]: index + 1,
+          [route.paramsKey]: page,
         },
       }
     : {}
   const query = route.queryKey
     ? {
         query: {
-          [route.queryKey]: index + 1,
+          [route.queryKey]: page,
         },
       }
     : {}
@@ -118,9 +118,9 @@ const onBind = (index) => {
           :is="as"
           class="m-pagination-anchor flex h-[30px] w-[30px] items-center justify-center rounded-[3px] transition-colors duration-300"
           :class="{
-            '--active': page === config.nowPage,
+            '--pagination-active': page === config.nowPage,
           }"
-          v-bind="onBind(index)"
+          v-bind="onBind(page)"
         >
           {{ page }}
         </component>
@@ -131,11 +131,11 @@ const onBind = (index) => {
 
 <style lang="postcss">
 .m-pagination-anchor {
-  &:not(.\-\-active) {
+  &:not(.\-\-pagination-active) {
     @apply text-[--gray-666];
   }
 
-  &.\-\-active {
+  &.\-\-pagination-active {
     @apply bg-[--green-8b0d] text-[--white];
   }
 }

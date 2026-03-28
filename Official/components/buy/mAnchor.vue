@@ -142,29 +142,29 @@ const onClick = (e) => {
       @apply text-[--white];
     }
 
-    &.\-\-text-gray-666 {
+    /* &.\-\-text-gray-666 {
       @apply text-[--gray-666];
-    }
+    } */
 
-    &.\-\-text-green-6a2d {
+    /* &.\-\-text-green-6a2d {
       @apply text-[--green-6a2d];
-    }
+    } */
 
     &.\-\-text-orange-e646 {
       @apply text-[--orange-e646];
     }
 
-    &.\-\-bg-white {
+    /* &.\-\-bg-white {
       @apply bg-[--white];
+    } */
+
+    &.\-\-bg-orange-e646 {
+      @apply bg-[--orange-e646];
     }
 
-    &.\-\-bg-green-6a2d {
-      @apply bg-[--green-6a2d];
-    }
-
-    &.\-\-border-gray-e5 {
+    /* &.\-\-border-gray-e5 {
       @apply border-[--gray-e5];
-    }
+    } */
   }
 
   &:disabled {

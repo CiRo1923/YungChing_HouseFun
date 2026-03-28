@@ -29,7 +29,7 @@ const config = computed(() => {
 const setClass = computed(() => {
   return {
     main: '',
-    title: '',
+    title: null,
     ...props.setClass,
   }
 })

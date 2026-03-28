@@ -57,7 +57,11 @@ const items = computed(() => {
             button: {
               text: '是否有其他樓層物件',
               icon: 'icon_question_dialog',
+              class: {
+                main: '--text-orange-e646 p:text-[14px]',
+              },
             },
+            isFlex: true,
           },
         ],
       },

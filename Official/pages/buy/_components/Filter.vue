@@ -1,6 +1,6 @@
 <script setup>
-import Information from '@pages/buy/_components/region/filter/Information.vue'
-import Mode from '@pages/buy/_components/region/filter/Mode.vue'
+import Information from '@pages/buy/_components/_Information.vue'
+import Mode from '@pages/buy/_components/_Mode.vue'
 
 const emits = defineEmits(['infoClick'])
 

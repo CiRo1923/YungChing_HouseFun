@@ -78,7 +78,7 @@ const config = computed(() => {
     props.config
   )
 })
-const isNumeric = computed(() => config.value.inputMode === 'numeric')
+const isNumeric = computed(() => /^(decimal|numeric)$/.test(config.value.inputMode))
 const formatLength = computed(() => {
   const { formatLength, maxlength } = config.value
 
@@ -133,7 +133,8 @@ const onInput = async (e) => {
     number: integer ? /[^0-9]/g : /[^0-9.]/g,
   }
 
-  const isRemoveChinese = (/numeric/.test(inputMode) || !inputChinese) && regex.chinese.test(value)
+  const isRemoveChinese =
+    (/^(decimal|numeric)$/.test(inputMode) || !inputChinese) && regex.chinese.test(value)
 
   await nextTick()
 
@@ -306,7 +307,7 @@ watch(
           <input
             :id="props.name"
             :type="props.type"
-            class="m-form-type min-w-0 grow"
+            class="m-form-type min-w-0 grow leading-[1]"
             :class="setClass.type"
             v-bind="onBind(field)"
             :inputMode="config.inputMode"
@@ -320,7 +321,7 @@ watch(
             @blur="onEvent($event, errorMessage)"
             @input="onInput($event)"
             @keydown.enter="onEnter($event)"
-          >
+          />
           <button
             v-if="config.isExistClose && !config.isDisabled"
             type="button"

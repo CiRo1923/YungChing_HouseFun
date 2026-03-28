@@ -1,4 +1,4 @@
-import { apiBuyHouse } from '@js/buy/_api/basic.js'
+import { apiBuyHouse } from '@js/_api/buy/basic.js'
 
 import { useHouseStore } from '@stores/buy/house.js'
 

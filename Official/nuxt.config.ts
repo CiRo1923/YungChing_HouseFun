@@ -7,9 +7,13 @@ import VitePluginSvgSpritemap from '@spiriit/vite-plugin-svg-spritemap'
 import { ViteImageOptimizer } from 'vite-plugin-image-optimizer'
 import { fileURLToPath } from 'node:url'
 
-const imageAssetInclude = new RegExp(
-  CONFIG.imgs.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\\/g, '/')
-)
+const spriteVersion =
+  process.env.NUXT_PUBLIC_SPRITE_VERSION ||
+  process.env.GITHUB_SHA ||
+  process.env.CI_COMMIT_SHA ||
+  process.env.VERCEL_GIT_COMMIT_SHA ||
+  process.env.npm_package_version ||
+  new Date().toISOString().replace(/[-:.TZ]/g, '')
 
 export default defineNuxtConfig({
   experimental: {
@@ -24,6 +28,7 @@ export default defineNuxtConfig({
         Object.entries(process.env).filter(([k]) => k.startsWith('NUXT_PUBLIC_'))
       ),
       spritePath: `${CONFIG.imgs}/svg/spritemap.svg`,
+      spriteVersion,
     },
   },
   imports: {
@@ -70,7 +75,7 @@ export default defineNuxtConfig({
       ],
     },
     esbuild: {
-      drop: process.env['NODE_ENV'] === 'production' ? ['console'] : [],
+      drop: process.env.NUXT_PUBLIC_APP_MODE === 'build' ? ['console'] : [],
     },
     build: {
       rollupOptions: {
@@ -106,36 +111,12 @@ export default defineNuxtConfig({
         },
       }) as never,
       ViteImageOptimizer({
-        include: imageAssetInclude,
+        // Keep SVG spritemap untouched; optimize only raster images.
+        include: /\.(png|jpe?g|gif|webp|avif)$/i,
         includePublic: false,
         logStats: true,
         cache: true,
         cacheLocation: '.cache/image-optimizer',
-        svg: {
-          multipass: true,
-          plugins: [
-            {
-              name: 'preset-default',
-              params: {
-                overrides: {
-                  cleanupNumericValues: false,
-                  cleanupIds: {
-                    minify: false,
-                    remove: false,
-                  },
-                  convertPathData: false,
-                },
-              },
-            },
-            'sortAttrs',
-            {
-              name: 'addAttributesToSVGElement',
-              params: {
-                attributes: [{ xmlns: 'http://www.w3.org/2000/svg' }],
-              },
-            },
-          ],
-        },
       }) as never,
     ],
     server: {

@@ -14,7 +14,7 @@
     }
 
     &:not(.\-\-error) {
-      @apply border-[--gray-e5];
+      @apply border-[--gray-ccce];
     }
 
     &:disabled,
@@ -82,19 +82,27 @@
       }
     }
 
-    &.\-\-py-8,
-    &.p\:\-\-py-8,
-    &.pt\:\-\-py-8 {
+    &.\-\-py-5,
+    &.p\:\-\-py-5,
+    &.pt\:\-\-py-5 {
       .m-form-element {
-        @apply py-[8px];
+        @apply py-[5px];
       }
     }
 
-    &.\-\-h-40,
-    &.p\:\-\-h-40,
-    &.pt\:\-\-h-40 {
+    &.\-\-h-45,
+    &.p\:\-\-h-45,
+    &.pt\:\-\-h-45 {
       .m-form-element {
-        @apply h-[40px];
+        @apply h-[45px];
+      }
+    }
+
+    &.\-\-h-35,
+    &.p\:\-\-h-35,
+    &.pt\:\-\-h-35 {
+      .m-form-element {
+        @apply h-[35px];
       }
     }
   }
@@ -111,21 +119,30 @@
       }
     }
 
-    &.\-\-py-8,
-    &.pt\:\-\-py-8,
-    &.tm\:\-\-py-8,
-    &.t\:\-\-py-8 {
+    &.\-\-py-5,
+    &.pt\:\-\-py-5,
+    &.tm\:\-\-py-5,
+    &.t\:\-\-py-5 {
       .m-form-element {
-        @apply py-[8px];
+        @apply py-[5px];
       }
     }
 
-    &.\-\-h-40,
-    &.pt\:\-\-h-40,
-    &.tm\:\-\-h-40,
-    &.t\:\-\-h-40 {
+    &.\-\-h-45,
+    &.pt\:\-\-h-45,
+    &.tm\:\-\-h-45,
+    &.t\:\-\-h-45 {
       .m-form-element {
-        @apply h-[40px];
+        @apply h-[45px];
+      }
+    }
+
+    &.\-\-h-35,
+    &.pt\:\-\-h-35,
+    &.tm\:\-\-h-35,
+    &.t\:\-\-h-35 {
+      .m-form-element {
+        @apply h-[35px];
       }
     }
   }
@@ -141,19 +158,27 @@
       }
     }
 
-    &.\-\-py-8,
-    &.tm\:\-\-py-8,
-    &.m\:\-\-py-8 {
+    &.\-\-py-5,
+    &.tm\:\-\-py-5,
+    &.m\:\-\-py-5 {
       .m-form-element {
-        @apply py-[8px];
+        @apply py-[5px];
       }
     }
 
-    &.\-\-h-40,
-    &.tm\:\-\-h-40,
-    &.m\:\-\-h-40 {
+    &.\-\-h-45,
+    &.tm\:\-\-h-45,
+    &.m\:\-\-h-45 {
       .m-form-element {
-        @apply h-[40px];
+        @apply h-[45px];
+      }
+    }
+
+    &.\-\-h-35,
+    &.tm\:\-\-h-35,
+    &.m\:\-\-h-35 {
+      .m-form-element {
+        @apply h-[35px];
       }
     }
   }
