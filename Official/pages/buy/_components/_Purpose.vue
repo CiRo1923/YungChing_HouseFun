@@ -10,7 +10,7 @@ const home = useHomeStore()
 const { options } = storeToRefs(project)
 const { purpose } = storeToRefs(home)
 
-const emits = defineEmits(['change'])
+// const emits = defineEmits(['change'])
 const props = defineProps({
   name: {
     type: String,
@@ -23,7 +23,7 @@ const onChange = (data) => {
   const { value, label } = data
 
   purpose.value.label = value ? label : `用途${label}`
-  selectDropdownRef.value.onClose()
+  // selectDropdownRef.value.onClose()
 
   // emits('change')
 }

@@ -302,7 +302,10 @@ const useProjectStores = () => {
   const onValueGetText = (optionName, value) => {
     const currOptions = options.value[optionName] || []
 
-    return currOptions.find((item) => item.value === value + '')?.text ?? null
+    return (
+      currOptions.find((item) => item.value === value + '' || item.code === value + '')?.text ??
+      null
+    )
   }
 
   const onResize = (type) => {

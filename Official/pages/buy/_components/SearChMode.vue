@@ -2,18 +2,23 @@
 import TabDefaultOval from '@components/buy/mTab/DefaultOval.vue'
 import Anchor from '@components/buy/mAnchor.vue'
 
+import Region from '@pages/buy/_components/_Region.vue'
 import Purpose from '@pages/buy/_components/_Purpose.vue'
 import Price from '@pages/buy/_components/_Price.vue'
 import Room from '@pages/buy/_components/_Room.vue'
+import KeywordRegion from '@pages/buy/_components/_KeywordRegion.vue'
 
 import { useProjectStore } from '@stores/buy/project.js'
 import { useHomeStore } from '@stores/buy/home.js'
+import useProjectStores from '@stores/buy/_composables/useProjectStores.js'
 
 const project = useProjectStore()
 const home = useHomeStore()
 const { options } = storeToRefs(project)
-const { region } = storeToRefs(home)
+const { region, purpose, price } = storeToRefs(home)
+const { onValueGetText } = useProjectStores()
 const route = useRoute()
+const router = useRouter()
 const emits = defineEmits(['search'])
 const items = readonly([
   {
@@ -49,8 +54,29 @@ const matchRoute = computed(() => route.matched[route.matched.length - 1])
 const channelName = computed(() => matchRoute.value?.meta.channel ?? null)
 
 const onSearch = () => {
+  router.push({
+    query: {
+      pg: 1,
+      ...(purpose.value.value ? { purpose: purpose.value.value } : {}),
+      // ...(price.value.value ? { price: price.value.value } : {}),
+    },
+  })
+
   emits('search')
 }
+
+const onInit = () => {
+  if (route.query.purpose) {
+    purpose.value.label = onValueGetText('casePurpose', route.query.purpose)
+    purpose.value.value = route.query.purpose
+  }
+
+  // if (route.query.price) {
+  //   purpose.value.value
+  // }
+}
+
+onInit()
 </script>
 
 <template>
@@ -68,32 +94,38 @@ const onSearch = () => {
     <div class="p:pb-[15px] p:pt-[25px]">
       <div class="p:flex p:gap-x-[5px]">
         <ul class="pt:flex pt:grow p:gap-x-[5px]">
+          <li class="p:w-[155px]">
+            <Region name="region" v-if="channelName === 'region'" />
+          </li>
+          <li class="p:w-[155px]">
+            <Purpose name="purpose" />
+          </li>
+          <li class="p:w-[155px]">
+            <Price name="price" />
+          </li>
+          <li class="p:w-[155px]">
+            <Room name="room" />
+          </li>
           <li>
-            <!-- <FormSelectDropdown name="regionDropdown" v-if="channelName === 'region'">
-              {{ region }}
-            </FormSelectDropdown> -->
-          </li>
-          <li class="p:w-[155px]">
-            <Purpose name="purpose" @change="onSearch" />
-          </li>
-          <li class="p:w-[155px]">
-            <Price name="price" @change="onSearch" />
-          </li>
-          <li class="p:w-[155px]">
-            <Room name="room" @change="onSearch" />
+            <KeywordRegion v-if="channelName === 'region'" />
           </li>
         </ul>
-        <Anchor
-          text="搜尋"
-          :config="{
-            icon: 'icon_search',
-          }"
-          :setClass="{
-            main: '--bg-orange-e646 --text-white --oval p:--h-45 p:--px-20',
-            icon: 'h-[16px] w-[16px]',
-          }"
-          @click="onSearch"
-        />
+        <div class="pt:shrink-0">
+          <Anchor
+            text="搜尋"
+            :config="{
+              icon: {
+                name: 'icon_search',
+                position: 'left',
+              },
+            }"
+            :setClass="{
+              main: '--bg-orange-e646 --text-white --oval p:--h-45 p:--px-20',
+              icon: 'h-[16px] w-[16px]',
+            }"
+            @click="onSearch"
+          />
+        </div>
       </div>
 
       <!-- <SearchRegion

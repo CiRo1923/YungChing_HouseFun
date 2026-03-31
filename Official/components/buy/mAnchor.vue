@@ -133,6 +133,10 @@ const onClick = (e) => {
     @apply border-[1px];
   }
 
+  &.\-\-rounded {
+    @apply rounded-[3px];
+  }
+
   &.\-\-oval {
     @apply rounded-full;
   }
@@ -160,6 +164,10 @@ const onClick = (e) => {
 
     &.\-\-bg-orange-e646 {
       @apply bg-[--orange-e646];
+    }
+
+    &.\-\-bg-green-8b0d {
+      @apply bg-[--green-8b0d];
     }
 
     /* &.\-\-border-gray-e5 {
@@ -214,6 +222,12 @@ const onClick = (e) => {
     &.p\:\-\-h-40,
     &.pt\:\-\-h-40 {
       @apply h-[40px];
+    }
+
+    &.\-\-h-35,
+    &.p\:\-\-h-35,
+    &.pt\:\-\-h-35 {
+      @apply h-[35px];
     }
 
     &.\-\-h-30,
@@ -275,6 +289,13 @@ const onClick = (e) => {
       @apply h-[40px];
     }
 
+    &.\-\-h-35,
+    &.pt\:\-\-h-35,
+    &.tm\:\-\-h-35,
+    &.t\:\-\-h-35 {
+      @apply h-[35px];
+    }
+
     &.\-\-h-30,
     &.pt\:\-\-h-30,
     &.tm\:\-\-h-30,
@@ -326,6 +347,12 @@ const onClick = (e) => {
     &.tm\:\-\-h-40,
     &.m\:\-\-h-40 {
       @apply h-[40px];
+    }
+
+    &.\-\-h-35,
+    &.tm\:\-\-h-35,
+    &.m\:\-\-h-35 {
+      @apply h-[35px];
     }
 
     &.\-\-h-30,

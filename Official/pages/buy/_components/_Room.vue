@@ -116,7 +116,7 @@ const onChange = (data) => {
           :config="{
             label: item.label,
             value: item.value,
-            isValueEmptyClickClear: true,
+            valueClickClear: '',
             sort: 'asc',
           }"
           @change="onChange"
@@ -163,8 +163,8 @@ const onChange = (data) => {
           :name="`${props.name}_agree`"
           v-model="room.hasAddon"
           :config="{
-            label: '房數不含加蓋',
             mode: 'boolean',
+            label: '房數不含加蓋',
           }"
         />
       </li>

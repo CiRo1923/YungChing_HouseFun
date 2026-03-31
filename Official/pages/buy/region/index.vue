@@ -42,9 +42,7 @@ const { onApiRegion, onApiBuyList } = useHomeStores()
 const onSearch = async () => {
   common.onIsLoading(true)
 
-  await onApiBuyList({
-    region: '',
-  })
+  await onApiBuyList(route.meta.channel)
 
   common.onIsLoading(false)
 }
@@ -55,7 +53,7 @@ await onWithLoadingAll([
   useAsyncData('purpose-options', () => onApiGETRealEstatePurposeCheckOptions()),
   useAsyncData('type-options', () => onApiGETRealEstateTypeSelectOptions()),
   useAsyncData('parking-type-options', () => onApiGETRealEstateParkingTypeSelectOptions()),
-  useAsyncData('buy-list-region', () => onApiBuyList()),
+  useAsyncData('buy-list-region', () => onApiBuyList(route.meta.channel)),
 ])
 
 watch(

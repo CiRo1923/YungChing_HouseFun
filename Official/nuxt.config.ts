@@ -38,6 +38,7 @@ export default defineNuxtConfig({
     `@/${CONFIG.css}/tailwind.css`,
     `@/${CONFIG.css}/_common/framework.css`,
     `@/${CONFIG.css}/_common/color.css`,
+    `@/${CONFIG.css}/_common/basic.css`,
   ],
   postcss: {
     plugins: {

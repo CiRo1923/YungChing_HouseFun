@@ -109,7 +109,7 @@ const onChange = () => {
             :class="setClass.icon"
           />
           <slot>
-            <em :class="setClass.label">{{ config.label }}</em>
+            <em class="m-form-label" :class="setClass.label">{{ config.label }}</em>
           </slot>
         </label>
       </div>
@@ -138,6 +138,10 @@ const onChange = () => {
       }
 
       &:checked {
+        & ~ .m-form-label {
+          @apply text-[--green-8b0d];
+        }
+
         & + .m-form-icon {
           @apply border-[--green-8b0d];
 

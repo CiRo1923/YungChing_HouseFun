@@ -264,6 +264,7 @@ const onWatchModel = (value) => {
 
 const onClear = () => {
   model.value = null
+  emits('update:modelValue', '')
 }
 
 watch(
@@ -329,6 +330,7 @@ watch(
             :class="{
               '--show': model,
             }"
+            tabindex="-1"
             @click="onClear"
           >
             <SvgIcon icon="icon_xmark" class="m-form-clear-icon" />

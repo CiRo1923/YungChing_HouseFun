@@ -79,6 +79,7 @@ const onSelected = () => {
         : model.value
       : ''
 }
+
 const onChange = (item) => {
   const { modelMode, schema } = config.value
   const isModelModeData = modelMode === 'data'
@@ -93,18 +94,18 @@ onSelected()
 <template>
   <div class="m-form --radios-oval overflow-hidden" :class="setClass.main">
     <ul
-      class="m-form-radios inline-flex overflow-hidden tm:flex-wrap tm:gap-x-[9px] tm:gap-y-[12px] p:rounded-[5px] p:bg-[--gray-f2]"
+      class="m-form-radios inline-flex overflow-hidden rounded-[4px] border-[1px] bg-[--white]"
       :class="setClass.radios"
     >
       <li
-        class="m-form-container overflow-hidden tm:h-[50px] tm:rounded-[5px] tm:bg-[--gray-f2] p:h-[35px]"
+        class="m-form-container"
         :class="setClass.container"
         v-for="(item, index) in props.options"
         :key="`${item[config.schema.label]}_${index}`"
       >
         <!-- '--checked': item[config.schema.value] == selected 用 == 會有形態別問題 '1' (string) !== 1 (int) -->
         <label
-          class="m-form-element relative flex h-full w-full cursor-pointer items-center justify-center text-[--gray-666] transition-colors duration-300 tm:gap-x-[3px] tm:px-[10px] p:gap-x-[5px] p:px-[12px]"
+          class="m-form-element relative flex h-full w-full cursor-pointer items-center justify-center transition-colors duration-300 tm:gap-x-[3px] p:gap-x-[5px]"
           :class="[
             {
               '--checked': item[config.schema.value] == selected,
@@ -124,7 +125,7 @@ onSelected()
           <!-- v-if="item[config.schema.value] == selected" 用 == 會有形態別問題 '1' (string) !== 1 (int) -->
           <SvgIcon
             icon="icon_check_solid"
-            class="m-form-icon h-[16px] w-[16px] text-[--orange-e646]"
+            class="m-form-icon h-[16px] w-[16px]"
             v-if="item[config.schema.value] == selected"
           />
           <em class="m-form-label text-[16px]">{{ item[config.schema.label] }}</em>
@@ -155,17 +156,35 @@ onSelected()
 <style lang="postcss">
 .m-form {
   &.\-\-radios-oval {
+    &.\-\-border {
+      .m-form-radios {
+        @apply border-[--gray-ccce];
+      }
+    }
+
+    &:not(.\-\-border) {
+      .m-form-radios {
+        @apply border-transparent;
+      }
+    }
+
+    .m-form-container {
+      &:not(:first-child) {
+        @apply border-l-[1px] border-l-[--gray-ccce];
+      }
+
+      &:not(:last-child) {
+        @apply border-r-[1px] border-r-[--gray-ccce];
+      }
+    }
+
     .m-form-element {
       &:not(&.\-\-checked) {
         @apply bg-transparent;
       }
 
       &.\-\-checked {
-        @apply bg-[--orange-feea];
-
-        .m-form-label {
-          @apply font-semibold;
-        }
+        @apply bg-[--green-8b0d] text-[--white];
       }
     }
   }
@@ -174,21 +193,83 @@ onSelected()
 @screen p {
   .m-form {
     &.\-\-radios-oval {
-      .m-form-element {
+      &.\-\-px-5,
+      &.p\:\-\-px-5,
+      &.pt\:\-\-px-5 {
+        .m-form-element {
+          @apply px-[5px];
+        }
+      }
+
+      &.\-\-h-45,
+      &.p\:\-\-h-45,
+      &.pt\:\-\-h-45 {
+        .m-form-radios {
+          @apply h-[45px];
+        }
+      }
+
+      /* .m-form-element {
         &:not(&.\-\-checked) {
           @apply px-[25px];
+        }
+      } */
+    }
+  }
+}
+
+/* @screen tm {
+  .m-form {
+    &.\-\-radios-oval {
+      .m-form-element {
+        &:not(&.\-\-checked) {
+          @apply pl-[19px] pr-[20px];
+        }
+      }
+    }
+  }
+} */
+
+@screen t {
+  .m-form {
+    &.\-\-radios-oval {
+      &.\-\-px-5,
+      &.pt\:\-\-px-5,
+      &.tm\:\-\-px-5,
+      &.t\:\-\-px-5 {
+        .m-form-element {
+          @apply px-[5px];
+        }
+      }
+
+      &.\-\-h-45,
+      &.pt\:\-\-h-45,
+      &.tm\:\-\-h-45,
+      &.t\:\-\-h-45 {
+        .m-form-radios {
+          @apply h-[45px];
         }
       }
     }
   }
 }
 
-@screen tm {
+@screen m {
   .m-form {
     &.\-\-radios-oval {
-      .m-form-element {
-        &:not(&.\-\-checked) {
-          @apply pl-[19px] pr-[20px];
+      &.\-\-px-5,
+      &.tm\:\-\-px-5,
+      &.m\:\-\-px-5 {
+        .m-form-element {
+          @apply px-[5px];
+        }
+      }
+
+      &.\-\-h-45,
+      &.tm\:\-\-h-45,
+      &.m\:\-\-h-45 {
+        .m-form-radios {
+          @apply h-[45px];
         }
       }
     }

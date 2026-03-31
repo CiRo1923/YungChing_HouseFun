@@ -2,15 +2,26 @@ import { defineStore } from 'pinia'
 
 export const useHomeStore = defineStore('hoem', () => {
   const content = ref(null)
-  const region = ref(null)
-  const mrt = ref(null)
+  const region = ref({
+    label: '',
+    value: '01',
+    options: null,
+  })
+  const mrt = ref({
+    label: '',
+    value: '01',
+    options: null,
+  })
   const purpose = ref({
-    value: '',
     label: '用途不限',
+    value: '',
   })
   const price = ref({
-    value: '',
     label: '總價不限',
+    value: '',
+    model: [],
+    maxPrice: null,
+    minPrice: null,
     options: [
       {
         label: '不限',
@@ -46,9 +57,15 @@ export const useHomeStore = defineStore('hoem', () => {
       },
     ],
   })
+  const repayment = ref({
+    downPayment: null,
+    monthlyPayment: null,
+    loanYears: 30,
+    annualInterestRate: null,
+  })
   const room = ref({
-    value: '',
     label: '格局不限',
+    value: '',
     hasAddon: false,
     options: [
       {
@@ -77,6 +94,7 @@ export const useHomeStore = defineStore('hoem', () => {
       },
     ],
   })
+  const keyword = ref(null)
   const info = ref({
     active: 0,
     items: [
@@ -115,7 +133,9 @@ export const useHomeStore = defineStore('hoem', () => {
     mrt,
     purpose,
     price,
+    repayment,
     room,
+    keyword,
     info,
     mode,
     pagination,

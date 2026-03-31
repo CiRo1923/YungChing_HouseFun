@@ -8,16 +8,21 @@ const useHomeStores = () => {
   const homeStores = useHomeStore()
   const route = useRoute()
   // const { apiData, options: projectOptions } = storeToRefs(projectStores)
-  const { content, mode, region, mrt, purpose, price, room, info, pagination } =
+  const { content, mode, region, mrt, purpose, price, room, keyword, info, pagination } =
     storeToRefs(homeStores)
 
   const onApiRegion = async () => {
-    if (region.value) return false
+    if (region.value.options) return false
 
     const { config, status, data } = await apiRegion()
 
     if (status === 200) {
-      region.value = data
+      const { items } = data
+
+      region.value.options = items.map((city) => ({
+        ...city,
+        areas: [{ id: city.id, name: '全區' }, ...city.areas],
+      }))
     }
 
     return { config, status, data }
@@ -35,12 +40,16 @@ const useHomeStores = () => {
     return { config, status, data }
   }
 
-  const onApiBuyList = async (params) => {
+  const onApiBuyList = async (channel) => {
+    const isRegion = channel === 'region'
+    const isMrt = channel === 'mrt'
     const { config, status, data } = await apiBuyList({
-      ...params,
+      ...(isRegion ? { region: region.value.value ? `${region.value.value}_region` : '' } : {}),
+      ...(isMrt ? { mrt: mrt.value.value ? `${mrt.value.value}_mrt` : '' } : {}),
       purpose: purpose.value.value ? `${purpose.value.value}_purpose` : '',
       price: price.value.value ? `${price.value.value}_price` : '',
       room: room.value.value ? `${room.value.value}_room` : '',
+      kw: keyword.value || '',
       tab: info.value.active,
       pg: route.query.pg,
       pageSize: 12,

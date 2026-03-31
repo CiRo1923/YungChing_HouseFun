@@ -32,7 +32,12 @@ const props = defineProps({
 })
 
 let rafId = null
+let measureId = 0
 const borderWidth = 0
+const waitForFrame = () =>
+  new Promise((resolve) => {
+    requestAnimationFrame(() => resolve())
+  })
 const elenemtRef = ref(null)
 const selectRef = ref(null)
 const dropdownRef = ref(null)
@@ -99,58 +104,85 @@ const onElementClick = async () => {
   onSwitchActive()
 
   await nextTick()
-  onDropdownOpen()
+  onDropdownHeight({ defer: false, fromHeight: 0 })
 }
 
-const onDropdownOpen = async () => {
+const getDropdownLayout = () => {
   const $elenemt = elenemtRef.value
   const $dropdown = dropdownRef.value
   const $dropdownContainer = dropdownContainerRef.value
-  const element = {
-    rect: $elenemt.getBoundingClientRect(),
+
+  if (!$elenemt || !$dropdown || !$dropdownContainer) return null
+
+  const elementRect = $elenemt.getBoundingClientRect()
+  const dropdownRect = $dropdown.getBoundingClientRect()
+  const dropdownContainerStyle = window.getComputedStyle($dropdownContainer)
+  const dropdownChildren = Array.from($dropdownContainer.children)
+  const lastChild = dropdownChildren.at(-1)
+  const lastChildStyle = lastChild ? window.getComputedStyle(lastChild) : null
+  const paddingBottom = parseFloat(dropdownContainerStyle.paddingBottom, 10) || 0
+  const lastChildMarginBottom = lastChildStyle
+    ? parseFloat(lastChildStyle.marginBottom, 10) || 0
+    : 0
+  const targetHeight = lastChild
+    ? lastChild.offsetTop + lastChild.offsetHeight + lastChildMarginBottom + paddingBottom
+    : $dropdownContainer.scrollHeight
+  const offsetTop = elementRect.height + elementRect.top + window.scrollY
+  const offsetLeftMin = dropdownRect.width + elementRect.left
+  const dropdownWidth = dropdownRect.width < elementRect.width ? elementRect.width : dropdownRect.width
+  const offsetLeftMax = elementRect.width + elementRect.left - dropdownWidth
+  const bodyWidth = document.body.scrollWidth
+  const left =
+    ((offsetLeftMin > bodyWidth && offsetLeftMax < 0) || offsetLeftMin < bodyWidth) &&
+    config.value.position !== 'right'
+      ? elementRect.left
+      : offsetLeftMax
+
+  return {
+    dropdownWidth,
+    elementRect,
+    left,
+    offsetTop,
+    targetHeight,
   }
+}
 
-  if ($elenemt && $dropdown && $dropdownContainer) {
-    const dropdown = {
-      rect: $dropdown.getBoundingClientRect(),
-    }
+const onDropdownHeight = async ({ defer = true, fromHeight = null } = {}) => {
+  const currentMeasureId = ++measureId
+  const $dropdown = dropdownRef.value
 
-    const offsetTop = element.rect.height + element.rect.top + window.scrollY
-    const offsetLeftMin = dropdown.rect.width + element.rect.left
-    const dropdownWidth =
-      dropdown.rect.width < element.rect.width ? element.rect.width : dropdown.rect.width
-    const offsetLeftMax = element.rect.width + element.rect.left - dropdownWidth
-    const bodyWidth = document.body.scrollWidth
-    const left =
-      ((offsetLeftMin > bodyWidth && offsetLeftMax < 0) || offsetLeftMin < bodyWidth) &&
-      config.value.position !== 'right'
-        ? element.rect.left
-        : offsetLeftMax
+  if (!$dropdown) return
 
+  if (defer) {
     await nextTick()
-
-    const dropdownContainer = {
-      style: window.getComputedStyle($dropdownContainer),
-      scrollHeight: $dropdownContainer.scrollHeight,
-    }
-
-    const maxHeight =
-      dropdownContainer.scrollHeight + parseFloat(dropdownContainer.style.padding, 10)
-
-    if (rafId) cancelAnimationFrame(rafId)
-
-    rafId = requestAnimationFrame(() => {
-      rafId = null
-
-      $dropdown.style.height = `${maxHeight}px`
-      $dropdown.style.top = `${offsetTop - borderWidth * 2}px`
-      $dropdown.style.left = `${left - borderWidth}px`
-
-      if (dropdown.rect.width < element.rect.width) {
-        $dropdown.style.minWidth = `${element.rect.width}px`
-      }
-    })
+    await waitForFrame()
   }
+
+  const layout = getDropdownLayout()
+
+  if (!layout || currentMeasureId !== measureId || !$dropdown.isConnected) return
+
+  if (rafId) cancelAnimationFrame(rafId)
+
+  const currentHeight = fromHeight ?? $dropdown.getBoundingClientRect().height
+
+  $dropdown.style.top = `${layout.offsetTop - borderWidth * 2}px`
+  $dropdown.style.left = `${layout.left - borderWidth}px`
+  $dropdown.style.height = `${currentHeight}px`
+
+  if (layout.dropdownWidth < layout.elementRect.width) {
+    $dropdown.style.minWidth = `${layout.elementRect.width}px`
+  }
+
+  void $dropdown.offsetHeight
+
+  rafId = requestAnimationFrame(() => {
+    if (currentMeasureId !== measureId || !$dropdown.isConnected) return
+
+    rafId = null
+
+    $dropdown.style.height = `${layout.targetHeight}px`
+  })
 }
 
 const onDropdownEnter = () => {
@@ -174,7 +206,7 @@ const onOutSide = (e) => {
 
 const onResize = () => {
   device.value = onDevice()
-  onDropdownOpen()
+  onDropdownHeight()
 }
 
 onMounted(() => {
@@ -191,6 +223,7 @@ onUnmounted(() => {
 
 defineExpose({
   onClose: onCloseDropdown,
+  onDropdownHeight,
 })
 </script>
 

@@ -43,7 +43,7 @@ const config = computed(() => {
       align: 'top',
       isDisabled: false,
       isJoin: null, // 只有 group 用
-      isValueEmptyClickClear: false,
+      valueClickClear: null,
     },
     props.config
   )
@@ -63,15 +63,17 @@ const model = computed({
         return props.modelValue
       }
 
-      if (sep && typeof props.modelValue === 'string') {
-        return props.modelValue
+      if (typeof props.modelValue === 'string') {
+        if (!props.modelValue) {
+          return currentValue === '' ? [''] : []
+        }
+
+        return sep
           ? props.modelValue
               .split(sep)
               .map((s) => s.trim())
               .filter(Boolean)
-          : currentValue === ''
-            ? ['']
-            : []
+          : [props.modelValue]
       }
 
       return currentValue === '' ? [''] : []
@@ -114,12 +116,35 @@ const joinSep = computed(() => {
   return null
 })
 
-const isEmptyClearItem = computed(() => {
-  return (
-    config.value.mode === 'group' &&
-    config.value.isValueEmptyClickClear === true &&
-    config.value.value === ''
-  )
+watch(
+  () => [config.value.mode, joinSep.value, props.modelValue],
+  ([mode, sep, modelValue]) => {
+    if (mode !== 'group' || !sep || !Array.isArray(modelValue)) return
+
+    const sortedValue = onSortGroupValue(modelValue)
+    const joinedValue = sortedValue.join(sep)
+
+    if (joinedValue !== props.modelValue) {
+      emits('update:modelValue', joinedValue)
+    }
+  },
+  {
+    immediate: true,
+  }
+)
+
+const valueClear = computed(() => {
+  const { mode, valueClickClear } = config.value
+  const hasValueClickClear = valueClickClear !== null
+  const isString = hasValueClickClear ? typeof valueClickClear === 'string' : false
+  const isClearItem = mode === 'group' && !!(valueClickClear || valueClickClear === '')
+
+  return hasValueClickClear && isClearItem
+    ? {
+        value: isString ? valueClickClear : valueClickClear.value,
+        regex: isString ? null : valueClickClear.regex,
+      }
+    : null
 })
 
 const setClass = computed(() => {
@@ -170,8 +195,30 @@ const onSortGroupValue = (list) => {
 const onChange = () => {
   const { label, value, mode } = config.value
 
-  if (isEmptyClearItem.value) {
-    model.value = []
+  if (valueClear.value) {
+    const isMatched = valueClear.value.value === value
+    const isRegExp = valueClear.value.regex && isMatched
+
+    if (isRegExp) {
+      const regex = new RegExp(valueClear.value.regex)
+
+      model.value = model.value.filter((item) => {
+        if (item === valueClear.value.value) return true
+        return !regex.test(String(item))
+      })
+    } else {
+      if (isMatched) {
+        model.value = valueClear.value.value ? [valueClear.value.value] : []
+      } else {
+        const valueClearIndex = model.value.findIndex((item) => item === valueClear.value.value)
+
+        if (valueClearIndex !== -1) {
+          const nextValue = [...model.value]
+          nextValue.splice(valueClearIndex, 1)
+          model.value = nextValue
+        }
+      }
+    }
   }
 
   emits('change', {
