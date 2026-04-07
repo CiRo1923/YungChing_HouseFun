@@ -4,21 +4,28 @@ export const useHomeStore = defineStore('hoem', () => {
   const content = ref(null)
   const region = ref({
     label: '',
-    value: '01',
+    params: '',
+    query: '01',
+    all: '',
     options: null,
   })
   const mrt = ref({
     label: '',
-    value: '01',
+    params: '',
+    query: '0102',
+    all: '',
     options: null,
   })
   const purpose = ref({
-    label: '用途不限',
-    value: '',
+    defaultLabel: '用途不限',
+    label: '',
+    params: '',
+    query: '',
   })
   const price = ref({
     label: '總價不限',
-    value: '',
+    query: '',
+    params: '',
     model: [],
     maxPrice: null,
     minPrice: null,
@@ -64,8 +71,10 @@ export const useHomeStore = defineStore('hoem', () => {
     annualInterestRate: null,
   })
   const room = ref({
-    label: '格局不限',
-    value: '',
+    defaultLabel: '格局不限',
+    label: '',
+    params: '',
+    query: '',
     hasAddon: false,
     options: [
       {
@@ -100,22 +109,34 @@ export const useHomeStore = defineStore('hoem', () => {
     items: [
       {
         id: 'all',
-        label: '全部 ({{ value }})',
+        label: {
+          pt: '全部 ({{ value }})',
+          m: '全部',
+        },
         value: 0,
       },
       {
         id: 'priceDrop',
-        label: '七天內降價 ({{ value }})',
+        label: {
+          pt: '七天內降價 ({{ value }})',
+          m: '降價',
+        },
         value: 1,
       },
       {
         id: 'new',
-        label: '兩周內上架 ({{ value }})',
+        label: {
+          pt: '兩周內上架 ({{ value }})',
+          m: '新上架',
+        },
         value: 2,
       },
       {
         id: 'vr',
-        label: 'VR ({{ value }})',
+        label: {
+          pt: 'VR ({{ value }})',
+          m: 'VR',
+        },
         value: 3,
       },
     ],

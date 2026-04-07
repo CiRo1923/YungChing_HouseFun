@@ -10,7 +10,7 @@ const onInfoClick = () => {
 </script>
 
 <template>
-  <div class="pt:flex p:mb-[30px] p:px-[20px]">
+  <div class="m:bg-[--gray-f7] m:py-[10px] tm:mb-[20px] pt:flex p:mb-[30px] p:px-[20px]">
     <Information @click="onInfoClick" />
     <Mode />
   </div>

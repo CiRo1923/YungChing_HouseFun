@@ -110,12 +110,44 @@ const onElementClick = async () => {
 const getDropdownLayout = () => {
   const $elenemt = elenemtRef.value
   const $dropdown = dropdownRef.value
-  const $dropdownContainer = dropdownContainerRef.value
 
-  if (!$elenemt || !$dropdown || !$dropdownContainer) return null
+  if (!$elenemt || !$dropdown) return null
 
   const elementRect = $elenemt.getBoundingClientRect()
   const dropdownRect = $dropdown.getBoundingClientRect()
+  const dropdownStyle = window.getComputedStyle($dropdown)
+  const offsetTop = elementRect.height + elementRect.top + window.scrollY
+  const viewportBottom = window.scrollY + window.innerHeight
+  const viewportMaxHeight = Math.max(viewportBottom - offsetTop, 0)
+  const dropdownMaxHeight = parseFloat(dropdownStyle.maxHeight, 10)
+  const maxHeight = Number.isNaN(dropdownMaxHeight)
+    ? viewportMaxHeight
+    : Math.min(viewportMaxHeight, dropdownMaxHeight)
+  const viewportWidth = document.documentElement.clientWidth
+  const isFullWidth = $dropdown.classList.contains('w-full') || dropdownStyle.width === '100%'
+  const dropdownWidth = isFullWidth
+    ? elementRect.width
+    : Math.max(dropdownRect.width, elementRect.width)
+  const maxLeft = Math.max(viewportWidth - dropdownWidth, 0)
+  const preferredLeft =
+    config.value.position === 'right' ? elementRect.right - dropdownWidth : elementRect.left
+  const left = Math.min(Math.max(preferredLeft, 0), maxLeft)
+
+  return {
+    dropdownWidth,
+    elementRect,
+    isFullWidth,
+    left,
+    maxHeight,
+    offsetTop,
+  }
+}
+
+const getDropdownTargetHeight = () => {
+  const $dropdownContainer = dropdownContainerRef.value
+
+  if (!$dropdownContainer) return 0
+
   const dropdownContainerStyle = window.getComputedStyle($dropdownContainer)
   const dropdownChildren = Array.from($dropdownContainer.children)
   const lastChild = dropdownChildren.at(-1)
@@ -124,39 +156,25 @@ const getDropdownLayout = () => {
   const lastChildMarginBottom = lastChildStyle
     ? parseFloat(lastChildStyle.marginBottom, 10) || 0
     : 0
-  const targetHeight = lastChild
+
+  return lastChild
     ? lastChild.offsetTop + lastChild.offsetHeight + lastChildMarginBottom + paddingBottom
     : $dropdownContainer.scrollHeight
-  const offsetTop = elementRect.height + elementRect.top + window.scrollY
-  const offsetLeftMin = dropdownRect.width + elementRect.left
-  const dropdownWidth = dropdownRect.width < elementRect.width ? elementRect.width : dropdownRect.width
-  const offsetLeftMax = elementRect.width + elementRect.left - dropdownWidth
-  const bodyWidth = document.body.scrollWidth
-  const left =
-    ((offsetLeftMin > bodyWidth && offsetLeftMax < 0) || offsetLeftMin < bodyWidth) &&
-    config.value.position !== 'right'
-      ? elementRect.left
-      : offsetLeftMax
-
-  return {
-    dropdownWidth,
-    elementRect,
-    left,
-    offsetTop,
-    targetHeight,
-  }
 }
 
 const onDropdownHeight = async ({ defer = true, fromHeight = null } = {}) => {
   const currentMeasureId = ++measureId
   const $dropdown = dropdownRef.value
+  const $dropdownContainer = dropdownContainerRef.value
 
-  if (!$dropdown) return
+  if (!$dropdown || !$dropdownContainer) return
 
   if (defer) {
     await nextTick()
     await waitForFrame()
   }
+
+  $dropdown.style.maxHeight = ''
 
   const layout = getDropdownLayout()
 
@@ -168,20 +186,32 @@ const onDropdownHeight = async ({ defer = true, fromHeight = null } = {}) => {
 
   $dropdown.style.top = `${layout.offsetTop - borderWidth * 2}px`
   $dropdown.style.left = `${layout.left - borderWidth}px`
-  $dropdown.style.height = `${currentHeight}px`
+  $dropdown.style.maxHeight = `${layout.maxHeight}px`
+  $dropdown.style.height = `${Math.min(currentHeight, layout.maxHeight)}px`
+  $dropdown.style.width = layout.isFullWidth ? `${layout.elementRect.width}px` : ''
+  $dropdownContainer.style.height = 'auto'
+  $dropdownContainer.style.maxHeight = 'none'
 
   if (layout.dropdownWidth < layout.elementRect.width) {
     $dropdown.style.minWidth = `${layout.elementRect.width}px`
+  } else if (!layout.isFullWidth) {
+    $dropdown.style.minWidth = ''
   }
 
   void $dropdown.offsetHeight
+
+  const targetHeight = getDropdownTargetHeight()
 
   rafId = requestAnimationFrame(() => {
     if (currentMeasureId !== measureId || !$dropdown.isConnected) return
 
     rafId = null
 
-    $dropdown.style.height = `${layout.targetHeight}px`
+    const finalHeight = Math.min(targetHeight, layout.maxHeight)
+
+    $dropdown.style.height = `${finalHeight}px`
+    $dropdownContainer.style.height = '100%'
+    $dropdownContainer.style.maxHeight = 'inherit'
   })
 }
 
@@ -239,7 +269,7 @@ defineExpose({
       <div class="m-form-container flex" :class="setClass.container">
         <button
           type="button"
-          class="m-form-element --select-dropdown grow text-left"
+          class="m-form-element --select-dropdown grow overflow-hidden text-left"
           :class="[
             setClass.element,
             { '--focus': isFocus },
@@ -290,13 +320,13 @@ defineExpose({
   <Teleport to="body">
     <Transition name="select-dropdown" @after-leave="onCloseDropdown" appear>
       <div
-        class="m-select-dropdown shadow-dropdown absolute z-[2] overflow-hidden rounded-[4px] p:mt-[10px]"
+        class="m-select-dropdown absolute z-[2] overflow-hidden shadow-dropdown p:mt-[10px]"
         :class="setClass.dropdown"
         ref="dropdownRef"
         v-if="isActive && !config.isDisabled"
       >
         <div
-          class="m-select-dropdown-container max-h-full bg-[--white]"
+          class="m-select-dropdown-container bg-[--white]"
           :class="setClass.dropdownContainer"
           ref="dropdownContainerRef"
         >
@@ -309,4 +339,35 @@ defineExpose({
 
 <style src="@css/_modules/buy/mForm.css"></style>
 <style src="@css/_modules/_vueTransition.css"></style>
-<style lang="postcss"></style>
+<style lang="postcss">
+@screen p {
+  .m-select-dropdown {
+    &.\-\-rounded,
+    &.p\:\-\-rounded,
+    &.pt\:\-\-rounded {
+      @apply rounded-[4px];
+    }
+  }
+}
+
+@screen t {
+  .m-select-dropdown {
+    &.\-\-rounded,
+    &.pt\:\-\-rounded,
+    &.tm\:\-\-rounded,
+    &.t\:\-\-rounded {
+      @apply rounded-[4px];
+    }
+  }
+}
+
+@screen m {
+  .m-select-dropdown {
+    &.\-\-rounded,
+    &.tm\:\-\-rounded,
+    &.m\:\-\-rounded {
+      @apply rounded-[4px];
+    }
+  }
+}
+</style>

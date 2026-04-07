@@ -23,10 +23,8 @@ import Nav from '@components/common/mNav.vue'
 
 <template>
   <div class="m-header relative bg-[--white] tm:h-[55px] p:h-[65px]">
-    <div
-      class="m-header-container mx-auto flex tm:px-[15px] pt:h-full p:max-w-[1220px] p:px-[10px]"
-    >
-      <div class="m-header-logo flex m:items-end m:gap-x-[3px] pt:flex-col pt:justify-center">
+    <div class="m-header-container mx-auto flex h-full tm:px-[15px] p:max-w-[1220px] p:px-[10px]">
+      <div class="m-header-logo flex m:items-center m:gap-x-[3px] pt:flex-col pt:justify-center">
         <ImgSrc
           src="buy/logo_text.svg"
           :setClass="{

@@ -58,7 +58,7 @@ const items = computed(() => {
               text: '是否有其他樓層物件',
               icon: 'icon_question_dialog',
               class: {
-                main: '--text-orange-e646 p:text-[14px]',
+                main: '--text-orange-e646 text-[14px] ',
               },
             },
             isFlex: true,
@@ -77,7 +77,7 @@ const items = computed(() => {
         label: '型態',
         values: [
           {
-            content: onValueGetText('caseType', caseType),
+            content: onValueGetText('caseType', caseType).text,
           },
         ],
       },

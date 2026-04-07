@@ -36,7 +36,7 @@ const setClass = computed(() => {
 </script>
 
 <template>
-  <header class="flex items-center gap-x-[5px] tm:mb-[10px]" :class="setClass.main">
+  <header class="flex items-center gap-x-[5px]" :class="setClass.main">
     <span
       class="tm:h-[22px] tm:w-[22px] p:h-[30px] p:w-[30px]"
       :class="setClass.icon"

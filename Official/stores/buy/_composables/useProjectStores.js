@@ -299,13 +299,34 @@ const useProjectStores = () => {
   //   return { config, status, data }
   // }
 
-  const onValueGetText = (optionName, value) => {
-    const currOptions = options.value[optionName] || []
+  const onValueGetText = (option, value) => {
+    const isOptionString = typeof option === 'string'
+    const currOptions = isOptionString ? options.value[option] : option || []
+    const onRecursive = (list, targetValue) => {
+      if (list) {
+        for (const item of list) {
+          // 直接掃整個物件的值
+          if (Object.values(item).includes(targetValue)) {
+            return item
+          }
 
-    return (
-      currOptions.find((item) => item.value === value + '' || item.code === value + '')?.text ??
-      null
-    )
+          // recursion
+          for (const value of Object.values(item)) {
+            if (Array.isArray(value)) {
+              const found = onRecursive(value, targetValue)
+              if (found) return found
+            } else if (value && typeof value === 'object') {
+              const found = onRecursive([value], targetValue)
+              if (found) return found
+            }
+          }
+        }
+      }
+
+      return null
+    }
+
+    return onRecursive(currOptions, value) || {}
   }
 
   const onResize = (type) => {

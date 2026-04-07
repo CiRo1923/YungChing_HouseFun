@@ -21,6 +21,11 @@ export default {
       changeOrigin: true,
       secure: false,
     },
+    '/api/v1': {
+      target: process.env.NUXT_PUBLIC_API_PATH,
+      changeOrigin: true,
+      secure: false,
+    },
     '/api': {
       target: process.env.NUXT_PUBLIC_MANAGE_API_PATH,
       changeOrigin: true,

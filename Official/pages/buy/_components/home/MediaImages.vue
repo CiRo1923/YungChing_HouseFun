@@ -2,20 +2,22 @@
 import Swiper12 from '@components/buy/mSwiper12.vue'
 import ImgSrc from '@components/common/ImgSrc.vue'
 
-import { useHouseStore } from '@stores/buy/house.js'
-
-const house = useHouseStore()
-const { media } = storeToRefs(house)
 const testImages = [1, 2, 3, 4]
-const hasImages = computed(() => media.value.images && media.value.images.length !== 0)
-const images = computed(() => (hasImages.value ? media.value.images : testImages))
+const props = defineProps({
+  datas: {
+    type: Array,
+    default: () => [],
+  },
+})
+const hasImages = computed(() => props.datas && props.datas.length !== 0)
+const images = computed(() => (hasImages.value ? props.datas : testImages))
 const onImageSize = (image) => {
   const hasWidth = /\{0\}/.test(image)
   const hasHeight = /\{0\}/.test(image)
   let resultImage = image
 
-  if (hasWidth) resultImage = resultImage.replace(/\{0\}/, 760)
-  if (hasHeight) resultImage = resultImage.replace(/\{1\}/, 570)
+  if (hasWidth) resultImage = resultImage.replace(/\{0\}/, 720)
+  if (hasHeight) resultImage = resultImage.replace(/\{1\}/, 540)
 
   return resultImage
 }

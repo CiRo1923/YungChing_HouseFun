@@ -1,6 +1,7 @@
 <script setup>
 import Container from '@components/common/mContainer.vue'
 
+import Breadcrumbs from '@pages/buy/_components/house/_Breadcrumbs.vue'
 import Basic from '@pages/buy/_components/house/Basic.vue'
 import Focus from '@pages/buy/_components/house/Focus.vue'
 import Information from '@pages/buy/_components/house/Information.vue'
@@ -50,6 +51,11 @@ useMeta({
 </script>
 
 <template>
+  <div class="bg-[--white] py-[12px] tm:px-[15px]">
+    <Container class="--inner">
+      <Breadcrumbs />
+    </Container>
+  </div>
   <!-- <pre>
     {{ detail }}
   </pre> -->

@@ -1,7 +1,7 @@
 <script setup>
 import FormSelectDropdown from '@components/buy/mForm/SelectDropdown.vue'
-import FormCheckBox from '@components/buy/mForm/CheckBox.vue'
 import Anchor from '@components/buy/mAnchor.vue'
+import FormCheckBox from '@components/buy/mForm/CheckBox.vue'
 
 import { useHomeStore } from '@stores/buy/home.js'
 // import useHomeStores from '@stores/buy/_composables/useHomeStores.js'
@@ -9,19 +9,19 @@ import { useHomeStore } from '@stores/buy/home.js'
 const home = useHomeStore()
 const { region } = storeToRefs(home)
 // const { onGetRegionData } = useHomeStores()
-const activeCityID = ref('01')
 const props = defineProps({
   name: {
     type: String,
     default: '',
   },
 })
+const activeCityID = ref(null)
 
 const getData = computed(() => {
-  const { value, options } = region.value
-  const areaArray = value ? value.split(',') : []
+  const { query, options } = region.value
+  const valueArray = query ? query.split(',') : []
 
-  return areaArray.map((val) => {
+  return valueArray.map((val) => {
     let city = null
     let area = null
 
@@ -80,6 +80,13 @@ const onCityClick = (value) => {
   activeCityID.value = value
 }
 
+const onInit = () => {
+  const datas = getData.value
+
+  activeCityID.value = datas[datas.length - 1].cityID
+}
+
+onInit()
 onGetLabel()
 </script>
 
@@ -91,24 +98,21 @@ onGetLabel()
       placeholder: '全區域',
     }"
     :setClass="{
-      main: 'p:--h-45 p:--px-12 p:--py-10 w-full',
+      main: 'p:--px-12 m:--h-50 pt:--h-45 tm:--px-10 pt:--border pt:--rounded --py-5 w-full',
+      dropdown: 'pt:--rounded m:w-full p:max-h-[420px]',
       dropdownContainer: 'p:min-w-[490px]',
     }"
   >
-    <div class="region-options flex items-start">
+    <div class="flex h-full items-start">
       <ul
-        class="scrollbar --y shrink-0 border-transparent bg-[--gray-f7] p:max-h-[420px] p:space-y-[5px] p:border-y-[20px] p:px-[20px]"
+        class="scrollbar --y max-h-full shrink-0 space-y-[5px] border-y-[20px] border-transparent bg-[--gray-f7] m:px-[5px] t:px-[10px] p:px-[20px]"
       >
-        <li
-          class="region-city-item"
-          v-for="(item, index) in region.options"
-          :key="`region_${item.id}_${index}`"
-        >
+        <li v-for="(item, index) in region.options" :key="`region_${item.id}_${index}`">
           <Anchor
             :text="item.name"
             :setClass="{
               main: [
-                'p:--h-35 p:--px-20 --rounded',
+                'p:--px-20 tm:--px-10 --h-35 --rounded',
                 activeCityID === item.id ? '--bg-green-8b0d --text-white' : '',
               ],
               text: 'font-normal',
@@ -118,7 +122,7 @@ onGetLabel()
         </li>
       </ul>
       <ul
-        class="scrollbar --y grid grow grid-cols-2 border-transparent p:max-h-[420px] p:gap-y-[20px] p:border-y-[20px] p:px-[50px]"
+        class="scrollbar --y grid max-h-full grow grid-cols-2 gap-y-[20px] border-y-[20px] border-transparent tm:px-[20px] p:px-[50px]"
       >
         <li
           :class="{ 'col-span-2': item.id === activeCityID }"
@@ -127,7 +131,7 @@ onGetLabel()
         >
           <FormCheckBox
             name="area"
-            v-model="region.value"
+            v-model="region.query"
             :config="{
               label: item.name,
               value: item.id,
@@ -144,3 +148,5 @@ onGetLabel()
     </div>
   </FormSelectDropdown>
 </template>
+
+<style></style>

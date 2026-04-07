@@ -190,24 +190,27 @@ const onDropdownOpen = () => {
       : 0
 
     const offsetTop = element.rect.height + element.rect.top + window.scrollY
-    const offsetLeftMin = dropdown.rect.width + element.rect.left
-    const dropdownWidth =
-      dropdown.rect.width < element.rect.width ? element.rect.width : dropdown.rect.width
-    const offsetLeftMax = element.rect.width + element.rect.left - dropdownWidth
-    const bodyWidth = document.body.scrollWidth
-    const left =
-      ((offsetLeftMin > bodyWidth && offsetLeftMax < 0) || offsetLeftMin < bodyWidth) &&
-      config.value.position !== 'right'
-        ? element.rect.left
-        : offsetLeftMax
+    const dropdownStyle = window.getComputedStyle($dropdown)
+    const viewportWidth = document.documentElement.clientWidth
+    const isFullWidth = $dropdown.classList.contains('w-full') || dropdownStyle.width === '100%'
+    const dropdownWidth = isFullWidth
+      ? element.rect.width
+      : Math.max(dropdown.rect.width, element.rect.width)
+    const maxLeft = Math.max(viewportWidth - dropdownWidth, 0)
+    const preferredLeft =
+      config.value.position === 'right' ? element.rect.right - dropdownWidth : element.rect.left
+    const left = Math.min(Math.max(preferredLeft, 0), maxLeft)
     const maxHeight = itemHeight + borderWidth
 
     $dropdown.style.height = `${maxHeight}px`
     $dropdown.style.top = `${offsetTop - borderWidth * 2}px`
     $dropdown.style.left = `${left - borderWidth}px`
+    $dropdown.style.width = isFullWidth ? `${element.rect.width}px` : ''
 
     if (dropdown.rect.width < element.rect.width) {
       $dropdown.style.minWidth = `${element.rect.width}px`
+    } else if (!isFullWidth) {
+      $dropdown.style.minWidth = ''
     }
 
     // console.log(dropdown.rect.width)
@@ -370,7 +373,7 @@ onUnmounted(() => {
       <div class="m-form-container flex" :class="setClass.container">
         <button
           type="button"
-          class="m-form-element --select grow text-left"
+          class="m-form-element --select grow overflow-hidden text-left"
           :class="[
             setClass.element,
             { '--focus': isFocus },

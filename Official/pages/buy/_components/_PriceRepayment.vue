@@ -55,16 +55,16 @@ const onHousePrice = () => {
   // 取較小值
   // const finalPrice = priceByMonthly
   totalPrice.value = Math.ceil(onToFixed(priceByMonthly, 0) / 10) * 10
-  price.value.value = `-${totalPrice.value}`
+  price.value.params = `-${totalPrice.value}`
 }
 
 onHousePrice()
 </script>
 
 <template>
-  <ul class="tracking-default p:w-[230px] p:space-y-[15px]">
-    <li class="p:space-y-[4px]">
-      <span class="block leading-[1.56] p:text-[16px]">自備款</span>
+  <ul class="grow space-y-[15px] tracking-default m:overflow-y-auto">
+    <li class="space-y-[4px]">
+      <span class="block text-[16px] leading-[1.56]">自備款</span>
       <FormInput
         name="downPayment"
         v-model="repayment.downPayment"
@@ -72,16 +72,16 @@ onHousePrice()
           placeholder: '請輸入',
         }"
         :setClass="{
-          main: 'p:--h-35 p:--px-12 w-full',
-          rearAssist: 'text-[--gray-999] p:text-[16px]',
+          main: '--h-35 --px-12 --border --rounded w-full',
+          rearAssist: 'text-[16px] text-[--gray-999]',
         }"
         @blur="onHousePrice"
       >
         <template #rearAssist>萬</template>
       </FormInput>
     </li>
-    <li class="p:space-y-[4px]">
-      <span class="block leading-[1.56] p:text-[16px]">每月可負擔房貸</span>
+    <li class="space-y-[4px]">
+      <span class="block text-[16px] leading-[1.56]">每月可負擔房貸</span>
       <FormInput
         name="monthlyPayment"
         v-model="repayment.monthlyPayment"
@@ -89,29 +89,29 @@ onHousePrice()
           placeholder: '請輸入',
         }"
         :setClass="{
-          main: 'p:--h-35 p:--px-12 p:--py-5 w-full',
-          rearAssist: 'text-[--gray-999] p:text-[16px]',
+          main: '--h-35 --px-12 p:--py-5 --border --rounded w-full',
+          rearAssist: 'text-[16px] text-[--gray-999]',
         }"
         @blur="onHousePrice"
       >
         <template #rearAssist>萬</template>
       </FormInput>
     </li>
-    <li class="p:space-y-[4px]">
-      <span class="block leading-[1.56] p:text-[16px]">貸款年限</span>
+    <li class="space-y-[4px]">
+      <span class="block text-[16px] leading-[1.56]">貸款年限</span>
       <FormRadiosOval
         :options="loanYears"
         v-model="repayment.loanYears"
         :setClass="{
-          main: '--border p:--px-5 p:--h-45',
+          main: '--border --px-5 --h-45',
           radios: 'w-full',
           container: 'flex-1',
         }"
         @change="onHousePrice"
       />
     </li>
-    <li class="p:space-y-[4px]">
-      <span class="block leading-[1.56] p:text-[16px]">貸款利率</span>
+    <li class="space-y-[4px]">
+      <span class="block text-[16px] leading-[1.56]">貸款利率</span>
       <FormInput
         name="annualInterestRate"
         v-model="repayment.annualInterestRate"
@@ -119,8 +119,8 @@ onHousePrice()
           placeholder: '2.65',
         }"
         :setClass="{
-          main: 'p:--h-35 p:--px-12 p:--py-5 w-full',
-          rearAssist: 'text-[--gray-999] p:text-[16px]',
+          main: '--h-35 --px-12 p:--py-5 --border --rounded w-full',
+          rearAssist: 'text-[16px] text-[--gray-999]',
         }"
         @blur="onHousePrice"
       >
@@ -128,13 +128,13 @@ onHousePrice()
       </FormInput>
     </li>
     <li>
-      <span class="block p:text-[16px]">參考總價</span>
+      <span class="block text-[16px]">參考總價</span>
       <div class="p:space-y-[8px]">
         <p class="flex items-center border-b-[2px] border-b-[--gray-ccce]">
-          <em class="grow text-center leading-[1.56] p:text-[18px]">{{ totalPrice }}</em>
-          <small class="shrink-0 text-[--gray-999] p:text-[16px]">萬</small>
+          <em class="grow text-center text-[18px] leading-[1.56]">{{ totalPrice }}</em>
+          <small class="shrink-0 text-[16px] text-[--gray-999]">萬</small>
         </p>
-        <p class="text-[--gray-999] p:text-[12px]">貸款以 7 成計算，搜尋參考總價浮動 10% 的物件</p>
+        <p class="text-[12px] text-[--gray-999]">貸款以 7 成計算，搜尋參考總價浮動 10% 的物件</p>
       </div>
     </li>
   </ul>

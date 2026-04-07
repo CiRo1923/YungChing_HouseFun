@@ -15,6 +15,12 @@
       @apply p-[24px];
     }
 
+    &.\-\-p-15,
+    &.p\:\-\-p-15,
+    &.pt\:\-\-p-15 {
+      @apply p-[15px];
+    }
+
     &.\-\-px-40,
     &.p\:\-\-px-40,
     &.pt\:\-\-px-40 {
@@ -50,6 +56,12 @@
     &.pt\:\-\-rounded-20 {
       @apply rounded-[20px];
     }
+
+    &.\-\-rounded-10,
+    &.p\:\-\-rounded-10,
+    &.pt\:\-\-rounded-10 {
+      @apply rounded-[10px];
+    }
   }
 }
 
@@ -60,6 +72,13 @@
     &.tm\:\-\-p-24,
     &.t\:\-\-p-24 {
       @apply p-[24px];
+    }
+
+    &.\-\-p-15,
+    &.pt\:\-\-p-15,
+    &.tm\:\-\-p-15,
+    &.t\:\-\-p-15 {
+      @apply p-[15px];
     }
 
     &.\-\-px-16,
@@ -103,6 +122,13 @@
     &.t\:\-\-rounded-20 {
       @apply rounded-[20px];
     }
+
+    &.\-\-rounded-10,
+    &.pt\:\-\-rounded-10,
+    &.tm\:\-\-rounded-10,
+    &.t\:\-\-rounded-10 {
+      @apply rounded-[10px];
+    }
   }
 }
 
@@ -112,6 +138,12 @@
     &.tm\:\-\-p-24,
     &.m\:\-\-p-24 {
       @apply p-[24px];
+    }
+
+    &.\-\-p-15,
+    &.tm\:\-\-p-15,
+    &.m\:\-\-p-15 {
+      @apply p-[15px];
     }
 
     &.\-\-px-16,
@@ -148,6 +180,12 @@
     &.tm\:\-\-rounded-20,
     &.m\:\-\-rounded-20 {
       @apply rounded-[20px];
+    }
+
+    &.\-\-rounded-10,
+    &.tm\:\-\-rounded-10,
+    &.m\:\-\-rounded-10 {
+      @apply rounded-[10px];
     }
   }
 }

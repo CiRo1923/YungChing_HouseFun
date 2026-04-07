@@ -25,7 +25,7 @@ const items = computed(() => {
               text: '有議價空間嗎',
               icon: 'icon_question_dialog',
               class: {
-                main: '--text-orange-e646 p:text-[14px]',
+                main: '--text-orange-e646 text-[14px]',
               },
             },
           },
@@ -43,7 +43,7 @@ const items = computed(() => {
               text: '貸款試算',
               icon: 'icon_calculator',
               class: {
-                main: 'p:text-[16px]',
+                main: 'p:text-[16px] tm:text-[14px]',
               },
             },
             isFlex: true,

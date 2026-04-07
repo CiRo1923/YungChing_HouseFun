@@ -30,9 +30,8 @@ const options = readonly([
   },
 ])
 
-const onChange = async () => {
-  await nextTick()
-  await selectDropdownRef.value?.onDropdownHeight()
+const onChange = () => {
+  selectDropdownRef.value?.onDropdownHeight()
 }
 </script>
 
@@ -41,26 +40,31 @@ const onChange = async () => {
     :name="`${props.name}Dropdown`"
     v-model="price.label"
     :setClass="{
-      main: 'p:--h-45 p:--px-12 p:--py-10 w-full',
-      dropdownContainer: 'p:min-w-[270px] p:p-[20px]',
+      main: 'p:--px-12 m:--h-50 pt:--h-45 tm:--px-10 pt:--border pt:--rounded --py-5 w-full',
+      dropdown: 'pt:--rounded m:w-full',
+      dropdownContainer: 'm:px-[30px] m:py-[20px] pt:p-[20px] p:w-[270px]',
     }"
     ref="selectDropdownRef"
   >
-    <ul class="flex items-center border-b-[1px] border-b-[--gray-ccce] p:mb-[15px] p:pb-[15px]">
-      <li class="flex-1" v-for="(item, index) in options" :key="`${item.value}_${index}`">
-        <FormRadio
-          name="priceType"
-          v-model="type"
-          :config="{
-            label: item.label,
-            value: item.value,
-          }"
-          @change="onChange"
-        />
-      </li>
-    </ul>
-    <PriceTotal v-if="type === 'total'" />
-    <PriceRepayment v-if="type === 'repayment'" />
+    <div class="flex max-h-full flex-col">
+      <ul
+        class="mb-[15px] flex shrink-0 items-center border-b-[1px] border-b-[--gray-ccce] pb-[15px]"
+      >
+        <li class="flex-1" v-for="(item, index) in options" :key="`${item.value}_${index}`">
+          <FormRadio
+            name="priceType"
+            v-model="type"
+            :config="{
+              label: item.label,
+              value: item.value,
+            }"
+            @change="onChange"
+          />
+        </li>
+      </ul>
+      <PriceTotal v-if="type === 'total'" />
+      <PriceRepayment v-if="type === 'repayment'" />
+    </div>
   </FormSelectDropdown>
 </template>
 

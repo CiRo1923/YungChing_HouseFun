@@ -52,5 +52,3 @@ const { basic } = storeToRefs(house)
 </template>
 
 <style></style>
-<style></style>
-<style></style>

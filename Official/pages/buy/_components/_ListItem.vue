@@ -2,7 +2,8 @@
 import SvgIcon from '@components/common/SvgIcon.vue'
 import Separator from '@components/buy/mSeparator.vue'
 import TagDefault from '@components/buy/mTag/Default.vue'
-import Swiper12 from '@components/buy/mSwiper12.vue'
+
+import MediaImages from '@pages/buy/_components/home/MediaImages.vue'
 
 import { numberComma, onToFixed, onDevice } from '@js/_prototype.js'
 
@@ -57,7 +58,7 @@ const basicInfo = computed(() => {
     {
       id: 'caseType',
       label: '型態',
-      value: onValueGetText('caseType', caseType),
+      value: onValueGetText('caseType', caseType).text,
     },
     {
       id: 'buildAge',
@@ -96,7 +97,7 @@ const pinParkingInfo = computed(() => {
     {
       id: 'parkingType',
       label: '停車方式',
-      value: onValueGetText('parkingType', type),
+      value: onValueGetText('parkingType', type).text,
       isHidden: !type,
     },
   ]
@@ -159,13 +160,13 @@ onMounted(() => {
           <Separator
             :items="basicInfo"
             :setClass="{
-              main: '--horizontal p:--gap-x-20',
+              main: '--horizontal p:--gap-x-20 tm:--gap-x-12',
             }"
           />
           <Separator
             :items="pinParkingInfo"
             :setClass="{
-              main: '--horizontal p:--gap-x-20',
+              main: '--horizontal p:--gap-x-20 tm:--gap-x-12',
             }"
           />
         </div>
@@ -199,26 +200,13 @@ onMounted(() => {
   <div
     class="relative overflow-hidden rounded-[8px] bg-[--gray-999] m:mb-[6px] m:h-[270px] m:w-full pt:h-[190px] pt:w-[250px]"
   >
-    <div class="absolute">
+    <!-- <div class="absolute">
       <p>gold: {{ props.item.badges.gold }}</p>
       <p>vr: {{ props.item.badges.vr }}</p>
       <p>aiTour: {{ props.item.badges.aiTour }}</p>
       <p>aiDecor: {{ props.item.badges.aiDecor }}</p>
-    </div>
-    <Swiper12
-      :name="`houseImages[${config.index}]`"
-      :data="[1, 2, 3, 4]"
-      :config="{
-        nav: true,
-      }"
-      :setClass="{
-        main: 'h-full',
-        nav: 'h-[30px] w-[30px] p-[6px] text-[--white]',
-      }"
-      v-slot="{ item: swiperItem }"
-    >
-      <div class="flex h-full flex-col items-center justify-center">Image {{ swiperItem }}</div>
-    </Swiper12>
+    </div> -->
+    <MediaImages :datas="props.item.media.images" />
   </div>
 </template>
 

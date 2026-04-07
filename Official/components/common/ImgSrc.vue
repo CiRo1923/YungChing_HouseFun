@@ -20,7 +20,7 @@ const resolveBundledImg = (raw) => {
   // 外部/特殊
   if (/^(https?:|data:|blob:)/.test(raw)) {
     if (/^http/.test(raw)) {
-      const imgName = /\/([^/?#]+)(?:\?|$)/.exec(raw)[0]
+      const imgName = /\/([^/?#]+)(?:\?|$)/.test(raw) ? /\/([^/?#]+)(?:\?|$)/.exec(raw)[0] : raw
       const hasQuery = /\?/.test(raw)
       return `${encodeURI(raw)}${hasQuery ? '&' : '?'}${hashHex(imgName, 8)}`
     }
@@ -90,7 +90,13 @@ const path = computed(() => {
   return resolveBundledImg(src)
 })
 
-const setClass = computed(() => ({ main: '', img: '', ...props.setClass }))
+const setClass = computed(() => {
+  return {
+    main: '',
+    img: '',
+    ...props.setClass,
+  }
+})
 
 // ---- lazy ----
 const onEnterView = (entries, observer) => {

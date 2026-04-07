@@ -33,18 +33,18 @@ const onInputBlur = () => {
 
   if (isSame) {
     price.value.label = `${price.value.maxPrice} 萬`
-    price.value.value = price.value.maxPrice
+    price.value.query = price.value.maxPrice
   }
 
   if (price.value.minPrice && price.value.maxPrice) {
     price.value.label = `${price.value.minPrice} - ${price.value.maxPrice} 萬`
-    price.value.value = `${price.value.minPrice}-${price.value.maxPrice}`
+    price.value.query = `${price.value.minPrice}-${price.value.maxPrice}`
   } else if (price.value.minPrice) {
     price.value.label = `${price.value.minPrice} 萬以上`
-    price.value.value = `${price.value.minPrice}-`
+    price.value.query = `${price.value.minPrice}-`
   } else if (price.value.maxPrice) {
     price.value.label = `${price.value.maxPrice} 萬以下`
-    price.value.value = `-${price.value.maxPrice}`
+    price.value.query = `-${price.value.maxPrice}`
   }
 
   // emits('change')
@@ -93,7 +93,7 @@ const onRadioChange = (data) => {
       : nextMin === 0
         ? `${nextMax} 萬以下`
         : `${/^\d+/.exec(minLabel.replace(/\s?萬/, ''))[0]} - ${/\d+$/.exec(maxLabel.replace(/\s?萬/, ''))[0]} 萬`
-  price.value.value =
+  price.value.query =
     nextMax === 6001
       ? '6000-'
       : nextMin === 0 && nextMax
@@ -108,7 +108,7 @@ const onRadioChange = (data) => {
 </script>
 
 <template>
-  <ul class="p:space-y-[15px]">
+  <ul class="grow space-y-[15px]">
     <li v-for="(item, index) in price.options" :key="`${props.name}_${item.code}_${index}`">
       <FormCheckBox
         :name="props.name"
@@ -122,7 +122,7 @@ const onRadioChange = (data) => {
         @change="onRadioChange"
       />
     </li>
-    <li class="flex items-center p:gap-x-[10px]">
+    <li class="flex items-center gap-x-[10px]">
       <FormInput
         name="minPrice"
         v-model="price.minPrice"
@@ -135,7 +135,7 @@ const onRadioChange = (data) => {
           checkNotIsZero: true,
         }"
         :setClass="{
-          main: 'p:--h-35 p:--px-12 p:--py-5 p:w-[80px]',
+          main: '--h-35 --px-12 --py-5 --border --rounded p:w-[80px]',
         }"
         @blur="onInputBlur"
       />
@@ -152,7 +152,7 @@ const onRadioChange = (data) => {
           checkNotIsZero: true,
         }"
         :setClass="{
-          main: 'p:--h-35 p:--px-12 p:--py-5 p:w-[80px]',
+          main: '--h-35 --px-12 --py-5 --border --rounded p:w-[80px]',
         }"
         @blur="onInputBlur"
       />

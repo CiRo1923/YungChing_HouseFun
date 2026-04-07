@@ -3,24 +3,31 @@ import TabDefaultOval from '@components/buy/mTab/DefaultOval.vue'
 import Anchor from '@components/buy/mAnchor.vue'
 
 import Region from '@pages/buy/_components/_Region.vue'
+import Mrt from '@pages/buy/_components/_Mrt.vue'
 import Purpose from '@pages/buy/_components/_Purpose.vue'
 import Price from '@pages/buy/_components/_Price.vue'
 import Room from '@pages/buy/_components/_Room.vue'
-import KeywordRegion from '@pages/buy/_components/_KeywordRegion.vue'
+import Keyword from '@pages/buy/_components/_Keyword.vue'
+import Condition from '@pages/buy/_components/_Condition.vue'
 
-import { useProjectStore } from '@stores/buy/project.js'
-import { useHomeStore } from '@stores/buy/home.js'
-import useProjectStores from '@stores/buy/_composables/useProjectStores.js'
+import { onDevice } from '@js/_prototype.js'
 
-const project = useProjectStore()
-const home = useHomeStore()
-const { options } = storeToRefs(project)
-const { region, purpose, price } = storeToRefs(home)
-const { onValueGetText } = useProjectStores()
+// import { useProjectStore } from '@stores/buy/project.js'
+// import { useHomeStore } from '@stores/buy/home.js'
+// import useProjectStores from '@stores/buy/_composables/useProjectStores.js'
+import useHomeStores from '@stores/buy/_composables/useHomeStores.js'
+
+// const project = useProjectStore()
+// const home = useHomeStore()
+// const { options } = storeToRefs(project)
+// const { region, mrt, purpose } = storeToRefs(home)
+// const { onValueGetText } = useProjectStores()
+const { tabQuery, listQuery } = useHomeStores()
 const route = useRoute()
 const router = useRouter()
-const emits = defineEmits(['search'])
-const items = readonly([
+
+const emits = defineEmits(['init', 'search'])
+const items = computed(() => [
   {
     id: 'region',
     label: '區域找房',
@@ -28,6 +35,7 @@ const items = readonly([
     to: {
       name: 'buy-region',
       query: {
+        ...tabQuery.value,
         pg: 1,
       },
     },
@@ -39,6 +47,7 @@ const items = readonly([
     to: {
       name: 'buy-mrt',
       query: {
+        ...tabQuery.value,
         pg: 1,
       },
     },
@@ -50,33 +59,20 @@ const items = readonly([
   },
 ])
 
-const matchRoute = computed(() => route.matched[route.matched.length - 1])
-const channelName = computed(() => matchRoute.value?.meta.channel ?? null)
+const isChannelRegion = computed(() => route.meta.channel === 'region')
+const isChannelMrt = computed(() => route.meta.channel === 'mrt')
 
-const onSearch = () => {
-  router.push({
+const onSearch = async () => {
+  await router.push({
     query: {
+      ...listQuery.value,
       pg: 1,
-      ...(purpose.value.value ? { purpose: purpose.value.value } : {}),
       // ...(price.value.value ? { price: price.value.value } : {}),
     },
   })
 
   emits('search')
 }
-
-const onInit = () => {
-  if (route.query.purpose) {
-    purpose.value.label = onValueGetText('casePurpose', route.query.purpose)
-    purpose.value.value = route.query.purpose
-  }
-
-  // if (route.query.price) {
-  //   purpose.value.value
-  // }
-}
-
-onInit()
 </script>
 
 <template>
@@ -91,26 +87,27 @@ onInit()
       anchor: 'm:w-full p:w-[160px]',
     }"
   >
-    <div class="p:pb-[15px] p:pt-[25px]">
-      <div class="p:flex p:gap-x-[5px]">
-        <ul class="pt:flex pt:grow p:gap-x-[5px]">
-          <li class="p:w-[155px]">
-            <Region name="region" v-if="channelName === 'region'" />
-          </li>
-          <li class="p:w-[155px]">
-            <Purpose name="purpose" />
-          </li>
-          <li class="p:w-[155px]">
-            <Price name="price" />
-          </li>
-          <li class="p:w-[155px]">
-            <Room name="room" />
-          </li>
-          <li>
-            <KeywordRegion v-if="channelName === 'region'" />
-          </li>
-        </ul>
-        <div class="pt:shrink-0">
+    <div class="search-mode p:space-y-[15px] p:pt-[25px]">
+      <ul class="search-mode-content relative flex flex-wrap m:gap-x-[20px] pt:grow p:gap-x-[5px]">
+        <li
+          class="search-mode-item --channel relative m:order-1 tm:w-[115px] pt:shrink-0 p:w-[155px]"
+        >
+          <Region name="region" v-if="isChannelRegion" />
+          <Mrt name="mrt" v-if="isChannelMrt" />
+        </li>
+        <li class="search-mode-item --purpose relative m:order-3 m:flex-1 pt:shrink-0 p:w-[155px]">
+          <Purpose name="purpose" />
+        </li>
+        <li class="search-mode-item --price relative m:order-3 m:flex-1 pt:shrink-0 p:w-[155px]">
+          <Price name="price" />
+        </li>
+        <li class="search-mode-item --room relative m:order-3 m:flex-1 pt:shrink-0 p:w-[155px]">
+          <Room name="room" />
+        </li>
+        <li
+          class="search-mode-item --keyword relative flex items-center gap-x-[5px] m:order-2 m:w-[240px] pt:grow"
+        >
+          <Keyword />
           <Anchor
             text="搜尋"
             :config="{
@@ -120,22 +117,34 @@ onInit()
               },
             }"
             :setClass="{
-              main: '--bg-orange-e646 --text-white --oval p:--h-45 p:--px-20',
+              main: '--bg-orange-e646 --text-white --oval pt:--h-45 tm:--px-10 p:--px-20 m:--h-40 shrink-0',
               icon: 'h-[16px] w-[16px]',
             }"
             @click="onSearch"
           />
-        </div>
-      </div>
-
-      <!-- <SearchRegion
-        v-model:purpose="modelPurpose"
-        @search="onSearch"
-        v-if="channelName === 'region'"
-      />
-      <SearchMrt v-if="channelName === 'mrt'" /> -->
+        </li>
+      </ul>
+      <Condition />
     </div>
   </TabDefaultOval>
 </template>
 
-<style></style>
+<style lang="postcss">
+@screen m {
+  .search-mode-content {
+    &::before {
+      @apply pointer-events-none absolute left-0 top-1/2 z-[1] h-[1px] w-full bg-[--gray-ccce] content-default;
+    }
+  }
+
+  .search-mode-item {
+    &.\-\-price,
+    &.\-\-room,
+    &.\-\-keyword {
+      &:before {
+        @apply absolute left-[-10px] top-1/2 z-0 h-[36%] w-[1px] -translate-y-1/2 bg-[--gray-ccce] content-default;
+      }
+    }
+  }
+}
+</style>

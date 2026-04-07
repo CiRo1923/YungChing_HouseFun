@@ -157,16 +157,48 @@ onUnmounted(() => {
 @screen p {
   .m-tab {
     &.\-\-separator {
-      .m-tab-header-item {
-        &:not(:last-child) {
-          &::after {
-            @apply absolute right-[-10px] top-1/2 h-[62.5%] w-[1px] -translate-y-1/2 bg-[--gray-ccce] content-default;
+      &.\-\-line,
+      &.p\:\-\-line,
+      &.pt\:\-\-line {
+        .m-tab-header-item {
+          &:not(:last-child) {
+            &::after {
+              @apply absolute right-[--tab-separator-after-right] top-1/2 h-[62.5%] w-[1px] -translate-y-1/2 bg-[--gray-ccce] content-default;
+            }
           }
         }
       }
 
-      .m-tab-header-content {
-        @apply gap-x-[20px];
+      &.\-\-gap-x-30,
+      &.p\:\-\-gap-x-30,
+      &.pt\:\-\-gap-x-30 {
+        .m-tab-header-content {
+          @apply gap-x-[30px];
+        }
+
+        .m-tab-header-item {
+          &:not(:last-child) {
+            &::after {
+              --tab-separator-after-right: -15px;
+            }
+          }
+        }
+      }
+
+      &.\-\-gap-x-5,
+      &.p\:\-\-gap-x-5,
+      &.pt\:\-\-gap-x-5 {
+        .m-tab-header-content {
+          @apply gap-x-[5px];
+        }
+
+        .m-tab-header-item {
+          &:not(:last-child) {
+            &::after {
+              --tab-separator-after-right: -3px;
+            }
+          }
+        }
       }
 
       .m-tab-header-anchor {
@@ -190,6 +222,106 @@ onUnmounted(() => {
   }
 }
 
+@screen t {
+  .m-tab {
+    &.\-\-separator {
+      &.\-\-line,
+      &.pt\:\-\-line,
+      &.tm\:\-\-line,
+      &.t\:\-\-line {
+        .m-tab-header-item {
+          &:not(:last-child) {
+            &::after {
+              @apply absolute right-[--tab-separator-after-right] top-1/2 h-[62.5%] w-[1px] -translate-y-1/2 bg-[--gray-ccce] content-default;
+            }
+          }
+        }
+      }
+
+      &.\-\-gap-x-30,
+      &.pt\:\-\-gap-x-30,
+      &.tm\:\-\-gap-x-30,
+      &.t\:\-\-gap-x-30 {
+        .m-tab-header-content {
+          @apply gap-x-[30px];
+        }
+
+        .m-tab-header-item {
+          &:not(:last-child) {
+            &::after {
+              --tab-separator-after-right: -15px;
+            }
+          }
+        }
+      }
+
+      &.\-\-gap-x-5,
+      &.pt\:\-\-gap-x-5,
+      &.tm\:\-\-gap-x-5,
+      &.t\:\-\-gap-x-5 {
+        .m-tab-header-content {
+          @apply gap-x-[5px];
+        }
+
+        .m-tab-header-item {
+          &:not(:last-child) {
+            &::after {
+              --tab-separator-after-right: -3px;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 @screen m {
+  .m-tab {
+    &.\-\-separator {
+      &.\-\-line,
+      &.tm\:\-\-line,
+      &.m\:\-\-line {
+        .m-tab-header-item {
+          &:not(:last-child) {
+            &::after {
+              @apply absolute right-[--tab-separator-after-right] top-1/2 h-[62.5%] w-[1px] -translate-y-1/2 bg-[--gray-ccce] content-default;
+            }
+          }
+        }
+      }
+
+      &.\-\-gap-x-30,
+      &.tm\:\-\-gap-x-30,
+      &.m\:\-\-gap-x-30 {
+        .m-tab-header-content {
+          @apply gap-x-[30px];
+        }
+
+        .m-tab-header-item {
+          &:not(:last-child) {
+            &::after {
+              --tab-separator-after-right: -15px;
+            }
+          }
+        }
+      }
+
+      &.\-\-gap-x-5,
+      &.tm\:\-\-gap-x-5,
+      &.m\:\-\-gap-x-5 {
+        .m-tab-header-content {
+          @apply gap-x-[5px];
+        }
+
+        .m-tab-header-item {
+          &:not(:last-child) {
+            &::after {
+              --tab-separator-after-right: -3px;
+            }
+          }
+        }
+      }
+    }
+  }
 }
 </style>

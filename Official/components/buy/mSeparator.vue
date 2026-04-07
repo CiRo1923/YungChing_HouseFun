@@ -109,6 +109,14 @@ const setClass = computed(() => {
 
       @apply gap-x-[12px];
     }
+
+    &.\-\-gap-x-10,
+    &.p\:\-\-gap-x-10,
+    &.pt\:\-\-gap-x-10 {
+      --item-before-right: -5px;
+
+      @apply gap-x-[10px];
+    }
   }
 }
 
@@ -171,6 +179,15 @@ const setClass = computed(() => {
 
       @apply gap-x-[12px];
     }
+
+    &.\-\-gap-x-10,
+    &.pt\:\-\-gap-x-10,
+    &.tm\:\-\-gap-x-10,
+    &.t\:\-\-gap-x-10 {
+      --item-before-right: -5px;
+
+      @apply gap-x-[10px];
+    }
   }
 }
 
@@ -226,6 +243,14 @@ const setClass = computed(() => {
       --item-before-right: -6px;
 
       @apply gap-x-[12px];
+    }
+
+    &.\-\-gap-x-10,
+    &.tm\:\-\-gap-x-10,
+    &.m\:\-\-gap-x-10 {
+      --item-before-right: -5px;
+
+      @apply gap-x-[10px];
     }
   }
 }

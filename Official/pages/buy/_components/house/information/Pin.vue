@@ -163,7 +163,7 @@ const items = computed(() => {
         label: '土地使用分區',
         values: [
           {
-            content: onValueGetText('zoingCity', caseZoingCity),
+            content: onValueGetText('zoingCity', caseZoingCity).text,
           },
         ],
       },

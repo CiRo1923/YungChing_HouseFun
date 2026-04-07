@@ -29,7 +29,7 @@ const layoutInfo = computed(() => {
         {
           id: 'caseType',
           label: '型態',
-          value: onValueGetText('caseType', caseType),
+          value: onValueGetText('caseType', caseType).text,
         },
         {
           id: 'floor',

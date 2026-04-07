@@ -1,5 +1,5 @@
 // 遞迴
-export const recursive = (obj, key, exec, finish) => {
+export const onRecursive = (obj, key, exec, finish) => {
   let recursiveIndex = 0
   const arrayWithoutHoles = (arr) => {
     const toArray = () => {

@@ -37,20 +37,23 @@ const {
   onApiGETRealEstateTypeSelectOptions,
   onApiGETRealEstateParkingTypeSelectOptions,
 } = useProjectStores()
-const { onApiBuyList } = useHomeStores()
+const { onGetBuyListParams, onApiMrt, onApiBuyList } = useHomeStores()
 
 const onSearch = async () => {
+  onGetBuyListParams()
+
   common.onIsLoading(true)
 
-  await onApiBuyList({
-    mrt: '',
-  })
+  await onApiBuyList()
 
   common.onIsLoading(false)
 }
 
+onGetBuyListParams()
+
 await onWithLoadingAll([
   // useAsyncData('city-options', () => onApiGETCitySelectOptions()),
+  useAsyncData('mrt-options', () => onApiMrt()),
   useAsyncData('purpose-options', () => onApiGETRealEstatePurposeCheckOptions()),
   useAsyncData('type-options', () => onApiGETRealEstateTypeSelectOptions()),
   useAsyncData('parking-type-options', () => onApiGETRealEstateParkingTypeSelectOptions()),

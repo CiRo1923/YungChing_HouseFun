@@ -1,6 +1,6 @@
 .m-form-element {
   &:not(label) {
-    @apply flex items-center gap-x-[8px] overflow-hidden rounded-[5px] border-[1px] bg-[--white] transition-colors duration-300;
+    @apply flex items-center gap-x-[8px] overflow-hidden bg-[--white] transition-colors duration-300;
 
     &:not(:disabled):not(.\-\-disabled) {
       .m-form-type {
@@ -82,11 +82,27 @@
       }
     }
 
+    &.\-\-px-10,
+    &.p\:\-\-px-10,
+    &.pt\:\-\-px-10 {
+      .m-form-element {
+        @apply px-[10px];
+      }
+    }
+
     &.\-\-py-5,
     &.p\:\-\-py-5,
     &.pt\:\-\-py-5 {
       .m-form-element {
         @apply py-[5px];
+      }
+    }
+
+    &.\-\-h-50,
+    &.p\:\-\-h-50,
+    &.pt\:\-\-h-50 {
+      .m-form-element {
+        @apply h-[50px];
       }
     }
 
@@ -105,6 +121,26 @@
         @apply h-[35px];
       }
     }
+
+    &.\-\-border,
+    &.p\:\-\-border,
+    &.pt\:\-\-border {
+      .m-form-element {
+        &:not(label) {
+          @apply border-[1px];
+        }
+      }
+    }
+
+    &.\-\-rounded,
+    &.p\:\-\-rounded,
+    &.pt\:\-\-rounded {
+      .m-form-element {
+        &:not(label) {
+          @apply rounded-[5px];
+        }
+      }
+    }
   }
 }
 
@@ -119,12 +155,30 @@
       }
     }
 
+    &.\-\-px-10,
+    &.pt\:\-\-px-10,
+    &.tm\:\-\-px-10,
+    &.t\:\-\-px-10 {
+      .m-form-element {
+        @apply px-[10px];
+      }
+    }
+
     &.\-\-py-5,
     &.pt\:\-\-py-5,
     &.tm\:\-\-py-5,
     &.t\:\-\-py-5 {
       .m-form-element {
         @apply py-[5px];
+      }
+    }
+
+    &.\-\-h-50,
+    &.pt\:\-\-h-50,
+    &.tm\:\-\-h-50,
+    &.t\:\-\-h-50 {
+      .m-form-element {
+        @apply h-[50px];
       }
     }
 
@@ -145,6 +199,28 @@
         @apply h-[35px];
       }
     }
+
+    &.\-\-border,
+    &.pt\:\-\-border,
+    &.tm\:\-\-border,
+    &.t\:\-\-border {
+      .m-form-element {
+        &:not(label) {
+          @apply border-[1px];
+        }
+      }
+    }
+
+    &.\-\-rounded,
+    &.pt\:\-\-rounded,
+    &.tm\:\-\-rounded,
+    &.t\:\-\-rounded {
+      .m-form-element {
+        &:not(label) {
+          @apply rounded-[5px];
+        }
+      }
+    }
   }
 }
 
@@ -158,11 +234,27 @@
       }
     }
 
+    &.\-\-px-10,
+    &.tm\:\-\-px-10,
+    &.m\:\-\-px-10 {
+      .m-form-element {
+        @apply px-[10px];
+      }
+    }
+
     &.\-\-py-5,
     &.tm\:\-\-py-5,
     &.m\:\-\-py-5 {
       .m-form-element {
         @apply py-[5px];
+      }
+    }
+
+    &.\-\-h-50,
+    &.tm\:\-\-h-50,
+    &.m\:\-\-h-50 {
+      .m-form-element {
+        @apply h-[50px];
       }
     }
 
@@ -179,6 +271,26 @@
     &.m\:\-\-h-35 {
       .m-form-element {
         @apply h-[35px];
+      }
+    }
+
+    &.\-\-border,
+    &.tm\:\-\-border,
+    &.m\:\-\-border {
+      .m-form-element {
+        &:not(label) {
+          @apply border-[1px];
+        }
+      }
+    }
+
+    &.\-\-rounded,
+    &.tm\:\-\-rounded,
+    &.m\:\-\-rounded {
+      .m-form-element {
+        &:not(label) {
+          @apply rounded-[5px];
+        }
       }
     }
   }

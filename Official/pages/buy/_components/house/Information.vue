@@ -18,7 +18,9 @@ import Function from '@pages/buy/_components/house/information/Function.vue'
     }"
   >
     <AccordionContent>
-      <div class="information-container divide-y-[1px] divide-[--gray-ccce] p:space-y-[30px]">
+      <div
+        class="information-container divide-y-[1px] divide-[--gray-ccce] tm:space-y-[20px] p:space-y-[30px]"
+      >
         <Basic />
         <Pin />
         <Parking />
@@ -36,6 +38,16 @@ import Function from '@pages/buy/_components/house/information/Function.vue'
     > * {
       &:not(:first-child) {
         @apply pt-[30px];
+      }
+    }
+  }
+}
+
+@screen tm {
+  .information-container {
+    > * {
+      &:not(:first-child) {
+        @apply pt-[20px];
       }
     }
   }
