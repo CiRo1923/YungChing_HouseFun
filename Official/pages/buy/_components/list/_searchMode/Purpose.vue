@@ -3,16 +3,14 @@ import FormSelectDropdown from '@components/buy/mForm/SelectDropdown.vue'
 import FormRadio from '@components/buy/mForm/Radio.vue'
 
 import { useProjectStore } from '@stores/buy/project.js'
-import { useHomeStore } from '@stores/buy/home.js'
+import { useListStore } from '@stores/buy/list.js'
 import useProjectStores from '@stores/buy/_composables/useProjectStores.js'
 
 const project = useProjectStore()
-const home = useHomeStore()
+const list = useListStore()
 const { options } = storeToRefs(project)
-const { purpose } = storeToRefs(home)
+const { purpose } = storeToRefs(list)
 const { onValueGetText } = useProjectStores()
-const route = useRoute()
-// const emits = defineEmits(['change'])
 const props = defineProps({
   name: {
     type: String,
@@ -23,17 +21,15 @@ const selectDropdownRef = ref(null)
 const onChange = (data) => {
   const { value, label } = data
 
-  purpose.value.label = value ? label : `用途${label}`
+  purpose.value.label = value ? label : purpose.value.defaultLabel
   // selectDropdownRef.value.onClose()
-
-  // emits('change')
 }
 
 const onInit = () => {
-  const queryPurpose = route.query.purpose
+  const apiData = purpose.value.apiData
 
-  purpose.value.label = queryPurpose
-    ? onValueGetText('casePurpose', queryPurpose).text
+  purpose.value.label = apiData
+    ? onValueGetText('casePurpose', apiData).text
     : purpose.value.defaultLabel
 }
 
@@ -55,7 +51,7 @@ onInit()
       <li v-for="(item, index) in options.casePurpose" :key="`${props.name}_${item.code}_${index}`">
         <FormRadio
           :name="props.name"
-          v-model="purpose.query"
+          v-model="purpose.apiData"
           :config="{
             label: item.text,
             value: item.code,

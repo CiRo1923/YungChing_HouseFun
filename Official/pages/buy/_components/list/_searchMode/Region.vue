@@ -3,12 +3,12 @@ import FormSelectDropdown from '@components/buy/mForm/SelectDropdown.vue'
 import Anchor from '@components/buy/mAnchor.vue'
 import FormCheckBox from '@components/buy/mForm/CheckBox.vue'
 
-import { useHomeStore } from '@stores/buy/home.js'
-// import useHomeStores from '@stores/buy/_composables/useHomeStores.js'
+import { useListStore } from '@stores/buy/list.js'
+// import useListStores from '@stores/buy/_composables/useListStores.js'
 
-const home = useHomeStore()
-const { region } = storeToRefs(home)
-// const { onGetRegionData } = useHomeStores()
+const list = useListStore()
+const { region } = storeToRefs(list)
+// const { onGetRegionData } = useListStores()
 const props = defineProps({
   name: {
     type: String,
@@ -18,8 +18,8 @@ const props = defineProps({
 const activeCityID = ref(null)
 
 const getData = computed(() => {
-  const { query, options } = region.value
-  const valueArray = query ? query.split(',') : []
+  const { apiData, options } = region.value
+  const valueArray = apiData ? apiData.split(',') : []
 
   return valueArray.map((val) => {
     let city = null
@@ -131,7 +131,7 @@ onGetLabel()
         >
           <FormCheckBox
             name="area"
-            v-model="region.query"
+            v-model="region.apiData"
             :config="{
               label: item.name,
               value: item.id,

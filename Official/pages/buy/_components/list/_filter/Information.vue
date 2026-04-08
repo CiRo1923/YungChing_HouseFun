@@ -3,11 +3,11 @@ import TabSeparator from '@components/buy/mTab/Separator.vue'
 
 import { onDevice } from '@js/_prototype.js'
 
-import { useHomeStore } from '@stores/buy/home.js'
+import { useListStore } from '@stores/buy/list.js'
 
 const emits = defineEmits(['click'])
-const home = useHomeStore()
-const { info } = storeToRefs(home)
+const list = useListStore()
+const { info } = storeToRefs(list)
 const device = ref('p')
 const items = computed(() => {
   return info.value.items.map((item) => {

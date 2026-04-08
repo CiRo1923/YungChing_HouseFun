@@ -26,6 +26,7 @@ const config = computed(() => {
     itemsPage: 0, // 一頁的筆數
     pageNumber: 0, // 分頁器秀的頁數
     total: 0, // 總共幾筆
+    queryKey: 'pg', // 取得 query 的 name
     ...props.config,
   }
 })
@@ -74,28 +75,18 @@ const setClass = computed(() => {
 })
 
 const onBind = (page) => {
+  const { queryKey } = config.value
   const { route } = props
-  const params = route.paramsKey
-    ? {
-        params: {
-          [route.paramsKey]: page,
-        },
-      }
-    : {}
-  const query = route.queryKey
-    ? {
-        query: {
-          [route.queryKey]: page,
-        },
-      }
-    : {}
 
   return as.value === 'router-link'
     ? {
         to: {
           name: route.name,
-          ...params,
-          ...query,
+          params: route.params,
+          query: {
+            ...route.query,
+            [queryKey]: page,
+          },
         },
         ...(route.target
           ? {

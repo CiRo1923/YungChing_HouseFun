@@ -3,10 +3,10 @@ import FormSelectDropdown from '@components/buy/mForm/SelectDropdown.vue'
 import Anchor from '@components/buy/mAnchor.vue'
 import FormCheckBox from '@components/buy/mForm/CheckBox.vue'
 
-import { useHomeStore } from '@stores/buy/home.js'
+import { useListStore } from '@stores/buy/list.js'
 
-const home = useHomeStore()
-const { mrt } = storeToRefs(home)
+const list = useListStore()
+const { mrt } = storeToRefs(list)
 
 const props = defineProps({
   name: {
@@ -37,8 +37,8 @@ const stations = computed(() => {
 })
 
 const getData = computed(() => {
-  const { query, options } = mrt.value
-  const valueArray = query ? query.split(',') : []
+  const { apiData, options } = mrt.value
+  const valueArray = apiData ? apiData.split(',') : []
 
   return valueArray.map((val) => {
     let area = null
@@ -188,7 +188,7 @@ onGetLabel()
         <li v-for="(item, index) in stations" :key="`mrt_stations_${item.id}_${index}`">
           <FormCheckBox
             name="stations"
-            v-model="mrt.query"
+            v-model="mrt.apiData"
             :config="{
               label: item.name,
               value: item.id,

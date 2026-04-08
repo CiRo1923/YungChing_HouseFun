@@ -2,13 +2,13 @@
 import FormSelectDropdown from '@components/buy/mForm/SelectDropdown.vue'
 import FormRadio from '@components/buy/mForm/Radio.vue'
 
-import PriceTotal from '@pages/buy/_components/_PriceTotal.vue'
-import PriceRepayment from '@pages/buy/_components/_PriceRepayment.vue'
+import PriceTotal from '@pages/buy/_components/list/_searchMode/PriceTotal.vue'
+import PriceRepayment from '@pages/buy/_components/list/_searchMode/PriceRepayment.vue'
 
-import { useHomeStore } from '@stores/buy/home.js'
+import { useListStore } from '@stores/buy/list.js'
 
-const home = useHomeStore()
-const { price } = storeToRefs(home)
+const list = useListStore()
+const { price } = storeToRefs(list)
 
 // const emits = defineEmits(['change'])
 const props = defineProps({

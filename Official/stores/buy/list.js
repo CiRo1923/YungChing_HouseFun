@@ -1,18 +1,19 @@
 import { defineStore } from 'pinia'
 
-export const useHomeStore = defineStore('hoem', () => {
+export const useListStore = defineStore('list', () => {
+  const channel = ref('region')
   const content = ref(null)
   const region = ref({
     label: '',
-    params: '',
-    query: '01',
+    params: '01',
+    apiData: '01',
     all: '',
     options: null,
   })
   const mrt = ref({
     label: '',
-    params: '',
-    query: '0102',
+    params: '0102',
+    apiData: '0102',
     all: '',
     options: null,
   })
@@ -20,11 +21,11 @@ export const useHomeStore = defineStore('hoem', () => {
     defaultLabel: '用途不限',
     label: '',
     params: '',
-    query: '',
+    apiData: '',
   })
   const price = ref({
     label: '總價不限',
-    query: '',
+    apiData: '',
     params: '',
     model: [],
     maxPrice: null,
@@ -74,7 +75,7 @@ export const useHomeStore = defineStore('hoem', () => {
     defaultLabel: '格局不限',
     label: '',
     params: '',
-    query: '',
+    apiData: '',
     hasAddon: false,
     options: [
       {
@@ -149,6 +150,7 @@ export const useHomeStore = defineStore('hoem', () => {
   })
 
   return {
+    channel,
     content,
     region,
     mrt,

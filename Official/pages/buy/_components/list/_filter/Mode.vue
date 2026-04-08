@@ -2,17 +2,17 @@
 import SvgIcon from '@components/common/SvgIcon.vue'
 
 import { useProjectStore } from '@stores/buy/project.js'
-import { useHomeStore } from '@stores/buy/home.js'
+import { useListStore } from '@stores/buy/list.js'
 
 import useProjectStores from '@stores/buy/_composables/useProjectStores.js'
-import useHomeStores from '@stores/buy/_composables/useHomeStores.js'
+import useListStores from '@stores/buy/_composables/useListStores.js'
 
 const project = useProjectStore()
-const home = useHomeStore()
+const list = useListStore()
 const { device } = storeToRefs(project)
-const { mode } = storeToRefs(home)
+const { mode } = storeToRefs(list)
 const { onResize } = useProjectStores()
-const { onModeClick } = useHomeStores()
+const { onModeClick } = useListStores()
 const isDeviceM = computed(() => device.value === 'm')
 
 const items = readonly([

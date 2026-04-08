@@ -3,7 +3,7 @@ import SvgIcon from '@components/common/SvgIcon.vue'
 import Separator from '@components/buy/mSeparator.vue'
 import TagDefault from '@components/buy/mTag/Default.vue'
 
-import MediaImages from '@pages/buy/_components/home/MediaImages.vue'
+import MediaImages from '@/pages/buy/_components/list/_list/MediaImages.vue'
 
 import { numberComma, onToFixed, onDevice } from '@js/_prototype.js'
 
@@ -103,12 +103,12 @@ const pinParkingInfo = computed(() => {
   ]
 })
 
-const config = computed(() => {
-  return {
-    index: null,
-    ...props.config,
-  }
-})
+// const config = computed(() => {
+//   return {
+//     index: null,
+//     ...props.config,
+//   }
+// })
 
 const onResize = () => {
   device.value = onDevice()

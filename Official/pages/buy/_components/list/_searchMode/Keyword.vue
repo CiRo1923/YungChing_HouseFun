@@ -1,10 +1,10 @@
 <script setup>
 import FormInput from '@components/buy/mForm/Input.vue'
 
-import { useHomeStore } from '@stores/buy/home.js'
+import { useListStore } from '@stores/buy/list.js'
 
-const home = useHomeStore()
-const { keyword } = storeToRefs(home)
+const list = useListStore()
+const { keyword } = storeToRefs(list)
 </script>
 
 <template>

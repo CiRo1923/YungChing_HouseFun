@@ -3,11 +3,11 @@ import FormSelectDropdown from '@components/buy/mForm/SelectDropdown.vue'
 import FormCheckBox from '@components/buy/mForm/CheckBox.vue'
 import FormInput from '@components/buy/mForm/Input.vue'
 
-import { useHomeStore } from '@stores/buy/home.js'
+import { useListStore } from '@stores/buy/list.js'
 // import useProjectStores from '@stores/buy/_composables/useProjectStores.js'
 
-const home = useHomeStore()
-const { room } = storeToRefs(home)
+const list = useListStore()
+const { room } = storeToRefs(list)
 // const { onValueGetText } = useProjectStores()
 const route = useRoute()
 
@@ -42,18 +42,18 @@ const onInputBlur = () => {
 
   if (isSame) {
     room.value.label = `${maxRoom.value} 房`
-    room.value.query = maxRoom.value
+    room.value.apiData = maxRoom.value
   }
 
   if (minRoom.value && maxRoom.value) {
     room.value.label = `${minRoom.value} - ${maxRoom.value} 房`
-    room.value.query = `${minRoom.value}-${maxRoom.value}`
+    room.value.apiData = `${minRoom.value}-${maxRoom.value}`
   } else if (minRoom.value) {
     room.value.label = `${minRoom.value} 房以上`
-    room.value.query = `${minRoom.value}-`
+    room.value.apiData = `${minRoom.value}-`
   } else if (maxRoom.value) {
     room.value.label = `${maxRoom.value} 房以下`
-    room.value.query = `-${maxRoom.value}`
+    room.value.apiData = `-${maxRoom.value}`
   }
 }
 
@@ -62,7 +62,7 @@ const onChange = (data) => {
 
   if (model.value.length === 0) {
     room.value.label = `格局${room.value.options[0].label}`
-    room.value.query = ''
+    room.value.apiData = ''
     minRoom.value = null
     maxRoom.value = null
     return
@@ -94,7 +94,7 @@ const onChange = (data) => {
   room.value.label = isSame
     ? room.value.options.find((item) => item.value === nextMax)?.label || String(nextMax)
     : `${nextMin} - ${nextMax} 房`
-  room.value.query = isSame ? nextMax : `${nextMin}-${nextMax}`
+  room.value.apiData = isSame ? nextMax : `${nextMin}-${nextMax}`
 
   minRoom.value = null
   maxRoom.value = null

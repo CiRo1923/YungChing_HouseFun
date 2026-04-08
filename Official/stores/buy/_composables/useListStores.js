@@ -1,41 +1,29 @@
 import { apiRegion, apiMrt } from '@js/_api/common.js'
 import { apiBuyList } from '@js/_api/buy/basic.js'
 
-import { useHomeStore } from '@stores/buy/home.js'
+import { useListStore } from '@stores/buy/list.js'
 
-const useHomeStores = () => {
+const useListStores = () => {
   // const projectStores = useProjectStore()
-  const homeStores = useHomeStore()
+  const listStores = useListStore()
+  const { channel, content, mode, region, mrt, purpose, price, room, keyword, info, pagination } =
+    storeToRefs(listStores)
   const route = useRoute()
-  const isChannelRegion = computed(() => route.meta.channel === 'region')
-  const isChannelMrt = computed(() => route.meta.channel === 'mrt')
-  const commonQuery = computed(() => {
-    return {
-      ...(purpose.value.query ? { purpose: purpose.value.query } : {}),
-      ...(price.value.query ? { price: price.value.query } : {}),
-      ...(room.value.query ? { room: room.value.query } : {}),
-    }
-  })
-  // tab 切換使用
-  const tabQuery = computed(() => {
-    // 在 region 要抓 mrt； 在 mrt 要抓 region
-    return {
-      ...(isChannelRegion.value && mrt.value.query ? { mrt: mrt.value.query } : {}),
-      ...(isChannelMrt.value && region.value.query ? { region: region.value.query } : {}),
-      ...commonQuery.value,
-    }
-  })
-  // list 搜尋使用
-  const listQuery = computed(() => {
-    return {
-      ...(isChannelRegion.value && region.value.query ? { region: region.value.query } : {}),
-      ...(isChannelMrt.value && mrt.value.query ? { mrt: mrt.value.query } : {}),
-      ...commonQuery.value,
-    }
+  const isChannelRegion = computed(() => channel.value === 'region')
+  const isChannelMrt = computed(() => channel.value === 'mrt')
+  const commonParams = computed(() => {
+    const paramsPurpose = purpose.value.apiData ? `${purpose.value.apiData}_purpose` : ''
+    const paramsPrice = price.value.apiData ? `${price.value.apiData}_price` : ''
+    const paramsRoom = room.value.apiData ? `${room.value.apiData}_room` : ''
+    const result = []
+
+    if (paramsPurpose) result.push(paramsPurpose)
+    if (paramsPrice) result.push(paramsPrice)
+    if (paramsRoom) result.push(paramsRoom)
+
+    return result
   })
   // const { apiData, options: projectOptions } = storeToRefs(projectStores)
-  const { content, mode, region, mrt, purpose, price, room, keyword, info, pagination } =
-    storeToRefs(homeStores)
 
   const onApiRegion = async () => {
     if (region.value.options) return false
@@ -80,11 +68,11 @@ const useHomeStores = () => {
 
   const onApiBuyList = async () => {
     const { config, status, data } = await apiBuyList({
-      ...(isChannelRegion.value ? { region: region.value.params || region.value.all } : {}),
-      ...(isChannelMrt.value ? { mrt: mrt.value.params || mrt.value.all } : {}),
-      purpose: purpose.value.params || '',
-      price: price.value.params || '',
-      room: room.value.params || '',
+      ...(isChannelRegion.value ? { region: region.value.apiData || region.value.all } : {}),
+      ...(isChannelMrt.value ? { mrt: mrt.value.apiData || mrt.value.all } : {}),
+      purpose: purpose.value.apiData || '',
+      price: price.value.apiData || '',
+      room: room.value.apiData || '',
       kw: keyword.value || '',
       tab: info.value.active,
       pg: route.query.pg,
@@ -118,27 +106,54 @@ const useHomeStores = () => {
     return { config, status, data }
   }
 
-  const onGetBuyListParams = () => {
-    const { query } = route
+  const onChannel = (targetRoute = route) => {
+    const filters = targetRoute.params.filters
+    const list = Array.isArray(filters) ? filters : filters ? [filters] : []
+    const hasRegion = !!list.find((item) => /region/.test(item))
+    const hasMrt = !!list.find((item) => /mrt/.test(item))
 
+    channel.value = hasRegion ? 'region' : hasMrt ? 'mrt' : ''
+  }
+  const onParseFilters = (targetRoute) => {
+    const filters = targetRoute.params.filters
+    const list = Array.isArray(filters) ? filters : filters ? [filters] : []
+
+    return list.reduce((acc, item) => {
+      const str = String(item)
+      const index = str.lastIndexOf('_')
+
+      if (index === -1) return acc
+
+      const value = str.slice(0, index)
+      const key = str.slice(index + 1)
+
+      if (!key) return acc
+
+      acc[key] = value
+      return acc
+    }, {})
+  }
+
+  const onGetBuyListParams = (targetRoute = route) => {
+    const parseFilters = onParseFilters(targetRoute)
     // region 有預設值 須等 query 有值才改變
-    region.value.query = isChannelRegion.value && query.region ? query.region : region.value.query
-    region.value.params = region.value.query
+    region.value.apiData = (isChannelRegion.value && parseFilters.region) || region.value.apiData
+    region.value.params = region.value.apiData
 
     // mrt 有預設值 須等 query 有值才改變
-    mrt.value.query = isChannelMrt.value && query.mrt ? query.mrt : mrt.value.query
-    mrt.value.params = mrt.value.query
+    mrt.value.apiData = (isChannelMrt.value && parseFilters.mrt) || mrt.value.apiData
+    mrt.value.params = mrt.value.apiData
 
     // purpose
-    purpose.value.query = query.purpose || ''
+    purpose.value.apiData = parseFilters.purpose || ''
     purpose.value.params = purpose.value.query
 
     // price
-    price.value.query = query.price || ''
+    price.value.apiData = parseFilters.price || ''
     price.value.params = price.value.query
 
     // room
-    room.value.query = query.room || ''
+    room.value.apiData = parseFilters.room || ''
     room.value.params = room.value.query
   }
 
@@ -151,14 +166,15 @@ const useHomeStores = () => {
   return {
     isChannelRegion,
     isChannelMrt,
-    tabQuery,
-    listQuery,
+    commonParams,
     onApiRegion,
     onApiMrt,
     onApiBuyList,
+    onChannel,
+    onParseFilters,
     onGetBuyListParams,
     onModeClick,
   }
 }
 
-export default useHomeStores
+export default useListStores

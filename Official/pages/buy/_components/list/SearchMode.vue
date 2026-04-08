@@ -2,40 +2,55 @@
 import TabDefaultOval from '@components/buy/mTab/DefaultOval.vue'
 import Anchor from '@components/buy/mAnchor.vue'
 
-import Region from '@pages/buy/_components/_Region.vue'
-import Mrt from '@pages/buy/_components/_Mrt.vue'
-import Purpose from '@pages/buy/_components/_Purpose.vue'
-import Price from '@pages/buy/_components/_Price.vue'
-import Room from '@pages/buy/_components/_Room.vue'
-import Keyword from '@pages/buy/_components/_Keyword.vue'
-import Condition from '@pages/buy/_components/_Condition.vue'
+import Region from '@pages/buy/_components/list/_searchMode/Region.vue'
+import Mrt from '@pages/buy/_components/list/_searchMode/Mrt.vue'
+import Purpose from '@pages/buy/_components/list/_searchMode/Purpose.vue'
+import Price from '@pages/buy/_components/list/_searchMode/Price.vue'
+import Room from '@pages/buy/_components/list/_searchMode/Room.vue'
+import Keyword from '@pages/buy/_components/list/_searchMode/Keyword.vue'
+import Condition from '@pages/buy/_components/list/_searchMode/Condition.vue'
 
-import { onDevice } from '@js/_prototype.js'
+// import { onDevice } from '@js/_prototype.js'
 
 // import { useProjectStore } from '@stores/buy/project.js'
-// import { useHomeStore } from '@stores/buy/home.js'
+import { useListStore } from '@stores/buy/list.js'
 // import useProjectStores from '@stores/buy/_composables/useProjectStores.js'
-import useHomeStores from '@stores/buy/_composables/useHomeStores.js'
+import useListStores from '@stores/buy/_composables/useListStores.js'
 
 // const project = useProjectStore()
-// const home = useHomeStore()
+const list = useListStore()
 // const { options } = storeToRefs(project)
-// const { region, mrt, purpose } = storeToRefs(home)
+const { region, mrt } = storeToRefs(list)
 // const { onValueGetText } = useProjectStores()
-const { tabQuery, listQuery } = useHomeStores()
-const route = useRoute()
+const { isChannelRegion, isChannelMrt, commonParams } = useListStores()
+// const route = useRoute()
 const router = useRouter()
+const paramsRegion = computed(() => {
+  const { params } = region.value
 
-const emits = defineEmits(['init', 'search'])
+  return params ? [`${params}_region`] : []
+})
+
+const paramsMrt = computed(() => {
+  const { params } = mrt.value
+
+  return params ? [`${params}_mrt`] : []
+})
+const paramsChannel = computed(() =>
+  isChannelRegion.value ? paramsRegion.value : isChannelMrt.value ? paramsMrt.value : []
+)
+
 const items = computed(() => [
   {
     id: 'region',
     label: '區域找房',
     icon: 'icon_loaction',
     to: {
-      name: 'buy-region',
+      name: 'buy-list-filters',
+      params: {
+        filters: [...paramsRegion.value, ...commonParams.value],
+      },
       query: {
-        ...tabQuery.value,
         pg: 1,
       },
     },
@@ -45,9 +60,11 @@ const items = computed(() => [
     label: '捷運找房',
     icon: 'icon_mrt',
     to: {
-      name: 'buy-mrt',
+      name: 'buy-list-filters',
+      params: {
+        filters: [...paramsMrt.value, ...commonParams.value],
+      },
       query: {
-        ...tabQuery.value,
         pg: 1,
       },
     },
@@ -59,19 +76,16 @@ const items = computed(() => [
   },
 ])
 
-const isChannelRegion = computed(() => route.meta.channel === 'region')
-const isChannelMrt = computed(() => route.meta.channel === 'mrt')
-
 const onSearch = async () => {
   await router.push({
+    name: 'buy-list-filters',
+    params: {
+      filters: [...paramsChannel.value, ...commonParams.value],
+    },
     query: {
-      ...listQuery.value,
       pg: 1,
-      // ...(price.value.value ? { price: price.value.value } : {}),
     },
   })
-
-  emits('search')
 }
 </script>
 
@@ -79,6 +93,7 @@ const onSearch = async () => {
   <TabDefaultOval
     :items="items"
     :config="{
+      active: isChannelRegion ? 0 : isChannelMrt ? 1 : 0,
       containerMode: 'single',
     }"
     :setClass="{

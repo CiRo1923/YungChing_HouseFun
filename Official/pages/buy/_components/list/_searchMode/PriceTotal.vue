@@ -2,10 +2,10 @@
 import FormCheckBox from '@components/buy/mForm/CheckBox.vue'
 import FormInput from '@components/buy/mForm/Input.vue'
 
-import { useHomeStore } from '@stores/buy/home.js'
+import { useListStore } from '@stores/buy/list.js'
 
-const home = useHomeStore()
-const { price } = storeToRefs(home)
+const list = useListStore()
+const { price } = storeToRefs(list)
 
 const props = defineProps({
   name: {
@@ -33,18 +33,18 @@ const onInputBlur = () => {
 
   if (isSame) {
     price.value.label = `${price.value.maxPrice} 萬`
-    price.value.query = price.value.maxPrice
+    price.value.apiData = price.value.maxPrice
   }
 
   if (price.value.minPrice && price.value.maxPrice) {
     price.value.label = `${price.value.minPrice} - ${price.value.maxPrice} 萬`
-    price.value.query = `${price.value.minPrice}-${price.value.maxPrice}`
+    price.value.apiData = `${price.value.minPrice}-${price.value.maxPrice}`
   } else if (price.value.minPrice) {
     price.value.label = `${price.value.minPrice} 萬以上`
-    price.value.query = `${price.value.minPrice}-`
+    price.value.apiData = `${price.value.minPrice}-`
   } else if (price.value.maxPrice) {
     price.value.label = `${price.value.maxPrice} 萬以下`
-    price.value.query = `-${price.value.maxPrice}`
+    price.value.apiData = `-${price.value.maxPrice}`
   }
 
   // emits('change')
@@ -55,7 +55,7 @@ const onRadioChange = (data) => {
 
   if (price.value.model.length === 0) {
     price.value.label = `總價${price.value.options[0].label}`
-    price.value.value = ''
+    price.value.apiData = ''
     price.value.minPrice = null
     price.value.maxPrice = null
     return
@@ -93,7 +93,7 @@ const onRadioChange = (data) => {
       : nextMin === 0
         ? `${nextMax} 萬以下`
         : `${/^\d+/.exec(minLabel.replace(/\s?萬/, ''))[0]} - ${/\d+$/.exec(maxLabel.replace(/\s?萬/, ''))[0]} 萬`
-  price.value.query =
+  price.value.apiData =
     nextMax === 6001
       ? '6000-'
       : nextMin === 0 && nextMax

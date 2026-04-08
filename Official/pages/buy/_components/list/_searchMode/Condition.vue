@@ -1,12 +1,12 @@
 <script setup>
 import { useProjectStore } from '@stores/buy/project.js'
-import { useHomeStore } from '@stores/buy/home.js'
+import { useListStore } from '@stores/buy/list.js'
 import useProjectStores from '@stores/buy/_composables/useProjectStores.js'
 
 const project = useProjectStore()
-const home = useHomeStore()
+const list = useListStore()
 const { device } = storeToRefs(project)
-const { region, mrt, purpose, price, room } = storeToRefs(home)
+const { region, mrt, purpose, price, room } = storeToRefs(list)
 const { onValueGetText, onResize } = useProjectStores()
 const route = useRoute()
 
@@ -21,7 +21,6 @@ const datas = computed(() => {
     return textArray
   }
 
-  onText(mrt.value.options, mrt.value.params)
   const regionData =
     isChannelRegion.value && region.value.params
       ? onText(region.value.options, region.value.params)
