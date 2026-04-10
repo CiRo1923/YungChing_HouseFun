@@ -1,8 +1,4 @@
 <script setup>
-import FormSelectDropdown from '@components/buy/mForm/SelectDropdown.vue'
-import FormCheckBox from '@components/buy/mForm/CheckBox.vue'
-import FormInput from '@components/buy/mForm/Input.vue'
-
 import { useBuyListStore } from '@stores/buy/list.js'
 // import useBuyProjectStores from '@stores/buy/_composables/useProjectStores.js'
 
@@ -118,7 +114,7 @@ onInit()
 </script>
 
 <template>
-  <FormSelectDropdown
+  <BuyMFormSelectDropdown
     :name="`${props.name}Dropdown`"
     v-model="room.label"
     :setClass="{
@@ -130,7 +126,7 @@ onInit()
   >
     <ul class="space-y-[15px]">
       <li v-for="(item, index) in room.options" :key="`${props.name}_${item.code}_${index}`">
-        <FormCheckBox
+        <BuyMFormCheckBox
           :name="props.name"
           v-model="model"
           :config="{
@@ -143,7 +139,7 @@ onInit()
         />
       </li>
       <li class="flex items-center gap-x-[10px]">
-        <FormInput
+        <BuyMFormInput
           name="minRoom"
           v-model="minRoom"
           :config="{
@@ -160,7 +156,7 @@ onInit()
           @blur="onInputBlur"
         />
         <span>-</span>
-        <FormInput
+        <BuyMFormInput
           name="maxRoom"
           v-model="maxRoom"
           :config="{
@@ -179,7 +175,7 @@ onInit()
         <span>房</span>
       </li>
       <li>
-        <FormCheckBox
+        <BuyMFormCheckBox
           :name="`${props.name}_agree`"
           v-model="room.hasAddon"
           :config="{
@@ -189,7 +185,7 @@ onInit()
         />
       </li>
     </ul>
-  </FormSelectDropdown>
+  </BuyMFormSelectDropdown>
 </template>
 
 <style></style>

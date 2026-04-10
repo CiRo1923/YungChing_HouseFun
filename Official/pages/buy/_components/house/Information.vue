@@ -1,6 +1,4 @@
 <script setup>
-import AccordionContent from '@components/buy/mAccordion/Content.vue'
-
 import Content from '@pages/buy/_components/house/_Content.vue'
 import Basic from '@pages/buy/_components/house/_information/Basic.vue'
 import Pin from '@pages/buy/_components/house/_information/Pin.vue'
@@ -17,7 +15,7 @@ import Function from '@pages/buy/_components/house/_information/Function.vue'
       icon: 'icon_house_info',
     }"
   >
-    <AccordionContent>
+    <BuyMAccordionContent>
       <div
         class="information-container divide-y-[1px] divide-[--gray-ccce] tm:space-y-[20px] p:space-y-[30px]"
       >
@@ -28,7 +26,7 @@ import Function from '@pages/buy/_components/house/_information/Function.vue'
         <Other />
         <Function />
       </div>
-    </AccordionContent>
+    </BuyMAccordionContent>
   </Content>
 </template>
 

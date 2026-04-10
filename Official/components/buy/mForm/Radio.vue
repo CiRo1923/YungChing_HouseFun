@@ -1,6 +1,4 @@
 ﻿<script setup>
-import ErrorMessageElem from '@components/buy/mErrorMessageElem.vue'
-
 import { onDeepMerge } from '@js/_prototype.js'
 
 import { Field, ErrorMessage } from 'vee-validate'
@@ -121,7 +119,7 @@ const onChange = () => {
       :class="setClass.error"
       v-slot="{ message }"
     >
-      <ErrorMessageElem class="text-[12px]" :message="message" />
+      <BuyMErrorMessageElem class="text-[12px]" :message="message" />
     </ErrorMessage>
   </div>
 </template>

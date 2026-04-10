@@ -1,6 +1,4 @@
 <script setup>
-import SvgIcon from '@components/common/SvgIcon.vue'
-
 const props = defineProps({
   items: {
     type: Array,
@@ -181,7 +179,7 @@ onMounted(() => {
           v-bind="onHeaderBind(item)"
           @click="onClick(item, index)"
         >
-          <SvgIcon
+          <CommonSvgIcon
             :icon="item.icon"
             class="m-tab-icon h-[22px] w-[22px] p-[2px] transition-colors duration-300"
           />

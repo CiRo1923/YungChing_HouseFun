@@ -1,6 +1,4 @@
 <script setup>
-import TabSeparator from '@components/buy/mTab/Separator.vue'
-
 import { useBuyProjectStore } from '@stores/buy/project.js'
 import { useBuyListStore } from '@stores/buy/list.js'
 import useBuyProjectStores from '@stores/buy/_composables/useProjectStores.js'
@@ -41,7 +39,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <TabSeparator
+  <BuyMTabSeparator
     :items="options"
     :config="{
       active: tab.apiData,

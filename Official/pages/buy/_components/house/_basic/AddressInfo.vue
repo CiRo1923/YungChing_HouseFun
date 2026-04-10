@@ -1,6 +1,4 @@
 <script setup>
-import SvgIcon from '@components/common/SvgIcon.vue'
-
 import { useBuyHouseStore } from '@stores/buy/house.js'
 
 const buyHouse = useBuyHouseStore()
@@ -31,7 +29,7 @@ const addressInfo = computed(() => {
     <template v-for="(data, index) in addressInfo" :key="`${data.id}_${index}`">
       <li v-if="data.value">
         <p class="flex items-center gap-x-[3px] text-[16px] tracking-default">
-          <SvgIcon :icon="data.icon" class="h-[18px] w-[18px] shrink-0 text-[--green-8b0d]" />
+          <CommonSvgIcon :icon="data.icon" class="h-[18px] w-[18px] shrink-0 text-[--green-8b0d]" />
           <em class="grow">{{ data.value }}</em>
         </p>
       </li>

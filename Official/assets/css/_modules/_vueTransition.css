@@ -55,3 +55,26 @@
 .datepicker-range-quickly-fixed-leave-from {
   @apply translate-y-0;
 }
+
+.popup-overlay-enter-active,
+.popup-overlay-leave-active {
+  transition: opacity calc(0.3s / 2);
+}
+
+.popup-overlay-enter-from,
+.popup-overlay-leave-to {
+  @apply opacity-0;
+}
+
+.popup-overlay-enter-to,
+.popup-overlay-leave-form {
+  @apply opacity-100;
+}
+
+.popup-bomb-enter-active {
+  animation: bomb 0.2s;
+}
+
+.popup-bomb-leave-active {
+  animation: bomb 0.2s reverse;
+}

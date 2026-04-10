@@ -1,8 +1,4 @@
 <script setup>
-import Container from '@components/common/mContainer.vue'
-import Content from '@components/common/mContent.vue'
-import Pagination from '@components/buy/mPagination.vue'
-
 import Tools from '@pages/buy/_components/list/Tools.vue'
 import SearchMode from '@pages/buy/_components/list/SearchMode.vue'
 import Filter from '@pages/buy/_components/list/Filter.vue'
@@ -15,6 +11,7 @@ import { useCommonStore } from '@stores/common.js'
 import { useBuyListStore } from '@stores/buy/list.js'
 import useBuyProjectStores from '@stores/buy/_composables/useProjectStores.js'
 import useBuyListStores from '@stores/buy/_composables/useListStores.js'
+import CustomPopup from '@/container/buy/CustomPopup.vue'
 
 definePageMeta({
   layout: 'common',
@@ -95,15 +92,15 @@ onBeforeRouteUpdate(async (to, from) => {
   <Tools>
     <SearchMode />
   </Tools>
-  <Container class="--inner p:mt-[20px]">
-    <Content class="pt:--rounded-20 p:--py-20">
+  <CommonMContainer class="--inner p:mt-[20px]">
+    <CommonMContent class="pt:--rounded-20 p:--py-20">
       <Filter @info-click="onSearch" />
       <!-- <Card /> -->
       <!-- <pre>
         {{ options.caseType }}
       </pre> -->
       <List />
-      <Pagination
+      <BuyMPagination
         :route="{
           name: buyList.basicRouteName,
           params: route.params,
@@ -119,9 +116,8 @@ onBeforeRouteUpdate(async (to, from) => {
           main: 'p:mt-[40px]',
         }"
       />
-    </Content>
-  </Container>
-  <div />
+    </CommonMContent>
+  </CommonMContainer>
 </template>
 
 <style></style>

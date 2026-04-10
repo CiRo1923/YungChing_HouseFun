@@ -1,7 +1,4 @@
 <script setup>
-import Swiper12 from '@components/buy/mSwiper12.vue'
-import ImgSrc from '@components/common/ImgSrc.vue'
-
 const testImages = [1, 2, 3, 4]
 const props = defineProps({
   datas: {
@@ -24,7 +21,7 @@ const onImageSize = (image) => {
 </script>
 
 <template>
-  <Swiper12
+  <BuyMSwiper12
     name="houseMediaImages"
     :data="images"
     :config="{
@@ -39,10 +36,10 @@ const onImageSize = (image) => {
   >
     <div class="flex h-full flex-col items-center justify-center break-keep">
       <!-- {{ onImageSize(item) }} -->
-      <ImgSrc :src="onImageSize(item)" />
+      <CommonImgSrc :src="onImageSize(item)" />
     </div>
-  </Swiper12>
-  <ImgSrc
+  </BuyMSwiper12>
+  <CommonImgSrc
     src="common/default_image.jpg"
     :setClass="{
       main: 'relative h-full',

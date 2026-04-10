@@ -1,6 +1,4 @@
 <script setup>
-import Item from '@components/buy/mItem/Main.vue'
-
 import { onDevice, onDeepMerge } from '@js/_prototype.js'
 
 import { computed, onMounted, onUnmounted, ref } from 'vue'
@@ -186,7 +184,12 @@ onUnmounted(() => {
         :class="[{ '--has-mask': !isActive && hasMatchDevice }, setClass.container]"
         ref="containerRef"
       >
-        <Item :data="props.data" :config="props.config" :setClass="setClass.item" ref="itemRef" />
+        <BuyMItemMain
+          :data="props.data"
+          :config="props.config"
+          :setClass="setClass.item"
+          ref="itemRef"
+        />
       </div>
     </div>
   </div>

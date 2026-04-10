@@ -1,7 +1,4 @@
 <script setup>
-import SvgIcon from '@components/common/SvgIcon.vue'
-import ImgSrc from '@components/common/ImgSrc.vue'
-
 const props = defineProps({
   title: {
     type: String,
@@ -43,8 +40,12 @@ const setClass = computed(() => {
       v-if="config.icon || config.imgSrc || $slots.icon"
     >
       <slot name="icon">
-        <SvgIcon :icon="config.icon" class="h-full w-full text-[--green-8b0d]" v-if="config.icon" />
-        <imgSrc
+        <CommonSvgIcon
+          :icon="config.icon"
+          class="h-full w-full text-[--green-8b0d]"
+          v-if="config.icon"
+        />
+        <CommonImgSrc
           :src="config.imgSrc"
           :setClass="{
             main: 'h-full w-full',

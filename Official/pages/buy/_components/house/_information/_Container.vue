@@ -1,7 +1,4 @@
 <script setup>
-import SvgIcon from '@components/common/SvgIcon.vue'
-import Anchor from '@components/buy/mAnchor.vue'
-
 const props = defineProps({
   name: {
     type: String,
@@ -54,7 +51,7 @@ const onAnchorBind = (item) => {
               >
                 <p v-html="value.content" v-if="value.content" />
                 <p class="flex items-center" :class="value.tools.class?.main" v-if="value.tools">
-                  <SvgIcon
+                  <CommonSvgIcon
                     :icon="value.tools.icon"
                     :class="value.tools.class?.icon"
                     v-if="value.tools.icon"
@@ -62,7 +59,7 @@ const onAnchorBind = (item) => {
                   <span v-html="value.tools.content" />
                 </p>
               </div>
-              <Anchor
+              <BuyMAnchor
                 :text="value.anchor.text"
                 v-bind="onAnchorBind(value.anchor)"
                 :setClass="{
@@ -71,7 +68,7 @@ const onAnchorBind = (item) => {
                 }"
                 v-if="value.anchor"
               />
-              <Anchor
+              <BuyMAnchor
                 :text="value.popupAnchor.text"
                 v-bind="onAnchorBind(value.popupAnchor)"
                 :config="{

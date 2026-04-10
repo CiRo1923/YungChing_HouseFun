@@ -1,6 +1,4 @@
 <script setup>
-import SvgIcon from '@components/common/SvgIcon.vue'
-import Separator from '@components/buy/mSeparator.vue'
 import TagDefault from '@components/buy/mTag/Default.vue'
 
 import MediaImages from '@/pages/buy/_components/list/_list/MediaImages.vue'
@@ -140,7 +138,7 @@ onMounted(() => {
             <template v-for="(data, idx) in addressInfo">
               <li v-if="data.value" :key="`${data.id}_${idx}`">
                 <p class="flex items-center">
-                  <SvgIcon
+                  <CommonSvgIcon
                     v-if="isDeviceP"
                     :icon="data.icon.name"
                     class="p:h-[20px] p:w-[20px] p:p-[1px]"
@@ -151,13 +149,13 @@ onMounted(() => {
               </li>
             </template>
           </ul>
-          <Separator
+          <BuyMSeparator
             :items="basicInfo"
             :setClass="{
               main: '--horizontal p:--gap-x-20 tm:--gap-x-12',
             }"
           />
-          <Separator
+          <BuyMSeparator
             :items="pinParkingInfo"
             :setClass="{
               main: '--horizontal p:--gap-x-20 tm:--gap-x-12',

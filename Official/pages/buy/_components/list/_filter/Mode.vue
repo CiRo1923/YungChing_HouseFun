@@ -1,6 +1,4 @@
 <script setup>
-import SvgIcon from '@components/common/SvgIcon.vue'
-
 import { useBuyProjectStore } from '@stores/buy/project.js'
 import { useBuyListStore } from '@stores/buy/list.js'
 
@@ -44,7 +42,7 @@ onMounted(() => {
         :class="{ '--active': item.id === mode }"
         @click="onModeClick(item.id)"
       >
-        <SvgIcon :icon="item.icon" class="h-full w-full" />
+        <CommonSvgIcon :icon="item.icon" class="h-full w-full" />
       </button>
     </li>
   </ul>

@@ -1,8 +1,4 @@
 <script setup>
-import FormInput from '@components/buy/mForm/Input.vue'
-import FormRadiosOval from '@components/buy/mForm/RadiosOval.vue'
-// import Anchor from '@components/buy/mAnchor.vue'
-
 import { onToFixed } from '@js/_prototype.js'
 
 import { useBuyListStore } from '@stores/buy/list.js'
@@ -65,7 +61,7 @@ onHousePrice()
   <ul class="grow space-y-[15px] tracking-default m:overflow-y-auto">
     <li class="space-y-[4px]">
       <span class="block text-[16px] leading-[1.56]">自備款</span>
-      <FormInput
+      <BuyMFormInput
         name="downPayment"
         v-model="repayment.downPayment"
         :config="{
@@ -78,11 +74,11 @@ onHousePrice()
         @blur="onHousePrice"
       >
         <template #rearAssist>萬</template>
-      </FormInput>
+      </BuyMFormInput>
     </li>
     <li class="space-y-[4px]">
       <span class="block text-[16px] leading-[1.56]">每月可負擔房貸</span>
-      <FormInput
+      <BuyMFormInput
         name="monthlyPayment"
         v-model="repayment.monthlyPayment"
         :config="{
@@ -95,11 +91,11 @@ onHousePrice()
         @blur="onHousePrice"
       >
         <template #rearAssist>萬</template>
-      </FormInput>
+      </BuyMFormInput>
     </li>
     <li class="space-y-[4px]">
       <span class="block text-[16px] leading-[1.56]">貸款年限</span>
-      <FormRadiosOval
+      <BuyMFormRadiosOval
         :options="loanYears"
         v-model="repayment.loanYears"
         :setClass="{
@@ -112,7 +108,7 @@ onHousePrice()
     </li>
     <li class="space-y-[4px]">
       <span class="block text-[16px] leading-[1.56]">貸款利率</span>
-      <FormInput
+      <BuyMFormInput
         name="annualInterestRate"
         v-model="repayment.annualInterestRate"
         :config="{
@@ -125,7 +121,7 @@ onHousePrice()
         @blur="onHousePrice"
       >
         <template #rearAssist>%</template>
-      </FormInput>
+      </BuyMFormInput>
     </li>
     <li>
       <span class="block text-[16px]">參考總價</span>
@@ -140,7 +136,7 @@ onHousePrice()
   </ul>
   <!-- <ul class="p:mt-[15px]">
     <li>
-      <Anchor
+      <BuyMAnchor
         text="確認"
         :setClass="{
           main: '--bg-orange-e646 --text-white --oval p:--h-35 p:--px-20 w-full',

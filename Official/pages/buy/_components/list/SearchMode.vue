@@ -1,7 +1,4 @@
 ﻿<script setup>
-import TabDefaultOval from '@components/buy/mTab/DefaultOval.vue'
-import Anchor from '@components/buy/mAnchor.vue'
-
 import Region from '@pages/buy/_components/list/_searchMode/Region.vue'
 import Mrt from '@pages/buy/_components/list/_searchMode/Mrt.vue'
 import Purpose from '@pages/buy/_components/list/_searchMode/Purpose.vue'
@@ -90,7 +87,7 @@ const onSearch = async () => {
 </script>
 
 <template>
-  <TabDefaultOval
+  <BuyMTabDefaultOval
     :items="items"
     :config="{
       active: isChannelRegion ? 0 : isChannelMrt ? 1 : 0,
@@ -123,7 +120,7 @@ const onSearch = async () => {
           class="search-mode-item --keyword relative flex items-center gap-x-[5px] m:order-2 m:w-[240px] pt:grow"
         >
           <Keyword />
-          <Anchor
+          <BuyMAnchor
             text="搜尋"
             :config="{
               icon: {
@@ -141,7 +138,7 @@ const onSearch = async () => {
       </ul>
       <Condition />
     </div>
-  </TabDefaultOval>
+  </BuyMTabDefaultOval>
 </template>
 
 <style lang="postcss">

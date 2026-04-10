@@ -113,11 +113,11 @@
       "@components/*": [
         "../components/*"
       ],
-      "@container": [
-        "../container"
+      "@containers": [
+        "../containers"
       ],
-      "@container/*": [
-        "../container/*"
+      "@containers/*": [
+        "../containers/*"
       ],
       "@composable": [
         "../composable"

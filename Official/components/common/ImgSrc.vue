@@ -1,6 +1,4 @@
 <script setup>
-import SvgIcon from '@components/common/SvgIcon.vue'
-
 import { hashHex } from '@js/_crypto.js'
 
 import blankUrl from '@imgs/common/blank.svg'
@@ -157,7 +155,7 @@ onMounted(() => onLazy())
 
   <div class="m-figure" :class="setClass.main" v-else>
     <div class="m-figure-error flex items-center justify-center">
-      <SvgIcon class="m:h-[36px] m:w-[36px] pt:h-[54px] pt:w-[54px]" icon="image_404" />
+      <CommonSvgIcon class="m:h-[36px] m:w-[36px] pt:h-[54px] pt:w-[54px]" icon="image_404" />
     </div>
   </div>
 </template>

@@ -34,6 +34,7 @@ export const BuyMHeader: typeof import("../components/buy/mHeader.vue")['default
 export const BuyMItemContainer: typeof import("../components/buy/mItem/Container.vue")['default']
 export const BuyMItemMain: typeof import("../components/buy/mItem/Main.vue")['default']
 export const BuyMItemSwitchtem: typeof import("../components/buy/mItem/Switchtem.vue")['default']
+export const BuyMPopup: typeof import("../components/buy/mPopup.vue")['default']
 export const BuyMStepArrow: typeof import("../components/buy/mStep/Arrow.vue")['default']
 export const BuyMTabCheck: typeof import("../components/buy/mTab/Check.vue")['default']
 export const BuyMTagCheckBox: typeof import("../components/buy/mTag/CheckBox.vue")['default']
@@ -87,6 +88,7 @@ export const LazyBuyMHeader: LazyComponent<typeof import("../components/buy/mHea
 export const LazyBuyMItemContainer: LazyComponent<typeof import("../components/buy/mItem/Container.vue")['default']>
 export const LazyBuyMItemMain: LazyComponent<typeof import("../components/buy/mItem/Main.vue")['default']>
 export const LazyBuyMItemSwitchtem: LazyComponent<typeof import("../components/buy/mItem/Switchtem.vue")['default']>
+export const LazyBuyMPopup: LazyComponent<typeof import("../components/buy/mPopup.vue")['default']>
 export const LazyBuyMStepArrow: LazyComponent<typeof import("../components/buy/mStep/Arrow.vue")['default']>
 export const LazyBuyMTabCheck: LazyComponent<typeof import("../components/buy/mTab/Check.vue")['default']>
 export const LazyBuyMTagCheckBox: LazyComponent<typeof import("../components/buy/mTag/CheckBox.vue")['default']>

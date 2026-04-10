@@ -1,10 +1,4 @@
 <script setup>
-import ImgSrc from '@components/common/ImgSrc.vue'
-import SvgIcon from '@components/common/SvgIcon.vue'
-
-import Separator from '@components/buy/mSeparator.vue'
-// import Anchor from '@components/buy/mAnchor.vue'
-
 import { useBuyProjectStore } from '@stores/buy/project.js'
 import useBuyProjectStores from '@stores/buy/_composables/useProjectStores.js'
 
@@ -124,7 +118,7 @@ onMounted(() => {
         <ul class="flex items-center gap-x-[8px]">
           <li v-for="(item, index) in stores" :key="`${item.id}_${index}`">
             <a :href="item.href" class="block" target="_blank" rel="noopener">
-              <ImgSrc
+              <CommonImgSrc
                 :src="item.src"
                 :setClass="{
                   main: 'h-[40px] w-[160px]',
@@ -134,7 +128,7 @@ onMounted(() => {
           </li>
         </ul>
         <p class="mt-[16px]">好房國際股份有限公司 (統編 28006949) 負責建置及維護</p>
-        <Separator
+        <BuyMSeparator
           :items="privacy"
           :config="{
             isHiddenItem: false,
@@ -148,7 +142,7 @@ onMounted(() => {
             {{ item.label }}
           </a>
           <p v-else>{{ item.label }}</p>
-        </Separator>
+        </BuyMSeparator>
       </div>
       <div class="m-footer-links space-y-[16px] tracking-default pt:shrink-0" v-if="!isDeviceM">
         <p class="text-[16px] text-[--green-6a2d]">關注好房網</p>
@@ -162,7 +156,7 @@ onMounted(() => {
                   target="_blank"
                   rel="noopener"
                 >
-                  <SvgIcon :icon="item.icon" class="h-[16px] w-[16px]" />
+                  <CommonSvgIcon :icon="item.icon" class="h-[16px] w-[16px]" />
                   <em>{{ item.label }}</em>
                 </a>
               </li>

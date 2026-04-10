@@ -1,7 +1,4 @@
 <script setup>
-import FormCheckBox from '@components/buy/mForm/CheckBox.vue'
-import FormInput from '@components/buy/mForm/Input.vue'
-
 import { useBuyListStore } from '@stores/buy/list.js'
 
 const buyList = useBuyListStore()
@@ -110,7 +107,7 @@ const onRadioChange = (data) => {
 <template>
   <ul class="grow space-y-[15px]">
     <li v-for="(item, index) in price.options" :key="`${props.name}_${item.code}_${index}`">
-      <FormCheckBox
+      <BuyMFormCheckBox
         :name="props.name"
         v-model="price.model"
         :config="{
@@ -123,7 +120,7 @@ const onRadioChange = (data) => {
       />
     </li>
     <li class="flex items-center gap-x-[10px]">
-      <FormInput
+      <BuyMFormInput
         name="minPrice"
         v-model="price.minPrice"
         :config="{
@@ -140,7 +137,7 @@ const onRadioChange = (data) => {
         @blur="onInputBlur"
       />
       <span>-</span>
-      <FormInput
+      <BuyMFormInput
         name="maxPrice"
         v-model="price.maxPrice"
         :config="{

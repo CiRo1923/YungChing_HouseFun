@@ -1,8 +1,4 @@
 <script setup>
-import FormSelectDropdown from '@components/buy/mForm/SelectDropdown.vue'
-import Anchor from '@components/buy/mAnchor.vue'
-import FormCheckBox from '@components/buy/mForm/CheckBox.vue'
-
 import { useBuyListStore } from '@stores/buy/list.js'
 // import useBuyListStores from '@stores/buy/_composables/useListStores.js'
 
@@ -91,7 +87,7 @@ onGetLabel()
 </script>
 
 <template>
-  <FormSelectDropdown
+  <BuyMFormSelectDropdown
     :name="`${props.name}Dropdown`"
     v-model="region.label"
     :config="{
@@ -108,7 +104,7 @@ onGetLabel()
         class="scrollbar --y max-h-full shrink-0 space-y-[5px] border-y-[20px] border-transparent bg-[--gray-f7] m:px-[5px] t:px-[10px] p:px-[20px]"
       >
         <li v-for="(item, index) in region.options" :key="`region_${item.id}_${index}`">
-          <Anchor
+          <BuyMAnchor
             :text="item.name"
             :setClass="{
               main: [
@@ -129,7 +125,7 @@ onGetLabel()
           v-for="(item, index) in areas"
           :key="`${item.id}_${index}`"
         >
-          <FormCheckBox
+          <BuyMFormCheckBox
             name="area"
             v-model="region.apiData"
             :config="{
@@ -146,7 +142,7 @@ onGetLabel()
         </li>
       </ul>
     </div>
-  </FormSelectDropdown>
+  </BuyMFormSelectDropdown>
 </template>
 
 <style></style>

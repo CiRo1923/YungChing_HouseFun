@@ -14,44 +14,9 @@ type HydrationStrategies = {
 type LazyComponent<T> = DefineComponent<HydrationStrategies, {}, {}, {}, {}, {}, {}, { hydrated: () => void }> & T
 
 interface _GlobalComponents {
-  BuyMAccordionContent: typeof import("../../components/buy/mAccordion/Content.vue")['default']
-  BuyMAddIdentical: typeof import("../../components/buy/mAddIdentical.vue")['default']
-  BuyMAddress: typeof import("../../components/buy/mAddress.vue")['default']
-  BuyMAnchor: typeof import("../../components/buy/mAnchor.vue")['default']
-  BuyMAnchorTool: typeof import("../../components/buy/mAnchorTool.vue")['default']
-  BuyMAutoComplete: typeof import("../../components/buy/mAutoComplete.vue")['default']
-  BuyMCardBorderContent: typeof import("../../components/buy/mCard/BorderContent.vue")['default']
-  BuyMCardFilter: typeof import("../../components/buy/mCard/Filter.vue")['default']
-  BuyMCkEditor4: typeof import("../../components/buy/mCkEditor4.vue")['default']
-  BuyMDialog: typeof import("../../components/buy/mDialog.vue")['default']
-  BuyMErrorMessageElem: typeof import("../../components/buy/mErrorMessageElem.vue")['default']
-  BuyMFormCheckBox: typeof import("../../components/buy/mForm/CheckBox.vue")['default']
-  BuyMFormInput: typeof import("../../components/buy/mForm/Input.vue")['default']
-  BuyMFormLabel: typeof import("../../components/buy/mForm/Label.vue")['default']
-  BuyMFormRadio: typeof import("../../components/buy/mForm/Radio.vue")['default']
-  BuyMFormRadiosOval: typeof import("../../components/buy/mForm/RadiosOval.vue")['default']
-  BuyMFormSelect: typeof import("../../components/buy/mForm/Select.vue")['default']
-  BuyMFormSelectDropdown: typeof import("../../components/buy/mForm/SelectDropdown.vue")['default']
-  BuyMItemContainer: typeof import("../../components/buy/mItem/Container.vue")['default']
-  BuyMItemMain: typeof import("../../components/buy/mItem/Main.vue")['default']
-  BuyMItemSwitchItem: typeof import("../../components/buy/mItem/SwitchItem.vue")['default']
-  BuyMPagination: typeof import("../../components/buy/mPagination.vue")['default']
-  BuyMSeparator: typeof import("../../components/buy/mSeparator.vue")['default']
-  BuyMStepArrow: typeof import("../../components/buy/mStep/Arrow.vue")['default']
-  BuyMSwiper12: typeof import("../../components/buy/mSwiper12.vue")['default']
-  BuyMTabCheck: typeof import("../../components/buy/mTab/Check.vue")['default']
-  BuyMTabDefaultOval: typeof import("../../components/buy/mTab/DefaultOval.vue")['default']
-  BuyMTabSeparator: typeof import("../../components/buy/mTab/Separator.vue")['default']
-  BuyMTagCheckBox: typeof import("../../components/buy/mTag/CheckBox.vue")['default']
-  BuyMTagDefault: typeof import("../../components/buy/mTag/Default.vue")['default']
-  CommonImgSrc: typeof import("../../components/common/ImgSrc.vue")['default']
-  CommonSvgIcon: typeof import("../../components/common/SvgIcon.vue")['default']
-  CommonMContainer: typeof import("../../components/common/mContainer.vue")['default']
-  CommonMContent: typeof import("../../components/common/mContent.vue")['default']
-  CommonMFooter: typeof import("../../components/common/mFooter.vue")['default']
-  CommonMHeader: typeof import("../../components/common/mHeader.vue")['default']
-  CommonMLoading: typeof import("../../components/common/mLoading.vue")['default']
-  CommonMNav: typeof import("../../components/common/mNav.vue")['default']
+  AlertSystem: typeof import("../../containers/buy/AlertSystem.vue")['default']
+  ConfirmSystem: typeof import("../../containers/buy/ConfirmSystem.vue")['default']
+  CustomPopup: typeof import("../../containers/buy/CustomPopup.vue")['default']
   NuxtWelcome: typeof import("../../node_modules/nuxt/dist/app/components/welcome.vue")['default']
   NuxtLayout: typeof import("../../node_modules/nuxt/dist/app/components/nuxt-layout")['default']
   NuxtErrorBoundary: typeof import("../../node_modules/nuxt/dist/app/components/nuxt-error-boundary.vue")['default']
@@ -80,44 +45,9 @@ interface _GlobalComponents {
   Html: typeof import("../../node_modules/nuxt/dist/head/runtime/components")['Html']
   Body: typeof import("../../node_modules/nuxt/dist/head/runtime/components")['Body']
   NuxtIsland: typeof import("../../node_modules/nuxt/dist/app/components/nuxt-island")['default']
-  LazyBuyMAccordionContent: LazyComponent<typeof import("../../components/buy/mAccordion/Content.vue")['default']>
-  LazyBuyMAddIdentical: LazyComponent<typeof import("../../components/buy/mAddIdentical.vue")['default']>
-  LazyBuyMAddress: LazyComponent<typeof import("../../components/buy/mAddress.vue")['default']>
-  LazyBuyMAnchor: LazyComponent<typeof import("../../components/buy/mAnchor.vue")['default']>
-  LazyBuyMAnchorTool: LazyComponent<typeof import("../../components/buy/mAnchorTool.vue")['default']>
-  LazyBuyMAutoComplete: LazyComponent<typeof import("../../components/buy/mAutoComplete.vue")['default']>
-  LazyBuyMCardBorderContent: LazyComponent<typeof import("../../components/buy/mCard/BorderContent.vue")['default']>
-  LazyBuyMCardFilter: LazyComponent<typeof import("../../components/buy/mCard/Filter.vue")['default']>
-  LazyBuyMCkEditor4: LazyComponent<typeof import("../../components/buy/mCkEditor4.vue")['default']>
-  LazyBuyMDialog: LazyComponent<typeof import("../../components/buy/mDialog.vue")['default']>
-  LazyBuyMErrorMessageElem: LazyComponent<typeof import("../../components/buy/mErrorMessageElem.vue")['default']>
-  LazyBuyMFormCheckBox: LazyComponent<typeof import("../../components/buy/mForm/CheckBox.vue")['default']>
-  LazyBuyMFormInput: LazyComponent<typeof import("../../components/buy/mForm/Input.vue")['default']>
-  LazyBuyMFormLabel: LazyComponent<typeof import("../../components/buy/mForm/Label.vue")['default']>
-  LazyBuyMFormRadio: LazyComponent<typeof import("../../components/buy/mForm/Radio.vue")['default']>
-  LazyBuyMFormRadiosOval: LazyComponent<typeof import("../../components/buy/mForm/RadiosOval.vue")['default']>
-  LazyBuyMFormSelect: LazyComponent<typeof import("../../components/buy/mForm/Select.vue")['default']>
-  LazyBuyMFormSelectDropdown: LazyComponent<typeof import("../../components/buy/mForm/SelectDropdown.vue")['default']>
-  LazyBuyMItemContainer: LazyComponent<typeof import("../../components/buy/mItem/Container.vue")['default']>
-  LazyBuyMItemMain: LazyComponent<typeof import("../../components/buy/mItem/Main.vue")['default']>
-  LazyBuyMItemSwitchItem: LazyComponent<typeof import("../../components/buy/mItem/SwitchItem.vue")['default']>
-  LazyBuyMPagination: LazyComponent<typeof import("../../components/buy/mPagination.vue")['default']>
-  LazyBuyMSeparator: LazyComponent<typeof import("../../components/buy/mSeparator.vue")['default']>
-  LazyBuyMStepArrow: LazyComponent<typeof import("../../components/buy/mStep/Arrow.vue")['default']>
-  LazyBuyMSwiper12: LazyComponent<typeof import("../../components/buy/mSwiper12.vue")['default']>
-  LazyBuyMTabCheck: LazyComponent<typeof import("../../components/buy/mTab/Check.vue")['default']>
-  LazyBuyMTabDefaultOval: LazyComponent<typeof import("../../components/buy/mTab/DefaultOval.vue")['default']>
-  LazyBuyMTabSeparator: LazyComponent<typeof import("../../components/buy/mTab/Separator.vue")['default']>
-  LazyBuyMTagCheckBox: LazyComponent<typeof import("../../components/buy/mTag/CheckBox.vue")['default']>
-  LazyBuyMTagDefault: LazyComponent<typeof import("../../components/buy/mTag/Default.vue")['default']>
-  LazyCommonImgSrc: LazyComponent<typeof import("../../components/common/ImgSrc.vue")['default']>
-  LazyCommonSvgIcon: LazyComponent<typeof import("../../components/common/SvgIcon.vue")['default']>
-  LazyCommonMContainer: LazyComponent<typeof import("../../components/common/mContainer.vue")['default']>
-  LazyCommonMContent: LazyComponent<typeof import("../../components/common/mContent.vue")['default']>
-  LazyCommonMFooter: LazyComponent<typeof import("../../components/common/mFooter.vue")['default']>
-  LazyCommonMHeader: LazyComponent<typeof import("../../components/common/mHeader.vue")['default']>
-  LazyCommonMLoading: LazyComponent<typeof import("../../components/common/mLoading.vue")['default']>
-  LazyCommonMNav: LazyComponent<typeof import("../../components/common/mNav.vue")['default']>
+  LazyAlertSystem: LazyComponent<typeof import("../../containers/buy/AlertSystem.vue")['default']>
+  LazyConfirmSystem: LazyComponent<typeof import("../../containers/buy/ConfirmSystem.vue")['default']>
+  LazyCustomPopup: LazyComponent<typeof import("../../containers/buy/CustomPopup.vue")['default']>
   LazyNuxtWelcome: LazyComponent<typeof import("../../node_modules/nuxt/dist/app/components/welcome.vue")['default']>
   LazyNuxtLayout: LazyComponent<typeof import("../../node_modules/nuxt/dist/app/components/nuxt-layout")['default']>
   LazyNuxtErrorBoundary: LazyComponent<typeof import("../../node_modules/nuxt/dist/app/components/nuxt-error-boundary.vue")['default']>

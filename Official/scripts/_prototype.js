@@ -123,7 +123,7 @@ export const onDeepMerge = (target, ...sources) => {
 }
 
 // 清空物件資料
-export const emptyData = (obj) => {
+export const onEmptyData = (obj) => {
   return onDeepClone(obj, (data) => {
     for (const key in obj) {
       if (data[key]) {
@@ -566,7 +566,7 @@ export const onReplaceSymbolToTag = (content, symbol, tag) => {
 }
 
 // 判斷特殊字元長度
-export const unicodLength = (text) => {
+export const onUnicodLength = (text) => {
   const regexUnicode =
     // eslint-disable-next-line no-misleading-character-class
     /\ud83c[\udffb-\udfff](?=\ud83c[\udffb-\udfff])|(?:[^\ud800-\udfff][\u0300-\u036f\ufe20-\ufe2f\u20d0-\u20ff\u1ab0-\u1aff\u1dc0-\u1dff]?|[\u0300-\u036f\ufe20-\ufe2f\u20d0-\u20ff\u1ab0-\u1aff\u1dc0-\u1dff]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff]|[\ud800-\udfff])[\ufe0e\ufe0f]?(?:[\u0300-\u036f\ufe20-\ufe2f\u20d0-\u20ff\u1ab0-\u1aff\u1dc0-\u1dff]|\ud83c[\udffb-\udfff])?(?:\u200d(?:[^\ud800-\udfff]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff])[\ufe0e\ufe0f]?(?:[\u0300-\u036f\ufe20-\ufe2f\u20d0-\u20ff\u1ab0-\u1aff\u1dc0-\u1dff]|\ud83c[\udffb-\udfff])?)*/g
@@ -599,7 +599,7 @@ export const onDevice = () => {
 }
 
 // 取得裝置
-export const onGetOS = () => {
+export const onOS = () => {
   let userAgent = navigator.userAgent.toLocaleLowerCase()
   let osName = null
 
@@ -619,7 +619,7 @@ export const onGetOS = () => {
 }
 
 // 取得瀏覽器
-export const onGetBrowser = () => {
+export const onBrowser = () => {
   let userAgent = navigator.userAgent.toLocaleLowerCase()
   let browserName = null
 
@@ -1215,6 +1215,18 @@ export const onQueryParam = (key) => {
   const { search } = window.location
   const params = new URLSearchParams(search)
   return params.get(key)
+}
+
+// 鎖住 body scrollbar
+export const onBodyOverflowHiddenToggle = (status) => {
+  const body = document.body
+  const classHidden = 'overflow-hidden'
+
+  if (status) {
+    body.classList.add(classHidden)
+  } else {
+    body.classList.remove(classHidden)
+  }
 }
 
 // 同時執行多支 api，會等全部回傳

@@ -154,6 +154,14 @@ const onClick = (e) => {
       @apply bg-[--white];
     }
 
+    &.\-\-bg-gray-f2 {
+      @apply bg-[--gray-f2];
+    }
+
+    &.\-\-bg-orange-e646 {
+      @apply bg-[--orange-e646];
+    }
+
     &.\-\-bg-green-6a2d {
       @apply bg-[--green-6a2d];
     }

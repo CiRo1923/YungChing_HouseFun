@@ -1,6 +1,4 @@
 <script setup>
-import FormInput from '@components/buy/mForm/Input.vue'
-
 import { useBuyListStore } from '@stores/buy/list.js'
 
 const buyList = useBuyListStore()
@@ -8,7 +6,7 @@ const { keyword } = storeToRefs(buyList)
 </script>
 
 <template>
-  <FormInput
+  <BuyMFormInput
     name="keyword"
     v-model="keyword"
     :config="{

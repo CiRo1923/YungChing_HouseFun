@@ -153,10 +153,10 @@ onMounted(async () => {
         </SwiperSlide>
         <template v-if="navConfig && props.data.length > 1">
           <button type="button" class="m-swiper12-nav --prev" :class="setClass.nav" @click="onPrev">
-            <SvgIcon :icon="navConfig.icon.prev" class="h-full w-full" />
+            <CommonSvgIcon :icon="navConfig.icon.prev" class="h-full w-full" />
           </button>
           <button type="button" class="m-swiper12-nav --next" :class="setClass.nav" @click="onNext">
-            <SvgIcon :icon="navConfig.icon.next" class="h-full w-full" />
+            <CommonSvgIcon :icon="navConfig.icon.next" class="h-full w-full" />
           </button>
         </template>
         <div

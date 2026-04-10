@@ -1,8 +1,4 @@
 <script setup>
-import ImgSrc from '@components/common/ImgSrc.vue'
-import SvgIcon from '@components/common/SvgIcon.vue'
-import Anchor from '@components/buy/mAnchor.vue'
-
 import { useBuyHouseStore } from '@stores/buy/house.js'
 
 const buyHouse = useBuyHouseStore()
@@ -41,7 +37,7 @@ const companyInfo = computed(() => {
 <template>
   <div class="flex gap-x-[20px]">
     <div class="shrink-0 space-y-[5px] text-center">
-      <ImgSrc
+      <CommonImgSrc
         :setClass="{
           main: 'h-[80px] w-[80px] rounded-full bg-[--gray-999]',
         }"
@@ -49,7 +45,7 @@ const companyInfo = computed(() => {
       <span
         class="account-info-community inline-flex h-[24px] items-center rounded-[8px] px-[8px] text-[--white]"
       >
-        <SvgIcon icon="icon_flag" class="h-[18px] w-[18px]" />
+        <CommonSvgIcon icon="icon_flag" class="h-[18px] w-[18px]" />
         <em class="text-[14px]">社區通</em>
       </span>
     </div>
@@ -61,7 +57,7 @@ const companyInfo = computed(() => {
           </li>
           <template v-for="(item, index) in personalInfo" :key="`${item.id}_${index}`">
             <li class="flex items-center">
-              <Anchor
+              <BuyMAnchor
                 :text="item.label"
                 :href="item.href"
                 :config="{
@@ -81,7 +77,7 @@ const companyInfo = computed(() => {
                 class="inline-flex items-center gap-x-[3px] text-[--green-8b0d]"
                 v-if="!item.href && !item.onClick"
               >
-                <SvgIcon :icon="item.icon" class="h-[18px] w-[18px]" />
+                <CommonSvgIcon :icon="item.icon" class="h-[18px] w-[18px]" />
                 <em class="text-[14px]">{{ item.label }}</em>
               </p>
             </li>

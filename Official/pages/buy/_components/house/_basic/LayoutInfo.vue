@@ -1,8 +1,4 @@
 <script setup>
-import SvgIcon from '@components/common/SvgIcon.vue'
-
-import Separator from '@components/buy/mSeparator.vue'
-
 import { useBuyHouseStore } from '@stores/buy/house.js'
 // import useBuyProjectStores from '@stores/buy/_composables/useProjectStores.js'
 
@@ -57,8 +53,8 @@ const layoutInfo = computed(() => {
       v-for="(item, index) in layoutInfo"
       :key="`${item.id}_${index}`"
     >
-      <SvgIcon :icon="item.icon" class="h-[18px] w-[18px] text-[--green-8b0d]" />
-      <Separator
+      <CommonSvgIcon :icon="item.icon" class="h-[18px] w-[18px] text-[--green-8b0d]" />
+      <BuyMSeparator
         :items="item.items"
         :setClass="{
           main: '--horizontal p:--gap-x-25 tm:--gap-x-20',

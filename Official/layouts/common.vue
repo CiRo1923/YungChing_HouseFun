@@ -1,8 +1,4 @@
 <script setup>
-import Header from '@components/common/mHeader.vue'
-import Footer from '@components/common/mFooter.vue'
-import Loading from '@components/common/mLoading.vue'
-
 import { useCommonStore } from '@stores/common.js'
 
 const route = useRoute()
@@ -15,15 +11,15 @@ const { isLoading } = storeToRefs(common)
   <div class="l-wrap">
     <header class="l-header relative z-[1] shadow-black-y2-b4">
       <h1 class="sr-only">{{ channel }}</h1>
-      <Header />
+      <CommonMHeader />
     </header>
     <main class="l-body relative z-0">
       <slot />
     </main>
     <footer class="l-footer">
-      <Footer />
+      <CommonMFooter />
     </footer>
-    <Loading v-if="isLoading" />
+    <CommonMLoading v-if="isLoading" />
   </div>
 </template>
 

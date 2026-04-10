@@ -1,8 +1,4 @@
 <script setup>
-import FormSelectDropdown from '@components/buy/mForm/SelectDropdown.vue'
-import Anchor from '@components/buy/mAnchor.vue'
-import FormCheckBox from '@components/buy/mForm/CheckBox.vue'
-
 import { useBuyListStore } from '@stores/buy/list.js'
 
 const buyList = useBuyListStore()
@@ -134,7 +130,7 @@ onGetLabel()
 </script>
 
 <template>
-  <FormSelectDropdown
+  <BuyMFormSelectDropdown
     :name="`${props.name}Dropdown`"
     v-model="mrt.label"
     :config="{
@@ -152,7 +148,7 @@ onGetLabel()
         class="scrollbar --y max-h-full shrink-0 space-y-[5px] border-y-[20px] border-transparent m:px-[5px] t:px-[10px] p:px-[20px]"
       >
         <li v-for="(item, index) in mrt.options" :key="`mrt_area_${item.id}_${index}`">
-          <Anchor
+          <BuyMAnchor
             :text="item.name"
             :setClass="{
               main: [
@@ -169,7 +165,7 @@ onGetLabel()
         class="scrollbar --y max-h-full shrink-0 space-y-[5px] border-y-[20px] border-transparent bg-[--blue-efef] m:px-[5px] t:px-[10px] p:w-[165px] p:px-[20px]"
       >
         <li v-for="(item, index) in lines" :key="`mrt_lines_${item.id}_${index}`">
-          <Anchor
+          <BuyMAnchor
             :text="item.name"
             :setClass="{
               main: [
@@ -186,7 +182,7 @@ onGetLabel()
         class="scrollbar --y max-h-full grow space-y-[20px] border-y-[20px] border-transparent m:px-[5px] t:px-[10px] p:px-[30px]"
       >
         <li v-for="(item, index) in stations" :key="`mrt_stations_${item.id}_${index}`">
-          <FormCheckBox
+          <BuyMFormCheckBox
             name="stations"
             v-model="mrt.apiData"
             :config="{
@@ -203,7 +199,7 @@ onGetLabel()
         </li>
       </ul>
     </div>
-  </FormSelectDropdown>
+  </BuyMFormSelectDropdown>
   <!-- <pre>{{ mrt }}</pre> -->
   <!-- <pre>{{ lines }}</pre> -->
 </template>

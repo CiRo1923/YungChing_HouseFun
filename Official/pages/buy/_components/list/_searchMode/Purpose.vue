@@ -1,7 +1,4 @@
 <script setup>
-import FormSelectDropdown from '@components/buy/mForm/SelectDropdown.vue'
-import FormRadio from '@components/buy/mForm/Radio.vue'
-
 import { useBuyProjectStore } from '@stores/buy/project.js'
 import { useBuyListStore } from '@stores/buy/list.js'
 import useBuyProjectStores from '@stores/buy/_composables/useProjectStores.js'
@@ -37,7 +34,7 @@ onInit()
 </script>
 
 <template>
-  <FormSelectDropdown
+  <BuyMFormSelectDropdown
     :name="`${props.name}Dropdown`"
     v-model="purpose.label"
     :setClass="{
@@ -49,7 +46,7 @@ onInit()
   >
     <ul class="m:grid m:grid-cols-3 m:gap-[15px] pt:space-y-[15px]">
       <li v-for="(item, index) in options.casePurpose" :key="`${props.name}_${item.code}_${index}`">
-        <FormRadio
+        <BuyMFormRadio
           :name="props.name"
           v-model="purpose.apiData"
           :config="{
@@ -60,7 +57,7 @@ onInit()
         />
       </li>
     </ul>
-  </FormSelectDropdown>
+  </BuyMFormSelectDropdown>
 </template>
 
 <style></style>

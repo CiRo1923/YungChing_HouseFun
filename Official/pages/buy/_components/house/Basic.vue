@@ -1,6 +1,4 @@
 <script setup>
-import Content from '@components/common/mContent.vue'
-
 import AddressInfo from '@pages/buy/_components/house/_basic/AddressInfo.vue'
 import Media from '@pages/buy/_components/house/_basic/Media.vue'
 import PriceInfo from '@pages/buy/_components/house/_basic/PriceInfo.vue'
@@ -15,7 +13,7 @@ const { basic } = storeToRefs(buyHouse)
 </script>
 
 <template>
-  <Content class="pt:--rounded-20 p:--p-24">
+  <CommonMContent class="pt:--rounded-20 p:--p-24">
     <div class="t:gap-x-[10px] pt:flex p:gap-x-[15px]">
       <div
         class="m:flex m:flex-col-reverse t:space-y-[10px] pt:shrink-0 p:w-[760px] p:space-y-[15px]"
@@ -48,7 +46,7 @@ const { basic } = storeToRefs(buyHouse)
         </pre> -->
       </div>
     </div>
-  </Content>
+  </CommonMContent>
 </template>
 
 <style></style>

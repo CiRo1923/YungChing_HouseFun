@@ -1,6 +1,4 @@
 <script setup>
-import SvgIcon from '@components/common/SvgIcon.vue'
-
 import { onDeepMerge } from '@js/_prototype.js'
 
 const emits = defineEmits(['update:modelValue', 'change'])
@@ -119,7 +117,7 @@ const onChange = () => {
       @change="onChange"
     />
     <span class="m-tag-assist relative h-[15px] w-[12px] shrink-0">
-      <SvgIcon
+      <CommonSvgIcon
         icon="icon_check_solid"
         class="m-tag-icon absolute right-0 top-0 h-full w-[15px] text-[--orange-e646] transition-opacitys duration-300"
         :class="setClass.icon"

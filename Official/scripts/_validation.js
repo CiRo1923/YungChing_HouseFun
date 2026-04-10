@@ -1,4 +1,4 @@
-import { unicodLength } from '@js/_prototype.js'
+import { onUnicodLength } from '@js/_prototype.js'
 import { defineRule } from 'vee-validate'
 import { all as rules } from '@vee-validate/rules'
 
@@ -46,7 +46,7 @@ defineRule('maxlength', (value, object, elem) => {
   const $elem = document.querySelector(`[name="${elem.name}"]`)
   const maxlength = object.value || Number($elem.getAttribute('maxlength'))
 
-  return value && unicodLength(value) > maxlength ? replaceMessage(elem, object) : true
+  return value && onUnicodLength(value) > maxlength ? replaceMessage(elem, object) : true
 })
 
 // 最小字元長度
@@ -54,7 +54,7 @@ defineRule('minlength', (value, object, elem) => {
   const $elem = document.querySelector(`[name="${elem.name}"]`)
   const minlength = object.value || Number($elem.getAttribute('minlength'))
 
-  return value && unicodLength(value) < minlength ? replaceMessage(elem, object) : true
+  return value && onUnicodLength(value) < minlength ? replaceMessage(elem, object) : true
 })
 
 // 中文格式

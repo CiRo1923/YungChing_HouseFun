@@ -1,5 +1,4 @@
 <script setup>
-import Anchor from '@components/buy/mAnchor.vue'
 const props = defineProps({
   config: {
     type: Object,
@@ -23,7 +22,7 @@ const config = computed(() => {
       </div>
     </div>
     <footer class="m-accordion-footer">
-      <Anchor :text="config.buttonText" />
+      <BuyMAnchor :text="config.buttonText" />
     </footer>
   </div>
 </template>

@@ -1,6 +1,4 @@
 <script setup>
-import Container from '@components/common/mContainer.vue'
-
 import Breadcrumbs from '@pages/buy/_components/house/Breadcrumbs.vue'
 import Basic from '@pages/buy/_components/house/Basic.vue'
 import Focus from '@pages/buy/_components/house/Focus.vue'
@@ -19,6 +17,7 @@ import { useMeta } from '@composable/useMeta.js'
 
 import { useCommonStore } from '@stores/common.js'
 import { useBuyHouseStore } from '@stores/buy/house.js'
+import { useBuyPopupStore } from '@stores/buy/popup.js'
 import useBuyProjectStores from '@stores/buy/_composables/useProjectStores.js'
 import useBuyHouseStores from '@stores/buy/_composables/useHouseStores.js'
 
@@ -31,6 +30,7 @@ const common = useCommonStore()
 const { onWithLoadingAll } = common
 const buyHouse = useBuyHouseStore()
 const { detail } = storeToRefs(buyHouse)
+const popup = useBuyPopupStore()
 const { onApiBuyHouse } = useBuyHouseStores()
 const {
   onApiGETRealEstateTypeSelectOptions,
@@ -53,13 +53,20 @@ useMeta({
   description: seo.value.description,
   url: useRequestURL(),
 })
+
+const onAskMessage = () => {
+  popup.custom({
+    id: 'askMessage',
+    title: '123',
+  })
+}
 </script>
 
 <template>
   <div class="bg-[--white] py-[12px] tm:px-[15px]">
-    <Container class="--inner">
+    <CommonMContainer class="--inner">
       <Breadcrumbs />
-    </Container>
+    </CommonMContainer>
   </div>
   <!-- <pre>
     {{ detail }}
@@ -67,7 +74,7 @@ useMeta({
   <!-- <pre>
     {{ seo }}
   </pre> -->
-  <Container class="--inner tm:space-y-[8px] p:mt-[45px] p:space-y-[12px]">
+  <CommonMContainer class="--inner tm:space-y-[8px] p:mt-[45px] p:space-y-[12px]">
     <Basic />
     <Focus />
     <Information />
@@ -80,7 +87,9 @@ useMeta({
     <Selections />
     <Recommend />
     <Construction />
-  </Container>
+  </CommonMContainer>
+
+  <CustomPopup id="askMessage"> 123 </CustomPopup>
 </template>
 
 <style></style>

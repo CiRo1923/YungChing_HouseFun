@@ -1,7 +1,4 @@
 <script setup>
-import FormSelectDropdown from '@components/buy/mForm/SelectDropdown.vue'
-import FormRadio from '@components/buy/mForm/Radio.vue'
-
 import PriceTotal from '@pages/buy/_components/list/_searchMode/PriceTotal.vue'
 import PriceRepayment from '@pages/buy/_components/list/_searchMode/PriceRepayment.vue'
 
@@ -44,7 +41,7 @@ onInit()
 </script>
 
 <template>
-  <FormSelectDropdown
+  <BuyMFormSelectDropdown
     :name="`${props.name}Dropdown`"
     v-model="price.label"
     :setClass="{
@@ -59,7 +56,7 @@ onInit()
         class="mb-[15px] flex shrink-0 items-center border-b-[1px] border-b-[--gray-ccce] pb-[15px]"
       >
         <li class="flex-1" v-for="(item, index) in options" :key="`${item.value}_${index}`">
-          <FormRadio
+          <BuyMFormRadio
             name="priceType"
             v-model="type"
             :config="{
@@ -73,7 +70,7 @@ onInit()
       <PriceTotal v-if="type === 'total'" />
       <PriceRepayment v-if="type === 'repayment'" />
     </div>
-  </FormSelectDropdown>
+  </BuyMFormSelectDropdown>
 </template>
 
 <style></style>

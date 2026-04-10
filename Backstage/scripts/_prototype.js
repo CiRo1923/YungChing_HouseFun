@@ -1,5 +1,5 @@
 // 遞迴
-export const recursive = (obj, key, exec, finish) => {
+export const onRecursive = (obj, key, exec, finish) => {
   let recursiveIndex = 0
   const arrayWithoutHoles = (arr) => {
     const toArray = () => {
@@ -123,7 +123,7 @@ export const onDeepMerge = (target, ...sources) => {
 }
 
 // 清空物件資料
-export const emptyData = (obj) => {
+export const onEmptyData = (obj) => {
   return onDeepClone(obj, (data) => {
     for (const key in obj) {
       if (data[key]) {
@@ -144,7 +144,7 @@ export const emptyData = (obj) => {
 }
 
 // 小數點設定
-export const toFixed = (number, fixed) => {
+export const onToFixed = (number, fixed) => {
   const length = number && /\./.test(number) ? (number + '').split('.')[1].length : 0
   const fix = fixed !== undefined ? fixed : length
   let result = +(Math.round(number + `e+${fix}`) + `e-${fix}`) || 0
@@ -553,13 +553,12 @@ export const onValueToDateRange = (today, date, format) => {
 }
 
 // 轉換 html tag
-export const replaceSymbolToTag = (content, symbol, tag) => {
+export const onReplaceSymbolToTag = (content, symbol, tag) => {
   return content.replace(new RegExp(`\\${symbol}`, 'g'), tag)
-  // return ''
 }
 
 // 判斷特殊字元長度
-export const unicodLength = (text) => {
+export const onUnicodLength = (text) => {
   const regexUnicode =
     // eslint-disable-next-line no-misleading-character-class
     /\ud83c[\udffb-\udfff](?=\ud83c[\udffb-\udfff])|(?:[^\ud800-\udfff][\u0300-\u036f\ufe20-\ufe2f\u20d0-\u20ff\u1ab0-\u1aff\u1dc0-\u1dff]?|[\u0300-\u036f\ufe20-\ufe2f\u20d0-\u20ff\u1ab0-\u1aff\u1dc0-\u1dff]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff]|[\ud800-\udfff])[\ufe0e\ufe0f]?(?:[\u0300-\u036f\ufe20-\ufe2f\u20d0-\u20ff\u1ab0-\u1aff\u1dc0-\u1dff]|\ud83c[\udffb-\udfff])?(?:\u200d(?:[^\ud800-\udfff]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff])[\ufe0e\ufe0f]?(?:[\u0300-\u036f\ufe20-\ufe2f\u20d0-\u20ff\u1ab0-\u1aff\u1dc0-\u1dff]|\ud83c[\udffb-\udfff])?)*/g
@@ -592,7 +591,7 @@ export const onDevice = () => {
 }
 
 // 取得裝置
-export const getOS = () => {
+export const onOS = () => {
   let userAgent = navigator.userAgent.toLocaleLowerCase()
   let osName = null
 
@@ -612,7 +611,7 @@ export const getOS = () => {
 }
 
 // 取得瀏覽器
-export const getBrowser = () => {
+export const onBrowser = () => {
   let userAgent = navigator.userAgent.toLocaleLowerCase()
   let browserName = null
 
@@ -1194,9 +1193,21 @@ export const countdown = {
 // 取得 YouTube 縮圖
 export const onGetYouTubeID = (url) => {
   const regex =
-    /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts|live)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i
+    /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?|shorts|live)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/i
   const match = url.match(regex)
   return match ? match[1] : null
+}
+
+// 鎖住 body scrollbar
+export const onBodyOverflowHiddenToggle = (status) => {
+  const body = document.body
+  const classHidden = 'overflow-hidden'
+
+  if (status) {
+    body.classList.add(classHidden)
+  } else {
+    body.classList.remove(classHidden)
+  }
 }
 
 /**

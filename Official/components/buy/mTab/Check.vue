@@ -1,6 +1,4 @@
 <script setup>
-import SvgIcon from '@components/common/SvgIcon.vue'
-
 const props = defineProps({
   options: {
     type: Array,
@@ -161,7 +159,11 @@ onMounted(() => {
           v-bind="onHeaderBind(item)"
           @click="onClick(item, index)"
         >
-          <SvgIcon icon="icon_check_solid" class="h-[16px] w-[16px]" v-if="index === activeIndex" />
+          <CommonSvgIcon
+            icon="icon_check_solid"
+            class="h-[16px] w-[16px]"
+            v-if="index === activeIndex"
+          />
           <slot name="header" :item="item" :index="index">
             <b class="font-semibold">{{ item.label }}</b>
           </slot>

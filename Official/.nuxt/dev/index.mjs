@@ -643,7 +643,7 @@ const _inlineRuntimeConfig = {
     "NUXT_PUBLIC_MANAGE_API_PATH": "https://agent-bff.housesfunlab.com",
     "NUXT_PUBLIC_PATH": "/",
     "spritePath": "assets/imgs/svg/spritemap.svg",
-    "spriteVersion": "20260409040752271"
+    "spriteVersion": "20260410034735735"
   }
 };
 const envOptions = {
@@ -2131,7 +2131,22 @@ _bMtLGJWbrglWB3VSUscYuQ9mg40SvWeNfpAPM2ouL0,
 _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw
 ];
 
-const assets = {};
+const assets = {
+  "/index.mjs": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"1a506-CjKJTuXbAQf9Q91eRBdmPMfwPHA\"",
+    "mtime": "2026-04-10T03:47:50.412Z",
+    "size": 107782,
+    "path": "index.mjs"
+  },
+  "/index.mjs.map": {
+    "type": "application/json",
+    "etag": "\"6b4ab-Robovs85zU1kNhPK0YedbmCahuU\"",
+    "mtime": "2026-04-10T03:47:50.413Z",
+    "size": 439467,
+    "path": "index.mjs.map"
+  }
+};
 
 function readAsset (id) {
   const serverDir = dirname$1(fileURLToPath(globalThis._importMeta_.url));
