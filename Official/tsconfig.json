@@ -9,7 +9,7 @@
       "~/*": ["./*"],
       "@stores/*": ["./stores/*"],
       "@components/*": ["./components/*"],
-      "@container/*": ["./container/*"],
+      "@containers/*": ["./containers/*"],
       "@composable/*": ["./composable/*"],
       "@pages/*": ["./pages/*"],
       "@imgs/*": ["./assets/images/*"],

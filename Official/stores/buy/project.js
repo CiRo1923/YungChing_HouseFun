@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 
-export const useBuyProjectStore = defineStore('project', () => {
+export const useBuyProjectStore = defineStore('buyProject', () => {
   const NAME = '好房網 買屋'
   const device = ref('p')
   const options = ref({

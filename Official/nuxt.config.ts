@@ -36,7 +36,11 @@ export default defineNuxtConfig({
   },
   components: [
     {
-      path: '@/containers',
+      path: '~/components',
+      pathPrefix: true,
+    },
+    {
+      path: '~/containers',
       pathPrefix: false,
     },
   ],

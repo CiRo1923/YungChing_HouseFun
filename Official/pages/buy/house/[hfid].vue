@@ -12,12 +12,12 @@ import SocialLife from '@pages/buy/_components/house/SocialLife.vue'
 import Selections from '@pages/buy/_components/house/Selections.vue'
 import Recommend from '@pages/buy/_components/house/Recommend.vue'
 import Construction from '@pages/buy/_components/house/Construction.vue'
+import PopupAskMessage from '@pages/buy/_components/house/PopupAskMessage.vue'
 
 import { useMeta } from '@composable/useMeta.js'
 
 import { useCommonStore } from '@stores/common.js'
 import { useBuyHouseStore } from '@stores/buy/house.js'
-import { useBuyPopupStore } from '@stores/buy/popup.js'
 import useBuyProjectStores from '@stores/buy/_composables/useProjectStores.js'
 import useBuyHouseStores from '@stores/buy/_composables/useHouseStores.js'
 
@@ -30,7 +30,7 @@ const common = useCommonStore()
 const { onWithLoadingAll } = common
 const buyHouse = useBuyHouseStore()
 const { detail } = storeToRefs(buyHouse)
-const popup = useBuyPopupStore()
+// const popup = useBuyPopupStore()
 const { onApiBuyHouse } = useBuyHouseStores()
 const {
   onApiGETRealEstateTypeSelectOptions,
@@ -53,13 +53,6 @@ useMeta({
   description: seo.value.description,
   url: useRequestURL(),
 })
-
-const onAskMessage = () => {
-  popup.custom({
-    id: 'askMessage',
-    title: '123',
-  })
-}
 </script>
 
 <template>
@@ -88,8 +81,7 @@ const onAskMessage = () => {
     <Recommend />
     <Construction />
   </CommonMContainer>
-
-  <CustomPopup id="askMessage"> 123 </CustomPopup>
+  <PopupAskMessage />
 </template>
 
 <style></style>

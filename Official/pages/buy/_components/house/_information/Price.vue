@@ -10,6 +10,7 @@ const buyHouse = useBuyHouseStore()
 const { pricing } = storeToRefs(buyHouse)
 // const { onValueGetText } = useBuyProjectStores()
 
+const emits = defineEmits(['popup'])
 const items = computed(() => {
   const { unitPrice, mortgageMonth } = pricing.value
 
@@ -26,6 +27,9 @@ const items = computed(() => {
               icon: 'icon_question_dialog',
               class: {
                 main: '--text-orange-e646 text-[14px]',
+              },
+              onClick: () => {
+                emits('popup', 'askMessage')
               },
             },
           },

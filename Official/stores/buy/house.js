@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 
-export const useBuyHouseStore = defineStore('house', () => {
+export const useBuyHouseStore = defineStore('buyHouse', () => {
   const detail = ref(null)
   const breadcrumb = ref(null) // 麵包屑
   const basic = ref(null) // 基本資訊

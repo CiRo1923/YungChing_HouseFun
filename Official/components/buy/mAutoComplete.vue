@@ -58,7 +58,7 @@ const config = computed(() => {
     noMatchClearLabel: true,
     noResult: '無任何選項。',
     isDisabled: false,
-    isExistClose: true,
+    hasExistClose: true,
     isError: false,
     position: 'auto',
     schema: {
@@ -425,7 +425,7 @@ onUnmounted(() => {
               '--show': inputLabel,
             }"
             @click="onClear"
-            v-if="config.isExistClose && !config.isDisabled"
+            v-if="config.hasExistClose && !config.isDisabled"
           >
             <CommonSvgIcon icon="icon_xmark" class="m-autocomplete-clear-icon" />
           </button>

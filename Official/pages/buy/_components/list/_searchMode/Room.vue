@@ -146,7 +146,7 @@ onInit()
             inputMode: 'numeric',
             maxlength: 2,
             inputChinese: false,
-            isExistClose: false,
+            hasClearButton: false,
             integer: true,
             checkNotIsZero: true,
           }"
@@ -163,7 +163,7 @@ onInit()
             inputMode: 'numeric',
             maxlength: 2,
             inputChinese: false,
-            isExistClose: false,
+            hasClearButton: false,
             integer: true,
             checkNotIsZero: true,
           }"

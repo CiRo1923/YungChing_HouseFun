@@ -4,7 +4,7 @@ import { useBuyHouseStore } from '@stores/buy/house.js'
 
 const useBuyHouseStores = () => {
   // const projectStores = useProjectStore()
-  const houseStores = useBuyHouseStore()
+  const buyHouseStores = useBuyHouseStore()
   const route = useRoute()
   // const { apiData, options: projectOptions } = storeToRefs(projectStores)
   const {
@@ -20,7 +20,7 @@ const useBuyHouseStores = () => {
     actualPrice,
     broker,
     poi,
-  } = storeToRefs(houseStores)
+  } = storeToRefs(buyHouseStores)
 
   const onApiBuyHouse = async () => {
     const { params } = route

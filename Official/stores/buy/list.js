@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 
-export const useBuyListStore = defineStore('list', () => {
+export const useBuyListStore = defineStore('buyList', () => {
   const basicRouteName = 'buy-list-filters'
   const channel = ref('region')
   const content = ref(null)

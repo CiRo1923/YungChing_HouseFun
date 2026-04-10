@@ -144,9 +144,9 @@ const onClick = (e) => {
       @apply text-[--white];
     }
 
-    /* &.\-\-text-gray-666 {
+    &.\-\-text-gray-666 {
       @apply text-[--gray-666];
-    } */
+    }
 
     /* &.\-\-text-green-6a2d {
       @apply text-[--green-6a2d];

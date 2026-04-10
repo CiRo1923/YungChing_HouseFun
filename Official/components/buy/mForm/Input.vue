@@ -65,7 +65,7 @@ const config = computed(() => {
       isDisabled: false,
       isError: false,
       inputMode: null,
-      isExistClose: true, // 輸入後開啟 X 清除
+      hasClearButton: true, // 輸入後開啟 X 清除
       inputChinese: true, // 開啟關閉輸入中文
       comma: false, // 啟用千分位功能
       checkNotIsZero: false, // 輸入欄位致不能為 0
@@ -321,7 +321,7 @@ watch(
             @keydown.enter="onEnter($event)"
           />
           <button
-            v-if="config.isExistClose && !config.isDisabled"
+            v-if="config.hasClearButton && !config.isDisabled"
             type="button"
             class="m-form-clear-button"
             :class="{

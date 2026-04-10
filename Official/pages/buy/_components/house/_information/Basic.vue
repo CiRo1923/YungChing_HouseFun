@@ -8,6 +8,7 @@ const buyHouse = useBuyHouseStore()
 const { basic, floor, community } = storeToRefs(buyHouse)
 const { onSearchParams } = useBuyProjectStores()
 
+const emits = defineEmits(['popup'])
 const items = computed(() => {
   const { caseType, layout, buildAge, caseUsageToken } = basic.value
   const { from, to, up } = floor.value // 樓層
@@ -61,6 +62,9 @@ const items = computed(() => {
               class: {
                 main: '--text-orange-e646 text-[14px] ',
               },
+              onClick: () => {
+                emits('popup', 'askMessage')
+              },
             },
             isFlex: true,
           },
@@ -104,6 +108,9 @@ const items = computed(() => {
                   icon: 'icon_question_dialog',
                   class: {
                     main: '--text-orange-e646 text-[14px] ',
+                  },
+                  onClick: () => {
+                    emits('popup', 'askMessage')
                   },
                 }
               : null,

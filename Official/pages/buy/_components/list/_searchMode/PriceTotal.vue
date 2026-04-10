@@ -127,7 +127,7 @@ const onRadioChange = (data) => {
           placeholder: '最低價',
           inputMode: 'numeric',
           inputChinese: false,
-          isExistClose: false,
+          hasClearButton: false,
           integer: true,
           checkNotIsZero: true,
         }"
@@ -144,7 +144,7 @@ const onRadioChange = (data) => {
           placeholder: '最高價',
           inputMode: 'numeric',
           inputChinese: false,
-          isExistClose: false,
+          hasClearButton: false,
           integer: true,
           checkNotIsZero: true,
         }"

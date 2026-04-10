@@ -1,7 +1,10 @@
 <script setup>
-import { useBuyPopupStore } from '@stores/buy/popup.js'
+import { usePopupStore } from '@stores/popup.js'
+import useBuyPopupActions from '@stores/buy/_composables/usePopupActions.js'
 
-const popup = useBuyPopupStore()
+const popup = usePopupStore()
+const { alertData, confirmData, customData, apiPromiseData } = storeToRefs(popup)
+const { onReset } = useBuyPopupActions()
 
 const props = defineProps({
   id: {
@@ -14,26 +17,30 @@ const props = defineProps({
   },
 })
 
+const isShowOverlay = ref(false)
+const isShowPopup = ref(false)
+
+const isOpen = computed(() => keyID.value && props.id === keyID.value)
 const keyID = computed(
-  () => popup.alertData.id || popup.confirmData.id || popup.customData.id || popup.apiRunData.id
+  () => alertData.value.id || confirmData.value.id || customData.value.id || apiPromiseData.value.id
 )
 
-const isExistClose = computed(() => {
-  const alertClose = keyID.value === 'alertSystem' ? popup.alertData.isExistClose : false
-  const confirmClose = keyID.value === 'confirmSystem' ? popup.confirmData.isExistClose : false
-  const popClose =
+const hasExistClose = computed(() => {
+  const alertClose = keyID.value === 'alertSystem' ? alertData.value.hasExistClose : false
+  const confirmClose = keyID.value === 'confirmSystem' ? confirmData.value.hasExistClose : false
+  const customClose =
     keyID.value !== 'alertSystem' &&
     keyID.value !== 'confirmSystem' &&
     keyID.value !== 'apiAwaitSystem'
-      ? popup.customData.isExistClose
+      ? customData.value.hasExistClose
       : false
-  const awaitClose = keyID.value === 'apiAwaitSystem' ? popup.apiAwaitData.isExistClose : null
+  const awaitClose = keyID.value === 'apiAwaitSystem' ? apiPromiseData.value.hasExistClose : null
 
-  return alertClose || confirmClose || popClose || awaitClose
+  return alertClose || confirmClose || customClose || awaitClose
 })
 
 const title = computed(
-  () => popup.alertData.title || popup.confirmData.title || popup.customData.title
+  () => alertData.value.title || confirmData.value.title || customData.value.title
 )
 
 const setClass = computed(() => {
@@ -48,42 +55,61 @@ const setClass = computed(() => {
   }
 })
 
-const onClose = () => {
-  popup.alertData.close()
-  popup.confirmData.close()
-  popup.customData.close()
+const onOverlayEnter = () => {
+  // overlay 出現後 → 開 popup
+  if (isOpen.value) {
+    isShowPopup.value = true
+  }
 }
+
+// bomb 關閉完後，再把 overlay 收掉
+const onAfterLeave = () => {
+  isShowOverlay.value = false
+}
+
+watchEffect(() => {
+  if (isOpen.value) {
+    isShowOverlay.value = true
+  } else {
+    // 關閉時先收 popup
+    isShowPopup.value = false
+  }
+})
 </script>
 
 <template>
-  <Transition name="popup-overlay" appear>
+  <Transition name="popup-overlay" appear @enter="onOverlayEnter">
     <div
       class="m-popup fixed inset-0 z-[5] flex items-center justify-center"
       :class="setClass.main"
-      v-if="keyID && props.id === keyID"
+      v-if="isOpen || isShowOverlay"
     >
-      <Transition name="popup-bomb" appear>
+      <Transition name="popup-bomb" appear @after-leave="onAfterLeave">
         <div
-          class="m-popup-container relative flex max-h-[92%] flex-col bg-[--white] m:mx-[16px] tm:rounded-[15px] p:rounded-[20px]"
+          class="m-popup-container relative flex max-h-[92%] flex-col overflow-hidden bg-[--white] m:mx-[16px] tm:rounded-[15px] p:rounded-[20px] p:pb-[40px]"
           :class="setClass.container"
+          v-if="isShowPopup"
         >
           <button
             type="button"
-            class="absolute right-[20px] top-[25px] flex items-center justify-center transition-colors duration-300"
-            @click="onClose"
-            v-if="isExistClose"
+            class="absolute right-[20px] top-[25px] flex items-center justify-center text-[--gray-666] transition-colors duration-300 p:h-[40px] p:w-[40px] p:p-[12px]"
+            @click="onReset"
+            v-if="hasExistClose"
           >
-            <CommonSvgIcon icon="icon_xmark" class="text-[--white]" />
+            <CommonSvgIcon icon="icon_xmark" />
           </button>
           <div class="m-popup-header shrink-0" :class="setClass.header" v-if="title">
             <slot name="header">
-              <p class="text-center" :class="setClass.headerTitle">
-                <b v-html="title" />
+              <p
+                class="flex items-center bg-[--blue-efef] p:h-[85px] p:px-[50px] p:text-[24px]"
+                :class="setClass.headerTitle"
+              >
+                <b class="font-medium" v-html="title" />
               </p>
             </slot>
           </div>
           <div
-            class="m-popup-body grow overflow-hidden overflow-y-auto p:px-[50px] p:pb-[40px] p:pt-[30px]"
+            class="m-popup-body grow overflow-hidden overflow-y-auto border-t-transparent p:border-t-[30px] p:px-[50px]"
             :class="setClass.body"
           >
             <slot />
@@ -102,7 +128,7 @@ const onClose = () => {
 
 <style src="@css/_modules/_vueTransition.css"></style>
 <style lang="postcss">
-@keyframes bomb {
+@keyframes popup-bomb {
   0% {
     transform: scale(0);
   }
@@ -120,7 +146,13 @@ const onClose = () => {
   }
 }
 
-@screep p {
+.m-popup {
+  &:before {
+    @apply absolute inset-0 bg-[--black] opacity-40 content-default;
+  }
+}
+
+@screen p {
   .m-popup {
     &.\-\-w-615,
     &.p\:\-\-w-615,
@@ -140,7 +172,7 @@ const onClose = () => {
   }
 }
 
-@screep t {
+@screen t {
   .m-popup {
     &.\-\-w-615,
     &.pt\:\-\-w-615,

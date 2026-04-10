@@ -11,7 +11,6 @@ import { useCommonStore } from '@stores/common.js'
 import { useBuyListStore } from '@stores/buy/list.js'
 import useBuyProjectStores from '@stores/buy/_composables/useProjectStores.js'
 import useBuyListStores from '@stores/buy/_composables/useListStores.js'
-import CustomPopup from '@/container/buy/CustomPopup.vue'
 
 definePageMeta({
   layout: 'common',

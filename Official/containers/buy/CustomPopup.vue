@@ -1,7 +1,13 @@
 <script setup>
+import { usePopupStore } from '@stores/popup.js'
 import { useBuyPopupStore } from '@stores/buy/popup.js'
 
-const popup = useBuyPopupStore()
+import useBuyPopupActions from '@stores/buy/_composables/usePopupActions.js'
+
+const popup = usePopupStore()
+const { customCheck, customData } = storeToRefs(popup)
+const buyPopup = useBuyPopupStore()
+const { onCustomClose } = useBuyPopupActions()
 const emits = defineEmits(['sure'])
 const props = defineProps({
   id: {
@@ -13,16 +19,16 @@ const props = defineProps({
     default: () => ({}),
   },
 })
-const custom = computed(() => popup.customData || {})
-const isAlertBtns = computed(() => !!(popup.customData.btns === 'alert'))
-const isConfirmBtns = computed(() => !!(popup.customData.btns === 'confirm'))
+const custom = computed(() => customData.value || {})
+const isAlertBtns = computed(() => !!(customData.value.btns === 'alert'))
+const isConfirmBtns = computed(() => !!(customData.value.btns === 'confirm'))
 
 const footerBtns = computed(() => {
   return isAlertBtns.value
-    ? popup.buttons.alert
+    ? buyPopup.buttons.alert
     : isConfirmBtns.value
-      ? popup.buttons.confirm
-      : popup.customData.btns || null
+      ? buyPopup.buttons.confirm
+      : customData.value.btns || null
 })
 
 const onClose = (item) => {
@@ -36,9 +42,9 @@ const onClose = (item) => {
 
   // cancel 或允許 sureClose 的情況：照舊 resolve + close
   const isShouldClose = item.isClose !== false
-  custom.value.check(isSure)
+  customCheck.value(isSure)
 
-  if (isShouldClose) custom.value.close()
+  if (isShouldClose) onCustomClose()
 }
 </script>
 
@@ -52,21 +58,24 @@ const onClose = (item) => {
     </slot>
     <template #footer v-if="$slots.footer || footerBtns">
       <slot name="footer">
-        <ul class="flex items-center">
-          <li
-            class="flex-1"
-            v-for="(item, index) in footerBtns"
-            :key="`custom_${item.label}_${index}`"
-          >
-            <BuyMAnchor
-              :text="item.label"
-              :setClass="{
-                main: [item.class, 'w-full'],
-              }"
-              @click="onClose(item)"
-            />
-          </li>
-        </ul>
+        <div class="text-center">
+          <ul class="inline-flex items-center p:gap-x-[16px]">
+            <li
+              class="p:w-[200px]"
+              v-for="(item, index) in footerBtns"
+              :key="`custom_${item.label}_${index}`"
+            >
+              <BuyMAnchor
+                :text="item.label"
+                :setClass="{
+                  main: [item.class, '--oval p:--h-45 w-full'],
+                  text: 'font-normal',
+                }"
+                @click="onClose(item)"
+              />
+            </li>
+          </ul>
+        </div>
       </slot>
     </template>
   </BuyMPopup>
