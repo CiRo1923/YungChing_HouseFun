@@ -12,7 +12,7 @@ const { options, apiData } = storeToRefs(buyProject)
 
 const isCaseZoingOtherShow = ref(false)
 const onCaseZoingChange = () => {
-  apiData.value.caseZoingTypeToken = null
+  apiData.value.caseInfo.caseZoingTypeToken = null
 }
 const onCaseZoingTypeChange = (props) => {
   const { text } = props
@@ -25,7 +25,7 @@ const onCaseZoingTypeChange = (props) => {
   <RadiosOval>
     <FormRadiosOval
       name="caseZoingToken"
-      v-model.number="apiData.caseZoingToken"
+      v-model.number="apiData.caseInfo.caseZoingToken"
       :options="options.caseZoing"
       :config="{
         schema: {
@@ -42,7 +42,7 @@ const onCaseZoingTypeChange = (props) => {
     <div class="m:space-y-[12px] pt:flex pt:gap-x-[8px]">
       <FormSelect
         name="caseZoingCity"
-        v-model.number="apiData.caseZoingTypeToken"
+        v-model.number="apiData.caseInfo.caseZoingTypeToken"
         :options="options.zoingCity"
         :config="{
           placeholder: '請選擇都市土地',
@@ -58,11 +58,11 @@ const onCaseZoingTypeChange = (props) => {
           main: '--h-40 --px-12 --py-8 pt:flex-1',
         }"
         @change="onCaseZoingTypeChange"
-        v-if="apiData.caseZoingToken === 1"
+        v-if="apiData.caseInfo.caseZoingToken === 1"
       />
       <FormSelect
         name="caseZoingLand"
-        v-model.number="apiData.caseZoingTypeToken"
+        v-model.number="apiData.caseInfo.caseZoingTypeToken"
         :options="options.zoingLand"
         :config="{
           placeholder: '請選擇非都市土地',
@@ -78,11 +78,11 @@ const onCaseZoingTypeChange = (props) => {
           main: '--h-40 --px-12 --py-8 pt:flex-1',
         }"
         @change="onCaseZoingTypeChange"
-        v-if="apiData.caseZoingToken === 2"
+        v-if="apiData.caseInfo.caseZoingToken === 2"
       />
       <FormInput
         name="caseZoingTypeOther"
-        v-model="apiData.caseZoingTypeOther"
+        v-model="apiData.caseInfo.caseZoingTypeOther"
         :config="{
           placeholder: '請填寫',
         }"

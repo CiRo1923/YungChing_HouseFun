@@ -232,6 +232,7 @@ const config = computed(() => {
       schema: {
         label: 'label',
         value: 'value',
+        model: 'label',
       },
     },
     ...props.config,
@@ -247,21 +248,21 @@ const setClass = computed(() => {
   }
 })
 
-const onCityChange = () => {
-  emits('change:city')
+const onCityChange = (source = 'user') => {
+  emits('change:city', { source })
 }
 
-const onAreaChange = () => {
-  emits('change:area')
+const onAreaChange = (source = 'user') => {
+  emits('change:area', { source })
 }
 
 const onInit = () => {
   if (modelCity.value) {
-    onCityChange()
+    onCityChange('init')
   }
 
   if (modelCity.value && modelArea.value) {
-    onAreaChange()
+    onAreaChange('init')
   }
 }
 
@@ -311,7 +312,7 @@ onMounted(() => {
       :config="{
         placeholder: '請選擇路段',
         schema: config.road.schema,
-        noMatchClearLabel: false,
+        noMatchClearLabel: true,
       }"
       :setClass="{
         main: ['--h-40 --px-12 --py-8 m:w-full', setClass.road],

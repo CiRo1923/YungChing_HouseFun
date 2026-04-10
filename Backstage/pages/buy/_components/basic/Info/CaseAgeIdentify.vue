@@ -9,26 +9,26 @@ import { useBuyProjectStore } from '@stores/buy/project.js'
 
 const buyProject = useBuyProjectStore()
 const { apiData, options } = storeToRefs(buyProject)
-const isModelAge = computed(() => apiData.value.caseAgeIdentifyToken === 1)
+const isModelAge = computed(() => apiData.value.caseInfo.caseAgeIdentifyToken === 1)
 
 const onCaseAgeIdentifyChange = () => {
   if (isModelAge.value) {
-    apiData.value.caseCompletedYear = null
-    apiData.value.caseCompletedMonth = null
+    apiData.value.caseInfo.caseCompletedYear = null
+    apiData.value.caseInfo.caseCompletedMonth = null
   } else {
-    apiData.value.caseAge = null
+    apiData.value.caseInfo.caseAge = null
   }
 }
 
 const onClearCheckbox = () => {
-  apiData.value.isCaseUnknownAge = false
-  apiData.value.isCasePreSale = false
+  apiData.value.caseInfo.isCaseUnknownAge = false
+  apiData.value.caseInfo.isCasePreSale = false
 }
 
 const onReset = () => {
-  apiData.value.caseAge = null
-  apiData.value.caseCompletedYear = null
-  apiData.value.caseCompletedMonth = null
+  apiData.value.caseInfo.caseAge = null
+  apiData.value.caseInfo.caseCompletedYear = null
+  apiData.value.caseInfo.caseCompletedMonth = null
 }
 </script>
 
@@ -36,7 +36,7 @@ const onReset = () => {
   <RadiosOval>
     <FormRadiosOval
       name="caseAgeIdentifyToken"
-      v-model.number="apiData.caseAgeIdentifyToken"
+      v-model.number="apiData.caseInfo.caseAgeIdentifyToken"
       :options="options.ageIdentify"
       :config="{
         schema: {
@@ -54,7 +54,7 @@ const onReset = () => {
       <li class="tm:w-[130px] p:w-[100px]" v-if="isModelAge">
         <FormInput
           name="caseAge"
-          v-model.number="apiData.caseAge"
+          v-model.number="apiData.caseInfo.caseAge"
           :config="{
             inputMode: 'numeric',
             inputChinese: false,
@@ -65,7 +65,7 @@ const onReset = () => {
           }"
           :rules="{
             required: {
-              valid: !apiData.isCaseUnknownAge && !apiData.isCasePreSale,
+              valid: !apiData.caseInfo.isCaseUnknownAge && !apiData.caseInfo.isCasePreSale,
               errorMessage: '請輸入屋齡',
             },
           }"
@@ -84,7 +84,7 @@ const onReset = () => {
           <li class="pt:w-[120px]">
             <FormInput
               name="caseCompletedYear"
-              v-model.number="apiData.caseCompletedYear"
+              v-model.number="apiData.caseInfo.caseCompletedYear"
               :config="{
                 inputMode: 'numeric',
                 inputChinese: false,
@@ -95,7 +95,7 @@ const onReset = () => {
               }"
               :rules="{
                 required: {
-                  valid: !apiData.isCaseUnknownAge && !apiData.isCasePreSale,
+                  valid: !apiData.caseInfo.isCaseUnknownAge && !apiData.caseInfo.isCasePreSale,
                   errorMessage: '請輸入完工年份',
                 },
               }"
@@ -114,7 +114,7 @@ const onReset = () => {
           <li class="pt:w-[100px]">
             <FormInput
               name="caseCompletedMonth"
-              v-model.number="apiData.caseCompletedMonth"
+              v-model.number="apiData.caseInfo.caseCompletedMonth"
               :config="{
                 inputMode: 'numeric',
                 inputChinese: false,
@@ -125,7 +125,7 @@ const onReset = () => {
               }"
               :rules="{
                 required: {
-                  valid: !apiData.isCaseUnknownAge && !apiData.isCasePreSale,
+                  valid: !apiData.caseInfo.isCaseUnknownAge && !apiData.caseInfo.isCasePreSale,
                   errorMessage: '請輸入完工月份',
                 },
               }"
@@ -144,7 +144,7 @@ const onReset = () => {
       <li class="flex h-[40px] items-center">
         <FormCheckBox
           name="isCaseUnknownAge"
-          v-model="apiData.isCaseUnknownAge"
+          v-model="apiData.caseInfo.isCaseUnknownAge"
           :config="{
             mode: 'boolean',
             label: '屋齡不詳',
@@ -158,7 +158,7 @@ const onReset = () => {
       <li class="flex h-[40px] items-center">
         <FormCheckBox
           name="isCasePreSale"
-          v-model="apiData.isCasePreSale"
+          v-model="apiData.caseInfo.isCasePreSale"
           :config="{
             mode: 'boolean',
             label: '預售屋',

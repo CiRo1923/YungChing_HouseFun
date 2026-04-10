@@ -1,32 +1,32 @@
 import { defineStore } from 'pinia'
 
-export const useListStore = defineStore('list', () => {
+export const useBuyListStore = defineStore('list', () => {
+  const basicRouteName = 'buy-list-filters'
   const channel = ref('region')
   const content = ref(null)
   const region = ref({
+    defaultApiData: '01',
     label: '',
-    params: '01',
-    apiData: '01',
+    apiData: '',
     all: '',
     options: null,
   })
   const mrt = ref({
+    defaultApiData: '0102',
     label: '',
-    params: '0102',
-    apiData: '0102',
+    apiData: '',
     all: '',
     options: null,
   })
   const purpose = ref({
     defaultLabel: '用途不限',
     label: '',
-    params: '',
     apiData: '',
   })
   const price = ref({
-    label: '總價不限',
+    defaultLabel: '總價不限',
+    label: '',
     apiData: '',
-    params: '',
     model: [],
     maxPrice: null,
     minPrice: null,
@@ -74,7 +74,6 @@ export const useListStore = defineStore('list', () => {
   const room = ref({
     defaultLabel: '格局不限',
     label: '',
-    params: '',
     apiData: '',
     hasAddon: false,
     options: [
@@ -105,9 +104,10 @@ export const useListStore = defineStore('list', () => {
     ],
   })
   const keyword = ref(null)
-  const info = ref({
-    active: 0,
-    items: [
+  const tab = ref({
+    defaultApiData: 0,
+    apiData: null,
+    options: [
       {
         id: 'all',
         label: {
@@ -150,6 +150,7 @@ export const useListStore = defineStore('list', () => {
   })
 
   return {
+    basicRouteName,
     channel,
     content,
     region,
@@ -159,7 +160,7 @@ export const useListStore = defineStore('list', () => {
     repayment,
     room,
     keyword,
-    info,
+    tab,
     mode,
     pagination,
   }

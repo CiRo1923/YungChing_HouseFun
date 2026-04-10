@@ -13,7 +13,7 @@ const { options, apiData } = storeToRefs(buyProject)
     <li class="t:w-[220px] p:w-[270px]">
       <FormSelect
         name="caseManageFeePeriodToken"
-        v-model.number="apiData.caseManageFeePeriodToken"
+        v-model.number="apiData.caseInfo.caseManageFeePeriodToken"
         :options="options.managePay"
         :config="{
           placeholder: {
@@ -33,13 +33,13 @@ const { options, apiData } = storeToRefs(buyProject)
     <li class="t:w-[220px] p:w-[270px]">
       <FormInput
         name="caseManageFee"
-        v-model.number="apiData.caseManageFee"
+        v-model.number="apiData.caseInfo.caseManageFee"
         :config="{
-          isDisabled: !apiData.caseManageFeePeriodToken,
+          isDisabled: !apiData.caseInfo.caseManageFeePeriodToken,
         }"
         :rules="{
           required: {
-            valid: apiData.caseManageFeePeriodToken,
+            valid: apiData.caseInfo.caseManageFeePeriodToken,
             errorMessage: '請輸入管理費',
           },
         }"

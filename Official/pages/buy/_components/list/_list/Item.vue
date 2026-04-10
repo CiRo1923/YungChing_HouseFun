@@ -5,13 +5,14 @@ import TagDefault from '@components/buy/mTag/Default.vue'
 
 import MediaImages from '@/pages/buy/_components/list/_list/MediaImages.vue'
 
-import { numberComma, onToFixed, onDevice } from '@js/_prototype.js'
+import { numberComma, onToFixed } from '@js/_prototype.js'
 
-// import { useProjectStore } from '@stores/buy/project.js'
-import useProjectStores from '@stores/buy/_composables/useProjectStores.js'
+import { useBuyProjectStore } from '@stores/buy/project.js'
+import useBuyProjectStores from '@stores/buy/_composables/useProjectStores.js'
 
-// const project = useProjectStore()
-const { onValueGetText } = useProjectStores()
+const project = useBuyProjectStore()
+const { device } = storeToRefs(project)
+const { onResize, onValueGetText } = useBuyProjectStores()
 const props = defineProps({
   item: {
     type: Object,
@@ -23,7 +24,6 @@ const props = defineProps({
   },
 })
 
-const device = ref('p')
 const isDeviceP = computed(() => device.value === 'p')
 const addressInfo = computed(() => {
   const { address, community } = props.item
@@ -109,18 +109,12 @@ const pinParkingInfo = computed(() => {
 //     ...props.config,
 //   }
 // })
-
-const onResize = () => {
-  device.value = onDevice()
-}
-
 onBeforeUnmount(() => {
-  window.removeEventListener('resize', onResize)
+  onResize('remove')
 })
 
 onMounted(() => {
-  onResize()
-  window.addEventListener('resize', onResize)
+  onResize('add')
 })
 </script>
 

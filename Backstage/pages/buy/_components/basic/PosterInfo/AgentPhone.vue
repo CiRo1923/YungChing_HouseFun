@@ -13,11 +13,11 @@ const { apiData } = storeToRefs(buyProject)
     <li class="t:w-[220px] p:w-[270px]">
       <FormInput
         name="agentPhone"
-        v-model="apiData.posterInfo.agentPhone"
+        v-model="apiData.caseInfo.posterInfo.agentPhone"
         :config="{
           inputMode: 'tel',
           inputChinese: false,
-          isDisabled: apiData.posterDataSourceToken === 1,
+          isDisabled: apiData.caseInfo.posterDataSourceToken === 1,
         }"
         :rules="{
           required: '請輸入行動電話',
@@ -32,7 +32,7 @@ const { apiData } = storeToRefs(buyProject)
     <li class="flex items-center pt:h-[40px]">
       <FormCheckBox
         name="isAgentDND"
-        v-model="apiData.posterInfo.isAgentDND"
+        v-model="apiData.caseInfo.posterInfo.isAgentDND"
         :config="{
           mode: 'boolean',
           label: '屋主聲明，請仲介勿擾！',

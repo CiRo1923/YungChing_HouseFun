@@ -347,7 +347,7 @@ const onClear = () => {
 
 watch(
   () => props.modelValue,
-  (value) => {
+  () => {
     onGetInputLabel()
   }
 )

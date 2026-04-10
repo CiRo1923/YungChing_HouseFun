@@ -12,7 +12,7 @@ const { options, apiData } = storeToRefs(buyProject)
     <li v-for="(item, index) in options.barrierFree" :key="`${item.code}_${index}`">
       <FormCheckBox
         :name="`caseBarrierfreeToken[${index}]`"
-        v-model="apiData.caseBarrierfreeToken"
+        v-model="apiData.caseInfo.caseBarrierfreeToken"
         :config="{
           label: item.text,
           value: item.code,

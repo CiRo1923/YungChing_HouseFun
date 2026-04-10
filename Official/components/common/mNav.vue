@@ -1,13 +1,15 @@
 <script setup>
-import { onDevice } from '@js/_prototype.js'
+import { useBuyProjectStore } from '@stores/buy/project.js'
+import useNavStores from '@stores/_composables/useNavStores.js'
+import useBuyProjectStores from '@stores/buy/_composables/useProjectStores.js'
 
-import { useNavStore } from '@stores/navs.js'
-
+const project = useBuyProjectStore()
 const route = useRoute()
-const device = ref('p') // 預設值先給 p
+const { device } = storeToRefs(project)
+const { onResize } = useBuyProjectStores()
+const { menu } = useNavStores()
 const isDevicePT = computed(() => /^(p|t)$/.test(device.value))
 
-const nav = useNavStore()
 const itemRef = ref(null)
 const childernRef = ref([])
 const submenuRef = ref([])
@@ -76,19 +78,18 @@ const onGetChildernHeight = () => {
   }
 }
 
-const onResize = async () => {
-  device.value = onDevice()
-  await nextTick()
-  onGetChildernHeight()
-}
-
-onMounted(() => {
-  onResize()
-  window.addEventListener('resize', onResize)
+onBeforeUnmount(() => {
+  onResize('remove', async () => {
+    await nextTick()
+    onGetChildernHeight()
+  })
 })
 
-onUnmounted(() => {
-  window.removeEventListener('resize', onResize)
+onMounted(() => {
+  onResize('add', async () => {
+    await nextTick()
+    onGetChildernHeight()
+  })
 })
 </script>
 
@@ -105,7 +106,7 @@ onUnmounted(() => {
           @click="onItemCurrIndex(index)"
           @mouseover="onItemCurrIndex(index)"
           @mouseout="onItemCurrIndex(null)"
-          v-for="(item, index) in nav.menu"
+          v-for="(item, index) in menu"
           :key="`${item.label}_${index}`"
           ref="itemRef"
         >
@@ -120,9 +121,18 @@ onUnmounted(() => {
           <div
             class="m-nav-childern absolute left-0 z-[1] w-full overflow-hidden bg-[--gray-e5] transition-heights duration-300 p:pl-[590px]"
             ref="childernRef"
-            v-if="isDevicePT && item.children"
+            v-if="isDevicePT && item.children && item.children.submenu"
           >
-            <ul class="p:py-[25px]" ref="submenuRef" />
+            <ul class="p:py-[25px]" ref="submenuRef">
+              <li
+                v-for="(submenu, idx) in item.children.submenu"
+                :key="`${submenu.label}_${idx}_${index}`"
+              >
+                <component :is="onAnchorAs(submenu)" v-bind="onAnchorBind(submenu)">
+                  <em>{{ submenu.label }}</em>
+                </component>
+              </li>
+            </ul>
           </div>
         </li>
       </ul>

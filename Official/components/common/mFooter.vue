@@ -5,9 +5,12 @@ import SvgIcon from '@components/common/SvgIcon.vue'
 import Separator from '@components/buy/mSeparator.vue'
 // import Anchor from '@components/buy/mAnchor.vue'
 
-import { onDevice } from '@js/_prototype.js'
+import { useBuyProjectStore } from '@stores/buy/project.js'
+import useBuyProjectStores from '@stores/buy/_composables/useProjectStores.js'
 
-const device = ref('p')
+const project = useBuyProjectStore()
+const { device } = storeToRefs(project)
+const { onResize } = useBuyProjectStores()
 const isDeviceM = computed(() => device.value === 'm')
 const stores = readonly([
   {
@@ -103,17 +106,12 @@ const links = readonly([
   ],
 ])
 
-const onResize = () => {
-  device.value = onDevice()
-}
-
 onBeforeUnmount(() => {
-  window.removeEventListener('resize', onResize)
+  onResize('remove')
 })
 
 onMounted(() => {
-  onResize()
-  window.addEventListener('resize', onResize)
+  onResize('add')
 })
 </script>
 

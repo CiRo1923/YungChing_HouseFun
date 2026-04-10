@@ -11,25 +11,16 @@ export default {
   js: 'scripts',
   svg: '_svg',
   proxy: {
-    '/api/v1/buy/list': {
-      target: process.env.NUXT_PUBLIC_API_PATH,
-      changeOrigin: true,
-      secure: false,
-    },
-    '/api/v1/buy/house': {
-      target: process.env.NUXT_PUBLIC_API_PATH,
-      changeOrigin: true,
-      secure: false,
-    },
-    '/api/v1': {
-      target: process.env.NUXT_PUBLIC_API_PATH,
-      changeOrigin: true,
-      secure: false,
-    },
     '/api': {
+      target: process.env.NUXT_PUBLIC_API_PATH,
+      changeOrigin: true,
+      secure: false,
+    },
+    '/manage/api': {
       target: process.env.NUXT_PUBLIC_MANAGE_API_PATH,
       changeOrigin: true,
       secure: false,
+      rewrite: (path) => path.replace(/^\/manage/, ''),
     },
   },
 }

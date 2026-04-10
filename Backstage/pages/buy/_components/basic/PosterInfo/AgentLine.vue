@@ -10,14 +10,14 @@ const { apiData } = storeToRefs(buyProject)
 <template>
   <FormInput
     name="agentLine"
-    v-model="apiData.posterInfo.agentLine"
+    v-model="apiData.caseInfo.posterInfo.agentLine"
     :config="{
       inputChinese: false,
-      isDisabled: apiData.posterDataSourceToken === 1,
+      isDisabled: apiData.caseInfo.posterDataSourceToken === 1,
     }"
     :rules="{
       custom: {
-        valid: /^https:\/\/line\.me/.test(apiData.posterInfo.agentLine),
+        valid: /^https:\/\/line\.me/.test(apiData.caseInfo.posterInfo.agentLine),
         errorMessage: '請輸入正確 LINE 聯絡網址',
       },
     }"

@@ -17,7 +17,7 @@ const { isLoading } = storeToRefs(common)
       <h1 class="sr-only">{{ channel }}</h1>
       <Header />
     </header>
-    <main class="l-body">
+    <main class="l-body relative z-0">
       <slot />
     </main>
     <footer class="l-footer">

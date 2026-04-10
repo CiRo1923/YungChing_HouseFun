@@ -1,4 +1,9 @@
 const METHOD_WITH_BODY = new Set(['post', 'put', 'patch'])
+const FORM_METHOD_MAP = {
+  postForm: 'post',
+  putForm: 'put',
+  patchForm: 'patch',
+}
 
 const onReplacePathParams = (path, data) => {
   const keys = Array.from(path.matchAll(/\{\s?(\w+)\s?\}/g)).map((m) => m[1])
@@ -18,9 +23,55 @@ const toPOJOHeaders = (headers) => (headers ? Object.fromEntries(headers.entries
 
 const isPlainObject = (v) => v != null && Object.prototype.toString.call(v) === '[object Object]'
 
+const isBlobLike = (v) =>
+  typeof Blob !== 'undefined' && v instanceof Blob
+
+const appendFormValue = (formData, key, value) => {
+  if (value == null) return
+
+  if (Array.isArray(value)) {
+    for (const item of value) appendFormValue(formData, key, item)
+    return
+  }
+
+  if (isBlobLike(value)) {
+    formData.append(key, value)
+    return
+  }
+
+  if (value instanceof Date) {
+    formData.append(key, value.toISOString())
+    return
+  }
+
+  if (typeof value === 'boolean' || typeof value === 'number') {
+    formData.append(key, String(value))
+    return
+  }
+
+  if (isPlainObject(value)) {
+    formData.append(key, JSON.stringify(value))
+    return
+  }
+
+  formData.append(key, value)
+}
+
+const toFormData = (data) => {
+  const formData = new FormData()
+
+  for (const [key, value] of Object.entries(data)) {
+    appendFormValue(formData, key, value)
+  }
+
+  return formData
+}
+
 export const onFetchApi = async (baseURL, method, path, data) => {
   const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
-  const m = method.toLowerCase()
+  const rawMethod = method.toLowerCase()
+  const m = FORM_METHOD_MAP[rawMethod] ?? rawMethod
+  const isFormRequest = rawMethod in FORM_METHOD_MAP
   const { url: urlPath, usedKeys } = onReplacePathParams(path, data)
 
   const rest = {}
@@ -30,7 +81,7 @@ export const onFetchApi = async (baseURL, method, path, data) => {
 
   const opts = { method: m }
   if (Object.keys(rest).length) {
-    if (METHOD_WITH_BODY.has(m)) opts.body = rest
+    if (METHOD_WITH_BODY.has(m)) opts.body = isFormRequest ? toFormData(rest) : rest
     else opts.query = rest
   }
 

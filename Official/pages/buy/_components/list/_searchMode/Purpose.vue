@@ -2,15 +2,15 @@
 import FormSelectDropdown from '@components/buy/mForm/SelectDropdown.vue'
 import FormRadio from '@components/buy/mForm/Radio.vue'
 
-import { useProjectStore } from '@stores/buy/project.js'
-import { useListStore } from '@stores/buy/list.js'
-import useProjectStores from '@stores/buy/_composables/useProjectStores.js'
+import { useBuyProjectStore } from '@stores/buy/project.js'
+import { useBuyListStore } from '@stores/buy/list.js'
+import useBuyProjectStores from '@stores/buy/_composables/useProjectStores.js'
 
-const project = useProjectStore()
-const list = useListStore()
+const project = useBuyProjectStore()
 const { options } = storeToRefs(project)
-const { purpose } = storeToRefs(list)
-const { onValueGetText } = useProjectStores()
+const buyList = useBuyListStore()
+const { purpose } = storeToRefs(buyList)
+const { onValueGetText } = useBuyProjectStores()
 const props = defineProps({
   name: {
     type: String,

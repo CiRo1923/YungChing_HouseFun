@@ -1,7 +1,7 @@
 <script setup>
 import Container from '@components/common/mContainer.vue'
 
-import Breadcrumbs from '@pages/buy/_components/house/_Breadcrumbs.vue'
+import Breadcrumbs from '@pages/buy/_components/house/Breadcrumbs.vue'
 import Basic from '@pages/buy/_components/house/Basic.vue'
 import Focus from '@pages/buy/_components/house/Focus.vue'
 import Information from '@pages/buy/_components/house/Information.vue'
@@ -18,28 +18,33 @@ import Construction from '@pages/buy/_components/house/Construction.vue'
 import { useMeta } from '@composable/useMeta.js'
 
 import { useCommonStore } from '@stores/common.js'
-import { useHouseStore } from '@stores/buy/house.js'
-import useProjectStores from '@stores/buy/_composables/useProjectStores.js'
-import useHouseStores from '@stores/buy/_composables/useHouseStores.js'
+import { useBuyHouseStore } from '@stores/buy/house.js'
+import useBuyProjectStores from '@stores/buy/_composables/useProjectStores.js'
+import useBuyHouseStores from '@stores/buy/_composables/useHouseStores.js'
 
 definePageMeta({
   layout: 'common',
-  title: '買屋明細',
-  channel: 'detail',
   requiresAuth: false,
 })
 
 const common = useCommonStore()
-const house = useHouseStore()
-const { onApiBuyHouse } = useHouseStores()
-const route = useRoute()
-const { onApiGETRealEstateTypeSelectOptions } = useProjectStores()
 const { onWithLoadingAll } = common
-const { detail } = storeToRefs(house)
+const buyHouse = useBuyHouseStore()
+const { detail } = storeToRefs(buyHouse)
+const { onApiBuyHouse } = useBuyHouseStores()
+const {
+  onApiGETRealEstateTypeSelectOptions,
+  onApiGETRealEstateParkingModeSelectOptions,
+  onApiGETRealEstateParkingRegSelectOptions,
+} = useBuyProjectStores()
+
+const route = useRoute()
 const seo = computed(() => detail.value?.seo ?? {})
 
 await onWithLoadingAll([
   useAsyncData('type-options', () => onApiGETRealEstateTypeSelectOptions()),
+  useAsyncData('parking-mode-options', () => onApiGETRealEstateParkingModeSelectOptions()),
+  useAsyncData('parking-reg-options', () => onApiGETRealEstateParkingRegSelectOptions()),
   useAsyncData(`buy-detail-${route.params.hfid}`, () => onApiBuyHouse()),
 ])
 

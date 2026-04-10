@@ -23,6 +23,7 @@ export default defineNuxtConfig({
       ...Object.fromEntries(
         Object.entries(process.env).filter(([k]) => k.startsWith('NUXT_PUBLIC_'))
       ),
+      appHash: process.env.VITE_APP_HASH || '',
       spritePath: `${CONFIG.imgs}/svg/spritemap.svg`,
     },
   },

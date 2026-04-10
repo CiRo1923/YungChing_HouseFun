@@ -148,21 +148,21 @@ const items = shallowReadonly([
 ])
 
 const onIsCaseParkingChange = () => {
-  const { isCaseParking } = apiData.value
+  const { isCaseParking } = apiData.value.caseInfo
 
   if (!isCaseParking) {
-    apiData.value.parkingInfos = []
+    apiData.value.caseInfo.parkingInfos = []
   } else {
     onAddInfo()
   }
 }
 
 const onAddInfo = () => {
-  apiData.value.parkingInfos.push(onDeepClone(buyProject.parkingInfo))
+  apiData.value.caseInfo.parkingInfos.push(onDeepClone(buyProject.parkingInfo))
 }
 
 const onInit = () => {
-  const { isCaseParking, parkingInfos } = apiData.value
+  const { isCaseParking, parkingInfos } = apiData.value.caseInfo
 
   if (isCaseParking && parkingInfos && parkingInfos.length === 0) {
     onAddInfo()
@@ -176,7 +176,7 @@ onInit()
   <RadiosOval>
     <FormRadiosOval
       name="isCaseParking"
-      v-model="apiData.isCaseParking"
+      v-model="apiData.caseInfo.isCaseParking"
       :options="radioOptions"
       :setClass="{
         radios: 'm:w-full',
@@ -185,7 +185,7 @@ onInit()
       @change="onIsCaseParkingChange"
     />
     <AddIdentical
-      v-model="apiData.parkingInfos"
+      v-model="apiData.caseInfo.parkingInfos"
       :config="{
         defaultData: buyProject.parkingInfo,
         anchor: {
@@ -196,7 +196,7 @@ onInit()
         main: '--card --gray-f7 --rounded-15 p:--p-30 tm:--p-24',
       }"
       v-slot="{ data, index }"
-      v-if="apiData.isCaseParking"
+      v-if="apiData.caseInfo.isCaseParking"
     >
       <ul class="m:space-y-[24px] pt:grid pt:grid-cols-2 p:gap-x-[24px] p:gap-y-[8px]">
         <li

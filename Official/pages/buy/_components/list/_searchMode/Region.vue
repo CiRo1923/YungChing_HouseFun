@@ -3,12 +3,12 @@ import FormSelectDropdown from '@components/buy/mForm/SelectDropdown.vue'
 import Anchor from '@components/buy/mAnchor.vue'
 import FormCheckBox from '@components/buy/mForm/CheckBox.vue'
 
-import { useListStore } from '@stores/buy/list.js'
-// import useListStores from '@stores/buy/_composables/useListStores.js'
+import { useBuyListStore } from '@stores/buy/list.js'
+// import useBuyListStores from '@stores/buy/_composables/useListStores.js'
 
-const list = useListStore()
-const { region } = storeToRefs(list)
-// const { onGetRegionData } = useListStores()
+const buyList = useBuyListStore()
+const { region } = storeToRefs(buyList)
+// const { onGetRegionData } = useBuyListStores()
 const props = defineProps({
   name: {
     type: String,

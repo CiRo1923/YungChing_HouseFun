@@ -24,7 +24,7 @@ const { pingData } = storeToRefs(buyBasic)
     :rules="{
       custom: {
         valid: basic.onPingVaild(),
-        errorMessage: apiData.isCaseBuildSqIncludeParking
+        errorMessage: apiData.caseInfo.isCaseBuildSqIncludeParking
           ? '主建物坪數不得超過登記坪數 (含車位)'
           : '主建物坪數不得超過登記坪數',
       },

@@ -19,7 +19,7 @@ const onIsCasePriceUnitAuto = () => {
     isCasePriceIncludeParking, // 總價含車位
     isCasePricePerPinDeductParking, // 扣除車位價
     isCaseBuildSqIncludeParking, // 登記坪數含車位
-  } = apiData.value
+  } = apiData.value.caseInfo
   if (isCasePriceUnitAuto && casePrice && caseBuildSqPin) {
     const price =
       isCasePriceIncludeParking && isCasePricePerPinDeductParking && caseParkingPrice
@@ -30,18 +30,18 @@ const onIsCasePriceUnitAuto = () => {
         ? Number(caseBuildSqPin) - Number(caseParkingSqPin)
         : Number(caseBuildSqPin)
 
-    apiData.value.casePriceUnit = Number(toFixed(price / buildSq, 2))
+    apiData.value.caseInfo.casePriceUnit = Number(toFixed(price / buildSq, 2))
   }
 }
 
 watch(
   () => [
-    apiData.value.casePrice,
-    apiData.value.caseBuildSqPin,
-    apiData.value.caseParkingSqPin,
-    apiData.value.isCasePriceIncludeParking,
-    apiData.value.isCasePricePerPinDeductParking,
-    apiData.value.isCaseBuildSqIncludeParking,
+    apiData.value.caseInfo.casePrice,
+    apiData.value.caseInfo.caseBuildSqPin,
+    apiData.value.caseInfo.caseParkingSqPin,
+    apiData.value.caseInfo.isCasePriceIncludeParking,
+    apiData.value.caseInfo.isCasePricePerPinDeductParking,
+    apiData.value.caseInfo.isCaseBuildSqIncludeParking,
   ],
   () => {
     onIsCasePriceUnitAuto()
@@ -54,14 +54,14 @@ watch(
     <li>
       <FormInput
         name="casePriceUnit"
-        v-model.number="apiData.casePriceUnit"
+        v-model.number="apiData.caseInfo.casePriceUnit"
         :config="{
           inputMode: 'numeric',
           inputChinese: false,
           checkNotIsZero: true,
           comma: true,
           toFixed: 2,
-          isDisabled: apiData.isCasePriceUnitAuto,
+          isDisabled: apiData.caseInfo.isCasePriceUnitAuto,
         }"
         :setClass="{
           main: '--h-40 --px-12 --py-8 p:w-[270px]',
@@ -79,7 +79,7 @@ watch(
         <li class="flex h-[40px] items-center">
           <FormCheckBox
             name="isCasePriceUnitAuto"
-            v-model="apiData.isCasePriceUnitAuto"
+            v-model="apiData.caseInfo.isCasePriceUnitAuto"
             :config="{
               mode: 'boolean',
               label: '自動計算',
@@ -92,7 +92,7 @@ watch(
         <li class="flex h-[40px] items-center">
           <FormCheckBox
             name="isCasePricePerPinDeductParking"
-            v-model="apiData.isCasePricePerPinDeductParking"
+            v-model="apiData.caseInfo.isCasePricePerPinDeductParking"
             :config="{
               mode: 'boolean',
               label: '扣除車位價',

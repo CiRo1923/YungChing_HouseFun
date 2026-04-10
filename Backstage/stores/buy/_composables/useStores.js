@@ -27,7 +27,7 @@ import {
   apiGETRealEstateVideoTypeSelectOptions,
   apiGETRealEstateFeatureCheckOptions,
   apiGETRealEstatePosterDataSourceSelectOptions,
-} from '@js/buy/_api/index.js'
+} from '@js/_api/buy/index.js'
 
 import { toFixed } from '@js/_prototype.js'
 
@@ -276,14 +276,16 @@ const useStores = () => {
   }
   const basic = {
     currentUnit: computed(() =>
-      basicStores.options.unit.find((item) => item.value === apiData.value.isCaseSqUnitPin)
+      basicStores.options.unit.find((item) => item.value === apiData.value.caseInfo.isCaseSqUnitPin)
     ),
     pingUnitLabel: computed(
       () =>
-        basicStores.options.unit.find((item) => item.value === apiData.value.isCaseSqUnitPin).label
+        basicStores.options.unit.find(
+          (item) => item.value === apiData.value.caseInfo.isCaseSqUnitPin
+        ).label
     ),
     onPingVaild() {
-      const { isCaseBuildSqIncludeParking } = apiData.value
+      const { isCaseBuildSqIncludeParking } = apiData.value.caseInfo
       const { caseBuildSq, caseParkingSq, caseMainSq } = pingData.value
       const caseBuildSqNumber = caseBuildSq || 0
       const caseParkingSqNumber = caseParkingSq || 0
@@ -309,9 +311,9 @@ const useStores = () => {
 
         if (val !== '' && !isNaN(Number(val))) {
           pingData.value[key] = isPin
-            ? apiData.value[pinKey]
+            ? apiData.value.caseInfo[pinKey]
             : isSqMeters
-              ? apiData.value[mKey]
+              ? apiData.value.caseInfo[mKey]
               : ''
         }
       })
@@ -331,11 +333,11 @@ const useStores = () => {
 
       if (!pinConf || !mConf) return
 
-      apiData.value[pinKey] = isPin ? Number(val) : onConvert(val, pinConf)
-      apiData.value[mKey] = isSqMeters ? Number(val) : onConvert(val, mConf)
+      apiData.value.caseInfo[pinKey] = isPin ? Number(val) : onConvert(val, pinConf)
+      apiData.value.caseInfo[mKey] = isSqMeters ? Number(val) : onConvert(val, mConf)
 
-      console.log(apiData.value[pinKey])
-      console.log(apiData.value[mKey])
+      console.log(apiData.value.caseInfo[pinKey])
+      console.log(apiData.value.caseInfo[mKey])
     },
     async onApiGETRealEstate(hfid) {
       const { config, status, data } = await apiGETRealEstate({
@@ -345,7 +347,7 @@ const useStores = () => {
       if (status === 200) {
         const { caseInfo } = data
 
-        apiData.value = caseInfo
+        apiData.value.caseInfo = caseInfo
       }
 
       return { config, status, data }
@@ -353,7 +355,7 @@ const useStores = () => {
     async onApiPOSTRealEstateDraft(hfid) {
       const { config, status, data } = await apiPOSTRealEstateDraft({
         hfid: hfid,
-        caseInfo: apiData.value,
+        ...apiData.value,
       })
 
       if (status === 200) {
@@ -365,7 +367,7 @@ const useStores = () => {
     async onApiPOSTRealEstate(hfid) {
       const { config, status, data } = await apiPOSTRealEstate({
         hfid: hfid,
-        caseInfo: apiData.value,
+        ...apiData.value,
       })
 
       if (status === 200) {

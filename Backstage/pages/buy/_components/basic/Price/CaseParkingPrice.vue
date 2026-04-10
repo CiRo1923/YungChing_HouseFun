@@ -6,20 +6,20 @@ import { useBuyProjectStore } from '@stores/buy/project.js'
 const buyProject = useBuyProjectStore()
 const { apiData } = storeToRefs(buyProject)
 
-const onIsCaseAddtionChange = () => {
-  if (!apiData.value.isCaseAddtion) {
-    apiData.value.caseAddRoom = ''
-    apiData.value.caseAddLivingRoom = ''
-    apiData.value.caseAddBathroom = ''
-    apiData.value.caseAddBalcony = ''
-  }
-}
+// const onIsCaseAddtionChange = () => {
+//   if (!apiData.value.caseInfo.isCaseAddtion) {
+//     apiData.value.caseInfo.caseAddRoom = ''
+//     apiData.value.caseInfo.caseAddLivingRoom = ''
+//     apiData.value.caseInfo.caseAddBathroom = ''
+//     apiData.value.caseInfo.caseAddBalcony = ''
+//   }
+// }
 </script>
 
 <template>
   <FormInput
     name="caseParkingPrice"
-    v-model.number="apiData.caseParkingPrice"
+    v-model.number="apiData.caseInfo.caseParkingPrice"
     :config="{
       inputMode: 'numeric',
       inputChinese: false,

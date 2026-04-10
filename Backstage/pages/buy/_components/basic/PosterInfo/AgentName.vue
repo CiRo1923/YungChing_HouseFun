@@ -13,9 +13,9 @@ const { apiData } = storeToRefs(buyProject)
     <li class="m:min-w-0 m:grow t:w-[220px] p:w-[270px]">
       <FormInput
         name="agentName"
-        v-model="apiData.posterInfo.agentName"
+        v-model="apiData.caseInfo.posterInfo.agentName"
         :config="{
-          isDisabled: apiData.posterDataSourceToken === 1,
+          isDisabled: apiData.caseInfo.posterDataSourceToken === 1,
         }"
         :rules="{
           required: '請輸入姓名',
@@ -29,7 +29,7 @@ const { apiData } = storeToRefs(buyProject)
     <li class="flex h-[40px] items-center m:shrink-0">
       <FormCheckBox
         name="isShowNickname"
-        v-model="apiData.posterInfo.isShowNickname"
+        v-model="apiData.caseInfo.posterInfo.isShowNickname"
         :config="{
           mode: 'boolean',
           label: '同時顯示暱稱',

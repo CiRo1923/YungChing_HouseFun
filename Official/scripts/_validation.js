@@ -97,8 +97,8 @@ defineRule('custom', (value, object, elem) => {
 
   const isArray = Array.isArray(object)
   const result = value != null && typeof value === 'number' ? String(value) : value
-  const hasValue = result?.length > 0
-  const valid = hasValue && !isArray && object.valid
+  const hasValue = !!result?.length > 0
+  const valid = hasValue ? !isArray && object.valid : true
 
   return !valid ? replaceMessage(elem, object) : true
 })

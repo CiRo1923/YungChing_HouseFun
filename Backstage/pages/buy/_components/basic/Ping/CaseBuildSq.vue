@@ -28,7 +28,7 @@ const { pingData } = storeToRefs(buyBasic)
           required: '請輸入登記坪數',
           custom: {
             valid: basic.onPingVaild(),
-            errorMessage: apiData.isCaseBuildSqIncludeParking
+            errorMessage: apiData.caseInfo.isCaseBuildSqIncludeParking
               ? '登記坪數 (含車位) 不得小於主建物坪數'
               : '登記坪數不得小於主建物坪數',
           },
@@ -46,7 +46,7 @@ const { pingData } = storeToRefs(buyBasic)
     <li class="flex h-[40px] items-center m:shrink-0">
       <FormCheckBox
         name="isCaseBuildSqIncludeParking"
-        v-model="apiData.isCaseBuildSqIncludeParking"
+        v-model="apiData.caseInfo.isCaseBuildSqIncludeParking"
         :config="{
           mode: 'boolean',
           label: '含車位',

@@ -11,7 +11,7 @@ import { useBuyProjectStore } from '@stores/buy/project.js'
 const buyProject = useBuyProjectStore()
 const { apiData, options } = storeToRefs(buyProject)
 const videoPicture = computed(() => {
-  const { caseVideoUrl } = apiData.value
+  const { caseVideoUrl } = apiData.value.caseInfo
   const youtubeID = /youtube/.test(caseVideoUrl) ? onGetYouTubeID(caseVideoUrl) : null
 
   if (youtubeID) return `https://img.youtube.com/vi/${youtubeID}/hqdefault.jpg`

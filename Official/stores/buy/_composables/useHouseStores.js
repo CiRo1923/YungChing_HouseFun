@@ -1,14 +1,26 @@
 import { apiBuyHouse } from '@js/_api/buy/basic.js'
 
-import { useHouseStore } from '@stores/buy/house.js'
+import { useBuyHouseStore } from '@stores/buy/house.js'
 
-const useHouseStores = () => {
+const useBuyHouseStores = () => {
   // const projectStores = useProjectStore()
-  const houseStores = useHouseStore()
+  const houseStores = useBuyHouseStore()
   const route = useRoute()
   // const { apiData, options: projectOptions } = storeToRefs(projectStores)
-  const { detail, basic, pricing, media, floor, parking, pin, actualPrice, broker } =
-    storeToRefs(houseStores)
+  const {
+    detail,
+    breadcrumb,
+    basic,
+    pricing,
+    media,
+    floor,
+    community,
+    parking,
+    pin,
+    actualPrice,
+    broker,
+    poi,
+  } = storeToRefs(houseStores)
 
   const onApiBuyHouse = async () => {
     const { params } = route
@@ -19,14 +31,17 @@ const useHouseStores = () => {
     if (status === 200) {
       detail.value = data
 
+      breadcrumb.value = data.breadcrumb || []
       basic.value = data.basic || {}
       pricing.value = data.pricing || {}
       media.value = data.media || {}
       floor.value = data.floor || {}
+      community.value = data.community || {}
       parking.value = data.parking || {}
       pin.value = data.pin || {}
       actualPrice.value = data.actualPrice || {}
       broker.value = data.broker || {}
+      poi.value = data.poi || {}
       // console.log(data)
     }
 
@@ -38,4 +53,4 @@ const useHouseStores = () => {
   }
 }
 
-export default useHouseStores
+export default useBuyHouseStores

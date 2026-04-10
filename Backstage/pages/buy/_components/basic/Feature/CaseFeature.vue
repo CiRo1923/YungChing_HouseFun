@@ -12,7 +12,7 @@ const { options, apiData } = storeToRefs(buyProject)
     <li v-for="(item, index) in options.feature" :key="`${item.code}_${index}`">
       <TagCheckBox
         :name="`caseFeatureToken[${index}]`"
-        v-model="apiData.caseFeatureToken"
+        v-model="apiData.caseInfo.caseFeatureToken"
         :config="{
           label: item.text,
           value: item.code,

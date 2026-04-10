@@ -1,17 +1,17 @@
 <script setup>
 import Content from '@components/common/mContent.vue'
 
-import AddressInfo from '@pages/buy/_components/house/basic/AddressInfo.vue'
-import Media from '@pages/buy/_components/house/basic/Media.vue'
-import PriceInfo from '@pages/buy/_components/house/basic/PriceInfo.vue'
-import HouseInfo from '@pages/buy/_components/house/basic/HouseInfo.vue'
-import LayoutInfo from '@pages/buy/_components/house/basic/LayoutInfo.vue'
-import AccountInfo from '@pages/buy/_components/house/basic/AccountInfo.vue'
+import AddressInfo from '@pages/buy/_components/house/_basic/AddressInfo.vue'
+import Media from '@pages/buy/_components/house/_basic/Media.vue'
+import PriceInfo from '@pages/buy/_components/house/_basic/PriceInfo.vue'
+import HouseInfo from '@pages/buy/_components/house/_basic/HouseInfo.vue'
+import LayoutInfo from '@pages/buy/_components/house/_basic/LayoutInfo.vue'
+import AccountInfo from '@pages/buy/_components/house/_basic/AccountInfo.vue'
 
-import { useHouseStore } from '@stores/buy/house.js'
+import { useBuyHouseStore } from '@stores/buy/house.js'
 
-const house = useHouseStore()
-const { basic } = storeToRefs(house)
+const buyHouse = useBuyHouseStore()
+const { basic } = storeToRefs(buyHouse)
 </script>
 
 <template>

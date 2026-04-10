@@ -327,6 +327,7 @@ watch(
             :class="{
               '--show': model,
             }"
+            tabindex="-1"
             @click="onClear"
             v-if="config.isExistClose && !config.isDisabled"
           >

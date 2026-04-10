@@ -10,13 +10,13 @@ const { apiData } = storeToRefs(buyProject)
 <template>
   <FormCheckBox
     name="isAgreeUserTerm"
-    v-model="apiData.isAgreeUserTerm"
+    v-model="apiData.caseInfo.isAgreeUserTerm"
     :config="{
       mode: 'boolean',
     }"
     :rules="{
       required: {
-        valid: apiData.isAgreeUserTerm === false,
+        valid: apiData.caseInfo.isAgreeUserTerm === false,
         errorMessage: '請勾選並同意好房會員服務使用條款',
       },
     }"

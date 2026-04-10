@@ -10,7 +10,7 @@ const { apiData } = storeToRefs(buyProject)
 <template>
   <FormInput
     name="caseLandNo"
-    v-model="apiData.caseLandNo"
+    v-model="apiData.caseInfo.caseLandNo"
     :config="{
       placeholder: '請輸入地號',
     }"

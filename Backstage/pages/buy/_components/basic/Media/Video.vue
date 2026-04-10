@@ -13,7 +13,7 @@ const { options, apiData } = storeToRefs(buyProject)
     <li class="pt:w-[160px] pt:shrink-0">
       <FormSelect
         name="caseVideoTypeToken"
-        v-model.number="apiData.caseVideoTypeToken"
+        v-model.number="apiData.caseInfo.caseVideoTypeToken"
         :options="options.videoType"
         :config="{
           placeholder: {
@@ -33,13 +33,13 @@ const { options, apiData } = storeToRefs(buyProject)
     <li class="pt:grow">
       <FormInput
         name="caseVideoUrl"
-        v-model="apiData.caseVideoUrl"
+        v-model="apiData.caseInfo.caseVideoUrl"
         :config="{
           placeholder: '請輸入影音來源',
         }"
         :rules="{
           required: {
-            valid: apiData.caseVideoTypeToken,
+            valid: apiData.caseInfo.caseVideoTypeToken,
             errorMessage: '請輸入影音來源',
           },
         }"

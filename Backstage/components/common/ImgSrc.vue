@@ -5,14 +5,16 @@ import { hashHex } from '@js/_crypto.js'
 
 import blankUrl from '@imgs/common/blank.svg'
 
+const runtimeConfig = useRuntimeConfig()
+
 // 用字面字串，固定抓 assets/imgs
 const MAP = import.meta.glob('/assets/imgs/**/*', { eager: true, import: 'default' })
 
 // 將相對檔名轉成 glob key
 const toKey = (p) => `/assets/imgs/${String(p).replace(/^\/+/, '')}`
 
-// 依照你的需求：回傳 URL + ?[hash]（用 VITE_APP_HASH）
-const bust = (url) => `${url}?${hashHex(import.meta.env.VITE_APP_HASH, 8)}`
+// 依照需求：回傳 URL + ?[hash]（用 VITE_APP_HASH）
+const bust = (url) => `${url}?${hashHex(runtimeConfig.public.appHash, 8)}`
 
 const resolveBundledImg = (raw) => {
   if (!raw) return null

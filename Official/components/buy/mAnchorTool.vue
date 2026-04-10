@@ -1,15 +1,18 @@
 <script setup>
 import Anchor from '@components/buy/mAnchor.vue'
 
-import { onDevice } from '@js/_prototype.js'
+import { useBuyProjectStore } from '@stores/buy/project.js'
+import useBuyProjectStores from '@stores/buy/_composables/useProjectStores.js'
 
+const project = useBuyProjectStore()
+const { device } = storeToRefs(project)
+const { onResize } = useBuyProjectStores()
 const props = defineProps({
   anchor: {
     type: Object,
     default: null,
   },
 })
-const device = ref('p') // 預設值先給 p
 const isDeviceP = computed(() => device.value === 'p')
 const anchor = computed(() => {
   return {
@@ -25,17 +28,12 @@ const anchor = computed(() => {
   }
 })
 
-const onResize = () => {
-  device.value = onDevice()
-}
-
-onMounted(() => {
-  onResize()
-  window.addEventListener('resize', onResize)
+onBeforeUnmount(() => {
+  onResize('remove')
 })
 
-onUnmounted(() => {
-  window.removeEventListener('resize', onResize)
+onMounted(() => {
+  onResize('add')
 })
 </script>
 

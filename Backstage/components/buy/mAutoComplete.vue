@@ -34,6 +34,7 @@ const props = defineProps({
     default: () => {},
   },
 })
+
 const elenemtRef = ref(null)
 const dropdownRef = ref(null)
 const dropdownNoDataRef = ref(null)
@@ -42,11 +43,18 @@ const dropdownItemRef = ref(null)
 const isActive = ref(false)
 const isFocus = ref(false)
 const isComposing = ref(false)
+const isSelectingOption = ref(false)
 const inputLabel = ref(null)
 const selected = ref({
   index: null,
 })
 const dropdownItems = ref(null)
+const apiOptions = ref([])
+const fetchId = ref(0)
+
+const apiWaitRafId = ref(null)
+const apiWaitToken = ref(0)
+
 const model = computed({
   get() {
     return props.modelValue
@@ -55,18 +63,28 @@ const model = computed({
     emits('update:modelValue', value)
   },
 })
+
 const config = computed(() => {
   const defaultConfig = {
     placeholder: '',
-    noMatchClearLabel: true,
+    noMatchClearLabel: false,
     noResult: '無任何選項。',
     isDisabled: false,
     isExistClose: true,
     isError: false,
     position: 'auto',
     schema: {
+      search: null,
+      data: null,
       label: 'label',
       value: 'value',
+      model: 'label',
+    },
+    api: {
+      path: null,
+      params: null,
+      wait: 500,
+      minChars: 1,
     },
     keyboard: false,
     maxItems: 5,
@@ -90,12 +108,146 @@ const setClass = computed(() => {
   }
 })
 
+const resolvedOptions = computed(() => {
+  const { api } = config.value
+
+  return api.path ? apiOptions.value : Array.isArray(props.options) ? props.options : []
+})
+
+const isMinCharsReached = computed(() => {
+  const { api } = config.value
+
+  if (!api.path) return true
+  return (inputLabel.value?.trim()?.length || 0) >= api.minChars
+})
+
+const cancelApiWait = () => {
+  apiWaitToken.value++
+
+  if (apiWaitRafId.value !== null) {
+    cancelAnimationFrame(apiWaitRafId.value)
+    apiWaitRafId.value = null
+  }
+}
+
+const waitByRaf = (duration) => {
+  cancelApiWait()
+
+  const currentToken = apiWaitToken.value
+  const wait = Number(duration) || 0
+
+  if (wait <= 0) return Promise.resolve(true)
+
+  return new Promise((resolve) => {
+    let startTime = null
+
+    const step = (timestamp) => {
+      if (currentToken !== apiWaitToken.value) {
+        resolve(false)
+        return
+      }
+
+      if (startTime === null) {
+        startTime = timestamp
+      }
+
+      if (timestamp - startTime >= wait) {
+        apiWaitRafId.value = null
+        resolve(true)
+        return
+      }
+
+      apiWaitRafId.value = requestAnimationFrame(step)
+    }
+
+    apiWaitRafId.value = requestAnimationFrame(step)
+  })
+}
+
+const onApiFeatch = async () => {
+  const { schema, api } = config.value
+  const keyword = inputLabel.value?.trim() || ''
+
+  if (typeof api.path !== 'function') return
+
+  if (keyword.length < api.minChars) {
+    apiOptions.value = []
+    dropdownItems.value = null
+    return
+  }
+
+  const currentFetchId = ++fetchId.value
+
+  try {
+    const {
+      config: apiConfig,
+      status,
+      data,
+    } = await api.path({
+      [schema.search]: inputLabel.value,
+      ...api.params,
+    })
+
+    if (currentFetchId !== fetchId.value) return
+
+    if (status === 200) {
+      const result = schema.data ? data?.[schema.data] : data
+      apiOptions.value = Array.isArray(result) ? result : []
+    } else {
+      apiOptions.value = []
+    }
+
+    dropdownItems.value = apiOptions.value
+    emits('search', { config: apiConfig, status, data })
+  } catch (error) {
+    if (currentFetchId !== fetchId.value) return
+
+    apiOptions.value = []
+    dropdownItems.value = []
+    console.error('[mAutoComplete] api search failed', error)
+  }
+}
+
+const onApiFeatchWithWait = async () => {
+  const { api } = config.value
+  const keyword = inputLabel.value?.trim() || ''
+
+  if (typeof api.path !== 'function') return
+
+  if (keyword.length < api.minChars) {
+    cancelApiWait()
+    apiOptions.value = []
+    dropdownItems.value = null
+    return
+  }
+
+  const canContinue = await waitByRaf(api.wait)
+
+  if (!canContinue) return
+
+  if ((inputLabel.value?.trim() || '').length < api.minChars) {
+    apiOptions.value = []
+    dropdownItems.value = null
+    return
+  }
+
+  await onApiFeatch()
+}
+
 const onFilter = () => {
-  const { schema } = config.value
-  const { label } = schema
-  const escapeRegExp = () => inputLabel.value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const { api, schema } = config.value
+  const sourceOptions = resolvedOptions.value
+
+  if (api.path) {
+    dropdownItems.value = isMinCharsReached.value ? sourceOptions : null
+    return
+  }
+
+  const escapeRegExp = () => (inputLabel.value || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   const regex = inputLabel.value ? new RegExp(escapeRegExp()) : null
-  const matches = regex ? props.options.filter((item) => regex.test(item[label])) : props.options
+  const matches = regex
+    ? sourceOptions.filter((item) => regex.test(item[schema.label]))
+    : sourceOptions
 
   dropdownItems.value = matches
 }
@@ -111,15 +263,17 @@ const onCloseDropdown = () => {
 
 const onGetInputLabel = () => {
   const hasModel = model.value !== null && model.value !== ''
-  const matchData = hasModel
-    ? props.options.find((item) => item[config.value.schema.value] == model.value)
-    : null
 
-  inputLabel.value = matchData ? matchData[config.value.schema.label] : ''
+  if (!hasModel) {
+    return
+  }
+
+  inputLabel.value = model.value
 }
 
 const onResetDropdownItems = () => {
-  dropdownItems.value = props.options.length !== 0 ? props.options : null
+  const sourceOptions = resolvedOptions.value
+  dropdownItems.value = sourceOptions.length !== 0 ? sourceOptions : null
 }
 
 const onIsComposingChange = (boolean) => {
@@ -127,7 +281,19 @@ const onIsComposingChange = (boolean) => {
 }
 
 const onFocus = async () => {
-  onResetDropdownItems()
+  const { api } = config.value
+
+  if (api.path) {
+    if (!isMinCharsReached.value) {
+      onSwitchActive(false)
+      return
+    }
+
+    await onApiFeatch()
+  } else {
+    onResetDropdownItems()
+  }
+
   onSwitchActive(true)
 
   await nextTick()
@@ -135,100 +301,81 @@ const onFocus = async () => {
 }
 
 const onInput = async () => {
+  const { api } = config.value
+
   if (isComposing.value) return
+
+  if (api.path) {
+    if (!isMinCharsReached.value) {
+      cancelApiWait()
+      onSwitchActive(false)
+      return
+    }
+
+    onSwitchActive(true)
+    await onApiFeatchWithWait()
+  }
+
   onFilter()
+
+  if (!isMinCharsReached.value) {
+    onSwitchActive(false)
+    return
+  }
+
   await nextTick()
   onDropdownOpen()
 }
 
 const onCompositionEnd = async () => {
+  const { api } = config.value
+
   onIsComposingChange(false)
+
+  if (api.path) {
+    if (!isMinCharsReached.value) {
+      cancelApiWait()
+      onSwitchActive(false)
+      return
+    }
+
+    onSwitchActive(true)
+    await onApiFeatchWithWait()
+  }
+
   onFilter()
+
+  if (!isMinCharsReached.value) {
+    onSwitchActive(false)
+    return
+  }
+
   await nextTick()
   onDropdownOpen()
 }
 
-// const onKeyup = async () => {
-//   onFilter()
-
-//   await nextTick()
-//   onDropdownOpen()
-// }
-
 const onBlur = () => {
-  const { noMatchClearLabel } = config.value
-  const hasMatch = inputLabel.value
-    ? !!props.options.find((item) => item[config.value.schema.label] === inputLabel.value)
-    : false
-  const matchData = props.options.find((item) => item[config.value.schema.value] === model.value)
-  const label = model.value && matchData ? matchData[config.value.schema.label] : ''
+  cancelApiWait()
 
-  if (noMatchClearLabel && !hasMatch) {
-    inputLabel.value = label
+  if (isSelectingOption.value || isComposing.value) return
+
+  const { noMatchClearLabel, schema } = config.value
+
+  if (!noMatchClearLabel) return
+
+  const sourceOptions = resolvedOptions.value
+
+  const hasMatch = inputLabel.value
+    ? !!sourceOptions.find((item) => item[schema.label] === inputLabel.value)
+    : false
+
+  if (!hasMatch) {
+    inputLabel.value = ''
   }
 }
 
-// const onChanged = (e) => {
-//   if (e.code !== 'ArrowUp' && e.code !== 'ArrowDown') {
-//     if (e.code !== 'Enter' && e.code !== 'NumpadEnter') {
-//       model.value = ''
-//       selectedIndex.value = 0
-//       onSwitchActive(true)
-//     }
-//   }
-// }
-
-// const onArrow = (e) => {
-//   const { code } = e
-//   const datas = data.value.filter((item) => item.isHidden === false)
-//   let index = datas.findIndex((item) => item.index === selectedIndex.value)
-
-//   e.preventDefault()
-
-//   if (datas.length > 0) {
-//     index = code === 'ArrowDown' ? ++index : --index
-
-//     if (index >= datas.length) {
-//       index = index % datas.length
-//     } else if (index < 0) {
-//       index = datas.length - 1
-//     }
-
-//     selectedIndex.value = datas[index].index
-
-//     const $dropdownRef = dropdownRef.value
-//     const containerHeight = $dropdownRef.offsetHeight - borderWidth * 2
-//     const $itemRef = itemRef.value[selectedIndex.value]
-//     const itemHeight = $itemRef.offsetHeight
-
-//     if (
-//       selectedIndex.value !== 0 &&
-//       selectedIndex.value !== data.value.length - 1
-//     ) {
-//       if (code === 'ArrowDown') {
-//         if ($dropdownRef.scrollTop + containerHeight <= $itemRef.offsetTop) {
-//           $dropdownRef.scrollTop = $dropdownRef.scrollTop + itemHeight
-//         }
-//       } else {
-//         if ($dropdownRef.scrollTop > $itemRef.offsetTop) {
-//           $dropdownRef.scrollTop = $dropdownRef.scrollTop - itemHeight
-//         }
-//       }
-//     } else {
-//       if (selectedIndex.value === 0) {
-//         $dropdownRef.scrollTop = 0
-//       } else {
-//         $dropdownRef.scrollTop =
-//           (data.value.length - props.maxItems) * itemHeight
-//       }
-//     }
-
-//     model.value = data.value[selectedIndex.value][config.value.schema.value]
-//   }
-// }
-
 const onDropdownOpen = () => {
-  const { maxItems, isDisabled } = config.value
+  const { maxItems, isDisabled, schema, position } = config.value
   const $elenemt = elenemtRef.value
   const $dropdown = dropdownRef.value
   const $dropdownContainer = dropdownContainerRef.value
@@ -264,7 +411,7 @@ const onDropdownOpen = () => {
       const bodyWidth = document.body.scrollWidth
       const left =
         ((offsetLeftMin > bodyWidth && offsetLeftMax < 0) || offsetLeftMin < bodyWidth) &&
-        config.value.position !== 'right'
+        position !== 'right'
           ? element.rect.left
           : offsetLeftMax
       const maxHeight = itemHeight
@@ -278,8 +425,8 @@ const onDropdownOpen = () => {
       }
 
       if (model.value !== null && model.value !== '') {
-        selected.value.index = props.options.findIndex(
-          (item) => item[config.value.schema.value] === model.value
+        selected.value.index = resolvedOptions.value.findIndex(
+          (item) => item[schema.model] === model.value
         )
 
         const $selectedItem = dropdownItemRef.value[selected.value.index]
@@ -302,52 +449,38 @@ const onDropdownOpen = () => {
   }
 }
 
-// const onClear = () => {
-//   onReset()
-//   onSwitchActive(false)
-//   emits('click', '')
-// }
-
-// const onEnter = () => {
-//   // const index = props.data.findIndex(
-//   //   (item) => item[config.value.schema.value] === model.value
-//   // )
-
-//   // console.log(selectedIndex.value)
-
-//   const result = data.value[selectedIndex.value]
-
-//   if (result) {
-//     label.value = result[config.value.schema.label]
-//     model.value = result[config.value.schema.value]
-
-//     if (result[config.value.schema.value]) {
-//       onSwitchActive(false)
-//     }
-//     emits('click', result)
-//   }
-// }
-
 const onDropdownItemClick = (item) => {
-  model.value = item[config.value.schema.value]
-  inputLabel.value = item[config.value.schema.label]
+  const { schema } = config.value
+  model.value = item[schema.model]
+  inputLabel.value = item[schema.label]
+  isSelectingOption.value = false
 
   onSwitchActive(false)
   emits('change', item)
 }
 
+const onDropdownItemMousedown = () => {
+  isSelectingOption.value = true
+}
+
 const onClear = () => {
+  const { api } = config.value
+
+  cancelApiWait()
   model.value = ''
   inputLabel.value = null
   selected.value.index = null
+  dropdownItems.value = api.path ? null : dropdownItems.value
+  emits('change', null)
 }
 
-watch(
-  () => props.modelValue,
-  (value) => {
-    onGetInputLabel()
+const onInit = () => {
+  const { api } = config.value
+
+  if (!api.path) {
+    onFilter()
   }
-)
+}
 
 const onOutSide = (e) => {
   const $elenemt = elenemtRef.value
@@ -362,26 +495,61 @@ const onOutSide = (e) => {
 }
 
 const onResize = () => {
-  // device.value = onDevice()
   onDropdownOpen()
 }
 
+watch(
+  () => props.modelValue,
+  () => {
+    const hasModel = props.modelValue !== null && props.modelValue !== ''
+
+    if (!hasModel) {
+      inputLabel.value = null
+      return
+    }
+
+    onGetInputLabel()
+  }
+)
+
+watch(
+  () => props.options,
+  () => {
+    const { api } = config.value
+
+    if (!api.path) {
+      onGetInputLabel()
+      onFilter()
+    }
+  },
+  { deep: true }
+)
+
+watch(
+  apiOptions,
+  () => {
+    const { api } = config.value
+
+    if (api.path) {
+      onGetInputLabel()
+    }
+  },
+  { deep: true }
+)
+
 onMounted(() => {
-  // onSetSelectedIndex()
   onGetInputLabel()
-  onFilter()
+  onInit()
+
   document.addEventListener('click', onOutSide, true)
   window.addEventListener('resize', onResize)
 })
 
 onUnmounted(() => {
+  cancelApiWait()
   document.removeEventListener('click', onOutSide, true)
   window.removeEventListener('resize', onResize)
 })
-
-// defineExpose({
-//   onReset,
-// })
 </script>
 
 <template>
@@ -424,6 +592,7 @@ onUnmounted(() => {
             :class="{
               '--show': inputLabel,
             }"
+            tabindex="-1"
             @click="onClear"
             v-if="config.isExistClose && !config.isDisabled"
           >
@@ -433,9 +602,6 @@ onUnmounted(() => {
             icon="icon_search"
             class="pointer-events-none h-[18px] w-[18px] shrink-0 text-[--autocomplete-icon-color] transition-colors duration-300"
           />
-          <!-- @keydown.up="onArrow($event)" -->
-          <!-- @keydown.down="onArrow($event)" -->
-          <!-- @keypress.enter="onEnter" -->
         </div>
       </Field>
     </div>
@@ -482,6 +648,7 @@ onUnmounted(() => {
               :class="{
                 '--active': index === selected.index,
               }"
+              @mousedown="onDropdownItemMousedown"
               @click="onDropdownItemClick(item)"
             >
               <em class="m-autocomplete-dropdown-label relative block grow py-[8px] text-[14px]">
@@ -520,32 +687,12 @@ onUnmounted(() => {
         @apply text-[--gray-999];
       }
     }
-
-    /* &.\-\-focus {
-      --autocomplete-border-color: var(--color-blue-major);
-    } */
   }
 
   &:not(.\-\-error) {
     --autocomplete-icon-color: var(--gray-ccce);
     --autocomplete-border-color: var(--gray-e5);
   }
-
-  /* &:not(.\-\-required):not(.\-\-focus):not(.\-\-error) {
-    @apply delay-150;
-  }
-
-  &.\-\-required {
-    @apply border-[--gray-4448];
-  }
-
-  &.\-\-focus {
-    @apply border-[--red-b12b];
-  }
-
-  &.\-\-error {
-    @apply border-[--red-f00] bg-[rgba(var(--red-f235-rgb),0.05)];
-  } */
 }
 
 .m-autocomplete-clear-button {
@@ -581,9 +728,6 @@ onUnmounted(() => {
 .m-autocomplete-dropdown-button {
   &:not(:disabled) {
     @apply text-[--gray-333];
-
-    /* &:not(.\-\-active) {
-    } */
 
     &.\-\-active {
       @apply bg-[--orange-feea];

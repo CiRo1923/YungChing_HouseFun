@@ -5,10 +5,10 @@ import FormRadiosOval from '@components/buy/mForm/RadiosOval.vue'
 
 import { onToFixed } from '@js/_prototype.js'
 
-import { useListStore } from '@stores/buy/list.js'
+import { useBuyListStore } from '@stores/buy/list.js'
 
-const list = useListStore()
-const { price, repayment } = storeToRefs(list)
+const buyList = useBuyListStore()
+const { price, repayment } = storeToRefs(buyList)
 const loanYears = readonly([
   {
     label: '20 年',

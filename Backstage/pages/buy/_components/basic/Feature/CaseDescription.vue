@@ -14,7 +14,7 @@ const onHighQualityWordCount = (length) => {
 
 <template>
   <CkEditor4
-    v-model="apiData.caseDescription"
+    v-model="apiData.caseInfo.caseDescription"
     :config="{
       loadMessage: '編輯器建置中...',
       placeholder: '請輸入物件特色說明',

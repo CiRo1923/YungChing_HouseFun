@@ -2,7 +2,7 @@
 import SvgIcon from '@components/common/SvgIcon.vue'
 import ErrorMessageElem from '@components/buy/mErrorMessageElem.vue'
 
-import { onDevice, onDeepMerge } from '@js/_prototype.js'
+import { onDeepMerge } from '@js/_prototype.js'
 
 import '@js/_validation.js'
 
@@ -42,7 +42,6 @@ const elenemtRef = ref(null)
 const selectRef = ref(null)
 const dropdownRef = ref(null)
 const dropdownContainerRef = ref(null)
-const device = ref(null)
 const isFocus = ref(false)
 const isActive = ref(false)
 const model = computed({
@@ -235,7 +234,6 @@ const onOutSide = (e) => {
 }
 
 const onResize = () => {
-  device.value = onDevice()
   onDropdownHeight()
 }
 

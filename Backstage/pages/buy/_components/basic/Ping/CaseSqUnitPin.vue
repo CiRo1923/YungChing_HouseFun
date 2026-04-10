@@ -14,7 +14,7 @@ const { basic } = useStores()
 <template>
   <FormRadiosOval
     name="isCaseSqUnitPin"
-    v-model="apiData.isCaseSqUnitPin"
+    v-model="apiData.caseInfo.isCaseSqUnitPin"
     :options="buyBasic.options.unit"
     :setClass="{
       radios: 'm:w-full',

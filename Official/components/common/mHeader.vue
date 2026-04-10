@@ -1,24 +1,6 @@
 <script setup>
 import ImgSrc from '@components/common/ImgSrc.vue'
 import Nav from '@components/common/mNav.vue'
-
-// import { onDevice } from '@js/_prototype.js'
-
-// const device = ref('p') // 預設值先給 p
-// const isDeviceP = computed(() => device.value === 'p')
-
-// const onResize = () => {
-//   device.value = onDevice()
-// }
-
-// onMounted(() => {
-//   onResize()
-//   window.addEventListener('resize', onResize)
-// })
-
-// onUnmounted(() => {
-//   window.removeEventListener('resize', onResize)
-// })
 </script>
 
 <template>

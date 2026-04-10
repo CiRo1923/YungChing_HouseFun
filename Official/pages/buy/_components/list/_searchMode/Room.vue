@@ -3,13 +3,13 @@ import FormSelectDropdown from '@components/buy/mForm/SelectDropdown.vue'
 import FormCheckBox from '@components/buy/mForm/CheckBox.vue'
 import FormInput from '@components/buy/mForm/Input.vue'
 
-import { useListStore } from '@stores/buy/list.js'
-// import useProjectStores from '@stores/buy/_composables/useProjectStores.js'
+import { useBuyListStore } from '@stores/buy/list.js'
+// import useBuyProjectStores from '@stores/buy/_composables/useProjectStores.js'
 
-const list = useListStore()
-const { room } = storeToRefs(list)
-// const { onValueGetText } = useProjectStores()
-const route = useRoute()
+const buyList = useBuyListStore()
+const { room } = storeToRefs(buyList)
+// const { onValueGetText } = useBuyProjectStores()
+// const route = useRoute()
 
 // const emits = defineEmits(['change'])
 const props = defineProps({
@@ -101,12 +101,12 @@ const onChange = (data) => {
 }
 
 const onInit = () => {
-  const queryRoom = route.query.room
-  const roomArray = queryRoom ? queryRoom.split('-') : null
+  const apiData = room.value.apiData
+  const roomArray = apiData ? apiData.split('-') : null
   const roomLabel = roomArray ? `${roomArray[0]} - ${roomArray[1]}` : null
 
-  room.value.label = queryRoom ? `${roomLabel} 房` : room.value.defaultLabel
-  model.value = queryRoom
+  room.value.label = apiData ? `${roomLabel} 房` : room.value.defaultLabel
+  model.value = apiData
     ? Array.from(
         { length: Number(roomArray[1]) - Number(roomArray[0]) + 1 },
         (_, i) => Number(roomArray[0]) + i

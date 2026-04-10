@@ -1,5 +1,5 @@
 import {
-  apiGETCitySelectOptions,
+  // apiGETCitySelectOptions,
   // apiGETDistrictSelectOptions,
   apiGETRealEstatePurposeCheckOptions,
   apiGETRealEstateTypeSelectOptions,
@@ -16,9 +16,9 @@ import {
   // apiGETRealEstateManageTypeSelectOptions,
   // apiGETRealEstateManageDutySelectOptions,
   // apiGETRealEstateManagePayPeriodSelectOptions,
-  // apiGETRealEstateParkingModeSelectOptions,
+  apiGETRealEstateParkingModeSelectOptions,
   apiGETRealEstateParkingTypeSelectOptions,
-  // apiGETRealEstateParkingRegSelectOptions,
+  apiGETRealEstateParkingRegSelectOptions,
   // apiGETRealEstateParkingPayPeriodSelectOptions,
   // apiGETRealEstateVideoDisplaySelectOptions,
   // apiGETRealEstateVideoTypeSelectOptions,
@@ -28,25 +28,26 @@ import {
 
 import { onDevice } from '@js/_prototype.js'
 
-import { useProjectStore } from '@stores/buy/project.js'
+import { useBuyProjectStore } from '@stores/buy/project.js'
 
-const useProjectStores = () => {
-  const projectStores = useProjectStore()
+const useBuyProjectStores = () => {
+  const projectStores = useBuyProjectStore()
   const { device, options } = storeToRefs(projectStores)
 
-  const onApiGETCitySelectOptions = async () => {
-    const { config, status, data } = await apiGETCitySelectOptions()
+  // const onApiGETCitySelectOptions = async () => {
+  //   if (options.value.city) return false
 
-    if (status === 200) {
-      options.value.city = data || []
-    }
+  //   const { config, status, data } = await apiGETCitySelectOptions()
 
-    return { config, status, data }
-  }
+  //   if (status === 200) {
+  //     options.value.city = data || []
+  //   }
+
+  //   return { config, status, data }
+  // }
 
   const onApiGETRealEstatePurposeCheckOptions = async () => {
-    // const { public: env } = useRuntimeConfig()
-    // const hfID = env.NUXT_PUBLIC_HFID_DEFAULT
+    if (options.value.casePurpose) return false
     const { config, status, data } = await apiGETRealEstatePurposeCheckOptions()
 
     if (status === 200) {
@@ -90,6 +91,8 @@ const useProjectStores = () => {
   // }
 
   const onApiGETRealEstateTypeSelectOptions = async () => {
+    if (options.value.caseType) return false
+
     const { config, status, data } = await apiGETRealEstateTypeSelectOptions()
 
     if (status === 200) {
@@ -219,17 +222,20 @@ const useProjectStores = () => {
   //   return { config, status, data }
   // }
 
-  // const onApiGETRealEstateParkingModeSelectOptions = async () => {
-  //   const { config, status, data } = await apiGETRealEstateParkingModeSelectOptions()
+  const onApiGETRealEstateParkingModeSelectOptions = async () => {
+    if (options.value.parkingMode) return false
+    const { config, status, data } = await apiGETRealEstateParkingModeSelectOptions()
 
-  //   if (status === 200) {
-  //     options.value.parkingMode = data || []
-  //   }
+    if (status === 200) {
+      options.value.parkingMode = data || []
+    }
 
-  //   return { config, status, data }
-  // }
+    return { config, status, data }
+  }
 
   const onApiGETRealEstateParkingTypeSelectOptions = async () => {
+    if (options.value.parkingType) return false
+
     const { config, status, data } = await apiGETRealEstateParkingTypeSelectOptions()
 
     if (status === 200) {
@@ -239,15 +245,17 @@ const useProjectStores = () => {
     return { config, status, data }
   }
 
-  // const onApiGETRealEstateParkingRegSelectOptions = async () => {
-  //   const { config, status, data } = await apiGETRealEstateParkingRegSelectOptions()
+  const onApiGETRealEstateParkingRegSelectOptions = async () => {
+    if (options.value.parkingReg) return false
 
-  //   if (status === 200) {
-  //     options.value.parkingReg = data || []
-  //   }
+    const { config, status, data } = await apiGETRealEstateParkingRegSelectOptions()
 
-  //   return { config, status, data }
-  // }
+    if (status === 200) {
+      options.value.parkingReg = data || []
+    }
+
+    return { config, status, data }
+  }
 
   // const onApiGETRealEstateParkingPayPeriodSelectOptions = async () => {
   //   const { config, status, data } = await apiGETRealEstateParkingPayPeriodSelectOptions()
@@ -299,6 +307,14 @@ const useProjectStores = () => {
   //   return { config, status, data }
   // }
 
+  const onSearchParams = (path) => {
+    const headers = useRequestHeaders(['host'])
+    const domain = import.meta.server ? headers.host : window.location.host
+    const url = new URL(path, `https://${domain}`)
+
+    return url.searchParams.size !== 0 ? Object.fromEntries(url.searchParams) : null
+  }
+
   const onValueGetText = (option, value) => {
     const isOptionString = typeof option === 'string'
     const currOptions = isOptionString ? options.value[option] : option || []
@@ -329,11 +345,12 @@ const useProjectStores = () => {
     return onRecursive(currOptions, value) || {}
   }
 
-  const onResize = (type) => {
+  const onResize = (type, apply) => {
     const isAdd = type === 'add'
     const isRemove = type === 'remove'
     const resize = () => {
       device.value = onDevice()
+      if (apply) apply()
     }
 
     if (isAdd) {
@@ -347,7 +364,7 @@ const useProjectStores = () => {
   }
 
   return {
-    onApiGETCitySelectOptions,
+    // onApiGETCitySelectOptions,
     onApiGETRealEstatePurposeCheckOptions,
     onApiGETRealEstateTypeSelectOptions,
     // onApiGETDistrictSelectOptions,
@@ -364,17 +381,18 @@ const useProjectStores = () => {
     // onApiGETRealEstateManageTypeSelectOptions,
     // onApiGETRealEstateManageDutySelectOptions,
     // onApiGETRealEstateManagePayPeriodSelectOptions,
-    // onApiGETRealEstateParkingModeSelectOptions,
+    onApiGETRealEstateParkingModeSelectOptions,
     onApiGETRealEstateParkingTypeSelectOptions,
-    // onApiGETRealEstateParkingRegSelectOptions,
+    onApiGETRealEstateParkingRegSelectOptions,
     // onApiGETRealEstateParkingPayPeriodSelectOptions,
     // onApiGETRealEstateVideoDisplaySelectOptions,
     // onApiGETRealEstateVideoTypeSelectOptions,
     // onApiGETRealEstateFeatureCheckOptions,
     // onApiGETRealEstatePosterDataSourceSelectOptions,
+    onSearchParams,
     onValueGetText,
     onResize,
   }
 }
 
-export default useProjectStores
+export default useBuyProjectStores

@@ -5,10 +5,10 @@ import FormRadio from '@components/buy/mForm/Radio.vue'
 import PriceTotal from '@pages/buy/_components/list/_searchMode/PriceTotal.vue'
 import PriceRepayment from '@pages/buy/_components/list/_searchMode/PriceRepayment.vue'
 
-import { useListStore } from '@stores/buy/list.js'
+import { useBuyListStore } from '@stores/buy/list.js'
 
-const list = useListStore()
-const { price } = storeToRefs(list)
+const buyList = useBuyListStore()
+const { price } = storeToRefs(buyList)
 
 // const emits = defineEmits(['change'])
 const props = defineProps({
@@ -33,6 +33,14 @@ const options = readonly([
 const onChange = () => {
   selectDropdownRef.value?.onDropdownHeight()
 }
+
+const onInit = () => {
+  const apiData = price.value.apiData
+
+  price.value.label = apiData ? `${apiData} 萬` : price.value.defaultLabel
+}
+
+onInit()
 </script>
 
 <template>

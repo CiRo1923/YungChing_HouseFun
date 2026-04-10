@@ -45,7 +45,7 @@ const items = shallowReadonly([
 
 watch(
   () => [
-    apiData.value.isCaseAttachedSqAutoCalculate,
+    apiData.value.caseInfo.isCaseAttachedSqAutoCalculate,
     pingData.value.caseBalconySq,
     pingData.value.casePlatformSq,
     pingData.value.caseTerraceSq,
@@ -55,7 +55,7 @@ watch(
     pingData.value.caseOtherSq,
   ],
   () => {
-    const { isCaseAttachedSqAutoCalculate } = apiData.value
+    const { isCaseAttachedSqAutoCalculate } = apiData.value.caseInfo
     const {
       caseBalconySq,
       casePlatformSq,
@@ -100,7 +100,7 @@ watch(
             inputMode: 'numeric',
             inputChinese: false,
             checkNotIsZero: true,
-            isDisabled: apiData.isCaseAttachedSqAutoCalculate,
+            isDisabled: apiData.caseInfo.isCaseAttachedSqAutoCalculate,
           }"
           :setClass="{
             main: '--h-40 --px-12 --py-8',
@@ -115,7 +115,7 @@ watch(
       <li class="flex h-[40px] items-center m:shrink-0">
         <FormCheckBox
           name="isCaseAttachedSqAutoCalculate"
-          v-model="apiData.isCaseAttachedSqAutoCalculate"
+          v-model="apiData.caseInfo.isCaseAttachedSqAutoCalculate"
           :config="{
             mode: 'boolean',
             label: '自動加總',

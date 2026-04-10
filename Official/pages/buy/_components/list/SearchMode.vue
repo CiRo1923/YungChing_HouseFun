@@ -12,29 +12,29 @@ import Condition from '@pages/buy/_components/list/_searchMode/Condition.vue'
 
 // import { onDevice } from '@js/_prototype.js'
 
-// import { useProjectStore } from '@stores/buy/project.js'
-import { useListStore } from '@stores/buy/list.js'
-// import useProjectStores from '@stores/buy/_composables/useProjectStores.js'
-import useListStores from '@stores/buy/_composables/useListStores.js'
+// import { useBuyProjectStore } from '@stores/buy/project.js'
+import { useBuyListStore } from '@stores/buy/list.js'
+// import useBuyProjectStores from '@stores/buy/_composables/useProjectStores.js'
+import useBuyListStores from '@stores/buy/_composables/useListStores.js'
 
-// const project = useProjectStore()
-const list = useListStore()
+// const project = useBuyProjectStore()
 // const { options } = storeToRefs(project)
-const { region, mrt } = storeToRefs(list)
-// const { onValueGetText } = useProjectStores()
-const { isChannelRegion, isChannelMrt, commonParams } = useListStores()
+const buyList = useBuyListStore()
+const { region, mrt } = storeToRefs(buyList)
+// const { onValueGetText } = useBuyProjectStores()
+const { isChannelRegion, isChannelMrt, commonParams } = useBuyListStores()
 // const route = useRoute()
 const router = useRouter()
 const paramsRegion = computed(() => {
-  const { params } = region.value
+  const { apiData } = region.value
 
-  return params ? [`${params}_region`] : []
+  return apiData ? [`${apiData}_region`] : []
 })
 
 const paramsMrt = computed(() => {
-  const { params } = mrt.value
+  const { apiData } = mrt.value
 
-  return params ? [`${params}_mrt`] : []
+  return apiData ? [`${apiData}_mrt`] : []
 })
 const paramsChannel = computed(() =>
   isChannelRegion.value ? paramsRegion.value : isChannelMrt.value ? paramsMrt.value : []
@@ -46,7 +46,7 @@ const items = computed(() => [
     label: '區域找房',
     icon: 'icon_loaction',
     to: {
-      name: 'buy-list-filters',
+      name: buyList.basicRouteName,
       params: {
         filters: [...paramsRegion.value, ...commonParams.value],
       },
@@ -60,7 +60,7 @@ const items = computed(() => [
     label: '捷運找房',
     icon: 'icon_mrt',
     to: {
-      name: 'buy-list-filters',
+      name: buyList.basicRouteName,
       params: {
         filters: [...paramsMrt.value, ...commonParams.value],
       },
@@ -78,7 +78,7 @@ const items = computed(() => [
 
 const onSearch = async () => {
   await router.push({
-    name: 'buy-list-filters',
+    name: buyList.basicRouteName,
     params: {
       filters: [...paramsChannel.value, ...commonParams.value],
     },

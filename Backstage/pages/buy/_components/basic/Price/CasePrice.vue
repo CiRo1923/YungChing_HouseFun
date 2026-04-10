@@ -7,14 +7,14 @@ import { useBuyProjectStore } from '@stores/buy/project.js'
 const buyProject = useBuyProjectStore()
 const { apiData } = storeToRefs(buyProject)
 
-const onIsCaseAddtionChange = () => {
-  if (!apiData.value.isCaseAddtion) {
-    apiData.value.caseAddRoom = ''
-    apiData.value.caseAddLivingRoom = ''
-    apiData.value.caseAddBathroom = ''
-    apiData.value.caseAddBalcony = ''
-  }
-}
+// const onIsCaseAddtionChange = () => {
+//   if (!apiData.value.caseInfo.isCaseAddtion) {
+//     apiData.value.caseInfo.caseAddRoom = ''
+//     apiData.value.caseInfo.caseAddLivingRoom = ''
+//     apiData.value.caseInfo.caseAddBathroom = ''
+//     apiData.value.caseInfo.caseAddBalcony = ''
+//   }
+// }
 </script>
 
 <template>
@@ -22,7 +22,7 @@ const onIsCaseAddtionChange = () => {
     <li class="tm:w-[228px] p:w-[270px]">
       <FormInput
         name="casePrice"
-        v-model.number="apiData.casePrice"
+        v-model.number="apiData.caseInfo.casePrice"
         :config="{
           inputMode: 'numeric',
           inputChinese: false,
@@ -44,7 +44,7 @@ const onIsCaseAddtionChange = () => {
     <li class="flex h-[40px] items-center">
       <FormCheckBox
         name="isCasePriceIncludeParking"
-        v-model="apiData.isCasePriceIncludeParking"
+        v-model="apiData.caseInfo.isCasePriceIncludeParking"
         :config="{
           mode: 'boolean',
           label: '含車位',

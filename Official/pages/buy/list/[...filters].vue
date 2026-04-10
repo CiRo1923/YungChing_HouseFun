@@ -11,37 +11,36 @@ import List from '@pages/buy/_components/list/List.vue'
 import { useMeta } from '@composable/useMeta.js'
 
 import { useCommonStore } from '@stores/common.js'
-// import { useProjectStore } from '@stores/buy/project.js'
-import { useListStore } from '@stores/buy/list.js'
-import useProjectStores from '@stores/buy/_composables/useProjectStores.js'
-import useListStores from '@stores/buy/_composables/useListStores.js'
-
-const common = useCommonStore()
-// const project = useProjectStore()
-const list = useListStore()
-const route = useRoute()
-// const { options } = storeToRefs(project)
-const { channel, pagination } = storeToRefs(list)
-const { onWithLoadingAll } = common
-const {
-  // onApiGETCitySelectOptions,
-  onApiGETRealEstatePurposeCheckOptions,
-  onApiGETRealEstateTypeSelectOptions,
-  onApiGETRealEstateParkingTypeSelectOptions,
-} = useProjectStores()
-const { onGetBuyListParams, onApiRegion, onApiMrt, onApiBuyList, onChannel } = useListStores()
-
-onChannel()
+// import { useBuyProjectStore } from '@stores/buy/project.js'
+import { useBuyListStore } from '@stores/buy/list.js'
+import useBuyProjectStores from '@stores/buy/_composables/useProjectStores.js'
+import useBuyListStores from '@stores/buy/_composables/useListStores.js'
 
 definePageMeta({
   layout: 'common',
   requiresAuth: false,
 })
 
+const common = useCommonStore()
+const { onWithLoadingAll } = common
+// const project = useBuyProjectStore()
+// const { options } = storeToRefs(project)
+const buyList = useBuyListStore()
+const { pagination } = storeToRefs(buyList)
+const {
+  // onApiGETCitySelectOptions,
+  onApiGETRealEstatePurposeCheckOptions,
+  onApiGETRealEstateTypeSelectOptions,
+  onApiGETRealEstateParkingTypeSelectOptions,
+} = useBuyProjectStores()
+const { onGetBuyListParams, onApiRegion, onApiMrt, onApiBuyList, onChannel } = useBuyListStores()
+const route = useRoute()
+
+onChannel()
+
 onGetBuyListParams()
 
 await onWithLoadingAll([
-  // useAsyncData('city-options', () => onApiGETCitySelectOptions()),
   useAsyncData('region-options', () => onApiRegion()),
   useAsyncData('mrt-options', () => onApiMrt()),
   useAsyncData('purpose-options', () => onApiGETRealEstatePurposeCheckOptions()),
@@ -61,7 +60,7 @@ const onRouteChanged = async (to) => {
   onChannel(to)
   onGetBuyListParams(to)
 
-  await onSearch()
+  await onSearch(to)
 
   if (import.meta.client) {
     window.scrollTo({
@@ -71,10 +70,9 @@ const onRouteChanged = async (to) => {
   }
 }
 
-const onSearch = async () => {
-  console.log(channel.value)
+const onSearch = async (to) => {
   common.onIsLoading(true)
-  await onApiBuyList()
+  await onApiBuyList(to)
   common.onIsLoading(false)
 }
 
@@ -95,7 +93,7 @@ onBeforeRouteUpdate(async (to, from) => {
     </pre>
   </div> -->
   <Tools>
-    <SearchMode @search="onSearch" />
+    <SearchMode />
   </Tools>
   <Container class="--inner p:mt-[20px]">
     <Content class="pt:--rounded-20 p:--py-20">
@@ -107,7 +105,7 @@ onBeforeRouteUpdate(async (to, from) => {
       <List />
       <Pagination
         :route="{
-          name: 'buy-list-filters',
+          name: buyList.basicRouteName,
           params: route.params,
         }"
         :config="{

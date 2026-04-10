@@ -11,12 +11,15 @@ const { options, apiData } = storeToRefs(buyProject)
 const areas = ref([])
 const roads = ref([])
 
-const onCityChange = async () => {
-  const { cityID } = apiData.value
-  apiData.value.districtID = ''
-  apiData.value.road = ''
-  areas.value = []
-  roads.value = []
+const onCityChange = async ({ source } = {}) => {
+  const { cityID } = apiData.value.caseInfo
+
+  if (source !== 'init') {
+    apiData.value.caseInfo.districtID = ''
+    apiData.value.caseInfo.road = ''
+    areas.value = []
+    roads.value = []
+  }
 
   if (!cityID) return
 
@@ -27,11 +30,13 @@ const onCityChange = async () => {
   }
 }
 
-const onAreaChange = async () => {
-  const { cityID, districtID } = apiData.value
+const onAreaChange = async ({ source } = {}) => {
+  const { cityID, districtID } = apiData.value.caseInfo
 
-  apiData.value.road = ''
-  roads.value = []
+  if (source !== 'init') {
+    apiData.value.caseInfo.road = ''
+    roads.value = []
+  }
 
   if (!cityID || !districtID) return
 
@@ -46,15 +51,15 @@ const onAreaChange = async () => {
 <template>
   <Address
     name="info"
-    v-model:city.number="apiData.cityID"
-    v-model:area.number="apiData.districtID"
-    v-model:road.number="apiData.road"
-    v-model:lane.number="apiData.lane"
-    v-model:alley.number="apiData.alley"
-    v-model:number.number="apiData.addrNum"
-    v-model:ofNumber.number="apiData.addrNumOf"
-    v-model:floor.number="apiData.floor"
-    v-model:ofFloor.number="apiData.addrNumOfFloor"
+    v-model:city.number="apiData.caseInfo.cityID"
+    v-model:area.number="apiData.caseInfo.districtID"
+    v-model:road="apiData.caseInfo.road"
+    v-model:lane.number="apiData.caseInfo.lane"
+    v-model:alley.number="apiData.caseInfo.alley"
+    v-model:number.number="apiData.caseInfo.addrNum"
+    v-model:ofNumber.number="apiData.caseInfo.addrNumOf"
+    v-model:floor.number="apiData.caseInfo.floor"
+    v-model:ofFloor.number="apiData.caseInfo.addrNumOfFloor"
     :config="{
       city: {
         options: options.city,
@@ -75,6 +80,7 @@ const onAreaChange = async () => {
         schema: {
           label: 'roadName',
           value: 'roadID',
+          model: 'roadName',
         },
       },
     }"

@@ -35,7 +35,7 @@ const items = shallowReadonly([
     >
       <FormInput
         :name="item.id"
-        v-model.number="apiData[item.id]"
+        v-model.number="apiData.caseInfo[item.id]"
         :config="{
           inputMode: 'numeric',
           inputChinese: false,
@@ -43,7 +43,7 @@ const items = shallowReadonly([
           integer: true,
           maxlength: 2,
           isExistClose: false,
-          isDisabled: !apiData.isCaseAddtion,
+          isDisabled: !apiData.caseInfo.isCaseAddtion,
         }"
         :setClass="{
           main: '--h-40 --px-12 --py-8',

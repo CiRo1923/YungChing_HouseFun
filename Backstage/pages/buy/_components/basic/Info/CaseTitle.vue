@@ -10,7 +10,7 @@ const { apiData } = storeToRefs(buyProject)
 <template>
   <FormInput
     name="caseTitle"
-    v-model="apiData.caseTitle"
+    v-model="apiData.caseInfo.caseTitle"
     :config="{
       placeholder: '請輸入物件標題',
       maxlength: 25,

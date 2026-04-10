@@ -2,12 +2,12 @@
 import AccordionContent from '@components/buy/mAccordion/Content.vue'
 
 import Content from '@pages/buy/_components/house/_Content.vue'
-import Basic from '@pages/buy/_components/house/information/Basic.vue'
-import Pin from '@pages/buy/_components/house/information/Pin.vue'
-import Parking from '@pages/buy/_components/house/information/Parking.vue'
-import Price from '@pages/buy/_components/house/information/Price.vue'
-import Other from '@pages/buy/_components/house/information/Other.vue'
-import Function from '@pages/buy/_components/house/information/Function.vue'
+import Basic from '@pages/buy/_components/house/_information/Basic.vue'
+import Pin from '@pages/buy/_components/house/_information/Pin.vue'
+import Parking from '@pages/buy/_components/house/_information/Parking.vue'
+import Price from '@pages/buy/_components/house/_information/Price.vue'
+import Other from '@pages/buy/_components/house/_information/Other.vue'
+import Function from '@pages/buy/_components/house/_information/Function.vue'
 </script>
 
 <template>

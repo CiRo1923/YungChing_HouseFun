@@ -1,13 +1,13 @@
 import { apiRegion, apiMrt } from '@js/_api/common.js'
 import { apiBuyList } from '@js/_api/buy/basic.js'
 
-import { useListStore } from '@stores/buy/list.js'
+import { useBuyListStore } from '@stores/buy/list.js'
 
-const useListStores = () => {
+const useBuyListStores = () => {
   // const projectStores = useProjectStore()
-  const listStores = useListStore()
-  const { channel, content, mode, region, mrt, purpose, price, room, keyword, info, pagination } =
-    storeToRefs(listStores)
+  const buyListStore = useBuyListStore()
+  const { channel, content, mode, region, mrt, purpose, price, room, keyword, tab, pagination } =
+    storeToRefs(buyListStore)
   const route = useRoute()
   const isChannelRegion = computed(() => channel.value === 'region')
   const isChannelMrt = computed(() => channel.value === 'mrt')
@@ -66,7 +66,8 @@ const useListStores = () => {
     return { config, status, data }
   }
 
-  const onApiBuyList = async () => {
+  const onApiBuyList = async (targetRoute = route) => {
+    const { params, query } = targetRoute
     const { config, status, data } = await apiBuyList({
       ...(isChannelRegion.value ? { region: region.value.apiData || region.value.all } : {}),
       ...(isChannelMrt.value ? { mrt: mrt.value.apiData || mrt.value.all } : {}),
@@ -74,16 +75,26 @@ const useListStores = () => {
       price: price.value.apiData || '',
       room: room.value.apiData || '',
       kw: keyword.value || '',
-      tab: info.value.active,
-      pg: route.query.pg,
+      tab: tab.value.apiData,
+      pg: query.pg,
       pageSize: 12,
     })
 
     if (status === 200) {
       const { items, tabs, paging } = data
-      const infoMap = info.value.items.map((item) => {
+      const infoMap = tab.value.options.map((item) => {
         const value = tabs?.[item.id] ?? item.value ?? 0
         const templateLabel = item.templateLabel ?? item.label
+        const filters = params.filters.filter((item) => !item.includes('_tab'))
+        const to = {
+          name: buyListStore.basicRouteName,
+          params: {
+            filters: [...filters, ...(item.value ? [`${item.value}_tab`] : [])],
+          },
+          query: {
+            pg: 1,
+          },
+        }
         const label = Object.fromEntries(
           Object.entries(templateLabel).map(([key, str]) => [
             key,
@@ -95,11 +106,12 @@ const useListStores = () => {
           ...item,
           templateLabel: templateLabel,
           label: label,
+          to,
         }
       })
 
       content.value = items
-      info.value.items = infoMap
+      tab.value.options = infoMap
       pagination.value = paging
     }
 
@@ -114,7 +126,7 @@ const useListStores = () => {
 
     channel.value = hasRegion ? 'region' : hasMrt ? 'mrt' : ''
   }
-  const onParseFilters = (targetRoute) => {
+  const onParseFilters = (targetRoute = route) => {
     const filters = targetRoute.params.filters
     const list = Array.isArray(filters) ? filters : filters ? [filters] : []
 
@@ -136,25 +148,27 @@ const useListStores = () => {
 
   const onGetBuyListParams = (targetRoute = route) => {
     const parseFilters = onParseFilters(targetRoute)
-    // region 有預設值 須等 query 有值才改變
-    region.value.apiData = (isChannelRegion.value && parseFilters.region) || region.value.apiData
-    region.value.params = region.value.apiData
 
-    // mrt 有預設值 須等 query 有值才改變
-    mrt.value.apiData = (isChannelMrt.value && parseFilters.mrt) || mrt.value.apiData
-    mrt.value.params = mrt.value.apiData
+    console.log(parseFilters)
+
+    // region
+    region.value.apiData =
+      (isChannelRegion.value && parseFilters.region) || region.value.defaultApiData
+
+    // mrt
+    mrt.value.apiData = (isChannelMrt.value && parseFilters.mrt) || mrt.value.defaultApiData
 
     // purpose
     purpose.value.apiData = parseFilters.purpose || ''
-    purpose.value.params = purpose.value.query
 
     // price
     price.value.apiData = parseFilters.price || ''
-    price.value.params = price.value.query
 
     // room
     room.value.apiData = parseFilters.room || ''
-    room.value.params = room.value.query
+
+    // tab
+    tab.value.apiData = Number(parseFilters.tab) || tab.value.defaultApiData
   }
 
   const onModeClick = (value) => {
@@ -177,4 +191,4 @@ const useListStores = () => {
   }
 }
 
-export default useListStores
+export default useBuyListStores

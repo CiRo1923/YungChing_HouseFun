@@ -39,11 +39,11 @@ const items = shallowReadonly([
 ])
 
 const onIsCaseAddtionChange = () => {
-  if (!apiData.value.isCaseAddtion) {
-    apiData.value.caseAddRoom = null
-    apiData.value.caseAddLivingRoom = null
-    apiData.value.caseAddBathroom = null
-    apiData.value.caseAddBalcony = null
+  if (!apiData.value.caseInfo.isCaseAddtion) {
+    apiData.value.caseInfo.caseAddRoom = null
+    apiData.value.caseInfo.caseAddLivingRoom = null
+    apiData.value.caseInfo.caseAddBathroom = null
+    apiData.value.caseInfo.caseAddBalcony = null
   }
 }
 </script>
@@ -59,7 +59,7 @@ const onIsCaseAddtionChange = () => {
         >
           <FormInput
             :name="item.id"
-            v-model.number="apiData[item.id]"
+            v-model.number="apiData.caseInfo[item.id]"
             :config="{
               inputMode: 'numeric',
               inputChinese: false,
@@ -83,7 +83,7 @@ const onIsCaseAddtionChange = () => {
     <li class="flex h-[40px] items-center">
       <FormCheckBox
         name="isCaseOpenConcept"
-        v-model="apiData.isCaseOpenConcept"
+        v-model="apiData.caseInfo.isCaseOpenConcept"
         :config="{
           mode: 'boolean',
           label: '開放式格局',
@@ -96,7 +96,7 @@ const onIsCaseAddtionChange = () => {
     <li class="flex h-[40px] items-center">
       <FormCheckBox
         name="isCaseAddtion"
-        v-model="apiData.isCaseAddtion"
+        v-model="apiData.caseInfo.isCaseAddtion"
         :config="{
           mode: 'boolean',
           label: '有加蓋',

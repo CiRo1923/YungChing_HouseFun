@@ -10,7 +10,7 @@ const { apiData } = storeToRefs(buyProject)
 <template>
   <FormInput
     name="caseFloorTotal"
-    v-model.number="apiData.caseFloorTotal"
+    v-model.number="apiData.caseInfo.caseFloorTotal"
     :config="{
       inputMode: 'numeric',
       inputChinese: false,

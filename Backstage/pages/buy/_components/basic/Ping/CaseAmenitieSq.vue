@@ -39,13 +39,13 @@ const { pingData } = storeToRefs(buyBasic)
         <li class="t:w-[228px] p:w-[270px]">
           <FormInput
             name="caseAmenitieSqRqtio"
-            v-model.number="apiData.caseAmenitieSqRqtio"
+            v-model.number="apiData.caseInfo.caseAmenitieSqRqtio"
             :config="{
               placeholder: '公設比',
               inputMode: 'numeric',
               inputChinese: false,
               checkNotIsZero: true,
-              isDisabled: apiData.isCaseAmenitieSqRqtioAuto,
+              isDisabled: apiData.caseInfo.isCaseAmenitieSqRqtioAuto,
             }"
             :setClass="{
               main: '--h-40 --px-12 --py-8',
@@ -61,7 +61,7 @@ const { pingData } = storeToRefs(buyBasic)
     <li class="flex items-center pt:h-[40px]">
       <FormCheckBox
         name="isCaseAmenitieSqRqtioAuto"
-        v-model="apiData.isCaseAmenitieSqRqtioAuto"
+        v-model="apiData.caseInfo.isCaseAmenitieSqRqtioAuto"
         :config="{
           mode: 'boolean',
           label: '自動計算',

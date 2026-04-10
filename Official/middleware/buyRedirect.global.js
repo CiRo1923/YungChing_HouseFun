@@ -1,8 +1,8 @@
-import { useListStore } from '@stores/buy/list.js'
+import { useBuyListStore } from '@stores/buy/list.js'
 
 export default defineNuxtRouteMiddleware((to) => {
   const pinia = useNuxtApp().$pinia
-  const list = useListStore(pinia)
+  const list = useBuyListStore(pinia)
   const { region } = storeToRefs(list)
 
   if (
@@ -11,7 +11,7 @@ export default defineNuxtRouteMiddleware((to) => {
     to.path === '/buy/list' ||
     to.path === '/buy/list/'
   ) {
-    return navigateTo(`/buy/list/${region.value.params}_region?pg=1`, {
+    return navigateTo(`/buy/list/${region.value.apiData}_region?pg=1`, {
       replace: true,
     })
   }

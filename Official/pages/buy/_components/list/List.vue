@@ -1,13 +1,13 @@
 <script setup>
 import ListItem from '@pages/buy/_components/list/_list/Item.vue'
 
-// import { useProjectStore } from '@stores/buy/project.js'
-import { useListStore } from '@stores/buy/list.js'
+// import { useBuyProjectStore } from '@stores/buy/project.js'
+import { useBuyListStore } from '@stores/buy/list.js'
 
-// const project = useProjectStore()
-const list = useListStore()
+// const project = useBuyProjectStore()
 // const { options } = storeToRefs(project)
-const { content } = storeToRefs(list)
+const buyList = useBuyListStore()
+const { content } = storeToRefs(buyList)
 </script>
 
 <template>

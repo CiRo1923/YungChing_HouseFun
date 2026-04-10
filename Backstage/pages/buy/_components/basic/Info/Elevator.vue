@@ -21,8 +21,8 @@ const radioOptions = readonly([
 ])
 
 const onIsCaseHasElevatorChnage = () => {
-  if (!apiData.value.isCaseHasElevator) {
-    apiData.value.caseElevatorCount = null
+  if (!apiData.value.caseInfo.isCaseHasElevator) {
+    apiData.value.caseInfo.caseElevatorCount = null
   }
 }
 </script>
@@ -31,7 +31,7 @@ const onIsCaseHasElevatorChnage = () => {
   <RadiosOval>
     <FormRadiosOval
       name="isCaseHasElevator"
-      v-model="apiData.isCaseHasElevator"
+      v-model="apiData.caseInfo.isCaseHasElevator"
       :options="radioOptions"
       :setClass="{
         radios: 'm:w-full',
@@ -43,7 +43,7 @@ const onIsCaseHasElevatorChnage = () => {
       <li class="p:w-[100px]">
         <FormInput
           name="caseElevatorCount"
-          v-model.number="apiData.caseElevatorCount"
+          v-model.number="apiData.caseInfo.caseElevatorCount"
           :config="{
             inputMode: 'numeric',
             inputChinese: false,
@@ -51,11 +51,11 @@ const onIsCaseHasElevatorChnage = () => {
             integer: true,
             maxlength: 3,
             isExistClose: false,
-            isDisabled: !apiData.isCaseHasElevator,
+            isDisabled: !apiData.caseInfo.isCaseHasElevator,
           }"
           :rules="{
             required: {
-              valid: apiData.isCaseHasElevator,
+              valid: apiData.caseInfo.isCaseHasElevator,
               errorMessage: '請輸入電梯數量',
             },
           }"

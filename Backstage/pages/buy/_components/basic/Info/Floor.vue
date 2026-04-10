@@ -21,8 +21,8 @@ const radioOptions = readonly([
 ])
 
 const onIsSingleFloorChange = () => {
-  apiData.value.floorToToken = 1
-  apiData.value.caseFloorTo = null
+  apiData.value.caseInfo.floorToToken = 1
+  apiData.value.caseInfo.caseFloorTo = null
 }
 </script>
 
@@ -30,7 +30,7 @@ const onIsSingleFloorChange = () => {
   <RadiosOval>
     <FormRadiosOval
       name="isSingleFloor"
-      v-model="apiData.isSingleFloor"
+      v-model="apiData.caseInfo.isSingleFloor"
       :options="radioOptions"
       :setClass="{
         radios: 'm:w-full',
@@ -42,7 +42,7 @@ const onIsSingleFloorChange = () => {
       <li class="pt:flex pt:grow pt:gap-x-[8px]">
         <FormSelect
           name="floorFromToken"
-          v-model.number="apiData.floorFromToken"
+          v-model.number="apiData.caseInfo.floorFromToken"
           :options="options.floor"
           :config="{
             placeholder: '請選擇',
@@ -57,7 +57,7 @@ const onIsSingleFloorChange = () => {
         />
         <FormInput
           name="caseFloorFrom"
-          v-model.number="apiData.caseFloorFrom"
+          v-model.number="apiData.caseInfo.caseFloorFrom"
           :config="{
             inputMode: 'numeric',
             inputChinese: false,
@@ -77,13 +77,13 @@ const onIsSingleFloorChange = () => {
           <template #rearAssist>樓</template>
         </FormInput>
       </li>
-      <li class="pt:shrink-0" v-if="!apiData.isSingleFloor">
+      <li class="pt:shrink-0" v-if="!apiData.caseInfo.isSingleFloor">
         <span class="text-[--gray-666] pt:flex pt:items-center p:h-[40px] p:text-[16px]">~</span>
       </li>
-      <li class="pt:flex pt:grow pt:gap-x-[8px]" v-if="!apiData.isSingleFloor">
+      <li class="pt:flex pt:grow pt:gap-x-[8px]" v-if="!apiData.caseInfo.isSingleFloor">
         <FormSelect
           name="floorToToken"
-          v-model.number="apiData.floorToToken"
+          v-model.number="apiData.caseInfo.floorToToken"
           :options="options.floor"
           :config="{
             placeholder: '請選擇',
@@ -98,7 +98,7 @@ const onIsSingleFloorChange = () => {
         />
         <FormInput
           name="caseFloorTo"
-          v-model.number="apiData.caseFloorTo"
+          v-model.number="apiData.caseInfo.caseFloorTo"
           :config="{
             inputMode: 'numeric',
             inputChinese: false,

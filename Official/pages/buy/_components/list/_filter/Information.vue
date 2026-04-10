@@ -1,23 +1,24 @@
 <script setup>
 import TabSeparator from '@components/buy/mTab/Separator.vue'
 
-import { onDevice } from '@js/_prototype.js'
+import { useBuyProjectStore } from '@stores/buy/project.js'
+import { useBuyListStore } from '@stores/buy/list.js'
+import useBuyProjectStores from '@stores/buy/_composables/useProjectStores.js'
 
-import { useListStore } from '@stores/buy/list.js'
-
+const project = useBuyProjectStore()
+const { device } = storeToRefs(project)
+const buyList = useBuyListStore()
+const { tab } = storeToRefs(buyList)
+const { onResize } = useBuyProjectStores()
 const emits = defineEmits(['click'])
-const list = useListStore()
-const { info } = storeToRefs(list)
-const device = ref('p')
-const items = computed(() => {
-  return info.value.items.map((item) => {
+const options = computed(() => {
+  return tab.value.options.map((item) => {
     const key =
       Object.keys(item.label).find((k) => k.includes(device.value)) || Object.keys(item.label)[0]
 
     return {
-      id: item.id,
+      ...item,
       label: item.label[key],
-      value: item.value,
     }
   })
 })
@@ -25,30 +26,25 @@ const items = computed(() => {
 const onClick = (data) => {
   const { item } = data
 
-  info.value.active = item.value
+  tab.value.apiData = item.value
 
   emits('click')
 }
 
-const onResize = () => {
-  device.value = onDevice()
-}
-
-onMounted(() => {
-  onResize()
-  window.addEventListener('resize', onResize)
+onBeforeUnmount(() => {
+  onResize('remove')
 })
 
-onUnmounted(() => {
-  window.removeEventListener('resize', onResize)
+onMounted(() => {
+  onResize('add')
 })
 </script>
 
 <template>
   <TabSeparator
-    :items="items"
+    :items="options"
     :config="{
-      active: 0,
+      active: tab.apiData,
     }"
     :setClass="{
       main: 'p:--gap-x-30 m:--gap-x-5 pt:--line pt:grow',

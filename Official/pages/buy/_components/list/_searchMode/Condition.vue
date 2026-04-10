@@ -1,37 +1,60 @@
 <script setup>
-import { useProjectStore } from '@stores/buy/project.js'
-import { useListStore } from '@stores/buy/list.js'
-import useProjectStores from '@stores/buy/_composables/useProjectStores.js'
+import { useBuyProjectStore } from '@stores/buy/project.js'
+import { useBuyListStore } from '@stores/buy/list.js'
+import useBuyProjectStores from '@stores/buy/_composables/useProjectStores.js'
+import useBuyListStores from '@stores/buy/_composables/useListStores.js'
 
-const project = useProjectStore()
-const list = useListStore()
+const project = useBuyProjectStore()
 const { device } = storeToRefs(project)
-const { region, mrt, purpose, price, room } = storeToRefs(list)
-const { onValueGetText, onResize } = useProjectStores()
-const route = useRoute()
-
+const buyList = useBuyListStore()
+const { region, mrt, purpose, price, room } = storeToRefs(buyList)
+const { onResize } = useBuyProjectStores()
+const { isChannelRegion, isChannelMrt, onParseFilters } = useBuyListStores()
+// const route = useRoute()
+const labels = {
+  region: region.value.label,
+  mrt: mrt.value.label,
+  purpose: purpose.value.label,
+  price: price.value.label,
+  room: room.value.label,
+}
 const isDeviceM = computed(() => device.value === 'm')
-const isChannelRegion = computed(() => route.meta.channel === 'region')
-const isChannelMrt = computed(() => route.meta.channel === 'mrt')
 const datas = computed(() => {
-  const onText = (options, params) => {
-    const array = params.split(',')
-    const textArray = array.map((item) => onValueGetText(options, item).name)
+  const parseFilters = onParseFilters()
+  // const onText = (options, params) => {
+  //   const array = params.split(',')
+  //   const textArray = array.map((item) => onValueGetText(options, item).name)
 
-    return textArray
-  }
+  //   return textArray
+  // }
 
-  const regionData =
-    isChannelRegion.value && region.value.params
-      ? onText(region.value.options, region.value.params)
-      : []
-  const mrtnData =
-    isChannelMrt.value && mrt.value.params ? onText(mrt.value.options, mrt.value.params) : []
-  const purposeData = purpose.value.params
-    ? onValueGetText('casePurpose', purpose.value.params).text
+  const regionData = isChannelRegion.value
+    ? parseFilters.region === region.value.apiData
+      ? [region.value.label]
+      : [labels.region]
+    : []
+  const mrtnData = isChannelMrt.value
+    ? parseFilters.mrt === mrt.value.apiData
+      ? [mrt.value.label]
+      : [labels.mrt]
+    : []
+
+  const purposeData = parseFilters.purpose
+    ? parseFilters.purpose === purpose.value.apiData
+      ? purpose.value.label
+      : labels.purpose
     : purpose.value.defaultLabel
-  const roomData = room.value.params ? `${room.value.params} 房` : room.value.defaultLabel
-  const result = [...regionData, ...mrtnData, purposeData, price.value.label, roomData]
+  const priceData = parseFilters.price
+    ? parseFilters.price === price.value.apiData
+      ? price.value.label
+      : labels.price
+    : price.value.defaultLabel
+  const roomData = parseFilters.room
+    ? parseFilters.room === room.value.apiData
+      ? room.value.label
+      : labels.room
+    : room.value.defaultLabel
+  const result = [...regionData, ...mrtnData, purposeData, priceData, roomData]
 
   return result.filter((item) => item).join('、')
 })

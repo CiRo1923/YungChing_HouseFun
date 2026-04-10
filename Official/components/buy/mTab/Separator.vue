@@ -1,6 +1,10 @@
 <script setup>
-import { onDevice } from '@js/_prototype.js'
+import { useBuyProjectStore } from '@stores/buy/project.js'
+import useBuyProjectStores from '@stores/buy/_composables/useProjectStores.js'
 
+const project = useBuyProjectStore()
+const { device } = storeToRefs(project)
+const { onResize } = useBuyProjectStores()
 const emits = defineEmits(['click'])
 const props = defineProps({
   items: {
@@ -16,7 +20,6 @@ const props = defineProps({
     default: () => ({}),
   },
 })
-const device = ref('p')
 const activeIndex = ref(null)
 const config = computed(() => {
   return {
@@ -103,18 +106,13 @@ const onInit = () => {
   activeIndex.value = active
 }
 
-const onResize = () => {
-  device.value = onDevice()
-}
+onBeforeUnmount(() => {
+  onResize('remove')
+})
 
 onMounted(() => {
   onInit()
-  onResize()
-  window.addEventListener('resize', onResize)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('resize', onResize)
+  onResize('add')
 })
 </script>
 
@@ -127,7 +125,7 @@ onUnmounted(() => {
             <component
               :is="onAs(item)"
               class="m-tab-header-anchor transition-colors duration-300 tm:text-[14px] p:text-[16px]"
-              :class="{ '--active': activeIndex === index }"
+              :class="{ '--curr': activeIndex === index }"
               v-bind="onBind(item, index)"
             >
               <em v-html="item[config.schema.label]" />
@@ -143,11 +141,11 @@ onUnmounted(() => {
 .m-tab {
   &.\-\-separator {
     .m-tab-header-anchor {
-      &:not(.\-\-active) {
+      &:not(.\-\-curr) {
         @apply text-[--gray-666];
       }
 
-      &.\-\-active {
+      &.\-\-curr {
         @apply font-bold text-[--gray-333];
       }
     }

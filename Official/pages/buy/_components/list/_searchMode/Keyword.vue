@@ -1,10 +1,10 @@
 <script setup>
 import FormInput from '@components/buy/mForm/Input.vue'
 
-import { useListStore } from '@stores/buy/list.js'
+import { useBuyListStore } from '@stores/buy/list.js'
 
-const list = useListStore()
-const { keyword } = storeToRefs(list)
+const buyList = useBuyListStore()
+const { keyword } = storeToRefs(buyList)
 </script>
 
 <template>

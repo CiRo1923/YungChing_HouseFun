@@ -36,27 +36,33 @@ const items = readonly({
   ],
 })
 
-const onCityChange = async () => {
-  if (!apiData.value.cityID) {
+const onCityChange = async ({ source } = {}) => {
+  if (!apiData.value.caseInfo.cityID) {
     areas.value = []
     roads.value = []
     return
   }
 
-  const { status, data } = await project.onApiGETDistrictSelectOptions(apiData.value.cityID)
+  const { status, data } = await project.onApiGETDistrictSelectOptions(
+    apiData.value.caseInfo.cityID
+  )
 
-  areas.value = []
-  roads.value = []
+  if (source !== 'init') {
+    areas.value = []
+    roads.value = []
+  }
 
   if (status === 200) {
     areas.value = data
   }
 }
 
-const onAreaChange = async () => {
-  const { cityID, districtID } = apiData.value
+const onAreaChange = async ({ source } = {}) => {
+  const { cityID, districtID } = apiData.value.caseInfo
 
-  roads.value = []
+  if (source !== 'init') {
+    roads.value = []
+  }
 
   if (!cityID || !districtID) return
 
@@ -81,14 +87,14 @@ const onClick = async (validate) => {
     <div class="p:flex p:gap-x-[16px]">
       <Address
         name="info"
-        v-model:city="apiData.cityID"
-        v-model:area="apiData.districtID"
-        v-model:road="apiData.road"
-        v-model:lane="apiData.lane"
-        v-model:alley="apiData.alley"
-        v-model:number="apiData.number"
-        v-model:ofNumber="apiData.ofNumber"
-        v-model:floor="apiData.floor"
+        v-model:city="apiData.caseInfo.cityID"
+        v-model:area="apiData.caseInfo.districtID"
+        v-model:road="apiData.caseInfo.road"
+        v-model:lane="apiData.caseInfo.lane"
+        v-model:alley="apiData.caseInfo.alley"
+        v-model:number="apiData.caseInfo.number"
+        v-model:ofNumber="apiData.caseInfo.ofNumber"
+        v-model:floor="apiData.caseInfo.floor"
         :config="{
           city: {
             options: options.city,

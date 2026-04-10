@@ -109,7 +109,7 @@ const onBind = (page) => {
           :is="as"
           class="m-pagination-anchor flex h-[30px] w-[30px] items-center justify-center rounded-[3px] transition-colors duration-300"
           :class="{
-            '--pagination-active': page === config.nowPage,
+            '--curr': page === config.nowPage,
           }"
           v-bind="onBind(page)"
         >
@@ -122,11 +122,11 @@ const onBind = (page) => {
 
 <style lang="postcss">
 .m-pagination-anchor {
-  &:not(.\-\-pagination-active) {
+  &:not(.\-\-curr) {
     @apply text-[--gray-666];
   }
 
-  &.\-\-pagination-active {
+  &.\-\-curr {
     @apply bg-[--green-8b0d] text-[--white];
   }
 }
