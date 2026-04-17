@@ -1,13 +1,13 @@
 <script setup>
 import { useBuyProjectStore } from '@stores/buy/project.js'
 import { useBuyListStore } from '@stores/buy/list.js'
-import useBuyProjectStores from '@stores/buy/_composables/useProjectStores.js'
+import useBuyProjectActions from '@stores/buy/_composables/useProjectActions.js'
 
 const project = useBuyProjectStore()
 const { options } = storeToRefs(project)
 const buyList = useBuyListStore()
 const { purpose } = storeToRefs(buyList)
-const { onValueGetText } = useBuyProjectStores()
+const { onValueGetText } = useBuyProjectActions()
 const props = defineProps({
   name: {
     type: String,

@@ -1,13 +1,13 @@
 <script setup>
 import { useBuyProjectStore } from '@stores/buy/project.js'
-import useNavStores from '@stores/_composables/useNavStores.js'
-import useBuyProjectStores from '@stores/buy/_composables/useProjectStores.js'
+import useNavActions from '@stores/_composables/useNavActions.js'
+import useBuyProjectActions from '@stores/buy/_composables/useProjectActions.js'
 
 const project = useBuyProjectStore()
 const route = useRoute()
 const { device } = storeToRefs(project)
-const { onResize } = useBuyProjectStores()
-const { menu } = useNavStores()
+const { onResize } = useBuyProjectActions()
+const { menu } = useNavActions()
 const isDevicePT = computed(() => /^(p|t)$/.test(device.value))
 
 const itemRef = ref(null)

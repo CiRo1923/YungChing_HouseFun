@@ -1,13 +1,13 @@
 <script setup>
 import { useBuyProjectStore } from '@stores/buy/project.js'
 import { useBuyListStore } from '@stores/buy/list.js'
-import useBuyProjectStores from '@stores/buy/_composables/useProjectStores.js'
+import useBuyProjectActions from '@stores/buy/_composables/useProjectActions.js'
 
 const project = useBuyProjectStore()
 const { device } = storeToRefs(project)
 const buyList = useBuyListStore()
 const { tab } = storeToRefs(buyList)
-const { onResize } = useBuyProjectStores()
+const { onResize } = useBuyProjectActions()
 const emits = defineEmits(['click'])
 const options = computed(() => {
   return tab.value.options.map((item) => {

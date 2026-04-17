@@ -1,10 +1,10 @@
 <script setup>
 import { useBuyHouseStore } from '@stores/buy/house.js'
-// import useBuyProjectStores from '@stores/buy/_composables/useProjectStores.js'
+// import useBuyProjectActions from '@stores/buy/_composables/useProjectActions.js'
 
 const buyHouse = useBuyHouseStore()
 const { basic, floor } = storeToRefs(buyHouse)
-// const { onValueGetText } = useBuyProjectStores()
+// const { onValueGetText } = useBuyProjectActions()
 
 const layoutInfo = computed(() => {
   const { caseType, layout } = basic.value

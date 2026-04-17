@@ -9,8 +9,8 @@ import { useMeta } from '@composable/useMeta.js'
 import { useCommonStore } from '@stores/common.js'
 // import { useBuyProjectStore } from '@stores/buy/project.js'
 import { useBuyListStore } from '@stores/buy/list.js'
-import useBuyProjectStores from '@stores/buy/_composables/useProjectStores.js'
-import useBuyListStores from '@stores/buy/_composables/useListStores.js'
+import useBuyProjectActions from '@stores/buy/_composables/useProjectActions.js'
+import useBuyListActions from '@stores/buy/_composables/useListActions.js'
 
 definePageMeta({
   layout: 'common',
@@ -28,8 +28,8 @@ const {
   onApiGETRealEstatePurposeCheckOptions,
   onApiGETRealEstateTypeSelectOptions,
   onApiGETRealEstateParkingTypeSelectOptions,
-} = useBuyProjectStores()
-const { onGetBuyListParams, onApiRegion, onApiMrt, onApiBuyList, onChannel } = useBuyListStores()
+} = useBuyProjectActions()
+const { onGetBuyListParams, onApiRegion, onApiMrt, onApiBuyList, onChannel } = useBuyListActions()
 const route = useRoute()
 
 onChannel()

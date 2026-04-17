@@ -1,10 +1,10 @@
 <script setup>
 import { useBuyListStore } from '@stores/buy/list.js'
-// import useBuyProjectStores from '@stores/buy/_composables/useProjectStores.js'
+// import useBuyProjectActions from '@stores/buy/_composables/useProjectActions.js'
 
 const buyList = useBuyListStore()
 const { room } = storeToRefs(buyList)
-// const { onValueGetText } = useBuyProjectStores()
+// const { onValueGetText } = useBuyProjectActions()
 // const route = useRoute()
 
 // const emits = defineEmits(['change'])

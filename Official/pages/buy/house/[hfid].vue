@@ -18,8 +18,8 @@ import { useMeta } from '@composable/useMeta.js'
 
 import { useCommonStore } from '@stores/common.js'
 import { useBuyHouseStore } from '@stores/buy/house.js'
-import useBuyProjectStores from '@stores/buy/_composables/useProjectStores.js'
-import useBuyHouseStores from '@stores/buy/_composables/useHouseStores.js'
+import useBuyProjectActions from '@stores/buy/_composables/useProjectActions.js'
+import useBuyHouseAction from '@stores/buy/_composables/useHouseActions.js'
 
 definePageMeta({
   layout: 'common',
@@ -31,12 +31,12 @@ const { onWithLoadingAll } = common
 const buyHouse = useBuyHouseStore()
 const { detail } = storeToRefs(buyHouse)
 // const popup = useBuyPopupStore()
-const { onApiBuyHouse } = useBuyHouseStores()
+const { onApiBuyHouse } = useBuyHouseAction()
 const {
   onApiGETRealEstateTypeSelectOptions,
   onApiGETRealEstateParkingModeSelectOptions,
   onApiGETRealEstateParkingRegSelectOptions,
-} = useBuyProjectStores()
+} = useBuyProjectActions()
 
 const route = useRoute()
 const seo = computed(() => detail.value?.seo ?? {})

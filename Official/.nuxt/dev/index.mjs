@@ -643,7 +643,7 @@ const _inlineRuntimeConfig = {
     "NUXT_PUBLIC_MANAGE_API_PATH": "https://agent-bff.housesfunlab.com",
     "NUXT_PUBLIC_PATH": "/",
     "spritePath": "assets/imgs/svg/spritemap.svg",
-    "spriteVersion": "20260410075153670"
+    "spriteVersion": "20260417105447878"
   }
 };
 const envOptions = {

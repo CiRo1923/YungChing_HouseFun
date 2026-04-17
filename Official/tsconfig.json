@@ -2,20 +2,7 @@
   // https://nuxt.com/docs/guide/concepts/typescript
   "extends": "./.nuxt/tsconfig.json",
   "compilerOptions": {
-    "baseUrl": ".",
     "forceConsistentCasingInFileNames": true,
-    "paths": {
-      "@/*": ["./*"],
-      "~/*": ["./*"],
-      "@stores/*": ["./stores/*"],
-      "@components/*": ["./components/*"],
-      "@containers/*": ["./containers/*"],
-      "@composable/*": ["./composable/*"],
-      "@pages/*": ["./pages/*"],
-      "@imgs/*": ["./assets/images/*"],
-      "@css/*": ["./assets/css/*"],
-      "@js/*": ["./assets/js/*"]
-    },
     "types": ["node"]
   }
 }

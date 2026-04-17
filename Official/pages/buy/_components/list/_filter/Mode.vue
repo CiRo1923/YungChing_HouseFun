@@ -2,15 +2,15 @@
 import { useBuyProjectStore } from '@stores/buy/project.js'
 import { useBuyListStore } from '@stores/buy/list.js'
 
-import useBuyProjectStores from '@stores/buy/_composables/useProjectStores.js'
-import useBuyListStores from '@stores/buy/_composables/useListStores.js'
+import useBuyProjectActions from '@stores/buy/_composables/useProjectActions.js'
+import useBuyListActions from '@stores/buy/_composables/useListActions.js'
 
 const project = useBuyProjectStore()
 const { device } = storeToRefs(project)
 const buyList = useBuyListStore()
 const { mode } = storeToRefs(buyList)
-const { onResize } = useBuyProjectStores()
-const { onModeClick } = useBuyListStores()
+const { onResize } = useBuyProjectActions()
+const { onModeClick } = useBuyListActions()
 const isDeviceM = computed(() => device.value === 'm')
 
 const items = readonly([

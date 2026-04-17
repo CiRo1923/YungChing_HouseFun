@@ -11,15 +11,15 @@ import Condition from '@pages/buy/_components/list/_searchMode/Condition.vue'
 
 // import { useBuyProjectStore } from '@stores/buy/project.js'
 import { useBuyListStore } from '@stores/buy/list.js'
-// import useBuyProjectStores from '@stores/buy/_composables/useProjectStores.js'
-import useBuyListStores from '@stores/buy/_composables/useListStores.js'
+// import useBuyProjectActions from '@stores/buy/_composables/useProjectActions.js'
+import useListActions from '@stores/buy/_composables/useListActions.js'
 
 // const project = useBuyProjectStore()
 // const { options } = storeToRefs(project)
 const buyList = useBuyListStore()
 const { region, mrt } = storeToRefs(buyList)
-// const { onValueGetText } = useBuyProjectStores()
-const { isChannelRegion, isChannelMrt, commonParams } = useBuyListStores()
+// const { onValueGetText } = useBuyProjectActions()
+const { isChannelRegion, isChannelMrt, commonParams } = useListActions()
 // const route = useRoute()
 const router = useRouter()
 const paramsRegion = computed(() => {

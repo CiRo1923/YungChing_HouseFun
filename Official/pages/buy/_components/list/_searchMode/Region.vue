@@ -1,10 +1,10 @@
 <script setup>
 import { useBuyListStore } from '@stores/buy/list.js'
-// import useBuyListStores from '@stores/buy/_composables/useListStores.js'
+// import useListActions from '@stores/buy/_composables/useListActions.js'
 
 const buyList = useBuyListStore()
 const { region } = storeToRefs(buyList)
-// const { onGetRegionData } = useBuyListStores()
+// const { onGetRegionData } = useListActions()
 const props = defineProps({
   name: {
     type: String,

@@ -2,11 +2,11 @@
 import Container from '@pages/buy/_components/house/_information/_Container.vue'
 
 import { useBuyHouseStore } from '@stores/buy/house.js'
-import useBuyProjectStores from '@stores/buy/_composables/useProjectStores.js'
+import useBuyProjectActions from '@stores/buy/_composables/useProjectActions.js'
 
 const buyHouse = useBuyHouseStore()
 const { basic, floor, community } = storeToRefs(buyHouse)
-const { onSearchParams } = useBuyProjectStores()
+const { onSearchParams } = useBuyProjectActions()
 
 const emits = defineEmits(['popup'])
 const items = computed(() => {

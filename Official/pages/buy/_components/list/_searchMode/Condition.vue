@@ -1,15 +1,15 @@
 <script setup>
 import { useBuyProjectStore } from '@stores/buy/project.js'
 import { useBuyListStore } from '@stores/buy/list.js'
-import useBuyProjectStores from '@stores/buy/_composables/useProjectStores.js'
-import useBuyListStores from '@stores/buy/_composables/useListStores.js'
+import useBuyProjectActions from '@stores/buy/_composables/useProjectActions.js'
+import useBuyListActions from '@stores/buy/_composables/useListActions.js'
 
 const project = useBuyProjectStore()
 const { device } = storeToRefs(project)
 const buyList = useBuyListStore()
 const { region, mrt, purpose, price, room } = storeToRefs(buyList)
-const { onResize } = useBuyProjectStores()
-const { isChannelRegion, isChannelMrt, onParseFilters } = useBuyListStores()
+const { onResize } = useBuyProjectActions()
+const { isChannelRegion, isChannelMrt, onParseFilters } = useBuyListActions()
 // const route = useRoute()
 const labels = {
   region: region.value.label,
