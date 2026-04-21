@@ -2,7 +2,7 @@
 import FormInput from '@components/buy/mForm/Input.vue'
 import FormCheckBox from '@components/buy/mForm/CheckBox.vue'
 
-import { toFixed } from '@js/_prototype.js'
+import { onToFixed } from '@js/_prototype.js'
 
 import { useBuyProjectStore } from '@stores/buy/project.js'
 
@@ -30,7 +30,7 @@ const onIsCasePriceUnitAuto = () => {
         ? Number(caseBuildSqPin) - Number(caseParkingSqPin)
         : Number(caseBuildSqPin)
 
-    apiData.value.caseInfo.casePriceUnit = Number(toFixed(price / buildSq, 2))
+    apiData.value.caseInfo.casePriceUnit = Number(onToFixed(price / buildSq, 2))
   }
 }
 

@@ -7,9 +7,10 @@ import CardFilterMedia from '@pages/buy/_components/basic/CardFilterMedia.vue'
 import CardFilterParking from '@pages/buy/_components/basic/CardFilterParking.vue'
 import CardFilterPosterInfo from '@pages/buy/_components/basic/CardFilterPosterInfo.vue'
 import CardFilterTerms from '@pages/buy/_components/basic/CardFilterTerms.vue'
+import CardFilterPictures from '@pages/buy/_components/basic/CardFilterPictures.vue'
 
 // import { useBuyProjectStore } from '@stores/buy/project.js'
-import useStores from '@stores/buy/_composables/useStores.js'
+import useBuyProjectActions from '@stores/buy/_composables/useProjectActions.js'
 
 // const buyProject = useBuyProjectStore()
 
@@ -47,6 +48,11 @@ export const datas = shallowReadonly([
     component: CardFilterFeature,
   },
   {
+    id: '',
+    label: '照片資訊',
+    component: CardFilterPictures,
+  },
+  {
     id: 'cardFilterMedia',
     label: '影音設定',
     component: CardFilterMedia,
@@ -64,7 +70,7 @@ export const datas = shallowReadonly([
 ])
 
 export const useBuyBasicAllPromise = () => {
-  const { project } = useStores()
+  const { project } = useBuyProjectActions()
 
   return [
     useAsyncData('purpose-options', () => project.onApiGETRealEstatePurposeCheckOptions()),

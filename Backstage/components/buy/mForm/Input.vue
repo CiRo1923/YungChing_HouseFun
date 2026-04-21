@@ -2,7 +2,7 @@
 import SvgIcon from '@components/common/SvgIcon.vue'
 import ErrorMessageElem from '@components/buy/mErrorMessageElem.vue'
 
-import { onDeepMerge, numberComma, toFixed } from '@js/_prototype.js'
+import { onDeepMerge, numberComma, onToFixed } from '@js/_prototype.js'
 
 import '@js/_validation.js'
 // import { userStore } from '@store/user.js'
@@ -233,8 +233,8 @@ const onEvent = (e, errorMessage) => {
         const d = Number(config.value.toFixed)
         if (Number.isFinite(d) && normalized !== '') {
           normalized = props.modelModifiers.number
-            ? Number(toFixed(Number(normalized), d))
-            : String(Number(toFixed(Number(normalized), d)))
+            ? Number(onToFixed(Number(normalized), d))
+            : String(Number(onToFixed(Number(normalized), d)))
         }
       }
 

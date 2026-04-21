@@ -29,12 +29,12 @@ import {
   apiGETRealEstatePosterDataSourceSelectOptions,
 } from '@js/_api/buy/index.js'
 
-import { toFixed } from '@js/_prototype.js'
+import { onToFixed } from '@js/_prototype.js'
 
 import { useBuyBasicStore } from '@stores/buy/basic.js'
 import { useBuyProjectStore } from '@stores/buy/project.js'
 
-const useStores = () => {
+const useBuyProjectActions = () => {
   const projectStores = useBuyProjectStore()
   const basicStores = useBuyBasicStore()
   const { apiData, options: projectOptions } = storeToRefs(projectStores)
@@ -329,7 +329,8 @@ const useStores = () => {
       const isSqMeters = unit.id === 'sqMeters'
       const pinConf = basicStores.options.unit.find((u) => u.id === 'pin')
       const mConf = basicStores.options.unit.find((u) => u.id === 'sqMeters')
-      const onConvert = (value, conf) => Number(toFixed(Number(value) * conf.convert, conf.toFixed))
+      const onConvert = (value, conf) =>
+        Number(onToFixed(Number(value) * conf.convert, conf.toFixed))
 
       if (!pinConf || !mConf) return
 
@@ -384,4 +385,4 @@ const useStores = () => {
   }
 }
 
-export default useStores
+export default useBuyProjectActions

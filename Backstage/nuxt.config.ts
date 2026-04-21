@@ -7,9 +7,8 @@ import VitePluginSvgSpritemap from '@spiriit/vite-plugin-svg-spritemap'
 import { ViteImageOptimizer } from 'vite-plugin-image-optimizer'
 import { fileURLToPath } from 'node:url'
 
-const imageAssetInclude = new RegExp(
-  CONFIG.imgs.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\\/g, '/')
-)
+const imageAssetDir = CONFIG.imgs.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\\/g, '/')
+const imageAssetInclude = new RegExp(`${imageAssetDir}/(?!svg/spritemap\\.svg$)`)
 
 export default defineNuxtConfig({
   experimental: {
@@ -23,7 +22,7 @@ export default defineNuxtConfig({
       ...Object.fromEntries(
         Object.entries(process.env).filter(([k]) => k.startsWith('NUXT_PUBLIC_'))
       ),
-      appHash: process.env.VITE_APP_HASH || '',
+      appHash: process.env.VITE_APP_HASH || new Date().toISOString(),
       spritePath: `${CONFIG.imgs}/svg/spritemap.svg`,
     },
   },

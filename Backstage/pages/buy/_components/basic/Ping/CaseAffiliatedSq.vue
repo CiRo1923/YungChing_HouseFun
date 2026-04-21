@@ -4,11 +4,11 @@ import FormCheckBox from '@components/buy/mForm/CheckBox.vue'
 
 import { useBuyProjectStore } from '@stores/buy/project.js'
 import { useBuyBasicStore } from '@stores/buy/basic.js'
-import useStores from '@stores/buy/_composables/useStores.js'
+import useBuyProjectActions from '@stores/buy/_composables/useProjectActions.js'
 
 const buyProject = useBuyProjectStore()
 const buyBasic = useBuyBasicStore()
-const { basic } = useStores()
+const { basic } = useBuyProjectActions()
 const { apiData } = storeToRefs(buyProject)
 const { pingData } = storeToRefs(buyBasic)
 const items = shallowReadonly([

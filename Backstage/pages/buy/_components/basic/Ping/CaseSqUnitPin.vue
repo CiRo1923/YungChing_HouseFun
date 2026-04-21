@@ -3,12 +3,12 @@ import FormRadiosOval from '@components/buy/mForm/RadiosOval.vue'
 
 import { useBuyProjectStore } from '@stores/buy/project.js'
 import { useBuyBasicStore } from '@stores/buy/basic.js'
-import useStores from '@stores/buy/_composables/useStores.js'
+import useBuyProjectActions from '@stores/buy/_composables/useProjectActions.js'
 
 const buyProject = useBuyProjectStore()
 const buyBasic = useBuyBasicStore()
 const { apiData } = storeToRefs(buyProject)
-const { basic } = useStores()
+const { basic } = useBuyProjectActions()
 </script>
 
 <template>

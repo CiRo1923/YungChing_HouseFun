@@ -9,7 +9,7 @@ import SubmitButtons from '@pages/buy/_containers/basic/SubmitButtons.vue'
 import { awaitAllPromise } from '@js/_prototype.js'
 
 import { useBuyProjectStore } from '@stores/buy/project.js'
-import useStores from '@stores/buy/_composables/useStores.js'
+import useBuyProjectActions from '@stores/buy/_composables/useProjectActions.js'
 import { useBuyBasicAllPromise } from '@pages/buy/_composables/useBuyBasicPage.js'
 
 import { Form } from 'vee-validate'
@@ -21,7 +21,7 @@ definePageMeta({
 })
 
 const buyProject = useBuyProjectStore()
-const { basic } = useStores()
+const { basic } = useBuyProjectActions()
 const { options, apiData } = storeToRefs(buyProject)
 const route = useRoute()
 const hfID = computed(() => route.params.id || '0')

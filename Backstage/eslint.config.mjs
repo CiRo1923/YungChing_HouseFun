@@ -143,6 +143,7 @@ export default createConfigForNuxt(
         onUnmounted: 'readonly',
         readonly: 'readonly',
         ref: 'readonly',
+        shallowReadonly: 'readonly',
         storeToRefs: 'readonly',
         useAsyncData: 'readonly',
         useNuxtApp: 'readonly',

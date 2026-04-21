@@ -34,9 +34,14 @@ export const useBuyBasicStore = defineStore('buyBasic', () => {
     caseAmenitieSq: null,
     caseLandSq: null,
   })
+  const pictures = shallowReadonly({
+    maxSizeMB: 25,
+    maxCount: 25,
+  })
 
   return {
     options,
     pingData,
+    pictures,
   }
 })

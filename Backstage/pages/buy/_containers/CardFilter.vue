@@ -68,8 +68,10 @@ onUnmounted(() => {
             :setClass="{
               main: ['pt:flex pt:w-[100px] pt:shrink-0 pt:items-center', item.class],
             }"
-            v-if="item.label"
-          />
+            v-if="item.label || $slots[`${item.id}_label`]"
+          >
+            <slot :name="`${item.id}_label`" />
+          </FormLabel>
           <div class="pt:grow">
             <component :is="item.component" />
           </div>

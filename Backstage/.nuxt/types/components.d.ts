@@ -38,6 +38,8 @@ interface _GlobalComponents {
   BuyMStepArrow: typeof import("../../components/buy/mStep/Arrow.vue")['default']
   BuyMTabCheck: typeof import("../../components/buy/mTab/Check.vue")['default']
   BuyMTagCheckBox: typeof import("../../components/buy/mTag/CheckBox.vue")['default']
+  BuyMUploadMultiple: typeof import("../../components/buy/mUpload/Multiple.vue")['default']
+  BuyMUploadSingle: typeof import("../../components/buy/mUpload/Single.vue")['default']
   CommonImgSrc: typeof import("../../components/common/ImgSrc.vue")['default']
   CommonSvgIcon: typeof import("../../components/common/SvgIcon.vue")['default']
   NuxtWelcome: typeof import("../../node_modules/nuxt/dist/app/components/welcome.vue")['default']
@@ -92,6 +94,8 @@ interface _GlobalComponents {
   LazyBuyMStepArrow: LazyComponent<typeof import("../../components/buy/mStep/Arrow.vue")['default']>
   LazyBuyMTabCheck: LazyComponent<typeof import("../../components/buy/mTab/Check.vue")['default']>
   LazyBuyMTagCheckBox: LazyComponent<typeof import("../../components/buy/mTag/CheckBox.vue")['default']>
+  LazyBuyMUploadMultiple: LazyComponent<typeof import("../../components/buy/mUpload/Multiple.vue")['default']>
+  LazyBuyMUploadSingle: LazyComponent<typeof import("../../components/buy/mUpload/Single.vue")['default']>
   LazyCommonImgSrc: LazyComponent<typeof import("../../components/common/ImgSrc.vue")['default']>
   LazyCommonSvgIcon: LazyComponent<typeof import("../../components/common/SvgIcon.vue")['default']>
   LazyNuxtWelcome: LazyComponent<typeof import("../../node_modules/nuxt/dist/app/components/welcome.vue")['default']>

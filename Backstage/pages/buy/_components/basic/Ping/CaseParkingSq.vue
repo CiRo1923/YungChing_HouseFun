@@ -2,10 +2,10 @@
 import FormInput from '@components/buy/mForm/Input.vue'
 
 import { useBuyBasicStore } from '@stores/buy/basic.js'
-import useStores from '@stores/buy/_composables/useStores.js'
+import useBuyProjectActions from '@stores/buy/_composables/useProjectActions.js'
 
 const buyBasic = useBuyBasicStore()
-const { basic } = useStores()
+const { basic } = useBuyProjectActions()
 const { pingData } = storeToRefs(buyBasic)
 </script>
 

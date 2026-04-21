@@ -642,7 +642,7 @@ const _inlineRuntimeConfig = {
     "NUXT_PUBLIC_APP_MODE": "dev",
     "NUXT_PUBLIC_HFID_DEFAULT": "6633852",
     "NUXT_PUBLIC_PATH": "/",
-    "appHash": "",
+    "appHash": "2026-04-20T14:28:33.203Z",
     "spritePath": "assets/imgs/svg/spritemap.svg"
   }
 };
@@ -2134,16 +2134,16 @@ _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw
 const assets = {
   "/index.mjs": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"1a4fe-iJUv304EuHqUNhb6qJZgLRYM94w\"",
-    "mtime": "2026-04-09T08:22:21.919Z",
-    "size": 107774,
+    "etag": "\"1a516-MZO8DltC2EWRMfYFNHRBC3xZ9dk\"",
+    "mtime": "2026-04-20T14:28:35.760Z",
+    "size": 107798,
     "path": "index.mjs"
   },
   "/index.mjs.map": {
     "type": "application/json",
-    "etag": "\"6b3cf-SAzS3LIy65aZDbYHuwHPpgC0VHE\"",
-    "mtime": "2026-04-09T08:22:21.919Z",
-    "size": 439247,
+    "etag": "\"6b447-GZNAUKRZHira0dHTNOKwEdBY6IM\"",
+    "mtime": "2026-04-20T14:28:35.760Z",
+    "size": 439367,
     "path": "index.mjs.map"
   }
 };

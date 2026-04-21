@@ -2,7 +2,7 @@
 import SvgIcon from '@components/common/SvgIcon.vue'
 import ErrorMessageElem from '@components/buy/mErrorMessageElem.vue'
 
-import { onDevice, onDeepMerge, onDeepClone, emptyData } from '@js/_prototype.js'
+import { onDevice, onDeepMerge, onDeepClone, onEmptyData } from '@js/_prototype.js'
 
 import '@js/_validation.js'
 
@@ -116,7 +116,7 @@ const options = computed(() => {
   const options = props.options ? onDeepClone(props.options) : []
   // When API fails or returns empty options, keep placeholder construction safe.
   const placeholderBase = options[0] ? onDeepClone(options[0]) : {}
-  const placeholderItem = emptyData(placeholderBase) || {}
+  const placeholderItem = onEmptyData(placeholderBase) || {}
 
   if (isToOption) {
     placeholderItem[schema.label] = value

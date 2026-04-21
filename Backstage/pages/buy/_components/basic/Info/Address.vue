@@ -2,10 +2,10 @@
 import Address from '@components/buy/mAddress.vue'
 
 import { useBuyProjectStore } from '@stores/buy/project.js'
-import useStores from '@stores/buy/_composables/useStores.js'
+import useBuyProjectActions from '@stores/buy/_composables/useProjectActions.js'
 
 const buyProject = useBuyProjectStore()
-const { project } = useStores()
+const { project } = useBuyProjectActions()
 const { options, apiData } = storeToRefs(buyProject)
 
 const areas = ref([])
