@@ -10,7 +10,7 @@ import useBuyProjectActions from '@stores/buy/_composables/useProjectActions.js'
 import { Form } from 'vee-validate'
 
 const buyProject = useBuyProjectStore()
-const { project } = useBuyProjectActions()
+const { onApiGETDistrictSelectOptions, onApiGETRoad } = useBuyProjectActions()
 const { options } = storeToRefs(buyProject)
 const apiData = ref({
   cityID: '',
@@ -43,9 +43,7 @@ const onCityChange = async ({ source } = {}) => {
     return
   }
 
-  const { status, data } = await project.onApiGETDistrictSelectOptions(
-    apiData.value.caseInfo.cityID
-  )
+  const { status, data } = await onApiGETDistrictSelectOptions(apiData.value.caseInfo.cityID)
 
   if (source !== 'init') {
     areas.value = []
@@ -66,7 +64,7 @@ const onAreaChange = async ({ source } = {}) => {
 
   if (!cityID || !districtID) return
 
-  const { status, data } = await project.onApiGETRoad(cityID, districtID)
+  const { status, data } = await onApiGETRoad(cityID, districtID)
 
   if (status === 200) {
     roads.value = data

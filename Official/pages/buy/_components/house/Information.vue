@@ -32,24 +32,17 @@ const onPopup = async (id) => {
 </script>
 
 <template>
-  <Content
-    title="基本資料"
-    :config="{
-      icon: 'icon_house_info',
-    }"
-  >
-    <BuyMAccordionContent>
-      <div
-        class="information-container divide-y-[1px] divide-[--gray-ccce] tm:space-y-[20px] p:space-y-[30px]"
-      >
-        <Basic @popup="onPopup" />
-        <Pin />
-        <Parking />
-        <Price @popup="onPopup" />
-        <Other />
-        <Function />
-      </div>
-    </BuyMAccordionContent>
+  <Content title="基本資料">
+    <div
+      class="information-container divide-y-[1px] divide-[--gray-ccce] tm:space-y-[20px] p:space-y-[30px]"
+    >
+      <Basic @popup="onPopup" />
+      <Pin />
+      <Parking />
+      <Price @popup="onPopup" />
+      <Other />
+      <Function />
+    </div>
   </Content>
 </template>
 

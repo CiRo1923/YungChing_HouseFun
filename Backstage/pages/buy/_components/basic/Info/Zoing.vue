@@ -1,14 +1,13 @@
 <script setup>
-import FormRadiosOval from '@components/buy/mForm/RadiosOval.vue'
-import FormSelect from '@components/buy/mForm/Select.vue'
-import FormInput from '@components/buy/mForm/Input.vue'
-
 import RadiosOval from '@pages/buy/_containers/RadiosOval.vue'
 
 import { useBuyProjectStore } from '@stores/buy/project.js'
+import { useBuyBasicStore } from '@stores/buy/basic.js'
 
 const buyProject = useBuyProjectStore()
-const { options, apiData } = storeToRefs(buyProject)
+const { options } = storeToRefs(buyProject)
+const buyBasic = useBuyBasicStore()
+const { apiData } = storeToRefs(buyBasic)
 
 const isCaseZoingOtherShow = ref(false)
 const onCaseZoingChange = () => {
@@ -23,7 +22,7 @@ const onCaseZoingTypeChange = (props) => {
 
 <template>
   <RadiosOval>
-    <FormRadiosOval
+    <BuyMFormRadiosOval
       name="caseZoingToken"
       v-model.number="apiData.caseInfo.caseZoingToken"
       :options="options.caseZoing"
@@ -40,7 +39,7 @@ const onCaseZoingTypeChange = (props) => {
       @change="onCaseZoingChange"
     />
     <div class="m:space-y-[12px] pt:flex pt:gap-x-[8px]">
-      <FormSelect
+      <BuyMFormSelect
         name="caseZoingCity"
         v-model.number="apiData.caseInfo.caseZoingTypeToken"
         :options="options.zoingCity"
@@ -60,7 +59,7 @@ const onCaseZoingTypeChange = (props) => {
         @change="onCaseZoingTypeChange"
         v-if="apiData.caseInfo.caseZoingToken === 1"
       />
-      <FormSelect
+      <BuyMFormSelect
         name="caseZoingLand"
         v-model.number="apiData.caseInfo.caseZoingTypeToken"
         :options="options.zoingLand"
@@ -80,7 +79,7 @@ const onCaseZoingTypeChange = (props) => {
         @change="onCaseZoingTypeChange"
         v-if="apiData.caseInfo.caseZoingToken === 2"
       />
-      <FormInput
+      <BuyMFormInput
         name="caseZoingTypeOther"
         v-model="apiData.caseInfo.caseZoingTypeOther"
         :config="{

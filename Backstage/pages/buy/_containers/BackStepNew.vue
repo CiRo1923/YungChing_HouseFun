@@ -1,7 +1,4 @@
 <script setup>
-import AnchorTool from '@components/buy/mAnchorTool.vue'
-import StepArrow from '@components/buy/mStep/Arrow.vue'
-
 const props = defineProps({
   anchor: {
     type: Object,
@@ -26,8 +23,8 @@ const config = computed(() => {
 </script>
 
 <template>
-  <AnchorTool :anchor="props.anchor">
-    <StepArrow
+  <BuyMAnchorTool :anchor="props.anchor">
+    <BuyMStepArrow
       :options="props.stepOptions"
       :config="{
         active: config.active,
@@ -38,7 +35,7 @@ const config = computed(() => {
         icon: 'text-[--orange-e646]',
       }"
     />
-  </AnchorTool>
+  </BuyMAnchorTool>
 </template>
 
 <style></style>

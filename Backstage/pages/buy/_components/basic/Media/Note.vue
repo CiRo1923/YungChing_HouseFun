@@ -1,6 +1,4 @@
 <script setup>
-import Item from '@components/buy/mItem/Main.vue'
-
 const note = readonly({
   label: 'disc',
   items: [
@@ -15,7 +13,7 @@ const note = readonly({
 </script>
 
 <template>
-  <Item
+  <BuyMItemMain
     :data="note"
     :setClass="{
       container: 'text-[14px] text-[--gray-999]',

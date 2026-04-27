@@ -1,11 +1,9 @@
-<script setup>
-import Anchor from '@components/buy/mAnchor.vue'
-</script>
+<script setup></script>
 
 <template>
   <div class="text-[14px] text-[--gray-666] m:hidden pt:inline-flex pt:items-center p:gap-x-[16px]">
     <p>請遵守著作權規範，勿使用他人特色描述</p>
-    <Anchor
+    <BuyMAnchor
       text="參考描述範例"
       :config="{
         icon: {

@@ -1,17 +1,14 @@
 <script setup>
-import FormInput from '@components/buy/mForm/Input.vue'
-import FormCheckBox from '@components/buy/mForm/CheckBox.vue'
+import { useBuyBasicStore } from '@stores/buy/basic.js'
 
-import { useBuyProjectStore } from '@stores/buy/project.js'
-
-const buyProject = useBuyProjectStore()
-const { apiData } = storeToRefs(buyProject)
+const buyBasic = useBuyBasicStore()
+const { apiData } = storeToRefs(buyBasic)
 </script>
 
 <template>
   <ul class="flex overflow-hidden tm:gap-x-[16px] p:gap-x-[24px]">
     <li class="m:min-w-0 m:grow t:w-[220px] p:w-[270px]">
-      <FormInput
+      <BuyMFormInput
         name="agentName"
         v-model="apiData.caseInfo.posterInfo.agentName"
         :config="{
@@ -27,7 +24,7 @@ const { apiData } = storeToRefs(buyProject)
       />
     </li>
     <li class="flex h-[40px] items-center m:shrink-0">
-      <FormCheckBox
+      <BuyMFormCheckBox
         name="isShowNickname"
         v-model="apiData.caseInfo.posterInfo.isShowNickname"
         :config="{

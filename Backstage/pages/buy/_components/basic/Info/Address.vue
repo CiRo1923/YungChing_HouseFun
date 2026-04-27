@@ -1,12 +1,13 @@
 <script setup>
-import Address from '@components/buy/mAddress.vue'
-
 import { useBuyProjectStore } from '@stores/buy/project.js'
 import useBuyProjectActions from '@stores/buy/_composables/useProjectActions.js'
+import { useBuyBasicStore } from '@stores/buy/basic.js'
 
 const buyProject = useBuyProjectStore()
-const { project } = useBuyProjectActions()
-const { options, apiData } = storeToRefs(buyProject)
+const { options } = storeToRefs(buyProject)
+const { onApiGETDistrictSelectOptions, onApiGETRoad } = useBuyProjectActions()
+const buyBasic = useBuyBasicStore()
+const { apiData } = storeToRefs(buyBasic)
 
 const areas = ref([])
 const roads = ref([])
@@ -23,7 +24,7 @@ const onCityChange = async ({ source } = {}) => {
 
   if (!cityID) return
 
-  const { status, data } = await project.onApiGETDistrictSelectOptions(cityID)
+  const { status, data } = await onApiGETDistrictSelectOptions(cityID)
 
   if (status === 200) {
     areas.value = data
@@ -40,7 +41,7 @@ const onAreaChange = async ({ source } = {}) => {
 
   if (!cityID || !districtID) return
 
-  const { status, data } = await project.onApiGETRoad(cityID, districtID)
+  const { status, data } = await onApiGETRoad(cityID, districtID)
 
   if (status === 200) {
     roads.value = data
@@ -49,7 +50,7 @@ const onAreaChange = async ({ source } = {}) => {
 </script>
 
 <template>
-  <Address
+  <BuyMAddress
     name="info"
     v-model:city.number="apiData.caseInfo.cityID"
     v-model:area.number="apiData.caseInfo.districtID"

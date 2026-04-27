@@ -1,6 +1,4 @@
 <script setup>
-import AnchorTool from '@components/buy/mAnchorTool.vue'
-
 const props = defineProps({
   anchor: {
     type: Object,
@@ -10,7 +8,7 @@ const props = defineProps({
 </script>
 
 <template>
-  <AnchorTool :anchor="props.anchor">尚未刊登</AnchorTool>
+  <BuyMAnchorTool :anchor="props.anchor">尚未刊登</BuyMAnchorTool>
 </template>
 
 <style></style>

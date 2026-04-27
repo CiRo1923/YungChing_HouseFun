@@ -1,15 +1,15 @@
 <script setup>
-import ImgSrc from '@components/common/ImgSrc.vue'
-import FormRadiosOval from '@components/buy/mForm/RadiosOval.vue'
-
 import RadiosOval from '@pages/buy/_containers/RadiosOval.vue'
 
 import { onGetYouTubeID } from '@js/_prototype.js'
 
 import { useBuyProjectStore } from '@stores/buy/project.js'
+import { useBuyBasicStore } from '@stores/buy/basic.js'
 
 const buyProject = useBuyProjectStore()
-const { apiData, options } = storeToRefs(buyProject)
+const { options } = storeToRefs(buyProject)
+const buyBasic = useBuyBasicStore()
+const { apiData } = storeToRefs(buyBasic)
 const videoPicture = computed(() => {
   const { caseVideoUrl } = apiData.value.caseInfo
   const youtubeID = /youtube/.test(caseVideoUrl) ? onGetYouTubeID(caseVideoUrl) : null
@@ -22,7 +22,7 @@ const videoPicture = computed(() => {
 
 <template>
   <RadiosOval>
-    <FormRadiosOval
+    <BuyMFormRadiosOval
       name="caseVideoDisplayToken"
       v-model.number="apiData.caseVideoDisplayToken"
       :options="options.videoDisplay"
@@ -45,7 +45,7 @@ const videoPicture = computed(() => {
         <b class="text-center tm:hidden">Video<br />290 x 163</b>
         <b class="text-center p:hidden">Video<br />311 x 175</b>
       </template>
-      <ImgSrc
+      <CommonImgSrc
         :src="videoPicture"
         :setClass="{
           main: 'relative h-full w-full',
@@ -62,7 +62,7 @@ const videoPicture = computed(() => {
         <b class="text-center tm:hidden">Video<br />290 x 363</b>
         <b class="text-center p:hidden">Video<br />311 x 390</b>
       </template>
-      <ImgSrc
+      <CommonImgSrc
         :src="videoPicture"
         :setClass="{
           main: 'relative h-full w-full',

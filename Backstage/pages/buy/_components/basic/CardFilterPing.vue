@@ -9,10 +9,10 @@ import CaseAffiliatedSq from '@pages/buy/_components/basic/ping/CaseAffiliatedSq
 import CaseLandSq from '@pages/buy/_components/basic/ping/CaseLandSq.vue'
 import CaseAmenitieSq from '@pages/buy/_components/basic/ping/CaseAmenitieSq.vue'
 
-import { useBuyBasicStore } from '@stores/buy/basic.js'
+// import { useBuyBasicStore } from '@stores/buy/basic.js'
 
-const buyBasic = useBuyBasicStore()
-const { pingData } = storeToRefs(buyBasic)
+// const buyBasic = useBuyBasicStore()
+// const { pingData } = storeToRefs(buyBasic)
 
 const props = defineProps({
   title: {

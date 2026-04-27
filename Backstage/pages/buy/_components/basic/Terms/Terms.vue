@@ -1,6 +1,4 @@
 <script setup>
-import Item from '@components/buy/mItem/Main.vue'
-
 const data = shallowReadonly({
   label: 'decimal',
   items: [
@@ -23,15 +21,13 @@ const data = shallowReadonly({
 </script>
 
 <template>
-  <div>
-    <Item
-      :data="data"
-      :setClass="{
-        container: 'text-[14px] text-[--gray-666]',
-        item: 'tracking-[0.043em]',
-      }"
-    />
-  </div>
+  <BuyMItemMain
+    :data="data"
+    :setClass="{
+      container: 'text-[14px] text-[--gray-666]',
+      item: 'tracking-[0.043em]',
+    }"
+  />
 </template>
 
 <style></style>

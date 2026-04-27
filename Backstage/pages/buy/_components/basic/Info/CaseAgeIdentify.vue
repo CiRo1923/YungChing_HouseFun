@@ -1,14 +1,14 @@
 <script setup>
-import FormRadiosOval from '@components/buy/mForm/RadiosOval.vue'
-import FormInput from '@components/buy/mForm/Input.vue'
-import FormCheckBox from '@components/buy/mForm/CheckBox.vue'
-
 import RadiosOval from '@pages/buy/_containers/RadiosOval.vue'
 
 import { useBuyProjectStore } from '@stores/buy/project.js'
+import { useBuyBasicStore } from '@stores/buy/basic.js'
 
 const buyProject = useBuyProjectStore()
-const { apiData, options } = storeToRefs(buyProject)
+const { options } = storeToRefs(buyProject)
+const buyBasic = useBuyBasicStore()
+const { apiData } = storeToRefs(buyBasic)
+
 const isModelAge = computed(() => apiData.value.caseInfo.caseAgeIdentifyToken === 1)
 
 const onCaseAgeIdentifyChange = () => {
@@ -34,7 +34,7 @@ const onReset = () => {
 
 <template>
   <RadiosOval>
-    <FormRadiosOval
+    <BuyMFormRadiosOval
       name="caseAgeIdentifyToken"
       v-model.number="apiData.caseInfo.caseAgeIdentifyToken"
       :options="options.ageIdentify"
@@ -52,7 +52,7 @@ const onReset = () => {
     />
     <ul class="flex flex-wrap tm:gap-x-[8px] p:gap-x-[24px]">
       <li class="tm:w-[130px] p:w-[100px]" v-if="isModelAge">
-        <FormInput
+        <BuyMFormInput
           name="caseAge"
           v-model.number="apiData.caseInfo.caseAge"
           :config="{
@@ -77,12 +77,12 @@ const onReset = () => {
           @input="onClearCheckbox"
         >
           <template #rearAssist>年</template>
-        </FormInput>
+        </BuyMFormInput>
       </li>
       <li v-else>
         <ul class="gap-x-[8px] m:grid m:grid-cols-2 pt:flex">
           <li class="pt:w-[120px]">
-            <FormInput
+            <BuyMFormInput
               name="caseCompletedYear"
               v-model.number="apiData.caseInfo.caseCompletedYear"
               :config="{
@@ -109,10 +109,10 @@ const onReset = () => {
             >
               <template #frontAssist>民國</template>
               <template #rearAssist>年</template>
-            </FormInput>
+            </BuyMFormInput>
           </li>
           <li class="pt:w-[100px]">
-            <FormInput
+            <BuyMFormInput
               name="caseCompletedMonth"
               v-model.number="apiData.caseInfo.caseCompletedMonth"
               :config="{
@@ -137,12 +137,12 @@ const onReset = () => {
               @input="onClearCheckbox"
             >
               <template #rearAssist>月</template>
-            </FormInput>
+            </BuyMFormInput>
           </li>
         </ul>
       </li>
       <li class="flex h-[40px] items-center">
-        <FormCheckBox
+        <BuyMFormCheckBox
           name="isCaseUnknownAge"
           v-model="apiData.caseInfo.isCaseUnknownAge"
           :config="{
@@ -156,7 +156,7 @@ const onReset = () => {
         />
       </li>
       <li class="flex h-[40px] items-center">
-        <FormCheckBox
+        <BuyMFormCheckBox
           name="isCasePreSale"
           v-model="apiData.caseInfo.isCasePreSale"
           :config="{

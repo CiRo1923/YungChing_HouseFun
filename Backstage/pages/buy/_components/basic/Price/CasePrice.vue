@@ -1,11 +1,8 @@
 <script setup>
-import FormInput from '@components/buy/mForm/Input.vue'
-import FormCheckBox from '@components/buy/mForm/CheckBox.vue'
+import { useBuyBasicStore } from '@stores/buy/basic.js'
 
-import { useBuyProjectStore } from '@stores/buy/project.js'
-
-const buyProject = useBuyProjectStore()
-const { apiData } = storeToRefs(buyProject)
+const buyBasic = useBuyBasicStore()
+const { apiData } = storeToRefs(buyBasic)
 
 // const onIsCaseAddtionChange = () => {
 //   if (!apiData.value.caseInfo.isCaseAddtion) {
@@ -20,7 +17,7 @@ const { apiData } = storeToRefs(buyProject)
 <template>
   <ul class="flex flex-wrap tm:gap-x-[8px] p:gap-x-[24px]">
     <li class="tm:w-[228px] p:w-[270px]">
-      <FormInput
+      <BuyMFormInput
         name="casePrice"
         v-model.number="apiData.caseInfo.casePrice"
         :config="{
@@ -39,10 +36,10 @@ const { apiData } = storeToRefs(buyProject)
         }"
       >
         <template #rearAssist>萬</template>
-      </FormInput>
+      </BuyMFormInput>
     </li>
     <li class="flex h-[40px] items-center">
-      <FormCheckBox
+      <BuyMFormCheckBox
         name="isCasePriceIncludeParking"
         v-model="apiData.caseInfo.isCasePriceIncludeParking"
         :config="{

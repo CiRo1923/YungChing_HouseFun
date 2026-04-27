@@ -7,7 +7,7 @@ import { onDeepMerge } from '@js/_prototype.js'
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { Field, ErrorMessage } from 'vee-validate'
 
-const emits = defineEmits(['change', 'search', 'update:modelValue'])
+const emits = defineEmits(['change', 'input', 'update:modelValue'])
 const props = defineProps({
   name: {
     type: String,
@@ -49,11 +49,9 @@ const selected = ref({
   index: null,
 })
 const dropdownItems = ref(null)
-const apiOptions = ref([])
-const fetchId = ref(0)
-
-const apiWaitRafId = ref(null)
-const apiWaitToken = ref(0)
+const inputOptions = ref(null)
+const inputWaitRafId = ref(null)
+const inputWaitToken = ref(0)
 
 const model = computed({
   get() {
@@ -73,18 +71,14 @@ const config = computed(() => {
     isExistClose: true,
     isError: false,
     position: 'auto',
+    input: {
+      wait: 0,
+      minChars: 0,
+    },
     schema: {
-      search: null,
-      data: null,
       label: 'label',
       value: 'value',
       model: 'label',
-    },
-    api: {
-      path: null,
-      params: null,
-      wait: 500,
-      minChars: 1,
     },
     keyboard: false,
     maxItems: 5,
@@ -109,31 +103,34 @@ const setClass = computed(() => {
 })
 
 const resolvedOptions = computed(() => {
-  const { api } = config.value
+  if (Array.isArray(inputOptions.value)) {
+    return inputOptions.value
+  }
 
-  return api.path ? apiOptions.value : Array.isArray(props.options) ? props.options : []
+  return Array.isArray(props.options) ? props.options : []
 })
 
 const isMinCharsReached = computed(() => {
-  const { api } = config.value
-
-  if (!api.path) return true
-  return (inputLabel.value?.trim()?.length || 0) >= api.minChars
+  return (inputLabel.value?.trim()?.length || 0) >= config.value.input.minChars
 })
 
-const cancelApiWait = () => {
-  apiWaitToken.value++
+const onSetInputOptions = (options) => {
+  inputOptions.value = Array.isArray(options) ? options : []
+}
 
-  if (apiWaitRafId.value !== null) {
-    cancelAnimationFrame(apiWaitRafId.value)
-    apiWaitRafId.value = null
+const cancelInputWait = () => {
+  inputWaitToken.value++
+
+  if (inputWaitRafId.value !== null) {
+    cancelAnimationFrame(inputWaitRafId.value)
+    inputWaitRafId.value = null
   }
 }
 
-const waitByRaf = (duration) => {
-  cancelApiWait()
+const waitInputByRaf = (duration) => {
+  cancelInputWait()
 
-  const currentToken = apiWaitToken.value
+  const currentToken = inputWaitToken.value
   const wait = Number(duration) || 0
 
   if (wait <= 0) return Promise.resolve(true)
@@ -142,7 +139,7 @@ const waitByRaf = (duration) => {
     let startTime = null
 
     const step = (timestamp) => {
-      if (currentToken !== apiWaitToken.value) {
+      if (currentToken !== inputWaitToken.value) {
         resolve(false)
         return
       }
@@ -152,96 +149,46 @@ const waitByRaf = (duration) => {
       }
 
       if (timestamp - startTime >= wait) {
-        apiWaitRafId.value = null
+        inputWaitRafId.value = null
         resolve(true)
         return
       }
 
-      apiWaitRafId.value = requestAnimationFrame(step)
+      inputWaitRafId.value = requestAnimationFrame(step)
     }
 
-    apiWaitRafId.value = requestAnimationFrame(step)
+    inputWaitRafId.value = requestAnimationFrame(step)
   })
 }
 
-const onApiFeatch = async () => {
-  const { schema, api } = config.value
-  const keyword = inputLabel.value?.trim() || ''
-
-  if (typeof api.path !== 'function') return
-
-  if (keyword.length < api.minChars) {
-    apiOptions.value = []
-    dropdownItems.value = null
-    return
-  }
-
-  const currentFetchId = ++fetchId.value
-
-  try {
-    const {
-      config: apiConfig,
-      status,
-      data,
-    } = await api.path({
-      [schema.search]: inputLabel.value,
-      ...api.params,
-    })
-
-    if (currentFetchId !== fetchId.value) return
-
-    if (status === 200) {
-      const result = schema.data ? data?.[schema.data] : data
-      apiOptions.value = Array.isArray(result) ? result : []
-    } else {
-      apiOptions.value = []
-    }
-
-    dropdownItems.value = apiOptions.value
-    emits('search', { config: apiConfig, status, data })
-  } catch (error) {
-    if (currentFetchId !== fetchId.value) return
-
-    apiOptions.value = []
-    dropdownItems.value = []
-    console.error('[mAutoComplete] api search failed', error)
-  }
+const emitInput = () => {
+  emits('input', inputLabel.value, onSetInputOptions)
 }
 
-const onApiFeatchWithWait = async () => {
-  const { api } = config.value
-  const keyword = inputLabel.value?.trim() || ''
+const emitInputWithWait = async () => {
+  const { input } = config.value
 
-  if (typeof api.path !== 'function') return
-
-  if (keyword.length < api.minChars) {
-    cancelApiWait()
-    apiOptions.value = []
-    dropdownItems.value = null
+  if (!isMinCharsReached.value) {
+    cancelInputWait()
+    inputOptions.value = null
     return
   }
 
-  const canContinue = await waitByRaf(api.wait)
+  const canContinue = await waitInputByRaf(input.wait)
 
   if (!canContinue) return
 
-  if ((inputLabel.value?.trim() || '').length < api.minChars) {
-    apiOptions.value = []
-    dropdownItems.value = null
+  if (!isMinCharsReached.value) {
+    inputOptions.value = null
     return
   }
 
-  await onApiFeatch()
+  emitInput()
 }
 
 const onFilter = () => {
-  const { api, schema } = config.value
+  const { schema } = config.value
   const sourceOptions = resolvedOptions.value
-
-  if (api.path) {
-    dropdownItems.value = isMinCharsReached.value ? sourceOptions : null
-    return
-  }
 
   const escapeRegExp = () => (inputLabel.value || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   const regex = inputLabel.value ? new RegExp(escapeRegExp()) : null
@@ -281,18 +228,7 @@ const onIsComposingChange = (boolean) => {
 }
 
 const onFocus = async () => {
-  const { api } = config.value
-
-  if (api.path) {
-    if (!isMinCharsReached.value) {
-      onSwitchActive(false)
-      return
-    }
-
-    await onApiFeatch()
-  } else {
-    onResetDropdownItems()
-  }
+  onResetDropdownItems()
 
   onSwitchActive(true)
 
@@ -301,20 +237,9 @@ const onFocus = async () => {
 }
 
 const onInput = async () => {
-  const { api } = config.value
-
   if (isComposing.value) return
 
-  if (api.path) {
-    if (!isMinCharsReached.value) {
-      cancelApiWait()
-      onSwitchActive(false)
-      return
-    }
-
-    onSwitchActive(true)
-    await onApiFeatchWithWait()
-  }
+  await emitInputWithWait()
 
   onFilter()
 
@@ -328,20 +253,8 @@ const onInput = async () => {
 }
 
 const onCompositionEnd = async () => {
-  const { api } = config.value
-
   onIsComposingChange(false)
-
-  if (api.path) {
-    if (!isMinCharsReached.value) {
-      cancelApiWait()
-      onSwitchActive(false)
-      return
-    }
-
-    onSwitchActive(true)
-    await onApiFeatchWithWait()
-  }
+  await emitInputWithWait()
 
   onFilter()
 
@@ -355,7 +268,7 @@ const onCompositionEnd = async () => {
 }
 
 const onBlur = () => {
-  cancelApiWait()
+  cancelInputWait()
 
   if (isSelectingOption.value || isComposing.value) return
 
@@ -456,6 +369,7 @@ const onDropdownItemClick = (item) => {
   isSelectingOption.value = false
 
   onSwitchActive(false)
+  emitInput()
   emits('change', item)
 }
 
@@ -464,22 +378,18 @@ const onDropdownItemMousedown = () => {
 }
 
 const onClear = () => {
-  const { api } = config.value
-
-  cancelApiWait()
+  cancelInputWait()
   model.value = ''
   inputLabel.value = null
+  inputOptions.value = null
   selected.value.index = null
-  dropdownItems.value = api.path ? null : dropdownItems.value
+  dropdownItems.value = null
+  emitInput()
   emits('change', null)
 }
 
 const onInit = () => {
-  const { api } = config.value
-
-  if (!api.path) {
-    onFilter()
-  }
+  onFilter()
 }
 
 const onOutSide = (e) => {
@@ -515,24 +425,16 @@ watch(
 watch(
   () => props.options,
   () => {
-    const { api } = config.value
-
-    if (!api.path) {
-      onGetInputLabel()
-      onFilter()
-    }
+    onGetInputLabel()
+    onFilter()
   },
   { deep: true }
 )
 
 watch(
-  apiOptions,
+  inputOptions,
   () => {
-    const { api } = config.value
-
-    if (api.path) {
-      onGetInputLabel()
-    }
+    onFilter()
   },
   { deep: true }
 )
@@ -546,7 +448,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  cancelApiWait()
+  cancelInputWait()
   document.removeEventListener('click', onOutSide, true)
   window.removeEventListener('resize', onResize)
 })

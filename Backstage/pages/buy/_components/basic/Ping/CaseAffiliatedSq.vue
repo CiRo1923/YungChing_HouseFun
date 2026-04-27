@@ -1,16 +1,13 @@
 <script setup>
-import FormInput from '@components/buy/mForm/Input.vue'
-import FormCheckBox from '@components/buy/mForm/CheckBox.vue'
-
-import { useBuyProjectStore } from '@stores/buy/project.js'
+// import { useBuyProjectStore } from '@stores/buy/project.js'
 import { useBuyBasicStore } from '@stores/buy/basic.js'
-import useBuyProjectActions from '@stores/buy/_composables/useProjectActions.js'
+import useBuyBasicActions from '@stores/buy/_composables/useBasicActions.js'
 
-const buyProject = useBuyProjectStore()
+// const buyProject = useBuyProjectStore()
 const buyBasic = useBuyBasicStore()
-const { basic } = useBuyProjectActions()
-const { apiData } = storeToRefs(buyProject)
-const { pingData } = storeToRefs(buyBasic)
+// const { options } = storeToRefs(buyProject)
+const { pingUnitLabel, onPinSqMetersConvert } = useBuyBasicActions()
+const { apiData, pingData } = storeToRefs(buyBasic)
 const items = shallowReadonly([
   {
     id: 'caseBalconySq',
@@ -93,7 +90,7 @@ watch(
   <div class="m:space-y-[16px] pt:space-y-[8px]">
     <ul class="flex overflow-hidden tm:gap-x-[16px] p:gap-x-[24px]">
       <li class="m:min-w-0 m:grow t:w-[220px] pt:w-[270px]">
-        <FormInput
+        <BuyMFormInput
           name="caseAffiliatedSqPin"
           v-model.number="pingData.caseAffiliatedSq"
           :config="{
@@ -107,13 +104,13 @@ watch(
             element: 'grow',
             rearAssist: 'text-[14px] text-[--gray-999]',
           }"
-          @blur="basic.onPinSqMetersConvert('caseAffiliatedSq')"
+          @blur="onPinSqMetersConvert('caseAffiliatedSq')"
         >
-          <template #rearAssist>{{ basic.pingUnitLabel }}</template>
-        </FormInput>
+          <template #rearAssist>{{ pingUnitLabel }}</template>
+        </BuyMFormInput>
       </li>
       <li class="flex h-[40px] items-center m:shrink-0">
-        <FormCheckBox
+        <BuyMFormCheckBox
           name="isCaseAttachedSqAutoCalculate"
           v-model="apiData.caseInfo.isCaseAttachedSqAutoCalculate"
           :config="{
@@ -139,7 +136,7 @@ watch(
           class="text-[16px] leading-[1.2] text-[--gray-666] pt:flex pt:h-[40px] pt:min-w-[48px] pt:shrink-0 pt:items-center"
           v-html="item.label"
         />
-        <FormInput
+        <BuyMFormInput
           :name="item.id"
           v-model.number="pingData[item.id]"
           :config="{
@@ -153,10 +150,10 @@ watch(
             element: 'grow',
             rearAssist: 'text-[14px] text-[--gray-999]',
           }"
-          @blur="basic.onPinSqMetersConvert(item.id)"
+          @blur="onPinSqMetersConvert(item.id)"
         >
-          <template #rearAssist>{{ basic.pingUnitLabel }}</template>
-        </FormInput>
+          <template #rearAssist>{{ pingUnitLabel }}</template>
+        </BuyMFormInput>
       </li>
     </ul>
   </div>

@@ -1,8 +1,8 @@
 <script setup>
 const props = defineProps({
-  data: {
-    type: Object,
-    default: () => ({}),
+  text: {
+    type: String,
+    default: null,
   },
   setClass: {
     type: Object,
@@ -19,14 +19,12 @@ const setClass = computed(() => {
 </script>
 
 <template>
-  <BuyMItemMain
-    :data="props.data"
-    :setClass="{
-      main: setClass.main,
-      container: 'text-[14px] text-[--gray-666]',
-      item: 'tracking-[0.043em]',
-    }"
-  />
+  <span
+    class="block text-[--gray-999] tm:w-[80px] tm:text-[14px] p:w-[100px] p:text-[16px]"
+    :class="setClass.main"
+  >
+    {{ props.text }}
+  </span>
 </template>
 
 <style></style>

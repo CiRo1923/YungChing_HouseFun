@@ -1,10 +1,8 @@
 <script setup>
-import FormInput from '@components/buy/mForm/Input.vue'
+import { useBuyBasicStore } from '@stores/buy/basic.js'
 
-import { useBuyProjectStore } from '@stores/buy/project.js'
-
-const buyProject = useBuyProjectStore()
-const { apiData } = storeToRefs(buyProject)
+const buyBasic = useBuyBasicStore()
+const { apiData } = storeToRefs(buyBasic)
 
 // const onIsCaseAddtionChange = () => {
 //   if (!apiData.value.caseInfo.isCaseAddtion) {
@@ -17,7 +15,7 @@ const { apiData } = storeToRefs(buyProject)
 </script>
 
 <template>
-  <FormInput
+  <BuyMFormInput
     name="caseParkingPrice"
     v-model.number="apiData.caseInfo.caseParkingPrice"
     :config="{
@@ -33,7 +31,7 @@ const { apiData } = storeToRefs(buyProject)
     }"
   >
     <template #rearAssist>萬</template>
-  </FormInput>
+  </BuyMFormInput>
 </template>
 
 <style></style>

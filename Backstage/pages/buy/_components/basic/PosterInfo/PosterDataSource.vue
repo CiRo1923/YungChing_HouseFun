@@ -1,14 +1,15 @@
 <script setup>
-import FormRadiosOval from '@components/buy/mForm/RadiosOval.vue'
-
 import { useBuyProjectStore } from '@stores/buy/project.js'
+import { useBuyBasicStore } from '@stores/buy/basic.js'
 
 const buyProject = useBuyProjectStore()
-const { apiData, options } = storeToRefs(buyProject)
+const { options } = storeToRefs(buyProject)
+const buyBasic = useBuyBasicStore()
+const { apiData } = storeToRefs(buyBasic)
 </script>
 
 <template>
-  <FormRadiosOval
+  <BuyMFormRadiosOval
     name="posterDataSourceToken"
     v-model.number="apiData.caseInfo.posterDataSourceToken"
     :options="options.posterDataSource"

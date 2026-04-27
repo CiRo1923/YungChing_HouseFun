@@ -1,7 +1,4 @@
 import {
-  apiGETRealEstate,
-  apiPOSTRealEstate,
-  apiPOSTRealEstateDraft,
   apiGETRealEstatePurposeCheckOptions,
   apiGETCitySelectOptions,
   apiGETDistrictSelectOptions,
@@ -13,6 +10,7 @@ import {
   apiGETRealEstateZoingLandSelectOptions,
   apiGETRealEstateAgeIdentifySelectOptions,
   apiGETRealEstateFloorSelectOptions,
+  apiGETCommunities,
   apiGETRealEstateFaceSelectOptions,
   apiGETRealEstateStructionSelectOptions,
   apiGETRealEstateBarrierFreeCheckOptions,
@@ -29,359 +27,277 @@ import {
   apiGETRealEstatePosterDataSourceSelectOptions,
 } from '@js/_api/buy/index.js'
 
-import { onToFixed } from '@js/_prototype.js'
-
-import { useBuyBasicStore } from '@stores/buy/basic.js'
 import { useBuyProjectStore } from '@stores/buy/project.js'
 
 const useBuyProjectActions = () => {
   const projectStores = useBuyProjectStore()
-  const basicStores = useBuyBasicStore()
-  const { apiData, options: projectOptions } = storeToRefs(projectStores)
-  const { pingData } = storeToRefs(basicStores)
+  const { options } = storeToRefs(projectStores)
 
-  const project = {
-    async onApiGETRealEstatePurposeCheckOptions() {
-      // const { public: env } = useRuntimeConfig()
-      // const hfID = env.NUXT_PUBLIC_HFID_DEFAULT
-      const { config, status, data } = await apiGETRealEstatePurposeCheckOptions()
+  const onApiGETRealEstatePurposeCheckOptions = async () => {
+    // const { public: env } = useRuntimeConfig()
+    // const hfID = env.NUXT_PUBLIC_HFID_DEFAULT
+    const { config, status, data } = await apiGETRealEstatePurposeCheckOptions()
 
-      if (status === 200) {
-        projectOptions.value.casePurpose = data || []
-      }
+    if (status === 200) {
+      options.value.casePurpose = data || []
+    }
 
-      return { config, status, data }
-    },
-    async onApiGETCitySelectOptions() {
-      const { config, status, data } = await apiGETCitySelectOptions()
-
-      if (status === 200) {
-        projectOptions.value.city = data || []
-      }
-
-      return { config, status, data }
-    },
-    async onApiGETDistrictSelectOptions(cityID) {
-      const { config, status, data } = await apiGETDistrictSelectOptions({
-        cityCode: cityID,
-      })
-
-      // if (status === 200) {
-      //   console.log(data)
-      // }
-
-      return { config, status, data }
-    },
-    async onApiGETRoad(cityID, AreaID) {
-      const { config, status, data } = await apiGETRoad({
-        cityCode: cityID,
-        districtCode: AreaID,
-      })
-
-      // if (status === 200) {
-      //   console.log(data)
-      // }
-
-      return { config, status, data }
-    },
-    async onApiGETRealEstateTypeSelectOptions() {
-      const { config, status, data } = await apiGETRealEstateTypeSelectOptions()
-
-      if (status === 200) {
-        projectOptions.value.caseType = data || []
-      }
-
-      return { config, status, data }
-    },
-    async onApiGETRealEstateLegalUsageSelectOptions() {
-      const { config, status, data } = await apiGETRealEstateLegalUsageSelectOptions()
-
-      if (status === 200) {
-        projectOptions.value.caseUsage = data || []
-      }
-
-      return { config, status, data }
-    },
-    async onApiGETRealEstateZoingCheckOptions() {
-      const { config, status, data } = await apiGETRealEstateZoingCheckOptions()
-
-      if (status === 200) {
-        projectOptions.value.caseZoing = data || []
-      }
-
-      return { config, status, data }
-    },
-    async onApiGETRealEstateZoingCitySelectOptions() {
-      const { config, status, data } = await apiGETRealEstateZoingCitySelectOptions()
-
-      if (status === 200) {
-        projectOptions.value.zoingCity = data || []
-      }
-
-      return { config, status, data }
-    },
-    async onApiGETRealEstateZoingLandSelectOptions() {
-      const { config, status, data } = await apiGETRealEstateZoingLandSelectOptions()
-
-      if (status === 200) {
-        projectOptions.value.zoingLand = data || []
-      }
-
-      return { config, status, data }
-    },
-    async onApiGETRealEstateAgeIdentifySelectOptions() {
-      const { config, status, data } = await apiGETRealEstateAgeIdentifySelectOptions()
-
-      if (status === 200) {
-        projectOptions.value.ageIdentify = data || []
-      }
-
-      return { config, status, data }
-    },
-    async onApiGETRealEstateFloorSelectOptions() {
-      const { config, status, data } = await apiGETRealEstateFloorSelectOptions()
-
-      if (status === 200) {
-        projectOptions.value.floor = data || []
-      }
-
-      return { config, status, data }
-    },
-    async onApiGETRealEstateFaceSelectOptions() {
-      const { config, status, data } = await apiGETRealEstateFaceSelectOptions()
-
-      if (status === 200) {
-        projectOptions.value.face = data || []
-      }
-
-      return { config, status, data }
-    },
-    async onApiGETRealEstateStructionSelectOptions() {
-      const { config, status, data } = await apiGETRealEstateStructionSelectOptions()
-
-      if (status === 200) {
-        projectOptions.value.structure = data || []
-      }
-
-      return { config, status, data }
-    },
-    async onApiGETRealEstateBarrierFreeCheckOptions() {
-      const { config, status, data } = await apiGETRealEstateBarrierFreeCheckOptions()
-
-      if (status === 200) {
-        projectOptions.value.barrierFree = data || []
-      }
-
-      return { config, status, data }
-    },
-    async onApiGETRealEstateManageTypeSelectOptions() {
-      const { config, status, data } = await apiGETRealEstateManageTypeSelectOptions()
-
-      if (status === 200) {
-        projectOptions.value.manageType = data || []
-      }
-
-      return { config, status, data }
-    },
-    async onApiGETRealEstateManageDutySelectOptions() {
-      const { config, status, data } = await apiGETRealEstateManageDutySelectOptions()
-
-      if (status === 200) {
-        projectOptions.value.manageDuty = data || []
-      }
-
-      return { config, status, data }
-    },
-    async onApiGETRealEstateManagePayPeriodSelectOptions() {
-      const { config, status, data } = await apiGETRealEstateManagePayPeriodSelectOptions()
-
-      if (status === 200) {
-        projectOptions.value.managePay = data || []
-      }
-
-      return { config, status, data }
-    },
-    async onApiGETRealEstateParkingModeSelectOptions() {
-      const { config, status, data } = await apiGETRealEstateParkingModeSelectOptions()
-
-      if (status === 200) {
-        projectOptions.value.parkingMode = data || []
-      }
-
-      return { config, status, data }
-    },
-    async onApiGETRealEstateParkingTypeSelectOptions() {
-      const { config, status, data } = await apiGETRealEstateParkingTypeSelectOptions()
-
-      if (status === 200) {
-        projectOptions.value.parkingType = data || []
-      }
-
-      return { config, status, data }
-    },
-    async onApiGETRealEstateParkingRegSelectOptions() {
-      const { config, status, data } = await apiGETRealEstateParkingRegSelectOptions()
-
-      if (status === 200) {
-        projectOptions.value.parkingReg = data || []
-      }
-
-      return { config, status, data }
-    },
-    async onApiGETRealEstateParkingPayPeriodSelectOptions() {
-      const { config, status, data } = await apiGETRealEstateParkingPayPeriodSelectOptions()
-
-      if (status === 200) {
-        projectOptions.value.parkingPayPeriod = data || []
-      }
-
-      return { config, status, data }
-    },
-    async onApiGETRealEstateVideoDisplaySelectOptions() {
-      const { config, status, data } = await apiGETRealEstateVideoDisplaySelectOptions()
-
-      if (status === 200) {
-        projectOptions.value.videoDisplay = data || []
-      }
-
-      return { config, status, data }
-    },
-    async onApiGETRealEstateVideoTypeSelectOptions() {
-      const { config, status, data } = await apiGETRealEstateVideoTypeSelectOptions()
-
-      if (status === 200) {
-        projectOptions.value.videoType = data || []
-      }
-
-      return { config, status, data }
-    },
-    async onApiGETRealEstateFeatureCheckOptions() {
-      const { config, status, data } = await apiGETRealEstateFeatureCheckOptions()
-
-      if (status === 200) {
-        projectOptions.value.feature = data || []
-      }
-
-      return { config, status, data }
-    },
-    async onApiGETRealEstatePosterDataSourceSelectOptions() {
-      const { config, status, data } = await apiGETRealEstatePosterDataSourceSelectOptions()
-
-      if (status === 200) {
-        projectOptions.value.posterDataSource = data || []
-      }
-
-      return { config, status, data }
-    },
+    return { config, status, data }
   }
-  const basic = {
-    currentUnit: computed(() =>
-      basicStores.options.unit.find((item) => item.value === apiData.value.caseInfo.isCaseSqUnitPin)
-    ),
-    pingUnitLabel: computed(
-      () =>
-        basicStores.options.unit.find(
-          (item) => item.value === apiData.value.caseInfo.isCaseSqUnitPin
-        ).label
-    ),
-    onPingVaild() {
-      const { isCaseBuildSqIncludeParking } = apiData.value.caseInfo
-      const { caseBuildSq, caseParkingSq, caseMainSq } = pingData.value
-      const caseBuildSqNumber = caseBuildSq || 0
-      const caseParkingSqNumber = caseParkingSq || 0
-      const caseMainSqNumber = caseMainSq || 0
-      const build = isCaseBuildSqIncludeParking
-        ? caseBuildSqNumber - caseParkingSqNumber
-        : caseBuildSqNumber
+  const onApiGETCitySelectOptions = async () => {
+    const { config, status, data } = await apiGETCitySelectOptions()
 
-      // 登記坪數
-      return build >= caseMainSqNumber
-    },
-    onPingUnitChange() {
-      const unit = basic.currentUnit.value
-      const isPin = unit.id === 'pin'
-      const isSqMeters = unit.id === 'sqMeters'
+    if (status === 200) {
+      options.value.city = data || []
+    }
 
-      if (!unit) return
+    return { config, status, data }
+  }
+  const onApiGETDistrictSelectOptions = async (cityID) => {
+    const { config, status, data } = await apiGETDistrictSelectOptions({
+      cityCode: cityID,
+    })
 
-      Object.keys(pingData.value).forEach((key) => {
-        const pinKey = `${key}Pin`
-        const mKey = `${key}M`
-        const val = pingData.value[key]
+    // if (status === 200) {
+    //   console.log(data)
+    // }
 
-        if (val !== '' && !isNaN(Number(val))) {
-          pingData.value[key] = isPin
-            ? apiData.value.caseInfo[pinKey]
-            : isSqMeters
-              ? apiData.value.caseInfo[mKey]
-              : ''
-        }
-      })
-    },
-    onPinSqMetersConvert(key) {
-      const val = pingData.value[key]
-      const unit = basic.currentUnit.value
-      if (!unit || !val) return
+    return { config, status, data }
+  }
+  const onApiGETRoad = async (cityID, AreaID) => {
+    const { config, status, data } = await apiGETRoad({
+      cityCode: cityID,
+      districtCode: AreaID,
+    })
 
-      const pinKey = `${key}Pin`
-      const mKey = `${key}M`
-      const isPin = unit.id === 'pin'
-      const isSqMeters = unit.id === 'sqMeters'
-      const pinConf = basicStores.options.unit.find((u) => u.id === 'pin')
-      const mConf = basicStores.options.unit.find((u) => u.id === 'sqMeters')
-      const onConvert = (value, conf) =>
-        Number(onToFixed(Number(value) * conf.convert, conf.toFixed))
+    // if (status === 200) {
+    //   console.log(data)
+    // }
 
-      if (!pinConf || !mConf) return
+    return { config, status, data }
+  }
+  const onApiGETRealEstateTypeSelectOptions = async () => {
+    const { config, status, data } = await apiGETRealEstateTypeSelectOptions()
 
-      apiData.value.caseInfo[pinKey] = isPin ? Number(val) : onConvert(val, pinConf)
-      apiData.value.caseInfo[mKey] = isSqMeters ? Number(val) : onConvert(val, mConf)
+    if (status === 200) {
+      options.value.caseType = data || []
+    }
 
-      console.log(apiData.value.caseInfo[pinKey])
-      console.log(apiData.value.caseInfo[mKey])
-    },
-    async onApiGETRealEstate(hfid) {
-      const { config, status, data } = await apiGETRealEstate({
-        hfid: hfid,
-      })
+    return { config, status, data }
+  }
+  const onApiGETRealEstateLegalUsageSelectOptions = async () => {
+    const { config, status, data } = await apiGETRealEstateLegalUsageSelectOptions()
 
-      if (status === 200) {
-        const { caseInfo } = data
+    if (status === 200) {
+      options.value.caseUsage = data || []
+    }
 
-        apiData.value.caseInfo = caseInfo
-      }
+    return { config, status, data }
+  }
+  const onApiGETRealEstateZoingCheckOptions = async () => {
+    const { config, status, data } = await apiGETRealEstateZoingCheckOptions()
 
-      return { config, status, data }
-    },
-    async onApiPOSTRealEstateDraft(hfid) {
-      const { config, status, data } = await apiPOSTRealEstateDraft({
-        hfid: hfid,
-        ...apiData.value,
-      })
+    if (status === 200) {
+      options.value.caseZoing = data || []
+    }
 
-      if (status === 200) {
-        console.log(data)
-      }
+    return { config, status, data }
+  }
+  const onApiGETRealEstateZoingCitySelectOptions = async () => {
+    const { config, status, data } = await apiGETRealEstateZoingCitySelectOptions()
 
-      return { config, status, data }
-    },
-    async onApiPOSTRealEstate(hfid) {
-      const { config, status, data } = await apiPOSTRealEstate({
-        hfid: hfid,
-        ...apiData.value,
-      })
+    if (status === 200) {
+      options.value.zoingCity = data || []
+    }
 
-      if (status === 200) {
-        console.log(data)
-      }
+    return { config, status, data }
+  }
+  const onApiGETRealEstateZoingLandSelectOptions = async () => {
+    const { config, status, data } = await apiGETRealEstateZoingLandSelectOptions()
 
-      return { config, status, data }
-    },
+    if (status === 200) {
+      options.value.zoingLand = data || []
+    }
+
+    return { config, status, data }
+  }
+  const onApiGETRealEstateAgeIdentifySelectOptions = async () => {
+    const { config, status, data } = await apiGETRealEstateAgeIdentifySelectOptions()
+
+    if (status === 200) {
+      options.value.ageIdentify = data || []
+    }
+
+    return { config, status, data }
+  }
+  const onApiGETRealEstateFloorSelectOptions = async () => {
+    const { config, status, data } = await apiGETRealEstateFloorSelectOptions()
+
+    if (status === 200) {
+      options.value.floor = data || []
+    }
+
+    return { config, status, data }
+  }
+  const onApiGETCommunities = async (params) => {
+    const { config, status, data } = await apiGETCommunities(params)
+
+    return { config, status, data }
+  }
+  const onApiGETRealEstateFaceSelectOptions = async () => {
+    const { config, status, data } = await apiGETRealEstateFaceSelectOptions()
+
+    if (status === 200) {
+      options.value.face = data || []
+    }
+
+    return { config, status, data }
+  }
+  const onApiGETRealEstateStructionSelectOptions = async () => {
+    const { config, status, data } = await apiGETRealEstateStructionSelectOptions()
+
+    if (status === 200) {
+      options.value.structure = data || []
+    }
+
+    return { config, status, data }
+  }
+  const onApiGETRealEstateBarrierFreeCheckOptions = async () => {
+    const { config, status, data } = await apiGETRealEstateBarrierFreeCheckOptions()
+
+    if (status === 200) {
+      options.value.barrierFree = data || []
+    }
+
+    return { config, status, data }
+  }
+  const onApiGETRealEstateManageTypeSelectOptions = async () => {
+    const { config, status, data } = await apiGETRealEstateManageTypeSelectOptions()
+
+    if (status === 200) {
+      options.value.manageType = data || []
+    }
+
+    return { config, status, data }
+  }
+  const onApiGETRealEstateManageDutySelectOptions = async () => {
+    const { config, status, data } = await apiGETRealEstateManageDutySelectOptions()
+
+    if (status === 200) {
+      options.value.manageDuty = data || []
+    }
+
+    return { config, status, data }
+  }
+  const onApiGETRealEstateManagePayPeriodSelectOptions = async () => {
+    const { config, status, data } = await apiGETRealEstateManagePayPeriodSelectOptions()
+
+    if (status === 200) {
+      options.value.managePay = data || []
+    }
+
+    return { config, status, data }
+  }
+  const onApiGETRealEstateParkingModeSelectOptions = async () => {
+    const { config, status, data } = await apiGETRealEstateParkingModeSelectOptions()
+
+    if (status === 200) {
+      options.value.parkingMode = data || []
+    }
+
+    return { config, status, data }
+  }
+  const onApiGETRealEstateParkingTypeSelectOptions = async () => {
+    const { config, status, data } = await apiGETRealEstateParkingTypeSelectOptions()
+
+    if (status === 200) {
+      options.value.parkingType = data || []
+    }
+
+    return { config, status, data }
+  }
+  const onApiGETRealEstateParkingRegSelectOptions = async () => {
+    const { config, status, data } = await apiGETRealEstateParkingRegSelectOptions()
+
+    if (status === 200) {
+      options.value.parkingReg = data || []
+    }
+
+    return { config, status, data }
+  }
+  const onApiGETRealEstateParkingPayPeriodSelectOptions = async () => {
+    const { config, status, data } = await apiGETRealEstateParkingPayPeriodSelectOptions()
+
+    if (status === 200) {
+      options.value.parkingPayPeriod = data || []
+    }
+
+    return { config, status, data }
+  }
+  const onApiGETRealEstateVideoDisplaySelectOptions = async () => {
+    const { config, status, data } = await apiGETRealEstateVideoDisplaySelectOptions()
+
+    if (status === 200) {
+      options.value.videoDisplay = data || []
+    }
+
+    return { config, status, data }
+  }
+  const onApiGETRealEstateVideoTypeSelectOptions = async () => {
+    const { config, status, data } = await apiGETRealEstateVideoTypeSelectOptions()
+
+    if (status === 200) {
+      options.value.videoType = data || []
+    }
+
+    return { config, status, data }
+  }
+  const onApiGETRealEstateFeatureCheckOptions = async () => {
+    const { config, status, data } = await apiGETRealEstateFeatureCheckOptions()
+
+    if (status === 200) {
+      options.value.feature = data || []
+    }
+
+    return { config, status, data }
+  }
+  const onApiGETRealEstatePosterDataSourceSelectOptions = async () => {
+    const { config, status, data } = await apiGETRealEstatePosterDataSourceSelectOptions()
+
+    if (status === 200) {
+      options.value.posterDataSource = data || []
+    }
+
+    return { config, status, data }
   }
 
   return {
-    project,
-    basic,
+    onApiGETRealEstatePurposeCheckOptions,
+    onApiGETCitySelectOptions,
+    onApiGETDistrictSelectOptions,
+    onApiGETRoad,
+    onApiGETRealEstateTypeSelectOptions,
+    onApiGETRealEstateLegalUsageSelectOptions,
+    onApiGETRealEstateZoingCheckOptions,
+    onApiGETRealEstateZoingCitySelectOptions,
+    onApiGETRealEstateZoingLandSelectOptions,
+    onApiGETRealEstateAgeIdentifySelectOptions,
+    onApiGETRealEstateFloorSelectOptions,
+    onApiGETCommunities,
+    onApiGETRealEstateFaceSelectOptions,
+    onApiGETRealEstateStructionSelectOptions,
+    onApiGETRealEstateBarrierFreeCheckOptions,
+    onApiGETRealEstateManageTypeSelectOptions,
+    onApiGETRealEstateManageDutySelectOptions,
+    onApiGETRealEstateManagePayPeriodSelectOptions,
+    onApiGETRealEstateParkingModeSelectOptions,
+    onApiGETRealEstateParkingTypeSelectOptions,
+    onApiGETRealEstateParkingRegSelectOptions,
+    onApiGETRealEstateParkingPayPeriodSelectOptions,
+    onApiGETRealEstateVideoDisplaySelectOptions,
+    onApiGETRealEstateVideoTypeSelectOptions,
+    onApiGETRealEstateFeatureCheckOptions,
+    onApiGETRealEstatePosterDataSourceSelectOptions,
   }
 }
 

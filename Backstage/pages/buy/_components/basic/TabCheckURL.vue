@@ -1,8 +1,4 @@
 <script setup>
-import FormLabel from '@components/buy/mForm/Label.vue'
-import FormInput from '@components/buy/mForm/Input.vue'
-import Anchor from '@components/buy/mAnchor.vue'
-
 import TabItem from '@pages/buy/_components/basic/TabItem.vue'
 
 import { Form } from 'vee-validate'
@@ -35,7 +31,7 @@ const onClick = async (validate) => {
 <template>
   <Form as="div" v-slot="{ validate }">
     <div class="p:flex p:gap-x-[16px]">
-      <FormLabel
+      <BuyMFormLabel
         label="網址匯入"
         :config="{
           isRequired: false,
@@ -44,7 +40,7 @@ const onClick = async (validate) => {
           main: 'shrink-0 p:ml-[12px] p:flex p:h-[40px] p:items-center',
         }"
       />
-      <FormInput
+      <BuyMFormInput
         name="URL"
         v-model="url"
         :config="{
@@ -60,7 +56,7 @@ const onClick = async (validate) => {
           main: '--h-40 --px-12 --py-8 grow',
         }"
       />
-      <Anchor
+      <BuyMAnchor
         text="匯入資料"
         :config="{
           isDisabled: !url,

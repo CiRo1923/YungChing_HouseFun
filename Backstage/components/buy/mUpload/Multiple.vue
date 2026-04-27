@@ -396,10 +396,10 @@ const onUploaded = (items, handleChange, validateField) => {
   const done = async (responseList) => {
     handled = true
 
-    if (!Array.isArray(responseList)) return
+    const normalizedResponseList = Array.isArray(responseList) ? responseList : [responseList]
 
     items.forEach((item, index) => {
-      item.responseData = responseList[index] ?? null
+      item.responseData = normalizedResponseList[index] ?? null
     })
 
     innerList.value = [...innerList.value]

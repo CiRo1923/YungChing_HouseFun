@@ -38,6 +38,7 @@ interface _GlobalComponents {
   BuyMTabSeparator: typeof import("../../components/buy/mTab/Separator.vue")['default']
   BuyMTagCheckBox: typeof import("../../components/buy/mTag/CheckBox.vue")['default']
   BuyMTagDefault: typeof import("../../components/buy/mTag/Default.vue")['default']
+  BuyMTitleBorderBottom: typeof import("../../components/buy/mTitle/BorderBottom.vue")['default']
   CommonImgSrc: typeof import("../../components/common/ImgSrc.vue")['default']
   CommonSvgIcon: typeof import("../../components/common/SvgIcon.vue")['default']
   CommonMContainer: typeof import("../../components/common/mContainer.vue")['default']
@@ -101,6 +102,7 @@ interface _GlobalComponents {
   LazyBuyMTabSeparator: LazyComponent<typeof import("../../components/buy/mTab/Separator.vue")['default']>
   LazyBuyMTagCheckBox: LazyComponent<typeof import("../../components/buy/mTag/CheckBox.vue")['default']>
   LazyBuyMTagDefault: LazyComponent<typeof import("../../components/buy/mTag/Default.vue")['default']>
+  LazyBuyMTitleBorderBottom: LazyComponent<typeof import("../../components/buy/mTitle/BorderBottom.vue")['default']>
   LazyCommonImgSrc: LazyComponent<typeof import("../../components/common/ImgSrc.vue")['default']>
   LazyCommonSvgIcon: LazyComponent<typeof import("../../components/common/SvgIcon.vue")['default']>
   LazyCommonMContainer: LazyComponent<typeof import("../../components/common/mContainer.vue")['default']>

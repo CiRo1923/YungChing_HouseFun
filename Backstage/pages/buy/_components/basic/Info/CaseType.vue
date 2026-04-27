@@ -1,14 +1,15 @@
 <script setup>
-import FormSelect from '@components/buy/mForm/Select.vue'
-
 import { useBuyProjectStore } from '@stores/buy/project.js'
+import { useBuyBasicStore } from '@stores/buy/basic.js'
 
 const buyProject = useBuyProjectStore()
-const { options, apiData } = storeToRefs(buyProject)
+const { options } = storeToRefs(buyProject)
+const buyBasic = useBuyBasicStore()
+const { apiData } = storeToRefs(buyBasic)
 </script>
 
 <template>
-  <FormSelect
+  <BuyMFormSelect
     name="caseTypeToken"
     v-model="apiData.caseInfo.caseTypeToken"
     :options="options.caseType"

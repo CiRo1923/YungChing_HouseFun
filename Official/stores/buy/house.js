@@ -13,6 +13,7 @@ export const useBuyHouseStore = defineStore('buyHouse', () => {
   const actualPrice = ref(null) // 實價登入
   const broker = ref(null) // 經紀人
   const poi = ref(null)
+  const highlights = ref(null) // 物件焦點
 
   return {
     detail,
@@ -27,5 +28,6 @@ export const useBuyHouseStore = defineStore('buyHouse', () => {
     actualPrice,
     broker,
     poi,
+    highlights,
   }
 })

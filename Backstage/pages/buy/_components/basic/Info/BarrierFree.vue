@@ -1,16 +1,17 @@
 <script setup>
-import FormCheckBox from '@components/buy/mForm/CheckBox.vue'
-
 import { useBuyProjectStore } from '@stores/buy/project.js'
+import { useBuyBasicStore } from '@stores/buy/basic.js'
 
 const buyProject = useBuyProjectStore()
-const { options, apiData } = storeToRefs(buyProject)
+const { options } = storeToRefs(buyProject)
+const buyBasic = useBuyBasicStore()
+const { apiData } = storeToRefs(buyBasic)
 </script>
 
 <template>
   <ul class="m:space-y-[16px] pt:flex pt:flex-wrap pt:gap-x-[24px] pt:gap-y-[16px]">
     <li v-for="(item, index) in options.barrierFree" :key="`${item.code}_${index}`">
-      <FormCheckBox
+      <BuyMFormCheckBox
         :name="`caseBarrierfreeToken[${index}]`"
         v-model="apiData.caseInfo.caseBarrierfreeToken"
         :config="{

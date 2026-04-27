@@ -38,6 +38,7 @@ export const BuyMTabDefaultOval: typeof import("../components/buy/mTab/DefaultOv
 export const BuyMTabSeparator: typeof import("../components/buy/mTab/Separator.vue")['default']
 export const BuyMTagCheckBox: typeof import("../components/buy/mTag/CheckBox.vue")['default']
 export const BuyMTagDefault: typeof import("../components/buy/mTag/Default.vue")['default']
+export const BuyMTitleBorderBottom: typeof import("../components/buy/mTitle/BorderBottom.vue")['default']
 export const CommonImgSrc: typeof import("../components/common/ImgSrc.vue")['default']
 export const CommonSvgIcon: typeof import("../components/common/SvgIcon.vue")['default']
 export const CommonMContainer: typeof import("../components/common/mContainer.vue")['default']
@@ -101,6 +102,7 @@ export const LazyBuyMTabDefaultOval: LazyComponent<typeof import("../components/
 export const LazyBuyMTabSeparator: LazyComponent<typeof import("../components/buy/mTab/Separator.vue")['default']>
 export const LazyBuyMTagCheckBox: LazyComponent<typeof import("../components/buy/mTag/CheckBox.vue")['default']>
 export const LazyBuyMTagDefault: LazyComponent<typeof import("../components/buy/mTag/Default.vue")['default']>
+export const LazyBuyMTitleBorderBottom: LazyComponent<typeof import("../components/buy/mTitle/BorderBottom.vue")['default']>
 export const LazyCommonImgSrc: LazyComponent<typeof import("../components/common/ImgSrc.vue")['default']>
 export const LazyCommonSvgIcon: LazyComponent<typeof import("../components/common/SvgIcon.vue")['default']>
 export const LazyCommonMContainer: LazyComponent<typeof import("../components/common/mContainer.vue")['default']>

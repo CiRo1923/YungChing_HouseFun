@@ -1,10 +1,11 @@
 <script setup>
-import CkEditor4 from '@components/buy/mCkEditor4.vue'
+// import { useBuyProjectStore } from '@stores/buy/project.js'
+import { useBuyBasicStore } from '@stores/buy/basic.js'
 
-import { useBuyProjectStore } from '@stores/buy/project.js'
-
-const buyProject = useBuyProjectStore()
-const { apiData } = storeToRefs(buyProject)
+// const buyProject = useBuyProjectStore()
+// const { options } = storeToRefs(buyProject)
+const buyBasic = useBuyBasicStore()
+const { apiData } = storeToRefs(buyBasic)
 const highQualityWordCount = 70
 
 const onHighQualityWordCount = (length) => {
@@ -13,7 +14,7 @@ const onHighQualityWordCount = (length) => {
 </script>
 
 <template>
-  <CkEditor4
+  <BuyMCkEditor4
     v-model="apiData.caseInfo.caseDescription"
     :config="{
       loadMessage: '編輯器建置中...',
@@ -37,7 +38,7 @@ const onHighQualityWordCount = (length) => {
       </p>
       <small class="pt:ml-[10px]">字數限制：{{ length }} / {{ maxlength }}</small>
     </template>
-  </CkEditor4>
+  </BuyMCkEditor4>
 </template>
 
 <style></style>

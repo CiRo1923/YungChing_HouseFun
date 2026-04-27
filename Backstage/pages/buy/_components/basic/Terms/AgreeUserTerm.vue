@@ -1,14 +1,12 @@
 <script setup>
-import FormCheckBox from '@components/buy/mForm/CheckBox.vue'
+import { useBuyBasicStore } from '@stores/buy/basic.js'
 
-import { useBuyProjectStore } from '@stores/buy/project.js'
-
-const buyProject = useBuyProjectStore()
-const { apiData } = storeToRefs(buyProject)
+const buyBasic = useBuyBasicStore()
+const { apiData } = storeToRefs(buyBasic)
 </script>
 
 <template>
-  <FormCheckBox
+  <BuyMFormCheckBox
     name="isAgreeUserTerm"
     v-model="apiData.caseInfo.isAgreeUserTerm"
     :config="{
@@ -26,7 +24,7 @@ const { apiData } = storeToRefs(buyProject)
   >
     我已詳閱並同意
     <a href="javascript:;" class="text-[--green-6a2d] underline">好房會員服務使用條款</a>
-  </FormCheckBox>
+  </BuyMFormCheckBox>
 </template>
 
 <style></style>

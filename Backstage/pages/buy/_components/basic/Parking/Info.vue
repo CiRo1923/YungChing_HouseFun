@@ -1,18 +1,15 @@
 <script setup>
-import FormRadiosOval from '@components/buy/mForm/RadiosOval.vue'
-import AddIdentical from '@components/buy/mAddIdentical.vue'
-import FormSelect from '@components/buy/mForm/Select.vue'
-import FormInput from '@components/buy/mForm/Input.vue'
-import FormCheckBox from '@components/buy/mForm/CheckBox.vue'
-
 import RadiosOval from '@pages/buy/_containers/RadiosOval.vue'
 
 import { onDeepClone } from '@js/_prototype.js'
 
 import { useBuyProjectStore } from '@stores/buy/project.js'
+import { useBuyBasicStore } from '@stores/buy/basic.js'
 
 const buyProject = useBuyProjectStore()
-const { apiData, options } = storeToRefs(buyProject)
+const { options } = storeToRefs(buyProject)
+const buyBasic = useBuyBasicStore()
+const { apiData } = storeToRefs(buyBasic)
 const radioOptions = readonly([
   {
     label: '無車位',
@@ -174,7 +171,8 @@ onInit()
 
 <template>
   <RadiosOval>
-    <FormRadiosOval
+    <!-- {{ apiData.caseInfo.parkingInfos }} -->
+    <BuyMFormRadiosOval
       name="isCaseParking"
       v-model="apiData.caseInfo.isCaseParking"
       :options="radioOptions"
@@ -184,7 +182,7 @@ onInit()
       }"
       @change="onIsCaseParkingChange"
     />
-    <AddIdentical
+    <BuyMAddIdentical
       v-model="apiData.caseInfo.parkingInfos"
       :config="{
         defaultData: buyProject.parkingInfo,
@@ -217,7 +215,7 @@ onInit()
               v-for="(value, key) in item.forms"
               :key="`${item.label}_${key}_${idx}_${index}`"
             >
-              <FormSelect
+              <BuyMFormSelect
                 :name="`${value.id}[${index}]`"
                 v-model.number="data[value.id]"
                 :options="value.options"
@@ -228,7 +226,7 @@ onInit()
                 }"
                 v-if="key === 'select'"
               />
-              <FormInput
+              <BuyMFormInput
                 :name="`${value.id}[${index}]`"
                 v-model.number="data[value.id]"
                 :config="value.config"
@@ -241,8 +239,8 @@ onInit()
                 v-if="key === 'text'"
               >
                 <template #rearAssist v-if="value.rearAssist">{{ value.rearAssist }}</template>
-              </FormInput>
-              <FormCheckBox
+              </BuyMFormInput>
+              <BuyMFormCheckBox
                 :name="`${value.id}[${index}]`"
                 v-model="data[value.id]"
                 :config="value.config"
@@ -256,7 +254,7 @@ onInit()
           </ul>
         </li>
       </ul>
-    </AddIdentical>
+    </BuyMAddIdentical>
   </RadiosOval>
 </template>
 

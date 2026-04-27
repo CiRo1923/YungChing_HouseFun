@@ -1,14 +1,13 @@
 <script setup>
-import FormRadiosOval from '@components/buy/mForm/RadiosOval.vue'
-import FormSelect from '@components/buy/mForm/Select.vue'
-import FormInput from '@components/buy/mForm/Input.vue'
-
 import RadiosOval from '@pages/buy/_containers/RadiosOval.vue'
 
 import { useBuyProjectStore } from '@stores/buy/project.js'
+import { useBuyBasicStore } from '@stores/buy/basic.js'
 
 const buyProject = useBuyProjectStore()
-const { options, apiData } = storeToRefs(buyProject)
+const { options } = storeToRefs(buyProject)
+const buyBasic = useBuyBasicStore()
+const { apiData } = storeToRefs(buyBasic)
 const radioOptions = readonly([
   {
     label: '單層',
@@ -28,7 +27,7 @@ const onIsSingleFloorChange = () => {
 
 <template>
   <RadiosOval>
-    <FormRadiosOval
+    <BuyMFormRadiosOval
       name="isSingleFloor"
       v-model="apiData.caseInfo.isSingleFloor"
       :options="radioOptions"
@@ -40,7 +39,7 @@ const onIsSingleFloorChange = () => {
     />
     <ul class="pt:flex pt:gap-x-[8px]">
       <li class="pt:flex pt:grow pt:gap-x-[8px]">
-        <FormSelect
+        <BuyMFormSelect
           name="floorFromToken"
           v-model.number="apiData.caseInfo.floorFromToken"
           :options="options.floor"
@@ -55,7 +54,7 @@ const onIsSingleFloorChange = () => {
             main: '--h-40 --px-12 --py-8 pt:shrink-0',
           }"
         />
-        <FormInput
+        <BuyMFormInput
           name="caseFloorFrom"
           v-model.number="apiData.caseInfo.caseFloorFrom"
           :config="{
@@ -75,13 +74,13 @@ const onIsSingleFloorChange = () => {
           }"
         >
           <template #rearAssist>樓</template>
-        </FormInput>
+        </BuyMFormInput>
       </li>
       <li class="pt:shrink-0" v-if="!apiData.caseInfo.isSingleFloor">
         <span class="text-[--gray-666] pt:flex pt:items-center p:h-[40px] p:text-[16px]">~</span>
       </li>
       <li class="pt:flex pt:grow pt:gap-x-[8px]" v-if="!apiData.caseInfo.isSingleFloor">
-        <FormSelect
+        <BuyMFormSelect
           name="floorToToken"
           v-model.number="apiData.caseInfo.floorToToken"
           :options="options.floor"
@@ -96,7 +95,7 @@ const onIsSingleFloorChange = () => {
             main: '--h-40 --px-12 --py-8 pt:shrink-0',
           }"
         />
-        <FormInput
+        <BuyMFormInput
           name="caseFloorTo"
           v-model.number="apiData.caseInfo.caseFloorTo"
           :config="{
@@ -116,7 +115,7 @@ const onIsSingleFloorChange = () => {
           }"
         >
           <template #rearAssist>樓</template>
-        </FormInput>
+        </BuyMFormInput>
       </li>
     </ul>
   </RadiosOval>

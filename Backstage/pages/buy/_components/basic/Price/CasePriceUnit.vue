@@ -1,13 +1,10 @@
 <script setup>
-import FormInput from '@components/buy/mForm/Input.vue'
-import FormCheckBox from '@components/buy/mForm/CheckBox.vue'
-
 import { onToFixed } from '@js/_prototype.js'
 
-import { useBuyProjectStore } from '@stores/buy/project.js'
+import { useBuyBasicStore } from '@stores/buy/basic.js'
 
-const buyProject = useBuyProjectStore()
-const { apiData } = storeToRefs(buyProject)
+const buyBasic = useBuyBasicStore()
+const { apiData } = storeToRefs(buyBasic)
 
 const onIsCasePriceUnitAuto = () => {
   const {
@@ -52,7 +49,7 @@ watch(
 <template>
   <ul class="flex flex-wrap tm:gap-x-[8px] p:gap-x-[24px]">
     <li>
-      <FormInput
+      <BuyMFormInput
         name="casePriceUnit"
         v-model.number="apiData.caseInfo.casePriceUnit"
         :config="{
@@ -72,12 +69,12 @@ watch(
       >
         <template #rearAssist>萬 / 坪</template>
         <template #suffix>單價 = 總價 / 建物登記坪數</template>
-      </FormInput>
+      </BuyMFormInput>
     </li>
     <li class="flex h-[40px] items-center">
       <ul class="flex tm:gap-x-[16px] p:gap-x-[24px]">
         <li class="flex h-[40px] items-center">
-          <FormCheckBox
+          <BuyMFormCheckBox
             name="isCasePriceUnitAuto"
             v-model="apiData.caseInfo.isCasePriceUnitAuto"
             :config="{
@@ -90,7 +87,7 @@ watch(
           />
         </li>
         <li class="flex h-[40px] items-center">
-          <FormCheckBox
+          <BuyMFormCheckBox
             name="isCasePricePerPinDeductParking"
             v-model="apiData.caseInfo.isCasePricePerPinDeductParking"
             :config="{

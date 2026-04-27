@@ -1,17 +1,14 @@
 <script setup>
-import FormInput from '@components/buy/mForm/Input.vue'
-import FormCheckBox from '@components/buy/mForm/CheckBox.vue'
+import { useBuyBasicStore } from '@stores/buy/basic.js'
 
-import { useBuyProjectStore } from '@stores/buy/project.js'
-
-const buyProject = useBuyProjectStore()
-const { apiData } = storeToRefs(buyProject)
+const buyBasic = useBuyBasicStore()
+const { apiData } = storeToRefs(buyBasic)
 </script>
 
 <template>
   <ul class="m:space-y-[12px] t:gap-x-[16px] pt:flex p:gap-x-[24px]">
     <li class="t:w-[220px] p:w-[270px]">
-      <FormInput
+      <BuyMFormInput
         name="agentPhone"
         v-model="apiData.caseInfo.posterInfo.agentPhone"
         :config="{
@@ -30,7 +27,7 @@ const { apiData } = storeToRefs(buyProject)
       />
     </li>
     <li class="flex items-center pt:h-[40px]">
-      <FormCheckBox
+      <BuyMFormCheckBox
         name="isAgentDND"
         v-model="apiData.caseInfo.posterInfo.isAgentDND"
         :config="{

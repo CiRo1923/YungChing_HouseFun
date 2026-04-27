@@ -1,16 +1,13 @@
 <script setup>
-import FormInput from '@components/buy/mForm/Input.vue'
-import FormCheckBox from '@components/buy/mForm/CheckBox.vue'
-
-import { useBuyProjectStore } from '@stores/buy/project.js'
+// import { useBuyProjectStore } from '@stores/buy/project.js'
 import { useBuyBasicStore } from '@stores/buy/basic.js'
-import useBuyProjectActions from '@stores/buy/_composables/useProjectActions.js'
+import useBuyBasicActions from '@stores/buy/_composables/useBasicActions.js'
 
-const buyProject = useBuyProjectStore()
+// const buyProject = useBuyProjectStore()
+// const { options } = storeToRefs(buyProject)
 const buyBasic = useBuyBasicStore()
-const { basic } = useBuyProjectActions()
-const { apiData } = storeToRefs(buyProject)
-const { pingData } = storeToRefs(buyBasic)
+const { pingUnitLabel, onPinSqMetersConvert } = useBuyBasicActions()
+const { apiData, pingData } = storeToRefs(buyBasic)
 </script>
 
 <template>
@@ -18,7 +15,7 @@ const { pingData } = storeToRefs(buyBasic)
     <li>
       <ul class="m:space-y-[12px] pt:flex pt:gap-x-[8px]">
         <li class="t:w-[228px] p:w-[270px]">
-          <FormInput
+          <BuyMFormInput
             name="caseAmenitieSq"
             v-model.number="pingData.caseAmenitieSq"
             :config="{
@@ -31,13 +28,13 @@ const { pingData } = storeToRefs(buyBasic)
               element: 'grow',
               rearAssist: 'text-[14px] text-[--gray-999]',
             }"
-            @blur="basic.onPinSqMetersConvert('caseAmenitieSq')"
+            @blur="onPinSqMetersConvert('caseAmenitieSq')"
           >
-            <template #rearAssist>{{ basic.pingUnitLabel }}</template>
-          </FormInput>
+            <template #rearAssist>{{ pingUnitLabel }}</template>
+          </BuyMFormInput>
         </li>
         <li class="t:w-[228px] p:w-[270px]">
-          <FormInput
+          <BuyMFormInput
             name="caseAmenitieSqRqtio"
             v-model.number="apiData.caseInfo.caseAmenitieSqRqtio"
             :config="{
@@ -54,12 +51,12 @@ const { pingData } = storeToRefs(buyBasic)
             }"
           >
             <template #rearAssist>%</template>
-          </FormInput>
+          </BuyMFormInput>
         </li>
       </ul>
     </li>
     <li class="flex items-center pt:h-[40px]">
-      <FormCheckBox
+      <BuyMFormCheckBox
         name="isCaseAmenitieSqRqtioAuto"
         v-model="apiData.caseInfo.isCaseAmenitieSqRqtioAuto"
         :config="{

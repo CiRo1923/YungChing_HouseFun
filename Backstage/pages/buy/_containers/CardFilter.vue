@@ -1,7 +1,4 @@
 <script setup>
-import CardFilter from '@components/buy/mCard/Filter.vue'
-import FormLabel from '@components/buy/mForm/Label.vue'
-
 import { onDevice } from '@js/_prototype.js'
 
 const props = defineProps({
@@ -51,7 +48,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <CardFilter :title="props.title">
+  <BuyMCardFilter :title="props.title">
     <ul class="tm:space-y-[40px] p:space-y-[24px]">
       <template v-for="(item, index) in props.items">
         <li
@@ -60,7 +57,7 @@ onUnmounted(() => {
           :key="`${item.id}_${index}`"
           v-if="!onIsHidden(item)"
         >
-          <FormLabel
+          <BuyMFormLabel
             :label="item.label"
             :config="{
               isRequired: item.isRequired,
@@ -71,14 +68,14 @@ onUnmounted(() => {
             v-if="item.label || $slots[`${item.id}_label`]"
           >
             <slot :name="`${item.id}_label`" />
-          </FormLabel>
+          </BuyMFormLabel>
           <div class="pt:grow">
             <component :is="item.component" />
           </div>
         </li>
       </template>
     </ul>
-  </CardFilter>
+  </BuyMCardFilter>
 </template>
 
 <style></style>

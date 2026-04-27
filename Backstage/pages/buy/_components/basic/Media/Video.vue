@@ -1,17 +1,17 @@
 <script setup>
-import FormSelect from '@components/buy/mForm/Select.vue'
-import FormInput from '@components/buy/mForm/Input.vue'
-
 import { useBuyProjectStore } from '@stores/buy/project.js'
+import { useBuyBasicStore } from '@stores/buy/basic.js'
 
 const buyProject = useBuyProjectStore()
-const { options, apiData } = storeToRefs(buyProject)
+const { options } = storeToRefs(buyProject)
+const buyBasic = useBuyBasicStore()
+const { apiData } = storeToRefs(buyBasic)
 </script>
 
 <template>
   <ul class="m:space-y-[12px] pt:flex pt:gap-x-[8px]">
     <li class="pt:w-[160px] pt:shrink-0">
-      <FormSelect
+      <BuyMFormSelect
         name="caseVideoTypeToken"
         v-model.number="apiData.caseInfo.caseVideoTypeToken"
         :options="options.videoType"
@@ -31,7 +31,7 @@ const { options, apiData } = storeToRefs(buyProject)
       />
     </li>
     <li class="pt:grow">
-      <FormInput
+      <BuyMFormInput
         name="caseVideoUrl"
         v-model="apiData.caseInfo.caseVideoUrl"
         :config="{

@@ -1,14 +1,15 @@
 <script setup>
-import FormInput from '@components/buy/mForm/Input.vue'
+// import { useBuyProjectStore } from '@stores/buy/project.js'
+import { useBuyBasicStore } from '@stores/buy/basic.js'
 
-import { useBuyProjectStore } from '@stores/buy/project.js'
-
-const buyProject = useBuyProjectStore()
-const { apiData } = storeToRefs(buyProject)
+// const buyProject = useBuyProjectStore()
+// const { options } = storeToRefs(buyProject)
+const buyBasic = useBuyBasicStore()
+const { apiData } = storeToRefs(buyBasic)
 </script>
 
 <template>
-  <FormInput
+  <BuyMFormInput
     name="caseLandNo"
     v-model="apiData.caseInfo.caseLandNo"
     :config="{

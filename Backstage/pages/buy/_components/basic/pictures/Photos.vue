@@ -1,10 +1,17 @@
 <script setup>
-import { useBuyProjectStore } from '@stores/buy/project.js'
+import { useCommonStore } from '@stores/common.js'
+// import { useBuyProjectStore } from '@stores/buy/project.js'
 import { useBuyBasicStore } from '@stores/buy/basic.js'
+import useBuyBasicActions from '@stores/buy/_composables/useBasicActions.js'
 
-const buyProject = useBuyProjectStore()
-const { apiData } = storeToRefs(buyProject)
+const common = useCommonStore()
+// const buyProject = useBuyProjectStore()
+// const { basic } = useBuyProjectActions()
 const buyBasic = useBuyBasicStore()
+const { apiData } = storeToRefs(buyBasic)
+const { onApiPOSTRealEstatePicUpload } = useBuyBasicActions()
+const route = useRoute()
+const hfID = computed(() => route.params.id)
 const hasCasePictures = computed(() => apiData.value.caseInfo?.casePictures.length !== 0)
 
 const message = computed(() => {
@@ -22,10 +29,30 @@ const message = computed(() => {
 const onPicturesDelete = () => {
   apiData.value.caseInfo.casePictures = []
 }
+
+const onUploaded = async (items, done) => {
+  common.onIsLoading(true)
+  const { status, data } = await onApiPOSTRealEstatePicUpload({
+    hfid: hfID.value,
+    imgType: 1, // (1: 物件圖片; 2: 格局圖)
+    imgUpload: items[0].file,
+  })
+
+  console.log(status)
+
+  if (status === 200) {
+    done(data)
+  }
+
+  common.onIsLoading(false)
+}
 </script>
 
 <template>
   <div>
+    <!-- <pre class="max-w-[500px] overflow-hidden whitespace-pre-line">
+      {{ apiData.caseInfo.casePictures }}
+    </pre> -->
     <div class="pt:flex pt:items-center">
       <p class="grow tracking-wider text-[--gray-999] p:text-[14px]" v-html="message" />
       <BuyMAnchor
@@ -52,12 +79,13 @@ const onPicturesDelete = () => {
       }"
       :rules="{
         accept: '僅支援 { accept } 格式',
-        maxCount: '圖片最多限制為 { maxCount }',
+        maxCount: '圖片最多上傳限制為 { maxCount } 張',
         maxSize: '圖片大小不可超過 { maxSizeMB } MB',
       }"
       :setClass="{
         main: 'p:mt-[16px]',
       }"
+      @uploaded="onUploaded"
     />
   </div>
 </template>

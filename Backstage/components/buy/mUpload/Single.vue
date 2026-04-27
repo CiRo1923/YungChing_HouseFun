@@ -3,7 +3,7 @@ import ErrorMessageElem from '@components/buy/mErrorMessageElem.vue'
 
 import '@js/_validation.js'
 
-import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { validate as validateValue, Field, ErrorMessage } from 'vee-validate'
 
 const emit = defineEmits(['uploaded'])
@@ -56,7 +56,7 @@ const setClass = computed(() => ({
   ...props.setClass,
 }))
 
-const hasImage = computed(() => Boolean(innerItem.value?.url))
+const hasImage = computed(() => Boolean(innerItem.value?.previewUrl))
 const name = computed(() => props.name || FALLBACK_NAME)
 const customRuleKeys = ['maxSize', 'accept']
 
@@ -199,28 +199,30 @@ const getPreviewUrl = (item) => {
 }
 
 const revokeItem = (item) => {
-  if (item?.url && item.isObjectUrl) {
-    URL.revokeObjectURL(item.url)
+  if (item?.previewUrl && item.isObjectUrl) {
+    URL.revokeObjectURL(item.previewUrl)
   }
 }
 
 const createInnerItemFromFile = (file) => ({
   id: createId(),
   file,
-  url: URL.createObjectURL(file),
+  previewUrl: URL.createObjectURL(file),
   responseData: null,
   isObjectUrl: true,
+  preservePreview: true,
 })
 
 const createInnerItemFromModel = (item) => {
-  const url = getPreviewUrl(item)
+  const previewUrl = getPreviewUrl(item)
 
   return {
     id: createId(),
     file: item instanceof File ? item : null,
-    url,
+    previewUrl,
     responseData: item instanceof File ? null : item,
-    isObjectUrl: isObjectUrl(url),
+    isObjectUrl: isObjectUrl(previewUrl),
+    preservePreview: false,
   }
 }
 
@@ -235,8 +237,18 @@ const syncInnerItemFromModel = (value) => {
 
   if (getModelValue(innerItem.value) === value) return
 
+  const preservedPreviewUrl = innerItem.value?.preservePreview ? innerItem.value.previewUrl : null
+  const nextItem = createInnerItemFromModel(value)
+
   revokeItem(innerItem.value)
-  innerItem.value = createInnerItemFromModel(value)
+
+  if (preservedPreviewUrl) {
+    nextItem.previewUrl = preservedPreviewUrl
+    nextItem.isObjectUrl = true
+    nextItem.preservePreview = true
+  }
+
+  innerItem.value = nextItem
 }
 
 const openFileDialog = () => {
@@ -307,34 +319,43 @@ const normalizeFile = (file) => {
   }
 }
 
-const updateModelValue = (handleChange) => {
+const updateModelValue = async (handleChange, validateField = fieldValidate.value) => {
   const nextValue = getModelValue(innerItem.value)
 
   lastEmittedModelValue.value = nextValue
   model.value = nextValue
   handleChange(nextValue)
+
+  await nextTick()
+  await validateField?.()
 }
 
-const onUploaded = (item, handleChange) => {
+const onUploaded = (items, handleChange, validateField) => {
   let handled = false
 
-  const done = (responseData) => {
+  const done = async (responseList) => {
     handled = true
-    item.responseData = responseData ?? null
-    innerItem.value = { ...item }
-    updateModelValue(handleChange)
+
+    const normalizedResponseList = Array.isArray(responseList) ? responseList : [responseList]
+
+    items.forEach((item, index) => {
+      item.responseData = normalizedResponseList[index] ?? null
+    })
+
+    innerItem.value = { ...items[0] }
+    await updateModelValue(handleChange, validateField)
   }
 
-  emit('uploaded', item, done)
+  emit('uploaded', items, done)
 
-  Promise.resolve().then(() => {
+  Promise.resolve().then(async () => {
     if (!handled) {
-      updateModelValue(handleChange)
+      await updateModelValue(handleChange, validateField)
     }
   })
 }
 
-const onAppendFile = (file, handleChange, validate) => {
+const onAppendFile = async (file, handleChange, validate) => {
   if (!file || config.value.isDisabled) return
 
   const {
@@ -347,24 +368,25 @@ const onAppendFile = (file, handleChange, validate) => {
   hasMaxSizeError.value = hasMaxSizeRule.value ? nextMaxSizeError : false
 
   if (!item) {
-    validate()
+    await nextTick()
+    await validate()
     return
   }
 
   revokeItem(innerItem.value)
   innerItem.value = item
 
-  onUploaded(item, handleChange)
-  validate()
+  onUploaded([item], handleChange, validate)
 }
 
-const onFileChange = (event, handleChange, validate) => {
+const onFileChange = async (event, handleChange, validate) => {
   const file = event.target.files?.[0]
 
   if (file) {
-    onAppendFile(file, handleChange, validate)
+    await onAppendFile(file, handleChange, validate)
   } else {
-    validate()
+    await nextTick()
+    await validate()
   }
 
   event.target.value = ''
@@ -399,7 +421,7 @@ const onUploadDragLeave = (event) => {
   isUploadDragging.value = false
 }
 
-const onUploadDrop = (event, handleChange, validate) => {
+const onUploadDrop = async (event, handleChange, validate) => {
   if (!config.value.draggableUpload || config.value.isDisabled) return
   if (!hasFilesInDrag(event)) return
 
@@ -409,20 +431,20 @@ const onUploadDrop = (event, handleChange, validate) => {
   const file = event.dataTransfer?.files?.[0]
 
   if (file) {
-    onAppendFile(file, handleChange, validate)
+    await onAppendFile(file, handleChange, validate)
     return
   }
 
-  validate()
+  await nextTick()
+  await validate()
 }
 
-const onRemoveImage = (handleChange, validate) => {
+const onRemoveImage = async (handleChange, validate) => {
   revokeItem(innerItem.value)
   innerItem.value = null
   hasAcceptError.value = false
   hasMaxSizeError.value = false
-  updateModelValue(handleChange)
-  validate()
+  await updateModelValue(handleChange, validate)
 }
 
 onBeforeUnmount(() => {
@@ -500,7 +522,7 @@ watch(
             }"
           >
             <img
-              :src="innerItem.url"
+              :src="innerItem.previewUrl"
               alt=""
               class="absolute inset-0 h-full w-full object-cover"
               draggable="false"

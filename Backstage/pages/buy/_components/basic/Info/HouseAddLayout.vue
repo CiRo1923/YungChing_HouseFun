@@ -1,10 +1,11 @@
 <script setup>
-import FormInput from '@components/buy/mForm/Input.vue'
+// import { useBuyProjectStore } from '@stores/buy/project.js'
+import { useBuyBasicStore } from '@stores/buy/basic.js'
 
-import { useBuyProjectStore } from '@stores/buy/project.js'
-
-const buyProject = useBuyProjectStore()
-const { apiData } = storeToRefs(buyProject)
+// const buyProject = useBuyProjectStore()
+// const { options } = storeToRefs(buyProject)
+const buyBasic = useBuyBasicStore()
+const { apiData } = storeToRefs(buyBasic)
 
 const items = shallowReadonly([
   {
@@ -33,7 +34,7 @@ const items = shallowReadonly([
       v-for="(item, index) in items"
       :key="`${item.id}_${index}`"
     >
-      <FormInput
+      <BuyMFormInput
         :name="item.id"
         v-model.number="apiData.caseInfo[item.id]"
         :config="{
@@ -52,7 +53,7 @@ const items = shallowReadonly([
         }"
       >
         <template #rearAssist>{{ item.label }}</template>
-      </FormInput>
+      </BuyMFormInput>
     </li>
   </ul>
 </template>

@@ -1,13 +1,13 @@
 <script setup>
-import FormRadiosOval from '@components/buy/mForm/RadiosOval.vue'
-import FormInput from '@components/buy/mForm/Input.vue'
-
 import RadiosOval from '@pages/buy/_containers/RadiosOval.vue'
 
-import { useBuyProjectStore } from '@stores/buy/project.js'
+// import { useBuyProjectStore } from '@stores/buy/project.js'
+import { useBuyBasicStore } from '@stores/buy/basic.js'
 
-const buyProject = useBuyProjectStore()
-const { apiData } = storeToRefs(buyProject)
+// const buyProject = useBuyProjectStore()
+// const { options } = storeToRefs(buyProject)
+const buyBasic = useBuyBasicStore()
+const { apiData } = storeToRefs(buyBasic)
 
 const radioOptions = readonly([
   {
@@ -29,7 +29,7 @@ const onIsCaseHasElevatorChnage = () => {
 
 <template>
   <RadiosOval>
-    <FormRadiosOval
+    <BuyMFormRadiosOval
       name="isCaseHasElevator"
       v-model="apiData.caseInfo.isCaseHasElevator"
       :options="radioOptions"
@@ -41,7 +41,7 @@ const onIsCaseHasElevatorChnage = () => {
     />
     <ul>
       <li class="p:w-[100px]">
-        <FormInput
+        <BuyMFormInput
           name="caseElevatorCount"
           v-model.number="apiData.caseInfo.caseElevatorCount"
           :config="{
@@ -66,7 +66,7 @@ const onIsCaseHasElevatorChnage = () => {
           }"
         >
           <template #rearAssist>部</template>
-        </FormInput>
+        </BuyMFormInput>
       </li>
     </ul>
   </RadiosOval>

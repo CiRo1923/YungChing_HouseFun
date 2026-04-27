@@ -1,14 +1,15 @@
 <script setup>
-import FormInput from '@components/buy/mForm/Input.vue'
+// import { useBuyProjectStore } from '@stores/buy/project.js'
+import { useBuyBasicStore } from '@stores/buy/basic.js'
 
-import { useBuyProjectStore } from '@stores/buy/project.js'
-
-const buyProject = useBuyProjectStore()
-const { apiData } = storeToRefs(buyProject)
+// const buyProject = useBuyProjectStore()
+// const { options } = storeToRefs(buyProject)
+const buyBasic = useBuyBasicStore()
+const { apiData } = storeToRefs(buyBasic)
 </script>
 
 <template>
-  <FormInput
+  <BuyMFormInput
     name="caseTitle"
     v-model="apiData.caseInfo.caseTitle"
     :config="{
@@ -32,7 +33,7 @@ const { apiData } = storeToRefs(buyProject)
         <span class="text-[--orange-e646]">{{ maxlength - length }}</span> 個字符合優質排序
       </p>
     </template>
-  </FormInput>
+  </BuyMFormInput>
 </template>
 
 <style></style>

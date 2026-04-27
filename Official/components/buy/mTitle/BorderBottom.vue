@@ -25,27 +25,32 @@ const props = defineProps({
 const setClass = computed(() => {
   return {
     main: '',
-    title: null,
+    // icon: '',
+    title: '',
     ...props.setClass,
   }
 })
 </script>
 
 <template>
-  <CommonMContent
-    class="pt:--rounded-20 p:--px-40 p:--py-30 tm:--rounded-10 tm:--p-15 m:mx-[10px]"
+  <header
+    class="m-title --border-bottom relative flex items-center gap-x-[5px]"
     :class="setClass.main"
   >
-    <BuyMTitleBorderBottom
-      :title="props.title"
-      :setClass="{
-        main: '--border-green',
-      }"
-    />
-    <div class="tm:mt-[10px] p:mt-[20px]" v-if="$slots.default">
-      <slot />
-    </div>
-  </CommonMContent>
+    <h2 class="m-title-text tm:text-[18px] p:text-[24px]" :class="setClass.title">
+      <strong class="font-medium">{{ props.title }}</strong>
+    </h2>
+  </header>
 </template>
 
-<style></style>
+<style lang="postcss">
+.m-title {
+  &.\-\-border-bottom {
+    .m-title-text {
+      &:after {
+        @apply block h-[5px] w-full rounded-full bg-[--green-8b0d] content-default;
+      }
+    }
+  }
+}
+</style>

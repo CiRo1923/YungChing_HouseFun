@@ -1,17 +1,17 @@
 <script setup>
-import FormSelect from '@components/buy/mForm/Select.vue'
-import FormInput from '@components/buy/mForm/Input.vue'
-
 import { useBuyProjectStore } from '@stores/buy/project.js'
+import { useBuyBasicStore } from '@stores/buy/basic.js'
 
 const buyProject = useBuyProjectStore()
-const { options, apiData } = storeToRefs(buyProject)
+const { options } = storeToRefs(buyProject)
+const buyBasic = useBuyBasicStore()
+const { apiData } = storeToRefs(buyBasic)
 </script>
 
 <template>
   <ul class="m:space-y-[12px] pt:flex pt:gap-x-[8px]">
     <li class="t:w-[220px] p:w-[270px]">
-      <FormSelect
+      <BuyMFormSelect
         name="caseManageFeePeriodToken"
         v-model.number="apiData.caseInfo.caseManageFeePeriodToken"
         :options="options.managePay"
@@ -31,7 +31,7 @@ const { options, apiData } = storeToRefs(buyProject)
       />
     </li>
     <li class="t:w-[220px] p:w-[270px]">
-      <FormInput
+      <BuyMFormInput
         name="caseManageFee"
         v-model.number="apiData.caseInfo.caseManageFee"
         :config="{
@@ -50,7 +50,7 @@ const { options, apiData } = storeToRefs(buyProject)
         }"
       >
         <template #rearAssist>元</template>
-      </FormInput>
+      </BuyMFormInput>
     </li>
   </ul>
 </template>

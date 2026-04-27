@@ -1,16 +1,14 @@
 <script setup>
-import Container from '@components/buy/mContainer.vue'
-
 import BackStepEdit from '@pages/buy/_components/basic/BackStepEdit.vue'
 import DataComponents from '@pages/buy/_containers/basic/DataComponents.vue'
 import SubmitButtons from '@pages/buy/_containers/basic/SubmitButtons.vue'
 
-import { awaitAllPromise } from '@js/_prototype.js'
+// import { awaitAllPromise } from '@js/_prototype.js'
 
-import { useBuyProjectStore } from '@stores/buy/project.js'
-import useBuyProjectActions from '@stores/buy/_composables/useProjectActions.js'
-
-import { useBuyBasicAllPromise } from '@pages/buy/_composables/useBuyBasicPage.js'
+import { useCommonStore } from '@stores/common.js'
+// import { useBuyProjectStore } from '@stores/buy/project.js'
+// import { useBuyBasicStore } from '@stores/buy/basic.js'
+import useBuyBasicActions from '@stores/buy/_composables/useBasicActions.js'
 
 import { Form } from 'vee-validate'
 
@@ -20,31 +18,35 @@ definePageMeta({
   title: '物件資料編輯',
 })
 
-const buyProject = useBuyProjectStore()
-const { basic } = useBuyProjectActions()
-const { options, apiData } = storeToRefs(buyProject)
+const common = useCommonStore()
+const { onWithLoadingAll } = common
+// const buyProject = useBuyProjectStore()
+// const { options } = storeToRefs(buyProject)
+// const buyBasic = useBuyBasicStore()
+// const { apiData } = storeToRefs(buyBasic)
+const { onAllPromise, onApiGETRealEstate, onApiPOSTRealEstateDraft, onApiPOSTRealEstate } =
+  useBuyBasicActions()
 const route = useRoute()
 const hfID = computed(() => route.params.id)
-const detailAsync = useAsyncData(`detail-${hfID.value}`, () => basic.onApiGETRealEstate(hfID.value))
+const detailAsync = useAsyncData(`detail-${hfID.value}`, () => onApiGETRealEstate(hfID.value))
 
 const onDraftSubmit = async () => {
-  await basic.onApiPOSTRealEstateDraft(hfID.value)
+  await onApiPOSTRealEstateDraft(hfID.value)
 }
 
 const onSaveSubmit = async (validate) => {
   const { valid } = await validate()
 
   if (valid) {
-    console.log('submit')
-    await basic.onApiPOSTRealEstate(hfID.value)
+    await onApiPOSTRealEstate(hfID.value)
   }
 }
 
-await awaitAllPromise([...useBuyBasicAllPromise(), detailAsync])
+await onWithLoadingAll([...onAllPromise(), detailAsync])
 </script>
 
 <template>
-  <Container
+  <BuyMContainer
     :setClass="{
       main: '--px-16',
     }"
@@ -70,7 +72,7 @@ await awaitAllPromise([...useBuyBasicAllPromise(), detailAsync])
       <DataComponents />
       <SubmitButtons @click:draft="onDraftSubmit" @click:save="() => onSaveSubmit(validate)" />
     </Form>
-  </Container>
+  </BuyMContainer>
 </template>
 
 <style></style>

@@ -42,6 +42,7 @@ export const BuyMUploadMultiple: typeof import("../components/buy/mUpload/Multip
 export const BuyMUploadSingle: typeof import("../components/buy/mUpload/Single.vue")['default']
 export const CommonImgSrc: typeof import("../components/common/ImgSrc.vue")['default']
 export const CommonSvgIcon: typeof import("../components/common/SvgIcon.vue")['default']
+export const CommonMLoading: typeof import("../components/common/mLoading.vue")['default']
 export const NuxtWelcome: typeof import("../node_modules/nuxt/dist/app/components/welcome.vue")['default']
 export const NuxtLayout: typeof import("../node_modules/nuxt/dist/app/components/nuxt-layout")['default']
 export const NuxtErrorBoundary: typeof import("../node_modules/nuxt/dist/app/components/nuxt-error-boundary.vue")['default']
@@ -98,6 +99,7 @@ export const LazyBuyMUploadMultiple: LazyComponent<typeof import("../components/
 export const LazyBuyMUploadSingle: LazyComponent<typeof import("../components/buy/mUpload/Single.vue")['default']>
 export const LazyCommonImgSrc: LazyComponent<typeof import("../components/common/ImgSrc.vue")['default']>
 export const LazyCommonSvgIcon: LazyComponent<typeof import("../components/common/SvgIcon.vue")['default']>
+export const LazyCommonMLoading: LazyComponent<typeof import("../components/common/mLoading.vue")['default']>
 export const LazyNuxtWelcome: LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/welcome.vue")['default']>
 export const LazyNuxtLayout: LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/nuxt-layout")['default']>
 export const LazyNuxtErrorBoundary: LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/nuxt-error-boundary.vue")['default']>

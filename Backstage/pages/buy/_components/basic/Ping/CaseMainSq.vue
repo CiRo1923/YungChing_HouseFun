@@ -1,19 +1,17 @@
 <script setup>
-import FormInput from '@components/buy/mForm/Input.vue'
-
-import { useBuyProjectStore } from '@stores/buy/project.js'
+// import { useBuyProjectStore } from '@stores/buy/project.js'
 import { useBuyBasicStore } from '@stores/buy/basic.js'
-import useBuyProjectActions from '@stores/buy/_composables/useProjectActions.js'
+import useBuyBasicActions from '@stores/buy/_composables/useBasicActions.js'
 
-const buyProject = useBuyProjectStore()
+// const buyProject = useBuyProjectStore()
+// const { options } = storeToRefs(buyProject)
 const buyBasic = useBuyBasicStore()
-const { basic } = useBuyProjectActions()
-const { apiData } = storeToRefs(buyProject)
-const { pingData } = storeToRefs(buyBasic)
+const { pingUnitLabel, onPingVaild, onPinSqMetersConvert } = useBuyBasicActions()
+const { apiData, pingData } = storeToRefs(buyBasic)
 </script>
 
 <template>
-  <FormInput
+  <BuyMFormInput
     name="caseMainSq"
     v-model.number="pingData.caseMainSq"
     :config="{
@@ -23,7 +21,7 @@ const { pingData } = storeToRefs(buyBasic)
     }"
     :rules="{
       custom: {
-        valid: basic.onPingVaild(),
+        valid: onPingVaild(),
         errorMessage: apiData.caseInfo.isCaseBuildSqIncludeParking
           ? '主建物坪數不得超過登記坪數 (含車位)'
           : '主建物坪數不得超過登記坪數',
@@ -34,10 +32,10 @@ const { pingData } = storeToRefs(buyBasic)
       element: 'grow',
       rearAssist: 'text-[14px] text-[--gray-999]',
     }"
-    @blur="basic.onPinSqMetersConvert('caseMainSq')"
+    @blur="onPinSqMetersConvert('caseMainSq')"
   >
-    <template #rearAssist>{{ basic.pingUnitLabel }}</template>
-  </FormInput>
+    <template #rearAssist>{{ pingUnitLabel }}</template>
+  </BuyMFormInput>
 </template>
 
 <style></style>

@@ -1,22 +1,19 @@
 <script setup>
-import FormInput from '@components/buy/mForm/Input.vue'
-import FormCheckBox from '@components/buy/mForm/CheckBox.vue'
-
-import { useBuyProjectStore } from '@stores/buy/project.js'
+// import { useBuyProjectStore } from '@stores/buy/project.js'
 import { useBuyBasicStore } from '@stores/buy/basic.js'
-import useBuyProjectActions from '@stores/buy/_composables/useProjectActions.js'
+import useBuyBasicActions from '@stores/buy/_composables/useBasicActions.js'
 
-const buyProject = useBuyProjectStore()
+// const buyProject = useBuyProjectStore()
+// const { options } = storeToRefs(buyProject)
 const buyBasic = useBuyBasicStore()
-const { basic } = useBuyProjectActions()
-const { apiData } = storeToRefs(buyProject)
-const { pingData } = storeToRefs(buyBasic)
+const { pingUnitLabel, onPingVaild, onPinSqMetersConvert } = useBuyBasicActions()
+const { apiData, pingData } = storeToRefs(buyBasic)
 </script>
 
 <template>
   <ul class="flex overflow-hidden tm:gap-x-[16px] p:gap-x-[24px]">
     <li class="m:min-w-0 m:grow t:w-[220px] p:w-[270px]">
-      <FormInput
+      <BuyMFormInput
         name="caseBuildSq"
         v-model.number="pingData.caseBuildSq"
         :config="{
@@ -27,7 +24,7 @@ const { pingData } = storeToRefs(buyBasic)
         :rules="{
           required: '請輸入登記坪數',
           custom: {
-            valid: basic.onPingVaild(),
+            valid: onPingVaild(),
             errorMessage: apiData.caseInfo.isCaseBuildSqIncludeParking
               ? '登記坪數 (含車位) 不得小於主建物坪數'
               : '登記坪數不得小於主建物坪數',
@@ -38,13 +35,13 @@ const { pingData } = storeToRefs(buyBasic)
           element: 'grow',
           rearAssist: 'text-[14px] text-[--gray-999]',
         }"
-        @blur="basic.onPinSqMetersConvert('caseBuildSq')"
+        @blur="onPinSqMetersConvert('caseBuildSq')"
       >
-        <template #rearAssist>{{ basic.pingUnitLabel }}</template>
-      </FormInput>
+        <template #rearAssist>{{ pingUnitLabel }}</template>
+      </BuyMFormInput>
     </li>
     <li class="flex h-[40px] items-center m:shrink-0">
-      <FormCheckBox
+      <BuyMFormCheckBox
         name="isCaseBuildSqIncludeParking"
         v-model="apiData.caseInfo.isCaseBuildSqIncludeParking"
         :config="{

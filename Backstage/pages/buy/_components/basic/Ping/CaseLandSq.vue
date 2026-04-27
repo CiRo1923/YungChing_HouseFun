@@ -1,16 +1,14 @@
 <script setup>
-import FormInput from '@components/buy/mForm/Input.vue'
-
 import { useBuyBasicStore } from '@stores/buy/basic.js'
-import useBuyProjectActions from '@stores/buy/_composables/useProjectActions.js'
+import useBuyBasicActions from '@stores/buy/_composables/useBasicActions.js'
 
 const buyBasic = useBuyBasicStore()
-const { basic } = useBuyProjectActions()
+const { pingUnitLabel, onPinSqMetersConvert } = useBuyBasicActions()
 const { pingData } = storeToRefs(buyBasic)
 </script>
 
 <template>
-  <FormInput
+  <BuyMFormInput
     name="caseLandSq"
     v-model.number="pingData.caseLandSq"
     :config="{
@@ -23,10 +21,10 @@ const { pingData } = storeToRefs(buyBasic)
       element: 'grow',
       rearAssist: 'text-[14px] text-[--gray-999]',
     }"
-    @blur="basic.onPinSqMetersConvert('caseLandSq')"
+    @blur="onPinSqMetersConvert('caseLandSq')"
   >
-    <template #rearAssist>{{ basic.pingUnitLabel }}</template>
-  </FormInput>
+    <template #rearAssist>{{ pingUnitLabel }}</template>
+  </BuyMFormInput>
 </template>
 
 <style></style>

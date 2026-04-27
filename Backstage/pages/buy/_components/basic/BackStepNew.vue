@@ -1,5 +1,6 @@
 <script setup>
 import BackStepNew from '@pages/buy/_containers/BackStepNew.vue'
+
 const props = defineProps({
   active: {
     type: Number,

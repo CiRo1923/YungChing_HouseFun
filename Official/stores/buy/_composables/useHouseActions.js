@@ -20,6 +20,7 @@ const useBuyHouseStores = () => {
     actualPrice,
     broker,
     poi,
+    highlights,
   } = storeToRefs(buyHouseStores)
 
   const onApiBuyHouse = async () => {
@@ -42,6 +43,7 @@ const useBuyHouseStores = () => {
       actualPrice.value = data.actualPrice || {}
       broker.value = data.broker || {}
       poi.value = data.poi || {}
+      highlights.value = data.highlights || {}
       // console.log(data)
     }
 

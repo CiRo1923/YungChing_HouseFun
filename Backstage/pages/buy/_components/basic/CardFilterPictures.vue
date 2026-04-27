@@ -4,12 +4,12 @@ import CardFilter from '@pages/buy/_containers/CardFilter.vue'
 import Photos from '@pages/buy/_components/basic/pictures/Photos.vue'
 import LayoutDiagram from '@pages/buy/_components/basic/pictures/LayoutDiagram.vue'
 
-import { useBuyProjectStore } from '@stores/buy/project.js'
+// import { useBuyProjectStore } from '@stores/buy/project.js'
 import { useBuyBasicStore } from '@stores/buy/basic.js'
 
-const buyProject = useBuyProjectStore()
-const { apiData } = storeToRefs(buyProject)
+// const buyProject = useBuyProjectStore()
 const buyBasic = useBuyBasicStore()
+const { apiData } = storeToRefs(buyBasic)
 const props = defineProps({
   title: {
     type: String,
