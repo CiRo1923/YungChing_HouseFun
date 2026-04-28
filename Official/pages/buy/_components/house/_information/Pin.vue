@@ -4,7 +4,7 @@ import Container from '@pages/buy/_components/house/_information/_Container.vue'
 import { onToFixed } from '@js/_prototype.js'
 
 import { useBuyHouseStore } from '@stores/buy/house.js'
-import useBuyProjectActions from '@stores/buy/_composables/useProjectActions.js'
+import useBuyProjectActions from '@stores/buy/composables/useProjectActions.js'
 
 const buyHouse = useBuyHouseStore()
 const { basic, pin } = storeToRefs(buyHouse)

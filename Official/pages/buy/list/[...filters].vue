@@ -5,11 +5,11 @@ import Filter from '@pages/buy/_components/list/Filter.vue'
 import List from '@pages/buy/_components/list/List.vue'
 
 // import { useCommonStore } from '@stores/common.js'
-import useCommonActions from '@stores/_composables/useCommonActions.js'
+import useCommonActions from '@stores/composables/useCommonActions.js'
 // import { useBuyProjectStore } from '@stores/buy/project.js'
 import { useBuyListStore } from '@stores/buy/list.js'
-import useBuyProjectActions from '@stores/buy/_composables/useProjectActions.js'
-import useBuyListActions from '@stores/buy/_composables/useListActions.js'
+import useBuyProjectActions from '@stores/buy/composables/useProjectActions.js'
+import useBuyListActions from '@stores/buy/composables/useListActions.js'
 
 definePageMeta({
   layout: 'common',

@@ -1,4 +1,4 @@
-import useCommonActions from '@stores/_composables/useCommonActions.js'
+import useCommonActions from '@stores/composables/useCommonActions.js'
 
 export default defineNuxtPlugin(() => {
   const router = useRouter()

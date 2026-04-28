@@ -8,8 +8,8 @@ import Other from '@pages/buy/_components/house/_information/Other.vue'
 import Function from '@pages/buy/_components/house/_information/Function.vue'
 
 import { useBuyPopupStore } from '@stores/buy/popup.js'
-import usePopupActions from '@stores/_composables/usePopupActions.js'
-import useBuyPopupActions from '@stores/buy/_composables/usePopupActions.js'
+import usePopupActions from '@stores/composables/usePopupActions.js'
+import useBuyPopupActions from '@stores/buy/composables/usePopupActions.js'
 
 const buyPopup = useBuyPopupStore()
 const { onMergeBtns } = usePopupActions()

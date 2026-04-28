@@ -1,7 +1,7 @@
 <script setup>
 import { useBuyProjectStore } from '@stores/buy/project.js'
 import { useBuyListStore } from '@stores/buy/list.js'
-import useBuyProjectActions from '@stores/buy/_composables/useProjectActions.js'
+import useBuyProjectActions from '@stores/buy/composables/useProjectActions.js'
 
 const project = useBuyProjectStore()
 const { device } = storeToRefs(project)

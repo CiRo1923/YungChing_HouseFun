@@ -12,7 +12,7 @@ import Condition from '@pages/buy/_components/list/_searchMode/Condition.vue'
 // import { useBuyProjectStore } from '@stores/buy/project.js'
 import { useBuyListStore } from '@stores/buy/list.js'
 // import useBuyProjectActions from '@stores/buy/_composables/useProjectActions.js'
-import useListActions from '@stores/buy/_composables/useListActions.js'
+import useListActions from '@stores/buy/composables/useListActions.js'
 
 // const project = useBuyProjectStore()
 // const { options } = storeToRefs(project)

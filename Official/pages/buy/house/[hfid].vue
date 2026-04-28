@@ -14,10 +14,10 @@ import Recommend from '@pages/buy/_components/house/Recommend.vue'
 import Construction from '@pages/buy/_components/house/Construction.vue'
 import PopupAskMessage from '@pages/buy/_components/house/PopupAskMessage.vue'
 
-import useCommonActions from '@stores/_composables/useCommonActions.js'
+import useCommonActions from '@stores/composables/useCommonActions.js'
 import { useBuyHouseStore } from '@stores/buy/house.js'
-import useBuyProjectActions from '@stores/buy/_composables/useProjectActions.js'
-import useBuyHouseActions from '@stores/buy/_composables/useHouseActions.js'
+import useBuyProjectActions from '@stores/buy/composables/useProjectActions.js'
+import useBuyHouseActions from '@stores/buy/composables/useHouseActions.js'
 
 definePageMeta({
   layout: 'common',

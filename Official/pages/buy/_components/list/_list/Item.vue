@@ -6,7 +6,7 @@ import MediaImages from '@/pages/buy/_components/list/_list/MediaImages.vue'
 import { numberComma, onToFixed } from '@js/_prototype.js'
 
 import { useBuyProjectStore } from '@stores/buy/project.js'
-import useBuyProjectActions from '@stores/buy/_composables/useProjectActions.js'
+import useBuyProjectActions from '@stores/buy/composables/useProjectActions.js'
 
 const project = useBuyProjectStore()
 const { device } = storeToRefs(project)

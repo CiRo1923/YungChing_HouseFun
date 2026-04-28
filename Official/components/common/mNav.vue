@@ -1,7 +1,7 @@
 <script setup>
 import { useBuyProjectStore } from '@stores/buy/project.js'
-import useNavActions from '@stores/_composables/useNavActions.js'
-import useBuyProjectActions from '@stores/buy/_composables/useProjectActions.js'
+import useNavActions from '@stores/composables/useNavActions.js'
+import useBuyProjectActions from '@stores/buy/composables/useProjectActions.js'
 
 const project = useBuyProjectStore()
 const route = useRoute()
