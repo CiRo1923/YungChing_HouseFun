@@ -55,3 +55,36 @@
 .datepicker-range-quickly-fixed-leave-from {
   @apply translate-y-0;
 }
+
+/* overlay */
+.popup-overlay-enter-active,
+.popup-overlay-leave-active {
+  transition: opacity 0.15s ease;
+}
+
+/* 進場：先出現 overlay */
+.popup-overlay-enter-from,
+.popup-overlay-leave-to {
+  @apply opacity-0;
+}
+
+.popup-overlay-enter-to,
+.popup-overlay-leave-from {
+  @apply opacity-100;
+}
+
+/* 離場：等 bomb 先收掉，再 fade overlay */
+.popup-overlay-leave-active {
+  transition-delay: 0.1s;
+}
+
+/* bomb */
+.popup-bomb-enter-active {
+  animation: popup-bomb 0.2s 0.075s both;
+  /* 0.075s delay = 等 overlay 先出現 */
+}
+
+.popup-bomb-leave-active {
+  animation: popup-bomb 0.2s reverse both;
+  /* 關閉時先跑 bomb */
+}

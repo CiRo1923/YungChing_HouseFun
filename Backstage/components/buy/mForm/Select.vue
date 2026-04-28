@@ -1,7 +1,4 @@
 <script setup>
-import SvgIcon from '@components/common/SvgIcon.vue'
-import ErrorMessageElem from '@components/buy/mErrorMessageElem.vue'
-
 import { onDevice, onDeepMerge, onDeepClone, onEmptyData } from '@js/_prototype.js'
 
 import '@js/_validation.js'
@@ -402,7 +399,7 @@ onUnmounted(() => {
               {{ placeholder.value }}
             </template>
           </div>
-          <SvgIcon
+          <CommonSvgIcon
             icon="caret_large_down"
             class="m-form-icon h-[14px] w-[14px] shrink-0 p-[2px] transition-transform duration-300"
             :class="setClass.icon"
@@ -425,7 +422,7 @@ onUnmounted(() => {
       :class="setClass.error"
       v-slot="{ message }"
     >
-      <ErrorMessageElem :message="message" />
+      <BuyMErrorMessageElem :message="message" />
     </ErrorMessage>
   </div>
   <Teleport to="body">

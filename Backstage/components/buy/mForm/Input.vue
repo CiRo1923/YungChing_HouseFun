@@ -1,7 +1,4 @@
 <script setup>
-import SvgIcon from '@components/common/SvgIcon.vue'
-import ErrorMessageElem from '@components/buy/mErrorMessageElem.vue'
-
 import { onDeepMerge, numberComma, onToFixed } from '@js/_prototype.js'
 
 import '@js/_validation.js'
@@ -331,7 +328,7 @@ watch(
             @click="onClear"
             v-if="config.isExistClose && !config.isDisabled"
           >
-            <SvgIcon icon="icon_xmark" class="m-form-clear-icon" />
+            <CommonSvgIcon icon="icon_xmark" class="m-form-clear-icon" />
           </button>
           <span class="m-form-length shrink-0" :class="setClass.length" v-if="formatLength">
             {{ formatLength }}
@@ -356,7 +353,7 @@ watch(
       :class="setClass.error"
       v-slot="{ message }"
     >
-      <ErrorMessageElem :message="message" />
+      <BuyMErrorMessageElem :message="message" />
     </ErrorMessage>
   </div>
 </template>

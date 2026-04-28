@@ -1,6 +1,4 @@
 <script setup>
-import SvgIcon from '@components/common/SvgIcon.vue'
-
 const props = defineProps({
   options: {
     type: Array,
@@ -48,12 +46,12 @@ const setClass = computed(() => {
       v-for="(item, index) in props.options"
       :key="`${item.label}_${index}`"
     >
-      <SvgIcon
+      <CommonSvgIcon
         icon="chevron_right"
         class="m-step-icon text-[--gray-e5]"
         v-if="index > config.active"
       />
-      <SvgIcon
+      <CommonSvgIcon
         :icon="config.icon"
         class="m-step-icon"
         :class="setClass.icon"

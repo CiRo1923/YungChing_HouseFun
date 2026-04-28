@@ -26,6 +26,7 @@ export const BuyMContainer: typeof import("../components/buy/mContainer.vue")['d
 export const BuyMErrorMessageElem: typeof import("../components/buy/mErrorMessageElem.vue")['default']
 export const BuyMFooter: typeof import("../components/buy/mFooter.vue")['default']
 export const BuyMFormCheckBox: typeof import("../components/buy/mForm/CheckBox.vue")['default']
+export const BuyMFormHidden: typeof import("../components/buy/mForm/Hidden.vue")['default']
 export const BuyMFormInput: typeof import("../components/buy/mForm/Input.vue")['default']
 export const BuyMFormLabel: typeof import("../components/buy/mForm/Label.vue")['default']
 export const BuyMFormRadiosOval: typeof import("../components/buy/mForm/RadiosOval.vue")['default']
@@ -83,6 +84,7 @@ export const LazyBuyMContainer: LazyComponent<typeof import("../components/buy/m
 export const LazyBuyMErrorMessageElem: LazyComponent<typeof import("../components/buy/mErrorMessageElem.vue")['default']>
 export const LazyBuyMFooter: LazyComponent<typeof import("../components/buy/mFooter.vue")['default']>
 export const LazyBuyMFormCheckBox: LazyComponent<typeof import("../components/buy/mForm/CheckBox.vue")['default']>
+export const LazyBuyMFormHidden: LazyComponent<typeof import("../components/buy/mForm/Hidden.vue")['default']>
 export const LazyBuyMFormInput: LazyComponent<typeof import("../components/buy/mForm/Input.vue")['default']>
 export const LazyBuyMFormLabel: LazyComponent<typeof import("../components/buy/mForm/Label.vue")['default']>
 export const LazyBuyMFormRadiosOval: LazyComponent<typeof import("../components/buy/mForm/RadiosOval.vue")['default']>

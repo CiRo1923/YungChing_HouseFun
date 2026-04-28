@@ -47,9 +47,9 @@ export const CommonMFooter: typeof import("../components/common/mFooter.vue")['d
 export const CommonMHeader: typeof import("../components/common/mHeader.vue")['default']
 export const CommonMLoading: typeof import("../components/common/mLoading.vue")['default']
 export const CommonMNav: typeof import("../components/common/mNav.vue")['default']
-export const AlertSystem: typeof import("../containers/buy/AlertSystem.vue")['default']
-export const ConfirmSystem: typeof import("../containers/buy/ConfirmSystem.vue")['default']
 export const CustomPopup: typeof import("../containers/buy/CustomPopup.vue")['default']
+export const AlertSystem: typeof import("../containers/common/AlertSystem.vue")['default']
+export const ConfirmSystem: typeof import("../containers/common/ConfirmSystem.vue")['default']
 export const NuxtWelcome: typeof import("../node_modules/nuxt/dist/app/components/welcome.vue")['default']
 export const NuxtLayout: typeof import("../node_modules/nuxt/dist/app/components/nuxt-layout")['default']
 export const NuxtErrorBoundary: typeof import("../node_modules/nuxt/dist/app/components/nuxt-error-boundary.vue")['default']
@@ -111,9 +111,9 @@ export const LazyCommonMFooter: LazyComponent<typeof import("../components/commo
 export const LazyCommonMHeader: LazyComponent<typeof import("../components/common/mHeader.vue")['default']>
 export const LazyCommonMLoading: LazyComponent<typeof import("../components/common/mLoading.vue")['default']>
 export const LazyCommonMNav: LazyComponent<typeof import("../components/common/mNav.vue")['default']>
-export const LazyAlertSystem: LazyComponent<typeof import("../containers/buy/AlertSystem.vue")['default']>
-export const LazyConfirmSystem: LazyComponent<typeof import("../containers/buy/ConfirmSystem.vue")['default']>
 export const LazyCustomPopup: LazyComponent<typeof import("../containers/buy/CustomPopup.vue")['default']>
+export const LazyAlertSystem: LazyComponent<typeof import("../containers/common/AlertSystem.vue")['default']>
+export const LazyConfirmSystem: LazyComponent<typeof import("../containers/common/ConfirmSystem.vue")['default']>
 export const LazyNuxtWelcome: LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/welcome.vue")['default']>
 export const LazyNuxtLayout: LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/nuxt-layout")['default']>
 export const LazyNuxtErrorBoundary: LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/nuxt-error-boundary.vue")['default']>

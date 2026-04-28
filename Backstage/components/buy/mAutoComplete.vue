@@ -1,7 +1,4 @@
 <script setup>
-import SvgIcon from '@components/common/SvgIcon.vue'
-import ErrorMessageElem from '@components/buy/mErrorMessageElem.vue'
-
 import { onDeepMerge } from '@js/_prototype.js'
 
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
@@ -498,9 +495,9 @@ onUnmounted(() => {
             @click="onClear"
             v-if="config.isExistClose && !config.isDisabled"
           >
-            <SvgIcon icon="icon_xmark" class="m-autocomplete-clear-icon" />
+            <CommonSvgIcon icon="icon_xmark" class="m-autocomplete-clear-icon" />
           </button>
-          <SvgIcon
+          <CommonSvgIcon
             icon="icon_search"
             class="pointer-events-none h-[18px] w-[18px] shrink-0 text-[--autocomplete-icon-color] transition-colors duration-300"
           />
@@ -514,7 +511,7 @@ onUnmounted(() => {
       :name="props.name"
       v-slot="{ message }"
     >
-      <ErrorMessageElem :message="message" />
+      <BuyMErrorMessageElem :message="message" />
     </ErrorMessage>
   </div>
   <Teleport to="body">

@@ -33,6 +33,7 @@ export default defineNuxtConfig({
     `@/${CONFIG.css}/tailwind.css`,
     `@/${CONFIG.css}/_common/framework.css`,
     `@/${CONFIG.css}/_common/color.css`,
+    `@/${CONFIG.css}/_common/basic.css`,
   ],
   postcss: {
     plugins: {
@@ -52,7 +53,7 @@ export default defineNuxtConfig({
   alias: {
     '@stores': fileURLToPath(new URL('./stores', import.meta.url)),
     '@components': fileURLToPath(new URL('./components', import.meta.url)),
-    '@container': fileURLToPath(new URL('./container', import.meta.url)),
+    '@containers': fileURLToPath(new URL('./containers', import.meta.url)),
     '@composable': fileURLToPath(new URL('./composable', import.meta.url)),
     '@pages': fileURLToPath(new URL('./pages', import.meta.url)),
     '@imgs': fileURLToPath(new URL(`./${CONFIG.imgs}`, import.meta.url)),

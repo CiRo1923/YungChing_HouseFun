@@ -70,6 +70,14 @@ const toFormData = (data) => {
 const isFetchMethod = (value) =>
   typeof value === 'string' && FETCH_METHODS.includes(value.toLowerCase())
 
+const createSafeConfig = (method, baseURL, url, opts) => ({
+  method,
+  baseURL,
+  url,
+  query: isPlainObject(opts.query) ? opts.query : undefined,
+  body: isPlainObject(opts.body) ? opts.body : undefined,
+})
+
 const executeFetchApi = async (method, path, data) => {
   const runtimeConfig = useRuntimeConfig()
   const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
@@ -86,33 +94,42 @@ const executeFetchApi = async (method, path, data) => {
   }
 
   const opts = { method: m }
-  if (Object.keys(rest).length) {
+  const hasRest = Object.keys(rest).length > 0
+  if (hasRest || METHOD_WITH_BODY.has(m)) {
     if (METHOD_WITH_BODY.has(m)) opts.body = isFormRequest ? toFormData(rest) : rest
     else opts.query = rest
   }
 
   const reqPath = urlPath.startsWith('/') ? urlPath : `/${urlPath}`
+  const config = createSafeConfig(m, baseURL, reqPath, opts)
 
   try {
-    const res = await $fetch.raw(reqPath, { ...opts, baseURL, headers })
+    const res = await $fetch.raw(reqPath, {
+      ...opts,
+      baseURL,
+      headers,
+      ignoreResponseError: true,
+    })
 
     // 只回傳可序列化的 config（避免 FormData/URLSearchParams）
-    const safeConfig = {
-      method: m,
-      baseURL,
-      url: reqPath,
-      query: isPlainObject(opts.query) ? opts.query : undefined,
-      body: isPlainObject(opts.body) ? opts.body : undefined,
-    }
-
     return {
       status: res.status,
       statusText: res.statusText,
       headers: toPOJOHeaders(res.headers),
-      config: safeConfig,
+      config,
       data: res._data,
     }
   } catch (error) {
+    if (error?.response) {
+      return {
+        status: error.response.status,
+        statusText: error.response.statusText,
+        headers: toPOJOHeaders(error.response.headers),
+        config,
+        data: error.response._data,
+      }
+    }
+
     // 不要把原始 error 直接 throw（裡面常含 non-POJO）
     const status = error?.response?.status
     const payload = error?.response?._data

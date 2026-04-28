@@ -34,9 +34,6 @@ const items = computed(() => {
     return result
   }
 
-  console.log(`hasTraffic: ${hasTraffic}`)
-  console.log(`hasSchools: ${hasSchools}`)
-
   return [
     [
       {

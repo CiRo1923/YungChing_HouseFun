@@ -1,7 +1,4 @@
 <script setup>
-import SvgIcon from '@components/common/SvgIcon.vue'
-import Anchor from '@components/buy/mAnchor.vue'
-
 import { onDeepMerge, onDeepClone } from '@js/_prototype.js'
 
 const emits = defineEmits(['update:modelValue', 'click'])
@@ -87,14 +84,14 @@ const onRemoveClick = (index) => {
           class="m-add-identical-clear-anchor absolute right-[5px] top-[5px] block h-[22px] w-[22px] p-[5px]"
           @click="onRemoveClick(index)"
         >
-          <SvgIcon icon="icon_xmark" class="h-full w-full" />
+          <CommonSvgIcon icon="icon_xmark" class="h-full w-full" />
         </button>
         <div class="m-add-identical-data">
           <slot :data="item" :index="index" />
         </div>
       </li>
     </ul>
-    <Anchor
+    <BuyMAnchor
       :text="config.anchor.text"
       :config="{
         icon: config.anchor.icon,

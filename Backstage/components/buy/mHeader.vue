@@ -1,6 +1,4 @@
 <script setup>
-import ImgSrc from '@components/common/ImgSrc.vue'
-
 import { onDevice } from '@js/_prototype.js'
 
 const device = ref('p') // 預設值先給 p
@@ -25,14 +23,14 @@ onUnmounted(() => {
     class="m-header mx-auto flex items-center tm:h-[50px] tm:px-[15px] p:h-[60px] p:max-w-[1920px] p:px-[50px]"
   >
     <div class="m-header-logo flex shrink-0 items-center">
-      <ImgSrc
+      <CommonImgSrc
         src="buy/logo_text.svg"
         :setClass="{
           main: 'tm:h-[20px] tm:w-[57px] p:h-[25px] p:w-[77px]',
         }"
       />
       <!-- device 預設值先給 p 平板、手機 先用 css 隱藏；畫面不會跳閃 -->
-      <ImgSrc
+      <CommonImgSrc
         src="buy/logo_icon.svg"
         :setClass="{
           main: 'tm:hidden p:ml-[4px] p:h-[25px] p:w-[87px]',

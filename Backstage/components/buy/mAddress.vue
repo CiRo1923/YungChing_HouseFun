@@ -1,8 +1,4 @@
 <script setup>
-import FormSelect from '@components/buy/mForm/Select.vue'
-import FormInput from '@components/buy/mForm/Input.vue'
-import AutoComplete from '@components/buy/mAutoComplete.vue'
-
 const emits = defineEmits([
   'update:city',
   'update:area',
@@ -276,7 +272,7 @@ onMounted(() => {
     class="m-address flex flex-wrap gap-x-[8px] m:gap-y-[12px] pt:gap-y-[8px]"
     :class="setClass.main"
   >
-    <FormSelect
+    <BuyMFormSelect
       :name="`${props.name}_address_city`"
       v-model="modelCity"
       :options="config.city.options"
@@ -290,7 +286,7 @@ onMounted(() => {
       @change="onCityChange()"
       v-if="props.city !== undefined"
     />
-    <FormSelect
+    <BuyMFormSelect
       :name="`${props.name}_address_area`"
       v-model="modelArea"
       :options="config.area.options"
@@ -305,7 +301,7 @@ onMounted(() => {
       @change="onAreaChange()"
       v-if="props.area !== undefined"
     />
-    <AutoComplete
+    <BuyMAutoComplete
       :name="`${props.name}_address_road`"
       v-model="modelRoad"
       :options="config.road.options"
@@ -319,7 +315,7 @@ onMounted(() => {
       }"
       v-if="props.road !== undefined"
     />
-    <FormInput
+    <BuyMFormInput
       :name="`${props.name}_address_lane`"
       v-model="modelLane"
       :config="{
@@ -336,8 +332,8 @@ onMounted(() => {
       v-if="props.lane !== undefined"
     >
       <template #rearAssist>巷</template>
-    </FormInput>
-    <FormInput
+    </BuyMFormInput>
+    <BuyMFormInput
       :name="`${props.name}_address_alley`"
       v-model="modelAlley"
       :config="{
@@ -354,8 +350,8 @@ onMounted(() => {
       v-if="props.alley !== undefined"
     >
       <template #rearAssist>弄</template>
-    </FormInput>
-    <FormInput
+    </BuyMFormInput>
+    <BuyMFormInput
       :name="`${props.name}_address_number`"
       v-model="modelNumber"
       :config="{
@@ -372,10 +368,10 @@ onMounted(() => {
       v-if="props.number !== undefined"
     >
       <template #rearAssist>號</template>
-    </FormInput>
+    </BuyMFormInput>
     <template v-if="props.ofNumber !== undefined">
       <span class="h-40px flex items-center text-[16px] text-[--gray-666]">之</span>
-      <FormInput
+      <BuyMFormInput
         :name="`${props.name}_address_of_number`"
         v-model="modelOfNumber"
         :config="{
@@ -391,7 +387,7 @@ onMounted(() => {
         }"
       />
     </template>
-    <FormInput
+    <BuyMFormInput
       :name="`${props.name}_address_floor`"
       v-model="modelFloor"
       :config="{
@@ -408,10 +404,10 @@ onMounted(() => {
       v-if="props.floor !== undefined"
     >
       <template #rearAssist>樓</template>
-    </FormInput>
+    </BuyMFormInput>
     <template v-if="props.ofFloor !== undefined">
       <span class="h-40px flex items-center text-[16px] text-[--gray-666]">之</span>
-      <FormInput
+      <BuyMFormInput
         :name="`${props.name}_address_of_floor`"
         v-model="modelOfFloor"
         :config="{

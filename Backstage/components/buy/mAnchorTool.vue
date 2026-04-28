@@ -1,6 +1,4 @@
 <script setup>
-import Anchor from '@components/buy/mAnchor.vue'
-
 import { onDevice } from '@js/_prototype.js'
 
 const props = defineProps({
@@ -44,7 +42,7 @@ onUnmounted(() => {
     <ul class="p:flex p:items-center p:gap-x-[16px]">
       <!-- device 預設值先給 p 平板、手機 先用 css 隱藏；畫面不會跳閃 -->
       <li class="tm:hidden p:shrink-0" v-if="isDeviceP">
-        <Anchor
+        <BuyMAnchor
           :text="anchor.text"
           :to="anchor.to"
           :href="anchor.href"

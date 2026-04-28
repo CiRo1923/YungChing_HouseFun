@@ -1,6 +1,4 @@
 <script setup>
-import SvgIcon from '@components/common/SvgIcon.vue'
-
 const emits = defineEmits(['click'])
 const props = defineProps({
   text: {
@@ -110,7 +108,7 @@ const onClick = (e) => {
     @click="onClick"
   >
     <slot>
-      <SvgIcon
+      <CommonSvgIcon
         :icon="icon.name"
         :class="setClass.icon"
         v-if="icon.position === 'left' && icon.name"
@@ -118,7 +116,7 @@ const onClick = (e) => {
       <b class="m-anchor-text" :class="setClass.text">
         {{ props.text }}
       </b>
-      <SvgIcon
+      <CommonSvgIcon
         :icon="icon.name"
         :class="setClass.icon"
         v-if="icon.position === 'right' && icon.name"

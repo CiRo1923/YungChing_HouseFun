@@ -26,6 +26,7 @@ interface _GlobalComponents {
   BuyMErrorMessageElem: typeof import("../../components/buy/mErrorMessageElem.vue")['default']
   BuyMFooter: typeof import("../../components/buy/mFooter.vue")['default']
   BuyMFormCheckBox: typeof import("../../components/buy/mForm/CheckBox.vue")['default']
+  BuyMFormHidden: typeof import("../../components/buy/mForm/Hidden.vue")['default']
   BuyMFormInput: typeof import("../../components/buy/mForm/Input.vue")['default']
   BuyMFormLabel: typeof import("../../components/buy/mForm/Label.vue")['default']
   BuyMFormRadiosOval: typeof import("../../components/buy/mForm/RadiosOval.vue")['default']
@@ -83,6 +84,7 @@ interface _GlobalComponents {
   LazyBuyMErrorMessageElem: LazyComponent<typeof import("../../components/buy/mErrorMessageElem.vue")['default']>
   LazyBuyMFooter: LazyComponent<typeof import("../../components/buy/mFooter.vue")['default']>
   LazyBuyMFormCheckBox: LazyComponent<typeof import("../../components/buy/mForm/CheckBox.vue")['default']>
+  LazyBuyMFormHidden: LazyComponent<typeof import("../../components/buy/mForm/Hidden.vue")['default']>
   LazyBuyMFormInput: LazyComponent<typeof import("../../components/buy/mForm/Input.vue")['default']>
   LazyBuyMFormLabel: LazyComponent<typeof import("../../components/buy/mForm/Label.vue")['default']>
   LazyBuyMFormRadiosOval: LazyComponent<typeof import("../../components/buy/mForm/RadiosOval.vue")['default']>

@@ -1,6 +1,8 @@
 <script setup>
 import BackStepNew from '@pages/buy/_components/basic/BackStepNew.vue'
 import TabCheck from '@pages/buy/_components/basic/TabCheck.vue'
+import PopupFeature from '@pages/buy/_components/basic/popup/Feature.vue'
+
 import DataComponents from '@pages/buy/_containers/basic/DataComponents.vue'
 import SubmitButtons from '@pages/buy/_containers/basic/SubmitButtons.vue'
 
@@ -29,7 +31,7 @@ const { onAllPromise, onApiPOSTRealEstate, onApiPOSTRealEstateNewCase, onApiPOST
   useBuyBasicActions()
 const route = useRoute()
 const hfID = computed(() => route.params.id || '0')
-const newCaseAsync = useAsyncData(`newCase-${+new Date()}`, () => onApiPOSTRealEstateNewCase())
+// const newCaseAsync = useAsyncData('newCase', () => onApiPOSTRealEstateNewCase())
 
 const onDraftSubmit = async () => {
   await onApiPOSTRealEstateDraft(hfID.value)
@@ -44,7 +46,10 @@ const onSaveSubmit = async (validate) => {
   }
 }
 
-await onWithLoadingAll([...onAllPromise(), newCaseAsync])
+await onWithLoadingAll([
+  ...onAllPromise(),
+  // newCaseAsync
+])
 </script>
 
 <template>
@@ -67,6 +72,7 @@ await onWithLoadingAll([...onAllPromise(), newCaseAsync])
       <SubmitButtons @click:draft="onDraftSubmit" @click:save="() => onSaveSubmit(validate)" />
     </Form>
   </BuyMContainer>
+  <PopupFeature />
 </template>
 
 <style></style>

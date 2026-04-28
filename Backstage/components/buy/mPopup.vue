@@ -1,75 +1,136 @@
 <script setup>
-import { useBuyPopupStore } from '@stores/buy/popup.js'
+import { usePopupStore } from '@stores/popup.js'
+import useBuyPopupActions from '@stores/buy/_composables/usePopupActions.js'
 
-const popup = useBuyPopupStore()
+const popup = usePopupStore()
+const { alertData, confirmData, customData, apiPromiseData } = storeToRefs(popup)
+const { onReset } = useBuyPopupActions()
 
 const props = defineProps({
   id: {
     type: String,
     default: '',
   },
+  setClass: {
+    type: Object,
+    default: () => ({}),
+  },
 })
 
+const isShowOverlay = ref(false)
+const isShowPopup = ref(false)
+
+const isOpen = computed(() => keyID.value && props.id === keyID.value)
 const keyID = computed(
-  () => popup.alertData.id || popup.confirmData.id || popup.customData.id || popup.apiRunData.id
+  () => alertData.value.id || confirmData.value.id || customData.value.id || apiPromiseData.value.id
 )
 
-const isExistClose = computed(() => {
-  const alertClose = keyID.value === 'alertSystem' ? popup.alertData.isExistClose : false
-  const confirmClose = keyID.value === 'confirmSystem' ? popup.confirmData.isExistClose : false
-  const popClose =
+const hasExistClose = computed(() => {
+  const alertClose = keyID.value === 'alertSystem' ? alertData.value.hasExistClose : false
+  const confirmClose = keyID.value === 'confirmSystem' ? confirmData.value.hasExistClose : false
+  const customClose =
     keyID.value !== 'alertSystem' &&
     keyID.value !== 'confirmSystem' &&
     keyID.value !== 'apiAwaitSystem'
-      ? popup.customData.isExistClose
+      ? customData.value.hasExistClose
       : false
-  const awaitClose = keyID.value === 'apiAwaitSystem' ? popup.apiAwaitData.isExistClose : null
+  const awaitClose = keyID.value === 'apiAwaitSystem' ? apiPromiseData.value.hasExistClose : null
 
-  return alertClose || confirmClose || popClose || awaitClose
+  return alertClose || confirmClose || customClose || awaitClose
 })
 
 const title = computed(
-  () => popup.alertData.title || popup.confirmData.title || popup.customData.title
+  () => alertData.value.title || confirmData.value.title || customData.value.title
 )
 
-const onClose = () => {
-  popup.alertData.close()
-  popup.confirmData.close()
-  popup.customData.close()
+const icon = computed(() => alertData.value.icon || confirmData.value.icon || customData.value.icon)
+
+const setClass = computed(() => {
+  return {
+    main: '',
+    header: '',
+    headerTitle: '',
+    body: '',
+    footer: '',
+    note: '',
+    ...props.setClass,
+  }
+})
+
+const onOverlayEnter = () => {
+  // overlay 出現後 → 開 popup
+  if (isOpen.value) {
+    isShowPopup.value = true
+  }
 }
+
+// bomb 關閉完後，再把 overlay 收掉
+const onAfterLeave = () => {
+  isShowOverlay.value = false
+}
+
+watchEffect(() => {
+  if (isOpen.value) {
+    isShowOverlay.value = true
+  } else {
+    // 關閉時先收 popup
+    isShowPopup.value = false
+  }
+})
 </script>
 
 <template>
-  <Transition name="popup-overlay" appear>
+  <Transition name="popup-overlay" appear @enter="onOverlayEnter">
     <div
       class="m-popup fixed inset-0 z-[5] flex items-center justify-center"
-      v-if="keyID && props.id === keyID"
+      :class="setClass.main"
+      v-if="isOpen || isShowOverlay"
     >
-      <Transition name="bomb" appear>
+      <Transition name="popup-bomb" appear @after-leave="onAfterLeave">
         <div
-          class="m-popup-container relative flex max-h-[92%] flex-col bg-[--white] tm:rounded-[15px] p:rounded-[20px]"
+          class="m-popup-container relative flex max-h-[92%] flex-col overflow-hidden rounded-[15px] bg-[--white] py-[40px] m:mx-[16px] tm:p-[32px] p:px-[72px]"
+          :class="setClass.container"
+          v-if="isShowPopup"
         >
-          <button
-            type="button"
-            class="absolute right-[20px] top-[25px] flex items-center justify-center transition-colors duration-300"
-            @click="onClose"
-            v-if="isExistClose"
+          <div
+            class="m-popup-header flex shrink-0 items-center border-b-[2px] border-b-[--orange-e646] pb-[24px] text-[--gray-333]"
+            :class="setClass.header"
+            v-if="title"
           >
-            <SvgIcon icon="times" class="text-[--white]" />
-          </button>
-          <div class="m-popup-header shrink-0" v-if="title">
             <slot name="header">
-              <p class="text-center">
-                <b v-html="title" />
+              <p
+                class="flex grow items-center gap-x-[10px] text-[24px]"
+                :class="setClass.headerTitle"
+              >
+                <CommonSvgIcon
+                  :icon="icon"
+                  class="h-[30px] w-[30px] p-[3px] text-[--gray-666]"
+                  v-if="icon"
+                />
+                <b class="font-medium" v-html="title" />
               </p>
             </slot>
+            <button
+              type="button"
+              class="flex h-[30px] w-[30px] shrink-0 items-center justify-center p-[8px] text-[--gray-ccce]"
+              @click="onReset"
+              v-if="hasExistClose"
+            >
+              <CommonSvgIcon icon="icon_xmark" class="h-full w-full" />
+            </button>
           </div>
-          <div class="m-popup-body grow overflow-hidden overflow-y-auto">
+          <div
+            class="m-popup-body scrollbar --y mt-[24px] grow overflow-hidden"
+            :class="setClass.body"
+          >
             <slot />
           </div>
-          <footer class="m-popup-footer" v-if="$slots.ft">
+          <footer class="m-popup-footer mt-[24px]" :class="setClass.footer" v-if="$slots.footer">
             <slot name="footer" />
           </footer>
+          <div class="m-popup-note" :class="setClass.note" v-if="$slots.note">
+            <slot name="note" />
+          </div>
         </div>
       </Transition>
     </div>
@@ -77,4 +138,104 @@ const onClose = () => {
 </template>
 
 <style src="@css/_modules/_vueTransition.css"></style>
-<style></style>
+<style lang="postcss">
+@keyframes popup-bomb {
+  0% {
+    transform: scale(0);
+  }
+  25% {
+    transform: scale(1.2);
+  }
+  50% {
+    transform: scale(0.9);
+  }
+  75% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.m-popup {
+  &:before {
+    @apply absolute inset-0 bg-[--black] opacity-40 content-default;
+  }
+}
+
+@screen p {
+  .m-popup {
+    &.\-\-w-1055,
+    &.p\:\-\-w-1055,
+    &.pt\:\-\-w-1055 {
+      .m-popup-container {
+        @apply w-[1055px];
+      }
+    }
+
+    &.\-\-w-720,
+    &.p\:\-\-w-720,
+    &.pt\:\-\-w-720 {
+      .m-popup-container {
+        @apply w-[720px];
+      }
+    }
+
+    &.\-\-w-655,
+    &.p\:\-\-w-655,
+    &.pt\:\-\-w-655 {
+      .m-popup-container {
+        @apply w-[655px];
+      }
+    }
+
+    &.\-\-w-490,
+    &.p\:\-\-w-490,
+    &.pt\:\-\-w-490 {
+      .m-popup-container {
+        @apply w-[490px];
+      }
+    }
+  }
+}
+
+@screen t {
+  .m-popup {
+    &.\-\-w-1055,
+    &.pt\:\-\-w-1055,
+    &.tm\:\-\-w-1055,
+    &.t\:\-\-w-1055 {
+      .m-popup-container {
+        @apply w-[1055px];
+      }
+    }
+
+    &.\-\-w-720,
+    &.pt\:\-\-w-720,
+    &.tm\:\-\-w-720,
+    &.t\:\-\-w-720 {
+      .m-popup-container {
+        @apply w-[720px];
+      }
+    }
+
+    &.\-\-w-655,
+    &.pt\:\-\-w-655,
+    &.tm\:\-\-w-655,
+    &.t\:\-\-w-655 {
+      .m-popup-container {
+        @apply w-[655px];
+      }
+    }
+
+    &.\-\-w-490,
+    &.pt\:\-\-w-490,
+    &.tm\:\-\-w-490,
+    &.t\:\-\-w-490 {
+      .m-popup-container {
+        @apply w-[490px];
+      }
+    }
+  }
+}
+</style>

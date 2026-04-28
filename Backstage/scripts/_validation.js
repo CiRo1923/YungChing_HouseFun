@@ -96,7 +96,10 @@ defineRule('custom', (value, object, elem) => {
   if (el.disabled) return true
 
   const isArray = Array.isArray(object)
-  const result = value != null && typeof value === 'number' ? String(value) : value
+  const result =
+    value != null && (typeof value === 'number' || typeof value === 'boolean')
+      ? String(value)
+      : value
   const hasValue = !!result?.length > 0
   const valid = hasValue ? !isArray && object.valid : true
 

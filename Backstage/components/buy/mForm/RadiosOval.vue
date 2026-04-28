@@ -1,7 +1,4 @@
 <script setup>
-import SvgIcon from '@components/common/SvgIcon.vue'
-import ErrorMessageElem from '@components/buy/mErrorMessageElem.vue'
-
 import '@js/_validation.js'
 
 import { Field, ErrorMessage } from 'vee-validate'
@@ -122,7 +119,7 @@ onSelected()
             @change="onChange(item)"
           />
           <!-- v-if="item[config.schema.value] == selected" 用 == 會有形態別問題 '1' (string) !== 1 (int) -->
-          <SvgIcon
+          <CommonSvgIcon
             icon="icon_check_solid"
             class="m-form-icon h-[16px] w-[16px] text-[--orange-e646]"
             v-if="item[config.schema.value] == selected"
@@ -146,7 +143,7 @@ onSelected()
       :class="setClass.error"
       v-slot="{ message }"
     >
-      <ErrorMessageElem :message="message" />
+      <BuyMErrorMessageElem :message="message" />
     </ErrorMessage>
   </div>
 </template>

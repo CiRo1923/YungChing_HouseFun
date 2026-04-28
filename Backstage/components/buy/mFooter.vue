@@ -1,7 +1,4 @@
-<script setup>
-import ImgSrc from '@components/common/ImgSrc.vue'
-// import Anchor from '@components/buy/mAnchor.vue'
-</script>
+<script setup></script>
 
 <template>
   <div class="m-fooetr mx-auto mt-[32px] px-[16px] p:max-w-[1232px]">
@@ -9,7 +6,7 @@ import ImgSrc from '@components/common/ImgSrc.vue'
       class="m-footer-container rounded-t-[15px] bg-[--gray-f7] py-[40px] tm:px-[16px] pt:flex p:px-[40px]"
     >
       <div class="m-footer-logo flex flex-col pt:grow">
-        <ImgSrc
+        <CommonImgSrc
           src="common/logo.svg"
           :setClass="{
             main: 'h-[50px] w-[126px] grow',

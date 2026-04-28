@@ -1,8 +1,7 @@
 <script setup>
-import SvgIcon from '@components/common/SvgIcon.vue'
-import ErrorMessageElem from '@components/buy/mErrorMessageElem.vue'
-
 import { onDeepMerge } from '@js/_prototype.js'
+
+import '@js/_validation.js'
 
 import { Field, ErrorMessage } from 'vee-validate'
 
@@ -147,7 +146,7 @@ const onChange = () => {
       type="checkbox"
       v-model="model"
       :rules="config.isDisabled ? '' : props.rules"
-      v-slot="{ field, errorMessage }"
+      v-slot="{ errorMessage }"
     >
       <div class="m-form-container" :class="setClass.container">
         <label
@@ -170,7 +169,7 @@ const onChange = () => {
             :disabled="config.isDisabled"
             @change="onChange"
           />
-          <SvgIcon
+          <CommonSvgIcon
             icon="icon_check_solid"
             class="m-form-icon relative mt-[2px] h-[18px] w-[18px] shrink-0 self-start rounded-[2px] border-[1px] p-[1px] text-[--orange-e646] transition-colors duration-300"
             :class="setClass.icon"
@@ -188,7 +187,7 @@ const onChange = () => {
       :class="setClass.error"
       v-slot="{ message }"
     >
-      <ErrorMessageElem class="text-[12px]" :message="message" />
+      <BuyMErrorMessageElem class="text-[12px]" :message="message" />
     </ErrorMessage>
   </div>
 </template>

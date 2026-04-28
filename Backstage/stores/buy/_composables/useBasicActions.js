@@ -8,8 +8,10 @@ import {
 
 import { onToFixed } from '@js/_prototype.js'
 
-import useBuyProjectActions from '@stores/buy/_composables/useProjectActions.js'
 import { useBuyBasicStore } from '@stores/buy/basic.js'
+
+import useBuyProjectActions from '@stores/buy/_composables/useProjectActions.js'
+import useBuyPopupActions from '@stores/buy/_composables/usePopupActions.js'
 
 const useBuyBasicActions = () => {
   const {
@@ -38,6 +40,7 @@ const useBuyBasicActions = () => {
     onApiGETRealEstatePosterDataSourceSelectOptions,
   } = useBuyProjectActions()
   const basicStores = useBuyBasicStore()
+  const { onApiError } = useBuyPopupActions()
   const { apiData, pingData } = storeToRefs(basicStores)
   const currentUnit = computed(() =>
     basicStores.options.unit.find((item) => item.value === apiData.value.caseInfo.isCaseSqUnitPin)
@@ -103,10 +106,14 @@ const useBuyBasicActions = () => {
     console.log(apiData.value.caseInfo[mKey])
   }
   const onApiPOSTRealEstateNewCase = async () => {
-    const { config, status, data } = await apiPOSTRealEstateNewCase()
+    const { config, status, data } = await apiPOSTRealEstateNewCase({
+      caseType: 4, //  (1:直營, 2:加盟, 3:複製, 4:B端)
+    })
 
     if (status === 200) {
       console.log(data)
+    } else {
+      onApiError(config, status, data)
     }
 
     return { config, status, data }
@@ -120,6 +127,8 @@ const useBuyBasicActions = () => {
       const { caseInfo } = data
 
       apiData.value.caseInfo = caseInfo
+    } else {
+      onApiError(config, status, data)
     }
 
     return { config, status, data }
@@ -132,6 +141,8 @@ const useBuyBasicActions = () => {
 
     if (status === 200) {
       console.log(data)
+    } else {
+      onApiError(config, status, data)
     }
 
     return { config, status, data }
@@ -144,12 +155,18 @@ const useBuyBasicActions = () => {
 
     if (status === 200) {
       console.log(data)
+    } else {
+      onApiError(config, status, data)
     }
 
     return { config, status, data }
   }
   const onApiPOSTRealEstatePicUpload = async (params) => {
     const { config, status, data } = await apiPOSTRealEstatePicUpload(params)
+
+    if (status !== 200) {
+      onApiError(config, status, data)
+    }
 
     return { config, status, data }
   }

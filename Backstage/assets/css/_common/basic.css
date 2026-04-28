@@ -1,0 +1,80 @@
+.scrollbar {
+  &::-webkit-scrollbar-thumb,
+  &::-webkit-scrollbar-track {
+    @apply rounded-[8px];
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-clip: padding-box;
+
+    @apply border-transparent bg-[--green-6a2d];
+  }
+
+  &::-webkit-scrollbar-track {
+    @apply bg-[--gray-e5];
+  }
+
+  &.\-\-x {
+    @apply overflow-x-auto;
+
+    &::-webkit-scrollbar {
+      @apply h-[4px];
+    }
+  }
+
+  &.\-\-y {
+    @apply overflow-y-auto;
+
+    &::-webkit-scrollbar {
+      @apply w-[4px];
+    }
+  }
+
+  &:not(.\-\-x):not(.\-\-y) {
+    @apply overflow-auto;
+  }
+}
+
+/* [class*='text-size'] {
+  @apply leading-[inherit];
+} */
+
+@screen p {
+  /* .scrollbar {
+    &::-webkit-scrollbar-thumb,
+    &::-webkit-scrollbar-track {
+      @apply rounded-[8px];
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background-clip: padding-box;
+
+      @apply border-transparent bg-[--green-8b0d];
+    }
+
+    &::-webkit-scrollbar-track {
+      @apply bg-[--gray-e5];
+    }
+
+    &.\-\-x {
+      &::-webkit-scrollbar {
+        @apply h-[4px];
+      }
+    }
+
+    &.\-\-y {
+      &::-webkit-scrollbar {
+        @apply w-[4px];
+      }
+    }
+  } */
+}
+
+@screen t {
+}
+
+@screen pt {
+}
+
+@screen m {
+}

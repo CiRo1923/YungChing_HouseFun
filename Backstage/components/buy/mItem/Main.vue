@@ -1,6 +1,4 @@
 <script setup>
-import ItemContainer from '@components/buy/mItem/Container.vue'
-
 import { onDeepMerge } from '@js/_prototype.js'
 
 import { computed, ref } from 'vue'
@@ -59,7 +57,7 @@ defineExpose({
         </b>
       </p>
     </div>
-    <ItemContainer
+    <BuyMItemContainer
       :data="props.data"
       :setClass="props.setClass"
       :config="config"

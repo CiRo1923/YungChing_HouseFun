@@ -4,6 +4,7 @@ const { dropShadow, letterSpacing, lineHeight } = require('./tailwind.extend.js'
 module.exports = {
   content: [
     './components/**/*.{js,vue,ts}',
+    './containers/**/*.{js,vue,ts}',
     './layouts/**/*.vue',
     './pages/**/*.vue',
     './static/**/*.{js,json,ts}',
