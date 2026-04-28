@@ -5,7 +5,7 @@ import RadiosOval from '@pages/buy/_containers/RadiosOval.vue'
 
 // import { useBuyProjectStore } from '@stores/buy/project.js'
 import { useBuyBasicStore } from '@stores/buy/basic.js'
-import useBuyProjectActions from '@stores/buy/_composables/useProjectActions.js'
+import useBuyProjectActions from '@stores/buy/composables/useProjectActions.js'
 
 // const buyProject = useBuyProjectStore()
 // const { options } = storeToRefs(buyProject)

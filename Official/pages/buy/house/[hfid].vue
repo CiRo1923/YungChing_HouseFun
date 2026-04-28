@@ -14,24 +14,21 @@ import Recommend from '@pages/buy/_components/house/Recommend.vue'
 import Construction from '@pages/buy/_components/house/Construction.vue'
 import PopupAskMessage from '@pages/buy/_components/house/PopupAskMessage.vue'
 
-import { useMeta } from '@composable/useMeta.js'
-
-import { useCommonStore } from '@stores/common.js'
+import useCommonActions from '@stores/_composables/useCommonActions.js'
 import { useBuyHouseStore } from '@stores/buy/house.js'
 import useBuyProjectActions from '@stores/buy/_composables/useProjectActions.js'
-import useBuyHouseAction from '@stores/buy/_composables/useHouseActions.js'
+import useBuyHouseActions from '@stores/buy/_composables/useHouseActions.js'
 
 definePageMeta({
   layout: 'common',
   requiresAuth: false,
 })
 
-const common = useCommonStore()
-const { onWithLoadingAll } = common
+const { onUseMeta, onWithLoadingAll } = useCommonActions()
 const buyHouse = useBuyHouseStore()
 const { detail } = storeToRefs(buyHouse)
 // const popup = useBuyPopupStore()
-const { onApiBuyHouse } = useBuyHouseAction()
+const { onApiBuyHouse } = useBuyHouseActions()
 const {
   onApiGETRealEstateTypeSelectOptions,
   onApiGETRealEstateParkingModeSelectOptions,
@@ -48,7 +45,7 @@ await onWithLoadingAll([
   useAsyncData(`buy-detail-${route.params.hfid}`, () => onApiBuyHouse()),
 ])
 
-useMeta({
+onUseMeta({
   title: seo.value.title,
   description: seo.value.description,
   url: useRequestURL(),

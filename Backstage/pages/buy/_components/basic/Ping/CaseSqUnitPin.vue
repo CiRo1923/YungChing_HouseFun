@@ -1,7 +1,7 @@
 <script setup>
 // import { useBuyProjectStore } from '@stores/buy/project.js'
 import { useBuyBasicStore } from '@stores/buy/basic.js'
-import useBuyBasicActions from '@stores/buy/_composables/useBasicActions.js'
+import useBuyBasicActions from '@stores/buy/composables/useBasicActions.js'
 
 // const buyProject = useBuyProjectStore()
 const buyBasic = useBuyBasicStore()

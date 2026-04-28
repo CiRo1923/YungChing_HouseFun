@@ -1,6 +1,6 @@
 <script setup>
 import { useBuyBasicStore } from '@stores/buy/basic.js'
-import useBuyBasicActions from '@stores/buy/_composables/useBasicActions.js'
+import useBuyBasicActions from '@stores/buy/composables/useBasicActions.js'
 
 const buyBasic = useBuyBasicStore()
 const { pingUnitLabel, onPinSqMetersConvert } = useBuyBasicActions()

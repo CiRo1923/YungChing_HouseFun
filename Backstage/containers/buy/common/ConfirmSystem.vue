@@ -1,7 +1,7 @@
 <script setup>
 import { usePopupStore } from '@stores/popup.js'
 
-import useBuyPopupActions from '@stores/buy/_composables/usePopupActions.js'
+import useBuyPopupActions from '@stores/buy/composables/usePopupActions.js'
 
 const popup = usePopupStore()
 const { confirmData, confirmCheck } = storeToRefs(popup)

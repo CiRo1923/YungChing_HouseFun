@@ -10,8 +10,8 @@ import { onToFixed } from '@js/_prototype.js'
 
 import { useBuyBasicStore } from '@stores/buy/basic.js'
 
-import useBuyProjectActions from '@stores/buy/_composables/useProjectActions.js'
-import useBuyPopupActions from '@stores/buy/_composables/usePopupActions.js'
+import useBuyProjectActions from '@stores/buy/composables/useProjectActions.js'
+import useBuyPopupActions from '@stores/buy/composables/usePopupActions.js'
 
 const useBuyBasicActions = () => {
   const {

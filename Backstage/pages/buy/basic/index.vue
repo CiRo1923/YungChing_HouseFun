@@ -8,10 +8,11 @@ import SubmitButtons from '@pages/buy/_containers/basic/SubmitButtons.vue'
 
 // import { awaitAllPromise } from '@js/_prototype.js'
 
-import { useCommonStore } from '@stores/common.js'
+// import { useCommonStore } from '@stores/common.js'
+import useCommonActions from '@stores/composables/useCommonActions.js'
 // import { useBuyProjectStore } from '@stores/buy/project.js'
 // import { useBuyBasicStore } from '@stores/buy/basic.js'
-import useBuyBasicActions from '@stores/buy/_composables/useBasicActions.js'
+import useBuyBasicActions from '@stores/buy/composables/useBasicActions.js'
 
 import { Form } from 'vee-validate'
 
@@ -21,8 +22,8 @@ definePageMeta({
   title: '出售物件刊登',
 })
 
-const common = useCommonStore()
-const { onWithLoadingAll } = common
+// const common = useCommonStore()
+const { onWithLoadingAll } = useCommonActions()
 // const buyProject = useBuyProjectStore()
 // const { options } = storeToRefs(buyProject)
 // const buyBasic = useBuyBasicStore()

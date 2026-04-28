@@ -5,7 +5,7 @@ import Anchor from '@components/buy/mAnchor.vue'
 import TabItem from '@pages/buy/_components/basic/TabItem.vue'
 
 import { useBuyProjectStore } from '@stores/buy/project.js'
-import useBuyProjectActions from '@stores/buy/_composables/useProjectActions.js'
+import useBuyProjectActions from '@stores/buy/composables/useProjectActions.js'
 
 import { Form } from 'vee-validate'
 

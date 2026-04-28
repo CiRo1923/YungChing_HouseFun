@@ -2,7 +2,7 @@ import { onDeepMerge, onBodyOverflowHiddenToggle } from '@js/_prototype.js'
 
 import { usePopupStore } from '@stores/popup.js'
 import { useBuyPopupStore } from '@stores/buy/popup.js'
-import usePopupActions from '@stores/_composables/usePopupActions.js'
+import usePopupActions from '@stores/composables/usePopupActions.js'
 
 export const useBuyPopupActions = () => {
   const popupStore = usePopupStore()

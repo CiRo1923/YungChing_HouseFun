@@ -1,5 +1,5 @@
 <script setup>
-import useBuyPopupActions from '@stores/buy/_composables/usePopupActions.js'
+import useBuyPopupActions from '@stores/buy/composables/usePopupActions.js'
 
 const { onCustom } = useBuyPopupActions()
 const onPopupFeature = async () => {

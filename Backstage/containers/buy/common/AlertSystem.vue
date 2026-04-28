@@ -2,7 +2,7 @@
 import { usePopupStore } from '@stores/popup.js'
 // import { useBuyPopupStore } from '@stores/buy/popup.js'
 
-import useBuyPopupActions from '@stores/buy/_composables/usePopupActions.js'
+import useBuyPopupActions from '@stores/buy/composables/usePopupActions.js'
 
 const popup = usePopupStore()
 const { alertData, alertCheck } = storeToRefs(popup)

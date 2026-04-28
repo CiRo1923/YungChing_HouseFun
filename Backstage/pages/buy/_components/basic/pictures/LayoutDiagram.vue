@@ -1,10 +1,12 @@
 <script setup>
-import { useCommonStore } from '@stores/common.js'
+// import { useCommonStore } from '@stores/common.js'
+import useCommonActions from '@stores/composables/useCommonActions.js'
 // import { useBuyProjectStore } from '@stores/buy/project.js'
 import { useBuyBasicStore } from '@stores/buy/basic.js'
-import useBuyBasicActions from '@stores/buy/_composables/useBasicActions.js'
+import useBuyBasicActions from '@stores/buy/composables/useBasicActions.js'
 
-const common = useCommonStore()
+// const common = useCommonStore()
+const { onIsLoading } = useCommonActions()
 // const buyProject = useBuyProjectStore()
 // const { basic } = useBuyProjectActions()
 const buyBasic = useBuyBasicStore()
@@ -20,7 +22,7 @@ const message = computed(() => {
 })
 
 const onUploaded = async (items, done) => {
-  common.onIsLoading(true)
+  onIsLoading(true)
   const { status, data } = await onApiPOSTRealEstatePicUpload({
     hfid: hfID.value,
     imgType: 2, // (1: 物件圖片; 2: 格局圖)
@@ -31,7 +33,7 @@ const onUploaded = async (items, done) => {
     done(data)
   }
 
-  common.onIsLoading(false)
+  onIsLoading(false)
 }
 </script>
 

@@ -1,10 +1,11 @@
 <script setup>
 import Container from '@components/buy/mContainer.vue'
 
-import { useCommonStore } from '@stores/common.js'
+// import { useCommonStore } from '@stores/common.js'
+import useCommonActions from '@stores/composables/useCommonActions.js'
 
-const common = useCommonStore()
-const { onWithLoadingAll } = common
+// const common = useCommonStore()
+const { onWithLoadingAll } = useCommonActions()
 
 definePageMeta({
   layout: 'buy',

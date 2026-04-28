@@ -6,6 +6,7 @@ import { onSetWidth } from './postcss.function.js'
 export default {
   content: [
     './components/**/*.{js,vue,ts}',
+    './containers/**/*.{js,vue,ts}',
     './layouts/**/*.vue',
     './pages/**/*.vue',
     './static/**/*.{js,json,ts}',

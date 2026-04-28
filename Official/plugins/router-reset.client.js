@@ -1,8 +1,8 @@
-import { useCommonStore } from '@stores/common.js'
+import useCommonActions from '@stores/_composables/useCommonActions.js'
 
 export default defineNuxtPlugin(() => {
   const router = useRouter()
-  const common = useCommonStore()
+  const { onReset, onIsLoading } = useCommonActions()
   let isFirstNavigation = true
 
   router.beforeEach(() => {
@@ -11,7 +11,7 @@ export default defineNuxtPlugin(() => {
       return
     }
 
-    common.onReset()
-    common.onIsLoading(true)
+    onReset()
+    onIsLoading(true)
   })
 })
