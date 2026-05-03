@@ -1,31 +1,39 @@
-<script setup></script>
+<script setup>
+const houseFun = readonly([
+  {
+    label: '好房網首頁',
+    href: 'javascript:;',
+  },
+  {
+    label: '會員中心',
+    href: 'javascript:;',
+  },
+])
+</script>
 
 <template>
   <div class="m-fooetr mx-auto mt-[32px] px-[16px] p:max-w-[1232px]">
     <div
-      class="m-footer-container rounded-t-[15px] bg-[--gray-f7] py-[40px] tm:px-[16px] pt:flex p:px-[40px]"
+      class="m-footer-container overflow-hidden rounded-t-[15px] bg-[--gray-f7] py-[40px] t:gap-x-[40px] tm:px-[16px] pt:flex p:px-[40px]"
     >
-      <div class="m-footer-logo flex flex-col pt:grow">
+      <div class="m-footer-logo flex flex-col t:shrink-0 p:grow">
         <CommonImgSrc
           src="common/logo.svg"
           :setClass="{
-            main: 'h-[50px] w-[126px] grow',
+            main: 'h-[50px] w-[126px] p:grow',
           }"
         />
-        <ul class="inline-flex shrink-0 items-center gap-x-[8px]">
-          <li>
-            <a href="javascript:;" class="text-[14px] text-[--green-6a2d] underline">
-              <em>好房網首頁</em>
-            </a>
-          </li>
-          <li>
-            <a href="javascript:;" class="text-[14px] text-[--green-6a2d] underline">
-              <em>會員中心</em>
+        <ul class="inline-flex items-center gap-x-[8px] tm:mt-[16px] p:shrink-0">
+          <li v-for="(item, index) in houseFun" :key="`${item.label}_${index}`">
+            <a :href="item.href" class="text-[14px] text-[--green-6a2d] underline">
+              <em>{{ item.label }}</em>
             </a>
           </li>
         </ul>
       </div>
-      <div class="m-footer-information space-y-[16px] text-[14px] text-[--gray-999] pt:shrink-0">
+      <div
+        class="m-footer-information space-y-[16px] text-[14px] tracking-wider text-[--gray-999] m:mt-[24px] t:grow p:shrink-0"
+      >
         <ul>
           <li>
             <p>

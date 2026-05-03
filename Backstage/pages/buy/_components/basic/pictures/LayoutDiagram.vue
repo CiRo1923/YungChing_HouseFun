@@ -17,8 +17,11 @@ const hfID = computed(() => route.params.id)
 
 const message = computed(() => {
   const { caseInfo } = apiData.value
+  const basicText = `圖片大小不可超過 ${buyBasic.pictures.maxSizeMB} MB，僅支援 jpg、png、gif 格式，`
 
-  return caseInfo.caseLayout ? '已符合優質排序' : '還差 1 張符合優質排序'
+  return caseInfo.caseLayout
+    ? `${basicText}已符合優質排序`
+    : `${basicText}還差 <span class="text-[--orange-e646]">1</span> 張符合優質排序`
 })
 
 const onUploaded = async (items, done) => {
@@ -42,9 +45,7 @@ const onUploaded = async (items, done) => {
     <!-- <pre class="max-w-[500px] overflow-hidden whitespace-pre-line">
       {{ apiData.caseInfo.caseLayout }}
     </pre> -->
-    <p class="tracking-wider text-[--gray-999] p:text-[14px]">
-      圖片大小不可超過 25 MB，僅支援 jpg、png、gif 格式，{{ message }}
-    </p>
+    <p class="text-[14px] tracking-wider text-[--gray-999]" v-html="message" />
     <BuyMUploadSingle
       v-model="apiData.caseInfo.caseLayout"
       :config="{
@@ -57,7 +58,7 @@ const onUploaded = async (items, done) => {
         maxSize: '圖片大小不可超過 { maxSizeMB } MB',
       }"
       :setClass="{
-        main: 'p:mt-[16px]',
+        main: 'm:mt-[24px] pt:mt-[16px]',
       }"
       @uploaded="onUploaded"
     />

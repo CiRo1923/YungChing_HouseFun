@@ -16,7 +16,7 @@ const { apiData } = storeToRefs(buyBasic)
 
 <template>
   <ul class="flex flex-wrap tm:gap-x-[8px] p:gap-x-[24px]">
-    <li class="tm:w-[228px] p:w-[270px]">
+    <li class="tm:w-[220px] p:w-[270px]">
       <BuyMFormInput
         name="casePrice"
         v-model.number="apiData.caseInfo.casePrice"

@@ -52,7 +52,7 @@ const model = computed({
   set: (value) => {
     let result = value
 
-    if (props.cityModifiers?.number) {
+    if (props.modelModifiers?.number) {
       result = value === '' ? null : Number(value)
     }
 

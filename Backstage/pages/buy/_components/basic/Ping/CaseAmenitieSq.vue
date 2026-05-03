@@ -14,7 +14,7 @@ const { apiData, pingData } = storeToRefs(buyBasic)
   <ul class="m:space-y-[12px] t:gap-x-[8px] pt:flex pt:flex-wrap p:gap-x-[24px]">
     <li>
       <ul class="m:space-y-[12px] pt:flex pt:gap-x-[8px]">
-        <li class="t:w-[228px] p:w-[270px]">
+        <li class="t:w-[220px] p:w-[270px]">
           <BuyMFormInput
             name="caseAmenitieSq"
             v-model.number="pingData.caseAmenitieSq"
@@ -33,7 +33,7 @@ const { apiData, pingData } = storeToRefs(buyBasic)
             <template #rearAssist>{{ pingUnitLabel }}</template>
           </BuyMFormInput>
         </li>
-        <li class="t:w-[228px] p:w-[270px]">
+        <li class="t:w-[220px] p:w-[270px]">
           <BuyMFormInput
             name="caseAmenitieSqRqtio"
             v-model.number="apiData.caseInfo.caseAmenitieSqRqtio"

@@ -40,7 +40,7 @@ const onIsCaseHasElevatorChnage = () => {
       @change="onIsCaseHasElevatorChnage"
     />
     <ul>
-      <li class="p:w-[100px]">
+      <li class="t:w-[90px] p:w-[100px]">
         <BuyMFormInput
           name="caseElevatorCount"
           v-model.number="apiData.caseInfo.caseElevatorCount"

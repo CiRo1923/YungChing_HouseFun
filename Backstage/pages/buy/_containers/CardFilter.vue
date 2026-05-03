@@ -1,6 +1,10 @@
 <script setup>
-import { onDevice } from '@js/_prototype.js'
+import { useCommonStore } from '@stores/common.js'
+import useCommonActions from '@stores/composables/useCommonActions.js'
 
+const common = useCommonStore()
+const { device } = storeToRefs(common)
+const { onResize } = useCommonActions()
 const props = defineProps({
   title: {
     type: String,
@@ -11,7 +15,6 @@ const props = defineProps({
     default: () => [],
   },
 })
-const device = ref('p')
 
 const onIsHidden = (item) => {
   const { hiddenDevice } = item
@@ -33,23 +36,32 @@ const onHiddenClass = (item) => {
   return ''
 }
 
-const onResize = () => {
-  device.value = onDevice()
+const onBind = (item) => {
+  const { setClass } = item
+
+  return setClass
+    ? {
+        setClass,
+      }
+    : {}
 }
+
+onUnmounted(() => {
+  window.removeEventListener('resize', onResize)
+})
 
 onMounted(() => {
   onResize()
   window.addEventListener('resize', onResize)
 })
-
-onUnmounted(() => {
-  window.removeEventListener('resize', onResize)
-})
 </script>
 
 <template>
   <BuyMCardFilter :title="props.title">
-    <ul class="tm:space-y-[40px] p:space-y-[24px]">
+    <template #tools v-if="$slots.tools">
+      <slot name="tools" />
+    </template>
+    <ul class="m:space-y-[40px] pt:space-y-[24px]">
       <template v-for="(item, index) in props.items">
         <li
           class="m:space-y-[12px] pt:flex pt:gap-x-[8px]"
@@ -69,8 +81,8 @@ onUnmounted(() => {
           >
             <slot :name="`${item.id}_label`" />
           </BuyMFormLabel>
-          <div class="pt:grow">
-            <component :is="item.component" />
+          <div class="overflow-hidden pt:grow">
+            <component :is="item.component" v-bind="onBind(item)" />
           </div>
         </li>
       </template>

@@ -51,23 +51,27 @@ const onUploaded = async (items, done) => {
 </script>
 
 <template>
-  <div>
+  <div
+    class="relative"
+    :class="{
+      'm:pb-[45px]': hasCasePictures,
+    }"
+  >
     <!-- <pre class="max-w-[500px] overflow-hidden whitespace-pre-line">
       {{ apiData.caseInfo.casePictures }}
     </pre> -->
     <div class="pt:flex pt:items-center">
-      <p class="grow tracking-wider text-[--gray-999] p:text-[14px]" v-html="message" />
+      <p class="grow text-[14px] tracking-wider text-[--gray-999]" v-html="message" />
       <BuyMAnchor
         :text="`刪除已勾選 ${apiData.caseInfo.casePictures.length} 張`"
         :setClass="{
-          main: '--border-gray-e5 --bg-white --oval --h-30 --px-15 --py-8 --text-gray-666 shrink-0',
-          text: 'font-normal p:text-[14px]',
+          main: '--border-gray-e5 --bg-white --oval --h-30 --px-15 --py-8 --text-gray-666 shrink-0 m:absolute m:bottom-0 m:left-1/2 m:-translate-x-1/2',
+          text: 'text-[14px] font-normal',
         }"
         @click="onPicturesDelete"
         v-if="hasCasePictures"
       />
     </div>
-
     <BuyMUploadMultiple
       v-model="apiData.caseInfo.casePictures"
       :config="{
@@ -85,7 +89,7 @@ const onUploaded = async (items, done) => {
         maxSize: '圖片大小不可超過 { maxSizeMB } MB',
       }"
       :setClass="{
-        main: 'p:mt-[16px]',
+        main: 'm:mt-[24px] pt:mt-[16px]',
       }"
       @uploaded="onUploaded"
     />

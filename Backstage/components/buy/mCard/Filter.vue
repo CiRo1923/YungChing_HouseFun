@@ -15,6 +15,9 @@ const props = defineProps({
       <h3 class="text-[--gray-333] tm:text-center tm:text-[20px] p:text-[24px]">
         <strong class="font-medium">{{ props.title }}</strong>
       </h3>
+      <div class="m-card-tools" v-if="$slots.tools">
+        <slot name="tools" />
+      </div>
     </header>
     <div class="m-card-body tm:pt-[32px] p:grow">
       <slot />

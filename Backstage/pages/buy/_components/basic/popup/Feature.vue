@@ -60,7 +60,7 @@ const example2 = readonly({
   <CustomPopup
     id="popupFeature"
     :setClass="{
-      main: 'p:--w-1055 t:--w-720',
+      main: 'p:--w-1200 t:--w-720',
     }"
   >
     <div class="tracking-wider">

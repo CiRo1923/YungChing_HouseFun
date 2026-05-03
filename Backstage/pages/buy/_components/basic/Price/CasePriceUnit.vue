@@ -48,7 +48,7 @@ watch(
 
 <template>
   <ul class="flex flex-wrap tm:gap-x-[8px] p:gap-x-[24px]">
-    <li>
+    <li class="t:w-[220px] p:w-[270px]">
       <BuyMFormInput
         name="casePriceUnit"
         v-model.number="apiData.caseInfo.casePriceUnit"
@@ -61,7 +61,7 @@ watch(
           isDisabled: apiData.caseInfo.isCasePriceUnitAuto,
         }"
         :setClass="{
-          main: '--h-40 --px-12 --py-8 p:w-[270px]',
+          main: '--h-40 --px-12 --py-8',
           element: 'grow',
           rearAssist: 'text-[14px] text-[--gray-999]',
           suffix: 'text-[14px] text-[--gray-999]',

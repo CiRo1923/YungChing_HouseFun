@@ -2,6 +2,7 @@
 import BackStepNew from '@pages/buy/_components/basic/BackStepNew.vue'
 import TabCheck from '@pages/buy/_components/basic/TabCheck.vue'
 import PopupFeature from '@pages/buy/_components/basic/popup/Feature.vue'
+import PopupTitleDeed from '@pages/buy/_components/basic/popup/TitleDeed.vue'
 
 import DataComponents from '@pages/buy/_containers/basic/DataComponents.vue'
 import SubmitButtons from '@pages/buy/_containers/basic/SubmitButtons.vue'
@@ -74,6 +75,7 @@ await onWithLoadingAll([
     </Form>
   </BuyMContainer>
   <PopupFeature />
+  <PopupTitleDeed />
 </template>
 
 <style></style>

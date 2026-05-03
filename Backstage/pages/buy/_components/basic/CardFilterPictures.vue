@@ -25,7 +25,7 @@ const items = shallowReadonly([
   {
     id: 'layoutDiagram',
     label: '格局圖',
-    class: 'p:h-[25px]',
+    class: 'pt:h-[25px]',
     component: LayoutDiagram,
   },
 ])
@@ -34,9 +34,9 @@ const items = shallowReadonly([
 <template>
   <CardFilter :title="props.title" :items="items">
     <template #photos_label>
-      <p>
-        物件照片<br />
-        <small class="text-[--gray-666] p:text-[14px]">
+      <p class="flex m:items-center m:gap-x-[16px] pt:flex-col">
+        <em>物件照片</em>
+        <small class="text-[14px] text-[--gray-666]">
           {{ apiData.caseInfo.casePictures.length }} / {{ buyBasic.pictures.maxCount }}
         </small>
       </p>

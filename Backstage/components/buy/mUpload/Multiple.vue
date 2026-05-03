@@ -1,5 +1,6 @@
 <script setup>
 import ErrorMessageElem from '@components/buy/mErrorMessageElem.vue'
+import MultipleItem from '@components/buy/mUpload/MultipleItem.vue'
 
 import '@js/_validation.js'
 
@@ -369,7 +370,10 @@ const syncInnerListCheckedFromModel = (items) => {
 
       if (!currentItem) return true
 
-      return item.checked !== currentItem.checked || getInnerItemValue(item) !== getInnerItemValue(currentItem)
+      return (
+        item.checked !== currentItem.checked ||
+        getInnerItemValue(item) !== getInnerItemValue(currentItem)
+      )
     })
 
   if (!hasChanged) return
@@ -907,10 +911,7 @@ watch(
 
       <div class="grid gap-x-[10px] gap-y-[16px] m:grid-cols-2 t:grid-cols-3 p:grid-cols-4">
         <div
-          v-for="(item, index) in innerList"
-          :key="item.id"
           class="cursor-move touch-none"
-          :ref="(element) => setSortItemRef(item.id, element)"
           :draggable="config.draggableSort"
           @dragstart="onSortDragStart($event, index)"
           @dragover="onSortDragOverItem($event)"
@@ -920,78 +921,34 @@ watch(
           @pointermove="onSortPointerMove($event)"
           @pointerup="(event) => onSortPointerUp(event, handleChange)"
           @pointercancel="onSortPointerCancel($event)"
+          v-for="(item, index) in innerList"
+          :key="item.id"
+          :ref="(element) => setSortItemRef(item.id, element)"
         >
-          <div class="relative m:w-[150px] p:w-[200px]">
+          <div class="relative p:w-[200px]">
             <div
               v-if="draggedPreviewItem && shouldShowDraggedPreviewAt(index)"
               class="pointer-events-none absolute inset-x-0 top-0 z-[2]"
             >
-              <div class="relative opacity-30">
-                <div class="relative overflow-hidden rounded-[5px] m:h-[114px] p:h-[152px]">
-                  <img
-                    :src="draggedPreviewItem.url"
-                    alt=""
-                    class="h-full w-full object-cover"
-                    draggable="false"
-                  />
-
-                  <button
-                    type="button"
-                    class="absolute right-0 top-0 z-[1] flex h-[24px] w-[24px] items-center justify-center rounded-[5px] bg-[--gray-f2]"
-                    tabindex="-1"
-                  >
-                    <CommonSvgIcon icon="icon_xmark" class="h-[10px] w-[10px] text-[--gray-666]" />
-                  </button>
-                </div>
-
-                <label class="flex items-center justify-center p:mt-[6px]">
-                  <input
-                    type="checkbox"
-                    class="m-upload-checkbox sr-only"
-                    :checked="draggedPreviewItem.checked"
-                    tabindex="-1"
-                  />
-                  <CommonSvgIcon
-                    icon="icon_check_solid"
-                    class="m-upload-checkbox-icon relative mt-[2px] h-[18px] w-[18px] shrink-0 self-start rounded-[2px] border-[1px] p-[1px] text-[--orange-e646] transition-colors duration-300"
-                    :class="setClass.icon"
-                  />
-                </label>
-              </div>
-            </div>
-
-            <div class="relative" :style="getSortPreviewStyle(index)">
-              <div
-                class="relative overflow-hidden rounded-[5px] m:h-[114px] p:h-[152px]"
-                :class="{
-                  'pointer-events-none': dragItemIndex !== null,
+              <MultipleItem
+                :item="draggedPreviewItem"
+                :config="{
+                  isPreview: true,
                 }"
-              >
-                <img :src="item.url" alt="" class="h-full w-full object-cover" draggable="false" />
-
-                <button
-                  type="button"
-                  class="absolute right-0 top-0 z-[1] flex h-[24px] w-[24px] items-center justify-center rounded-[5px] bg-[--gray-f2]"
-                  @click.stop="onRemoveItem(index, handleChange)"
-                >
-                  <CommonSvgIcon icon="icon_xmark" class="h-[10px] w-[10px] text-[--gray-666]" />
-                </button>
-              </div>
-
-              <label class="flex items-center justify-center p:mt-[6px]">
-                <input
-                  type="checkbox"
-                  class="m-upload-checkbox sr-only"
-                  :checked="item.checked"
-                  @change="(event) => onCheckItemChange(event, item, handleChange)"
-                />
-                <CommonSvgIcon
-                  icon="icon_check_solid"
-                  class="m-upload-checkbox-icon relative mt-[2px] h-[18px] w-[18px] shrink-0 self-start rounded-[2px] border-[1px] p-[1px] text-[--orange-e646] transition-colors duration-300"
-                  :class="setClass.icon"
-                />
-              </label>
+                :setClass="setClass"
+              />
             </div>
+
+            <MultipleItem
+              :item="item"
+              :config="{
+                isDragging: dragItemIndex !== null,
+              }"
+              :setClass="setClass"
+              :style="getSortPreviewStyle(index)"
+              @remove="onRemoveItem(index, handleChange)"
+              @check="(event) => onCheckItemChange(event, item, handleChange)"
+            />
           </div>
         </div>
 
@@ -1000,8 +957,8 @@ watch(
           type="button"
           class="flex items-center justify-center rounded-[10px] border-[1px] border-[--gray-e5] bg-[--gray-f7]"
           :class="{
-            'w-full m:col-span-2 t:col-span-3 p:col-span-4 p:min-h-[130px]': !hasImages,
-            'text-sm p:h-[152px] p:w-[200px]': hasImages,
+            'min-h-[130px] w-full m:col-span-2 t:col-span-3 p:col-span-4': !hasImages,
+            'm:h-[114px] p:h-[152px] p:w-[200px]': hasImages,
             'border-blue-400 bg-blue-50': isUploadDragging,
           }"
           @click="openFileDialog"
@@ -1009,13 +966,15 @@ watch(
           @drop="(event) => onAppendButtonDrop(event, handleChange, validate)"
         >
           <div
-            class="flex h-full flex-col items-center justify-center text-[--green-6a2d] p:gap-y-[10px] p:text-[16px]"
+            class="flex grow flex-col items-center justify-center gap-y-[10px] text-[16px] text-[--green-6a2d]"
           >
             <CommonSvgIcon
               class="h-[24px] w-[24px] shrink-0 text-[--gray-666]"
               :icon="hasImages ? 'icon_plus_circle' : 'icon_upload'"
             />
-            <span>{{ hasImages ? placeholder.hasImages : placeholder.default }}</span>
+            <span class="grow text-[16px]">
+              {{ hasImages ? placeholder.hasImages : placeholder.default }}
+            </span>
           </div>
         </button>
       </div>

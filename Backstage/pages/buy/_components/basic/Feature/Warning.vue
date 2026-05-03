@@ -2,6 +2,20 @@
 import useBuyPopupActions from '@stores/buy/composables/usePopupActions.js'
 
 const { onCustom } = useBuyPopupActions()
+const props = defineProps({
+  setClass: {
+    type: Object,
+    default: () => ({}),
+  },
+})
+
+const setClass = computed(() => {
+  return {
+    main: '',
+    ...props.setClass,
+  }
+})
+
 const onPopupFeature = async () => {
   const isCustom = await onCustom({
     id: 'popupFeature',
@@ -17,7 +31,10 @@ const onPopupFeature = async () => {
 </script>
 
 <template>
-  <div class="text-[14px] text-[--gray-666] m:hidden pt:inline-flex pt:items-center p:gap-x-[16px]">
+  <div
+    class="text-[14px] text-[--gray-666] m:space-y-[8px] m:text-center pt:inline-flex pt:items-center p:gap-x-[16px]"
+    :class="setClass.main"
+  >
     <p>請遵守著作權規範，勿使用他人特色描述</p>
     <BuyMAnchor
       text="參考描述範例"

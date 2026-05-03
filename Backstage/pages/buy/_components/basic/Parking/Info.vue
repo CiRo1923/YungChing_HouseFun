@@ -185,6 +185,7 @@ onInit()
     <BuyMAddIdentical
       v-model="apiData.caseInfo.parkingInfos"
       :config="{
+        keepDelItems: 1,
         defaultData: buyProject.parkingInfo,
         anchor: {
           text: '新增一組車位',
@@ -196,7 +197,9 @@ onInit()
       v-slot="{ data, index }"
       v-if="apiData.caseInfo.isCaseParking"
     >
-      <ul class="m:space-y-[24px] pt:grid pt:grid-cols-2 p:gap-x-[24px] p:gap-y-[8px]">
+      <ul
+        class="m:space-y-[24px] t:gap-x-[16px] pt:grid pt:grid-cols-2 pt:gap-y-[8px] p:gap-x-[24px]"
+      >
         <li
           class="m:space-y-[12px] pt:flex pt:gap-x-[8px]"
           :class="item.class"

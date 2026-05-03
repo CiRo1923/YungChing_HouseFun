@@ -37,8 +37,8 @@ const onIsSingleFloorChange = () => {
       }"
       @change="onIsSingleFloorChange"
     />
-    <ul class="pt:flex pt:gap-x-[8px]">
-      <li class="pt:flex pt:grow pt:gap-x-[8px]">
+    <ul class="m:space-y-[8px] pt:flex pt:gap-x-[8px]">
+      <li class="flex grow gap-x-[8px] overflow-hidden">
         <BuyMFormSelect
           name="floorFromToken"
           v-model.number="apiData.caseInfo.floorFromToken"
@@ -51,7 +51,7 @@ const onIsSingleFloorChange = () => {
             },
           }"
           :setClass="{
-            main: '--h-40 --px-12 --py-8 pt:shrink-0',
+            main: '--h-40 --px-12 --py-8 shrink-0',
           }"
         />
         <BuyMFormInput
@@ -68,7 +68,7 @@ const onIsSingleFloorChange = () => {
             required: '請輸入樓層',
           }"
           :setClass="{
-            main: '--h-40 --px-12 --py-8 p:grow',
+            main: '--h-40 --px-12 --py-8 :grow',
             element: 'grow',
             rearAssist: 'text-[14px] text-[--gray-999]',
           }"
@@ -76,10 +76,10 @@ const onIsSingleFloorChange = () => {
           <template #rearAssist>樓</template>
         </BuyMFormInput>
       </li>
-      <li class="pt:shrink-0" v-if="!apiData.caseInfo.isSingleFloor">
-        <span class="text-[--gray-666] pt:flex pt:items-center p:h-[40px] p:text-[16px]">~</span>
+      <li class="m:hidden pt:shrink-0" v-if="!apiData.caseInfo.isSingleFloor">
+        <span class="text-[16px] text-[--gray-666] pt:flex pt:h-[40px] pt:items-center">~</span>
       </li>
-      <li class="pt:flex pt:grow pt:gap-x-[8px]" v-if="!apiData.caseInfo.isSingleFloor">
+      <li class="flex grow gap-x-[8px] overflow-hidden" v-if="!apiData.caseInfo.isSingleFloor">
         <BuyMFormSelect
           name="floorToToken"
           v-model.number="apiData.caseInfo.floorToToken"
@@ -92,7 +92,7 @@ const onIsSingleFloorChange = () => {
             },
           }"
           :setClass="{
-            main: '--h-40 --px-12 --py-8 pt:shrink-0',
+            main: '--h-40 --px-12 --py-8 shrink-0',
           }"
         />
         <BuyMFormInput
@@ -109,7 +109,7 @@ const onIsSingleFloorChange = () => {
             required: '請輸入樓層',
           }"
           :setClass="{
-            main: '--h-40 --px-12 --py-8 pt:grow',
+            main: '--h-40 --px-12 --py-8 grow',
             element: 'grow',
             rearAssist: 'text-[14px] text-[--gray-999]',
           }"

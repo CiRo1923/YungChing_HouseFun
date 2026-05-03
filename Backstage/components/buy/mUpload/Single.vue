@@ -503,7 +503,7 @@ watch(
         type="button"
         class="relative flex flex-col"
         :class="{
-          'w-full p:min-h-[130px]': !hasImage,
+          'min-h-[130px] w-full': !hasImage,
           'border-blue-400 bg-blue-50': isUploadDragging,
         }"
         :disabled="config.isDisabled"
@@ -518,7 +518,7 @@ watch(
             class="relative flex items-center justify-center overflow-hidden rounded-[10px] bg-[--gray-f7]"
             :class="{
               'h-full w-full': !hasImage,
-              'p:h-[152px] p:w-[200px]': hasImage,
+              'm:h-[114px] p:h-[152px] p:w-[200px]': hasImage,
             }"
           >
             <img
@@ -546,13 +546,13 @@ watch(
 
         <template v-else>
           <div
-            class="flex w-full grow flex-col items-center justify-center gap-y-[10px] rounded-[10px] border-[1px] border-[--gray-e5] bg-[--gray-f7] text-[16px] text-[--green-6a2d]"
+            class="flex w-full grow flex-col items-center justify-center gap-y-[10px] rounded-[10px] border-[1px] border-[--gray-e5] bg-[--gray-f7] text-[--green-6a2d]"
           >
             <CommonSvgIcon
               icon="icon_upload"
               class="h-[24px] w-[24px] shrink-0 text-[--gray-666]"
             />
-            <span>{{ config.placeholder }}</span>
+            <span class="text-[16px]">{{ config.placeholder }}</span>
           </div>
         </template>
       </button>

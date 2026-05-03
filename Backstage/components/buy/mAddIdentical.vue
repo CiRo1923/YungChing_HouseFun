@@ -32,7 +32,7 @@ const model = computed({
 
 const config = computed(() => {
   const defaultConfig = {
-    removeAll: false, // true 可以全部刪除；false 最少要有一個
+    keepDelItems: 0, // 0 可以全部刪除；{number} 最少要有 {number} 個
     defaultData: null,
     anchor: {
       text: null,
@@ -83,6 +83,7 @@ const onRemoveClick = (index) => {
           type="button"
           class="m-add-identical-clear-anchor absolute right-[5px] top-[5px] block h-[22px] w-[22px] p-[5px]"
           @click="onRemoveClick(index)"
+          v-if="config.keepDelItems < model.length"
         >
           <CommonSvgIcon icon="icon_xmark" class="h-full w-full" />
         </button>

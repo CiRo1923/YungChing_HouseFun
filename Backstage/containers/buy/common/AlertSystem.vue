@@ -23,7 +23,7 @@ const onClose = (item) => {
   <BuyMPopup
     id="alertSystem"
     :setClass="{
-      main: 'p:--w-655 t:--w-490',
+      main: 'p:--w-800 t:--w-600',
     }"
   >
     <div class="text-center text-[16px]" v-html="alert.content" />

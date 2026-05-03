@@ -24,7 +24,7 @@ const { apiData } = storeToRefs(buyBasic)
       },
     }"
     :setClass="{
-      main: '--h-40 --px-12 --py-8 p:w-[270px]',
+      main: '--h-40 --px-12 --py-8 t:w-[220px] p:w-[270px]',
     }"
   />
 </template>

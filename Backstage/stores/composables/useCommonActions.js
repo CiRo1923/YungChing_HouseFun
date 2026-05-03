@@ -1,8 +1,10 @@
+import { onDevice } from '@js/_prototype.js'
+
 import { useCommonStore } from '@stores/common.js'
 
 const useCommonActions = () => {
   const common = useCommonStore()
-  const { isLoading } = storeToRefs(common)
+  const { isLoading, device } = storeToRefs(common)
   const onUseMeta = (meta) => {
     const { title, description, url } = meta
 
@@ -39,6 +41,10 @@ const useCommonActions = () => {
     isLoading.value = boolean
   }
 
+  const onResize = () => {
+    device.value = onDevice()
+  }
+
   const onWithLoadingAll = async (promises) => {
     if (import.meta.client) {
       onIsLoading(true)
@@ -60,6 +66,7 @@ const useCommonActions = () => {
   return {
     onUseMeta,
     onIsLoading,
+    onResize,
     onWithLoadingAll,
     onReset,
   }

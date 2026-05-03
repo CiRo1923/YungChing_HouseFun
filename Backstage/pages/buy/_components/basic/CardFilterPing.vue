@@ -11,6 +11,9 @@ import CaseAmenitieSq from '@pages/buy/_components/basic/ping/CaseAmenitieSq.vue
 
 // import { useBuyBasicStore } from '@stores/buy/basic.js'
 
+import useBuyPopupActions from '@stores/buy/composables/usePopupActions.js'
+
+const { onCustom } = useBuyPopupActions()
 // const buyBasic = useBuyBasicStore()
 // const { pingData } = storeToRefs(buyBasic)
 
@@ -71,13 +74,46 @@ const items = shallowReadonly([
     component: CaseLandSq,
   },
 ])
+
+const onPopupTitleDeed = async () => {
+  const isCustom = await onCustom({
+    id: 'popupTitleDeed',
+    title: '權狀書說明',
+    icon: 'icon_book',
+    btns: 'alert',
+  })
+
+  if (isCustom) {
+    console.log('ok')
+  }
+}
 </script>
 
 <template>
   <!-- <pre>
     {{ pingData }}
   </pre> -->
-  <CardFilter :title="props.title" :items="items" />
+  <CardFilter :title="props.title" :items="items">
+    <template #tools>
+      <div class="m:mt-[8px] m:text-center">
+        <BuyMAnchor
+          text="權狀書說明"
+          :config="{
+            icon: {
+              position: 'left',
+              name: 'icon_circle_question',
+            },
+          }"
+          :setClass="{
+            main: '--text-green-6a2d underline',
+            text: 'font-normal',
+            icon: 'h-[18px] w-[18px] text-[--gray-666]',
+          }"
+          @click="onPopupTitleDeed"
+        />
+      </div>
+    </template>
+  </CardFilter>
 </template>
 
 <style></style>

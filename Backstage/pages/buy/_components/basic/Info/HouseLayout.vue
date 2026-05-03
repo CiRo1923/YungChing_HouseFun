@@ -48,7 +48,7 @@ const onIsCaseAddtionChange = () => {
       <li>
         <ul class="flex flex-wrap gap-x-[8px] gap-y-[12px]">
           <li
-            class="tm:w-[151px] p:w-[100px]"
+            class="m:w-[151px] t:w-[90px] p:w-[100px]"
             v-for="(item, index) in items"
             :key="`${item.id}_${index}`"
           >

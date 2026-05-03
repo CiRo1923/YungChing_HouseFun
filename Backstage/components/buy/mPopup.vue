@@ -165,11 +165,19 @@ watchEffect(() => {
 
 @screen p {
   .m-popup {
-    &.\-\-w-1055,
-    &.p\:\-\-w-1055,
-    &.pt\:\-\-w-1055 {
+    &.\-\-w-1200,
+    &.p\:\-\-w-1200,
+    &.pt\:\-\-w-1200 {
       .m-popup-container {
-        @apply w-[1055px];
+        @apply w-[1200px];
+      }
+    }
+
+    &.\-\-w-800,
+    &.p\:\-\-w-800,
+    &.pt\:\-\-w-800 {
+      .m-popup-container {
+        @apply w-[800px];
       }
     }
 
@@ -181,19 +189,11 @@ watchEffect(() => {
       }
     }
 
-    &.\-\-w-655,
-    &.p\:\-\-w-655,
-    &.pt\:\-\-w-655 {
+    &.\-\-w-600,
+    &.p\:\-\-w-600,
+    &.pt\:\-\-w-600 {
       .m-popup-container {
-        @apply w-[655px];
-      }
-    }
-
-    &.\-\-w-490,
-    &.p\:\-\-w-490,
-    &.pt\:\-\-w-490 {
-      .m-popup-container {
-        @apply w-[490px];
+        @apply w-[600px];
       }
     }
   }
@@ -201,12 +201,21 @@ watchEffect(() => {
 
 @screen t {
   .m-popup {
-    &.\-\-w-1055,
-    &.pt\:\-\-w-1055,
-    &.tm\:\-\-w-1055,
-    &.t\:\-\-w-1055 {
+    &.\-\-w-1200,
+    &.pt\:\-\-w-1200,
+    &.tm\:\-\-w-1200,
+    &.t\:\-\-w-1200 {
       .m-popup-container {
-        @apply w-[1055px];
+        @apply w-[1200px];
+      }
+    }
+
+    &.\-\-w-800,
+    &.pt\:\-\-w-800,
+    &.tm\:\-\-w-800,
+    &.t\:\-\-w-800 {
+      .m-popup-container {
+        @apply w-[800px];
       }
     }
 
@@ -219,21 +228,12 @@ watchEffect(() => {
       }
     }
 
-    &.\-\-w-655,
-    &.pt\:\-\-w-655,
-    &.tm\:\-\-w-655,
-    &.t\:\-\-w-655 {
+    &.\-\-w-600,
+    &.pt\:\-\-w-600,
+    &.tm\:\-\-w-600,
+    &.t\:\-\-w-600 {
       .m-popup-container {
-        @apply w-[655px];
-      }
-    }
-
-    &.\-\-w-490,
-    &.pt\:\-\-w-490,
-    &.tm\:\-\-w-490,
-    &.t\:\-\-w-490 {
-      .m-popup-container {
-        @apply w-[490px];
+        @apply w-[600px];
       }
     }
   }

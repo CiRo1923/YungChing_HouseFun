@@ -24,6 +24,7 @@ const items = shallowReadonly([
   {
     id: 'caseStairwellSq',
     label: '電 / 樓梯間',
+    class: 't:col-span-2',
   },
   {
     id: 'caseMezzanineSq',
@@ -89,7 +90,7 @@ watch(
 <template>
   <div class="m:space-y-[16px] pt:space-y-[8px]">
     <ul class="flex overflow-hidden tm:gap-x-[16px] p:gap-x-[24px]">
-      <li class="m:min-w-0 m:grow t:w-[220px] pt:w-[270px]">
+      <li class="m:min-w-0 m:grow t:w-[220px] p:w-[270px]">
         <BuyMFormInput
           name="caseAffiliatedSqPin"
           v-model.number="pingData.caseAffiliatedSq"
@@ -124,7 +125,7 @@ watch(
       </li>
     </ul>
     <ul
-      class="grid rounded-[15px] bg-[--gray-f7] m:grid-cols-2 tm:gap-x-[16px] tm:gap-y-[24px] tm:p-[24px] pt:grid-cols-4 p:gap-x-[24px] p:gap-y-[8px] p:p-[30px]"
+      class="grid rounded-[15px] bg-[--gray-f7] m:grid-cols-2 m:gap-y-[24px] t:grid-cols-3 tm:gap-x-[16px] tm:p-[24px] pt:gap-y-[8px] p:grid-cols-4 p:gap-x-[24px] p:p-[30px]"
     >
       <li
         class="m:space-y-[12px] pt:flex pt:gap-x-[8px]"

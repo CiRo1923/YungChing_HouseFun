@@ -86,9 +86,9 @@ const onAreaChange = async ({ source } = {}) => {
       },
     }"
     :setClass="{
-      city: 'pt:w-[260px]',
-      area: 'pt:w-[260px]',
-      road: 'pt:w-[262px]',
+      city: 't:w-[180px] p:w-[260px]',
+      area: 't:w-[180px] p:w-[260px]',
+      road: 't:w-[220px] p:w-[294px]',
       lane: 'm:w-[98px] pt:w-[86px]',
       alley: 'm:w-[98px] pt:w-[86px]',
       number: 'm:w-[98px] pt:w-[86px]',
