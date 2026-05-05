@@ -1,5 +1,5 @@
 <script setup>
-const emits = defineEmits(['update:modelValue', 'blur'])
+const emits = defineEmits(['update:modelValue', 'blur', 'remove'])
 const props = defineProps({
   name: {
     type: String,
@@ -156,6 +156,15 @@ const onFocus = () => {
   isFocus.value = true
 }
 
+const onClear = () => {
+  model.value = ''
+  onUpdateInputWidth()
+}
+
+const onRemove = () => {
+  emits('remove')
+}
+
 watch(
   () => props.modelValue,
   (value) => {
@@ -236,23 +245,22 @@ onBeforeUnmount(() => {
           '--show': model,
         }"
         tabindex="-1"
-        @click="onClear"
+        @mousedown.prevent.stop
+        @click.stop="onClear"
         v-if="!config.isDisabled && isFocus"
       >
-        <CommonSvgIcon icon="icon_xmark" class="m-tag-clear-icon" />
+        <CommonSvgIcon icon="icon_xmark" class="m-tag-clear-icon h-[10px] w-[10px]" />
       </button>
     </div>
     <button
       type="button"
       class="m-tag-clear-button"
-      :class="{
-        '--show': model,
-      }"
       tabindex="-1"
-      @click="onClear"
+      @mousedown.prevent.stop
+      @click.stop="onRemove"
       v-if="!config.isDisabled && hasCheckValue"
     >
-      <CommonSvgIcon icon="icon_xmark" class="m-tag-remove-icon" />
+      <CommonSvgIcon icon="icon_xmark_circle" class="m-tag-remove-icon h-[15px] w-[15px]" />
     </button>
     <span
       class="m-tag-mirror pointer-events-none invisible absolute whitespace-pre"

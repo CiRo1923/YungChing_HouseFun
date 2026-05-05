@@ -31,6 +31,7 @@ interface _GlobalComponents {
   BuyMFormLabel: typeof import("../../components/buy/mForm/Label.vue")['default']
   BuyMFormRadiosOval: typeof import("../../components/buy/mForm/RadiosOval.vue")['default']
   BuyMFormSelect: typeof import("../../components/buy/mForm/Select.vue")['default']
+  BuyMGoogleMap: typeof import("../../components/buy/mGoogleMap.vue")['default']
   BuyMHeader: typeof import("../../components/buy/mHeader.vue")['default']
   BuyMItemContainer: typeof import("../../components/buy/mItem/Container.vue")['default']
   BuyMItemMain: typeof import("../../components/buy/mItem/Main.vue")['default']
@@ -92,6 +93,7 @@ interface _GlobalComponents {
   LazyBuyMFormLabel: LazyComponent<typeof import("../../components/buy/mForm/Label.vue")['default']>
   LazyBuyMFormRadiosOval: LazyComponent<typeof import("../../components/buy/mForm/RadiosOval.vue")['default']>
   LazyBuyMFormSelect: LazyComponent<typeof import("../../components/buy/mForm/Select.vue")['default']>
+  LazyBuyMGoogleMap: LazyComponent<typeof import("../../components/buy/mGoogleMap.vue")['default']>
   LazyBuyMHeader: LazyComponent<typeof import("../../components/buy/mHeader.vue")['default']>
   LazyBuyMItemContainer: LazyComponent<typeof import("../../components/buy/mItem/Container.vue")['default']>
   LazyBuyMItemMain: LazyComponent<typeof import("../../components/buy/mItem/Main.vue")['default']>

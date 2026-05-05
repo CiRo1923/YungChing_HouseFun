@@ -71,9 +71,11 @@ const useBuyProjectActions = () => {
       onApiError(config, status, data)
     }
 
-    // if (status === 200) {
-    //   console.log(data)
-    // }
+    if (status === 200) {
+      options.value.area = data || []
+    } else {
+      onApiError(config, status, data)
+    }
 
     return { config, status, data }
   }
@@ -377,6 +379,51 @@ const useBuyProjectActions = () => {
 
     return { config, status, data }
   }
+  const onValueGetText = (option, value) => {
+    const isOptionString = typeof option === 'string'
+    const currOptions = isOptionString ? options.value[option] : option || []
+    const onRecursive = (list, targetValue) => {
+      if (list) {
+        for (const item of list) {
+          // 直接掃整個物件的值
+          if (Object.values(item).includes(targetValue)) {
+            return item
+          }
+
+          // recursion
+          for (const value of Object.values(item)) {
+            if (Array.isArray(value)) {
+              const found = onRecursive(value, targetValue)
+              if (found) return found
+            } else if (value && typeof value === 'object') {
+              const found = onRecursive([value], targetValue)
+              if (found) return found
+            }
+          }
+        }
+      }
+
+      return null
+    }
+
+    return onRecursive(currOptions, value) || {}
+  }
+  const onReplaceImageSize = (data, key, size) => {
+    const onReplaceKey = (item) => ({
+      ...item,
+      url: item[key].replaceAll('{0}', size.width).replaceAll('{1}', size.height),
+    })
+
+    if (Array.isArray(data)) {
+      return data.map(onReplaceKey)
+    }
+
+    if (typeof data === 'object' && data !== null) {
+      return onReplaceKey(data)
+    }
+
+    return data
+  }
 
   return {
     onApiGETRealEstatePurposeCheckOptions,
@@ -405,6 +452,8 @@ const useBuyProjectActions = () => {
     onApiGETRealEstateVideoTypeSelectOptions,
     onApiGETRealEstateFeatureCheckOptions,
     onApiGETRealEstatePosterDataSourceSelectOptions,
+    onValueGetText,
+    onReplaceImageSize,
   }
 }
 

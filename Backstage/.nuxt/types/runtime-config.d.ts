@@ -19,13 +19,15 @@ import { RuntimeConfig as UserRuntimeConfig, PublicRuntimeConfig as UserPublicRu
 
    NUXT_PUBLIC_APP_MODE: string,
 
-   NUXT_PUBLIC_HFID_DEFAULT: string,
+   NUXT_PUBLIC_GOOGLE_MAPS_API_KEY: string,
 
    NUXT_PUBLIC_PATH: string,
 
    appHash: string,
 
    spritePath: string,
+
+   googleMapsApiKey: string,
   }
 declare module '@nuxt/schema' {
   interface RuntimeConfig extends UserRuntimeConfig {}

@@ -14,6 +14,10 @@ const props = defineProps({
     type: String,
     default: null,
   },
+  config: {
+    type: Object,
+    default: () => ({}),
+  },
   setClass: {
     type: Object,
     default: () => ({}),
@@ -22,13 +26,18 @@ const props = defineProps({
 const custom = computed(() => customData.value || {})
 const isAlertBtns = computed(() => !!(customData.value.btns === 'alert'))
 const isConfirmBtns = computed(() => !!(customData.value.btns === 'confirm'))
-
 const footerBtns = computed(() => {
   return isAlertBtns.value
     ? buyPopup.buttons.alert
     : isConfirmBtns.value
       ? buyPopup.buttons.confirm
       : customData.value.btns || null
+})
+const config = computed(() => {
+  return {
+    data: null,
+    ...props.config,
+  }
 })
 
 const onClose = (item) => {
@@ -42,7 +51,7 @@ const onClose = (item) => {
 
   // cancel 或允許 sureClose 的情況：照舊 resolve + close
   const isShouldClose = item.isClose !== false
-  customCheck.value(isSure)
+  customCheck.value(isSure ? config.value.data : false)
 
   if (isShouldClose) onCustomClose()
 }
@@ -59,7 +68,7 @@ const onClose = (item) => {
     <template #footer v-if="$slots.footer || footerBtns">
       <slot name="footer">
         <div class="text-center">
-          <ul class="inline-flex items-center p:gap-x-[16px]">
+          <ul class="inline-flex items-center tm:gap-x-[8px] p:gap-x-[16px]">
             <li
               class="min-w-[100px]"
               v-for="(item, index) in footerBtns"

@@ -32,6 +32,7 @@
     "vite-plugin-image-optimizer": "^2.0.3"
   },
   "dependencies": {
+    "@googlemaps/js-api-loader": "^2.0.2",
     "@mayasabha/ckeditor4-vue3": "^1.0.9",
     "@pinia/nuxt": "^0.11.2",
     "@spiriit/vite-plugin-svg-spritemap": "^5.0.0",

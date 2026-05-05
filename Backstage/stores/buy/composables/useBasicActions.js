@@ -38,10 +38,12 @@ const useBuyBasicActions = () => {
     onApiGETRealEstateVideoTypeSelectOptions,
     onApiGETRealEstateFeatureCheckOptions,
     onApiGETRealEstatePosterDataSourceSelectOptions,
+    onValueGetText,
+    onReplaceImageSize,
   } = useBuyProjectActions()
   const basicStores = useBuyBasicStore()
-  const { onApiError } = useBuyPopupActions()
-  const { apiData, pingData } = storeToRefs(basicStores)
+  const { apiData, address, pingData } = storeToRefs(basicStores)
+  const { onAlert, onApiError } = useBuyPopupActions()
   const currentUnit = computed(() =>
     basicStores.options.unit.find((item) => item.value === apiData.value.caseInfo.isCaseSqUnitPin)
   )
@@ -50,6 +52,28 @@ const useBuyBasicActions = () => {
       basicStores.options.unit.find((item) => item.value === apiData.value.caseInfo.isCaseSqUnitPin)
         .label
   )
+  const onAddress = () => {
+    if (address.value) {
+      const { city, area, road, lane, alley, number } = address.value
+      const laneText = lane ? `${lane}巷` : ''
+      const alleyText = alley ? `${alley}弄` : ''
+      const numberText = number ? `${number}號` : ''
+
+      return [city, area, road, laneText, alleyText, numberText].filter(Boolean).join('')
+    }
+
+    const caseInfo = apiData.value.caseInfo
+    const cityID = caseInfo.cityID ? String(caseInfo.cityID) : ''
+    const districtID = caseInfo.districtID ? String(caseInfo.districtID) : ''
+    const city = onValueGetText('city', cityID).text
+    const area = onValueGetText('area', districtID).text
+    const lane = caseInfo.lane ? `${caseInfo.lane}巷` : ''
+    const alley = caseInfo.alley ? `${caseInfo.alley}弄` : ''
+    const number = caseInfo.addrNum ? `${caseInfo.addrNum}號` : ''
+    const ofNumber = caseInfo.addrNumOf ? `之${caseInfo.addrNumOf}` : ''
+
+    return [city, area, caseInfo.road, lane, alley, number, ofNumber].filter(Boolean).join('')
+  }
   const onPingVaild = () => {
     const { isCaseBuildSqIncludeParking } = apiData.value.caseInfo
     const { caseBuildSq, caseParkingSq, caseMainSq } = pingData.value
@@ -125,8 +149,35 @@ const useBuyBasicActions = () => {
 
     if (status === 200) {
       const { caseInfo } = data
+      const isCaseSqUnitPin = caseInfo.isCaseSqUnitPin
+      const imageSize = {
+        width: 400,
+        height: 304,
+      }
+      const fields = [
+        'caseBuildSq',
+        'caseParkingSq',
+        'caseMainSq',
+        'caseAffiliatedSq',
+        'caseBalconySq',
+        'casePlatformSq',
+        'caseTerraceSq',
+        'caseStairwellSq',
+        'caseMezzanineSq',
+        'caseBasementSq',
+        'caseOtherSq',
+        'caseAmenitieSq',
+        'caseLandSq',
+      ]
+      const casePictures = onReplaceImageSize(caseInfo.casePictures, 'url', imageSize)
+      const caseLayout = onReplaceImageSize(caseInfo.caseLayout, 'url', imageSize)
 
       apiData.value.caseInfo = caseInfo
+      apiData.value.caseInfo.casePictures = casePictures // 替換 width  & height
+      apiData.value.caseInfo.caseLayout = caseLayout // 替換 width  & height
+      fields.forEach((key) => {
+        pingData.value[key] = isCaseSqUnitPin ? caseInfo[`${key}Pin`] : caseInfo[`${key}M`]
+      })
     } else {
       onApiError(config, status, data)
     }
@@ -140,7 +191,10 @@ const useBuyBasicActions = () => {
     })
 
     if (status === 200) {
-      console.log(data)
+      onAlert({
+        content: '儲存成功',
+      })
+      // console.log(data)
     } else {
       onApiError(config, status, data)
     }
@@ -154,7 +208,10 @@ const useBuyBasicActions = () => {
     })
 
     if (status === 200) {
-      console.log(data)
+      onAlert({
+        content: '儲存成功',
+      })
+      // console.log(data)
     } else {
       onApiError(config, status, data)
     }
@@ -205,6 +262,7 @@ const useBuyBasicActions = () => {
   return {
     currentUnit,
     pingUnitLabel,
+    onAddress,
     onPingVaild,
     onPingUnitChange,
     onPinSqMetersConvert,

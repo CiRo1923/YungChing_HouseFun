@@ -1,6 +1,7 @@
 <script setup>
 import BackStepNew from '@pages/buy/_components/basic/BackStepNew.vue'
 import TabCheck from '@pages/buy/_components/basic/TabCheck.vue'
+import PopupAddressGoogleMap from '@pages/buy/_components/basic/popup/AddressGoogleMap.vue'
 import PopupFeature from '@pages/buy/_components/basic/popup/Feature.vue'
 import PopupTitleDeed from '@pages/buy/_components/basic/popup/TitleDeed.vue'
 
@@ -74,6 +75,7 @@ await onWithLoadingAll([
       <SubmitButtons @click:draft="onDraftSubmit" @click:save="() => onSaveSubmit(validate)" />
     </Form>
   </BuyMContainer>
+  <PopupAddressGoogleMap />
   <PopupFeature />
   <PopupTitleDeed />
 </template>

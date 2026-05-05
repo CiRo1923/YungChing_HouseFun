@@ -31,6 +31,7 @@ export const BuyMFormInput: typeof import("../components/buy/mForm/Input.vue")['
 export const BuyMFormLabel: typeof import("../components/buy/mForm/Label.vue")['default']
 export const BuyMFormRadiosOval: typeof import("../components/buy/mForm/RadiosOval.vue")['default']
 export const BuyMFormSelect: typeof import("../components/buy/mForm/Select.vue")['default']
+export const BuyMGoogleMap: typeof import("../components/buy/mGoogleMap.vue")['default']
 export const BuyMHeader: typeof import("../components/buy/mHeader.vue")['default']
 export const BuyMItemContainer: typeof import("../components/buy/mItem/Container.vue")['default']
 export const BuyMItemMain: typeof import("../components/buy/mItem/Main.vue")['default']
@@ -92,6 +93,7 @@ export const LazyBuyMFormInput: LazyComponent<typeof import("../components/buy/m
 export const LazyBuyMFormLabel: LazyComponent<typeof import("../components/buy/mForm/Label.vue")['default']>
 export const LazyBuyMFormRadiosOval: LazyComponent<typeof import("../components/buy/mForm/RadiosOval.vue")['default']>
 export const LazyBuyMFormSelect: LazyComponent<typeof import("../components/buy/mForm/Select.vue")['default']>
+export const LazyBuyMGoogleMap: LazyComponent<typeof import("../components/buy/mGoogleMap.vue")['default']>
 export const LazyBuyMHeader: LazyComponent<typeof import("../components/buy/mHeader.vue")['default']>
 export const LazyBuyMItemContainer: LazyComponent<typeof import("../components/buy/mItem/Container.vue")['default']>
 export const LazyBuyMItemMain: LazyComponent<typeof import("../components/buy/mItem/Main.vue")['default']>

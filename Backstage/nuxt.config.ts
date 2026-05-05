@@ -24,6 +24,7 @@ export default defineNuxtConfig({
       ),
       appHash: process.env.VITE_APP_HASH || new Date().toISOString(),
       spritePath: `${CONFIG.imgs}/svg/spritemap.svg`,
+      googleMapsApiKey: process.env.NUXT_PUBLIC_GOOGLE_MAPS_API_KEY,
     },
   },
   imports: {
@@ -181,6 +182,9 @@ export default defineNuxtConfig({
   //     ErrorMessage: 'VeeErrorMessage'
   //   }
   // },
+  build: {
+    transpile: ['@googlemaps/js-api-loader'],
+  },
   router: {
     options: {
       linkActiveClass: 'active',

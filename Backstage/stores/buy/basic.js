@@ -142,6 +142,7 @@ export const useBuyBasicStore = defineStore('buyBasic', () => {
       parkingInfos: [],
       caseDescription: null,
       caseFeatureToken: null,
+      caseFeatureCustomize: null,
       casePictures: [],
       caseLayout: null,
       caseVideoDisplayToken: 1,
@@ -180,6 +181,7 @@ export const useBuyBasicStore = defineStore('buyBasic', () => {
       },
     ],
   })
+  const address = ref(null)
   const pingData = ref({
     caseBuildSq: null,
     caseParkingSq: null,
@@ -204,6 +206,7 @@ export const useBuyBasicStore = defineStore('buyBasic', () => {
     components,
     apiData,
     options,
+    address,
     pingData,
     pictures,
   }

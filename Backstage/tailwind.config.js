@@ -1,3 +1,5 @@
+import plugin from 'tailwindcss/plugin'
+
 const CONFIG = require('./config.js')
 const { dropShadow, letterSpacing, lineHeight } = require('./tailwind.extend.js')
 
@@ -87,5 +89,21 @@ module.exports = {
   corePlugins: {
     fontFamily: false,
   },
-  plugins: [],
+  plugins: [
+    plugin(({ addComponents }) => {
+      const truncateMultiline = {}
+      for (let i = 2; i <= 5; i += 1) {
+        truncateMultiline[`.truncate-${i}`] = {
+          display: '-webkit-box;',
+          '-webkit-line-clamp': `${i}`,
+          '-webkit-box-orient': 'vertical',
+          overflow: 'hidden',
+        }
+      }
+      addComponents(truncateMultiline)
+      addComponents({
+        '.imeMode-disabled': { 'ime-mode': 'disabled' },
+      })
+    }),
+  ],
 }

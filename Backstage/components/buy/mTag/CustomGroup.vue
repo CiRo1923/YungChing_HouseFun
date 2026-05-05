@@ -6,8 +6,8 @@ const props = defineProps({
     default: null,
   },
   modelValue: {
-    type: Array,
-    default: () => [],
+    type: [String, Array],
+    default: undefined,
   },
   // modelModifiers: {
   //   type: Object,
@@ -24,18 +24,53 @@ const props = defineProps({
 })
 
 const items = ref([])
-const model = computed({
-  get: () => props.modelValue,
-  set: (value) => {
-    emits('update:modelValue', value)
-  },
-})
 
 const config = computed(() => {
   return {
     maxItems: null,
+    isJoin: false,
     ...props.config,
   }
+})
+
+const joinSep = computed(() => {
+  const { isJoin } = config.value
+
+  if (isJoin === true) return ','
+  if (typeof isJoin === 'string' && isJoin.length) return isJoin
+
+  return null
+})
+
+const model = computed({
+  get() {
+    const sep = joinSep.value
+
+    if (Array.isArray(props.modelValue)) return props.modelValue
+
+    if (sep && typeof props.modelValue === 'string') {
+      return props.modelValue
+        ? props.modelValue
+            .split(sep)
+            .map((item) => item.trim())
+            .filter(Boolean)
+        : []
+    }
+
+    if (typeof props.modelValue === 'string') return props.modelValue ? [props.modelValue] : []
+
+    return []
+  },
+  set(value) {
+    const sep = joinSep.value
+
+    if (sep && Array.isArray(value)) {
+      emits('update:modelValue', value.join(sep))
+      return
+    }
+
+    emits('update:modelValue', value)
+  },
 })
 
 const setClass = computed(() => {
@@ -78,9 +113,9 @@ const onNormalizeItems = (value = []) => {
 }
 
 watch(
-  [() => props.modelValue, maxItems],
-  ([value]) => {
-    onNormalizeItems(value)
+  [() => props.modelValue, maxItems, joinSep],
+  () => {
+    onNormalizeItems(model.value)
   },
   {
     immediate: true,
@@ -94,6 +129,12 @@ const onSyncModel = () => {
 
 const onUpdateItem = (index, value) => {
   items.value[index] = value
+}
+
+const onRemoveItem = (index) => {
+  items.value.splice(index, 1)
+  onSyncModel()
+  onNormalizeItems(items.value)
 }
 
 const onBlurItem = (index, value) => {
@@ -123,6 +164,7 @@ const onBlurItem = (index, value) => {
         :setClass="setClass.tag"
         @update:model-value="onUpdateItem(index, $event)"
         @blur="onBlurItem(index, $event)"
+        @remove="onRemoveItem(index)"
       />
     </li>
   </ul>
