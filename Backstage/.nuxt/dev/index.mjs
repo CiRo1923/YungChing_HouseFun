@@ -642,8 +642,8 @@ const _inlineRuntimeConfig = {
     "NUXT_PUBLIC_APP_MODE": "dev",
     "NUXT_PUBLIC_GOOGLE_MAPS_API_KEY": "AIzaSyCLt5cajmqkDmmtatyXIWWoXTMYYAyibNM",
     "NUXT_PUBLIC_PATH": "/",
-    "appHash": "2026-05-05T01:53:38.549Z",
-    "spritePath": "assets/imgs/svg/spritemap.svg",
+    "appHash": "17a2e1d",
+    "spritePath": "/__housefun_svg_spritemap",
     "googleMapsApiKey": "AIzaSyCLt5cajmqkDmmtatyXIWWoXTMYYAyibNM"
   }
 };
@@ -2133,19 +2133,19 @@ _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw
 ];
 
 const assets = {
-  "/index.mjs": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"1a580-mOCY6FJJ2+yEPULS1Pq1AIAQ3JE\"",
-    "mtime": "2026-05-05T01:54:38.414Z",
-    "size": 107904,
-    "path": "index.mjs"
-  },
   "/index.mjs.map": {
     "type": "application/json",
-    "etag": "\"6b632-1nInn6W8q0UCX9wQoo5KPgNxwxQ\"",
-    "mtime": "2026-05-05T01:54:38.414Z",
-    "size": 439858,
+    "etag": "\"6b5c9-trBWUKpnII2RsK3PdqJLvYy2b9I\"",
+    "mtime": "2026-05-07T07:40:07.828Z",
+    "size": 439753,
     "path": "index.mjs.map"
+  },
+  "/index.mjs": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"1a56b-b6JtrIg+ni59hJe3UwFgUJNumyA\"",
+    "mtime": "2026-05-07T07:40:07.828Z",
+    "size": 107883,
+    "path": "index.mjs"
   }
 };
 

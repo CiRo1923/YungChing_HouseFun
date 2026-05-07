@@ -4,8 +4,10 @@ import CONFIG from './config.js'
 import POSTCSSFUNCTIONS from './postcss.function.js'
 
 import VitePluginSvgSpritemap from '@spiriit/vite-plugin-svg-spritemap'
+import SvgSpritemapDevPlugin from './scripts/vite/svg-spritemap-dev.mjs'
 import { ViteImageOptimizer } from 'vite-plugin-image-optimizer'
 import { fileURLToPath } from 'node:url'
+import { execSync } from 'node:child_process'
 
 const imageAssetDir = CONFIG.imgs.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\\/g, '/')
 const imageAssetInclude = new RegExp(`${imageAssetDir}/(?!svg/spritemap\\.svg$)`)
@@ -22,8 +24,13 @@ export default defineNuxtConfig({
       ...Object.fromEntries(
         Object.entries(process.env).filter(([k]) => k.startsWith('NUXT_PUBLIC_'))
       ),
-      appHash: process.env.VITE_APP_HASH || new Date().toISOString(),
-      spritePath: `${CONFIG.imgs}/svg/spritemap.svg`,
+      appHash:
+        process.env.NUXT_PUBLIC_APP_HASH ||
+        execSync('git rev-parse --short HEAD').toString().trim(),
+      spritePath:
+        process.env.NODE_ENV === 'development'
+          ? '/__housefun_svg_spritemap'
+          : `${CONFIG.imgs}/svg/spritemap.svg`,
       googleMapsApiKey: process.env.NUXT_PUBLIC_GOOGLE_MAPS_API_KEY,
     },
   },
@@ -71,7 +78,7 @@ export default defineNuxtConfig({
       ],
     },
     esbuild: {
-      drop: process.env['NODE_ENV'] === 'production' ? ['console'] : [],
+      drop: process.env.NUXT_PUBLIC_APP_MODE === 'build' ? ['console'] : [],
     },
     build: {
       rollupOptions: {
@@ -106,12 +113,11 @@ export default defineNuxtConfig({
           use: true,
         },
       }) as never,
+      SvgSpritemapDevPlugin(CONFIG.svg) as never,
       ViteImageOptimizer({
         include: imageAssetInclude,
         includePublic: false,
         logStats: true,
-        cache: true,
-        cacheLocation: '.cache/image-optimizer',
         svg: {
           multipass: true,
           plugins: [

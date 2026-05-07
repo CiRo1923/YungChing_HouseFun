@@ -1,12 +1,12 @@
 <script setup>
-import BackStepNew from '@pages/buy/_components/basic/BackStepNew.vue'
-import TabCheck from '@pages/buy/_components/basic/TabCheck.vue'
-import PopupAddressGoogleMap from '@pages/buy/_components/basic/popup/AddressGoogleMap.vue'
-import PopupFeature from '@pages/buy/_components/basic/popup/Feature.vue'
-import PopupTitleDeed from '@pages/buy/_components/basic/popup/TitleDeed.vue'
+import BackStepNew from '@pages/buy/basic/_components/BackStepNew.vue'
+import TabCheck from '@pages/buy/basic/_components/TabCheck.vue'
+import PopupAddressGoogleMap from '@pages/buy/basic/_components/popup/AddressGoogleMap.vue'
+import PopupFeature from '@pages/buy/basic/_components/popup/Feature.vue'
+import PopupTitleDeed from '@pages/buy/basic/_components/popup/TitleDeed.vue'
 
-import DataComponents from '@pages/buy/_containers/basic/DataComponents.vue'
-import SubmitButtons from '@pages/buy/_containers/basic/SubmitButtons.vue'
+import DataComponents from '@pages/buy/basic/_containers/DataComponents.vue'
+import SubmitButtons from '@pages/buy/basic/_containers/SubmitButtons.vue'
 
 // import { awaitAllPromise } from '@js/_prototype.js'
 

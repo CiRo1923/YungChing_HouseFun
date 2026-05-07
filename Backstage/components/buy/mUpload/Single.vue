@@ -1,6 +1,4 @@
 <script setup>
-import ErrorMessageElem from '@components/buy/mErrorMessageElem.vue'
-
 import '@js/_validation.js'
 
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
@@ -566,7 +564,7 @@ watch(
     :class="setClass.error"
     v-slot="{ message }"
   >
-    <ErrorMessageElem :message="message" />
+    <BuyMErrorMessageElem :message="message" />
   </ErrorMessage>
 </template>
 

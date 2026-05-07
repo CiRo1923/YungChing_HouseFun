@@ -13,7 +13,7 @@ import { useBuyBasicStore } from '@stores/buy/basic.js'
 import useBuyProjectActions from '@stores/buy/composables/useProjectActions.js'
 import useBuyPopupActions from '@stores/buy/composables/usePopupActions.js'
 
-const useBuyBasicActions = () => {
+export default () => {
   const {
     onApiGETRealEstatePurposeCheckOptions,
     onApiGETCitySelectOptions,
@@ -148,6 +148,7 @@ const useBuyBasicActions = () => {
     })
 
     if (status === 200) {
+      console.log(data)
       const { caseInfo } = data
       const isCaseSqUnitPin = caseInfo.isCaseSqUnitPin
       const imageSize = {
@@ -275,4 +276,4 @@ const useBuyBasicActions = () => {
   }
 }
 
-export default useBuyBasicActions
+// export default useBuyBasicActions

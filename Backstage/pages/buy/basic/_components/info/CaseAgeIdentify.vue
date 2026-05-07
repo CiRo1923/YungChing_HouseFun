@@ -1,0 +1,176 @@
+<script setup>
+import RadiosOval from '@pages/buy/basic/_containers/RadiosOval.vue'
+
+import { useBuyProjectStore } from '@stores/buy/project.js'
+import { useBuyBasicStore } from '@stores/buy/basic.js'
+
+const buyProject = useBuyProjectStore()
+const { options } = storeToRefs(buyProject)
+const buyBasic = useBuyBasicStore()
+const { apiData } = storeToRefs(buyBasic)
+
+const isModelAge = computed(() => apiData.value.caseInfo.caseAgeIdentifyToken === 1)
+
+const onCaseAgeIdentifyChange = () => {
+  if (isModelAge.value) {
+    apiData.value.caseInfo.caseCompletedYear = null
+    apiData.value.caseInfo.caseCompletedMonth = null
+  } else {
+    apiData.value.caseInfo.caseAge = null
+  }
+}
+
+const onClearCheckbox = () => {
+  apiData.value.caseInfo.isCaseUnknownAge = false
+  apiData.value.caseInfo.isCasePreSale = false
+}
+
+const onReset = () => {
+  apiData.value.caseInfo.caseAge = null
+  apiData.value.caseInfo.caseCompletedYear = null
+  apiData.value.caseInfo.caseCompletedMonth = null
+}
+</script>
+
+<template>
+  <RadiosOval>
+    <BuyMFormRadiosOval
+      name="caseAgeIdentifyToken"
+      v-model.number="apiData.caseInfo.caseAgeIdentifyToken"
+      :options="options.ageIdentify"
+      :config="{
+        schema: {
+          label: 'text',
+          value: 'value',
+        },
+      }"
+      :setClass="{
+        radios: 'm:w-full',
+        container: 'm:flex-1',
+      }"
+      @change="onCaseAgeIdentifyChange"
+    />
+    <ul class="flex flex-wrap tm:gap-x-[8px] p:gap-x-[24px]">
+      <li class="tm:w-[130px] p:w-[100px]" v-if="isModelAge">
+        <BuyMFormInput
+          name="caseAge"
+          v-model.number="apiData.caseInfo.caseAge"
+          :config="{
+            inputMode: 'numeric',
+            inputChinese: false,
+            checkNotIsZero: true,
+            integer: true,
+            maxlength: 3,
+            isExistClose: false,
+          }"
+          :rules="{
+            required: {
+              valid: !apiData.caseInfo.isCaseUnknownAge && !apiData.caseInfo.isCasePreSale,
+              errorMessage: '請輸入屋齡',
+            },
+          }"
+          :setClass="{
+            main: '--h-40 --px-12 --py-8',
+            element: 'grow',
+            rearAssist: 'text-[14px] text-[--gray-999]',
+          }"
+          @input="onClearCheckbox"
+        >
+          <template #rearAssist>年</template>
+        </BuyMFormInput>
+      </li>
+      <li v-else>
+        <ul class="gap-x-[8px] m:grid m:grid-cols-2 pt:flex">
+          <li class="pt:w-[120px]">
+            <BuyMFormInput
+              name="caseCompletedYear"
+              v-model.number="apiData.caseInfo.caseCompletedYear"
+              :config="{
+                inputMode: 'numeric',
+                inputChinese: false,
+                checkNotIsZero: true,
+                integer: true,
+                maxlength: 3,
+                isExistClose: false,
+              }"
+              :rules="{
+                required: {
+                  valid: !apiData.caseInfo.isCaseUnknownAge && !apiData.caseInfo.isCasePreSale,
+                  errorMessage: '請輸入完工年份',
+                },
+              }"
+              :setClass="{
+                main: '--h-40 --px-12 --py-8',
+                element: 'grow',
+                frontAssist: 'text-[14px] text-[--gray-999]',
+                rearAssist: 'text-[14px] text-[--gray-999]',
+              }"
+              @input="onClearCheckbox"
+            >
+              <template #frontAssist>民國</template>
+              <template #rearAssist>年</template>
+            </BuyMFormInput>
+          </li>
+          <li class="pt:w-[100px]">
+            <BuyMFormInput
+              name="caseCompletedMonth"
+              v-model.number="apiData.caseInfo.caseCompletedMonth"
+              :config="{
+                inputMode: 'numeric',
+                inputChinese: false,
+                checkNotIsZero: true,
+                integer: true,
+                maxlength: 2,
+                isExistClose: false,
+              }"
+              :rules="{
+                required: {
+                  valid: !apiData.caseInfo.isCaseUnknownAge && !apiData.caseInfo.isCasePreSale,
+                  errorMessage: '請輸入完工月份',
+                },
+              }"
+              :setClass="{
+                main: '--h-40 --px-12 --py-8',
+                element: 'grow',
+                rearAssist: 'text-[14px] text-[--gray-999]',
+              }"
+              @input="onClearCheckbox"
+            >
+              <template #rearAssist>月</template>
+            </BuyMFormInput>
+          </li>
+        </ul>
+      </li>
+      <li class="flex h-[40px] items-center">
+        <BuyMFormCheckBox
+          name="isCaseUnknownAge"
+          v-model="apiData.caseInfo.isCaseUnknownAge"
+          :config="{
+            mode: 'boolean',
+            label: '屋齡不詳',
+          }"
+          :setClass="{
+            label: 'text-[16px]',
+          }"
+          @change="onReset"
+        />
+      </li>
+      <li class="flex h-[40px] items-center">
+        <BuyMFormCheckBox
+          name="isCasePreSale"
+          v-model="apiData.caseInfo.isCasePreSale"
+          :config="{
+            mode: 'boolean',
+            label: '預售屋',
+          }"
+          :setClass="{
+            label: 'text-[16px]',
+          }"
+          @change="onReset"
+        />
+      </li>
+    </ul>
+  </RadiosOval>
+</template>
+
+<style></style>

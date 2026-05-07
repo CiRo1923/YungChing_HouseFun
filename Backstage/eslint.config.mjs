@@ -152,6 +152,7 @@ export default createConfigForNuxt(
         useRouter: 'readonly',
         useHead: 'readonly',
         useRuntimeConfig: 'readonly',
+        useState: 'readonly',
         watch: 'readonly',
         watchEffect: 'readonly',
         useRequestHeaders: 'readonly',

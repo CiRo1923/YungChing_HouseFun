@@ -1,13 +1,16 @@
 <script setup>
-import { onDevice } from '@js/_prototype.js'
+import { useCommonStore } from '@stores/common.js'
+import useCommonActions from '@stores/composables/useCommonActions.js'
 
+const common = useCommonStore()
+const { device } = storeToRefs(common)
+const { onResize } = useCommonActions()
 const props = defineProps({
   anchor: {
     type: Object,
     default: null,
   },
 })
-const device = ref('p') // 預設值先給 p
 const isDeviceP = computed(() => device.value === 'p')
 const anchor = computed(() => {
   return {
@@ -23,17 +26,13 @@ const anchor = computed(() => {
   }
 })
 
-const onResize = () => {
-  device.value = onDevice()
-}
+onUnmounted(() => {
+  window.removeEventListener('resize', onResize)
+})
 
 onMounted(() => {
   onResize()
   window.addEventListener('resize', onResize)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('resize', onResize)
 })
 </script>
 

@@ -1,12 +1,11 @@
 <script setup>
-import { onDevice } from '@js/_prototype.js'
+import { useCommonStore } from '@stores/common.js'
+import useCommonActions from '@stores/composables/useCommonActions.js'
 
-const device = ref('p') // 預設值先給 p
+const common = useCommonStore()
+const { device } = storeToRefs(common)
+const { onResize } = useCommonActions()
 const isDeviceP = computed(() => device.value === 'p')
-
-const onResize = () => {
-  device.value = onDevice()
-}
 
 onMounted(() => {
   onResize()

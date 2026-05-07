@@ -31,7 +31,7 @@ import { useBuyProjectStore } from '@stores/buy/project.js'
 
 import useBuyPopupActions from '@stores/buy/composables/usePopupActions.js'
 
-const useBuyProjectActions = () => {
+export default () => {
   const projectStores = useBuyProjectStore()
   const { onApiError } = useBuyPopupActions()
   const { options } = storeToRefs(projectStores)
@@ -411,7 +411,10 @@ const useBuyProjectActions = () => {
   const onReplaceImageSize = (data, key, size) => {
     const onReplaceKey = (item) => ({
       ...item,
-      url: item[key].replaceAll('{0}', size.width).replaceAll('{1}', size.height),
+      [key]:
+        typeof item?.[key] === 'string'
+          ? item[key].replaceAll('{0}', size.width).replaceAll('{1}', size.height)
+          : item?.[key],
     })
 
     if (Array.isArray(data)) {
@@ -456,5 +459,3 @@ const useBuyProjectActions = () => {
     onReplaceImageSize,
   }
 }
-
-export default useBuyProjectActions

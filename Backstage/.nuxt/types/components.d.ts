@@ -39,6 +39,7 @@ interface _GlobalComponents {
   BuyMPopup: typeof import("../../components/buy/mPopup.vue")['default']
   BuyMStepArrow: typeof import("../../components/buy/mStep/Arrow.vue")['default']
   BuyMTabCheck: typeof import("../../components/buy/mTab/Check.vue")['default']
+  BuyMTabDefaultOval: typeof import("../../components/buy/mTab/DefaultOval.vue")['default']
   BuyMTagCheckBox: typeof import("../../components/buy/mTag/CheckBox.vue")['default']
   BuyMTagCustom: typeof import("../../components/buy/mTag/Custom.vue")['default']
   BuyMTagCustomGroup: typeof import("../../components/buy/mTag/CustomGroup.vue")['default']
@@ -101,6 +102,7 @@ interface _GlobalComponents {
   LazyBuyMPopup: LazyComponent<typeof import("../../components/buy/mPopup.vue")['default']>
   LazyBuyMStepArrow: LazyComponent<typeof import("../../components/buy/mStep/Arrow.vue")['default']>
   LazyBuyMTabCheck: LazyComponent<typeof import("../../components/buy/mTab/Check.vue")['default']>
+  LazyBuyMTabDefaultOval: LazyComponent<typeof import("../../components/buy/mTab/DefaultOval.vue")['default']>
   LazyBuyMTagCheckBox: LazyComponent<typeof import("../../components/buy/mTag/CheckBox.vue")['default']>
   LazyBuyMTagCustom: LazyComponent<typeof import("../../components/buy/mTag/Custom.vue")['default']>
   LazyBuyMTagCustomGroup: LazyComponent<typeof import("../../components/buy/mTag/CustomGroup.vue")['default']>

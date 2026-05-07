@@ -4,7 +4,7 @@ import { usePopupStore } from '@stores/popup.js'
 import { useBuyPopupStore } from '@stores/buy/popup.js'
 import usePopupActions from '@stores/composables/usePopupActions.js'
 
-export const useBuyPopupActions = () => {
+export default () => {
   const popupStore = usePopupStore()
   const buyPopupStore = useBuyPopupStore()
   const { onMergeBtns } = usePopupActions()
@@ -146,5 +146,3 @@ export const useBuyPopupActions = () => {
     onReset,
   }
 }
-
-export default useBuyPopupActions

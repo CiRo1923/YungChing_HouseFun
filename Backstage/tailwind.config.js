@@ -1,7 +1,6 @@
+import CONFIG from './config.js'
 import plugin from 'tailwindcss/plugin'
-
-const CONFIG = require('./config.js')
-const { dropShadow, letterSpacing, lineHeight } = require('./tailwind.extend.js')
+import { fontFamily, boxShadow, dropShadow } from './tailwind.extend.js'
 
 module.exports = {
   content: [
@@ -58,12 +57,14 @@ module.exports = {
         raw: 'screen and (-ms-high-contrast:active), (-ms-high-contrast:none)',
       },
     },
+    fontFamily: fontFamily,
     fontSize: {
       vmp: `${(16 / CONFIG.desktopMinWidth) * 100}vw`,
       vmt: `${(16 / 768) * 100}vw`,
       vmm: `${(16 / CONFIG.basicMobileWidth) * 100}vw`,
       vmmls: `${((16 / CONFIG.basicMobileWidth) * 100) / 1.77}vw`,
     },
+    boxShadow,
     extend: {
       content: {
         default: "''",
@@ -75,19 +76,17 @@ module.exports = {
         margin: 'margin',
         widths: 'width, max-width, min-width',
         heights: 'height, max-height, min-height',
+        sizes: 'width, max-width, min-width, height, max-height, min-height',
         opacitys: 'opacity, visibility',
         filter: 'filter',
       },
-      letterSpacing: {
-        ...letterSpacing,
-      },
-      lineHeight: {
-        ...lineHeight,
-      },
+      // letterSpacing: {
+      //   ...letterSpacing,
+      // },
+      // lineHeight: {
+      //   ...lineHeight,
+      // },
     },
-  },
-  corePlugins: {
-    fontFamily: false,
   },
   plugins: [
     plugin(({ addComponents }) => {

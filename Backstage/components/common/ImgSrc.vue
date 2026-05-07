@@ -1,6 +1,4 @@
 <script setup>
-import { hashHex } from '@js/_crypto.js'
-
 import blankUrl from '@imgs/common/blank.svg'
 
 const runtimeConfig = useRuntimeConfig()
@@ -12,7 +10,7 @@ const MAP = import.meta.glob('/assets/imgs/**/*', { eager: true, import: 'defaul
 const toKey = (p) => `/assets/imgs/${String(p).replace(/^\/+/, '')}`
 
 // 依照需求：回傳 URL + ?[hash]（用 VITE_APP_HASH）
-const bust = (url) => `${url}?${hashHex(runtimeConfig.public.appHash, 8)}`
+const bust = (url) => `${url}?${runtimeConfig.public.appHash}`
 
 const resolveBundledImg = (raw) => {
   if (!raw) return null
@@ -20,9 +18,8 @@ const resolveBundledImg = (raw) => {
   // 外部/特殊
   if (/^(https?:|data:|blob:)/.test(raw)) {
     if (/^http/.test(raw)) {
-      const imgName = /\/([^/?#]+)(?:\?|$)/.exec(raw)[0]
       const hasQuery = /\?/.test(raw)
-      return `${encodeURI(raw)}${hasQuery ? '&' : '?'}${hashHex(imgName, 8)}`
+      return `${encodeURI(raw)}${hasQuery ? '&' : '?'}${runtimeConfig.public.appHash}`
     }
     return encodeURI(raw)
   }

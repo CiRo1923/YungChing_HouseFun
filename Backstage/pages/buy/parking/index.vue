@@ -1,6 +1,4 @@
 <script setup>
-import Container from '@components/buy/mContainer.vue'
-
 // import { useCommonStore } from '@stores/common.js'
 import useCommonActions from '@stores/composables/useCommonActions.js'
 
@@ -17,7 +15,7 @@ await onWithLoadingAll([])
 </script>
 
 <template>
-  <Container
+  <BuyMContainer
     :setClass="{
       main: '--px-16',
     }"
@@ -29,7 +27,7 @@ await onWithLoadingAll([])
     >
       basic
     </NuxtLink>
-  </Container>
+  </BuyMContainer>
 </template>
 
 <style></style>

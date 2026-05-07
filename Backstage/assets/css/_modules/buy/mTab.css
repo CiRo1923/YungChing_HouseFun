@@ -1,10 +1,26 @@
 @screen p {
   .m-tab {
     &.\-\-anchor-height-40,
-    &.\-\-p\:anchor-height-40,
-    &.\-\-pt\:anchor-height-40 {
+    &.p\:\-\-anchor-height-40,
+    &.pt\:\-\-anchor-height-40 {
       .m-tab-anchor {
         @apply min-h-[40px];
+      }
+    }
+
+    &.\-\-anchor-px-20,
+    &.p\:\-\-anchor-px-20,
+    &.pt\:\-\-anchor-px-20 {
+      .m-tab-anchor {
+        @apply px-[20px];
+      }
+    }
+
+    &.\-\-anchor-px-14,
+    &.p\:\-\-anchor-px-14,
+    &.pt\:\-\-anchor-px-14 {
+      .m-tab-anchor {
+        @apply px-[14px];
       }
     }
 
@@ -37,11 +53,29 @@
 @screen t {
   .m-tab {
     &.\-\-anchor-height-40,
-    &.\-\-pt\:anchor-height-40,
-    &.\-\-tm\:anchor-height-40,
-    &.\-\-t\:anchor-height-40 {
+    &.pt\:\-\-anchor-height-40,
+    &.tm\:\-\-anchor-height-40,
+    &.t\:\-\-anchor-height-40 {
       .m-tab-anchor {
         @apply min-h-[40px];
+      }
+    }
+
+    &.\-\-anchor-px-20,
+    &.pt\:\-\-anchor-px-20,
+    &.tm\:\-\-anchor-px-20,
+    &.t\:\-\-anchor-px-20 {
+      .m-tab-anchor {
+        @apply px-[20px];
+      }
+    }
+
+    &.\-\-anchor-px-14,
+    &.pt\:\-\-anchor-px-14,
+    &.tm\:\-\-anchor-px-14,
+    &.t\:\-\-anchor-px-14 {
+      .m-tab-anchor {
+        @apply px-[14px];
       }
     }
 
@@ -77,10 +111,26 @@
 @screen m {
   .m-tab {
     &.\-\-anchor-height-40,
-    &.\-\-tm\:anchor-height-40,
-    &.\-\-m\:anchor-height-40 {
+    &.tm\:\-\-anchor-height-40,
+    &.m\:\-\-anchor-height-40 {
       .m-tab-anchor {
         @apply min-h-[40px];
+      }
+    }
+
+    &.\-\-anchor-px-20,
+    &.tm\:\-\-anchor-px-20,
+    &.m\:\-\-anchor-px-20 {
+      .m-tab-anchor {
+        @apply px-[20px];
+      }
+    }
+
+    &.\-\-anchor-px-14,
+    &.tm\:\-\-anchor-px-14,
+    &.m\:\-\-anchor-px-14 {
+      .m-tab-anchor {
+        @apply px-[14px];
       }
     }
 

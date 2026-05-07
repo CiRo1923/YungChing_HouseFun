@@ -1,7 +1,4 @@
 <script setup>
-import ErrorMessageElem from '@components/buy/mErrorMessageElem.vue'
-import MultipleItem from '@components/buy/mUpload/MultipleItem.vue'
-
 import '@js/_validation.js'
 
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
@@ -930,7 +927,7 @@ watch(
               v-if="draggedPreviewItem && shouldShowDraggedPreviewAt(index)"
               class="pointer-events-none absolute inset-x-0 top-0 z-[2]"
             >
-              <MultipleItem
+              <BuyMUploadMultipleItem
                 :item="draggedPreviewItem"
                 :config="{
                   isPreview: true,
@@ -939,7 +936,7 @@ watch(
               />
             </div>
 
-            <MultipleItem
+            <BuyMUploadMultipleItem
               :item="item"
               :config="{
                 isDragging: dragItemIndex !== null,
@@ -987,7 +984,7 @@ watch(
     :class="setClass.error"
     v-slot="{ message }"
   >
-    <ErrorMessageElem :message="message" />
+    <BuyMErrorMessageElem :message="message" />
   </ErrorMessage>
 </template>
 

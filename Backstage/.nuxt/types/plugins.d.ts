@@ -25,6 +25,7 @@ type NuxtAppInjections =
   InjectionType<typeof import("../../node_modules/nuxt/dist/app/plugins/check-if-layout-used.js")> &
   InjectionType<typeof import("../../plugins/ckeditor4.client.js")> &
   InjectionType<typeof import("../../plugins/router-reset.client.js")> &
+  InjectionType<typeof import("../../plugins/svg-spritemap-dev.client.js")> &
   InjectionType<typeof import("../../plugins/svgicon.client.js")>
 
 declare module '#app' {
