@@ -36,15 +36,16 @@ const config = computed(() => {
 const as = computed(() => {
   const { as } = config.value
 
-  if (as === 'router') return 'router-link'
+  if (as === 'router') return resolveComponent('NuxtLink')
   if (/^(button|submit)$/.test(as)) return 'button'
-  if (props.to) return 'router-link'
+  if (props.to) return resolveComponent('NuxtLink')
   if (props.href) return 'a'
   return 'button'
 })
 
 const bind = computed(() => {
-  return as.value === 'router-link'
+  const name = typeof as.value === 'object' ? as.value.name : as.value
+  return name === 'NuxtLink'
     ? {
         to: props.to,
         ...(config.value.target
@@ -166,6 +167,10 @@ const onClick = (e) => {
 
     &.\-\-border-gray-e5 {
       @apply border-[--gray-e5];
+    }
+
+    &.\-\-border-transparent {
+      @apply border-transparent;
     }
   }
 

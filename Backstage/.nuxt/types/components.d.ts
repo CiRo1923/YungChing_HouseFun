@@ -37,6 +37,7 @@ interface _GlobalComponents {
   BuyMItemMain: typeof import("../../components/buy/mItem/Main.vue")['default']
   BuyMItemSwitchtem: typeof import("../../components/buy/mItem/Switchtem.vue")['default']
   BuyMPopup: typeof import("../../components/buy/mPopup.vue")['default']
+  BuyMSeparator: typeof import("../../components/buy/mSeparator.vue")['default']
   BuyMStepArrow: typeof import("../../components/buy/mStep/Arrow.vue")['default']
   BuyMTabCheck: typeof import("../../components/buy/mTab/Check.vue")['default']
   BuyMTabDefaultOval: typeof import("../../components/buy/mTab/DefaultOval.vue")['default']
@@ -100,6 +101,7 @@ interface _GlobalComponents {
   LazyBuyMItemMain: LazyComponent<typeof import("../../components/buy/mItem/Main.vue")['default']>
   LazyBuyMItemSwitchtem: LazyComponent<typeof import("../../components/buy/mItem/Switchtem.vue")['default']>
   LazyBuyMPopup: LazyComponent<typeof import("../../components/buy/mPopup.vue")['default']>
+  LazyBuyMSeparator: LazyComponent<typeof import("../../components/buy/mSeparator.vue")['default']>
   LazyBuyMStepArrow: LazyComponent<typeof import("../../components/buy/mStep/Arrow.vue")['default']>
   LazyBuyMTabCheck: LazyComponent<typeof import("../../components/buy/mTab/Check.vue")['default']>
   LazyBuyMTabDefaultOval: LazyComponent<typeof import("../../components/buy/mTab/DefaultOval.vue")['default']>

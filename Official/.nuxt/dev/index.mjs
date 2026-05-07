@@ -643,7 +643,7 @@ const _inlineRuntimeConfig = {
     "NUXT_PUBLIC_MANAGE_API_PATH": "https://agent-bff.housesfunlab.com",
     "NUXT_PUBLIC_PATH": "/",
     "spritePath": "assets/imgs/svg/spritemap.svg",
-    "spriteVersion": "20260428074821615"
+    "spriteVersion": "20260507163513590"
   }
 };
 const envOptions = {
@@ -2134,15 +2134,15 @@ _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw
 const assets = {
   "/index.mjs": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"1a506-la/E9Ht+XmBv7oC6nYZMIOOauEQ\"",
-    "mtime": "2026-04-28T07:48:25.714Z",
+    "etag": "\"1a506-ZPkTbSETfuUlnX4/QRDJjfLFZ54\"",
+    "mtime": "2026-05-07T16:35:21.508Z",
     "size": 107782,
     "path": "index.mjs"
   },
   "/index.mjs.map": {
     "type": "application/json",
     "etag": "\"6b4ab-Robovs85zU1kNhPK0YedbmCahuU\"",
-    "mtime": "2026-04-28T07:48:25.715Z",
+    "mtime": "2026-05-07T16:35:21.508Z",
     "size": 439467,
     "path": "index.mjs.map"
   }

@@ -148,7 +148,6 @@ export default () => {
     })
 
     if (status === 200) {
-      console.log(data)
       const { caseInfo } = data
       const isCaseSqUnitPin = caseInfo.isCaseSqUnitPin
       const imageSize = {

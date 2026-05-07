@@ -67,7 +67,8 @@ small {
 }
 
 em,
-i {
+i,
+address {
   @apply not-italic;
 }
 
