@@ -99,7 +99,7 @@ const onRemoveClick = (index) => {
       }"
       :setClass="{
         main: ['m-add-identical-anchor --text-green-6a2d underline', setClass.anchor],
-        text: 'font-normal m:text-[16px] pt:text-[14px]',
+        text: 'm:text-[16px] pt:text-[14px]',
         icon: 'text-[--gray-666] m:h-[20px] m:w-[20px] pt:h-[18px] pt:w-[18px]',
       }"
       @click="onAddClick"

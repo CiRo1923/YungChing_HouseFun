@@ -4,7 +4,7 @@ import {
   apiPOSTRealEstate,
   apiPOSTRealEstateDraft,
   apiPOSTRealEstatePicUpload,
-} from '@js/_api/buy/index.js'
+} from '@js/_api/buy/basic.js'
 
 import { onToFixed } from '@js/_prototype.js'
 

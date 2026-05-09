@@ -22,8 +22,10 @@ const { apiData } = storeToRefs(buyBasic)
       label: 'text-[16px]',
     }"
   >
-    我已詳閱並同意
-    <a href="javascript:;" class="text-[--green-6a2d] underline">好房會員服務使用條款</a>
+    <p>
+      我已詳閱並同意
+      <a href="javascript:;" class="text-[--green-6a2d] underline">好房會員服務使用條款</a>
+    </p>
   </BuyMFormCheckBox>
 </template>
 

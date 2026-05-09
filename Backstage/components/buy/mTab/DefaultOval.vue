@@ -6,6 +6,8 @@ const common = useCommonStore()
 const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
 const route = useRoute()
+
+const emit = defineEmits(['click'])
 const props = defineProps({
   items: {
     type: Array,
@@ -20,6 +22,7 @@ const props = defineProps({
     default: () => ({}),
   },
 })
+
 const activeIndex = ref(null)
 // 切換動畫用
 const rafId = ref(null)
@@ -116,12 +119,18 @@ const onStartAnimate = () => {
   })
 }
 
-const onClick = async (item, index) => {
+const onClick = async (item, index, event) => {
   const { href, to } = item
   const { containerMode } = config.value
   const isURL = !!(href || to)
   const isSingle = containerMode === 'single'
   const isMultiple = containerMode === 'multiple'
+
+  emit('click', {
+    item,
+    index,
+    event,
+  })
 
   if (isURL) return
   if (isShowItem.value) return
@@ -201,7 +210,7 @@ onMounted(() => {
             setClass.anchor,
           ]"
           v-bind="onHeaderBind(item)"
-          @click="onClick(item, index)"
+          @click="onClick(item, index, $event)"
         >
           <CommonSvgIcon
             :icon="item.icon"

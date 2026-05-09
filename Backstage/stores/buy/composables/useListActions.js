@@ -1,4 +1,4 @@
-import { apiPOSTRealEstateSearch } from '@js/_api/buy/index.js'
+import { apiPOSTRealEstateSearch } from '@js/_api/buy/list.js'
 
 import { useBuyListStore } from '@stores/buy/list.js'
 import useBuyProjectActions from '@stores/buy/composables/useProjectActions.js'
@@ -9,6 +9,9 @@ export default () => {
   const buyList = useBuyListStore()
   const { apiData, datas } = storeToRefs(buyList)
   const { onApiError } = useBuyPopupActions()
+  const selectCount = computed(() =>
+    datas.value ? datas.value.filter((item) => item._isSelect).length : 0
+  )
   const onApiPOSTRealEstateSearch = async (caseStatusToken) => {
     const route = useRoute()
     const page = route.query.pg ? +route.query.pg : 1
@@ -24,11 +27,16 @@ export default () => {
       const { casesList } = data
 
       const imageSize = {
-        width: 400,
-        height: 304,
+        width: 640,
+        height: 485,
       }
-      const list = onReplaceImageSize(casesList, 'picURLCover', imageSize)
-      datas.value = list // 替換 width  & height
+      const list = onReplaceImageSize(casesList, 'picURLCover', imageSize) // 替換 width  & height
+      datas.value = list.map((item) => {
+        return {
+          ...item,
+          _isSelect: false,
+        }
+      })
 
       console.log(data)
     } else {
@@ -37,11 +45,13 @@ export default () => {
 
     return { config, status, data }
   }
+
   const onReset = () => {
     datas.value = null
   }
 
   return {
+    selectCount,
     onApiPOSTRealEstateSearch,
     onReset,
   }

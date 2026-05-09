@@ -12,7 +12,7 @@ const props = defineProps({
     default: null,
   },
   modelValue: {
-    type: [Boolean, String, Array],
+    type: [Boolean, String, Number],
     default: undefined,
   },
   rules: {
@@ -31,46 +31,10 @@ const props = defineProps({
 
 const model = computed({
   get() {
-    const { mode } = config.value
-    // value/boolean：完全不要轉 array
-    if (mode !== 'group') return props.modelValue
-
-    // group：input 端永遠 array
-    const sep = joinSep.value
-
-    if (Array.isArray(props.modelValue)) return props.modelValue
-
-    // join 模式才從字串切回 array
-    if (sep && typeof props.modelValue === 'string') {
-      return props.modelValue
-        ? props.modelValue
-            .split(sep)
-            .map((s) => s.trim())
-            .filter(Boolean)
-        : []
-    }
-
-    // group 但外部給了字串（例如 '1'/'10'）→ 你要嘛當成單選 group，就包成 array
-    if (typeof props.modelValue === 'string') return [props.modelValue]
-
-    return []
+    return props.modelValue
   },
 
   set(val) {
-    const { mode } = config.value
-    // value/boolean：原樣吐回（或由 true/false-value 控制）
-    if (mode !== 'group') {
-      emits('update:modelValue', val)
-      return
-    }
-
-    // group：可 join 才 join
-    const sep = joinSep.value
-    if (sep && Array.isArray(val)) {
-      emits('update:modelValue', val.join(sep))
-      return
-    }
-
     emits('update:modelValue', val)
   },
 })
@@ -78,46 +42,13 @@ const model = computed({
 const config = computed(() => {
   return onDeepMerge(
     {
-      mode: 'group', // 'boolean' | 'group' | 'value'
       label: null,
       value: null,
       align: 'top',
       isDisabled: false,
-      isJoin: null,
     },
     props.config
   )
-})
-
-const joinSep = computed(() => {
-  const { mode, isJoin } = config.value
-  if (mode !== 'group') return null
-
-  if (isJoin === true) return ','
-  if (typeof isJoin === 'string' && isJoin.length) return isJoin
-  return null
-})
-
-const bind = computed(() => {
-  const { mode, value } = config.value
-
-  // value / boolean：用 true-value/false-value 才不會變 boolean
-  if (mode === 'value') {
-    return {
-      'true-value': value?.true, // 勾選回傳 '1' / '10'
-      'false-value': value?.false, // 取消回傳 ''（你要 null 也可以）
-    }
-  }
-
-  if (mode === 'boolean') {
-    return {
-      'true-value': true,
-      'false-value': false,
-    }
-  }
-
-  // group：用 value 做 array 比對
-  return { value }
 })
 
 const setClass = computed(() => {
@@ -143,25 +74,28 @@ const onChange = () => {
   <div class="m-form overflow-hidden" :class="setClass.main">
     <Field
       :name="props.name"
-      type="checkbox"
+      type="radio"
       v-model="model"
       :rules="config.isDisabled ? '' : props.rules"
       v-slot="{ errorMessage }"
     >
       <div class="m-form-container overflow-hidden" :class="setClass.container">
         <label
-          class="m-form-element --checkbox relative inline-flex gap-x-[8px] align-middle leading-[1.35] text-[--gray-999]"
+          class="m-form-element --radio-item relative flex gap-x-[8px] rounded-[15px] border-[1px] align-middle leading-[1.35] transition-colors duration-300"
           :class="[
-            config.align === 'top' && config.label ? 'items-baseline' : 'items-center',
+            config.align === 'top' && (config.label || $slots.default)
+              ? 'items-baseline'
+              : 'items-center',
             config.isDisabled ? 'cursor-not-allowed' : 'cursor-pointer',
             setClass.element,
+            { '--checked': model === config.value },
           ]"
         >
           <input
             :name="props.name"
-            type="checkbox"
+            type="radio"
             v-model="model"
-            v-bind="bind"
+            :value="config.value"
             class="m-form-type jFormValid sr-only"
             :class="{
               '--error': errorMessage,
@@ -171,14 +105,12 @@ const onChange = () => {
           />
           <CommonSvgIcon
             icon="icon_check_solid"
-            class="m-form-icon relative mt-[2px] h-[18px] w-[18px] shrink-0 self-start rounded-[2px] border-[1px] text-[--orange-e646] transition-colors duration-300"
+            class="m-form-icon relative mt-[2px] h-[18px] w-[18px] shrink-0 self-start rounded-full border-[1px] text-[--orange-e646] transition-colors duration-300"
             :class="setClass.icon"
           />
-          <slot>
-            <em :class="setClass.label" v-if="config.label">
-              {{ config.label }}
-            </em>
-          </slot>
+          <div class="grow" :class="setClass.label">
+            <slot />
+          </div>
         </label>
       </div>
     </Field>
@@ -194,10 +126,13 @@ const onChange = () => {
   </div>
 </template>
 
-<style src="@css/_modules/buy/mForm.css"></style>
 <style lang="postcss">
 .m-form-element {
-  &.\-\-checkbox {
+  &.\-\-radio-item {
+    &.\-\-checked {
+      @apply border-transparent bg-[--orange-feea];
+    }
+
     .m-form-type {
       &:not(:checked) {
         & + .m-form-icon {

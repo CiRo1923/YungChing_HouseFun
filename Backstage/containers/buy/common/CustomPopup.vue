@@ -51,7 +51,7 @@ const onClose = (item) => {
 
   // cancel 或允許 sureClose 的情況：照舊 resolve + close
   const isShouldClose = item.isClose !== false
-  customCheck.value(isSure ? config.value.data : false)
+  customCheck.value(isSure ? config.value.data || true : false)
 
   if (isShouldClose) onCustomClose()
 }
@@ -78,7 +78,6 @@ const onClose = (item) => {
                 :text="item.label"
                 :setClass="{
                   main: [item.class, '--oval --h-45 w-full'],
-                  text: 'font-normal',
                 }"
                 @click="onClose(item)"
               />

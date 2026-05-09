@@ -1,7 +1,11 @@
 import {
-  apiGETRealEstatePurposeCheckOptions,
   apiGETCitySelectOptions,
   apiGETDistrictSelectOptions,
+  apiGetVasPublishAvailablePlans,
+} from '@js/_api/buy/common.js'
+
+import {
+  apiGETRealEstatePurposeCheckOptions,
   apiGETRoad,
   apiGETRealEstateTypeSelectOptions,
   apiGETRealEstateLegalUsageSelectOptions,
@@ -25,7 +29,7 @@ import {
   apiGETRealEstateVideoTypeSelectOptions,
   apiGETRealEstateFeatureCheckOptions,
   apiGETRealEstatePosterDataSourceSelectOptions,
-} from '@js/_api/buy/index.js'
+} from '@js/_api/buy/basic.js'
 
 import { useBuyProjectStore } from '@stores/buy/project.js'
 
@@ -34,7 +38,7 @@ import useBuyPopupActions from '@stores/buy/composables/usePopupActions.js'
 export default () => {
   const projectStores = useBuyProjectStore()
   const { onApiError } = useBuyPopupActions()
-  const { options } = storeToRefs(projectStores)
+  const { availablePlans, apiDataRenewal, options } = storeToRefs(projectStores)
 
   const onApiGETRealEstatePurposeCheckOptions = async () => {
     if (options.value.casePurpose) return false
@@ -379,6 +383,24 @@ export default () => {
 
     return { config, status, data }
   }
+  const onApiGetVasPublishAvailablePlans = async (hfid) => {
+    const { config, status, data } = await apiGetVasPublishAvailablePlans({
+      userId: 0,
+      hfid,
+    })
+
+    if (status === 200) {
+      const { listPlan } = data
+      availablePlans.value = listPlan
+    } else {
+      onApiError(config, status, data)
+    }
+
+    return { config, status, data }
+  }
+  const onResetApiDataRenewal = () => {
+    apiDataRenewal.value.planId = null
+  }
   const onValueGetText = (option, value) => {
     const isOptionString = typeof option === 'string'
     const currOptions = isOptionString ? options.value[option] : option || []
@@ -455,6 +477,8 @@ export default () => {
     onApiGETRealEstateVideoTypeSelectOptions,
     onApiGETRealEstateFeatureCheckOptions,
     onApiGETRealEstatePosterDataSourceSelectOptions,
+    onApiGetVasPublishAvailablePlans,
+    onResetApiDataRenewal,
     onValueGetText,
     onReplaceImageSize,
   }

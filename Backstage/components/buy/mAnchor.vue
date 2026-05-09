@@ -102,7 +102,7 @@ const onClick = (e) => {
 <template>
   <component
     :is="as"
-    class="m-anchor relative inline-flex items-center justify-center gap-x-[3px] tracking-[0.06em] transition-colors duration-300"
+    class="m-anchor relative inline-flex items-center justify-center gap-x-[4px] tracking-[0.06em] transition-colors duration-300"
     :class="setClass.main"
     v-bind="bind"
     :disabled="config.isDisabled"
@@ -114,9 +114,9 @@ const onClick = (e) => {
         :class="setClass.icon"
         v-if="icon.position === 'left' && icon.name"
       />
-      <b class="m-anchor-text" :class="setClass.text">
+      <em class="m-anchor-text" :class="setClass.text">
         {{ props.text }}
-      </b>
+      </em>
       <CommonSvgIcon
         :icon="icon.name"
         :class="setClass.icon"

@@ -50,6 +50,7 @@ onMounted(() => {
           }"
           :setClass="{
             main: '--border-gray-e5 --bg-white --oval --h-30 --px-15 --text-gray-666',
+            text: 'font-semibold',
             icon: 'text-[--gray-999] p:h-[16px] p:w-[16px]',
           }"
           @click="anchor.onClick"

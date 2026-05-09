@@ -66,7 +66,7 @@ const onUploaded = async (items, done) => {
         :text="`刪除已勾選 ${apiData.caseInfo.casePictures.length} 張`"
         :setClass="{
           main: '--border-gray-e5 --bg-white --oval --h-30 --px-15 --py-8 --text-gray-666 shrink-0 m:absolute m:bottom-0 m:left-1/2 m:-translate-x-1/2',
-          text: 'text-[14px] font-normal',
+          text: 'text-[14px]',
         }"
         @click="onPicturesDelete"
         v-if="hasCasePictures"
