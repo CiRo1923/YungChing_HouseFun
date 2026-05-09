@@ -11,3 +11,7 @@ export const apiGETDistrictSelectOptions = async (data) =>
 // 列表 & 明細流程 都用的到
 export const apiGetVasPublishAvailablePlans = async (data) =>
   await onFetchApi.get(`api/${version}/vas/Publish/AvailablePlans`, data)
+
+// 列表 & 明細流程 都用的到
+export const apiPOSTVasPublishRenewal = async (data) =>
+  await onFetchApi.post(`api/${version}/vas/Publish/Renewal`, data)

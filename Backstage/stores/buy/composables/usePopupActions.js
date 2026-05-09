@@ -19,6 +19,7 @@ export default () => {
   } = storeToRefs(popupStore)
   const onAlert = (data) => {
     const buttons = buyPopupStore.buttons.alert
+    const setClass = buyPopupStore.setClass.alert
 
     alertData.value.id = 'alertSystem'
     alertData.value.title = data.title
@@ -26,6 +27,7 @@ export default () => {
     alertData.value.content = data.content
     alertData.value.btns = onDeepMerge(buttons, data.btns)
     alertData.value.hasExistClose = data.hasExistClose !== undefined ? data.hasExistClose : true
+    alertData.value.setClass = data.setClass || setClass
 
     onBodyOverflowHiddenToggle(true)
 
@@ -40,12 +42,14 @@ export default () => {
     alertData.value.content = null
     alertData.value.btns = buyPopupStore.buttons.alert
     alertData.value.hasExistClose = true
+    alertData.value.setClass = null
     alertCheck.value = null
 
     onBodyOverflowHiddenToggle(false)
   }
   const onConfirm = (data) => {
     const buttons = buyPopupStore.buttons.confirm
+    const setClass = buyPopupStore.setClass.confirm
 
     onMergeBtns(buttons, data.btns)
 
@@ -55,6 +59,7 @@ export default () => {
     confirmData.value.content = data.content
     confirmData.value.btns = onMergeBtns()
     confirmData.value.hasExistClose = data.hasExistClose !== undefined ? data.hasExistClose : true
+    confirmData.value.setClass = data.setClass || setClass
 
     onBodyOverflowHiddenToggle(true)
 
@@ -69,6 +74,7 @@ export default () => {
     confirmData.value.content = null
     confirmData.value.btns = buyPopupStore.buttons.confirm
     confirmData.value.hasExistClose = true
+    confirmData.value.setClass = null
     confirmCheck.value = null
 
     onBodyOverflowHiddenToggle(false)
@@ -78,6 +84,7 @@ export default () => {
     customData.value.title = data.title
     customData.value.icon = data.icon
     customData.value.content = data.content
+    customData.value.data = data.data
     customData.value.btns = data.btns
     customData.value.hasExistClose = data.hasExistClose !== undefined ? data.hasExistClose : true
 
@@ -92,6 +99,7 @@ export default () => {
     customData.value.title = null
     customData.value.icon = null
     customData.value.content = null
+    customData.value.data = null
     customData.value.btns = null
     customData.value.hasExistClose = true
     customCheck.value = null
@@ -100,7 +108,7 @@ export default () => {
   }
   const onApiPromise = (type) => {
     if (type === 'open') {
-      apiPromiseData.value.id = 'apiRunSystem'
+      apiPromiseData.value.id = 'apiPromiseSystem'
     } else {
       onApiPromiseClose()
     }

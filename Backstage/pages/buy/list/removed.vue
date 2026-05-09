@@ -2,6 +2,7 @@
 import ItemsInfo from '@pages/buy/list/_components/ItemsInfo.vue'
 import TabDefaultOval from '@pages/buy/list/_components/TabDefaultOval.vue'
 import Content from '@pages/buy/list/_components/Content.vue'
+import RemovedInfo from '@pages/buy/list/_components/item/RemovedInfo.vue'
 
 import { useBuyProjectStore } from '@stores/buy/project.js'
 import useCommonActions from '@stores/composables/useCommonActions.js'
@@ -18,9 +19,18 @@ const { onUseMeta, onWithLoadingAll } = useCommonActions()
 const { onApiPOSTRealEstateSearch } = useBuyListActions()
 const route = useRoute()
 const page = computed(() => route.query.pg)
-const listAsync = useAsyncData(`list-remove-${page.value}`, () => onApiPOSTRealEstateSearch(4))
+// publish (刊登) / done (成交)
+const funEventsItem = ['publish', 'done']
+// editor (修改) / done (成交)
+const contentEventsItem = ['editor', 'done']
 
-await onWithLoadingAll([listAsync])
+const onUpdate = async (done) => {
+  await onApiPOSTRealEstateSearch(4)
+
+  done()
+}
+
+await onWithLoadingAll([useAsyncData(`list-remove-${page.value}`, () => onUpdate())])
 
 onUseMeta({
   title: `物件管理 - 已下架 | ${buyProject.NAME}`,
@@ -39,7 +49,14 @@ onUseMeta({
       <ItemsInfo />
     </template>
     <TabDefaultOval />
-    <Content />
+    <Content
+      :funEventsItem="funEventsItem"
+      :contentEventsItem="contentEventsItem"
+      v-slot="{ item }"
+      @update="onUpdate"
+    >
+      <RemovedInfo :data="item" class="m:mt-[24px]" />
+    </Content>
   </BuyMContainer>
 </template>
 

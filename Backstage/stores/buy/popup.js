@@ -25,8 +25,17 @@ export const useBuyPopupStore = defineStore('buyPopup', () => {
       },
     ],
   })
+  const setClass = readonly({
+    alert: {
+      main: 'p:--w-450 t:--w-300',
+    },
+    confirm: {
+      main: 'p:--w-450 t:--w-300',
+    },
+  })
 
   return {
     buttons,
+    setClass,
   }
 })

@@ -19,8 +19,8 @@ const items = computed(() => {
       button: {
         text: '續刊',
         onClick: () => {
-          emits('click:renewal')
-          // alert('續刊')
+          // 有 props.data popup 會出現單一一筆樣式
+          emits('click:renewal', props.data)
         },
       },
       class: {

@@ -3,11 +3,7 @@ import { defineStore } from 'pinia'
 export const useBuyProjectStore = defineStore('buyProject', () => {
   const NAME = '好房網買屋 Housefun 管理後台'
   const availablePlans = ref(null)
-  const apiDataRenewal = ref({
-    userId: 0,
-    hfids: [],
-    planId: null,
-  })
+  const renewalPlanId = ref(null)
   const options = ref({
     casePurpose: null,
     city: null,
@@ -48,7 +44,7 @@ export const useBuyProjectStore = defineStore('buyProject', () => {
   return {
     NAME,
     availablePlans,
-    apiDataRenewal,
+    renewalPlanId,
     options,
     parkingInfo,
   }

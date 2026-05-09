@@ -4,7 +4,7 @@ import Events from '@pages/buy/list/_components/functions/Events.vue'
 import SelectCount from '@pages/buy/list/_components/functions/SelectCount.vue'
 import Sort from '@pages/buy/list/_components/functions/Sort.vue'
 
-const emits = defineEmits(['click:renewal', 'click:removed', 'click:done'])
+const emits = defineEmits(['click:renewal', 'click:publish', 'click:removed', 'click:done'])
 const props = defineProps({
   eventsItems: {
     type: Array,
@@ -24,6 +24,7 @@ const onClick = (id) => {
       <Events
         :items="props.eventsItems"
         @click:renewal="onClick('renewal')"
+        @click:publish="onClick('publish')"
         @click:removed="onClick('removed')"
         @click:done="onClick('done')"
       />

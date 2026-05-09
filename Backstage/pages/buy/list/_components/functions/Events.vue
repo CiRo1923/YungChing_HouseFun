@@ -3,7 +3,7 @@ import useBuyListActions from '@stores/buy/composables/useListActions.js'
 
 const { selectCount } = useBuyListActions()
 
-const emits = defineEmits(['click:renewal', 'click:removed', 'click:done'])
+const emits = defineEmits(['click:renewal', 'click:publish', 'click:removed', 'click:done'])
 const props = defineProps({
   items: {
     type: Array,
@@ -14,6 +14,10 @@ const datas = readonly([
   {
     id: 'renewal',
     label: '續刊',
+  },
+  {
+    id: 'publish',
+    label: '刊登',
   },
   {
     id: 'removed',

@@ -4,6 +4,7 @@ import TabDefaultOval from '@pages/buy/list/_components/TabDefaultOval.vue'
 import Content from '@pages/buy/list/_components/Content.vue'
 import Setting from '@pages/buy/list/_components/item/Setting.vue'
 import PopupPlans from '@pages/buy/list/_components/popup/Plans.vue'
+import PopupRemoved from '@pages/buy/list/_components/popup/Removed.vue'
 
 import { useBuyProjectStore } from '@stores/buy/project.js'
 import useCommonActions from '@stores/composables/useCommonActions.js'
@@ -27,8 +28,14 @@ const funEventsItem = ['renewal', 'removed', 'done']
 const contentEventsItem = ['editor', 'removed', 'done']
 const page = computed(() => route.query.pg)
 
+const onUpdate = async (done) => {
+  await onApiPOSTRealEstateSearch(1)
+
+  done()
+}
+
 await onWithLoadingAll([
-  useAsyncData(`list-publish-${page.value}`, () => onApiPOSTRealEstateSearch(1)),
+  useAsyncData(`list-publish-${page.value}`, () => onUpdate()),
   useAsyncData('available-plans', () => onApiGetVasPublishAvailablePlans()),
 ])
 
@@ -53,11 +60,13 @@ onUseMeta({
       :funEventsItem="funEventsItem"
       :contentEventsItem="contentEventsItem"
       v-slot="{ item, renewalFun }"
+      @update="onUpdate"
     >
       <Setting :data="item" @click:renewal="renewalFun" class="m:mt-[24px]" />
     </Content>
   </BuyMContainer>
   <PopupPlans />
+  <PopupRemoved />
 </template>
 
 <style></style>

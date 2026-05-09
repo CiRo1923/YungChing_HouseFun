@@ -4,17 +4,34 @@ import { numberComma } from '@js/_prototype.js'
 import { useBuyProjectStore } from '@stores/buy/project.js'
 
 const buyProject = useBuyProjectStore()
-const { availablePlans, apiDataRenewal } = storeToRefs(buyProject)
+const { availablePlans, renewalPlanId } = storeToRefs(buyProject)
+
+const props = defineProps({
+  setClass: {
+    type: Object,
+    default: () => ({}),
+  },
+})
+
+const setClass = computed(() => {
+  return {
+    main: '',
+    ...props.setClass,
+  }
+})
 </script>
 
 <template>
-  <ul class="mx-auto m:space-y-[16px] pt:space-y-[8px] p:max-w-[800px]">
+  <ul class="mx-auto m:space-y-[16px] pt:space-y-[8px] p:max-w-[800px]" :class="setClass.main">
     <li v-for="(item, index) in availablePlans" :key="`${item.planType}_${item.planId}_${index}`">
       <BuyMFormRadioItem
         :name="`planId[${index}]`"
-        v-model="apiDataRenewal.planId"
+        v-model="renewalPlanId"
         :config="{
           value: item.planId,
+        }"
+        :rules="{
+          required: '請選擇額度',
         }"
         :setClass="{
           main: 'p:--px-40 p:--py-16 tm:p-16',

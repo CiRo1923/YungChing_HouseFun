@@ -24,6 +24,16 @@ const items = computed(() => {
     caseLayout,
   } = props.data
   const { room, livingRoom, bathroom } = caseLayout || {}
+  const land = [
+    {
+      id: 'purpose',
+      value: casePurpose,
+    },
+    {
+      id: 'areaPin',
+      value: `${caseAreaPin} 坪`,
+    },
+  ]
   const result = {
     1: [
       {
@@ -67,16 +77,8 @@ const items = computed(() => {
         value: `${caseFloor} / ${caseTotalFloor} 樓`,
       },
     ],
-    6: [
-      {
-        id: 'purpose',
-        value: casePurpose,
-      },
-      {
-        id: 'areaPin',
-        value: `${caseAreaPin} 坪`,
-      },
-    ],
+    6: land,
+    F: land,
   }
 
   return result[casePurposeToken] ?? []
@@ -92,6 +94,7 @@ onMounted(() => {
 })
 </script>
 <template>
+  <!-- {{ props.data.casePurposeToken }} -->
   <BuyMSeparator
     :items="items"
     :setClass="{

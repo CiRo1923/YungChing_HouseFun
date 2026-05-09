@@ -8,12 +8,12 @@ const props = defineProps({
 
 const items = shallowReadonly([
   {
-    id: 'caseAddr',
+    id: 'address',
     component: 'address',
     icon: 'icon_location',
   },
   {
-    id: 'buName',
+    id: 'community',
     component: 'p',
     icon: 'icon_community',
   },

@@ -2,6 +2,7 @@ import {
   apiGETCitySelectOptions,
   apiGETDistrictSelectOptions,
   apiGetVasPublishAvailablePlans,
+  apiPOSTVasPublishRenewal,
 } from '@js/_api/buy/common.js'
 
 import {
@@ -38,7 +39,7 @@ import useBuyPopupActions from '@stores/buy/composables/usePopupActions.js'
 export default () => {
   const projectStores = useBuyProjectStore()
   const { onApiError } = useBuyPopupActions()
-  const { availablePlans, apiDataRenewal, options } = storeToRefs(projectStores)
+  const { availablePlans, renewalPlanId, options } = storeToRefs(projectStores)
 
   const onApiGETRealEstatePurposeCheckOptions = async () => {
     if (options.value.casePurpose) return false
@@ -398,8 +399,21 @@ export default () => {
 
     return { config, status, data }
   }
+  const onApiPOSTVasPublishRenewal = async (hfids) => {
+    const { config, status, data } = await apiPOSTVasPublishRenewal({
+      userId: 0,
+      hfids,
+      planId: renewalPlanId.value,
+    })
+
+    if (status !== 200) {
+      onApiError(config, status, data)
+    }
+
+    return { config, status, data }
+  }
   const onResetApiDataRenewal = () => {
-    apiDataRenewal.value.planId = null
+    renewalPlanId.value = null
   }
   const onValueGetText = (option, value) => {
     const isOptionString = typeof option === 'string'
@@ -478,6 +492,7 @@ export default () => {
     onApiGETRealEstateFeatureCheckOptions,
     onApiGETRealEstatePosterDataSourceSelectOptions,
     onApiGetVasPublishAvailablePlans,
+    onApiPOSTVasPublishRenewal,
     onResetApiDataRenewal,
     onValueGetText,
     onReplaceImageSize,

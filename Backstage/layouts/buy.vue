@@ -1,6 +1,7 @@
 <script setup>
 import AlertSystem from '@containers/buy/common/AlertSystem.vue'
-// import ConfirmSystem from '@containers/buy/common/ConfirmSystem.vue'
+import ConfirmSystem from '@containers/buy/common/ConfirmSystem.vue'
+import ApiPromiseSystem from '@containers/buy/common/ApiPromiseSystem.vue'
 
 import { useCommonStore } from '@stores/common.js'
 import { useBuyProjectStore } from '@stores/buy/project.js'
@@ -23,11 +24,11 @@ const { isLoading } = storeToRefs(common)
       <BuyMFooter />
     </footer>
   </div>
-  <CommonMLoading v-if="isLoading" />
+  <CommonMLoadingContainer v-if="isLoading" />
   <div id="box">
     <AlertSystem />
-    <!-- <ConfirmSystem /> -->
-    <!-- <ApiRunSystem /> -->
+    <ConfirmSystem />
+    <ApiPromiseSystem />
   </div>
 </template>
 

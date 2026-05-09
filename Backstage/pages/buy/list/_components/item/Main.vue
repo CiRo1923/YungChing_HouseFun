@@ -1,5 +1,5 @@
 <script setup>
-import Address from '@pages/buy/list/_components/item/Address.vue'
+import Address from '@pages/buy/_components/Address.vue'
 import Information from '@pages/buy/list/_components/item/Information.vue'
 import Hot from '@pages/buy/list/_components/item/Hot.vue'
 import Events from '@pages/buy/list/_components/item/Events.vue'
@@ -13,7 +13,7 @@ const common = useCommonStore()
 const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
 
-const emits = defineEmits(['update:isSelect', 'click:removed', 'click:done'])
+const emits = defineEmits(['update:isSelect', 'click:publish', 'click:removed', 'click:done'])
 const props = defineProps({
   data: {
     type: Object,
@@ -37,9 +37,21 @@ const modelIsSelect = computed({
   },
 })
 const hasEventsItem = computed(() => props.eventsItems && props.eventsItems.length !== 0)
+const addressData = computed(() => {
+  const keyMap = {
+    caseAddr: 'address',
+    buName: 'community',
+  }
 
-const onEventsClick = (id) => {
-  emits(`click:${id}`)
+  return Object.fromEntries(
+    Object.entries(props.data)
+      .filter(([key]) => keyMap[key])
+      .map(([key, value]) => [keyMap[key], value])
+  )
+})
+
+const onEventsClick = (id, data) => {
+  emits(`click:${id}`, data)
 }
 
 onUnmounted(() => {
@@ -76,7 +88,7 @@ onMounted(() => {
           <span class="text-[18px] text-[--orange-e646] pt:order-2 pt:shrink-0">
             {{ numberComma.add(props.data.casePrice) }} 萬
           </span>
-          <Address :data="props.data" />
+          <Address :data="addressData" />
         </div>
         <Information :data="props.data" />
         <div class="m:mt-[8px] pt:flex pt:items-center p:mt-[20px]">
@@ -84,8 +96,9 @@ onMounted(() => {
           <Events
             :data="props.data"
             :items="eventsItems"
-            @click:removed="onEventsClick('removed')"
-            @click:done="onEventsClick('done')"
+            @click:publish="(data) => onEventsClick('publish', data)"
+            @click:removed="(data) => onEventsClick('removed', data)"
+            @click:done="(data) => onEventsClick('done', data)"
             v-if="!isDeviceM && hasEventsItem"
           />
         </div>
@@ -109,8 +122,9 @@ onMounted(() => {
     <Events
       :data="props.data"
       :items="eventsItems"
-      @click:removed="onEventsClick('removed')"
-      @click:done="onEventsClick('done')"
+      @click:publish="(data) => onEventsClick('publish', data)"
+      @click:removed="(data) => onEventsClick('removed', data)"
+      @click:done="(data) => onEventsClick('done', data)"
       v-if="isDeviceM && hasEventsItem"
     />
   </section>

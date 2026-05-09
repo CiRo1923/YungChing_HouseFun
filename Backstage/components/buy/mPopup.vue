@@ -119,10 +119,7 @@ watchEffect(() => {
               <CommonSvgIcon icon="icon_xmark" class="h-full w-full" />
             </button>
           </div>
-          <div
-            class="m-popup-body scrollbar --y mt-[24px] grow overflow-hidden"
-            :class="setClass.body"
-          >
+          <div class="m-popup-body scrollbar --y grow overflow-hidden" :class="setClass.body">
             <slot />
           </div>
           <footer class="m-popup-footer mt-[24px]" :class="setClass.footer" v-if="$slots.footer">
@@ -163,6 +160,12 @@ watchEffect(() => {
   }
 }
 
+.m-popup-body {
+  &:not(:only-child) {
+    @apply mt-[24px];
+  }
+}
+
 @screen p {
   .m-popup {
     &.\-\-w-1200,
@@ -194,6 +197,22 @@ watchEffect(() => {
     &.pt\:\-\-w-600 {
       .m-popup-container {
         @apply w-[600px];
+      }
+    }
+
+    &.\-\-w-450,
+    &.p\:\-\-w-450,
+    &.pt\:\-\-w-450 {
+      .m-popup-container {
+        @apply w-[450px];
+      }
+    }
+
+    &.\-\-w-300,
+    &.p\:\-\-w-300,
+    &.pt\:\-\-w-300 {
+      .m-popup-container {
+        @apply w-[300px];
       }
     }
   }
@@ -234,6 +253,24 @@ watchEffect(() => {
     &.t\:\-\-w-600 {
       .m-popup-container {
         @apply w-[600px];
+      }
+    }
+
+    &.\-\-w-450,
+    &.pt\:\-\-w-450,
+    &.tm\:\-\-w-450,
+    &.t\:\-\-w-450 {
+      .m-popup-container {
+        @apply w-[450px];
+      }
+    }
+
+    &.\-\-w-300,
+    &.pt\:\-\-w-300,
+    &.tm\:\-\-w-300,
+    &.t\:\-\-w-300 {
+      .m-popup-container {
+        @apply w-[300px];
       }
     }
   }

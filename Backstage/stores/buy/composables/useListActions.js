@@ -1,4 +1,4 @@
-import { apiPOSTRealEstateSearch } from '@js/_api/buy/list.js'
+import { apiPOSTRealEstateSearch, apiPOSTRealEstateOffline } from '@js/_api/buy/list.js'
 
 import { useBuyListStore } from '@stores/buy/list.js'
 import useBuyProjectActions from '@stores/buy/composables/useProjectActions.js'
@@ -9,9 +9,10 @@ export default () => {
   const buyList = useBuyListStore()
   const { apiData, datas } = storeToRefs(buyList)
   const { onApiError } = useBuyPopupActions()
-  const selectCount = computed(() =>
-    datas.value ? datas.value.filter((item) => item._isSelect).length : 0
+  const selectItems = computed(() =>
+    datas.value ? datas.value.filter((item) => item._isSelect).map((item) => item.hfID) : []
   )
+  const selectCount = computed(() => selectItems.value.length)
   const onApiPOSTRealEstateSearch = async (caseStatusToken) => {
     const route = useRoute()
     const page = route.query.pg ? +route.query.pg : 1
@@ -19,7 +20,7 @@ export default () => {
       is7DayExpirerFilterer: false,
       caseStatusToken, // 刊登中: 1、草稿: 2、已成交: 3、已下架: 4
       page,
-      pageSize: 3,
+      pageSize: 12,
       ...apiData.value,
     })
 
@@ -45,14 +46,27 @@ export default () => {
 
     return { config, status, data }
   }
+  const onApiPOSTRealEstateOffline = async (hfids) => {
+    const { config, status, data } = await apiPOSTRealEstateOffline({
+      hfids,
+    })
+
+    if (status !== 200) {
+      onApiError(config, status, data)
+    }
+
+    return { config, status, data }
+  }
 
   const onReset = () => {
     datas.value = null
   }
 
   return {
+    selectItems,
     selectCount,
     onApiPOSTRealEstateSearch,
+    onApiPOSTRealEstateOffline,
     onReset,
   }
 }
