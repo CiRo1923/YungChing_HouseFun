@@ -3,7 +3,13 @@ import useBuyListActions from '@stores/buy/composables/useListActions.js'
 
 const { selectCount } = useBuyListActions()
 
-const emits = defineEmits(['click:renewal', 'click:publish', 'click:removed', 'click:done'])
+const emits = defineEmits([
+  'click:renewal',
+  'click:publish',
+  'click:offline',
+  'click:deal',
+  'click:copy',
+])
 const props = defineProps({
   items: {
     type: Array,
@@ -20,12 +26,16 @@ const datas = readonly([
     label: '刊登',
   },
   {
-    id: 'removed',
+    id: 'offline',
     label: '下架',
   },
   {
-    id: 'done',
+    id: 'deal',
     label: '成交',
+  },
+  {
+    id: 'copy',
+    label: '複製資料',
   },
 ])
 const result = computed(() => datas.filter((item) => props.items.includes(item.id)))

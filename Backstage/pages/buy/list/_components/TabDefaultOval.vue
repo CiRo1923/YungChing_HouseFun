@@ -16,7 +16,7 @@ const items = shallowReadonly([
   {
     label: '已下架',
     to: {
-      name: 'buy-list-removed',
+      name: 'buy-list-offline',
       query: {
         pg: '1',
       },
@@ -34,7 +34,7 @@ const items = shallowReadonly([
   {
     label: '已成交',
     to: {
-      name: 'buy-list-done',
+      name: 'buy-list-deal',
       query: {
         pg: '1',
       },

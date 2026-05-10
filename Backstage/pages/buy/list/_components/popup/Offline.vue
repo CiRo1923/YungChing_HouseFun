@@ -11,7 +11,7 @@ const { selectCount } = useBuyListActions()
 
 <template>
   <CustomPopup
-    id="popupRemoved"
+    id="popupOffline"
     :setClass="{
       main: 'p:--w-800 t:--w-600',
     }"

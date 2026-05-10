@@ -13,7 +13,7 @@ const common = useCommonStore()
 const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
 
-const emits = defineEmits(['update:isSelect', 'click:publish', 'click:removed', 'click:done'])
+const emits = defineEmits(['update:checked', 'click:publish', 'click:offline', 'click:deal'])
 const props = defineProps({
   data: {
     type: Object,
@@ -23,17 +23,17 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
-  isSelect: {
+  checked: {
     type: Boolean,
     default: false,
   },
 })
 
 const isDeviceM = computed(() => device.value === 'm')
-const modelIsSelect = computed({
-  get: () => props.isSelect,
+const modelIsChecked = computed({
+  get: () => props.checked,
   set: (value) => {
-    emits('update:isSelect', value)
+    emits('update:checked', value)
   },
 })
 const hasEventsItem = computed(() => props.eventsItems && props.eventsItems.length !== 0)
@@ -69,7 +69,7 @@ onMounted(() => {
     <div class="flex m:flex-col pt:grow pt:items-center p:gap-x-[16px]">
       <div class="order-3 grow">
         <header class="mb-[8px]">
-          <h3 class="font-normal">
+          <h3 class="font-normal tracking-wider tm:text-[16px] p:text-[18px]">
             <BuyMAnchor
               :text="props.data.caseTitle"
               :to="{
@@ -79,9 +79,11 @@ onMounted(() => {
                 },
               }"
               :setClass="{
-                main: 'tracking-wider underline p:text-[18px]',
+                main: 'underline',
               }"
+              v-if="props.data.caseStatue !== '3'"
             />
+            <em>{{ props.data.caseTitle }}</em>
           </h3>
         </header>
         <div class="m:mb-[8px] pt:mb-[4px] pt:flex pt:items-center">
@@ -97,8 +99,8 @@ onMounted(() => {
             :data="props.data"
             :items="eventsItems"
             @click:publish="(data) => onEventsClick('publish', data)"
-            @click:removed="(data) => onEventsClick('removed', data)"
-            @click:done="(data) => onEventsClick('done', data)"
+            @click:offline="(data) => onEventsClick('offline', data)"
+            @click:deal="(data) => onEventsClick('deal', data)"
             v-if="!isDeviceM && hasEventsItem"
           />
         </div>
@@ -111,10 +113,14 @@ onMounted(() => {
         }"
       />
       <BuyMFormCheckBox
-        :name="`isSelect[${props.data.hfID}]`"
-        v-model="modelIsSelect"
+        :name="`checked[${props.data.hfID}]`"
+        v-model="modelIsChecked"
         :config="{
           mode: 'boolean',
+          isDisabled: props.data._checked.disabled,
+        }"
+        :setClass="{
+          main: 'shrink-0',
         }"
       />
     </div>
@@ -123,8 +129,8 @@ onMounted(() => {
       :data="props.data"
       :items="eventsItems"
       @click:publish="(data) => onEventsClick('publish', data)"
-      @click:removed="(data) => onEventsClick('removed', data)"
-      @click:done="(data) => onEventsClick('done', data)"
+      @click:offline="(data) => onEventsClick('offline', data)"
+      @click:deal="(data) => onEventsClick('deal', data)"
       v-if="isDeviceM && hasEventsItem"
     />
   </section>

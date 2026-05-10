@@ -7,3 +7,6 @@ export const apiPOSTRealEstateSearch = async (data) =>
 
 export const apiPOSTRealEstateOffline = async (data) =>
   await onFetchApi.post(`api/${version}/buy/realEstate/offline`, data)
+
+export const apiPOSTVasPublishSubmit = async (data) =>
+  await onFetchApi.post(`api/${version}/vas/Publish/Submit`, data)

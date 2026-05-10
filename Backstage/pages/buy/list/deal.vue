@@ -2,6 +2,8 @@
 import ItemsInfo from '@pages/buy/list/_components/ItemsInfo.vue'
 import TabDefaultOval from '@pages/buy/list/_components/TabDefaultOval.vue'
 import Content from '@pages/buy/list/_components/Content.vue'
+import DealInfo from '@pages/buy/list/_components/item/DealInfo.vue'
+import PopupDeal from '@pages/buy/list/_components/popup/Deal.vue'
 
 import { useBuyProjectStore } from '@stores/buy/project.js'
 import useCommonActions from '@stores/composables/useCommonActions.js'
@@ -18,9 +20,16 @@ const { onUseMeta, onWithLoadingAll } = useCommonActions()
 const { onApiPOSTRealEstateSearch } = useBuyListActions()
 const route = useRoute()
 const page = computed(() => route.query.pg)
-const listAsync = useAsyncData(`list-done-${page.value}`, () => onApiPOSTRealEstateSearch(3))
+// copy (複製資料)
+const funEventsItem = ['copy']
 
-await onWithLoadingAll([listAsync])
+const onUpdate = async (done) => {
+  await onApiPOSTRealEstateSearch(3)
+
+  done()
+}
+
+await onWithLoadingAll([useAsyncData(`list-done-${page.value}`, () => onUpdate())])
 
 onUseMeta({
   title: `物件管理 - 已成交 | ${buyProject.NAME}`,
@@ -39,8 +48,11 @@ onUseMeta({
       <ItemsInfo />
     </template>
     <TabDefaultOval />
-    <Content />
+    <Content :funEventsItem="funEventsItem" v-slot="{ item, dealFun }">
+      <DealInfo :data="item" @click:deal="dealFun" />
+    </Content>
   </BuyMContainer>
+  <PopupDeal />
 </template>
 
 <style></style>

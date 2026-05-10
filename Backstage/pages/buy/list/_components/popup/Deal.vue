@@ -2,7 +2,6 @@
 import CustomPopup from '@containers/buy/common/CustomPopup.vue'
 
 import PublishInfo from '@pages/buy/_components/PublishInfo.vue'
-import AvailablePlans from '@pages/buy/_components/AvailablePlans.vue'
 
 import { usePopupStore } from '@stores/popup.js'
 import useBuyListActions from '@stores/buy/composables/useListActions.js'
@@ -47,7 +46,7 @@ const onSure = async () => {
 
 <template>
   <CustomPopup
-    id="popupPlans"
+    id="popupDeal"
     :setClass="{
       main: 'p:--w-1200 t:--w-720',
     }"
@@ -55,12 +54,10 @@ const onSure = async () => {
   >
     <PublishInfo :data="publishInfo" v-if="publishInfo" />
     <p class="text-[14px] text-[--gray-666]" v-else>
-      已選擇 <span class="text-[--orange-e646]">{{ selectCount }}</span> 個物件，需要使用
-      <span class="text-[--orange-e646]">{{ selectCount }}</span> 個刊登額度
+      已選擇
+      <span class="text-[--orange-e646]">{{ selectCount }}</span> 個物件，物件成交後將無法重新上架
     </p>
-    <Form as="div" class="tm:mt-[16px] p:mt-[24px]" ref="formRef">
-      <AvailablePlans />
-    </Form>
+    <Form as="div" class="tm:mt-[16px] p:mt-[24px]" ref="formRef"> 111 </Form>
   </CustomPopup>
 </template>
 

@@ -199,19 +199,27 @@ const onChange = () => {
 .m-form-element {
   &.\-\-checkbox {
     .m-form-type {
-      &:not(:checked) {
-        & + .m-form-icon {
-          @apply border-[--gray-ccce];
+      &:not(:disabled) {
+        &:not(:checked) {
+          & + .m-form-icon {
+            @apply border-[--gray-ccce];
+          }
+        }
+
+        &:checked {
+          & + .m-form-icon {
+            @apply border-transparent;
+
+            > use {
+              @apply opacity-100;
+            }
+          }
         }
       }
 
-      &:checked {
+      &:disabled {
         & + .m-form-icon {
-          @apply border-transparent;
-
-          > use {
-            @apply opacity-100;
-          }
+          @apply border-[--gray-e5] bg-[--gray-f2];
         }
       }
     }

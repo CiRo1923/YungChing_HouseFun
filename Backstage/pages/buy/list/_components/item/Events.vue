@@ -1,5 +1,5 @@
 <script setup>
-const emits = defineEmits(['click:publish', 'click:removed', 'click:done'])
+const emits = defineEmits(['click:publish', 'click:offline', 'click:deal'])
 const props = defineProps({
   data: {
     type: Object,
@@ -34,22 +34,23 @@ const datas = shallowReadonly([
     },
   },
   {
-    id: 'removed',
+    id: 'offline',
     icon: 'icon_eye_hidden',
     label: '下架',
     component: 'button',
     onClick: () => {
       // 有 props.data popup 不會出現已選擇 {0} 筆物件
-      emits('click:removed', props.data)
+      emits('click:offline', props.data)
     },
   },
   {
-    id: 'done',
+    id: 'deal',
     icon: 'icon_house_done',
     label: '成交',
     component: 'button',
     onClick: () => {
-      emits('click:done')
+      // 有 props.data popup 不會出現已選擇 {0} 筆物件
+      emits('click:deal', props.data)
     },
   },
 ])

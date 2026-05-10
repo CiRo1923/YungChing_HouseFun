@@ -19,16 +19,7 @@ const onClose = (item) => {
 </script>
 
 <template>
-  <BuyMPopup
-    id="confirmSystem"
-    :setClass="{
-      main: 'p:--w-450 t:--w-300',
-    }"
-  >
-    <!-- <pre>
-    {{ confirm.setClass }}
-  </pre
-    > -->
+  <BuyMPopup id="confirmSystem" :setClass="confirm.setClass">
     <div class="text-center text-[16px]" v-html="confirm.content" />
     <template #footer>
       <div class="text-center">

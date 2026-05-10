@@ -2,9 +2,14 @@
 import ItemsInfo from '@pages/buy/list/_components/ItemsInfo.vue'
 import TabDefaultOval from '@pages/buy/list/_components/TabDefaultOval.vue'
 import Content from '@pages/buy/list/_components/Content.vue'
+import DraftInfo from '@pages/buy/list/_components/item/DraftInfo.vue'
+import PopupPlans from '@pages/buy/list/_components/popup/Plans.vue'
+import PopupFinish from '@pages/buy/list/_components/popup/Finish.vue'
+import PopupDeal from '@pages/buy/list/_components/popup/Deal.vue'
 
 import { useBuyProjectStore } from '@stores/buy/project.js'
 import useCommonActions from '@stores/composables/useCommonActions.js'
+import useBuyProjectActions from '@stores/buy/composables/useProjectActions.js'
 import useBuyListActions from '@stores/buy/composables/useListActions.js'
 
 definePageMeta({
@@ -15,12 +20,25 @@ definePageMeta({
 
 const buyProject = useBuyProjectStore()
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
+const { onApiGetVasPublishAvailablePlans } = useBuyProjectActions()
 const { onApiPOSTRealEstateSearch } = useBuyListActions()
 const route = useRoute()
 const page = computed(() => route.query.pg)
-const listAsync = useAsyncData(`list-draft-${page.value}`, () => onApiPOSTRealEstateSearch(2))
+// publish (刊登) / deal (成交)
+const funEventsItem = ['publish', 'deal']
+// editor (修改) / deal (成交)
+const contentEventsItem = ['editor', 'deal']
 
-await onWithLoadingAll([listAsync])
+const onUpdate = async (done) => {
+  await onApiPOSTRealEstateSearch(2)
+
+  done()
+}
+
+await onWithLoadingAll([
+  useAsyncData(`list-draft-${page.value}`, () => onUpdate()),
+  useAsyncData('available-plans-draft', () => onApiGetVasPublishAvailablePlans()),
+])
 
 onUseMeta({
   title: `物件管理 - 草稿區 | ${buyProject.NAME}`,
@@ -39,8 +57,18 @@ onUseMeta({
       <ItemsInfo />
     </template>
     <TabDefaultOval />
-    <Content />
+    <Content
+      :funEventsItem="funEventsItem"
+      :contentEventsItem="contentEventsItem"
+      v-slot="{ item, publishFun }"
+      @update="onUpdate"
+    >
+      <DraftInfo :data="item" @click:publish="publishFun" class="m:mt-[24px]" />
+    </Content>
   </BuyMContainer>
+  <PopupPlans />
+  <PopupFinish />
+  <PopupDeal />
 </template>
 
 <style></style>

@@ -23,7 +23,7 @@ export default () => {
 
     alertData.value.id = 'alertSystem'
     alertData.value.title = data.title
-    alertData.value.icon = 'icon_circle_exclamation'
+    alertData.value.icon = data.icon || 'icon_circle_exclamation'
     alertData.value.content = data.content
     alertData.value.btns = onDeepMerge(buttons, data.btns)
     alertData.value.hasExistClose = data.hasExistClose !== undefined ? data.hasExistClose : true
@@ -51,13 +51,11 @@ export default () => {
     const buttons = buyPopupStore.buttons.confirm
     const setClass = buyPopupStore.setClass.confirm
 
-    onMergeBtns(buttons, data.btns)
-
     confirmData.value.id = 'confirmSystem'
     confirmData.value.title = data.title
-    confirmData.value.icon = 'icon_circle_exclamation'
+    confirmData.value.icon = data.icon || 'icon_circle_exclamation'
     confirmData.value.content = data.content
-    confirmData.value.btns = onMergeBtns()
+    confirmData.value.btns = onMergeBtns(buttons, data.btns)
     confirmData.value.hasExistClose = data.hasExistClose !== undefined ? data.hasExistClose : true
     confirmData.value.setClass = data.setClass || setClass
 

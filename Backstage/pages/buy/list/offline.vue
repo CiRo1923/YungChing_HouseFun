@@ -2,10 +2,14 @@
 import ItemsInfo from '@pages/buy/list/_components/ItemsInfo.vue'
 import TabDefaultOval from '@pages/buy/list/_components/TabDefaultOval.vue'
 import Content from '@pages/buy/list/_components/Content.vue'
-import RemovedInfo from '@pages/buy/list/_components/item/RemovedInfo.vue'
+import OfflineInfo from '@pages/buy/list/_components/item/OfflineInfo.vue'
+import PopupPlans from '@pages/buy/list/_components/popup/Plans.vue'
+import PopupFinish from '@pages/buy/list/_components/popup/Finish.vue'
+import PopupDeal from '@pages/buy/list/_components/popup/Deal.vue'
 
 import { useBuyProjectStore } from '@stores/buy/project.js'
 import useCommonActions from '@stores/composables/useCommonActions.js'
+import useBuyProjectActions from '@stores/buy/composables/useProjectActions.js'
 import useBuyListActions from '@stores/buy/composables/useListActions.js'
 
 definePageMeta({
@@ -16,13 +20,14 @@ definePageMeta({
 
 const buyProject = useBuyProjectStore()
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
+const { onApiGetVasPublishAvailablePlans } = useBuyProjectActions()
 const { onApiPOSTRealEstateSearch } = useBuyListActions()
 const route = useRoute()
 const page = computed(() => route.query.pg)
-// publish (刊登) / done (成交)
-const funEventsItem = ['publish', 'done']
-// editor (修改) / done (成交)
-const contentEventsItem = ['editor', 'done']
+// publish (刊登) / deal (成交)
+const funEventsItem = ['publish', 'deal']
+// editor (修改) / deal (成交)
+const contentEventsItem = ['editor', 'deal']
 
 const onUpdate = async (done) => {
   await onApiPOSTRealEstateSearch(4)
@@ -30,7 +35,10 @@ const onUpdate = async (done) => {
   done()
 }
 
-await onWithLoadingAll([useAsyncData(`list-remove-${page.value}`, () => onUpdate())])
+await onWithLoadingAll([
+  useAsyncData(`list-offline-${page.value}`, () => onUpdate()),
+  useAsyncData('available-plans-offline', () => onApiGetVasPublishAvailablePlans()),
+])
 
 onUseMeta({
   title: `物件管理 - 已下架 | ${buyProject.NAME}`,
@@ -52,12 +60,15 @@ onUseMeta({
     <Content
       :funEventsItem="funEventsItem"
       :contentEventsItem="contentEventsItem"
-      v-slot="{ item }"
+      v-slot="{ item, publishFun }"
       @update="onUpdate"
     >
-      <RemovedInfo :data="item" class="m:mt-[24px]" />
+      <OfflineInfo :data="item" @click:publish="publishFun" class="m:mt-[24px]" />
     </Content>
   </BuyMContainer>
+  <PopupPlans />
+  <PopupFinish />
+  <PopupDeal />
 </template>
 
 <style></style>

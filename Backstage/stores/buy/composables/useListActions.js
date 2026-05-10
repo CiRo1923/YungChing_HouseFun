@@ -1,16 +1,23 @@
-import { apiPOSTRealEstateSearch, apiPOSTRealEstateOffline } from '@js/_api/buy/list.js'
+import {
+  apiPOSTRealEstateSearch,
+  apiPOSTRealEstateOffline,
+  apiPOSTVasPublishSubmit,
+} from '@js/_api/buy/list.js'
 
+import { useBuyProjectStore } from '@stores/buy/project.js'
 import { useBuyListStore } from '@stores/buy/list.js'
 import useBuyProjectActions from '@stores/buy/composables/useProjectActions.js'
 import useBuyPopupActions from '@stores/buy/composables/usePopupActions.js'
 
 export default () => {
+  const buyProject = useBuyProjectStore()
+  const { renewalPlanId } = storeToRefs(buyProject)
   const { onReplaceImageSize } = useBuyProjectActions()
   const buyList = useBuyListStore()
   const { apiData, datas } = storeToRefs(buyList)
   const { onApiError } = useBuyPopupActions()
   const selectItems = computed(() =>
-    datas.value ? datas.value.filter((item) => item._isSelect).map((item) => item.hfID) : []
+    datas.value ? datas.value.filter((item) => item._checked.value).map((item) => item.hfID) : []
   )
   const selectCount = computed(() => selectItems.value.length)
   const onApiPOSTRealEstateSearch = async (caseStatusToken) => {
@@ -32,14 +39,31 @@ export default () => {
         height: 485,
       }
       const list = onReplaceImageSize(casesList, 'picURLCover', imageSize) // 替換 width  & height
+      // 下架 會不能批次刊登的條件
+      const onPublishDisabled = (item) => {
+        const offlineInfo = item.caseOfflineInfo
+
+        return (
+          !offlineInfo || (![7, 8].includes(offlineInfo.reasonID) && offlineInfo.reasonID !== 1)
+        )
+
+        // (
+        //   !offlineInfo ||
+        //   (![7, 8].includes(offlineInfo.reasonID) &&
+        //     (offlineInfo.reasonID !== 1 || !offlineInfo.note))
+        // )
+      }
       datas.value = list.map((item) => {
         return {
           ...item,
-          _isSelect: false,
+          _checked: {
+            value: false,
+            publish: onPublishDisabled(item),
+          },
         }
       })
 
-      console.log(data)
+      console.log(datas.value)
     } else {
       onApiError(config, status, data)
     }
@@ -57,7 +81,30 @@ export default () => {
 
     return { config, status, data }
   }
+  const onApiPOSTVasPublishSubmit = async (hfids) => {
+    const { config, status, data } = await apiPOSTVasPublishSubmit({
+      userId: 0,
+      hfids,
+      planId: renewalPlanId.value,
+    })
 
+    if (status !== 200) {
+      onApiError(config, status, data)
+    }
+
+    return { config, status, data }
+  }
+  const onSyncCheckedDatas = (hfids) => {
+    const idSet = new Set(hfids)
+
+    datas.value = datas.value.map((item) => ({
+      ...item,
+      _checked: {
+        ...item._checked,
+        value: idSet.has(item.hfID),
+      },
+    }))
+  }
   const onReset = () => {
     datas.value = null
   }
@@ -67,6 +114,8 @@ export default () => {
     selectCount,
     onApiPOSTRealEstateSearch,
     onApiPOSTRealEstateOffline,
+    onApiPOSTVasPublishSubmit,
+    onSyncCheckedDatas,
     onReset,
   }
 }

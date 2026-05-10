@@ -4,7 +4,8 @@ import TabDefaultOval from '@pages/buy/list/_components/TabDefaultOval.vue'
 import Content from '@pages/buy/list/_components/Content.vue'
 import Setting from '@pages/buy/list/_components/item/Setting.vue'
 import PopupPlans from '@pages/buy/list/_components/popup/Plans.vue'
-import PopupRemoved from '@pages/buy/list/_components/popup/Removed.vue'
+import PopupOffline from '@pages/buy/list/_components/popup/Offline.vue'
+import PopupDeal from '@pages/buy/list/_components/popup/Deal.vue'
 
 import { useBuyProjectStore } from '@stores/buy/project.js'
 import useCommonActions from '@stores/composables/useCommonActions.js'
@@ -22,10 +23,10 @@ const { onUseMeta, onWithLoadingAll } = useCommonActions()
 const { onApiGetVasPublishAvailablePlans } = useBuyProjectActions()
 const { onApiPOSTRealEstateSearch } = useBuyListActions()
 const route = useRoute()
-// renewal (續刊) / removed (下架) / done (成交)
-const funEventsItem = ['renewal', 'removed', 'done']
-// editor (修改) / removed (下架) / done (成交)
-const contentEventsItem = ['editor', 'removed', 'done']
+// renewal (續刊) / offline (下架) / deal (成交)
+const funEventsItem = ['renewal', 'offline', 'deal']
+// editor (修改) / offline (下架) / deal (成交)
+const contentEventsItem = ['editor', 'offline', 'deal']
 const page = computed(() => route.query.pg)
 
 const onUpdate = async (done) => {
@@ -36,7 +37,7 @@ const onUpdate = async (done) => {
 
 await onWithLoadingAll([
   useAsyncData(`list-publish-${page.value}`, () => onUpdate()),
-  useAsyncData('available-plans', () => onApiGetVasPublishAvailablePlans()),
+  useAsyncData('available-plans-publish', () => onApiGetVasPublishAvailablePlans()),
 ])
 
 onUseMeta({
@@ -66,7 +67,8 @@ onUseMeta({
     </Content>
   </BuyMContainer>
   <PopupPlans />
-  <PopupRemoved />
+  <PopupOffline />
+  <PopupDeal />
 </template>
 
 <style></style>

@@ -9,7 +9,7 @@ const props = defineProps({
   },
 })
 const items = computed(() => {
-  const { is7DayExpired, dateExpired, isGolden, amountAutoRefresh, _isSelect } = props.data
+  const { is7DayExpired, dateExpired, isGolden, amountAutoRefresh, _checked } = props.data
 
   return [
     {
@@ -25,7 +25,7 @@ const items = computed(() => {
       },
       class: {
         main: [
-          _isSelect ? '--bg-white' : '--bg-gray',
+          _checked.value ? '--bg-white' : '--bg-gray',
           is7DayExpired ? '--border-orange' : '--border-gray',
         ],
         label: is7DayExpired ? 'text-[--orange-e646]' : '',
@@ -48,7 +48,7 @@ const items = computed(() => {
       class: {
         main: !isGolden
           ? '--bg-yellow --border-yellow'
-          : _isSelect
+          : _checked.value
             ? '--bg-white --border-gray'
             : '--bg-gray --border-gray',
         label: !isGolden ? 'text-[--orange-e646]' : '',
@@ -71,7 +71,7 @@ const items = computed(() => {
         },
       },
       class: {
-        main: ['--border-gray', _isSelect ? '--bg-white' : '--bg-gray'],
+        main: ['--border-gray', _checked.value ? '--bg-white' : '--bg-gray'],
         button: {
           main: '--border-gray-e5 --bg-white --text-gray-666',
         },
