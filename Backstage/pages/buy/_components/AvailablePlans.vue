@@ -23,7 +23,10 @@ const setClass = computed(() => {
 
 <template>
   <ul class="mx-auto m:space-y-[16px] pt:space-y-[8px] p:max-w-[800px]" :class="setClass.main">
-    <li v-for="(item, index) in availablePlans" :key="`${item.planType}_${item.planId}_${index}`">
+    <li
+      v-for="(item, index) in availablePlans.listPlan"
+      :key="`${item.planType}_${item.planId}_${index}`"
+    >
       <BuyMFormRadioItem
         :name="`planId[${index}]`"
         v-model="renewalPlanId"

@@ -88,3 +88,6 @@ export const apiGETRealEstateFeatureCheckOptions = async (data) =>
 
 export const apiGETRealEstatePosterDataSourceSelectOptions = async (data) =>
   await onFetchApi.get(`api/${version}/buy/realEstatePosterDataSource/select-options`, data)
+
+export const apiPOSTRealEstateReadToPublish = async (data) =>
+  await onFetchApi.post(`api/${version}/buy/realEstate/ReadToPublish`, data)

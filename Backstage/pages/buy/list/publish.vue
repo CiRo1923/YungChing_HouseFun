@@ -20,7 +20,7 @@ definePageMeta({
 
 const buyProject = useBuyProjectStore()
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
-const { onApiGetVasPublishAvailablePlans } = useBuyProjectActions()
+const { onApiGetPublishAvailablePlans } = useBuyProjectActions()
 const { onApiPOSTRealEstateSearch } = useBuyListActions()
 const route = useRoute()
 // renewal (續刊) / offline (下架) / deal (成交)
@@ -37,7 +37,7 @@ const onUpdate = async (done) => {
 
 await onWithLoadingAll([
   useAsyncData(`list-publish-${page.value}`, () => onUpdate()),
-  useAsyncData('available-plans-publish', () => onApiGetVasPublishAvailablePlans()),
+  useAsyncData('available-plans-publish', () => onApiGetPublishAvailablePlans()),
 ])
 
 onUseMeta({

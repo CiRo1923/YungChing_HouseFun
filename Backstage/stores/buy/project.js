@@ -4,6 +4,7 @@ export const useBuyProjectStore = defineStore('buyProject', () => {
   const NAME = '好房網買屋 Housefun 管理後台'
   const availablePlans = ref(null)
   const renewalPlanId = ref(null)
+  const publishResponse = ref(null)
   const options = ref({
     casePurpose: null,
     city: null,
@@ -45,6 +46,7 @@ export const useBuyProjectStore = defineStore('buyProject', () => {
     NAME,
     availablePlans,
     renewalPlanId,
+    publishResponse,
     options,
     parkingInfo,
   }

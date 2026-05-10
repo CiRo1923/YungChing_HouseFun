@@ -48,7 +48,7 @@ onUseMeta({
       <ItemsInfo />
     </template>
     <TabDefaultOval />
-    <Content :funEventsItem="funEventsItem" v-slot="{ item, dealFun }">
+    <Content :funEventsItem="funEventsItem" @update="onUpdate" v-slot="{ item, dealFun }">
       <DealInfo :data="item" @click:deal="dealFun" />
     </Content>
   </BuyMContainer>

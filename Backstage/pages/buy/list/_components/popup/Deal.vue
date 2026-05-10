@@ -2,6 +2,7 @@
 import CustomPopup from '@containers/buy/common/CustomPopup.vue'
 
 import PublishInfo from '@pages/buy/_components/PublishInfo.vue'
+import DealInfo from '@pages/buy/_components/DealInfo.vue'
 
 import { usePopupStore } from '@stores/popup.js'
 import useBuyListActions from '@stores/buy/composables/useListActions.js'
@@ -57,7 +58,9 @@ const onSure = async () => {
       已選擇
       <span class="text-[--orange-e646]">{{ selectCount }}</span> 個物件，物件成交後將無法重新上架
     </p>
-    <Form as="div" class="tm:mt-[16px] p:mt-[24px]" ref="formRef"> 111 </Form>
+    <Form as="div" class="tm:mt-[16px] p:mt-[24px]" ref="formRef">
+      <DealInfo />
+    </Form>
   </CustomPopup>
 </template>
 

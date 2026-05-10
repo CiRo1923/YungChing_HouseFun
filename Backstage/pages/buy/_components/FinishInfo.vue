@@ -1,4 +1,9 @@
 <script setup>
+import { useBuyProjectStore } from '@stores/buy/project.js'
+
+const buyPorject = useBuyProjectStore()
+const { publishResponse } = storeToRefs(buyPorject)
+
 const emits = defineEmits(['click:golden', 'click:autoRefresh'])
 const props = defineProps({
   setClass: {
@@ -37,7 +42,7 @@ const items = shallowReadonly([
     label: '刊登期間，每天於以下時間<span class="text-[--orange-e646]">免費刷新排序</span>',
     content: {
       type: 'times',
-      value: ['10:00', '12:00', '14:00'],
+      value: publishResponse.value.listRefreshTime,
     },
     button: {
       text: '加購或更改刷新時間 >',

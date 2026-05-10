@@ -7,18 +7,24 @@ import useBuyProjectActions from '@stores/buy/composables/useProjectActions.js'
 import useBuyListActions from '@stores/buy/composables/useListActions.js'
 import useBuyPopupActions from '@stores/buy/composables/usePopupActions.js'
 
-const { onApiPOSTVasPublishRenewal, onResetApiDataRenewal } = useBuyProjectActions()
+const {
+  onApiPOSTPublishRenewal,
+  onResetApiDataRenewal,
+  onApiPOSTPublishSubmit,
+  onApiPOSTPublishGetPublishResponse,
+} = useBuyProjectActions()
 const buyList = useBuyListStore()
 const { datas } = storeToRefs(buyList)
 const {
   selectItems,
   selectCount,
   onApiPOSTRealEstateOffline,
-  onApiPOSTVasPublishSubmit,
+  onApiPOSTRealEstateDeal,
   onSyncCheckedDatas,
 } = useBuyListActions()
 const { onAlert, onConfirm, onCustom, onApiPromise } = useBuyPopupActions()
 const router = useRouter()
+
 const emits = defineEmits(['update'])
 const props = defineProps({
   funEventsItem: {
@@ -66,7 +72,7 @@ const onRenewalClick = async (objectData) => {
     onApiPromise('open')
 
     const hfIDs = objectData ? [objectData.hfID] : selectItems.value
-    const { status, data } = await onApiPOSTVasPublishRenewal(hfIDs)
+    const { status, data } = await onApiPOSTPublishRenewal(hfIDs)
     await new Promise((resolve) => {
       emits('update', resolve)
     })
@@ -133,8 +139,10 @@ const onPublishClick = async (objectData) => {
     onApiPromise('open')
 
     const hfIDs = objectData ? [objectData.hfID] : selectItems.value
-    const { status } = await onApiPOSTVasPublishSubmit(hfIDs)
-
+    const { status } = await onApiPOSTPublishSubmit(hfIDs)
+    if (objectData) {
+      await onApiPOSTPublishGetPublishResponse(objectData.hfID)
+    }
     await new Promise((resolve) => {
       emits('update', resolve)
     })
@@ -231,15 +239,22 @@ const onDealClick = async (objectData) => {
         label: '設定成交',
         class: '--bg-green-6a2d --text-white',
         type: 'sure',
-        isClose: true,
+        isClose: false,
       },
     ],
   })
 
   if (isDeal) {
-    console.log('ok')
+    onApiPromise('open')
+
+    const hfIDs = objectData ? [objectData.hfID] : selectItems.value
+    await onApiPOSTRealEstateDeal(hfIDs)
+    await new Promise((resolve) => {
+      emits('update', resolve)
+    })
+
+    onApiPromise('close')
   }
-  // console.log(objectData)
 }
 
 // 複製資料
@@ -265,7 +280,7 @@ const onCopyClick = () => {
     />
     <ul class="divide-y-[1px] divide-[--gray-e5] border-b-[1px] border-b-[--gray-e5]">
       <li
-        class="transition-colors duration-300 p:px-[16px] p:py-[40px]"
+        class="transition-colors duration-300 tm:py-[24px] p:px-[16px] p:py-[40px]"
         :class="{ 'bg-[--gray-f7]': item._checked.value }"
         v-for="(item, index) in datas"
         :key="`${item.hfID}_${index}`"

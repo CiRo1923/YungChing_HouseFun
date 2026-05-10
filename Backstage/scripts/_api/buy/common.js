@@ -9,9 +9,17 @@ export const apiGETDistrictSelectOptions = async (data) =>
   await onFetchApi.get(`api/${version}/buy/{cityCode}/district/select-options`, data)
 
 // 列表 & 明細流程 都用的到
-export const apiGetVasPublishAvailablePlans = async (data) =>
+export const apiGetPublishAvailablePlans = async (data) =>
   await onFetchApi.get(`api/${version}/vas/Publish/AvailablePlans`, data)
 
 // 列表 & 明細流程 都用的到
-export const apiPOSTVasPublishRenewal = async (data) =>
+export const apiPOSTPublishSubmit = async (data) =>
+  await onFetchApi.post(`api/${version}/vas/Publish/Submit`, data)
+
+// 列表 & 明細流程 都用的到
+export const apiPOSTPublishRenewal = async (data) =>
   await onFetchApi.post(`api/${version}/vas/Publish/Renewal`, data)
+
+// 列表 & 明細流程 都用的到
+export const apiPOSTPublishGetPublishResponse = async (data) =>
+  await onFetchApi.get(`api/${version}/vas/Publish/GetPublishResponse`, data)

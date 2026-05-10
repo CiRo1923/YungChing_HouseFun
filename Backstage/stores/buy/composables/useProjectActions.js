@@ -1,8 +1,10 @@
 import {
   apiGETCitySelectOptions,
   apiGETDistrictSelectOptions,
-  apiGetVasPublishAvailablePlans,
-  apiPOSTVasPublishRenewal,
+  apiGetPublishAvailablePlans,
+  apiPOSTPublishSubmit,
+  apiPOSTPublishRenewal,
+  apiPOSTPublishGetPublishResponse,
 } from '@js/_api/buy/common.js'
 
 import {
@@ -39,7 +41,7 @@ import useBuyPopupActions from '@stores/buy/composables/usePopupActions.js'
 export default () => {
   const projectStores = useBuyProjectStore()
   const { onApiError } = useBuyPopupActions()
-  const { availablePlans, renewalPlanId, options } = storeToRefs(projectStores)
+  const { availablePlans, renewalPlanId, publishResponse, options } = storeToRefs(projectStores)
 
   const onApiGETRealEstatePurposeCheckOptions = async () => {
     if (options.value.casePurpose) return false
@@ -384,29 +386,58 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGetVasPublishAvailablePlans = async (hfid) => {
-    const { config, status, data } = await apiGetVasPublishAvailablePlans({
+  const onApiGetPublishAvailablePlans = async (hfid) => {
+    const { config, status, data } = await apiGetPublishAvailablePlans({
       userId: 0,
       hfid,
     })
 
     if (status === 200) {
-      const { listPlan } = data
-      availablePlans.value = listPlan
+      // const { listPlan } = data
+      console.log(data)
+      availablePlans.value = data
     } else {
       onApiError(config, status, data)
     }
 
     return { config, status, data }
   }
-  const onApiPOSTVasPublishRenewal = async (hfids) => {
-    const { config, status, data } = await apiPOSTVasPublishRenewal({
+  const onApiPOSTPublishRenewal = async (hfids) => {
+    const { config, status, data } = await apiPOSTPublishRenewal({
       userId: 0,
       hfids,
       planId: renewalPlanId.value,
     })
 
     if (status !== 200) {
+      onApiError(config, status, data)
+    }
+
+    return { config, status, data }
+  }
+  const onApiPOSTPublishSubmit = async (hfids) => {
+    const { config, status, data } = await apiPOSTPublishSubmit({
+      userId: 0,
+      hfids,
+      planId: renewalPlanId.value,
+    })
+
+    if (status !== 200) {
+      onApiError(config, status, data)
+    }
+
+    return { config, status, data }
+  }
+  const onApiPOSTPublishGetPublishResponse = async (hfid) => {
+    const { config, status, data } = await apiPOSTPublishGetPublishResponse({
+      hfid,
+    })
+
+    if (status === 200) {
+      // const { listPlan } = data
+      console.log(data)
+      publishResponse.value = data
+    } else {
       onApiError(config, status, data)
     }
 
@@ -491,8 +522,10 @@ export default () => {
     onApiGETRealEstateVideoTypeSelectOptions,
     onApiGETRealEstateFeatureCheckOptions,
     onApiGETRealEstatePosterDataSourceSelectOptions,
-    onApiGetVasPublishAvailablePlans,
-    onApiPOSTVasPublishRenewal,
+    onApiGetPublishAvailablePlans,
+    onApiPOSTPublishRenewal,
+    onApiPOSTPublishSubmit,
+    onApiPOSTPublishGetPublishResponse,
     onResetApiDataRenewal,
     onValueGetText,
     onReplaceImageSize,

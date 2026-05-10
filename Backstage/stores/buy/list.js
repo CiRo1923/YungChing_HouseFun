@@ -22,10 +22,15 @@ export const useBuyListStore = defineStore('buyList', () => {
     roomRangeMin: null,
     roomRangeMax: null,
   })
+  const apiDealData = ref({
+    dateDeal: null,
+    isDealShow: false,
+  })
   const datas = ref(null)
 
   return {
     apiData,
+    apiDealData,
     datas,
   }
 })

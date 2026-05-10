@@ -82,7 +82,7 @@ watchEffect(() => {
 <template>
   <Transition name="popup-overlay" appear @enter="onOverlayEnter">
     <div
-      class="m-popup fixed inset-0 z-[5] flex items-center justify-center"
+      class="m-popup fixed inset-0 z-[3] flex items-center justify-center"
       :class="setClass.main"
       v-if="isOpen || isShowOverlay"
     >

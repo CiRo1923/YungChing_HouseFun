@@ -73,7 +73,7 @@ onMounted(() => {
             <BuyMAnchor
               :text="props.data.caseTitle"
               :to="{
-                name: 'buy-basic-id',
+                name: 'buy-publish-basic-id',
                 params: {
                   id: props.data.hfID,
                 },
@@ -83,7 +83,7 @@ onMounted(() => {
               }"
               v-if="props.data.caseStatue !== '3'"
             />
-            <em>{{ props.data.caseTitle }}</em>
+            <em v-else>{{ props.data.caseTitle }}</em>
           </h3>
         </header>
         <div class="m:mb-[8px] pt:mb-[4px] pt:flex pt:items-center">

@@ -20,7 +20,7 @@ definePageMeta({
 
 const buyProject = useBuyProjectStore()
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
-const { onApiGetVasPublishAvailablePlans } = useBuyProjectActions()
+const { onApiGetPublishAvailablePlans } = useBuyProjectActions()
 const { onApiPOSTRealEstateSearch } = useBuyListActions()
 const route = useRoute()
 const page = computed(() => route.query.pg)
@@ -37,7 +37,7 @@ const onUpdate = async (done) => {
 
 await onWithLoadingAll([
   useAsyncData(`list-draft-${page.value}`, () => onUpdate()),
-  useAsyncData('available-plans-draft', () => onApiGetVasPublishAvailablePlans()),
+  useAsyncData('available-plans-draft', () => onApiGetPublishAvailablePlans()),
 ])
 
 onUseMeta({

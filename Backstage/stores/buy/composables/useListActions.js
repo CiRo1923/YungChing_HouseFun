@@ -1,20 +1,20 @@
 import {
   apiPOSTRealEstateSearch,
   apiPOSTRealEstateOffline,
-  apiPOSTVasPublishSubmit,
+  apiPOSTRealEstateDeal,
 } from '@js/_api/buy/list.js'
 
-import { useBuyProjectStore } from '@stores/buy/project.js'
+// import { useBuyProjectStore } from '@stores/buy/project.js'
 import { useBuyListStore } from '@stores/buy/list.js'
 import useBuyProjectActions from '@stores/buy/composables/useProjectActions.js'
 import useBuyPopupActions from '@stores/buy/composables/usePopupActions.js'
 
 export default () => {
-  const buyProject = useBuyProjectStore()
-  const { renewalPlanId } = storeToRefs(buyProject)
+  // const buyProject = useBuyProjectStore()
+  // const { renewalPlanId } = storeToRefs(buyProject)
   const { onReplaceImageSize } = useBuyProjectActions()
   const buyList = useBuyListStore()
-  const { apiData, datas } = storeToRefs(buyList)
+  const { apiData, apiDealData, datas } = storeToRefs(buyList)
   const { onApiError } = useBuyPopupActions()
   const selectItems = computed(() =>
     datas.value ? datas.value.filter((item) => item._checked.value).map((item) => item.hfID) : []
@@ -81,11 +81,11 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiPOSTVasPublishSubmit = async (hfids) => {
-    const { config, status, data } = await apiPOSTVasPublishSubmit({
-      userId: 0,
+
+  const onApiPOSTRealEstateDeal = async (hfids) => {
+    const { config, status, data } = await apiPOSTRealEstateDeal({
       hfids,
-      planId: renewalPlanId.value,
+      ...apiDealData.value,
     })
 
     if (status !== 200) {
@@ -114,7 +114,7 @@ export default () => {
     selectCount,
     onApiPOSTRealEstateSearch,
     onApiPOSTRealEstateOffline,
-    onApiPOSTVasPublishSubmit,
+    onApiPOSTRealEstateDeal,
     onSyncCheckedDatas,
     onReset,
   }

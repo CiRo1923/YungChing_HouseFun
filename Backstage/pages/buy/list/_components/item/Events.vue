@@ -17,7 +17,7 @@ const datas = shallowReadonly([
     icon: 'icon_pen',
     label: '修改',
     to: {
-      name: 'buy-basic-id',
+      name: 'buy-publish-basic-id',
       params: {
         id: props.data.hfID,
       },

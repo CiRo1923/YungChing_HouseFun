@@ -31,14 +31,14 @@ onMounted(() => {
   <div class="flex items-center">
     <div class="order-2 grow pt:flex pt:items-center">
       <div class="m:space-y-[16px] pt:grow pt:space-y-[8px]">
-        <p class="mb-[8px] text-[--gray-666]">
+        <p class="text-[--gray-666]">
           <b class="font-medium tracking-wider p:text-[18px]">{{ props.data.title }}</b>
         </p>
         <Address :data="props.data" />
       </div>
-      <div class="pt:shrink-0">
-        <span class="text-[--gray-666] p:text-[16px]">
-          <b class="text-[--orange-e646] p:text-[36px]">{{ numberComma.add(props.data.price) }}</b>
+      <div class="m:text-center pt:shrink-0">
+        <span class="text-[16px] text-[--gray-666]">
+          <b class="text-[36px] text-[--orange-e646]">{{ numberComma.add(props.data.price) }}</b>
           萬
         </span>
       </div>

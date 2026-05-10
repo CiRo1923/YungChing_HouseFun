@@ -4,6 +4,7 @@ import {
   apiPOSTRealEstate,
   apiPOSTRealEstateDraft,
   apiPOSTRealEstatePicUpload,
+  apiPOSTRealEstateReadToPublish,
 } from '@js/_api/buy/basic.js'
 
 import { onToFixed } from '@js/_prototype.js'
@@ -190,12 +191,7 @@ export default () => {
       ...apiData.value,
     })
 
-    if (status === 200) {
-      onAlert({
-        content: '儲存成功',
-      })
-      // console.log(data)
-    } else {
+    if (status !== 200) {
       onApiError(config, status, data)
     }
 
@@ -220,6 +216,17 @@ export default () => {
   }
   const onApiPOSTRealEstatePicUpload = async (params) => {
     const { config, status, data } = await apiPOSTRealEstatePicUpload(params)
+
+    if (status !== 200) {
+      onApiError(config, status, data)
+    }
+
+    return { config, status, data }
+  }
+  const onApiPOSTRealEstateReadToPublish = async (hfid) => {
+    const { config, status, data } = await apiPOSTRealEstateReadToPublish({
+      hfid,
+    })
 
     if (status !== 200) {
       onApiError(config, status, data)
@@ -271,6 +278,7 @@ export default () => {
     onApiPOSTRealEstateDraft,
     onApiPOSTRealEstate,
     onApiPOSTRealEstatePicUpload,
+    onApiPOSTRealEstateReadToPublish,
     onAllPromise,
   }
 }
