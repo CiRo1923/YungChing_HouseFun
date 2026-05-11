@@ -2,22 +2,21 @@
 // import { useCommonStore } from '@stores/common.js'
 import useCommonActions from '@stores/composables/useCommonActions.js'
 // import { useBuyProjectStore } from '@stores/buy/project.js'
-import { useBuyBasicStore } from '@stores/buy/basic.js'
-import useBuyBasicActions from '@stores/buy/composables/useBasicActions.js'
+import { useBuyPublishStore } from '@stores/buy/publish.js'
+import useBuyPublishActions from '~/stores/buy/composables/usePublishActions.js'
 
 // const common = useCommonStore()
 const { onIsLoading } = useCommonActions()
 // const buyProject = useBuyProjectStore()
-// const { basic } = useBuyProjectActions()
-const buyBasic = useBuyBasicStore()
-const { apiData } = storeToRefs(buyBasic)
-const { onApiPOSTRealEstatePicUpload } = useBuyBasicActions()
+const buyPublish = useBuyPublishStore()
+const { apiData } = storeToRefs(buyPublish)
+const { onApiPOSTRealEstatePicUpload } = useBuyPublishActions()
 const route = useRoute()
 const hfID = computed(() => route.params.id)
 
 const message = computed(() => {
   const { caseInfo } = apiData.value
-  const basicText = `圖片大小不可超過 ${buyBasic.pictures.maxSizeMB} MB，僅支援 jpg、png、gif 格式，`
+  const basicText = `圖片大小不可超過 ${buyPublish.pictures.maxSizeMB} MB，僅支援 jpg、png、gif 格式，`
 
   return caseInfo.caseLayout
     ? `${basicText}已符合優質排序`
@@ -50,7 +49,7 @@ const onUploaded = async (items, done) => {
       v-model="apiData.caseInfo.caseLayout"
       :config="{
         accept: '.jpg, .jpeg, .png, .gif',
-        maxSizeMB: buyBasic.pictures.maxSizeMB,
+        maxSizeMB: buyPublish.pictures.maxSizeMB,
         placeholder: '拖曳檔案至此，或點擊新增照片',
       }"
       :rules="{

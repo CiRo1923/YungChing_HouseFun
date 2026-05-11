@@ -10,9 +10,9 @@ import CardFilterPosterInfo from '@pages/buy/publish/basic/_components/CardFilte
 import CardFilterTerms from '@pages/buy/publish/basic/_components/CardFilterTerms.vue'
 import CardFilterPictures from '@pages/buy/publish/basic/_components/CardFilterPictures.vue'
 
-import { useBuyBasicStore } from '@stores/buy/basic.js'
+import { useBuyPublishStore } from '@stores/buy/publish.js'
 
-const buyBasic = useBuyBasicStore()
+const buyPublish = useBuyPublishStore()
 const componentMap = {
   CardFilterInfo,
   CardFilterPrice,
@@ -29,7 +29,7 @@ const componentMap = {
 
 <template>
   <ul class="tm:space-y-[24px] p:space-y-[32px]">
-    <li v-for="(item, index) in buyBasic.components" :key="`${item.id}_${index}`">
+    <li v-for="(item, index) in buyPublish.components" :key="`${item.id}_${index}`">
       <component :is="componentMap[item.id]" :title="item.label" />
     </li>
   </ul>

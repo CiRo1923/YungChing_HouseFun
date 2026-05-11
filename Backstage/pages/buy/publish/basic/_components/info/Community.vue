@@ -4,14 +4,14 @@
 import RadiosOval from '@pages/buy/publish/basic/_containers/RadiosOval.vue'
 
 // import { useBuyProjectStore } from '@stores/buy/project.js'
-import { useBuyBasicStore } from '@stores/buy/basic.js'
+import { useBuyPublishStore } from '@stores/buy/publish.js'
 import useBuyProjectActions from '@stores/buy/composables/useProjectActions.js'
 
 // const buyProject = useBuyProjectStore()
 // const { options } = storeToRefs(buyProject)
 const { onApiGETCommunities } = useBuyProjectActions()
-const buyBasic = useBuyBasicStore()
-const { apiData } = storeToRefs(buyBasic)
+const buyPublish = useBuyPublishStore()
+const { apiData } = storeToRefs(buyPublish)
 
 const radioOptions = readonly([
   {

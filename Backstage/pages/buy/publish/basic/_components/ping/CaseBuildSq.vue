@@ -1,13 +1,13 @@
 <script setup>
 // import { useBuyProjectStore } from '@stores/buy/project.js'
-import { useBuyBasicStore } from '@stores/buy/basic.js'
-import useBuyBasicActions from '@stores/buy/composables/useBasicActions.js'
+import { useBuyPublishStore } from '@stores/buy/publish.js'
+import useBuyPublishActions from '~/stores/buy/composables/usePublishActions.js'
 
 // const buyProject = useBuyProjectStore()
 // const { options } = storeToRefs(buyProject)
-const buyBasic = useBuyBasicStore()
-const { pingUnitLabel, onPingVaild, onPinSqMetersConvert } = useBuyBasicActions()
-const { apiData, pingData } = storeToRefs(buyBasic)
+const buyPublish = useBuyPublishStore()
+const { pingUnitLabel, onPingVaild, onPinSqMetersConvert } = useBuyPublishActions()
+const { apiData, pingData } = storeToRefs(buyPublish)
 </script>
 
 <template>

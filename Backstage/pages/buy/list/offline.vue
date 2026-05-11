@@ -1,4 +1,6 @@
 <script setup>
+import popupGolden from '@pages/buy/_components/popup/Golden.vue'
+
 import ItemsInfo from '@pages/buy/list/_components/ItemsInfo.vue'
 import TabDefaultOval from '@pages/buy/list/_components/TabDefaultOval.vue'
 import Content from '@pages/buy/list/_components/Content.vue'
@@ -20,7 +22,7 @@ definePageMeta({
 
 const buyProject = useBuyProjectStore()
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
-const { onApiGetPublishAvailablePlans } = useBuyProjectActions()
+const { onApiGetPublishAvailablePlans, onApiGETGoldenGetPlanList } = useBuyProjectActions()
 const { onApiPOSTRealEstateSearch } = useBuyListActions()
 const route = useRoute()
 const page = computed(() => route.query.pg)
@@ -38,6 +40,7 @@ const onUpdate = async (done) => {
 await onWithLoadingAll([
   useAsyncData(`list-offline-${page.value}`, () => onUpdate()),
   useAsyncData('available-plans-offline', () => onApiGetPublishAvailablePlans()),
+  useAsyncData('golden-planList-offline', () => onApiGETGoldenGetPlanList()),
 ])
 
 onUseMeta({
@@ -69,6 +72,7 @@ onUseMeta({
   <PopupPlans />
   <PopupFinish />
   <PopupDeal />
+  <popupGolden />
 </template>
 
 <style></style>

@@ -1,6 +1,4 @@
 <script setup>
-import { onDeepMerge } from '@js/_prototype.js'
-
 import '@js/_validation.js'
 
 import { Field, ErrorMessage } from 'vee-validate'
@@ -14,13 +12,9 @@ const props = defineProps({
     type: [String, Number, Boolean, Object],
     default: null,
   },
-  modelModifiers: {
-    type: Object,
-    default: () => ({}),
-  },
   config: {
     type: Object,
-    default: () => {},
+    default: () => ({}),
   },
   rules: {
     type: Object,
@@ -28,30 +22,8 @@ const props = defineProps({
   },
   setClass: {
     type: Object,
-    default: () => {},
+    default: () => ({}),
   },
-})
-
-const model = computed({
-  get: () => props.modelValue,
-  set: (value) => {
-    let result = value
-
-    if (props.cityModifiers?.number) {
-      result = value === '' ? null : Number(value)
-    }
-
-    emits('update:modelValue', result)
-  },
-})
-
-const config = computed(() => {
-  const defaultConfig = {
-    isDisabled: false,
-    isError: false,
-  }
-
-  return onDeepMerge(defaultConfig, props.config)
 })
 
 const setClass = computed(() => {
@@ -68,17 +40,17 @@ const setClass = computed(() => {
 <template>
   <div class="m-form" :class="setClass.main">
     <Field
-      :name="props.name"
-      v-model="model"
-      :rules="config.isDisabled ? '' : props.rules"
+      :name="`${props.name}_hidden`"
+      :modelValue="props.modelValue"
+      :rules="props.config.isDisabled ? '' : props.rules"
       v-slot="{ field }"
     >
-      <input type="hidden" :id="props.name" v-bind="field" />
+      <input type="hidden" :id="`${props.name}_hidden`" v-bind="field" />
     </Field>
     <ErrorMessage
       as="span"
-      :name="props.name"
-      class="m-form-error"
+      :name="`${props.name}_hidden`"
+      class="m-form-error block"
       :class="setClass.error"
       v-slot="{ message }"
     >

@@ -28,8 +28,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex items-center">
-    <div class="order-2 grow pt:flex pt:items-center">
+  <div class="flex items-center t:gap-x-[16px] p:gap-x-[24px]">
+    <div class="order-2 grow t:gap-x-[16px] pt:flex pt:items-center p:gap-x-[24px]">
       <div class="m:space-y-[16px] pt:grow pt:space-y-[8px]">
         <p class="text-[--gray-666]">
           <b class="font-medium tracking-wider p:text-[18px]">{{ props.data.title }}</b>
@@ -47,7 +47,7 @@ onMounted(() => {
       :src="props.data.cover"
       :alt="props.data.title"
       :setClass="{
-        main: 'order-1 shrink-0 overflow-hidden t:h-[114px] t:w-[150px] p:h-[114px] p:w-[150px]',
+        main: 'order-1 shrink-0 overflow-hidden rounded-[15px] t:h-[114px] t:w-[150px] p:h-[114px] p:w-[150px]',
       }"
       v-if="!isDeviceM"
     />

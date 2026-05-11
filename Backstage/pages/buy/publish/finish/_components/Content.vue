@@ -8,8 +8,8 @@ import { useBuyProjectStore } from '@stores/buy/project.js'
 import useBuyProjectActions from '@stores/buy/composables/useProjectActions.js'
 
 const buyProject = useBuyProjectStore()
-const { availablePlans } = storeToRefs(buyProject)
-const { onResetApiDataRenewal } = useBuyProjectActions()
+const { renewal } = storeToRefs(buyProject)
+const { onResetPojectData } = useBuyProjectActions()
 const publishInfo = computed(() => {
   const keyMap = {
     caseTitle: 'title',
@@ -19,16 +19,16 @@ const publishInfo = computed(() => {
     pucURLCover: 'cover',
   }
 
-  return availablePlans.value
+  return renewal.value.data
     ? Object.fromEntries(
-        Object.entries(availablePlans.value)
+        Object.entries(renewal.value.data)
           .filter(([key]) => keyMap[key])
           .map(([key, value]) => [keyMap[key], value])
       )
     : null
 })
 
-onResetApiDataRenewal()
+onResetPojectData('renewal')
 </script>
 
 <template>

@@ -49,6 +49,7 @@ const setClass = computed(() => {
   return {
     main: '',
     header: '',
+    icon: '',
     headerTitle: '',
     body: '',
     footer: '',
@@ -105,6 +106,7 @@ watchEffect(() => {
                 <CommonSvgIcon
                   :icon="icon"
                   class="h-[30px] w-[30px] p-[3px] text-[--gray-666]"
+                  :class="setClass.icon || 'text-[--gray-666]'"
                   v-if="icon"
                 />
                 <b class="font-medium" v-html="title" />
@@ -134,7 +136,7 @@ watchEffect(() => {
   </Transition>
 </template>
 
-<style src="@css/_modules/_vueTransition.css"></style>
+<style src="@css/_common/vueTransition.css"></style>
 <style lang="postcss">
 @keyframes popup-bomb {
   0% {

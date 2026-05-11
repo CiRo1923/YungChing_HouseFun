@@ -198,14 +198,14 @@ const onEvent = (e, errorMessage) => {
         normalized = normalized.split('.')[0]
       }
 
-      // 3) 去掉前導 0（但小數模式要保留 0.x 的 0）
+      // 3) 去掉多餘前導 0（單獨 0 要保留；小數模式保留 0.x 的 0）
       if (normalized) {
         if (integer) {
-          normalized = normalized.replace(/^0+/, '')
+          normalized = normalized.replace(/^0+(?=\d)/, '')
         } else {
           // 非整數：保留 "0.xxx"
           if (!normalized.startsWith('0.')) {
-            normalized = normalized.replace(/^0+/, '')
+            normalized = normalized.replace(/^0+(?=\d)/, '')
             if (normalized.startsWith('.')) normalized = '0' + normalized
           }
         }
@@ -352,7 +352,7 @@ watch(
       v-slot="{ message }"
       as="span"
       :name="props.name"
-      class="m-form-error"
+      class="m-form-error block"
       :class="setClass.error"
     >
       <BuyMErrorMessageElem :message="message" />

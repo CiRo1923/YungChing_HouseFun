@@ -4,12 +4,12 @@ import RadiosOval from '@pages/buy/publish/basic/_containers/RadiosOval.vue'
 import { onGetYouTubeID } from '@js/_prototype.js'
 
 import { useBuyProjectStore } from '@stores/buy/project.js'
-import { useBuyBasicStore } from '@stores/buy/basic.js'
+import { useBuyPublishStore } from '@stores/buy/publish.js'
 
 const buyProject = useBuyProjectStore()
 const { options } = storeToRefs(buyProject)
-const buyBasic = useBuyBasicStore()
-const { apiData } = storeToRefs(buyBasic)
+const buyPublish = useBuyPublishStore()
+const { apiData } = storeToRefs(buyPublish)
 const videoPicture = computed(() => {
   const { caseVideoUrl } = apiData.value.caseInfo
   const youtubeID = /youtube/.test(caseVideoUrl) ? onGetYouTubeID(caseVideoUrl) : null

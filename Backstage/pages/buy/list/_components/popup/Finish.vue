@@ -37,6 +37,7 @@ const hasFinishInfo = computed(() => true)
   >
     <PublishInfo :data="publishInfo" v-if="publishInfo" />
     <FinishInfo
+      :data="customData.data"
       :setClass="{
         main: 'tm:mt-[16px] p:mt-[24px]',
       }"

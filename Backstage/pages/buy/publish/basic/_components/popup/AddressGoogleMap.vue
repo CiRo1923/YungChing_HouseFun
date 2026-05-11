@@ -1,8 +1,8 @@
 <script setup>
 import CustomPopup from '@containers/buy/common/CustomPopup.vue'
-import useBuyBasicActions from '@stores/buy/composables/useBasicActions.js'
+import useBuyPublishActions from '~/stores/buy/composables/usePublishActions.js'
 
-const { onAddress } = useBuyBasicActions()
+const { onAddress } = useBuyPublishActions()
 const addressData = ref(null)
 
 const onClick = (data) => {

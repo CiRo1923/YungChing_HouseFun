@@ -4,12 +4,12 @@ import RadiosOval from '@pages/buy/publish/basic/_containers/RadiosOval.vue'
 import { onDeepClone } from '@js/_prototype.js'
 
 import { useBuyProjectStore } from '@stores/buy/project.js'
-import { useBuyBasicStore } from '@stores/buy/basic.js'
+import { useBuyPublishStore } from '@stores/buy/publish.js'
 
 const buyProject = useBuyProjectStore()
 const { options } = storeToRefs(buyProject)
-const buyBasic = useBuyBasicStore()
-const { apiData } = storeToRefs(buyBasic)
+const buyPublish = useBuyPublishStore()
+const { apiData } = storeToRefs(buyPublish)
 const radioOptions = readonly([
   {
     label: '無車位',
@@ -115,7 +115,7 @@ const items = shallowReadonly([
         rules: {
           required: '請選擇繳費方式',
         },
-        class: 'p:w-[165px] m:w-[147px]',
+        class: 'p:w-[150px] m:w-[147px]',
       },
       text: {
         id: 'caseParkingFee',
@@ -130,7 +130,7 @@ const items = shallowReadonly([
         rules: {
           required: '請輸入管理費',
         },
-        class: 'w-[108px] shrink-0',
+        class: 'p:w-[123px] m:w-[108px] shrink-0',
       },
       checkbox: {
         id: 'isCaseParkingFeeInclude',

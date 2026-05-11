@@ -1,19 +1,19 @@
 <script setup>
 // import { useBuyProjectStore } from '@stores/buy/project.js'
-import { useBuyBasicStore } from '@stores/buy/basic.js'
-import useBuyBasicActions from '@stores/buy/composables/useBasicActions.js'
+import { useBuyPublishStore } from '@stores/buy/publish.js'
+import useBuyPublishActions from '~/stores/buy/composables/usePublishActions.js'
 
 // const buyProject = useBuyProjectStore()
-const buyBasic = useBuyBasicStore()
-const { apiData } = storeToRefs(buyBasic)
-const { onPingUnitChange } = useBuyBasicActions()
+const buyPublish = useBuyPublishStore()
+const { apiData } = storeToRefs(buyPublish)
+const { onPingUnitChange } = useBuyPublishActions()
 </script>
 
 <template>
   <BuyMFormRadiosOval
     name="isCaseSqUnitPin"
     v-model="apiData.caseInfo.isCaseSqUnitPin"
-    :options="buyBasic.options.unit"
+    :options="buyPublish.options.unit"
     :setClass="{
       radios: 'm:w-full',
       container: 'm:flex-1',

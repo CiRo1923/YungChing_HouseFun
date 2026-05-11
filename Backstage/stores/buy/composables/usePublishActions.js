@@ -5,11 +5,12 @@ import {
   apiPOSTRealEstateDraft,
   apiPOSTRealEstatePicUpload,
   apiPOSTRealEstateReadToPublish,
-} from '@js/_api/buy/basic.js'
+  apiGERealEstateCaseStatus,
+} from '@js/_api/buy/publish.js'
 
 import { onToFixed } from '@js/_prototype.js'
 
-import { useBuyBasicStore } from '@stores/buy/basic.js'
+import { useBuyPublishStore } from '@stores/buy/publish.js'
 
 import useBuyProjectActions from '@stores/buy/composables/useProjectActions.js'
 import useBuyPopupActions from '@stores/buy/composables/usePopupActions.js'
@@ -42,16 +43,17 @@ export default () => {
     onValueGetText,
     onReplaceImageSize,
   } = useBuyProjectActions()
-  const basicStores = useBuyBasicStore()
-  const { apiData, address, pingData } = storeToRefs(basicStores)
+  const publishStores = useBuyPublishStore()
+  const { apiData, statusData, address, pingData } = storeToRefs(publishStores)
   const { onAlert, onApiError } = useBuyPopupActions()
   const currentUnit = computed(() =>
-    basicStores.options.unit.find((item) => item.value === apiData.value.caseInfo.isCaseSqUnitPin)
+    publishStores.options.unit.find((item) => item.value === apiData.value.caseInfo.isCaseSqUnitPin)
   )
   const pingUnitLabel = computed(
     () =>
-      basicStores.options.unit.find((item) => item.value === apiData.value.caseInfo.isCaseSqUnitPin)
-        .label
+      publishStores.options.unit.find(
+        (item) => item.value === apiData.value.caseInfo.isCaseSqUnitPin
+      ).label
   )
   const onAddress = () => {
     if (address.value) {
@@ -118,8 +120,8 @@ export default () => {
     const mKey = `${key}M`
     const isPin = unit.id === 'pin'
     const isSqMeters = unit.id === 'sqMeters'
-    const pinConf = basicStores.options.unit.find((u) => u.id === 'pin')
-    const mConf = basicStores.options.unit.find((u) => u.id === 'sqMeters')
+    const pinConf = publishStores.options.unit.find((u) => u.id === 'pin')
+    const mConf = publishStores.options.unit.find((u) => u.id === 'sqMeters')
     const onConvert = (value, conf) => Number(onToFixed(Number(value) * conf.convert, conf.toFixed))
 
     if (!pinConf || !mConf) return
@@ -234,6 +236,19 @@ export default () => {
 
     return { config, status, data }
   }
+  const onApiGERealEstateCaseStatus = async (hfid) => {
+    const { config, status, data } = await apiGERealEstateCaseStatus({
+      hfid,
+    })
+
+    if (status === 200) {
+      statusData.value = data
+    } else {
+      onApiError(config, status, data)
+    }
+
+    return { config, status, data }
+  }
   const onAllPromise = () => {
     return [
       useAsyncData('purpose-options', () => onApiGETRealEstatePurposeCheckOptions()),
@@ -279,8 +294,7 @@ export default () => {
     onApiPOSTRealEstate,
     onApiPOSTRealEstatePicUpload,
     onApiPOSTRealEstateReadToPublish,
+    onApiGERealEstateCaseStatus,
     onAllPromise,
   }
 }
-
-// export default useBuyBasicActions

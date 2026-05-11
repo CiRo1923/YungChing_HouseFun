@@ -6,14 +6,19 @@ import SubmitButtons from '@pages/buy/publish/finish/_containers/SubmitButtons.v
 
 // import { useCommonStore } from '@stores/common.js'
 import { useBuyProjectStore } from '@stores/buy/project.js'
+import { useBuyPublishStore } from '@stores/buy/publish.js'
 import useCommonActions from '@stores/composables/useCommonActions.js'
 import useBuyProjectActions from '@stores/buy/composables/useProjectActions.js'
+import useBuyPublishActions from '@stores/buy/composables/usePublishActions.js'
 
 // const common = useCommonStore()
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
 const buyProject = useBuyProjectStore()
-// const { renewalPlanId } = storeToRefs(buyProject)
-const { onApiGetPublishAvailablePlans, onApiPOSTPublishGetPublishResponse } = useBuyProjectActions()
+// const { renewal } = storeToRefs(buyProject)
+const { onApiGetPublishAvailablePlans, onApiGETPublishGetPublishResponse } = useBuyProjectActions()
+const buyPublish = useBuyPublishStore()
+const { statusData } = storeToRefs(buyPublish)
+const { onApiGERealEstateCaseStatus } = useBuyPublishActions()
 
 const route = useRoute()
 
@@ -25,12 +30,18 @@ definePageMeta({
 
 const hfID = computed(() => route.params.id)
 
+// 先取得 物件狀態
+await useAsyncData(`case-status-renewal-${hfID.value}`, () =>
+  onApiGERealEstateCaseStatus(hfID.value)
+)
+
 await onWithLoadingAll([
+  useAsyncData(`case-status-finish-${hfID.value}`, () => onApiGERealEstateCaseStatus(hfID.value)),
   useAsyncData(`available-plans-publish-finish-${hfID.value}`, () =>
     onApiGetPublishAvailablePlans(hfID.value)
   ),
   useAsyncData(`get-publish-response-finish-${hfID.value}`, () =>
-    onApiPOSTPublishGetPublishResponse(hfID.value)
+    onApiGETPublishGetPublishResponse(hfID.value)
   ),
 ])
 
@@ -42,6 +53,9 @@ onUseMeta({
 </script>
 
 <template>
+  <!-- <pre>
+    {{ statusData }}
+  </pre> -->
   <BuyMContainer
     :setClass="{
       main: '--px-16',
@@ -51,7 +65,7 @@ onUseMeta({
       <BackStepNew
         :anchor="{
           to: {
-            name: 'buy-publish-renewal-id',
+            name: statusData.isExpired ? 'buy-publish-renewal-id' : 'buy-publish-basic-id',
             params: route.params,
           },
         }"

@@ -2,9 +2,22 @@ import { defineStore } from 'pinia'
 
 export const useBuyProjectStore = defineStore('buyProject', () => {
   const NAME = '好房網買屋 Housefun 管理後台'
-  const availablePlans = ref(null)
-  const renewalPlanId = ref(null)
-  const publishResponse = ref(null)
+  const renewal = ref({
+    data: null,
+    apiData: {
+      planId: null,
+    },
+  })
+  const autoRefresh = ref({
+    data: null,
+  })
+  const golden = ref({
+    plans: null,
+    apiData: {
+      planID: null,
+      empID: null,
+    },
+  })
   const options = ref({
     casePurpose: null,
     city: null,
@@ -44,9 +57,9 @@ export const useBuyProjectStore = defineStore('buyProject', () => {
 
   return {
     NAME,
-    availablePlans,
-    renewalPlanId,
-    publishResponse,
+    renewal,
+    golden,
+    autoRefresh,
     options,
     parkingInfo,
   }

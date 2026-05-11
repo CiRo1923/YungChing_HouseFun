@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import BackStepNew from '@pages/buy/publish/_components/BackStepNew.vue'
 
 import Content from '@pages/buy/publish/renewal/_components/Content.vue'
@@ -6,9 +6,10 @@ import SubmitButtons from '@pages/buy/publish/renewal/_containers/SubmitButtons.
 
 // import { useCommonStore } from '@stores/common.js'
 import { useBuyProjectStore } from '@stores/buy/project.js'
+import { useBuyPublishStore } from '@stores/buy/publish.js'
 import useCommonActions from '@stores/composables/useCommonActions.js'
 import useBuyProjectActions from '@stores/buy/composables/useProjectActions.js'
-import useBuyRenewalActions from '@stores/buy/composables/useRenewalActions.js'
+import useBuyPublishActions from '@stores/buy/composables/usePublishActions.js'
 // import useBuyListActions from '@stores/buy/composables/useListActions.js'
 import useBuyPopupActions from '@stores/buy/composables/usePopupActions.js'
 
@@ -17,12 +18,16 @@ import { Form } from 'vee-validate'
 // const common = useCommonStore()
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
 const buyProject = useBuyProjectStore()
-// const { renewalPlanId } = storeToRefs(buyProject)
+// const { renewal } = storeToRefs(buyProject)
+const buyPublish = useBuyPublishStore()
+const { statusData } = storeToRefs(buyPublish)
 const { onApiGetPublishAvailablePlans, onApiPOSTPublishSubmit } = useBuyProjectActions()
-const { onApiPOSTRealEstateReadToPublish } = useBuyRenewalActions()
+const { onApiGERealEstateCaseStatus, onApiPOSTRealEstateReadToPublish } = useBuyPublishActions()
 const { onAlert, onApiPromise } = useBuyPopupActions()
 const route = useRoute()
 const router = useRouter()
+const nuxtApp = useNuxtApp()
+const requestURL = useRequestURL()
 
 definePageMeta({
   layout: 'buy',
@@ -32,21 +37,17 @@ definePageMeta({
 
 const hfID = computed(() => route.params.id)
 
-const onDraftSubmit = async (validate) => {
-  const { valid } = await validate()
+const onDraftSubmit = async () => {
+  onApiPromise('open')
 
-  if (valid) {
-    onApiPromise('open')
+  const { status } = await onApiPOSTRealEstateReadToPublish(hfID.value)
 
-    const { status } = await onApiPOSTRealEstateReadToPublish(hfID.value)
+  onApiPromise('close')
 
-    onApiPromise('close')
-
-    if (status === 200) {
-      onAlert({
-        content: '儲存成功',
-      })
-    }
+  if (status === 200) {
+    onAlert({
+      content: '儲存成功',
+    })
   }
 }
 
@@ -75,16 +76,32 @@ const onSaveSubmit = async (validate) => {
   }
 }
 
-await onWithLoadingAll([
-  useAsyncData(`available-plans-publish-renewal-${hfID.value}`, () =>
-    onApiGetPublishAvailablePlans(hfID.value)
-  ),
-])
+// 先取得 物件狀態
+await useAsyncData(`case-status-renewal-${hfID.value}`, () =>
+  onApiGERealEstateCaseStatus(hfID.value)
+)
+
+// 如果 額度沒有過期 isExpired (true 過期 / false 未過期) 無法進入頁面
+if (!statusData.value.isExpired) {
+  await nuxtApp.runWithContext(() =>
+    navigateTo(
+      {
+        name: 'buy-publish-basic-id',
+        params: route.params,
+      },
+      {
+        replace: true,
+      }
+    )
+  )
+} else {
+  await onWithLoadingAll([onApiGetPublishAvailablePlans(hfID.value)])
+}
 
 onUseMeta({
   title: `物件管理 - 選擇額度 | ${buyProject.NAME}`,
   description: '',
-  url: useRequestURL(),
+  url: requestURL,
 })
 </script>
 
@@ -93,6 +110,7 @@ onUseMeta({
     :setClass="{
       main: '--px-16',
     }"
+    v-if="statusData.isExpired"
   >
     <template #tools>
       <BackStepNew
@@ -111,10 +129,7 @@ onUseMeta({
       v-slot="{ validate }"
     >
       <Content />
-      <SubmitButtons
-        @click:draft="onDraftSubmit(validate)"
-        @click:save="() => onSaveSubmit(validate)"
-      />
+      <SubmitButtons @click:draft="onDraftSubmit()" @click:save="() => onSaveSubmit(validate)" />
     </Form>
   </BuyMContainer>
 </template>

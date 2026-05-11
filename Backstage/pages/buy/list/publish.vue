@@ -1,4 +1,6 @@
 <script setup>
+import popupGolden from '@pages/buy/_components/popup/Golden.vue'
+
 import ItemsInfo from '@pages/buy/list/_components/ItemsInfo.vue'
 import TabDefaultOval from '@pages/buy/list/_components/TabDefaultOval.vue'
 import Content from '@pages/buy/list/_components/Content.vue'
@@ -20,7 +22,7 @@ definePageMeta({
 
 const buyProject = useBuyProjectStore()
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
-const { onApiGetPublishAvailablePlans } = useBuyProjectActions()
+const { onApiGetPublishAvailablePlans, onApiGETGoldenGetPlanList } = useBuyProjectActions()
 const { onApiPOSTRealEstateSearch } = useBuyListActions()
 const route = useRoute()
 // renewal (續刊) / offline (下架) / deal (成交)
@@ -38,6 +40,7 @@ const onUpdate = async (done) => {
 await onWithLoadingAll([
   useAsyncData(`list-publish-${page.value}`, () => onUpdate()),
   useAsyncData('available-plans-publish', () => onApiGetPublishAvailablePlans()),
+  useAsyncData('golden-planList-publish', () => onApiGETGoldenGetPlanList()),
 ])
 
 onUseMeta({
@@ -60,15 +63,21 @@ onUseMeta({
     <Content
       :funEventsItem="funEventsItem"
       :contentEventsItem="contentEventsItem"
-      v-slot="{ item, renewalFun }"
+      v-slot="{ item, renewalFun, goldenFun }"
       @update="onUpdate"
     >
-      <Setting :data="item" @click:renewal="renewalFun" class="m:mt-[24px]" />
+      <Setting
+        :data="item"
+        @click:renewal="renewalFun"
+        @click:golden="goldenFun"
+        class="m:mt-[24px]"
+      />
     </Content>
   </BuyMContainer>
   <PopupPlans />
   <PopupOffline />
   <PopupDeal />
+  <popupGolden />
 </template>
 
 <style></style>

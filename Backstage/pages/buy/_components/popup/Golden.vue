@@ -2,17 +2,15 @@
 import CustomPopup from '@containers/buy/common/CustomPopup.vue'
 
 import PublishInfo from '@pages/buy/_components/PublishInfo.vue'
-import RenewalInfo from '@pages/buy/_components/RenewalInfo.vue'
+import GoldenInfo from '@pages/buy/_components/GoldenInfo.vue'
 
 import { usePopupStore } from '@stores/popup.js'
-import useBuyListActions from '@stores/buy/composables/useListActions.js'
 import useBuyPopupActions from '@stores/buy/composables/usePopupActions.js'
 
 import { Form } from 'vee-validate'
 
 const popup = usePopupStore()
 const { customData, customCheck } = storeToRefs(popup)
-const { selectCount } = useBuyListActions()
 const { onCustomClose } = useBuyPopupActions()
 const formRef = ref(null)
 const publishInfo = computed(() => {
@@ -47,19 +45,15 @@ const onSure = async () => {
 
 <template>
   <CustomPopup
-    id="popupPlans"
+    id="popupGolden"
     :setClass="{
       main: 'p:--w-1200 t:--w-720',
     }"
     @sure="onSure"
   >
     <PublishInfo :data="publishInfo" v-if="publishInfo" />
-    <p class="text-[14px] text-[--gray-666]" v-else>
-      已選擇 <span class="text-[--orange-e646]">{{ selectCount }}</span> 個物件，需要使用
-      <span class="text-[--orange-e646]">{{ selectCount }}</span> 個刊登額度
-    </p>
     <Form as="div" class="tm:mt-[16px] p:mt-[24px]" ref="formRef">
-      <RenewalInfo />
+      <GoldenInfo />
     </Form>
   </CustomPopup>
 </template>

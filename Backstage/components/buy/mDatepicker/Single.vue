@@ -764,32 +764,39 @@ const onOpen = () => {
   const rect = datePickerContainerRef.value.getBoundingClientRect()
   const viewHeight = Math.max(document.documentElement.clientHeight, window.innerHeight)
   const viewWidth = Math.max(document.documentElement.clientWidth, window.innerWidth)
+  const scrollTop = window.scrollY
+  const scrollLeft = window.scrollX
 
-  const datePickerMainTop = rect.top + window.scrollY
+  const datePickerMainTop = rect.top + scrollTop
   const datePickerMainHeight = datePickerContainerRef.value.scrollHeight
   const contentWidth = datePickerCalendarRef.value.scrollWidth
   const contentHeight = datePickerCalendarRef.value.scrollHeight
+  const bottomTop = datePickerMainTop + datePickerMainHeight
+  const topTop = datePickerMainTop - contentHeight
 
   // 依設定計算日曆展開位置。
   const rawTop =
     positionY === 'popup'
-      ? viewHeight / 2 - contentHeight / 2
+      ? scrollTop + viewHeight / 2 - contentHeight / 2
       : positionY === 'top'
-        ? datePickerMainTop - contentHeight
-        : datePickerMainTop + datePickerMainHeight
+        ? topTop
+        : bottomTop
 
   const rawLeft =
     positionX === 'popup'
-      ? viewWidth / 2 - contentWidth / 2
+      ? scrollLeft + viewWidth / 2 - contentWidth / 2
       : positionX === 'left'
-        ? rect.left
+        ? scrollLeft + rect.left
         : positionX === 'right'
-          ? rect.right - contentWidth
-          : rect.left + rect.width / 2 - contentWidth / 2
+          ? scrollLeft + rect.right - contentWidth
+          : scrollLeft + rect.left + rect.width / 2 - contentWidth / 2
 
-  // 限制在 viewport 內，避免日曆超出畫面。
-  const safeLeft = onClamp(rawLeft, 0, viewWidth - contentWidth)
-  const safeTop = onClamp(rawTop, 0, viewHeight - contentHeight)
+  // 下方空間不足時改展開在容器上方；上方也放不下時維持 config 設定的位置。
+  const isBottomOverflow = rawTop - scrollTop + contentHeight > viewHeight
+  const isTopFits = topTop >= scrollTop
+  const safeLeft = onClamp(rawLeft, scrollLeft, scrollLeft + viewWidth - contentWidth)
+  const safeTop =
+    positionY !== 'popup' && positionY !== 'top' && isBottomOverflow && isTopFits ? topTop : rawTop
 
   datePickerCalendarRef.value.style.left = `${safeLeft}px`
   datePickerCalendarRef.value.style.top = `${safeTop}px`
@@ -957,7 +964,7 @@ onUnmounted(() => {
       >
         <Transition name="detepacker-bomb" appear>
           <div
-            class="m-datapicker-calendar-container relative z-[1] mt-[--datepacker-calendar-margin-top] overflow-hidden rounded-[--datepacker-calendar-rounded] border-[1px] border-[--datepacker-calendar-border-color] bg-[--white] px-[--datepacker-calendar-padding-x] py-[--datepacker-calendar-padding-y] transition-colors duration-300"
+            class="m-datapicker-calendar-container relative z-[1] my-[--datepacker-calendar-margin-y] overflow-hidden rounded-[--datepacker-calendar-rounded] border-[1px] border-[--datepacker-calendar-border-color] bg-[--white] px-[--datepacker-calendar-padding-x] py-[--datepacker-calendar-padding-y] transition-colors duration-300"
             v-if="isActive"
           >
             <ul
@@ -1108,7 +1115,7 @@ onUnmounted(() => {
   --datepacker-focus-border-color: var(--green-6a2d);
   --datepacker-error-color: var(--orange-e646);
   --datepacker-error-border-color: var(--orange-e646);
-  --datepacker-calendar-margin-top: 10px;
+  --datepacker-calendar-margin-y: 10px;
   --datepacker-calendar-padding-x: 24px;
   --datepacker-calendar-padding-y: 24px;
   --datepacker-calendar-border-color: var(--green-6a2d);

@@ -1,6 +1,6 @@
 <script setup>
 import PublishInfo from '@pages/buy/_components/PublishInfo.vue'
-import AvailablePlans from '@pages/buy/_components/AvailablePlans.vue'
+import RenewalInfo from '@pages/buy/_components/RenewalInfo.vue'
 
 import LabelText from '@pages/buy/publish/_components/LabelText.vue'
 
@@ -8,8 +8,8 @@ import { useBuyProjectStore } from '@stores/buy/project.js'
 import useBuyProjectActions from '@stores/buy/composables/useProjectActions.js'
 
 const buyProject = useBuyProjectStore()
-const { availablePlans } = storeToRefs(buyProject)
-const { onResetApiDataRenewal } = useBuyProjectActions()
+const { renewal } = storeToRefs(buyProject)
+const { onResetPojectData } = useBuyProjectActions()
 const publishInfo = computed(() => {
   const keyMap = {
     caseTitle: 'title',
@@ -19,16 +19,16 @@ const publishInfo = computed(() => {
     pucURLCover: 'cover',
   }
 
-  return availablePlans.value
+  return renewal.data.value
     ? Object.fromEntries(
-        Object.entries(availablePlans.value)
+        Object.entries(renewal.data.value)
           .filter(([key]) => keyMap[key])
           .map(([key, value]) => [keyMap[key], value])
       )
     : null
 })
 
-onResetApiDataRenewal()
+onResetPojectData('renewal')
 </script>
 
 <template>
@@ -48,7 +48,7 @@ onResetApiDataRenewal()
           icon: 'text-[--gray-666]',
         }"
       />
-      <AvailablePlans />
+      <RenewalInfo />
     </BuyMCardDefault>
   </div>
 </template>

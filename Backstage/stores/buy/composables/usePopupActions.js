@@ -21,6 +21,10 @@ export default () => {
     const buttons = buyPopupStore.buttons.alert
     const setClass = buyPopupStore.setClass.alert
 
+    console.log('onAlert')
+    console.log(data.btns)
+    console.log(onDeepMerge(buttons, data.btns))
+
     alertData.value.id = 'alertSystem'
     alertData.value.title = data.title
     alertData.value.icon = data.icon || 'icon_circle_exclamation'

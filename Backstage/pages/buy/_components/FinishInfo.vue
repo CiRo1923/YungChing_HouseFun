@@ -1,11 +1,17 @@
 <script setup>
 import { useBuyProjectStore } from '@stores/buy/project.js'
+import useBuyProjectActions from '@stores/buy/composables/useProjectActions.js'
 
 const buyPorject = useBuyProjectStore()
-const { publishResponse } = storeToRefs(buyPorject)
+const { autoRefresh } = storeToRefs(buyPorject)
+const { onGoldenPopup } = useBuyProjectActions()
+const router = useRouter()
 
-const emits = defineEmits(['click:golden', 'click:autoRefresh'])
 const props = defineProps({
+  data: {
+    type: Object,
+    default: () => ({}),
+  },
   setClass: {
     type: Object,
     default: () => ({}),
@@ -31,8 +37,24 @@ const items = shallowReadonly([
     },
     button: {
       text: '立即開通黃金曝光 >',
-      onClick: () => {
-        emits('click:golden')
+      onClick: async () => {
+        const isSuccess = await onGoldenPopup(props.data, [
+          {
+            label: '前往刊登管理',
+            class: '--bg-green-6a2d --text-white',
+            type: 'sure',
+            isClose: true,
+          },
+        ])
+
+        if (isSuccess) {
+          router.push({
+            name: 'buy-list-publish',
+            query: {
+              pg: 1,
+            },
+          })
+        }
       },
     },
   },
@@ -42,12 +64,12 @@ const items = shallowReadonly([
     label: '刊登期間，每天於以下時間<span class="text-[--orange-e646]">免費刷新排序</span>',
     content: {
       type: 'times',
-      value: publishResponse.value.listRefreshTime,
+      value: autoRefresh.value.data.listRefreshTime,
     },
     button: {
       text: '加購或更改刷新時間 >',
-      onClick: () => {
-        emits('click:autoRefresh')
+      onClick: async () => {
+        console.log('自動刷新')
       },
     },
   },

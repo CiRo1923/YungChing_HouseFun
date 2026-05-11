@@ -4,7 +4,9 @@ import {
   apiGetPublishAvailablePlans,
   apiPOSTPublishSubmit,
   apiPOSTPublishRenewal,
-  apiPOSTPublishGetPublishResponse,
+  apiGETPublishGetPublishResponse,
+  apiGETGoldenGetPlanList,
+  apiPOSTGoldenSetPlanSingle,
 } from '@js/_api/buy/common.js'
 
 import {
@@ -32,7 +34,7 @@ import {
   apiGETRealEstateVideoTypeSelectOptions,
   apiGETRealEstateFeatureCheckOptions,
   apiGETRealEstatePosterDataSourceSelectOptions,
-} from '@js/_api/buy/basic.js'
+} from '@js/_api/buy/publish.js'
 
 import { useBuyProjectStore } from '@stores/buy/project.js'
 
@@ -40,8 +42,8 @@ import useBuyPopupActions from '@stores/buy/composables/usePopupActions.js'
 
 export default () => {
   const projectStores = useBuyProjectStore()
-  const { onApiError } = useBuyPopupActions()
-  const { availablePlans, renewalPlanId, publishResponse, options } = storeToRefs(projectStores)
+  const { onAlert, onCustom, onApiPromise, onApiError } = useBuyPopupActions()
+  const { renewal, autoRefresh, golden, options } = storeToRefs(projectStores)
 
   const onApiGETRealEstatePurposeCheckOptions = async () => {
     if (options.value.casePurpose) return false
@@ -197,8 +199,6 @@ export default () => {
     const { config, status, data } = await apiGETCommunities(params)
 
     if (status !== 200) {
-      onApiError(config, status, data)
-    } else {
       onApiError(config, status, data)
     }
 
@@ -395,7 +395,7 @@ export default () => {
     if (status === 200) {
       // const { listPlan } = data
       console.log(data)
-      availablePlans.value = data
+      renewal.value.data = data
     } else {
       onApiError(config, status, data)
     }
@@ -406,7 +406,7 @@ export default () => {
     const { config, status, data } = await apiPOSTPublishRenewal({
       userId: 0,
       hfids,
-      planId: renewalPlanId.value,
+      ...renewal.value.apiData,
     })
 
     if (status !== 200) {
@@ -419,7 +419,7 @@ export default () => {
     const { config, status, data } = await apiPOSTPublishSubmit({
       userId: 0,
       hfids,
-      planId: renewalPlanId.value,
+      ...renewal.value.apiData,
     })
 
     if (status !== 200) {
@@ -428,23 +428,104 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiPOSTPublishGetPublishResponse = async (hfid) => {
-    const { config, status, data } = await apiPOSTPublishGetPublishResponse({
+  const onApiGETPublishGetPublishResponse = async (hfid) => {
+    const { config, status, data } = await apiGETPublishGetPublishResponse({
       hfid,
     })
 
     if (status === 200) {
       // const { listPlan } = data
       console.log(data)
-      publishResponse.value = data
+      autoRefresh.value.data = data
     } else {
       onApiError(config, status, data)
     }
 
     return { config, status, data }
   }
-  const onResetApiDataRenewal = () => {
-    renewalPlanId.value = null
+  const onApiGETGoldenGetPlanList = async () => {
+    const { config, status, data } = await apiGETGoldenGetPlanList()
+
+    if (status === 200) {
+      golden.value.plans = data
+    } else {
+      onApiError(config, status, data)
+    }
+
+    return { config, status, data }
+  }
+  const onApiPOSTGoldenSetPlanSingle = async (hfid) => {
+    const { config, status, data } = await apiPOSTGoldenSetPlanSingle({
+      userId: 0,
+      hfid,
+      ...golden.value.apiData,
+    })
+
+    console.log(data)
+
+    if (status !== 200) {
+      onApiError(config, status, data)
+    }
+
+    return { config, status, data }
+  }
+  const onGoldenPopup = async (data, btns) => {
+    onResetPojectData('golden')
+
+    const isSure = await onCustom({
+      id: 'popupGolden',
+      title: '請選擇額度',
+      data,
+      icon: 'icon_quota',
+      btns: [
+        {
+          label: '取消',
+          class: '--border-gray-e5 --text-gray-666',
+          type: 'cancel',
+          isClose: true,
+        },
+        {
+          label: '確認',
+          class: '--bg-green-6a2d --text-white',
+          type: 'sure',
+          isClose: false,
+        },
+      ],
+    })
+
+    if (isSure) {
+      onApiPromise('open')
+      const { status } = await onApiPOSTGoldenSetPlanSingle(data.hfID)
+
+      onApiPromise('close')
+
+      if (status === 200) {
+        const isAlert = await onAlert({
+          title: '黃金曝光設定完成',
+          icon: 'icon_check_solid',
+          content: '黃金曝光設定已完成，將於 1 ~ 2 分鐘後生效',
+          btns,
+          setClass: {
+            main: 'p:--w-800 t:--w-600',
+            icon: 'text-[--orange-e646]',
+            content: 'text-[--gray-666] tracking-wider',
+          },
+        })
+
+        return isAlert
+      }
+    }
+
+    return false
+  }
+  const onResetPojectData = (type) => {
+    if (type === 'renewal' || !type) {
+      renewal.value.apiData.planId = null
+    }
+
+    if (type === 'golden' || !type) {
+      golden.value.apiData.planID = null
+    }
   }
   const onValueGetText = (option, value) => {
     const isOptionString = typeof option === 'string'
@@ -525,8 +606,11 @@ export default () => {
     onApiGetPublishAvailablePlans,
     onApiPOSTPublishRenewal,
     onApiPOSTPublishSubmit,
-    onApiPOSTPublishGetPublishResponse,
-    onResetApiDataRenewal,
+    onApiGETPublishGetPublishResponse,
+    onApiGETGoldenGetPlanList,
+    onApiPOSTGoldenSetPlanSingle,
+    onGoldenPopup,
+    onResetPojectData,
     onValueGetText,
     onReplaceImageSize,
   }

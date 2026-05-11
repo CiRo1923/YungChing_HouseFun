@@ -8,14 +8,6 @@ const props = defineProps({
 })
 const isChecked = computed(() => props.data._checked.value)
 const offlineInfo = computed(() => props.data.caseOfflineInfo || {})
-// 1: 自行關閉 / 2: 刊登到期關閉 / 4: 委託到期關閉 / 7: 客服強制下架 / 8: 源頭下架 / 9: 更換物件
-const isShowButton = computed(() => /^(1|2|9)$/.test(offlineInfo.value.reasonID))
-// const label = computed(() => {
-//   const IDMap = {
-//     1: ''
-//   }
-//   return
-// })
 
 const onClick = () => {
   emits('click:publish', props.data)
@@ -31,12 +23,15 @@ const onClick = () => {
     }"
   >
     <div class="grow text-center tracking-wider text-[--gray-666]">
-      <p>
+      <p class="text-[16px]">
         <time :datetime="offlineInfo.dateDown">{{ offlineInfo.dateDown }}</time>
         {{ offlineInfo.exchangeHFID ? '更換物件' : offlineInfo.downReason }}
       </p>
+      <span class="block text-[14px]" v-if="offlineInfo.extraInfo">
+        {{ offlineInfo.extraInfo }}
+      </span>
     </div>
-    <div class="shrink-0" v-if="isShowButton">
+    <div class="shrink-0" v-if="offlineInfo.isAllowRestoreToOnline">
       <BuyMAnchor
         text="刊登"
         :setClass="{

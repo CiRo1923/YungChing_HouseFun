@@ -88,3 +88,48 @@
   animation: popup-bomb 0.2s reverse both;
   /* 關閉時先跑 bomb */
 }
+
+.datepicker-enter-active,
+.datepicker-leave-active {
+  will-change: opacity;
+  transition: opacity 0.3s;
+
+  @apply visible opacity-100;
+}
+
+.datepicker-enter-from,
+.datepicker-leave-to {
+  @apply invisible opacity-0;
+}
+
+.detepacker-overlay-enter-active,
+.detepacker-overlay-leave-active {
+  transition: opacity calc(0.3s / 2);
+}
+
+.detepacker-overlay-enter-from,
+.detepacker-overlay-leave-to {
+  @apply opacity-0;
+}
+
+.detepacker-overlay-enter-to,
+.detepacker-overlay-leave-from {
+  @apply opacity-100;
+}
+
+.detepacker-bomb-enter-active,
+.detepacker-bomb-leave-active {
+  transition:
+    opacity 0.3s,
+    transform 0.3s;
+}
+
+.detepacker-bomb-enter-from,
+.detepacker-bomb-leave-to {
+  @apply scale-95 opacity-0;
+}
+
+.detepacker-bomb-enter-to,
+.detepacker-bomb-leave-from {
+  @apply scale-100 opacity-100;
+}

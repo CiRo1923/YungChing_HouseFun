@@ -9,12 +9,13 @@ import useBuyPopupActions from '@stores/buy/composables/usePopupActions.js'
 
 const {
   onApiPOSTPublishRenewal,
-  onResetApiDataRenewal,
+  onResetPojectData,
   onApiPOSTPublishSubmit,
-  onApiPOSTPublishGetPublishResponse,
+  onApiGETPublishGetPublishResponse,
+  onGoldenPopup,
 } = useBuyProjectActions()
 const buyList = useBuyListStore()
-const { datas } = storeToRefs(buyList)
+const { datas, pagination } = storeToRefs(buyList)
 const {
   selectItems,
   selectCount,
@@ -23,6 +24,7 @@ const {
   onSyncCheckedDatas,
 } = useBuyListActions()
 const { onAlert, onConfirm, onCustom, onApiPromise } = useBuyPopupActions()
+const route = useRoute()
 const router = useRouter()
 
 const emits = defineEmits(['update'])
@@ -64,7 +66,7 @@ const onPopupPlans = async (data) => {
 
 // 續刊
 const onRenewalClick = async (objectData) => {
-  onResetApiDataRenewal()
+  onResetPojectData('renewal')
 
   const isSure = await onPopupPlans(objectData)
 
@@ -114,6 +116,65 @@ const onPublishClick = async (objectData) => {
           value: invalidIds.size === 0,
           datas: selectItems.value.filter((id) => !invalidIds.has(id)),
         }
+  const onPublishSubmit = async () => {
+    onResetPojectData('renewal')
+    const isSure = await onPopupPlans(objectData)
+
+    if (isSure) {
+      onApiPromise('open')
+
+      const hfIDs = objectData ? [objectData.hfID] : selectItems.value
+      const { status } = await onApiPOSTPublishSubmit(hfIDs)
+      if (objectData) {
+        await onApiGETPublishGetPublishResponse(objectData.hfID)
+      }
+      await new Promise((resolve) => {
+        emits('update', resolve)
+      })
+
+      onApiPromise('close')
+
+      if (status === 200) {
+        if (objectData || selectCount.value === 1) {
+          const isFinish = await onCustom({
+            id: 'popupFinish',
+            title: '物件刊登完成',
+            data: objectData,
+            icon: 'icon_check_solid',
+            btns: [
+              {
+                label: '返回',
+                class: '--border-gray-e5 --text-gray-666',
+                type: 'cancel',
+                isClose: true,
+              },
+              {
+                label: '前往刊登管理',
+                class: '--bg-green-6a2d --text-white',
+                type: 'sure',
+                isClose: true,
+              },
+            ],
+          })
+
+          if (isFinish) {
+            router.push({
+              name: 'buy-list-publish',
+              query: {
+                pg: 1,
+              },
+            })
+          }
+        } else {
+          onAlert({
+            title: '物件刊登完成',
+            icon: 'icon_check_solid',
+            content: '請確認物件是否已刊登',
+          })
+        }
+      }
+    }
+  }
 
   // 批次刊登中有未符合條件的告知使用者
   if (!result.value) {
@@ -129,66 +190,10 @@ const onPublishClick = async (objectData) => {
     // 選擇確認 自動移除未符合的物件
     if (isConfirm) {
       onSyncCheckedDatas(result.datas)
+      onPublishSubmit()
     }
-  }
-
-  onResetApiDataRenewal()
-  const isSure = await onPopupPlans(objectData)
-
-  if (isSure) {
-    onApiPromise('open')
-
-    const hfIDs = objectData ? [objectData.hfID] : selectItems.value
-    const { status } = await onApiPOSTPublishSubmit(hfIDs)
-    if (objectData) {
-      await onApiPOSTPublishGetPublishResponse(objectData.hfID)
-    }
-    await new Promise((resolve) => {
-      emits('update', resolve)
-    })
-
-    onApiPromise('close')
-
-    if (status === 200) {
-      if (objectData || selectCount.value === 1) {
-        const isFinish = await onCustom({
-          id: 'popupFinish',
-          title: '物件刊登完成',
-          data: objectData,
-          icon: 'icon_check_solid',
-          btns: [
-            {
-              label: '返回',
-              class: '--border-gray-e5 --text-gray-666',
-              type: 'cancel',
-              isClose: true,
-            },
-            {
-              label: '前往刊登',
-              class: '--bg-green-6a2d --text-white',
-              type: 'sure',
-              isClose: true,
-            },
-          ],
-        })
-
-        if (isFinish) {
-          console.log(1)
-          router.push({
-            name: 'buy-list-publish',
-            query: {
-              pg: 1,
-            },
-          })
-        }
-      } else {
-        onAlert({
-          title: '物件刊登完成',
-          icon: 'icon_check_solid',
-          content: '請確認物件是否已刊登',
-        })
-      }
-    }
+  } else {
+    onPublishSubmit()
   }
 }
 
@@ -261,6 +266,11 @@ const onDealClick = async (objectData) => {
 const onCopyClick = () => {
   console.log('onCopyClick')
 }
+
+// 黃金曝光
+const onGoldenClick = async (objectData) => {
+  await onGoldenPopup(objectData)
+}
 </script>
 
 <template>
@@ -293,12 +303,14 @@ const onCopyClick = () => {
           @click:renewal="onRenewalClick"
           @click:offline="onOfflineClick"
           @click:deal="onDealClick"
+          @click:golden="onGoldenClick"
         >
           <slot
             :item="item"
             :renewalFun="onRenewalClick"
             :publishFun="onPublishClick"
             :dealFun="onDealClick"
+            :goldenFun="onGoldenClick"
           />
         </Item>
         <!-- <pre>
@@ -306,6 +318,19 @@ const onCopyClick = () => {
         </pre> -->
       </li>
     </ul>
+    <BuyMPagination
+      :route="route"
+      :config="{
+        nowPage: pagination.page,
+        itemsPage: pagination.pageSize,
+        pageNumber: 5,
+        total: pagination.total,
+        queryKey: 'pg',
+      }"
+      :setClass="{
+        main: 'tm:mt-[32px] p:mt-[40px]',
+      }"
+    />
   </BuyMCardDefault>
   <!-- <pre>
     {{ datas }}

@@ -63,7 +63,7 @@ const onClose = (item) => {
       <slot name="header" />
     </template>
     <slot>
-      <div class="text-[16px]" v-html="custom.content" />
+      <div class="text-[16px]" :class="custom.setClass?.content" v-html="custom.content" />
     </slot>
     <template #footer v-if="$slots.footer || footerBtns">
       <slot name="footer">
@@ -77,7 +77,7 @@ const onClose = (item) => {
               <BuyMAnchor
                 :text="item.label"
                 :setClass="{
-                  main: [item.class, '--oval --h-45 w-full'],
+                  main: [item.class, '--oval --h-45 --px-20 w-full'],
                 }"
                 @click="onClose(item)"
               />

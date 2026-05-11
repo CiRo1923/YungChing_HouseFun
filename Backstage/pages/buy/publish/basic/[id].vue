@@ -13,8 +13,8 @@ import SubmitButtons from '@pages/buy/publish/basic/_containers/SubmitButtons.vu
 // import { useCommonStore } from '@stores/common.js'
 import useCommonActions from '@stores/composables/useCommonActions.js'
 import { useBuyProjectStore } from '@stores/buy/project.js'
-// import { useBuyBasicStore } from '@stores/buy/basic.js'
-import useBuyBasicActions from '@stores/buy/composables/useBasicActions.js'
+import { useBuyPublishStore } from '@stores/buy/publish.js'
+import useBuyPublishActions from '~/stores/buy/composables/usePublishActions.js'
 import useBuyPopupActions from '@stores/buy/composables/usePopupActions.js'
 
 import { Form } from 'vee-validate'
@@ -28,11 +28,15 @@ definePageMeta({
 // const common = useCommonStore()
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
 const buyProject = useBuyProjectStore()
-// const { options } = storeToRefs(buyProject)
-// const buyBasic = useBuyBasicStore()
-// const { apiData } = storeToRefs(buyBasic)
-const { onAllPromise, onApiGETRealEstate, onApiPOSTRealEstateDraft, onApiPOSTRealEstate } =
-  useBuyBasicActions()
+const buyPublish = useBuyPublishStore()
+const { statusData } = storeToRefs(buyPublish)
+const {
+  onAllPromise,
+  onApiGERealEstateCaseStatus,
+  onApiGETRealEstate,
+  onApiPOSTRealEstateDraft,
+  onApiPOSTRealEstate,
+} = useBuyPublishActions()
 const { onAlert } = useBuyPopupActions()
 const route = useRoute()
 const router = useRouter()
@@ -54,8 +58,12 @@ const onSaveSubmit = async (validate) => {
       })
 
       if (isAlert) {
+        const routeName = statusData.value?.isExpired
+          ? 'buy-publish-renewal-id'
+          : 'buy-publish-finish-id'
+
         router.push({
-          name: 'buy-publish-renewal-id',
+          name: routeName,
           params: {
             id: hfID.value,
           },
@@ -67,6 +75,7 @@ const onSaveSubmit = async (validate) => {
 
 await onWithLoadingAll([
   ...onAllPromise(),
+  useAsyncData(`case-status-basic-${hfID.value}`, () => onApiGERealEstateCaseStatus(hfID.value)),
   useAsyncData(`detail-${hfID.value}`, () => onApiGETRealEstate(hfID.value)),
 ])
 
@@ -87,7 +96,7 @@ onUseMeta({
       <BackStepNew
         :anchor="{
           to: {
-            name: 'buy-list-publish',
+            name: buyPublish.statusMap[statusData.caseStatus],
             query: {
               pg: 1,
             },

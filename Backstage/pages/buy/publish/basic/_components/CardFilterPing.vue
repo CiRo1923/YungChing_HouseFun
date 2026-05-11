@@ -9,13 +9,13 @@ import CaseAmenitieSq from '@pages/buy/publish/basic/_components/ping/CaseAmenit
 
 import CardFilter from '@pages/buy/publish/basic/_containers/CardFilter.vue'
 
-// import { useBuyBasicStore } from '@stores/buy/basic.js'
+// import { useBuyPublishStore } from '@stores/buy/publish.js'
 
 import useBuyPopupActions from '@stores/buy/composables/usePopupActions.js'
 
 const { onCustom } = useBuyPopupActions()
-// const buyBasic = useBuyBasicStore()
-// const { pingData } = storeToRefs(buyBasic)
+// const buyPublish = useBuyPublishStore()
+// const { pingData } = storeToRefs(buyPublish)
 
 const props = defineProps({
   title: {

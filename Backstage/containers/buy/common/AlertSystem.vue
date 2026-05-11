@@ -21,7 +21,7 @@ const onClose = (item) => {
 
 <template>
   <BuyMPopup id="alertSystem" :setClass="alert.setClass">
-    <div class="text-center text-[16px]" v-html="alert.content" />
+    <div class="text-center text-[16px]" :class="alert.setClass?.content" v-html="alert.content" />
     <template #footer>
       <div class="text-center">
         <ul class="inline-flex items-center m:gap-x-[8px] pt:gap-x-[12px]">
@@ -33,7 +33,7 @@ const onClose = (item) => {
             <BuyMAnchor
               :text="item.label"
               :setClass="{
-                main: [item.class, '--oval --h-45 w-full'],
+                main: [item.class, '--oval --h-45 --px-20 w-full'],
               }"
               @click="onClose(item)"
             />

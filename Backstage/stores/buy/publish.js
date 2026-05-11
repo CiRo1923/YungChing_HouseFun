@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 
-export const useBuyBasicStore = defineStore('buyBasic', () => {
+export const useBuyPublishStore = defineStore('buyPublish', () => {
   const components = shallowReadonly([
     {
       id: 'CardFilterInfo',
@@ -181,6 +181,7 @@ export const useBuyBasicStore = defineStore('buyBasic', () => {
       },
     ],
   })
+  const statusData = ref(null)
   const address = ref(null)
   const pingData = ref({
     caseBuildSq: null,
@@ -201,13 +202,20 @@ export const useBuyBasicStore = defineStore('buyBasic', () => {
     maxSizeMB: 25,
     maxCount: 25,
   })
+  const statusMap = readonly({
+    2: 'buy-list-publish', // 刊登
+    4: 'buy-list-offline', // 下架
+    6: 'buy-list-draft', // 草稿
+  })
 
   return {
     components,
     apiData,
     options,
+    statusData,
     address,
     pingData,
     pictures,
+    statusMap,
   }
 })

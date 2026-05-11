@@ -1,10 +1,10 @@
 <script setup>
 import { onToFixed } from '@js/_prototype.js'
 
-import { useBuyBasicStore } from '@stores/buy/basic.js'
+import { useBuyPublishStore } from '@stores/buy/publish.js'
 
-const buyBasic = useBuyBasicStore()
-const { apiData } = storeToRefs(buyBasic)
+const buyPublish = useBuyPublishStore()
+const { apiData } = storeToRefs(buyPublish)
 
 const onIsCasePriceUnitAuto = () => {
   const {

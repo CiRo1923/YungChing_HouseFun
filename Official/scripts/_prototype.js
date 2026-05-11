@@ -93,8 +93,15 @@ export const onDeepMerge = (target, ...sources) => {
   const isShallow = (item) => {
     return !(Array.isArray(item) && item.find((item) => typeof item === 'object'))
   }
+  const isDeepArray = (item) => {
+    return Array.isArray(item) && item.find((item) => typeof item === 'object')
+  }
 
-  if (isObject(target) && isObject(source)) {
+  if (Array.isArray(target) && Array.isArray(source)) {
+    target = isDeepArray(source)
+      ? source.map((item, index) => onDeepMerge(onDeepClone(target[index] || item), item))
+      : source
+  } else if (isObject(target) && isObject(source)) {
     for (const key in source) {
       if (isObject(source[key])) {
         // console.log(key)

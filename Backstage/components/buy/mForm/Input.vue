@@ -65,7 +65,7 @@ const config = computed(() => {
       isDisabled: false,
       isError: false,
       inputMode: null,
-      isExistClose: true, // 輸入後開啟 X 清除
+      hasClearButton: true, // 輸入後開啟 X 清除
       inputChinese: true, // 開啟關閉輸入中文
       comma: false, // 啟用千分位功能
       checkNotIsZero: false, // 輸入欄位致不能為 0
@@ -75,7 +75,7 @@ const config = computed(() => {
     props.config
   )
 })
-const isNumeric = computed(() => config.value.inputMode === 'numeric')
+const isNumeric = computed(() => /^(decimal|numeric)$/.test(config.value.inputMode))
 const formatLength = computed(() => {
   const { formatLength, maxlength } = config.value
 
@@ -130,7 +130,8 @@ const onInput = async (e) => {
     number: integer ? /[^0-9]/g : /[^0-9.]/g,
   }
 
-  const isRemoveChinese = (/numeric/.test(inputMode) || !inputChinese) && regex.chinese.test(value)
+  const isRemoveChinese =
+    (/^(decimal|numeric)$/.test(inputMode) || !inputChinese) && regex.chinese.test(value)
 
   await nextTick()
 
@@ -197,14 +198,14 @@ const onEvent = (e, errorMessage) => {
         normalized = normalized.split('.')[0]
       }
 
-      // 3) 去掉前導 0（但小數模式要保留 0.x 的 0）
+      // 3) 去掉多餘前導 0（單獨 0 要保留；小數模式保留 0.x 的 0）
       if (normalized) {
         if (integer) {
-          normalized = normalized.replace(/^0+/, '')
+          normalized = normalized.replace(/^0+(?=\d)/, '')
         } else {
           // 非整數：保留 "0.xxx"
           if (!normalized.startsWith('0.')) {
-            normalized = normalized.replace(/^0+/, '')
+            normalized = normalized.replace(/^0+(?=\d)/, '')
             if (normalized.startsWith('.')) normalized = '0' + normalized
           }
         }
@@ -260,6 +261,7 @@ const onWatchModel = (value) => {
 
 const onClear = () => {
   model.value = null
+  emits('update:modelValue', '')
 }
 
 watch(
@@ -276,11 +278,11 @@ watch(
 <template>
   <div class="m-form overflow-hidden" :class="setClass.main">
     <Field
+      v-slot="{ field, errorMessage }"
+      v-model="model"
       :name="props.name"
       :type="props.type"
-      v-model="model"
       :rules="config.isDisabled ? '' : props.rules"
-      v-slot="{ field, errorMessage }"
     >
       <div class="m-form-container" :class="setClass.container">
         <div
@@ -294,16 +296,16 @@ watch(
           ]"
         >
           <div
+            v-if="$slots.frontAssist"
             class="m-form-assist shrink-0"
             :class="setClass.frontAssist"
-            v-if="$slots.frontAssist"
           >
             <slot name="frontAssist" />
           </div>
           <input
             :id="props.name"
             :type="props.type"
-            class="m-form-type min-w-0 grow"
+            class="m-form-type min-w-0 grow leading-[1]"
             :class="setClass.type"
             v-bind="onBind(field)"
             :inputMode="config.inputMode"
@@ -319,6 +321,7 @@ watch(
             @keydown.enter="onEnter($event)"
           />
           <button
+            v-if="config.hasClearButton && !config.isDisabled"
             type="button"
             class="m-form-clear-button"
             :class="{
@@ -326,18 +329,17 @@ watch(
             }"
             tabindex="-1"
             @click="onClear"
-            v-if="config.isExistClose && !config.isDisabled"
           >
             <CommonSvgIcon icon="icon_xmark" class="m-form-clear-icon" />
           </button>
-          <span class="m-form-length shrink-0" :class="setClass.length" v-if="formatLength">
+          <span v-if="formatLength" class="m-form-length shrink-0" :class="setClass.length">
             {{ formatLength }}
           </span>
-          <div class="m-form-assist shrink-0" :class="setClass.rearAssist" v-if="$slots.rearAssist">
+          <div v-if="$slots.rearAssist" class="m-form-assist shrink-0" :class="setClass.rearAssist">
             <slot name="rearAssist" />
           </div>
         </div>
-        <small class="m-form-suffix shrink-0" :class="setClass.suffix" v-if="$slots.suffix">
+        <small v-if="$slots.suffix" class="m-form-suffix shrink-0" :class="setClass.suffix">
           <slot
             name="suffix"
             :maxlength="config.length || config.maxlength"
@@ -347,11 +349,11 @@ watch(
       </div>
     </Field>
     <ErrorMessage
+      v-slot="{ message }"
       as="span"
       :name="props.name"
-      class="m-form-error"
+      class="m-form-error block"
       :class="setClass.error"
-      v-slot="{ message }"
     >
       <BuyMErrorMessageElem :message="message" />
     </ErrorMessage>

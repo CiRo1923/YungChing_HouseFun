@@ -418,7 +418,7 @@ onUnmounted(() => {
     <ErrorMessage
       as="span"
       :name="props.name"
-      class="m-form-error"
+      class="m-form-error block"
       :class="setClass.error"
       v-slot="{ message }"
     >
@@ -467,7 +467,7 @@ onUnmounted(() => {
 </template>
 
 <style src="@css/_modules/buy/mForm.css"></style>
-<style src="@css/_modules/_vueTransition.css"></style>
+<style src="@css/_common/vueTransition.css"></style>
 <style lang="postcss">
 .m-form-element {
   &.\-\-select {

@@ -2,26 +2,25 @@
 // import { useCommonStore } from '@stores/common.js'
 import useCommonActions from '@stores/composables/useCommonActions.js'
 // import { useBuyProjectStore } from '@stores/buy/project.js'
-import { useBuyBasicStore } from '@stores/buy/basic.js'
-import useBuyBasicActions from '@stores/buy/composables/useBasicActions.js'
+import { useBuyPublishStore } from '@stores/buy/publish.js'
+import useBuyPublishActions from '~/stores/buy/composables/usePublishActions.js'
 
 // const common = useCommonStore()
 const { onIsLoading } = useCommonActions()
 // const buyProject = useBuyProjectStore()
-// const { basic } = useBuyProjectActions()
-const buyBasic = useBuyBasicStore()
-const { apiData } = storeToRefs(buyBasic)
-const { onApiPOSTRealEstatePicUpload } = useBuyBasicActions()
+const buyPublish = useBuyPublishStore()
+const { apiData } = storeToRefs(buyPublish)
+const { onApiPOSTRealEstatePicUpload } = useBuyPublishActions()
 const route = useRoute()
 const hfID = computed(() => route.params.id)
 const hasCasePictures = computed(() => apiData.value.caseInfo?.casePictures.length !== 0)
 
 const message = computed(() => {
-  const picturesLength = buyBasic.pictures.maxCount
+  const picturesLength = buyPublish.pictures.maxCount
   const { caseInfo } = apiData.value
   const casePictures = caseInfo.casePictures || []
   const casePicturesLength = casePictures.length
-  const basicText = `圖片大小不可超過 ${buyBasic.pictures.maxSizeMB} MB，僅支援 jpg、png、gif 格式，拖動照片調整排序，`
+  const basicText = `圖片大小不可超過 ${buyPublish.pictures.maxSizeMB} MB，僅支援 jpg、png、gif 格式，拖動照片調整排序，`
 
   return casePicturesLength >= picturesLength
     ? `${basicText}已達可上傳張數上限`
@@ -76,8 +75,8 @@ const onUploaded = async (items, done) => {
       v-model="apiData.caseInfo.casePictures"
       :config="{
         accept: '.jpg, .jpeg, .png, .gif',
-        maxCount: buyBasic.pictures.maxCount,
-        maxSizeMB: buyBasic.pictures.maxSizeMB,
+        maxCount: buyPublish.pictures.maxCount,
+        maxSizeMB: buyPublish.pictures.maxSizeMB,
         placeholder: {
           default: '點擊或拖曳圖片到這裡上傳',
           hasImages: '新增圖片',

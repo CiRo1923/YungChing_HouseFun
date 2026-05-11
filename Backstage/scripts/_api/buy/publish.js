@@ -2,6 +2,7 @@ import { onFetchApi } from '@js/_api/export.js'
 
 export const version = 'v1'
 
+// basic
 export const apiPOSTRealEstateNewCase = async (data) =>
   await onFetchApi.post(`api/${version}/buy/realEstate/NewCase`, data)
 
@@ -89,5 +90,10 @@ export const apiGETRealEstateFeatureCheckOptions = async (data) =>
 export const apiGETRealEstatePosterDataSourceSelectOptions = async (data) =>
   await onFetchApi.get(`api/${version}/buy/realEstatePosterDataSource/select-options`, data)
 
+// renewal
 export const apiPOSTRealEstateReadToPublish = async (data) =>
   await onFetchApi.post(`api/${version}/buy/realEstate/ReadToPublish`, data)
+
+// basic / renewal / fiinish
+export const apiGERealEstateCaseStatus = async (data) =>
+  await onFetchApi.get(`api/${version}/buy/realEstate/CaseStatus/{hfid}`, data)

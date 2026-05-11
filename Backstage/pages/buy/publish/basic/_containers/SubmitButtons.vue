@@ -1,11 +1,16 @@
 <script setup>
+import { useBuyPublishStore } from '@stores/buy/publish.js'
+
+const buyPublish = useBuyPublishStore()
+const { statusData } = storeToRefs(buyPublish)
+
 const emits = defineEmits(['click:draft', 'click:save'])
 
 const items = shallowReadonly([
   {
     label: '取消',
     to: {
-      name: 'buy-list-publish',
+      name: buyPublish.statusMap[statusData.value.caseStatus],
       query: {
         pg: 1,
       },
@@ -24,7 +29,7 @@ const items = shallowReadonly([
     },
   },
   {
-    label: '儲存，選擇刊登額度',
+    label: statusData.value.isExpired ? '儲存，選擇刊登額度' : '確定刊登上架',
     class: {
       main: '--bg-green-6a2d --text-white',
     },

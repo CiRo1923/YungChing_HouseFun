@@ -1,7 +1,7 @@
 <script setup>
-import { useBuyBasicStore } from '@stores/buy/basic.js'
-const buyBasic = useBuyBasicStore()
-const { apiData } = storeToRefs(buyBasic)
+import { useBuyPublishStore } from '@stores/buy/publish.js'
+const buyPublish = useBuyPublishStore()
+const { apiData } = storeToRefs(buyPublish)
 </script>
 
 <template>

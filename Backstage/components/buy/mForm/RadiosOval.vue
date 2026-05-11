@@ -139,7 +139,7 @@ onSelected()
     <ErrorMessage
       as="span"
       :name="`${props.name}_radios`"
-      class="m-form-error"
+      class="m-form-error block"
       :class="setClass.error"
       v-slot="{ message }"
     >

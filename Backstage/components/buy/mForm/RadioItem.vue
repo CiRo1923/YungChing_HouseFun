@@ -121,7 +121,7 @@ const onChange = () => {
       :class="setClass.error"
       v-slot="{ message }"
     >
-      <BuyMErrorMessageElem class="text-[12px]" :message="message" />
+      <BuyMErrorMessageElem :message="message" />
     </ErrorMessage>
   </div>
 </template>

@@ -109,7 +109,7 @@ onMounted(() => {
         :src="props.data.picURLCover"
         :alt="props.data.caseTitle"
         :setClass="{
-          main: 'order-2 shrink-0 overflow-hidden m:mb-[16px] m:h-[242px] t:h-[114px] t:w-[150px] p:h-[152px] p:w-[200px]',
+          main: 'order-2 shrink-0 overflow-hidden rounded-[10px] m:mb-[16px] m:h-[242px] t:h-[114px] t:w-[150px] p:h-[152px] p:w-[200px]',
         }"
       />
       <BuyMFormCheckBox

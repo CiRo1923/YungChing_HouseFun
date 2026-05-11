@@ -1,7 +1,7 @@
 <script setup>
 import SettingItem from '@pages/buy/list/_components/item/SettingItem.vue'
 
-const emits = defineEmits(['click:renewal'])
+const emits = defineEmits(['click:renewal', 'click:golden'])
 const props = defineProps({
   data: {
     type: Object,
@@ -42,7 +42,7 @@ const items = computed(() => {
       button: {
         text: '設定',
         onClick: () => {
-          // alert('設定')
+          emits('click:golden', props.data)
         },
       },
       class: {

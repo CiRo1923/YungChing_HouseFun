@@ -1,10 +1,10 @@
 <script setup>
-import { useBuyBasicStore } from '@stores/buy/basic.js'
-import useBuyBasicActions from '@stores/buy/composables/useBasicActions.js'
+import { useBuyPublishStore } from '@stores/buy/publish.js'
+import useBuyPublishActions from '~/stores/buy/composables/usePublishActions.js'
 
-const buyBasic = useBuyBasicStore()
-const { pingUnitLabel, onPinSqMetersConvert } = useBuyBasicActions()
-const { pingData } = storeToRefs(buyBasic)
+const buyPublish = useBuyPublishStore()
+const { pingUnitLabel, onPinSqMetersConvert } = useBuyPublishActions()
+const { pingData } = storeToRefs(buyPublish)
 </script>
 
 <template>

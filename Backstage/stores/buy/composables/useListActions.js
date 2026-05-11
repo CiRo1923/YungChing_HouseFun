@@ -11,10 +11,10 @@ import useBuyPopupActions from '@stores/buy/composables/usePopupActions.js'
 
 export default () => {
   // const buyProject = useBuyProjectStore()
-  // const { renewalPlanId } = storeToRefs(buyProject)
+  // const { renewal } = storeToRefs(buyProject)
   const { onReplaceImageSize } = useBuyProjectActions()
   const buyList = useBuyListStore()
-  const { apiData, apiDealData, datas } = storeToRefs(buyList)
+  const { apiData, apiDealData, datas, pagination } = storeToRefs(buyList)
   const { onApiError } = useBuyPopupActions()
   const selectItems = computed(() =>
     datas.value ? datas.value.filter((item) => item._checked.value).map((item) => item.hfID) : []
@@ -32,7 +32,7 @@ export default () => {
     })
 
     if (status === 200) {
-      const { casesList } = data
+      const { casesList, page, pageSize, totalPages } = data
 
       const imageSize = {
         width: 640,
@@ -42,16 +42,20 @@ export default () => {
       // 下架 會不能批次刊登的條件
       const onPublishDisabled = (item) => {
         const offlineInfo = item.caseOfflineInfo
+        const draftInfo = item.caseDraftInfo
 
-        return (
-          !offlineInfo || (![7, 8].includes(offlineInfo.reasonID) && offlineInfo.reasonID !== 1)
-        )
+        if (offlineInfo) {
+          return (
+            offlineInfo.isAllowRestoreToOnline &&
+            (offlineInfo.reasonID !== 1 || !offlineInfo.isExpired)
+          )
+        }
 
-        // (
-        //   !offlineInfo ||
-        //   (![7, 8].includes(offlineInfo.reasonID) &&
-        //     (offlineInfo.reasonID !== 1 || !offlineInfo.note))
-        // )
+        if (draftInfo) {
+          return draftInfo.isReadToPublish
+        }
+
+        return true
       }
       datas.value = list.map((item) => {
         return {
@@ -63,6 +67,11 @@ export default () => {
         }
       })
 
+      pagination.value = {
+        page,
+        pageSize,
+        total: totalPages,
+      }
       console.log(datas.value)
     } else {
       onApiError(config, status, data)
