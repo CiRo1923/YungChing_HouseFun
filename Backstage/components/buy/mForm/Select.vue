@@ -358,7 +358,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="m-form" :class="setClass.main">
+  <div class="m-form overflow-hidden" :class="setClass.main">
     <Field
       :name="props.name"
       v-model="model"
@@ -369,7 +369,7 @@ onUnmounted(() => {
       <div class="m-form-container flex" :class="setClass.container">
         <button
           type="button"
-          class="m-form-element --select grow text-left"
+          class="m-form-element --select grow overflow-hidden text-left"
           :class="[
             setClass.element,
             { '--focus': isFocus },

@@ -145,6 +145,7 @@ watch(
             inputChinese: false,
             checkNotIsZero: true,
             isExistClose: false,
+            hasClearButton: false,
           }"
           :setClass="{
             main: '--h-40 --px-12 --py-8 pt:grow',

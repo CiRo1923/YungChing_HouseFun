@@ -50,6 +50,7 @@ const items = shallowReadonly([
         config: {
           isExistClose: false,
           maxlength: 3,
+          hasClearButton: false,
         },
         rules: {
           required: '請輸入車位數量',
@@ -115,7 +116,7 @@ const items = shallowReadonly([
         rules: {
           required: '請選擇繳費方式',
         },
-        class: 'p:w-[150px] m:w-[147px]',
+        class: 'p:w-[160px] m:w-[147px]',
       },
       text: {
         id: 'caseParkingFee',
@@ -125,12 +126,13 @@ const items = shallowReadonly([
           isExistClose: false,
           inputChinese: false,
           checkNotIsZero: true,
+          hasClearButton: false,
           integer: true,
         },
         rules: {
           required: '請輸入管理費',
         },
-        class: 'p:w-[123px] m:w-[108px] shrink-0',
+        class: 'p:w-[113px] m:w-[108px] shrink-0',
       },
       checkbox: {
         id: 'isCaseParkingFeeInclude',
@@ -214,6 +216,7 @@ onInit()
           </span>
           <ul class="flex flex-wrap gap-x-[8px] overflow-hidden m:gap-y-[12px] pt:grow">
             <li
+              class="overflow-hidden"
               :class="value.class"
               v-for="(value, key) in item.forms"
               :key="`${item.label}_${key}_${idx}_${index}`"

@@ -3,6 +3,7 @@ import {
   apiGETDistrictSelectOptions,
   apiGetPublishAvailablePlans,
   apiPOSTPublishSubmit,
+  apiPOSTRealEstateRestoreToOnline,
   apiPOSTPublishRenewal,
   apiGETPublishGetPublishResponse,
   apiGETGoldenGetPlanList,
@@ -428,6 +429,17 @@ export default () => {
 
     return { config, status, data }
   }
+  const onApiPOSTRealEstateRestoreToOnline = async (hfids) => {
+    const { config, status, data } = await apiPOSTRealEstateRestoreToOnline({
+      hfids,
+    })
+
+    if (status !== 200) {
+      onApiError(config, status, data)
+    }
+
+    return { config, status, data }
+  }
   const onApiGETPublishGetPublishResponse = async (hfid) => {
     const { config, status, data } = await apiGETPublishGetPublishResponse({
       hfid,
@@ -606,6 +618,7 @@ export default () => {
     onApiGetPublishAvailablePlans,
     onApiPOSTPublishRenewal,
     onApiPOSTPublishSubmit,
+    onApiPOSTRealEstateRestoreToOnline,
     onApiGETPublishGetPublishResponse,
     onApiGETGoldenGetPlanList,
     onApiPOSTGoldenSetPlanSingle,

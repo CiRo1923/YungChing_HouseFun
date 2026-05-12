@@ -87,6 +87,7 @@ onUseMeta({
 </script>
 
 <template>
+  <!-- {{ statusData }} -->
   <BuyMContainer
     :setClass="{
       main: '--px-16',

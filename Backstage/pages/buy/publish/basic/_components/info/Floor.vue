@@ -63,12 +63,13 @@ const onIsSingleFloorChange = () => {
             checkNotIsZero: true,
             integer: true,
             isExistClose: false,
+            hasClearButton: false,
           }"
           :rules="{
             required: '請輸入樓層',
           }"
           :setClass="{
-            main: '--h-40 --px-12 --py-8 :grow',
+            main: '--h-40 --px-12 --py-8 p:grow',
             element: 'grow',
             rearAssist: 'text-[14px] text-[--gray-999]',
           }"
@@ -104,6 +105,7 @@ const onIsSingleFloorChange = () => {
             checkNotIsZero: true,
             integer: true,
             isExistClose: false,
+            hasClearButton: false,
           }"
           :rules="{
             required: '請輸入樓層',

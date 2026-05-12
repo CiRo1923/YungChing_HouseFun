@@ -11,8 +11,8 @@ const isSelectAll = computed({
     datas.value = datas.value.map((item) => ({
       ...item,
       _checked: {
-        value,
-        publish: item._checked.publish,
+        ...item._checked,
+        ...{ value },
       },
     }))
   },

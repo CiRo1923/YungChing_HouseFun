@@ -20,6 +20,18 @@ export default () => {
     datas.value ? datas.value.filter((item) => item._checked.value).map((item) => item.hfID) : []
   )
   const selectCount = computed(() => selectItems.value.length)
+  const renewalCanNotPublishData = computed(() => {
+    const selectedIds = new Set(selectItems.value)
+
+    return datas.value.filter((item) => selectedIds.has(item.hfID) && !item._checked.publish)
+  })
+  const renewalNotExpiredData = computed(() => {
+    const selectedIds = new Set(selectItems.value)
+
+    return datas.value.filter(
+      (item) => selectedIds.has(item.hfID) && item._checked.publish && !item._checked.isExpired
+    )
+  })
   const onApiPOSTRealEstateSearch = async (caseStatusToken) => {
     const route = useRoute()
     const page = route.query.pg ? +route.query.pg : 1
@@ -40,15 +52,12 @@ export default () => {
       }
       const list = onReplaceImageSize(casesList, 'picURLCover', imageSize) // 替換 width  & height
       // 下架 會不能批次刊登的條件
-      const onPublishDisabled = (item) => {
+      const onIsPublish = (item) => {
         const offlineInfo = item.caseOfflineInfo
         const draftInfo = item.caseDraftInfo
 
         if (offlineInfo) {
-          return (
-            offlineInfo.isAllowRestoreToOnline &&
-            (offlineInfo.reasonID !== 1 || !offlineInfo.isExpired)
-          )
+          return offlineInfo.isAllowRestoreToOnline
         }
 
         if (draftInfo) {
@@ -57,12 +66,27 @@ export default () => {
 
         return true
       }
+      const onIsExpired = (item) => {
+        const offlineInfo = item.caseOfflineInfo
+        // const draftInfo = item.caseDraftInfo
+
+        if (offlineInfo) {
+          return offlineInfo.isAllowRestoreToOnline && offlineInfo.isExpired
+        }
+
+        // if (draftInfo) {
+        //   return draftInfo.isReadToPublish
+        // }
+
+        return true
+      }
       datas.value = list.map((item) => {
         return {
           ...item,
           _checked: {
             value: false,
-            publish: onPublishDisabled(item),
+            publish: onIsPublish(item),
+            isExpired: onIsExpired(item),
           },
         }
       })
@@ -121,6 +145,8 @@ export default () => {
   return {
     selectItems,
     selectCount,
+    renewalCanNotPublishData,
+    renewalNotExpiredData,
     onApiPOSTRealEstateSearch,
     onApiPOSTRealEstateOffline,
     onApiPOSTRealEstateDeal,

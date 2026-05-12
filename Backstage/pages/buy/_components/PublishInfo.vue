@@ -31,10 +31,15 @@ onMounted(() => {
   <div class="flex items-center t:gap-x-[16px] p:gap-x-[24px]">
     <div class="order-2 grow t:gap-x-[16px] pt:flex pt:items-center p:gap-x-[24px]">
       <div class="m:space-y-[16px] pt:grow pt:space-y-[8px]">
-        <p class="text-[--gray-666]">
-          <b class="font-medium tracking-wider p:text-[18px]">{{ props.data.title }}</b>
+        <p class="text-[18px] tracking-wider text-[--gray-666]">
+          <b class="font-medium">{{ props.data.title }}</b>
         </p>
-        <Address :data="props.data" />
+        <Address
+          :data="props.data"
+          :setClass="{
+            main: 'text-[16px] text-[--gray-666]',
+          }"
+        />
       </div>
       <div class="m:text-center pt:shrink-0">
         <span class="text-[16px] text-[--gray-666]">

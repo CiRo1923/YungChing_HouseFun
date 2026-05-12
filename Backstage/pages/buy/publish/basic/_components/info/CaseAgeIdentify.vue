@@ -62,6 +62,7 @@ const onReset = () => {
             integer: true,
             maxlength: 3,
             isExistClose: false,
+            hasClearButton: false,
           }"
           :rules="{
             required: {
@@ -92,6 +93,7 @@ const onReset = () => {
                 integer: true,
                 maxlength: 3,
                 isExistClose: false,
+                hasClearButton: false,
               }"
               :rules="{
                 required: {
@@ -122,6 +124,7 @@ const onReset = () => {
                 integer: true,
                 maxlength: 2,
                 isExistClose: false,
+                hasClearButton: false,
               }"
               :rules="{
                 required: {

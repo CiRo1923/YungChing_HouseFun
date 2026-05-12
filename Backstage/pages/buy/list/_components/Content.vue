@@ -41,9 +41,9 @@ const props = defineProps({
 
 const hasFunEventsItem = computed(() => props.funEventsItem && props.funEventsItem.length !== 0)
 
-const onPopupPlans = async (data) => {
+const onPopupRenewal = async (data) => {
   return await onCustom({
-    id: 'popupPlans',
+    id: 'popupRenewal',
     title: '請選擇額度',
     data,
     icon: 'icon_quota',
@@ -68,7 +68,7 @@ const onPopupPlans = async (data) => {
 const onRenewalClick = async (objectData) => {
   onResetPojectData('renewal')
 
-  const isSure = await onPopupPlans(objectData)
+  const isSure = await onPopupRenewal(objectData)
 
   if (isSure) {
     onApiPromise('open')
@@ -101,99 +101,77 @@ const onRenewalClick = async (objectData) => {
 
 // 刊登
 const onPublishClick = async (objectData) => {
-  const invalidIds = new Set(
-    datas.value
-      .filter((item) => selectItems.value.includes(item.hfID) && item._checked.publish === false)
-      .map((item) => item.hfID)
-  )
-  const result =
-    objectData || selectCount.value === 1
-      ? {
-          value: true,
-          datas: objectData ? [objectData.hfID] : selectItems.value,
-        }
-      : {
-          value: invalidIds.size === 0,
-          datas: selectItems.value.filter((id) => !invalidIds.has(id)),
-        }
-  const onPublishSubmit = async () => {
-    onResetPojectData('renewal')
-    const isSure = await onPopupPlans(objectData)
+  const selectedIds = new Set(selectItems.value)
+  const selecedtFilterIDs = datas.value[0].caseOfflineInfo
+    ? datas.value
+        .filter(
+          (item) =>
+            selectedIds.has(item.hfID) &&
+            item.caseOfflineInfo.isAllowRestoreToOnline &&
+            item.caseOfflineInfo.isExpired
+        )
+        .map((item) => item.hfID)
+    : datas.value
+        .filter((item) => selectedIds.has(item.hfID) && item._checked.publish)
+        .map((item) => item.hfID)
 
-    if (isSure) {
-      onApiPromise('open')
+  console.log(selecedtFilterIDs)
+  onResetPojectData('renewal')
+  const isSure = await onPopupRenewal(objectData)
 
-      const hfIDs = objectData ? [objectData.hfID] : selectItems.value
-      const { status } = await onApiPOSTPublishSubmit(hfIDs)
-      if (objectData) {
-        await onApiGETPublishGetPublishResponse(objectData.hfID)
-      }
-      await new Promise((resolve) => {
-        emits('update', resolve)
-      })
+  if (isSure) {
+    onApiPromise('open')
 
-      onApiPromise('close')
-
-      if (status === 200) {
-        if (objectData || selectCount.value === 1) {
-          const isFinish = await onCustom({
-            id: 'popupFinish',
-            title: '物件刊登完成',
-            data: objectData,
-            icon: 'icon_check_solid',
-            btns: [
-              {
-                label: '返回',
-                class: '--border-gray-e5 --text-gray-666',
-                type: 'cancel',
-                isClose: true,
-              },
-              {
-                label: '前往刊登管理',
-                class: '--bg-green-6a2d --text-white',
-                type: 'sure',
-                isClose: true,
-              },
-            ],
-          })
-
-          if (isFinish) {
-            router.push({
-              name: 'buy-list-publish',
-              query: {
-                pg: 1,
-              },
-            })
-          }
-        } else {
-          onAlert({
-            title: '物件刊登完成',
-            icon: 'icon_check_solid',
-            content: '請確認物件是否已刊登',
-          })
-        }
-      }
+    const hfIDs = objectData ? [objectData.hfID] : selecedtFilterIDs
+    const { status } = await onApiPOSTPublishSubmit(hfIDs)
+    if (objectData) {
+      await onApiGETPublishGetPublishResponse(objectData.hfID)
     }
-  }
-
-  // 批次刊登中有未符合條件的告知使用者
-  if (!result.value) {
-    const isConfirm = await onConfirm({
-      title: '刊登提醒',
-      content:
-        '批次刊登時有無法達成刊登條件的物件<br / >是否自動取消未達成批次刊登的物件？<br />取消後請自行調整批次刊登物件',
-      setClass: {
-        main: 'p:--w-800 t:--w-600',
-      },
+    await new Promise((resolve) => {
+      emits('update', resolve)
     })
 
-    // 選擇確認 自動移除未符合的物件
-    if (isConfirm) {
-      onSyncCheckedDatas(result.datas)
-      onPublishSubmit()
+    onApiPromise('close')
+
+    if (status === 200) {
+      if (objectData || selectCount.value === 1) {
+        const isFinish = await onCustom({
+          id: 'popupFinish',
+          title: '物件刊登完成',
+          data: objectData,
+          icon: 'icon_check_solid',
+          btns: [
+            {
+              label: '返回',
+              class: '--border-gray-e5 --text-gray-666',
+              type: 'cancel',
+              isClose: true,
+            },
+            {
+              label: '前往刊登管理',
+              class: '--bg-green-6a2d --text-white',
+              type: 'sure',
+              isClose: true,
+            },
+          ],
+        })
+
+        if (isFinish) {
+          router.push({
+            name: 'buy-list-publish',
+            query: {
+              pg: 1,
+            },
+          })
+        }
+      } else {
+        onAlert({
+          title: '物件刊登完成',
+          icon: 'icon_check_solid',
+          content: '請確認物件是否已刊登',
+        })
+      }
     }
-  } else {
-    onPublishSubmit()
   }
 }
 

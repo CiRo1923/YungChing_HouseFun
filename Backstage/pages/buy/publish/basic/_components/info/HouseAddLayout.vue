@@ -51,6 +51,7 @@ const isError = computed(() => {
             integer: true,
             maxlength: 2,
             isExistClose: false,
+            hasClearButton: false,
             isDisabled: !apiData.caseInfo.isCaseAddtion,
             isError: isError,
           }"

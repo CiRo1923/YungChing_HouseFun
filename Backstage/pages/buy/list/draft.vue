@@ -5,7 +5,7 @@ import ItemsInfo from '@pages/buy/list/_components/ItemsInfo.vue'
 import TabDefaultOval from '@pages/buy/list/_components/TabDefaultOval.vue'
 import Content from '@pages/buy/list/_components/Content.vue'
 import DraftInfo from '@pages/buy/list/_components/item/DraftInfo.vue'
-import PopupPlans from '@pages/buy/list/_components/popup/Plans.vue'
+import PopupRenewal from '@pages/buy/list/_components/popup/Renewal.vue'
 import PopupFinish from '@pages/buy/list/_components/popup/Finish.vue'
 import PopupDeal from '@pages/buy/list/_components/popup/Deal.vue'
 
@@ -69,7 +69,7 @@ onUseMeta({
       <DraftInfo :data="item" @click:publish="publishFun" class="m:mt-[24px]" />
     </Content>
   </BuyMContainer>
-  <PopupPlans />
+  <PopupRenewal />
   <PopupFinish />
   <PopupDeal />
   <popupGolden />

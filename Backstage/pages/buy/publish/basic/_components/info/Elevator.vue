@@ -51,6 +51,7 @@ const onIsCaseHasElevatorChnage = () => {
             integer: true,
             maxlength: 3,
             isExistClose: false,
+            hasClearButton: false,
             isDisabled: !apiData.caseInfo.isCaseHasElevator,
           }"
           :rules="{

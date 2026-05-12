@@ -85,12 +85,22 @@ onMounted(() => {
             />
             <em v-else>{{ props.data.caseTitle }}</em>
           </h3>
+          <!-- <pre>
+            {{ props.data.caseOfflineInfo }}
+
+          </pre> -->
+          <!-- {{ props.data._checked }} -->
         </header>
         <div class="m:mb-[8px] pt:mb-[4px] pt:flex pt:items-center">
           <span class="text-[18px] text-[--orange-e646] pt:order-2 pt:shrink-0">
             {{ numberComma.add(props.data.casePrice) }} 萬
           </span>
-          <Address :data="addressData" />
+          <Address
+            :data="addressData"
+            :setClass="{
+              main: 'text-[14px] text-[--gray-666] pt:order-1',
+            }"
+          />
         </div>
         <Information :data="props.data" />
         <div class="m:mt-[8px] pt:flex pt:items-center p:mt-[20px]">

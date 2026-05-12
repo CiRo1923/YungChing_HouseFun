@@ -5,7 +5,7 @@ import ItemsInfo from '@pages/buy/list/_components/ItemsInfo.vue'
 import TabDefaultOval from '@pages/buy/list/_components/TabDefaultOval.vue'
 import Content from '@pages/buy/list/_components/Content.vue'
 import Setting from '@pages/buy/list/_components/item/Setting.vue'
-import PopupPlans from '@pages/buy/list/_components/popup/Plans.vue'
+import PopupRenewal from '@pages/buy/list/_components/popup/Renewal.vue'
 import PopupOffline from '@pages/buy/list/_components/popup/Offline.vue'
 import PopupDeal from '@pages/buy/list/_components/popup/Deal.vue'
 
@@ -74,7 +74,7 @@ onUseMeta({
       />
     </Content>
   </BuyMContainer>
-  <PopupPlans />
+  <PopupRenewal />
   <PopupOffline />
   <PopupDeal />
   <popupGolden />

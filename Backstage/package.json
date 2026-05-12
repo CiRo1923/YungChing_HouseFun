@@ -46,9 +46,6 @@
   "overrides": {
     "@rollup/plugin-terser": "1.0.0",
     "braces": "^3.0.3",
-    "engines": {
-      "node": "20.x"
-    },
     "koa": "^2.16.4",
     "minimatch": "10.2.3"
   }
