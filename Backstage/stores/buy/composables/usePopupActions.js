@@ -21,17 +21,13 @@ export default () => {
     const buttons = buyPopupStore.buttons.alert
     const setClass = buyPopupStore.setClass.alert
 
-    console.log('onAlert')
-    console.log(data.btns)
-    console.log(onDeepMerge(buttons, data.btns))
-
     alertData.value.id = 'alertSystem'
     alertData.value.title = data.title
     alertData.value.icon = data.icon || 'icon_circle_exclamation'
     alertData.value.content = data.content
     alertData.value.btns = onDeepMerge(buttons, data.btns)
     alertData.value.hasExistClose = data.hasExistClose !== undefined ? data.hasExistClose : true
-    alertData.value.setClass = data.setClass || setClass
+    alertData.value.setClass = onDeepMerge(setClass, data.setClass) || setClass
 
     onBodyOverflowHiddenToggle(true)
 
@@ -61,7 +57,7 @@ export default () => {
     confirmData.value.content = data.content
     confirmData.value.btns = onMergeBtns(buttons, data.btns)
     confirmData.value.hasExistClose = data.hasExistClose !== undefined ? data.hasExistClose : true
-    confirmData.value.setClass = data.setClass || setClass
+    confirmData.value.setClass = onDeepMerge(setClass, data.setClass) || setClass
 
     onBodyOverflowHiddenToggle(true)
 

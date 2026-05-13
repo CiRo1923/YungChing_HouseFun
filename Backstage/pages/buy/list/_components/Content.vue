@@ -11,19 +11,15 @@ const {
   onApiPOSTPublishRenewal,
   onResetPojectData,
   onApiPOSTPublishSubmit,
+  onApiPOSTRealEstateRestoreToOnline,
   onApiGETPublishGetPublishResponse,
   onGoldenPopup,
 } = useBuyProjectActions()
 const buyList = useBuyListStore()
 const { datas, pagination } = storeToRefs(buyList)
-const {
-  selectItems,
-  selectCount,
-  onApiPOSTRealEstateOffline,
-  onApiPOSTRealEstateDeal,
-  onSyncCheckedDatas,
-} = useBuyListActions()
-const { onAlert, onConfirm, onCustom, onApiPromise } = useBuyPopupActions()
+const { selectItems, selectCount, onApiPOSTRealEstateOffline, onApiPOSTRealEstateDeal } =
+  useBuyListActions()
+const { onAlert, onCustom, onApiPromise } = useBuyPopupActions()
 const route = useRoute()
 const router = useRouter()
 
@@ -102,77 +98,99 @@ const onRenewalClick = async (objectData) => {
 // 刊登
 const onPublishClick = async (objectData) => {
   const selectedIds = new Set(selectItems.value)
-  const selecedtFilterIDs = datas.value[0].caseOfflineInfo
-    ? datas.value
-        .filter(
-          (item) =>
-            selectedIds.has(item.hfID) &&
-            item.caseOfflineInfo.isAllowRestoreToOnline &&
-            item.caseOfflineInfo.isExpired
-        )
-        .map((item) => item.hfID)
-    : datas.value
-        .filter((item) => selectedIds.has(item.hfID) && item._checked.publish)
-        .map((item) => item.hfID)
+  const hasOfflineInfo = !!datas.value[0]?.caseOfflineInfo
+  const onSelectedPublishItems = () => {
+    if (objectData) return [objectData]
 
-  console.log(selecedtFilterIDs)
+    return datas.value.filter((item) => selectedIds.has(item.hfID) && item._checked.publish)
+  }
+  const selectedPublishItems = onSelectedPublishItems()
+
+  const renewalIDs = selectedPublishItems
+    .filter((item) => !hasOfflineInfo || item._checked.isExpired)
+    .map((item) => item.hfID)
+
+  const onlineIDs = hasOfflineInfo
+    ? selectedPublishItems
+        .filter((item) => objectData || !item._checked.isExpired)
+        .map((item) => item.hfID)
+    : []
+
   onResetPojectData('renewal')
   const isSure = await onPopupRenewal(objectData)
 
-  if (isSure) {
-    onApiPromise('open')
+  if (!isSure) return
 
-    const hfIDs = objectData ? [objectData.hfID] : selecedtFilterIDs
-    const { status } = await onApiPOSTPublishSubmit(hfIDs)
+  onApiPromise('open')
+
+  let isSuccess = false
+  try {
+    const apiTasks = []
+
+    if (renewalIDs.length) {
+      apiTasks.push(onApiPOSTPublishSubmit(renewalIDs))
+    }
+
+    if (onlineIDs.length) {
+      apiTasks.push(onApiPOSTRealEstateRestoreToOnline(onlineIDs))
+    }
+
+    const results = await Promise.all(apiTasks)
+
+    isSuccess = results.every(({ status }) => status === 200)
+
     if (objectData) {
       await onApiGETPublishGetPublishResponse(objectData.hfID)
     }
+
     await new Promise((resolve) => {
       emits('update', resolve)
     })
-
+  } finally {
     onApiPromise('close')
-
-    if (status === 200) {
-      if (objectData || selectCount.value === 1) {
-        const isFinish = await onCustom({
-          id: 'popupFinish',
-          title: '物件刊登完成',
-          data: objectData,
-          icon: 'icon_check_solid',
-          btns: [
-            {
-              label: '返回',
-              class: '--border-gray-e5 --text-gray-666',
-              type: 'cancel',
-              isClose: true,
-            },
-            {
-              label: '前往刊登管理',
-              class: '--bg-green-6a2d --text-white',
-              type: 'sure',
-              isClose: true,
-            },
-          ],
-        })
-
-        if (isFinish) {
-          router.push({
-            name: 'buy-list-publish',
-            query: {
-              pg: 1,
-            },
-          })
-        }
-      } else {
-        onAlert({
-          title: '物件刊登完成',
-          icon: 'icon_check_solid',
-          content: '請確認物件是否已刊登',
-        })
-      }
-    }
   }
+
+  if (!isSuccess) return
+
+  if (objectData || selectCount.value === 1) {
+    const isFinish = await onCustom({
+      id: 'popupFinish',
+      title: '物件刊登完成',
+      data: objectData,
+      icon: 'icon_check_solid',
+      btns: [
+        {
+          label: '返回',
+          class: '--border-gray-e5 --text-gray-666',
+          type: 'cancel',
+          isClose: true,
+        },
+        {
+          label: '前往刊登管理',
+          class: '--bg-green-6a2d --text-white',
+          type: 'sure',
+          isClose: true,
+        },
+      ],
+    })
+
+    if (isFinish) {
+      router.push({
+        name: 'buy-list-publish',
+        query: {
+          pg: 1,
+        },
+      })
+    }
+
+    return
+  }
+
+  onAlert({
+    title: '物件刊登完成',
+    icon: 'icon_check_solid',
+    content: '請確認物件是否已刊登',
+  })
 }
 
 // 下架

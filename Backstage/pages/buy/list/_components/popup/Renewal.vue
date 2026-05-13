@@ -57,10 +57,12 @@ const count = computed(() =>
 )
 
 const onSure = async () => {
-  const validate = async () => await formRef.value?.validate?.()
-  const { valid } = await validate()
+  if (formRef.value) {
+    const validate = async () => await formRef.value?.validate?.()
+    const { valid } = await validate()
 
-  if (!valid) return
+    if (!valid) return
+  }
 
   // 驗證通過才真正 resolve + close
   customCheck.value(true)

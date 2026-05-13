@@ -23,8 +23,7 @@ const toPOJOHeaders = (headers) => (headers ? Object.fromEntries(headers.entries
 
 const isPlainObject = (v) => v != null && Object.prototype.toString.call(v) === '[object Object]'
 
-const isBlobLike = (v) =>
-  typeof Blob !== 'undefined' && v instanceof Blob
+const isBlobLike = (v) => typeof Blob !== 'undefined' && v instanceof Blob
 
 const appendFormValue = (formData, key, value) => {
   if (value == null) return

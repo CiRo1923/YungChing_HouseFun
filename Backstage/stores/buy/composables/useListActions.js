@@ -68,15 +68,15 @@ export default () => {
       }
       const onIsExpired = (item) => {
         const offlineInfo = item.caseOfflineInfo
-        // const draftInfo = item.caseDraftInfo
+        const draftInfo = item.caseDraftInfo
 
         if (offlineInfo) {
           return offlineInfo.isAllowRestoreToOnline && offlineInfo.isExpired
         }
 
-        // if (draftInfo) {
-        //   return draftInfo.isReadToPublish
-        // }
+        if (draftInfo) {
+          return draftInfo.isReadToPublish && draftInfo.isExpired
+        }
 
         return true
       }

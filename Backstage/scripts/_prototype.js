@@ -85,48 +85,64 @@ export const onDeepClone = (obj, callback) => {
 
 // 深度合併
 export const onDeepMerge = (target, ...sources) => {
-  if (!sources.length) return target
-  const source = sources.shift()
   const isObject = (item) => {
     return item && typeof item === 'object' && !Array.isArray(item)
   }
-  const isShallow = (item) => {
-    return !(Array.isArray(item) && item.find((item) => typeof item === 'object'))
+  const getArrayMergeKey = (item) => {
+    if (!isObject(item)) return null
+
+    const keys = ['type', 'id', 'key', 'name']
+    const key = keys.find((key) => item[key] !== undefined && item[key] !== null)
+
+    return key ? `${key}:${item[key]}` : null
   }
-  const isDeepArray = (item) => {
-    return Array.isArray(item) && item.find((item) => typeof item === 'object')
-  }
+  const mergeArray = (target, source) => {
+    const result = []
+    const usedIndex = []
 
-  if (Array.isArray(target) && Array.isArray(source)) {
-    target = isDeepArray(source)
-      ? source.map((item, index) => onDeepMerge(onDeepClone(target[index] || item), item))
-      : source
-  } else if (isObject(target) && isObject(source)) {
-    for (const key in source) {
-      if (isObject(source[key])) {
-        // console.log(key)
-        // console.log(source[key])
-        // console.log(target[key])
-        // console.log('------------------')
-
-        if (!target[key]) Object.assign(target, { [key]: {} })
-        // Object.assign(target, { [key]: source[key].map((item, index) => onDeepMerge(target[key][index] || item, item)) });
-
-        onDeepMerge(target[key], source[key])
-      } else {
-        if (isShallow(source[key])) {
-          Object.assign(target, { [key]: source[key] })
-        } else {
-          if (!target[key]) Object.assign(target, { [key]: [] })
-          Object.assign(target, {
-            [key]: source[key].map((item, index) => onDeepMerge(target[key][index] || item, item)),
+    for (let i = 0; i < source.length; i += 1) {
+      const item = source[i]
+      const mergeKey = getArrayMergeKey(item)
+      const targetIndex = mergeKey
+        ? target.findIndex((targetItem, index) => {
+            return !usedIndex.includes(index) && getArrayMergeKey(targetItem) === mergeKey
           })
-        }
+        : i
+      const targetItem = targetIndex > -1 ? target[targetIndex] : undefined
+
+      if (targetIndex > -1) {
+        usedIndex.push(targetIndex)
+      }
+
+      result.push(merge(targetItem, item))
+    }
+
+    for (let i = 0; i < target.length; i += 1) {
+      if (!usedIndex.includes(i)) {
+        result.push(onDeepClone(target[i]))
       }
     }
+
+    return result
+  }
+  const merge = (target, source) => {
+    if (source === undefined) return onDeepClone(target)
+    if (Array.isArray(target) && Array.isArray(source)) return mergeArray(target, source)
+
+    if (isObject(target) && isObject(source)) {
+      const result = onDeepClone(target)
+
+      for (const key in source) {
+        result[key] = merge(result[key], source[key])
+      }
+
+      return result
+    }
+
+    return onDeepClone(source)
   }
 
-  return onDeepMerge(target, ...sources)
+  return sources.reduce((result, source) => merge(result, source), onDeepClone(target))
 }
 
 // 清空物件資料

@@ -203,10 +203,11 @@ export const useBuyPublishStore = defineStore('buyPublish', () => {
     maxCount: 25,
   })
   const statusMap = readonly({
-    1: 'buy-list-draft', // 草稿
-    2: 'buy-list-publish', // 刊登
+    1: 'buy-list-publish', // 刊登
+    2: 'buy-list-draft', // 草稿
+    3: 'buy-list-deal', // 成交
     4: 'buy-list-offline', // 下架
-    6: 'buy-list-draft', // 草稿
+    6: 'buy-list-draft', // 草稿 (待刊登)
   })
 
   return {

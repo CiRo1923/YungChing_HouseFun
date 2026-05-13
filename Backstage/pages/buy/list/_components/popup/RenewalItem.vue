@@ -38,7 +38,7 @@ const setClass = computed(() => {
 <template>
   <div :class="setClass.main">
     <p class="text-[16px] tracking-wider">
-      <b class="font-medium">{{ props.data.caseTitle }}</b> / {{ props.data.hfID }}
+      <b class="font-medium">{{ props.data.caseTitle }}</b>
     </p>
     <div class="flex items-center">
       <Address

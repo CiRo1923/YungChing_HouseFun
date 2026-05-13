@@ -14,7 +14,7 @@ import SubmitButtons from '@pages/buy/publish/basic/_containers/SubmitButtons.vu
 import useCommonActions from '@stores/composables/useCommonActions.js'
 import { useBuyProjectStore } from '@stores/buy/project.js'
 // import { useBuyPublishStore } from '@stores/buy/publish.js'
-import useBuyPublishActions from '~/stores/buy/composables/usePublishActions.js'
+import useBuyPublishActions from '@stores/buy/composables/usePublishActions.js'
 import useBuyPopupActions from '@stores/buy/composables/usePopupActions.js'
 
 import { Form } from 'vee-validate'

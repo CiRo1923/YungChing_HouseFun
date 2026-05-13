@@ -14,7 +14,8 @@ import SubmitButtons from '@pages/buy/publish/basic/_containers/SubmitButtons.vu
 import useCommonActions from '@stores/composables/useCommonActions.js'
 import { useBuyProjectStore } from '@stores/buy/project.js'
 import { useBuyPublishStore } from '@stores/buy/publish.js'
-import useBuyPublishActions from '~/stores/buy/composables/usePublishActions.js'
+import useBuyProjectActions from '@stores/buy/composables/useProjectActions.js'
+import useBuyPublishActions from '@stores/buy/composables/usePublishActions.js'
 import useBuyPopupActions from '@stores/buy/composables/usePopupActions.js'
 
 import { Form } from 'vee-validate'
@@ -28,8 +29,10 @@ definePageMeta({
 // const common = useCommonStore()
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
 const buyProject = useBuyProjectStore()
+const { onApiPOSTRealEstateRestoreToOnline } = useBuyProjectActions()
 const buyPublish = useBuyPublishStore()
 const { statusData } = storeToRefs(buyPublish)
+
 const {
   onAllPromise,
   onApiGERealEstateCaseStatus,
@@ -37,36 +40,113 @@ const {
   onApiPOSTRealEstateDraft,
   onApiPOSTRealEstate,
 } = useBuyPublishActions()
-const { onAlert } = useBuyPopupActions()
+const { onAlert, onConfirm, onApiPromise } = useBuyPopupActions()
 const route = useRoute()
 const router = useRouter()
 const hfID = computed(() => route.params.id)
 
-const onDraftSubmit = async () => {
-  await onApiPOSTRealEstateDraft(hfID.value)
+const onAlertSuccess = async (content) => {
+  return await onAlert({
+    title: '刊登物件',
+    icon: 'icon_check_solid',
+    content,
+    setClass: {
+      icon: 'text-[--orange-e646]',
+      content: 'text-[--gray-666] tracking-wider',
+    },
+  })
 }
 
-const onSaveSubmit = async (validate) => {
+const onDraft = async () => {
+  onApiPromise('close')
+
+  const { status } = await onApiPOSTRealEstateDraft(hfID.value)
+
+  onApiPromise('close')
+
+  if (status === 200) {
+    await onAlertSuccess('儲存草稿成功')
+  }
+}
+
+const onSave = async (validate) => {
   const { valid } = await validate()
 
   if (valid) {
+    onApiPromise('close')
+
     const { status } = await onApiPOSTRealEstate(hfID.value)
 
+    onApiPromise('close')
+
     if (status === 200) {
-      const isAlert = await onAlert({
-        content: '儲存成功',
-      })
+      await onAlertSuccess('儲存成功')
+    }
+  }
+}
 
-      if (isAlert) {
-        const routeName = statusData.value?.isExpired
-          ? 'buy-publish-renewal-id'
-          : 'buy-publish-finish-id'
+const onRenewal = async (validate) => {
+  const { isExpired, caseStatus } = statusData.value || {}
 
+  if (isExpired) {
+    const { valid } = await validate()
+
+    if (valid) {
+      onApiPromise('open')
+
+      const { status } = await onApiPOSTRealEstate(hfID.value)
+
+      onApiPromise('close')
+
+      if (status === 200) {
+        const isAlert = await onAlertSuccess('儲存成功')
+
+        if (isAlert) {
+          router.push({
+            name: 'buy-publish-renewal-id',
+            params: {
+              id: hfID.value,
+            },
+          })
+        }
+      }
+    }
+  } else {
+    const isConfirm = await onConfirm({
+      title: '刊登物件',
+      icon: 'icon_check_solid',
+      content: '物件仍在刊登效期內，無需使用刊登額度<br />確定要刊登物件嗎？',
+      btns: [
+        {
+          label: '返回',
+          class: '--border-gray-e5 --text-gray-666',
+          type: 'cancel',
+          isClose: true,
+        },
+        {
+          label: '確定刊登',
+          class: '--bg-green-6a2d --text-white',
+          type: 'sure',
+          isClose: true,
+        },
+      ],
+      setClass: {
+        icon: 'text-[--orange-e646]',
+        content: 'text-[--gray-666] tracking-wider',
+      },
+    })
+
+    if (isConfirm && caseStatus === 4) {
+      onApiPromise('open')
+
+      const { status } = await onApiPOSTRealEstateRestoreToOnline([hfID.value])
+
+      onApiPromise('close')
+
+      if (status === 200) {
         router.push({
-          name: routeName,
-          params: {
-            id: hfID.value,
-          },
+          name: 'buy-publish-finish-id',
+          params: route.params,
         })
       }
     }
@@ -123,7 +203,11 @@ onUseMeta({
     >
       <!-- <pre>{{ apiData }}</pre> -->
       <DataComponents />
-      <SubmitButtons @click:draft="onDraftSubmit" @click:save="() => onSaveSubmit(validate)" />
+      <SubmitButtons
+        @click:draft="onDraft"
+        @click:save="() => onSave(validate)"
+        @click:renewal="() => onRenewal(validate)"
+      />
     </Form>
   </BuyMContainer>
   <PopupAddressGoogleMap />

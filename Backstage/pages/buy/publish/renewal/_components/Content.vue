@@ -19,9 +19,9 @@ const publishInfo = computed(() => {
     pucURLCover: 'cover',
   }
 
-  return renewal.data.value
+  return renewal.value.data
     ? Object.fromEntries(
-        Object.entries(renewal.data.value)
+        Object.entries(renewal.value.data)
           .filter(([key]) => keyMap[key])
           .map(([key, value]) => [keyMap[key], value])
       )
