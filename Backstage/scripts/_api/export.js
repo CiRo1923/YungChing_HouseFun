@@ -118,6 +118,24 @@ const parseResponseData = async (response) => {
   return response.text()
 }
 
+const isJsonResponse = (response) => {
+  const contentType = response.headers.get('content-type') || ''
+
+  return contentType.includes('application/json')
+}
+
+const shouldReceiveJson = (headers = {}) => {
+  const accept = headers.Accept || headers.accept || ''
+
+  return accept.includes('application/json')
+}
+
+const createResponseStatusData = (message) => ({
+  responseStatus: {
+    message,
+  },
+})
+
 const createSafeConfig = (method, baseURL, url, opts = {}) => ({
   method,
   baseURL,
@@ -141,6 +159,7 @@ const createRequestOptions = (method, data, usedKeys, isFormRequest) => {
   }
 
   const hasRest = Object.keys(rest).length > 0
+
   const opts = {
     method: method.toUpperCase(),
     query: undefined,
@@ -172,49 +191,122 @@ const createRequestOptions = (method, data, usedKeys, isFormRequest) => {
   return opts
 }
 
+const createInterceptorManager = () => {
+  const handlers = []
+
+  return {
+    use(onFulfilled, onRejected) {
+      handlers.push({
+        onFulfilled,
+        onRejected,
+      })
+
+      return handlers.length - 1
+    },
+
+    eject(id) {
+      if (handlers[id]) {
+        handlers[id] = null
+      }
+    },
+
+    async runFulfilled(value) {
+      let result = value
+
+      for (const handler of handlers) {
+        if (!handler?.onFulfilled) continue
+        result = await handler.onFulfilled(result)
+      }
+
+      return result
+    },
+
+    async runRejected(error) {
+      let result = error
+
+      for (const handler of handlers) {
+        if (!handler?.onRejected) continue
+        result = await handler.onRejected(result)
+      }
+
+      return result
+    },
+  }
+}
+
+const createErrorResponse = ({
+  status,
+  statusCode,
+  statusText,
+  headers,
+  config,
+  data,
+  message,
+}) => ({
+  status,
+  statusCode: statusCode ?? status,
+  statusText,
+  headers: headers ?? {},
+  config,
+  data,
+  message,
+  isError: true,
+})
+
 export const onFetchApi = (globalConfig = {}) => {
   const { baseURL, headers, fetcher = fetch } = globalConfig
 
+  const interceptors = {
+    request: createInterceptorManager(),
+    response: createInterceptorManager(),
+  }
+
   const executeFetchApi = async (method, path, data, requestConfig = {}) => {
-    if (!isFetchMethod(method)) {
-      throw new Error(`[onFetchApi] invalid method: ${method}`)
-    }
-
-    if (!path) {
-      throw new Error('[onFetchApi] path is required')
-    }
-
-    const rawMethod = method.toLowerCase()
-    const fetchMethod = FORM_METHOD_MAP[rawMethod] ?? rawMethod
-    const isFormRequest = rawMethod in FORM_METHOD_MAP
-
-    const finalBaseURL = requestConfig.baseURL ?? (await resolveValue(baseURL))
-
-    if (!finalBaseURL) {
-      throw new Error('[onFetchApi] baseURL is required')
-    }
-
-    const globalHeaders = await resolveValue(headers)
-    const localHeaders = await resolveValue(requestConfig.headers)
-
-    const { url: urlPath, usedKeys } = onReplacePathParams(path, data)
-
-    const reqPath = urlPath.startsWith('/') ? urlPath : `/${urlPath}`
-
-    const opts = createRequestOptions(fetchMethod, data, usedKeys, isFormRequest)
-
-    const queryString = opts.query ? buildQueryString(opts.query) : ''
-    const requestURL = `${joinURL(finalBaseURL, reqPath)}${queryString}`
-
-    const safeConfig = createSafeConfig(fetchMethod, finalBaseURL, reqPath, {
-      query: opts.query,
-      body: opts.safeBody,
-    })
+    let safeConfig
 
     try {
-      const response = await fetcher(requestURL, {
+      if (!isFetchMethod(method)) {
+        throw new Error(`[onFetchApi] invalid method: ${method}`)
+      }
+
+      if (!path) {
+        throw new Error('[onFetchApi] path is required')
+      }
+
+      const rawMethod = method.toLowerCase()
+      const fetchMethod = FORM_METHOD_MAP[rawMethod] ?? rawMethod
+      const isFormRequest = rawMethod in FORM_METHOD_MAP
+
+      const finalBaseURL = requestConfig.baseURL ?? (await resolveValue(baseURL))
+
+      if (!finalBaseURL) {
+        throw new Error('[onFetchApi] baseURL is required')
+      }
+
+      const globalHeaders = await resolveValue(headers)
+      const localHeaders = await resolveValue(requestConfig.headers)
+
+      const { url: urlPath, usedKeys } = onReplacePathParams(path, data)
+
+      const reqPath = urlPath.startsWith('/') ? urlPath : `/${urlPath}`
+
+      const opts = createRequestOptions(fetchMethod, data, usedKeys, isFormRequest)
+
+      const queryString = opts.query ? buildQueryString(opts.query) : ''
+      const requestURL = `${joinURL(finalBaseURL, reqPath)}${queryString}`
+
+      safeConfig = createSafeConfig(fetchMethod, finalBaseURL, reqPath, {
+        query: opts.query,
+        body: opts.safeBody,
+      })
+
+      let fetchConfig = {
         method: opts.method,
+        url: requestURL,
+        baseURL: finalBaseURL,
+        path: reqPath,
         headers: {
+          Accept: 'application/json',
           ...opts.headers,
           ...globalHeaders,
           ...localHeaders,
@@ -222,21 +314,73 @@ export const onFetchApi = (globalConfig = {}) => {
         body: opts.body,
         signal: requestConfig.signal,
         credentials: requestConfig.credentials,
+        config: safeConfig,
+      }
+
+      fetchConfig = await interceptors.request.runFulfilled(fetchConfig)
+
+      const response = await fetcher(fetchConfig.url, {
+        method: fetchConfig.method,
+        headers: fetchConfig.headers,
+        body: fetchConfig.body,
+        signal: fetchConfig.signal,
+        credentials: fetchConfig.credentials,
       })
 
       const resData = await parseResponseData(response)
+      const isInvalidJsonResponse =
+        response.ok &&
+        response.status !== 204 &&
+        shouldReceiveJson(fetchConfig.headers) &&
+        !isJsonResponse(response)
 
-      return {
+      if (!response.ok || isInvalidJsonResponse) {
+        const status = isInvalidJsonResponse ? 404 : response.status
+        const statusText = isInvalidJsonResponse ? 'Invalid JSON response' : response.statusText
+        const data = isInvalidJsonResponse
+          ? createResponseStatusData('Invalid JSON response')
+          : resData
+        let errorResponse = createErrorResponse({
+          status,
+          statusCode: status,
+          statusText,
+          headers: toPOJOHeaders(response.headers),
+          config: fetchConfig.config ?? safeConfig,
+          data,
+          message: statusText || 'Fetch error',
+        })
+
+        errorResponse = await interceptors.response.runRejected(errorResponse)
+
+        return errorResponse
+      }
+
+      let result = {
         status: response.status,
         statusText: response.statusText,
         headers: toPOJOHeaders(response.headers),
-        config: safeConfig,
+        config: fetchConfig.config ?? safeConfig,
         data: resData,
+        isError: false,
       }
+
+      result = await interceptors.response.runFulfilled(result)
+
+      return result
     } catch (error) {
-      const e = new Error(error?.message || 'Fetch error')
-      e.config = safeConfig
-      throw e
+      let errorResponse = createErrorResponse({
+        status: error?.status,
+        statusCode: error?.statusCode,
+        statusText: error?.statusText || error?.message,
+        headers: error?.headers,
+        config: error?.config ?? safeConfig,
+        data: error?.data,
+        message: error?.message || 'Fetch error',
+      })
+
+      errorResponse = await interceptors.response.runRejected(errorResponse)
+
+      return errorResponse
     }
   }
 
@@ -253,6 +397,8 @@ export const onFetchApi = (globalConfig = {}) => {
   for (const method of FETCH_METHODS) {
     api[method] = (path, data, config) => executeFetchApi(method, path, data, config)
   }
+
+  api.interceptors = interceptors
 
   return api
 }
