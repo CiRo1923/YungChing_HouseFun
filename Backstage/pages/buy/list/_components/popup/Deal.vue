@@ -5,8 +5,8 @@ import PublishInfo from '@pages/buy/_components/PublishInfo.vue'
 import DealInfo from '@pages/buy/_components/DealInfo.vue'
 
 import { usePopupStore } from '@stores/popup.js'
-import useBuyListActions from '@stores/buy/composables/useListActions.js'
-import useBuyPopupActions from '@stores/buy/composables/usePopupActions.js'
+import useBuyListActions from '@stores/buy/.composables/useListActions.js'
+import useBuyPopupActions from '@stores/buy/.composables/usePopupActions.js'
 
 import { Form } from 'vee-validate'
 

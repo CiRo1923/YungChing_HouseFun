@@ -11,7 +11,7 @@ import CardFilter from '@pages/buy/publish/basic/_containers/CardFilter.vue'
 
 // import { useBuyPublishStore } from '@stores/buy/publish.js'
 
-import useBuyPopupActions from '@stores/buy/composables/usePopupActions.js'
+import useBuyPopupActions from '@stores/buy/.composables/usePopupActions.js'
 
 const { onCustom } = useBuyPopupActions()
 // const buyPublish = useBuyPublishStore()

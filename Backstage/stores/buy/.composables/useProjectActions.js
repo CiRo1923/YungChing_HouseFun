@@ -39,7 +39,7 @@ import {
 
 import { useBuyProjectStore } from '@stores/buy/project.js'
 
-import useBuyPopupActions from '@stores/buy/composables/usePopupActions.js'
+import useBuyPopupActions from '@stores/buy/.composables/usePopupActions.js'
 
 export default () => {
   const projectStores = useBuyProjectStore()

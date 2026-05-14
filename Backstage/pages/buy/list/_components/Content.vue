@@ -3,9 +3,9 @@ import Functions from '@pages/buy/list/_components/functions/Main.vue'
 import Item from '@pages/buy/list/_components/item/Main.vue'
 
 import { useBuyListStore } from '@stores/buy/list.js'
-import useBuyProjectActions from '@stores/buy/composables/useProjectActions.js'
-import useBuyListActions from '@stores/buy/composables/useListActions.js'
-import useBuyPopupActions from '@stores/buy/composables/usePopupActions.js'
+import useBuyProjectActions from '@stores/buy/.composables/useProjectActions.js'
+import useBuyListActions from '@stores/buy/.composables/useListActions.js'
+import useBuyPopupActions from '@stores/buy/.composables/usePopupActions.js'
 
 const {
   onApiPOSTPublishRenewal,

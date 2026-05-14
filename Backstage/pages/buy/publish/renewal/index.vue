@@ -1,6 +1,6 @@
 <script setup>
 // import { useCommonStore } from '@stores/common.js'
-import useCommonActions from '@stores/composables/useCommonActions.js'
+import useCommonActions from '@stores/.composables/useCommonActions.js'
 
 // const common = useCommonStore()
 const { onWithLoadingAll } = useCommonActions()

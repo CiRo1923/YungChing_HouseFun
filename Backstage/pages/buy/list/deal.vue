@@ -6,8 +6,8 @@ import DealInfo from '@pages/buy/list/_components/item/DealInfo.vue'
 import PopupDeal from '@pages/buy/list/_components/popup/Deal.vue'
 
 import { useBuyProjectStore } from '@stores/buy/project.js'
-import useCommonActions from '@stores/composables/useCommonActions.js'
-import useBuyListActions from '@stores/buy/composables/useListActions.js'
+import useCommonActions from '@stores/.composables/useCommonActions.js'
+import useBuyListActions from '@stores/buy/.composables/useListActions.js'
 
 definePageMeta({
   layout: 'buy',

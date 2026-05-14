@@ -7,7 +7,7 @@ import Events from '@pages/buy/list/_components/item/Events.vue'
 import { numberComma } from '@js/_prototype.js'
 
 import { useCommonStore } from '@stores/common.js'
-import useCommonActions from '@stores/composables/useCommonActions.js'
+import useCommonActions from '@stores/.composables/useCommonActions.js'
 
 const common = useCommonStore()
 const { device } = storeToRefs(common)

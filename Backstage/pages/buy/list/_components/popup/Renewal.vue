@@ -9,8 +9,8 @@ import RenewalItem from '@pages/buy/list/_components/popup/RenewalItem.vue'
 // import { useBuyProjectStore } from '@stores/buy/project.js'
 // import { useBuyListStore } from '@stores/buy/list.js'
 import { usePopupStore } from '@stores/popup.js'
-import useBuyListActions from '@stores/buy/composables/useListActions.js'
-import useBuyPopupActions from '@stores/buy/composables/usePopupActions.js'
+import useBuyListActions from '@stores/buy/.composables/useListActions.js'
+import useBuyPopupActions from '@stores/buy/.composables/usePopupActions.js'
 
 import { Form } from 'vee-validate'
 

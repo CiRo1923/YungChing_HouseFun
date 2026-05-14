@@ -6,8 +6,8 @@ import {
 
 // import { useBuyProjectStore } from '@stores/buy/project.js'
 import { useBuyListStore } from '@stores/buy/list.js'
-import useBuyProjectActions from '@stores/buy/composables/useProjectActions.js'
-import useBuyPopupActions from '@stores/buy/composables/usePopupActions.js'
+import useBuyProjectActions from '@stores/buy/.composables/useProjectActions.js'
+import useBuyPopupActions from '@stores/buy/.composables/usePopupActions.js'
 
 export default () => {
   // const buyProject = useBuyProjectStore()

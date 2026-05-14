@@ -7,7 +7,7 @@ import CaseFeatureCustomize from '@pages/buy/publish/basic/_components/feature/C
 import CardFilter from '@pages/buy/publish/basic/_containers/CardFilter.vue'
 
 import { useCommonStore } from '@stores/common.js'
-import useCommonActions from '@stores/composables/useCommonActions.js'
+import useCommonActions from '@stores/.composables/useCommonActions.js'
 
 const common = useCommonStore()
 const { device } = storeToRefs(common)

@@ -1,5 +1,5 @@
 <script setup>
-import useBuyListActions from '@stores/buy/composables/useListActions.js'
+import useBuyListActions from '@stores/buy/.composables/useListActions.js'
 
 const { selectCount } = useBuyListActions()
 </script>

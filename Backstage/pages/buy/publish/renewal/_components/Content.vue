@@ -5,7 +5,7 @@ import RenewalInfo from '@pages/buy/_components/RenewalInfo.vue'
 import LabelText from '@pages/buy/publish/_components/LabelText.vue'
 
 import { useBuyProjectStore } from '@stores/buy/project.js'
-import useBuyProjectActions from '@stores/buy/composables/useProjectActions.js'
+import useBuyProjectActions from '@stores/buy/.composables/useProjectActions.js'
 
 const buyProject = useBuyProjectStore()
 const { renewal } = storeToRefs(buyProject)

@@ -1,6 +1,6 @@
 <script setup>
 import CustomPopup from '@containers/buy/common/CustomPopup.vue'
-import useBuyPublishActions from '@stores/buy/composables/usePublishActions.js'
+import useBuyPublishActions from '@stores/buy/.composables/usePublishActions.js'
 
 const { onAddress } = useBuyPublishActions()
 const addressData = ref(null)

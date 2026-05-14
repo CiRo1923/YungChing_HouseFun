@@ -7,11 +7,11 @@ import SubmitButtons from '@pages/buy/publish/renewal/_containers/SubmitButtons.
 // import { useCommonStore } from '@stores/common.js'
 import { useBuyProjectStore } from '@stores/buy/project.js'
 import { useBuyPublishStore } from '@stores/buy/publish.js'
-import useCommonActions from '@stores/composables/useCommonActions.js'
-import useBuyProjectActions from '@stores/buy/composables/useProjectActions.js'
-import useBuyPublishActions from '@stores/buy/composables/usePublishActions.js'
-// import useBuyListActions from '@stores/buy/composables/useListActions.js'
-import useBuyPopupActions from '@stores/buy/composables/usePopupActions.js'
+import useCommonActions from '@stores/.composables/useCommonActions.js'
+import useBuyProjectActions from '@stores/buy/.composables/useProjectActions.js'
+import useBuyPublishActions from '@stores/buy/.composables/usePublishActions.js'
+// import useBuyListActions from '@stores/buy/.composables/useListActions.js'
+import useBuyPopupActions from '@stores/buy/.composables/usePopupActions.js'
 
 import { Form } from 'vee-validate'
 

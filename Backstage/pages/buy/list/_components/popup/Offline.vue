@@ -2,7 +2,7 @@
 import CustomPopup from '@containers/buy/common/CustomPopup.vue'
 
 import { usePopupStore } from '@stores/popup.js'
-import useBuyListActions from '@stores/buy/composables/useListActions.js'
+import useBuyListActions from '@stores/buy/.composables/useListActions.js'
 
 const popup = usePopupStore()
 const { customData } = storeToRefs(popup)

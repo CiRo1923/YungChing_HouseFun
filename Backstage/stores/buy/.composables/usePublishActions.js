@@ -12,8 +12,8 @@ import { onToFixed } from '@js/_prototype.js'
 
 import { useBuyPublishStore } from '@stores/buy/publish.js'
 
-import useBuyProjectActions from '@stores/buy/composables/useProjectActions.js'
-import useBuyPopupActions from '@stores/buy/composables/usePopupActions.js'
+import useBuyProjectActions from '@stores/buy/.composables/useProjectActions.js'
+import useBuyPopupActions from '@stores/buy/.composables/usePopupActions.js'
 
 export default () => {
   const {

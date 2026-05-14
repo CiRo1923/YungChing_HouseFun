@@ -1,10 +1,9 @@
 <script setup>
 import { useBuyProjectStore } from '@stores/buy/project.js'
-import useBuyProjectActions from '@stores/buy/composables/useProjectActions.js'
 import { useBuyPublishStore } from '@stores/buy/publish.js'
-import useBuyPublicActions from '@stores/buy/composables/usePublishActions.js'
-
-import useBuyPopupActions from '@stores/buy/composables/usePopupActions.js'
+import useBuyProjectActions from '@stores/buy/.composables/useProjectActions.js'
+import useBuyPublicActions from '@stores/buy/.composables/usePublishActions.js'
+import useBuyPopupActions from '@stores/buy/.composables/usePopupActions.js'
 
 const buyProject = useBuyProjectStore()
 const { options } = storeToRefs(buyProject)

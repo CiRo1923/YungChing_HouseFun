@@ -2,7 +2,7 @@
 import TabItem from '@pages/buy/publish/basic/_components/TabItem.vue'
 
 import { useBuyProjectStore } from '@stores/buy/project.js'
-import useBuyProjectActions from '@stores/buy/composables/useProjectActions.js'
+import useBuyProjectActions from '@stores/buy/.composables/useProjectActions.js'
 
 import { Form } from 'vee-validate'
 

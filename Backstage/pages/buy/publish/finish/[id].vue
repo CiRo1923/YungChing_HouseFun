@@ -7,9 +7,9 @@ import SubmitButtons from '@pages/buy/publish/finish/_containers/SubmitButtons.v
 // import { useCommonStore } from '@stores/common.js'
 import { useBuyProjectStore } from '@stores/buy/project.js'
 import { useBuyPublishStore } from '@stores/buy/publish.js'
-import useCommonActions from '@stores/composables/useCommonActions.js'
-import useBuyProjectActions from '@stores/buy/composables/useProjectActions.js'
-import useBuyPublishActions from '@stores/buy/composables/usePublishActions.js'
+import useCommonActions from '@stores/.composables/useCommonActions.js'
+import useBuyProjectActions from '@stores/buy/.composables/useProjectActions.js'
+import useBuyPublishActions from '@stores/buy/.composables/usePublishActions.js'
 
 // const common = useCommonStore()
 const { onUseMeta, onWithLoadingAll } = useCommonActions()

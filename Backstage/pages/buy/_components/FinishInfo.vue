@@ -1,6 +1,6 @@
 <script setup>
 import { useBuyProjectStore } from '@stores/buy/project.js'
-import useBuyProjectActions from '@stores/buy/composables/useProjectActions.js'
+import useBuyProjectActions from '@stores/buy/.composables/useProjectActions.js'
 
 const buyPorject = useBuyProjectStore()
 const { autoRefresh } = storeToRefs(buyPorject)
