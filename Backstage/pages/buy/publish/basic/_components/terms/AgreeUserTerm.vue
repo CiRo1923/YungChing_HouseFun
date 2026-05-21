@@ -1,6 +1,4 @@
 <script setup>
-import { useBuyPublishStore } from '@stores/buy/publish.js'
-
 const buyPublish = useBuyPublishStore()
 const { apiData } = storeToRefs(buyPublish)
 </script>

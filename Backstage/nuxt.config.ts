@@ -3,8 +3,10 @@
 import CONFIG from './config.js'
 import POSTCSSFUNCTIONS from './postcss.function.js'
 
-import VitePluginSvgSpritemap from '@spiriit/vite-plugin-svg-spritemap'
 import SvgSpritemapDevPlugin from './scripts/vite/svg-spritemap-dev.mjs'
+import { getPageComponentDirs } from './scripts/nuxt/page-component-dirs'
+import { getStoreComposableImports, getStoreImports } from './scripts/nuxt/store-composable-imports'
+import VitePluginSvgSpritemap from '@spiriit/vite-plugin-svg-spritemap'
 import { ViteImageOptimizer } from 'vite-plugin-image-optimizer'
 import { fileURLToPath } from 'node:url'
 import { execSync } from 'node:child_process'
@@ -36,6 +38,20 @@ export default defineNuxtConfig({
   },
   imports: {
     autoImport: true,
+  },
+  hooks: {
+    'imports:extend'(imports) {
+      const storesDir = fileURLToPath(new URL('./stores', import.meta.url))
+
+      imports.push(...getStoreImports(storesDir), ...getStoreComposableImports(storesDir))
+    },
+    'components:dirs'(dirs) {
+      dirs.push({
+        path: '~/containers',
+        pathPrefix: true,
+      })
+      dirs.push(...getPageComponentDirs(fileURLToPath(new URL('./pages', import.meta.url))))
+    },
   },
   css: [
     `@/${CONFIG.css}/tailwind.css`,

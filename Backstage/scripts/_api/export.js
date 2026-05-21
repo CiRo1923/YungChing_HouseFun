@@ -1,6 +1,7 @@
 const METHOD_WITH_BODY = new Set(['post', 'put', 'patch'])
 
 const FETCH_METHODS = ['get', 'post', 'put', 'patch', 'delete', 'postForm', 'putForm', 'patchForm']
+const FETCH_METHOD_SET = new Set(FETCH_METHODS.map((method) => method.toLowerCase()))
 
 const FORM_METHOD_MAP = {
   postform: 'post',
@@ -8,14 +9,52 @@ const FORM_METHOD_MAP = {
   patchform: 'patch',
 }
 
+const FORM_MAX_DEPTH = 100
+
 const isPlainObject = (v) => v != null && Object.prototype.toString.call(v) === '[object Object]'
 
 const isBlobLike = (v) => typeof Blob !== 'undefined' && v instanceof Blob
 
+const isFormDataLike = (v) => typeof FormData !== 'undefined' && v instanceof FormData
+
 const toPOJOHeaders = (headers) => (headers ? Object.fromEntries(headers.entries()) : {})
 
+const RESPONSE_TYPES = new Set(['json', 'blob', 'text'])
+
+const normalizeResponseType = (responseType) =>
+  RESPONSE_TYPES.has(responseType) ? responseType : undefined
+
 const isFetchMethod = (value) =>
-  typeof value === 'string' && FETCH_METHODS.includes(value.toLowerCase())
+  typeof value === 'string' && FETCH_METHOD_SET.has(value.toLowerCase())
+
+const removeBrackets = (key) =>
+  typeof key === 'string' && key.endsWith('[]') ? key.slice(0, -2) : key
+
+const renderFormKey = (path, key) => {
+  const tokens = path ? path.concat(key) : [key]
+
+  return tokens
+    .map((token, index) => {
+      const normalizedToken = removeBrackets(String(token))
+
+      return index === 0 ? normalizedToken : `[${normalizedToken}]`
+    })
+    .join('')
+}
+
+const isFormVisitable = (value) => isPlainObject(value) || Array.isArray(value)
+
+const isFlatArray = (value) => Array.isArray(value) && !value.some(isFormVisitable)
+
+const convertFormValue = (value) => {
+  if (value instanceof Date) return value.toISOString()
+
+  if (typeof value === 'boolean' || typeof value === 'number') {
+    return String(value)
+  }
+
+  return value
+}
 
 const onReplacePathParams = (path, data) => {
   const keys = Array.from(path.matchAll(/\{\s?(\w+)\s?\}/g)).map((m) => m[1])
@@ -35,42 +74,68 @@ const onReplacePathParams = (path, data) => {
   return { url, usedKeys: new Set(keys) }
 }
 
-const appendFormValue = (formData, key, value) => {
+const appendFormValue = (formData, key, value, path, stack, depth = 0) => {
   if (value == null) return
 
-  if (Array.isArray(value)) {
-    for (const item of value) appendFormValue(formData, key, item)
+  if (depth > FORM_MAX_DEPTH) {
+    throw new Error(
+      `[onFetchApi] object is too deeply nested (${depth} levels). Max depth: ${FORM_MAX_DEPTH}`
+    )
+  }
+
+  if (!path && typeof key === 'string' && key.endsWith('{}')) {
+    formData.append(renderFormKey(path, key), JSON.stringify(value))
     return
   }
 
-  if (isBlobLike(value)) {
-    formData.append(key, value)
+  if (!path && (isFlatArray(value) || (typeof key === 'string' && key.endsWith('[]')))) {
+    const arrayKey = `${removeBrackets(key)}[]`
+
+    for (const item of Array.from(value)) {
+      if (item != null) {
+        formData.append(arrayKey, convertFormValue(item))
+      }
+    }
+
     return
   }
 
-  if (value instanceof Date) {
-    formData.append(key, value.toISOString())
+  if (isFormVisitable(value) && !isBlobLike(value)) {
+    if (stack.includes(value)) {
+      const formPath = path ? path.concat(key).join('.') : key
+
+      throw new Error(`[onFetchApi] circular reference detected: ${formPath}`)
+    }
+
+    stack.push(value)
+
+    try {
+      for (const [childKey, childValue] of Object.entries(value)) {
+        appendFormValue(
+          formData,
+          childKey,
+          childValue,
+          path ? path.concat(key) : [key],
+          stack,
+          depth + 1
+        )
+      }
+    } finally {
+      stack.pop()
+    }
+
     return
   }
 
-  if (typeof value === 'boolean' || typeof value === 'number') {
-    formData.append(key, String(value))
-    return
-  }
-
-  if (isPlainObject(value)) {
-    formData.append(key, JSON.stringify(value))
-    return
-  }
-
-  formData.append(key, value)
+  formData.append(renderFormKey(path, key), convertFormValue(value))
 }
 
 const toFormData = (data = {}) => {
   const formData = new FormData()
+  const stack = []
 
   for (const [key, value] of Object.entries(data)) {
-    appendFormValue(formData, key, value)
+    appendFormValue(formData, key, value, null, stack)
   }
 
   return formData
@@ -106,35 +171,31 @@ const joinURL = (baseURL, path) => {
   return `${base}${urlPath}`
 }
 
-const parseResponseData = async (response) => {
-  const contentType = response.headers.get('content-type') || ''
+const parseJson = (data) => {
+  if (typeof data !== 'string') return data
 
+  try {
+    return JSON.parse(data)
+  } catch {
+    return data
+  }
+}
+
+const parseResponseData = async (response, responseType) => {
   if (response.status === 204) return null
 
-  if (contentType.includes('application/json')) {
-    return response.json()
-  }
+  if (responseType === 'blob') return response.blob()
 
-  return response.text()
+  if (responseType === 'text') return response.text()
+
+  const data = await response.text()
+
+  return parseJson(data)
 }
 
-const isJsonResponse = (response) => {
-  const contentType = response.headers.get('content-type') || ''
+const validateStatus = (status) => status >= 200 && status < 300
 
-  return contentType.includes('application/json')
-}
-
-const shouldReceiveJson = (headers = {}) => {
-  const accept = headers.Accept || headers.accept || ''
-
-  return accept.includes('application/json')
-}
-
-const createResponseStatusData = (message) => ({
-  responseStatus: {
-    message,
-  },
-})
+const createStatusErrorMessage = (status) => `Request failed with status code ${status}`
 
 const createSafeConfig = (method, baseURL, url, opts = {}) => ({
   method,
@@ -142,6 +203,7 @@ const createSafeConfig = (method, baseURL, url, opts = {}) => ({
   url,
   query: isPlainObject(opts.query) ? opts.query : undefined,
   body: isPlainObject(opts.body) ? opts.body : undefined,
+  responseType: opts.responseType,
 })
 
 const resolveValue = async (value) => {
@@ -150,6 +212,19 @@ const resolveValue = async (value) => {
 }
 
 const createRequestOptions = (method, data, usedKeys, isFormRequest) => {
+  const opts = {
+    method: method.toUpperCase(),
+    query: undefined,
+    body: undefined,
+    headers: undefined,
+    safeBody: undefined,
+  }
+
+  if (isFormRequest && isFormDataLike(data)) {
+    opts.body = data
+    return opts
+  }
+
   const rest = {}
 
   for (const [key, value] of Object.entries(data ?? {})) {
@@ -159,14 +234,6 @@ const createRequestOptions = (method, data, usedKeys, isFormRequest) => {
   }
 
   const hasRest = Object.keys(rest).length > 0
-
-  const opts = {
-    method: method.toUpperCase(),
-    query: undefined,
-    body: undefined,
-    headers: undefined,
-    safeBody: undefined,
-  }
 
   if (!hasRest && !METHOD_WITH_BODY.has(method)) {
     return opts
@@ -276,6 +343,7 @@ export const onFetchApi = (globalConfig = {}) => {
       const rawMethod = method.toLowerCase()
       const fetchMethod = FORM_METHOD_MAP[rawMethod] ?? rawMethod
       const isFormRequest = rawMethod in FORM_METHOD_MAP
+      const responseType = normalizeResponseType(requestConfig.responseType)
 
       const finalBaseURL = requestConfig.baseURL ?? (await resolveValue(baseURL))
 
@@ -298,6 +366,7 @@ export const onFetchApi = (globalConfig = {}) => {
       safeConfig = createSafeConfig(fetchMethod, finalBaseURL, reqPath, {
         query: opts.query,
         body: opts.safeBody,
+        responseType,
       })
 
       let fetchConfig = {
@@ -306,7 +375,7 @@ export const onFetchApi = (globalConfig = {}) => {
         baseURL: finalBaseURL,
         path: reqPath,
         headers: {
-          Accept: 'application/json',
+          Accept: 'application/json, text/plain, */*',
           ...opts.headers,
           ...globalHeaders,
           ...localHeaders,
@@ -314,6 +383,7 @@ export const onFetchApi = (globalConfig = {}) => {
         body: opts.body,
         signal: requestConfig.signal,
         credentials: requestConfig.credentials,
+        responseType,
         config: safeConfig,
       }
 
@@ -327,27 +397,19 @@ export const onFetchApi = (globalConfig = {}) => {
         credentials: fetchConfig.credentials,
       })
 
-      const resData = await parseResponseData(response)
-      const isInvalidJsonResponse =
-        response.ok &&
-        response.status !== 204 &&
-        shouldReceiveJson(fetchConfig.headers) &&
-        !isJsonResponse(response)
+      const resData = await parseResponseData(response, fetchConfig.responseType)
 
-      if (!response.ok || isInvalidJsonResponse) {
-        const status = isInvalidJsonResponse ? 404 : response.status
-        const statusText = isInvalidJsonResponse ? 'Invalid JSON response' : response.statusText
-        const data = isInvalidJsonResponse
-          ? createResponseStatusData('Invalid JSON response')
-          : resData
+      if (!validateStatus(response.status)) {
+        const message = createStatusErrorMessage(response.status)
+
         let errorResponse = createErrorResponse({
-          status,
-          statusCode: status,
-          statusText,
+          status: response.status,
+          statusCode: response.status,
+          statusText: response.statusText,
           headers: toPOJOHeaders(response.headers),
           config: fetchConfig.config ?? safeConfig,
-          data,
-          message: statusText || 'Fetch error',
+          data: resData,
+          message,
         })
 
         errorResponse = await interceptors.response.runRejected(errorResponse)

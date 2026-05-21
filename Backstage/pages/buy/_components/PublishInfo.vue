@@ -1,10 +1,5 @@
 <script setup>
-import Address from '@pages/buy/_components/Address.vue'
-
 import { numberComma } from '@js/_prototype.js'
-
-import { useCommonStore } from '@stores/common.js'
-import useCommonActions from '@stores/.composables/useCommonActions.js'
 
 const common = useCommonStore()
 const { device } = storeToRefs(common)
@@ -34,7 +29,7 @@ onMounted(() => {
         <p class="text-[18px] tracking-wider text-[--gray-666]">
           <b class="font-medium">{{ props.data.title }}</b>
         </p>
-        <Address
+        <PageBuyAddress
           :data="props.data"
           :setClass="{
             main: 'text-[16px] text-[--gray-666]',

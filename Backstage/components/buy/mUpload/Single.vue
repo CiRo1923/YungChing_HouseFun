@@ -497,13 +497,13 @@ watch(
         @change="(event) => onFileChange(event, handleChange, validate)"
       />
 
-      <button
-        type="button"
+      <div
         class="relative flex flex-col"
         :class="{
           'min-h-[130px] w-full': !hasImage,
           'border-blue-400 bg-blue-50': isUploadDragging,
         }"
+        role="button"
         :disabled="config.isDisabled"
         @click="openFileDialog"
         @dragenter="onUploadDragEnter"
@@ -553,7 +553,7 @@ watch(
             <span class="text-[16px]">{{ config.placeholder }}</span>
           </div>
         </template>
-      </button>
+      </div>
     </div>
   </Field>
 

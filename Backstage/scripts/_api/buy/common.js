@@ -1,5 +1,9 @@
 import { fetchApi, version } from '@js/_api/config.js'
 
+// server 時間
+export const apiGetCommonServerTime = async (data) =>
+  await fetchApi.get(`api/${version}/common/server-time`, data)
+
 // 縣市選單 (明細)
 export const apiGETCitySelectOptions = async (data) =>
   await fetchApi.get(`api/${version}/buy/city/select-options`, data)

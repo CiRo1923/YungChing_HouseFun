@@ -3,9 +3,6 @@ import AlertSystem from '@containers/buy/common/AlertSystem.vue'
 import ConfirmSystem from '@containers/buy/common/ConfirmSystem.vue'
 import ApiPromiseSystem from '@containers/buy/common/ApiPromiseSystem.vue'
 
-import { useCommonStore } from '@stores/common.js'
-import { useBuyProjectStore } from '@stores/buy/project.js'
-
 const common = useCommonStore()
 const buyProject = useBuyProjectStore()
 const { isLoading } = storeToRefs(common)

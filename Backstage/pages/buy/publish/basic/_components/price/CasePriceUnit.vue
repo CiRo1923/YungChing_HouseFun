@@ -1,8 +1,6 @@
 <script setup>
 import { onToFixed } from '@js/_prototype.js'
 
-import { useBuyPublishStore } from '@stores/buy/publish.js'
-
 const buyPublish = useBuyPublishStore()
 const { apiData } = storeToRefs(buyPublish)
 

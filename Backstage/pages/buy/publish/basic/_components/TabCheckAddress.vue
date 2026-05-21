@@ -1,9 +1,4 @@
 <script setup>
-import TabItem from '@pages/buy/publish/basic/_components/TabItem.vue'
-
-import { useBuyProjectStore } from '@stores/buy/project.js'
-import useBuyProjectActions from '@stores/buy/.composables/useProjectActions.js'
-
 import { Form } from 'vee-validate'
 
 const buyProject = useBuyProjectStore()
@@ -136,7 +131,7 @@ const onClick = async (validate) => {
         @click="onClick(validate)"
       />
     </div>
-    <TabItem
+    <PageBuyPublishBasicTabItem
       :data="items"
       :setClass="{
         main: 'mt-[16px]',

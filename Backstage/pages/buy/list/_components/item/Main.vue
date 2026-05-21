@@ -1,13 +1,5 @@
 <script setup>
-import Address from '@pages/buy/_components/Address.vue'
-import Information from '@pages/buy/list/_components/item/Information.vue'
-import Hot from '@pages/buy/list/_components/item/Hot.vue'
-import Events from '@pages/buy/list/_components/item/Events.vue'
-
 import { numberComma } from '@js/_prototype.js'
-
-import { useCommonStore } from '@stores/common.js'
-import useCommonActions from '@stores/.composables/useCommonActions.js'
 
 const common = useCommonStore()
 const { device } = storeToRefs(common)
@@ -95,17 +87,17 @@ onMounted(() => {
           <span class="text-[18px] text-[--orange-e646] pt:order-2 pt:shrink-0">
             {{ numberComma.add(props.data.casePrice) }} 萬
           </span>
-          <Address
+          <PageBuyAddress
             :data="addressData"
             :setClass="{
               main: 'text-[14px] text-[--gray-666] pt:order-1',
             }"
           />
         </div>
-        <Information :data="props.data" />
+        <PageBuyListItemInformation :data="props.data" />
         <div class="m:mt-[8px] pt:flex pt:items-center p:mt-[20px]">
-          <Hot :data="props.data" />
-          <Events
+          <PageBuyListItemHot :data="props.data" />
+          <PageBuyListItemEvents
             :data="props.data"
             :items="eventsItems"
             @click:publish="(data) => onEventsClick('publish', data)"
@@ -135,7 +127,7 @@ onMounted(() => {
       />
     </div>
     <slot />
-    <Events
+    <PageBuyListItemEvents
       :data="props.data"
       :items="eventsItems"
       @click:publish="(data) => onEventsClick('publish', data)"

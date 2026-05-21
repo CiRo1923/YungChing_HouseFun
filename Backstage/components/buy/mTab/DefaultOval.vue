@@ -1,6 +1,5 @@
 <script setup>
-import { useCommonStore } from '@stores/common.js'
-import useCommonActions from '@stores/.composables/useCommonActions.js'
+import { onDeepMerge } from '@js/_prototype.js'
 
 const common = useCommonStore()
 const { device } = storeToRefs(common)
@@ -33,16 +32,19 @@ const isShowItem = ref(false)
 const isDeviceM = computed(() => device.value === 'm')
 
 const config = computed(() => {
-  return {
+  const defaultConfig = {
     active: null,
     containerMode: 'multiple', // 'multiple' / 'single' / false
-    showIcon: 'active', // 'active' / 'all'
+    icon: {
+      name: null,
+      show: 'active', // 'active' / 'all'
+    },
     schema: {
       id: 'id',
       label: 'label',
     },
-    ...props.config,
   }
+  return onDeepMerge(defaultConfig, props.config)
 })
 
 const setClass = computed(() => {
@@ -205,7 +207,7 @@ onMounted(() => {
           :class="[
             {
               '--active': index === activeIndex,
-              '--icon-active': config.showIcon === 'active',
+              '--icon-active': config.icon.show === 'active',
             },
             setClass.anchor,
           ]"
@@ -213,12 +215,12 @@ onMounted(() => {
           @click="onClick(item, index, $event)"
         >
           <CommonSvgIcon
-            :icon="item.icon"
-            class="m-tab-icon h-[18px] w-[18px] overflow-hidden transition-all duration-300"
-            v-if="!isDeviceM && item.icon"
+            :icon="config.icon.name || item.icon"
+            class="m-tab-icon h-[18px] w-[18px] overflow-hidden transition-all duration-300 m:hidden"
+            v-if="!isDeviceM && (config.icon.name || item.icon)"
           />
           <slot name="header" :item="item" :index="index">
-            <em class="m-tab-anchor-text">{{ item[config.schema.label] }}</em>
+            <em class="m-tab-anchor-text" v-html="item[config.schema.label]" />
           </slot>
         </component>
       </li>

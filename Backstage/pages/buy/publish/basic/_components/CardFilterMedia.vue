@@ -1,9 +1,9 @@
 <script setup>
-import Video from '@pages/buy/publish/basic/_components/media/Video.vue'
-import CaseVideoDisplay from '@pages/buy/publish/basic/_components/media/CaseVideoDisplay.vue'
-import Note from '@pages/buy/publish/basic/_components/media/Note.vue'
-
-import CardFilter from '@pages/buy/publish/basic/_containers/CardFilter.vue'
+import {
+  PageBuyPublishBasicMediaVideo,
+  PageBuyPublishBasicMediaCaseVideoDisplay,
+  PageBuyPublishBasicMediaNote,
+} from '#components'
 
 const props = defineProps({
   title: {
@@ -14,21 +14,21 @@ const props = defineProps({
 const items = shallowReadonly([
   {
     id: 'video',
-    component: Video,
+    component: PageBuyPublishBasicMediaVideo,
   },
   {
     id: 'caseVideoDisplay',
-    component: CaseVideoDisplay,
+    component: PageBuyPublishBasicMediaCaseVideoDisplay,
   },
   {
     id: 'note',
-    component: Note,
+    component: PageBuyPublishBasicMediaNote,
   },
 ])
 </script>
 
 <template>
-  <CardFilter :title="props.title" :items="items" />
+  <PageBuyPublishBasicCardFilter :title="props.title" :items="items" />
 </template>
 
 <style></style>

@@ -1,9 +1,4 @@
 <script setup>
-import RadiosOval from '@pages/buy/publish/basic/_containers/RadiosOval.vue'
-
-import { useBuyProjectStore } from '@stores/buy/project.js'
-import { useBuyPublishStore } from '@stores/buy/publish.js'
-
 const buyProject = useBuyProjectStore()
 const { options } = storeToRefs(buyProject)
 const buyPublish = useBuyPublishStore()
@@ -26,7 +21,7 @@ const onIsSingleFloorChange = () => {
 </script>
 
 <template>
-  <RadiosOval>
+  <PageBuyPublishBasicRadiosOval>
     <BuyMFormRadiosOval
       name="isSingleFloor"
       v-model="apiData.caseInfo.isSingleFloor"
@@ -120,7 +115,7 @@ const onIsSingleFloorChange = () => {
         </BuyMFormInput>
       </li>
     </ul>
-  </RadiosOval>
+  </PageBuyPublishBasicRadiosOval>
 </template>
 
 <style></style>

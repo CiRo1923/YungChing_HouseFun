@@ -1,9 +1,9 @@
 <script setup>
-import CaseManageType from '@pages/buy/publish/basic/_components/manage/CaseManageType.vue'
-import CaseManageDuty from '@pages/buy/publish/basic/_components/manage/CaseManageDuty.vue'
-import CaseManagePay from '@pages/buy/publish/basic/_components/manage/CaseManagePay.vue'
-
-import CardFilter from '@pages/buy/publish/basic/_containers/CardFilter.vue'
+import {
+  PageBuyPublishBasicManageCaseManageType,
+  PageBuyPublishBasicManageCaseManageDuty,
+  PageBuyPublishBasicManageCaseManagePay,
+} from '#components'
 
 const props = defineProps({
   title: {
@@ -17,27 +17,27 @@ const items = shallowReadonly([
     isRequired: false,
     label: '管理方式',
     class: 'p:h-[40px]',
-    component: CaseManageType,
+    component: PageBuyPublishBasicManageCaseManageType,
   },
   {
     id: 'caseManageDuty',
     isRequired: false,
     label: '管理時段',
     class: 'p:h-[40px]',
-    component: CaseManageDuty,
+    component: PageBuyPublishBasicManageCaseManageDuty,
   },
   {
     id: 'caseManagePay',
     isRequired: false,
     label: '管理費',
     class: 'p:h-[40px]',
-    component: CaseManagePay,
+    component: PageBuyPublishBasicManageCaseManagePay,
   },
 ])
 </script>
 
 <template>
-  <CardFilter :title="props.title" :items="items" />
+  <PageBuyPublishBasicCardFilter :title="props.title" :items="items" />
 </template>
 
 <style></style>

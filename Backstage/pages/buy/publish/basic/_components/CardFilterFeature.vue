@@ -1,13 +1,10 @@
 <script setup>
-import Warning from '@pages/buy/publish/basic/_components/feature/Warning.vue'
-import CaseDescription from '@pages/buy/publish/basic/_components/feature/CaseDescription.vue'
-import CaseFeature from '@pages/buy/publish/basic/_components/feature/CaseFeature.vue'
-import CaseFeatureCustomize from '@pages/buy/publish/basic/_components/feature/CaseFeatureCustomize.vue'
-
-import CardFilter from '@pages/buy/publish/basic/_containers/CardFilter.vue'
-
-import { useCommonStore } from '@stores/common.js'
-import useCommonActions from '@stores/.composables/useCommonActions.js'
+import {
+  PageBuyPublishBasicFeatureWarning,
+  PageBuyPublishBasicFeatureCaseDescription,
+  PageBuyPublishBasicFeatureCaseFeature,
+  PageBuyPublishBasicFeatureCaseFeatureCustomize,
+} from '#components'
 
 const common = useCommonStore()
 const { device } = storeToRefs(common)
@@ -22,7 +19,7 @@ const isDeviceM = computed(() => device.value === 'm')
 const items = shallowReadonly([
   {
     id: 'warning',
-    component: Warning,
+    component: PageBuyPublishBasicFeatureWarning,
     setClass: {
       main: 'm:hidden',
     },
@@ -30,15 +27,15 @@ const items = shallowReadonly([
   },
   {
     id: 'caseDescription',
-    component: CaseDescription,
+    component: PageBuyPublishBasicFeatureCaseDescription,
   },
   {
     id: 'caseFeature',
-    component: CaseFeature,
+    component: PageBuyPublishBasicFeatureCaseFeature,
   },
   {
     id: 'caseFeatureCustomize',
-    component: CaseFeatureCustomize,
+    component: PageBuyPublishBasicFeatureCaseFeatureCustomize,
   },
 ])
 
@@ -53,15 +50,15 @@ onMounted(() => {
 </script>
 
 <template>
-  <CardFilter :title="props.title" :items="items">
+  <PageBuyPublishBasicCardFilter :title="props.title" :items="items">
     <template #tools v-if="isDeviceM">
-      <Warning
+      <PageBuyPublishBasicFeatureWarning
         :setClass="{
           main: 'm:mt-[8px] pt:hidden',
         }"
       />
     </template>
-  </CardFilter>
+  </PageBuyPublishBasicCardFilter>
 </template>
 
 <style></style>

@@ -1,9 +1,14 @@
 <script setup>
-import { useBuyListStore } from '@stores/buy/list.js'
-
+const buyProject = useBuyProjectStore()
+const { serverTime } = storeToRefs(buyProject)
+const { onApiGetCommonServerTime } = useBuyProjectActions()
 const buyList = useBuyListStore()
 const { apiDealData } = storeToRefs(buyList)
 const props = defineProps({
+  data: {
+    type: Object,
+    default: () => ({}),
+  },
   setClass: {
     type: Object,
     default: () => ({}),
@@ -27,6 +32,16 @@ const dealShow = readonly([
     value: false,
   },
 ])
+
+const onInit = () => {
+  if (props.data && props.data.info) {
+    apiDealData.value.dateDeal = props.data.info.dateDeal
+  }
+}
+
+await useAsyncData('common-server-time', () => onApiGetCommonServerTime())
+
+onInit()
 </script>
 
 <template>
@@ -46,7 +61,7 @@ const dealShow = readonly([
           v-model="apiDealData.dateDeal"
           :config="{
             defaultIsToday: false,
-            maxDate: +new Date(),
+            maxDate: serverTime.value,
           }"
           :rules="{
             required: '請選擇成交日期',

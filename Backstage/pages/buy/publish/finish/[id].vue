@@ -1,16 +1,4 @@
 <script setup>
-import BackStepNew from '@pages/buy/publish/_components/BackStepNew.vue'
-
-import Content from '@pages/buy/publish/finish/_components/Content.vue'
-import SubmitButtons from '@pages/buy/publish/finish/_containers/SubmitButtons.vue'
-
-// import { useCommonStore } from '@stores/common.js'
-import { useBuyProjectStore } from '@stores/buy/project.js'
-import { useBuyPublishStore } from '@stores/buy/publish.js'
-import useCommonActions from '@stores/.composables/useCommonActions.js'
-import useBuyProjectActions from '@stores/buy/.composables/useProjectActions.js'
-import useBuyPublishActions from '@stores/buy/.composables/usePublishActions.js'
-
 // const common = useCommonStore()
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
 const buyProject = useBuyProjectStore()
@@ -62,7 +50,7 @@ onUseMeta({
     }"
   >
     <template #tools>
-      <BackStepNew
+      <PageBuyPublishBackStepNew
         :anchor="{
           to: {
             name: statusData.isExpired ? 'buy-publish-renewal-id' : 'buy-publish-basic-id',
@@ -73,8 +61,8 @@ onUseMeta({
       />
     </template>
     <div class="tm:mt-[24px] tm:space-y-[24px] p:mt-[32px] p:space-y-[32px]">
-      <Content />
-      <SubmitButtons />
+      <PageBuyPublishFinishContent />
+      <PageBuyPublishFinishSubmitButtons />
     </div>
   </BuyMContainer>
 </template>

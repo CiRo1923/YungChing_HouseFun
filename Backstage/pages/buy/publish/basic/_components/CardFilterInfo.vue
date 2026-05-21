@@ -1,23 +1,23 @@
 <script setup>
-import CasePurpose from '@pages/buy/publish/basic/_components/info/CasePurpose.vue'
-import CaseTitle from '@pages/buy/publish/basic/_components/info/CaseTitle.vue'
-import Address from '@pages/buy/publish/basic/_components/info/Address.vue'
-import CaseType from '@pages/buy/publish/basic/_components/info/CaseType.vue'
-import CaseUsage from '@pages/buy/publish/basic/_components/info/CaseUsage.vue'
-import Zoing from '@pages/buy/publish/basic/_components/info/Zoing.vue'
-import CaseLandNo from '@pages/buy/publish/basic/_components/info/CaseLandNo.vue'
-import Floor from '@pages/buy/publish/basic/_components/info/Floor.vue'
-import TotalFloor from '@pages/buy/publish/basic/_components/info/TotalFloor.vue'
-import CaseAgeIdentify from '@pages/buy/publish/basic/_components/info/CaseAgeIdentify.vue'
-import Community from '@pages/buy/publish/basic/_components/info/Community.vue'
-import HouseLayout from '@pages/buy/publish/basic/_components/info/HouseLayout.vue'
-import HouseAddLayout from '@pages/buy/publish/basic/_components/info/HouseAddLayout.vue'
-import Elevator from '@pages/buy/publish/basic/_components/info/Elevator.vue'
-import Face from '@pages/buy/publish/basic/_components/info/Face.vue'
-import Structure from '@pages/buy/publish/basic/_components/info/Structure.vue'
-import BarrierFree from '@pages/buy/publish/basic/_components/info/BarrierFree.vue'
-
-import CardFilter from '@pages/buy/publish/basic/_containers/CardFilter.vue'
+import {
+  PageBuyPublishBasicInfoCasePurpose,
+  PageBuyPublishBasicInfoCaseTitle,
+  PageBuyPublishBasicInfoAddress,
+  PageBuyPublishBasicInfoCaseType,
+  PageBuyPublishBasicInfoCaseUsage,
+  PageBuyPublishBasicInfoZoing,
+  PageBuyPublishBasicInfoCaseLandNo,
+  PageBuyPublishBasicInfoFloor,
+  PageBuyPublishBasicInfoTotalFloor,
+  PageBuyPublishBasicInfoCaseAgeIdentify,
+  PageBuyPublishBasicInfoCommunity,
+  PageBuyPublishBasicInfoHouseLayout,
+  PageBuyPublishBasicInfoHouseAddLayout,
+  PageBuyPublishBasicInfoElevator,
+  PageBuyPublishBasicInfoFace,
+  PageBuyPublishBasicInfoStructure,
+  PageBuyPublishBasicInfoBarrierFree,
+} from '#components'
 
 const props = defineProps({
   title: {
@@ -31,125 +31,125 @@ const items = shallowReadonly([
     isRequired: true,
     label: '現況',
     class: 'p:h-[35px] t:h-[50px]',
-    component: CasePurpose,
+    component: PageBuyPublishBasicInfoCasePurpose,
   },
   {
     id: 'caseTitle',
     isRequired: true,
     label: '物件標題',
     class: 'pt:h-[40px]',
-    component: CaseTitle,
+    component: PageBuyPublishBasicInfoCaseTitle,
   },
   {
     id: 'address',
     isRequired: true,
     label: '地址',
     class: 'pt:h-[40px]',
-    component: Address,
+    component: PageBuyPublishBasicInfoAddress,
   },
   {
     id: 'caseType',
     isRequired: true,
     label: '型態',
     class: 'pt:h-[40px]',
-    component: CaseType,
+    component: PageBuyPublishBasicInfoCaseType,
   },
   {
     id: 'caseUsage',
     isRequired: true,
     label: '法定用途',
     class: 'pt:h-[40px]',
-    component: CaseUsage,
+    component: PageBuyPublishBasicInfoCaseUsage,
   },
   {
     id: 'zoing',
     isRequired: true,
     label: '土地分區',
     class: 'p:h-[35px] t:h-[50px]',
-    component: Zoing,
+    component: PageBuyPublishBasicInfoZoing,
   },
   {
     id: 'caseLandNo',
     isRequired: true,
     label: '地號',
     class: 'pt:h-[40px]',
-    component: CaseLandNo,
+    component: PageBuyPublishBasicInfoCaseLandNo,
   },
   {
     id: 'floor',
     isRequired: true,
     label: '出售樓層',
     class: 'p:h-[35px] t:h-[50px]',
-    component: Floor,
+    component: PageBuyPublishBasicInfoFloor,
   },
   {
     id: 'totalFloor',
     isRequired: true,
     label: '總樓高',
     class: 'pt:h-[40px]',
-    component: TotalFloor,
+    component: PageBuyPublishBasicInfoTotalFloor,
   },
   {
     id: 'caseAgeIdentify',
     isRequired: true,
     label: '屋齡',
     class: 'p:h-[35px] t:h-[50px]',
-    component: CaseAgeIdentify,
+    component: PageBuyPublishBasicInfoCaseAgeIdentify,
   },
   {
     id: 'community',
     isRequired: true,
     label: '社區',
     class: 'p:h-[35px] t:h-[50px]',
-    component: Community,
+    component: PageBuyPublishBasicInfoCommunity,
   },
   {
     id: 'houseLayout',
     isRequired: true,
     label: '格局',
     class: 'pt:h-[40px]',
-    component: HouseLayout,
+    component: PageBuyPublishBasicInfoHouseLayout,
   },
   {
     id: 'houseAddLayout',
     isRequired: false,
     label: '加蓋格局',
     class: 'pt:h-[40px]',
-    component: HouseAddLayout,
+    component: PageBuyPublishBasicInfoHouseAddLayout,
   },
   {
     id: 'elevator',
     isRequired: false,
     label: '電梯',
     class: 'p:h-[35px] t:h-[50px]',
-    component: Elevator,
+    component: PageBuyPublishBasicInfoElevator,
   },
   {
     id: 'face',
     isRequired: false,
     label: '朝向',
     class: 'pt:h-[40px]',
-    component: Face,
+    component: PageBuyPublishBasicInfoFace,
   },
   {
     id: 'structure',
     isRequired: false,
     label: '建物結構',
     class: 'pt:h-[40px]',
-    component: Structure,
+    component: PageBuyPublishBasicInfoStructure,
   },
   {
     id: 'barrierFree',
     isRequired: false,
     label: '無障礙設施',
     class: 'pt:h-[25px]',
-    component: BarrierFree,
+    component: PageBuyPublishBasicInfoBarrierFree,
   },
 ])
 </script>
 
 <template>
-  <CardFilter :title="props.title" :items="items" />
+  <PageBuyPublishBasicCardFilter :title="props.title" :items="items" />
 </template>
 
 <style></style>

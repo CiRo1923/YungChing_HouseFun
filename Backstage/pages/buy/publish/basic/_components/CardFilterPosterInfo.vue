@@ -1,10 +1,10 @@
 <script setup>
-import PosterDataSource from '@pages/buy/publish/basic/_components/posterInfo/PosterDataSource.vue'
-import AgentName from '@pages/buy/publish/basic/_components/posterInfo/AgentName.vue'
-import AgentPhone from '@pages/buy/publish/basic/_components/posterInfo/AgentPhone.vue'
-import AgentLine from '@pages/buy/publish/basic/_components/posterInfo/AgentLine.vue'
-
-import CardFilter from '@pages/buy/publish/basic/_containers/CardFilter.vue'
+import {
+  PageBuyPublishBasicPosterInfoPosterDataSource,
+  PageBuyPublishBasicPosterInfoAgentName,
+  PageBuyPublishBasicPosterInfoAgentPhone,
+  PageBuyPublishBasicPosterInfoAgentLine,
+} from '#components'
 
 const props = defineProps({
   title: {
@@ -18,34 +18,34 @@ const items = shallowReadonly([
     isRequired: false,
     label: '匯入資訊',
     class: 'p:h-[35px]',
-    component: PosterDataSource,
+    component: PageBuyPublishBasicPosterInfoPosterDataSource,
   },
   {
     id: 'agentName',
     isRequired: true,
     label: '姓名',
     class: 'p:h-[40px]',
-    component: AgentName,
+    component: PageBuyPublishBasicPosterInfoAgentName,
   },
   {
     id: 'agentPhone',
     isRequired: true,
     label: '行動電話',
     class: 'p:h-[40px]',
-    component: AgentPhone,
+    component: PageBuyPublishBasicPosterInfoAgentPhone,
   },
   {
     id: 'agentLine',
     isRequired: false,
     label: 'LINE 聯絡',
     class: 'p:h-[40px]',
-    component: AgentLine,
+    component: PageBuyPublishBasicPosterInfoAgentLine,
   },
 ])
 </script>
 
 <template>
-  <CardFilter :title="props.title" :items="items" />
+  <PageBuyPublishBasicCardFilter :title="props.title" :items="items" />
 </template>
 
 <style></style>

@@ -1,11 +1,6 @@
 <script setup>
 import CustomPopup from '@containers/buy/common/CustomPopup.vue'
 
-import PublishInfo from '@pages/buy/_components/PublishInfo.vue'
-import FinishInfo from '@pages/buy/_components/FinishInfo.vue'
-
-import { usePopupStore } from '@stores/popup.js'
-
 const popup = usePopupStore()
 const { customData } = storeToRefs(popup)
 const publishInfo = computed(() => {
@@ -35,8 +30,8 @@ const hasFinishInfo = computed(() => true)
       main: 'p:--w-1200 t:--w-720',
     }"
   >
-    <PublishInfo :data="publishInfo" v-if="publishInfo" />
-    <FinishInfo
+    <PageBuyPublishInfo :data="publishInfo" v-if="publishInfo" />
+    <PageBuyFinishInfo
       :data="customData.data"
       :setClass="{
         main: 'tm:mt-[16px] p:mt-[24px]',

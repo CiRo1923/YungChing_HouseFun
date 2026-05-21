@@ -1,8 +1,4 @@
 <script setup>
-import TabCheckURL from '@pages/buy/publish/basic/_components/TabCheckURL.vue'
-import TabCheckAddress from '@pages/buy/publish/basic/_components/TabCheckAddress.vue'
-import TabCheckID from '@pages/buy/publish/basic/_components/TabCheckID.vue'
-
 const options = readonly([
   {
     label: '網址匯入',
@@ -26,15 +22,15 @@ const options = readonly([
   >
     <!-- 網址匯入 -->
     <template #content_0>
-      <TabCheckURL />
+      <PageBuyPublishBasicTabCheckURL />
     </template>
     <!-- 地址匯入 -->
     <template #content_1>
-      <TabCheckAddress />
+      <PageBuyPublishBasicTabCheckAddress />
     </template>
     <!-- 建號匯入 -->
     <template #content_2>
-      <TabCheckID />
+      <PageBuyPublishBasicTabCheckID />
     </template>
   </BuyMTabCheck>
 </template>

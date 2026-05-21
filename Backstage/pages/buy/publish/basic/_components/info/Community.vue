@@ -1,12 +1,6 @@
 <script setup>
 // import { apiGETCommunities } from '@js/_api/buy/index.js'
 
-import RadiosOval from '@pages/buy/publish/basic/_containers/RadiosOval.vue'
-
-// import { useBuyProjectStore } from '@stores/buy/project.js'
-import { useBuyPublishStore } from '@stores/buy/publish.js'
-import useBuyProjectActions from '@stores/buy/.composables/useProjectActions.js'
-
 // const buyProject = useBuyProjectStore()
 // const { options } = storeToRefs(buyProject)
 const { onApiGETCommunities } = useBuyProjectActions()
@@ -55,7 +49,7 @@ const onCommunityChange = (item) => {
 </script>
 
 <template>
-  <RadiosOval>
+  <PageBuyPublishBasicRadiosOval>
     <BuyMFormRadiosOval
       name="isCaseCommunity"
       v-model="apiData.caseInfo.isCaseCommunity"
@@ -89,7 +83,7 @@ const onCommunityChange = (item) => {
       @input="onCommunities"
       @change="onCommunityChange"
     />
-  </RadiosOval>
+  </PageBuyPublishBasicRadiosOval>
 </template>
 
 <style></style>

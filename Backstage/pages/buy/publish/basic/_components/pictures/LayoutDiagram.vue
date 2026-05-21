@@ -1,10 +1,4 @@
 <script setup>
-// import { useCommonStore } from '@stores/common.js'
-// import { useBuyProjectStore } from '@stores/buy/project.js'
-import { useBuyPublishStore } from '@stores/buy/publish.js'
-import useCommonActions from '@stores/.composables/useCommonActions.js'
-import useBuyPublishActions from '@stores/buy/.composables/usePublishActions.js'
-
 // const common = useCommonStore()
 const { onIsLoading } = useCommonActions()
 // const buyProject = useBuyProjectStore()

@@ -1,16 +1,10 @@
 <script setup>
-import { useBuyProjectStore } from '@stores/buy/project.js'
-import { useBuyPublishStore } from '@stores/buy/publish.js'
-import useBuyProjectActions from '@stores/buy/.composables/useProjectActions.js'
-import useBuyPublicActions from '@stores/buy/.composables/usePublishActions.js'
-import useBuyPopupActions from '@stores/buy/.composables/usePopupActions.js'
-
 const buyProject = useBuyProjectStore()
 const { options } = storeToRefs(buyProject)
 const { onApiGETDistrictSelectOptions, onApiGETRoad } = useBuyProjectActions()
 const buyPublish = useBuyPublishStore()
 const { apiData, address } = storeToRefs(buyPublish)
-const { onAddress } = useBuyPublicActions()
+const { onAddress } = useBuyPublishActions()
 
 const { onCustom } = useBuyPopupActions()
 

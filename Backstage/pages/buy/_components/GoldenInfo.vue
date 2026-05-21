@@ -1,8 +1,4 @@
 <script setup>
-// import { numberComma } from '@js/_prototype.js'
-
-import { useBuyProjectStore } from '@stores/buy/project.js'
-
 const buyProject = useBuyProjectStore()
 const { golden } = storeToRefs(buyProject)
 
@@ -29,7 +25,7 @@ const setClass = computed(() => {
           :name="`planId[${index}]`"
           v-model="golden.apiData.planID"
           :config="{
-            value: item.planID,
+            value: item.planId,
           }"
           :setClass="{
             main: 'p:--px-40 p:--py-16 tm:p-16',

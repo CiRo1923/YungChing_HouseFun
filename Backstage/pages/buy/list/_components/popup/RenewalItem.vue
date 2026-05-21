@@ -1,6 +1,4 @@
 <script setup>
-import Address from '@pages/buy/_components/Address.vue'
-
 import { numberComma } from '@js/_prototype.js'
 
 const props = defineProps({
@@ -41,7 +39,7 @@ const setClass = computed(() => {
       <b class="font-medium">{{ props.data.caseTitle }}</b>
     </p>
     <div class="flex items-center">
-      <Address
+      <PageBuyAddress
         :data="addressData"
         :setClass="{
           main: 'text-[14px]',

@@ -1,7 +1,5 @@
 <script setup>
-import Info from '@pages/buy/publish/basic/_components/parking/Info.vue'
-
-import CardFilter from '@pages/buy/publish/basic/_containers/CardFilter.vue'
+import { PageBuyPublishBasicParkingInfo } from '#components'
 
 const props = defineProps({
   title: {
@@ -15,13 +13,13 @@ const items = shallowReadonly([
     isRequired: false,
     label: '車位',
     class: 'p:h-[35px]',
-    component: Info,
+    component: PageBuyPublishBasicParkingInfo,
   },
 ])
 </script>
 
 <template>
-  <CardFilter :title="props.title" :items="items" />
+  <PageBuyPublishBasicCardFilter :title="props.title" :items="items" />
 </template>
 
 <style></style>

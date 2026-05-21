@@ -1,6 +1,4 @@
 <script setup>
-import { useBuyListStore } from '@stores/buy/list.js'
-
 const buyList = useBuyListStore()
 const { datas } = storeToRefs(buyList)
 const isSelectAll = computed({

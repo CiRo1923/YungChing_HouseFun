@@ -1,21 +1,5 @@
 <script setup>
-import BackStepNew from '@pages/buy/publish/_components/BackStepNew.vue'
-import TabCheck from '@pages/buy/publish/basic/_components/TabCheck.vue'
-import PopupAddressGoogleMap from '@pages/buy/publish/basic/_components/popup/AddressGoogleMap.vue'
-import PopupFeature from '@pages/buy/publish/basic/_components/popup/Feature.vue'
-import PopupTitleDeed from '@pages/buy/publish/basic/_components/popup/TitleDeed.vue'
-
-import DataComponents from '@pages/buy/publish/basic/_containers/DataComponents.vue'
-import SubmitButtons from '@pages/buy/publish/basic/_containers/SubmitButtons.vue'
-
 // import { awaitAllPromise } from '@js/_prototype.js'
-
-// import { useCommonStore } from '@stores/common.js'
-import { useBuyProjectStore } from '@stores/buy/project.js'
-// import { useBuyPublishStore } from '@stores/buy/publish.js'
-import useCommonActions from '@stores/.composables/useCommonActions.js'
-import useBuyPublishActions from '@stores/buy/.composables/usePublishActions.js'
-import useBuyPopupActions from '@stores/buy/.composables/usePopupActions.js'
 
 import { Form } from 'vee-validate'
 
@@ -85,7 +69,7 @@ onUseMeta({
     }"
   >
     <template #tools>
-      <BackStepNew
+      <PageBuyPublishBackStepNew
         :anchor="{
           to: {
             name: 'buy-list-publish',
@@ -97,20 +81,23 @@ onUseMeta({
         :active="0"
       />
     </template>
-    <TabCheck />
+    <PageBuyPublishBasicTabCheck />
     <Form
       as="div"
       class="tm:mt-[24px] tm:space-y-[24px] p:mt-[32px] p:space-y-[32px]"
       v-slot="{ validate }"
     >
       <!-- <pre>{{ apiData }}</pre> -->
-      <DataComponents />
-      <SubmitButtons @click:draft="onDraftSubmit" @click:save="() => onSaveSubmit(validate)" />
+      <PageBuyPublishBasicDataComponents />
+      <PageBuyPublishBasicSubmitButtons
+        @click:draft="onDraftSubmit"
+        @click:save="() => onSaveSubmit(validate)"
+      />
     </Form>
   </BuyMContainer>
-  <PopupAddressGoogleMap />
-  <PopupFeature />
-  <PopupTitleDeed />
+  <PageBuyPublishBasicPopupAddressGoogleMap />
+  <PageBuyPublishBasicPopupFeature />
+  <PageBuyPublishBasicPopupTitleDeed />
 </template>
 
 <style lang="postcss"></style>

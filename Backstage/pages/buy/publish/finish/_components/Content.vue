@@ -1,12 +1,4 @@
 <script setup>
-import PublishInfo from '@pages/buy/_components/PublishInfo.vue'
-import FinishInfo from '@pages/buy/_components/FinishInfo.vue'
-
-import LabelText from '@pages/buy/publish/_components/LabelText.vue'
-
-import { useBuyProjectStore } from '@stores/buy/project.js'
-import useBuyProjectActions from '@stores/buy/.composables/useProjectActions.js'
-
 const buyProject = useBuyProjectStore()
 const { renewal } = storeToRefs(buyProject)
 const { onResetPojectData } = useBuyProjectActions()
@@ -34,21 +26,21 @@ onResetPojectData('renewal')
 <template>
   <div class="tm:space-y-[24px] p:space-y-[32px]">
     <BuyMCardDefault>
-      <PublishInfo :data="publishInfo" v-if="publishInfo" />
+      <PageBuyPublishInfo :data="publishInfo" v-if="publishInfo" />
     </BuyMCardDefault>
     <BuyMCardDefault
       :setClass="{
         main: 'tm:space-y-[16px] p:space-y-[24px]',
       }"
     >
-      <LabelText
+      <PageBuyPublishLabelText
         label="物件刊登完成"
         icon="icon_check_solid"
         :setClass="{
           icon: 'text-[--orange-e646]',
         }"
       />
-      <FinishInfo />
+      <PageBuyFinishInfo />
     </BuyMCardDefault>
   </div>
 </template>

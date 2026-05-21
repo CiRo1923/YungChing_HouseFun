@@ -1,17 +1,6 @@
 <script setup>
 import CustomPopup from '@containers/buy/common/CustomPopup.vue'
 
-import PublishInfo from '@pages/buy/_components/PublishInfo.vue'
-import RenewalInfo from '@pages/buy/_components/RenewalInfo.vue'
-
-import RenewalItem from '@pages/buy/list/_components/popup/RenewalItem.vue'
-
-// import { useBuyProjectStore } from '@stores/buy/project.js'
-// import { useBuyListStore } from '@stores/buy/list.js'
-import { usePopupStore } from '@stores/popup.js'
-import useBuyListActions from '@stores/buy/.composables/useListActions.js'
-import useBuyPopupActions from '@stores/buy/.composables/usePopupActions.js'
-
 import { Form } from 'vee-validate'
 
 // const buyProject = useBuyProjectStore()
@@ -78,7 +67,7 @@ const onSure = async () => {
     }"
     @sure="onSure"
   >
-    <PublishInfo :data="publishInfo" v-if="customData.data" />
+    <PageBuyPublishInfo :data="publishInfo" v-if="customData.data" />
 
     <ul class="popup-renewal-contaiiner" :class="{ 'tm:mt-[8px] p:mt-[16px]': publishInfo }">
       <li class="popup-renewal-item" v-if="count !== 0">
@@ -88,7 +77,7 @@ const onSure = async () => {
           個刊登額度
         </p>
         <Form as="div" class="tm:mt-[8px] p:mt-[16px]" ref="formRef">
-          <RenewalInfo />
+          <PageBuyRenewalInfo />
         </Form>
       </li>
       <li class="popup-renewal-item" v-if="!hasExpired">
@@ -104,7 +93,7 @@ const onSure = async () => {
               v-for="(item, index) in renewalNotExpiredData"
               :key="`${item.hfID}_${index}`"
             >
-              <RenewalItem
+              <PageBuyListPopupRenewalItem
                 :data="item"
                 :setClass="{
                   main: 'text-[--gray-666]',
@@ -129,7 +118,7 @@ const onSure = async () => {
             v-for="(item, index) in renewalCanNotPublishData"
             :key="`${item.hfID}_${index}`"
           >
-            <RenewalItem
+            <PageBuyListPopupRenewalItem
               :data="item"
               :setClass="{
                 main: 'text-[--gray-ccce]',

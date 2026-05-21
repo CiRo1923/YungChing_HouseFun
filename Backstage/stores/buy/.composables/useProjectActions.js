@@ -1,4 +1,5 @@
 import {
+  apiGetCommonServerTime,
   apiGETCitySelectOptions,
   apiGETDistrictSelectOptions,
   apiGetPublishAvailablePlans,
@@ -37,6 +38,8 @@ import {
   apiGETRealEstatePosterDataSourceSelectOptions,
 } from '@js/_api/buy/publish.js'
 
+import { onFormatDate } from '@js/_prototype.js'
+
 import { useBuyProjectStore } from '@stores/buy/project.js'
 
 import useBuyPopupActions from '@stores/buy/.composables/usePopupActions.js'
@@ -44,7 +47,28 @@ import useBuyPopupActions from '@stores/buy/.composables/usePopupActions.js'
 export default () => {
   const projectStores = useBuyProjectStore()
   const { onAlert, onCustom, onApiPromise, onApiError } = useBuyPopupActions()
-  const { renewal, autoRefresh, golden, options } = storeToRefs(projectStores)
+  const { serverTime, renewal, autoRefresh, golden, options } = storeToRefs(projectStores)
+
+  const onApiGetCommonServerTime = async () => {
+    const { config, status, data } = await apiGetCommonServerTime()
+
+    if (status === 200) {
+      serverTime.value = {
+        value: onFormatDate(data.serverTime, 'YYYY-MM-DD'),
+        full: onFormatDate(data.serverTime, 'YYYY-MM-DD hh:mm:ss'),
+        year: onFormatDate(data.serverTime, 'YYYY'),
+        month: onFormatDate(data.serverTime, 'MM'),
+        day: onFormatDate(data.serverTime, 'DD'),
+        hours: onFormatDate(data.serverTime, 'hh'),
+        minute: onFormatDate(data.serverTime, 'mm'),
+        second: onFormatDate(data.serverTime, 'ss'),
+      }
+    } else {
+      onApiError(config, status, data)
+    }
+
+    return { config, status, data }
+  }
 
   const onApiGETRealEstatePurposeCheckOptions = async () => {
     if (options.value.casePurpose) return false
@@ -532,7 +556,7 @@ export default () => {
   }
   const onResetPojectData = (type) => {
     if (type === 'renewal' || !type) {
-      renewal.value.apiData.planId = null
+      renewal.value.apiData.planID = null
     }
 
     if (type === 'golden' || !type) {
@@ -589,6 +613,7 @@ export default () => {
   }
 
   return {
+    onApiGetCommonServerTime,
     onApiGETRealEstatePurposeCheckOptions,
     onApiGETCitySelectOptions,
     onApiGETDistrictSelectOptions,

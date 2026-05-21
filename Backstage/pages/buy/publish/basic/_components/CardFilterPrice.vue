@@ -1,9 +1,9 @@
 <script setup>
-import CasePrice from '@pages/buy/publish/basic/_components/price/CasePrice.vue'
-import CaseParkingPrice from '@pages/buy/publish/basic/_components/price/CaseParkingPrice.vue'
-import CasePriceUnit from '@pages/buy/publish/basic/_components/price/CasePriceUnit.vue'
-
-import CardFilter from '@pages/buy/publish/basic/_containers/CardFilter.vue'
+import {
+  PageBuyPublishBasicPriceCasePrice,
+  PageBuyPublishBasicPriceCaseParkingPrice,
+  PageBuyPublishBasicPriceCasePriceUnit,
+} from '#components'
 
 const props = defineProps({
   title: {
@@ -17,27 +17,27 @@ const items = shallowReadonly([
     isRequired: true,
     label: '總價',
     class: 'p:h-[40px]',
-    component: CasePrice,
+    component: PageBuyPublishBasicPriceCasePrice,
   },
   {
     id: 'caseParkingPrice',
     isRequired: false,
     label: '車位價',
     class: 'p:h-[40px]',
-    component: CaseParkingPrice,
+    component: PageBuyPublishBasicPriceCaseParkingPrice,
   },
   {
     id: 'casePriceUnit',
     isRequired: false,
     label: '單價',
     class: 'p:h-[40px]',
-    component: CasePriceUnit,
+    component: PageBuyPublishBasicPriceCasePriceUnit,
   },
 ])
 </script>
 
 <template>
-  <CardFilter :title="props.title" :items="items" />
+  <PageBuyPublishBasicCardFilter :title="props.title" :items="items" />
 </template>
 
 <style></style>

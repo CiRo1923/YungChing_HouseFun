@@ -1,6 +1,4 @@
 <script setup>
-import SettingItem from '@pages/buy/list/_components/item/SettingItem.vue'
-
 const emits = defineEmits(['click:renewal', 'click:golden'])
 const props = defineProps({
   data: {
@@ -84,7 +82,7 @@ const items = computed(() => {
 <template>
   <ul class="space-y-[8px] p:min-w-[320px]">
     <li v-for="(item, index) in items" :key="`${item.label}_${index}`">
-      <SettingItem
+      <PageBuyListItemSettingItem
         :label="item.label"
         :config="{
           icon: item.icon,
@@ -102,7 +100,7 @@ const items = computed(() => {
             @click="item.button.onClick"
           />
         </template>
-      </SettingItem>
+      </PageBuyListItemSettingItem>
     </li>
   </ul>
 </template>

@@ -1,6 +1,4 @@
 <script setup>
-import TabItem from '@pages/buy/publish/basic/_components/TabItem.vue'
-
 import { Form } from 'vee-validate'
 
 const url = ref(null)
@@ -68,7 +66,7 @@ const onClick = async (validate) => {
         @click="onClick(validate)"
       />
     </div>
-    <TabItem
+    <PageBuyPublishBasicTabItem
       :data="items"
       :setClass="{
         main: 'mt-[16px]',

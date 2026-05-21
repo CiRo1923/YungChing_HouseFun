@@ -1,13 +1,6 @@
 <script setup>
 import CustomPopup from '@containers/buy/common/CustomPopup.vue'
 
-import PublishInfo from '@pages/buy/_components/PublishInfo.vue'
-import DealInfo from '@pages/buy/_components/DealInfo.vue'
-
-import { usePopupStore } from '@stores/popup.js'
-import useBuyListActions from '@stores/buy/.composables/useListActions.js'
-import useBuyPopupActions from '@stores/buy/.composables/usePopupActions.js'
-
 import { Form } from 'vee-validate'
 
 const popup = usePopupStore()
@@ -22,6 +15,7 @@ const publishInfo = computed(() => {
     buName: 'community',
     casePrice: 'price',
     picURLCover: 'cover',
+    caseDealInfo: 'info',
   }
 
   return customData.value.data
@@ -53,13 +47,13 @@ const onSure = async () => {
     }"
     @sure="onSure"
   >
-    <PublishInfo :data="publishInfo" v-if="publishInfo" />
+    <PageBuyPublishInfo :data="publishInfo" v-if="publishInfo" />
     <p class="text-[14px] text-[--gray-666]" v-else>
       已選擇
       <span class="text-[--orange-e646]">{{ selectCount }}</span> 個物件，物件成交後將無法重新上架
     </p>
     <Form as="div" class="tm:mt-[16px] p:mt-[24px]" ref="formRef">
-      <DealInfo />
+      <PageBuyDealInfo :data="publishInfo" />
     </Form>
   </CustomPopup>
 </template>

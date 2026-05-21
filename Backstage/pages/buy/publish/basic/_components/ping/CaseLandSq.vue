@@ -1,7 +1,4 @@
 <script setup>
-import { useBuyPublishStore } from '@stores/buy/publish.js'
-import useBuyPublishActions from '@stores/buy/.composables/usePublishActions.js'
-
 const buyPublish = useBuyPublishStore()
 const { pingUnitLabel, onPinSqMetersConvert } = useBuyPublishActions()
 const { pingData } = storeToRefs(buyPublish)

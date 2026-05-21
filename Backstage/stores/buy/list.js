@@ -26,12 +26,14 @@ export const useBuyListStore = defineStore('buyList', () => {
     dateDeal: null,
     isDealShow: false,
   })
+  const aggregate = ref(null)
   const datas = ref(null)
   const pagination = ref(null)
 
   return {
     apiData,
     apiDealData,
+    aggregate,
     datas,
     pagination,
   }

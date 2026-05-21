@@ -1,12 +1,4 @@
 <script setup>
-import Functions from '@pages/buy/list/_components/functions/Main.vue'
-import Item from '@pages/buy/list/_components/item/Main.vue'
-
-import { useBuyListStore } from '@stores/buy/list.js'
-import useBuyProjectActions from '@stores/buy/.composables/useProjectActions.js'
-import useBuyListActions from '@stores/buy/.composables/useListActions.js'
-import useBuyPopupActions from '@stores/buy/.composables/usePopupActions.js'
-
 const {
   onApiPOSTPublishRenewal,
   onResetPojectData,
@@ -275,7 +267,7 @@ const onGoldenClick = async (objectData) => {
       main: 'p:mt-[32px]',
     }"
   >
-    <Functions
+    <PageBuyListFunctionsMain
       :eventsItems="props.funEventsItem"
       @click:renewal="onRenewalClick"
       @click:publish="onPublishClick"
@@ -291,7 +283,7 @@ const onGoldenClick = async (objectData) => {
         v-for="(item, index) in datas"
         :key="`${item.hfID}_${index}`"
       >
-        <Item
+        <PageBuyListItemMain
           :data="item"
           :eventsItems="contentEventsItem"
           v-model:checked="item._checked.value"
@@ -308,7 +300,7 @@ const onGoldenClick = async (objectData) => {
             :dealFun="onDealClick"
             :goldenFun="onGoldenClick"
           />
-        </Item>
+        </PageBuyListItemMain>
         <!-- <pre>
           {{ item }}
         </pre> -->

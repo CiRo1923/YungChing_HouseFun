@@ -2,9 +2,6 @@
 import '@js/_validation.js'
 import { onAddZero } from '@js/_prototype.js'
 
-import { useCommonStore } from '@stores/common.js'
-import useCommonActions from '@stores/.composables/useCommonActions.js'
-
 import { Field, ErrorMessage } from 'vee-validate'
 
 const common = useCommonStore()

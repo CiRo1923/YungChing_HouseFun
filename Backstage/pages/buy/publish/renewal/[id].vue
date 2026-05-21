@@ -1,18 +1,4 @@
 ﻿<script setup>
-import BackStepNew from '@pages/buy/publish/_components/BackStepNew.vue'
-
-import Content from '@pages/buy/publish/renewal/_components/Content.vue'
-import SubmitButtons from '@pages/buy/publish/renewal/_containers/SubmitButtons.vue'
-
-// import { useCommonStore } from '@stores/common.js'
-import { useBuyProjectStore } from '@stores/buy/project.js'
-import { useBuyPublishStore } from '@stores/buy/publish.js'
-import useCommonActions from '@stores/.composables/useCommonActions.js'
-import useBuyProjectActions from '@stores/buy/.composables/useProjectActions.js'
-import useBuyPublishActions from '@stores/buy/.composables/usePublishActions.js'
-// import useBuyListActions from '@stores/buy/.composables/useListActions.js'
-import useBuyPopupActions from '@stores/buy/.composables/usePopupActions.js'
-
 import { Form } from 'vee-validate'
 
 // const common = useCommonStore()
@@ -113,7 +99,7 @@ onUseMeta({
     v-if="statusData.isExpired"
   >
     <template #tools>
-      <BackStepNew
+      <PageBuyPublishBackStepNew
         :anchor="{
           to: {
             name: 'buy-publish-basic-id',
@@ -128,8 +114,11 @@ onUseMeta({
       class="tm:mt-[24px] tm:space-y-[24px] p:mt-[32px] p:space-y-[32px]"
       v-slot="{ validate }"
     >
-      <Content />
-      <SubmitButtons @click:draft="onDraftSubmit()" @click:save="() => onSaveSubmit(validate)" />
+      <PageBuyPublishRenewalContent />
+      <PageBuyPublishRenewalSubmitButtons
+        @click:draft="onDraftSubmit()"
+        @click:save="() => onSaveSubmit(validate)"
+      />
     </Form>
   </BuyMContainer>
 </template>

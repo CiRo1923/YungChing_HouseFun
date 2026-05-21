@@ -1,10 +1,5 @@
 <script setup>
-import RadiosOval from '@pages/buy/publish/basic/_containers/RadiosOval.vue'
-
 import { onGetYouTubeID } from '@js/_prototype.js'
-
-import { useBuyProjectStore } from '@stores/buy/project.js'
-import { useBuyPublishStore } from '@stores/buy/publish.js'
 
 const buyProject = useBuyProjectStore()
 const { options } = storeToRefs(buyProject)
@@ -21,7 +16,7 @@ const videoPicture = computed(() => {
 </script>
 
 <template>
-  <RadiosOval>
+  <PageBuyPublishBasicRadiosOval>
     <BuyMFormRadiosOval
       name="caseVideoDisplayToken"
       v-model.number="apiData.caseVideoDisplayToken"
@@ -71,7 +66,7 @@ const videoPicture = computed(() => {
         v-else
       />
     </div>
-  </RadiosOval>
+  </PageBuyPublishBasicRadiosOval>
 </template>
 
 <style></style>

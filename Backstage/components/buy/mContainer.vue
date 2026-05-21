@@ -10,6 +10,7 @@ const props = defineProps({
 const setClass = computed(() => {
   return {
     main: '',
+    headerTools: '',
     ...props.setClass,
   }
 })
@@ -21,7 +22,11 @@ const setClass = computed(() => {
       <h2 class="text-[--gray-333] tm:text-center tm:text-[24px] p:grow p:text-[30px]">
         <strong class="font-semibold">{{ route.meta.title }}</strong>
       </h2>
-      <div class="m-container-header-tools p:shrink-0" v-if="$slots.header_tools">
+      <div
+        class="m-container-header-tools p:shrink-0"
+        :class="setClass.headerTools"
+        v-if="$slots.header_tools"
+      >
         <slot name="header_tools" />
       </div>
     </header>

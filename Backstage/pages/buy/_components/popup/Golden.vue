@@ -1,12 +1,4 @@
 <script setup>
-import CustomPopup from '@containers/buy/common/CustomPopup.vue'
-
-import PublishInfo from '@pages/buy/_components/PublishInfo.vue'
-import GoldenInfo from '@pages/buy/_components/GoldenInfo.vue'
-
-import { usePopupStore } from '@stores/popup.js'
-import useBuyPopupActions from '@stores/buy/.composables/usePopupActions.js'
-
 import { Form } from 'vee-validate'
 
 const popup = usePopupStore()
@@ -44,18 +36,18 @@ const onSure = async () => {
 </script>
 
 <template>
-  <CustomPopup
+  <BuyCommonCustomPopup
     id="popupGolden"
     :setClass="{
       main: 'p:--w-1200 t:--w-720',
     }"
     @sure="onSure"
   >
-    <PublishInfo :data="publishInfo" v-if="publishInfo" />
+    <PageBuyPublishInfo :data="publishInfo" v-if="publishInfo" />
     <Form as="div" class="tm:mt-[16px] p:mt-[24px]" ref="formRef">
-      <GoldenInfo />
+      <PageBuyGoldenInfo />
     </Form>
-  </CustomPopup>
+  </BuyCommonCustomPopup>
 </template>
 
 <style lang="postcss"></style>

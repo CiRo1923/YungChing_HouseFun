@@ -1,8 +1,5 @@
 <script setup>
-import Terms from '@pages/buy/publish/basic/_components/terms/Terms.vue'
-import AgreeUserTerm from '@pages/buy/publish/basic/_components/terms/AgreeUserTerm.vue'
-
-import CardFilter from '@pages/buy/publish/basic/_containers/CardFilter.vue'
+import { PageBuyPublishBasicTermsItems, PageBuyPublishBasicTermsAgreeUserTerm } from '#components'
 
 const props = defineProps({
   title: {
@@ -12,18 +9,18 @@ const props = defineProps({
 })
 const items = shallowReadonly([
   {
-    id: 'terms',
-    component: Terms,
+    id: 'items',
+    component: PageBuyPublishBasicTermsItems,
   },
   {
     id: 'agreeUserTerm',
-    component: AgreeUserTerm,
+    component: PageBuyPublishBasicTermsAgreeUserTerm,
   },
 ])
 </script>
 
 <template>
-  <CardFilter :title="props.title" :items="items" />
+  <PageBuyPublishBasicCardFilter :title="props.title" :items="items" />
 </template>
 
 <style></style>

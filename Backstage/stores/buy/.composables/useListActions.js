@@ -1,4 +1,5 @@
 import {
+  apiPOSTRealEstateCaseAggregate,
   apiPOSTRealEstateSearch,
   apiPOSTRealEstateOffline,
   apiPOSTRealEstateDeal,
@@ -14,7 +15,7 @@ export default () => {
   // const { renewal } = storeToRefs(buyProject)
   const { onReplaceImageSize } = useBuyProjectActions()
   const buyList = useBuyListStore()
-  const { apiData, apiDealData, datas, pagination } = storeToRefs(buyList)
+  const { apiData, apiDealData, aggregate, datas, pagination } = storeToRefs(buyList)
   const { onApiError } = useBuyPopupActions()
   const selectItems = computed(() =>
     datas.value ? datas.value.filter((item) => item._checked.value).map((item) => item.hfID) : []
@@ -32,6 +33,18 @@ export default () => {
       (item) => selectedIds.has(item.hfID) && item._checked.publish && !item._checked.isExpired
     )
   })
+  const onApiPOSTRealEstateCaseAggregate = async () => {
+    const { config, status, data } = await apiPOSTRealEstateCaseAggregate()
+
+    if (status === 200) {
+      aggregate.value = data
+    } else {
+      onApiError(config, status, data)
+    }
+
+    return { config, status, data }
+  }
+
   const onApiPOSTRealEstateSearch = async (caseStatusToken) => {
     const route = useRoute()
     const page = route.query.pg ? +route.query.pg : 1
@@ -147,6 +160,7 @@ export default () => {
     selectCount,
     renewalCanNotPublishData,
     renewalNotExpiredData,
+    onApiPOSTRealEstateCaseAggregate,
     onApiPOSTRealEstateSearch,
     onApiPOSTRealEstateOffline,
     onApiPOSTRealEstateDeal,

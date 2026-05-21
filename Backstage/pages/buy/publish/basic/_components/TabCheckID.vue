@@ -1,6 +1,4 @@
 <script setup>
-import TabItem from '@pages/buy/publish/basic/_components/TabItem.vue'
-
 const items = readonly({
   label: 'disc',
   items: [
@@ -12,7 +10,7 @@ const items = readonly({
 </script>
 
 <template>
-  <TabItem :data="items" />
+  <PageBuyPublishBasicTabItem :data="items" />
 </template>
 
 <style></style>

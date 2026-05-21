@@ -1,6 +1,4 @@
 <script setup>
-import { usePopupStore } from '@stores/popup.js'
-
 const popup = usePopupStore()
 const { apiPromiseData } = storeToRefs(popup)
 </script>

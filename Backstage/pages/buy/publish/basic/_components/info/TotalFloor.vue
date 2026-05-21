@@ -1,7 +1,4 @@
 <script setup>
-// import { useBuyProjectStore } from '@stores/buy/project.js'
-import { useBuyPublishStore } from '@stores/buy/publish.js'
-
 // const buyProject = useBuyProjectStore()
 // const { options } = storeToRefs(buyProject)
 const buyPublish = useBuyPublishStore()

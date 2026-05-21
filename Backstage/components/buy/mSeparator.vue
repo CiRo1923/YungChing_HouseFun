@@ -39,7 +39,7 @@ const setClass = computed(() => {
         :key="`${item.id}_${index}`"
         v-if="item.isHidden !== true || !config.isHiddenItem"
       >
-        <slot :name="`item_${index + 1}`" :item="item" :value="item.value">
+        <slot :item="item">
           <span v-html="item.value" />
         </slot>
       </li>
@@ -70,29 +70,13 @@ const setClass = computed(() => {
       }
     }
 
-    /* &.\-\-gap-x-30,
-    &.p\:\-\-gap-x-30,
-    &.pt\:\-\-gap-x-30 {
-      --item-before-right: -15px;
+    &.\-\-gap-x-32,
+    &.p\:\-\-gap-x-32,
+    &.pt\:\-\-gap-x-32 {
+      --item-before-right: -16px;
 
-      @apply gap-x-[30px];
+      @apply gap-x-[32px];
     }
-
-    &.\-\-gap-x-25,
-    &.p\:\-\-gap-x-25,
-    &.pt\:\-\-gap-x-25 {
-      --item-before-right: -13px;
-
-      @apply gap-x-[25px];
-    }
-
-    &.\-\-gap-x-20,
-    &.p\:\-\-gap-x-20,
-    &.pt\:\-\-gap-x-20 {
-      --item-before-right: -10px;
-
-      @apply gap-x-[20px];
-    } */
 
     &.\-\-gap-x-16,
     &.p\:\-\-gap-x-16,
@@ -102,21 +86,13 @@ const setClass = computed(() => {
       @apply gap-x-[16px];
     }
 
-    /* &.\-\-gap-x-12,
-    &.p\:\-\-gap-x-12,
-    &.pt\:\-\-gap-x-12 {
-      --item-before-right: -6px;
+    &.\-\-gap-x-8,
+    &.p\:\-\-gap-x-8,
+    &.pt\:\-\-gap-x-8 {
+      --item-before-right: -4px;
 
-      @apply gap-x-[12px];
+      @apply gap-x-[8px];
     }
-
-    &.\-\-gap-x-10,
-    &.p\:\-\-gap-x-10,
-    &.pt\:\-\-gap-x-10 {
-      --item-before-right: -5px;
-
-      @apply gap-x-[10px];
-    } */
   }
 }
 
@@ -135,32 +111,14 @@ const setClass = computed(() => {
       }
     }
 
-    /* &.\-\-gap-x-30,
-    &.pt\:\-\-gap-x-30,
-    &.tm\:\-\-gap-x-30,
-    &.t\:\-\-gap-x-30 {
-      --item-before-right: -15px;
+    &.\-\-gap-x-32,
+    &.pt\:\-\-gap-x-32,
+    &.tm\:\-\-gap-x-32,
+    &.t\:\-\-gap-x-32 {
+      --item-before-right: -16px;
 
-      @apply gap-x-[30px];
+      @apply gap-x-[32px];
     }
-
-    &.\-\-gap-x-25,
-    &.pt\:\-\-gap-x-25,
-    &.tm\:\-\-gap-x-25,
-    &.t\:\-\-gap-x-25 {
-      --item-before-right: -13px;
-
-      @apply gap-x-[25px];
-    }
-
-    &.\-\-gap-x-20,
-    &.pt\:\-\-gap-x-20,
-    &.tm\:\-\-gap-x-20,
-    &.t\:\-\-gap-x-20 {
-      --item-before-right: -10px;
-
-      @apply gap-x-[20px];
-    } */
 
     &.\-\-gap-x-16,
     &.pt\:\-\-gap-x-16,
@@ -171,23 +129,14 @@ const setClass = computed(() => {
       @apply gap-x-[16px];
     }
 
-    /* &.\-\-gap-x-12,
-    &.pt\:\-\-gap-x-12,
-    &.tm\:\-\-gap-x-12,
-    &.t\:\-\-gap-x-12 {
-      --item-before-right: -6px;
+    &.\-\-gap-x-8,
+    &.pt\:\-\-gap-x-8,
+    &.tm\:\-\-gap-x-8,
+    &.t\:\-\-gap-x-8 {
+      --item-before-right: -4px;
 
-      @apply gap-x-[12px];
+      @apply gap-x-[8px];
     }
-
-    &.\-\-gap-x-10,
-    &.pt\:\-\-gap-x-10,
-    &.tm\:\-\-gap-x-10,
-    &.t\:\-\-gap-x-10 {
-      --item-before-right: -5px;
-
-      @apply gap-x-[10px];
-    } */
   }
 }
 
@@ -205,29 +154,13 @@ const setClass = computed(() => {
       }
     }
 
-    /* &.\-\-gap-x-30,
-    &.tm\:\-\-gap-x-30,
-    &.m\:\-\-gap-x-30 {
-      --item-before-right: -15px;
+    &.\-\-gap-x-32,
+    &.tm\:\-\-gap-x-32,
+    &.m\:\-\-gap-x-32 {
+      --item-before-right: -16px;
 
-      @apply gap-x-[30px];
+      @apply gap-x-[32px];
     }
-
-    &.\-\-gap-x-25,
-    &.tm\:\-\-gap-x-25,
-    &.m\:\-\-gap-x-25 {
-      --item-before-right: -13px;
-
-      @apply gap-x-[25px];
-    }
-
-    &.\-\-gap-x-20,
-    &.tm\:\-\-gap-x-20,
-    &.m\:\-\-gap-x-20 {
-      --item-before-right: -10px;
-
-      @apply gap-x-[20px];
-    } */
 
     &.\-\-gap-x-16,
     &.tm\:\-\-gap-x-16,
@@ -237,21 +170,13 @@ const setClass = computed(() => {
       @apply gap-x-[16px];
     }
 
-    /* &.\-\-gap-x-12,
-    &.tm\:\-\-gap-x-12,
-    &.m\:\-\-gap-x-12 {
-      --item-before-right: -6px;
+    &.\-\-gap-x-8,
+    &.tm\:\-\-gap-x-8,
+    &.m\:\-\-gap-x-8 {
+      --item-before-right: -4px;
 
-      @apply gap-x-[12px];
+      @apply gap-x-[8px];
     }
-
-    &.\-\-gap-x-10,
-    &.tm\:\-\-gap-x-10,
-    &.m\:\-\-gap-x-10 {
-      --item-before-right: -5px;
-
-      @apply gap-x-[10px];
-    } */
   }
 }
 </style>

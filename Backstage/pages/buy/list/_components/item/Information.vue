@@ -1,7 +1,4 @@
 <script setup>
-import { useCommonStore } from '@stores/common.js'
-import useCommonActions from '@stores/.composables/useCommonActions.js'
-
 const common = useCommonStore()
 const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
@@ -28,10 +25,12 @@ const items = computed(() => {
     {
       id: 'purpose',
       value: casePurpose,
+      isHidden: !casePurpose,
     },
     {
       id: 'areaPin',
       value: `${caseAreaPin} 坪`,
+      isHidden: !caseAreaPin,
     },
   ]
   const result = {
@@ -39,42 +38,51 @@ const items = computed(() => {
       {
         id: 'purpose',
         value: casePurpose,
+        isHidden: !casePurpose,
       },
       {
         id: 'age',
         value: `${caseAge} 年`,
+        isHidden: !caseAge,
       },
       {
         id: 'areaPin',
         value: `${caseAreaPin} 坪`,
+        isHidden: !caseAreaPin,
       },
       {
         id: 'floor',
         value: `${caseFloor} / ${caseTotalFloor} 樓`,
+        isHidden: !caseFloor || !caseTotalFloor,
       },
       {
         id: 'layout',
         value: isDeviceM.value
           ? `${room} 房 (室)`
           : `${room} 房 (室) ${livingRoom} 廳 ${bathroom} 衛`,
+        isHidden: !room || !livingRoom || !bathroom,
       },
     ],
     5: [
       {
         id: 'purpose',
         value: casePurpose,
+        isHidden: !casePurpose,
       },
       {
         id: 'age',
         value: `${caseAge} 年`,
+        isHidden: !caseAge,
       },
       {
         id: 'areaPin',
         value: `${caseAreaPin} 坪`,
+        isHidden: !caseAreaPin,
       },
       {
         id: 'floor',
         value: `${caseFloor} / ${caseTotalFloor} 樓`,
+        isHidden: !caseFloor || !caseTotalFloor,
       },
     ],
     6: land,

@@ -1,8 +1,6 @@
 <script setup>
 import { numberComma } from '@js/_prototype.js'
 
-import { useBuyProjectStore } from '@stores/buy/project.js'
-
 const buyProject = useBuyProjectStore()
 const { renewal } = storeToRefs(buyProject)
 
@@ -26,13 +24,13 @@ const setClass = computed(() => {
     <ul class="m:space-y-[16px] pt:space-y-[8px]">
       <li
         v-for="(item, index) in renewal.data.listPlan"
-        :key="`${item.planType}_${item.planId}_${index}`"
+        :key="`${item.planType}_${item.planID}_${index}`"
       >
         <BuyMFormRadioItem
           :name="`planId[${index}]`"
-          v-model="renewal.apiData.planId"
+          v-model="renewal.apiData.planID"
           :config="{
-            value: item.planId,
+            value: item.planID,
           }"
           :setClass="{
             main: 'p:--px-40 p:--py-16 tm:p-16',
@@ -55,7 +53,7 @@ const setClass = computed(() => {
     </ul>
     <BuyMFormHidden
       name="planId"
-      v-model="renewal.apiData.planId"
+      v-model="renewal.apiData.planID"
       :rules="{
         required: '請選擇額度',
       }"

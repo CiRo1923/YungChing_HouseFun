@@ -114,14 +114,14 @@ export default () => {
   const onApiPromiseClose = () => {
     apiPromiseData.value.id = null
   }
-  const onApiError = (config, status, data) => {
+  const onApiError = (config = {}, status, data = {}) => {
     const title = '錯誤訊息'
     const message =
       status === 404
         ? '存取的對應的資料已被刪除、移動或從未存在'
         : status === 503
           ? '服務無法使用'
-          : data.Message || data.title
+          : data.Message || data.title || data.message || 'Fetch error'
     const content =
       /^(400|401)$/.test(status) && data.Message
         ? message

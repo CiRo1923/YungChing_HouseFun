@@ -1,22 +1,5 @@
 <script setup>
-import BackStepNew from '@pages/buy/publish/_components/BackStepNew.vue'
-// import BackStepEdit from '@pages/buy/publish/basic/_components/BackStepEdit.vue'
-import PopupAddressGoogleMap from '@pages/buy/publish/basic/_components/popup/AddressGoogleMap.vue'
-import PopupFeature from '@pages/buy/publish/basic/_components/popup/Feature.vue'
-import PopupTitleDeed from '@pages/buy/publish/basic/_components/popup/TitleDeed.vue'
-
-import DataComponents from '@pages/buy/publish/basic/_containers/DataComponents.vue'
-import SubmitButtons from '@pages/buy/publish/basic/_containers/SubmitButtons.vue'
-
 // import { awaitAllPromise } from '@js/_prototype.js'
-
-// import { useCommonStore } from '@stores/common.js'
-import { useBuyProjectStore } from '@stores/buy/project.js'
-import { useBuyPublishStore } from '@stores/buy/publish.js'
-import useCommonActions from '@stores/.composables/useCommonActions.js'
-import useBuyProjectActions from '@stores/buy/.composables/useProjectActions.js'
-import useBuyPublishActions from '@stores/buy/.composables/usePublishActions.js'
-import useBuyPopupActions from '@stores/buy/.composables/usePopupActions.js'
 
 import { Form } from 'vee-validate'
 
@@ -174,7 +157,7 @@ onUseMeta({
     }"
   >
     <template #tools>
-      <BackStepNew
+      <PageBuyPublishBackStepNew
         :anchor="{
           to: {
             name: buyPublish.statusMap[statusData.caseStatus],
@@ -202,17 +185,17 @@ onUseMeta({
       v-slot="{ validate }"
     >
       <!-- <pre>{{ apiData }}</pre> -->
-      <DataComponents />
-      <SubmitButtons
+      <PageBuyPublishBasicDataComponents />
+      <PageBuyPublishBasicSubmitButtons
         @click:draft="onDraft"
         @click:save="() => onSave(validate)"
         @click:renewal="() => onRenewal(validate)"
       />
     </Form>
   </BuyMContainer>
-  <PopupAddressGoogleMap />
-  <PopupFeature />
-  <PopupTitleDeed />
+  <PageBuyPublishBasicPopupAddressGoogleMap />
+  <PageBuyPublishBasicPopupFeature />
+  <PageBuyPublishBasicPopupTitleDeed />
 </template>
 
 <style lang="postcss"></style>

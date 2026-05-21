@@ -1,14 +1,4 @@
 <script setup>
-import ItemsInfo from '@pages/buy/list/_components/ItemsInfo.vue'
-import TabDefaultOval from '@pages/buy/list/_components/TabDefaultOval.vue'
-import Content from '@pages/buy/list/_components/Content.vue'
-import DealInfo from '@pages/buy/list/_components/item/DealInfo.vue'
-import PopupDeal from '@pages/buy/list/_components/popup/Deal.vue'
-
-import { useBuyProjectStore } from '@stores/buy/project.js'
-import useCommonActions from '@stores/.composables/useCommonActions.js'
-import useBuyListActions from '@stores/buy/.composables/useListActions.js'
-
 definePageMeta({
   layout: 'buy',
   requiresAuth: true,
@@ -17,7 +7,7 @@ definePageMeta({
 
 const buyProject = useBuyProjectStore()
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
-const { onApiPOSTRealEstateSearch } = useBuyListActions()
+const { onApiPOSTRealEstateCaseAggregate, onApiPOSTRealEstateSearch } = useBuyListActions()
 const route = useRoute()
 const page = computed(() => route.query.pg)
 // copy (複製資料)
@@ -29,7 +19,12 @@ const onUpdate = async (done) => {
   done()
 }
 
-await onWithLoadingAll([useAsyncData(`list-done-${page.value}`, () => onUpdate())])
+await onWithLoadingAll([
+  useAsyncData('list-case-aggregate-deal', () => onApiPOSTRealEstateCaseAggregate()),
+  useAsyncData('list-done', () => onUpdate(), {
+    watch: [page],
+  }),
+])
 
 onUseMeta({
   title: `物件管理 - 已成交 | ${buyProject.NAME}`,
@@ -42,17 +37,22 @@ onUseMeta({
   <BuyMContainer
     :setClass="{
       main: '--px-16',
+      headerTools: 'm:mt-[32px]',
     }"
   >
     <template #header_tools>
-      <ItemsInfo />
+      <PageBuyListItemsInfo />
     </template>
-    <TabDefaultOval />
-    <Content :funEventsItem="funEventsItem" @update="onUpdate" v-slot="{ item, dealFun }">
-      <DealInfo :data="item" @click:deal="dealFun" />
-    </Content>
+    <PageBuyListTabDefaultOval />
+    <PageBuyListContent
+      :funEventsItem="funEventsItem"
+      @update="onUpdate"
+      v-slot="{ item, dealFun }"
+    >
+      <PageBuyListItemDealInfo :data="item" @click:deal="dealFun" />
+    </PageBuyListContent>
   </BuyMContainer>
-  <PopupDeal />
+  <PageBuyListPopupDeal />
 </template>
 
 <style></style>

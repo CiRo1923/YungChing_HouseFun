@@ -1,6 +1,4 @@
 <script setup>
-import BackStepNew from '@pages/buy/publish/_container/BackStepNew.vue'
-
 const props = defineProps({
   anchor: {
     type: Object,
@@ -26,7 +24,7 @@ const stepOptions = readonly([
 </script>
 
 <template>
-  <BackStepNew
+  <PageBuyPublishBackTools
     :anchor="props.anchor"
     :stepOptions="stepOptions"
     :config="{
