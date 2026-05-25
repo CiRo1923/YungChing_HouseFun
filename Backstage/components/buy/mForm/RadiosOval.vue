@@ -84,7 +84,16 @@ const onChange = (item) => {
   emits('change', item)
 }
 
-onSelected()
+watch(
+  () => props.modelValue,
+  () => {
+    onSelected()
+  },
+  {
+    immediate: true,
+    deep: true,
+  }
+)
 </script>
 
 <template>

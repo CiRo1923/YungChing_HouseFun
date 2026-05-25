@@ -893,7 +893,7 @@ onUnmounted(() => {
     >
       <div class="m-datepicker-container" ref="datePickerContainerRef">
         <div
-          class="m-datepicker-element jFormValid flex items-center rounded-[--datepacker-rounded] border-[1px] border-[--datepacker-border-color] bg-[--datepacker-bg-color] px-[--datepacker-padding-x] leading-[1] text-[--datepacker-color] transition-colors duration-300"
+          class="m-datepicker-element flex items-center rounded-[--datepacker-rounded] border-[1px] border-[--datepacker-border-color] bg-[--datepacker-bg-color] px-[--datepacker-padding-x] leading-[1] text-[--datepacker-color] transition-colors duration-300"
           :class="[
             setClass.label,
             { '--required': model },

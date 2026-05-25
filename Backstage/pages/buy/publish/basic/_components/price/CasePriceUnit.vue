@@ -34,9 +34,11 @@ watch(
     apiData.value.caseInfo.casePrice,
     apiData.value.caseInfo.caseBuildSqPin,
     apiData.value.caseInfo.caseParkingSqPin,
+    apiData.value.caseInfo.caseParkingPrice,
     apiData.value.caseInfo.isCasePriceIncludeParking,
     apiData.value.caseInfo.isCasePricePerPinDeductParking,
     apiData.value.caseInfo.isCaseBuildSqIncludeParking,
+    apiData.value.caseInfo.isCasePriceUnitAuto,
   ],
   () => {
     onIsCasePriceUnitAuto()

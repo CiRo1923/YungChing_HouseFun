@@ -16,6 +16,7 @@ const { apiData } = storeToRefs(buyPublish)
       integer: true,
       isExistClose: false,
       hasClearButton: false,
+      maxlength: 3,
     }"
     :rules="{
       required: '請輸入總樓高',

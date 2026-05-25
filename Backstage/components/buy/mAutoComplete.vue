@@ -462,7 +462,7 @@ onUnmounted(() => {
       >
         <input type="hidden" v-bind="field" />
         <div
-          class="m-autocomplete-element jFormValid relative flex items-center gap-x-[8px] rounded-[5px] border-[1px] border-[--autocomplete-border-color] bg-[--autocomplete-bg-color] px-[10px] transition-colors duration-300"
+          class="m-autocomplete-element relative flex items-center gap-x-[8px] rounded-[5px] border-[1px] border-[--autocomplete-border-color] bg-[--autocomplete-bg-color] px-[10px] transition-colors duration-300"
           :class="[
             setClass.element,
             { '--focus': isFocus },

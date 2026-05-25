@@ -10,6 +10,12 @@ const { apiData } = storeToRefs(buyPublish)
 //     apiData.value.caseInfo.caseAddBalcony = ''
 //   }
 // }
+
+const onIsCasePriceIncludeParkingChange = () => {
+  if (!apiData.value.caseInfo.isCasePriceIncludeParking) return
+
+  apiData.value.caseInfo.isCaseParking = true
+}
 </script>
 
 <template>
@@ -47,6 +53,7 @@ const { apiData } = storeToRefs(buyPublish)
         :setClass="{
           label: 'text-[16px]',
         }"
+        @change="onIsCasePriceIncludeParkingChange"
       />
     </li>
   </ul>

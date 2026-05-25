@@ -1,5 +1,5 @@
 <script setup>
-// import { awaitAllPromise } from '@js/_prototype.js'
+import { onFormErrorScrollToElem } from '@js/_prototype.js'
 
 import { Form } from 'vee-validate'
 
@@ -53,7 +53,7 @@ const onDraft = async () => {
 }
 
 const onSave = async (validate) => {
-  const { valid } = await validate()
+  const { valid, errors } = await validate()
 
   if (valid) {
     onApiPromise('close')
@@ -65,16 +65,18 @@ const onSave = async (validate) => {
     if (status === 200) {
       await onAlertSuccess('儲存成功')
     }
+  } else {
+    onFormErrorScrollToElem(errors)
   }
 }
 
 const onRenewal = async (validate) => {
-  const { isExpired, caseStatus } = statusData.value || {}
+  const { valid, errors } = await validate()
 
-  if (isExpired) {
-    const { valid } = await validate()
+  if (valid) {
+    const { isExpired, caseStatus } = statusData.value || {}
 
-    if (valid) {
+    if (isExpired) {
       onApiPromise('open')
 
       const { status } = await onApiPOSTRealEstate(hfID.value)
@@ -93,46 +95,48 @@ const onRenewal = async (validate) => {
           })
         }
       }
-    }
-  } else {
-    const isConfirm = await onConfirm({
-      title: '刊登物件',
-      icon: 'icon_check_solid',
-      content: '物件仍在刊登效期內，無需使用刊登額度<br />確定要刊登物件嗎？',
-      btns: [
-        {
-          label: '返回',
-          class: '--border-gray-e5 --text-gray-666',
-          type: 'cancel',
-          isClose: true,
+    } else {
+      const isConfirm = await onConfirm({
+        title: '刊登物件',
+        icon: 'icon_check_solid',
+        content: '物件仍在刊登效期內，無需使用刊登額度<br />確定要刊登物件嗎？',
+        btns: [
+          {
+            label: '返回',
+            class: '--border-gray-e5 --text-gray-666',
+            type: 'cancel',
+            isClose: true,
+          },
+          {
+            label: '確定刊登',
+            class: '--bg-green-6a2d --text-white',
+            type: 'sure',
+            isClose: true,
+          },
+        ],
+        setClass: {
+          icon: 'text-[--orange-e646]',
+          content: 'text-[--gray-666] tracking-wider',
         },
-        {
-          label: '確定刊登',
-          class: '--bg-green-6a2d --text-white',
-          type: 'sure',
-          isClose: true,
-        },
-      ],
-      setClass: {
-        icon: 'text-[--orange-e646]',
-        content: 'text-[--gray-666] tracking-wider',
-      },
-    })
+      })
 
-    if (isConfirm && caseStatus === 4) {
-      onApiPromise('open')
+      if (isConfirm && caseStatus === 4) {
+        onApiPromise('open')
 
-      const { status } = await onApiPOSTRealEstateRestoreToOnline([hfID.value])
+        const { status } = await onApiPOSTRealEstateRestoreToOnline([hfID.value])
 
-      onApiPromise('close')
+        onApiPromise('close')
 
-      if (status === 200) {
-        router.push({
-          name: 'buy-publish-finish-id',
-          params: route.params,
-        })
+        if (status === 200) {
+          router.push({
+            name: 'buy-publish-finish-id',
+            params: route.params,
+          })
+        }
       }
     }
+  } else {
+    onFormErrorScrollToElem(errors)
   }
 }
 

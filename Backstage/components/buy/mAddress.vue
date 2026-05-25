@@ -325,6 +325,7 @@ onMounted(() => {
         integer: true,
         isExistClose: false,
         hasClearButton: false,
+        maxlength: 3,
       }"
       :setClass="{
         main: ['--h-40 --px-12 --py-8', setClass.lane],
@@ -344,6 +345,7 @@ onMounted(() => {
         integer: true,
         isExistClose: false,
         hasClearButton: false,
+        maxlength: 3,
       }"
       :setClass="{
         main: ['--h-40 --px-12 --py-8', setClass.alley],
@@ -363,6 +365,7 @@ onMounted(() => {
         integer: true,
         isExistClose: false,
         hasClearButton: false,
+        maxlength: 3,
       }"
       :setClass="{
         main: ['--h-40 --px-12 --py-8', setClass.number],
@@ -401,6 +404,7 @@ onMounted(() => {
         integer: true,
         isExistClose: false,
         hasClearButton: false,
+        maxlength: 3,
       }"
       :setClass="{
         main: ['--h-40 --px-12 --py-8', setClass.floor],

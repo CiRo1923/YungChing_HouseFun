@@ -96,7 +96,7 @@ const onChange = () => {
             type="radio"
             v-model="model"
             :value="config.value"
-            class="m-form-type jFormValid sr-only"
+            class="m-form-type sr-only"
             :class="{
               '--error': errorMessage,
             }"

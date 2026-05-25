@@ -1,7 +1,15 @@
 <script setup>
 const buyPublish = useBuyPublishStore()
 const { pingUnitLabel, onPinSqMetersConvert } = useBuyPublishActions()
-const { pingData } = storeToRefs(buyPublish)
+const { apiData, pingData } = storeToRefs(buyPublish)
+
+const onParkingSqBlur = () => {
+  onPinSqMetersConvert('caseParkingSq')
+
+  if (pingData.value.caseParkingSq) {
+    apiData.value.caseInfo.isCaseParking = true
+  }
+}
 </script>
 
 <template>
@@ -18,7 +26,7 @@ const { pingData } = storeToRefs(buyPublish)
       element: 'grow',
       rearAssist: 'text-[14px] text-[--gray-999]',
     }"
-    @blur="onPinSqMetersConvert('caseParkingSq')"
+    @blur="onParkingSqBlur"
   >
     <template #rearAssist>{{ pingUnitLabel }}</template>
   </BuyMFormInput>

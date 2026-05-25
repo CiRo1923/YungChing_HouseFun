@@ -1244,6 +1244,65 @@ export const onQueryParam = (key) => {
   return params.get(key)
 }
 
+// 驗證錯誤時取第一個錯誤的 elem 位置
+export const onFormErrorScrollToElem = (errors, options = {}) => {
+  const { offset = 10, behavior = 'smooth' } = options
+  const names = Object.keys(errors || {})
+
+  if (!names.length || typeof document === 'undefined' || typeof window === 'undefined') return
+
+  const escapeSelector = (value) => {
+    return window.CSS && typeof window.CSS.escape === 'function'
+      ? window.CSS.escape(value)
+      : String(value).replace(/["\\]/g, '\\$&')
+  }
+
+  const getHiddenTarget = (elem) => {
+    const form = elem.closest('.m-form')
+
+    return (
+      elem.previousElementSibling ||
+      elem.parentElement?.previousElementSibling ||
+      form?.previousElementSibling ||
+      form ||
+      elem.nextElementSibling ||
+      elem
+    )
+  }
+
+  const getScrollTarget = (name) => {
+    const safeName = escapeSelector(name)
+    const elem = document.querySelector(`[name="${safeName}"], #${safeName}`)
+
+    if (!elem) return null
+
+    const isHidden = elem.type === 'hidden' || elem.hidden
+    const target = isHidden ? getHiddenTarget(elem) : elem
+
+    return target.closest?.('.m-form') || target
+  }
+
+  requestAnimationFrame(() => {
+    const targets = names
+      .map((name) => getScrollTarget(name))
+      .filter(Boolean)
+      .sort((a, b) => {
+        return a.getBoundingClientRect().top - b.getBoundingClientRect().top
+      })
+
+    const target = targets[0]
+
+    if (!target) return
+
+    const top = target.getBoundingClientRect().top + window.scrollY - offset
+
+    window.scrollTo({
+      top,
+      behavior,
+    })
+  })
+}
+
 // 同時執行多支 api，會等全部回傳
 export const awaitAllPromise = async (apis) => {
   try {

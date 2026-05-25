@@ -25,6 +25,22 @@ const onReset = () => {
   apiData.value.caseInfo.caseCompletedYear = null
   apiData.value.caseInfo.caseCompletedMonth = null
 }
+
+const onIsCaseUnknownAge = () => {
+  if (apiData.value.caseInfo.isCaseUnknownAge) {
+    apiData.value.caseInfo.isCasePreSale = false
+  }
+
+  onReset()
+}
+
+const onIsCasePreSale = () => {
+  if (apiData.value.caseInfo.isCasePreSale) {
+    apiData.value.caseInfo.isCaseUnknownAge = false
+  }
+
+  onReset()
+}
 </script>
 
 <template>
@@ -150,7 +166,7 @@ const onReset = () => {
           :setClass="{
             label: 'text-[16px]',
           }"
-          @change="onReset"
+          @change="onIsCaseUnknownAge"
         />
       </li>
       <li class="flex h-[40px] items-center">
@@ -164,7 +180,7 @@ const onReset = () => {
           :setClass="{
             label: 'text-[16px]',
           }"
-          @change="onReset"
+          @change="onIsCasePreSale"
         />
       </li>
     </ul>

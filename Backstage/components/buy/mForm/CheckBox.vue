@@ -162,7 +162,7 @@ const onChange = () => {
             type="checkbox"
             v-model="model"
             v-bind="bind"
-            class="m-form-type jFormValid sr-only"
+            class="m-form-type sr-only"
             :class="{
               '--error': errorMessage,
             }"

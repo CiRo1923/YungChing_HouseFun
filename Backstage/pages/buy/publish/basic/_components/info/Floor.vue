@@ -59,6 +59,7 @@ const onIsSingleFloorChange = () => {
             integer: true,
             isExistClose: false,
             hasClearButton: false,
+            maxlength: 3,
           }"
           :rules="{
             required: '請輸入樓層',
@@ -101,6 +102,7 @@ const onIsSingleFloorChange = () => {
             integer: true,
             isExistClose: false,
             hasClearButton: false,
+            maxlength: 3,
           }"
           :rules="{
             required: '請輸入樓層',

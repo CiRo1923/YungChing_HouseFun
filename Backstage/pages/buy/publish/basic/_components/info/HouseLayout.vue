@@ -26,16 +26,25 @@ const items = shallowReadonly([
 const isError = computed(() => {
   const matchValue = items.filter((item) => !apiData.value.caseInfo[item.id])
 
-  return matchValue.length === items.length
+  return matchValue.length === items.length && !apiData.value.caseInfo.isCaseOpenConcept
 })
 
 const onIsCaseAddtionChange = () => {
-  if (!apiData.value.caseInfo.isCaseAddtion) {
-    apiData.value.caseInfo.caseAddRoom = null
-    apiData.value.caseInfo.caseAddLivingRoom = null
-    apiData.value.caseInfo.caseAddBathroom = null
-    apiData.value.caseInfo.caseAddBalcony = null
-  }
+  if (apiData.value.caseInfo.isCaseAddtion) return
+
+  apiData.value.caseInfo.caseAddRoom = null
+  apiData.value.caseInfo.caseAddLivingRoom = null
+  apiData.value.caseInfo.caseAddBathroom = null
+  apiData.value.caseInfo.caseAddBalcony = null
+}
+
+const onIsCaseOpenConceptChange = () => {
+  if (!apiData.value.caseInfo.isCaseOpenConcept) return
+
+  apiData.value.caseInfo.caseRoom = null
+  apiData.value.caseInfo.caseLivingRoom = null
+  apiData.value.caseInfo.caseBathroom = null
+  apiData.value.caseInfo.caseBalcony = null
 }
 </script>
 
@@ -60,6 +69,7 @@ const onIsCaseAddtionChange = () => {
                 maxlength: 2,
                 isExistClose: false,
                 hasClearButton: false,
+                isDisabled: apiData.caseInfo.isCaseOpenConcept,
                 isError: isError,
               }"
               :setClass="{
@@ -84,6 +94,7 @@ const onIsCaseAddtionChange = () => {
           :setClass="{
             label: 'text-[16px]',
           }"
+          @change="onIsCaseOpenConceptChange"
         />
       </li>
       <li class="flex h-[40px] items-center">

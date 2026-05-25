@@ -51,7 +51,7 @@ defineExpose({
 <template>
   <div class="m-item" :class="setClass.main" ref="mainRef">
     <div :class="setClass.header" v-if="config.header.label">
-      <p class="inline-flex m:text-[13px] pt:text-[14px]">
+      <p class="inline-flex">
         <b class="grow font-medium" :class="setClass.label">
           {{ config.header.label }}
         </b>
