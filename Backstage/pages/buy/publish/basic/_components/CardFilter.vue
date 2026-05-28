@@ -47,8 +47,9 @@ onUnmounted(() => {
   window.removeEventListener('resize', onResize)
 })
 
+onResize()
+
 onMounted(() => {
-  onResize()
   window.addEventListener('resize', onResize)
 })
 </script>

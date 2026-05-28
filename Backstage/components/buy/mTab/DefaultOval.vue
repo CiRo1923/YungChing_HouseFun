@@ -181,14 +181,15 @@ const onReset = () => {
 // 執行
 onInit()
 
+onResize()
+
+onMounted(() => {
+  window.addEventListener('resize', onResize)
+})
+
 onUnmounted(() => {
   onCancelAnimationFram()
   window.removeEventListener('resize', onResize)
-})
-
-onMounted(() => {
-  onResize()
-  window.addEventListener('resize', onResize)
 })
 </script>
 

@@ -4,8 +4,9 @@ const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
 const isDeviceP = computed(() => device.value === 'p')
 
+onResize()
+
 onMounted(() => {
-  onResize()
   window.addEventListener('resize', onResize)
 })
 
@@ -25,15 +26,14 @@ onUnmounted(() => {
           main: 'tm:h-[20px] tm:w-[57px] p:h-[25px] p:w-[77px]',
         }"
       />
-      <!-- device 預設值先給 p 平板、手機 先用 css 隱藏；畫面不會跳閃 -->
       <CommonImgSrc
         src="buy/logo_icon.svg"
         :setClass="{
-          main: 'tm:hidden p:ml-[4px] p:h-[25px] p:w-[87px]',
+          main: 'p:ml-[4px] p:h-[25px] p:w-[87px]',
         }"
         v-if="isDeviceP"
       />
-      <em class="text-[--white] tm:hidden p:ml-[10px] p:text-[24px]" v-if="isDeviceP">管理後台</em>
+      <em class="text-[--white] p:ml-[10px] p:text-[24px]" v-if="isDeviceP">管理後台</em>
     </div>
   </div>
 </template>

@@ -863,8 +863,9 @@ watch(
   { immediate: true }
 )
 
+onResize()
+
 onMounted(() => {
-  onResize()
   onGetDefaultDate()
   document.addEventListener('click', onClickOutside, true)
   window.addEventListener('resize', () => {

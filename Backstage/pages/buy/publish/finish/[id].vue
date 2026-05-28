@@ -7,6 +7,7 @@ const { onApiGetPublishAvailablePlans, onApiGETPublishGetPublishResponse } = use
 const buyPublish = useBuyPublishStore()
 const { statusData } = storeToRefs(buyPublish)
 const { onApiGERealEstateCaseStatus } = useBuyPublishActions()
+const { onApiErrorServerToClient } = useBuyPopupActions()
 
 const route = useRoute()
 
@@ -37,6 +38,10 @@ onUseMeta({
   title: `物件管理 - 刊登完成 | ${buyProject.NAME}`,
   description: '',
   url: useRequestURL(),
+})
+
+onMounted(() => {
+  onApiErrorServerToClient()
 })
 </script>
 

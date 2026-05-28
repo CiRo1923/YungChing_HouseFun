@@ -22,7 +22,7 @@ const setClass = computed(() => {
     <ul class="m:space-y-[16px] pt:space-y-[8px]">
       <li v-for="(item, index) in golden.plans" :key="`${item.planType}_${item.planID}_${index}`">
         <BuyMFormRadioItem
-          :name="`planId[${index}]`"
+          name="planID"
           v-model="golden.apiData.planID"
           :config="{
             value: item.planId,

@@ -1,6 +1,7 @@
 <script setup>
 import { numberComma } from '@js/_prototype.js'
 
+const emits = defineEmits(['click:view', 'click:comment'])
 const props = defineProps({
   data: {
     type: Object,
@@ -26,7 +27,7 @@ const items = computed(() => {
       icon: 'icon_two_people',
       content: numberComma.add(caseViewCount),
       class: 'm:shrink-0',
-      onClick: () => {},
+      onClick: () => emits('click:view', props.data),
     },
     {
       id: 'commentCount',
@@ -34,7 +35,7 @@ const items = computed(() => {
       icon: 'icon_dialogue',
       content: numberComma.add(caseCommentCount),
       class: 'm:shrink-0',
-      onClick: () => {},
+      onClick: () => emits('click:comment', props.data),
     },
   ]
 })

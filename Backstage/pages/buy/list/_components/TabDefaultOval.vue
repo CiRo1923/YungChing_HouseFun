@@ -10,7 +10,7 @@ const isDeviceM = computed(() => device.value === 'm')
 function onAggregate(key) {
   return isDeviceM.value
     ? ''
-    : `<small class="text-[12px] font-normal m:hidden">(${aggregate.value[key]})</span>`
+    : `<small class="text-[12px] font-normal">(${aggregate.value[key]})</small>`
 }
 
 const items = computed(() => {
@@ -58,13 +58,14 @@ const onClick = () => {
   onReset()
 }
 
-onUnmounted(() => {
-  window.removeEventListener('resize', onResize)
-})
+onResize()
 
 onMounted(() => {
-  onResize()
   window.addEventListener('resize', onResize)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', onResize)
 })
 </script>
 

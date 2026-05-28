@@ -3,6 +3,8 @@ import {
   apiPOSTRealEstateSearch,
   apiPOSTRealEstateOffline,
   apiPOSTRealEstateDeal,
+  apiPOSTRealEstateRemove,
+  apiGETRealEstateCaseViewCounts,
 } from '@js/_api/buy/list.js'
 
 // import { useBuyProjectStore } from '@stores/buy/project.js'
@@ -140,6 +142,28 @@ export default () => {
 
     return { config, status, data }
   }
+  const onApiPOSTRealEstateRemove = async (hfids) => {
+    const { config, status, data } = await apiPOSTRealEstateRemove({
+      hfids,
+    })
+
+    if (status !== 200) {
+      onApiError(config, status, data)
+    }
+
+    return { config, status, data }
+  }
+  const onApiGETRealEstateCaseViewCounts = async (hfid) => {
+    const { config, status, data } = await apiGETRealEstateCaseViewCounts({
+      hfid,
+    })
+
+    if (status !== 200) {
+      onApiError(config, status, data)
+    }
+
+    return { config, status, data }
+  }
   const onSyncCheckedDatas = (hfids) => {
     const idSet = new Set(hfids)
 
@@ -164,6 +188,8 @@ export default () => {
     onApiPOSTRealEstateSearch,
     onApiPOSTRealEstateOffline,
     onApiPOSTRealEstateDeal,
+    onApiPOSTRealEstateRemove,
+    onApiGETRealEstateCaseViewCounts,
     onSyncCheckedDatas,
     onReset,
   }

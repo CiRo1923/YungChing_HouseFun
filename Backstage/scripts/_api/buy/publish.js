@@ -8,10 +8,10 @@ export const apiGETRealEstate = async (data) =>
   await fetchApi.get(`api/${version}/buy/realEstate/{hfid}`, data)
 
 export const apiPOSTRealEstate = async (data) =>
-  await fetchApi.postForm(`api/${version}/buy/realEstate/{hfid}`, data)
+  await fetchApi.postString(`api/${version}/buy/realEstate/{hfid}`, data)
 
 export const apiPOSTRealEstateDraft = async (data) =>
-  await fetchApi.postForm(`api/${version}/buy/realEstateDraft/{hfid}`, data)
+  await fetchApi.postString(`api/${version}/buy/realEstateDraft/{hfid}`, data)
 
 export const apiPOSTRealEstatePicUpload = async (data) =>
   await fetchApi.postForm(`api/${version}/buy/realEstatePic/Upload`, data)

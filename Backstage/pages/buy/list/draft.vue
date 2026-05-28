@@ -9,12 +9,13 @@ const buyProject = useBuyProjectStore()
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
 const { onApiGetPublishAvailablePlans, onApiGETGoldenGetPlanList } = useBuyProjectActions()
 const { onApiPOSTRealEstateCaseAggregate, onApiPOSTRealEstateSearch } = useBuyListActions()
+const { onApiErrorServerToClient } = useBuyPopupActions()
 const route = useRoute()
 const page = computed(() => route.query.pg)
-// publish (刊登) / deal (成交)
-const funEventsItem = ['publish', 'deal']
-// editor (修改) / deal (成交)
-const contentEventsItem = ['editor', 'deal']
+// publish (刊登) / deal (成交) / remove (刪除)
+const funEventsItem = ['publish', 'deal', 'remove']
+// editor (修改) / deal (成交) / remove (刪除)
+const contentEventsItem = ['editor', 'deal', 'remove']
 
 const onUpdate = async (done) => {
   await onApiPOSTRealEstateSearch(2)
@@ -35,6 +36,10 @@ onUseMeta({
   title: `物件管理 - 草稿區 | ${buyProject.NAME}`,
   description: '',
   url: useRequestURL(),
+})
+
+onMounted(() => {
+  onApiErrorServerToClient()
 })
 </script>
 

@@ -9,6 +9,7 @@ const buyProject = useBuyProjectStore()
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
 const { onApiGetPublishAvailablePlans, onApiGETGoldenGetPlanList } = useBuyProjectActions()
 const { onApiPOSTRealEstateCaseAggregate, onApiPOSTRealEstateSearch } = useBuyListActions()
+const { onApiErrorServerToClient } = useBuyPopupActions()
 const route = useRoute()
 // renewal (續刊) / offline (下架) / deal (成交)
 const funEventsItem = ['renewal', 'offline', 'deal']
@@ -34,6 +35,10 @@ onUseMeta({
   title: `物件管理 - 刊登中 | ${buyProject.NAME}`,
   description: '',
   url: useRequestURL(),
+})
+
+onMounted(() => {
+  onApiErrorServerToClient()
 })
 </script>
 

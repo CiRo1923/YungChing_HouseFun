@@ -5,6 +5,8 @@ const emits = defineEmits([
   'click:offline',
   'click:deal',
   'click:copy',
+  'click:remove',
+  'update',
 ])
 const props = defineProps({
   eventsItems: {
@@ -19,7 +21,7 @@ const onClick = (id) => {
 </script>
 
 <template>
-  <div class="border-b-[2px] border-b-[--gray-e5] pt:flex pt:items-center p:px-[16px] p:pb-[16px]">
+  <div class="border-b-[2px] border-b-[--gray-e5] px-[16px] pb-[16px] pt:flex pt:items-center">
     <div class="flex items-center pt:grow p:gap-x-[24px]">
       <PageBuyListFunctionsSelectAll />
       <PageBuyListFunctionsEvents
@@ -29,10 +31,11 @@ const onClick = (id) => {
         @click:offline="onClick('offline')"
         @click:deal="onClick('deal')"
         @click:copy="onClick('copy')"
+        @click:remove="onClick('remove')"
       />
       <PageBuyListFunctionsSelectCount />
     </div>
-    <PageBuyListFunctionsSort />
+    <PageBuyListFunctionsSort @update="emits('update')" />
   </div>
 </template>
 

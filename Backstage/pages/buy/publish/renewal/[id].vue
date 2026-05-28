@@ -9,7 +9,7 @@ const buyPublish = useBuyPublishStore()
 const { statusData } = storeToRefs(buyPublish)
 const { onApiGetPublishAvailablePlans, onApiPOSTPublishSubmit } = useBuyProjectActions()
 const { onApiGERealEstateCaseStatus, onApiPOSTRealEstateReadToPublish } = useBuyPublishActions()
-const { onAlert, onApiPromise } = useBuyPopupActions()
+const { onAlert, onApiPromise, onApiErrorServerToClient } = useBuyPopupActions()
 const route = useRoute()
 const router = useRouter()
 const nuxtApp = useNuxtApp()
@@ -88,6 +88,10 @@ onUseMeta({
   title: `物件管理 - 選擇額度 | ${buyProject.NAME}`,
   description: '',
   url: requestURL,
+})
+
+onMounted(() => {
+  onApiErrorServerToClient()
 })
 </script>
 

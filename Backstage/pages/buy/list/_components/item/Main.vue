@@ -5,7 +5,15 @@ const common = useCommonStore()
 const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
 
-const emits = defineEmits(['update:checked', 'click:publish', 'click:offline', 'click:deal'])
+const emits = defineEmits([
+  'update:checked',
+  'click:publish',
+  'click:offline',
+  'click:deal',
+  'click:remove',
+  'click:view',
+  'click:comment',
+])
 const props = defineProps({
   data: {
     type: Object,
@@ -41,18 +49,26 @@ const addressData = computed(() => {
       .map(([key, value]) => [keyMap[key], value])
   )
 })
+const photoTags = computed(() => {
+  const { isGolden, isCaseExchange, caseNo } = props.data
+
+  return [isGolden ? '黃金曝光' : null, isCaseExchange ? '可換物件' : null, caseNo || null].filter(
+    Boolean
+  )
+})
 
 const onEventsClick = (id, data) => {
   emits(`click:${id}`, data)
 }
 
-onUnmounted(() => {
-  window.removeEventListener('resize', onResize)
-})
+onResize()
 
 onMounted(() => {
-  onResize()
   window.addEventListener('resize', onResize)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', onResize)
 })
 </script>
 
@@ -96,24 +112,42 @@ onMounted(() => {
         </div>
         <PageBuyListItemInformation :data="props.data" />
         <div class="m:mt-[8px] pt:flex pt:items-center p:mt-[20px]">
-          <PageBuyListItemHot :data="props.data" />
+          <PageBuyListItemHot
+            :data="props.data"
+            @click:view="(data) => onEventsClick('view', data)"
+            @click:comment="(data) => onEventsClick('comment', data)"
+          />
           <PageBuyListItemEvents
             :data="props.data"
             :items="eventsItems"
             @click:publish="(data) => onEventsClick('publish', data)"
             @click:offline="(data) => onEventsClick('offline', data)"
             @click:deal="(data) => onEventsClick('deal', data)"
+            @click:remove="(data) => onEventsClick('remove', data)"
             v-if="!isDeviceM && hasEventsItem"
           />
         </div>
       </div>
-      <CommonImgSrc
-        :src="props.data.picURLCover"
-        :alt="props.data.caseTitle"
-        :setClass="{
-          main: 'order-2 shrink-0 overflow-hidden rounded-[10px] m:mb-[16px] m:h-[242px] t:h-[114px] t:w-[150px] p:h-[152px] p:w-[200px]',
-        }"
-      />
+      <div
+        class="relative order-2 shrink-0 overflow-hidden rounded-[10px] m:mb-[16px] m:h-[242px] t:h-[114px] t:w-[150px] p:h-[152px] p:w-[200px]"
+      >
+        <CommonImgSrc
+          :src="props.data.picURLCover"
+          :alt="props.data.caseTitle"
+          :setClass="{
+            main: 'h-full w-full',
+          }"
+        />
+        <ul class="absolute left-[8px] top-[8px] flex flex-wrap gap-[4px]" v-if="photoTags.length">
+          <li
+            class="rounded-[2px] bg-[rgba(0,0,0,0.72)] px-[6px] py-[2px] text-[12px] text-[--white]"
+            v-for="tag in photoTags"
+            :key="tag"
+          >
+            {{ tag }}
+          </li>
+        </ul>
+      </div>
       <BuyMFormCheckBox
         :name="`checked[${props.data.hfID}]`"
         v-model="modelIsChecked"
@@ -133,6 +167,7 @@ onMounted(() => {
       @click:publish="(data) => onEventsClick('publish', data)"
       @click:offline="(data) => onEventsClick('offline', data)"
       @click:deal="(data) => onEventsClick('deal', data)"
+      @click:remove="(data) => onEventsClick('remove', data)"
       v-if="isDeviceM && hasEventsItem"
     />
   </section>

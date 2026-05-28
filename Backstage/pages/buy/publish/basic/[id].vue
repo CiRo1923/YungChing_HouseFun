@@ -23,7 +23,7 @@ const {
   onApiPOSTRealEstateDraft,
   onApiPOSTRealEstate,
 } = useBuyPublishActions()
-const { onAlert, onConfirm, onApiPromise } = useBuyPopupActions()
+const { onAlert, onConfirm, onApiPromise, onApiErrorServerToClient } = useBuyPopupActions()
 const route = useRoute()
 const router = useRouter()
 const hfID = computed(() => route.params.id)
@@ -73,8 +73,11 @@ const onSave = async (validate) => {
 const onRenewal = async (validate) => {
   const { valid, errors } = await validate()
 
+  console.log(valid)
+
   if (valid) {
     const { isExpired, caseStatus } = statusData.value || {}
+    console.log(isExpired)
 
     if (isExpired) {
       onApiPromise('open')
@@ -120,6 +123,8 @@ const onRenewal = async (validate) => {
         },
       })
 
+      console.log(caseStatus)
+
       if (isConfirm && caseStatus === 4) {
         onApiPromise('open')
 
@@ -150,6 +155,10 @@ onUseMeta({
   title: `物件管理 - 資料編輯 | ${buyProject.NAME}`,
   description: '',
   url: useRequestURL(),
+})
+
+onMounted(() => {
+  onApiErrorServerToClient()
 })
 </script>
 

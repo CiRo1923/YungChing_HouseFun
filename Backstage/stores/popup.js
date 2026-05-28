@@ -39,6 +39,7 @@ export const usePopupStore = defineStore('popup', () => {
     content: '資料處理中，請勿退出或關閉頁面<br />感謝您耐心等候！',
     hasExistClose: false,
   })
+  const apiError = ref(null)
 
   return {
     alertCheck,
@@ -48,5 +49,6 @@ export const usePopupStore = defineStore('popup', () => {
     confirmData,
     customData,
     apiPromiseData,
+    apiError,
   }
 })

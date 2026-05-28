@@ -1,9 +1,11 @@
 <script setup>
-import { onDevice, onDeepMerge, onDeepClone, onEmptyData } from '@js/_prototype.js'
+import { onDeepMerge, onDeepClone, onEmptyData } from '@js/_prototype.js'
 
 import '@js/_validation.js'
 
 import { Field, ErrorMessage } from 'vee-validate'
+
+const { onResize } = useCommonActions()
 
 const emits = defineEmits(['update:modelValue', 'change'])
 const props = defineProps({
@@ -42,7 +44,6 @@ const selectRef = ref(null)
 const dropdownRef = ref(null)
 const dropdownContainerRef = ref(null)
 const dropdownItemRef = ref(null)
-const device = ref(null)
 const isFocus = ref(false)
 const isActive = ref(false)
 const selectedIndex = ref(-1)
@@ -322,8 +323,7 @@ const onOutSide = (e) => {
   }
 }
 
-const onResize = () => {
-  device.value = onDevice()
+const onSelectResize = () => {
   onDropdownOpen()
 }
 
@@ -344,16 +344,19 @@ watch(
   }
 )
 
+onResize()
+
 onMounted(() => {
   onSetSelectedIndex()
-  onResize()
   document.addEventListener('click', onOutSide, true)
   window.addEventListener('resize', onResize)
+  window.addEventListener('resize', onSelectResize)
 })
 
 onUnmounted(() => {
   document.removeEventListener('click', onOutSide, true)
   window.removeEventListener('resize', onResize)
+  window.removeEventListener('resize', onSelectResize)
 })
 </script>
 

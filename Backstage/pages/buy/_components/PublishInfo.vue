@@ -12,13 +12,14 @@ const props = defineProps({
 })
 const isDeviceM = computed(() => device.value === 'm')
 
-onUnmounted(() => {
-  window.removeEventListener('resize', onResize)
-})
+onResize()
 
 onMounted(() => {
-  onResize()
   window.addEventListener('resize', onResize)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', onResize)
 })
 </script>
 

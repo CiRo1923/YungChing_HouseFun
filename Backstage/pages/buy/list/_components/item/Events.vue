@@ -1,5 +1,5 @@
 <script setup>
-const emits = defineEmits(['click:publish', 'click:offline', 'click:deal'])
+const emits = defineEmits(['click:publish', 'click:offline', 'click:deal', 'click:remove'])
 const props = defineProps({
   data: {
     type: Object,
@@ -51,6 +51,15 @@ const datas = shallowReadonly([
     onClick: () => {
       // 有 props.data popup 不會出現已選擇 {0} 筆物件
       emits('click:deal', props.data)
+    },
+  },
+  {
+    id: 'remove',
+    icon: 'icon_xmark_circle',
+    label: '刪除',
+    component: 'button',
+    onClick: () => {
+      emits('click:remove', props.data)
     },
   },
 ])

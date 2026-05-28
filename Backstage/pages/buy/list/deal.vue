@@ -8,10 +8,11 @@ definePageMeta({
 const buyProject = useBuyProjectStore()
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
 const { onApiPOSTRealEstateCaseAggregate, onApiPOSTRealEstateSearch } = useBuyListActions()
+const { onApiErrorServerToClient } = useBuyPopupActions()
 const route = useRoute()
 const page = computed(() => route.query.pg)
-// copy (複製資料)
-const funEventsItem = ['copy']
+// remove (刪除)
+const funEventsItem = ['remove']
 
 const onUpdate = async (done) => {
   await onApiPOSTRealEstateSearch(3)
@@ -30,6 +31,10 @@ onUseMeta({
   title: `物件管理 - 已成交 | ${buyProject.NAME}`,
   description: '',
   url: useRequestURL(),
+})
+
+onMounted(() => {
+  onApiErrorServerToClient()
 })
 </script>
 

@@ -7,6 +7,7 @@ const emits = defineEmits([
   'click:offline',
   'click:deal',
   'click:copy',
+  'click:remove',
 ])
 const props = defineProps({
   items: {
@@ -34,6 +35,10 @@ const datas = readonly([
   {
     id: 'copy',
     label: '複製資料',
+  },
+  {
+    id: 'remove',
+    label: '刪除',
   },
 ])
 const result = computed(() => datas.filter((item) => props.items.includes(item.id)))

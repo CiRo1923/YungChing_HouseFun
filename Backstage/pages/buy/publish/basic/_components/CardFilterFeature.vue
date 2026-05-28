@@ -39,13 +39,14 @@ const items = shallowReadonly([
   },
 ])
 
-onUnmounted(() => {
-  window.removeEventListener('resize', onResize)
-})
+onResize()
 
 onMounted(() => {
-  onResize()
   window.addEventListener('resize', onResize)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', onResize)
 })
 </script>
 

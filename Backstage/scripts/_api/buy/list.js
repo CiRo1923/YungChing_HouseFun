@@ -11,3 +11,9 @@ export const apiPOSTRealEstateOffline = async (data) =>
 
 export const apiPOSTRealEstateDeal = async (data) =>
   await fetchApi.post(`api/${version}/buy/realEstate/deal`, data)
+
+export const apiPOSTRealEstateRemove = async (data) =>
+  await fetchApi.post(`api/${version}/buy/realEstate/Remove`, data)
+
+export const apiGETRealEstateCaseViewCounts = async (data) =>
+  await fetchApi.get(`api/${version}/buy/realEstate/caseViewCounts`, data)

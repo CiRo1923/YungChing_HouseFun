@@ -1,12 +1,30 @@
 const METHOD_WITH_BODY = new Set(['post', 'put', 'patch'])
 
-const FETCH_METHODS = ['get', 'post', 'put', 'patch', 'delete', 'postForm', 'putForm', 'patchForm']
+const FETCH_METHODS = [
+  'get',
+  'post',
+  'put',
+  'patch',
+  'delete',
+  'postForm',
+  'putForm',
+  'patchForm',
+  'postString',
+  'putString',
+  'patchString',
+]
 const FETCH_METHOD_SET = new Set(FETCH_METHODS.map((method) => method.toLowerCase()))
 
 const FORM_METHOD_MAP = {
   postform: 'post',
   putform: 'put',
   patchform: 'patch',
+}
+
+const STRING_METHOD_MAP = {
+  poststring: 'post',
+  putstring: 'put',
+  patchstring: 'patch',
 }
 
 const FORM_MAX_DEPTH = 100
@@ -141,6 +159,37 @@ const toFormData = (data = {}) => {
   return formData
 }
 
+const appendStringFormValue = (formData, key, value) => {
+  if (value == null) return
+
+  if (Array.isArray(value)) {
+    for (const item of value) appendStringFormValue(formData, key, item)
+    return
+  }
+
+  if (isBlobLike(value)) {
+    formData.append(key, value)
+    return
+  }
+
+  if (isPlainObject(value)) {
+    formData.append(key, JSON.stringify(value))
+    return
+  }
+
+  formData.append(key, convertFormValue(value))
+}
+
+const toStringFormData = (data = {}) => {
+  const formData = new FormData()
+
+  for (const [key, value] of Object.entries(data)) {
+    appendStringFormValue(formData, key, value)
+  }
+
+  return formData
+}
+
 const buildQueryString = (query = {}) => {
   const params = new URLSearchParams()
 
@@ -211,7 +260,7 @@ const resolveValue = async (value) => {
   return value
 }
 
-const createRequestOptions = (method, data, usedKeys, isFormRequest) => {
+const createRequestOptions = (method, data, usedKeys, isFormRequest, isStringRequest) => {
   const opts = {
     method: method.toUpperCase(),
     query: undefined,
@@ -220,7 +269,7 @@ const createRequestOptions = (method, data, usedKeys, isFormRequest) => {
     safeBody: undefined,
   }
 
-  if (isFormRequest && isFormDataLike(data)) {
+  if ((isFormRequest || isStringRequest) && isFormDataLike(data)) {
     opts.body = data
     return opts
   }
@@ -242,6 +291,8 @@ const createRequestOptions = (method, data, usedKeys, isFormRequest) => {
   if (METHOD_WITH_BODY.has(method)) {
     if (isFormRequest) {
       opts.body = toFormData(rest)
+    } else if (isStringRequest) {
+      opts.body = toStringFormData(rest)
     } else {
       opts.body = JSON.stringify(rest)
       opts.safeBody = rest
@@ -341,8 +392,9 @@ export const onFetchApi = (globalConfig = {}) => {
       }
 
       const rawMethod = method.toLowerCase()
-      const fetchMethod = FORM_METHOD_MAP[rawMethod] ?? rawMethod
+      const fetchMethod = FORM_METHOD_MAP[rawMethod] ?? STRING_METHOD_MAP[rawMethod] ?? rawMethod
       const isFormRequest = rawMethod in FORM_METHOD_MAP
+      const isStringRequest = rawMethod in STRING_METHOD_MAP
       const responseType = normalizeResponseType(requestConfig.responseType)
 
       const finalBaseURL = requestConfig.baseURL ?? (await resolveValue(baseURL))
@@ -358,7 +410,13 @@ export const onFetchApi = (globalConfig = {}) => {
 
       const reqPath = urlPath.startsWith('/') ? urlPath : `/${urlPath}`
 
-      const opts = createRequestOptions(fetchMethod, data, usedKeys, isFormRequest)
+      const opts = createRequestOptions(
+        fetchMethod,
+        data,
+        usedKeys,
+        isFormRequest,
+        isStringRequest
+      )
 
       const queryString = opts.query ? buildQueryString(opts.query) : ''
       const requestURL = `${joinURL(finalBaseURL, reqPath)}${queryString}`

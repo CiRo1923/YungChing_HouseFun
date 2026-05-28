@@ -16,6 +16,7 @@ export default () => {
     confirmData,
     customData,
     apiPromiseData,
+    apiError,
   } = storeToRefs(popupStore)
   const onAlert = (data) => {
     const buttons = buyPopupStore.buttons.alert
@@ -115,22 +116,36 @@ export default () => {
     apiPromiseData.value.id = null
   }
   const onApiError = (config = {}, status, data = {}) => {
-    const title = '錯誤訊息'
-    const message =
-      status === 404
-        ? '存取的對應的資料已被刪除、移動或從未存在'
-        : status === 503
-          ? '服務無法使用'
-          : data.Message || data.title || data.message || 'Fetch error'
-    const content =
-      /^(400|401)$/.test(status) && data.Message
-        ? message
-        : `${config.url}<br>${status} 錯誤:<br>${message}`
+    if (import.meta.server) {
+      apiError.value = { config, status, data }
+    } else {
+      const title = '錯誤訊息'
+      const message =
+        status === 404
+          ? '存取的對應的資料已被刪除、移動或從未存在'
+          : status === 503
+            ? '服務無法使用'
+            : data.Message || data.title
+      const content =
+        /^(400|401)$/.test(status) && data.Message
+          ? message
+          : `${config.url}<br />${status} 錯誤:<br />${message}`
 
-    onAlert({
-      title,
-      content,
-    })
+      onAlert({
+        title,
+        content,
+      })
+    }
+  }
+  const onApiErrorServerToClient = () => {
+    if (apiError.value) {
+      const { config, status, data } = apiError.value
+
+      onApiError(config, status, data)
+    }
+  }
+  const onApiErrorClear = () => {
+    apiError.value = null
   }
   const onReset = () => {
     onAlertClose()
@@ -149,6 +164,8 @@ export default () => {
     onApiPromise,
     onApiPromiseClose,
     onApiError,
+    onApiErrorServerToClient,
+    onApiErrorClear,
     onReset,
   }
 }

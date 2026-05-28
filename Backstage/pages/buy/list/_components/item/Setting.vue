@@ -1,5 +1,5 @@
 <script setup>
-const emits = defineEmits(['click:renewal', 'click:golden'])
+const emits = defineEmits(['click:renewal', 'click:golden', 'click:autoRefresh'])
 const props = defineProps({
   data: {
     type: Object,
@@ -65,7 +65,7 @@ const items = computed(() => {
       button: {
         text: '增加',
         onClick: () => {
-          // alert('增加')
+          emits('click:autoRefresh', props.data)
         },
       },
       class: {
