@@ -72,6 +72,7 @@ onMounted(() => {
   <PageBuyListPopupDeal />
   <PageBuyPopupGolden />
   <PageBuyListPopupView />
+  <PageBuyListPopupRemove />
 </template>
 
 <style></style>

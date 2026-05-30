@@ -1,6 +1,7 @@
 import CONFIG from './config.js'
 import plugin from 'tailwindcss/plugin'
 import { fontFamily, boxShadow, dropShadow } from './tailwind.extend.js'
+import { onSetWidth, onColorWithAlpha } from './tailwind.function.js'
 
 module.exports = {
   content: [
@@ -69,6 +70,7 @@ module.exports = {
       content: {
         default: "''",
       },
+      width: onSetWidth(),
       dropShadow: {
         ...dropShadow,
       },
@@ -89,19 +91,26 @@ module.exports = {
     },
   },
   plugins: [
-    plugin(({ addComponents }) => {
-      const truncateMultiline = {}
-      for (let i = 2; i <= 5; i += 1) {
-        truncateMultiline[`.truncate-${i}`] = {
-          display: '-webkit-box;',
-          '-webkit-line-clamp': `${i}`,
-          '-webkit-box-orient': 'vertical',
-          overflow: 'hidden',
-        }
-      }
-      addComponents(truncateMultiline)
+    plugin(({ addComponents, matchUtilities }) => {
       addComponents({
         '.imeMode-disabled': { 'ime-mode': 'disabled' },
+      })
+
+      matchUtilities({
+        'text-hexa': (value) => ({
+          color: onColorWithAlpha(value),
+        }),
+        'bg-hexa': (value) => ({
+          backgroundColor: onColorWithAlpha(value),
+        }),
+        'border-hexa': (value) => ({
+          borderColor: onColorWithAlpha(value),
+        }),
+        'divide-hexa': (value) => ({
+          '& > :not([hidden]) ~ :not([hidden])': {
+            borderColor: onColorWithAlpha(value),
+          },
+        }),
       })
     }),
   ],

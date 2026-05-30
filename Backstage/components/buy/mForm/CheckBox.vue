@@ -202,7 +202,7 @@ const onChange = () => {
       &:not(:disabled) {
         &:not(:checked) {
           & + .m-form-icon {
-            @apply border-[--gray-ccce];
+            @apply border-[--gray-ccce] bg-[--white];
           }
         }
 

@@ -15,6 +15,7 @@ const {
   onApiPOSTRealEstateOffline,
   onApiPOSTRealEstateDeal,
   onApiGETRealEstateCaseViewCounts,
+  onApiPOSTRealEstateRemove,
 } = useBuyListActions()
 const { onAlert, onCustom, onApiPromise } = useBuyPopupActions()
 const route = useRoute()
@@ -255,6 +256,27 @@ const onDealClick = async (objectData) => {
   }
 }
 
+// 刪除
+const onRemoveClick = async (objectData) => {
+  const hfIDs = objectData ? [objectData.hfID] : selectItems.value
+
+  const isRemove = await onCustom({
+    id: 'popupRemove',
+    title: '物件刪除',
+    icon: 'icon_xmark_circle',
+    data: objectData,
+    btns: 'confirm',
+  })
+
+  if (isRemove) {
+    await onApiPOSTRealEstateRemove(hfIDs)
+
+    await new Promise((resolve) => {
+      emits('update', resolve)
+    })
+  }
+}
+
 // 複製資料
 const onCopyClick = () => {
   console.log('onCopyClick')
@@ -274,6 +296,7 @@ const onSortUpdate = async () => {
   onApiPromise('close')
 }
 
+// 瀏覽數
 const onViewClick = async (objectData) => {
   const { hfID } = objectData
 
@@ -293,6 +316,11 @@ const onViewClick = async (objectData) => {
 
   onApiPromise('close')
 }
+
+// 留言管理
+const onCommentClick = async () => {
+  console.log('留言管理')
+}
 </script>
 
 <template>
@@ -307,6 +335,7 @@ const onViewClick = async (objectData) => {
       @click:publish="onPublishClick"
       @click:offline="onOfflineClick"
       @click:deal="onDealClick"
+      @click:remove="onRemoveClick"
       @click:copy="onCopyClick"
       @sort:update="onSortUpdate"
       v-if="hasFunEventsItem"
@@ -327,7 +356,9 @@ const onViewClick = async (objectData) => {
           @click:offline="onOfflineClick"
           @click:deal="onDealClick"
           @click:golden="onGoldenClick"
+          @click:remove="onRemoveClick"
           @click:view="onViewClick"
+          @click:comment="onCommentClick"
         >
           <slot
             :item="item"

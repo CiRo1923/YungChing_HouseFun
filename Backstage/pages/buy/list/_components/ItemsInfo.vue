@@ -1,4 +1,6 @@
 <script setup>
+import { numberComma } from '@js/_prototype.js'
+
 const common = useCommonStore()
 const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
@@ -36,8 +38,8 @@ const items = computed(() => {
 
     return {
       ...item,
-      total: plan?.availableCount ?? 0,
-      expired: plan?.expiringSoonCount ?? 0,
+      total: plan?.availableCount ? numberComma.add(plan.availableCount) : 0,
+      expired: plan?.expiringSoonCount ? numberComma.add(plan.expiringSoonCount) : 0,
     }
   })
 })
@@ -66,12 +68,12 @@ onUnmounted(() => {
       v-slot="{ item }"
     >
       <div class="flex items-center pt:gap-x-[3px]">
-        <CommonSvgIcon :icon="item.icon" class="h-[16px] w-[16px] m:hidden" v-if="!isDeviceM" />
+        <CommonSvgIcon :icon="item.icon" class="h-[16px] w-[16px]" v-if="!isDeviceM" />
         <p>
           {{ item.label }} <b>{{ item.total }}</b>
         </p>
       </div>
-      <p class="m:hidden" v-if="!isDeviceM">
+      <p v-if="!isDeviceM">
         快到期 <b class="font-semibold text-[--orange-e646]">{{ item.expired }}</b>
       </p>
     </BuyMSeparator>

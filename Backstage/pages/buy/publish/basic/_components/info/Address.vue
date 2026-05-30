@@ -139,7 +139,7 @@ const onPopupAddressGoogleMap = async () => {
         }"
         @click="onPopupAddressGoogleMap"
       />
-      <p class="min-w-0 truncate text-[--gray-666] m:w-full">顯示至路段名：{{ onAddress() }}</p>
+      <p class="line-clamp-1 min-w-0 text-[--gray-666] m:w-full">顯示至路段名：{{ onAddress() }}</p>
     </div>
   </div>
 </template>

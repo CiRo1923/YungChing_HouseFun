@@ -386,7 +386,7 @@ onUnmounted(() => {
           @keypress.enter="onDropdownEnter"
         >
           <div
-            class="m-form-type w-full cursor-pointer truncate leading-[1.33]"
+            class="m-form-type line-clamp-1 w-full cursor-pointer leading-[1.33]"
             :class="[
               setClass.type,
               {

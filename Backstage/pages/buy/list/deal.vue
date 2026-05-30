@@ -14,6 +14,8 @@ const route = useRoute()
 const page = computed(() => route.query.pg)
 // remove (刪除)
 const funEventsItem = ['remove']
+// remove (刪除)
+const contentEventsItem = ['remove']
 
 const onUpdate = async (done) => {
   const result = await onApiPOSTRealEstateSearch(3)
@@ -55,6 +57,7 @@ onMounted(() => {
     <PageBuyListTabDefaultOval />
     <PageBuyListContent
       :funEventsItem="funEventsItem"
+      :contentEventsItem="contentEventsItem"
       @update="onUpdate"
       v-slot="{ item, dealFun }"
     >
@@ -63,6 +66,7 @@ onMounted(() => {
   </BuyMContainer>
   <PageBuyListPopupDeal />
   <PageBuyListPopupView />
+  <PageBuyListPopupRemove />
 </template>
 
 <style></style>

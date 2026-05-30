@@ -49,13 +49,6 @@ const addressData = computed(() => {
       .map(([key, value]) => [keyMap[key], value])
   )
 })
-const photoTags = computed(() => {
-  const { isGolden, isCaseExchange, caseNo } = props.data
-
-  return [isGolden ? '黃金曝光' : null, isCaseExchange ? '可換物件' : null, caseNo || null].filter(
-    Boolean
-  )
-})
 
 const onEventsClick = (id, data) => {
   emits(`click:${id}`, data)
@@ -74,7 +67,7 @@ onUnmounted(() => {
 
 <template>
   <section class="flex m:flex-col pt:items-center pt:gap-x-[24px]">
-    <div class="flex m:flex-col pt:grow pt:items-center p:gap-x-[16px]">
+    <div class="flex m:relative m:flex-col pt:grow pt:items-center p:gap-x-[16px]">
       <div class="order-3 grow">
         <header class="mb-[8px]">
           <h3 class="font-normal tracking-wider tm:text-[16px] p:text-[18px]">
@@ -138,15 +131,24 @@ onUnmounted(() => {
             main: 'h-full w-full',
           }"
         />
-        <ul class="absolute left-[8px] top-[8px] flex flex-wrap gap-[4px]" v-if="photoTags.length">
-          <li
-            class="rounded-[2px] bg-[rgba(0,0,0,0.72)] px-[6px] py-[2px] text-[12px] text-[--white]"
-            v-for="tag in photoTags"
-            :key="tag"
+        <div>
+          <span
+            class="m:roundef-l-full absolute top-0 flex h-[22px] items-center bg-[--orange-e646] px-[12px] text-[14px] leading-[1] tracking-wider text-[--white] m:right-0 m:rounded-l-full pt:left-0 pt:rounded-r-full"
+            v-if="props.data.isGolden"
           >
-            {{ tag }}
-          </li>
-        </ul>
+            黃金曝光
+          </span>
+          <span
+            class="bg-hexa-[--black,0.7] absolute bottom-0 left-0 flex h-[22px] items-center rounded-r-full px-[12px] text-[14px] leading-[1] tracking-wider text-[--white]"
+          >
+            {{ props.data.isCaseExchange ? '可換' : '不可換' }}
+          </span>
+          <span
+            class="bg-hexa-[--black,0.7] absolute bottom-0 right-0 flex h-[22px] items-center rounded-l-full px-[12px] text-[14px] leading-[1] tracking-wider text-[--white]"
+          >
+            {{ props.data.hfID }}
+          </span>
+        </div>
       </div>
       <BuyMFormCheckBox
         :name="`checked[${props.data.hfID}]`"
@@ -156,7 +158,7 @@ onUnmounted(() => {
           isDisabled: props.data._checked.disabled,
         }"
         :setClass="{
-          main: 'shrink-0',
+          main: 'shrink-0 m:absolute m:left-[12px] m:top-[5px] m:z-[1]',
         }"
       />
     </div>
