@@ -26,6 +26,7 @@ const isSelectAll = computed({
       label: '全選',
     }"
     :setClass="{
+      main: 'm:order-1',
       label: 'text-[16px]',
     }"
   />

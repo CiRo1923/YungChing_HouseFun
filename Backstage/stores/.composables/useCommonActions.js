@@ -84,6 +84,7 @@ const useCommonActions = () => {
   }
 
   return {
+    onDevice,
     onUseMeta,
     onIsLoading,
     onResize,

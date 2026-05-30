@@ -253,11 +253,15 @@ const onAreaChange = (source = 'user') => {
 }
 
 const onInit = () => {
-  if (modelCity.value) {
+  const { area, road } = config.value
+  const noArea = !area.options?.length
+  const noRoad = !road.options?.length
+
+  if (modelCity.value && noArea) {
     onCityChange('init')
   }
 
-  if (modelCity.value && modelArea.value) {
+  if (modelCity.value && modelArea.value && noRoad) {
     onAreaChange('init')
   }
 }

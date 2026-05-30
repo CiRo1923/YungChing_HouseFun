@@ -9,8 +9,13 @@ const {
 } = useBuyProjectActions()
 const buyList = useBuyListStore()
 const { datas, pagination } = storeToRefs(buyList)
-const { selectItems, selectCount, onApiPOSTRealEstateOffline, onApiPOSTRealEstateDeal } =
-  useBuyListActions()
+const {
+  selectItems,
+  selectCount,
+  onApiPOSTRealEstateOffline,
+  onApiPOSTRealEstateDeal,
+  onApiGETRealEstateCaseViewCounts,
+} = useBuyListActions()
 const { onAlert, onCustom, onApiPromise } = useBuyPopupActions()
 const route = useRoute()
 const router = useRouter()
@@ -259,6 +264,35 @@ const onCopyClick = () => {
 const onGoldenClick = async (objectData) => {
   await onGoldenPopup(objectData)
 }
+
+// 更新排序
+const onSortUpdate = async () => {
+  onApiPromise('open')
+  await new Promise((resolve) => {
+    emits('update', resolve)
+  })
+  onApiPromise('close')
+}
+
+const onViewClick = async (objectData) => {
+  const { hfID } = objectData
+
+  onApiPromise('open')
+
+  const { status, data } = await onApiGETRealEstateCaseViewCounts(hfID)
+
+  if (status === 200) {
+    await onCustom({
+      id: 'popupView',
+      title: '物件瀏覽數',
+      data,
+      icon: 'icon_two_people',
+      btns: 'alert',
+    })
+  }
+
+  onApiPromise('close')
+}
 </script>
 
 <template>
@@ -274,6 +308,7 @@ const onGoldenClick = async (objectData) => {
       @click:offline="onOfflineClick"
       @click:deal="onDealClick"
       @click:copy="onCopyClick"
+      @sort:update="onSortUpdate"
       v-if="hasFunEventsItem"
     />
     <ul class="divide-y-[1px] divide-[--gray-e5] border-b-[1px] border-b-[--gray-e5]">
@@ -292,6 +327,7 @@ const onGoldenClick = async (objectData) => {
           @click:offline="onOfflineClick"
           @click:deal="onDealClick"
           @click:golden="onGoldenClick"
+          @click:view="onViewClick"
         >
           <slot
             :item="item"

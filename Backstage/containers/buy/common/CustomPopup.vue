@@ -57,6 +57,9 @@ const onClose = (item) => {
     <template #header v-if="$slots.header">
       <slot name="header" />
     </template>
+    <template #headerTools v-if="$slots.headerTools">
+      <slot name="headerTools" />
+    </template>
     <slot>
       <div class="text-[16px]" :class="custom.setClass?.content" v-html="custom.content" />
     </slot>

@@ -7,7 +7,8 @@ definePageMeta({
 
 const buyProject = useBuyProjectStore()
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
-const { onApiPOSTRealEstateCaseAggregate, onApiPOSTRealEstateSearch } = useBuyListActions()
+const { onApiGETCommonPlanAggregate, onApiPOSTRealEstateCaseAggregate, onApiPOSTRealEstateSearch } =
+  useBuyListActions()
 const { onApiErrorServerToClient } = useBuyPopupActions()
 const route = useRoute()
 const page = computed(() => route.query.pg)
@@ -15,12 +16,15 @@ const page = computed(() => route.query.pg)
 const funEventsItem = ['remove']
 
 const onUpdate = async (done) => {
-  await onApiPOSTRealEstateSearch(3)
+  const result = await onApiPOSTRealEstateSearch(3)
 
-  done()
+  if (typeof done === 'function') done()
+
+  return result
 }
 
 await onWithLoadingAll([
+  useAsyncData('list-plan-aggergate-deal', () => onApiGETCommonPlanAggregate()),
   useAsyncData('list-case-aggregate-deal', () => onApiPOSTRealEstateCaseAggregate()),
   useAsyncData('list-done', () => onUpdate(), {
     watch: [page],
@@ -58,6 +62,7 @@ onMounted(() => {
     </PageBuyListContent>
   </BuyMContainer>
   <PageBuyListPopupDeal />
+  <PageBuyListPopupView />
 </template>
 
 <style></style>

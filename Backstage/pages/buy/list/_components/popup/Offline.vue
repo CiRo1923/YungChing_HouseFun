@@ -1,13 +1,11 @@
 <script setup>
-import CustomPopup from '@containers/buy/common/CustomPopup.vue'
-
 const popup = usePopupStore()
 const { customData } = storeToRefs(popup)
 const { selectCount } = useBuyListActions()
 </script>
 
 <template>
-  <CustomPopup
+  <BuyCommonCustomPopup
     id="popupOffline"
     :setClass="{
       main: 'p:--w-800 t:--w-600',
@@ -28,7 +26,7 @@ const { selectCount } = useBuyListActions()
         </b>
       </p>
     </div>
-  </CustomPopup>
+  </BuyCommonCustomPopup>
 </template>
 
 <style lang="postcss"></style>

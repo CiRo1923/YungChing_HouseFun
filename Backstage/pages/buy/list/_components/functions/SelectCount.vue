@@ -3,7 +3,7 @@ const { selectCount } = useBuyListActions()
 </script>
 
 <template>
-  <p class="text-[--gray-666]">
+  <p class="text-[--gray-666] m:order-2 m:ml-auto">
     已選 <span class="text-[--orange-e646]">{{ selectCount }}</span> 筆
   </p>
 </template>

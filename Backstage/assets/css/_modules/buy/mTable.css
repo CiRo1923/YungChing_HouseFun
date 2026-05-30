@@ -1,0 +1,43 @@
+:root {
+  --table-pc-rounded: 15px;
+  --table-tabled-rounded: 15px;
+  --table-mobile-rounded: 15px;
+}
+
+.m-table {
+  &.\-\-rounded {
+    .m-table-thead-th {
+      &:first-child {
+        @apply rounded-l-[--table-rounded];
+      }
+
+      &:last-child {
+        @apply rounded-r-[--table-rounded];
+      }
+    }
+  }
+
+  &.\-\-thead-gray-f7 {
+    .m-table-thead-th {
+      @apply bg-[--gray-f7];
+    }
+  }
+}
+
+@screen p {
+  .m-table {
+    --table-rounded: var(--table-pc-rounded);
+  }
+}
+
+@screen t {
+  .m-table {
+    --table-rounded: var(--table-tabled-rounded);
+  }
+}
+
+@screen m {
+  .m-table {
+    --table-rounded: var(--table-mobile-rounded);
+  }
+}

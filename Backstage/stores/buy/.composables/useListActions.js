@@ -1,4 +1,5 @@
 import {
+  apiGETCommonPlanAggregate,
   apiPOSTRealEstateCaseAggregate,
   apiPOSTRealEstateSearch,
   apiPOSTRealEstateOffline,
@@ -17,7 +18,7 @@ export default () => {
   // const { renewal } = storeToRefs(buyProject)
   const { onReplaceImageSize } = useBuyProjectActions()
   const buyList = useBuyListStore()
-  const { apiData, apiDealData, aggregate, datas, pagination } = storeToRefs(buyList)
+  const { apiData, apiDealData, planAggregate, aggregate, datas, pagination } = storeToRefs(buyList)
   const { onApiError } = useBuyPopupActions()
   const selectItems = computed(() =>
     datas.value ? datas.value.filter((item) => item._checked.value).map((item) => item.hfID) : []
@@ -35,6 +36,18 @@ export default () => {
       (item) => selectedIds.has(item.hfID) && item._checked.publish && !item._checked.isExpired
     )
   })
+  const onApiGETCommonPlanAggregate = async () => {
+    const { config, status, data } = await apiGETCommonPlanAggregate()
+
+    if (status === 200) {
+      planAggregate.value = data
+    } else {
+      onApiError(config, status, data)
+    }
+
+    return { config, status, data }
+  }
+
   const onApiPOSTRealEstateCaseAggregate = async () => {
     const { config, status, data } = await apiPOSTRealEstateCaseAggregate()
 
@@ -176,6 +189,8 @@ export default () => {
     }))
   }
   const onReset = () => {
+    apiData.value.listSortToken = 0
+    apiData.value.listOrderToken = 2
     datas.value = null
   }
 
@@ -184,6 +199,7 @@ export default () => {
     selectCount,
     renewalCanNotPublishData,
     renewalNotExpiredData,
+    onApiGETCommonPlanAggregate,
     onApiPOSTRealEstateCaseAggregate,
     onApiPOSTRealEstateSearch,
     onApiPOSTRealEstateOffline,

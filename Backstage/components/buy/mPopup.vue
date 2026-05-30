@@ -48,6 +48,7 @@ const setClass = computed(() => {
     header: '',
     icon: '',
     headerTitle: '',
+    headerTools: '',
     body: '',
     footer: '',
     note: '',
@@ -93,22 +94,34 @@ watchEffect(() => {
           <div
             class="m-popup-header flex shrink-0 items-center border-b-[2px] border-b-[--orange-e646] pb-[24px] text-[--gray-333]"
             :class="setClass.header"
-            v-if="title"
+            v-if="title || $slots.headerTools"
           >
-            <slot name="header">
-              <p
-                class="flex grow items-center gap-x-[10px] text-[24px]"
-                :class="setClass.headerTitle"
+            <div
+              class="m-popup-header-content flex grow items-center tm:gap-x-[12px] p:gap-x-[24px]"
+            >
+              <slot name="header">
+                <p
+                  class="flex shrink-0 items-center gap-x-[10px] text-[24px]"
+                  :class="setClass.headerTitle"
+                >
+                  <CommonSvgIcon
+                    :icon="icon"
+                    class="h-[30px] w-[30px] p-[3px] text-[--gray-666]"
+                    :class="setClass.icon || 'text-[--gray-666]'"
+                    v-if="icon"
+                  />
+                  <b class="font-medium" v-html="title" />
+                </p>
+              </slot>
+              <div
+                class="flex grow items-center"
+                :class="setClass.headerTools"
+                v-if="$slots.headerTools"
               >
-                <CommonSvgIcon
-                  :icon="icon"
-                  class="h-[30px] w-[30px] p-[3px] text-[--gray-666]"
-                  :class="setClass.icon || 'text-[--gray-666]'"
-                  v-if="icon"
-                />
-                <b class="font-medium" v-html="title" />
-              </p>
-            </slot>
+                <slot name="headerTools" />
+              </div>
+            </div>
+
             <button
               type="button"
               class="flex h-[30px] w-[30px] shrink-0 items-center justify-center p-[8px] text-[--gray-ccce]"

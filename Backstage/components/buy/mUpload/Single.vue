@@ -498,9 +498,10 @@ watch(
       />
 
       <div
-        class="relative flex flex-col"
+        class="relative flex-col"
         :class="{
-          'min-h-[130px] w-full': !hasImage,
+          'flex min-h-[130px] w-full': !hasImage,
+          'inline-flex p:w-[200px]': hasImage,
           'border-blue-400 bg-blue-50': isUploadDragging,
         }"
         role="button"
@@ -513,11 +514,7 @@ watch(
       >
         <template v-if="hasImage">
           <div
-            class="relative flex items-center justify-center overflow-hidden rounded-[10px] bg-[--gray-f7]"
-            :class="{
-              'h-full w-full': !hasImage,
-              'm:h-[114px] p:h-[152px] p:w-[200px]': hasImage,
-            }"
+            class="relative flex items-center justify-center overflow-hidden rounded-[10px] bg-[--gray-f7] m:h-[114px] p:h-[152px]"
           >
             <img
               :src="innerItem.previewUrl"
@@ -532,7 +529,6 @@ watch(
               <span>點擊或拖曳重新上傳</span>
             </div>
           </div>
-
           <button
             type="button"
             class="absolute right-0 top-0 z-[1] flex h-[24px] w-[24px] items-center justify-center rounded-[5px] bg-[--gray-f2]"
@@ -542,17 +538,13 @@ watch(
           </button>
         </template>
 
-        <template v-else>
-          <div
-            class="flex w-full grow flex-col items-center justify-center gap-y-[10px] rounded-[10px] border-[1px] border-[--gray-e5] bg-[--gray-f7] text-[--green-6a2d]"
-          >
-            <CommonSvgIcon
-              icon="icon_upload"
-              class="h-[24px] w-[24px] shrink-0 text-[--gray-666]"
-            />
-            <span class="text-[16px]">{{ config.placeholder }}</span>
-          </div>
-        </template>
+        <div
+          class="flex w-full grow flex-col items-center justify-center gap-y-[10px] rounded-[10px] border-[1px] border-[--gray-e5] bg-[--gray-f7] text-[--green-6a2d]"
+          v-else
+        >
+          <CommonSvgIcon icon="icon_upload" class="h-[24px] w-[24px] shrink-0 text-[--gray-666]" />
+          <span class="text-[16px]">{{ config.placeholder }}</span>
+        </div>
       </div>
     </div>
   </Field>

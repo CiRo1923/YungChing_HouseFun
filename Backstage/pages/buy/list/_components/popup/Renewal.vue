@@ -1,6 +1,4 @@
 <script setup>
-import CustomPopup from '@containers/buy/common/CustomPopup.vue'
-
 import { Form } from 'vee-validate'
 
 // const buyProject = useBuyProjectStore()
@@ -60,7 +58,7 @@ const onSure = async () => {
 </script>
 
 <template>
-  <CustomPopup
+  <BuyCommonCustomPopup
     id="popupRenewal"
     :setClass="{
       main: 'p:--w-1200 t:--w-720',
@@ -128,7 +126,7 @@ const onSure = async () => {
         </ul>
       </li>
     </ul>
-  </CustomPopup>
+  </BuyCommonCustomPopup>
 </template>
 
 <style lang="postcss">

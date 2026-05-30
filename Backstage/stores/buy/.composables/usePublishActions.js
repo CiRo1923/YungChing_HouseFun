@@ -10,12 +10,15 @@ import {
 
 import { onToFixed } from '@js/_prototype.js'
 
+import { useBuyProjectStore } from '@stores/buy/project.js'
 import { useBuyPublishStore } from '@stores/buy/publish.js'
 
 import useBuyProjectActions from '@stores/buy/.composables/useProjectActions.js'
 import useBuyPopupActions from '@stores/buy/.composables/usePopupActions.js'
 
 export default () => {
+  const buyProject = useBuyProjectStore()
+  const { options } = storeToRefs(buyProject)
   const {
     onApiGETRealEstatePurposeCheckOptions,
     onApiGETCitySelectOptions,
@@ -151,7 +154,8 @@ export default () => {
     })
 
     if (status === 200) {
-      const { caseInfo } = data
+      const { caseInfo, caseAddrDistrictOptions } = data
+      const hasArea = caseAddrDistrictOptions?.length !== 0
       const isCaseSqUnitPin = caseInfo.isCaseSqUnitPin
       const imageSize = {
         width: 400,
@@ -181,6 +185,12 @@ export default () => {
       fields.forEach((key) => {
         pingData.value[key] = isCaseSqUnitPin ? caseInfo[`${key}Pin`] : caseInfo[`${key}M`]
       })
+
+      if (hasArea) {
+        options.value.area = caseAddrDistrictOptions
+      }
+
+      console.log(data)
     } else {
       onApiError(config, status, data)
     }

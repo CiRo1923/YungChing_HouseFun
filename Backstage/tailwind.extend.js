@@ -11,7 +11,9 @@ export default {
       'sans-serif',
     ],
   },
-  boxShadow: {},
+  boxShadow: {
+    dropdown: '0 4px 24px 0 #02041614, 0 2px 16px -8px #02041633',
+  },
   dropShadow: {
     text: '0 8px 3px #0000008c',
   },

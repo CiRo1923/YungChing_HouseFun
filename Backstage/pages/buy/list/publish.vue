@@ -8,7 +8,8 @@ definePageMeta({
 const buyProject = useBuyProjectStore()
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
 const { onApiGetPublishAvailablePlans, onApiGETGoldenGetPlanList } = useBuyProjectActions()
-const { onApiPOSTRealEstateCaseAggregate, onApiPOSTRealEstateSearch } = useBuyListActions()
+const { onApiGETCommonPlanAggregate, onApiPOSTRealEstateCaseAggregate, onApiPOSTRealEstateSearch } =
+  useBuyListActions()
 const { onApiErrorServerToClient } = useBuyPopupActions()
 const route = useRoute()
 // renewal (續刊) / offline (下架) / deal (成交)
@@ -18,11 +19,15 @@ const contentEventsItem = ['editor', 'offline', 'deal']
 const page = computed(() => route.query.pg)
 
 const onUpdate = async (done) => {
-  await onApiPOSTRealEstateSearch(1)
-  done()
+  const result = await onApiPOSTRealEstateSearch(1)
+
+  if (typeof done === 'function') done()
+
+  return result
 }
 
 await onWithLoadingAll([
+  useAsyncData('list-plan-aggergate-publish', () => onApiGETCommonPlanAggregate()),
   useAsyncData('list-case-aggregate-publish', () => onApiPOSTRealEstateCaseAggregate()),
   useAsyncData('list-publish', () => onUpdate(), {
     watch: [page],
@@ -71,6 +76,7 @@ onMounted(() => {
   <PageBuyListPopupOffline />
   <PageBuyListPopupDeal />
   <PageBuyPopupGolden />
+  <PageBuyListPopupView />
 </template>
 
 <style></style>

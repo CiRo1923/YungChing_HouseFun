@@ -4,6 +4,8 @@ import '@js/_validation.js'
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { validate as validateValue, Field, ErrorMessage } from 'vee-validate'
 
+const emit = defineEmits(['uploaded'])
+
 const model = defineModel({
   type: Array,
   default: () => [],
@@ -27,8 +29,6 @@ const props = defineProps({
     default: () => ({}),
   },
 })
-
-const emit = defineEmits(['uploaded'])
 
 const inputRef = ref(null)
 const innerList = ref([])

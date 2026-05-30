@@ -2,29 +2,44 @@
 const common = useCommonStore()
 const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
+const buyList = useBuyListStore()
+const { planAggregate } = storeToRefs(buyList)
 
 const isDeviceM = computed(() => device.value === 'm')
 const items = computed(() => {
-  return [
+  const baseItems = [
     {
+      planName: 'Listing',
       icon: 'icon_publish',
       label: '刊登額度',
       total: 0,
       expired: 0,
     },
     {
+      planName: 'Golden',
       icon: 'icon_diamond',
       label: '黃金曝光',
       total: 0,
       expired: 0,
     },
     {
+      planName: 'Refresh',
       icon: 'icon_double_star',
-      label: '黃金曝光',
+      label: '自動刷新',
       total: 0,
       expired: 0,
     },
   ]
+
+  return baseItems.map((item) => {
+    const plan = planAggregate.value.find((plan) => plan.planName === item.planName)
+
+    return {
+      ...item,
+      total: plan?.availableCount ?? 0,
+      expired: plan?.expiringSoonCount ?? 0,
+    }
+  })
 })
 
 onResize()

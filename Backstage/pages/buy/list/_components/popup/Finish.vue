@@ -1,6 +1,4 @@
 <script setup>
-import CustomPopup from '@containers/buy/common/CustomPopup.vue'
-
 const popup = usePopupStore()
 const { customData } = storeToRefs(popup)
 const publishInfo = computed(() => {
@@ -24,7 +22,7 @@ const hasFinishInfo = computed(() => true)
 </script>
 
 <template>
-  <CustomPopup
+  <BuyCommonCustomPopup
     id="popupFinish"
     :setClass="{
       main: 'p:--w-1200 t:--w-720',
@@ -38,7 +36,7 @@ const hasFinishInfo = computed(() => true)
       }"
       v-if="hasFinishInfo"
     />
-  </CustomPopup>
+  </BuyCommonCustomPopup>
 </template>
 
 <style lang="postcss"></style>

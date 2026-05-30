@@ -10,7 +10,7 @@ export const useBuyListStore = defineStore('buyList', () => {
     exchangeToken: 0,
     goldenToken: 0,
     listSortToken: 0,
-    listOrderToken: 1,
+    listOrderToken: 2,
     pinToken: 0,
     pinRangeMin: null,
     pinRangeMax: null,
@@ -26,6 +26,7 @@ export const useBuyListStore = defineStore('buyList', () => {
     dateDeal: null,
     isDealShow: false,
   })
+  const planAggregate = ref(null)
   const aggregate = ref(null)
   const datas = ref(null)
   const pagination = ref(null)
@@ -33,6 +34,7 @@ export const useBuyListStore = defineStore('buyList', () => {
   return {
     apiData,
     apiDealData,
+    planAggregate,
     aggregate,
     datas,
     pagination,

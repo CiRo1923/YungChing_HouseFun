@@ -8,7 +8,7 @@ const { onAddress } = useBuyPublishActions()
 
 const { onCustom } = useBuyPopupActions()
 
-const areas = ref([])
+const areas = ref(options.value.area || [])
 const roads = ref([])
 
 const onCityChange = async ({ source } = {}) => {
