@@ -14,6 +14,7 @@ const onSearchClick = () => {
   <PageBuyListFilterAccordion @search="onSearchClick">
     <PageBuyListFilterPurpose />
     <template #hide>
+      <PageBuyListFilterAddr />
       <BuyMFormSelect
         name="exchangeToken"
         v-model="apiData.exchangeToken"

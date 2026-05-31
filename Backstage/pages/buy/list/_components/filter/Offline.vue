@@ -13,6 +13,7 @@ const onSearchClick = () => {
   <PageBuyListFilterAccordion @search="onSearchClick">
     <PageBuyListFilterPurpose />
     <template #hide>
+      <PageBuyListFilterAddr />
       <BuyMFormSelect
         name="caseDownToken"
         v-model="apiData.caseDownToken"

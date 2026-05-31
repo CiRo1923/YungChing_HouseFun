@@ -25,13 +25,13 @@ onUnmounted(() => {
 <template>
   <div class="list-accordion m:space-y-[16px] pt:flex pt:items-center pt:gap-x-[8px]">
     <div
-      class="list-accordion-container m:space-y-[16px] pt:flex pt:grow pt:items-center pt:gap-x-[8px]"
+      class="list-accordion-container m:space-y-[16px] pt:flex pt:min-w-0 pt:grow pt:items-center pt:gap-x-[8px]"
     >
       <div class="list-accordion-default pt:flex pt:shrink-0 pt:items-center pt:gap-x-[8px]">
         <slot />
       </div>
       <div
-        class="list-accordion-hide m:space-y-[16px] pt:flex pt:grow pt:items-center pt:gap-x-[8px]"
+        class="list-accordion-hide m:space-y-[16px] pt:flex pt:min-w-0 pt:grow pt:items-center pt:gap-x-[8px]"
       >
         <slot name="hide" />
       </div>

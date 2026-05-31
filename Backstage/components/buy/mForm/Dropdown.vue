@@ -1,7 +1,24 @@
 <script setup>
 import { onMergeDropdownConfig, useDropdownCore } from './.composables/useDropdownCore.js'
 
+import '@js/_validation.js'
+
+import { Field, ErrorMessage } from 'vee-validate'
+
+const emits = defineEmits(['update:modelValue'])
 const props = defineProps({
+  name: {
+    type: String,
+    default: null,
+  },
+  modelValue: {
+    type: [String, Number, Boolean, Object],
+    default: null,
+  },
+  modelModifiers: {
+    type: Object,
+    default: () => ({}),
+  },
   config: {
     type: Object,
     default: () => ({}),
@@ -13,9 +30,25 @@ const props = defineProps({
 })
 
 const selectedIndex = ref(-1)
-const options = computed(() => [])
+const model = computed({
+  get: () => props.modelValue,
+  set: (value) => {
+    let result = value
+
+    if (props.modelModifiers?.number) {
+      result = value === '' ? null : Number(value)
+    }
+
+    emits('update:modelValue', result)
+  },
+})
 const config = computed(() => {
-  return onMergeDropdownConfig(props.config)
+  const defaultConfig = {
+    placeholder: null,
+    isError: false,
+  }
+
+  return onMergeDropdownConfig(props.config, defaultConfig)
 })
 
 const setClass = computed(() => {
@@ -31,6 +64,18 @@ const setClass = computed(() => {
     },
     ...props.setClass,
   }
+})
+
+const placeholder = computed(() => {
+  const { placeholder } = config.value
+  const isObject = placeholder && typeof placeholder !== 'string'
+
+  return isObject
+    ? placeholder
+    : {
+        value: placeholder,
+        isToOption: false,
+      }
 })
 
 const {
@@ -49,7 +94,6 @@ const {
   isDropdownOutside,
 } = useDropdownCore({
   config,
-  options,
   selectedIndex,
 })
 
@@ -87,32 +131,59 @@ onUnmounted(() => {
 
 <template>
   <div class="m-form overflow-hidden" :class="setClass.main">
-    <div class="m-form-container flex" :class="setClass.container">
-      <button
-        type="button"
-        class="m-form-element --select"
-        :class="[
-          setClass.element,
-          {
-            '--focus': isFocus,
-          },
-        ]"
-        :disabled="config.isDisabled"
-        ref="elenemtRef"
-        @click="onElementClick()"
-      >
-        <div class="m-form-type" :class="setClass.type">
-          <slot />
-        </div>
-        <CommonSvgIcon
-          icon="caret_large_down"
-          class="m-form-icon"
-          :class="setClass.icon"
-          v-if="config.arrowType === 'caret'"
-        />
-        <i class="m-form-icon-arrow" v-if="config.arrowType === 'arrow'" />
-      </button>
-    </div>
+    <Field
+      :name="props.name"
+      v-model="model"
+      :rules="config.isDisabled ? '' : props.rules"
+      v-slot="{ field, errorMessage }"
+    >
+      <input type="hidden" :id="props.name" v-bind="field" />
+      <div class="m-form-container flex" :class="setClass.container">
+        <button
+          type="button"
+          class="m-form-element --select"
+          :class="[
+            setClass.element,
+            { '--focus': isFocus },
+            { '--error': errorMessage || config.isError },
+          ]"
+          :disabled="config.isDisabled"
+          ref="elenemtRef"
+          @click="onElementClick()"
+        >
+          <em
+            class="m-form-type"
+            :class="[
+              setClass.type,
+              {
+                '--placeholder': !model,
+              },
+            ]"
+            v-html="model || placeholder.value"
+            ref="selectRef"
+          />
+          <CommonSvgIcon
+            icon="caret_large_down"
+            class="m-form-icon"
+            :class="setClass.icon"
+            v-if="config.arrowType === 'caret'"
+          />
+          <i class="m-form-icon-arrow" v-if="config.arrowType === 'arrow'" />
+        </button>
+        <small class="m-form-suffix" :class="setClass.suffix" v-if="$slots.suffix">
+          <slot name="suffix" />
+        </small>
+      </div>
+    </Field>
+    <ErrorMessage
+      as="span"
+      :name="props.name"
+      class="m-form-error block"
+      :class="setClass.error"
+      v-slot="{ message }"
+    >
+      <BuyMErrorMessageElem :message="message" />
+    </ErrorMessage>
   </div>
   <Teleport to="body">
     <Transition name="dropdown" @before-leave="onCloseDropdown" appear>

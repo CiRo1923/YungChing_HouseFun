@@ -10,6 +10,7 @@ const onSearchClick = () => {
   <PageBuyListFilterAccordion @search="onSearchClick">
     <PageBuyListFilterPurpose />
     <template #hide>
+      <PageBuyListFilterAddr />
       <PageBuyListFilterMore />
       <PageBuyListFilterSearch />
     </template>
