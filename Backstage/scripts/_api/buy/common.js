@@ -39,3 +39,15 @@ export const apiGETGoldenGetPlanList = async (data) =>
 // 單一物件 設定黃金曝光 (列表 & 明細流程)
 export const apiPOSTGoldenSetPlanSingle = async (data) =>
   await fetchApi.post(`api/${version}/vas/Golden/SetPlanSingle`, data)
+
+// 自動刷新設定 (列表 & 明細流程)
+export const apiGETRefreshCurrentPlansForCase = async (data) =>
+  await fetchApi.get(`api/${version}/vas/Refresh/CurrentPlansForCase`, data)
+
+// 修改自動刷新時間 (列表 & 明細流程)
+export const apiGETRefreshGetPlanInfo = async (data) =>
+  await fetchApi.get(`api/${version}/vas/Refresh/GetPlanInfo`, data)
+
+// 單一物件 設定自動刷新 (列表 & 明細流程)
+export const apiPOSTRefreshSavePlan = async (data) =>
+  await fetchApi.post(`api/${version}/vas/Refresh/SavePlan`, data)

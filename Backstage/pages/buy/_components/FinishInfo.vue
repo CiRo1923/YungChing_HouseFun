@@ -1,7 +1,7 @@
 <script setup>
 const buyPorject = useBuyProjectStore()
 const { autoRefresh } = storeToRefs(buyPorject)
-const { onGoldenPopup } = useBuyProjectActions()
+const { onGoldenPopup, onAutoRefreshPopup } = useBuyProjectActions()
 const router = useRouter()
 
 const props = defineProps({
@@ -66,7 +66,9 @@ const items = shallowReadonly([
     button: {
       text: '加購或更改刷新時間 >',
       onClick: async () => {
-        console.log('自動刷新')
+        await onAutoRefreshPopup(props.data)
+
+        // console.log('自動刷新')
       },
     },
   },

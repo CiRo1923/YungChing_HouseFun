@@ -1,5 +1,6 @@
 <script setup>
-import { onDeepMerge, onDeepClone, onEmptyData } from '@js/_prototype.js'
+import { onDeepClone, onEmptyData } from '@js/_prototype.js'
+import { onMergeDropdownConfig, useDropdownCore } from './.composables/useDropdownCore.js'
 
 import '@js/_validation.js'
 
@@ -38,14 +39,7 @@ const props = defineProps({
     default: () => {},
   },
 })
-const borderWidth = 0
-const elenemtRef = ref(null)
 const selectRef = ref(null)
-const dropdownRef = ref(null)
-const dropdownContainerRef = ref(null)
-const dropdownItemRef = ref(null)
-const isFocus = ref(false)
-const isActive = ref(false)
 const selectedIndex = ref(-1)
 const label = ref(null)
 const model = computed({
@@ -62,12 +56,9 @@ const model = computed({
 })
 const config = computed(() => {
   const defaultConfig = {
-    arrowType: 'caret',
     startOption: null,
     placeholder: null,
-    isDisabled: false,
     isError: false,
-    position: 'auto',
     // dropdownWidth: 'auto',
     schema: {
       label: 'label',
@@ -77,7 +68,7 @@ const config = computed(() => {
     maxItems: 5,
   }
 
-  return onDeepMerge(defaultConfig, props.config)
+  return onMergeDropdownConfig(props.config, defaultConfig)
 })
 
 const setClass = computed(() => {
@@ -91,6 +82,7 @@ const setClass = computed(() => {
       error: '',
       dropdown: '',
       dropdownContainer: '',
+      dropdownButton: '',
     },
     ...props.setClass,
   }
@@ -146,102 +138,25 @@ const onSetSelectedIndex = () => {
   selectedIndex.value = index
 }
 
-const onSwitchActive = (value) => {
-  isFocus.value = value !== undefined ? value : !isFocus.value
-  isActive.value = value !== undefined ? value : !isActive.value
-}
-
-const onCloseDropdown = () => {
-  onSwitchActive(false)
-}
-
-const onElementClick = async () => {
-  onSwitchActive()
-
-  await nextTick()
-  onDropdownOpen()
-}
-
-const onDropdownOpen = () => {
-  const { maxItems } = config.value
-  const $elenemt = elenemtRef.value
-  const $dropdown = dropdownRef.value
-  const $dropdownContainer = dropdownContainerRef.value
-  const element = {
-    rect: elenemtRef.value.getBoundingClientRect(),
-  }
-
-  if ($elenemt && $dropdown && $dropdownContainer) {
-    const hasItemsThanMax = maxItems <= dropdownItemRef.value.length - 1
-
-    if (hasItemsThanMax) {
-      $dropdownContainer.style.overflowY = 'auto'
-    }
-
-    const index = !hasItemsThanMax ? dropdownItemRef.value.length - 1 : maxItems
-    const $item = dropdownItemRef.value ? dropdownItemRef.value[index] : null
-    const dropdown = {
-      rect: dropdownRef.value.getBoundingClientRect(),
-    }
-    const itemHeight = $item
-      ? hasItemsThanMax
-        ? $item.offsetTop
-        : $item.offsetTop + $item.offsetHeight
-      : 0
-
-    const offsetTop = element.rect.height + element.rect.top + window.scrollY
-    const offsetLeftMin = dropdown.rect.width + element.rect.left
-    const dropdownWidth =
-      dropdown.rect.width < element.rect.width ? element.rect.width : dropdown.rect.width
-    const offsetLeftMax = element.rect.width + element.rect.left - dropdownWidth
-    const bodyWidth = document.body.scrollWidth
-    const left =
-      ((offsetLeftMin > bodyWidth && offsetLeftMax < 0) || offsetLeftMin < bodyWidth) &&
-      config.value.position !== 'right'
-        ? element.rect.left
-        : offsetLeftMax
-    const maxHeight = itemHeight + borderWidth
-
-    $dropdown.style.height = `${maxHeight}px`
-    $dropdown.style.top = `${offsetTop - borderWidth * 2}px`
-    $dropdown.style.left = `${left - borderWidth}px`
-
-    if (dropdown.rect.width < element.rect.width) {
-      $dropdown.style.minWidth = `${element.rect.width}px`
-    }
-
-    // console.log(dropdown.rect.width)
-
-    // if (config.value.dropdownWidth !== 'auto') {
-    //   $dropdown.style.maxWidth = `${config.value.dropdownWidth}px`
-    // }
-
-    console.log(selectedIndex.value)
-
-    if (model.value !== null && model.value !== '') {
-      const idx = options.value.findIndex(
-        (item) => item?.[config.value.schema.value] == model.value
-      )
-
-      // 沒找到就不要往下做
-      if (idx < 0) return
-
-      // refs 還沒就緒也不要做
-      const items = dropdownItemRef.value
-      const $selectedItem = items?.[idx]
-      if (!$selectedItem) return
-
-      selectedIndex.value = idx
-
-      const selectedItem = {
-        rect: $selectedItem.getBoundingClientRect(),
-      }
-
-      $dropdownContainer.scrollTop =
-        $selectedItem.offsetTop + selectedItem.rect.height / 2 - maxHeight / 2
-    }
-  }
-}
+const {
+  elenemtRef,
+  dropdownRef,
+  dropdownContainerRef,
+  dropdownItemRef,
+  isFocus,
+  isActive,
+  isOpen,
+  onSwitchActive,
+  onCloseDropdown,
+  onElementClick,
+  onSelectResize,
+  isDropdownOutside,
+} = useDropdownCore({
+  config,
+  model,
+  options,
+  selectedIndex,
+})
 
 const onDropdownArrow = (e) => {
   const { code } = e
@@ -312,19 +227,9 @@ const onDropdownItemClick = (index) => {
 }
 
 const onOutSide = (e) => {
-  const $elenemt = elenemtRef.value
-  const $dropdown = dropdownRef.value
-  const isElenemtContains = $elenemt ? !$elenemt.contains(e.target) : true
-  const isDropdownContains = $dropdown ? !$dropdown.contains(e.target) : true
-  const isOutSide = isElenemtContains && isDropdownContains
-
-  if (isOutSide) {
+  if (isDropdownOutside(e)) {
     onSwitchActive(false)
   }
-}
-
-const onSelectResize = () => {
-  onDropdownOpen()
 }
 
 watch(
@@ -372,7 +277,7 @@ onUnmounted(() => {
       <div class="m-form-container flex" :class="setClass.container">
         <button
           type="button"
-          class="m-form-element --select grow overflow-hidden text-left"
+          class="m-form-element --select"
           :class="[
             setClass.element,
             { '--focus': isFocus },
@@ -386,7 +291,7 @@ onUnmounted(() => {
           @keypress.enter="onDropdownEnter"
         >
           <div
-            class="m-form-type line-clamp-1 w-full cursor-pointer leading-[1.33]"
+            class="m-form-type"
             :class="[
               setClass.type,
               {
@@ -404,14 +309,11 @@ onUnmounted(() => {
           </div>
           <CommonSvgIcon
             icon="caret_large_down"
-            class="m-form-icon h-[14px] w-[14px] shrink-0 p-[2px] transition-transform duration-300"
+            class="m-form-icon"
             :class="setClass.icon"
             v-if="config.arrowType === 'caret'"
           />
-          <i
-            class="m-form-icon-arrow h-[16px] w-[16px] shrink-0"
-            v-if="config.arrowType === 'arrow'"
-          />
+          <i class="m-form-icon-arrow" v-if="config.arrowType === 'arrow'" />
         </button>
         <small class="m-form-suffix" :class="setClass.suffix" v-if="$slots.suffix">
           <slot name="suffix" />
@@ -429,113 +331,62 @@ onUnmounted(() => {
     </ErrorMessage>
   </div>
   <Teleport to="body">
-    <Transition name="select-dropdown" @after-leave="onCloseDropdown" appear>
+    <Transition name="dropdown" @before-leave="onCloseDropdown" appear>
       <div
-        class="m-select-dropdown absolute z-[5] mt-[3px] overflow-hidden"
-        :class="setClass.dropdown"
+        class="m-form-dropdown --select"
+        :class="[setClass.dropdown, { '--open': isOpen }]"
         ref="dropdownRef"
         v-if="isActive && options && options.length !== 0 && !config.isDisabled"
       >
-        <ul
-          class="m-select-dropdown-container max-h-full bg-[--white]"
+        <div
+          class="m-form-dropdown-container scrollbar --y"
           :class="setClass.dropdownContainer"
           ref="dropdownContainerRef"
         >
-          <li
-            class="m-select-dropdown-item"
-            v-for="(item, index) in options"
-            :key="`${item}_${index}`"
-            ref="dropdownItemRef"
-          >
-            <button
-              type="button"
-              class="m-select-dropdown-button block w-full px-[8px] text-left transition-colors duration-300"
-              :class="{
-                '--active': index === selectedIndex,
-              }"
-              :disabled="item[config.schema.isDisabled] === true"
-              @click="onDropdownItemClick(index)"
+          <div class="m-form-dropdown-header" v-if="$slots.dropdownHeader">
+            <slot name="dropdownHeader" />
+          </div>
+          <ul class="m-form-dropdown-options">
+            <li
+              class="m-form-dropdown-item"
+              v-for="(item, index) in options"
+              :key="`${item}_${index}`"
+              ref="dropdownItemRef"
             >
-              <em class="m-select-dropdown-label relative block grow py-[8px] text-[14px]">
-                <slot name="option" :item="item">
-                  {{ item[config.schema.label] }}
-                </slot>
-              </em>
-            </button>
-          </li>
-        </ul>
+              <button
+                type="button"
+                class="m-form-dropdown-button"
+                :class="[
+                  setClass.dropdownButton,
+                  {
+                    '--active': index === selectedIndex,
+                  },
+                ]"
+                :disabled="item[config.schema.isDisabled] === true"
+                @click="onDropdownItemClick(index)"
+              >
+                <CommonSvgIcon
+                  icon="icon_check_solid"
+                  class="m-form-dropdown-icon"
+                  v-if="index === selectedIndex"
+                />
+                <em class="m-form-dropdown-label">
+                  <slot name="option" :item="item">
+                    {{ item[config.schema.label] }}
+                  </slot>
+                </em>
+              </button>
+            </li>
+          </ul>
+          <footer class="m-form-dropdown-footer" v-if="$slots.dropdownFooter">
+            <slot name="dropdownFooter" />
+          </footer>
+        </div>
       </div>
     </Transition>
   </Teleport>
 </template>
 
 <style src="@css/_modules/buy/mForm.css"></style>
-<style src="@css/_common/vueTransition.css"></style>
-<style lang="postcss">
-.m-form-element {
-  &.\-\-select {
-    &.\-\-focus {
-      .m-form-icon {
-        @apply -rotate-180;
-      }
-
-      .m-form-icon-arrow {
-        &:before {
-          @apply -rotate-180;
-        }
-      }
-    }
-
-    &:not(:disabled) {
-      .m-form-icon {
-        @apply text-[--gray-999];
-      }
-    }
-
-    &:disabled {
-      .m-form-icon {
-        @apply text-[--gray-ccce];
-      }
-    }
-  }
-}
-
-.m-form-icon-arrow {
-  &:before {
-    @apply block h-0 w-0 border-x-[3px] border-t-[5px] border-transparent border-t-[--gray-222] transition-transform duration-300 content-default;
-  }
-}
-
-.m-select-dropdown {
-  box-shadow:
-    0px 4px 24px 0px #02041614,
-    0px 2px 16px -8px #02041633;
-}
-
-.m-select-dropdown-button {
-  &:not(:disabled) {
-    @apply text-[--gray-333];
-
-    /* &:not(.\-\-active) {
-    } */
-
-    &.\-\-active {
-      @apply bg-[--orange-feea];
-    }
-  }
-
-  &:disabled {
-    @apply text-[--gray-3334d];
-  }
-}
-
-.m-select-dropdown-item {
-  &:not(:last-child) {
-    .m-select-dropdown-button {
-      &:after {
-        @apply block h-[1px] w-full bg-[--gray-e5] opacity-30 content-default;
-      }
-    }
-  }
-}
-</style>
+<style src="@css/_modules/buy/mFormDropdown.css"></style>
+<style lang="postcss"></style>

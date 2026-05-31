@@ -40,7 +40,7 @@ onResetPojectData('renewal')
           icon: 'text-[--orange-e646]',
         }"
       />
-      <PageBuyFinishInfo />
+      <PageBuyFinishInfo :data="renewal.data" />
     </BuyMCardDefault>
   </div>
 </template>

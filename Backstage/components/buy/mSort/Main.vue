@@ -341,7 +341,7 @@ onUnmounted(() => {
   </div>
   <template v-if="currentMode === 'dropdown'">
     <Teleport to="body">
-      <Transition name="select-dropdown" @after-leave="onCloseDropdown" appear>
+      <Transition name="dropdown" @after-leave="onCloseDropdown" appear>
         <div
           class="m-sort-dropdown absolute z-[5] overflow-hidden"
           ref="dropdownRef"
@@ -372,7 +372,6 @@ onUnmounted(() => {
   </template>
 </template>
 
-<style src="@css/_common/vueTransition.css"></style>
 <style lang="postcss">
 :root {
   --sort-list-pc-gap-x: 16px;

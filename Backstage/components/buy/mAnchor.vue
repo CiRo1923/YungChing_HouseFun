@@ -199,16 +199,22 @@ const onClick = (e) => {
       @apply px-[15px];
     }
 
+    &.\-\-px-5,
+    &.p\:\-\-px-5,
+    &.pt\:\-\-px-5 {
+      @apply px-[5px];
+    }
+
     &.\-\-py-8,
     &.p\:\-\-py-8,
     &.pt\:\-\-py-8 {
       @apply py-[8px];
     }
 
-    &.\-\-py-5,
-    &.p\:\-\-py-5,
-    &.pt\:\-\-py-5 {
-      @apply py-[5px];
+    &.\-\-py-8,
+    &.p\:\-\-py-8,
+    &.pt\:\-\-py-8 {
+      @apply py-[8px];
     }
 
     &.\-\-h-45,
@@ -258,6 +264,13 @@ const onClick = (e) => {
     &.tm\:\-\-px-15,
     &.t\:\-\-px-15 {
       @apply px-[15px];
+    }
+
+    &.\-\-px-8,
+    &.pt\:\-\-px-8,
+    &.tm\:\-\-px-8,
+    &.t\:\-\-px-8 {
+      @apply px-[8px];
     }
 
     &.\-\-py-8,
@@ -322,6 +335,12 @@ const onClick = (e) => {
     &.tm\:\-\-px-15,
     &.m\:\-\-px-15 {
       @apply px-[15px];
+    }
+
+    &.\-\-px-8,
+    &.tm\:\-\-px-8,
+    &.m\:\-\-px-8 {
+      @apply px-[8px];
     }
 
     &.\-\-py-8,

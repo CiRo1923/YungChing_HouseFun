@@ -3,6 +3,9 @@ import { fetchApi, version } from '@js/_api/config.js'
 export const apiGETCommonPlanAggregate = async (data) =>
   await fetchApi.get(`api/${version}/vas/Common/PlanAggregate`, data)
 
+export const apiGETRealEstateSearchFilter = async (data) =>
+  await fetchApi.get(`api/${version}/buy/realEstate/searchFilter`, data)
+
 export const apiPOSTRealEstateCaseAggregate = async (data) =>
   await fetchApi.get(`api/${version}/buy/realEstate/caseAggregate`, data)
 

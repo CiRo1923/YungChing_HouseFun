@@ -27,10 +27,10 @@ const setClass = computed(() => {
         :key="`${item.planType}_${item.planID}_${index}`"
       >
         <BuyMFormRadioItem
-          :name="`planId[${index}]`"
+          name="planId"
           v-model="renewal.apiData.planID"
           :config="{
-            value: item.planID,
+            value: item.planId,
           }"
           :setClass="{
             main: 'p:--px-40 p:--py-16 tm:p-16',

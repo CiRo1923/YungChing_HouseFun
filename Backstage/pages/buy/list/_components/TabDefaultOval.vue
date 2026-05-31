@@ -73,7 +73,7 @@ onUnmounted(() => {
   <BuyMTabDefaultOval
     :items="items"
     :config="{
-      containerMode: false,
+      containerMode: 'single',
       icon: {
         name: 'icon_check_solid',
       },
@@ -81,9 +81,12 @@ onUnmounted(() => {
     :setClass="{
       main: '--orange-e646 --anchor-height-40 p:--anchor-px-20 tm:--anchor-px-14',
       headerItem: 'm:flex-1',
+      body: 'rounded-b-[15px] bg-[--white] py-[32px] tm:px-[16px] p:px-[40px]',
     }"
     @click="onClick"
-  />
+  >
+    <slot />
+  </BuyMTabDefaultOval>
 </template>
 
 <style lang="postcss"></style>

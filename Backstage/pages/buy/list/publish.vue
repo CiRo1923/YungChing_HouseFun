@@ -8,8 +8,12 @@ definePageMeta({
 const buyProject = useBuyProjectStore()
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
 const { onApiGetPublishAvailablePlans, onApiGETGoldenGetPlanList } = useBuyProjectActions()
-const { onApiGETCommonPlanAggregate, onApiPOSTRealEstateCaseAggregate, onApiPOSTRealEstateSearch } =
-  useBuyListActions()
+const {
+  onApiGETCommonPlanAggregate,
+  onApiGETRealEstateSearchFilter,
+  onApiPOSTRealEstateCaseAggregate,
+  onApiPOSTRealEstateSearch,
+} = useBuyListActions()
 const { onApiErrorServerToClient } = useBuyPopupActions()
 const route = useRoute()
 // renewal (續刊) / offline (下架) / deal (成交)
@@ -27,6 +31,7 @@ const onUpdate = async (done) => {
 }
 
 await onWithLoadingAll([
+  useAsyncData('list-search-filter', () => onApiGETRealEstateSearchFilter()),
   useAsyncData('list-plan-aggergate-publish', () => onApiGETCommonPlanAggregate()),
   useAsyncData('list-case-aggregate-publish', () => onApiPOSTRealEstateCaseAggregate()),
   useAsyncData('list-publish', () => onUpdate(), {
@@ -57,17 +62,20 @@ onMounted(() => {
     <template #header_tools>
       <PageBuyListItemsInfo />
     </template>
-    <PageBuyListTabDefaultOval />
+    <PageBuyListTabDefaultOval>
+      <PageBuyListFilterPublish @search="onUpdate" />
+    </PageBuyListTabDefaultOval>
     <PageBuyListContent
       :funEventsItem="funEventsItem"
       :contentEventsItem="contentEventsItem"
-      v-slot="{ item, renewalFun, goldenFun }"
+      v-slot="{ item, renewalFun, goldenFun, autoRefreshFun }"
       @update="onUpdate"
     >
       <PageBuyListItemSetting
         :data="item"
         @click:renewal="renewalFun"
         @click:golden="goldenFun"
+        @click:auto-refresh="autoRefreshFun"
         class="m:mt-[24px]"
       />
     </PageBuyListContent>
@@ -76,6 +84,8 @@ onMounted(() => {
   <PageBuyListPopupOffline />
   <PageBuyListPopupDeal />
   <PageBuyPopupGolden />
+  <PageBuyPopupAutoRefresh />
+  <PageBuyPopupEditTime />
   <PageBuyListPopupView />
 </template>
 

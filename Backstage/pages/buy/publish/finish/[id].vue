@@ -3,7 +3,11 @@
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
 const buyProject = useBuyProjectStore()
 // const { renewal } = storeToRefs(buyProject)
-const { onApiGetPublishAvailablePlans, onApiGETPublishGetPublishResponse } = useBuyProjectActions()
+const {
+  onApiGetPublishAvailablePlans,
+  onApiGETPublishGetPublishResponse,
+  onApiGETGoldenGetPlanList,
+} = useBuyProjectActions()
 const buyPublish = useBuyPublishStore()
 const { statusData } = storeToRefs(buyPublish)
 const { onApiGERealEstateCaseStatus } = useBuyPublishActions()
@@ -32,6 +36,7 @@ await onWithLoadingAll([
   useAsyncData(`get-publish-response-finish-${hfID.value}`, () =>
     onApiGETPublishGetPublishResponse(hfID.value)
   ),
+  useAsyncData('golden-planList-finish', () => onApiGETGoldenGetPlanList()),
 ])
 
 onUseMeta({
@@ -70,6 +75,9 @@ onMounted(() => {
       <PageBuyPublishFinishSubmitButtons />
     </div>
   </BuyMContainer>
+  <PageBuyPopupGolden />
+  <PageBuyPopupAutoRefresh />
+  <PageBuyPopupEditTime />
 </template>
 
 <style></style>

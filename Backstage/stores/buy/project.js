@@ -11,6 +11,22 @@ export const useBuyProjectStore = defineStore('buyProject', () => {
   })
   const autoRefresh = ref({
     data: null,
+    info: null,
+    plans: null,
+    planInfo: {
+      apiData: {
+        hfID: null,
+        vasID: null,
+      },
+    },
+    save: {
+      apiData: {
+        planID: null,
+        vasid: null,
+        empID: null,
+        listSelectedRefreshTime: [],
+      },
+    },
   })
   const golden = ref({
     plans: null,

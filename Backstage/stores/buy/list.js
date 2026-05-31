@@ -1,30 +1,42 @@
 import { defineStore } from 'pinia'
 
 export const useBuyListStore = defineStore('buyList', () => {
-  const apiData = ref({
-    caseBarrierfreeToken: [],
-    cityToken: 0,
-    caseDownToken: 0,
-    caseDealShowToken: 0,
-    districtToken: [],
-    exchangeToken: 0,
-    goldenToken: 0,
-    listSortToken: 0,
-    listOrderToken: 2,
-    pinToken: 0,
-    pinRangeMin: null,
-    pinRangeMax: null,
-    priceToken: 0,
-    priceRangeMin: null,
-    priceRangeMax: null,
+  const apiDataDefault = readonly({
     searchKey: '',
-    roomCountToken: 0,
+    purposeToken: '0',
+    exchangeToken: '0',
+    goldenToken: '0',
+    roomCountToken: '0',
     roomRangeMin: null,
     roomRangeMax: null,
+    priceToken: '0',
+    priceRangeMin: null,
+    priceRangeMax: null,
+    pinToken: '0',
+    pinRangeMin: null,
+    pinRangeMax: null,
+    cityToken: 0,
+    districtToken: [],
+    caseDownToken: 0,
+    caseDealShowToken: 0,
+    listSortToken: 0,
+    listOrderToken: 2,
   })
+  const apiData = ref({ ...apiDataDefault })
   const apiDealData = ref({
     dateDeal: null,
     isDealShow: false,
+  })
+  const options = ref({
+    purpose: null,
+    address: null,
+    exchange: null,
+    golden: null,
+    room: null,
+    price: null,
+    pin: null,
+    down: null,
+    dealShow: null,
   })
   const planAggregate = ref(null)
   const aggregate = ref(null)
@@ -32,8 +44,10 @@ export const useBuyListStore = defineStore('buyList', () => {
   const pagination = ref(null)
 
   return {
+    apiDataDefault,
     apiData,
     apiDealData,
+    options,
     planAggregate,
     aggregate,
     datas,

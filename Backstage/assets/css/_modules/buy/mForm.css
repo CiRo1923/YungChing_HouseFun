@@ -1,13 +1,31 @@
+:root {
+  --form-element-border-color: var(--gray-e5);
+  --form-element-focus-border-color: var(--green-6a2d);
+  --form-element-disbaled-border-color: var(--gray-e5);
+  --form-element-error-border-color: var(--orange-e646);
+
+  --form-element-color: var(--gray-666);
+  --form-element-focus-color: var(--gray-666);
+  --form-element-disbaled-color: var(--gray-666);
+  --form-element-error-color: var(--orange-e646);
+}
+
 .m-form-element {
   @apply overflow-hidden;
 
   &:not(label) {
     @apply flex items-center gap-x-[8px] rounded-[5px] border-[1px] bg-[--white] transition-colors duration-300;
 
+    &:not(:disabled):not(.\-\-disabled):not(.\-\-focus):not(.\-\-error) {
+      @apply border-[--form-element-border-color];
+
+      .m-form-type {
+        @apply text-[--form-element-color];
+      }
+    }
+
     &:not(:disabled):not(.\-\-disabled) {
       .m-form-type {
-        @apply text-[--gray-666];
-
         &::placeholder,
         &.\-\-placeholder {
           @apply text-[--gray-999];
@@ -15,16 +33,12 @@
       }
     }
 
-    &:not(.\-\-error) {
-      @apply border-[--gray-e5];
-    }
-
     &:disabled,
     &.\-\-disabled {
-      @apply cursor-not-allowed bg-[--gray-f2];
+      @apply cursor-not-allowed border-[--form-element-disbaled-border-color] bg-[--gray-f2];
 
       .m-form-type {
-        @apply pointer-events-none;
+        @apply pointer-events-none text-[--form-element-disabled-color];
 
         &,
         &::placeholder,
@@ -34,8 +48,20 @@
       }
     }
 
+    &.\-\-focus {
+      @apply border-[--form-element-focus-border-color];
+
+      .m-form-type {
+        @apply text-[--form-element-focus-color];
+      }
+    }
+
     &.\-\-error {
-      @apply border-[--orange-e646];
+      @apply border-[--form-element-error-border-color];
+
+      .m-form-type {
+        @apply text-[--form-element-error-color];
+      }
 
       .m-form-length,
       .m-form-assist {
@@ -47,7 +73,7 @@
 
 .m-form-type {
   &:not([type='checkbox']):not([type='radio']) {
-    @apply h-full bg-transparent text-[16px];
+    @apply h-full bg-transparent text-[16px] transition-colors duration-300;
   }
 }
 

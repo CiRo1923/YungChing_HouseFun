@@ -72,8 +72,12 @@ const onSave = async (validate) => {
 
 const onRenewal = async (validate) => {
   const { valid, errors } = await validate()
-
-  console.log(valid)
+  const onToFinish = () => {
+    router.push({
+      name: 'buy-publish-finish-id',
+      params: route.params,
+    })
+  }
 
   if (valid) {
     const { isExpired, caseStatus } = statusData.value || {}
@@ -125,18 +129,20 @@ const onRenewal = async (validate) => {
 
       console.log(caseStatus)
 
-      if (isConfirm && caseStatus === 4) {
-        onApiPromise('open')
+      // caseStatus: 1 刊登 | caseStatus: 2 草稿 | caseStatus: 3 成交 | caseStatus: 4 下架 | caseStatus: 6 草稿 (待刊登)
+      if (isConfirm) {
+        if (caseStatus === 1) {
+          onToFinish()
+        } else if (caseStatus === 4) {
+          onApiPromise('open')
 
-        const { status } = await onApiPOSTRealEstateRestoreToOnline([hfID.value])
+          const { status } = await onApiPOSTRealEstateRestoreToOnline([hfID.value])
 
-        onApiPromise('close')
+          onApiPromise('close')
 
-        if (status === 200) {
-          router.push({
-            name: 'buy-publish-finish-id',
-            params: route.params,
-          })
+          if (status === 200) {
+            onToFinish()
+          }
         }
       }
     }

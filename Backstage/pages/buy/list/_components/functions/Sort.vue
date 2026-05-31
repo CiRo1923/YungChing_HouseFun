@@ -2,7 +2,7 @@
 const buyList = useBuyListStore()
 const { apiData } = storeToRefs(buyList)
 
-const emits = defineEmits('update')
+const emits = defineEmits(['update'])
 const options = shallowReadonly([
   {
     label: '預設',

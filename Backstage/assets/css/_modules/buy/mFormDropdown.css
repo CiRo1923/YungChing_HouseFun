@@ -1,0 +1,347 @@
+:root {
+  --form-select-icon-arrow-pc-p: 2px;
+  --form-select-icon-arrow-tablet-p: 2px;
+  --form-select-icon-arrow-mobile-p: 2px;
+
+  --form-select-icon-arrow-pc-size: 14px;
+  --form-select-icon-arrow-tablet-size: 14px;
+  --form-select-icon-arrow-mobile-size: 14px;
+
+  --form-dropdown-pc-my: 8px;
+  --form-dropdown-tablet-my: 8px;
+  --form-dropdown-mobile-my: 8px;
+
+  --form-dropdown-pc-rounded: 5px;
+  --form-dropdown-tablet-rounded: 5px;
+  --form-dropdown-mobile-rounded: 5px;
+
+  --form-dropdown-pc-border: 1px;
+  --form-dropdown-tablet-border: 1px;
+  --form-dropdown-mobile-border: 1px;
+
+  --form-dropdown-pc-shadow: 0 3px 3px 0px #0000001f;
+  --form-dropdown-tablet-shadow: 0 3px 3px 0px #0000001f;
+  --form-dropdown-mobile-shadow: 0 3px 3px 0px #0000001f;
+
+  --form-dropdown-container-pc-px: 16px;
+  --form-dropdown-container-tablet-px: 16px;
+  --form-dropdown-container-mobile-px: 16px;
+
+  --form-dropdown-container-pc-py: 16px;
+  --form-dropdown-container-tablet-py: 16px;
+  --form-dropdown-container-mobile-py: 16px;
+
+  --form-dropdown-datas-pc-gap-x: 16px;
+  --form-dropdown-datas-tablet-gap-x: 16px;
+  --form-dropdown-datas-mobile-gap-x: 16px;
+
+  --form-dropdown-header-pc-mb: 8px;
+  --form-dropdown-header-tablet-mb: 8px;
+  --form-dropdown-header-mobile-mb: 8px;
+
+  --form-dropdown-options-pc-gap-y: 8px;
+  --form-dropdown-options-tablet-gap-y: 8px;
+  --form-dropdown-options-mobile-gap-y: 8px;
+
+  --form-dropdown-item-pc-border-bottom: 0;
+  --form-dropdown-item-tablet-border-bottom: 0;
+  --form-dropdown-item-mobile-border-bottom: 0;
+
+  --form-dropdown-button-pc-px: 8px;
+  --form-dropdown-button-tablet-px: 8px;
+  --form-dropdown-button-mobile-px: 8px;
+
+  --form-dropdown-button-pc-py: 12px;
+  --form-dropdown-button-tablet-py: 12px;
+  --form-dropdown-button-mobile-py: 12px;
+
+  --form-dropdown-button-pc-rounded: 5px;
+  --form-dropdown-button-tablet-rounded: 5px;
+  --form-dropdown-button-mobile-rounded: 5px;
+
+  --form-dropdown-button-pc-gap-x: 3px;
+  --form-dropdown-button-tablet-gap-x: 3px;
+  --form-dropdown-button-mobile-gap-x: 3px;
+
+  --form-dropdown-icon-pc-p: 2px;
+  --form-dropdown-icon-tablet-p: 2px;
+  --form-dropdown-icon-mobile-p: 2px;
+
+  --form-dropdown-icon-pc-size: 16px;
+  --form-dropdown-icon-tablet-size: 16px;
+  --form-dropdown-icon-mobile-size: 16px;
+
+  --form-dropdown-label-pc-text: 16px;
+  --form-dropdown-label-tablet-text: 16px;
+  --form-dropdown-label-mobile-text: 16px;
+
+  --form-dropdown-footer-pc-mt: 8px;
+  --form-dropdown-footer-tablet-mt: 8px;
+  --form-dropdown-footer-mobile-mt: 8px;
+
+  --form-select-focus-color: var(--green-6a2d);
+
+  --form-select-icon-color: var(--gray-999);
+  --form-select-icon-focus-color: var(--green-6a2d);
+  --form-select-icon-disabled-color: var(--gray-ccce);
+
+  --form-dropdown-default-px: 4px;
+  --form-dropdown-bg-color: var(--white);
+  --form-dropdown-border-color: var(--green-6a2d);
+
+  --form-dropdown-item-border-bottom-color: transparent;
+
+  --form-dropdown-button-align: center;
+
+  --form-dropdown-button-color: var(--gray-333);
+  --form-dropdown-button-active-color: var(--gray-333);
+  --form-dropdown-button-disabled-color: var(--gray-3334d);
+
+  --form-dropdown-button-bg-color: var(--gray-f2);
+  --form-dropdown-button-active-bg-color: var(--orange-feea);
+  --form-dropdown-button-disabled-bg-color: transparent;
+
+  --form-dropdown-icon-color: var(--orange-e646);
+}
+
+/* select */
+.m-form-element {
+  &.\-\-select {
+    @apply grow overflow-hidden text-left;
+
+    &.\-\-focus {
+      .m-form-type {
+        @apply text-[--form-select-focus-color];
+      }
+
+      .m-form-icon {
+        @apply -rotate-180 text-[--form-select-icon-focus-color];
+      }
+
+      /* .m-form-icon-arrow {
+        &:before {
+          @apply -rotate-180;
+        }
+      } */
+    }
+
+    &:not(:disabled):not(.\-\-focus) {
+      .m-form-icon {
+        @apply text-[--form-select-icon-color];
+      }
+    }
+
+    &:disabled {
+      .m-form-icon {
+        @apply text-[--form-select-icon-disabled-color];
+      }
+    }
+
+    .m-form-type {
+      @apply line-clamp-1 w-full leading-[1.33];
+    }
+
+    .m-form-icon {
+      @apply h-[--form-select-icon-arrow-size] w-[--form-select-icon-arrow-size] shrink-0 p-[--form-select-icon-arrow-p] transition-all duration-300;
+    }
+
+    /* .m-form-icon-arrow {
+      &:before {
+        @apply block h-0 w-0 border-x-[3px] border-t-[5px] border-transparent border-t-[--gray-222] transition-transform duration-300 content-default shrink-0;
+      }
+    } */
+  }
+}
+
+.m-form-dropdown {
+  border: var(--form-dropdown-border) solid var(--form-dropdown-border-color);
+  box-shadow: var(--form-dropdown-shadow);
+
+  @apply absolute my-[--form-dropdown-my] overflow-hidden rounded-[--form-dropdown-rounded] bg-[--form-dropdown-bg-color] px-[--form-dropdown-default-px];
+
+  &:not(.\-\-open) {
+    @apply z-[1];
+  }
+
+  &.\-\-open {
+    @apply z-[3];
+  }
+}
+
+.m-form-dropdown-container {
+  border-top-width: var(--form-dropdown-container-py);
+  border-bottom-width: var(--form-dropdown-container-py);
+
+  @apply border-solid border-y-transparent px-[calc(var(--form-dropdown-container-px)_-_var(--form-dropdown-default-px))];
+}
+
+.m-form-dropdown-datas {
+  @apply gap-x-[--form-dropdown-datas-gap-x];
+}
+
+.m-form-dropdown-header {
+  @apply mb-[--form-dropdown-header-mb];
+}
+
+.m-form-dropdown-options {
+  @apply flex flex-col gap-y-[--form-dropdown-options-gap-y];
+}
+
+.m-form-dropdown-item {
+  &:not(:last-child) {
+    .m-form-dropdown-button {
+      &:after {
+        @apply absolute bottom-0 h-[--form-dropdown-item-border-bottom] w-full bg-[--form-dropdown-item-border-bottom-color] content-default;
+      }
+    }
+  }
+}
+
+.m-form-dropdown-button {
+  justify-content: var(--form-dropdown-button-align);
+
+  @apply relative flex w-full items-center gap-x-[--form-dropdown-button-gap-x] rounded-[--form-dropdown-button-rounded] px-[--form-dropdown-button-px] py-[--form-dropdown-button-py] transition-colors duration-300;
+
+  &:not(:disabled) {
+    &:not(.\-\-active) {
+      @apply bg-[--form-dropdown-button-bg-color] text-[--form-dropdown-button-color];
+    }
+
+    &.\-\-active {
+      @apply bg-[--form-dropdown-button-active-bg-color] text-[--form-dropdown-button-active-color];
+    }
+  }
+
+  &:disabled {
+    @apply bg-[--form-dropdown-button-disabled-bg-color] text-[--form-dropdown-button-disabled-color];
+  }
+}
+
+.m-form-dropdown-label {
+  @apply relative text-[--form-dropdown-label-text];
+}
+
+.m-form-dropdown-icon {
+  @apply h-[--form-dropdown-icon-size] w-[--form-dropdown-icon-size] shrink-0 p-[--form-dropdown-icon-p] text-[--form-dropdown-icon-color];
+}
+
+.m-form-dropdown-footer {
+  @apply mt-[--form-dropdown-header-mb];
+}
+
+@screen p {
+  .m-form-element {
+    &.\-\-select {
+      --form-select-icon-arrow-p: var(--form-select-icon-arrow-pc-p);
+      --form-select-icon-arrow-size: var(--form-select-icon-arrow-pc-size);
+    }
+  }
+
+  .m-form-dropdown {
+    --form-dropdown-shadow: var(--form-dropdown-pc-shadow);
+    --form-dropdown-my: var(--form-dropdown-pc-my);
+    --form-dropdown-border: var(--form-dropdown-pc-border);
+    --form-dropdown-rounded: var(--form-dropdown-pc-rounded);
+
+    --form-dropdown-container-px: var(--form-dropdown-container-pc-px);
+    --form-dropdown-container-py: var(--form-dropdown-container-pc-py);
+
+    --form-dropdown-datas-gap-x: var(--form-dropdown-datas-pc-gap-x);
+
+    --form-dropdown-header-mb: var(--form-dropdown-header-pc-mb);
+
+    --form-dropdown-options-gap-y: var(--form-dropdown-options-pc-gap-y);
+
+    --form-dropdown-item-border-bottom: var(--form-dropdown-item-pc-border-bottom);
+
+    --form-dropdown-button-px: var(--form-dropdown-button-pc-px);
+    --form-dropdown-button-py: var(--form-dropdown-button-pc-py);
+    --form-dropdown-button-rounded: var(--form-dropdown-button-pc-rounded);
+    --form-dropdown-button-gap-x: var(--form-dropdown-button-pc-gap-x);
+
+    --form-dropdown-label-text: var(--form-dropdown-label-pc-text);
+
+    --form-dropdown-icon-p: var(--form-dropdown-icon-pc-p);
+    --form-dropdown-icon-size: var(--form-dropdown-icon-pc-size);
+
+    --form-dropdown-footer-mt: var(--form-dropdown-footer-pc-mt);
+  }
+}
+
+@screen t {
+  .m-form-element {
+    &.\-\-select {
+      --form-select-icon-arrow-p: var(--form-select-icon-arrow-tablet-p);
+      --form-select-icon-arrow-size: var(--form-select-icon-arrow-tablet-size);
+    }
+  }
+
+  .m-form-dropdown {
+    --form-dropdown-shadow: var(--form-dropdown-tablet-shadow);
+    --form-dropdown-my: var(--form-dropdown-tablet-my);
+    --form-dropdown-border: var(--form-dropdown-tablet-border);
+    --form-dropdown-rounded: var(--form-dropdown-tablet-rounded);
+
+    --form-dropdown-container-px: var(--form-dropdown-container-tablet-px);
+    --form-dropdown-container-py: var(--form-dropdown-container-tablet-py);
+
+    --form-dropdown-datas-gap-x: var(--form-dropdown-datas-tablet-gap-x);
+
+    --form-dropdown-header-mb: var(--form-dropdown-header-tablet-mb);
+
+    --form-dropdown-options-gap-y: var(--form-dropdown-options-tablet-gap-y);
+
+    --form-dropdown-item-border-bottom: var(--form-dropdown-item-tablet-border-bottom);
+
+    --form-dropdown-button-px: var(--form-dropdown-button-tablet-px);
+    --form-dropdown-button-py: var(--form-dropdown-button-tablet-py);
+    --form-dropdown-button-rounded: var(--form-dropdown-button-tablet-rounded);
+    --form-dropdown-button-gap-x: var(--form-dropdown-button-tablet-gap-x);
+
+    --form-dropdown-label-text: var(--form-dropdown-label-tablet-text);
+
+    --form-dropdown-icon-p: var(--form-dropdown-icon-tablet-p);
+    --form-dropdown-icon-size: var(--form-dropdown-icon-tablet-size);
+
+    --form-dropdown-footer-mt: var(--form-dropdown-footer-tablet-mt);
+  }
+}
+
+@screen m {
+  .m-form-element {
+    &.\-\-select {
+      --form-select-icon-arrow-p: var(--form-select-icon-arrow-mobile-p);
+      --form-select-icon-arrow-size: var(--form-select-icon-arrow-mobile-size);
+    }
+  }
+
+  .m-form-dropdown {
+    --form-dropdown-shadow: var(--form-dropdown-mobile-shadow);
+    --form-dropdown-my: var(--form-dropdown-mobile-my);
+    --form-dropdown-border: var(--form-dropdown-mobile-border);
+    --form-dropdown-rounded: var(--form-dropdown-mobile-rounded);
+
+    --form-dropdown-container-px: var(--form-dropdown-container-mobile-px);
+    --form-dropdown-container-py: var(--form-dropdown-container-mobile-py);
+
+    --form-dropdown-datas-gap-x: var(--form-dropdown-datas-mobile-gap-x);
+
+    --form-dropdown-header-mb: var(--form-dropdown-header-mobile-mb);
+
+    --form-dropdown-options-gap-y: var(--form-dropdown-options-mobile-gap-y);
+
+    --form-dropdown-item-border-bottom: var(--form-dropdown-item-mobile-border-bottom);
+
+    --form-dropdown-button-px: var(--form-dropdown-button-mobile-px);
+    --form-dropdown-button-py: var(--form-dropdown-button-mobile-py);
+    --form-dropdown-button-rounded: var(--form-dropdown-button-mobile-rounded);
+    --form-dropdown-button-gap-x: var(--form-dropdown-button-mobile-gap-x);
+
+    --form-dropdown-label-text: var(--form-dropdown-label-b-text);
+
+    --form-dropdown-icon-p: var(--form-dropdown-icon-mobile-p);
+    --form-dropdown-icon-size: var(--form-dropdown-icon-mobile-size);
+
+    --form-dropdown-footer-mt: var(--form-dropdown-footer-mobile-mt);
+  }
+}

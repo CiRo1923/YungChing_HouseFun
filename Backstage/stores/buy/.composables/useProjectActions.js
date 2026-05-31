@@ -9,6 +9,8 @@ import {
   apiGETPublishGetPublishResponse,
   apiGETGoldenGetPlanList,
   apiPOSTGoldenSetPlanSingle,
+  apiGETRefreshCurrentPlansForCase,
+  apiGETRefreshGetPlanInfo,
 } from '@js/_api/buy/common.js'
 
 import {
@@ -419,7 +421,7 @@ export default () => {
 
     if (status === 200) {
       // const { listPlan } = data
-      console.log(data)
+      // console.log(data)
       renewal.value.data = data
     } else {
       onApiError(config, status, data)
@@ -471,7 +473,7 @@ export default () => {
 
     if (status === 200) {
       // const { listPlan } = data
-      console.log(data)
+      // console.log(data)
       autoRefresh.value.data = data
     } else {
       onApiError(config, status, data)
@@ -497,7 +499,36 @@ export default () => {
       ...golden.value.apiData,
     })
 
-    console.log(data)
+    // console.log(data)
+
+    if (status !== 200) {
+      onApiError(config, status, data)
+    }
+
+    return { config, status, data }
+  }
+  const onApiGETRefreshCurrentPlansForCase = async (hfid) => {
+    const { config, status, data } = await apiGETRefreshCurrentPlansForCase({
+      userId: 0,
+      hfid,
+    })
+
+    if (status === 200) {
+      const { listPlan, ...info } = data
+      autoRefresh.value.info = info
+      autoRefresh.value.plans = listPlan
+    } else {
+      onApiError(config, status, data)
+    }
+
+    return { config, status, data }
+  }
+  const onApiGETRefreshGetPlanInfo = async () => {
+    const { config, status, data } = await apiGETRefreshGetPlanInfo(
+      autoRefresh.value.planInfo.apiData
+    )
+
+    // console.log(data)
 
     if (status !== 200) {
       onApiError(config, status, data)
@@ -554,6 +585,45 @@ export default () => {
 
     return false
   }
+
+  const onAutoRefreshPopup = async (data) => {
+    onApiPromise('open')
+    const { status } = await onApiGETRefreshCurrentPlansForCase(data.hfID)
+
+    onApiPromise('close')
+
+    if (status === 200) {
+      const isSure = await onCustom({
+        id: 'popupAutoRefresh',
+        title: '自動刷新設定',
+        data,
+        icon: 'icon_double_star',
+        btns: [
+          {
+            label: '取消',
+            class: '--border-gray-e5 --text-gray-666',
+            type: 'cancel',
+            isClose: true,
+          },
+          {
+            label: '修改儲存',
+            class: '--bg-green-6a2d --text-white',
+            type: 'sure',
+            isClose: true,
+          },
+        ],
+      })
+
+      if (isSure) {
+        onApiPromise('open')
+
+        onApiPromise('close')
+      }
+    }
+
+    return false
+  }
+
   const onResetPojectData = (type) => {
     if (type === 'renewal' || !type) {
       renewal.value.apiData.planID = null
@@ -562,6 +632,10 @@ export default () => {
     if (type === 'golden' || !type) {
       golden.value.apiData.planID = null
     }
+
+    // if (type === 'refresh' || !type) {
+    //   autoRefresh.value.apiData.planID = null
+    // }
   }
   const onValueGetText = (option, value) => {
     const isOptionString = typeof option === 'string'
@@ -647,7 +721,10 @@ export default () => {
     onApiGETPublishGetPublishResponse,
     onApiGETGoldenGetPlanList,
     onApiPOSTGoldenSetPlanSingle,
+    onApiGETRefreshCurrentPlansForCase,
+    onApiGETRefreshGetPlanInfo,
     onGoldenPopup,
+    onAutoRefreshPopup,
     onResetPojectData,
     onValueGetText,
     onReplaceImageSize,

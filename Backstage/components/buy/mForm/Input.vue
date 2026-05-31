@@ -1,20 +1,12 @@
 <script setup>
-import { onDeepMerge, numberComma, onToFixed } from '@js/_prototype.js'
+import { numberComma, onToFixed } from '@js/_prototype.js'
+import { useTextCore } from './.composables/useTextCore.js'
 
 import '@js/_validation.js'
-// import { userStore } from '@store/user.js'
 
 import { Field, ErrorMessage } from 'vee-validate'
 
-// const user = userStore()
-const emits = defineEmits([
-  'update:modelValue',
-  'focusin',
-  // 'focusout',
-  'blur',
-  'input',
-  'keydown.enter',
-])
+const emits = defineEmits(['update:modelValue', 'focusin', 'blur', 'input', 'keydown.enter'])
 
 const props = defineProps({
   name: {
@@ -33,49 +25,53 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
-  value: {
-    type: [String, Number],
-    default: null,
-  },
   rules: {
     type: Object,
     default: null,
   },
   config: {
     type: Object,
-    default: () => {},
+    default: () => ({}),
   },
   setClass: {
     type: Object,
-    default: () => {},
+    default: () => ({}),
   },
 })
-// const isOnComposition = ref(false)
+
 const model = ref(null)
 const isFocus = ref(false)
-const config = computed(() => {
-  return onDeepMerge(
-    {
-      placeholder: '',
-      length: null,
-      minlength: null,
-      maxlength: null,
-      formatLength: null,
-      isReadonly: false,
-      isDisabled: false,
-      isError: false,
-      inputMode: null,
-      hasClearButton: true, // 輸入後開啟 X 清除
-      inputChinese: true, // 開啟關閉輸入中文
-      comma: false, // 啟用千分位功能
-      checkNotIsZero: false, // 輸入欄位致不能為 0
-      integer: false, // 整數功能 (不可使用小數點)
-      toFixed: null, // 取得小數點第幾位
-    },
-    props.config
-  )
+
+const { config, setClass, onEnter } = useTextCore({
+  props,
+  emits,
+  model,
+  config: {
+    length: null,
+    minlength: null,
+    maxlength: null,
+    formatLength: null,
+    isReadonly: false,
+    isDisabled: false,
+    isError: false,
+    inputMode: null,
+    inputChinese: true,
+    comma: false,
+    checkNotIsZero: false,
+    integer: false,
+    toFixed: null,
+  },
+  setClass: {
+    frontAssist: '',
+    length: '',
+    rearAssist: '',
+    suffix: '',
+    error: '',
+  },
 })
+
 const isNumeric = computed(() => /^(decimal|numeric)$/.test(config.value.inputMode))
+
 const formatLength = computed(() => {
   const { formatLength, maxlength } = config.value
 
@@ -85,30 +81,9 @@ const formatLength = computed(() => {
       })
     : null
 })
-const setClass = computed(() => {
-  return {
-    ...{
-      main: '',
-      container: '',
-      element: '',
-      type: '',
-      formatLength: '',
-      frontAssist: '',
-      rearAssist: '',
-      suffix: '',
-      error: '',
-    },
-    ...props.setClass,
-  }
-})
+
 const onBind = (field) => {
   const { inputMode } = config.value
-  const value =
-    !props.modelValue && props.value
-      ? {
-          value: props.value,
-        }
-      : {}
   const inputmode = isNumeric.value
     ? {
         inputmode: inputMode,
@@ -117,7 +92,6 @@ const onBind = (field) => {
 
   return {
     ...field,
-    ...value,
     ...inputmode,
   }
 }
@@ -149,11 +123,6 @@ const onInput = async (e) => {
   emits('input', e)
 }
 
-const onEnter = (e) => {
-  e.preventDefault()
-  emits('keydown.enter')
-}
-
 const onEvent = (e, errorMessage) => {
   const { comma, integer, checkNotIsZero } = config.value
   const { type } = e
@@ -162,8 +131,12 @@ const onEvent = (e, errorMessage) => {
   const isBlur = type === 'blur'
   const isComma = comma && (model.value !== '' || model.value != null)
 
-  if (isFocusIn || isBlur) {
-    isFocus.value = !isFocus.value
+  if (isFocusIn) {
+    isFocus.value = true
+  }
+
+  if (isBlur) {
+    isFocus.value = false
   }
 
   if (isFocusIn && isComma) {
@@ -172,16 +145,11 @@ const onEvent = (e, errorMessage) => {
 
   if (isBlur) {
     const raw = model.value
-
-    // 如果有 comma 顯示，先用「去逗號後」的值來判斷
     const plain = isComma ? numberComma.remove(raw, false) : raw
 
     if (isNumeric.value) {
-      // 1) 先把暫態輸入修正：'.' -> ''、'0.' -> '0'（或 ''，看你規則）
-      //    你需求是 checkNotIsZero 時不能是 0，所以 '0.' 這種 blur 最後也不能留下
       let normalized = String(plain ?? '').trim()
 
-      // 空值直接送出
       if (normalized === '') {
         emits('update:modelValue', '')
         model.value = isComma ? numberComma.add('', false) : ''
@@ -189,46 +157,35 @@ const onEvent = (e, errorMessage) => {
         return
       }
 
-      // 只打一個 '.' 的狀況
       if (normalized === '.') normalized = ''
 
-      // 2) 若 integer：禁止小數點（blur 時直接砍掉小數部分）
-      //    例：'12.34' -> '12'
       if (integer && normalized.includes('.')) {
         normalized = normalized.split('.')[0]
       }
 
-      // 3) 去掉多餘前導 0（單獨 0 要保留；小數模式保留 0.x 的 0）
       if (normalized) {
         if (integer) {
           normalized = normalized.replace(/^0+(?=\d)/, '')
-        } else {
-          // 非整數：保留 "0.xxx"
-          if (!normalized.startsWith('0.')) {
-            normalized = normalized.replace(/^0+(?=\d)/, '')
-            if (normalized.startsWith('.')) normalized = '0' + normalized
-          }
+        } else if (!normalized.startsWith('0.')) {
+          normalized = normalized.replace(/^0+(?=\d)/, '')
+          if (normalized.startsWith('.')) normalized = '0' + normalized
         }
       }
 
-      // 4) checkNotIsZero：最終值不能是 0
-      //    這裡用 Number 判斷，比正則安全（0.0、0.00 都會變 0）
       if (checkNotIsZero) {
         const n = Number(normalized)
-
-        // normalized 可能變成 ''，或是 '0.'（如果你前面沒清掉），這裡一起處理
         const isTransient = normalized === '' || normalized === '0.' || normalized === '.'
+
         if (!isTransient && Number.isFinite(n) && n === 0) {
-          normalized = '' // 你也可以改成 '1' 或回復成上一個值
+          normalized = ''
         }
 
-        // '0.' blur 時清掉
         if (/^0\.$/.test(normalized)) normalized = ''
       }
 
-      // 5) toFixed
       if (!integer && config.value.toFixed != null && config.value.toFixed !== '') {
         const d = Number(config.value.toFixed)
+
         if (Number.isFinite(d) && normalized !== '') {
           normalized = props.modelModifiers.number
             ? Number(onToFixed(Number(normalized), d))
@@ -236,19 +193,14 @@ const onEvent = (e, errorMessage) => {
         }
       }
 
-      // 6) 最終送出（注意：送出要送「無逗號」值）
       emits('update:modelValue', normalized)
-
-      // 顯示用的 model.value 再套 comma
       model.value = isComma ? numberComma.add(normalized, false) : normalized
     } else {
-      // 非 numeric 就照舊：送出 plain（有 comma 的話也去逗號）
       emits('update:modelValue', plain)
       model.value = isComma ? numberComma.add(plain, false) : plain
     }
   }
 
-  // console.log(type)
   emits(type, e, isError)
 }
 
@@ -359,4 +311,5 @@ watch(
     </ErrorMessage>
   </div>
 </template>
+
 <style src="@css/_modules/buy/mForm.css"></style>

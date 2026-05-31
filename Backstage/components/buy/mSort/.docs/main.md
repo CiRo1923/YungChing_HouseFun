@@ -223,8 +223,8 @@ const onClick = (item) => {
 需求如下：
 
 - 使用 `Teleport to="body"`
-- 使用 `Transition name="select-dropdown"`
-- Transition 名稱直接使用 `select-dropdown`
+- 使用 `Transition name="dropdown"`
+- Transition 名稱直接使用 `dropdown`
 - 可參考 `components/mForm/Select.vue`
 - 下拉內容使用 `ul` / `li` 排列
 - 每個選項使用 `button type="button"`
@@ -235,7 +235,7 @@ const onClick = (item) => {
 
 ```html
 <Teleport to="body">
-  <Transition name="select-dropdown">
+  <Transition name="dropdown">
     <ul class="m-sort-dropdown-list">
       <li class="m-sort-dropdown-item">
         <button type="button" class="m-sort-dropdown-anchor" @click="onClick(item)">
@@ -614,7 +614,7 @@ onUnmounted(() => {
 - [ ] 建立 button 模式 template
 - [ ] 建立 dropdown 模式 template
 - [ ] 使用 `Teleport to="body"`
-- [ ] 使用 `Transition name="select-dropdown"`
+- [ ] 使用 `Transition name="dropdown"`
 - [ ] 加入 resize 監聽
 - [ ] unmounted 時移除 resize 監聽
 - [ ] click 時 emits 單筆 item 資料
@@ -629,6 +629,7 @@ onUnmounted(() => {
 - 有 `sort` 的 options 需要拆成 asc 與 desc 兩筆資料。
 - `mode` 若是物件，需要依照 `device.value` 動態取得對應模式。
 - resize handler 需要抽成同一個 function，才能正確移除事件監聽。
+
 ## responsive mode 比對邏輯
 
 `config.mode` 支援 responsive object，key 可使用：

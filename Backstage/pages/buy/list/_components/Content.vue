@@ -6,6 +6,7 @@ const {
   onApiPOSTRealEstateRestoreToOnline,
   onApiGETPublishGetPublishResponse,
   onGoldenPopup,
+  onAutoRefreshPopup,
 } = useBuyProjectActions()
 const buyList = useBuyListStore()
 const { datas, pagination } = storeToRefs(buyList)
@@ -287,6 +288,11 @@ const onGoldenClick = async (objectData) => {
   await onGoldenPopup(objectData)
 }
 
+// 自動刷新
+const onAutoRefreshClick = async (objectData) => {
+  await onAutoRefreshPopup(objectData)
+}
+
 // 更新排序
 const onSortUpdate = async () => {
   onApiPromise('open')
@@ -326,7 +332,7 @@ const onCommentClick = async () => {
 <template>
   <BuyMCardDefault
     :setClass="{
-      main: 'p:mt-[32px]',
+      main: 'tm:mt-[24px] p:mt-[32px]',
     }"
   >
     <PageBuyListFunctionsMain
@@ -355,7 +361,6 @@ const onCommentClick = async () => {
           @click:renewal="onRenewalClick"
           @click:offline="onOfflineClick"
           @click:deal="onDealClick"
-          @click:golden="onGoldenClick"
           @click:remove="onRemoveClick"
           @click:view="onViewClick"
           @click:comment="onCommentClick"
@@ -366,6 +371,7 @@ const onCommentClick = async () => {
             :publishFun="onPublishClick"
             :dealFun="onDealClick"
             :goldenFun="onGoldenClick"
+            :autoRefreshFun="onAutoRefreshClick"
           />
         </PageBuyListItemMain>
         <!-- <pre>

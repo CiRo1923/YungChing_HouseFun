@@ -58,6 +58,7 @@ export default defineNuxtConfig({
     `@/${CONFIG.css}/_common/framework.css`,
     `@/${CONFIG.css}/_common/color.css`,
     `@/${CONFIG.css}/_common/basic.css`,
+    `@/${CONFIG.css}/_common/vueTransition.css`,
   ],
   postcss: {
     plugins: {

@@ -21,7 +21,12 @@ const { isLoading } = storeToRefs(common)
       <BuyMFooter />
     </footer>
   </div>
-  <CommonMLoadingContainer v-if="isLoading" />
+  <CommonMLoadingMain
+    :config="{
+      isFixed: true,
+    }"
+    v-if="isLoading"
+  />
   <div id="box">
     <AlertSystem />
     <ConfirmSystem />

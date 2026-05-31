@@ -92,44 +92,41 @@ watchEffect(() => {
           v-if="isShowPopup"
         >
           <div
-            class="m-popup-header flex shrink-0 items-center border-b-[2px] border-b-[--orange-e646] pb-[24px] text-[--gray-333]"
+            class="m-popup-header flex shrink-0 items-center border-b-[2px] border-b-[--orange-e646] pb-[24px] text-[--gray-333] m:flex-wrap"
             :class="setClass.header"
             v-if="title || $slots.headerTools"
           >
-            <div
-              class="m-popup-header-content flex grow items-center tm:gap-x-[12px] p:gap-x-[24px]"
-            >
-              <slot name="header">
-                <p
-                  class="flex shrink-0 items-center gap-x-[10px] text-[24px]"
-                  :class="setClass.headerTitle"
-                >
-                  <CommonSvgIcon
-                    :icon="icon"
-                    class="h-[30px] w-[30px] p-[3px] text-[--gray-666]"
-                    :class="setClass.icon || 'text-[--gray-666]'"
-                    v-if="icon"
-                  />
-                  <b class="font-medium" v-html="title" />
-                </p>
-              </slot>
-              <div
-                class="flex grow items-center"
-                :class="setClass.headerTools"
-                v-if="$slots.headerTools"
+            <slot name="header">
+              <p
+                class="order-1 flex shrink-0 items-center gap-x-[10px] text-[24px]"
+                :class="setClass.headerTitle"
               >
-                <slot name="headerTools" />
-              </div>
-            </div>
+                <CommonSvgIcon
+                  :icon="icon"
+                  class="h-[30px] w-[30px] p-[3px] text-[--gray-666]"
+                  :class="setClass.icon || 'text-[--gray-666]'"
+                  v-if="icon"
+                />
+                <b class="font-medium" v-html="title" />
+              </p>
+            </slot>
 
             <button
               type="button"
-              class="flex h-[30px] w-[30px] shrink-0 items-center justify-center p-[8px] text-[--gray-ccce]"
+              class="ml-auto flex h-[30px] w-[30px] shrink-0 items-center justify-center p-[8px] text-[--gray-ccce] m:order-2 pt:order-3"
               @click="onReset"
               v-if="hasExistClose"
             >
               <CommonSvgIcon icon="icon_xmark" class="h-full w-full" />
             </button>
+
+            <div
+              class="p flex grow items-center m:order-3 m:mt-[12px] t:mx-[12px] pt:order-2 p:mx-[24px]"
+              :class="setClass.headerTools"
+              v-if="$slots.headerTools"
+            >
+              <slot name="headerTools" />
+            </div>
           </div>
           <div class="m-popup-body scrollbar --y grow overflow-hidden" :class="setClass.body">
             <slot />
@@ -146,7 +143,6 @@ watchEffect(() => {
   </Transition>
 </template>
 
-<style src="@css/_common/vueTransition.css"></style>
 <style lang="postcss">
 @keyframes popup-bomb {
   0% {

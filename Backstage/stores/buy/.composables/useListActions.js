@@ -1,5 +1,6 @@
 import {
   apiGETCommonPlanAggregate,
+  apiGETRealEstateSearchFilter,
   apiPOSTRealEstateCaseAggregate,
   apiPOSTRealEstateSearch,
   apiPOSTRealEstateOffline,
@@ -18,7 +19,8 @@ export default () => {
   // const { renewal } = storeToRefs(buyProject)
   const { onReplaceImageSize } = useBuyProjectActions()
   const buyList = useBuyListStore()
-  const { apiData, apiDealData, planAggregate, aggregate, datas, pagination } = storeToRefs(buyList)
+  const { apiData, apiDealData, options, planAggregate, aggregate, datas, pagination } =
+    storeToRefs(buyList)
   const { onApiError } = useBuyPopupActions()
   const selectItems = computed(() =>
     datas.value ? datas.value.filter((item) => item._checked.value).map((item) => item.hfID) : []
@@ -48,6 +50,35 @@ export default () => {
     return { config, status, data }
   }
 
+  const onApiGETRealEstateSearchFilter = async () => {
+    if (options.value.purpose) return false
+
+    const { config, status, data } = await apiGETRealEstateSearchFilter()
+
+    if (status === 200) {
+      const keyMap = {
+        purpose: 'casePurposeOptions',
+        address: 'caseAddrOptions',
+        exchange: 'caseExchangeOptions',
+        golden: 'caseGoldenOptions',
+        room: 'caseRoomOptions',
+        price: 'casePriceOptions',
+        pin: 'casePinOptions',
+        down: 'caseDownOptions',
+        dealShow: 'caseDealShowOptions',
+      }
+
+      Object.entries(keyMap).forEach(([targetKey, sourceKey]) => {
+        options.value[targetKey] = data[sourceKey] ?? []
+      })
+
+      console.log(data)
+    } else {
+      onApiError(config, status, data)
+    }
+
+    return { config, status, data }
+  }
   const onApiPOSTRealEstateCaseAggregate = async () => {
     const { config, status, data } = await apiPOSTRealEstateCaseAggregate()
 
@@ -124,7 +155,8 @@ export default () => {
         pageSize,
         total: totalPages,
       }
-      console.log(datas.value)
+
+      // console.log(datas.value)
     } else {
       onApiError(config, status, data)
     }
@@ -189,8 +221,7 @@ export default () => {
     }))
   }
   const onReset = () => {
-    apiData.value.listSortToken = 0
-    apiData.value.listOrderToken = 2
+    apiData.value = { ...buyList.apiDataDefault }
     datas.value = null
   }
 
@@ -200,6 +231,7 @@ export default () => {
     renewalCanNotPublishData,
     renewalNotExpiredData,
     onApiGETCommonPlanAggregate,
+    onApiGETRealEstateSearchFilter,
     onApiPOSTRealEstateCaseAggregate,
     onApiPOSTRealEstateSearch,
     onApiPOSTRealEstateOffline,

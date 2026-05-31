@@ -19,8 +19,8 @@
   @apply opacity-100;
 }
 
-.select-dropdown-enter-active,
-.select-dropdown-leave-active,
+.dropdown-enter-active,
+.dropdown-leave-active,
 .autocomplete-enter-active,
 .autocomplete-leave-active {
   will-change: height;
@@ -28,8 +28,8 @@
   @apply overflow-hidden transition-heights duration-300;
 }
 
-.select-dropdown-enter-from,
-.select-dropdown-leave-to,
+.dropdown-enter-from,
+.dropdown-leave-to,
 .autocomplete-enter-from,
 .autocomplete-leave-to {
   @apply !h-0;

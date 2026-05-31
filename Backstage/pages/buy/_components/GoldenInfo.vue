@@ -1,4 +1,6 @@
 <script setup>
+import { numberComma } from '@js/_prototype.js'
+
 const buyProject = useBuyProjectStore()
 const { golden } = storeToRefs(buyProject)
 
@@ -34,14 +36,14 @@ const setClass = computed(() => {
         >
           <p class="pt:grow">{{ item.planName }}</p>
           <div class="flex items-center p:gap-x-[30px]">
-            <!-- <p class="grow p:w-[135px]">
+            <p class="grow p:w-[135px]">
               {{ item.isExchange ? `${item.expireDate} 到期` : `刊登期 ${item.durationDays} 天` }}
-            </p> -->
-            <!-- <p class="shrink-0">
+            </p>
+            <p class="shrink-0">
               剩餘額度：<b class="font-semibold text-[--orange-e646]">
                 {{ numberComma.add(item.availableCount) }}
               </b>
-            </p> -->
+            </p>
           </div>
         </BuyMFormRadioItem>
       </li>

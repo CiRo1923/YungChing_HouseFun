@@ -499,7 +499,7 @@ onUnmounted(() => {
           </button>
           <CommonSvgIcon
             icon="icon_search"
-            class="pointer-events-none h-[18px] w-[18px] shrink-0 text-[--autocomplete-icon-color] transition-colors duration-300"
+            class="pointer-events-none h-[20px] w-[20px] shrink-0 p-[2px] text-[--autocomplete-icon-color] transition-colors duration-300"
           />
         </div>
       </Field>
@@ -563,7 +563,6 @@ onUnmounted(() => {
   </Teleport>
 </template>
 
-<style src="@css/_common/vueTransition.css"></style>
 <style lang="postcss">
 .m-autocomplete-element {
   &.\-\-disabled {
