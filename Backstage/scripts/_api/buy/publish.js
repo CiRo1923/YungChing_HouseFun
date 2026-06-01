@@ -5,13 +5,13 @@ export const apiPOSTRealEstateNewCase = async (data) =>
   await fetchApi.post(`api/${version}/buy/realEstate/NewCase`, data)
 
 export const apiGETRealEstate = async (data) =>
-  await fetchApi.get(`api/${version}/buy/realEstate/{hfid}`, data)
+  await fetchApi.get(`api/${version}/buy/realEstate/{hfID}`, data)
 
 export const apiPOSTRealEstate = async (data) =>
-  await fetchApi.postString(`api/${version}/buy/realEstate/{hfid}`, data)
+  await fetchApi.postString(`api/${version}/buy/realEstate/{hfID}`, data)
 
 export const apiPOSTRealEstateDraft = async (data) =>
-  await fetchApi.postString(`api/${version}/buy/realEstateDraft/{hfid}`, data)
+  await fetchApi.postString(`api/${version}/buy/realEstateDraft/{hfID}`, data)
 
 export const apiPOSTRealEstatePicUpload = async (data) =>
   await fetchApi.postForm(`api/${version}/buy/realEstatePic/Upload`, data)
@@ -94,4 +94,4 @@ export const apiPOSTRealEstateReadToPublish = async (data) =>
 
 // basic / renewal / fiinish
 export const apiGERealEstateCaseStatus = async (data) =>
-  await fetchApi.get(`api/${version}/buy/realEstate/CaseStatus/{hfid}`, data)
+  await fetchApi.get(`api/${version}/buy/realEstate/CaseStatus/{hfID}`, data)

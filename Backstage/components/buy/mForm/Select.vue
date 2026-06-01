@@ -1,6 +1,7 @@
 <script setup>
 import { onDeepClone, onEmptyData } from '@js/_prototype.js'
 import { onMergeDropdownConfig, useDropdownCore } from './.composables/useDropdownCore.js'
+import SelectDropdownOptions from './SelectDropdownOptions.vue'
 
 import '@js/_validation.js'
 
@@ -66,6 +67,9 @@ const config = computed(() => {
     },
     keyboard: false,
     maxItems: 5,
+    dropdownOption: {
+      type: 'single',
+    },
   }
 
   return onMergeDropdownConfig(props.config, defaultConfig)
@@ -82,6 +86,8 @@ const setClass = computed(() => {
       error: '',
       dropdown: '',
       dropdownContainer: '',
+      dropdownBody: '',
+      dropdownOptions: '',
       dropdownButton: '',
     },
     ...props.setClass,
@@ -142,6 +148,7 @@ const {
   elenemtRef,
   dropdownRef,
   dropdownContainerRef,
+  dropdownBodyRef,
   dropdownItemRef,
   isFocus,
   isActive,
@@ -172,10 +179,10 @@ const onDropdownArrow = (e) => {
       selectedIndex.value = options.value.length - 1
     }
 
-    const $dropdown = dropdownRef.value
+    const $dropdown = dropdownBodyRef.value
     const $dropdownItemRef = dropdownItemRef.value[selectedIndex.value]
     const dropdown = {
-      rect: dropdownRef.value.getBoundingClientRect(),
+      rect: dropdownBodyRef.value.getBoundingClientRect(),
     }
     const dropdownItem = {
       rect: $dropdownItemRef.getBoundingClientRect(),
@@ -224,6 +231,26 @@ const onDropdownItemClick = (index) => {
 
   onSwitchActive(false)
   emits('change', option)
+}
+
+const onSetDropdownItemRef = (el, index) => {
+  if (!Array.isArray(dropdownItemRef.value)) {
+    dropdownItemRef.value = []
+  }
+
+  dropdownItemRef.value[index] = el
+}
+
+const onIsDropdownOptionActive = (_item, index) => {
+  return index === selectedIndex.value
+}
+
+const onGetDropdownOptionKey = (item, index) => {
+  return `${item}_${index}`
+}
+
+const onDropdownOptionClick = (_item, index) => {
+  onDropdownItemClick(index)
 }
 
 const onOutSide = (e) => {
@@ -339,45 +366,34 @@ onUnmounted(() => {
         v-if="isActive && options && options.length !== 0 && !config.isDisabled"
       >
         <div
-          class="m-form-dropdown-container scrollbar --y"
+          class="m-form-dropdown-container"
           :class="setClass.dropdownContainer"
           ref="dropdownContainerRef"
         >
           <div class="m-form-dropdown-header" v-if="$slots.dropdownHeader">
             <slot name="dropdownHeader" />
           </div>
-          <ul class="m-form-dropdown-options">
-            <li
-              class="m-form-dropdown-item"
-              v-for="(item, index) in options"
-              :key="`${item}_${index}`"
-              ref="dropdownItemRef"
+          <div
+            class="m-form-dropdown-body scrollbar --y"
+            :class="setClass.dropdownBody"
+            ref="dropdownBodyRef"
+          >
+            <SelectDropdownOptions
+              :options="options"
+              :config="config"
+              :setClass="setClass"
+              :isActiveOption="onIsDropdownOptionActive"
+              :onItemClick="onDropdownOptionClick"
+              :itemRef="onSetDropdownItemRef"
+              :getKey="onGetDropdownOptionKey"
             >
-              <button
-                type="button"
-                class="m-form-dropdown-button"
-                :class="[
-                  setClass.dropdownButton,
-                  {
-                    '--active': index === selectedIndex,
-                  },
-                ]"
-                :disabled="item[config.schema.isDisabled] === true"
-                @click="onDropdownItemClick(index)"
-              >
-                <CommonSvgIcon
-                  icon="icon_check_solid"
-                  class="m-form-dropdown-icon"
-                  v-if="index === selectedIndex"
-                />
-                <em class="m-form-dropdown-label">
-                  <slot name="option" :item="item">
-                    {{ item[config.schema.label] }}
-                  </slot>
-                </em>
-              </button>
-            </li>
-          </ul>
+              <template #option="{ item, index, isOptionActive }">
+                <slot name="option" :item="item" :index="index" :isOptionActive="isOptionActive">
+                  {{ item[config.schema.label] }}
+                </slot>
+              </template>
+            </SelectDropdownOptions>
+          </div>
           <footer class="m-form-dropdown-footer" v-if="$slots.dropdownFooter">
             <slot name="dropdownFooter" />
           </footer>
@@ -389,4 +405,6 @@ onUnmounted(() => {
 
 <style src="@css/_modules/buy/mForm.css"></style>
 <style src="@css/_modules/buy/mFormDropdown.css"></style>
-<style lang="postcss"></style>
+<style lang="postcss">
+@import '@css/_common/vueTransition.css';
+</style>

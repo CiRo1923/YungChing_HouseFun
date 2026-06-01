@@ -27,7 +27,7 @@ const setClass = computed(() => {
           name="planID"
           v-model="golden.apiData.planID"
           :config="{
-            value: item.planId,
+            value: item.planID,
           }"
           :setClass="{
             main: 'p:--px-40 p:--py-16 tm:p-16',
@@ -49,7 +49,7 @@ const setClass = computed(() => {
       </li>
     </ul>
     <BuyMFormHidden
-      name="planId"
+      name="planID"
       v-model="golden.apiData.planID"
       :rules="{
         required: '請選擇額度',

@@ -20,7 +20,7 @@ const message = computed(() => {
 const onUploaded = async (items, done) => {
   onIsLoading(true)
   const { status, data } = await onApiPOSTRealEstatePicUpload({
-    hfid: hfID.value,
+    hfID: hfID.value,
     imgType: 2, // (1: 物件圖片; 2: 格局圖)
     imgUpload: items[0].file,
   })

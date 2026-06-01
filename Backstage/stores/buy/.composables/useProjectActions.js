@@ -413,10 +413,10 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGetPublishAvailablePlans = async (hfid) => {
+  const onApiGetPublishAvailablePlans = async (hfID) => {
     const { config, status, data } = await apiGetPublishAvailablePlans({
-      userId: 0,
-      hfid,
+      userID: 0,
+      hfID,
     })
 
     if (status === 200) {
@@ -429,10 +429,10 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiPOSTPublishRenewal = async (hfids) => {
+  const onApiPOSTPublishRenewal = async (hfIDs) => {
     const { config, status, data } = await apiPOSTPublishRenewal({
-      userId: 0,
-      hfids,
+      userID: 0,
+      hfIDs,
       ...renewal.value.apiData,
     })
 
@@ -442,10 +442,10 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiPOSTPublishSubmit = async (hfids) => {
+  const onApiPOSTPublishSubmit = async (hfIDs) => {
     const { config, status, data } = await apiPOSTPublishSubmit({
-      userId: 0,
-      hfids,
+      userID: 0,
+      hfIDs,
       ...renewal.value.apiData,
     })
 
@@ -455,9 +455,9 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiPOSTRealEstateRestoreToOnline = async (hfids) => {
+  const onApiPOSTRealEstateRestoreToOnline = async (hfIDs) => {
     const { config, status, data } = await apiPOSTRealEstateRestoreToOnline({
-      hfids,
+      hfIDs,
     })
 
     if (status !== 200) {
@@ -466,9 +466,9 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGETPublishGetPublishResponse = async (hfid) => {
+  const onApiGETPublishGetPublishResponse = async (hfID) => {
     const { config, status, data } = await apiGETPublishGetPublishResponse({
-      hfid,
+      hfID,
     })
 
     if (status === 200) {
@@ -492,10 +492,10 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiPOSTGoldenSetPlanSingle = async (hfid) => {
+  const onApiPOSTGoldenSetPlanSingle = async (hfID) => {
     const { config, status, data } = await apiPOSTGoldenSetPlanSingle({
-      userId: 0,
-      hfid,
+      userID: 0,
+      hfID,
       ...golden.value.apiData,
     })
 
@@ -507,10 +507,10 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGETRefreshCurrentPlansForCase = async (hfid) => {
+  const onApiGETRefreshCurrentPlansForCase = async (hfID) => {
     const { config, status, data } = await apiGETRefreshCurrentPlansForCase({
-      userId: 0,
-      hfid,
+      userID: 0,
+      hfID,
     })
 
     if (status === 200) {
@@ -528,7 +528,7 @@ export default () => {
       autoRefresh.value.planInfo.apiData
     )
 
-    // console.log(data)
+    console.log(data)
 
     if (status !== 200) {
       onApiError(config, status, data)

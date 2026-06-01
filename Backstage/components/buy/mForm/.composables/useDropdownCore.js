@@ -11,12 +11,19 @@ export const onMergeDropdownConfig = (config = {}, extendConfig = {}) => {
   return onDeepMerge(onDeepMerge(defaultDropdownConfig, extendConfig), config)
 }
 
+const onNextFrame = () => {
+  return new Promise((resolve) => {
+    requestAnimationFrame(resolve)
+  })
+}
+
 export const useDropdownCore = ({ config, model = ref(null), options, selectedIndex }) => {
   const borderWidth = 0
   const elenemtRef = ref(null)
   const dropdownRef = ref(null)
   const dropdownContainerRef = ref(null)
-  const dropdownItemRef = ref(null)
+  const dropdownBodyRef = ref(null)
+  const dropdownItemRef = ref([])
   const isFocus = ref(false)
   const isActive = ref(false)
   const isOpen = ref(false)
@@ -37,20 +44,22 @@ export const useDropdownCore = ({ config, model = ref(null), options, selectedIn
     onSwitchActive(false)
   }
 
-  const onDropdownOpen = () => {
+  const onDropdownOpen = ({ bodyHeight: bodyHeightOverride = null } = {}) => {
     const { maxItems } = config.value
     const maxItemsNumber = Number(maxItems)
     const $elenemt = elenemtRef.value
     const $dropdown = dropdownRef.value
     const $dropdownContainer = dropdownContainerRef.value
+    const $dropdownBody = dropdownBodyRef.value || $dropdownContainer
     const refItems = dropdownItemRef.value
     const items = Array.isArray(refItems)
-      ? refItems
+      ? refItems.filter(Boolean)
       : Array.from($dropdownContainer?.children || [])
 
     if ($elenemt && $dropdown && $dropdownContainer) {
       $dropdown.style.height = ''
       $dropdownContainer.style.height = ''
+      $dropdownBody.style.height = ''
 
       const element = {
         rect: $elenemt.getBoundingClientRect(),
@@ -62,9 +71,6 @@ export const useDropdownCore = ({ config, model = ref(null), options, selectedIn
         rect: $dropdown.getBoundingClientRect(),
       }
       const containerStyle = getComputedStyle($dropdownContainer)
-      const containerPaddingHeight =
-        (parseFloat(containerStyle.paddingTop) || 0) +
-        (parseFloat(containerStyle.paddingBottom) || 0)
       const containerBorderHeight =
         (parseFloat(containerStyle.borderTopWidth) || 0) +
         (parseFloat(containerStyle.borderBottomWidth) || 0)
@@ -79,18 +85,18 @@ export const useDropdownCore = ({ config, model = ref(null), options, selectedIn
       const visibleItemsGapHeight = hasItemsThanMax
         ? Math.max(maxItemsNumber - 1, 0) * itemsGapY
         : 0
-      const dropdownHeight = hasItemsThanMax
-        ? containerPaddingHeight +
-          containerBorderHeight +
-          visibleItemsHeight +
-          visibleItemsGapHeight
-        : $dropdownContainer.scrollHeight + containerBorderHeight
-      const containerHeight = hasItemsThanMax
-        ? containerPaddingHeight +
-          containerBorderHeight +
-          visibleItemsHeight +
-          visibleItemsGapHeight
-        : null
+      const bodyHeight =
+        bodyHeightOverride !== null
+          ? bodyHeightOverride
+          : hasItemsThanMax
+            ? visibleItemsHeight + visibleItemsGapHeight
+            : null
+
+      if (bodyHeight !== null) {
+        $dropdownBody.style.height = `${bodyHeight}px`
+      }
+
+      const dropdownHeight = $dropdownContainer.scrollHeight + containerBorderHeight
 
       const offsetTop = element.rect.height + element.rect.top + window.scrollY
       const offsetLeftMin = dropdown.rect.width + element.rect.left
@@ -106,7 +112,6 @@ export const useDropdownCore = ({ config, model = ref(null), options, selectedIn
       const maxHeight = dropdownHeight + borderWidth
 
       $dropdown.style.height = `${maxHeight}px`
-      $dropdownContainer.style.height = hasItemsThanMax ? `${containerHeight}px` : ''
       $dropdown.style.top = `${offsetTop - borderWidth * 2}px`
       $dropdown.style.left = `${left - borderWidth}px`
 
@@ -131,9 +136,12 @@ export const useDropdownCore = ({ config, model = ref(null), options, selectedIn
         const selectedItem = {
           rect: $selectedItem.getBoundingClientRect(),
         }
+        const dropdownBody = {
+          rect: $dropdownBody.getBoundingClientRect(),
+        }
 
-        $dropdownContainer.scrollTop =
-          $selectedItem.offsetTop + selectedItem.rect.height / 2 - maxHeight / 2
+        $dropdownBody.scrollTop =
+          $selectedItem.offsetTop + selectedItem.rect.height / 2 - dropdownBody.rect.height / 2
       }
     }
   }
@@ -149,6 +157,22 @@ export const useDropdownCore = ({ config, model = ref(null), options, selectedIn
     onDropdownOpen()
   }
 
+  const onDropdownHeightUpdate = async ({ frames = 1, target = null, bodyHeight = null } = {}) => {
+    await nextTick()
+
+    for (let i = 0; i < frames; i++) {
+      await onNextFrame()
+      await nextTick()
+    }
+
+    const $target = target?.value ?? target
+    const targetHeight = $target ? $target.getBoundingClientRect().height : null
+
+    onDropdownOpen({
+      bodyHeight: bodyHeight ?? targetHeight,
+    })
+  }
+
   const isDropdownOutside = (e) => {
     const $elenemt = elenemtRef.value
     const $dropdown = dropdownRef.value
@@ -162,6 +186,7 @@ export const useDropdownCore = ({ config, model = ref(null), options, selectedIn
     elenemtRef,
     dropdownRef,
     dropdownContainerRef,
+    dropdownBodyRef,
     dropdownItemRef,
     isFocus,
     isActive,
@@ -169,6 +194,7 @@ export const useDropdownCore = ({ config, model = ref(null), options, selectedIn
     onSwitchActive,
     onCloseDropdown,
     onDropdownOpen,
+    onDropdownHeightUpdate,
     onElementClick,
     onSelectResize,
     isDropdownOutside,

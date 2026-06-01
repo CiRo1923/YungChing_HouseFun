@@ -23,6 +23,10 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
+  rules: {
+    type: Object,
+    default: null,
+  },
   setClass: {
     type: Object,
     default: () => ({}),
@@ -59,8 +63,11 @@ const setClass = computed(() => {
       element: '',
       type: '',
       icon: '',
+      suffix: '',
+      error: '',
       dropdown: '',
       dropdownContainer: '',
+      dropdownBody: '',
     },
     ...props.setClass,
   }
@@ -82,6 +89,7 @@ const {
   elenemtRef,
   dropdownRef,
   dropdownContainerRef,
+  dropdownBodyRef,
   dropdownItemRef,
   isActive,
   isFocus,
@@ -89,6 +97,7 @@ const {
   onSwitchActive,
   onCloseDropdown,
   onDropdownOpen,
+  onDropdownHeightUpdate,
   onElementClick,
   onSelectResize,
   isDropdownOutside,
@@ -107,12 +116,14 @@ defineExpose({
   elenemtRef,
   dropdownRef,
   dropdownContainerRef,
+  dropdownBodyRef,
   dropdownItemRef,
   isActive,
   isFocus,
   isOpen,
   onSwitchActive,
   onDropdownOpen,
+  onDropdownHeightUpdate,
   onElementClick,
   onSelectResize,
   isDropdownOutside,
@@ -194,14 +205,18 @@ onUnmounted(() => {
         v-if="isActive && !config.isDisabled"
       >
         <div
-          class="m-form-dropdown-container scrollbar --y"
+          class="m-form-dropdown-container"
           :class="setClass.dropdownContainer"
           ref="dropdownContainerRef"
         >
           <div class="m-form-dropdown-header" v-if="$slots.dropdownHeader">
             <slot name="dropdownHeader" />
           </div>
-          <div class="m-form-dropdown-body">
+          <div
+            class="m-form-dropdown-body scrollbar --y"
+            :class="setClass.dropdownBody"
+            ref="dropdownBodyRef"
+          >
             <slot name="dropdown" />
           </div>
           <footer class="m-form-dropdown-footer" v-if="$slots.dropdownFooter">

@@ -29,7 +29,7 @@ export const useBuyListStore = defineStore('buyList', () => {
   })
   const options = ref({
     purpose: null,
-    address: null,
+    area: null,
     exchange: null,
     golden: null,
     room: null,

@@ -7,14 +7,14 @@ const onSearchClick = () => {
 </script>
 
 <template>
-  <PageBuyListFilterAccordion @search="onSearchClick">
-    <PageBuyListFilterPurpose />
+  <PageBuyListFilterCommonAccordion @search="onSearchClick">
+    <PageBuyListFilterCommonPurpose />
     <template #hide>
-      <PageBuyListFilterAddr />
-      <PageBuyListFilterMore />
-      <PageBuyListFilterSearch />
+      <PageBuyListFilterCommonArea />
+      <PageBuyListFilterCommonMore />
+      <PageBuyListFilterCommonSearch />
     </template>
-  </PageBuyListFilterAccordion>
+  </PageBuyListFilterCommonAccordion>
 </template>
 
 <style lang="postcss"></style>

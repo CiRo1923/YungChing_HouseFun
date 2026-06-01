@@ -1,5 +1,6 @@
 <script setup>
 import { onMergeDropdownConfig, useDropdownCore } from './.composables/useDropdownCore.js'
+import SelectDropdownOptions from './SelectDropdownOptions.vue'
 
 const props = defineProps({
   items: {
@@ -17,7 +18,7 @@ const props = defineProps({
 })
 
 const selectedIndex = ref(-1)
-const dropdownOptionsRef = ref([])
+const dropdownBodyRefs = ref([])
 const onGetRefValue = (source) => {
   return isRef(source) ? source.value : source
 }
@@ -39,6 +40,9 @@ const config = computed(() => {
       label: 'label',
       value: 'value',
       isDisabled: 'isDisabled',
+    },
+    dropdownOption: {
+      type: 'multiple',
     },
   }
 
@@ -82,6 +86,8 @@ const setClass = computed(() => {
       icon: '',
       dropdown: '',
       dropdownContainer: '',
+      dropdownBody: '',
+      dropdownOptions: '',
       dropdownButton: '',
     },
     ...props.setClass,
@@ -114,8 +120,22 @@ const onGetMaxItems = () => {
   return Number.isFinite(maxItemsNumber) && maxItemsNumber > 0 ? Math.floor(maxItemsNumber) : null
 }
 
-const onSetDropdownOptionsRef = (el, index) => {
-  dropdownOptionsRef.value[index] = el
+const onSetDropdownBodyRef = (el, index) => {
+  dropdownBodyRefs.value[index] = el
+}
+
+const onGetDropdownOptionOffset = (dataIndex) => {
+  return dropdownDatas.value
+    .slice(0, dataIndex)
+    .reduce((total, data) => total + data.options.length, 0)
+}
+
+const onSetDropdownItemRef = (el, index) => {
+  if (!Array.isArray(dropdownItemRef.value)) {
+    dropdownItemRef.value = []
+  }
+
+  dropdownItemRef.value[index] = el
 }
 
 const onDropdownHeightUpdate = () => {
@@ -135,10 +155,13 @@ const onDropdownHeightUpdate = () => {
 const onDropdownOptionsOpen = () => {
   const maxItems = onGetMaxItems()
 
-  dropdownOptionsRef.value.forEach(($options) => {
-    if (!$options) return
+  dropdownBodyRefs.value.forEach(($body) => {
+    if (!$body) return
 
-    $options.style.height = ''
+    $body.style.height = ''
+
+    const $options = $body.querySelector('.m-form-dropdown-options')
+    if (!$options) return
 
     const items = Array.from($options.children || [])
     const hasItemsThanMax = maxItems && items.length > maxItems
@@ -152,7 +175,7 @@ const onDropdownOptionsOpen = () => {
       .reduce((total, item) => total + item.getBoundingClientRect().height, 0)
     const visibleItemsGapHeight = Math.max(maxItems - 1, 0) * gapY
 
-    $options.style.height = `${visibleItemsHeight + visibleItemsGapHeight}px`
+    $body.style.height = `${visibleItemsHeight + visibleItemsGapHeight}px`
   })
 
   onDropdownHeightUpdate()
@@ -209,6 +232,25 @@ const onDropdownItemClick = (dataIndex, option) => {
   const value = onGetOptionValue(data, option)
 
   onSetRefValue(modelRef, value)
+}
+
+const onIsDropdownOptionActive = (data, item) => {
+  return onIsSelected(data, item)
+}
+
+const onGetDropdownOptionKey = (data, item, index) => {
+  return item?.[onGetSchema(data).value] ?? `${data.dataIndex}_${index}`
+}
+
+const onGetDropdownOptionConfig = (data) => {
+  return {
+    ...config.value,
+    schema: onGetSchema(data),
+  }
+}
+
+const onDropdownOptionClick = (dataIndex, item) => {
+  onDropdownItemClick(dataIndex, item)
 }
 
 defineExpose({
@@ -275,7 +317,7 @@ onUnmounted(() => {
         v-if="isActive && !config.isDisabled"
       >
         <div
-          class="m-form-dropdown-container scrollbar --y"
+          class="m-form-dropdown-container"
           :class="setClass.dropdownContainer"
           ref="dropdownContainerRef"
         >
@@ -288,41 +330,33 @@ onUnmounted(() => {
               <div class="m-form-dropdown-header" v-if="$slots.dropdownHeader">
                 <slot name="dropdownHeader" :data="data" />
               </div>
-              <ul
-                class="m-form-dropdown-options scrollbar --y"
-                :ref="(el) => onSetDropdownOptionsRef(el, dataIndex)"
+              <div
+                class="m-form-dropdown-body scrollbar --y"
+                :class="setClass.dropdownBody"
+                :ref="(el) => onSetDropdownBodyRef(el, dataIndex)"
               >
-                <li
-                  class="m-form-dropdown-item"
-                  v-for="(item, index) in data.options"
-                  :key="item?.[onGetSchema(data).value] ?? `${dataIndex}_${index}`"
-                  ref="dropdownItemRef"
+                <SelectDropdownOptions
+                  :options="data.options"
+                  :config="onGetDropdownOptionConfig(data)"
+                  :setClass="setClass"
+                  :isActiveOption="(item) => onIsDropdownOptionActive(data, item)"
+                  :onItemClick="(item) => onDropdownOptionClick(dataIndex, item)"
+                  :itemRef="onSetDropdownItemRef"
+                  :itemRefIndexOffset="onGetDropdownOptionOffset(dataIndex)"
+                  :getKey="(item, index) => onGetDropdownOptionKey(data, item, index)"
                 >
-                  <button
-                    type="button"
-                    class="m-form-dropdown-button"
-                    :class="[
-                      setClass.dropdownButton,
-                      {
-                        '--active': onIsSelected(data, item),
-                      },
-                    ]"
-                    :disabled="item[onGetSchema(data).isDisabled] === true"
-                    @click="onDropdownItemClick(dataIndex, item)"
-                  >
-                    <CommonSvgIcon
-                      icon="icon_check_solid"
-                      class="m-form-dropdown-icon"
-                      v-if="onIsSelected(data, item)"
-                    />
-                    <em class="m-form-dropdown-label">
-                      <slot name="option" :item="item">
-                        {{ item[onGetSchema(data).label] }}
-                      </slot>
-                    </em>
-                  </button>
-                </li>
-              </ul>
+                  <template #option="{ item, index, isOptionActive }">
+                    <slot
+                      name="option"
+                      :item="item"
+                      :index="index"
+                      :isOptionActive="isOptionActive"
+                    >
+                      {{ item[onGetSchema(data).label] }}
+                    </slot>
+                  </template>
+                </SelectDropdownOptions>
+              </div>
               <footer class="m-form-dropdown-footer" v-if="$slots.dropdownFooter">
                 <slot name="dropdownFooter" :data="data" />
               </footer>
@@ -336,4 +370,6 @@ onUnmounted(() => {
 
 <style src="@css/_modules/buy/mForm.css"></style>
 <style src="@css/_modules/buy/mFormDropdown.css"></style>
-<style lang="postcss"></style>
+<style lang="postcss">
+@import '@css/_common/vueTransition.css';
+</style>

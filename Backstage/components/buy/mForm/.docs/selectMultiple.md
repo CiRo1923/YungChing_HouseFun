@@ -50,16 +50,18 @@
             <div class="m-form-dropdown-header">
               <slot name="dropdownHeader" :data="data" />
             </div>
-            <ul class="m-form-dropdown-options scrollbar --y">
-              <li class="m-form-dropdown-item">
-                <button class="m-form-dropdown-button">
-                  <CommonSvgIcon class="m-form-dropdown-icon" />
-                  <em class="m-form-dropdown-label">
-                    <slot name="option" :item="item" />
-                  </em>
-                </button>
-              </li>
-            </ul>
+            <div class="m-form-dropdown-body scrollbar --y">
+              <ul class="m-form-dropdown-options">
+                <li class="m-form-dropdown-item">
+                  <button class="m-form-dropdown-button">
+                    <CommonSvgIcon class="m-form-dropdown-icon" />
+                    <em class="m-form-dropdown-label">
+                      <slot name="option" :item="item" />
+                    </em>
+                  </button>
+                </li>
+              </ul>
+            </div>
             <footer class="m-form-dropdown-footer">
               <slot name="dropdownFooter" :data="data" />
             </footer>
@@ -174,17 +176,19 @@ const items = [
 
 ### config.maxItems / config.maxItem
 
-`SelectMultiple.vue` 的高度限制會套在每一組 `.m-form-dropdown-options`，不是整個 `.m-form-dropdown-container`。
+`SelectMultiple.vue` 的高度限制會套在每一組 `.m-form-dropdown-body`，不是整個 `.m-form-dropdown-container`。
 
-當某組 options 數量超過 `maxItems` 時，該組 `.m-form-dropdown-options` 會依照可見 item 高度與 `gap-y` 計算高度，並透過 `scrollbar --y` 出現垂直捲軸。
+當某組 options 數量超過 `maxItems` 時，該組 `.m-form-dropdown-body` 會依照可見 item 高度與 `.m-form-dropdown-options` 的 `gap-y` 計算高度，並透過 `scrollbar --y` 出現垂直捲軸。
 
 ```vue
-<ul class="m-form-dropdown-options scrollbar --y">
-  ...
-</ul>
+<div class="m-form-dropdown-body scrollbar --y">
+  <ul class="m-form-dropdown-options">
+    ...
+  </ul>
+</div>
 ```
 
-options 高度套用完成後，元件會重新用 `.m-form-dropdown-container` 的內容高度回寫 `.m-form-dropdown`，避免外層保留未限制前的完整高度。
+body 高度套用完成後，元件會重新用 `.m-form-dropdown-container` 的內容高度回寫 `.m-form-dropdown`，避免外層保留未限制前的完整高度。
 
 ## setClass key
 
@@ -284,7 +288,7 @@ options 高度套用完成後，元件會重新用 `.m-form-dropdown-container` 
 
 ## 高度與樣式注意
 
-- 不要在 `.m-form-dropdown-container` 加 `max-height: 100%` / `max-h-full`，避免展開時量到被裁切後的高度。
+- 不要在 `.m-form-dropdown-container` 或 `.m-form-dropdown-body` 加 `max-height: 100%` / `max-h-full`，避免展開時量到被裁切後的高度。
 - 需要 dropdown 與欄位距離時，請調整 `.m-form-dropdown` 的 `--form-dropdown-*-my`。
 - options 會被建立在 `.m-form-dropdown-options` 內，讓 `gap-y` 能被 `useDropdownCore` 正確計算。
 - `.m-form-dropdown-datas` 使用 `w-full`，`.m-form-dropdown-data` 使用 `min-w-0 flex-1`，避免 footer 內的 input 或長文字把單一欄位撐寬，讓多組 data 能平均分欄。

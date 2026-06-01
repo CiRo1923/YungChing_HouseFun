@@ -10,10 +10,10 @@ const onSearchClick = () => {
 </script>
 
 <template>
-  <PageBuyListFilterAccordion @search="onSearchClick">
-    <PageBuyListFilterPurpose />
+  <PageBuyListFilterCommonAccordion @search="onSearchClick">
+    <PageBuyListFilterCommonPurpose />
     <template #hide>
-      <PageBuyListFilterAddr />
+      <PageBuyListFilterCommonArea />
       <BuyMFormSelect
         name="caseDownToken"
         v-model="apiData.caseDownToken"
@@ -30,10 +30,10 @@ const onSearchClick = () => {
           dropdown: 't:w-[300px] p:w-[400px]',
         }"
       />
-      <PageBuyListFilterMore />
-      <PageBuyListFilterSearch />
+      <PageBuyListFilterCommonMore />
+      <PageBuyListFilterCommonSearch />
     </template>
-  </PageBuyListFilterAccordion>
+  </PageBuyListFilterCommonAccordion>
 </template>
 
 <style lang="postcss"></style>

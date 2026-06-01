@@ -58,7 +58,7 @@ export default () => {
     if (status === 200) {
       const keyMap = {
         purpose: 'casePurposeOptions',
-        address: 'caseAddrOptions',
+        area: 'caseAddrOptions',
         exchange: 'caseExchangeOptions',
         golden: 'caseGoldenOptions',
         room: 'caseRoomOptions',
@@ -163,9 +163,9 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiPOSTRealEstateOffline = async (hfids) => {
+  const onApiPOSTRealEstateOffline = async (hfIDs) => {
     const { config, status, data } = await apiPOSTRealEstateOffline({
-      hfids,
+      hfIDs,
     })
 
     if (status !== 200) {
@@ -175,9 +175,9 @@ export default () => {
     return { config, status, data }
   }
 
-  const onApiPOSTRealEstateDeal = async (hfids) => {
+  const onApiPOSTRealEstateDeal = async (hfIDs) => {
     const { config, status, data } = await apiPOSTRealEstateDeal({
-      hfids,
+      hfIDs,
       ...apiDealData.value,
     })
 
@@ -187,9 +187,9 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiPOSTRealEstateRemove = async (hfids) => {
+  const onApiPOSTRealEstateRemove = async (hfIDs) => {
     const { config, status, data } = await apiPOSTRealEstateRemove({
-      hfids,
+      hfIDs,
     })
 
     if (status !== 200) {
@@ -198,9 +198,9 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGETRealEstateCaseViewCounts = async (hfid) => {
+  const onApiGETRealEstateCaseViewCounts = async (hfID) => {
     const { config, status, data } = await apiGETRealEstateCaseViewCounts({
-      hfid,
+      hfID,
     })
 
     if (status !== 200) {
@@ -209,8 +209,8 @@ export default () => {
 
     return { config, status, data }
   }
-  const onSyncCheckedDatas = (hfids) => {
-    const idSet = new Set(hfids)
+  const onSyncCheckedDatas = (hfIDs) => {
+    const idSet = new Set(hfIDs)
 
     datas.value = datas.value.map((item) => ({
       ...item,

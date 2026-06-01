@@ -51,9 +51,9 @@
   --form-dropdown-button-tablet-px: 8px;
   --form-dropdown-button-mobile-px: 8px;
 
-  --form-dropdown-button-pc-py: 12px;
-  --form-dropdown-button-tablet-py: 12px;
-  --form-dropdown-button-mobile-py: 12px;
+  --form-dropdown-button-pc-py: 5px;
+  --form-dropdown-button-tablet-py: 5px;
+  --form-dropdown-button-mobile-py: 10px;
 
   --form-dropdown-button-pc-rounded: 5px;
   --form-dropdown-button-tablet-rounded: 5px;
@@ -172,15 +172,25 @@
   border-top-width: var(--form-dropdown-container-py);
   border-bottom-width: var(--form-dropdown-container-py);
 
-  @apply border-solid border-y-transparent px-[calc(var(--form-dropdown-container-px)_-_var(--form-dropdown-default-px))];
+  @apply border-solid border-y-transparent;
 }
 
 .m-form-dropdown-datas {
-  @apply gap-x-[--form-dropdown-datas-gap-x];
+  @apply gap-x-[--form-dropdown-datas-gap-x] px-[calc(var(--form-dropdown-container-px)_-_var(--form-dropdown-default-px))];
+
+  .m-form-dropdown-header,
+  .m-form-dropdown-body,
+  .m-form-dropdown-footer {
+    @apply px-0;
+  }
 }
 
 .m-form-dropdown-header {
-  @apply mb-[--form-dropdown-header-mb];
+  @apply mb-[--form-dropdown-header-mb] px-[--form-dropdown-container-px];
+}
+
+.m-form-dropdown-body {
+  @apply px-[calc(var(--form-dropdown-container-px)_-_var(--form-dropdown-default-px))];
 }
 
 .m-form-dropdown-options {
@@ -226,7 +236,7 @@
 }
 
 .m-form-dropdown-footer {
-  @apply mt-[--form-dropdown-header-mb];
+  @apply mt-[--form-dropdown-header-mb] px-[--form-dropdown-container-px];
 }
 
 @screen p {

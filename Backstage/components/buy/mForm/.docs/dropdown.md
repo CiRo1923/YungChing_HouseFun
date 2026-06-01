@@ -1,12 +1,13 @@
 # Dropdown.vue
 
-`Dropdown.vue` 是 `components/buy/mForm/Select.vue` 抽出的 dropdown shell，目標是讓下拉層的觸發元素、開關、定位、動畫與樣式 class 可以共用。
+`Dropdown.vue` 是 mForm 的自訂 dropdown 欄位。它保留 dropdown shell 的定位與開關邏輯，同時接上 `v-model`、`vee-validate`、placeholder、錯誤狀態與 suffix。
 
 ## 參考來源
 
-- 主要參考：`components/buy/mForm/Select.vue`
+- 元件：`components/buy/mForm/Dropdown.vue`
 - 共用邏輯：`components/buy/mForm/.composables/useDropdownCore.js`
-- 動畫：`<Transition name="dropdown" @after-leave="onCloseDropdown" appear>`
+- 驗證：`vee-validate` 的 `Field` / `ErrorMessage`
+- 動畫：`<Transition name="dropdown" @before-leave="onCloseDropdown" appear>`
 
 ## 目前結構
 
@@ -15,17 +16,24 @@
 - `elenemtRef`：觸發元素，提供 dropdown 定位基準。
 - `config`：合併 dropdown 預設設定與外部傳入設定。
 - `setClass`：合併預設 class key 與外部傳入 class。
-- `isActive`：控制 dropdown 是否顯示。
+- `model`：透過 `modelValue` / `update:modelValue` 雙向綁定目前顯示值。
+- `placeholder`：把字串或物件格式統一成 `{ value, isToOption }`。
+- `isActive`：控制 dropdown 是否掛載。
 - `isFocus`：控制觸發元素 focus 樣式。
+- `isOpen`：dropdown 定位與高度計算完成後設為 true，用來補開啟狀態 class。
 - `onCloseDropdown`：離場動畫結束後關閉 dropdown。
-- `dropdownRef` / `dropdownContainerRef`：提供定位與捲動計算使用。
+- `dropdownRef` / `dropdownContainerRef` / `dropdownBodyRef`：提供定位、高度與捲動計算使用。
 - 外部點擊與視窗 resize 事件：開啟後可點擊外部關閉，視窗尺寸變更時重新定位。
 
 ## Props
 
 | 名稱 | 型別 | 預設 | 說明 |
 | --- | --- | --- | --- |
+| `name` | `String` | `null` | vee-validate 欄位名稱。 |
+| `modelValue` | `String` / `Number` / `Boolean` / `Object` | `null` | 目前欄位值。 |
+| `modelModifiers` | `Object` | `{}` | 支援 `number` modifier，空字串會轉成 `null`。 |
 | `config` | `Object` | `{}` | dropdown 設定。 |
+| `rules` | `Object` | `null` | vee-validate rules。 |
 | `setClass` | `Object` | `{}` | 外部覆寫 class。 |
 
 ## config 預設值
@@ -33,7 +41,9 @@
 ```js
 {
   arrowType: 'caret',
+  placeholder: null,
   isDisabled: false,
+  isError: false,
   position: 'auto'
 }
 ```
@@ -52,6 +62,8 @@
   element: '',
   type: '',
   icon: '',
+  suffix: '',
+  error: '',
   dropdown: '',
   dropdownContainer: '',
 }
@@ -59,17 +71,25 @@
 
 ## Slots
 
-### `default`
+### `suffix`
 
-觸發 dropdown 的內容，會被包在 `.m-form-element` button 內。
+欄位右側輔助內容，會渲染在 `.m-form-suffix`。
+
+### `dropdownHeader`
+
+dropdown container 上方區塊。
 
 ### `dropdown`
 
-dropdown container 內的內容。沒有設定 `maxItems` 時，`useDropdownCore` 會用 container `scrollHeight` 加上 container 自己的 border 計算展開高度。
+dropdown body 內的內容。卷軸掛在 `.m-form-dropdown-body.scrollbar.--y`，`useDropdownCore` 會在需要限制高度時把高度寫到 body，再用 container 內容高度回寫外層 dropdown。
+
+### `dropdownFooter`
+
+dropdown container 下方區塊。
 
 需要 dropdown 與觸發元素之間的間距時，請加在 `.m-form-dropdown` / `dropdownRef` 外層，不要加在 `.m-form-dropdown-container`，避免內層 margin 被外層 `overflow-hidden` 裁切。
 
-不要在 `dropdownContainer` 上加 `max-height: 100%` / `max-h-full`，否則 container 會被父層動畫高度限制，導致 `scrollHeight` 量到被裁切後的高度。
+不要在 `dropdownContainer` 或 `.m-form-dropdown-body` 上加 `max-height: 100%` / `max-h-full`，否則會被父層動畫高度限制，導致 `scrollHeight` 量到被裁切後的高度。
 
 ## defineExpose
 
@@ -78,9 +98,11 @@ dropdown container 內的內容。沒有設定 `maxItems` 時，`useDropdownCore
 - `elenemtRef`
 - `dropdownRef`
 - `dropdownContainerRef`
+- `dropdownBodyRef`
 - `dropdownItemRef`
 - `isActive`
 - `isFocus`
+- `isOpen`
 - `onSwitchActive`
 - `onDropdownOpen`
 - `onElementClick`
@@ -90,19 +112,51 @@ dropdown container 內的內容。沒有設定 `maxItems` 時，`useDropdownCore
 ## 使用範例
 
 ```vue
-<BuyMFormDropdown>
-  <span>展開</span>
+<BuyMFormDropdown
+  name="customDropdown"
+  v-model="dropdownValue"
+  :config="{ placeholder: '請選擇' }"
+>
+  <template #suffix>
+    <span>單位</span>
+  </template>
+
+  <template #dropdownHeader>
+    <p>標題</p>
+  </template>
 
   <template #dropdown>
-    <button type="button" class="m-form-dropdown-button">選項一</button>
-    <button type="button" class="m-form-dropdown-button">選項二</button>
+    <button type="button" class="m-form-dropdown-button" @click="dropdownValue = '選項一'">
+      選項一
+    </button>
+    <button type="button" class="m-form-dropdown-button" @click="dropdownValue = '選項二'">
+      選項二
+    </button>
+  </template>
+
+  <template #dropdownFooter>
+    <button type="button">套用</button>
   </template>
 </BuyMFormDropdown>
 ```
 
-## 後續補強方向
+## 樣式與動畫
 
-- 若需要完整 Select 行為，可繼續搬移 `Select.vue` 的鍵盤操作與選取事件。
+`Dropdown.vue` 直接引入：
+
+```vue
+<style src="@css/_modules/buy/mForm.css"></style>
+<style src="@css/_modules/buy/mFormDropdown.css"></style>
+<style lang="postcss">
+@import '@css/_common/vueTransition.css';
+</style>
+```
+
+dropdown 外層會套上 `--open`：
+
+```vue
+<div class="m-form-dropdown --dropdown" :class="[setClass.dropdown, { '--open': isOpen }]">
+```
 
 ## CSS Variables
 
@@ -213,4 +267,5 @@ dropdown container 內的內容。沒有設定 `maxItems` 時，`useDropdownCore
 
 - `.m-form-dropdown` 的 `my` 是 dropdown 與欄位之間的外距，會留在外層，不會加進內容高度。
 - `.m-form-dropdown-container` 使用 `border-top-width` / `border-bottom-width` 模擬上下 padding，`useDropdownCore` 會把 border 高度納入 dropdown 高度。
-- `.m-form-dropdown-options` 使用 `gap-y` 時，超過 `maxItems` 的高度會另外計算可見項目之間的 row gap。
+- `.m-form-dropdown-body` 是卷軸與 `maxItems` 高度限制的目標。
+- `.m-form-dropdown-options` 使用 `gap-y` 時，超過 `maxItems` 的 body 高度會另外計算可見項目之間的 row gap。

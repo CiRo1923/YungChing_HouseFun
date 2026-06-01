@@ -148,9 +148,9 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGETRealEstate = async (hfid) => {
+  const onApiGETRealEstate = async (hfID) => {
     const { config, status, data } = await apiGETRealEstate({
-      hfid: hfid,
+      hfID,
     })
 
     if (status === 200) {
@@ -197,9 +197,9 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiPOSTRealEstateDraft = async (hfid) => {
+  const onApiPOSTRealEstateDraft = async (hfID) => {
     const { config, status, data } = await apiPOSTRealEstateDraft({
-      hfid: hfid,
+      hfID,
       ...apiData.value,
     })
 
@@ -209,9 +209,9 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiPOSTRealEstate = async (hfid) => {
+  const onApiPOSTRealEstate = async (hfID) => {
     const { config, status, data } = await apiPOSTRealEstate({
-      hfid: hfid,
+      hfID,
       ...apiData.value,
     })
 
@@ -235,9 +235,9 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiPOSTRealEstateReadToPublish = async (hfid) => {
+  const onApiPOSTRealEstateReadToPublish = async (hfID) => {
     const { config, status, data } = await apiPOSTRealEstateReadToPublish({
-      hfid,
+      hfID,
     })
 
     if (status !== 200) {
@@ -246,9 +246,9 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGERealEstateCaseStatus = async (hfid) => {
+  const onApiGERealEstateCaseStatus = async (hfID) => {
     const { config, status, data } = await apiGERealEstateCaseStatus({
-      hfid,
+      hfID,
     })
 
     if (status === 200) {

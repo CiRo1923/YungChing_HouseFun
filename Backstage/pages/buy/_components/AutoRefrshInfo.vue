@@ -58,28 +58,26 @@ const setClass = computed(() => {
 })
 
 const onEditTimeClick = async (item) => {
-  const { hfid, vasid, expireDate } = item
+  const { hfID, vasID, expireDate } = item
 
-  console.log(item)
+  autoRefresh.value.planInfo.apiData.hfID = hfID
+  autoRefresh.value.planInfo.apiData.vasID = vasID
 
-  autoRefresh.value.planInfo.apiData.hfID = hfid
-  autoRefresh.value.planInfo.apiData.vasID = vasid
+  const { status } = await onApiGETRefreshGetPlanInfo()
 
-  console.log(autoRefresh.value.planInfo.apiData)
+  if (status === 200) {
+    const isEditTime = await onCustom({
+      id: 'popupEditTime',
+      title: `修改時間${expireDate ? ` - ${expireDate} 到期` : ''}`,
+      icon: 'icon_double_star',
+      btns: 'confirm',
+    })
 
-  // onApiGETRefreshGetPlanInfo
-  const isEditTime = await onCustom({
-    id: 'popupEditTime',
-    title: `修改時間${expireDate ? ` - ${expireDate} 到期` : ''}`,
-    icon: 'icon_double_star',
-    btns: 'confirm',
-  })
-
-  if (isEditTime) {
-    console.log('edit!!')
-  } else {
-    console.log(autoRefresh.value.info)
-    await onAutoRefreshPopup(autoRefresh.value.info)
+    if (isEditTime) {
+      console.log('edit!!')
+    } else {
+      await onAutoRefreshPopup(autoRefresh.value.info)
+    }
   }
 }
 </script>

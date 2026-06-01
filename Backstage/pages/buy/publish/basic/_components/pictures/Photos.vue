@@ -28,7 +28,7 @@ const onPicturesDelete = () => {
 const onUploaded = async (items, done) => {
   onIsLoading(true)
   const { status, data } = await onApiPOSTRealEstatePicUpload({
-    hfid: hfID.value,
+    hfID: hfID.value,
     imgType: 1, // (1: 物件圖片; 2: 格局圖)
     imgUpload: items[0].file,
   })

@@ -27,10 +27,10 @@ const setClass = computed(() => {
         :key="`${item.planType}_${item.planID}_${index}`"
       >
         <BuyMFormRadioItem
-          name="planId"
+          name="planID"
           v-model="renewal.apiData.planID"
           :config="{
-            value: item.planId,
+            value: item.planID,
           }"
           :setClass="{
             main: 'p:--px-40 p:--py-16 tm:p-16',
@@ -52,7 +52,7 @@ const setClass = computed(() => {
       </li>
     </ul>
     <BuyMFormHidden
-      name="planId"
+      name="planID"
       v-model="renewal.apiData.planID"
       :rules="{
         required: '請選擇額度',
