@@ -6,7 +6,9 @@ const { apiData } = storeToRefs(buyPublish)
 </script>
 
 <template>
-  <ul class="flex flex-wrap m:gap-[12px] pt:gap-[8px]">
+  <ul
+    class="flex flex-wrap border-b-[1px] border-dashed border-b-[--gray-e5] m:gap-[12px] m:pb-[40px] pt:gap-[8px] pt:pb-[24px]"
+  >
     <li v-for="(item, index) in options.feature" :key="`${item.code}_${index}`">
       <BuyMTagCheckBox
         :name="`caseFeatureToken[${index}]`"

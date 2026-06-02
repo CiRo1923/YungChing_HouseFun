@@ -4,6 +4,8 @@
 const buyPublish = useBuyPublishStore()
 const { pingUnitLabel, onPingVaild, onPinSqMetersConvert } = useBuyPublishActions()
 const { apiData, pingData } = storeToRefs(buyPublish)
+
+const casePurposeToken = computed(() => apiData.value.caseInfo.casePurposeToken)
 </script>
 
 <template>
@@ -36,7 +38,8 @@ const { apiData, pingData } = storeToRefs(buyPublish)
         <template #rearAssist>{{ pingUnitLabel }}</template>
       </BuyMFormInput>
     </li>
-    <li class="flex h-[40px] items-center m:shrink-0">
+    <!-- 1: 住宅 2: 店面 3: 住店 4: 辦公 5: 住辦 6: 廠房 7: 車位 8: 土地 9: 其他 -->
+    <li class="flex h-[40px] items-center m:shrink-0" v-if="casePurposeToken !== 7">
       <BuyMFormCheckBox
         name="isCaseBuildSqIncludeParking"
         v-model="apiData.caseInfo.isCaseBuildSqIncludeParking"

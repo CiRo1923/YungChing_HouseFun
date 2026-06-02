@@ -36,11 +36,9 @@ const onSure = async () => {
     }"
     @sure="onSure"
   >
-    <!-- <template #headerTools>
-      <div>
-        <p></p>
-      </div>
-    </template> -->
+    <template #headerTools>
+      <PageBuyPopupAutoRefreshTools />
+    </template>
     <!-- <pre>
     {{ customData.data }}
   </pre

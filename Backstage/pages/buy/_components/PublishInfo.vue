@@ -9,8 +9,18 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
+  setClass: {
+    type: Object,
+    default: () => ({}),
+  },
 })
 const isDeviceM = computed(() => device.value === 'm')
+const setClass = computed(() => {
+  return {
+    main: '',
+    ...props.setClass,
+  }
+})
 
 onResize()
 
@@ -24,7 +34,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="flex items-center t:gap-x-[16px] p:gap-x-[24px]">
+  <div class="flex items-center t:gap-x-[16px] p:gap-x-[24px]" :class="setClass.main">
     <div class="order-2 grow t:gap-x-[16px] pt:flex pt:items-center p:gap-x-[24px]">
       <div class="m:space-y-[16px] pt:grow pt:space-y-[8px]">
         <p class="text-[18px] tracking-wider text-[--gray-666]">

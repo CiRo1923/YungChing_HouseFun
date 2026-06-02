@@ -1,4 +1,4 @@
-const clientEvent = 'housefun:svg-spritemap-update'
+const clientEvent = 'project:svg-spritemap-update'
 
 export default defineNuxtPlugin(() => {
   if (!import.meta.dev) {

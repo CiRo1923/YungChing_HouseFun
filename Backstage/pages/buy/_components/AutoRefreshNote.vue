@@ -22,7 +22,7 @@ const data = shallowReadonly({
   <BuyMItemMain
     :data="data"
     :setClass="{
-      main: 'mt-[24px] text-[14px] text-[--gray-666]',
+      main: 'mt-[24px] text-[14px] text-[--gray-666] pt:shrink-0',
       item: 'tracking-wider',
     }"
   />

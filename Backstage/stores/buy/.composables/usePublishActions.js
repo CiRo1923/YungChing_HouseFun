@@ -41,7 +41,7 @@ export default () => {
     onApiGETRealEstateParkingPayPeriodSelectOptions,
     onApiGETRealEstateVideoDisplaySelectOptions,
     onApiGETRealEstateVideoTypeSelectOptions,
-    onApiGETRealEstateFeatureCheckOptions,
+    // onApiGETRealEstateFeatureCheckOptions,
     onApiGETRealEstatePosterDataSourceSelectOptions,
     onValueGetText,
     onReplaceImageSize,
@@ -284,7 +284,7 @@ export default () => {
       ),
       useAsyncData('videoDisplay-options', () => onApiGETRealEstateVideoDisplaySelectOptions()),
       useAsyncData('videoType-options', () => onApiGETRealEstateVideoTypeSelectOptions()),
-      useAsyncData('feature-options', () => onApiGETRealEstateFeatureCheckOptions()),
+      // useAsyncData('feature-options', () => onApiGETRealEstateFeatureCheckOptions()),
       useAsyncData('posterDataSource-options', () =>
         onApiGETRealEstatePosterDataSourceSelectOptions()
       ),

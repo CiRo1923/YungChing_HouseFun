@@ -121,7 +121,7 @@ watchEffect(() => {
             </button>
 
             <div
-              class="p flex grow items-center m:order-3 m:mt-[12px] t:mx-[12px] pt:order-2 p:mx-[24px]"
+              class="flex grow items-center m:order-3 m:mt-[12px] t:mx-[12px] pt:order-2 p:mx-[24px]"
               :class="setClass.headerTools"
               v-if="$slots.headerTools"
             >

@@ -3,7 +3,9 @@
 import CONFIG from './config.js'
 import POSTCSSFUNCTIONS from './postcss.function.js'
 
-import SvgSpritemapDevPlugin from './scripts/vite/svg-spritemap-dev.mjs'
+import SvgSpritemapDevPlugin, {
+  spritemapRoute as devSpritemapRoute,
+} from './scripts/vite/svg-spritemap-dev.mjs'
 import { getPageComponentDirs } from './scripts/nuxt/page-component-dirs'
 import { getStoreComposableImports, getStoreImports } from './scripts/nuxt/store-composable-imports'
 import VitePluginSvgSpritemap from '@spiriit/vite-plugin-svg-spritemap'
@@ -31,7 +33,7 @@ export default defineNuxtConfig({
         execSync('git rev-parse --short HEAD').toString().trim(),
       spritePath:
         process.env.NODE_ENV === 'development'
-          ? '/__housefun_svg_spritemap'
+          ? devSpritemapRoute
           : `${CONFIG.imgs}/svg/spritemap.svg`,
       googleMapsApiKey: process.env.NUXT_PUBLIC_GOOGLE_MAPS_API_KEY,
     },

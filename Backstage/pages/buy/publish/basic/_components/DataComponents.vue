@@ -10,9 +10,10 @@ const { apiData } = storeToRefs(buyPublish)
 const emits = defineEmits(['change:casePurpose'])
 
 const visibleComponents = computed(() => {
+  // 1: 住宅 2: 店面 3: 住店 4: 辦公 5: 住辦 6: 廠房 7: 車位 8: 土地 9: 其他
   const hiddenData = {
-    5: ['CardFilterManage'], // 5 車位
-    6: ['CardFilterManage', 'CardFilterParking'], // 6 土地
+    7: ['CardFilterManage'], // 車位
+    8: ['CardFilterParking', 'CardFilterPing', 'CardFilterManage'], // 土地
   }
 
   const casePurposeToken = apiData.value.caseInfo.casePurposeToken

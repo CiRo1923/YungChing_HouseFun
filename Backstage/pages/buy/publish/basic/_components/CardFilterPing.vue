@@ -10,8 +10,8 @@ import {
 } from '#components'
 
 const { onCustom } = useBuyPopupActions()
-// const buyPublish = useBuyPublishStore()
-// const { pingData } = storeToRefs(buyPublish)
+const buyPublish = useBuyPublishStore()
+const { apiData } = storeToRefs(buyPublish)
 
 const props = defineProps({
   title: {
@@ -41,6 +41,7 @@ const items = shallowReadonly([
     isRequired: false,
     label: '車位坪數',
     class: 'p:h-[40px]',
+    hidden: [7], // 7: 車位
     component: PageBuyPublishBasicPingCaseParkingSq,
     hasEmits: false,
   },
@@ -57,6 +58,7 @@ const items = shallowReadonly([
     isRequired: false,
     label: '附屬建物',
     class: 'p:h-[40px]',
+    hidden: [7], // 7: 車位
     component: PageBuyPublishBasicPingCaseAffiliatedSq,
     hasEmits: false,
   },
@@ -65,6 +67,7 @@ const items = shallowReadonly([
     isRequired: false,
     label: '公設',
     class: 'p:h-[40px]',
+    hidden: [7], // 7: 車位
     component: PageBuyPublishBasicPingCaseAmenitieSq,
     hasEmits: false,
   },
@@ -79,24 +82,37 @@ const items = shallowReadonly([
 ])
 
 const onPopupTitleDeed = async () => {
-  const { isSure: isCustom } = await onCustom({
+  await onCustom({
     id: 'popupTitleDeed',
     title: '權狀書說明',
     icon: 'icon_book',
     btns: 'alert',
   })
-
-  if (isCustom) {
-    console.log('ok')
-  }
 }
+
+const visibleItems = computed(() => {
+  const casePurposeToken = apiData.value.caseInfo.casePurposeToken
+
+  return items.filter((item) => {
+    const isHidden = item.hidden?.includes(casePurposeToken)
+    const isVisibleOnly = item.visible?.length
+
+    if (isHidden) return false
+
+    if (isVisibleOnly) {
+      return item.visible.includes(casePurposeToken)
+    }
+
+    return true
+  })
+})
 </script>
 
 <template>
   <!-- <pre>
     {{ pingData }}
   </pre> -->
-  <PageBuyPublishBasicCardFilter :title="props.title" :items="items">
+  <PageBuyPublishBasicCardFilter :title="props.title" :items="visibleItems">
     <template #tools>
       <div class="m:mt-[8px] m:text-center">
         <BuyMAnchor

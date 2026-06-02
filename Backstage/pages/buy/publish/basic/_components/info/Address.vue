@@ -11,6 +11,8 @@ const { onCustom } = useBuyPopupActions()
 const areas = ref(options.value.area || [])
 const roads = ref([])
 
+const casePurposeToken = computed(() => apiData.value.caseInfo.casePurposeToken)
+
 const onCityChange = async ({ source } = {}) => {
   const { cityID } = apiData.value.caseInfo
 
@@ -55,17 +57,24 @@ const onPopupAddressGoogleMap = async () => {
 
   if (isCustom) {
     const { city, area, road, lane, alley, number } = address.value
-    const cityID = options.value.city.find((item) => item.text === city)
-    const districtID = options.value.area.find((item) => item.text === area)
-    const [addrNum, addrNumOf = null] = number.split(/-|之/)
+    const { caseInfo } = apiData.value
 
-    apiData.value.caseInfo.cityID = Number(cityID.value)
-    apiData.value.caseInfo.districtID = Number(districtID.value)
-    apiData.value.caseInfo.road = road
-    apiData.value.caseInfo.lane = lane
-    apiData.value.caseInfo.alley = alley
-    apiData.value.caseInfo.addrNum = addrNum
-    apiData.value.caseInfo.addrNumOf = addrNumOf
+    const cityOption = options.value.city.find((item) => item.text === city)
+    const districtOption = options.value.area.find((item) => item.text === area)
+    const [addrNum, addrNumOf = null] = String(number || '').split(/-|之/)
+
+    caseInfo.cityID = cityOption ? Number(cityOption.value) : null
+    caseInfo.districtID = districtOption ? Number(districtOption.value) : null
+    caseInfo.road = road || null
+
+    if (casePurposeToken.value !== 8) {
+      Object.assign(caseInfo, {
+        lane: lane || null,
+        alley: alley || null,
+        addrNum: addrNum || null,
+        addrNumOf,
+      })
+    }
 
     console.log('地圖定位地址:', address)
   }
@@ -74,6 +83,7 @@ const onPopupAddressGoogleMap = async () => {
 
 <template>
   <div class="space-y-[8px]">
+    <!-- 1: 住宅 2: 店面 3: 住店 4: 辦公 5: 住辦 6: 廠房 7: 車位 8: 土地 9: 其他 -->
     <BuyMAddress
       name="info"
       v-model:city.number="apiData.caseInfo.cityID"
@@ -122,6 +132,45 @@ const onPopupAddressGoogleMap = async () => {
       }"
       @change:city="onCityChange"
       @change:area="onAreaChange"
+      v-if="casePurposeToken !== 8"
+    />
+    <BuyMAddress
+      name="info"
+      v-model:city.number="apiData.caseInfo.cityID"
+      v-model:area.number="apiData.caseInfo.districtID"
+      v-model:road="apiData.caseInfo.road"
+      :config="{
+        city: {
+          options: options.city,
+          schema: {
+            label: 'text',
+            value: 'value',
+          },
+        },
+        area: {
+          options: areas,
+          schema: {
+            label: 'text',
+            value: 'value',
+          },
+        },
+        road: {
+          options: roads,
+          schema: {
+            label: 'roadName',
+            value: 'roadID',
+            model: 'roadName',
+          },
+        },
+      }"
+      :setClass="{
+        city: 't:w-[180px] p:w-[260px]',
+        area: 't:w-[180px] p:w-[260px]',
+        road: 't:w-[220px] p:w-[294px]',
+      }"
+      @change:city="onCityChange"
+      @change:area="onAreaChange"
+      v-if="casePurposeToken === 8"
     />
     <div
       class="flex m:flex-col-reverse m:items-start m:gap-y-[12px] m:text-[16px] t:gap-x-[12px] pt:items-center pt:text-[14px] p:gap-x-[16px]"

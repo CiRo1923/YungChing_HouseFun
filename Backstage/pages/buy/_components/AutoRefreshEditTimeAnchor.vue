@@ -1,4 +1,6 @@
 <script setup>
+import { onFormatDate } from '@js/_prototype.js'
+
 const buyProject = useBuyProjectStore()
 const { autoRefresh } = storeToRefs(buyProject)
 const {
@@ -39,7 +41,7 @@ const onClick = async () => {
 
     const { isSure: isEditTime } = await onCustom({
       id: 'popupEditTime',
-      title: `修改時間${expireDate ? ` - ${expireDate} 到期` : ''}`,
+      title: `修改時間${expireDate ? ` - ${onFormatDate(expireDate, 'YYYY-MM-DD')} 到期` : ''}`,
       icon: 'icon_double_star',
       data,
       btns: [

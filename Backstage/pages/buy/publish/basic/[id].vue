@@ -16,6 +16,7 @@ const {
   onApiGETRealEstateTypeSelectOptions,
   onApiGETRealEstateLegalUsageSelectOptions,
   onApiPOSTRealEstateRestoreToOnline,
+  onApiGETRealEstateFeatureCheckOptions,
 } = useBuyProjectActions()
 const buyPublish = useBuyPublishStore()
 const { statusData } = storeToRefs(buyPublish)
@@ -38,6 +39,10 @@ const onTypeSelectOptionsUpdate = async () => {
 
 const onUsageSelectOptionsUpdate = async () => {
   return await onApiGETRealEstateLegalUsageSelectOptions()
+}
+
+const onFeatureCheckOptionsUpdate = async () => {
+  return await onApiGETRealEstateFeatureCheckOptions()
 }
 
 const onAlertSuccess = async (content) => {
@@ -163,8 +168,14 @@ const onRenewal = async (validate) => {
   }
 }
 
-const onPurposeChnage = async () => {
-  return await Promise.all([onTypeSelectOptionsUpdate(), onUsageSelectOptionsUpdate()])
+const onOptionsUpdate = async () => {
+  await Promise.all([
+    onTypeSelectOptionsUpdate(),
+    onUsageSelectOptionsUpdate(),
+    onFeatureCheckOptionsUpdate(),
+  ])
+
+  return true
 }
 
 await onWithLoadingAll([
@@ -172,10 +183,12 @@ await onWithLoadingAll([
   useAsyncData(`case-status-basic-${hfID.value}`, () => onApiGERealEstateCaseStatus(hfID.value)),
   useAsyncData(`detail-${hfID.value}`, () => onApiGETRealEstate(hfID.value)),
 ])
-await Promise.all([
-  useAsyncData(`type-options`, () => onTypeSelectOptionsUpdate()),
-  useAsyncData(`usage-options`, () => onUsageSelectOptionsUpdate()),
-])
+
+const { refresh: refreshOptions } = await useAsyncData('publish-basic-options', onOptionsUpdate)
+
+const onPurposeChange = async () => {
+  await refreshOptions()
+}
 
 onUseMeta({
   title: `物件管理 - 資料編輯 | ${buyProject.NAME}`,
@@ -224,7 +237,7 @@ onMounted(() => {
       v-slot="{ validate }"
     >
       <!-- <pre>{{ apiData }}</pre> -->
-      <PageBuyPublishBasicDataComponents @change:case-purpose="onPurposeChnage" />
+      <PageBuyPublishBasicDataComponents @change:case-purpose="onPurposeChange" />
       <PageBuyPublishBasicSubmitButtons
         @click:draft="onDraft"
         @click:save="() => onSave(validate)"

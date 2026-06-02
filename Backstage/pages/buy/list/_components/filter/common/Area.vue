@@ -75,14 +75,23 @@ const onTrackTransitionEnd = (e) => {
 
 const onCityClick = async (item) => {
   const { text, value } = item
+  const isActiveCity = model.value.city === value
 
-  if (model.value.city !== value) {
-    model.value.city = value
-    model.value.district = []
+  model.value.district = []
+
+  if (isActiveCity) {
+    model.value.city = 0
+    model.value.label = '不限'
     apiSearchData.value.cityToken = model.value.city
     apiSearchData.value.districtToken = model.value.district
-    model.value.label = text
+
+    return
   }
+
+  model.value.city = value
+  model.value.label = text
+  apiSearchData.value.cityToken = model.value.city
+  apiSearchData.value.districtToken = model.value.district
 
   await nextTick()
   onStartAnimate('district')

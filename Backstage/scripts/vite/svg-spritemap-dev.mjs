@@ -2,8 +2,8 @@ import { readdir, readFile } from 'node:fs/promises'
 import { basename, resolve } from 'node:path'
 import { DOMImplementation, DOMParser, XMLSerializer } from '@xmldom/xmldom'
 
-const clientEvent = 'housefun:svg-spritemap-update'
-const spritemapRoute = '/__housefun_svg_spritemap'
+const clientEvent = 'project:svg-spritemap-update'
+const spritemapRoute = '/__project_svg_spritemap'
 
 const normalizePath = (path) => path.replace(/\\/g, '/')
 
@@ -57,7 +57,7 @@ export default function SvgSpritemapDevPlugin(svgDirName = '_svg') {
   let spritemap = ''
 
   return {
-    name: 'housefun-svg-spritemap-dev',
+    name: 'project-svg-spritemap-dev',
     apply: 'serve',
     configResolved(config) {
       svgDir = resolve(config.root, svgDirName)

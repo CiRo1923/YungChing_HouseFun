@@ -38,6 +38,7 @@ const publishInfo = computed(() => {
     id="popupAutoRefresh"
     :setClass="{
       main: 'p:--w-1200 t:--w-720',
+      body: 'pt:flex pt:flex-col',
     }"
   >
     <template #headerTools>
@@ -59,10 +60,17 @@ const publishInfo = computed(() => {
         }"
       />
     </template>
-
-    <PageBuyPublishInfo :data="publishInfo" v-if="publishInfo" />
-    <div class="tm:mt-[16px] p:mt-[24px]">
-      <PageBuyAutoRefrshInfo :update="props.update" />
+    <div class="pt:flex pt:grow pt:flex-col pt:overflow-hidden">
+      <PageBuyPublishInfo
+        :data="publishInfo"
+        :setClass="{
+          main: 'pt:shrink-0',
+        }"
+        v-if="publishInfo"
+      />
+      <div class="tm:mt-[16px] pt:flex pt:grow pt:flex-col pt:overflow-hidden p:mt-[24px]">
+        <PageBuyAutoRefrshInfo :update="props.update" />
+      </div>
     </div>
   </BuyCommonCustomPopup>
 </template>

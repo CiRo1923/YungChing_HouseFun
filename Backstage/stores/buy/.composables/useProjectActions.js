@@ -397,9 +397,10 @@ export default () => {
     return { config, status, data }
   }
   const onApiGETRealEstateFeatureCheckOptions = async () => {
-    if (options.value.feature) return false
-
-    const { config, status, data } = await apiGETRealEstateFeatureCheckOptions()
+    const { casePurposeToken } = apiData.value.caseInfo
+    const { config, status, data } = await apiGETRealEstateFeatureCheckOptions({
+      purposeToken: casePurposeToken,
+    })
 
     if (status === 200) {
       options.value.feature = data || []
@@ -644,7 +645,7 @@ export default () => {
     onApiPromise('close')
 
     if (status === 200) {
-      const { isSure } = await onCustom({
+      await onCustom({
         id: 'popupAutoRefresh',
         title: '自動刷新設定',
         data,
@@ -656,20 +657,8 @@ export default () => {
             type: 'cancel',
             isClose: true,
           },
-          {
-            label: '修改儲存',
-            class: '--bg-green-6a2d --text-white',
-            type: 'sure',
-            isClose: true,
-          },
         ],
       })
-
-      if (isSure) {
-        onApiPromise('open')
-
-        onApiPromise('close')
-      }
     }
 
     return false
