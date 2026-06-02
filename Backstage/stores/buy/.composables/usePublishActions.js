@@ -132,8 +132,8 @@ export default () => {
     apiData.value.caseInfo[pinKey] = isPin ? Number(val) : onConvert(val, pinConf)
     apiData.value.caseInfo[mKey] = isSqMeters ? Number(val) : onConvert(val, mConf)
 
-    console.log(apiData.value.caseInfo[pinKey])
-    console.log(apiData.value.caseInfo[mKey])
+    // console.log(apiData.value.caseInfo[pinKey])
+    // console.log(apiData.value.caseInfo[mKey])
   }
   const onApiPOSTRealEstateNewCase = async () => {
     const { config, status, data } = await apiPOSTRealEstateNewCase({
@@ -190,7 +190,7 @@ export default () => {
         options.value.area = caseAddrDistrictOptions
       }
 
-      console.log(data)
+      // console.log(data)
     } else {
       onApiError(config, status, data)
     }

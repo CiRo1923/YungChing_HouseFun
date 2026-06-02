@@ -91,8 +91,11 @@ const onChange = async (item) => {
   if (value === 7) {
     // 價格資訊
     apiData.value.caseInfo.casePrice = null // 含車位
-    apiData.value.caseInfo.casePriceUnit = casePriceUnit // 單價
+    apiData.value.caseInfo.casePriceUnit = null // 單價
     apiData.value.caseInfo.isCasePriceUnitAuto = true // 自動計算
+
+    //
+    apiData.value.caseInfo.isCaseParking = true
   }
 
   if (value === 8) {

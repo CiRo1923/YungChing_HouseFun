@@ -141,6 +141,8 @@ const items = shallowReadonly([
   },
 ])
 
+const casePurposeToken = computed(() => apiData.value.caseInfo.casePurposeToken)
+
 const onIsCaseParkingChange = () => {
   const { isCaseParking } = apiData.value.caseInfo
 
@@ -167,6 +169,7 @@ onInit()
 </script>
 
 <template>
+  <!-- 1: 住宅 2: 店面 3: 住店 4: 辦公 5: 住辦 6: 廠房 7: 車位 8: 土地 9: 其他 -->
   <PageBuyPublishBasicRadiosOval>
     <!-- {{ apiData.caseInfo.parkingInfos }} -->
     <BuyMFormRadiosOval
@@ -178,6 +181,7 @@ onInit()
         container: 'm:flex-1',
       }"
       @change="onIsCaseParkingChange"
+      v-if="casePurposeToken !== 7"
     />
     <BuyMAddIdentical
       v-model="apiData.caseInfo.parkingInfos"

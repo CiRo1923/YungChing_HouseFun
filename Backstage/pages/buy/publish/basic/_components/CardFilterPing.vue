@@ -19,67 +19,72 @@ const props = defineProps({
     default: null,
   },
 })
-const items = shallowReadonly([
-  {
-    id: 'caseSqUnitPin',
-    isRequired: false,
-    label: '顯示單位',
-    class: 'p:h-[35px]',
-    component: PageBuyPublishBasicPingCaseSqUnitPin,
-    hasEmits: false,
-  },
-  {
-    id: 'caseBuildSq',
-    isRequired: true,
-    label: '登記坪數',
-    class: 'p:h-[40px]',
-    component: PageBuyPublishBasicPingCaseBuildSq,
-    hasEmits: false,
-  },
-  {
-    id: 'caseParkingSq',
-    isRequired: false,
-    label: '車位坪數',
-    class: 'p:h-[40px]',
-    hidden: [7], // 7: 車位
-    component: PageBuyPublishBasicPingCaseParkingSq,
-    hasEmits: false,
-  },
-  {
-    id: 'caseMainSq',
-    isRequired: false,
-    label: '主建物',
-    class: 'p:h-[40px]',
-    component: PageBuyPublishBasicPingCaseMainSq,
-    hasEmits: false,
-  },
-  {
-    id: 'caseAffiliatedSq',
-    isRequired: false,
-    label: '附屬建物',
-    class: 'p:h-[40px]',
-    hidden: [7], // 7: 車位
-    component: PageBuyPublishBasicPingCaseAffiliatedSq,
-    hasEmits: false,
-  },
-  {
-    id: 'caseAmenitieSq',
-    isRequired: false,
-    label: '公設',
-    class: 'p:h-[40px]',
-    hidden: [7], // 7: 車位
-    component: PageBuyPublishBasicPingCaseAmenitieSq,
-    hasEmits: false,
-  },
-  {
-    id: 'caseLandSq',
-    isRequired: false,
-    label: '土地坪數',
-    class: 'p:h-[40px]',
-    component: PageBuyPublishBasicPingCaseLandSq,
-    hasEmits: false,
-  },
-])
+
+const casePurposeToken = computed(() => apiData.value.caseInfo.casePurposeToken)
+
+const items = computed(() => {
+  return [
+    {
+      id: 'caseSqUnitPin',
+      isRequired: false,
+      label: '顯示單位',
+      class: 'p:h-[35px]',
+      component: PageBuyPublishBasicPingCaseSqUnitPin,
+      hasEmits: false,
+    },
+    {
+      id: 'caseBuildSq',
+      isRequired: true,
+      label: '登記坪數',
+      class: 'p:h-[40px]',
+      component: PageBuyPublishBasicPingCaseBuildSq,
+      hasEmits: false,
+    },
+    {
+      id: 'caseParkingSq',
+      isRequired: false,
+      label: '車位坪數',
+      class: 'p:h-[40px]',
+      hidden: [7], // 7: 車位
+      component: PageBuyPublishBasicPingCaseParkingSq,
+      hasEmits: false,
+    },
+    {
+      id: 'caseMainSq',
+      isRequired: false,
+      label: '主建物',
+      class: 'p:h-[40px]',
+      component: PageBuyPublishBasicPingCaseMainSq,
+      hasEmits: false,
+    },
+    {
+      id: 'caseAffiliatedSq',
+      isRequired: false,
+      label: '附屬建物',
+      class: 'p:h-[40px]',
+      hidden: [7], // 7: 車位
+      component: PageBuyPublishBasicPingCaseAffiliatedSq,
+      hasEmits: false,
+    },
+    {
+      id: 'caseAmenitieSq',
+      isRequired: false,
+      label: '公設',
+      class: 'p:h-[40px]',
+      hidden: [7], // 7: 車位
+      component: PageBuyPublishBasicPingCaseAmenitieSq,
+      hasEmits: false,
+    },
+    {
+      id: 'caseLandSq',
+      isRequired: false,
+      label: '土地坪數',
+      class: 'p:h-[40px]',
+      component: PageBuyPublishBasicPingCaseLandSq,
+      hasEmits: false,
+    },
+  ]
+})
 
 const onPopupTitleDeed = async () => {
   await onCustom({
@@ -91,16 +96,14 @@ const onPopupTitleDeed = async () => {
 }
 
 const visibleItems = computed(() => {
-  const casePurposeToken = apiData.value.caseInfo.casePurposeToken
-
-  return items.filter((item) => {
-    const isHidden = item.hidden?.includes(casePurposeToken)
+  return items.value.filter((item) => {
+    const isHidden = item.hidden?.includes(casePurposeToken.value)
     const isVisibleOnly = item.visible?.length
 
     if (isHidden) return false
 
     if (isVisibleOnly) {
-      return item.visible.includes(casePurposeToken)
+      return item.visible.includes(casePurposeToken.value)
     }
 
     return true

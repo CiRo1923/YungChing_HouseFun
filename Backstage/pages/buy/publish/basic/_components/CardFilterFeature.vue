@@ -19,48 +19,50 @@ const props = defineProps({
   },
 })
 
-// 1: 住宅 2: 店面 3: 住店 4: 辦公 5: 住辦 6: 廠房 7: 車位 8: 土地 9: 其他
-const items = shallowReadonly([
-  {
-    id: 'warning',
-    component: PageBuyPublishBasicFeatureWarning,
-    hasEmits: false,
-    setClass: {
-      main: 'm:hidden',
-    },
-    hiddenDevice: 'm',
-  },
-  {
-    id: 'caseDescription',
-    component: PageBuyPublishBasicFeatureCaseDescription,
-    hasEmits: false,
-  },
-  {
-    id: 'caseFeature',
-    hidden: [8], // 8 土地;
-    component: PageBuyPublishBasicFeatureCaseFeature,
+const casePurposeToken = computed(() => apiData.value.caseInfo.casePurposeToken)
 
-    hasEmits: false,
-  },
-  {
-    id: 'caseFeatureCustomize',
-    component: PageBuyPublishBasicFeatureCaseFeatureCustomize,
-    hasEmits: false,
-  },
-])
+// 1: 住宅 2: 店面 3: 住店 4: 辦公 5: 住辦 6: 廠房 7: 車位 8: 土地 9: 其他
+const items = computed(() => {
+  return [
+    {
+      id: 'warning',
+      component: PageBuyPublishBasicFeatureWarning,
+      hasEmits: false,
+      setClass: {
+        main: 'm:hidden',
+      },
+      hiddenDevice: 'm',
+    },
+    {
+      id: 'caseDescription',
+      component: PageBuyPublishBasicFeatureCaseDescription,
+      hasEmits: false,
+    },
+    {
+      id: 'caseFeature',
+      hidden: [8], // 8 土地;
+      component: PageBuyPublishBasicFeatureCaseFeature,
+
+      hasEmits: false,
+    },
+    {
+      id: 'caseFeatureCustomize',
+      component: PageBuyPublishBasicFeatureCaseFeatureCustomize,
+      hasEmits: false,
+    },
+  ]
+})
 
 const isDeviceM = computed(() => device.value === 'm')
 const visibleItems = computed(() => {
-  const casePurposeToken = apiData.value.caseInfo.casePurposeToken
-
-  return items.filter((item) => {
-    const isHidden = item.hidden?.includes(casePurposeToken)
+  return items.value.filter((item) => {
+    const isHidden = item.hidden?.includes(casePurposeToken.value)
     const isVisibleOnly = item.visible?.length
 
     if (isHidden) return false
 
     if (isVisibleOnly) {
-      return item.visible.includes(casePurposeToken)
+      return item.visible.includes(casePurposeToken.value)
     }
 
     return true

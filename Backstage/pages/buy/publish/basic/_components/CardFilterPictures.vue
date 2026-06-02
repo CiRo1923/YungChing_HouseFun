@@ -15,35 +15,37 @@ const props = defineProps({
   },
 })
 
+const casePurposeToken = computed(() => apiData.value.caseInfo.casePurposeToken)
+
 // 1: 住宅 2: 店面 3: 住店 4: 辦公 5: 住辦 6: 廠房 7: 車位 8: 土地 9: 其他
-const items = shallowReadonly([
-  {
-    id: 'photos',
-    class: 'p:h-[50px]',
-    component: PageBuyPublishBasicPicturesPhotos,
-    hasEmits: false,
-  },
-  {
-    id: 'layoutDiagram',
-    label: '格局圖',
-    class: 'pt:h-[25px]',
-    hidden: [8], // 8 土地;
-    component: PageBuyPublishBasicPicturesLayoutDiagram,
-    hasEmits: false,
-  },
-])
+const items = computed(() => {
+  return [
+    {
+      id: 'photos',
+      class: 'p:h-[50px]',
+      component: PageBuyPublishBasicPicturesPhotos,
+      hasEmits: false,
+    },
+    {
+      id: 'layoutDiagram',
+      label: '格局圖',
+      class: 'pt:h-[25px]',
+      hidden: [8], // 8 土地;
+      component: PageBuyPublishBasicPicturesLayoutDiagram,
+      hasEmits: false,
+    },
+  ]
+})
 
 const visibleItems = computed(() => {
-  const casePurposeToken = apiData.value.caseInfo.casePurposeToken
-
-  return items.filter((item) => {
-    const isHidden = item.hidden?.includes(casePurposeToken)
+  return items.value.filter((item) => {
+    const isHidden = item.hidden?.includes(casePurposeToken.value)
     const isVisibleOnly = item.visible?.length
 
     if (isHidden) return false
 
     if (isVisibleOnly) {
-      return item.visible.includes(casePurposeToken)
+      return item.visible.includes(casePurposeToken.value)
     }
 
     return true
