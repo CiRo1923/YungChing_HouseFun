@@ -63,7 +63,7 @@ const onPopupRenewal = async (data) => {
 const onRenewalClick = async (objectData) => {
   onResetPojectData('renewal')
 
-  const isSure = await onPopupRenewal(objectData)
+  const { isSure } = await onPopupRenewal(objectData)
 
   if (isSure) {
     onApiPromise('open')
@@ -116,7 +116,7 @@ const onPublishClick = async (objectData) => {
     : []
 
   onResetPojectData('renewal')
-  const isSure = await onPopupRenewal(objectData)
+  const { isSure } = await onPopupRenewal(objectData)
 
   if (!isSure) return
 
@@ -152,7 +152,7 @@ const onPublishClick = async (objectData) => {
   if (!isSuccess) return
 
   if (objectData || selectCount.value === 1) {
-    const isFinish = await onCustom({
+    const { isSure: isFinish } = await onCustom({
       id: 'popupFinish',
       title: '物件刊登完成',
       data: objectData,
@@ -194,7 +194,7 @@ const onPublishClick = async (objectData) => {
 
 // 下架
 const onOfflineClick = async (objectData) => {
-  const isOffline = await onCustom({
+  const { isSure: isOffline } = await onCustom({
     id: 'popupOffline',
     title: '下架物件',
     data: objectData,
@@ -223,7 +223,7 @@ const onOfflineClick = async (objectData) => {
 
 // 成交
 const onDealClick = async (objectData) => {
-  const isDeal = await onCustom({
+  const { isSure: isDeal } = await onCustom({
     id: 'popupDeal',
     title: '成交設定',
     data: objectData,
@@ -261,7 +261,7 @@ const onDealClick = async (objectData) => {
 const onRemoveClick = async (objectData) => {
   const hfIDs = objectData ? [objectData.hfID] : selectItems.value
 
-  const isRemove = await onCustom({
+  const { isSure: isRemove } = await onCustom({
     id: 'popupRemove',
     title: '物件刪除',
     icon: 'icon_xmark_circle',

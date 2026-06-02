@@ -23,9 +23,14 @@ const onClose = (item) => {
     />
     <template #footer>
       <div class="text-center">
-        <ul class="inline-flex items-center m:gap-x-[8px] pt:gap-x-[12px]">
+        <ul
+          class="m:grid m:grid-cols-2 m:gap-[8px] t:gap-x-[8px] pt:inline-flex pt:items-center p:gap-x-[16px]"
+        >
           <li
-            class="min-w-[100px]"
+            class="pt:min-w-[100px]"
+            :class="{
+              'm:col-span-2': footerBtns.length % 2 === 1 && index === footerBtns.length - 1,
+            }"
             v-for="(item, index) in confirm.btns"
             :key="`confirm_${item.label}_${index}`"
           >

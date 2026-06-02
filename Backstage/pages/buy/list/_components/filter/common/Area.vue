@@ -2,14 +2,14 @@
 import SelectDropdownOptions from '@components/buy/mForm/SelectDropdownOptions.vue'
 
 const buyList = useBuyListStore()
-const { apiData, options } = storeToRefs(buyList)
+const { apiSearchData, options } = storeToRefs(buyList)
 
 const dropdownRef = ref(null)
 const cityPanelRef = ref(null)
 const districtPanelRef = ref(null)
 const model = ref({
-  city: apiData.value.cityToken,
-  district: apiData.value.districtToken,
+  city: apiSearchData.value.cityToken,
+  district: apiSearchData.value.districtToken,
   label: '不限',
 })
 
@@ -79,8 +79,8 @@ const onCityClick = async (item) => {
   if (model.value.city !== value) {
     model.value.city = value
     model.value.district = []
-    apiData.value.cityToken = model.value.city
-    apiData.value.districtToken = model.value.district
+    apiSearchData.value.cityToken = model.value.city
+    apiSearchData.value.districtToken = model.value.district
     model.value.label = text
   }
 
@@ -113,14 +113,19 @@ const onAreaClick = (item) => {
     model.value.district.push(item.value)
   }
 
-  apiData.value.districtToken = model.value.district
-  model.value.label = model.value.district
-    .map((value) => {
-      const district = districtOptions.value.find((item) => item.value === value)
+  const district = model.value.district || []
 
-      return district ? `${selectCityLabel.value}-${district.text}` : null
-    })
-    .filter(Boolean)
+  apiSearchData.value.districtToken = district
+
+  model.value.label = district.length
+    ? district
+        .map((value) => {
+          const option = districtOptions.value.find((item) => item.value === value)
+
+          return option ? `${selectCityLabel.value}-${option.text}` : null
+        })
+        .filter(Boolean)
+    : selectCityLabel.value
 }
 
 onUnmounted(() => {

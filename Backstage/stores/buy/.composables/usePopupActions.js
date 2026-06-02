@@ -33,7 +33,12 @@ export default () => {
     onBodyOverflowHiddenToggle(true)
 
     return new Promise((resolve) => {
-      alertCheck.value = resolve
+      alertCheck.value = (isSure, item) => {
+        resolve({
+          isSure,
+          item,
+        })
+      }
     })
   }
   const onAlertClose = () => {
@@ -63,7 +68,12 @@ export default () => {
     onBodyOverflowHiddenToggle(true)
 
     return new Promise((resolve) => {
-      confirmCheck.value = resolve
+      confirmCheck.value = (isSure, item) => {
+        resolve({
+          isSure,
+          item,
+        })
+      }
     })
   }
   const onConfirmClose = () => {
@@ -90,7 +100,12 @@ export default () => {
     onBodyOverflowHiddenToggle(true)
 
     return new Promise((resolve) => {
-      customCheck.value = resolve
+      customCheck.value = (isSure, item) => {
+        resolve({
+          isSure,
+          item,
+        })
+      }
     })
   }
   const onCustomClose = () => {

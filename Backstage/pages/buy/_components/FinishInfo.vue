@@ -107,11 +107,11 @@ const items = shallowReadonly([
                 v-for="(time, idx) in item.content.value"
                 :key="`${time}_${idx}_${index}`"
               >
-                <BuyMTagDefault
+                <BuyMTimeMain
                   :text="time"
                   :setClass="{
-                    main: '--h-35 --px-8 --bg-orange-feea w-full',
-                    text: 'text-[14px] font-semibold',
+                    main: '--h-30 p:--w-85 tm:--w-80',
+                    text: 'text-[14px]',
                   }"
                 />
               </li>

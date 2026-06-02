@@ -40,7 +40,14 @@ onResetPojectData('renewal')
           icon: 'text-[--gray-666]',
         }"
       />
-      <PageBuyRenewalInfo />
+      <PageBuyRenewalInfo
+        :setClass="{
+          hiddenForm: {
+            main: 'text-center',
+            error: 'mt-[4px]',
+          },
+        }"
+      />
     </BuyMCardDefault>
   </div>
 </template>

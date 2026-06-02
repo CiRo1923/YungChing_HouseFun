@@ -14,6 +14,10 @@ const props = defineProps({
 const setClass = computed(() => {
   return {
     main: '',
+    hiddenForm: {
+      main: '',
+      error: '',
+    },
     ...props.setClass,
   }
 })
@@ -33,7 +37,7 @@ const setClass = computed(() => {
             value: item.planID,
           }"
           :setClass="{
-            main: 'p:--px-40 p:--py-16 tm:p-16',
+            main: 'p:--px-40 p:--py-16 tm:--p-16',
             label: 'text-[16px] text-[--gray-666] pt:flex pt:items-center',
           }"
         >
@@ -57,6 +61,7 @@ const setClass = computed(() => {
       :rules="{
         required: '請選擇額度',
       }"
+      :setClass="setClass.hiddenForm"
     />
   </div>
 

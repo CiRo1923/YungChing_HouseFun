@@ -18,6 +18,7 @@ const items = shallowReadonly([
     label: '管理方式',
     class: 'p:h-[40px]',
     component: PageBuyPublishBasicManageCaseManageType,
+    hasEmits: false,
   },
   {
     id: 'caseManageDuty',
@@ -25,6 +26,7 @@ const items = shallowReadonly([
     label: '管理時段',
     class: 'p:h-[40px]',
     component: PageBuyPublishBasicManageCaseManageDuty,
+    hasEmits: false,
   },
   {
     id: 'caseManagePay',
@@ -32,6 +34,7 @@ const items = shallowReadonly([
     label: '管理費',
     class: 'p:h-[40px]',
     component: PageBuyPublishBasicManageCaseManagePay,
+    hasEmits: false,
   },
 ])
 </script>

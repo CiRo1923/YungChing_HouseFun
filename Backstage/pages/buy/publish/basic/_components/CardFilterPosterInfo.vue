@@ -19,6 +19,7 @@ const items = shallowReadonly([
     label: '匯入資訊',
     class: 'p:h-[35px]',
     component: PageBuyPublishBasicPosterInfoPosterDataSource,
+    hasEmits: false,
   },
   {
     id: 'agentName',
@@ -26,6 +27,7 @@ const items = shallowReadonly([
     label: '姓名',
     class: 'p:h-[40px]',
     component: PageBuyPublishBasicPosterInfoAgentName,
+    hasEmits: false,
   },
   {
     id: 'agentPhone',
@@ -33,6 +35,7 @@ const items = shallowReadonly([
     label: '行動電話',
     class: 'p:h-[40px]',
     component: PageBuyPublishBasicPosterInfoAgentPhone,
+    hasEmits: false,
   },
   {
     id: 'agentLine',
@@ -40,6 +43,7 @@ const items = shallowReadonly([
     label: 'LINE 聯絡',
     class: 'p:h-[40px]',
     component: PageBuyPublishBasicPosterInfoAgentLine,
+    hasEmits: false,
   },
 ])
 </script>

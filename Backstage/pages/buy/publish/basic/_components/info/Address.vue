@@ -46,7 +46,7 @@ const onAreaChange = async ({ source } = {}) => {
 }
 
 const onPopupAddressGoogleMap = async () => {
-  const isCustom = await onCustom({
+  const { isSure: isCustom } = await onCustom({
     id: 'popupAddressGoogleMap',
     title: '地圖定位',
     icon: 'icon_map',
@@ -54,19 +54,20 @@ const onPopupAddressGoogleMap = async () => {
   })
 
   if (isCustom) {
-    const { city, area, road, lane, alley, number } = isCustom
+    const { city, area, road, lane, alley, number } = address.value
     const cityID = options.value.city.find((item) => item.text === city)
     const districtID = options.value.area.find((item) => item.text === area)
+    const [addrNum, addrNumOf = null] = number.split(/-|之/)
 
     apiData.value.caseInfo.cityID = Number(cityID.value)
     apiData.value.caseInfo.districtID = Number(districtID.value)
     apiData.value.caseInfo.road = road
     apiData.value.caseInfo.lane = lane
     apiData.value.caseInfo.alley = alley
-    apiData.value.caseInfo.addrNum = number
+    apiData.value.caseInfo.addrNum = addrNum
+    apiData.value.caseInfo.addrNumOf = addrNumOf
 
-    address.value = isCustom
-    console.log('地圖定位地址:', isCustom)
+    console.log('地圖定位地址:', address)
   }
 }
 </script>

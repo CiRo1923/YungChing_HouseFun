@@ -18,12 +18,14 @@ const items = shallowReadonly([
     id: 'photos',
     class: 'p:h-[50px]',
     component: PageBuyPublishBasicPicturesPhotos,
+    hasEmits: false,
   },
   {
     id: 'layoutDiagram',
     label: '格局圖',
     class: 'pt:h-[25px]',
     component: PageBuyPublishBasicPicturesLayoutDiagram,
+    hasEmits: false,
   },
 ])
 </script>

@@ -44,9 +44,17 @@ export const apiPOSTGoldenSetPlanSingle = async (data) =>
 export const apiGETRefreshCurrentPlansForCase = async (data) =>
   await fetchApi.get(`api/${version}/vas/Refresh/CurrentPlansForCase`, data)
 
+// 新增自動刷新時間 (列表 & 明細流程)
+export const apiGETRefreshNewPlan = async (data) =>
+  await fetchApi.get(`api/${version}/vas/Refresh/NewPlan`, data)
+
 // 修改自動刷新時間 (列表 & 明細流程)
 export const apiGETRefreshGetPlanInfo = async (data) =>
   await fetchApi.get(`api/${version}/vas/Refresh/GetPlanInfo`, data)
+
+// 自動刷新選擇額度 (列表 & 明細流程)
+export const apiGETRefreshAvailablePlans = async (data) =>
+  await fetchApi.get(`api/${version}/vas/Refresh/AvailablePlans`, data)
 
 // 單一物件 設定自動刷新 (列表 & 明細流程)
 export const apiPOSTRefreshSavePlan = async (data) =>

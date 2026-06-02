@@ -1,6 +1,4 @@
 <script setup>
-import CustomPopup from '@containers/buy/common/CustomPopup.vue'
-
 const example1 = readonly([
   {
     content: '★室內格局：3 房 2 廳 2 衛.採光通風良好.工作陽台方便實用.★',
@@ -57,7 +55,7 @@ const example2 = readonly({
 </script>
 
 <template>
-  <CustomPopup
+  <BuyCommonCustomPopup
     id="popupFeature"
     :setClass="{
       main: 'p:--w-1200 t:--w-720',
@@ -87,7 +85,7 @@ const example2 = readonly({
         </li>
       </ol>
     </div>
-  </CustomPopup>
+  </BuyCommonCustomPopup>
 </template>
 
 <style></style>

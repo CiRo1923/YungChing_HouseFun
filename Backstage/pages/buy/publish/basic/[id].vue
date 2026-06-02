@@ -12,7 +12,11 @@ definePageMeta({
 // const common = useCommonStore()
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
 const buyProject = useBuyProjectStore()
-const { onApiPOSTRealEstateRestoreToOnline } = useBuyProjectActions()
+const {
+  onApiGETRealEstateTypeSelectOptions,
+  onApiGETRealEstateLegalUsageSelectOptions,
+  onApiPOSTRealEstateRestoreToOnline,
+} = useBuyProjectActions()
 const buyPublish = useBuyPublishStore()
 const { statusData } = storeToRefs(buyPublish)
 
@@ -27,6 +31,14 @@ const { onAlert, onConfirm, onApiPromise, onApiErrorServerToClient } = useBuyPop
 const route = useRoute()
 const router = useRouter()
 const hfID = computed(() => route.params.id)
+
+const onTypeSelectOptionsUpdate = async () => {
+  return await onApiGETRealEstateTypeSelectOptions()
+}
+
+const onUsageSelectOptionsUpdate = async () => {
+  return await onApiGETRealEstateLegalUsageSelectOptions()
+}
 
 const onAlertSuccess = async (content) => {
   return await onAlert({
@@ -151,10 +163,18 @@ const onRenewal = async (validate) => {
   }
 }
 
+const onPurposeChnage = async () => {
+  return await Promise.all([onTypeSelectOptionsUpdate(), onUsageSelectOptionsUpdate()])
+}
+
 await onWithLoadingAll([
   ...onAllPromise(),
   useAsyncData(`case-status-basic-${hfID.value}`, () => onApiGERealEstateCaseStatus(hfID.value)),
   useAsyncData(`detail-${hfID.value}`, () => onApiGETRealEstate(hfID.value)),
+])
+await Promise.all([
+  useAsyncData(`type-options`, () => onTypeSelectOptionsUpdate()),
+  useAsyncData(`usage-options`, () => onUsageSelectOptionsUpdate()),
 ])
 
 onUseMeta({
@@ -204,7 +224,7 @@ onMounted(() => {
       v-slot="{ validate }"
     >
       <!-- <pre>{{ apiData }}</pre> -->
-      <PageBuyPublishBasicDataComponents />
+      <PageBuyPublishBasicDataComponents @change:case-purpose="onPurposeChnage" />
       <PageBuyPublishBasicSubmitButtons
         @click:draft="onDraft"
         @click:save="() => onSave(validate)"

@@ -13,16 +13,13 @@ export const useBuyProjectStore = defineStore('buyProject', () => {
     data: null,
     info: null,
     plans: null,
-    planInfo: {
+    availableInfo: null,
+    availablePlans: null,
+    save: {
       apiData: {
         hfID: null,
         vasID: null,
-      },
-    },
-    save: {
-      apiData: {
         planID: null,
-        vasid: null,
         empID: null,
         listSelectedRefreshTime: [],
       },

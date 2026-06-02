@@ -71,6 +71,9 @@ const isError = computed(() => {
           errorMessage: '請輸入加蓋格局',
         },
       }"
+      :setClass="{
+        error: 'mt-[4px]',
+      }"
     />
   </div>
 </template>

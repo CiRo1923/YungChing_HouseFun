@@ -20,6 +20,7 @@ const items = shallowReadonly([
   {
     id: 'warning',
     component: PageBuyPublishBasicFeatureWarning,
+    hasEmits: false,
     setClass: {
       main: 'm:hidden',
     },
@@ -28,14 +29,17 @@ const items = shallowReadonly([
   {
     id: 'caseDescription',
     component: PageBuyPublishBasicFeatureCaseDescription,
+    hasEmits: false,
   },
   {
     id: 'caseFeature',
     component: PageBuyPublishBasicFeatureCaseFeature,
+    hasEmits: false,
   },
   {
     id: 'caseFeatureCustomize',
     component: PageBuyPublishBasicFeatureCaseFeatureCustomize,
+    hasEmits: false,
   },
 ])
 

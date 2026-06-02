@@ -44,7 +44,7 @@ const config = computed(() => {
     {
       label: null,
       value: null,
-      align: 'top',
+      align: 'center',
       isDisabled: false,
     },
     props.config
@@ -83,11 +83,11 @@ const onChange = () => {
         <label
           class="m-form-element --radio-item relative flex gap-x-[8px] rounded-[15px] border-[1px] align-middle leading-[1.35] transition-colors duration-300"
           :class="[
+            setClass.element,
             config.align === 'top' && (config.label || $slots.default)
               ? 'items-baseline'
               : 'items-center',
-            config.isDisabled ? 'cursor-not-allowed' : 'cursor-pointer',
-            setClass.element,
+            { '--disabled': config.isDisabled },
             { '--checked': model === config.value },
           ]"
         >
@@ -105,7 +105,7 @@ const onChange = () => {
           />
           <CommonSvgIcon
             icon="icon_check_solid"
-            class="m-form-icon relative mt-[2px] h-[18px] w-[18px] shrink-0 self-start rounded-full border-[1px] text-[--orange-e646] transition-colors duration-300"
+            class="m-form-icon relative h-[18px] w-[18px] shrink-0 rounded-full border-[1px] text-[--orange-e646] transition-colors duration-300"
             :class="setClass.icon"
           />
           <div class="grow" :class="setClass.label">
@@ -126,11 +126,32 @@ const onChange = () => {
   </div>
 </template>
 
+<style src="@css/_modules/buy/mForm.css"></style>
 <style lang="postcss">
 .m-form-element {
   &.\-\-radio-item {
-    &.\-\-checked {
-      @apply border-transparent bg-[--orange-feea];
+    &.items-baseline {
+      .m-form-icon {
+        @apply mt-[2px] self-start;
+      }
+    }
+
+    &:not(.-\-\disabled) {
+      @apply cursor-pointer;
+
+      &.\-\-checked {
+        @apply border-transparent bg-[--orange-feea];
+      }
+    }
+
+    &.\-\-disabled {
+      @apply cursor-not-allowed;
+
+      @apply border-transparent bg-[--gray-f2];
+
+      * {
+        @apply text-[--gray-ccce];
+      }
     }
 
     .m-form-type {

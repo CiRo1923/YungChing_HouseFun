@@ -11,10 +11,12 @@ const items = shallowReadonly([
   {
     id: 'items',
     component: PageBuyPublishBasicTermsItems,
+    hasEmits: false,
   },
   {
     id: 'agreeUserTerm',
     component: PageBuyPublishBasicTermsAgreeUserTerm,
+    hasEmits: false,
   },
 ])
 </script>

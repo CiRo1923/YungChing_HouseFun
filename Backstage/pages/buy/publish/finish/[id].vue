@@ -77,7 +77,10 @@ onMounted(() => {
   </BuyMContainer>
   <PageBuyPopupGolden />
   <PageBuyPopupAutoRefresh />
-  <PageBuyPopupEditTime />
+  <PageBuyPopupAutoRefreshRenewal />
+  <PageBuyPopupAutoRefreshAddTime />
+  <PageBuyPopupAutoRefreshEditTime />
+  <PageBuyPopupAutoRefreshSuccess />
 </template>
 
 <style></style>

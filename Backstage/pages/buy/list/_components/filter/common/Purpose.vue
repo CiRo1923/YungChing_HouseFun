@@ -1,12 +1,12 @@
 <script setup>
 const buyList = useBuyListStore()
-const { apiData, options } = storeToRefs(buyList)
+const { apiSearchData, options } = storeToRefs(buyList)
 </script>
 
 <template>
   <BuyMFormSelect
     name="purposeToken"
-    v-model="apiData.purposeToken"
+    v-model="apiSearchData.purposeToken"
     :options="options.purpose"
     :config="{
       placeholder: '選擇用途',

@@ -1,12 +1,16 @@
 <script setup>
 const buyList = useBuyListStore()
-const { apiData, options } = storeToRefs(buyList)
+const { apiSearchData, options } = storeToRefs(buyList)
+const { onApiPromise } = useBuyPopupActions()
 
 const emits = defineEmits(['search'])
 
-const onSearchClick = () => {
-  console.log('Publish search')
-  emits('search')
+const onSearchClick = async () => {
+  onApiPromise('open')
+  await new Promise((resolve) => {
+    emits('search', resolve)
+  })
+  onApiPromise('close')
 }
 </script>
 
@@ -17,7 +21,7 @@ const onSearchClick = () => {
       <PageBuyListFilterCommonArea />
       <BuyMFormSelect
         name="exchangeToken"
-        v-model="apiData.exchangeToken"
+        v-model="apiSearchData.exchangeToken"
         :options="options.exchange"
         :config="{
           placeholder: '選擇刊登類型',
@@ -33,7 +37,7 @@ const onSearchClick = () => {
       />
       <BuyMFormSelect
         name="goldenToken"
-        v-model="apiData.goldenToken"
+        v-model="apiSearchData.goldenToken"
         :options="options.golden"
         :config="{
           placeholder: '選擇廣告狀態',

@@ -1,20 +1,16 @@
 <script setup>
-import CustomPopup from '@containers/buy/common/CustomPopup.vue'
-
+const buyPublish = useBuyPublishStore()
+const { address } = storeToRefs(buyPublish)
 const { onAddress } = useBuyPublishActions()
-const addressData = ref(null)
 
 const onClick = (data) => {
-  addressData.value = data
+  address.value = data
 }
 </script>
 
 <template>
-  <CustomPopup
+  <BuyCommonCustomPopup
     id="popupAddressGoogleMap"
-    :config="{
-      data: addressData,
-    }"
     :setClass="{
       main: 'p:--w-1200 t:--w-720',
     }"
@@ -34,7 +30,7 @@ const onClick = (data) => {
         />
       </ClientOnly>
     </div>
-  </CustomPopup>
+  </BuyCommonCustomPopup>
 </template>
 
 <style></style>

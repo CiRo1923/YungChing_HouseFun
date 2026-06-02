@@ -84,8 +84,11 @@ onMounted(() => {
   <PageBuyListPopupOffline />
   <PageBuyListPopupDeal />
   <PageBuyPopupGolden />
-  <PageBuyPopupAutoRefresh />
-  <PageBuyPopupEditTime />
+  <PageBuyPopupAutoRefresh :update="onUpdate" />
+  <PageBuyPopupAutoRefreshRenewal />
+  <PageBuyPopupAutoRefreshAddTime />
+  <PageBuyPopupAutoRefreshEditTime />
+  <PageBuyPopupAutoRefreshSuccess />
   <PageBuyListPopupView />
 </template>
 

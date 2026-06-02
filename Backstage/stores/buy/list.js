@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 
 export const useBuyListStore = defineStore('buyList', () => {
-  const apiDataDefault = readonly({
+  const apiSearchDataDefault = readonly({
     searchKey: '',
     purposeToken: '0',
     exchangeToken: '0',
@@ -22,7 +22,7 @@ export const useBuyListStore = defineStore('buyList', () => {
     listSortToken: 0,
     listOrderToken: 2,
   })
-  const apiData = ref({ ...apiDataDefault })
+  const apiSearchData = ref({ ...apiSearchDataDefault })
   const apiDealData = ref({
     dateDeal: null,
     isDealShow: false,
@@ -44,8 +44,8 @@ export const useBuyListStore = defineStore('buyList', () => {
   const pagination = ref(null)
 
   return {
-    apiDataDefault,
-    apiData,
+    apiSearchDataDefault,
+    apiSearchData,
     apiDealData,
     options,
     planAggregate,

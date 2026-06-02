@@ -15,14 +15,17 @@ const items = shallowReadonly([
   {
     id: 'video',
     component: PageBuyPublishBasicMediaVideo,
+    hasEmits: false,
   },
   {
     id: 'caseVideoDisplay',
     component: PageBuyPublishBasicMediaCaseVideoDisplay,
+    hasEmits: false,
   },
   {
     id: 'note',
     component: PageBuyPublishBasicMediaNote,
+    hasEmits: false,
   },
 ])
 </script>

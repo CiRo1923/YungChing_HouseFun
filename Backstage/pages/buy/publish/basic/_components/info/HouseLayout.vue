@@ -121,6 +121,9 @@ const onIsCaseOpenConceptChange = () => {
           errorMessage: '請輸入格局',
         },
       }"
+      :setClass="{
+        error: 'mt-[4px]',
+      }"
     />
   </div>
 </template>

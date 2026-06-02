@@ -3,7 +3,7 @@ const common = useCommonStore()
 const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
 const buyList = useBuyListStore()
-const { apiData, options } = storeToRefs(buyList)
+const { apiSearchData, options } = storeToRefs(buyList)
 
 const isDeviceM = computed(() => device.value === 'm')
 const items = computed(() => {
@@ -13,7 +13,7 @@ const items = computed(() => {
       name: 'roomCountToken',
       header: '選擇房數',
       options: options.value.room,
-      model: toRef(apiData.value, 'roomCountToken'),
+      model: toRef(apiSearchData.value, 'roomCountToken'),
       rearAssist: '房',
     },
     {
@@ -21,7 +21,7 @@ const items = computed(() => {
       name: 'priceToken',
       header: '選擇總價',
       options: options.value.price,
-      model: toRef(apiData.value, 'priceToken'),
+      model: toRef(apiSearchData.value, 'priceToken'),
       rearAssist: '萬',
     },
     {
@@ -29,7 +29,7 @@ const items = computed(() => {
       name: 'pinToken',
       header: '選擇坪數',
       options: options.value.pin,
-      model: toRef(apiData.value, 'pinToken'),
+      model: toRef(apiSearchData.value, 'pinToken'),
       rearAssist: '坪',
     },
   ]
@@ -70,7 +70,7 @@ onUnmounted(() => {
       <div class="flex items-center gap-x-[4px] overflow-hidden">
         <BuyMFormInput
           :name="`${data.key}RangeMin`"
-          v-model="apiData[`${data.key}RangeMin`]"
+          v-model="apiSearchData[`${data.key}RangeMin`]"
           :config="{
             hasClearButton: false,
           }"
@@ -84,7 +84,7 @@ onUnmounted(() => {
         <small>-</small>
         <BuyMFormInput
           :name="`${data.key}RangeMax`"
-          v-model="apiData[`${data.key}RangeMax`]"
+          v-model="apiSearchData[`${data.key}RangeMax`]"
           :config="{
             hasClearButton: false,
           }"
@@ -101,7 +101,7 @@ onUnmounted(() => {
   <template v-if="isDeviceM">
     <BuyMFormSelect
       :name="item.name"
-      v-model="apiData[item.name]"
+      v-model="apiSearchData[item.name]"
       :options="item.options"
       :config="{
         placeholder: item.header,

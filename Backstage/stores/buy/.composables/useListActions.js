@@ -19,7 +19,7 @@ export default () => {
   // const { renewal } = storeToRefs(buyProject)
   const { onReplaceImageSize } = useBuyProjectActions()
   const buyList = useBuyListStore()
-  const { apiData, apiDealData, options, planAggregate, aggregate, datas, pagination } =
+  const { apiSearchData, apiDealData, options, planAggregate, aggregate, datas, pagination } =
     storeToRefs(buyList)
   const { onApiError } = useBuyPopupActions()
   const selectItems = computed(() =>
@@ -99,7 +99,7 @@ export default () => {
       caseStatusToken, // 刊登中: 1、草稿: 2、已成交: 3、已下架: 4
       page,
       pageSize: 12,
-      ...apiData.value,
+      ...apiSearchData.value,
     })
 
     if (status === 200) {
@@ -221,7 +221,7 @@ export default () => {
     }))
   }
   const onReset = () => {
-    apiData.value = { ...buyList.apiDataDefault }
+    apiSearchData.value = { ...buyList.apiSearchDataDefault }
     datas.value = null
   }
 

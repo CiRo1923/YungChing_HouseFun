@@ -1,10 +1,16 @@
 <script setup>
 const buyList = useBuyListStore()
-const { apiData, options } = storeToRefs(buyList)
+const { apiSearchData, options } = storeToRefs(buyList)
+const { onApiPromise } = useBuyPopupActions()
+
 const emits = defineEmits(['search'])
 
-const onSearchClick = () => {
-  emits('search')
+const onSearchClick = async () => {
+  onApiPromise('open')
+  await new Promise((resolve) => {
+    emits('search', resolve)
+  })
+  onApiPromise('close')
 }
 </script>
 
@@ -15,7 +21,7 @@ const onSearchClick = () => {
       <PageBuyListFilterCommonArea />
       <BuyMFormSelect
         name="caseDealShowToken"
-        v-model="apiData.caseDealShowToken"
+        v-model="apiSearchData.caseDealShowToken"
         :options="options.dealShow"
         :config="{
           placeholder: '選擇實績',

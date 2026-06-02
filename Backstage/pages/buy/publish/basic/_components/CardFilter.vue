@@ -2,6 +2,7 @@
 const common = useCommonStore()
 const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
+const emits = defineEmits(['change'])
 const props = defineProps({
   title: {
     type: String,
@@ -43,6 +44,10 @@ const onBind = (item) => {
     : {}
 }
 
+const onChange = (item) => {
+  emits('change', item)
+}
+
 onUnmounted(() => {
   window.removeEventListener('resize', onResize)
 })
@@ -80,7 +85,7 @@ onMounted(() => {
             <slot :name="`${item.id}_label`" />
           </BuyMFormLabel>
           <div class="overflow-hidden pt:grow">
-            <component :is="item.component" v-bind="onBind(item)" />
+            <component :is="item.component" v-bind="onBind(item)" @change="onChange(item)" />
           </div>
         </li>
       </template>

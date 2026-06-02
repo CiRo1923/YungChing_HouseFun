@@ -9,10 +9,6 @@ const props = defineProps({
     type: String,
     default: null,
   },
-  config: {
-    type: Object,
-    default: () => ({}),
-  },
   setClass: {
     type: Object,
     default: () => ({}),
@@ -28,12 +24,6 @@ const footerBtns = computed(() => {
       ? buyPopup.buttons.confirm
       : customData.value.btns || null
 })
-const config = computed(() => {
-  return {
-    data: null,
-    ...props.config,
-  }
-})
 
 const onClose = (item) => {
   const isSure = item.type === 'sure'
@@ -46,7 +36,7 @@ const onClose = (item) => {
 
   // cancel 或允許 sureClose 的情況：照舊 resolve + close
   const isShouldClose = item.isClose !== false
-  customCheck.value(isSure ? config.value.data || true : false)
+  customCheck.value(isSure, item)
 
   if (isShouldClose) onCustomClose()
 }
@@ -66,9 +56,14 @@ const onClose = (item) => {
     <template #footer v-if="$slots.footer || footerBtns">
       <slot name="footer">
         <div class="text-center">
-          <ul class="inline-flex items-center tm:gap-x-[8px] p:gap-x-[16px]">
+          <ul
+            class="m:grid m:grid-cols-2 m:gap-[8px] t:gap-x-[8px] pt:inline-flex pt:items-center p:gap-x-[16px]"
+          >
             <li
-              class="min-w-[100px]"
+              class="pt:min-w-[100px]"
+              :class="{
+                'm:col-span-2': footerBtns.length % 2 === 1 && index === footerBtns.length - 1,
+              }"
               v-for="(item, index) in footerBtns"
               :key="`custom_${item.label}_${index}`"
             >

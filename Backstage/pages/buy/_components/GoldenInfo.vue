@@ -54,6 +54,9 @@ const setClass = computed(() => {
       :rules="{
         required: '請選擇額度',
       }"
+      :setClass="{
+        error: 'mt-[4px]',
+      }"
     />
   </div>
   <!-- <pre>

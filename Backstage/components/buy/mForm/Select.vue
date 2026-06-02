@@ -42,7 +42,6 @@ const props = defineProps({
 })
 const selectRef = ref(null)
 const selectedIndex = ref(-1)
-const label = ref(null)
 const model = computed({
   get: () => props.modelValue,
   set: (value) => {
@@ -55,6 +54,7 @@ const model = computed({
     emits('update:modelValue', result)
   },
 })
+
 const config = computed(() => {
   const defaultConfig = {
     startOption: null,
@@ -124,24 +124,37 @@ const options = computed(() => {
   return options
 })
 
+const selectedOption = computed(() => {
+  const { schema, startOption } = config.value
+  const targetValue = startOption ?? model.value
+  const optionList = Array.isArray(options.value) ? options.value : []
+
+  return optionList.find((item) => {
+    return item[schema.value] == targetValue
+  })
+})
+
+const label = computed(() => {
+  const { schema } = config.value
+
+  return selectedOption.value?.[schema.label] || null
+})
+
+const displayLabel = computed(() => {
+  return label.value || placeholder.value?.value || null
+})
+
+const isPlaceholder = computed(() => {
+  return !label.value || !model.value
+})
+
 const onSetSelectedIndex = () => {
-  const { startOption } = config.value
-  let index = -1
+  const { startOption, schema } = config.value
+  const targetValue = startOption ?? model.value
 
-  if (options.value) {
-    if (startOption) {
-      // item.value == startOption 用 == 會有形態別問題 '1' (string) !== 1 (int)
-      index = options.value.findIndex((item) => item.value == startOption)
-    } else {
-      // item[config.value.schema.value] == model.value 用 == 會有形態別問題 '1' (string) !== 1 (int)
-      index = options.value.findIndex((item) => item[config.value.schema.value] == model.value)
-    }
-
-    // index = index === -1 ? 0 : index
-    label.value = index !== -1 ? options.value[index][config.value.schema.label] : null
-  }
-
-  selectedIndex.value = index
+  selectedIndex.value = options.value.findIndex((item) => {
+    return item[schema.value] == targetValue
+  })
 }
 
 const {
@@ -181,8 +194,10 @@ const onDropdownArrow = (e) => {
 
     const $dropdown = dropdownBodyRef.value
     const $dropdownItemRef = dropdownItemRef.value[selectedIndex.value]
+    if (!$dropdown || !$dropdownItemRef) return
+
     const dropdown = {
-      rect: dropdownBodyRef.value.getBoundingClientRect(),
+      rect: $dropdown.getBoundingClientRect(),
     }
     const dropdownItem = {
       rect: $dropdownItemRef.getBoundingClientRect(),
@@ -208,7 +223,6 @@ const onDropdownArrow = (e) => {
     }
     const result = options.value[selectedIndex.value]
     model.value = result[config.value.schema.value]
-    label.value = result[config.value.schema.label]
 
     // emits('change', result)
   }
@@ -218,7 +232,7 @@ const onDropdownEnter = () => {
   const $selectRef = selectRef.value
 
   onSwitchActive(false)
-  $selectRef.blur()
+  $selectRef?.blur()
 }
 
 const onDropdownItemClick = (index) => {
@@ -227,7 +241,6 @@ const onDropdownItemClick = (index) => {
 
   selectedIndex.value = index
   model.value = option[schema.value]
-  label.value = option[schema.label]
 
   onSwitchActive(false)
   emits('change', option)
@@ -322,16 +335,13 @@ onUnmounted(() => {
             :class="[
               setClass.type,
               {
-                '--placeholder': !label || !model,
+                '--placeholder': isPlaceholder,
               },
             ]"
             ref="selectRef"
           >
-            <template v-if="label">
-              {{ label }}
-            </template>
-            <template v-else-if="!label && placeholder.value">
-              {{ placeholder.value }}
+            <template v-if="displayLabel">
+              {{ displayLabel }}
             </template>
           </div>
           <CommonSvgIcon

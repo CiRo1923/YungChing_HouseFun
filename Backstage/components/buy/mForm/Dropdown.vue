@@ -85,6 +85,14 @@ const placeholder = computed(() => {
       }
 })
 
+const displayLabel = computed(() => {
+  return model.value || placeholder.value?.value || null
+})
+
+const isPlaceholder = computed(() => {
+  return !model.value
+})
+
 const {
   elenemtRef,
   dropdownRef,
@@ -167,11 +175,10 @@ onUnmounted(() => {
             :class="[
               setClass.type,
               {
-                '--placeholder': !model,
+                '--placeholder': isPlaceholder,
               },
             ]"
-            v-html="model || placeholder.value"
-            ref="selectRef"
+            v-html="displayLabel"
           />
           <CommonSvgIcon
             icon="caret_large_down"

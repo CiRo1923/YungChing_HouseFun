@@ -1,8 +1,4 @@
 <script setup>
-import AlertSystem from '@containers/buy/common/AlertSystem.vue'
-import ConfirmSystem from '@containers/buy/common/ConfirmSystem.vue'
-import ApiPromiseSystem from '@containers/buy/common/ApiPromiseSystem.vue'
-
 const common = useCommonStore()
 const buyProject = useBuyProjectStore()
 const { isLoading } = storeToRefs(common)
@@ -28,9 +24,9 @@ const { isLoading } = storeToRefs(common)
     v-if="isLoading"
   />
   <div id="box">
-    <AlertSystem />
-    <ConfirmSystem />
-    <ApiPromiseSystem />
+    <BuyCommonAlertSystem />
+    <BuyCommonConfirmSystem />
+    <BuyCommonApiPromiseSystem />
   </div>
 </template>
 

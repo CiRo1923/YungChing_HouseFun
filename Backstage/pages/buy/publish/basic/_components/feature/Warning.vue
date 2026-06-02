@@ -15,7 +15,7 @@ const setClass = computed(() => {
 })
 
 const onPopupFeature = async () => {
-  const isCustom = await onCustom({
+  const { isSure: isCustom } = await onCustom({
     id: 'popupFeature',
     title: '參考描述範例',
     icon: 'icon_edit',

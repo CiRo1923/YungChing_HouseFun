@@ -85,7 +85,7 @@ watchEffect(() => {
       :class="setClass.main"
       v-if="isOpen || isShowOverlay"
     >
-      <Transition name="popup-bomb" appear @after-leave="onAfterLeave">
+      <Transition name="popup-zoom" appear @after-leave="onAfterLeave">
         <div
           class="m-popup-container relative flex max-h-[92%] flex-col overflow-hidden rounded-[15px] bg-[--white] py-[40px] m:mx-[16px] tm:p-[32px] p:px-[72px]"
           :class="setClass.container"
@@ -144,24 +144,6 @@ watchEffect(() => {
 </template>
 
 <style lang="postcss">
-@keyframes popup-bomb {
-  0% {
-    transform: scale(0);
-  }
-  25% {
-    transform: scale(1.2);
-  }
-  50% {
-    transform: scale(0.9);
-  }
-  75% {
-    transform: scale(1.1);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
 .m-popup {
   &:before {
     @apply absolute inset-0 bg-[--black] opacity-40 content-default;

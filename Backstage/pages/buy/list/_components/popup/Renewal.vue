@@ -75,7 +75,14 @@ const onSure = async () => {
           個刊登額度
         </p>
         <Form as="div" class="tm:mt-[8px] p:mt-[16px]" ref="formRef">
-          <PageBuyRenewalInfo />
+          <PageBuyRenewalInfo
+            :setClass="{
+              hiddenForm: {
+                main: 'text-center',
+                error: 'mt-[15px]',
+              },
+            }"
+          />
         </Form>
       </li>
       <li class="popup-renewal-item" v-if="!hasExpired">

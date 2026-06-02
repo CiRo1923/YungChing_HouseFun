@@ -10,7 +10,10 @@ import {
   apiGETGoldenGetPlanList,
   apiPOSTGoldenSetPlanSingle,
   apiGETRefreshCurrentPlansForCase,
+  apiGETRefreshNewPlan,
   apiGETRefreshGetPlanInfo,
+  apiGETRefreshAvailablePlans,
+  apiPOSTRefreshSavePlan,
 } from '@js/_api/buy/common.js'
 
 import {
@@ -43,6 +46,7 @@ import {
 import { onFormatDate } from '@js/_prototype.js'
 
 import { useBuyProjectStore } from '@stores/buy/project.js'
+import { useBuyPublishStore } from '@stores/buy/publish.js'
 
 import useBuyPopupActions from '@stores/buy/.composables/usePopupActions.js'
 
@@ -50,7 +54,8 @@ export default () => {
   const projectStores = useBuyProjectStore()
   const { onAlert, onCustom, onApiPromise, onApiError } = useBuyPopupActions()
   const { serverTime, renewal, autoRefresh, golden, options } = storeToRefs(projectStores)
-
+  const buyPublish = useBuyPublishStore()
+  const { apiData } = storeToRefs(buyPublish)
   const onApiGetCommonServerTime = async () => {
     const { config, status, data } = await apiGetCommonServerTime()
 
@@ -132,9 +137,11 @@ export default () => {
     return { config, status, data }
   }
   const onApiGETRealEstateTypeSelectOptions = async () => {
-    if (options.value.caseType) return false
+    const { casePurposeToken } = apiData.value.caseInfo
 
-    const { config, status, data } = await apiGETRealEstateTypeSelectOptions()
+    const { config, status, data } = await apiGETRealEstateTypeSelectOptions({
+      purposeToken: casePurposeToken,
+    })
 
     if (status === 200) {
       options.value.caseType = data || []
@@ -145,9 +152,11 @@ export default () => {
     return { config, status, data }
   }
   const onApiGETRealEstateLegalUsageSelectOptions = async () => {
-    if (options.value.caseUsage) return false
+    const { casePurposeToken } = apiData.value.caseInfo
 
-    const { config, status, data } = await apiGETRealEstateLegalUsageSelectOptions()
+    const { config, status, data } = await apiGETRealEstateLegalUsageSelectOptions({
+      purposeToken: casePurposeToken,
+    })
 
     if (status === 200) {
       options.value.caseUsage = data || []
@@ -523,12 +532,54 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGETRefreshGetPlanInfo = async () => {
-    const { config, status, data } = await apiGETRefreshGetPlanInfo(
-      autoRefresh.value.planInfo.apiData
-    )
+  const onApiGETRefreshNewPlan = async (hfID) => {
+    const { config, status, data } = await apiGETRefreshNewPlan({
+      userId: 0,
+      hfID,
+    })
 
-    console.log(data)
+    if (status !== 200) {
+      onApiError(config, status, data)
+    }
+
+    return { config, status, data }
+  }
+  const onApiGETRefreshGetPlanInfo = async () => {
+    const { hfID, vasID } = autoRefresh.value.save.apiData
+    const { config, status, data } = await apiGETRefreshGetPlanInfo({
+      userId: 0,
+      hfID,
+      vasID,
+    })
+
+    // console.log(data)
+
+    if (status !== 200) {
+      onApiError(config, status, data)
+    }
+
+    return { config, status, data }
+  }
+  const onApiGETRefreshAvailablePlans = async () => {
+    const { hfID, listSelectedRefreshTime } = autoRefresh.value.save.apiData
+    const { config, status, data } = await apiGETRefreshAvailablePlans({
+      userID: 0,
+      hfID,
+      expectedCount: listSelectedRefreshTime.length,
+    })
+
+    if (status === 200) {
+      const { listPlan, ...info } = data
+      autoRefresh.value.availableInfo = info
+      autoRefresh.value.availablePlans = listPlan
+    } else {
+      onApiError(config, status, data)
+    }
+
+    return { config, status, data }
+  }
+  const onApiPOSTRefreshSavePlan = async () => {
+    const { config, status, data } = await apiPOSTRefreshSavePlan(autoRefresh.value.save.apiData)
 
     if (status !== 200) {
       onApiError(config, status, data)
@@ -539,7 +590,7 @@ export default () => {
   const onGoldenPopup = async (data, btns) => {
     onResetPojectData('golden')
 
-    const isSure = await onCustom({
+    const { isSure } = await onCustom({
       id: 'popupGolden',
       title: '請選擇額度',
       data,
@@ -593,7 +644,7 @@ export default () => {
     onApiPromise('close')
 
     if (status === 200) {
-      const isSure = await onCustom({
+      const { isSure } = await onCustom({
         id: 'popupAutoRefresh',
         title: '自動刷新設定',
         data,
@@ -633,9 +684,10 @@ export default () => {
       golden.value.apiData.planID = null
     }
 
-    // if (type === 'refresh' || !type) {
-    //   autoRefresh.value.apiData.planID = null
-    // }
+    if (type === 'autoRefresh' || !type) {
+      autoRefresh.value.save.apiData.planID = null
+      autoRefresh.value.save.apiData.listSelectedRefreshTime = []
+    }
   }
   const onValueGetText = (option, value) => {
     const isOptionString = typeof option === 'string'
@@ -722,7 +774,10 @@ export default () => {
     onApiGETGoldenGetPlanList,
     onApiPOSTGoldenSetPlanSingle,
     onApiGETRefreshCurrentPlansForCase,
+    onApiGETRefreshNewPlan,
     onApiGETRefreshGetPlanInfo,
+    onApiGETRefreshAvailablePlans,
+    onApiPOSTRefreshSavePlan,
     onGoldenPopup,
     onAutoRefreshPopup,
     onResetPojectData,

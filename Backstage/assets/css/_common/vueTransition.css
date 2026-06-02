@@ -78,7 +78,41 @@
   transition-delay: 0.1s;
 }
 
+/* fade */
+.popup-fade-enter-active,
+.popup-fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.popup-fade-enter-from,
+.popup-fade-leave-to {
+  opacity: 0;
+}
+
+.popup-fade-enter-to,
+.popup-fade-leave-from {
+  opacity: 1;
+}
+
 /* bomb */
+@keyframes popup-bomb {
+  0% {
+    transform: scale(0);
+  }
+  25% {
+    transform: scale(1.2);
+  }
+  50% {
+    transform: scale(0.9);
+  }
+  75% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
 .popup-bomb-enter-active {
   animation: popup-bomb 0.2s 0.075s both;
   /* 0.075s delay = 等 overlay 先出現 */
@@ -86,6 +120,26 @@
 
 .popup-bomb-leave-active {
   animation: popup-bomb 0.2s reverse both;
+  /* 關閉時先跑 bomb */
+}
+
+/* zoom */
+@keyframes popup-bomb {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+.popup-zoom-enter-active {
+  animation: popup-bomb 0.1s 0.075s both;
+  /* 0.075s delay = 等 overlay 先出現 */
+}
+
+.popup-zoom-leave-active {
+  animation: popup-bomb 0.1s reverse both;
   /* 關閉時先跑 bomb */
 }
 

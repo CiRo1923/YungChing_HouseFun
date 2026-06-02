@@ -7,6 +7,8 @@ const cardFilterModules = import.meta.glob('./CardFilter*.vue', {
 const buyPublish = useBuyPublishStore()
 const { apiData } = storeToRefs(buyPublish)
 
+const emits = defineEmits(['change:casePurpose'])
+
 const visibleComponents = computed(() => {
   const hiddenData = {
     5: ['CardFilterManage'], // 5 車位
@@ -36,13 +38,19 @@ const componentMap = {
   ...autoComponentMap,
   // ...overrideComponentMap,
 }
+
+const onChange = (item) => {
+  const { id, hasEmits } = item
+
+  if (hasEmits) emits(`change:${id}`)
+}
 </script>
 
 <template>
   <ul class="tm:space-y-[24px] p:space-y-[32px]">
     <template v-for="(item, index) in visibleComponents" :key="`${item.id}_${index}`">
       <li v-if="componentMap[item.id]">
-        <component :is="componentMap[item.id]" :title="item.label" />
+        <component :is="componentMap[item.id]" :title="item.label" @change="onChange" />
       </li>
     </template>
   </ul>

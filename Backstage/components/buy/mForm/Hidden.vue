@@ -50,7 +50,7 @@ const setClass = computed(() => {
     <ErrorMessage
       as="span"
       :name="`${props.name}_hidden`"
-      class="m-form-error block"
+      class="m-form-hidden-error block text-[14px]"
       :class="setClass.error"
       v-slot="{ message }"
     >

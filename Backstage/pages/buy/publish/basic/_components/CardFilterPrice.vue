@@ -18,6 +18,7 @@ const items = shallowReadonly([
     label: '總價',
     class: 'p:h-[40px]',
     component: PageBuyPublishBasicPriceCasePrice,
+    hasEmits: false,
   },
   {
     id: 'caseParkingPrice',
@@ -25,6 +26,7 @@ const items = shallowReadonly([
     label: '車位價',
     class: 'p:h-[40px]',
     component: PageBuyPublishBasicPriceCaseParkingPrice,
+    hasEmits: false,
   },
   {
     id: 'casePriceUnit',
@@ -32,6 +34,7 @@ const items = shallowReadonly([
     label: '單價',
     class: 'p:h-[40px]',
     component: PageBuyPublishBasicPriceCasePriceUnit,
+    hasEmits: false,
   },
 ])
 </script>

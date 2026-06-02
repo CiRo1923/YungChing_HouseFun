@@ -14,6 +14,7 @@ const items = shallowReadonly([
     label: '車位',
     class: 'p:h-[35px]',
     component: PageBuyPublishBasicParkingInfo,
+    hasEmits: false,
   },
 ])
 </script>

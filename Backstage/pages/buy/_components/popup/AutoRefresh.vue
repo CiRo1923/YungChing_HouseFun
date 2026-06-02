@@ -5,6 +5,14 @@ const buyProject = useBuyProjectStore()
 const { autoRefresh } = storeToRefs(buyProject)
 const popup = usePopupStore()
 const { customData } = storeToRefs(popup)
+
+const props = defineProps({
+  update: {
+    type: Function,
+    default: null,
+  },
+})
+
 const info = computed(() => autoRefresh.value.info || {})
 const publishInfo = computed(() => {
   const keyMap = {
@@ -54,7 +62,7 @@ const publishInfo = computed(() => {
 
     <PageBuyPublishInfo :data="publishInfo" v-if="publishInfo" />
     <div class="tm:mt-[16px] p:mt-[24px]">
-      <PageBuyAutoRefrshInfo />
+      <PageBuyAutoRefrshInfo :update="props.update" />
     </div>
   </BuyCommonCustomPopup>
 </template>

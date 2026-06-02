@@ -1,6 +1,6 @@
 <script setup>
 const buyList = useBuyListStore()
-const { apiData } = storeToRefs(buyList)
+const { apiSearchData } = storeToRefs(buyList)
 
 const emits = defineEmits(['update'])
 const options = shallowReadonly([
@@ -69,8 +69,8 @@ const options = shallowReadonly([
 const onClick = (item) => {
   const { value } = item
   const isObject = typeof value === 'object'
-  apiData.value.listSortToken = isObject ? value.key : value
-  apiData.value.listOrderToken = isObject ? value.sort : 2
+  apiSearchData.value.listSortToken = isObject ? value.key : value
+  apiSearchData.value.listOrderToken = isObject ? value.sort : 2
 
   emits('update')
 }

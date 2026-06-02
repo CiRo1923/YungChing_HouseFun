@@ -26,6 +26,7 @@ const items = shallowReadonly([
     label: '顯示單位',
     class: 'p:h-[35px]',
     component: PageBuyPublishBasicPingCaseSqUnitPin,
+    hasEmits: false,
   },
   {
     id: 'caseBuildSq',
@@ -33,6 +34,7 @@ const items = shallowReadonly([
     label: '登記坪數',
     class: 'p:h-[40px]',
     component: PageBuyPublishBasicPingCaseBuildSq,
+    hasEmits: false,
   },
   {
     id: 'caseParkingSq',
@@ -40,6 +42,7 @@ const items = shallowReadonly([
     label: '車位坪數',
     class: 'p:h-[40px]',
     component: PageBuyPublishBasicPingCaseParkingSq,
+    hasEmits: false,
   },
   {
     id: 'caseMainSq',
@@ -47,6 +50,7 @@ const items = shallowReadonly([
     label: '主建物',
     class: 'p:h-[40px]',
     component: PageBuyPublishBasicPingCaseMainSq,
+    hasEmits: false,
   },
   {
     id: 'caseAffiliatedSq',
@@ -54,6 +58,7 @@ const items = shallowReadonly([
     label: '附屬建物',
     class: 'p:h-[40px]',
     component: PageBuyPublishBasicPingCaseAffiliatedSq,
+    hasEmits: false,
   },
   {
     id: 'caseAmenitieSq',
@@ -61,6 +66,7 @@ const items = shallowReadonly([
     label: '公設',
     class: 'p:h-[40px]',
     component: PageBuyPublishBasicPingCaseAmenitieSq,
+    hasEmits: false,
   },
   {
     id: 'caseLandSq',
@@ -68,11 +74,12 @@ const items = shallowReadonly([
     label: '土地坪數',
     class: 'p:h-[40px]',
     component: PageBuyPublishBasicPingCaseLandSq,
+    hasEmits: false,
   },
 ])
 
 const onPopupTitleDeed = async () => {
-  const isCustom = await onCustom({
+  const { isSure: isCustom } = await onCustom({
     id: 'popupTitleDeed',
     title: '權狀書說明',
     icon: 'icon_book',

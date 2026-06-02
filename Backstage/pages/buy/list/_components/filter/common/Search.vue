@@ -1,12 +1,12 @@
 <script setup>
 const buyList = useBuyListStore()
-const { apiData } = storeToRefs(buyList)
+const { apiSearchData } = storeToRefs(buyList)
 </script>
 
 <template>
   <BuyMFormSearch
     name="searchKey"
-    v-model="apiData.searchKey"
+    v-model="apiSearchData.searchKey"
     :config="{
       placeholder: '物件編號、地址、社區或案名',
     }"

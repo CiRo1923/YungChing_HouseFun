@@ -22,6 +22,7 @@ import {
 const buyPublish = useBuyPublishStore()
 const { apiData } = storeToRefs(buyPublish)
 
+const emits = defineEmits(['change'])
 const props = defineProps({
   title: {
     type: String,
@@ -35,6 +36,7 @@ const items = shallowReadonly([
     label: '現況',
     class: 'p:h-[35px] t:h-[50px]',
     component: PageBuyPublishBasicInfoCasePurpose,
+    hasEmits: true,
   },
   {
     id: 'caseTitle',
@@ -42,6 +44,7 @@ const items = shallowReadonly([
     label: '物件標題',
     class: 'pt:h-[40px]',
     component: PageBuyPublishBasicInfoCaseTitle,
+    hasEmits: false,
   },
   {
     id: 'address',
@@ -49,6 +52,7 @@ const items = shallowReadonly([
     label: '地址',
     class: 'pt:h-[40px]',
     component: PageBuyPublishBasicInfoAddress,
+    hasEmits: false,
   },
   {
     id: 'caseType',
@@ -56,6 +60,7 @@ const items = shallowReadonly([
     label: '型態',
     class: 'pt:h-[40px]',
     component: PageBuyPublishBasicInfoCaseType,
+    hasEmits: false,
   },
   {
     id: 'caseUsage',
@@ -64,6 +69,7 @@ const items = shallowReadonly([
     class: 'pt:h-[40px]',
     hidden: [6],
     component: PageBuyPublishBasicInfoCaseUsage,
+    hasEmits: false,
   },
   {
     id: 'zoing',
@@ -72,14 +78,16 @@ const items = shallowReadonly([
     class: 'p:h-[35px] t:h-[50px]',
     hidden: [5], // 5 車位;
     component: PageBuyPublishBasicInfoZoing,
+    hasEmits: false,
   },
   {
     id: 'caseLandNo',
     isRequired: true,
     label: '地號',
     class: 'pt:h-[40px]',
-    hidden: [5], // 5 車位;
+    visible: [6], // 6 土地;
     component: PageBuyPublishBasicInfoCaseLandNo,
+    hasEmits: false,
   },
   {
     id: 'floor',
@@ -88,6 +96,7 @@ const items = shallowReadonly([
     class: 'p:h-[35px] t:h-[50px]',
     hidden: [5, 6], // 5 車位; 6 土地;
     component: PageBuyPublishBasicInfoFloor,
+    hasEmits: false,
   },
   {
     id: 'totalFloor',
@@ -96,6 +105,7 @@ const items = shallowReadonly([
     class: 'pt:h-[40px]',
     hidden: [5, 6], // 5 車位; 6 土地;
     component: PageBuyPublishBasicInfoTotalFloor,
+    hasEmits: false,
   },
   {
     id: 'caseAgeIdentify',
@@ -104,6 +114,7 @@ const items = shallowReadonly([
     class: 'p:h-[35px] t:h-[50px]',
     hidden: [5, 6], // 5 車位; 6 土地;
     component: PageBuyPublishBasicInfoCaseAgeIdentify,
+    hasEmits: false,
   },
   {
     id: 'community',
@@ -112,6 +123,7 @@ const items = shallowReadonly([
     class: 'p:h-[35px] t:h-[50px]',
     hidden: [6], // 6 土地;
     component: PageBuyPublishBasicInfoCommunity,
+    hasEmits: false,
   },
   {
     id: 'houseLayout',
@@ -120,6 +132,7 @@ const items = shallowReadonly([
     class: 'pt:h-[40px]',
     hidden: [5, 6], // 5 車位; 6 土地;
     component: PageBuyPublishBasicInfoHouseLayout,
+    hasEmits: false,
   },
   {
     id: 'houseAddLayout',
@@ -128,6 +141,7 @@ const items = shallowReadonly([
     class: 'pt:h-[40px]',
     hidden: [5, 6], // 5 車位; 6 土地;
     component: PageBuyPublishBasicInfoHouseAddLayout,
+    hasEmits: false,
   },
   {
     id: 'elevator',
@@ -136,6 +150,7 @@ const items = shallowReadonly([
     class: 'p:h-[35px] t:h-[50px]',
     hidden: [5, 6], // 5 車位; 6 土地;
     component: PageBuyPublishBasicInfoElevator,
+    hasEmits: false,
   },
   {
     id: 'face',
@@ -144,6 +159,7 @@ const items = shallowReadonly([
     class: 'pt:h-[40px]',
     hidden: [5, 6], // 5 車位; 6 土地;
     component: PageBuyPublishBasicInfoFace,
+    hasEmits: false,
   },
   {
     id: 'structure',
@@ -152,6 +168,7 @@ const items = shallowReadonly([
     class: 'pt:h-[40px]',
     hidden: [5, 6], // 5 車位; 6 土地;
     component: PageBuyPublishBasicInfoStructure,
+    hasEmits: false,
   },
   {
     id: 'barrierFree',
@@ -160,17 +177,34 @@ const items = shallowReadonly([
     class: 'pt:h-[25px]',
     hidden: [5, 6], // 5 車位; 6 土地;
     component: PageBuyPublishBasicInfoBarrierFree,
+    hasEmits: false,
   },
 ])
 
 const visibleItems = computed(() => {
   const casePurposeToken = apiData.value.caseInfo.casePurposeToken
-  return items.filter((item) => !item.hidden?.includes(casePurposeToken))
+
+  return items.filter((item) => {
+    const isHidden = item.hidden?.includes(casePurposeToken)
+    const isVisibleOnly = item.visible?.length
+
+    if (isHidden) return false
+
+    if (isVisibleOnly) {
+      return item.visible.includes(casePurposeToken)
+    }
+
+    return true
+  })
 })
+
+const onChange = (item) => {
+  emits('change', item)
+}
 </script>
 
 <template>
-  <PageBuyPublishBasicCardFilter :title="props.title" :items="visibleItems" />
+  <PageBuyPublishBasicCardFilter :title="props.title" :items="visibleItems" @change="onChange" />
 </template>
 
 <style></style>
