@@ -29,7 +29,7 @@ const onClose = (item) => {
           <li
             class="pt:min-w-[100px]"
             :class="{
-              'm:col-span-2': footerBtns.length % 2 === 1 && index === footerBtns.length - 1,
+              'm:col-span-2': confirm.btns.length % 2 === 1 && index === confirm.btns.length - 1,
             }"
             v-for="(item, index) in confirm.btns"
             :key="`confirm_${item.label}_${index}`"

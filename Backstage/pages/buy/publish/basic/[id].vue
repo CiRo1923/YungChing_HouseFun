@@ -73,7 +73,7 @@ const onSave = async (validate) => {
   const { valid, errors } = await validate()
 
   if (valid) {
-    onApiPromise('close')
+    onApiPromise('open')
 
     const { status } = await onApiPOSTRealEstate(hfID.value)
 
@@ -108,9 +108,9 @@ const onRenewal = async (validate) => {
       onApiPromise('close')
 
       if (status === 200) {
-        const isAlert = await onAlertSuccess('儲存成功')
+        const { isSure } = await onAlertSuccess('儲存成功')
 
-        if (isAlert) {
+        if (isSure) {
           router.push({
             name: 'buy-publish-renewal-id',
             params: {
@@ -120,7 +120,7 @@ const onRenewal = async (validate) => {
         }
       }
     } else {
-      const isConfirm = await onConfirm({
+      const { isSure } = await onConfirm({
         title: '刊登物件',
         icon: 'icon_check_solid',
         content: '物件仍在刊登效期內，無需使用刊登額度<br />確定要刊登物件嗎？',
@@ -145,11 +145,20 @@ const onRenewal = async (validate) => {
       })
 
       console.log(caseStatus)
-
       // caseStatus: 1 刊登 | caseStatus: 2 草稿 | caseStatus: 3 成交 | caseStatus: 4 下架 | caseStatus: 6 草稿 (待刊登)
-      if (isConfirm) {
+
+      if (isSure) {
         if (caseStatus === 1) {
-          onToFinish()
+          onApiPromise('open')
+
+          const { status } = await onApiPOSTRealEstate(hfID.value)
+
+          onApiPromise('close')
+
+          if (status === 200) {
+            await onAlertSuccess('儲存成功')
+            onToFinish()
+          }
         } else if (caseStatus === 4) {
           onApiPromise('open')
 

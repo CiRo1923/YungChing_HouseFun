@@ -30,7 +30,7 @@ const items = computed(() => {
       id: 'layoutDiagram',
       label: '格局圖',
       class: 'pt:h-[25px]',
-      hidden: [8], // 8 土地;
+      hidden: ['8'], // 8 土地;
       component: PageBuyPublishBasicPicturesLayoutDiagram,
       hasEmits: false,
     },

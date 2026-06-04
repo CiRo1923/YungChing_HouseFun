@@ -25,7 +25,7 @@ const items = computed(() => {
       isRequired: true,
       label: '總價',
       class: 'p:h-[40px]',
-      hidden: [7], // 7: 車位
+      hidden: ['7'], // 7: 車位
       component: PageBuyPublishBasicPriceCasePrice,
       hasEmits: false,
     },
@@ -34,7 +34,7 @@ const items = computed(() => {
       isRequired: casePurposeToken.value === 7, // 7: 車位
       label: '車位價',
       class: 'p:h-[40px]',
-      hidden: [8], // 8: 車位
+      hidden: ['8'], // 8: 車位
       component: PageBuyPublishBasicPriceCaseParkingPrice,
       hasEmits: false,
     },
@@ -43,7 +43,7 @@ const items = computed(() => {
       isRequired: false,
       label: '單價',
       class: 'p:h-[40px]',
-      hidden: [7], // 7: 車位
+      hidden: ['7'], // 7: 車位
       component: PageBuyPublishBasicPriceCasePriceUnit,
       hasEmits: false,
     },

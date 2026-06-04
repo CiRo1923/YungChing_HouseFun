@@ -40,7 +40,7 @@ const items = computed(() => {
     },
     {
       id: 'caseFeature',
-      hidden: [8], // 8 土地;
+      hidden: ['8'], // 8 土地;
       component: PageBuyPublishBasicFeatureCaseFeature,
 
       hasEmits: false,

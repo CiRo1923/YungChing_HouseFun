@@ -181,7 +181,7 @@ onInit()
         container: 'm:flex-1',
       }"
       @change="onIsCaseParkingChange"
-      v-if="casePurposeToken !== 7"
+      v-if="casePurposeToken !== '7'"
     />
     <BuyMAddIdentical
       v-model="apiData.caseInfo.parkingInfos"

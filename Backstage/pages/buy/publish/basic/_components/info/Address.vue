@@ -67,7 +67,7 @@ const onPopupAddressGoogleMap = async () => {
     caseInfo.districtID = districtOption ? Number(districtOption.value) : null
     caseInfo.road = road || null
 
-    if (casePurposeToken.value !== 8) {
+    if (casePurposeToken.value !== '8') {
       Object.assign(caseInfo, {
         lane: lane || null,
         alley: alley || null,
@@ -132,7 +132,7 @@ const onPopupAddressGoogleMap = async () => {
       }"
       @change:city="onCityChange"
       @change:area="onAreaChange"
-      v-if="casePurposeToken !== 8"
+      v-if="casePurposeToken !== '8'"
     />
     <BuyMAddress
       name="info"
@@ -170,7 +170,7 @@ const onPopupAddressGoogleMap = async () => {
       }"
       @change:city="onCityChange"
       @change:area="onAreaChange"
-      v-if="casePurposeToken === 8"
+      v-if="casePurposeToken === '8'"
     />
     <div
       class="flex m:flex-col-reverse m:items-start m:gap-y-[12px] m:text-[16px] t:gap-x-[12px] pt:items-center pt:text-[14px] p:gap-x-[16px]"

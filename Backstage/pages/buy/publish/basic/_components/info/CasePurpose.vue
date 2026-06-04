@@ -9,7 +9,7 @@ const emits = defineEmits(['change'])
 // 1: 住宅 2: 店面 3: 住店 4: 辦公 5: 住辦 6: 廠房 7: 車位 8: 土地 9: 其他
 const onChange = async (item) => {
   const { code } = item
-  const value = Number(code)
+  // const value = Number(code)
 
   apiData.value.caseInfo.caseTypeToken = null // 型態
   apiData.value.caseInfo.caseUsageToken = null // 法定用途
@@ -17,13 +17,13 @@ const onChange = async (item) => {
   // 特色描述
   apiData.value.caseInfo.caseFeatureToken = null // 特色標籤
 
-  if (/^(6|8)$/.test(value)) {
+  if (/^(6|8)$/.test(code)) {
     // 社區
     apiData.value.caseInfo.isCaseCommunity = false // 社區類型
     apiData.value.caseInfo.caseCommunityName = null // 所屬社區 / 建案
   }
 
-  if (/^(7|8)$/.test(value)) {
+  if (/^(7|8)$/.test(code)) {
     // 屋齡
     apiData.value.caseInfo.caseAgeIdentifyToken = 1 // 屋齡類型
     apiData.value.caseInfo.caseAge = null // 屋齡
@@ -84,11 +84,11 @@ const onChange = async (item) => {
     apiData.value.caseInfo.caseManageFee = null // 管理費
   }
 
-  if (value !== 8) {
+  if (code !== '8') {
     apiData.value.caseInfo.caseLandNo = null // 地號
   }
 
-  if (value === 7) {
+  if (code === '7') {
     // 價格資訊
     apiData.value.caseInfo.casePrice = null // 含車位
     apiData.value.caseInfo.casePriceUnit = null // 單價
@@ -98,7 +98,7 @@ const onChange = async (item) => {
     apiData.value.caseInfo.isCaseParking = true
   }
 
-  if (value === 8) {
+  if (code === '8') {
     // 地址
     apiData.value.caseInfo.lane = null // 巷
     apiData.value.caseInfo.alley = null // 弄
@@ -153,7 +153,7 @@ const onChange = async (item) => {
 <template>
   <BuyMFormRadiosOval
     name="casePurposeToken"
-    v-model.number="apiData.caseInfo.casePurposeToken"
+    v-model="apiData.caseInfo.casePurposeToken"
     :options="options.casePurpose"
     :config="{
       schema: {
