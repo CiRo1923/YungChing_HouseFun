@@ -6,6 +6,14 @@ const buyList = useBuyListStore()
 const { apiSearchData, options } = storeToRefs(buyList)
 
 const isDeviceM = computed(() => device.value === 'm')
+const hasRangeValue = (value) => value !== '' && value != null
+const onRangeUpdate = (item, rangeName, value) => {
+  apiSearchData.value[rangeName] = value
+
+  if (hasRangeValue(value)) {
+    apiSearchData.value[item.name] = '999'
+  }
+}
 const items = computed(() => {
   return [
     {
@@ -70,7 +78,8 @@ onUnmounted(() => {
       <div class="flex items-center gap-x-[4px] overflow-hidden">
         <BuyMFormInput
           :name="`${data.key}RangeMin`"
-          v-model="apiSearchData[`${data.key}RangeMin`]"
+          :modelValue="apiSearchData[`${data.key}RangeMin`]"
+          @update:modelValue="onRangeUpdate(data, `${data.key}RangeMin`, $event)"
           :config="{
             hasClearButton: false,
           }"
@@ -84,7 +93,8 @@ onUnmounted(() => {
         <small>-</small>
         <BuyMFormInput
           :name="`${data.key}RangeMax`"
-          v-model="apiSearchData[`${data.key}RangeMax`]"
+          :modelValue="apiSearchData[`${data.key}RangeMax`]"
+          @update:modelValue="onRangeUpdate(data, `${data.key}RangeMax`, $event)"
           :config="{
             hasClearButton: false,
           }"

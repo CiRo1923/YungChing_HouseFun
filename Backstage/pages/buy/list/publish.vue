@@ -75,7 +75,7 @@ onMounted(() => {
         :data="item"
         @click:renewal="renewalFun"
         @click:golden="goldenFun"
-        @click:auto-refresh="autoRefreshFun"
+        @click:autoRefresh="autoRefreshFun"
         class="m:mt-[24px]"
       />
     </PageBuyListContent>

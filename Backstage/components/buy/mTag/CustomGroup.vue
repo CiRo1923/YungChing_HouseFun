@@ -162,7 +162,7 @@ const onBlurItem = (index, value) => {
         :modelValue="item"
         :config="config"
         :setClass="setClass.tag"
-        @update:model-value="onUpdateItem(index, $event)"
+        @update:modelValue="onUpdateItem(index, $event)"
         @blur="onBlurItem(index, $event)"
         @remove="onRemoveItem(index)"
       />

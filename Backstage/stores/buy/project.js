@@ -61,9 +61,12 @@ export const useBuyProjectStore = defineStore('buyProject', () => {
   const parkingInfo = readonly({
     parkingID: null,
     caseParkingModeToken: null,
+    caseParkingModeOther: null,
     caseParkingCount: null,
     caseParkingTypeToken: null,
+    caseParkingTypeOther: null,
     caseParkingRegToken: null,
+    caseParkingRegOther: null,
     caseParkingFeePayTypeToken: null,
     caseParkingFee: null,
     isCaseParkingFeeInclude: true,

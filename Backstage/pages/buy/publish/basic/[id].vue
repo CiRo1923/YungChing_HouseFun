@@ -246,7 +246,7 @@ onMounted(() => {
       v-slot="{ validate }"
     >
       <!-- <pre>{{ apiData }}</pre> -->
-      <PageBuyPublishBasicDataComponents @change:case-purpose="onPurposeChange" />
+      <PageBuyPublishBasicDataComponents @change:casePurpose="onPurposeChange" />
       <PageBuyPublishBasicSubmitButtons
         @click:draft="onDraft"
         @click:save="() => onSave(validate)"

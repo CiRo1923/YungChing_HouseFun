@@ -85,7 +85,7 @@ watchEffect(() => {
       :class="setClass.main"
       v-if="isOpen || isShowOverlay"
     >
-      <Transition name="popup-zoom" appear @after-leave="onAfterLeave">
+      <Transition name="popup-zoom" appear @afterLeave="onAfterLeave">
         <div
           class="m-popup-container relative flex max-h-[92%] flex-col overflow-hidden rounded-[15px] bg-[--white] py-[40px] m:mx-[16px] tm:p-[32px] p:px-[72px]"
           :class="setClass.container"

@@ -4,14 +4,8 @@ const { options } = storeToRefs(buyProject)
 const buyPublish = useBuyPublishStore()
 const { apiData } = storeToRefs(buyPublish)
 
-const isCaseZoingOtherShow = ref(false)
 const onCaseZoingChange = () => {
   apiData.value.caseInfo.caseZoingTypeToken = null
-}
-const onCaseZoingTypeChange = (props) => {
-  const { text } = props
-
-  isCaseZoingOtherShow.value = text === '其他'
 }
 </script>
 
@@ -33,62 +27,76 @@ const onCaseZoingTypeChange = (props) => {
       }"
       @change="onCaseZoingChange"
     />
-    <div class="m:space-y-[12px] pt:flex pt:gap-x-[8px]">
-      <BuyMFormSelect
-        name="caseZoingCity"
-        v-model.number="apiData.caseInfo.caseZoingTypeToken"
-        :options="options.zoingCity"
-        :config="{
+    <PageBuyPublishBasicSelectInputOther
+      selectName="caseZoingTypeToken"
+      v-model:select="apiData.caseInfo.caseZoingTypeToken"
+      otherName="caseZoingTypeOther"
+      v-model:other="apiData.caseInfo.caseZoingTypeOther"
+      :config="{
+        select: {
+          options: options.zoingCity,
           placeholder: '請選擇都市土地',
           schema: {
             label: 'text',
             value: 'value',
           },
-        }"
-        :rules="{
-          required: '請選擇都市土地',
-        }"
-        :setClass="{
+        },
+        other: {
+          placeholder: '請輸入其他原因',
+        },
+      }"
+      :selectRules="{
+        required: '請選擇都市土地',
+      }"
+      :otherRules="{
+        required: '請輸入其他原因',
+      }"
+      :setClass="{
+        main: 'm:space-y-[12px] pt:flex pt:gap-x-[8px]',
+        select: {
           main: '--h-40 --px-12 --py-8 pt:flex-1',
-        }"
-        @change="onCaseZoingTypeChange"
-        v-if="apiData.caseInfo.caseZoingToken === 1"
-      />
-      <BuyMFormSelect
-        name="caseZoingLand"
-        v-model.number="apiData.caseInfo.caseZoingTypeToken"
-        :options="options.zoingLand"
-        :config="{
+        },
+        other: {
+          main: '--h-40 --px-12 --py-8 pt:flex-1',
+        },
+      }"
+      v-if="apiData.caseInfo.caseZoingToken === 1"
+    />
+    <PageBuyPublishBasicSelectInputOther
+      selectName="caseZoingTypeToken"
+      v-model:select="apiData.caseInfo.caseZoingTypeToken"
+      otherName="caseZoingTypeOther"
+      v-model:other="apiData.caseInfo.caseZoingTypeOther"
+      :config="{
+        select: {
+          options: options.zoingLand,
           placeholder: '請選擇非都市土地',
           schema: {
             label: 'text',
             value: 'value',
           },
-        }"
-        :rules="{
-          required: '請選擇非都市土地',
-        }"
-        :setClass="{
+        },
+        other: {
+          placeholder: '請輸入其他原因',
+        },
+      }"
+      :selectRules="{
+        required: '請選擇非都市土地',
+      }"
+      :otherRules="{
+        required: '請輸入其他原因',
+      }"
+      :setClass="{
+        main: 'm:space-y-[12px] pt:flex pt:gap-x-[8px]',
+        select: {
           main: '--h-40 --px-12 --py-8 pt:flex-1',
-        }"
-        @change="onCaseZoingTypeChange"
-        v-if="apiData.caseInfo.caseZoingToken === 2"
-      />
-      <BuyMFormInput
-        name="caseZoingTypeOther"
-        v-model="apiData.caseInfo.caseZoingTypeOther"
-        :config="{
-          placeholder: '請填寫',
-        }"
-        :rules="{
-          required: '請填寫',
-        }"
-        :setClass="{
+        },
+        other: {
           main: '--h-40 --px-12 --py-8 pt:flex-1',
-        }"
-        v-if="isCaseZoingOtherShow"
-      />
-    </div>
+        },
+      }"
+      v-if="apiData.caseInfo.caseZoingToken === 2"
+    />
   </PageBuyPublishBasicRadiosOval>
 </template>
 

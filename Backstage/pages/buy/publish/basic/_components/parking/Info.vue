@@ -20,7 +20,7 @@ const items = shallowReadonly([
     label: '車位類型',
     forms: {
       select: {
-        id: 'caseParkingModeToken',
+        id: 'caseParkingMode',
         options: options.value.parkingMode,
         config: {
           placeholder: '請選擇車位類型',
@@ -58,7 +58,7 @@ const items = shallowReadonly([
     label: '停車方式',
     forms: {
       select: {
-        id: 'caseParkingTypeToken',
+        id: 'caseParkingType',
         options: options.value.parkingType,
         config: {
           placeholder: '請選擇停車方式',
@@ -78,7 +78,7 @@ const items = shallowReadonly([
     label: '產權登記',
     forms: {
       select: {
-        id: 'caseParkingRegToken',
+        id: 'caseParkingReg',
         options: options.value.parkingReg,
         config: {
           placeholder: '請選擇產權登記',
@@ -99,7 +99,7 @@ const items = shallowReadonly([
     class: 'pt:col-span-2',
     forms: {
       select: {
-        id: 'caseParkingFeePayTypeToken',
+        id: 'caseParkingFeePayType',
         options: options.value.parkingPayPeriod,
         config: {
           placeholder: '請選擇繳費方式',
@@ -220,19 +220,38 @@ onInit()
               v-for="(value, key) in item.forms"
               :key="`${item.label}_${key}_${idx}_${index}`"
             >
-              <BuyMFormSelect
-                :name="`${value.id}[${index}]`"
-                v-model.number="data[value.id]"
-                :options="value.options"
-                :config="value.config"
-                :rules="value.rules"
+              <PageBuyPublishBasicSelectInputOther
+                :selectName="`parkingInfos[${index}].${value.id}Token`"
+                v-model:select="data[`${value.id}Token`]"
+                :otherName="`parkingInfos[${index}].${value.id}Other`"
+                v-model:other="data[`${value.id}Other`]"
+                :config="{
+                  select: {
+                    options: value.options,
+                    ...value.config,
+                  },
+                  other: {
+                    placeholder: '請輸入其他原因',
+                  },
+                }"
+                :selectRules="value.rules"
+                :otherRules="{
+                  required: '請輸入其他原因',
+                }"
                 :setClass="{
-                  main: '--h-40 --px-12 --py-8',
+                  main: 'm:space-y-[12px] pt:space-y-[8px]',
+                  select: {
+                    main: '--h-40 --px-12 --py-8',
+                  },
+                  other: {
+                    main: '--h-40 --px-12 --py-8',
+                  },
                 }"
                 v-if="key === 'select'"
               />
+
               <BuyMFormInput
-                :name="`${value.id}[${index}]`"
+                :name="`parkingInfos[${index}].${value.id}`"
                 v-model.number="data[value.id]"
                 :config="value.config"
                 :rules="value.rules"
@@ -246,7 +265,7 @@ onInit()
                 <template #rearAssist v-if="value.rearAssist">{{ value.rearAssist }}</template>
               </BuyMFormInput>
               <BuyMFormCheckBox
-                :name="`${value.id}[${index}]`"
+                :name="`parkingInfos[${index}].${value.id}`"
                 v-model="data[value.id]"
                 :config="value.config"
                 :rules="value.rules"

@@ -6,22 +6,36 @@ const { apiData } = storeToRefs(buyPublish)
 </script>
 
 <template>
-  <BuyMFormSelect
-    name="caseManageTypeToken"
-    v-model.number="apiData.caseInfo.caseManageTypeToken"
-    :options="options.manageType"
+  <PageBuyPublishBasicSelectInputOther
+    selectName="caseManageTypeToken"
+    v-model:select="apiData.caseInfo.caseManageTypeToken"
+    otherName="caseManageTypeOther"
+    v-model:other="apiData.caseInfo.caseManageTypeOther"
     :config="{
-      placeholder: {
-        value: '請選擇管理方式',
+      select: {
         isToOption: true,
+        options: options.manageType,
+        placeholder: '請選擇管理方式',
+        schema: {
+          label: 'text',
+          value: 'value',
+        },
       },
-      schema: {
-        label: 'text',
-        value: 'value',
+      other: {
+        placeholder: '請輸入其他原因',
       },
     }"
+    :otherRules="{
+      required: '請輸入其他原因',
+    }"
     :setClass="{
-      main: '--h-40 --px-12 --py-8 t:w-[220px] p:w-[270px]',
+      main: 'm:space-y-[12px] pt:flex pt:gap-x-[8px]',
+      select: {
+        main: '--h-40 --px-12 --py-8 t:w-[220px] p:w-[270px]',
+      },
+      other: {
+        main: '--h-40 --px-12 --py-8 t:w-[220px] p:w-[270px]',
+      },
     }"
   />
 </template>

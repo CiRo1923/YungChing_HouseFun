@@ -71,7 +71,9 @@ const optionConfig = computed(() => {
 })
 
 const onGetKey = (item, index) => {
-  return props.getKey?.(item, index) ?? item?.[optionConfig.value.schema.value] ?? `${item}_${index}`
+  return (
+    props.getKey?.(item, index) ?? item?.[optionConfig.value.schema.value] ?? `${item}_${index}`
+  )
 }
 
 const dropdownOptionConfig = computed(() => {

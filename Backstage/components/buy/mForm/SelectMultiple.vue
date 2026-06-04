@@ -309,7 +309,7 @@ onUnmounted(() => {
     </div>
   </div>
   <Teleport to="body">
-    <Transition name="dropdown" @before-leave="onCloseDropdown" appear>
+    <Transition name="dropdown" @beforeLeave="onCloseDropdown" appear>
       <div
         class="m-form-dropdown --dropdown"
         :class="[setClass.dropdown, { '--open': isOpen }]"

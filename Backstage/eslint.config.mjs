@@ -187,6 +187,13 @@ export default createConfigForNuxt(
           ignoreTags: [],
         },
       ],
+      'vue/v-on-event-hyphenation': [
+        'error',
+        'never',
+        {
+          autofix: true,
+        },
+      ],
       'vue/no-v-html': 'off',
       'vue/no-multiple-template-root': 'off',
       'vue/html-self-closing': [

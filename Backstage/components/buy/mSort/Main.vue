@@ -341,7 +341,7 @@ onUnmounted(() => {
   </div>
   <template v-if="currentMode === 'dropdown'">
     <Teleport to="body">
-      <Transition name="dropdown" @after-leave="onCloseDropdown" appear>
+      <Transition name="dropdown" @afterLeave="onCloseDropdown" appear>
         <div
           class="m-sort-dropdown absolute z-[5] overflow-hidden"
           ref="dropdownRef"
