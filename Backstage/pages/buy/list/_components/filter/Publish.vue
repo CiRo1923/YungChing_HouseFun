@@ -1,6 +1,6 @@
 <script setup>
 const buyList = useBuyListStore()
-const { apiSearchData, options } = storeToRefs(buyList)
+const { apiSearchData, serachOptions } = storeToRefs(buyList)
 const { onApiPromise } = useBuyPopupActions()
 
 const emits = defineEmits(['search'])
@@ -22,7 +22,7 @@ const onSearchClick = async () => {
       <BuyMFormSelect
         name="exchangeToken"
         v-model="apiSearchData.exchangeToken"
-        :options="options.exchange"
+        :options="serachOptions.exchange"
         :config="{
           placeholder: '選擇刊登類型',
           schema: {
@@ -38,7 +38,7 @@ const onSearchClick = async () => {
       <BuyMFormSelect
         name="goldenToken"
         v-model="apiSearchData.goldenToken"
-        :options="options.golden"
+        :options="serachOptions.golden"
         :config="{
           placeholder: '選擇廣告狀態',
           schema: {

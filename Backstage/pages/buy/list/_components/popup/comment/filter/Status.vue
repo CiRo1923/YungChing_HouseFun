@@ -1,22 +1,22 @@
 <script setup>
 const buyList = useBuyListStore()
-const { apiSearchData, serachOptions } = storeToRefs(buyList)
+const { apiCommentsData, commentsOptions } = storeToRefs(buyList)
 </script>
 
 <template>
   <BuyMFormSelect
-    name="purposeToken"
-    v-model="apiSearchData.purposeToken"
-    :options="serachOptions.purpose"
+    name="statueToken"
+    v-model="apiCommentsData.statueToken"
+    :options="commentsOptions.status"
     :config="{
-      placeholder: '選擇用途',
+      placeholder: '選擇狀態',
       schema: {
         label: 'text',
         value: 'value',
       },
     }"
     :setClass="{
-      main: '--h-40 --px-12 --py-8 p:w-[115px]',
+      main: '--h-40 --px-12 --py-8 p:w-[150px]',
       dropdown: 't:w-[300px] p:w-[400px]',
     }"
   />

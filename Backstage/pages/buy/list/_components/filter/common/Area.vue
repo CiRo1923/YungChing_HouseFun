@@ -2,7 +2,7 @@
 import SelectDropdownOptions from '@components/buy/mForm/SelectDropdownOptions.vue'
 
 const buyList = useBuyListStore()
-const { apiSearchData, options } = storeToRefs(buyList)
+const { apiSearchData, serachOptions } = storeToRefs(buyList)
 
 const dropdownRef = ref(null)
 const cityPanelRef = ref(null)
@@ -19,14 +19,14 @@ const direction = ref(null)
 const animating = ref(null)
 
 const cityOptions = computed(() =>
-  options.value.area.map(({ value, text }) => ({
+  serachOptions.value.area.map(({ value, text }) => ({
     value,
     text,
   }))
 )
 
 const districtOptions = computed(() => {
-  const city = options.value.area.find((item) => item.value === model.value.city)
+  const city = serachOptions.value.area.find((item) => item.value === model.value.city)
 
   return city?.district || []
 })

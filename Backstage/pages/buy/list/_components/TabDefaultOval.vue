@@ -4,7 +4,7 @@ const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
 const buyList = useBuyListStore()
 const { aggregate } = storeToRefs(buyList)
-const { onReset } = useBuyListActions()
+const { onSearchReset } = useBuyListActions()
 const isDeviceM = computed(() => device.value === 'm')
 
 function onAggregate(key) {
@@ -55,7 +55,7 @@ const items = computed(() => {
 })
 
 const onClick = () => {
-  onReset()
+  onSearchReset()
 }
 
 onResize()

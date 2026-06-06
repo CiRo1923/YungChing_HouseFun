@@ -28,9 +28,11 @@ export const useBuyPopupStore = defineStore('buyPopup', () => {
   const setClass = readonly({
     alert: {
       main: 'p:--w-450 t:--w-300',
+      content: 'text-center',
     },
     confirm: {
       main: 'p:--w-450 t:--w-300',
+      content: 'text-center',
     },
   })
 

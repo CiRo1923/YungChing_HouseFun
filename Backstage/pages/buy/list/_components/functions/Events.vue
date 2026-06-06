@@ -1,5 +1,5 @@
 <script setup>
-const { selectCount } = useBuyListActions()
+const { searchSelectCount } = useBuyListActions()
 
 const emits = defineEmits([
   'click:renewal',
@@ -54,7 +54,7 @@ const onClick = (id) => {
       <BuyMAnchor
         :text="item.label"
         :config="{
-          isDisabled: selectCount === 0,
+          isDisabled: searchSelectCount === 0,
         }"
         :setClass="{
           main: '--border-gray-e5 --bg-white --oval --h-30 --px-15 --text-gray-666',

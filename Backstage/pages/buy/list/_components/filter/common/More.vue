@@ -3,7 +3,7 @@ const common = useCommonStore()
 const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
 const buyList = useBuyListStore()
-const { apiSearchData, options } = storeToRefs(buyList)
+const { apiSearchData, serachOptions } = storeToRefs(buyList)
 
 const isDeviceM = computed(() => device.value === 'm')
 const hasRangeValue = (value) => value !== '' && value != null
@@ -20,7 +20,7 @@ const items = computed(() => {
       key: 'room',
       name: 'roomCountToken',
       header: '選擇房數',
-      options: options.value.room,
+      options: serachOptions.value.room,
       model: toRef(apiSearchData.value, 'roomCountToken'),
       rearAssist: '房',
     },
@@ -28,7 +28,7 @@ const items = computed(() => {
       key: 'price',
       name: 'priceToken',
       header: '選擇總價',
-      options: options.value.price,
+      options: serachOptions.value.price,
       model: toRef(apiSearchData.value, 'priceToken'),
       rearAssist: '萬',
     },
@@ -36,7 +36,7 @@ const items = computed(() => {
       key: 'pin',
       name: 'pinToken',
       header: '選擇坪數',
-      options: options.value.pin,
+      options: serachOptions.value.pin,
       model: toRef(apiSearchData.value, 'pinToken'),
       rearAssist: '坪',
     },

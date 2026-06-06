@@ -1,6 +1,6 @@
 <script setup>
 const buyList = useBuyListStore()
-const { apiSearchData, options } = storeToRefs(buyList)
+const { apiSearchData, serachOptions } = storeToRefs(buyList)
 const { onApiPromise } = useBuyPopupActions()
 
 const emits = defineEmits(['search'])
@@ -22,7 +22,7 @@ const onSearchClick = async () => {
       <BuyMFormSelect
         name="caseDownToken"
         v-model="apiSearchData.caseDownToken"
-        :options="options.down"
+        :options="serachOptions.down"
         :config="{
           placeholder: '選擇下架原因',
           schema: {

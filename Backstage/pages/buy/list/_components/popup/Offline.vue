@@ -1,7 +1,7 @@
 <script setup>
 const popup = usePopupStore()
 const { customData } = storeToRefs(popup)
-const { selectCount } = useBuyListActions()
+const { searchSelectCount } = useBuyListActions()
 </script>
 
 <template>
@@ -14,7 +14,7 @@ const { selectCount } = useBuyListActions()
     <div class="tracking-wider p:space-y-[8px] p:text-[16px]">
       <p v-if="!customData.data">
         <b class="font-semibold">
-          已選擇 <span class="text-[--orange-e646]">{{ selectCount }}</span> 筆物件
+          已選擇 <span class="text-[--orange-e646]">{{ searchSelectCount }}</span> 筆物件
         </b>
       </p>
       <p class="text-[--gray-666]">

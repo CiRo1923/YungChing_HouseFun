@@ -28,7 +28,7 @@ export default () => {
     alertData.value.content = data.content
     alertData.value.btns = onDeepMerge(buttons, data.btns)
     alertData.value.hasExistClose = data.hasExistClose !== undefined ? data.hasExistClose : true
-    alertData.value.setClass = onDeepMerge(setClass, data.setClass) || setClass
+    alertData.value.setClass = onDeepMerge({ ...setClass }, data.setClass) || setClass
 
     onBodyOverflowHiddenToggle(true)
 
@@ -63,7 +63,7 @@ export default () => {
     confirmData.value.content = data.content
     confirmData.value.btns = onMergeBtns(buttons, data.btns)
     confirmData.value.hasExistClose = data.hasExistClose !== undefined ? data.hasExistClose : true
-    confirmData.value.setClass = onDeepMerge(setClass, data.setClass) || setClass
+    confirmData.value.setClass = onDeepMerge({ ...setClass }, data.setClass) || setClass
 
     onBodyOverflowHiddenToggle(true)
 

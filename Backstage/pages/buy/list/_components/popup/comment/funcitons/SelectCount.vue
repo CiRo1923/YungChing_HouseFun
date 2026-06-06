@@ -1,10 +1,10 @@
 <script setup>
-const { searchSelectCount } = useBuyListActions()
+const { commentsSelectCount } = useBuyListActions()
 </script>
 
 <template>
   <p class="text-[--gray-666] m:order-2 m:ml-auto">
-    已選 <span class="text-[--orange-e646]">{{ searchSelectCount }}</span> 筆
+    已選 <span class="text-[--orange-e646]">{{ commentsSelectCount }}</span> 筆
   </p>
 </template>
 

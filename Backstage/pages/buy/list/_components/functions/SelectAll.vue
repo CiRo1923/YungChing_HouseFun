@@ -1,12 +1,16 @@
 <script setup>
 const buyList = useBuyListStore()
-const { datas } = storeToRefs(buyList)
+const { searchDatas } = storeToRefs(buyList)
 const isSelectAll = computed({
   get() {
-    return datas.value && datas.value.length > 0 && datas.value.every((item) => item._checked.value)
+    return (
+      searchDatas.value &&
+      searchDatas.value.length > 0 &&
+      searchDatas.value.every((item) => item._checked.value)
+    )
   },
   set(value) {
-    datas.value = datas.value.map((item) => ({
+    searchDatas.value = searchDatas.value.map((item) => ({
       ...item,
       _checked: {
         ...item._checked,

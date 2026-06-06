@@ -1,4 +1,6 @@
 <script setup>
+import useTableCore from './.composables/useTableCore'
+
 const props = defineProps({
   thead: {
     type: Array,
@@ -26,160 +28,25 @@ const props = defineProps({
   },
 })
 
-const slots = useSlots()
-const containerRef = ref(null)
-const tableContentRef = ref(null)
-const theadRef = ref(null)
-
-const defaultConfig = {
-  isTheadFixed: false,
-  noData: {
-    icon: null,
-    message: '尚無資料',
-  },
-}
-
-const config = computed(() => {
-  return {
-    ...defaultConfig,
-    ...props.config,
-    noData: {
-      ...defaultConfig.noData,
-      ...props.config?.noData,
-    },
-  }
-})
-
-const setClass = computed(() => {
-  return {
-    main: '',
-    container: '',
-    content: '',
-    thead: '',
-    theadTr: '',
-    theadTh: '',
-    theadLabel: '',
-    tbody: '',
-    tbodyTr: '',
-    tbodyTd: '',
-    tfoot: '',
-    tfootTr: '',
-    tfootTd: '',
-    footer: '',
-    noData: '',
-    ...props.setClass,
-  }
-})
-
-const thead = computed(() => {
-  return props.table ? props.table.thead || [] : props.thead || []
-})
-
-const tbody = computed(() => {
-  return props.table ? props.table.tbody || [] : props.tbody || []
-})
-
-const tfoot = computed(() => {
-  return props.table ? props.table.tfoot || [] : props.tfoot || []
-})
-
-const hasTbody = computed(() => {
-  return Array.isArray(tbody.value) && tbody.value.length > 0
-})
-
-const hasTfoot = computed(() => {
-  return Array.isArray(tfoot.value) && tfoot.value.length > 0
-})
-
-const isTheadFixedActive = ref(false)
-const fixedTheadStyle = ref({})
-
-const getScopeValue = (item, column) => {
-  return item?.[column.id]
-}
-
-const getSpan = (column, type, key) => {
-  return column?.[key]?.[type] || null
-}
-
-const getColumnClass = (column, type) => {
-  return column?.class?.[type] || ''
-}
-
-const onResetFixedThead = () => {
-  isTheadFixedActive.value = false
-  fixedTheadStyle.value = {}
-}
-
-const onSyncFixedThead = () => {
-  if (!config.value.isTheadFixed) {
-    onResetFixedThead()
-    return
-  }
-
-  const $table = tableContentRef.value
-  const $thead = theadRef.value
-  const $container = containerRef.value
-
-  if (!$table || !$thead || !$container) {
-    onResetFixedThead()
-    return
-  }
-
-  const containerRect = $container.getBoundingClientRect()
-  const tableRect = $table.getBoundingClientRect()
-  const theadHeight = $thead.offsetHeight
-  const isContainerScroll = $container.scrollHeight > $container.clientHeight
-  const isActive = isContainerScroll
-    ? $container.scrollTop > 0 && tableRect.bottom > containerRect.top + theadHeight
-    : tableRect.top <= 0 && tableRect.bottom > theadHeight
-
-  isTheadFixedActive.value = isActive
-
-  if (!isActive) {
-    fixedTheadStyle.value = {}
-    return
-  }
-
-  fixedTheadStyle.value = isContainerScroll
-    ? {
-        transform: `translateY(${$container.scrollTop}px)`,
-      }
-    : {}
-}
-
-const onWindowChange = () => {
-  onSyncFixedThead()
-}
-
-const onContainerScroll = () => {
-  onSyncFixedThead()
-}
-
-watch(
-  () => [thead.value, tbody.value, config.value.isTheadFixed],
-  async () => {
-    await nextTick()
-    onSyncFixedThead()
-  },
-  {
-    deep: true,
-  }
-)
-
-onMounted(async () => {
-  await nextTick()
-  onSyncFixedThead()
-  containerRef.value?.addEventListener('scroll', onContainerScroll)
-  window.addEventListener('resize', onWindowChange)
-  window.addEventListener('scroll', onWindowChange, true)
-})
-
-onUnmounted(() => {
-  containerRef.value?.removeEventListener('scroll', onContainerScroll)
-  window.removeEventListener('resize', onWindowChange)
-  window.removeEventListener('scroll', onWindowChange, true)
-})
+// Default 在所有裝置都會固定 thead，因此 canFixThead 維持預設 true
+const {
+  slots,
+  containerRef,
+  tableContentRef,
+  theadRef,
+  config,
+  setClass,
+  thead,
+  tbody,
+  tfoot,
+  hasTbody,
+  hasTfoot,
+  isTheadFixedActive,
+  fixedTheadStyle,
+  getScopeValue,
+  getSpan,
+  getColumnClass,
+} = useTableCore(props)
 </script>
 
 <template>
@@ -286,9 +153,9 @@ onUnmounted(() => {
   --table-default-thtd-tabled-px: 5px;
   --table-default-thtd-mobile-px: 5px;
 
-  --table-default-tbody-tr-pc-boder-b: 1px;
-  --table-default-tbody-tr-tabled-boder-b: 1px;
-  --table-default-tbody-tr-mobile-boder-b: 1px;
+  --table-default-tbody-tr-pc-border-b: 1px;
+  --table-default-tbody-tr-tabled-border-b: 1px;
+  --table-default-tbody-tr-mobile-border-b: 1px;
 
   --table-default-thead-th-pc-py: 8px;
   --table-default-thead-th-tabled-py: 5px;
@@ -308,7 +175,7 @@ onUnmounted(() => {
 
   --table-default-thead-th-color: var(--gray-666);
   --table-default-tbody-td-color: var(--gray-666);
-  --table-default-tbody-tr-boder-color: var(--gray-e5);
+  --table-default-tbody-tr-border-color: var(--gray-e5);
 }
 
 .m-table {
@@ -325,8 +192,8 @@ onUnmounted(() => {
     }
 
     .m-table-tbody-tr {
-      border-bottom: var(--table-default-tbody-tr-boder-b) solid
-        var(--table-default-tbody-tr-boder-color);
+      border-bottom: var(--table-default-tbody-tr-border-b) solid
+        var(--table-default-tbody-tr-border-color);
     }
 
     .m-table-tbody-td {
@@ -344,7 +211,7 @@ onUnmounted(() => {
       --table-default-thead-th-py: var(--table-default-thead-th-pc-py);
       --table-default-thead-th-text: var(--table-default-thead-th-pc-text);
 
-      --table-default-tbody-tr-boder-b: var(--table-default-tbody-tr-pc-boder-b);
+      --table-default-tbody-tr-border-b: var(--table-default-tbody-tr-pc-border-b);
       --table-default-tbody-td-py: var(--table-default-tbody-td-pc-py);
       --table-default-tbody-td-text: var(--table-default-tbody-td-pc-text);
     }
@@ -358,7 +225,7 @@ onUnmounted(() => {
       --table-default-thead-th-py: var(--table-default-thead-th-tabled-py);
       --table-default-thead-th-text: var(--table-default-thead-th-tabled-text);
 
-      --table-default-tbody-tr-boder-b: var(--table-default-tbody-tr-tabled-boder-b);
+      --table-default-tbody-tr-border-b: var(--table-default-tbody-tr-tabled-border-b);
       --table-default-tbody-td-py: var(--table-default-tbody-td-tabled-py);
       --table-default-tbody-td-text: var(--table-default-tbody-td-tabled-text);
     }
@@ -371,7 +238,7 @@ onUnmounted(() => {
       --table-default-thtd-px: var(--table-default-thtd-mobile-px);
       --table-default-thead-th-py: var(--table-default-thead-th-mobile-py);
       --table-default-thead-th-text: var(--table-default-thead-th-mobile-text);
-      --table-default-tbody-tr-boder-b: var(--table-default-tbody-tr-mobile-boder-b);
+      --table-default-tbody-tr-border-b: var(--table-default-tbody-tr-mobile-border-b);
 
       --table-default-tbody-td-py: var(--table-default-tbody-td-mobile-py);
       --table-default-tbody-td-text: var(--table-default-tbody-td-mobile-text);

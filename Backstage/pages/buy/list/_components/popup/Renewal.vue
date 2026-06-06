@@ -2,12 +2,12 @@
 import { Form } from 'vee-validate'
 
 // const buyProject = useBuyProjectStore()
-// const { selectItems } = storeToRefs(buyProject)
+// const { searchSelectItems } = storeToRefs(buyProject)
 // const buyList = useBuyListStore()
-// const { datas } = storeToRefs(buyList)
+// const { searchDatas } = storeToRefs(buyList)
 const popup = usePopupStore()
 const { customData, customCheck } = storeToRefs(popup)
-const { selectCount, renewalCanNotPublishData, renewalNotExpiredData } = useBuyListActions()
+const { searchSelectCount, renewalCanNotPublishData, renewalNotExpiredData } = useBuyListActions()
 const { onCustomClose } = useBuyPopupActions()
 const formRef = ref(null)
 const publishInfo = computed(() => {
@@ -37,7 +37,9 @@ const hasExpired = computed(() =>
 )
 const count = computed(() =>
   !customData.value.data
-    ? selectCount.value - renewalCanNotPublishData.value.length - renewalNotExpiredData.value.length
+    ? searchSelectCount.value -
+      renewalCanNotPublishData.value.length -
+      renewalNotExpiredData.value.length
     : hasExpired.value
       ? 1
       : 0
@@ -70,7 +72,7 @@ const onSure = async () => {
     <ul class="popup-renewal-contaiiner" :class="{ 'tm:mt-[8px] p:mt-[16px]': publishInfo }">
       <li class="popup-renewal-item" v-if="count !== 0">
         <p class="text-[14px] text-[--gray-666]" v-if="!customData.data">
-          已選擇 <span class="text-[--orange-e646]">{{ selectCount }}</span> 個物件，需要使用
+          已選擇 <span class="text-[--orange-e646]">{{ searchSelectCount }}</span> 個物件，需要使用
           <span class="text-[--orange-e646]">{{ count }}</span>
           個刊登額度
         </p>
@@ -89,7 +91,8 @@ const onSure = async () => {
         <template v-if="!customData.data">
           <p class="text-[14px] text-[--gray-666]">
             已選擇
-            <span class="text-[--orange-e646]">{{ selectCount }}</span> 個物件，無需使用刊登額度為
+            <span class="text-[--orange-e646]">{{ searchSelectCount }}</span>
+            個物件，無需使用刊登額度為
             <span class="text-[--orange-e646]">{{ renewalNotExpiredData.length }}</span> 個物件
           </p>
           <ul class="divide-y-[1px] divide-[--gray-e5] tm:mt-[8px] p:mt-[16px]">
@@ -114,7 +117,7 @@ const onSure = async () => {
       <li class="popup-renewal-item" v-if="hasNotPublish">
         <p class="text-[14px] text-[--gray-666]">
           已選擇
-          <span class="text-[--orange-e646]">{{ selectCount }}</span> 個物件，不符合刊登條件為
+          <span class="text-[--orange-e646]">{{ searchSelectCount }}</span> 個物件，不符合刊登條件為
           <span class="text-[--orange-e646]">{{ renewalCanNotPublishData.length }}</span> 個物件
         </p>
         <ul class="divide-y-[1px] divide-[--gray-e5] tm:mt-[8px] p:mt-[16px]">

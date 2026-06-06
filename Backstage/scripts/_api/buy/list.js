@@ -23,3 +23,12 @@ export const apiPOSTRealEstateRemove = async (data) =>
 
 export const apiGETRealEstateCaseViewCounts = async (data) =>
   await fetchApi.get(`api/${version}/buy/realEstate/caseViewCounts`, data)
+
+export const apiGETCommentssearchCommentFilter = async (data) =>
+  await fetchApi.get(`api/${version}/buy/Comments/SearchCommentFilter`, data)
+
+export const apiPOSTCommentsSearch = async (data) =>
+  await fetchApi.post(`api/${version}/buy/Comments/Search`, data)
+
+export const apiPOSTCommentsUpdateReplyStatue = async (data) =>
+  await fetchApi.post(`api/${version}/buy/Comments/UpdateReplyStatue`, data)

@@ -56,7 +56,7 @@ const items = computed(() => {
 </script>
 
 <template>
-  <BuyMCardDefault class="text-center">
+  <BuyMCardDefault class="text-center tm:mt-[24px] p:mt-[32px]">
     <ul class="inline-flex m:flex-col-reverse m:gap-y-[24px] pt:items-center pt:gap-x-[24px]">
       <template v-for="(item, index) in items" :key="`${item.label}_${index}`">
         <li class="m:w-[230px]" v-if="!item.isHiden">

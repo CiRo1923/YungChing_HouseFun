@@ -13,6 +13,7 @@ const {
   onApiGETRealEstateSearchFilter,
   onApiPOSTRealEstateCaseAggregate,
   onApiPOSTRealEstateSearch,
+  onApiGETCommentssearchCommentFilter,
 } = useBuyListActions()
 const { onApiErrorServerToClient } = useBuyPopupActions()
 const route = useRoute()
@@ -39,6 +40,8 @@ await onWithLoadingAll([
   }),
   useAsyncData('available-plans-publish', () => onApiGetPublishAvailablePlans()),
   useAsyncData('golden-planList-publish', () => onApiGETGoldenGetPlanList()),
+  useAsyncData('golden-planList-publish', () => onApiGETGoldenGetPlanList()),
+  useAsyncData('comments-search-publish', () => onApiGETCommentssearchCommentFilter()),
 ])
 
 onUseMeta({
@@ -94,6 +97,8 @@ onMounted(() => {
   <PageBuyPopupAutoRefreshTemplateRenewal />
   <PageBuyPopupAutoRefreshTemplateEditTime />
   <PageBuyListPopupView />
+  <PageBuyListPopupComment />
+  <PageBuyListPopupCommentsReply />
 </template>
 
 <style></style>

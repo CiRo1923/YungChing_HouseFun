@@ -1,4 +1,12 @@
 :root {
+  --form-clear-button-pc-p: 4px;
+  --form-clear-button-tablet-p: 4px;
+  --form-clear-button-mobile-p: 4px;
+
+  --form-clear-button-pc-size: 18px;
+  --form-clear-button-tablet-size: 18px;
+  --form-clear-button-mobile-size: 18px;
+
   --form-element-border-color: var(--gray-e5);
   --form-element-focus-border-color: var(--green-6a2d);
   --form-element-disbaled-border-color: var(--gray-e5);
@@ -8,6 +16,8 @@
   --form-element-focus-color: var(--gray-666);
   --form-element-disbaled-color: var(--gray-666);
   --form-element-error-color: var(--orange-e646);
+
+  --form-clear-button-color: var(--gray-999);
 }
 
 .m-form-element {
@@ -78,19 +88,29 @@
 }
 
 .m-form-clear-button {
-  @apply transition-opacitys duration-300;
+  @apply h-[--form-clear-button-size] p-[--form-clear-button-p];
 
   &:not(.\-\-show) {
-    @apply pointer-events-none invisible opacity-0;
+    transition:
+      opacity 0.3s,
+      visibility 0.3s,
+      width 0s 0.3s;
+
+    @apply pointer-events-none invisible w-0 opacity-0;
   }
 
   &.\-\-show {
-    @apply visible opacity-100;
+    transition:
+      opacity 0.3s,
+      visibility 0.3s,
+      width 0s;
+
+    @apply visible w-[--form-clear-button-size] opacity-100;
   }
 }
 
 .m-form-clear-icon {
-  @apply h-[18px] w-[18px] p-[4px] text-[--gray-999];
+  @apply h-full w-full text-[--form-clear-button-color];
 }
 
 .m-form-length,
@@ -104,6 +124,9 @@
 
 @screen p {
   .m-form {
+    --form-clear-button-p: var(--form-clear-button-pc-p);
+    --form-clear-button-size: var(--form-clear-button-pc-size);
+
     &.\-\-p-16,
     &.p\:\-\-p-16,
     &.pt\:\-\-p-16 {
@@ -164,6 +187,9 @@
 
 @screen t {
   .m-form {
+    --form-clear-button-p: var(--form-clear-button-tabled-p);
+    --form-clear-button-size: var(--form-clear-button-tabled-size);
+
     &.\-\-p-16,
     &.pt\:\-\-p-16,
     &.tm\:\-\-p-16,
@@ -231,6 +257,9 @@
 
 @screen m {
   .m-form {
+    --form-clear-button-p: var(--form-clear-button-mobile-p);
+    --form-clear-button-size: var(--form-clear-button-mobile-size);
+
     &.\-\-p-16,
     &.tm\:\-\-p-16,
     &.m\:\-\-p-16 {

@@ -1,5 +1,5 @@
 <script setup>
-const { selectCount } = useBuyListActions()
+const { searchSelectCount } = useBuyListActions()
 const popup = usePopupStore()
 const { customData } = storeToRefs(popup)
 </script>
@@ -13,7 +13,7 @@ const { customData } = storeToRefs(popup)
   >
     <div class="space-y-[8px] text-[16px]">
       <p class="font-semibold" v-if="!customData.data">
-        已選擇 <span class="text-[--orange-e646]">{{ selectCount }}</span> 筆物件
+        已選擇 <span class="text-[--orange-e646]">{{ searchSelectCount }}</span> 筆物件
       </p>
       <p class="text-[--gray-666]">物件刪除後，將無法復原資料</p>
       <p class="font-semibold">

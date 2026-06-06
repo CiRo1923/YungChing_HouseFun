@@ -148,7 +148,7 @@ const onChange = () => {
       :rules="config.isDisabled ? '' : props.rules"
       v-slot="{ errorMessage }"
     >
-      <div class="m-form-container overflow-hidden" :class="setClass.container">
+      <div class="m-form-container overflow-hidden leading-none" :class="setClass.container">
         <label
           class="m-form-element --checkbox relative inline-flex gap-x-[8px] align-middle leading-[1.35] text-[--gray-999]"
           :class="[
@@ -171,8 +171,8 @@ const onChange = () => {
           />
           <CommonSvgIcon
             icon="icon_check_solid"
-            class="m-form-icon relative mt-[2px] h-[18px] w-[18px] shrink-0 self-start rounded-[2px] border-[1px] text-[--orange-e646] transition-colors duration-300"
-            :class="setClass.icon"
+            class="m-form-icon relative h-[18px] w-[18px] shrink-0 self-start rounded-[2px] border-[1px] leading-[0] text-[--orange-e646] transition-colors duration-300"
+            :class="[{ 'mt-[2px]': config.label }, setClass.icon]"
           />
           <slot>
             <em :class="setClass.label" v-if="config.label">

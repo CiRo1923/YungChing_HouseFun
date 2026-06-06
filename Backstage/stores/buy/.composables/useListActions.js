@@ -7,6 +7,9 @@ import {
   apiPOSTRealEstateDeal,
   apiPOSTRealEstateRemove,
   apiGETRealEstateCaseViewCounts,
+  apiGETCommentssearchCommentFilter,
+  apiPOSTCommentsSearch,
+  apiPOSTCommentsUpdateReplyStatue,
 } from '@js/_api/buy/list.js'
 
 // import { useBuyProjectStore } from '@stores/buy/project.js'
@@ -19,22 +22,44 @@ export default () => {
   // const { renewal } = storeToRefs(buyProject)
   const { onReplaceImageSize } = useBuyProjectActions()
   const buyList = useBuyListStore()
-  const { apiSearchData, apiDealData, options, planAggregate, aggregate, datas, pagination } =
-    storeToRefs(buyList)
-  const { onApiError } = useBuyPopupActions()
-  const selectItems = computed(() =>
-    datas.value ? datas.value.filter((item) => item._checked.value).map((item) => item.hfID) : []
-  )
-  const selectCount = computed(() => selectItems.value.length)
-  const renewalCanNotPublishData = computed(() => {
-    const selectedIds = new Set(selectItems.value)
+  const {
+    apiCommentsDefault,
+    apiSearchData,
+    apiDealData,
+    apiCommentsData,
+    apiCommentUpdateData,
+    serachOptions,
+    commentsOptions,
+    planAggregate,
+    aggregate,
+    searchDatas,
+    commentsDatas,
+    searchPagination,
+    commentsPagination,
+  } = storeToRefs(buyList)
+  const { onCustom, onApiPromise, onApiError } = useBuyPopupActions()
 
-    return datas.value.filter((item) => selectedIds.has(item.hfID) && !item._checked.publish)
+  const searchSelectItems = computed(() =>
+    searchDatas.value
+      ? searchDatas.value.filter((item) => item._checked.value).map((item) => item.hfID)
+      : []
+  )
+  const searchSelectCount = computed(() => searchSelectItems.value.length)
+  // const commentsSelectItems = computed(() =>
+  //   commentsDatas.value
+  //     ? commentsDatas.value.filter((item) => item._checked).map((item) => item.commentID)
+  //     : []
+  // )
+  const commentsSelectCount = computed(() => apiCommentUpdateData.value?.commentIDList.length)
+  const renewalCanNotPublishData = computed(() => {
+    const selectedIds = new Set(searchSelectItems.value)
+
+    return searchDatas.value.filter((item) => selectedIds.has(item.hfID) && !item._checked.publish)
   })
   const renewalNotExpiredData = computed(() => {
-    const selectedIds = new Set(selectItems.value)
+    const selectedIds = new Set(searchSelectItems.value)
 
-    return datas.value.filter(
+    return searchDatas.value.filter(
       (item) => selectedIds.has(item.hfID) && item._checked.publish && !item._checked.isExpired
     )
   })
@@ -51,7 +76,7 @@ export default () => {
   }
 
   const onApiGETRealEstateSearchFilter = async () => {
-    if (options.value.purpose) return false
+    if (serachOptions.value.purpose) return false
 
     const { config, status, data } = await apiGETRealEstateSearchFilter()
 
@@ -69,10 +94,10 @@ export default () => {
       }
 
       Object.entries(keyMap).forEach(([targetKey, sourceKey]) => {
-        options.value[targetKey] = data[sourceKey] ?? []
+        serachOptions.value[targetKey] = data[sourceKey] ?? []
       })
 
-      console.log(data)
+      // console.log(data)
     } else {
       onApiError(config, status, data)
     }
@@ -139,7 +164,7 @@ export default () => {
 
         return true
       }
-      datas.value = list.map((item) => {
+      searchDatas.value = list.map((item) => {
         return {
           ...item,
           _checked: {
@@ -150,13 +175,13 @@ export default () => {
         }
       })
 
-      pagination.value = {
+      searchPagination.value = {
         page,
         pageSize,
         total: totalPages,
       }
 
-      // console.log(datas.value)
+      // console.log(searchDatas.value)
     } else {
       onApiError(config, status, data)
     }
@@ -209,10 +234,64 @@ export default () => {
 
     return { config, status, data }
   }
+  const onApiGETCommentssearchCommentFilter = async () => {
+    const { config, status, data } = await apiGETCommentssearchCommentFilter()
+
+    if (status === 200) {
+      const keyMap = {
+        status: 'commentStatusOptions',
+        type: 'caseCommentTypeOptions',
+      }
+
+      Object.entries(keyMap).forEach(([targetKey, sourceKey]) => {
+        commentsOptions.value[targetKey] = data[sourceKey] ?? []
+      })
+    } else {
+      onApiError(config, status, data)
+    }
+
+    return { config, status, data }
+  }
+  const onApiPOSTCommentsSearch = async () => {
+    const { config, status, data } = await apiPOSTCommentsSearch({
+      pageSize: 9,
+      ...apiCommentsData.value,
+    })
+
+    if (status === 200) {
+      const { commentsList, page, pageSize, totalPages } = data
+
+      commentsDatas.value = commentsList.map((item) => ({
+        ...item,
+        _checked: false,
+      }))
+
+      commentsPagination.value = {
+        page,
+        pageSize,
+        total: totalPages,
+      }
+    } else {
+      onApiError(config, status, data)
+    }
+
+    return { config, status, data }
+  }
+  const onApiPOSTCommentsUpdateReplyStatue = async () => {
+    const { config, status, data } = await apiPOSTCommentsUpdateReplyStatue(
+      apiCommentUpdateData.value
+    )
+
+    if (status !== 200) {
+      onApiError(config, status, data)
+    }
+
+    return { config, status, data }
+  }
   const onSyncCheckedDatas = (hfIDs) => {
     const idSet = new Set(hfIDs)
 
-    datas.value = datas.value.map((item) => ({
+    searchDatas.value = searchDatas.value.map((item) => ({
       ...item,
       _checked: {
         ...item._checked,
@@ -220,14 +299,45 @@ export default () => {
       },
     }))
   }
-  const onReset = () => {
+  const onCommentPopup = async () => {
+    onApiPromise('open')
+
+    const { status } = await onApiPOSTCommentsSearch()
+
+    onApiPromise('close')
+
+    if (status === 200) {
+      const { isSure } = await onCustom({
+        id: 'popupComment',
+        title: '留言管理',
+        icon: 'icon_dialogue',
+        btns: [
+          {
+            label: '關閉',
+            class: '--border-gray-e5 --text-gray-666',
+            type: 'cancel',
+            isClose: true,
+          },
+        ],
+      })
+
+      if (isSure) {
+        onCommentsReset()
+      }
+    }
+  }
+  const onSearchReset = () => {
     apiSearchData.value = { ...buyList.apiSearchDataDefault }
-    datas.value = null
+    searchDatas.value = null
+  }
+  const onCommentsReset = () => {
+    apiCommentsData.value = { ...apiCommentsDefault }
   }
 
   return {
-    selectItems,
-    selectCount,
+    searchSelectItems,
+    searchSelectCount,
+    commentsSelectCount,
     renewalCanNotPublishData,
     renewalNotExpiredData,
     onApiGETCommonPlanAggregate,
@@ -238,7 +348,12 @@ export default () => {
     onApiPOSTRealEstateDeal,
     onApiPOSTRealEstateRemove,
     onApiGETRealEstateCaseViewCounts,
+    onApiGETCommentssearchCommentFilter,
+    onApiPOSTCommentsSearch,
+    onApiPOSTCommentsUpdateReplyStatue,
     onSyncCheckedDatas,
-    onReset,
+    onCommentPopup,
+    onSearchReset,
+    onCommentsReset,
   }
 }

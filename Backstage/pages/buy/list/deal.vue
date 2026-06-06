@@ -12,6 +12,7 @@ const {
   onApiGETRealEstateSearchFilter,
   onApiPOSTRealEstateCaseAggregate,
   onApiPOSTRealEstateSearch,
+  onApiGETCommentssearchCommentFilter,
 } = useBuyListActions()
 const { onApiErrorServerToClient } = useBuyPopupActions()
 const route = useRoute()
@@ -36,6 +37,7 @@ await onWithLoadingAll([
   useAsyncData('list-done', () => onUpdate(), {
     watch: [page],
   }),
+  useAsyncData('comments-search-offline', () => onApiGETCommentssearchCommentFilter()),
 ])
 
 onUseMeta({
@@ -73,6 +75,8 @@ onMounted(() => {
   </BuyMContainer>
   <PageBuyListPopupDeal />
   <PageBuyListPopupView />
+  <PageBuyListPopupComment />
+  <PageBuyListPopupCommentsReply />
   <PageBuyListPopupRemove />
 </template>
 

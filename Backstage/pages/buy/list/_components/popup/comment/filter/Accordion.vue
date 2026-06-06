@@ -1,8 +1,8 @@
 <script setup>
-const emits = defineEmits(['search'])
+const emits = defineEmits(['click:search'])
 
 const onSearchClick = () => {
-  emits('search')
+  emits('click:search')
 }
 </script>
 
@@ -18,16 +18,17 @@ const onSearchClick = () => {
       },
     }"
     :setClass="{
-      main: 'm:space-y-[16px] pt:flex pt:items-center pt:gap-x-[8px]',
+      main: 'mb-[24px] m:space-y-[16px] pt:flex pt:items-center pt:gap-x-[8px]',
       container: 'm:space-y-[16px] pt:flex pt:min-w-0 pt:grow pt:items-center pt:gap-x-[8px]',
       show: 'pt:flex pt:shrink-0 pt:items-center pt:gap-x-[8px]',
       hide: 'm:space-y-[16px] pt:flex pt:min-w-0 pt:grow pt:items-center pt:gap-x-[8px]',
       footer: 'pt:shrink-0',
     }"
   >
-    <slot />
+    <PageBuyListPopupCommentFilterStatus />
     <template #hide>
-      <slot name="hide" />
+      <PageBuyListPopupCommentFilterType />
+      <PageBuyListPopupCommentFilterSearch />
     </template>
     <template #footer="{ device, toggleText, onToggle }">
       <ul class="flex items-center justify-between">

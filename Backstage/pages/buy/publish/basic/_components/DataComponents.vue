@@ -50,11 +50,12 @@ const onChange = (item) => {
 <template>
   <ul class="tm:space-y-[24px] p:space-y-[32px]">
     <template v-for="(item, index) in visibleComponents" :key="`${item.id}_${index}`">
-      <li v-if="componentMap[item.id]">
+      <li v-if="componentMap[item.id]" :data-component="item.id">
         <component :is="componentMap[item.id]" :title="item.label" @change="onChange" />
       </li>
     </template>
   </ul>
+  <PageBuyPublishBasicNav :data="visibleComponents" />
 </template>
 
 <style></style>

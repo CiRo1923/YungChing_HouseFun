@@ -243,11 +243,7 @@ onMounted(() => {
         }"
       /> -->
     </template>
-    <Form
-      as="div"
-      class="tm:mt-[24px] tm:space-y-[24px] p:mt-[32px] p:space-y-[32px]"
-      v-slot="{ validate }"
-    >
+    <Form as="div" class="relative tm:mt-[24px] p:mt-[32px]" v-slot="{ validate }">
       <!-- <pre>{{ apiData }}</pre> -->
       <PageBuyPublishBasicDataComponents @change:casePurpose="onPurposeChange" />
       <PageBuyPublishBasicSubmitButtons

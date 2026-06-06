@@ -17,9 +17,27 @@
     }
   }
 
+  &.\-\-rounded-t {
+    .m-table-thead-th {
+      &:first-child {
+        @apply rounded-tl-[--table-rounded];
+      }
+
+      &:last-child {
+        @apply rounded-tr-[--table-rounded];
+      }
+    }
+  }
+
   &.\-\-thead-gray-f7 {
     .m-table-thead-th {
       @apply bg-[--gray-f7];
+    }
+  }
+
+  &.\-\-thead-gray-f2 {
+    .m-table-thead-th {
+      @apply bg-[--gray-f2];
     }
   }
 }

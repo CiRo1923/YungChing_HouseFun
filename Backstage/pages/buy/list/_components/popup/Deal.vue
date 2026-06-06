@@ -3,7 +3,7 @@ import { Form } from 'vee-validate'
 
 const popup = usePopupStore()
 const { customData, customCheck } = storeToRefs(popup)
-const { selectCount } = useBuyListActions()
+const { searchSelectCount } = useBuyListActions()
 const { onCustomClose } = useBuyPopupActions()
 const formRef = ref(null)
 const publishInfo = computed(() => {
@@ -48,7 +48,8 @@ const onSure = async () => {
     <PageBuyPublishInfo :data="publishInfo" v-if="publishInfo" />
     <p class="text-[14px] text-[--gray-666]" v-else>
       已選擇
-      <span class="text-[--orange-e646]">{{ selectCount }}</span> 個物件，物件成交後將無法重新上架
+      <span class="text-[--orange-e646]">{{ searchSelectCount }}</span>
+      個物件，物件成交後將無法重新上架
     </p>
     <Form as="div" class="tm:mt-[16px] p:mt-[24px]" ref="formRef">
       <PageBuyDealInfo :data="publishInfo" />

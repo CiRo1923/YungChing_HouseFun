@@ -9,14 +9,15 @@ const {
   onAutoRefreshPopup,
 } = useBuyProjectActions()
 const buyList = useBuyListStore()
-const { datas, pagination } = storeToRefs(buyList)
+const { searchDatas, searchPagination, apiCommentsData } = storeToRefs(buyList)
 const {
-  selectItems,
-  selectCount,
+  searchSelectItems,
+  searchSelectCount,
   onApiPOSTRealEstateOffline,
   onApiPOSTRealEstateDeal,
   onApiGETRealEstateCaseViewCounts,
   onApiPOSTRealEstateRemove,
+  onCommentPopup,
 } = useBuyListActions()
 const { onAlert, onCustom, onApiPromise } = useBuyPopupActions()
 const route = useRoute()
@@ -34,6 +35,7 @@ const props = defineProps({
   },
 })
 
+const hasData = computed(() => searchDatas.value?.length !== 0)
 const hasFunEventsItem = computed(() => props.funEventsItem && props.funEventsItem.length !== 0)
 
 const onPopupRenewal = async (data) => {
@@ -68,7 +70,7 @@ const onRenewalClick = async (objectData) => {
   if (isSure) {
     onApiPromise('open')
 
-    const hfIDs = objectData ? [objectData.hfID] : selectItems.value
+    const hfIDs = objectData ? [objectData.hfID] : searchSelectItems.value
     const { status, data } = await onApiPOSTPublishRenewal(hfIDs)
     await new Promise((resolve) => {
       emits('update', resolve)
@@ -96,12 +98,12 @@ const onRenewalClick = async (objectData) => {
 
 // 刊登
 const onPublishClick = async (objectData) => {
-  const selectedIds = new Set(selectItems.value)
-  const hasOfflineInfo = !!datas.value[0]?.caseOfflineInfo
+  const selectedIds = new Set(selecsearchSelectItemstItems.value)
+  const hasOfflineInfo = !!searchDatas.value[0]?.caseOfflineInfo
   const onSelectedPublishItems = () => {
     if (objectData) return [objectData]
 
-    return datas.value.filter((item) => selectedIds.has(item.hfID) && item._checked.publish)
+    return searchDatas.value.filter((item) => selectedIds.has(item.hfID) && item._checked.publish)
   }
   const selectedPublishItems = onSelectedPublishItems()
 
@@ -151,7 +153,7 @@ const onPublishClick = async (objectData) => {
 
   if (!isSuccess) return
 
-  if (objectData || selectCount.value === 1) {
+  if (objectData || searchSelectCount.value === 1) {
     const { isSure: isFinish } = await onCustom({
       id: 'popupFinish',
       title: '物件刊登完成',
@@ -205,7 +207,7 @@ const onOfflineClick = async (objectData) => {
   if (isOffline) {
     onApiPromise('open')
 
-    const hfIDs = objectData ? [objectData.hfID] : selectItems.value
+    const hfIDs = objectData ? [objectData.hfID] : searchSelectItems.value
 
     await onApiPOSTRealEstateOffline(hfIDs)
     await new Promise((resolve) => {
@@ -247,7 +249,7 @@ const onDealClick = async (objectData) => {
   if (isDeal) {
     onApiPromise('open')
 
-    const hfIDs = objectData ? [objectData.hfID] : selectItems.value
+    const hfIDs = objectData ? [objectData.hfID] : searchSelectItems.value
     await onApiPOSTRealEstateDeal(hfIDs)
     await new Promise((resolve) => {
       emits('update', resolve)
@@ -259,7 +261,7 @@ const onDealClick = async (objectData) => {
 
 // 刪除
 const onRemoveClick = async (objectData) => {
-  const hfIDs = objectData ? [objectData.hfID] : selectItems.value
+  const hfIDs = objectData ? [objectData.hfID] : searchSelectItems.value
 
   const { isSure: isRemove } = await onCustom({
     id: 'popupRemove',
@@ -324,8 +326,11 @@ const onViewClick = async (objectData) => {
 }
 
 // 留言管理
-const onCommentClick = async () => {
-  console.log('留言管理')
+const onCommentClick = async (objectData) => {
+  const { hfID } = objectData
+  apiCommentsData.value.hfID = hfID
+
+  onCommentPopup()
 }
 </script>
 
@@ -335,67 +340,69 @@ const onCommentClick = async () => {
       main: 'tm:mt-[24px] p:mt-[32px]',
     }"
   >
-    <PageBuyListFunctionsMain
-      :eventsItems="props.funEventsItem"
-      @click:renewal="onRenewalClick"
-      @click:publish="onPublishClick"
-      @click:offline="onOfflineClick"
-      @click:deal="onDealClick"
-      @click:remove="onRemoveClick"
-      @click:copy="onCopyClick"
-      @sort:update="onSortUpdate"
-      v-if="hasFunEventsItem"
-    />
-    <ul class="divide-y-[1px] divide-[--gray-e5] border-b-[1px] border-b-[--gray-e5]">
-      <li
-        class="transition-colors duration-300 tm:py-[24px] p:px-[16px] p:py-[40px]"
-        :class="{ 'bg-[--gray-f7]': item._checked.value }"
-        v-for="(item, index) in datas"
-        :key="`${item.hfID}_${index}`"
-      >
-        <PageBuyListItemMain
-          :data="item"
-          :eventsItems="contentEventsItem"
-          v-model:checked="item._checked.value"
-          @click:publish="onPublishClick"
-          @click:renewal="onRenewalClick"
-          @click:offline="onOfflineClick"
-          @click:deal="onDealClick"
-          @click:remove="onRemoveClick"
-          @click:view="onViewClick"
-          @click:comment="onCommentClick"
+    <!-- 有資料 -->
+    <template v-if="hasData">
+      <PageBuyListFunctionsMain
+        :eventsItems="props.funEventsItem"
+        @click:renewal="onRenewalClick"
+        @click:publish="onPublishClick"
+        @click:offline="onOfflineClick"
+        @click:deal="onDealClick"
+        @click:remove="onRemoveClick"
+        @click:copy="onCopyClick"
+        @sort:update="onSortUpdate"
+        v-if="hasFunEventsItem"
+      />
+      <ul class="divide-y-[1px] divide-[--gray-e5] border-b-[1px] border-b-[--gray-e5]">
+        <li
+          class="transition-colors duration-300 tm:py-[24px] p:px-[16px] p:py-[40px]"
+          :class="{ 'bg-[--gray-f7]': item._checked.value }"
+          v-for="(item, index) in searchDatas"
+          :key="`${item.hfID}_${index}`"
         >
-          <slot
-            :item="item"
-            :renewalFun="onRenewalClick"
-            :publishFun="onPublishClick"
-            :dealFun="onDealClick"
-            :goldenFun="onGoldenClick"
-            :autoRefreshFun="onAutoRefreshClick"
-          />
-        </PageBuyListItemMain>
-        <!-- <pre>
-          {{ item }}
-        </pre> -->
-      </li>
-    </ul>
-    <BuyMPagination
-      :route="route"
-      :config="{
-        nowPage: pagination.page,
-        itemsPage: pagination.pageSize,
-        pageNumber: 5,
-        total: pagination.total,
-        queryKey: 'pg',
-      }"
-      :setClass="{
-        main: 'tm:mt-[32px] p:mt-[40px]',
-      }"
-    />
+          <PageBuyListItemMain
+            :data="item"
+            :eventsItems="contentEventsItem"
+            v-model:checked="item._checked.value"
+            @click:publish="onPublishClick"
+            @click:renewal="onRenewalClick"
+            @click:offline="onOfflineClick"
+            @click:deal="onDealClick"
+            @click:remove="onRemoveClick"
+            @click:view="onViewClick"
+            @click:comment="onCommentClick"
+          >
+            <slot
+              :item="item"
+              :renewalFun="onRenewalClick"
+              :publishFun="onPublishClick"
+              :dealFun="onDealClick"
+              :goldenFun="onGoldenClick"
+              :autoRefreshFun="onAutoRefreshClick"
+            />
+          </PageBuyListItemMain>
+          <!-- <pre>
+            {{ item }}
+          </pre> -->
+        </li>
+      </ul>
+      <BuyMPagination
+        :route="route"
+        :config="{
+          nowPage: searchPagination.page,
+          itemsPage: searchPagination.pageSize,
+          pageNumber: 5,
+          total: searchPagination.total,
+          queryKey: 'pg',
+        }"
+        :setClass="{
+          main: 'tm:mt-[32px] p:mt-[40px]',
+        }"
+      />
+    </template>
+    <!-- 沒資料 -->
+    <PageBuyListNoData v-else />
   </BuyMCardDefault>
-  <!-- <pre>
-    {{ datas }}
-  </pre> -->
 </template>
 
 <style lang="postcss"></style>

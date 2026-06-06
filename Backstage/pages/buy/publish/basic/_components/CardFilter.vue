@@ -44,6 +44,14 @@ const onBind = (item) => {
     : {}
 }
 
+const onEvents = (item) => {
+  if (!item.hasEmits) return {}
+
+  return {
+    change: () => onChange(item),
+  }
+}
+
 const onChange = (item) => {
   emits('change', item)
 }
@@ -85,7 +93,7 @@ onMounted(() => {
             <slot :name="`${item.id}_label`" />
           </BuyMFormLabel>
           <div class="overflow-hidden pt:grow">
-            <component :is="item.component" v-bind="onBind(item)" @change="onChange(item)" />
+            <component :is="item.component" v-bind="onBind(item)" v-on="onEvents(item)" />
           </div>
         </li>
       </template>
