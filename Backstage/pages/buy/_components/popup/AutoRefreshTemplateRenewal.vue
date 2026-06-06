@@ -11,7 +11,10 @@ const { onCustomClose } = useBuyPopupActions()
 const formRef = ref(null)
 const info = computed(() => autoRefresh.value.info || null)
 const listPlans = computed(() => autoRefresh.value.availablePlans)
-const count = computed(() => autoRefresh.value.save.apiData.listSelectedRefreshTime.length)
+const selectedIndex = computed(() => autoRefresh.value.templateSave.selectedIndex)
+const template = computed(() => autoRefresh.value.templateSave.list || [])
+const refreshCount = computed(() => template.value[selectedIndex.value]?.refreshCount ?? 0)
+const count = computed(() => refreshCount.value - info.value.currentCount)
 
 const publishInfo = computed(() => {
   const keyMap = {
@@ -45,7 +48,7 @@ const onSure = async () => {
 
 <template>
   <BuyCommonCustomPopup
-    id="popupAutoRefreshRenewal"
+    id="popupAutoRefreshTemplateRenewal"
     :setClass="{
       main: 'p:--w-1200 t:--w-720',
     }"
@@ -64,7 +67,7 @@ const onSure = async () => {
         class="shrink-0 text-center tracking-wider text-[--gray-666] tm:mt-[8px] tm:text-[14px] p:mt-[16px] p:text-[16px]"
       >
         已設定
-        <b class="font-semibold text-[--orange-e646]">{{ count }}</b>
+        <b class="font-semibold text-[--orange-e646]">{{ refreshCount }}</b>
         個時間<br class="pt:hidden" /><small class="m:hidden">，</small>需要使用
         <b class="font-semibold text-[--orange-e646]">{{ count }}</b>
         個自動刷新額度
@@ -74,7 +77,7 @@ const onSure = async () => {
           <li v-for="(item, index) in listPlans" :key="`${item.planType}_${item.planID}_${index}`">
             <BuyMFormRadioItem
               name="planID"
-              v-model="autoRefresh.save.apiData.planID"
+              v-model="autoRefresh.templateSave.apiData.planID"
               :config="{
                 value: item.planID,
                 isDisabled: item.isDisabled,
@@ -102,7 +105,7 @@ const onSure = async () => {
         </ul>
         <BuyMFormHidden
           name="planID"
-          v-model="autoRefresh.save.apiData.planID"
+          v-model="autoRefresh.templateSave.apiData.planID"
           :rules="{
             required: '請選擇額度',
           }"

@@ -30,6 +30,7 @@ const setClass = computed(() => {
   return {
     ...{
       main: '',
+      container: '',
       error: '',
     },
     ...props.setClass,
@@ -38,14 +39,17 @@ const setClass = computed(() => {
 </script>
 
 <template>
-  <div class="m-form" :class="setClass.main">
+  <div class="m-form-hidden" :class="setClass.main">
     <Field
       :name="`${props.name}_hidden`"
       :modelValue="props.modelValue"
       :rules="props.config.isDisabled ? '' : props.rules"
-      v-slot="{ field }"
+      v-slot="{ field, errorMessage }"
     >
       <input type="hidden" :id="`${props.name}_hidden`" v-bind="field" />
+      <div class="m-form-hidden-container" :class="setClass.container">
+        <slot :isError="!!errorMessage" />
+      </div>
     </Field>
     <ErrorMessage
       as="span"

@@ -35,6 +35,24 @@
   @apply !h-0;
 }
 
+/* accordion 展開更多搜尋 */
+.accordion-enter-active,
+.accordion-leave-active {
+  will-change: max-height;
+
+  @apply overflow-hidden transition-heights duration-300;
+}
+
+.accordion-enter-from,
+.accordion-leave-to {
+  @apply !max-h-0;
+}
+
+.accordion-enter-to,
+.accordion-leave-from {
+  @apply max-h-[1000px];
+}
+
 .select-fixed-enter-active,
 .select-fixed-leave-active,
 .datepicker-range-quickly-fixed-enter-active,

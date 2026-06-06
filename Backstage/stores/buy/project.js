@@ -24,6 +24,27 @@ export const useBuyProjectStore = defineStore('buyProject', () => {
         listSelectedRefreshTime: [],
       },
     },
+    templateSaveTime: {
+      apiData: {
+        templateID: null,
+        isCustom: null,
+        templateName: null,
+        listSelectedRefreshTime: [],
+      },
+    },
+    templateSave: {
+      info: null,
+      list: null,
+      selectedIndex: null,
+      apiData: {
+        hfID: null,
+        templateID: null,
+        planID: null,
+        isCustom: false,
+        empID: null,
+        listSelectedRefreshTime: [],
+      },
+    },
   })
   const golden = ref({
     plans: null,

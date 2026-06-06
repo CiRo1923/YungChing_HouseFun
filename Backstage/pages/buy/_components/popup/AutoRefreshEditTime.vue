@@ -38,7 +38,7 @@ const onSure = async () => {
 
 <template>
   <BuyCommonCustomPopup
-    id="popupEditTime"
+    id="popupAutoRefreshEditTime"
     :setClass="{
       main: 'p:--w-1200 t:--w-720',
       body: 'flex flex-col',

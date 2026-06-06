@@ -1,14 +1,15 @@
 <script setup>
 const {
-  onApiGETRefreshNewPlan,
   onApiGETRefreshAvailablePlans,
   onApiPOSTRefreshSavePlan,
-  onAutoRefreshPopup,
+  onAutoRefreshAddTimePopup,
+  onAutoRefreshRenewalPopup,
+  onAutoRefreshSuccess,
   onResetPojectData,
 } = useBuyProjectActions()
 const buyProject = useBuyProjectStore()
 const { autoRefresh } = storeToRefs(buyProject)
-const { onCustom, onApiPromise } = useBuyPopupActions()
+const { onApiPromise } = useBuyPopupActions()
 
 const props = defineProps({
   update: {
@@ -19,106 +20,6 @@ const props = defineProps({
 
 const info = computed(() => autoRefresh.value.info || {})
 
-// 續刊
-const onRenewal = async () => {
-  const { isSure: isRenewal, item } = await onCustom({
-    id: 'popupAutoRefreshRenewal',
-    title: '請選擇額度',
-    icon: 'icon_quota',
-    btns: [
-      {
-        id: 'cancel',
-        label: '取消',
-        class: '--border-gray-e5 --text-gray-666',
-        type: 'cancel',
-        isClose: true,
-      },
-      {
-        id: 'back',
-        label: '上一步',
-        class: '--border-gray-e5 --text-gray-666',
-        type: 'cancel',
-        isClose: true,
-      },
-      {
-        id: 'sure',
-        label: '確定，使用額度',
-        class: '--bg-green-6a2d --text-white',
-        type: 'sure',
-        isClose: false,
-      },
-    ],
-  })
-
-  if (isRenewal) {
-    onApiPromise('open')
-    await onApiPOSTRefreshSavePlan()
-    onApiPromise('close')
-
-    const { isSure } = await onCustom({
-      id: 'popupAutoRefreshSuccess',
-      title: '自動刷新',
-      icon: 'icon_double_star',
-      hasExistClose: false,
-      btns: 'alert',
-    })
-
-    if (isSure) {
-      onApiPromise('open')
-      if (props.update) await props.update()
-      onApiPromise('close')
-    }
-  } else if (item.id === 'back') {
-    onNewPlan()
-  }
-}
-
-const onNewPlan = async () => {
-  const { hfID } = info.value
-
-  const { status, data } = await onApiGETRefreshNewPlan(hfID)
-
-  if (status === 200) {
-    const { isSure: isAddTime, item } = await onCustom({
-      id: 'popupAddTime',
-      title: '增加刷新次數',
-      icon: 'icon_double_star',
-      data,
-      btns: [
-        {
-          label: '取消',
-          class: '--border-gray-e5 --text-gray-666',
-          type: 'cancel',
-          isClose: true,
-        },
-        {
-          id: 'back',
-          label: '上一步',
-          class: '--border-gray-e5 --text-gray-666',
-          type: 'cancel',
-          isClose: true,
-        },
-        {
-          id: 'sure',
-          label: '確認',
-          class: '--bg-green-6a2d --text-white',
-          type: 'sure',
-          isClose: false,
-        },
-      ],
-    })
-
-    if (isAddTime) {
-      onApiPromise('open')
-      await onApiGETRefreshAvailablePlans()
-      onRenewal()
-      onApiPromise('close')
-    } else if (item.id === 'back') {
-      await onAutoRefreshPopup(autoRefresh.value.info)
-    }
-  }
-}
-
 const onClick = async () => {
   const { hfID } = info.value
 
@@ -127,7 +28,28 @@ const onClick = async () => {
 
   onResetPojectData('autoRefresh') // 清空 autoRefresh 選取的資料
 
-  await onNewPlan()
+  while (true) {
+    // 增加刷新次數 popup（上一步會自行回到「自動刷新設定」）
+    const isAddTime = await onAutoRefreshAddTimePopup(info.value)
+    if (!isAddTime) return
+
+    onApiPromise('open')
+    await onApiGETRefreshAvailablePlans()
+    onApiPromise('close')
+
+    // 請選擇額度 popup
+    const renewal = await onAutoRefreshRenewalPopup()
+    if (renewal === 'back') continue // 上一步 → 回到增加刷新次數
+    if (renewal !== 'sure') return // 取消 / 關閉 → 結束
+
+    break
+  }
+
+  onApiPromise('open')
+  await onApiPOSTRefreshSavePlan()
+  onApiPromise('close')
+
+  await onAutoRefreshSuccess(props.update)
 }
 </script>
 

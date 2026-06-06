@@ -211,6 +211,7 @@ const config = computed(() => {
   return {
     city: {
       options: null,
+      isError: false,
       schema: {
         label: 'label',
         value: 'value',
@@ -218,6 +219,7 @@ const config = computed(() => {
     },
     area: {
       options: null,
+      isError: false,
       schema: {
         label: 'label',
         value: 'value',
@@ -225,11 +227,15 @@ const config = computed(() => {
     },
     road: {
       options: null,
+      isError: false,
       schema: {
         label: 'label',
         value: 'value',
         model: 'label',
       },
+    },
+    number: {
+      isError: false,
     },
     ...props.config,
   }
@@ -283,6 +289,7 @@ onMounted(() => {
       :config="{
         placeholder: '選擇縣市',
         schema: config.city.schema,
+        isError: config.city.isError,
       }"
       :setClass="{
         main: ['--h-40 --px-12 --py-8 m:w-full', setClass.city],
@@ -297,6 +304,7 @@ onMounted(() => {
       :config="{
         placeholder: '選擇區域',
         schema: config.area.schema,
+        isError: config.area.isError,
         isDisabled: !modelCity,
       }"
       :setClass="{
@@ -312,6 +320,7 @@ onMounted(() => {
       :config="{
         placeholder: '請選擇路段',
         schema: config.road.schema,
+        isError: config.road.isError,
         noMatchClearLabel: true,
       }"
       :setClass="{
@@ -370,6 +379,7 @@ onMounted(() => {
         isExistClose: false,
         hasClearButton: false,
         maxlength: 3,
+        isError: config.number.isError,
       }"
       :setClass="{
         main: ['--h-40 --px-12 --py-8', setClass.number],

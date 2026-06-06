@@ -22,8 +22,6 @@ export default () => {
   const {
     onApiGETRealEstatePurposeCheckOptions,
     onApiGETCitySelectOptions,
-    // onApiGETRealEstateTypeSelectOptions,
-    // onApiGETRealEstateLegalUsageSelectOptions,
     onApiGETRealEstateZoingCheckOptions,
     onApiGETRealEstateZoingCitySelectOptions,
     onApiGETRealEstateZoingLandSelectOptions,
@@ -41,7 +39,6 @@ export default () => {
     onApiGETRealEstateParkingPayPeriodSelectOptions,
     onApiGETRealEstateVideoDisplaySelectOptions,
     onApiGETRealEstateVideoTypeSelectOptions,
-    // onApiGETRealEstateFeatureCheckOptions,
     onApiGETRealEstatePosterDataSourceSelectOptions,
     onValueGetText,
     onReplaceImageSize,
@@ -263,8 +260,6 @@ export default () => {
     return [
       useAsyncData('purpose-options', () => onApiGETRealEstatePurposeCheckOptions()),
       useAsyncData('city-options', () => onApiGETCitySelectOptions()),
-      // useAsyncData('type-options', () => onApiGETRealEstateTypeSelectOptions()),
-      // useAsyncData('usage-options', () => onApiGETRealEstateLegalUsageSelectOptions()),
       useAsyncData('zoing-options', () => onApiGETRealEstateZoingCheckOptions()),
       useAsyncData('zoingCity-options', () => onApiGETRealEstateZoingCitySelectOptions()),
       useAsyncData('zoingLand-options', () => onApiGETRealEstateZoingLandSelectOptions()),

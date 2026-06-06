@@ -56,6 +56,22 @@ export const apiGETRefreshGetPlanInfo = async (data) =>
 export const apiGETRefreshAvailablePlans = async (data) =>
   await fetchApi.get(`api/${version}/vas/Refresh/AvailablePlans`, data)
 
-// 單一物件 設定自動刷新 (列表 & 明細流程)
+// 單一物件 自動刷新儲存 (列表 & 明細流程)
 export const apiPOSTRefreshSavePlan = async (data) =>
   await fetchApi.post(`api/${version}/vas/Refresh/SavePlan`, data)
+
+// 自動刷新範本設定 (列表 & 明細流程)
+export const apiGETRefreshTemplateAvailableTemplates = async (data) =>
+  await fetchApi.get(`api/${version}/vas/Refresh/Template/AvailableTemplates`, data)
+
+// 取得自動刷新範本時間 (列表 & 明細流程)
+export const apiGETRefreshTemplateGetTemplateInfo = async (data) =>
+  await fetchApi.get(`api/${version}/vas/Refresh/Template/GetTemplateInfo`, data)
+
+// 單一物件 自動刷新範本時間儲存 (列表 & 明細流程)
+export const apiPOSTRefreshTemplateSaveTemplate = async (data) =>
+  await fetchApi.post(`api/${version}/vas/Refresh/Template/SaveTemplate`, data)
+
+// 單一物件 自動刷新範本儲存 (列表 & 明細流程)
+export const apiPOSTRefreshSavePlanTemplate = async (data) =>
+  await fetchApi.post(`api/${version}/vas/Refresh/SavePlan/template`, data)

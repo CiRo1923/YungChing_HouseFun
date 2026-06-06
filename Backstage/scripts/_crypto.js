@@ -4,11 +4,11 @@ const decoder = new TextDecoder()
 const ACTIVE_KID = 'main-key-v1'
 
 const KEY_RING = {
-  'main-key-v1': 'SUGARFUN_F2E_TEAM_CRYPTO_KEY_VAL',
+  'main-key-v1': 'HOUSEFUN_BUY_NEWHOUSE_RENT_PRICE',
 }
 
 const PBKDF2_CONFIG = {
-  salt: 'sugarfun-salt-v1',
+  salt: 'housefun_to_nuxt',
   iterations: 100000,
   hash: 'SHA-256',
 }
@@ -19,7 +19,7 @@ const AES_CONFIG = {
   ivLength: 12,
 }
 
-const URL_TOKEN_SECRET = 'SUGARFUN_URL_TOKEN_F2E'
+const URL_TOKEN_SECRET = 'HOUSEFUN_URL_TOKEN_F2E'
 
 const isPlainObject = (value) => {
   if (Object.prototype.toString.call(value) !== '[object Object]') {
@@ -35,7 +35,7 @@ const toBase64 = (buffer) => {
   let binary = ''
 
   for (const byte of bytes) {
-    binary += String.fromCharCode(byte)
+    binary += String.fromCodePoint(byte)
   }
 
   return btoa(binary)
@@ -53,7 +53,7 @@ const fromBase64 = (base64) => {
 }
 
 const toUrlSafeBase64 = (text) => {
-  return btoa(text).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '')
+  return btoa(text).replaceAll('+', '-').replaceAll('/', '_').replaceAll(/=+$/g, '')
 }
 
 const fromUrlSafeBase64 = (text) => {
@@ -70,7 +70,7 @@ const xorText = (text, secret) => {
 
   for (let i = 0; i < text.length; i += 1) {
     const code = text.charCodeAt(i) ^ secret.charCodeAt(i % secret.length)
-    result += String.fromCharCode(code)
+    result += String.fromCodePoint(code)
   }
 
   return result
@@ -162,7 +162,7 @@ const serializeValue = (input) => {
       const output = {}
 
       for (const [key, value] of Object.entries(input)) {
-        if (typeof value === 'undefined') continue
+        if (value === undefined) continue
         output[key] = serializeValue(value)
       }
 
@@ -262,7 +262,7 @@ export const onDeCrypto = async (cipherText) => {
   }
 }
 
-export const onEnDeToken = (value) => {
+export const onEnUrlToken = (value) => {
   const serialized = JSON.stringify(value)
   const mixed = xorText(serialized, URL_TOKEN_SECRET)
 
@@ -274,8 +274,8 @@ export const onEnDeToken = (value) => {
   return toUrlSafeBase64(JSON.stringify(payload))
 }
 
-export const onDeToken = (token) => {
-  if (!token || !token.trim()) return null
+export const onDeUrlToken = (token) => {
+  if (!token?.trim()) return null
 
   try {
     const decoded = fromUrlSafeBase64(token)

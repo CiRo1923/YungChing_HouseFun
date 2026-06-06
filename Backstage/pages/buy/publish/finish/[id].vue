@@ -81,6 +81,10 @@ onMounted(() => {
   <PageBuyPopupAutoRefreshAddTime />
   <PageBuyPopupAutoRefreshEditTime />
   <PageBuyPopupAutoRefreshSuccess />
+  <PageBuyPopupAutoRefreshTemplate />
+  <PageBuyPopupAutoRefreshTemplateCheck />
+  <PageBuyPopupAutoRefreshTemplateRenewal />
+  <PageBuyPopupAutoRefreshTemplateEditTime />
 </template>
 
 <style></style>

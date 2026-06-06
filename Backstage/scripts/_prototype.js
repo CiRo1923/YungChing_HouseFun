@@ -17,30 +17,27 @@ export const onRecursive = (obj, key, exec, finish) => {
       return toArray()
     }
   }
+  const buildPath = (parentPath, index) =>
+    parentPath ? [].concat(arrayWithoutHoles(parentPath), [index]) : []
+
+  const visit = (node, parentPath, index) => {
+    const path = buildPath(parentPath, index)
+
+    exec(node, path)
+
+    if (node[key]) {
+      foeEach(node[key], path)
+    }
+  }
+
   const foeEach = (object, parentPath) => {
     recursiveIndex++
 
-    // console.log(object.constructor)
-
     if (object.constructor === Object) {
-      const path = parentPath ? [].concat(arrayWithoutHoles(parentPath), [0]) : []
-
-      exec(object, path)
-
-      if (object[key]) {
-        foeEach(object[key], path)
-      }
+      visit(object, parentPath, 0)
     } else {
       for (let i = 0; i < object.length; i += 1) {
-        const item = object[i]
-        const index = i
-        const path = parentPath ? [].concat(arrayWithoutHoles(parentPath), [index]) : []
-
-        exec(item, path)
-
-        if (item[key]) {
-          foeEach(item[key], path)
-        }
+        visit(object[i], parentPath, i)
       }
     }
 
@@ -85,64 +82,33 @@ export const onDeepClone = (obj, callback) => {
 
 // 深度合併
 export const onDeepMerge = (target, ...sources) => {
+  if (!sources.length) return target
+  const source = sources.shift()
   const isObject = (item) => {
     return item && typeof item === 'object' && !Array.isArray(item)
   }
-  const getArrayMergeKey = (item) => {
-    if (!isObject(item)) return null
-
-    const keys = ['type', 'id', 'key', 'name']
-    const key = keys.find((key) => item[key] !== undefined && item[key] !== null)
-
-    return key ? `${key}:${item[key]}` : null
-  }
-  const mergeArray = (target, source) => {
-    const result = []
-    const usedIndex = []
-
-    for (let i = 0; i < source.length; i += 1) {
-      const item = source[i]
-      const mergeKey = getArrayMergeKey(item)
-      const targetIndex = mergeKey
-        ? target.findIndex((targetItem, index) => {
-            return !usedIndex.includes(index) && getArrayMergeKey(targetItem) === mergeKey
-          })
-        : i
-      const targetItem = targetIndex > -1 ? target[targetIndex] : undefined
-
-      if (targetIndex > -1) {
-        usedIndex.push(targetIndex)
-      }
-
-      result.push(merge(targetItem, item))
-    }
-
-    for (let i = 0; i < target.length; i += 1) {
-      if (!usedIndex.includes(i)) {
-        result.push(onDeepClone(target[i]))
-      }
-    }
-
-    return result
-  }
-  const merge = (target, source) => {
-    if (source === undefined) return onDeepClone(target)
-    if (Array.isArray(target) && Array.isArray(source)) return mergeArray(target, source)
-
-    if (isObject(target) && isObject(source)) {
-      const result = onDeepClone(target)
-
-      for (const key in source) {
-        result[key] = merge(result[key], source[key])
-      }
-
-      return result
-    }
-
-    return onDeepClone(source)
+  const isShallow = (item) => {
+    return !(Array.isArray(item) && item.some((value) => typeof value === 'object'))
   }
 
-  return sources.reduce((result, source) => merge(result, source), onDeepClone(target))
+  if (isObject(target) && isObject(source)) {
+    for (const key in source) {
+      if (isObject(source[key])) {
+        if (!target[key]) Object.assign(target, { [key]: {} })
+
+        onDeepMerge(target[key], source[key])
+      } else if (isShallow(source[key])) {
+        Object.assign(target, { [key]: source[key] })
+      } else {
+        if (!target[key]) Object.assign(target, { [key]: [] })
+        Object.assign(target, {
+          [key]: source[key].map((item, index) => onDeepMerge(target[key][index] || item, item)),
+        })
+      }
+    }
+  }
+
+  return onDeepMerge(target, ...sources)
 }
 
 // 清空物件資料
@@ -154,12 +120,10 @@ export const onEmptyData = (obj) => {
           data[key] = ''
         } else if (typeof data[key] === 'number') {
           data[key] = null
-        } else {
-          if (Array.isArray(data[key])) {
-            data[key] = []
-          } else if (typeof data[key] !== 'boolean') {
-            data[key] = {}
-          }
+        } else if (Array.isArray(data[key])) {
+          data[key] = []
+        } else if (typeof data[key] !== 'boolean') {
+          data[key] = {}
         }
       }
     }
@@ -169,26 +133,16 @@ export const onEmptyData = (obj) => {
 // 小數點設定
 export const onToFixed = (number, fixed) => {
   const length = number && /\./.test(number) ? (number + '').split('.')[1].length : 0
-  const fix = fixed !== undefined ? fixed : length
-  let result = +(Math.round(number + `e+${fix}`) + `e-${fix}`) || 0
-  const pointNumber = /\./.test(result) ? result.toString().split('.')[1] : []
+  const fix = fixed === undefined ? length : fixed
+  let result = Number(`${Math.round(Number(`${number}e+${fix}`))}e-${fix}`) || 0
 
-  if (fix && pointNumber.length < fix) {
-    for (let i = 0; i < fix - pointNumber.length; i += 1) {
-      if (/\./.test(result)) {
-        result = `${result}0`
-      } else {
-        if (i === 0) {
-          result = `${result}.0`
-        } else {
-          result = `${result}0`
-        }
-      }
+  // 小數位數不足時補 0（位數剛好則維持原本的 number 型別）
+  if (fix) {
+    const [integer, decimal = ''] = String(result).split('.')
+    if (decimal.length < fix) {
+      result = `${integer}.${decimal.padEnd(fix, '0')}`
     }
   }
-
-  // console.log(/\./.test(result))
-  // console.log(pointNumber)
 
   return number || number === 0 ? result : null
 }
@@ -204,7 +158,7 @@ export const numberComma = {
     const [integer, decimal] = str.split('.')
     const integerWithComma = integer.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 
-    return decimal !== undefined ? `${integerWithComma}.${decimal}` : integerWithComma
+    return decimal === undefined ? integerWithComma : `${integerWithComma}.${decimal}`
   },
 
   remove(number, isReturnZero = true) {
@@ -212,7 +166,7 @@ export const numberComma = {
       return isReturnZero ? '0' : ''
     }
 
-    return String(number).replace(/,/g, '')
+    return String(number).replaceAll(',', '')
   },
 }
 
@@ -220,7 +174,7 @@ export const numberComma = {
 export const onAddZero = (number) => {
   const value = typeof number === 'string' ? Number(number) : number
 
-  return value > 9 ? value : `0${value}`
+  return value > 9 ? String(value) : `0${value}`
 }
 
 // 格式化日期
@@ -228,17 +182,19 @@ export const onFormatDate = (date, format) => {
   // ---- helpers ----
   const pad2 = (n) => String(n).padStart(2, '0')
 
-  const getSeparator = (fmt) => {
-    const m = fmt.match(/\W/)
-    return m ? m[0] : ''
-  }
-
   const parseTimeFromDateString = (input) => {
     // 原本邏輯是「format 需要 hh/mm/ss 且 date 字串含有時間」才抓，不然補 00
     // 這邊一樣：只抓 "HH:MM:SS" 形式
-    const m = typeof input === 'string' ? input.match(/(\d{2}):(\d{2}):(\d{2})/) : null
+    const m = typeof input === 'string' ? /(\d{1,2}):(\d{1,2}):(\d{1,2})/.exec(input) : null
     if (!m) return null
-    return { hh: m[1], mm: m[2], ss: m[3] }
+    return {
+      hh: pad2(Number(m[1])),
+      h: String(Number(m[1])),
+      mm: pad2(Number(m[2])),
+      m: String(Number(m[2])),
+      ss: pad2(Number(m[3])),
+      s: String(Number(m[3])),
+    }
   }
 
   const toLocalYMD = (ms) => {
@@ -305,6 +261,43 @@ export const onFormatDate = (date, format) => {
     return Number.isNaN(utcMs) ? null : utcMs
   }
 
+  // 解析各種日期字串格式（已去頭尾空白、非空）
+  const parseDateTimeString = (s) => {
+    // YYYYMMDD
+    if (/^\d{8}$/.test(s)) {
+      const y = parseInt(s.slice(0, 4), 10)
+      const mo = parseInt(s.slice(4, 6), 10)
+      const d = parseInt(s.slice(6, 8), 10)
+      return safeMsFromYMD(y, mo, d)
+    }
+
+    // YYYY-MM-DD / YYYY/MM/DD
+    const ymd = /^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$/.exec(s)
+    if (ymd) {
+      return safeMsFromYMD(parseInt(ymd[1], 10), parseInt(ymd[2], 10), parseInt(ymd[3], 10))
+    }
+
+    // YYYY-MM-DD HH:mm:ss / YYYY/MM/DD HH:mm:ss / YYYY-MM-DDTHH:mm:ss
+    const ymdhms = /^(\d{4})[-/](\d{1,2})[-/](\d{1,2})(?:T|\s)(\d{1,2}):(\d{1,2}):(\d{1,2})$/.exec(
+      s
+    )
+    if (ymdhms) {
+      const [, y, mo, d, hh, mm, ss] = ymdhms.map((v) => parseInt(v, 10))
+      return safeMsFromYMD(y, mo, d, hh, mm, ss)
+    }
+
+    // 新增：ISO 8601 with fractional seconds + timezone
+    // 例如：2026-02-03T17:50:08.5662303+08:00
+    const isoMs = parseIsoWithTzToMs(s)
+    if (isoMs != null) return isoMs
+
+    // string / others
+    // 這裡仍然可能因格式太自由而不穩，所以先把 '-' 轉成 '/'
+    // 舊 iOS 對 '/' 相對友善一點
+    const ms = +new Date(s.replaceAll('-', '/'))
+    return Number.isNaN(ms) ? null : ms
+  }
+
   const parseToMs = (input) => {
     if (!input && input !== 0) return null
 
@@ -322,102 +315,64 @@ export const onFormatDate = (date, format) => {
 
     // .NET: /Date(1690000000000+0800)/
     if (typeof input === 'string' && /^\/Date/.test(input)) {
-      const m = input.match(/\((\d+)(?:[-+]\d+)?\)/)
+      const m = /\((\d+)(?:[-+]\d+)?\)/.exec(input)
       return m ? Number(m[1]) : null
     }
 
     const s = String(input).trim()
     if (!s) return null
 
-    // YYYYMMDD
-    if (/^\d{8}$/.test(s)) {
-      const y = parseInt(s.slice(0, 4), 10)
-      const mo = parseInt(s.slice(4, 6), 10)
-      const d = parseInt(s.slice(6, 8), 10)
-      return safeMsFromYMD(y, mo, d)
-    }
-
-    // YYYY-MM-DD / YYYY/MM/DD
-    {
-      const m = s.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$/)
-      if (m) {
-        const y = parseInt(m[1], 10)
-        const mo = parseInt(m[2], 10)
-        const d = parseInt(m[3], 10)
-        return safeMsFromYMD(y, mo, d)
-      }
-    }
-
-    // YYYY-MM-DD HH:mm:ss / YYYY/MM/DD HH:mm:ss / YYYY-MM-DDTHH:mm:ss
-    {
-      const m = s.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})(?:T|\s)(\d{1,2}):(\d{1,2}):(\d{1,2})$/)
-      if (m) {
-        const y = parseInt(m[1], 10)
-        const mo = parseInt(m[2], 10)
-        const d = parseInt(m[3], 10)
-        const hh = parseInt(m[4], 10)
-        const mm = parseInt(m[5], 10)
-        const ss = parseInt(m[6], 10)
-        return safeMsFromYMD(y, mo, d, hh, mm, ss)
-      }
-    }
-
-    // 新增：ISO 8601 with fractional seconds + timezone
-    // 例如：2026-02-03T17:50:08.5662303+08:00
-    {
-      const isoMs = parseIsoWithTzToMs(s)
-      if (isoMs != null) return isoMs
-    }
-
-    // string / others
-    // 這裡仍然可能因格式太自由而不穩，所以先把 '-' 轉成 '/'
-    // 舊 iOS 對 '/' 相對友善一點
-    const ms = +new Date(s.replace(/-/g, '/'))
-    return Number.isNaN(ms) ? null : ms
+    return parseDateTimeString(s)
   }
 
   // ---- main ----
   const ms = parseToMs(date)
   if (ms == null) return ''
 
-  // format 沒帶值：回傳 +new Date(計算好的日期) 的結果（timestamp number）
+  // format 沒帶值：回傳計算好的日期 timestamp（轉成字串，與其他分支型別一致）
   // (+new Date(ms) === ms，但寫清楚符合需求)
   if (!format || !String(format).trim()) {
-    return +new Date(ms)
+    return String(+new Date(ms))
   }
 
   const fmt = String(format).trim()
-  const sep = getSeparator(fmt)
+  const timeTokenIndex = fmt.search(/hh|h|mm|m|ss|s/)
+  const dateFmt = timeTokenIndex === -1 ? fmt : fmt.slice(0, timeTokenIndex).trim()
 
   // 用本地取日期（避免 UTC 切日）
   const ymd = toLocalYMD(ms)
-  const YYYY = /YYYY/.test(fmt) ? ymd.YYYY : ''
-  const MM = /MM/.test(fmt) ? ymd.MM : ''
-  const DD = /DD/.test(fmt) ? ymd.DD : ''
+  const dateTokens = {
+    YYYY: ymd.YYYY,
+    YYY: String(Number(ymd.YYYY) - 1911),
+    MM: ymd.MM,
+    M: String(Number(ymd.MM)),
+    DD: ymd.DD,
+    D: String(Number(ymd.DD)),
+  }
 
   // 組日期字串
   let dateStr = ''
-  if (YYYY) dateStr = YYYY
-  if (MM) dateStr = dateStr ? `${dateStr}${sep}${MM}` : MM
-  if (DD) dateStr = dateStr ? `${dateStr}${sep}${DD}` : DD
+  dateStr = dateFmt.replace(/YYYY|YYY|MM|M|DD|D/g, (token) => dateTokens[token])
 
   // 組時間字串（只在 format 有 hh/mm/ss 才開始帶時間）
   let timeStr = ''
-  const needsHh = /hh/.test(fmt)
-  const needsMm = /mm/.test(fmt)
-  const needsSs = /ss/.test(fmt)
+  const needsTime = /hh|h|mm|m|ss|s/.test(fmt)
 
-  if (needsHh || needsMm || needsSs) {
-    const t = parseTimeFromDateString(date) || { hh: '00', mm: '00', ss: '00' }
+  if (needsTime) {
+    const t = parseTimeFromDateString(date) || {
+      hh: '00',
+      h: '0',
+      mm: '00',
+      m: '0',
+      ss: '00',
+      s: '0',
+    }
 
     // 最穩方式：直接用原 fmt 的時間部分（從第一個 h/m/s token 開始）
-    const idx = fmt.search(/hh|mm|ss/)
+    const idx = timeTokenIndex
     if (idx !== -1) {
       const timeFmt = fmt.slice(idx)
-      let tStr = timeFmt
-      if (needsHh) tStr = tStr.replace('hh', t.hh)
-      if (needsMm) tStr = tStr.replace('mm', t.mm)
-      if (needsSs) tStr = tStr.replace('ss', t.ss)
+      const tStr = timeFmt.replace(/hh|h|mm|m|ss|s/g, (token) => t[token])
       timeStr = ` ${tStr}`
     }
   }
@@ -444,76 +399,60 @@ export const onValueToDateRange = (today, date, format) => {
     }
   }
 
-  // 支援 number / Date / 'YYYY-MM-DD' / 'YYYY/MM/DD' / 'YYYYMMDD' / .NET /Date(...)/
-  // 注意：絕對不使用 new Date('YYYY-MM-DD')，避免舊 iOS/Safari 解析坑
-  const parseToUtcDate = (v) => {
-    if (v instanceof Date) {
-      // 取這個瞬間在 UTC 的年月日，轉成「日曆日期」(UTC noon)
-      const y = v.getUTCFullYear()
-      const m = v.getUTCMonth() + 1
-      const d = v.getUTCDate()
-      return makeUtcDate(y, m, d)
-    }
+  // 取某個瞬間在 UTC 的年月日，轉成「日曆日期」(UTC noon)
+  const calendarDateOf = (d0) =>
+    makeUtcDate(d0.getUTCFullYear(), d0.getUTCMonth() + 1, d0.getUTCDate())
 
-    if (typeof v === 'number') {
-      const d0 = new Date(v)
-      if (isNaN(d0.getTime())) return null
-      const y = d0.getUTCFullYear()
-      const m = d0.getUTCMonth() + 1
-      const d = d0.getUTCDate()
-      return makeUtcDate(y, m, d)
-    }
+  // 同上，但無效日期回 null
+  const safeCalendarDate = (d0) => (isNaN(d0.getTime()) ? null : calendarDateOf(d0))
 
-    const s = String(v || '').trim()
-    if (!s) return null
-
+  const parseUtcDateString = (s) => {
     // .NET: /Date(1690000000000+0800)/
-    if (/^\/Date/.test(s)) {
-      const m = s.match(/\((\d+)(?:[-+]\d+)?\)/)
-      if (!m) return null
-      const d0 = new Date(Number(m[1]))
-      if (isNaN(d0.getTime())) return null
-      const y = d0.getUTCFullYear()
-      const mo = d0.getUTCMonth() + 1
-      const d = d0.getUTCDate()
-      return makeUtcDate(y, mo, d)
+    if (s.startsWith('/Date')) {
+      const m = /\((\d+)(?:[-+]\d+)?\)/.exec(s)
+      return m ? safeCalendarDate(new Date(Number(m[1]))) : null
     }
 
     // YYYYMMDD
     if (/^\d{8}$/.test(s)) {
-      const y = parseInt(s.slice(0, 4), 10)
-      const mo = parseInt(s.slice(4, 6), 10)
-      const d = parseInt(s.slice(6, 8), 10)
-      const dt = makeUtcDate(y, mo, d)
+      const dt = makeUtcDate(
+        parseInt(s.slice(0, 4), 10),
+        parseInt(s.slice(4, 6), 10),
+        parseInt(s.slice(6, 8), 10)
+      )
       return isNaN(dt.getTime()) ? null : dt
     }
 
     // YYYY-MM-DD or YYYY/MM/DD
-    {
-      const m = s.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$/)
-      if (m) {
-        const y = parseInt(m[1], 10)
-        const mo = parseInt(m[2], 10)
-        const d = parseInt(m[3], 10)
-        const dt = makeUtcDate(y, mo, d)
-        return isNaN(dt.getTime()) ? null : dt
-      }
+    const ymd = /^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$/.exec(s)
+    if (ymd) {
+      const dt = makeUtcDate(parseInt(ymd[1], 10), parseInt(ymd[2], 10), parseInt(ymd[3], 10))
+      return isNaN(dt.getTime()) ? null : dt
     }
 
     // 其他格式：先把 '-' 轉成 '/' 再 new Date，盡量避開舊 iOS 坑
     // 但這條路本來就不保證所有格式都穩，能不用就不用
-    const fallback = new Date(s.replace(/-/g, '/'))
-    if (isNaN(fallback.getTime())) return null
-    const y = fallback.getUTCFullYear()
-    const mo = fallback.getUTCMonth() + 1
-    const d = fallback.getUTCDate()
-    return makeUtcDate(y, mo, d)
+    return safeCalendarDate(new Date(s.replaceAll('-', '/')))
+  }
+
+  // 支援 number / Date / 'YYYY-MM-DD' / 'YYYY/MM/DD' / 'YYYYMMDD' / .NET /Date(...)/
+  // 注意：絕對不使用 new Date('YYYY-MM-DD')，避免舊 iOS/Safari 解析坑
+  const parseToUtcDate = (v) => {
+    // Date 物件維持原行為（不做 NaN 檢查）
+    if (v instanceof Date) return calendarDateOf(v)
+
+    if (typeof v === 'number') return safeCalendarDate(new Date(v))
+
+    const s = String(v || '').trim()
+    if (!s) return null
+
+    return parseUtcDateString(s)
   }
 
   const daysInMonth = (y, m) => new Date(Date.UTC(y, m, 0)).getUTCDate()
 
   const addDays = (dt, n) => {
-    const d = new Date(dt.getTime())
+    const d = new Date(dt)
     d.setUTCDate(d.getUTCDate() + n)
     return d
   }
@@ -560,7 +499,7 @@ export const onValueToDateRange = (today, date, format) => {
   }
 
   // +N/-N + unit (allow "3 month", "-1year", "10 day", "-5 day")
-  const m = input.match(/^([+-]?\d+)\s*(year|month|day)s?$/i)
+  const m = /^([+-]?\d+)\s*(year|month|day)s?$/i.exec(input)
   if (!m) return null
 
   const amount = parseInt(m[1], 10)
@@ -582,28 +521,29 @@ export const onReplaceSymbolToTag = (content, symbol, tag) => {
 
 // 判斷特殊字元長度
 export const onUnicodLength = (text) => {
-  const regexUnicode =
-    // eslint-disable-next-line no-misleading-character-class
-    /\ud83c[\udffb-\udfff](?=\ud83c[\udffb-\udfff])|(?:[^\ud800-\udfff][\u0300-\u036f\ufe20-\ufe2f\u20d0-\u20ff\u1ab0-\u1aff\u1dc0-\u1dff]?|[\u0300-\u036f\ufe20-\ufe2f\u20d0-\u20ff\u1ab0-\u1aff\u1dc0-\u1dff]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff]|[\ud800-\udfff])[\ufe0e\ufe0f]?(?:[\u0300-\u036f\ufe20-\ufe2f\u20d0-\u20ff\u1ab0-\u1aff\u1dc0-\u1dff]|\ud83c[\udffb-\udfff])?(?:\u200d(?:[^\ud800-\udfff]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff])[\ufe0e\ufe0f]?(?:[\u0300-\u036f\ufe20-\ufe2f\u20d0-\u20ff\u1ab0-\u1aff\u1dc0-\u1dff]|\ud83c[\udffb-\udfff])?)*/g
+  if (!text) return 0
 
-  return text ? text.match(regexUnicode).length : 0
+  const segmenter = new Intl.Segmenter()
+  return [...segmenter.segment(String(text))].length
 }
 
 // 取得裝置
 export const onDevice = () => {
-  const angle = window.screen.orientation ? window.screen.orientation.angle : 0
+  const angle = globalThis.screen.orientation ? globalThis.screen.orientation.angle : 0
   const PCMinWidth = 1024
   const mobileWidth = 740
   const userAgent = navigator.userAgent
-  const isPCPad = angle === 0 && window.innerWidth > mobileWidth && window.innerWidth < PCMinWidth // 在桌機時 resize 模擬 Pad 的尺寸
+  const isPCPad =
+    angle === 0 && globalThis.innerWidth > mobileWidth && globalThis.innerWidth < PCMinWidth // 在桌機時 resize 模擬 Pad 的尺寸
   const isAndroidPad = /Android|webOS|BlackBerry/i.test(userAgent)
   const is16BelowPad = /iPad/i.test(userAgent) // ios 16 以下的系統
   const is17AbovePad = angle !== 0 && /Mac OS X/i.test(userAgent) // iso 17 以上的系統
   const isAndroidMobile = /Android|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)
   const isIPhoneMobile =
-    (angle !== 0 && window.innerWidth > 730 && window.innerWidth < 815) || /iPhone/i.test(userAgent)
+    (angle !== 0 && globalThis.innerWidth > 730 && globalThis.innerWidth < 815) ||
+    /iPhone/i.test(userAgent)
 
-  if (window.innerWidth <= mobileWidth || isAndroidMobile || isIPhoneMobile) {
+  if (globalThis.innerWidth <= mobileWidth || isAndroidMobile || isIPhoneMobile) {
     return 'm'
   }
   if (isPCPad || isAndroidPad || is16BelowPad || is17AbovePad) {
@@ -684,20 +624,63 @@ export const onUUID = () => {
       return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, callback)
     }
   }
-  let timestamp = new Date().getTime()
+  let timestamp = Date.now()
   let perforNow =
     (typeof performance !== 'undefined' && performance.now && performance.now() * 1000) || 0
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
     let random = Math.random() * 16
     if (timestamp > 0) {
-      random = ((timestamp + random) % 16) | 0
+      random = Math.trunc((timestamp + random) % 16)
       timestamp = Math.floor(timestamp / 16)
     } else {
-      random = ((perforNow + random) % 16) | 0
+      random = Math.trunc((perforNow + random) % 16)
       perforNow = Math.floor(perforNow / 16)
     }
     return (c === 'x' ? random : (random & 0x3) | 0x8).toString(16)
   })
+}
+
+// 時間單位對毫秒的換算表
+const TIME_UNIT_FACTOR = { ms: 1, s: 1000, m: 60000, h: 3600000 }
+
+// timeFormat.parseToMs 的 number 分支
+const parseTimeNumberToMs = (input, numberUnit, autoNumberUnit) => {
+  if (!Number.isFinite(input)) return null
+  // 常見：< 1e10 可能是秒；但 300 也可能是毫秒，autoNumberUnit 只在可接受「猜測」時開
+  if (autoNumberUnit) return input < 1e10 ? input * 1000 : input
+  return numberUnit === 's' ? input * 1000 : input
+}
+
+// timeFormat.parseToMs 的 string 分支（已 trim、非空）
+const parseTimeStringToMs = (raw, numberUnit) => {
+  // mm:ss
+  if (/^\d{1,2}:\d{2}$/.test(raw)) {
+    const [mm, ss] = raw.split(':').map(Number)
+    return (mm * 60 + ss) * 1000
+  }
+
+  // hh:mm:ss
+  if (/^\d{1,2}:\d{2}:\d{2}$/.test(raw)) {
+    const [hh, mm, ss] = raw.split(':').map(Number)
+    return (hh * 3600 + mm * 60 + ss) * 1000
+  }
+
+  // 單位字串：1500ms / 30s / 5m / 2h
+  const unitMatch = /^(-?\d+(?:\.\d+)?)\s*(ms|s|m|h)$/i.exec(raw)
+  if (unitMatch) {
+    const n = Number(unitMatch[1])
+    if (!Number.isFinite(n)) return null
+    return n * TIME_UNIT_FACTOR[unitMatch[2].toLowerCase()]
+  }
+
+  // 純數字字串：'300'
+  if (/^-?\d+(?:\.\d+)?$/.test(raw)) {
+    const n = Number(raw)
+    if (!Number.isFinite(n)) return null
+    return numberUnit === 's' ? n * 1000 : n
+  }
+
+  return null
 }
 
 // 轉換時間格式
@@ -713,8 +696,8 @@ export const timeFormat = {
    */
   parseToMs(input, props) {
     if (input == null || input === '') return null
-    const numberUnit = props && props.numberUnit ? props.numberUnit : 'ms'
-    const autoNumberUnit = props && props.autoNumberUnit ? props.autoNumberUnit : false
+    const numberUnit = props?.numberUnit || 'ms'
+    const autoNumberUnit = props?.autoNumberUnit || false
 
     // Date
     if (input instanceof Date) {
@@ -724,13 +707,7 @@ export const timeFormat = {
 
     // number
     if (typeof input === 'number') {
-      if (!Number.isFinite(input)) return null
-      if (autoNumberUnit) {
-        // 常見：< 1e12 可能是秒；但你需求說 300 也可能是毫秒
-        // 所以 autoNumberUnit 建議只在你能接受「猜測」時開
-        return input < 1e10 ? input * 1000 : input
-      }
-      return numberUnit === 's' ? input * 1000 : input
+      return parseTimeNumberToMs(input, numberUnit, autoNumberUnit)
     }
 
     // string
@@ -738,36 +715,7 @@ export const timeFormat = {
     const raw = input.trim()
     if (!raw) return null
 
-    // 1) 先判斷是否是 mm:ss / hh:mm:ss
-    // mm:ss (兩段)
-    if (/^\d{1,2}:\d{2}$/.test(raw)) {
-      const [mm, ss] = raw.split(':').map(Number)
-      return (mm * 60 + ss) * 1000
-    }
-    // hh:mm:ss (三段)
-    if (/^\d{1,2}:\d{2}:\d{2}$/.test(raw)) {
-      const [hh, mm, ss] = raw.split(':').map(Number)
-      return (hh * 3600 + mm * 60 + ss) * 1000
-    }
-
-    // 2) 單位字串：1500ms / 30s / 5m / 2h
-    const unitMatch = raw.match(/^(-?\d+(?:\.\d+)?)\s*(ms|s|m|h)$/i)
-    if (unitMatch) {
-      const n = Number(unitMatch[1])
-      const unit = unitMatch[2].toLowerCase()
-      if (!Number.isFinite(n)) return null
-      const factor = unit === 'ms' ? 1 : unit === 's' ? 1000 : unit === 'm' ? 60000 : 3600000
-      return n * factor
-    }
-
-    // 3) 純數字字串：'300'
-    if (/^-?\d+(?:\.\d+)?$/.test(raw)) {
-      const n = Number(raw)
-      if (!Number.isFinite(n)) return null
-      return numberUnit === 's' ? n * 1000 : n
-    }
-
-    return null
+    return parseTimeStringToMs(raw, numberUnit)
   },
 
   /**
@@ -850,12 +798,8 @@ export const timeFormat = {
   toTimeString(input, props) {
     const { parseToMs, formatMs } = timeFormat
     const isPropsObject = typeof props === 'object'
-    const format = isPropsObject
-      ? props && props.format
-        ? props.format
-        : 'mm:ss'
-      : props || 'mm:ss'
-    const parseOptions = isPropsObject && props && props.parseOptions ? props.parseOptions : {}
+    const format = isPropsObject ? props?.format || 'mm:ss' : props || 'mm:ss'
+    const parseOptions = (isPropsObject && props?.parseOptions) || {}
     const ms = parseToMs(input, parseOptions)
     if (ms == null) return ''
     return formatMs(ms, format, {
@@ -863,6 +807,29 @@ export const timeFormat = {
       parseOptions,
     })
   },
+}
+
+// 秒或毫秒的數字 → 毫秒（< 1e12 視為秒，例如 1770262224；>= 1e12 視為毫秒）
+const countdownNumberToMs = (n) => (n < 1e12 ? Math.round(n * 1000) : Math.round(n))
+
+// 解析 YYYY[-/.]MM[-/.]DD（可選時間）→ ms（本地時區），失敗回 null
+const parseCountdownDateString = (s) => {
+  const m =
+    /^(\d{4})[./-](\d{1,2})[./-](\d{1,2})(?:[ T](\d{1,2})(?::(\d{1,2})(?::(\d{1,2})(?:\.(\d{1,3}))?)?)?)?$/.exec(
+      s
+    )
+  if (!m) return null
+
+  const year = Number(m[1])
+  const month = Number(m[2]) - 1
+  const day = Number(m[3])
+  const hh = Number(m[4] ?? 0)
+  const mm = Number(m[5] ?? 0)
+  const ss = Number(m[6] ?? 0)
+  const ms = m[7] == null ? 0 : Number(String(m[7]).padEnd(3, '0'))
+
+  const t = new Date(year, month, day, hh, mm, ss, ms).getTime() // 本地時區
+  return Number.isFinite(t) ? t : null
 }
 
 // 倒數計時
@@ -890,9 +857,7 @@ export const countdown = {
 
     // number
     if (typeof input === 'number') {
-      if (!Number.isFinite(input)) return null
-      // 小於 1e12 通常是「秒」(例如 1770262224)，大於等於 1e12 通常是「毫秒」
-      return input < 1e12 ? Math.round(input * 1000) : Math.round(input)
+      return Number.isFinite(input) ? countdownNumberToMs(input) : null
     }
 
     // string
@@ -902,8 +867,7 @@ export const countdown = {
     // 純數字字串：當作 timestamp（秒或毫秒）
     if (/^\d+$/.test(s)) {
       const n = Number(s)
-      if (!Number.isFinite(n)) return null
-      return n < 1e12 ? Math.round(n * 1000) : Math.round(n)
+      return Number.isFinite(n) ? countdownNumberToMs(n) : null
     }
 
     // 先試原生 Date.parse（ISO / RFC 等大多吃得到）
@@ -912,24 +876,7 @@ export const countdown = {
 
     // 自己處理：YYYY[-/.]MM[-/.]DD (可選時間)
     // 例：2026-02-05、2026/02/05 13:05:09、2026.02.05 00:00:00
-    const m = s.match(
-      /^(\d{4})[./-](\d{1,2})[./-](\d{1,2})(?:[ T](\d{1,2})(?::(\d{1,2})(?::(\d{1,2})(?:\.(\d{1,3}))?)?)?)?$/
-    )
-    if (m) {
-      const year = Number(m[1])
-      const month = Number(m[2]) - 1
-      const day = Number(m[3])
-      const hh = m[4] != null ? Number(m[4]) : 0
-      const mm = m[5] != null ? Number(m[5]) : 0
-      const ss = m[6] != null ? Number(m[6]) : 0
-      const ms = m[7] != null ? Number(String(m[7]).padEnd(3, '0')) : 0
-
-      const d = new Date(year, month, day, hh, mm, ss, ms) // 這裡用「本地時區」
-      const t = d.getTime()
-      return Number.isFinite(t) ? t : null
-    }
-
-    return null
+    return parseCountdownDateString(s)
   },
   /**
    * expireTime 的單位容錯：
@@ -952,7 +899,7 @@ export const countdown = {
     if (!s) return null
 
     // 形如 "30s" / "5m" / "2h" / "1d"
-    const unit = s.match(/^(\d+(?:\.\d+)?)(ms|s|m|h|d)$/i)
+    const unit = /^(\d+(?:\.\d+)?)(ms|s|m|h|d)$/i.exec(s)
     if (unit) {
       const n = Number(unit[1])
       const u = unit[2].toLowerCase()
@@ -1239,7 +1186,7 @@ export const onBodyOverflowHiddenToggle = (status) => {
  */
 export const onQueryParam = (key) => {
   if (!key) return null
-  const { search } = window.location
+  const { search } = globalThis.location
   const params = new URLSearchParams(search)
   return params.get(key)
 }

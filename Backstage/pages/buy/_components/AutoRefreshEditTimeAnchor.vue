@@ -7,6 +7,7 @@ const {
   onApiGETRefreshGetPlanInfo,
   onApiPOSTRefreshSavePlan,
   onAutoRefreshPopup,
+  onAutoRefreshSuccess,
   onResetPojectData,
 } = useBuyProjectActions()
 const { onCustom, onApiPromise } = useBuyPopupActions()
@@ -32,56 +33,45 @@ const onClick = async () => {
 
   const { status, data } = await onApiGETRefreshGetPlanInfo()
 
-  if (status === 200) {
-    const { listTimeSpan } = data
+  if (status !== 200) return
 
-    autoRefresh.value.save.apiData.listSelectedRefreshTime = listTimeSpan
-      .filter((item) => item.isSelected)
-      .map((item) => item.timeID)
+  const { listTimeSpan } = data
 
-    const { isSure: isEditTime } = await onCustom({
-      id: 'popupEditTime',
-      title: `修改時間${expireDate ? ` - ${onFormatDate(expireDate, 'YYYY-MM-DD')} 到期` : ''}`,
-      icon: 'icon_double_star',
-      data,
-      btns: [
-        {
-          label: '取消',
-          class: '--border-gray-e5 --text-gray-666',
-          type: 'cancel',
-          isClose: true,
-        },
-        {
-          label: '確認',
-          class: '--bg-green-6a2d --text-white',
-          type: 'sure',
-          isClose: false,
-        },
-      ],
-    })
+  autoRefresh.value.save.apiData.listSelectedRefreshTime = listTimeSpan
+    .filter((item) => item.isSelected)
+    .map((item) => item.timeID)
 
-    if (isEditTime) {
-      onApiPromise('open')
-      await onApiPOSTRefreshSavePlan()
-      onApiPromise('close')
+  const { isSure: isEditTime } = await onCustom({
+    id: 'popupAutoRefreshEditTime',
+    title: `修改時間${expireDate ? ` - ${onFormatDate(expireDate, 'YYYY-MM-DD')} 到期` : ''}`,
+    icon: 'icon_double_star',
+    data,
+    btns: [
+      {
+        label: '取消',
+        class: '--border-gray-e5 --text-gray-666',
+        type: 'cancel',
+        isClose: true,
+      },
+      {
+        label: '確認',
+        class: '--bg-green-6a2d --text-white',
+        type: 'sure',
+        isClose: false,
+      },
+    ],
+  })
 
-      const { isSure } = await onCustom({
-        id: 'popupAutoRefreshSuccess',
-        title: '自動刷新',
-        icon: 'icon_double_star',
-        hasExistClose: false,
-        btns: 'alert',
-      })
-
-      if (isSure) {
-        onApiPromise('open')
-        if (props.update) await props.update()
-        onApiPromise('close')
-      }
-    } else {
-      await onAutoRefreshPopup(autoRefresh.value.info)
-    }
+  if (!isEditTime) {
+    await onAutoRefreshPopup(autoRefresh.value.info)
+    return
   }
+
+  onApiPromise('open')
+  await onApiPOSTRefreshSavePlan()
+  onApiPromise('close')
+
+  await onAutoRefreshSuccess(props.update)
 }
 </script>
 

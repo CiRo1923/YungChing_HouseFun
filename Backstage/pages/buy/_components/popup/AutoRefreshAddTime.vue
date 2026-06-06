@@ -29,7 +29,7 @@ const onSure = async () => {
 
 <template>
   <BuyCommonCustomPopup
-    id="popupAddTime"
+    id="popupAutoRefreshAddTime"
     :setClass="{
       main: 'p:--w-1200 t:--w-720',
       body: 'flex flex-col',
@@ -87,7 +87,7 @@ const onSure = async () => {
         :rules="{
           custom: {
             valid: !notCount,
-            errorMessage: `請設定自動刷新時段`,
+            errorMessage: '請設定自動刷新時段',
           },
         }"
         :setClass="{

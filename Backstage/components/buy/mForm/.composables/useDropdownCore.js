@@ -8,7 +8,7 @@ export const defaultDropdownConfig = {
 }
 
 export const onMergeDropdownConfig = (config = {}, extendConfig = {}) => {
-  return onDeepMerge(onDeepMerge(defaultDropdownConfig, extendConfig), config)
+  return onDeepMerge({}, defaultDropdownConfig, extendConfig, config)
 }
 
 const onNextFrame = () => {

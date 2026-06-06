@@ -193,7 +193,10 @@ await onWithLoadingAll([
   useAsyncData(`detail-${hfID.value}`, () => onApiGETRealEstate(hfID.value)),
 ])
 
-const { refresh: refreshOptions } = await useAsyncData('publish-basic-options', onOptionsUpdate)
+const { refresh: refreshOptions } = await useAsyncData(
+  `publish-basic-options-${hfID.value}`,
+  onOptionsUpdate
+)
 
 const onPurposeChange = async () => {
   await refreshOptions()

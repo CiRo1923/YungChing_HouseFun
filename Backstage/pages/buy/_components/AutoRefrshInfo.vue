@@ -41,7 +41,7 @@ const setClass = computed(() => {
           <PageBuyAutoRefreshAddTimeAnchor :update="props.update" />
         </li>
         <li>
-          <PageBuyAutoRefreshTemplateAnchor />
+          <PageBuyAutoRefreshTemplateAnchor :update="props.update" />
         </li>
       </ul>
     </div>

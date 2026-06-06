@@ -22,6 +22,7 @@ const props = defineProps({
 
 const casePurposeToken = computed(() => apiData.value.caseInfo.casePurposeToken)
 
+// 1: 住宅 2: 店面 3: 住店 4: 辦公 5: 住辦 6: 廠房 7: 車位 8: 土地 9: 其他
 const items = computed(() => {
   return [
     {
@@ -45,7 +46,7 @@ const items = computed(() => {
       isRequired: false,
       label: '車位坪數',
       class: 'p:h-[40px]',
-      hidden: [7], // 7: 車位
+      hidden: ['7'], // 7: 車位
       component: PageBuyPublishBasicPingCaseParkingSq,
       hasEmits: false,
     },
@@ -62,7 +63,7 @@ const items = computed(() => {
       isRequired: false,
       label: '附屬建物',
       class: 'p:h-[40px]',
-      hidden: [7], // 7: 車位
+      hidden: ['7'], // 7: 車位
       component: PageBuyPublishBasicPingCaseAffiliatedSq,
       hasEmits: false,
     },
@@ -71,7 +72,7 @@ const items = computed(() => {
       isRequired: false,
       label: '公設',
       class: 'p:h-[40px]',
-      hidden: [7], // 7: 車位
+      hidden: ['7'], // 7: 車位
       component: PageBuyPublishBasicPingCaseAmenitieSq,
       hasEmits: false,
     },

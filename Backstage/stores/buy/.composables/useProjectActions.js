@@ -14,6 +14,10 @@ import {
   apiGETRefreshGetPlanInfo,
   apiGETRefreshAvailablePlans,
   apiPOSTRefreshSavePlan,
+  apiGETRefreshTemplateAvailableTemplates,
+  apiPOSTRefreshSavePlanTemplate,
+  apiGETRefreshTemplateGetTemplateInfo,
+  apiPOSTRefreshTemplateSaveTemplate,
 } from '@js/_api/buy/common.js'
 
 import {
@@ -580,7 +584,10 @@ export default () => {
     return { config, status, data }
   }
   const onApiPOSTRefreshSavePlan = async () => {
-    const { config, status, data } = await apiPOSTRefreshSavePlan(autoRefresh.value.save.apiData)
+    const { config, status, data } = await apiPOSTRefreshSavePlan({
+      userID: 0,
+      ...autoRefresh.value.save.apiData,
+    })
 
     if (status !== 200) {
       onApiError(config, status, data)
@@ -588,13 +595,65 @@ export default () => {
 
     return { config, status, data }
   }
-  const onGoldenPopup = async (data, btns) => {
+  const onApiGETRefreshTemplateAvailableTemplates = async (hfID) => {
+    const { config, status, data } = await apiGETRefreshTemplateAvailableTemplates({
+      hfID,
+    })
+
+    if (status === 200) {
+      const { listTemplate, ...info } = data
+      autoRefresh.value.templateSave.info = info
+      autoRefresh.value.templateSave.list = listTemplate
+    } else {
+      onApiError(config, status, data)
+    }
+
+    return { config, status, data }
+  }
+  const onApiPOSTRefreshSavePlanTemplate = async () => {
+    const { config, status, data } = await apiPOSTRefreshSavePlanTemplate({
+      userID: 0,
+      ...autoRefresh.value.templateSave.apiData,
+    })
+
+    if (status !== 200) {
+      onApiError(config, status, data)
+    }
+
+    return { config, status, data }
+  }
+  const onApiGETRefreshTemplateGetTemplateInfo = async () => {
+    const { config, status, data } = await apiGETRefreshTemplateGetTemplateInfo({
+      userId: 0,
+      ...autoRefresh.value.templateSaveTime.apiData,
+    })
+
+    if (status !== 200) {
+      onApiError(config, status, data)
+    }
+
+    return { config, status, data }
+  }
+
+  const onApiPOSTRefreshTemplateSaveTemplate = async () => {
+    const { config, status, data } = await apiPOSTRefreshTemplateSaveTemplate(
+      autoRefresh.value.templateSaveTime.apiData
+    )
+
+    if (status !== 200) {
+      onApiError(config, status, data)
+    }
+
+    return { config, status, data }
+  }
+
+  const onGoldenPopup = async (objectData, btns) => {
     onResetPojectData('golden')
 
     const { isSure } = await onCustom({
       id: 'popupGolden',
       title: '請選擇額度',
-      data,
+      data: objectData,
       icon: 'icon_quota',
       btns: [
         {
@@ -614,7 +673,7 @@ export default () => {
 
     if (isSure) {
       onApiPromise('open')
-      const { status } = await onApiPOSTGoldenSetPlanSingle(data.hfID)
+      const { status } = await onApiPOSTGoldenSetPlanSingle(objectData.hfID)
 
       onApiPromise('close')
 
@@ -638,9 +697,9 @@ export default () => {
     return false
   }
 
-  const onAutoRefreshPopup = async (data) => {
+  const onAutoRefreshPopup = async (objectData) => {
     onApiPromise('open')
-    const { status } = await onApiGETRefreshCurrentPlansForCase(data.hfID)
+    const { status } = await onApiGETRefreshCurrentPlansForCase(objectData.hfID)
 
     onApiPromise('close')
 
@@ -648,7 +707,7 @@ export default () => {
       await onCustom({
         id: 'popupAutoRefresh',
         title: '自動刷新設定',
-        data,
+        data: objectData,
         icon: 'icon_double_star',
         btns: [
           {
@@ -663,6 +722,223 @@ export default () => {
 
     return false
   }
+  // 增加刷新次數 popup
+  const onAutoRefreshAddTimePopup = async (objectData) => {
+    const { status, data } = await onApiGETRefreshNewPlan(objectData.hfID)
+
+    if (status === 200) {
+      const { isSure: isAddTime, item } = await onCustom({
+        id: 'popupAutoRefreshAddTime',
+        title: '增加刷新次數',
+        icon: 'icon_double_star',
+        data,
+        btns: [
+          {
+            id: 'cancel',
+            label: '取消',
+            class: '--border-gray-e5 --text-gray-666',
+            type: 'cancel',
+            isClose: true,
+          },
+          {
+            id: 'back',
+            label: '上一步',
+            class: '--border-gray-e5 --text-gray-666',
+            type: 'cancel',
+            isClose: true,
+          },
+          {
+            id: 'sure',
+            label: '確認',
+            class: '--bg-green-6a2d --text-white',
+            type: 'sure',
+            isClose: false,
+          },
+        ],
+      })
+
+      if (isAddTime) {
+        return true
+      } else if (item?.id === 'back') {
+        await onAutoRefreshPopup(objectData)
+      }
+    }
+  }
+  // 請選擇額度 popup（增加刷新次數流程）
+  const onAutoRefreshRenewalPopup = async () => {
+    const { isSure: isRenewal, item } = await onCustom({
+      id: 'popupAutoRefreshRenewal',
+      title: '請選擇額度',
+      icon: 'icon_quota',
+      btns: [
+        {
+          id: 'cancel',
+          label: '取消',
+          class: '--border-gray-e5 --text-gray-666',
+          type: 'cancel',
+          isClose: true,
+        },
+        {
+          id: 'back',
+          label: '上一步',
+          class: '--border-gray-e5 --text-gray-666',
+          type: 'cancel',
+          isClose: true,
+        },
+        {
+          id: 'sure',
+          label: '確定，使用額度',
+          class: '--bg-green-6a2d --text-white',
+          type: 'sure',
+          isClose: false,
+        },
+      ],
+    })
+
+    if (isRenewal) return 'sure'
+
+    return item?.id ?? 'cancel' // 'back' | 'cancel'，由 onClick 決定退回哪一步
+  }
+  const onAutoRefreshTemplatePopup = async (objectData) => {
+    onApiPromise('open')
+
+    const { status, data } = await onApiGETRefreshTemplateAvailableTemplates(objectData.hfID)
+
+    onApiPromise('close')
+
+    if (status === 200) {
+      const { isSure: isListTemplate, item } = await onCustom({
+        id: 'popupAutoRefreshTemplate',
+        title: '請選擇範本',
+        icon: 'icon_copy',
+        data,
+        btns: [
+          {
+            id: 'cancel',
+            label: '取消',
+            class: '--border-gray-e5 --text-gray-666',
+            type: 'cancel',
+            isClose: true,
+          },
+          {
+            id: 'back',
+            label: '上一步',
+            class: '--border-gray-e5 --text-gray-666',
+            type: 'cancel',
+            isClose: true,
+          },
+          {
+            id: 'sure',
+            label: '確認',
+            class: '--bg-green-6a2d --text-white',
+            type: 'sure',
+            isClose: false,
+          },
+        ],
+      })
+
+      if (isListTemplate) {
+        return true
+      } else if (item?.id === 'back') {
+        await onAutoRefreshPopup(objectData)
+      }
+    }
+  }
+  const onAutoRefreshTemplateCheckPopup = async () => {
+    const { isSure: isCheck, item } = await onCustom({
+      id: 'popupAutoRefreshTemplateCheck',
+      title: '刷新變更確認',
+      icon: 'icon_template',
+      btns: [
+        {
+          id: 'cancel',
+          label: '取消',
+          class: '--border-gray-e5 --text-gray-666',
+          type: 'cancel',
+          isClose: true,
+        },
+        {
+          id: 'back',
+          label: '上一步',
+          class: '--border-gray-e5 --text-gray-666',
+          type: 'cancel',
+          isClose: true,
+        },
+        {
+          id: 'sure',
+          label: '確定，套用範本',
+          class: '--bg-green-6a2d --text-white',
+          type: 'sure',
+          isClose: true,
+        },
+      ],
+    })
+
+    if (isCheck) {
+      return 'sure'
+    }
+
+    return item?.id ?? 'cancel' // 'back' | 'cancel'，由 onClick 決定退回哪一步
+  }
+  const onAutoRefreshTemplateRenewalPopup = async () => {
+    const { isSure: isRenewal, item } = await onCustom({
+      id: 'popupAutoRefreshTemplateRenewal',
+      title: '請選擇額度',
+      icon: 'icon_quota',
+      btns: [
+        {
+          id: 'cancel',
+          label: '取消',
+          class: '--border-gray-e5 --text-gray-666',
+          type: 'cancel',
+          isClose: true,
+        },
+        {
+          id: 'back',
+          label: '上一步',
+          class: '--border-gray-e5 --text-gray-666',
+          type: 'cancel',
+          isClose: true,
+        },
+        {
+          id: 'sure',
+          label: '確定，使用額度',
+          class: '--bg-green-6a2d --text-white',
+          type: 'sure',
+          isClose: false,
+        },
+      ],
+    })
+
+    if (isRenewal) {
+      return 'sure'
+    }
+
+    return item?.id ?? 'cancel' // 'back' | 'cancel'，由 onClick 決定退回哪一步
+  }
+  const onAutoRefreshSuccessPopup = async () => {
+    const { isSure } = await onCustom({
+      id: 'popupAutoRefreshSuccess',
+      title: '自動刷新',
+      icon: 'icon_double_star',
+      hasExistClose: false,
+      btns: 'alert',
+    })
+
+    if (isSure) {
+      return true
+    }
+  }
+  // 顯示成功彈窗，確認後執行頁面更新
+  const onAutoRefreshSuccess = async (update) => {
+    const isSure = await onAutoRefreshSuccessPopup()
+
+    if (!isSure) return
+
+    onApiPromise('open')
+    if (update) await update()
+    onApiPromise('close')
+  }
 
   const onResetPojectData = (type) => {
     if (type === 'renewal' || !type) {
@@ -676,6 +952,18 @@ export default () => {
     if (type === 'autoRefresh' || !type) {
       autoRefresh.value.save.apiData.planID = null
       autoRefresh.value.save.apiData.listSelectedRefreshTime = []
+    }
+
+    if (type === 'autoRefreshTemplate' || !type) {
+      autoRefresh.value.templateSave.selectedIndex = null
+      autoRefresh.value.templateSave.apiData.templateID = null
+      autoRefresh.value.templateSave.apiData.planID = null
+      autoRefresh.value.templateSave.apiData.listSelectedRefreshTime = []
+    }
+
+    if (type === 'autoRefreshSaveTemplate' || !type) {
+      autoRefresh.value.templateSaveTime.apiData.templateID = null
+      autoRefresh.value.templateSaveTime.apiData.listSelectedRefreshTime = []
     }
   }
   const onValueGetText = (option, value) => {
@@ -767,8 +1055,19 @@ export default () => {
     onApiGETRefreshGetPlanInfo,
     onApiGETRefreshAvailablePlans,
     onApiPOSTRefreshSavePlan,
+    onApiGETRefreshTemplateAvailableTemplates,
+    onApiPOSTRefreshSavePlanTemplate,
+    onApiGETRefreshTemplateGetTemplateInfo,
+    onApiPOSTRefreshTemplateSaveTemplate,
     onGoldenPopup,
     onAutoRefreshPopup,
+    onAutoRefreshAddTimePopup,
+    onAutoRefreshRenewalPopup,
+    onAutoRefreshTemplatePopup,
+    onAutoRefreshTemplateCheckPopup,
+    onAutoRefreshTemplateRenewalPopup,
+    onAutoRefreshSuccessPopup,
+    onAutoRefreshSuccess,
     onResetPojectData,
     onValueGetText,
     onReplaceImageSize,

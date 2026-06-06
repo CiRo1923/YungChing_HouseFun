@@ -1,5 +1,5 @@
 <script setup>
-const emits = defineEmits(['update:select', 'update:other', 'change'])
+const emits = defineEmits(['update:select', 'update:other'])
 
 const props = defineProps({
   selectName: {
@@ -43,27 +43,6 @@ const props = defineProps({
     default: () => ({}),
   },
 })
-
-function isOtherSelect(value) {
-  return String(value) === '999'
-}
-
-function getEmptyOtherValue() {
-  return props.otherModifiers?.number ? null : ''
-}
-
-function clearOther() {
-  const emptyValue = getEmptyOtherValue()
-
-  if (props.other === emptyValue) return
-
-  emits('update:other', emptyValue)
-}
-
-function onSelectChange(option) {
-  emits('change', option)
-}
-
 const modelSelect = computed({
   get: () => props.select,
   set: (value) => {
@@ -81,7 +60,7 @@ const modelSelect = computed({
   },
 })
 const modelOther = computed({
-  get: () => props.other,
+  get: () => props.other ?? '',
   set: (value) => {
     let result = value
 
@@ -97,6 +76,14 @@ const modelOther = computed({
     emits('update:other', result)
   },
 })
+
+const isOtherSelect = (value) => String(value) === '999'
+
+const clearOther = () => {
+  if ((props.other ?? '') === '') return
+
+  emits('update:other', '')
+}
 
 watch(
   modelSelect,
@@ -141,19 +128,22 @@ const setClass = computed(() => {
       :name="props.selectName"
       v-model="modelSelect"
       :options="config.select.options"
-      :config="config.select"
+      :config="{
+        placeholder: config.select.placeholder,
+        schema: config.select.schema,
+      }"
       :rules="props.selectRules"
       :setClass="setClass.select"
-      @change="onSelectChange"
     />
-    <!-- modelSelect 回傳 '999' 等於其他 -->
     <BuyMFormInput
+      v-if="isOtherSelect(modelSelect)"
       :name="props.otherName"
       v-model="modelOther"
-      :config="config.other"
+      :config="{
+        placeholder: config.other.placeholder,
+      }"
       :rules="props.otherRules"
       :setClass="setClass.other"
-      v-if="isOtherSelect(modelSelect)"
     />
   </div>
 </template>

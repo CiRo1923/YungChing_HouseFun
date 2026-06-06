@@ -575,21 +575,27 @@ onUnmounted(() => {
   }
 
   &:not(.\-\-disabled) {
-    --autocomplete-bg-color: var(--modules-bgColor);
-    --autocomplete-text-color: var(--textColor-title);
-
-    .m-autocomplete-type {
-      @apply text-[--gray-666];
-
-      &::placeholder {
-        @apply text-[--gray-999];
-      }
-    }
+    --autocomplete-text-color: var(--gray-666);
+    --autocomplete-text-placeholder-color: var(--gray-999);
   }
 
   &:not(.\-\-error) {
     --autocomplete-icon-color: var(--gray-ccce);
     --autocomplete-border-color: var(--gray-e5);
+  }
+
+  &.\-\-error {
+    --autocomplete-text-color: var(--orange-e646);
+    --autocomplete-icon-color: var(--orange-e646);
+    --autocomplete-border-color: var(--orange-e646);
+  }
+}
+
+.m-autocomplete-type {
+  @apply text-[--autocomplete-text-color];
+
+  &::placeholder {
+    @apply text-[--autocomplete-text-placeholder-color];
   }
 }
 

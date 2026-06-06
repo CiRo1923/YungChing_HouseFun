@@ -2,22 +2,22 @@ import { onUnicodLength } from '@js/_prototype.js'
 import { defineRule } from 'vee-validate'
 import { all as rules } from '@vee-validate/rules'
 
-const replaceMessage = (elem, object) => {
+const onReplaceMessage = (elem, object) => {
   let message = object.errorMessage || object[0]
 
-  if (object.value != null) {
-    const regex = /{\s?.*\s?}/
-
-    message = message ? message.replace(regex, object.value) : message
-  } else {
+  if (object.value == null) {
     const attributes = document.querySelector(`[name="${elem.name}"]`).attributes
 
     for (let i = 0; i < attributes.length; i += 1) {
       const { nodeName, nodeValue } = attributes[i]
-      const regex = new RegExp(`{\\s?${nodeName}\\s?}`)
+      const regex = new RegExp(String.raw`{\s?${nodeName}\s?}`)
 
       message = message ? message.replace(regex, nodeValue) : message
     }
+  } else {
+    const regex = /{\s?.*\s?}/
+
+    message = message ? message.replace(regex, object.value) : message
   }
 
   return message
@@ -38,7 +38,7 @@ defineRule('required', (value, object, elem) => {
   const hasValue = result?.length > 0
   const valid = hasValue || (!isArray && !object.valid)
 
-  return !valid ? replaceMessage(elem, object) : true
+  return valid ? true : onReplaceMessage(elem, object)
 })
 
 // 最大字元長度
@@ -46,7 +46,7 @@ defineRule('maxlength', (value, object, elem) => {
   const $elem = document.querySelector(`[name="${elem.name}"]`)
   const maxlength = object.value || Number($elem.getAttribute('maxlength'))
 
-  return value && onUnicodLength(value) > maxlength ? replaceMessage(elem, object) : true
+  return value && onUnicodLength(value) > maxlength ? onReplaceMessage(elem, object) : true
 })
 
 // 最小字元長度
@@ -54,7 +54,7 @@ defineRule('minlength', (value, object, elem) => {
   const $elem = document.querySelector(`[name="${elem.name}"]`)
   const minlength = object.value || Number($elem.getAttribute('minlength'))
 
-  return value && onUnicodLength(value) < minlength ? replaceMessage(elem, object) : true
+  return value && onUnicodLength(value) < minlength ? onReplaceMessage(elem, object) : true
 })
 
 // 中文格式
@@ -67,7 +67,9 @@ defineRule('halfWidth', (value, object) => {
   const isObject = !!object.exception
   const exception = isObject ? value.replace(new RegExp(`\\${object.exception}`, 'g', '')) : value
 
-  return value && /[^x00-xff]/g.test(exception) ? (isObject ? object.message : object[0]) : true
+  const message = isObject ? object.message : object[0]
+
+  return value && /[\u0100-\uffff]/g.test(exception) ? message : true
 })
 
 // 電話格式
@@ -84,7 +86,7 @@ defineRule('number', (value, message) => {
 
 // email 格式
 defineRule('email', (value, message) => {
-  return value && !/^\w+((-\w+)|(\.\w+))*@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/.test(value)
+  return value && !/^\w+((-\w+)|(\.\w+))*@[A-Za-z0-9]+([.-][A-Za-z0-9]+)*\.[A-Za-z]+$/.test(value)
     ? message[0]
     : true
 })
@@ -103,5 +105,5 @@ defineRule('custom', (value, object, elem) => {
   const hasValue = !!result?.length > 0
   const valid = hasValue ? !isArray && object.valid : true
 
-  return !valid ? replaceMessage(elem, object) : true
+  return valid ? true : onReplaceMessage(elem, object)
 })

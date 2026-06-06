@@ -29,9 +29,6 @@ const items = shallowReadonly([
             value: 'value',
           },
         },
-        rules: {
-          required: '請選擇車位類型',
-        },
         class: 'grow',
       },
     },
@@ -67,9 +64,6 @@ const items = shallowReadonly([
             value: 'value',
           },
         },
-        rules: {
-          required: '請選擇停車方式',
-        },
         class: 'grow',
       },
     },
@@ -86,9 +80,6 @@ const items = shallowReadonly([
             label: 'text',
             value: 'value',
           },
-        },
-        rules: {
-          required: '請選擇產權登記',
         },
         class: 'grow',
       },
@@ -108,9 +99,6 @@ const items = shallowReadonly([
             value: 'value',
           },
         },
-        rules: {
-          required: '請選擇繳費方式',
-        },
         class: 'p:w-[160px] m:w-[147px]',
       },
       text: {
@@ -123,9 +111,6 @@ const items = shallowReadonly([
           checkNotIsZero: true,
           hasClearButton: false,
           integer: true,
-        },
-        rules: {
-          required: '請輸入管理費',
         },
         class: 'p:w-[113px] m:w-[108px] shrink-0',
       },

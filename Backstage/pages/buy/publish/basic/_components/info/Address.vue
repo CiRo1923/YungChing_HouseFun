@@ -12,6 +12,11 @@ const areas = ref(options.value.area || [])
 const roads = ref([])
 
 const casePurposeToken = computed(() => apiData.value.caseInfo.casePurposeToken)
+const rules = computed(() => {
+  const { cityID, districtID, road, addrNum } = apiData.value.caseInfo
+
+  return !!(cityID && districtID && road && addrNum)
+})
 
 const onCityChange = async ({ source } = {}) => {
   const { cityID } = apiData.value.caseInfo
@@ -82,7 +87,20 @@ const onPopupAddressGoogleMap = async () => {
 </script>
 
 <template>
-  <div class="space-y-[8px]">
+  <BuyMFormHidden
+    name="address"
+    v-model="rules"
+    :rules="{
+      custom: {
+        valid: rules,
+        errorMessage: '請填寫完整的地址',
+      },
+    }"
+    :setClass="{
+      error: 'mt-[4px]',
+    }"
+    v-slot="{ isError }"
+  >
     <!-- 1: 住宅 2: 店面 3: 住店 4: 辦公 5: 住辦 6: 廠房 7: 車位 8: 土地 9: 其他 -->
     <BuyMAddress
       name="info"
@@ -98,6 +116,7 @@ const onPopupAddressGoogleMap = async () => {
       :config="{
         city: {
           options: options.city,
+          isError,
           schema: {
             label: 'text',
             value: 'value',
@@ -105,6 +124,7 @@ const onPopupAddressGoogleMap = async () => {
         },
         area: {
           options: areas,
+          isError,
           schema: {
             label: 'text',
             value: 'value',
@@ -112,11 +132,15 @@ const onPopupAddressGoogleMap = async () => {
         },
         road: {
           options: roads,
+          isError,
           schema: {
             label: 'roadName',
             value: 'roadID',
             model: 'roadName',
           },
+        },
+        number: {
+          isError,
         },
       }"
       :setClass="{
@@ -142,6 +166,7 @@ const onPopupAddressGoogleMap = async () => {
       :config="{
         city: {
           options: options.city,
+          isError,
           schema: {
             label: 'text',
             value: 'value',
@@ -149,6 +174,7 @@ const onPopupAddressGoogleMap = async () => {
         },
         area: {
           options: areas,
+          isError,
           schema: {
             label: 'text',
             value: 'value',
@@ -156,6 +182,7 @@ const onPopupAddressGoogleMap = async () => {
         },
         road: {
           options: roads,
+          isError,
           schema: {
             label: 'roadName',
             value: 'roadID',
@@ -172,25 +199,25 @@ const onPopupAddressGoogleMap = async () => {
       @change:area="onAreaChange"
       v-if="casePurposeToken === '8'"
     />
-    <div
-      class="flex m:flex-col-reverse m:items-start m:gap-y-[12px] m:text-[16px] t:gap-x-[12px] pt:items-center pt:text-[14px] p:gap-x-[16px]"
-    >
-      <BuyMAnchor
-        text="調整地圖定位"
-        :config="{
-          icon: {
-            position: 'left',
-            name: 'icon_location',
-          },
-        }"
-        :setClass="{
-          main: '--text-green-6a2d shrink-0 underline',
-          icon: 'h-[16px] w-[16px] text-[--gray-666]',
-        }"
-        @click="onPopupAddressGoogleMap"
-      />
-      <p class="line-clamp-1 min-w-0 text-[--gray-666] m:w-full">顯示至路段名：{{ onAddress() }}</p>
-    </div>
+  </BuyMFormHidden>
+  <div
+    class="mt-[8px] flex m:flex-col-reverse m:items-start m:gap-y-[12px] m:text-[16px] t:gap-x-[12px] pt:items-center pt:text-[14px] p:gap-x-[16px]"
+  >
+    <BuyMAnchor
+      text="調整地圖定位"
+      :config="{
+        icon: {
+          position: 'left',
+          name: 'icon_location',
+        },
+      }"
+      :setClass="{
+        main: '--text-green-6a2d shrink-0 underline',
+        icon: 'h-[16px] w-[16px] text-[--gray-666]',
+      }"
+      @click="onPopupAddressGoogleMap"
+    />
+    <p class="line-clamp-1 min-w-0 text-[--gray-666] m:w-full">顯示至路段名：{{ onAddress() }}</p>
   </div>
 </template>
 
