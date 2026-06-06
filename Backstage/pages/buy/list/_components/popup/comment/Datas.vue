@@ -86,8 +86,9 @@ const onActionClick = (item) => {
 
   apiCommentUpdateData.value.commentIDList = [commentID]
 
-  if (!statueToken) emits(`click:reply`, item)
-  if (statueToken) emits(`click:noReply`, item)
+  // 1: 已回覆, 2: 未回覆
+  if (statueToken === 2) emits(`click:reply`, item)
+  if (statueToken === 1) emits(`click:noReply`, item)
 }
 </script>
 <template>
@@ -133,7 +134,7 @@ const onActionClick = (item) => {
         </p>
       </template>
       <template #statueTokenName="{ item, value }">
-        <span :class="[{ 'text-[--orange-e646]': !item.statueToken }]">{{ value }}</span>
+        <span :class="[{ 'text-[--orange-e646]': item.statueToken === 2 }]">{{ value }}</span>
       </template>
       <template #content_m="{ value }">
         <div class="rounded-[15px] bg-[--gray-ed] p-[16px]">
@@ -142,7 +143,7 @@ const onActionClick = (item) => {
       </template>
       <template #action="{ item }">
         <BuyMAnchor
-          :text="item.statueToken ? '設為未回覆' : '設為已回覆'"
+          :text="item.statueToken === 1 ? '設為未回覆' : '設為已回覆'"
           :setClass="{
             main: '--oval --border-gray-e5 --bg-white --text-gray-666 --h-35 --px-20',
             text: 'text-[16px]',
