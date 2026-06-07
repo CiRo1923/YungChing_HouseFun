@@ -42,10 +42,7 @@ onResetPojectData('renewal')
       />
       <PageBuyRenewalInfo
         :setClass="{
-          hiddenForm: {
-            main: 'text-center',
-            error: 'mt-[4px]',
-          },
+          error: 'mt-[4px] text-center',
         }"
       />
     </BuyMCardDefault>

@@ -70,36 +70,6 @@ const onSure = async () => {
         個自動刷新額度
       </p>
       <Form as="div" class="mx-auto tm:mt-[16px] p:mt-[24px] p:max-w-[800px]" ref="formRef">
-        <ul class="m:space-y-[16px] pt:space-y-[8px]">
-          <li v-for="(item, index) in listPlans" :key="`${item.planType}_${item.planID}_${index}`">
-            <BuyMFormRadioItem
-              name="planID"
-              v-model="autoRefresh.save.apiData.planID"
-              :config="{
-                value: item.planID,
-                isDisabled: item.isDisabled,
-              }"
-              :setClass="{
-                main: 'p:--px-40 p:--py-16 tm:--p-16',
-                label: 'text-[16px] text-[--gray-666] pt:flex pt:items-center',
-              }"
-            >
-              <p class="pt:grow">{{ item.planName }}</p>
-              <div class="flex items-center p:gap-x-[30px]">
-                <p class="grow p:w-[135px]">
-                  {{
-                    item.isExchange ? `${item.expireDate} 到期` : `刊登期 ${item.durationDays} 天`
-                  }}
-                </p>
-                <p class="shrink-0">
-                  剩餘額度：<b class="font-semibold text-[--orange-e646]">
-                    {{ numberComma.add(item.availableCount) }}
-                  </b>
-                </p>
-              </div>
-            </BuyMFormRadioItem>
-          </li>
-        </ul>
         <BuyMFormHidden
           name="planID"
           v-model="autoRefresh.save.apiData.planID"
@@ -107,10 +77,43 @@ const onSure = async () => {
             required: '請選擇額度',
           }"
           :setClass="{
-            main: 'text-center',
-            error: 'mt-[15px]',
+            error: 'mt-[15px] text-center',
           }"
-        />
+        >
+          <ul class="m:space-y-[16px] pt:space-y-[8px]">
+            <li
+              v-for="(item, index) in listPlans"
+              :key="`${item.planType}_${item.planID}_${index}`"
+            >
+              <BuyMFormRadioItem
+                name="planID"
+                v-model="autoRefresh.save.apiData.planID"
+                :config="{
+                  value: item.planID,
+                  isDisabled: item.isDisabled,
+                }"
+                :setClass="{
+                  main: 'p:--px-40 p:--py-16 tm:--p-16',
+                  label: 'text-[16px] text-[--gray-666] pt:flex pt:items-center',
+                }"
+              >
+                <p class="pt:grow">{{ item.planName }}</p>
+                <div class="flex items-center p:gap-x-[30px]">
+                  <p class="grow p:w-[135px]">
+                    {{
+                      item.isExchange ? `${item.expireDate} 到期` : `刊登期 ${item.durationDays} 天`
+                    }}
+                  </p>
+                  <p class="shrink-0">
+                    剩餘額度：<b class="font-semibold text-[--orange-e646]">
+                      {{ numberComma.add(item.availableCount) }}
+                    </b>
+                  </p>
+                </div>
+              </BuyMFormRadioItem>
+            </li>
+          </ul>
+        </BuyMFormHidden>
       </Form>
     </div>
   </BuyCommonCustomPopup>

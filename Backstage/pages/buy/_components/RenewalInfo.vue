@@ -14,17 +14,25 @@ const props = defineProps({
 const setClass = computed(() => {
   return {
     main: '',
-    hiddenForm: {
-      main: '',
-      error: '',
-    },
+    error: '',
     ...props.setClass,
   }
 })
 </script>
 
 <template>
-  <div class="mx-auto p:max-w-[800px]" :class="setClass.main">
+  <BuyMFormHidden
+    name="planID"
+    v-model="renewal.apiData.planID"
+    :rules="{
+      required: '請選擇額度',
+    }"
+    :setClass="{
+      main: ['mx-auto p:max-w-[800px]', setClass.main],
+      error: setClass.error,
+    }"
+    v-slot="{ isError }"
+  >
     <ul class="m:space-y-[16px] pt:space-y-[8px]">
       <li
         v-for="(item, index) in renewal.data.listPlan"
@@ -35,6 +43,7 @@ const setClass = computed(() => {
           v-model="renewal.apiData.planID"
           :config="{
             value: item.planID,
+            isError: isError,
           }"
           :setClass="{
             main: 'p:--px-40 p:--py-16 tm:--p-16',
@@ -55,19 +64,7 @@ const setClass = computed(() => {
         </BuyMFormRadioItem>
       </li>
     </ul>
-    <BuyMFormHidden
-      name="planID"
-      v-model="renewal.apiData.planID"
-      :rules="{
-        required: '請選擇額度',
-      }"
-      :setClass="setClass.hiddenForm"
-    />
-  </div>
-
-  <!-- <pre>
-    {{ renewal }}
-  </pre> -->
+  </BuyMFormHidden>
 </template>
 
 <style lang="postcss"></style>

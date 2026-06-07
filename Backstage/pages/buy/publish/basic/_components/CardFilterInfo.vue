@@ -179,7 +179,7 @@ const items = computed(() => {
       id: 'barrierFree',
       isRequired: false,
       label: '無障礙設施',
-      class: 'pt:h-[25px]',
+      class: 'pt:h-[40px]',
       hidden: ['8'], // 8 土地;
       component: PageBuyPublishBasicInfoBarrierFree,
       hasEmits: false,

@@ -91,8 +91,7 @@ const onSure = async () => {
           },
         }"
         :setClass="{
-          main: 'text-center',
-          error: 'mt-[15px]',
+          error: 'mt-[15px] text-center',
         }"
       />
     </Form>

@@ -54,6 +54,10 @@ import { useBuyPublishStore } from '@stores/buy/publish.js'
 
 import useBuyPopupActions from '@stores/buy/.composables/usePopupActions.js'
 
+// 套用範本流程的頁面更新 callback。「編輯」按鈕位於全域 popup 內無法透過 props 取得 update，
+// 故以模組層級保存，讓編輯後重新進入流程仍能於成功後刷新頁面。
+let autoRefreshTemplateUpdate = null
+
 export default () => {
   const projectStores = useBuyProjectStore()
   const { onAlert, onCustom, onApiPromise, onApiError } = useBuyPopupActions()
@@ -916,6 +920,58 @@ export default () => {
 
     return item?.id ?? 'cancel' // 'back' | 'cancel'，由 onClick 決定退回哪一步
   }
+  // 套用範本完整流程：選擇範本 → 確認範本時間 → 續約 → 儲存
+  // 同時供「編輯」流程重新進入，避免回到選擇範本後無法繼續後續步驟
+  const onAutoRefreshTemplateCount = () => {
+    const { list, selectedIndex } = autoRefresh.value.templateSave
+    const refreshCount = list?.[selectedIndex]?.refreshCount ?? 0
+    const currentCount = autoRefresh.value.info?.currentCount ?? 0
+
+    return refreshCount - currentCount
+  }
+  const onAutoRefreshTemplateFlow = async (update) => {
+    if (update) autoRefreshTemplateUpdate = update // 保留首次進入流程帶入的頁面更新 callback
+
+    autoRefresh.value.templateSave.apiData.hfID = autoRefresh.value.info?.hfID
+
+    onResetPojectData('autoRefreshTemplate') // 清空 autoRefresh 選取的資料
+
+    while (true) {
+      // 選擇範本 popup（上一步會自行回到「自動刷新設定」）
+      const isTemplate = await onAutoRefreshTemplatePopup(autoRefresh.value.info)
+      if (!isTemplate) return
+
+      // 確認範本時間 popup
+      const check = await onAutoRefreshTemplateCheckPopup()
+      if (check === 'back') continue // 上一步 → 回到選擇範本
+      if (check !== 'sure') return // 取消 / 關閉 → 結束
+
+      const count = onAutoRefreshTemplateCount()
+
+      if (count === 0) {
+        autoRefresh.value.templateSave.apiData.planID = 0 // 0 為覆蓋不是新增
+      }
+
+      // 續約 popup（次數不相同才需要選額度）
+      if (count > 0) {
+        onApiPromise('open')
+        await onApiGETRefreshAvailablePlans()
+        onApiPromise('close')
+
+        const renewal = await onAutoRefreshTemplateRenewalPopup()
+        if (renewal === 'back') continue // 上一步 → 回到選擇範本
+        if (renewal !== 'sure') return // 取消 / 關閉 → 結束
+      }
+
+      break
+    }
+
+    onApiPromise('open')
+    await onApiPOSTRefreshSavePlanTemplate()
+    onApiPromise('close')
+
+    await onAutoRefreshSuccess(autoRefreshTemplateUpdate)
+  }
   const onAutoRefreshSuccessPopup = async () => {
     const { isSure } = await onCustom({
       id: 'popupAutoRefreshSuccess',
@@ -1066,6 +1122,7 @@ export default () => {
     onAutoRefreshTemplatePopup,
     onAutoRefreshTemplateCheckPopup,
     onAutoRefreshTemplateRenewalPopup,
+    onAutoRefreshTemplateFlow,
     onAutoRefreshSuccessPopup,
     onAutoRefreshSuccess,
     onResetPojectData,

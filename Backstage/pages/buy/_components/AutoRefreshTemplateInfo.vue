@@ -25,7 +25,6 @@ const onItemClick = async (item, index) => {
 
   autoRefresh.value.templateSave.selectedIndex = index
   autoRefresh.value.templateSave.apiData.templateID = templateID
-  autoRefresh.value.templateSave.apiData.planID = 0 // 先預設 0
   autoRefresh.value.templateSave.apiData.isCustom = isCustom
   autoRefresh.value.templateSave.apiData.listSelectedRefreshTime = [0] // 固定傳 0
 }

@@ -45,6 +45,7 @@ const config = computed(() => {
       label: null,
       value: null,
       align: 'center',
+      isError: false,
       isDisabled: false,
     },
     props.config
@@ -87,6 +88,7 @@ const onChange = () => {
             config.align === 'top' && (config.label || $slots.default)
               ? 'items-baseline'
               : 'items-center',
+            { '--error': config.isError },
             { '--disabled': config.isDisabled },
             { '--checked': model === config.value },
           ]"
@@ -138,6 +140,10 @@ const onChange = () => {
 
     &:not(.-\-\disabled) {
       @apply cursor-pointer;
+
+      &.\-\-error {
+        @apply border-[--orange-e646];
+      }
 
       &.\-\-checked {
         @apply border-transparent bg-[--orange-feea];

@@ -95,8 +95,6 @@ export default () => {
       Object.entries(keyMap).forEach(([targetKey, sourceKey]) => {
         serachOptions.value[targetKey] = data[sourceKey] ?? []
       })
-
-      // console.log(data)
     } else {
       onApiError(config, status, data)
     }
@@ -127,7 +125,7 @@ export default () => {
     })
 
     if (status === 200) {
-      const { casesList, page, pageSize, totalPages } = data
+      const { casesList, page, pageSize, totalCount } = data
 
       const imageSize = {
         width: 640,
@@ -177,10 +175,8 @@ export default () => {
       searchPagination.value = {
         page,
         pageSize,
-        total: totalPages,
+        total: totalCount, // 給總筆數
       }
-
-      // console.log(searchDatas.value)
     } else {
       onApiError(config, status, data)
     }
@@ -258,7 +254,7 @@ export default () => {
     })
 
     if (status === 200) {
-      const { commentsList, page, pageSize, totalPages } = data
+      const { commentsList, page, pageSize, totalCount } = data
 
       commentsDatas.value = commentsList.map((item) => ({
         ...item,
@@ -268,7 +264,7 @@ export default () => {
       commentsPagination.value = {
         page,
         pageSize,
-        total: totalPages,
+        total: totalCount, // 給總筆數
       }
     } else {
       onApiError(config, status, data)

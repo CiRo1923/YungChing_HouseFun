@@ -4,7 +4,7 @@ const { autoRefresh } = storeToRefs(buyProject)
 const {
   onApiGETRefreshTemplateGetTemplateInfo,
   onApiPOSTRefreshTemplateSaveTemplate,
-  onAutoRefreshTemplatePopup,
+  onAutoRefreshTemplateFlow,
 } = useBuyProjectActions()
 const { onCustom, onApiPromise } = useBuyPopupActions()
 
@@ -67,7 +67,8 @@ const onClick = async () => {
   })
 
   if (!isTemplateEditTime) {
-    if (item.id === 'back') await onAutoRefreshTemplatePopup(autoRefresh.value.info)
+    // 上一步 → 回到選擇範本並重新進入完整套用流程
+    if (item.id === 'back') await onAutoRefreshTemplateFlow(props.update)
     return
   }
 
@@ -75,7 +76,8 @@ const onClick = async () => {
   await onApiPOSTRefreshTemplateSaveTemplate()
   onApiPromise('close')
 
-  await onAutoRefreshTemplatePopup(autoRefresh.value.info)
+  // 編輯儲存後回到選擇範本，繼續完整套用流程（確認範本時間 → 續約 → 儲存）
+  await onAutoRefreshTemplateFlow(props.update)
 }
 </script>
 

@@ -79,10 +79,7 @@ const onSure = async () => {
         <Form as="div" class="tm:mt-[8px] p:mt-[16px]" ref="formRef">
           <PageBuyRenewalInfo
             :setClass="{
-              hiddenForm: {
-                main: 'text-center',
-                error: 'mt-[15px]',
-              },
+              error: 'mt-[15px] text-center',
             }"
           />
         </Form>

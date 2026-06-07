@@ -60,7 +60,6 @@ const onSure = async () => {
         class="tm:mt-[16px] pt:flex pt:grow pt:flex-col pt:overflow-hidden p:mt-[24px]"
         ref="formRef"
       >
-        <PageBuyAutoRefreshTemplateInfo />
         <BuyMFormHidden
           name="listSelectedtempalteID"
           v-model="autoRefresh.templateSave.apiData.templateID"
@@ -68,10 +67,12 @@ const onSure = async () => {
             required: '請選擇範本',
           }"
           :setClass="{
-            main: 'text-center',
-            error: 'mt-[15px]',
+            main: '',
+            error: 'mt-[15px] text-center',
           }"
-        />
+        >
+          <PageBuyAutoRefreshTemplateInfo />
+        </BuyMFormHidden>
       </Form>
     </div>
   </BuyCommonCustomPopup>

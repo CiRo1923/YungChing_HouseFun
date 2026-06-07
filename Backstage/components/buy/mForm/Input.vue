@@ -72,6 +72,39 @@ const { config, setClass, onEnter } = useTextCore({
 
 const isNumeric = computed(() => /^(decimal|numeric)$/.test(config.value.inputMode))
 
+// decimal 欄位：maxlength 只算小數點前位數，toFixed 算小數點後位數，
+// 但原生 <input> maxlength 會計算整串，所以這裡換算成「整數位 + 小數點 + 小數位」的總長度
+const fieldMaxlength = computed(() => {
+  const { maxlength, length, toFixed, integer } = config.value
+  const base = maxlength || length
+
+  if (!base || integer || !isNumeric.value) return base
+
+  const decimals = toFixed != null && toFixed !== '' ? Number(toFixed) : 0
+
+  return Number(base) + (decimals > 0 ? decimals + 1 : 0)
+})
+
+// 依 maxlength（小數點前）與 toFixed（小數點後）限制 decimal 字串長度
+const onLimitDecimal = (number, maxlength, toFixed) => {
+  const firstDot = number.indexOf('.')
+  let intPart = firstDot === -1 ? number : number.slice(0, firstDot)
+
+  if (maxlength) intPart = intPart.slice(0, Number(maxlength))
+
+  if (firstDot === -1) return intPart
+
+  let decPart = number.slice(firstDot + 1).replace(/\./g, '')
+  const decimals = toFixed != null && toFixed !== '' ? Number(toFixed) : null
+
+  if (decimals != null && Number.isFinite(decimals)) {
+    if (decimals === 0) return intPart
+    decPart = decPart.slice(0, decimals)
+  }
+
+  return `${intPart}.${decPart}`
+}
+
 const formatLength = computed(() => {
   const { formatLength, maxlength } = config.value
 
@@ -98,7 +131,7 @@ const onBind = (field) => {
 
 const onInput = async (e) => {
   const value = e.target.value
-  const { inputMode, checkNotIsZero, integer, inputChinese } = config.value
+  const { inputMode, checkNotIsZero, integer, inputChinese, maxlength, toFixed } = config.value
   const regex = {
     chinese: /[\u4e00-\u9fa5０-９Ａ-Ｚａ-ｚ～！＠＃＄％︿＆＊（）＿｜｛｝［］＜＞？／＊＼＋－]/g,
     number: integer ? /[^0-9]/g : /[^0-9.]/g,
@@ -110,7 +143,9 @@ const onInput = async (e) => {
   await nextTick()
 
   if (isNumeric.value) {
-    const number = regex.number.test(value) ? value.replace(regex.number, '') : value
+    let number = regex.number.test(value) ? value.replace(regex.number, '') : value
+
+    if (!integer) number = onLimitDecimal(number, maxlength, toFixed)
 
     model.value =
       (checkNotIsZero && integer && /^0/.test(number)) || (checkNotIsZero && /^0\d/.test(number))
@@ -262,7 +297,7 @@ watch(
             v-bind="onBind(field)"
             :inputMode="config.inputMode"
             :minlength="config.minlength || config.length"
-            :maxlength="config.maxlength || config.length"
+            :maxlength="fieldMaxlength"
             :placeholder="config.placeholder"
             :readonly="config.isReadonly"
             :disabled="config.isDisabled"

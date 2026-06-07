@@ -27,9 +27,6 @@ const { apiData } = storeToRefs(buyPublish)
         placeholder: '請輸入其他原因',
       },
     }"
-    :selectRules="{
-      required: '請選擇型態',
-    }"
     :otherRules="{
       required: '請輸入其他原因',
     }"

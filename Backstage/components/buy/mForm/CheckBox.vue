@@ -171,8 +171,12 @@ const onChange = () => {
           />
           <CommonSvgIcon
             icon="icon_check_solid"
-            class="m-form-icon relative h-[18px] w-[18px] shrink-0 self-start rounded-[2px] border-[1px] leading-[0] text-[--orange-e646] transition-colors duration-300"
-            :class="[{ 'mt-[2px]': config.label }, setClass.icon]"
+            class="m-form-icon relative h-[18px] w-[18px] shrink-0 rounded-[2px] border-[1px] leading-[0] text-[--orange-e646] transition-colors duration-300"
+            :class="[
+              { 'mt-[2px]': config.label },
+              { 'self-start': config.align === 'top' },
+              setClass.icon,
+            ]"
           />
           <slot>
             <em :class="setClass.label" v-if="config.label">

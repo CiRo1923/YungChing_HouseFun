@@ -31,7 +31,19 @@ const isError = computed(() => {
 </script>
 
 <template>
-  <div>
+  <BuyMFormHidden
+    name="HouseAddLayout"
+    v-model="isError"
+    :rules="{
+      custom: {
+        valid: !isError,
+        errorMessage: '請輸入加蓋格局',
+      },
+    }"
+    :setClass="{
+      error: 'mt-[4px]',
+    }"
+  >
     <ul class="flex flex-wrap gap-x-[8px] gap-y-[12px]">
       <li
         class="m:w-[151px] t:w-[90px] p:w-[100px]"
@@ -62,20 +74,7 @@ const isError = computed(() => {
         </BuyMFormInput>
       </li>
     </ul>
-    <BuyMFormHidden
-      name="HouseAddLayout"
-      v-model="isError"
-      :rules="{
-        custom: {
-          valid: !isError,
-          errorMessage: '請輸入加蓋格局',
-        },
-      }"
-      :setClass="{
-        error: 'mt-[4px]',
-      }"
-    />
-  </div>
+  </BuyMFormHidden>
 </template>
 
 <style></style>

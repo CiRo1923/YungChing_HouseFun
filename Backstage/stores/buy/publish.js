@@ -100,6 +100,7 @@ export const useBuyPublishStore = defineStore('buyPublish', () => {
       caseStructureToken: null,
       caseStructureOther: null,
       caseBarrierfreeToken: null,
+      caseBarrierfreeOther: null,
       casePrice: null,
       isCasePriceIncludeParking: false,
       caseParkingPrice: null,

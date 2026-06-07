@@ -20,7 +20,18 @@ const setClass = computed(() => {
 </script>
 
 <template>
-  <div class="mx-auto p:max-w-[800px]" :class="setClass.main">
+  <BuyMFormHidden
+    name="planID"
+    v-model="golden.apiData.planID"
+    :rules="{
+      required: '請選擇額度',
+    }"
+    :setClass="{
+      main: ['mx-auto p:max-w-[800px]', setClass.main],
+      error: 'mt-[15px] text-center',
+    }"
+    v-slot="{ isError }"
+  >
     <ul class="m:space-y-[16px] pt:space-y-[8px]">
       <li v-for="(item, index) in golden.plans" :key="`${item.planType}_${item.planID}_${index}`">
         <BuyMFormRadioItem
@@ -28,6 +39,7 @@ const setClass = computed(() => {
           v-model="golden.apiData.planID"
           :config="{
             value: item.planID,
+            isError: isError,
           }"
           :setClass="{
             main: 'p:--px-40 p:--py-16 tm:p-16',
@@ -48,20 +60,7 @@ const setClass = computed(() => {
         </BuyMFormRadioItem>
       </li>
     </ul>
-    <BuyMFormHidden
-      name="planID"
-      v-model="golden.apiData.planID"
-      :rules="{
-        required: '請選擇額度',
-      }"
-      :setClass="{
-        error: 'mt-[4px]',
-      }"
-    />
-  </div>
-  <!-- <pre>
-    {{ renewal }}
-  </pre> -->
+  </BuyMFormHidden>
 </template>
 
 <style lang="postcss"></style>

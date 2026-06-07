@@ -49,7 +49,19 @@ const onIsCaseOpenConceptChange = () => {
 </script>
 
 <template>
-  <div>
+  <BuyMFormHidden
+    name="HouseLayout"
+    v-model="isError"
+    :rules="{
+      custom: {
+        valid: !isError,
+        errorMessage: '請輸入格局',
+      },
+    }"
+    :setClass="{
+      error: 'mt-[4px]',
+    }"
+  >
     <ul class="flex flex-wrap tm:gap-x-[8px] p:gap-x-[24px]">
       <li>
         <ul class="flex flex-wrap gap-x-[8px] gap-y-[12px]">
@@ -112,20 +124,7 @@ const onIsCaseOpenConceptChange = () => {
         />
       </li>
     </ul>
-    <BuyMFormHidden
-      name="HouseLayout"
-      v-model="isError"
-      :rules="{
-        custom: {
-          valid: !isError,
-          errorMessage: '請輸入格局',
-        },
-      }"
-      :setClass="{
-        error: 'mt-[4px]',
-      }"
-    />
-  </div>
+  </BuyMFormHidden>
 </template>
 
 <style></style>

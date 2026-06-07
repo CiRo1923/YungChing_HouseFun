@@ -72,6 +72,9 @@ const onClick = async () => {
   onApiPromise('close')
 
   await onAutoRefreshSuccess(props.update)
+
+  // 成功後回到「自動刷新設定」popup
+  await onAutoRefreshPopup(autoRefresh.value.info)
 }
 </script>
 

@@ -6,7 +6,7 @@ const { promise } = storeToRefs(popup)
 <template>
   <Transition name="popup-promise-overlay">
     <div
-      class="m-popup-promise absolute inset-0 flex items-center justify-center"
+      class="m-popup-promise absolute inset-0 z-[2] flex items-center justify-center"
       v-if="promise.status === 'open'"
     >
       <Transition name="popup-promise">

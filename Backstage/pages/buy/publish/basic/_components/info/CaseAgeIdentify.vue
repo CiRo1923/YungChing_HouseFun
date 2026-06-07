@@ -67,13 +67,13 @@ const onIsCasePreSale = () => {
           name="caseAge"
           v-model.number="apiData.caseInfo.caseAge"
           :config="{
-            inputMode: 'numeric',
+            inputMode: 'decimal',
             inputChinese: false,
             checkNotIsZero: true,
-            integer: true,
             maxlength: 3,
             isExistClose: false,
             hasClearButton: false,
+            toFixed: 1,
           }"
           :rules="{
             required: {

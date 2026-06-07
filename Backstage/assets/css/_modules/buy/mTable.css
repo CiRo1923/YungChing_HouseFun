@@ -42,6 +42,10 @@
   }
 }
 
+.m-table-thead {
+  @apply relative z-[1];
+}
+
 @screen p {
   .m-table {
     --table-rounded: var(--table-pc-rounded);

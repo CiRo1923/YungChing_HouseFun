@@ -66,7 +66,20 @@ const onSure = async () => {
         :minSelectCount="minSelectCount"
         :count="selectedLength"
       />
-      <div class="overflow-hidden m:flex m:grow m:flex-col">
+      <BuyMFormHidden
+        name="listSelectedRefreshTime"
+        v-model="notMinCount"
+        :rules="{
+          custom: {
+            valid: !notMinCount,
+            errorMessage: `請至少設定 ${minSelectCount} 次時間`,
+          },
+        }"
+        :setClass="{
+          main: 'overflow-hidden m:flex m:grow m:flex-col',
+          error: 'mt-[15px] text-center',
+        }"
+      >
         <div class="scrollbar --y m:grow">
           <ul
             class="flex flex-wrap items-center gap-y-[16px] m:gap-x-[8px] t:gap-x-[10px] p:gap-x-[20px]"
@@ -92,21 +105,7 @@ const onSure = async () => {
             </li>
           </ul>
         </div>
-      </div>
-      <BuyMFormHidden
-        name="listSelectedRefreshTime"
-        v-model="notMinCount"
-        :rules="{
-          custom: {
-            valid: !notMinCount,
-            errorMessage: `請至少設定 ${minSelectCount} 次時間`,
-          },
-        }"
-        :setClass="{
-          main: 'text-center',
-          error: 'mt-[15px]',
-        }"
-      />
+      </BuyMFormHidden>
     </Form>
   </BuyCommonCustomPopup>
 </template>
