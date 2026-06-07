@@ -98,7 +98,7 @@ const onRenewalClick = async (objectData) => {
 
 // 刊登
 const onPublishClick = async (objectData) => {
-  const selectedIds = new Set(selecsearchSelectItemstItems.value)
+  const selectedIds = new Set(searchSelectItems.value)
   const hasOfflineInfo = !!searchDatas.value[0]?.caseOfflineInfo
   const onSelectedPublishItems = () => {
     if (objectData) return [objectData]
