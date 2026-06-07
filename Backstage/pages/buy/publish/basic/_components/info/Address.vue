@@ -15,7 +15,7 @@ const casePurposeToken = computed(() => apiData.value.caseInfo.casePurposeToken)
 const rules = computed(() => {
   const { cityID, districtID, road, addrNum } = apiData.value.caseInfo
 
-  return !!(cityID && districtID && road && addrNum)
+  return !!(cityID && districtID && road && (casePurposeToken.value !== '8' ? addrNum : true))
 })
 
 const onCityChange = async ({ source } = {}) => {
