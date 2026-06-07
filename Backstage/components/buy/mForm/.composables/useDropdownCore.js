@@ -1,4 +1,4 @@
-import { nextTick, ref } from 'vue'
+import { nextTick, onUnmounted, ref } from 'vue'
 import { onDeepMerge } from '@js/_prototype.js'
 
 export const defaultDropdownConfig = {
@@ -17,6 +17,24 @@ const onNextFrame = () => {
   })
 }
 
+const onGetScrollParents = (el) => {
+  const parents = []
+  let node = el?.parentElement
+
+  while (node && node !== document.body && node !== document.documentElement) {
+    const { overflowY, overflowX, overflow } = getComputedStyle(node)
+    const isScrollable = /(auto|scroll|overlay)/.test(`${overflow}${overflowY}${overflowX}`)
+
+    if (isScrollable && (node.scrollHeight > node.clientHeight || node.scrollWidth > node.clientWidth)) {
+      parents.push(node)
+    }
+
+    node = node.parentElement
+  }
+
+  return parents
+}
+
 export const useDropdownCore = ({ config, model = ref(null), options, selectedIndex }) => {
   const borderWidth = 0
   const elenemtRef = ref(null)
@@ -28,6 +46,25 @@ export const useDropdownCore = ({ config, model = ref(null), options, selectedIn
   const isActive = ref(false)
   const isOpen = ref(false)
 
+  let scrollTargets = []
+  const onScrollClose = () => onSwitchActive(false)
+
+  const onBindScroll = () => {
+    onUnbindScroll()
+
+    scrollTargets = onGetScrollParents(elenemtRef.value)
+    scrollTargets.forEach((target) => {
+      target.addEventListener('scroll', onScrollClose, { passive: true })
+    })
+  }
+
+  const onUnbindScroll = () => {
+    scrollTargets.forEach((target) => {
+      target.removeEventListener('scroll', onScrollClose)
+    })
+    scrollTargets = []
+  }
+
   const onSwitchActive = (value) => {
     const nextValue = value !== undefined ? value : !isActive.value
 
@@ -36,6 +73,7 @@ export const useDropdownCore = ({ config, model = ref(null), options, selectedIn
 
     if (!nextValue) {
       isOpen.value = false
+      onUnbindScroll()
     }
   }
 
@@ -151,6 +189,10 @@ export const useDropdownCore = ({ config, model = ref(null), options, selectedIn
 
     await nextTick()
     onDropdownOpen()
+
+    if (isActive.value) {
+      onBindScroll()
+    }
   }
 
   const onSelectResize = () => {
@@ -172,6 +214,10 @@ export const useDropdownCore = ({ config, model = ref(null), options, selectedIn
       bodyHeight: bodyHeight ?? targetHeight,
     })
   }
+
+  onUnmounted(() => {
+    onUnbindScroll()
+  })
 
   const isDropdownOutside = (e) => {
     const $elenemt = elenemtRef.value

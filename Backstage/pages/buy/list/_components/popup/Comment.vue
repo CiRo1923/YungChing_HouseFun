@@ -1,8 +1,11 @@
 <script setup>
 const buyList = useBuyListStore()
 const { apiCommentsData, apiCommentUpdateData } = storeToRefs(buyList)
-const { onCommentPopup, onApiPOSTCommentsUpdateReplyStatue } = useBuyListActions()
-const { onCustom, onCustomClose, onAlert, onApiPromise } = useBuyPopupActions()
+const { onCommentPopup, onCommentSearch, onApiPOSTCommentsUpdateReplyStatue } = useBuyListActions()
+// const popup = usePopupStore()
+// const { promise } = storeToRefs(popup)
+const { onPromise } = usePopupActions()
+const { onCustom, onAlert, onApiPromise } = useBuyPopupActions()
 
 const REPLY_CONFIG = {
   reply: { statusText: '已回覆', isReply: 1 },
@@ -53,11 +56,11 @@ const onReplyClick = async (type, item) => {
 const onClickSearch = async () => {
   apiCommentsData.value.page = 1
 
-  // 先收掉目前彈窗，onApiPromise('open') 的 loading 才顯示得出來，
-  // onCommentPopup 內部抓完資料後會再重新打開彈窗
-  onCustomClose()
+  onPromise('open')
+  // 不關閉重開彈窗，直接重新搜尋並更新內容（不顯示 onApiPromise loading）
+  await onCommentSearch()
 
-  await onCommentPopup()
+  onPromise('close')
 }
 </script>
 

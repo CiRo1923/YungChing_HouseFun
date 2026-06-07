@@ -137,6 +137,7 @@ watchEffect(() => {
           <div class="m-popup-note" :class="setClass.note" v-if="$slots.note">
             <slot name="note" />
           </div>
+          <BuyMPopupPromise />
         </div>
       </Transition>
     </div>

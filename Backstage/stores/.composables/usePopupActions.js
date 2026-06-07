@@ -1,4 +1,8 @@
+import { usePopupStore } from '@stores/popup.js'
+
 export const usePopupActions = () => {
+  const popup = usePopupStore()
+  const { promise } = storeToRefs(popup)
   const onMergeBtns = (buttons, dataBtns) => {
     let btns = buttons
 
@@ -29,9 +33,13 @@ export const usePopupActions = () => {
 
     return btns
   }
+  const onPromise = (status) => {
+    promise.value.status = status
+  }
 
   return {
     onMergeBtns,
+    onPromise,
   }
 }
 

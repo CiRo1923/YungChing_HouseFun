@@ -43,7 +43,7 @@ const onClose = (item) => {
 </script>
 
 <template>
-  <BuyMPopup :id="props.id" :setClass="props.setClass">
+  <BuyMPopupMain :id="props.id" :setClass="props.setClass">
     <template #header v-if="$slots.header">
       <slot name="header" />
     </template>
@@ -79,7 +79,7 @@ const onClose = (item) => {
         </div>
       </slot>
     </template>
-  </BuyMPopup>
+  </BuyMPopupMain>
 </template>
 
 <style></style>

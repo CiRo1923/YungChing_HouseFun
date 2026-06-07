@@ -23,7 +23,6 @@ export default () => {
   const { onReplaceImageSize } = useBuyProjectActions()
   const buyList = useBuyListStore()
   const {
-    apiCommentsDefault,
     apiSearchData,
     apiDealData,
     apiCommentsData,
@@ -299,6 +298,26 @@ export default () => {
       },
     }))
   }
+  const onOpenCommentPopup = async () => {
+    const { isSure } = await onCustom({
+      id: 'popupComment',
+      title: '留言管理',
+      icon: 'icon_dialogue',
+      btns: [
+        {
+          label: '關閉',
+          class: '--border-gray-e5 --text-gray-666',
+          type: 'cancel',
+          isClose: true,
+        },
+      ],
+    })
+
+    if (isSure) {
+      onCommentsReset()
+    }
+  }
+  // 開啟留言彈窗（含 onApiPromise loading）
   const onCommentPopup = async () => {
     onApiPromise('open')
 
@@ -307,31 +326,21 @@ export default () => {
     onApiPromise('close')
 
     if (status === 200) {
-      const { isSure } = await onCustom({
-        id: 'popupComment',
-        title: '留言管理',
-        icon: 'icon_dialogue',
-        btns: [
-          {
-            label: '關閉',
-            class: '--border-gray-e5 --text-gray-666',
-            type: 'cancel',
-            isClose: true,
-          },
-        ],
-      })
-
-      if (isSure) {
-        onCommentsReset()
-      }
+      await onOpenCommentPopup()
     }
+  }
+  // 彈窗內搜尋（不關閉重開彈窗，資料直接響應更新；loading 由呼叫端控制）
+  const onCommentSearch = async () => {
+    const { status } = await onApiPOSTCommentsSearch()
+
+    return { status }
   }
   const onSearchReset = () => {
     apiSearchData.value = { ...buyList.apiSearchDataDefault }
     searchDatas.value = null
   }
   const onCommentsReset = () => {
-    apiCommentsData.value = { ...apiCommentsDefault }
+    apiCommentsData.value = { ...buyList.apiCommentsDefault }
   }
 
   return {
@@ -353,6 +362,7 @@ export default () => {
     onApiPOSTCommentsUpdateReplyStatue,
     onSyncCheckedDatas,
     onCommentPopup,
+    onCommentSearch,
     onSearchReset,
     onCommentsReset,
   }

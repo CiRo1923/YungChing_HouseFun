@@ -15,7 +15,7 @@ const onClose = (item) => {
 </script>
 
 <template>
-  <BuyMPopup id="confirmSystem" :setClass="confirm.setClass">
+  <BuyMPopupMain id="confirmSystem" :setClass="confirm.setClass">
     <div class="text-[16px]" :class="confirm.setClass?.content" v-html="confirm.content" />
     <template #footer>
       <div class="text-center">
@@ -41,7 +41,7 @@ const onClose = (item) => {
         </ul>
       </div>
     </template>
-  </BuyMPopup>
+  </BuyMPopupMain>
 </template>
 
 <style></style>

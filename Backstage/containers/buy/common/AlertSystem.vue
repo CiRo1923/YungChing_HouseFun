@@ -15,7 +15,7 @@ const onClose = (item) => {
 </script>
 
 <template>
-  <BuyMPopup id="alertSystem" :setClass="alert.setClass">
+  <BuyMPopupMain id="alertSystem" :setClass="alert.setClass">
     <div class="text-[16px]" :class="alert.setClass?.content" v-html="alert.content" />
     <template #footer>
       <div class="text-center">
@@ -36,7 +36,7 @@ const onClose = (item) => {
         </ul>
       </div>
     </template>
-  </BuyMPopup>
+  </BuyMPopupMain>
 </template>
 
 <style></style>

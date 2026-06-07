@@ -4,6 +4,10 @@ export const usePopupStore = defineStore('popup', () => {
   let alertCheck = ref(null)
   let confirmCheck = ref(null)
   let customCheck = ref(null)
+  const promise = ref({
+    message: '資料處理中，請勿退出或關閉頁面<br />感謝您耐心等候！',
+    status: 'close', // 'open' / 'close'
+  })
   const alertData = reactive({
     id: null,
     title: null,
@@ -36,7 +40,7 @@ export const usePopupStore = defineStore('popup', () => {
   const apiPromiseData = reactive({
     id: null,
     title: null,
-    content: '資料處理中，請勿退出或關閉頁面<br />感謝您耐心等候！',
+    content: promise.value.message,
     hasExistClose: false,
   })
   const apiError = ref(null)
@@ -45,6 +49,7 @@ export const usePopupStore = defineStore('popup', () => {
     alertCheck,
     confirmCheck,
     customCheck,
+    promise,
     alertData,
     confirmData,
     customData,

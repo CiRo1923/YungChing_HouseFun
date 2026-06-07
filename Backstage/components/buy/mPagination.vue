@@ -1,4 +1,5 @@
 <script setup>
+const emits = defineEmits(['click'])
 const props = defineProps({
   route: {
     type: Object,
@@ -100,6 +101,9 @@ const onBind = (page) => {
         type: 'button',
       }
 }
+const onClick = (page) => {
+  emits('click', page)
+}
 </script>
 
 <template>
@@ -110,6 +114,7 @@ const onBind = (page) => {
           :is="as"
           class="m-pagination-anchor"
           v-bind="onBind(page)"
+          @click="onClick(page)"
           v-if="page !== config.nowPage"
         >
           {{ page }}
@@ -117,6 +122,7 @@ const onBind = (page) => {
         <button
           type="button"
           class="m-pagination-anchor --curr bg-[--pagination-curr-bg-color] text-[--pagination-curr-color]"
+          @click="onClick(page)"
           v-else
         >
           {{ page }}
