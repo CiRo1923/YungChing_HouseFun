@@ -1,7 +1,4 @@
 <script setup>
-import { useBuyHouseStore } from '@stores/buy/house.js'
-import useBuyProjectActions from '@stores/buy/composables/useProjectActions.js'
-
 const buyHouse = useBuyHouseStore()
 const { breadcrumb } = storeToRefs(buyHouse)
 const { onSearchParams } = useBuyProjectActions()

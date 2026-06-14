@@ -79,9 +79,13 @@ async function main() {
   const result = await prepareCompressedCopy()
 
   if (!result.exists) {
-    console.log(`Skipped public image copy compression: \`public/${PUBLIC_IMAGE_SUBDIR}\` not found.`)
+    console.log(
+      `Skipped public image copy compression: \`public/${PUBLIC_IMAGE_SUBDIR}\` not found.`
+    )
   } else if (result.checkedCount === 0) {
-    console.log(`Skipped public image copy compression: no supported image files found under public/${PUBLIC_IMAGE_SUBDIR}.`)
+    console.log(
+      `Skipped public image copy compression: no supported image files found under public/${PUBLIC_IMAGE_SUBDIR}.`
+    )
   } else if (result.changedCount === 0) {
     console.log(
       `Prepared copied public images for build from public/${PUBLIC_IMAGE_SUBDIR}; checked ${result.checkedCount} files, no smaller output was produced.`

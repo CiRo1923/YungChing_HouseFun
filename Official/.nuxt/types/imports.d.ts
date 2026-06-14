@@ -81,6 +81,7 @@ declare global {
   const refreshCookie: typeof import('../../node_modules/nuxt/dist/app/composables/cookie').refreshCookie
   const refreshNuxtData: typeof import('../../node_modules/nuxt/dist/app/composables/asyncData').refreshNuxtData
   const reloadNuxtApp: typeof import('../../node_modules/nuxt/dist/app/composables/chunk').reloadNuxtApp
+  const rentProjectStore: typeof import('../../stores/rent/project').rentProjectStore
   const requestIdleCallback: typeof import('../../node_modules/nuxt/dist/app/compat/idle-callback').requestIdleCallback
   const resolveComponent: typeof import('../../node_modules/vue').resolveComponent
   const setInterval: typeof import('../../node_modules/nuxt/dist/app/compat/interval').setInterval
@@ -104,6 +105,15 @@ declare global {
   const useAppConfig: typeof import('../../node_modules/nuxt/dist/app/config').useAppConfig
   const useAsyncData: typeof import('../../node_modules/nuxt/dist/app/composables/asyncData').useAsyncData
   const useAttrs: typeof import('../../node_modules/vue').useAttrs
+  const useBuyHouseActions: typeof import('../../stores/buy/.composables/useHouseActions').default
+  const useBuyHouseStore: typeof import('../../stores/buy/house').useBuyHouseStore
+  const useBuyListActions: typeof import('../../stores/buy/.composables/useListActions').default
+  const useBuyListStore: typeof import('../../stores/buy/list').useBuyListStore
+  const useBuyPopupActions: typeof import('../../stores/buy/.composables/usePopupActions').default
+  const useBuyPopupStore: typeof import('../../stores/buy/popup').useBuyPopupStore
+  const useBuyProjectActions: typeof import('../../stores/buy/.composables/useProjectActions').default
+  const useBuyProjectStore: typeof import('../../stores/buy/project').useBuyProjectStore
+  const useCommonActions: typeof import('../../stores/.composables/useCommonActions').default
   const useCommonStore: typeof import('../../stores/common').useCommonStore
   const useCookie: typeof import('../../node_modules/nuxt/dist/app/composables/cookie').useCookie
   const useCssModule: typeof import('../../node_modules/vue').useCssModule
@@ -135,11 +145,13 @@ declare global {
   const useLink: typeof import('../../node_modules/vue-router').useLink
   const useLoadingIndicator: typeof import('../../node_modules/nuxt/dist/app/composables/loading-indicator').useLoadingIndicator
   const useModel: typeof import('../../node_modules/vue').useModel
+  const useNavActions: typeof import('../../stores/.composables/useNavActions').default
   const useNavStore: typeof import('../../stores/navs').useNavStore
   const useNuxtApp: typeof import('../../node_modules/nuxt/dist/app/nuxt').useNuxtApp
   const useNuxtData: typeof import('../../node_modules/nuxt/dist/app/composables/asyncData').useNuxtData
   const useNuxtDevTools: typeof import('../../node_modules/@nuxt/devtools/dist/runtime/use-nuxt-devtools').useNuxtDevTools
   const usePinia: typeof import('../../node_modules/@pinia/nuxt/dist/runtime/composables').usePinia
+  const usePopupActions: typeof import('../../stores/.composables/usePopupActions').default
   const usePopupStore: typeof import('../../stores/popup').usePopupStore
   const usePreviewMode: typeof import('../../node_modules/nuxt/dist/app/composables/preview').usePreviewMode
   const useRequestEvent: typeof import('../../node_modules/nuxt/dist/app/composables/ssr').useRequestEvent
@@ -301,6 +313,7 @@ declare module 'vue' {
     readonly refreshCookie: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/cookie')['refreshCookie']>
     readonly refreshNuxtData: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/asyncData')['refreshNuxtData']>
     readonly reloadNuxtApp: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/chunk')['reloadNuxtApp']>
+    readonly rentProjectStore: UnwrapRef<typeof import('../../stores/rent/project')['rentProjectStore']>
     readonly requestIdleCallback: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/compat/idle-callback')['requestIdleCallback']>
     readonly resolveComponent: UnwrapRef<typeof import('../../node_modules/vue')['resolveComponent']>
     readonly setInterval: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/compat/interval')['setInterval']>
@@ -324,6 +337,15 @@ declare module 'vue' {
     readonly useAppConfig: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/config')['useAppConfig']>
     readonly useAsyncData: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/asyncData')['useAsyncData']>
     readonly useAttrs: UnwrapRef<typeof import('../../node_modules/vue')['useAttrs']>
+    readonly useBuyHouseActions: UnwrapRef<typeof import('../../stores/buy/.composables/useHouseActions')['default']>
+    readonly useBuyHouseStore: UnwrapRef<typeof import('../../stores/buy/house')['useBuyHouseStore']>
+    readonly useBuyListActions: UnwrapRef<typeof import('../../stores/buy/.composables/useListActions')['default']>
+    readonly useBuyListStore: UnwrapRef<typeof import('../../stores/buy/list')['useBuyListStore']>
+    readonly useBuyPopupActions: UnwrapRef<typeof import('../../stores/buy/.composables/usePopupActions')['default']>
+    readonly useBuyPopupStore: UnwrapRef<typeof import('../../stores/buy/popup')['useBuyPopupStore']>
+    readonly useBuyProjectActions: UnwrapRef<typeof import('../../stores/buy/.composables/useProjectActions')['default']>
+    readonly useBuyProjectStore: UnwrapRef<typeof import('../../stores/buy/project')['useBuyProjectStore']>
+    readonly useCommonActions: UnwrapRef<typeof import('../../stores/.composables/useCommonActions')['default']>
     readonly useCommonStore: UnwrapRef<typeof import('../../stores/common')['useCommonStore']>
     readonly useCookie: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/cookie')['useCookie']>
     readonly useCssModule: UnwrapRef<typeof import('../../node_modules/vue')['useCssModule']>
@@ -355,11 +377,13 @@ declare module 'vue' {
     readonly useLink: UnwrapRef<typeof import('../../node_modules/vue-router')['useLink']>
     readonly useLoadingIndicator: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/loading-indicator')['useLoadingIndicator']>
     readonly useModel: UnwrapRef<typeof import('../../node_modules/vue')['useModel']>
+    readonly useNavActions: UnwrapRef<typeof import('../../stores/.composables/useNavActions')['default']>
     readonly useNavStore: UnwrapRef<typeof import('../../stores/navs')['useNavStore']>
     readonly useNuxtApp: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/nuxt')['useNuxtApp']>
     readonly useNuxtData: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/asyncData')['useNuxtData']>
     readonly useNuxtDevTools: UnwrapRef<typeof import('../../node_modules/@nuxt/devtools/dist/runtime/use-nuxt-devtools')['useNuxtDevTools']>
     readonly usePinia: UnwrapRef<typeof import('../../node_modules/@pinia/nuxt/dist/runtime/composables')['usePinia']>
+    readonly usePopupActions: UnwrapRef<typeof import('../../stores/.composables/usePopupActions')['default']>
     readonly usePopupStore: UnwrapRef<typeof import('../../stores/popup')['usePopupStore']>
     readonly usePreviewMode: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/preview')['usePreviewMode']>
     readonly useRequestEvent: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/ssr')['useRequestEvent']>

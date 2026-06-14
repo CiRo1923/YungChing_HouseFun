@@ -71,26 +71,8 @@ onUnmounted(() => {
       <div class="order-3 grow">
         <header class="mb-[8px]">
           <h3 class="font-normal tracking-wider tm:text-[16px] p:text-[18px]">
-            <BuyMAnchor
-              :text="props.data.caseTitle"
-              :to="{
-                name: 'buy-publish-basic-id',
-                params: {
-                  id: props.data.hfID,
-                },
-              }"
-              :setClass="{
-                main: 'underline',
-              }"
-              v-if="props.data.caseStatue !== '3'"
-            />
-            <em v-else>{{ props.data.caseTitle }}</em>
+            <em class="underline">{{ props.data.caseTitle }}</em>
           </h3>
-          <!-- <pre>
-            {{ props.data.caseOfflineInfo }}
-
-          </pre> -->
-          <!-- {{ props.data._checked }} -->
         </header>
         <div class="m:mb-[8px] pt:mb-[4px] pt:flex pt:items-center">
           <span class="text-[18px] text-[--orange-e646] pt:order-2 pt:shrink-0">

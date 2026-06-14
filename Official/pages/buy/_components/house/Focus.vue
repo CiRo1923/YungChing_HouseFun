@@ -1,9 +1,4 @@
 <script setup>
-import Content from '@pages/buy/_components/house/_Content.vue'
-import Label from '@pages/buy/_components/house/_Label.vue'
-
-import { useBuyHouseStore } from '@stores/buy/house.js'
-
 const buyHouse = useBuyHouseStore()
 const { highlights } = storeToRefs(buyHouse)
 const datas = computed(() => {
@@ -15,18 +10,18 @@ const datas = computed(() => {
 </script>
 
 <template>
-  <Content title="物件焦點">
+  <PageBuyHouseContent title="物件焦點">
     <div
       class="focus-container divide-y-[1px] divide-[--gray-ccce] tm:space-y-[20px] p:space-y-[30px]"
     >
       <ul>
         <li class="flex" v-for="(item, index) in datas" :key="`${item.label}_${index}`">
-          <Label :text="item.label" />
+          <PageBuyHouseLabel :text="item.label" />
           <p>{{ item.content }}</p>
         </li>
       </ul>
     </div>
-  </Content>
+  </PageBuyHouseContent>
 </template>
 
 <style></style>

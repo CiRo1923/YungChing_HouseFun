@@ -1,13 +1,10 @@
 <script setup>
-import { useBuyProjectStore } from '@stores/buy/project.js'
-import useNavActions from '@stores/composables/useNavActions.js'
-import useBuyProjectActions from '@stores/buy/composables/useProjectActions.js'
-
-const project = useBuyProjectStore()
-const route = useRoute()
-const { device } = storeToRefs(project)
-const { onResize } = useBuyProjectActions()
+const common = useCommonStore()
+const { device } = storeToRefs(common)
+const { onResize } = useCommonActions()
 const { menu } = useNavActions()
+
+const route = useRoute()
 const isDevicePT = computed(() => /^(p|t)$/.test(device.value))
 
 const itemRef = ref(null)
@@ -78,15 +75,19 @@ const onGetChildernHeight = () => {
   }
 }
 
-onBeforeUnmount(() => {
-  onResize('remove', async () => {
+onResize()
+
+onMounted(() => {
+  window.addEventListener('resize', async () => {
+    onResize()
     await nextTick()
     onGetChildernHeight()
   })
 })
 
-onMounted(() => {
-  onResize('add', async () => {
+onUnmounted(() => {
+  window.removeEventListener('resize', async () => {
+    onResize()
     await nextTick()
     onGetChildernHeight()
   })

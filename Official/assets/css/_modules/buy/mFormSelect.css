@@ -1,0 +1,216 @@
+:root {
+  --form-select-icon-pc-p: 2px;
+  --form-select-icon-tablet-p: 2px;
+  --form-select-icon-mobile-p: 2px;
+
+  --form-select-icon-pc-size: 14px;
+  --form-select-icon-tablet-size: 12px;
+  --form-select-icon-mobile-size: 12px;
+
+  --form-select-dropdown-pc-my: 10px;
+  --form-select-dropdown-tablet-my: 5px;
+  --form-select-dropdown-mobile-my: 1px;
+
+  --form-select-dropdown-pc-shadow: 0px 4px 24px 0px #02041614, 0px 2px 16px -8px #02041633;
+  --form-select-dropdown-tablet-shadow: 0px 4px 24px 0px #02041614, 0px 2px 16px -8px #02041633;
+  --form-select-dropdown-mobile-shadow: 0px 4px 24px 0px #02041614, 0px 2px 16px -8px #02041633;
+
+  --form-select-elment-icon-color: var(--gray-999);
+  --form-select-elment-icon-focus-color: var(--green-8b0d);
+  --form-select-elment-icon-disabled-color: var(--gray-f2);
+  --form-select-elment-icon-error-color: var(--red-e45c);
+}
+
+.m-form-element {
+  &.\-\-select {
+    @apply grow overflow-hidden text-left;
+
+    &.\-\-focus {
+      .m-form-icon {
+        @apply -rotate-180;
+      }
+    }
+
+    &:not(:disabled):not(.\-\-focus):not(.\-\-error) {
+      .m-form-icon {
+        @apply text-[--form-select-elment-icon-color];
+      }
+    }
+
+    &.\-\-focus {
+      .m-form-icon {
+        @apply text-[--form-select-elment-icon-focus-color];
+      }
+    }
+
+    &.\-\-error {
+      .m-form-icon {
+        @apply text-[--form-select-elment-icon-error-color];
+      }
+    }
+
+    &:disabled {
+      .m-form-icon {
+        @apply text-[--form-select-elment-icon-disabled-color];
+      }
+    }
+
+    .m-form-type {
+      @apply line-clamp-1 h-auto w-full grow cursor-pointer leading-[1];
+    }
+
+    .m-form-icon {
+      @apply h-[--form-select-icon-size] w-[--form-select-icon-size] shrink-0 p-[--form-select-icon-p] transition-transform duration-300;
+    }
+  }
+}
+
+/* .m-form-icon-arrow {
+  &:before {
+    @apply block h-0 w-0 border-x-[3px] border-t-[5px] border-transparent border-t-[--gray-222] transition-transform duration-300 content-default;
+  }
+} */
+
+.m-select-dropdown {
+  box-shadow: var(--form-select-dropdown-shadow);
+
+  @apply absolute z-[2] my-[--form-select-dropdown-my] overflow-hidden;
+}
+
+.m-select-dropdown-container {
+  @apply h-full bg-[--white];
+}
+
+.m-select-dropdown-body {
+  @apply max-h-full overflow-y-auto;
+}
+
+@screen p {
+  .m-form {
+    --form-select-icon-p: var(--form-select-icon-pc-p);
+    --form-select-icon-size: var(--form-select-icon-pc-size);
+  }
+
+  .m-select-dropdown {
+    --form-select-dropdown-my: var(--form-select-dropdown-pc-my);
+    --form-select-dropdown-shadow: var(--form-select-dropdown-pc-shadow);
+
+    &.\-\-rounded,
+    &.p\:\-\-rounded,
+    &.pt\:\-\-rounded {
+      @apply rounded-[4px];
+    }
+
+    &.\-\-px-30,
+    &.p\:\-\-px-30,
+    &.pt\:\-\-px-30 {
+      .m-select-dropdown-container {
+        @apply px-[30px];
+      }
+    }
+
+    &.\-\-px-20,
+    &.p\:\-\-px-20,
+    &.pt\:\-\-px-20 {
+      .m-select-dropdown-container {
+        @apply px-[20px];
+      }
+    }
+
+    &.\-\-py-20,
+    &.p\:\-\-py-20,
+    &.pt\:\-\-py-20 {
+      .m-select-dropdown-container {
+        @apply py-[20px];
+      }
+    }
+  }
+}
+
+@screen t {
+  .m-form {
+    --form-select-icon-p: var(--form-select-icon-tablet-p);
+    --form-select-icon-size: var(--form-select-icon-tablet-size);
+  }
+
+  .m-select-dropdown {
+    --form-select-dropdown-my: var(--form-select-dropdown-tablet-my);
+    --form-select-dropdown-shadow: var(--form-select-dropdown-tablet-shadow);
+
+    &.\-\-rounded,
+    &.pt\:\-\-rounded,
+    &.tm\:\-\-rounded,
+    &.t\:\-\-rounded {
+      @apply rounded-[4px];
+    }
+
+    &.\-\-px-30,
+    &.pt\:\-\-px-30,
+    &.tm\:\-\-px-30,
+    &.t\:\-\-px-30 {
+      .m-select-dropdown-container {
+        @apply px-[30px];
+      }
+    }
+
+    &.\-\-px-20,
+    &.pt\:\-\-px-20,
+    &.tm\:\-\-px-20,
+    &.t\:\-\-px-20 {
+      .m-select-dropdown-container {
+        @apply px-[20px];
+      }
+    }
+
+    &.\-\-py-20,
+    &.pt\:\-\-py-20,
+    &.tm\:\-\-py-20,
+    &.t\:\-\-py-20 {
+      .m-select-dropdown-container {
+        @apply py-[20px];
+      }
+    }
+  }
+}
+
+@screen m {
+  .m-form {
+    --form-select-icon-p: var(--form-select-icon-mobile-p);
+    --form-select-icon-size: var(--form-select-icon-mobile-size);
+  }
+
+  .m-select-dropdown {
+    --form-select-dropdown-my: var(--form-select-dropdown-mobile-my);
+    --form-select-dropdown-shadow: var(--form-select-dropdown-mobile-shadow);
+
+    &.\-\-rounded,
+    &.tm\:\-\-rounded,
+    &.m\:\-\-rounded {
+      @apply rounded-[4px];
+    }
+
+    &.\-\-px-30,
+    &.tm\:\-\-px-30,
+    &.m\:\-\-px-30 {
+      .m-select-dropdown-container {
+        @apply px-[30px];
+      }
+    }
+
+    &.\-\-px-20,
+    &.tm\:\-\-px-20,
+    &.m\:\-\-px-20 {
+      .m-select-dropdown-container {
+        @apply px-[20px];
+      }
+    }
+
+    &.\-\-py-20,
+    &.tm\:\-\-py-20,
+    &.m\:\-\-py-20 {
+      .m-select-dropdown-container {
+        @apply py-[20px];
+      }
+    }
+  }
+}

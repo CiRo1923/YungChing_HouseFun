@@ -1,7 +1,4 @@
 <script setup>
-import { usePopupStore } from '@stores/popup.js'
-import useBuyPopupActions from '@stores/buy/composables/usePopupActions.js'
-
 const popup = usePopupStore()
 const { alertData, confirmData, customData, apiPromiseData } = storeToRefs(popup)
 const { onReset } = useBuyPopupActions()
@@ -84,7 +81,7 @@ watchEffect(() => {
       :class="setClass.main"
       v-if="isOpen || isShowOverlay"
     >
-      <Transition name="popup-bomb" appear @after-leave="onAfterLeave">
+      <Transition name="popup-bomb" appear @afterLeave="onAfterLeave">
         <div
           class="m-popup-container relative flex max-h-[92%] flex-col overflow-hidden bg-[--white] m:mx-[16px] tm:rounded-[15px] p:rounded-[20px] p:pb-[40px]"
           :class="setClass.container"
@@ -126,7 +123,6 @@ watchEffect(() => {
   </Transition>
 </template>
 
-<style src="@css/_modules/_vueTransition.css"></style>
 <style lang="postcss">
 @keyframes popup-bomb {
   0% {

@@ -642,8 +642,10 @@ const _inlineRuntimeConfig = {
     "NUXT_PUBLIC_APP_MODE": "dev",
     "NUXT_PUBLIC_MANAGE_API_PATH": "https://agent-bff.housesfunlab.com",
     "NUXT_PUBLIC_PATH": "/",
-    "spritePath": "assets/imgs/svg/spritemap.svg",
-    "spriteVersion": "20260507163513590"
+    "appHash": "7ac44b6",
+    "spriteVersion": "7ac44b6",
+    "spritePath": "/__project_svg_spritemap",
+    "googleMapsApiKey": ""
   }
 };
 const envOptions = {
@@ -2134,16 +2136,16 @@ _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw
 const assets = {
   "/index.mjs": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"1a506-ZPkTbSETfuUlnX4/QRDJjfLFZ54\"",
-    "mtime": "2026-05-07T16:35:21.508Z",
-    "size": 107782,
+    "etag": "\"1a52d-YISfzsdcJ1whEi2ArwddXwkr8Ts\"",
+    "mtime": "2026-06-14T16:35:40.996Z",
+    "size": 107821,
     "path": "index.mjs"
   },
   "/index.mjs.map": {
     "type": "application/json",
-    "etag": "\"6b4ab-Robovs85zU1kNhPK0YedbmCahuU\"",
-    "mtime": "2026-05-07T16:35:21.508Z",
-    "size": 439467,
+    "etag": "\"6b54c-+DD+xpbBr6gG+4O7jHAUYeegzEQ\"",
+    "mtime": "2026-06-14T16:35:40.996Z",
+    "size": 439628,
     "path": "index.mjs.map"
   }
 };

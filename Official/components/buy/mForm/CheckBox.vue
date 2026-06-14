@@ -190,8 +190,12 @@ const onSortGroupValue = (list) => {
   return nextList
 }
 
-const onChange = () => {
+const onChange = async () => {
   const { label, value, mode } = config.value
+
+  // 等 vee-validate 的 update:modelValue 經由 props 回流後，
+  // 再讀 model.value 套用清空邏輯，否則會讀到點擊前的舊值（要點兩次才生效）
+  await nextTick()
 
   if (valueClear.value) {
     const isMatched = valueClear.value.value === value

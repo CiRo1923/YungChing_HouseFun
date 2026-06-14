@@ -1,0 +1,249 @@
+.select-overlay-enter-active,
+.select-overlay-leave-active,
+.datepicker-fixed-overlay-enter-active,
+.datepicker-fixed-overlay-leave-active {
+  @apply transition-opacitys duration-150;
+}
+
+.select-overlay-enter-from,
+.select-overlay-leave-to,
+.datepicker-fixed-overlay-enter-from,
+.datepicker-fixed-overlay-leave-to {
+  @apply opacity-0;
+}
+
+.select-overlay-leave-from,
+.select-overlay-enter-to,
+.datepicker-fixed-overlay-leave-from,
+.datepicker-fixed-overlay-enter-to {
+  @apply opacity-100;
+}
+
+.dropdown-enter-active,
+.dropdown-leave-active,
+.autocomplete-enter-active,
+.autocomplete-leave-active {
+  will-change: height;
+
+  @apply overflow-hidden transition-heights duration-300;
+}
+
+.dropdown-enter-from,
+.dropdown-leave-to,
+.autocomplete-enter-from,
+.autocomplete-leave-to {
+  @apply !h-0;
+}
+
+/* accordion 展開更多搜尋 */
+.accordion-enter-active,
+.accordion-leave-active {
+  will-change: max-height;
+
+  @apply overflow-hidden transition-heights duration-300;
+}
+
+.accordion-enter-from,
+.accordion-leave-to {
+  @apply !max-h-0;
+}
+
+.accordion-enter-to,
+.accordion-leave-from {
+  @apply max-h-[1000px];
+}
+
+.select-fixed-enter-active,
+.select-fixed-leave-active,
+.datepicker-range-quickly-fixed-enter-active,
+.datepicker-range-quickly-fixed-leave-active {
+  @apply transition-transform duration-200;
+}
+
+.select-fixed-enter-from,
+.select-fixed-leave-to,
+.datepicker-range-quickly-fixed-enter-from,
+.datepicker-range-quickly-fixed-leave-to {
+  @apply translate-y-full;
+}
+
+.select-fixed-enter-to,
+.select-fixed-leave-from,
+.datepicker-range-quickly-fixed-enter-to,
+.datepicker-range-quickly-fixed-leave-from {
+  @apply translate-y-0;
+}
+
+/* overlay */
+.popup-overlay-enter-active,
+.popup-overlay-leave-active {
+  transition: opacity 0.15s ease;
+}
+
+/* 進場：先出現 overlay */
+.popup-overlay-enter-from,
+.popup-overlay-leave-to {
+  @apply opacity-0;
+}
+
+.popup-overlay-enter-to,
+.popup-overlay-leave-from {
+  @apply opacity-100;
+}
+
+/* 離場：等 bomb 先收掉，再 fade overlay */
+.popup-overlay-leave-active {
+  transition-delay: 0.1s;
+}
+
+/* fade */
+.popup-fade-enter-active,
+.popup-fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.popup-fade-enter-from,
+.popup-fade-leave-to {
+  opacity: 0;
+}
+
+.popup-fade-enter-to,
+.popup-fade-leave-from {
+  opacity: 1;
+}
+
+/* bomb */
+@keyframes popup-bomb {
+  0% {
+    transform: scale(0);
+  }
+  25% {
+    transform: scale(1.2);
+  }
+  50% {
+    transform: scale(0.9);
+  }
+  75% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.popup-bomb-enter-active {
+  animation: popup-bomb 0.2s 0.075s both;
+  /* 0.075s delay = 等 overlay 先出現 */
+}
+
+.popup-bomb-leave-active {
+  animation: popup-bomb 0.2s reverse both;
+  /* 關閉時先跑 bomb */
+}
+
+/* zoom */
+@keyframes popup-bomb {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+.popup-zoom-enter-active {
+  animation: popup-bomb 0.1s 0.075s both;
+  /* 0.075s delay = 等 overlay 先出現 */
+}
+
+.popup-zoom-leave-active {
+  animation: popup-bomb 0.1s reverse both;
+  /* 關閉時先跑 bomb */
+}
+
+.datepicker-enter-active,
+.datepicker-leave-active {
+  will-change: opacity;
+  transition: opacity 0.3s;
+
+  @apply visible opacity-100;
+}
+
+.datepicker-enter-from,
+.datepicker-leave-to {
+  @apply invisible opacity-0;
+}
+
+.detepacker-overlay-enter-active,
+.detepacker-overlay-leave-active {
+  transition: opacity calc(0.3s / 2);
+}
+
+.detepacker-overlay-enter-from,
+.detepacker-overlay-leave-to {
+  @apply opacity-0;
+}
+
+.detepacker-overlay-enter-to,
+.detepacker-overlay-leave-from {
+  @apply opacity-100;
+}
+
+.detepacker-bomb-enter-active,
+.detepacker-bomb-leave-active {
+  transition:
+    opacity 0.3s,
+    transform 0.3s;
+}
+
+.detepacker-bomb-enter-from,
+.detepacker-bomb-leave-to {
+  @apply scale-95 opacity-0;
+}
+
+.detepacker-bomb-enter-to,
+.detepacker-bomb-leave-from {
+  @apply scale-100 opacity-100;
+}
+
+/* popup-promise-overlay（.m-popup-promise） */
+/* 進場：先漸入(0→0.3s)；離場：後漸出(delay 0.15s 等 message 先收) */
+.popup-promise-overlay-enter-active,
+.popup-promise-overlay-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.popup-promise-overlay-leave-active {
+  transition-delay: 0.15s;
+}
+
+.popup-promise-overlay-enter-from,
+.popup-promise-overlay-leave-to {
+  @apply opacity-0;
+}
+
+.popup-promise-overlay-enter-to,
+.popup-promise-overlay-leave-from {
+  @apply opacity-100;
+}
+
+/* popup-promise（.m-popup-promise-message） */
+/* 進場：後漸入(delay 0.15s 等 overlay 先出現)；離場：先漸出(0→0.3s) */
+.popup-promise-enter-active,
+.popup-promise-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.popup-promise-enter-active {
+  transition-delay: 0.15s;
+}
+
+.popup-promise-enter-from,
+.popup-promise-leave-to {
+  @apply opacity-0;
+}
+
+.popup-promise-enter-to,
+.popup-promise-leave-from {
+  @apply opacity-100;
+}

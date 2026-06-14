@@ -1,6 +1,4 @@
 <script setup>
-import { useBuyPopupStore } from '@stores/buy/popup.js'
-
 const popup = useBuyPopupStore()
 const alert = computed(() => popup.alertData || {})
 

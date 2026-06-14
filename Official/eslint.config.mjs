@@ -142,8 +142,10 @@ export default createConfigForNuxt(
         onMounted: 'readonly',
         onUnmounted: 'readonly',
         readonly: 'readonly',
+        shallowReadonly: 'readonly',
         ref: 'readonly',
         storeToRefs: 'readonly',
+        toValue: 'readonly',
         useAsyncData: 'readonly',
         useNuxtApp: 'readonly',
         useRequestURL: 'readonly',
@@ -151,6 +153,8 @@ export default createConfigForNuxt(
         useRouter: 'readonly',
         useHead: 'readonly',
         useRuntimeConfig: 'readonly',
+        useSlots: 'readonly',
+        useState: 'readonly',
         watch: 'readonly',
         watchEffect: 'readonly',
         useRequestHeaders: 'readonly',
@@ -183,6 +187,13 @@ export default createConfigForNuxt(
         {
           ignore: [],
           ignoreTags: [],
+        },
+      ],
+      'vue/v-on-event-hyphenation': [
+        'error',
+        'never',
+        {
+          autofix: true,
         },
       ],
       'vue/no-v-html': 'off',

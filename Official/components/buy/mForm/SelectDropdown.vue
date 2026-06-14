@@ -1,5 +1,5 @@
 <script setup>
-import { onDeepMerge } from '@js/_prototype.js'
+import { onMergeDropdownConfig, useDropdownCore } from './.composables/useDropdownCore.js'
 
 import '@js/_validation.js'
 
@@ -28,19 +28,7 @@ const props = defineProps({
   },
 })
 
-let rafId = null
-let measureId = 0
-const borderWidth = 0
-const waitForFrame = () =>
-  new Promise((resolve) => {
-    requestAnimationFrame(() => resolve())
-  })
-const elenemtRef = ref(null)
 const selectRef = ref(null)
-const dropdownRef = ref(null)
-const dropdownContainerRef = ref(null)
-const isFocus = ref(false)
-const isActive = ref(false)
 const model = computed({
   get: () => props.modelValue,
   set: (value) => {
@@ -49,14 +37,11 @@ const model = computed({
 })
 const config = computed(() => {
   const defaultConfig = {
-    arrowType: 'caret',
     placeholder: null,
-    isDisabled: false,
     isError: false,
-    position: 'auto',
   }
 
-  return onDeepMerge(defaultConfig, props.config)
+  return onMergeDropdownConfig(props.config, defaultConfig)
 })
 
 const setClass = computed(() => {
@@ -87,168 +72,48 @@ const placeholder = computed(() => {
       }
 })
 
-const onSwitchActive = (value) => {
-  isFocus.value = value !== undefined ? value : !isFocus.value
-  isActive.value = value !== undefined ? value : !isActive.value
-}
-
-const onCloseDropdown = () => {
-  onSwitchActive(false)
-}
-
-const onElementClick = async () => {
-  onSwitchActive()
-
-  await nextTick()
-  onDropdownHeight({ defer: false, fromHeight: 0 })
-}
-
-const getDropdownLayout = () => {
-  const $elenemt = elenemtRef.value
-  const $dropdown = dropdownRef.value
-
-  if (!$elenemt || !$dropdown) return null
-
-  const elementRect = $elenemt.getBoundingClientRect()
-  const dropdownRect = $dropdown.getBoundingClientRect()
-  const dropdownStyle = window.getComputedStyle($dropdown)
-  const offsetTop = elementRect.height + elementRect.top + window.scrollY
-  const viewportBottom = window.scrollY + window.innerHeight
-  const viewportMaxHeight = Math.max(viewportBottom - offsetTop, 0)
-  const dropdownMaxHeight = parseFloat(dropdownStyle.maxHeight, 10)
-  const maxHeight = Number.isNaN(dropdownMaxHeight)
-    ? viewportMaxHeight
-    : Math.min(viewportMaxHeight, dropdownMaxHeight)
-  const viewportWidth = document.documentElement.clientWidth
-  const isFullWidth = $dropdown.classList.contains('w-full') || dropdownStyle.width === '100%'
-  const dropdownWidth = isFullWidth
-    ? elementRect.width
-    : Math.max(dropdownRect.width, elementRect.width)
-  const maxLeft = Math.max(viewportWidth - dropdownWidth, 0)
-  const preferredLeft =
-    config.value.position === 'right' ? elementRect.right - dropdownWidth : elementRect.left
-  const left = Math.min(Math.max(preferredLeft, 0), maxLeft)
-
-  return {
-    dropdownWidth,
-    elementRect,
-    isFullWidth,
-    left,
-    maxHeight,
-    offsetTop,
-  }
-}
-
-const getDropdownTargetHeight = () => {
-  const $dropdownContainer = dropdownContainerRef.value
-
-  if (!$dropdownContainer) return 0
-
-  const dropdownContainerStyle = window.getComputedStyle($dropdownContainer)
-  const dropdownChildren = Array.from($dropdownContainer.children)
-  const lastChild = dropdownChildren.at(-1)
-  const lastChildStyle = lastChild ? window.getComputedStyle(lastChild) : null
-  const paddingBottom = parseFloat(dropdownContainerStyle.paddingBottom, 10) || 0
-  const lastChildMarginBottom = lastChildStyle
-    ? parseFloat(lastChildStyle.marginBottom, 10) || 0
-    : 0
-
-  return lastChild
-    ? lastChild.offsetTop + lastChild.offsetHeight + lastChildMarginBottom + paddingBottom
-    : $dropdownContainer.scrollHeight
-}
-
-const onDropdownHeight = async ({ defer = true, fromHeight = null } = {}) => {
-  const currentMeasureId = ++measureId
-  const $dropdown = dropdownRef.value
-  const $dropdownContainer = dropdownContainerRef.value
-
-  if (!$dropdown || !$dropdownContainer) return
-
-  if (defer) {
-    await nextTick()
-    await waitForFrame()
-  }
-
-  $dropdown.style.maxHeight = ''
-
-  const layout = getDropdownLayout()
-
-  if (!layout || currentMeasureId !== measureId || !$dropdown.isConnected) return
-
-  if (rafId) cancelAnimationFrame(rafId)
-
-  const currentHeight = fromHeight ?? $dropdown.getBoundingClientRect().height
-
-  $dropdown.style.top = `${layout.offsetTop - borderWidth * 2}px`
-  $dropdown.style.left = `${layout.left - borderWidth}px`
-  $dropdown.style.maxHeight = `${layout.maxHeight}px`
-  $dropdown.style.height = `${Math.min(currentHeight, layout.maxHeight)}px`
-  $dropdown.style.width = layout.isFullWidth ? `${layout.elementRect.width}px` : ''
-  $dropdownContainer.style.height = 'auto'
-  $dropdownContainer.style.maxHeight = 'none'
-
-  if (layout.dropdownWidth < layout.elementRect.width) {
-    $dropdown.style.minWidth = `${layout.elementRect.width}px`
-  } else if (!layout.isFullWidth) {
-    $dropdown.style.minWidth = ''
-  }
-
-  void $dropdown.offsetHeight
-
-  const targetHeight = getDropdownTargetHeight()
-
-  rafId = requestAnimationFrame(() => {
-    if (currentMeasureId !== measureId || !$dropdown.isConnected) return
-
-    rafId = null
-
-    const finalHeight = Math.min(targetHeight, layout.maxHeight)
-
-    $dropdown.style.height = `${finalHeight}px`
-    $dropdownContainer.style.height = '100%'
-    $dropdownContainer.style.maxHeight = 'inherit'
-  })
-}
+const {
+  elenemtRef,
+  dropdownRef,
+  dropdownContainerRef,
+  isFocus,
+  isActive,
+  onSwitchActive,
+  onCloseDropdown,
+  onElementClick,
+  onSelectResize,
+  onDropdownHeightUpdate,
+  isDropdownOutside,
+} = useDropdownCore({
+  config,
+})
 
 const onDropdownEnter = () => {
   const $selectRef = selectRef.value
 
   onSwitchActive(false)
-  $selectRef.blur()
+  $selectRef?.blur()
 }
 
 const onOutSide = (e) => {
-  const $elenemt = elenemtRef.value
-  const $dropdown = dropdownRef.value
-  const isElenemtContains = $elenemt ? !$elenemt.contains(e.target) : true
-  const isDropdownContains = $dropdown ? !$dropdown.contains(e.target) : true
-  const isOutSide = isElenemtContains && isDropdownContains
-
-  if (isOutSide) {
+  if (isDropdownOutside(e)) {
     onSwitchActive(false)
   }
 }
 
-const onResize = () => {
-  onDropdownHeight()
-}
-
 onMounted(() => {
-  onResize()
   document.addEventListener('click', onOutSide, true)
-  window.addEventListener('resize', onResize)
+  window.addEventListener('resize', onSelectResize)
 })
 
 onUnmounted(() => {
-  if (rafId) cancelAnimationFrame(rafId)
   document.removeEventListener('click', onOutSide, true)
-  window.removeEventListener('resize', onResize)
+  window.removeEventListener('resize', onSelectResize)
 })
 
 defineExpose({
   onClose: onCloseDropdown,
-  onDropdownHeight,
+  onDropdownHeight: onDropdownHeightUpdate,
 })
 </script>
 
@@ -264,7 +129,7 @@ defineExpose({
       <div class="m-form-container flex" :class="setClass.container">
         <button
           type="button"
-          class="m-form-element --select-dropdown grow overflow-hidden text-left"
+          class="m-form-element --select"
           :class="[
             setClass.element,
             { '--focus': isFocus },
@@ -276,7 +141,7 @@ defineExpose({
           @keypress.enter="onDropdownEnter"
         >
           <em
-            class="m-form-type flex w-full cursor-pointer items-center truncate leading-[1]"
+            class="m-form-type"
             :class="[
               setClass.type,
               {
@@ -288,14 +153,14 @@ defineExpose({
           />
           <CommonSvgIcon
             icon="caret_large_down"
-            class="m-form-icon h-[14px] w-[14px] shrink-0 p-[2px] transition-transform duration-300"
+            class="m-form-icon"
             :class="setClass.icon"
             v-if="config.arrowType === 'caret'"
           />
-          <i
+          <!-- <i
             class="m-form-icon-arrow h-[16px] w-[16px] shrink-0"
             v-if="config.arrowType === 'arrow'"
-          />
+          /> -->
         </button>
         <small class="m-form-suffix" :class="setClass.suffix" v-if="$slots.suffix">
           <slot name="suffix" />
@@ -313,15 +178,15 @@ defineExpose({
     </ErrorMessage>
   </div>
   <Teleport to="body">
-    <Transition name="select-dropdown" @after-leave="onCloseDropdown" appear>
+    <Transition name="dropdown" @afterLeave="onCloseDropdown" appear>
       <div
-        class="m-select-dropdown absolute z-[2] overflow-hidden shadow-dropdown p:mt-[10px]"
+        class="m-select-dropdown"
         :class="setClass.dropdown"
         ref="dropdownRef"
         v-if="isActive && !config.isDisabled"
       >
         <div
-          class="m-select-dropdown-container bg-[--white]"
+          class="m-select-dropdown-container"
           :class="setClass.dropdownContainer"
           ref="dropdownContainerRef"
         >
@@ -333,36 +198,5 @@ defineExpose({
 </template>
 
 <style src="@css/_modules/buy/mForm.css"></style>
-<style src="@css/_modules/_vueTransition.css"></style>
-<style lang="postcss">
-@screen p {
-  .m-select-dropdown {
-    &.\-\-rounded,
-    &.p\:\-\-rounded,
-    &.pt\:\-\-rounded {
-      @apply rounded-[4px];
-    }
-  }
-}
-
-@screen t {
-  .m-select-dropdown {
-    &.\-\-rounded,
-    &.pt\:\-\-rounded,
-    &.tm\:\-\-rounded,
-    &.t\:\-\-rounded {
-      @apply rounded-[4px];
-    }
-  }
-}
-
-@screen m {
-  .m-select-dropdown {
-    &.\-\-rounded,
-    &.tm\:\-\-rounded,
-    &.m\:\-\-rounded {
-      @apply rounded-[4px];
-    }
-  }
-}
-</style>
+<style src="@css/_modules/buy/mFormSelect.css"></style>
+<style lang="postcss"></style>

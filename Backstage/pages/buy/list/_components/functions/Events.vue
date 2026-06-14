@@ -49,7 +49,7 @@ const onClick = (id) => {
 </script>
 
 <template>
-  <ul class="flex items-center m:order-3 tm:gap-x-[4px] p:gap-x-[8px]">
+  <ul class="flex items-center m:order-3 m:min-w-[195px] tm:gap-x-[4px] p:gap-x-[8px]">
     <li v-for="(item, index) in result" :key="`${item.id}_${index}`">
       <BuyMAnchor
         :text="item.label"

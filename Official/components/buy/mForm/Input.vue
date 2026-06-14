@@ -154,7 +154,7 @@ const onEnter = (e) => {
   emits('keydown.enter')
 }
 
-const onEvent = (e, errorMessage) => {
+const onEvent = async (e, errorMessage) => {
   const { comma, integer, checkNotIsZero } = config.value
   const { type } = e
   const isError = !!errorMessage
@@ -185,6 +185,8 @@ const onEvent = (e, errorMessage) => {
       if (normalized === '') {
         emits('update:modelValue', '')
         model.value = isComma ? numberComma.add('', false) : ''
+        // 等 update:modelValue 回填到上層 props 後再 emit blur，父層 onBlur 才讀得到最新值
+        await nextTick()
         emits(type, e, isError)
         return
       }
@@ -248,7 +250,11 @@ const onEvent = (e, errorMessage) => {
     }
   }
 
-  // console.log(type)
+  // blur 時等 update:modelValue 回填到上層 props 後再 emit，父層 onBlur 才讀得到最新值
+  if (isBlur) {
+    await nextTick()
+  }
+
   emits(type, e, isError)
 }
 

@@ -1,8 +1,11 @@
 <script setup>
-import { onDevice, onDeepMerge } from '@js/_prototype.js'
+import { onDeepMerge } from '@js/_prototype.js'
 
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 
+const common = useCommonStore()
+const { device } = storeToRefs(common)
+const { onResize } = useCommonActions()
 const props = defineProps({
   label: {
     type: String,
@@ -21,7 +24,6 @@ const props = defineProps({
     default: () => {},
   },
 })
-const device = ref(null)
 const bodyRef = ref(null)
 const containerRef = ref(null)
 const itemRef = ref(null)
@@ -142,19 +144,22 @@ const onAnchorClick = () => {
   onToggleMaskHeight()
 }
 
-const onResize = () => {
-  device.value = onDevice()
-
-  onToggleMaskHeight()
-}
+onResize()
 
 onMounted(() => {
-  onResize()
-  window.addEventListener('resize', onResize)
+  onToggleMaskHeight()
+
+  window.addEventListener('resize', () => {
+    onResize()
+    onToggleMaskHeight()
+  })
 })
 
 onUnmounted(() => {
-  window.removeEventListener('resize', onResize)
+  window.removeEventListener('resize', () => {
+    onResize()
+    onToggleMaskHeight()
+  })
 })
 </script>
 

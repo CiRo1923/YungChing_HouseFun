@@ -1,7 +1,4 @@
 <script setup>
-import { usePopupStore } from '@stores/popup.js'
-import useBuyPopupActions from '@stores/buy/composables/usePopupActions.js'
-
 const popup = usePopupStore()
 const { customCheck } = storeToRefs(popup)
 const { onCustomClose } = useBuyPopupActions()
@@ -18,7 +15,7 @@ const onSure = async () => {
 </script>
 
 <template>
-  <CustomPopup
+  <BuyCustomPopup
     id="askMessage"
     :setClass="{
       main: 'p:--w-615',
@@ -26,7 +23,7 @@ const onSure = async () => {
     @sure="onSure"
   >
     留言
-  </CustomPopup>
+  </BuyCustomPopup>
 </template>
 
 <style></style>

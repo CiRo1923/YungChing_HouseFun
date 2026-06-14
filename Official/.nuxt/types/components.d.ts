@@ -32,9 +32,10 @@ interface _GlobalComponents {
   BuyMPagination: typeof import("../../components/buy/mPagination.vue")['default']
   BuyMPopup: typeof import("../../components/buy/mPopup.vue")['default']
   BuyMSeparator: typeof import("../../components/buy/mSeparator.vue")['default']
+  BuyMSortMain: typeof import("../../components/buy/mSort/Main.vue")['default']
   BuyMSwiper12: typeof import("../../components/buy/mSwiper12.vue")['default']
   BuyMTabCheck: typeof import("../../components/buy/mTab/Check.vue")['default']
-  BuyMTabDefaultOval: typeof import("../../components/buy/mTab/DefaultOval.vue")['default']
+  BuyMTabOvalResponsiv: typeof import("../../components/buy/mTab/OvalResponsiv.vue")['default']
   BuyMTabSeparator: typeof import("../../components/buy/mTab/Separator.vue")['default']
   BuyMTagCheckBox: typeof import("../../components/buy/mTag/CheckBox.vue")['default']
   BuyMTagDefault: typeof import("../../components/buy/mTag/Default.vue")['default']
@@ -47,9 +48,65 @@ interface _GlobalComponents {
   CommonMHeader: typeof import("../../components/common/mHeader.vue")['default']
   CommonMLoading: typeof import("../../components/common/mLoading.vue")['default']
   CommonMNav: typeof import("../../components/common/mNav.vue")['default']
-  CustomPopup: typeof import("../../containers/buy/CustomPopup.vue")['default']
-  AlertSystem: typeof import("../../containers/common/AlertSystem.vue")['default']
-  ConfirmSystem: typeof import("../../containers/common/ConfirmSystem.vue")['default']
+  BuyCustomPopup: typeof import("../../containers/buy/CustomPopup.vue")['default']
+  CommonAlertSystem: typeof import("../../containers/common/AlertSystem.vue")['default']
+  CommonConfirmSystem: typeof import("../../containers/common/ConfirmSystem.vue")['default']
+  PageBuyListContent: typeof import("../../pages/buy/_components/List/Content.vue")['default']
+  PageBuyListSearchFilter: typeof import("../../pages/buy/_components/List/SearchFilter.vue")['default']
+  PageBuyListSearchFunction: typeof import("../../pages/buy/_components/List/SearchFunction.vue")['default']
+  PageBuyListTabOvalResponsiv: typeof import("../../pages/buy/_components/List/TabOvalResponsiv.vue")['default']
+  PageBuyListContentItem: typeof import("../../pages/buy/_components/List/content/Item.vue")['default']
+  PageBuyListContentMediaImages: typeof import("../../pages/buy/_components/List/content/MediaImages.vue")['default']
+  PageBuyListSearchCategory: typeof import("../../pages/buy/_components/List/search/Category.vue")['default']
+  PageBuyListSearchCondition: typeof import("../../pages/buy/_components/List/search/Condition.vue")['default']
+  PageBuyListSearchKeyword: typeof import("../../pages/buy/_components/List/search/Keyword.vue")['default']
+  PageBuyListSearchMaxMinRange: typeof import("../../pages/buy/_components/List/search/MaxMinRange.vue")['default']
+  PageBuyListSearchMore: typeof import("../../pages/buy/_components/List/search/More.vue")['default']
+  PageBuyListSearchMrt: typeof import("../../pages/buy/_components/List/search/Mrt.vue")['default']
+  PageBuyListSearchPrice: typeof import("../../pages/buy/_components/List/search/Price.vue")['default']
+  PageBuyListSearchPurpose: typeof import("../../pages/buy/_components/List/search/Purpose.vue")['default']
+  PageBuyListSearchRegion: typeof import("../../pages/buy/_components/List/search/Region.vue")['default']
+  PageBuyListSearchRoom: typeof import("../../pages/buy/_components/List/search/Room.vue")['default']
+  PageBuyListSearchSort: typeof import("../../pages/buy/_components/List/search/Sort.vue")['default']
+  PageBuyListSearchMoreAge: typeof import("../../pages/buy/_components/List/search/more/Age.vue")['default']
+  PageBuyListSearchMoreFace: typeof import("../../pages/buy/_components/List/search/more/Face.vue")['default']
+  PageBuyListSearchMoreFloor: typeof import("../../pages/buy/_components/List/search/more/Floor.vue")['default']
+  PageBuyListSearchMoreNearBy: typeof import("../../pages/buy/_components/List/search/more/NearBy.vue")['default']
+  PageBuyListSearchMoreParkingMode: typeof import("../../pages/buy/_components/List/search/more/ParkingMode.vue")['default']
+  PageBuyListSearchMorePin: typeof import("../../pages/buy/_components/List/search/more/Pin.vue")['default']
+  PageBuyListSearchMoreType: typeof import("../../pages/buy/_components/List/search/more/Type.vue")['default']
+  PageBuyListSearchMoreUnitPrice: typeof import("../../pages/buy/_components/List/search/more/UnitPrice.vue")['default']
+  PageBuyListSearchPriceRepayment: typeof import("../../pages/buy/_components/List/search/price/Repayment.vue")['default']
+  PageBuyListSearchPriceTotal: typeof import("../../pages/buy/_components/List/search/price/Total.vue")['default']
+  PageBuyHouseActualPrice: typeof import("../../pages/buy/_components/house/ActualPrice.vue")['default']
+  PageBuyHouseBasic: typeof import("../../pages/buy/_components/house/Basic.vue")['default']
+  PageBuyHouseBreadcrumbs: typeof import("../../pages/buy/_components/house/Breadcrumbs.vue")['default']
+  PageBuyHouseCommunity: typeof import("../../pages/buy/_components/house/Community.vue")['default']
+  PageBuyHouseConstruction: typeof import("../../pages/buy/_components/house/Construction.vue")['default']
+  PageBuyHouseEnvironment: typeof import("../../pages/buy/_components/house/Environment.vue")['default']
+  PageBuyHouseFeatures: typeof import("../../pages/buy/_components/house/Features.vue")['default']
+  PageBuyHouseFocus: typeof import("../../pages/buy/_components/house/Focus.vue")['default']
+  PageBuyHouseInformation: typeof import("../../pages/buy/_components/house/Information.vue")['default']
+  PageBuyHousePopupAskMessage: typeof import("../../pages/buy/_components/house/PopupAskMessage.vue")['default']
+  PageBuyHouseRecommend: typeof import("../../pages/buy/_components/house/Recommend.vue")['default']
+  PageBuyHouseSelections: typeof import("../../pages/buy/_components/house/Selections.vue")['default']
+  PageBuyHouseSocialLife: typeof import("../../pages/buy/_components/house/SocialLife.vue")['default']
+  PageBuyHouseContent: typeof import("../../pages/buy/_components/house/_Content.vue")['default']
+  PageBuyHouseLabel: typeof import("../../pages/buy/_components/house/_Label.vue")['default']
+  PageBuyHouseBasicAccountInfo: typeof import("../../pages/buy/_components/house/basic/AccountInfo.vue")['default']
+  PageBuyHouseBasicAddressInfo: typeof import("../../pages/buy/_components/house/basic/AddressInfo.vue")['default']
+  PageBuyHouseBasicHouseInfo: typeof import("../../pages/buy/_components/house/basic/HouseInfo.vue")['default']
+  PageBuyHouseBasicLayoutInfo: typeof import("../../pages/buy/_components/house/basic/LayoutInfo.vue")['default']
+  PageBuyHouseBasicMedia: typeof import("../../pages/buy/_components/house/basic/Media.vue")['default']
+  PageBuyHouseBasicMediaImages: typeof import("../../pages/buy/_components/house/basic/MediaImages.vue")['default']
+  PageBuyHouseBasicPriceInfo: typeof import("../../pages/buy/_components/house/basic/PriceInfo.vue")['default']
+  PageBuyHouseInformationBasic: typeof import("../../pages/buy/_components/house/information/Basic.vue")['default']
+  PageBuyHouseInformationFunction: typeof import("../../pages/buy/_components/house/information/Function.vue")['default']
+  PageBuyHouseInformationOther: typeof import("../../pages/buy/_components/house/information/Other.vue")['default']
+  PageBuyHouseInformationParking: typeof import("../../pages/buy/_components/house/information/Parking.vue")['default']
+  PageBuyHouseInformationPin: typeof import("../../pages/buy/_components/house/information/Pin.vue")['default']
+  PageBuyHouseInformationPrice: typeof import("../../pages/buy/_components/house/information/Price.vue")['default']
+  PageBuyHouseInformationContainer: typeof import("../../pages/buy/_components/house/information/_Container.vue")['default']
   NuxtWelcome: typeof import("../../node_modules/nuxt/dist/app/components/welcome.vue")['default']
   NuxtLayout: typeof import("../../node_modules/nuxt/dist/app/components/nuxt-layout")['default']
   NuxtErrorBoundary: typeof import("../../node_modules/nuxt/dist/app/components/nuxt-error-boundary.vue")['default']
@@ -96,9 +153,10 @@ interface _GlobalComponents {
   LazyBuyMPagination: LazyComponent<typeof import("../../components/buy/mPagination.vue")['default']>
   LazyBuyMPopup: LazyComponent<typeof import("../../components/buy/mPopup.vue")['default']>
   LazyBuyMSeparator: LazyComponent<typeof import("../../components/buy/mSeparator.vue")['default']>
+  LazyBuyMSortMain: LazyComponent<typeof import("../../components/buy/mSort/Main.vue")['default']>
   LazyBuyMSwiper12: LazyComponent<typeof import("../../components/buy/mSwiper12.vue")['default']>
   LazyBuyMTabCheck: LazyComponent<typeof import("../../components/buy/mTab/Check.vue")['default']>
-  LazyBuyMTabDefaultOval: LazyComponent<typeof import("../../components/buy/mTab/DefaultOval.vue")['default']>
+  LazyBuyMTabOvalResponsiv: LazyComponent<typeof import("../../components/buy/mTab/OvalResponsiv.vue")['default']>
   LazyBuyMTabSeparator: LazyComponent<typeof import("../../components/buy/mTab/Separator.vue")['default']>
   LazyBuyMTagCheckBox: LazyComponent<typeof import("../../components/buy/mTag/CheckBox.vue")['default']>
   LazyBuyMTagDefault: LazyComponent<typeof import("../../components/buy/mTag/Default.vue")['default']>
@@ -111,9 +169,65 @@ interface _GlobalComponents {
   LazyCommonMHeader: LazyComponent<typeof import("../../components/common/mHeader.vue")['default']>
   LazyCommonMLoading: LazyComponent<typeof import("../../components/common/mLoading.vue")['default']>
   LazyCommonMNav: LazyComponent<typeof import("../../components/common/mNav.vue")['default']>
-  LazyCustomPopup: LazyComponent<typeof import("../../containers/buy/CustomPopup.vue")['default']>
-  LazyAlertSystem: LazyComponent<typeof import("../../containers/common/AlertSystem.vue")['default']>
-  LazyConfirmSystem: LazyComponent<typeof import("../../containers/common/ConfirmSystem.vue")['default']>
+  LazyBuyCustomPopup: LazyComponent<typeof import("../../containers/buy/CustomPopup.vue")['default']>
+  LazyCommonAlertSystem: LazyComponent<typeof import("../../containers/common/AlertSystem.vue")['default']>
+  LazyCommonConfirmSystem: LazyComponent<typeof import("../../containers/common/ConfirmSystem.vue")['default']>
+  LazyPageBuyListContent: LazyComponent<typeof import("../../pages/buy/_components/List/Content.vue")['default']>
+  LazyPageBuyListSearchFilter: LazyComponent<typeof import("../../pages/buy/_components/List/SearchFilter.vue")['default']>
+  LazyPageBuyListSearchFunction: LazyComponent<typeof import("../../pages/buy/_components/List/SearchFunction.vue")['default']>
+  LazyPageBuyListTabOvalResponsiv: LazyComponent<typeof import("../../pages/buy/_components/List/TabOvalResponsiv.vue")['default']>
+  LazyPageBuyListContentItem: LazyComponent<typeof import("../../pages/buy/_components/List/content/Item.vue")['default']>
+  LazyPageBuyListContentMediaImages: LazyComponent<typeof import("../../pages/buy/_components/List/content/MediaImages.vue")['default']>
+  LazyPageBuyListSearchCategory: LazyComponent<typeof import("../../pages/buy/_components/List/search/Category.vue")['default']>
+  LazyPageBuyListSearchCondition: LazyComponent<typeof import("../../pages/buy/_components/List/search/Condition.vue")['default']>
+  LazyPageBuyListSearchKeyword: LazyComponent<typeof import("../../pages/buy/_components/List/search/Keyword.vue")['default']>
+  LazyPageBuyListSearchMaxMinRange: LazyComponent<typeof import("../../pages/buy/_components/List/search/MaxMinRange.vue")['default']>
+  LazyPageBuyListSearchMore: LazyComponent<typeof import("../../pages/buy/_components/List/search/More.vue")['default']>
+  LazyPageBuyListSearchMrt: LazyComponent<typeof import("../../pages/buy/_components/List/search/Mrt.vue")['default']>
+  LazyPageBuyListSearchPrice: LazyComponent<typeof import("../../pages/buy/_components/List/search/Price.vue")['default']>
+  LazyPageBuyListSearchPurpose: LazyComponent<typeof import("../../pages/buy/_components/List/search/Purpose.vue")['default']>
+  LazyPageBuyListSearchRegion: LazyComponent<typeof import("../../pages/buy/_components/List/search/Region.vue")['default']>
+  LazyPageBuyListSearchRoom: LazyComponent<typeof import("../../pages/buy/_components/List/search/Room.vue")['default']>
+  LazyPageBuyListSearchSort: LazyComponent<typeof import("../../pages/buy/_components/List/search/Sort.vue")['default']>
+  LazyPageBuyListSearchMoreAge: LazyComponent<typeof import("../../pages/buy/_components/List/search/more/Age.vue")['default']>
+  LazyPageBuyListSearchMoreFace: LazyComponent<typeof import("../../pages/buy/_components/List/search/more/Face.vue")['default']>
+  LazyPageBuyListSearchMoreFloor: LazyComponent<typeof import("../../pages/buy/_components/List/search/more/Floor.vue")['default']>
+  LazyPageBuyListSearchMoreNearBy: LazyComponent<typeof import("../../pages/buy/_components/List/search/more/NearBy.vue")['default']>
+  LazyPageBuyListSearchMoreParkingMode: LazyComponent<typeof import("../../pages/buy/_components/List/search/more/ParkingMode.vue")['default']>
+  LazyPageBuyListSearchMorePin: LazyComponent<typeof import("../../pages/buy/_components/List/search/more/Pin.vue")['default']>
+  LazyPageBuyListSearchMoreType: LazyComponent<typeof import("../../pages/buy/_components/List/search/more/Type.vue")['default']>
+  LazyPageBuyListSearchMoreUnitPrice: LazyComponent<typeof import("../../pages/buy/_components/List/search/more/UnitPrice.vue")['default']>
+  LazyPageBuyListSearchPriceRepayment: LazyComponent<typeof import("../../pages/buy/_components/List/search/price/Repayment.vue")['default']>
+  LazyPageBuyListSearchPriceTotal: LazyComponent<typeof import("../../pages/buy/_components/List/search/price/Total.vue")['default']>
+  LazyPageBuyHouseActualPrice: LazyComponent<typeof import("../../pages/buy/_components/house/ActualPrice.vue")['default']>
+  LazyPageBuyHouseBasic: LazyComponent<typeof import("../../pages/buy/_components/house/Basic.vue")['default']>
+  LazyPageBuyHouseBreadcrumbs: LazyComponent<typeof import("../../pages/buy/_components/house/Breadcrumbs.vue")['default']>
+  LazyPageBuyHouseCommunity: LazyComponent<typeof import("../../pages/buy/_components/house/Community.vue")['default']>
+  LazyPageBuyHouseConstruction: LazyComponent<typeof import("../../pages/buy/_components/house/Construction.vue")['default']>
+  LazyPageBuyHouseEnvironment: LazyComponent<typeof import("../../pages/buy/_components/house/Environment.vue")['default']>
+  LazyPageBuyHouseFeatures: LazyComponent<typeof import("../../pages/buy/_components/house/Features.vue")['default']>
+  LazyPageBuyHouseFocus: LazyComponent<typeof import("../../pages/buy/_components/house/Focus.vue")['default']>
+  LazyPageBuyHouseInformation: LazyComponent<typeof import("../../pages/buy/_components/house/Information.vue")['default']>
+  LazyPageBuyHousePopupAskMessage: LazyComponent<typeof import("../../pages/buy/_components/house/PopupAskMessage.vue")['default']>
+  LazyPageBuyHouseRecommend: LazyComponent<typeof import("../../pages/buy/_components/house/Recommend.vue")['default']>
+  LazyPageBuyHouseSelections: LazyComponent<typeof import("../../pages/buy/_components/house/Selections.vue")['default']>
+  LazyPageBuyHouseSocialLife: LazyComponent<typeof import("../../pages/buy/_components/house/SocialLife.vue")['default']>
+  LazyPageBuyHouseContent: LazyComponent<typeof import("../../pages/buy/_components/house/_Content.vue")['default']>
+  LazyPageBuyHouseLabel: LazyComponent<typeof import("../../pages/buy/_components/house/_Label.vue")['default']>
+  LazyPageBuyHouseBasicAccountInfo: LazyComponent<typeof import("../../pages/buy/_components/house/basic/AccountInfo.vue")['default']>
+  LazyPageBuyHouseBasicAddressInfo: LazyComponent<typeof import("../../pages/buy/_components/house/basic/AddressInfo.vue")['default']>
+  LazyPageBuyHouseBasicHouseInfo: LazyComponent<typeof import("../../pages/buy/_components/house/basic/HouseInfo.vue")['default']>
+  LazyPageBuyHouseBasicLayoutInfo: LazyComponent<typeof import("../../pages/buy/_components/house/basic/LayoutInfo.vue")['default']>
+  LazyPageBuyHouseBasicMedia: LazyComponent<typeof import("../../pages/buy/_components/house/basic/Media.vue")['default']>
+  LazyPageBuyHouseBasicMediaImages: LazyComponent<typeof import("../../pages/buy/_components/house/basic/MediaImages.vue")['default']>
+  LazyPageBuyHouseBasicPriceInfo: LazyComponent<typeof import("../../pages/buy/_components/house/basic/PriceInfo.vue")['default']>
+  LazyPageBuyHouseInformationBasic: LazyComponent<typeof import("../../pages/buy/_components/house/information/Basic.vue")['default']>
+  LazyPageBuyHouseInformationFunction: LazyComponent<typeof import("../../pages/buy/_components/house/information/Function.vue")['default']>
+  LazyPageBuyHouseInformationOther: LazyComponent<typeof import("../../pages/buy/_components/house/information/Other.vue")['default']>
+  LazyPageBuyHouseInformationParking: LazyComponent<typeof import("../../pages/buy/_components/house/information/Parking.vue")['default']>
+  LazyPageBuyHouseInformationPin: LazyComponent<typeof import("../../pages/buy/_components/house/information/Pin.vue")['default']>
+  LazyPageBuyHouseInformationPrice: LazyComponent<typeof import("../../pages/buy/_components/house/information/Price.vue")['default']>
+  LazyPageBuyHouseInformationContainer: LazyComponent<typeof import("../../pages/buy/_components/house/information/_Container.vue")['default']>
   LazyNuxtWelcome: LazyComponent<typeof import("../../node_modules/nuxt/dist/app/components/welcome.vue")['default']>
   LazyNuxtLayout: LazyComponent<typeof import("../../node_modules/nuxt/dist/app/components/nuxt-layout")['default']>
   LazyNuxtErrorBoundary: LazyComponent<typeof import("../../node_modules/nuxt/dist/app/components/nuxt-error-boundary.vue")['default']>

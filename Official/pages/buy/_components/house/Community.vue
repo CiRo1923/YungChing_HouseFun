@@ -1,9 +1,7 @@
-<script setup>
-import Content from '@pages/buy/_components/house/_Content.vue'
-</script>
+<script setup></script>
 
 <template>
-  <Content title="社區資訊" />
+  <PageBuyHouseContent title="社區資訊" />
 </template>
 
 <style></style>

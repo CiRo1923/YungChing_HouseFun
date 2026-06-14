@@ -1,16 +1,4 @@
 <script setup>
-import Content from '@pages/buy/_components/house/_Content.vue'
-import Basic from '@pages/buy/_components/house/_information/Basic.vue'
-import Pin from '@pages/buy/_components/house/_information/Pin.vue'
-import Parking from '@pages/buy/_components/house/_information/Parking.vue'
-import Price from '@pages/buy/_components/house/_information/Price.vue'
-import Other from '@pages/buy/_components/house/_information/Other.vue'
-import Function from '@pages/buy/_components/house/_information/Function.vue'
-
-import { useBuyPopupStore } from '@stores/buy/popup.js'
-import usePopupActions from '@stores/composables/usePopupActions.js'
-import useBuyPopupActions from '@stores/buy/composables/usePopupActions.js'
-
 const buyPopup = useBuyPopupStore()
 const { onMergeBtns } = usePopupActions()
 const { onCustom } = useBuyPopupActions()
@@ -32,18 +20,18 @@ const onPopup = async (id) => {
 </script>
 
 <template>
-  <Content title="基本資料">
+  <PageBuyHouseContent title="基本資料">
     <div
       class="information-container divide-y-[1px] divide-[--gray-ccce] tm:space-y-[20px] p:space-y-[30px]"
     >
-      <Basic @popup="onPopup" />
-      <Pin />
-      <Parking />
-      <Price @popup="onPopup" />
-      <Other />
-      <Function />
+      <PageBuyHouseInformationBasic @popup="onPopup" />
+      <PageBuyHouseInformationPin />
+      <PageBuyHouseInformationParking />
+      <PageBuyHouseInformationPrice @popup="onPopup" />
+      <PageBuyHouseInformationOther />
+      <PageBuyHouseInformationFunction />
     </div>
-  </Content>
+  </PageBuyHouseContent>
 </template>
 
 <style lang="postcss">

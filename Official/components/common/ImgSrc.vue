@@ -1,7 +1,8 @@
 <script setup>
-import { hashHex } from '@js/_crypto.js'
-
 import blankUrl from '@imgs/common/blank.svg'
+import noImageUrl from '@imgs/common/no_image.svg'
+
+const runtimeConfig = useRuntimeConfig()
 
 // 用字面字串，固定抓 assets/imgs
 const MAP = import.meta.glob('/assets/imgs/**/*', { eager: true, import: 'default' })
@@ -9,19 +10,14 @@ const MAP = import.meta.glob('/assets/imgs/**/*', { eager: true, import: 'defaul
 // 將相對檔名轉成 glob key
 const toKey = (p) => `/assets/imgs/${String(p).replace(/^\/+/, '')}`
 
-// 依照你的需求：回傳 URL + ?[hash]（用 VITE_APP_HASH）
-const bust = (url) => `${url}?${hashHex(import.meta.env.VITE_APP_HASH, 8)}`
+// 依照需求：回傳 URL + ?[hash]（用 VITE_APP_HASH）
+const bust = (url) => `${url}?${runtimeConfig.public.appHash}`
 
 const resolveBundledImg = (raw) => {
   if (!raw) return null
 
   // 外部/特殊
   if (/^(https?:|data:|blob:)/.test(raw)) {
-    if (/^http/.test(raw)) {
-      const imgName = /\/([^/?#]+)(?:\?|$)/.test(raw) ? /\/([^/?#]+)(?:\?|$)/.exec(raw)[0] : raw
-      const hasQuery = /\?/.test(raw)
-      return `${encodeURI(raw)}${hasQuery ? '&' : '?'}${hashHex(imgName, 8)}`
-    }
     return encodeURI(raw)
   }
 
@@ -30,7 +26,7 @@ const resolveBundledImg = (raw) => {
   if (hit) return bust(hit)
 
   console.warn('[ImgSrc] not found:', toKey(raw))
-  return blankUrl // 找不到就用佔位圖
+  return encodeURI(raw)
 }
 
 // ---- props & 狀態 ----
@@ -61,8 +57,13 @@ const config = computed(() => {
     ...props.config,
   }
 })
-const as = computed(() => (status.value === 200 ? 'figure' : 'div'))
+const as = computed(() => 'figure')
 const hasLazy = computed(() => config.value.lazy)
+const hasNoImage = computed(() => {
+  if (!props.src) return true
+  if (typeof props.src === 'object') return !props.src.p && !props.src.m
+  return false
+})
 const hasMobile = computed(() =>
   props.src && typeof props.src === 'object' ? true : !!/[?&#]m=[^?&#]*/.test(props.src)
 )
@@ -79,6 +80,8 @@ const mobilePath = computed(() => {
 })
 
 const path = computed(() => {
+  if (hasNoImage.value) return noImageUrl
+
   const src =
     props.src && typeof props.src === 'object'
       ? props.src.p
@@ -88,26 +91,40 @@ const path = computed(() => {
   return resolveBundledImg(src)
 })
 
-const setClass = computed(() => {
-  return {
-    main: '',
-    img: '',
-    ...props.setClass,
-  }
-})
+const setClass = computed(() => ({ main: '', img: '', ...props.setClass }))
+const initialSrc = computed(() => (hasNoImage.value ? noImageUrl : blankUrl))
 
 // ---- lazy ----
+const setImageSrc = () => {
+  if (imageRef.value && path.value) imageRef.value.setAttribute('src', path.value)
+}
+
+const isInViewport = () => {
+  if (!imageRef.value) return false
+  const rect = imageRef.value.getBoundingClientRect()
+  return (
+    rect.top < window.innerHeight &&
+    rect.bottom > 0 &&
+    rect.left < window.innerWidth &&
+    rect.right > 0
+  )
+}
+
 const onEnterView = (entries, observer) => {
   for (const entry of entries) {
     if (entry.isIntersecting) {
-      const image = entry.target
-      if (path.value) image.setAttribute('src', path.value)
-      observer.unobserve(image)
+      setImageSrc()
+      observer.unobserve(entry.target)
     }
   }
 }
 
 const onLazy = () => {
+  if (!hasLazy.value || !('IntersectionObserver' in window)) {
+    setImageSrc()
+    return
+  }
+
   if (hasLazy.value && 'IntersectionObserver' in window) {
     const imageObserver = new IntersectionObserver(onEnterView)
     const el = imageRef.value
@@ -116,21 +133,32 @@ const onLazy = () => {
 }
 
 watch(path, (newValue) => {
-  if (imageRef.value) imageRef.value.setAttribute('src', newValue || blankUrl)
+  status.value = 200
+  if (imageRef.value) imageRef.value.setAttribute('src', newValue || initialSrc.value)
 })
 
 const onError = () => {
   status.value = 404
 }
-onMounted(() => onLazy())
+onMounted(() => {
+  onLazy()
+  requestAnimationFrame(() => {
+    if (isInViewport()) setImageSrc()
+  })
+})
 </script>
 
 <template>
-  <component :is="as" class="m-figure" :class="setClass.main" v-if="status === 200">
+  <component
+    :is="as"
+    class="m-figure"
+    :class="[setClass.main, { '--no-image': hasNoImage }]"
+    v-if="status === 200"
+  >
     <picture v-if="mobilePath && hasMobile">
       <source :srcset="mobilePath" media="(max-width: 428px)" />
       <img
-        :src="blankUrl"
+        :src="initialSrc"
         width="100%"
         height="100%"
         :loading="hasLazy ? 'lazy' : null"
@@ -141,7 +169,7 @@ onMounted(() => onLazy())
       />
     </picture>
     <img
-      :src="blankUrl"
+      :src="initialSrc"
       width="100%"
       height="100%"
       :loading="hasLazy ? 'lazy' : null"
@@ -153,11 +181,24 @@ onMounted(() => onLazy())
     />
   </component>
 
-  <div class="m-figure" :class="setClass.main" v-else>
+  <div class="m-figure flex items-center justify-center" :class="setClass.main" v-else>
     <div class="m-figure-error flex items-center justify-center">
-      <CommonSvgIcon class="m:h-[36px] m:w-[36px] pt:h-[54px] pt:w-[54px]" icon="image_404" />
+      <CommonSvgIcon
+        class="h-[30%] max-h-[120px] w-[30%] max-w-[120px] text-[--white]"
+        icon="icon_image_error"
+      />
     </div>
   </div>
 </template>
 
-<style lang="postcss"></style>
+<style lang="postcss">
+.m-figure {
+  &.\-\-no-image {
+    @apply flex items-center justify-center bg-[--gray-f2];
+
+    img {
+      @apply h-[auto] w-[50%] max-w-[250px];
+    }
+  }
+}
+</style>

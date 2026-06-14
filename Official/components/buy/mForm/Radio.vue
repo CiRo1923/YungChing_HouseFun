@@ -10,7 +10,7 @@ const props = defineProps({
     default: null,
   },
   modelValue: {
-    type: [String, Array, null],
+    type: [String, Number, Array, null],
     default: '',
   },
   rules: {

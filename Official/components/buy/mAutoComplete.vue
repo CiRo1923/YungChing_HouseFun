@@ -1,10 +1,10 @@
 <script setup>
 import { onDeepMerge } from '@js/_prototype.js'
 
-import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, getCurrentInstance, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { Field, ErrorMessage } from 'vee-validate'
 
-const emits = defineEmits(['change', 'search', 'update:modelValue'])
+const emits = defineEmits(['change', 'input', 'update:modelValue'])
 const props = defineProps({
   name: {
     type: String,
@@ -31,6 +31,7 @@ const props = defineProps({
     default: () => {},
   },
 })
+
 const elenemtRef = ref(null)
 const dropdownRef = ref(null)
 const dropdownNoDataRef = ref(null)
@@ -39,11 +40,20 @@ const dropdownItemRef = ref(null)
 const isActive = ref(false)
 const isFocus = ref(false)
 const isComposing = ref(false)
+const isSelectingOption = ref(false)
 const inputLabel = ref(null)
 const selected = ref({
   index: null,
 })
 const dropdownItems = ref(null)
+const inputOptions = ref(null)
+const inputWaitRafId = ref(null)
+const inputWaitToken = ref(0)
+const isWaiting = ref(false)
+
+const instance = getCurrentInstance()
+const hasInputListener = computed(() => !!instance?.vnode?.props?.onInput)
+
 const model = computed({
   get() {
     return props.modelValue
@@ -52,18 +62,25 @@ const model = computed({
     emits('update:modelValue', value)
   },
 })
+
 const config = computed(() => {
   const defaultConfig = {
     placeholder: '',
-    noMatchClearLabel: true,
+    noMatchClearLabel: false,
+    waitMessage: '資料讀取中',
     noResult: '無任何選項。',
     isDisabled: false,
-    hasExistClose: true,
+    isExistClose: true,
     isError: false,
     position: 'auto',
+    input: {
+      wait: 0,
+      minChars: 0,
+    },
     schema: {
       label: 'label',
       value: 'value',
+      model: 'label',
     },
     keyboard: false,
     maxItems: 5,
@@ -87,12 +104,106 @@ const setClass = computed(() => {
   }
 })
 
+const resolvedOptions = computed(() => {
+  if (Array.isArray(inputOptions.value)) {
+    return inputOptions.value
+  }
+
+  return Array.isArray(props.options) ? props.options : []
+})
+
+const isMinCharsReached = computed(() => {
+  return (inputLabel.value?.trim()?.length || 0) >= config.value.input.minChars
+})
+
+const onSetInputOptions = (options) => {
+  inputOptions.value = Array.isArray(options) ? options : []
+  isWaiting.value = false
+}
+
+const cancelInputWait = () => {
+  inputWaitToken.value++
+
+  if (inputWaitRafId.value !== null) {
+    cancelAnimationFrame(inputWaitRafId.value)
+    inputWaitRafId.value = null
+  }
+}
+
+const waitInputByRaf = (duration) => {
+  cancelInputWait()
+
+  const currentToken = inputWaitToken.value
+  const wait = Number(duration) || 0
+
+  if (wait <= 0) return Promise.resolve(true)
+
+  return new Promise((resolve) => {
+    let startTime = null
+
+    const step = (timestamp) => {
+      if (currentToken !== inputWaitToken.value) {
+        resolve(false)
+        return
+      }
+
+      if (startTime === null) {
+        startTime = timestamp
+      }
+
+      if (timestamp - startTime >= wait) {
+        inputWaitRafId.value = null
+        resolve(true)
+        return
+      }
+
+      inputWaitRafId.value = requestAnimationFrame(step)
+    }
+
+    inputWaitRafId.value = requestAnimationFrame(step)
+  })
+}
+
+const emitInput = () => {
+  if (hasInputListener.value) {
+    isWaiting.value = true
+  }
+
+  emits('input', inputLabel.value, onSetInputOptions)
+}
+
+const emitInputWithWait = async () => {
+  const { input } = config.value
+
+  if (!isMinCharsReached.value) {
+    cancelInputWait()
+    inputOptions.value = null
+    isWaiting.value = false
+    return
+  }
+
+  const canContinue = await waitInputByRaf(input.wait)
+
+  if (!canContinue) return
+
+  if (!isMinCharsReached.value) {
+    inputOptions.value = null
+    isWaiting.value = false
+    return
+  }
+
+  emitInput()
+}
+
 const onFilter = () => {
   const { schema } = config.value
-  const { label } = schema
-  const escapeRegExp = () => inputLabel.value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const sourceOptions = resolvedOptions.value
+
+  const escapeRegExp = () => (inputLabel.value || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   const regex = inputLabel.value ? new RegExp(escapeRegExp()) : null
-  const matches = regex ? props.options.filter((item) => regex.test(item[label])) : props.options
+  const matches = regex
+    ? sourceOptions.filter((item) => regex.test(item[schema.label]))
+    : sourceOptions
 
   dropdownItems.value = matches
 }
@@ -108,15 +219,20 @@ const onCloseDropdown = () => {
 
 const onGetInputLabel = () => {
   const hasModel = model.value !== null && model.value !== ''
-  const matchData = hasModel
-    ? props.options.find((item) => item[config.value.schema.value] == model.value)
-    : null
 
-  inputLabel.value = matchData ? matchData[config.value.schema.label] : ''
+  if (!hasModel) {
+    return
+  }
+
+  const { schema } = config.value
+  const matchData = resolvedOptions.value.find((item) => item[schema.model] == model.value)
+
+  inputLabel.value = matchData ? matchData[schema.label] : model.value
 }
 
 const onResetDropdownItems = () => {
-  dropdownItems.value = props.options.length !== 0 ? props.options : null
+  const sourceOptions = resolvedOptions.value
+  dropdownItems.value = sourceOptions.length !== 0 ? sourceOptions : null
 }
 
 const onIsComposingChange = (boolean) => {
@@ -125,6 +241,7 @@ const onIsComposingChange = (boolean) => {
 
 const onFocus = async () => {
   onResetDropdownItems()
+
   onSwitchActive(true)
 
   await nextTick()
@@ -133,99 +250,62 @@ const onFocus = async () => {
 
 const onInput = async () => {
   if (isComposing.value) return
+
+  model.value = inputLabel.value
+
+  await emitInputWithWait()
+
   onFilter()
+
+  if (!isMinCharsReached.value) {
+    onSwitchActive(false)
+    return
+  }
+
   await nextTick()
   onDropdownOpen()
 }
 
 const onCompositionEnd = async () => {
   onIsComposingChange(false)
+
+  model.value = inputLabel.value
+
+  await emitInputWithWait()
+
   onFilter()
+
+  if (!isMinCharsReached.value) {
+    onSwitchActive(false)
+    return
+  }
+
   await nextTick()
   onDropdownOpen()
 }
 
-// const onKeyup = async () => {
-//   onFilter()
-
-//   await nextTick()
-//   onDropdownOpen()
-// }
-
 const onBlur = () => {
-  const { noMatchClearLabel } = config.value
-  const hasMatch = inputLabel.value
-    ? !!props.options.find((item) => item[config.value.schema.label] === inputLabel.value)
-    : false
-  const matchData = props.options.find((item) => item[config.value.schema.value] === model.value)
-  const label = model.value && matchData ? matchData[config.value.schema.label] : ''
+  cancelInputWait()
 
-  if (noMatchClearLabel && !hasMatch) {
-    inputLabel.value = label
+  if (isSelectingOption.value || isComposing.value) return
+
+  const { noMatchClearLabel, schema } = config.value
+
+  if (!noMatchClearLabel) return
+
+  const sourceOptions = resolvedOptions.value
+
+  const hasMatch = inputLabel.value
+    ? !!sourceOptions.find((item) => item[schema.label] === inputLabel.value)
+    : false
+
+  if (!hasMatch) {
+    inputLabel.value = ''
   }
 }
 
-// const onChanged = (e) => {
-//   if (e.code !== 'ArrowUp' && e.code !== 'ArrowDown') {
-//     if (e.code !== 'Enter' && e.code !== 'NumpadEnter') {
-//       model.value = ''
-//       selectedIndex.value = 0
-//       onSwitchActive(true)
-//     }
-//   }
-// }
-
-// const onArrow = (e) => {
-//   const { code } = e
-//   const datas = data.value.filter((item) => item.isHidden === false)
-//   let index = datas.findIndex((item) => item.index === selectedIndex.value)
-
-//   e.preventDefault()
-
-//   if (datas.length > 0) {
-//     index = code === 'ArrowDown' ? ++index : --index
-
-//     if (index >= datas.length) {
-//       index = index % datas.length
-//     } else if (index < 0) {
-//       index = datas.length - 1
-//     }
-
-//     selectedIndex.value = datas[index].index
-
-//     const $dropdownRef = dropdownRef.value
-//     const containerHeight = $dropdownRef.offsetHeight - borderWidth * 2
-//     const $itemRef = itemRef.value[selectedIndex.value]
-//     const itemHeight = $itemRef.offsetHeight
-
-//     if (
-//       selectedIndex.value !== 0 &&
-//       selectedIndex.value !== data.value.length - 1
-//     ) {
-//       if (code === 'ArrowDown') {
-//         if ($dropdownRef.scrollTop + containerHeight <= $itemRef.offsetTop) {
-//           $dropdownRef.scrollTop = $dropdownRef.scrollTop + itemHeight
-//         }
-//       } else {
-//         if ($dropdownRef.scrollTop > $itemRef.offsetTop) {
-//           $dropdownRef.scrollTop = $dropdownRef.scrollTop - itemHeight
-//         }
-//       }
-//     } else {
-//       if (selectedIndex.value === 0) {
-//         $dropdownRef.scrollTop = 0
-//       } else {
-//         $dropdownRef.scrollTop =
-//           (data.value.length - props.maxItems) * itemHeight
-//       }
-//     }
-
-//     model.value = data.value[selectedIndex.value][config.value.schema.value]
-//   }
-// }
-
 const onDropdownOpen = () => {
-  const { maxItems, isDisabled } = config.value
+  const { maxItems, isDisabled, schema, position } = config.value
   const $elenemt = elenemtRef.value
   const $dropdown = dropdownRef.value
   const $dropdownContainer = dropdownContainerRef.value
@@ -254,32 +334,29 @@ const onDropdownOpen = () => {
           : $item.offsetTop + $item.offsetHeight
         : 0
 
-      const dropdownStyle = window.getComputedStyle($dropdown)
-      const viewportWidth = document.documentElement.clientWidth
-      const isFullWidth = $dropdown.classList.contains('w-full') || dropdownStyle.width === '100%'
-      const dropdownWidth = isFullWidth
-        ? element.rect.width
-        : Math.max(dropdown.rect.width, element.rect.width)
-      const maxLeft = Math.max(viewportWidth - dropdownWidth, 0)
-      const preferredLeft =
-        config.value.position === 'right' ? element.rect.right - dropdownWidth : element.rect.left
-      const left = Math.min(Math.max(preferredLeft, 0), maxLeft)
+      const offsetLeftMin = dropdown.rect.width + element.rect.left
+      const dropdownWidth =
+        dropdown.rect.width < element.rect.width ? element.rect.width : dropdown.rect.width
+      const offsetLeftMax = element.rect.width + element.rect.left - dropdownWidth
+      const bodyWidth = document.body.scrollWidth
+      const left =
+        ((offsetLeftMin > bodyWidth && offsetLeftMax < 0) || offsetLeftMin < bodyWidth) &&
+        position !== 'right'
+          ? element.rect.left
+          : offsetLeftMax
       const maxHeight = itemHeight
 
       $dropdown.style.height = `${maxHeight}px`
       $dropdown.style.top = `${offsetTop}px`
       $dropdown.style.left = `${left}px`
-      $dropdown.style.width = isFullWidth ? `${element.rect.width}px` : ''
 
       if (dropdown.rect.width < element.rect.width) {
         $dropdown.style.minWidth = `${element.rect.width}px`
-      } else if (!isFullWidth) {
-        $dropdown.style.minWidth = ''
       }
 
       if (model.value !== null && model.value !== '') {
-        selected.value.index = props.options.findIndex(
-          (item) => item[config.value.schema.value] === model.value
+        selected.value.index = resolvedOptions.value.findIndex(
+          (item) => item[schema.model] === model.value
         )
 
         const $selectedItem = dropdownItemRef.value[selected.value.index]
@@ -302,52 +379,36 @@ const onDropdownOpen = () => {
   }
 }
 
-// const onClear = () => {
-//   onReset()
-//   onSwitchActive(false)
-//   emits('click', '')
-// }
-
-// const onEnter = () => {
-//   // const index = props.data.findIndex(
-//   //   (item) => item[config.value.schema.value] === model.value
-//   // )
-
-//   // console.log(selectedIndex.value)
-
-//   const result = data.value[selectedIndex.value]
-
-//   if (result) {
-//     label.value = result[config.value.schema.label]
-//     model.value = result[config.value.schema.value]
-
-//     if (result[config.value.schema.value]) {
-//       onSwitchActive(false)
-//     }
-//     emits('click', result)
-//   }
-// }
-
 const onDropdownItemClick = (item) => {
-  model.value = item[config.value.schema.value]
-  inputLabel.value = item[config.value.schema.label]
+  const { schema } = config.value
+  model.value = item[schema.model]
+  inputLabel.value = item[schema.label]
+  isSelectingOption.value = false
 
   onSwitchActive(false)
+  emitInput()
   emits('change', item)
 }
 
-const onClear = () => {
-  model.value = ''
-  inputLabel.value = null
-  selected.value.index = null
+const onDropdownItemMousedown = () => {
+  isSelectingOption.value = true
 }
 
-watch(
-  () => props.modelValue,
-  () => {
-    onGetInputLabel()
-  }
-)
+const onClear = () => {
+  cancelInputWait()
+  model.value = ''
+  inputLabel.value = null
+  inputOptions.value = null
+  selected.value.index = null
+  dropdownItems.value = null
+  emitInput()
+  isWaiting.value = false
+  emits('change', null)
+}
+
+const onInit = () => {
+  onFilter()
+}
 
 const onOutSide = (e) => {
   const $elenemt = elenemtRef.value
@@ -362,31 +423,65 @@ const onOutSide = (e) => {
 }
 
 const onResize = () => {
-  // device.value = onDevice()
   onDropdownOpen()
 }
 
+watch(
+  () => props.modelValue,
+  () => {
+    const hasModel = props.modelValue !== null && props.modelValue !== ''
+
+    if (!hasModel) {
+      inputLabel.value = null
+      return
+    }
+
+    onGetInputLabel()
+  }
+)
+
+watch(
+  () => props.options,
+  () => {
+    onGetInputLabel()
+    onFilter()
+  },
+  { deep: true }
+)
+
+watch(
+  inputOptions,
+  async () => {
+    onFilter()
+
+    if (!isActive.value || !isMinCharsReached.value) return
+
+    onSwitchActive(true)
+
+    await nextTick()
+    onDropdownOpen()
+  },
+  { deep: true }
+)
+
 onMounted(() => {
-  // onSetSelectedIndex()
   onGetInputLabel()
-  onFilter()
+  onInit()
+
   document.addEventListener('click', onOutSide, true)
   window.addEventListener('resize', onResize)
 })
 
 onUnmounted(() => {
+  cancelInputWait()
   document.removeEventListener('click', onOutSide, true)
   window.removeEventListener('resize', onResize)
 })
-
-// defineExpose({
-//   onReset,
-// })
 </script>
 
 <template>
-  <div class="m-autocomplete" :class="setClass.main">
-    <div class="m-autocomplete-container overflow-hidden" :class="setClass.container">
+  <div class="m-autocomplete overflow-hidden" :class="setClass.main">
+    <div class="m-autocomplete-container" :class="setClass.container">
       <Field
         :name="props.name"
         :rules="props.rules"
@@ -395,7 +490,7 @@ onUnmounted(() => {
       >
         <input type="hidden" v-bind="field" />
         <div
-          class="m-autocomplete-element jFormValid relative flex items-center gap-x-[8px] rounded-[5px] border-[1px] border-[--autocomplete-border-color] bg-[--autocomplete-bg-color] px-[10px] transition-colors duration-300"
+          class="m-autocomplete-element relative flex items-center gap-x-[8px] rounded-[5px] border-[1px] border-[--autocomplete-border-color] bg-[--autocomplete-bg-color] px-[10px] transition-colors duration-300"
           :class="[
             setClass.element,
             { '--focus': isFocus },
@@ -424,18 +519,16 @@ onUnmounted(() => {
             :class="{
               '--show': inputLabel,
             }"
+            tabindex="-1"
             @click="onClear"
-            v-if="config.hasExistClose && !config.isDisabled"
+            v-if="config.isExistClose && !config.isDisabled"
           >
             <CommonSvgIcon icon="icon_xmark" class="m-autocomplete-clear-icon" />
           </button>
           <CommonSvgIcon
             icon="icon_search"
-            class="pointer-events-none h-[18px] w-[18px] shrink-0 text-[--autocomplete-icon-color] transition-colors duration-300"
+            class="pointer-events-none h-[20px] w-[20px] shrink-0 p-[2px] text-[--autocomplete-icon-color] transition-colors duration-300"
           />
-          <!-- @keydown.up="onArrow($event)" -->
-          <!-- @keydown.down="onArrow($event)" -->
-          <!-- @keypress.enter="onEnter" -->
         </div>
       </Field>
     </div>
@@ -450,7 +543,7 @@ onUnmounted(() => {
     </ErrorMessage>
   </div>
   <Teleport to="body">
-    <Transition name="autocomplete" @after-leave="onCloseDropdown" appear>
+    <Transition name="autocomplete" @afterLeave="onCloseDropdown" appear>
       <div
         class="m-autocomplete-dropdown absolute z-[5] mt-[3px] overflow-hidden"
         :class="setClass.dropdown"
@@ -462,7 +555,7 @@ onUnmounted(() => {
           v-if="dropdownItems.length === 0"
           ref="dropdownNoDataRef"
         >
-          <p>{{ config.noResult }}</p>
+          <p>{{ isWaiting ? config.waitMessage : config.noResult }}</p>
         </div>
         <ul
           class="m-autocomplete-dropdown-container max-h-full bg-[--white]"
@@ -482,6 +575,7 @@ onUnmounted(() => {
               :class="{
                 '--active': index === selected.index,
               }"
+              @mousedown="onDropdownItemMousedown"
               @click="onDropdownItemClick(item)"
             >
               <em class="m-autocomplete-dropdown-label relative block grow py-[8px] text-[14px]">
@@ -497,7 +591,6 @@ onUnmounted(() => {
   </Teleport>
 </template>
 
-<style src="@css/_common/vueTransition.css"></style>
 <style lang="postcss">
 .m-autocomplete-element {
   &.\-\-disabled {
@@ -510,20 +603,8 @@ onUnmounted(() => {
   }
 
   &:not(.\-\-disabled) {
-    --autocomplete-bg-color: var(--modules-bgColor);
-    --autocomplete-text-color: var(--textColor-title);
-
-    .m-autocomplete-type {
-      @apply text-[--gray-666];
-
-      &::placeholder {
-        @apply text-[--gray-999];
-      }
-    }
-
-    /* &.\-\-focus {
-      --autocomplete-border-color: var(--color-blue-major);
-    } */
+    --autocomplete-text-color: var(--gray-666);
+    --autocomplete-text-placeholder-color: var(--gray-999);
   }
 
   &:not(.\-\-error) {
@@ -531,21 +612,19 @@ onUnmounted(() => {
     --autocomplete-border-color: var(--gray-e5);
   }
 
-  /* &:not(.\-\-required):not(.\-\-focus):not(.\-\-error) {
-    @apply delay-150;
-  }
-
-  &.\-\-required {
-    @apply border-[--gray-4448];
-  }
-
-  &.\-\-focus {
-    @apply border-[--red-b12b];
-  }
-
   &.\-\-error {
-    @apply border-[--red-f00] bg-[rgba(var(--red-f235-rgb),0.05)];
-  } */
+    --autocomplete-text-color: var(--orange-e646);
+    --autocomplete-icon-color: var(--orange-e646);
+    --autocomplete-border-color: var(--orange-e646);
+  }
+}
+
+.m-autocomplete-type {
+  @apply text-[--autocomplete-text-color];
+
+  &::placeholder {
+    @apply text-[--autocomplete-text-placeholder-color];
+  }
 }
 
 .m-autocomplete-clear-button {
@@ -582,9 +661,6 @@ onUnmounted(() => {
   &:not(:disabled) {
     @apply text-[--gray-333];
 
-    /* &:not(.\-\-active) {
-    } */
-
     &.\-\-active {
       @apply bg-[--orange-feea];
     }
@@ -605,11 +681,19 @@ onUnmounted(() => {
       }
     }
 
-    &.\-\-padding-y-16,
-    &.p\:\-\-padding-y-16,
-    &.pt\:\-\-padding-y-16 {
+    &.\-\-h-50,
+    &.p\:\-\-h-50,
+    &.pt\:\-\-h-50 {
       .m-autocomplete-element {
-        @apply py-[16px];
+        @apply h-[50px];
+      }
+    }
+
+    &.\-\-h-45,
+    &.p\:\-\-h-45,
+    &.pt\:\-\-h-45 {
+      .m-autocomplete-element {
+        @apply h-[45px];
       }
     }
 
@@ -621,19 +705,11 @@ onUnmounted(() => {
       }
     }
 
-    &.\-\-text-18,
-    &.p\:\-\-text-18,
-    &.pt\:\-\-text-18 {
-      .m-autocomplete-type {
-        @apply text-[18px];
-      }
-    }
-
-    &.\-\-text-16,
-    &.p\:\-\-text-16,
-    &.pt\:\-\-text-16 {
-      .m-autocomplete-type {
-        @apply text-[16px];
+    &.\-\-h-35,
+    &.p\:\-\-h-35,
+    &.pt\:\-\-h-35 {
+      .m-autocomplete-element {
+        @apply h-[35px];
       }
     }
   }
@@ -645,54 +721,54 @@ onUnmounted(() => {
       @apply rounded-[16px];
     }
 
-    &.\-\-padding-12,
-    &.p\:\-\-padding-12,
-    &.pt\:\-\-padding-12 {
+    &.\-\-p-12,
+    &.p\:\-\-p-12,
+    &.pt\:\-\-p-12 {
       .m-autocomplete-dropdown-no-data,
       .m-autocomplete-dropdown-button {
         @apply p-[12px];
       }
     }
 
-    &.\-\-padding-x-12,
-    &.p\:\-\-padding-x-12,
-    &.pt\:\-\-padding-x-12 {
+    &.\-\-p-x-12,
+    &.p\:\-\-p-x-12,
+    &.pt\:\-\-p-x-12 {
       .m-autocomplete-dropdown-no-data,
       .m-autocomplete-dropdown-button {
         @apply px-[12px];
       }
     }
 
-    &.\-\-padding-y-12,
-    &.p\:\-\-padding-y-12,
-    &.pt\:\-\-padding-y-12 {
+    &.\-\-p-y-12,
+    &.p\:\-\-p-y-12,
+    &.pt\:\-\-p-y-12 {
       .m-autocomplete-dropdown-no-data,
       .m-autocomplete-dropdown-button {
         @apply py-[12px];
       }
     }
 
-    &.\-\-padding-24,
-    &.p\:\-\-padding-24,
-    &.pt\:\-\-padding-24 {
+    &.\-\-p-24,
+    &.p\:\-\-p-24,
+    &.pt\:\-\-p-24 {
       .m-autocomplete-dropdown-no-data,
       .m-autocomplete-dropdown-button {
         @apply p-[24px];
       }
     }
 
-    &.\-\-padding-x-24,
-    &.p\:\-\-padding-x-24,
-    &.pt\:\-\-padding-x-24 {
+    &.\-\-p-x-24,
+    &.p\:\-\-p-x-24,
+    &.pt\:\-\-p-x-24 {
       .m-autocomplete-dropdown-no-data,
       .m-autocomplete-dropdown-button {
         @apply px-[24px];
       }
     }
 
-    &.\-\-padding-y-24,
-    &.p\:\-\-padding-y-24,
-    &.pt\:\-\-padding-y-24 {
+    &.\-\-p-y-24,
+    &.p\:\-\-p-y-24,
+    &.pt\:\-\-p-y-24 {
       .m-autocomplete-dropdown-no-data,
       .m-autocomplete-dropdown-button {
         @apply py-[24px];
@@ -730,12 +806,30 @@ onUnmounted(() => {
       }
     }
 
-    &.\-\-padding-y-16,
-    &.pt\:\-\-padding-y-16,
-    &.tm\:\-\-padding-y-16,
-    &.t\:\-\-padding-y-16 {
+    &.\-\-p-y-16,
+    &.pt\:\-\-p-y-16,
+    &.tm\:\-\-p-y-16,
+    &.t\:\-\-p-y-16 {
       .m-autocomplete-element {
         @apply py-[16px];
+      }
+    }
+
+    &.\-\-h-50,
+    &.pt\:\-\-h-50,
+    &.tm\:\-\-h-50,
+    &.t\:\-\-h-50 {
+      .m-autocomplete-element {
+        @apply h-[50px];
+      }
+    }
+
+    &.\-\-h-45,
+    &.pt\:\-\-h-45,
+    &.tm\:\-\-h-45,
+    &.t\:\-\-h-45 {
+      .m-autocomplete-element {
+        @apply h-[45px];
       }
     }
 
@@ -745,6 +839,15 @@ onUnmounted(() => {
     &.t\:\-\-h-40 {
       .m-autocomplete-element {
         @apply h-[40px];
+      }
+    }
+
+    &.\-\-h-35,
+    &.pt\:\-\-h-35,
+    &.tm\:\-\-h-35,
+    &.t\:\-\-h-35 {
+      .m-autocomplete-element {
+        @apply h-[35px];
       }
     }
 
@@ -775,60 +878,60 @@ onUnmounted(() => {
       @apply rounded-[16px];
     }
 
-    &.\-\-padding-12,
-    &.pt\:\-\-padding-12,
-    &.tm\:\-\-padding-12,
-    &.t\:\-\-padding-12 {
+    &.\-\-p-12,
+    &.pt\:\-\-p-12,
+    &.tm\:\-\-p-12,
+    &.t\:\-\-p-12 {
       .m-autocomplete-dropdown-no-data,
       .m-autocomplete-dropdown-button {
         @apply p-[12px];
       }
     }
 
-    &.\-\-padding-x-12,
-    &.pt\:\-\-padding-x-12,
-    &.tm\:\-\-padding-x-12,
-    &.t\:\-\-padding-x-12 {
+    &.\-\-p-x-12,
+    &.pt\:\-\-p-x-12,
+    &.tm\:\-\-p-x-12,
+    &.t\:\-\-p-x-12 {
       .m-autocomplete-dropdown-no-data,
       .m-autocomplete-dropdown-button {
         @apply px-[12px];
       }
     }
 
-    &.\-\-padding-y-12,
-    &.pt\:\-\-padding-y-12,
-    &.tm\:\-\-padding-y-12,
-    &.t\:\-\-padding-y-12 {
+    &.\-\-p-y-12,
+    &.pt\:\-\-p-y-12,
+    &.tm\:\-\-p-y-12,
+    &.t\:\-\-p-y-12 {
       .m-autocomplete-dropdown-no-data,
       .m-autocomplete-dropdown-button {
         @apply py-[12px];
       }
     }
 
-    &.\-\-padding-24,
-    &.pt\:\-\-padding-24,
-    &.tm\:\-\-padding-24,
-    &.t\:\-\-padding-24 {
+    &.\-\-p-24,
+    &.pt\:\-\-p-24,
+    &.tm\:\-\-p-24,
+    &.t\:\-\-p-24 {
       .m-autocomplete-dropdown-no-data,
       .m-autocomplete-dropdown-button {
         @apply p-[24px];
       }
     }
 
-    &.\-\-padding-x-24,
-    &.pt\:\-\-padding-x-24,
-    &.tm\:\-\-padding-x-24,
-    &.t\:\-\-padding-x-24 {
+    &.\-\-p-x-24,
+    &.pt\:\-\-p-x-24,
+    &.tm\:\-\-p-x-24,
+    &.t\:\-\-p-x-24 {
       .m-autocomplete-dropdown-no-data,
       .m-autocomplete-dropdown-button {
         @apply px-[24px];
       }
     }
 
-    &.\-\-padding-y-24,
-    &.pt\:\-\-padding-y-24,
-    &.tm\:\-\-padding-y-24,
-    &.t\:\-\-padding-y-24 {
+    &.\-\-p-y-24,
+    &.pt\:\-\-p-y-24,
+    &.tm\:\-\-p-y-24,
+    &.t\:\-\-p-y-24 {
       .m-autocomplete-dropdown-no-data,
       .m-autocomplete-dropdown-button {
         @apply py-[24px];
@@ -867,11 +970,27 @@ onUnmounted(() => {
       }
     }
 
-    &.\-\-padding-y-16,
-    &.tm\:\-\-padding-y-16,
-    &.m\:\-\-padding-y-16 {
+    &.\-\-p-y-16,
+    &.tm\:\-\-p-y-16,
+    &.m\:\-\-p-y-16 {
       .m-autocomplete-element {
         @apply py-[16px];
+      }
+    }
+
+    &.\-\-h-50,
+    &.tm\:\-\-h-50,
+    &.m\:\-\-h-50 {
+      .m-autocomplete-element {
+        @apply h-[50px];
+      }
+    }
+
+    &.\-\-h-45,
+    &.tm\:\-\-h-45,
+    &.m\:\-\-h-45 {
+      .m-autocomplete-element {
+        @apply h-[45px];
       }
     }
 
@@ -880,6 +999,14 @@ onUnmounted(() => {
     &.m\:\-\-h-40 {
       .m-autocomplete-element {
         @apply h-[40px];
+      }
+    }
+
+    &.\-\-h-35,
+    &.tm\:\-\-h-35,
+    &.m\:\-\-h-35 {
+      .m-autocomplete-element {
+        @apply h-[35px];
       }
     }
 
@@ -907,54 +1034,54 @@ onUnmounted(() => {
       @apply rounded-[16px];
     }
 
-    &.\-\-padding-12,
-    &.tm\:\-\-padding-12,
-    &.m\:\-\-padding-12 {
+    &.\-\-p-12,
+    &.tm\:\-\-p-12,
+    &.m\:\-\-p-12 {
       .m-autocomplete-dropdown-no-data,
       .m-autocomplete-dropdown-button {
         @apply p-[12px];
       }
     }
 
-    &.\-\-padding-x-12,
-    &.tm\:\-\-padding-x-12,
-    &.m\:\-\-padding-x-12 {
+    &.\-\-p-x-12,
+    &.tm\:\-\-p-x-12,
+    &.m\:\-\-p-x-12 {
       .m-autocomplete-dropdown-no-data,
       .m-autocomplete-dropdown-button {
         @apply px-[12px];
       }
     }
 
-    &.\-\-padding-y-12,
-    &.tm\:\-\-padding-y-12,
-    &.m\:\-\-padding-y-12 {
+    &.\-\-p-y-12,
+    &.tm\:\-\-p-y-12,
+    &.m\:\-\-p-y-12 {
       .m-autocomplete-dropdown-no-data,
       .m-autocomplete-dropdown-button {
         @apply py-[12px];
       }
     }
 
-    &.\-\-padding-24,
-    &.tm\:\-\-padding-24,
-    &.m\:\-\-padding-24 {
+    &.\-\-p-24,
+    &.tm\:\-\-p-24,
+    &.m\:\-\-p-24 {
       .m-autocomplete-dropdown-no-data,
       .m-autocomplete-dropdown-button {
         @apply p-[24px];
       }
     }
 
-    &.\-\-padding-x-24,
-    &.tm\:\-\-padding-x-24,
-    &.m\:\-\-padding-x-24 {
+    &.\-\-p-x-24,
+    &.tm\:\-\-p-x-24,
+    &.m\:\-\-p-x-24 {
       .m-autocomplete-dropdown-no-data,
       .m-autocomplete-dropdown-button {
         @apply px-[24px];
       }
     }
 
-    &.\-\-padding-y-24,
-    &.tm\:\-\-padding-y-24,
-    &.m\:\-\-padding-y-24 {
+    &.\-\-p-y-24,
+    &.tm\:\-\-p-y-24,
+    &.m\:\-\-p-y-24 {
       .m-autocomplete-dropdown-no-data,
       .m-autocomplete-dropdown-button {
         @apply py-[24px];

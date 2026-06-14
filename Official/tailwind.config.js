@@ -1,9 +1,9 @@
 import CONFIG from './config.js'
-import plugin from 'tailwindcss/plugin.js'
-import { boxShadow, letterSpacing, lineHeight } from './tailwind.extend.js'
-import { onSetWidth } from './postcss.function.js'
+import plugin from 'tailwindcss/plugin'
+import { fontFamily, boxShadow, dropShadow } from './tailwind.extend.js'
+import { onSetWidth, onColorWithAlpha } from './tailwind.function.js'
 
-export default {
+module.exports = {
   content: [
     './components/**/*.{js,vue,ts}',
     './containers/**/*.{js,vue,ts}',
@@ -58,52 +58,60 @@ export default {
         raw: 'screen and (-ms-high-contrast:active), (-ms-high-contrast:none)',
       },
     },
+    fontFamily: fontFamily,
     fontSize: {
       vmp: `${(16 / CONFIG.desktopMinWidth) * 100}vw`,
       vmt: `${(16 / 768) * 100}vw`,
       vmm: `${(16 / CONFIG.basicMobileWidth) * 100}vw`,
       vmmls: `${((16 / CONFIG.basicMobileWidth) * 100) / 1.77}vw`,
     },
+    boxShadow,
     extend: {
       content: {
         default: "''",
       },
       width: onSetWidth(),
-      boxShadow: {
-        ...boxShadow,
+      dropShadow: {
+        ...dropShadow,
       },
       transitionProperty: {
         margin: 'margin',
         widths: 'width, max-width, min-width',
         heights: 'height, max-height, min-height',
+        sizes: 'width, max-width, min-width, height, max-height, min-height',
         opacitys: 'opacity, visibility',
         filter: 'filter',
       },
-      letterSpacing: {
-        ...letterSpacing,
-      },
-      lineHeight: {
-        ...lineHeight,
-      },
+      // letterSpacing: {
+      //   ...letterSpacing,
+      // },
+      // lineHeight: {
+      //   ...lineHeight,
+      // },
     },
   },
-  corePlugins: {
-    fontFamily: false,
-  },
   plugins: [
-    plugin(({ addComponents }) => {
-      const truncateMultiline = {}
+    plugin(({ addComponents, matchUtilities }) => {
+      addComponents({
+        '.imeMode-disabled': { 'ime-mode': 'disabled' },
+      })
 
-      for (let i = 2; i <= 5; i += 1) {
-        truncateMultiline[`.truncate-${i}`] = {
-          display: '-webkit-box;',
-          '-webkit-line-clamp': `${i}`,
-          '-webkit-box-orient': 'vertical',
-          overflow: 'hidden',
-        }
-      }
-
-      addComponents(truncateMultiline)
+      matchUtilities({
+        'text-hexa': (value) => ({
+          color: onColorWithAlpha(value),
+        }),
+        'bg-hexa': (value) => ({
+          backgroundColor: onColorWithAlpha(value),
+        }),
+        'border-hexa': (value) => ({
+          borderColor: onColorWithAlpha(value),
+        }),
+        'divide-hexa': (value) => ({
+          '& > :not([hidden]) ~ :not([hidden])': {
+            borderColor: onColorWithAlpha(value),
+          },
+        }),
+      })
     }),
   ],
 }

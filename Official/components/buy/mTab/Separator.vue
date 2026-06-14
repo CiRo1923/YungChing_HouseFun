@@ -1,10 +1,7 @@
 <script setup>
-import { useBuyProjectStore } from '@stores/buy/project.js'
-import useBuyProjectActions from '@stores/buy/composables/useProjectActions.js'
-
-const project = useBuyProjectStore()
-const { device } = storeToRefs(project)
-const { onResize } = useBuyProjectActions()
+const common = useCommonStore()
+const { device } = storeToRefs(common)
+const { onResize } = useCommonActions()
 const emits = defineEmits(['click'])
 const props = defineProps({
   items: {
@@ -106,13 +103,15 @@ const onInit = () => {
   activeIndex.value = active
 }
 
-onBeforeUnmount(() => {
-  onResize('remove')
-})
+onResize()
 
 onMounted(() => {
   onInit()
-  onResize('add')
+  window.addEventListener('resize', onResize)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', onResize)
 })
 </script>
 

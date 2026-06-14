@@ -4,6 +4,7 @@ export const useBuyPopupStore = defineStore('buyPopup', () => {
   const buttons = readonly({
     alert: [
       {
+        id: 'sure',
         label: '確認',
         class: '--bg-green-6a2d --text-white',
         type: 'sure',
@@ -12,12 +13,14 @@ export const useBuyPopupStore = defineStore('buyPopup', () => {
     ],
     confirm: [
       {
+        id: 'cancel',
         label: '取消',
         class: '--border-gray-e5 --text-gray-666',
         type: 'cancel',
         isClose: true,
       },
       {
+        id: 'sure',
         label: '確認',
         class: '--bg-green-6a2d --text-white',
         type: 'sure',

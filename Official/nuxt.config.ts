@@ -1,19 +1,23 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 
 import CONFIG from './config.js'
-import * as POSTCSSFUNCTIONS from './postcss.function.js'
+import POSTCSSFUNCTIONS from './postcss.function.js'
 
+import SvgSpritemapDevPlugin, {
+  spritemapRoute as devSpritemapRoute,
+} from './scripts/vite/svg-spritemap-dev.mjs'
+import { getPageComponentDirs } from './scripts/nuxt/page-component-dirs'
+import { getStoreComposableImports, getStoreImports } from './scripts/nuxt/store-composable-imports'
 import VitePluginSvgSpritemap from '@spiriit/vite-plugin-svg-spritemap'
 import { ViteImageOptimizer } from 'vite-plugin-image-optimizer'
 import { fileURLToPath } from 'node:url'
+import { execSync } from 'node:child_process'
 
-const spriteVersion =
-  process.env.NUXT_PUBLIC_SPRITE_VERSION ||
-  process.env.GITHUB_SHA ||
-  process.env.CI_COMMIT_SHA ||
-  process.env.VERCEL_GIT_COMMIT_SHA ||
-  process.env.npm_package_version ||
-  new Date().toISOString().replace(/[-:.TZ]/g, '')
+const APP_HASH =
+  process.env.NUXT_PUBLIC_APP_HASH || execSync('git rev-parse --short HEAD').toString().trim()
+
+const imageAssetDir = CONFIG.imgs.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\\/g, '/')
+const imageAssetInclude = new RegExp(`${imageAssetDir}/(?!svg/spritemap\\.svg$)`)
 
 export default defineNuxtConfig({
   experimental: {
@@ -27,33 +31,42 @@ export default defineNuxtConfig({
       ...Object.fromEntries(
         Object.entries(process.env).filter(([k]) => k.startsWith('NUXT_PUBLIC_'))
       ),
-      spritePath: `${CONFIG.imgs}/svg/spritemap.svg`,
-      spriteVersion,
+      appHash: APP_HASH,
+      spriteVersion: APP_HASH,
+      spritePath:
+        process.env.NODE_ENV === 'development'
+          ? devSpritemapRoute
+          : `${CONFIG.imgs}/svg/spritemap.svg`,
+      googleMapsApiKey: process.env.NUXT_PUBLIC_GOOGLE_MAPS_API_KEY,
     },
   },
   imports: {
     autoImport: true,
   },
-  components: [
-    {
-      path: '~/components',
-      pathPrefix: true,
+  hooks: {
+    'imports:extend'(imports) {
+      const storesDir = fileURLToPath(new URL('./stores', import.meta.url))
+
+      imports.push(...getStoreImports(storesDir), ...getStoreComposableImports(storesDir))
     },
-    {
-      path: '~/containers',
-      pathPrefix: false,
+    'components:dirs'(dirs) {
+      dirs.push({
+        path: '~/containers',
+        pathPrefix: true,
+      })
+      dirs.push(...getPageComponentDirs(fileURLToPath(new URL('./pages', import.meta.url))))
     },
-  ],
+  },
   css: [
     `@/${CONFIG.css}/tailwind.css`,
     `@/${CONFIG.css}/_common/framework.css`,
     `@/${CONFIG.css}/_common/color.css`,
     `@/${CONFIG.css}/_common/basic.css`,
+    `@/${CONFIG.css}/_common/vueTransition.css`,
   ],
   postcss: {
     plugins: {
       'tailwindcss/nesting': {},
-      'postcss-each': {},
       tailwindcss: {},
       'postcss-functions': {
         functions: POSTCSSFUNCTIONS,
@@ -70,6 +83,7 @@ export default defineNuxtConfig({
     '@stores': fileURLToPath(new URL('./stores', import.meta.url)),
     '@components': fileURLToPath(new URL('./components', import.meta.url)),
     '@containers': fileURLToPath(new URL('./containers', import.meta.url)),
+    '@composable': fileURLToPath(new URL('./composable', import.meta.url)),
     '@pages': fileURLToPath(new URL('./pages', import.meta.url)),
     '@imgs': fileURLToPath(new URL(`./${CONFIG.imgs}`, import.meta.url)),
     '@css': fileURLToPath(new URL(`./${CONFIG.css}`, import.meta.url)),
@@ -120,13 +134,36 @@ export default defineNuxtConfig({
           use: true,
         },
       }) as never,
+      SvgSpritemapDevPlugin(CONFIG.svg) as never,
       ViteImageOptimizer({
-        // Keep SVG spritemap untouched; optimize only raster images.
-        include: /\.(png|jpe?g|gif|webp|avif)$/i,
+        include: imageAssetInclude,
         includePublic: false,
         logStats: true,
-        cache: true,
-        cacheLocation: '.cache/image-optimizer',
+        svg: {
+          multipass: true,
+          plugins: [
+            {
+              name: 'preset-default',
+              params: {
+                overrides: {
+                  cleanupNumericValues: false,
+                  cleanupIds: {
+                    minify: false,
+                    remove: false,
+                  },
+                  convertPathData: false,
+                },
+              },
+            },
+            'sortAttrs',
+            {
+              name: 'addAttributesToSVGElement',
+              params: {
+                attributes: [{ xmlns: 'http://www.w3.org/2000/svg' }],
+              },
+            },
+          ],
+        },
       }) as never,
     ],
     server: {
@@ -172,6 +209,9 @@ export default defineNuxtConfig({
   //     ErrorMessage: 'VeeErrorMessage'
   //   }
   // },
+  build: {
+    transpile: ['@googlemaps/js-api-loader'],
+  },
   router: {
     options: {
       linkActiveClass: 'active',

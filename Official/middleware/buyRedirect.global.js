@@ -11,7 +11,7 @@ export default defineNuxtRouteMiddleware((to) => {
     to.path === '/buy/list' ||
     to.path === '/buy/list/'
   ) {
-    return navigateTo(`/buy/list/${region.value.apiData}_region?pg=1`, {
+    return navigateTo(`/buy/list/${region.value.defaultIDs}_region?pg=1`, {
       replace: true,
     })
   }

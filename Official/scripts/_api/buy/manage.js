@@ -1,19 +1,16 @@
-import { version, onFetchManageApi } from '@js/_api/fetchApi.js'
-
-export const apiGETCitySelectOptions = async (data) =>
-  await onFetchManageApi.get(`api/${version}/buy/city/select-options`, data)
+import { version, fetchManageApi } from '@js/_api/fetchApi.js'
 
 export const apiGETRealEstatePurposeCheckOptions = async (data) =>
-  await onFetchManageApi.get(`api/${version}/buy/realEstatePurpose/check-options`, data)
+  await fetchManageApi.get(`api/${version}/buy/realEstatePurpose/check-options`, data)
 
 export const apiGETRealEstateTypeSelectOptions = async (data) =>
-  await onFetchManageApi.get(`api/${version}/buy/realEstateType/select-options`, data)
+  await fetchManageApi.get(`api/${version}/buy/realEstateType/select-options`, data)
+
+export const apiGETRealEstateFaceSelectOptions = async (data) =>
+  await fetchManageApi.get(`api/${version}/buy/realEstateFace/select-options`, data)
 
 export const apiGETRealEstateParkingModeSelectOptions = async (data) =>
-  await onFetchManageApi.get(`api/${version}/buy/realEstateParkingMode/select-options`, data)
+  await fetchManageApi.get(`api/${version}/buy/realEstateParkingMode/select-options`, data)
 
-export const apiGETRealEstateParkingTypeSelectOptions = async (data) =>
-  await onFetchManageApi.get(`api/${version}/buy/realEstateParkingType/select-options`, data)
-
-export const apiGETRealEstateParkingRegSelectOptions = async (data) =>
-  await onFetchManageApi.get(`api/${version}/buy/realEstateParkingReg/select-options`, data)
+export const apiGETRealEstateNearByCheckOptions = async (data) =>
+  await fetchManageApi.get(`api/${version}/buy/realEstateNearBy/check-options`, data)

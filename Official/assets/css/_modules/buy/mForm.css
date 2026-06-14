@@ -1,6 +1,23 @@
+:root {
+  --form-element-pc-border: 1px;
+  --form-element-tablet-border: 1px;
+  --form-element-mobile-border: 1px;
+
+  --form-element-border-color: var(--gray-e5);
+  --form-element-border-focus-color: var(--green-8b0d);
+  --form-element-border-disabled-color: var(--gray-f2);
+  --form-element-border-error-color: var(--red-e45c);
+}
+
 .m-form-element {
   &:not(label) {
-    @apply flex items-center gap-x-[8px] overflow-hidden bg-[--white] transition-colors duration-300;
+    border-width: var(--form-element-pc-border);
+
+    @apply flex items-center gap-x-[8px] overflow-hidden border-solid bg-[--white] transition-colors duration-300;
+
+    &:not(:disabled):not(.\-\-disabled):not(.\-\-focus):not(.\-\-error) {
+      @apply border-[--form-element-border-color];
+    }
 
     &:not(:disabled):not(.\-\-disabled) {
       .m-form-type {
@@ -13,13 +30,17 @@
       }
     }
 
-    &:not(.\-\-error) {
-      @apply border-[--gray-ccce];
+    &.\-\-focus {
+      @apply border-[--form-element-border-focus-color];
+    }
+
+    &.\-\-error {
+      @apply border-[--form-element-border-error-color];
     }
 
     &:disabled,
     &.\-\-disabled {
-      @apply cursor-not-allowed bg-[--gray-f2];
+      @apply cursor-not-allowed border-[--form-element-border-disabled-color] bg-[--gray-f2];
 
       .m-form-type {
         @apply pointer-events-none;
@@ -44,7 +65,7 @@
 }
 
 .m-form-type {
-  @apply h-full bg-transparent text-[16px];
+  @apply h-full bg-transparent;
 }
 
 .m-form-clear-button {
@@ -74,6 +95,8 @@
 
 @screen p {
   .m-form {
+    --form-element-border: var(--form-element-pc-border);
+
     &.\-\-px-12,
     &.p\:\-\-px-12,
     &.pt\:\-\-px-12 {
@@ -82,19 +105,27 @@
       }
     }
 
-    &.\-\-px-10,
-    &.p\:\-\-px-10,
-    &.pt\:\-\-px-10 {
+    &.\-\-px-8,
+    &.p\:\-\-px-8,
+    &.pt\:\-\-px-8 {
       .m-form-element {
-        @apply px-[10px];
+        @apply px-[8px];
       }
     }
 
-    &.\-\-py-5,
-    &.p\:\-\-py-5,
-    &.pt\:\-\-py-5 {
+    &.\-\-py-10,
+    &.p\:\-\-py-10,
+    &.pt\:\-\-py-10 {
       .m-form-element {
-        @apply py-[5px];
+        @apply py-[10px];
+      }
+    }
+
+    &.\-\-py-8,
+    &.p\:\-\-py-8,
+    &.pt\:\-\-py-8 {
+      .m-form-element {
+        @apply py-[8px];
       }
     }
 
@@ -114,21 +145,19 @@
       }
     }
 
+    &.\-\-h-40,
+    &.p\:\-\-h-40,
+    &.pt\:\-\-h-40 {
+      .m-form-element {
+        @apply h-[40px];
+      }
+    }
+
     &.\-\-h-35,
     &.p\:\-\-h-35,
     &.pt\:\-\-h-35 {
       .m-form-element {
         @apply h-[35px];
-      }
-    }
-
-    &.\-\-border,
-    &.p\:\-\-border,
-    &.pt\:\-\-border {
-      .m-form-element {
-        &:not(label) {
-          @apply border-[1px];
-        }
       }
     }
 
@@ -146,6 +175,8 @@
 
 @screen t {
   .m-form {
+    --form-element-border: var(--form-element-tablet-border);
+
     &.\-\-px-12,
     &.pt\:\-\-px-12,
     &.tm\:\-\-px-12,
@@ -155,21 +186,30 @@
       }
     }
 
-    &.\-\-px-10,
-    &.pt\:\-\-px-10,
-    &.tm\:\-\-px-10,
-    &.t\:\-\-px-10 {
+    &.\-\-px-8,
+    &.pt\:\-\-px-8,
+    &.tm\:\-\-px-8,
+    &.t\:\-\-px-8 {
       .m-form-element {
-        @apply px-[10px];
+        @apply px-[8px];
       }
     }
 
-    &.\-\-py-5,
-    &.pt\:\-\-py-5,
-    &.tm\:\-\-py-5,
-    &.t\:\-\-py-5 {
+    &.\-\-py-10,
+    &.pt\:\-\-py-10,
+    &.tm\:\-\-py-10,
+    &.t\:\-\-py-10 {
       .m-form-element {
-        @apply py-[5px];
+        @apply py-[10px];
+      }
+    }
+
+    &.\-\-py-8,
+    &.pt\:\-\-py-8,
+    &.tm\:\-\-py-8,
+    &.t\:\-\-py-8 {
+      .m-form-element {
+        @apply py-[8px];
       }
     }
 
@@ -191,23 +231,21 @@
       }
     }
 
+    &.\-\-h-40,
+    &.pt\:\-\-h-40,
+    &.tm\:\-\-h-40,
+    &.t\:\-\-h-40 {
+      .m-form-element {
+        @apply h-[40px];
+      }
+    }
+
     &.\-\-h-35,
     &.pt\:\-\-h-35,
     &.tm\:\-\-h-35,
     &.t\:\-\-h-35 {
       .m-form-element {
         @apply h-[35px];
-      }
-    }
-
-    &.\-\-border,
-    &.pt\:\-\-border,
-    &.tm\:\-\-border,
-    &.t\:\-\-border {
-      .m-form-element {
-        &:not(label) {
-          @apply border-[1px];
-        }
       }
     }
 
@@ -226,6 +264,8 @@
 
 @screen m {
   .m-form {
+    --form-element-border: var(--form-element-mobile-border);
+
     &.\-\-px-12,
     &.tm\:\-\-px-12,
     &.m\:\-\-px-12 {
@@ -234,19 +274,27 @@
       }
     }
 
-    &.\-\-px-10,
-    &.tm\:\-\-px-10,
-    &.m\:\-\-px-10 {
+    &.\-\-px-8,
+    &.tm\:\-\-px-8,
+    &.m\:\-\-px-8 {
       .m-form-element {
-        @apply px-[10px];
+        @apply px-[8px];
       }
     }
 
-    &.\-\-py-5,
-    &.tm\:\-\-py-5,
-    &.m\:\-\-py-5 {
+    &.\-\-py-10,
+    &.tm\:\-\-py-10,
+    &.m\:\-\-py-10 {
       .m-form-element {
-        @apply py-[5px];
+        @apply py-[10px];
+      }
+    }
+
+    &.\-\-py-8,
+    &.tm\:\-\-py-8,
+    &.m\:\-\-py-8 {
+      .m-form-element {
+        @apply py-[8px];
       }
     }
 
@@ -266,21 +314,19 @@
       }
     }
 
+    &.\-\-h-40,
+    &.tm\:\-\-h-40,
+    &.m\:\-\-h-40 {
+      .m-form-element {
+        @apply h-[40px];
+      }
+    }
+
     &.\-\-h-35,
     &.tm\:\-\-h-35,
     &.m\:\-\-h-35 {
       .m-form-element {
         @apply h-[35px];
-      }
-    }
-
-    &.\-\-border,
-    &.tm\:\-\-border,
-    &.m\:\-\-border {
-      .m-form-element {
-        &:not(label) {
-          @apply border-[1px];
-        }
       }
     }
 

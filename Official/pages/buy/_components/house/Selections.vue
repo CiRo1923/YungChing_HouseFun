@@ -1,9 +1,7 @@
-<script setup>
-import Content from '@pages/buy/_components/house/_Content.vue'
-</script>
+<script setup></script>
 
 <template>
-  <Content :title="`郝慧邁的精選物件`" />
+  <PageBuyHouseContent :title="`郝慧邁的精選物件`" />
 </template>
 
 <style></style>

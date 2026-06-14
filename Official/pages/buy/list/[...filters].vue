@@ -1,38 +1,29 @@
 <script setup>
-import Tools from '@pages/buy/_components/list/Tools.vue'
-import SearchMode from '@pages/buy/_components/list/SearchMode.vue'
-import Filter from '@pages/buy/_components/list/Filter.vue'
-import List from '@pages/buy/_components/list/List.vue'
-
-// import { useCommonStore } from '@stores/common.js'
-import useCommonActions from '@stores/composables/useCommonActions.js'
-// import { useBuyProjectStore } from '@stores/buy/project.js'
-import { useBuyListStore } from '@stores/buy/list.js'
-import useBuyProjectActions from '@stores/buy/composables/useProjectActions.js'
-import useBuyListActions from '@stores/buy/composables/useListActions.js'
+const common = useCommonStore()
+const { device } = storeToRefs(common)
+const { onResize } = useCommonActions()
+const { onUseMeta, onIsLoading, onWithLoadingAll } = useCommonActions()
+const buyList = useBuyListStore()
+const { pagination } = storeToRefs(buyList)
+const {
+  onApiGETRealEstatePurposeCheckOptions,
+  onApiGETRealEstateTypeSelectOptions,
+  onApiGETRealEstateFaceSelectOptions,
+  onApiGETRealEstateParkingModeSelectOptions,
+  onApiGETRealEstateNearByCheckOptions,
+} = useBuyProjectActions()
+const { onGetBuyListParams, onApiRegion, onApiMrt, onApiBuyList, onChannel } = useBuyListActions()
+const { onApiErrorServerToClient } = useBuyPopupActions()
+const route = useRoute()
 
 definePageMeta({
   layout: 'common',
   requiresAuth: false,
 })
 
-const { onUseMeta, onIsLoading, onWithLoadingAll } = useCommonActions()
-
-// const project = useBuyProjectStore()
-// const { options } = storeToRefs(project)
-const buyList = useBuyListStore()
-const { pagination } = storeToRefs(buyList)
-const {
-  // onApiGETCitySelectOptions,
-  onApiGETRealEstatePurposeCheckOptions,
-  onApiGETRealEstateTypeSelectOptions,
-  onApiGETRealEstateParkingTypeSelectOptions,
-} = useBuyProjectActions()
-const { onGetBuyListParams, onApiRegion, onApiMrt, onApiBuyList, onChannel } = useBuyListActions()
-const route = useRoute()
+const isDeviceM = computed(() => device.value === 'm')
 
 onChannel()
-
 onGetBuyListParams()
 
 await onWithLoadingAll([
@@ -40,7 +31,9 @@ await onWithLoadingAll([
   useAsyncData('mrt-options', () => onApiMrt()),
   useAsyncData('purpose-options', () => onApiGETRealEstatePurposeCheckOptions()),
   useAsyncData('type-options', () => onApiGETRealEstateTypeSelectOptions()),
-  useAsyncData('parking-type-options', () => onApiGETRealEstateParkingTypeSelectOptions()),
+  useAsyncData('face-options', () => onApiGETRealEstateFaceSelectOptions()),
+  useAsyncData('parking-options', () => onApiGETRealEstateParkingModeSelectOptions()),
+  useAsyncData('near-options', () => onApiGETRealEstateNearByCheckOptions()),
   useAsyncData('buy-list-region', () => onApiBuyList()),
 ])
 
@@ -75,6 +68,17 @@ onBeforeRouteUpdate(async (to, from) => {
   if (to.fullPath === from.fullPath) return
   await onRouteChanged(to)
 })
+
+onResize()
+
+onMounted(() => {
+  onApiErrorServerToClient()
+  window.addEventListener('resize', onResize)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', onResize)
+})
 </script>
 
 <template>
@@ -87,17 +91,18 @@ onBeforeRouteUpdate(async (to, from) => {
       >{{ options.city }}
     </pre>
   </div> -->
-  <Tools>
-    <SearchMode />
-  </Tools>
+
+  <div class="bg-[--white] p:pt-[12px]">
+    <PageBuyListTabOvalResponsiv />
+    <PageBuyListSearchFunction />
+  </div>
   <CommonMContainer class="--inner p:mt-[20px]">
     <CommonMContent class="pt:--rounded-20 p:--py-20">
-      <Filter @info-click="onSearch" />
-      <!-- <Card /> -->
+      <PageBuyListSearchFilter @click="onSearch" v-if="!isDeviceM" />
       <!-- <pre>
         {{ options.caseType }}
       </pre> -->
-      <List />
+      <PageBuyListContent />
       <BuyMPagination
         :route="{
           name: buyList.basicRouteName,

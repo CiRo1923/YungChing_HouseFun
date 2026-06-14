@@ -119,6 +119,9 @@
       "@containers/*": [
         "../containers/*"
       ],
+      "@composable": [
+        "../composable"
+      ],
       "@pages": [
         "../pages"
       ],

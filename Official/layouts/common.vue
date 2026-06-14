@@ -3,8 +3,6 @@ import AlertSystem from '@containers/common/AlertSystem.vue'
 import ConfirmSystem from '@containers/common/ConfirmSystem.vue'
 // import ApiRunSystem from '@containers/common/ApiRunSystem.vue'
 
-import { useCommonStore } from '@stores/common.js'
-
 const route = useRoute()
 const channel = computed(() => route.meta.title)
 const common = useCommonStore()

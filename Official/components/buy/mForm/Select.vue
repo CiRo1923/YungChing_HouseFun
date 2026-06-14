@@ -1,5 +1,5 @@
 <script setup>
-import { onDeepMerge, onDeepClone, emptyData } from '@js/_prototype.js'
+import { onMergeDropdownConfig, useDropdownCore } from './.composables/useDropdownCore.js'
 
 import '@js/_validation.js'
 
@@ -36,14 +36,7 @@ const props = defineProps({
     default: () => {},
   },
 })
-const borderWidth = 0
-const elenemtRef = ref(null)
 const selectRef = ref(null)
-const dropdownRef = ref(null)
-const dropdownContainerRef = ref(null)
-const dropdownItemRef = ref(null)
-const isFocus = ref(false)
-const isActive = ref(false)
 const selectedIndex = ref(-1)
 const label = ref(null)
 const model = computed({
@@ -60,12 +53,9 @@ const model = computed({
 })
 const config = computed(() => {
   const defaultConfig = {
-    arrowType: 'caret',
     startOption: null,
     placeholder: null,
-    isDisabled: false,
     isError: false,
-    position: 'auto',
     // dropdownWidth: 'auto',
     schema: {
       label: 'label',
@@ -75,7 +65,7 @@ const config = computed(() => {
     maxItems: 5,
   }
 
-  return onDeepMerge(defaultConfig, props.config)
+  return onMergeDropdownConfig(props.config, defaultConfig)
 })
 
 const setClass = computed(() => {
@@ -89,6 +79,7 @@ const setClass = computed(() => {
       error: '',
       dropdown: '',
       dropdownContainer: '',
+      dropdownBody: '',
     },
     ...props.setClass,
   }
@@ -142,105 +133,26 @@ const onSetSelectedIndex = () => {
   selectedIndex.value = index
 }
 
-const onSwitchActive = (value) => {
-  isFocus.value = value !== undefined ? value : !isFocus.value
-  isActive.value = value !== undefined ? value : !isActive.value
-}
-
-const onCloseDropdown = () => {
-  onSwitchActive(false)
-}
-
-const onElementClick = async () => {
-  onSwitchActive()
-
-  await nextTick()
-  onDropdownOpen()
-}
-
-const onDropdownOpen = () => {
-  const { maxItems } = config.value
-  const $elenemt = elenemtRef.value
-  const $dropdown = dropdownRef.value
-  const $dropdownContainer = dropdownContainerRef.value
-  const element = {
-    rect: elenemtRef.value.getBoundingClientRect(),
-  }
-
-  if ($elenemt && $dropdown && $dropdownContainer) {
-    const hasItemsThanMax = maxItems <= dropdownItemRef.value.length - 1
-
-    if (hasItemsThanMax) {
-      $dropdownContainer.style.overflowY = 'auto'
-    }
-
-    const index = !hasItemsThanMax ? dropdownItemRef.value.length - 1 : maxItems
-    const $item = dropdownItemRef.value ? dropdownItemRef.value[index] : null
-    const dropdown = {
-      rect: dropdownRef.value.getBoundingClientRect(),
-    }
-    const itemHeight = $item
-      ? hasItemsThanMax
-        ? $item.offsetTop
-        : $item.offsetTop + $item.offsetHeight
-      : 0
-
-    const offsetTop = element.rect.height + element.rect.top + window.scrollY
-    const dropdownStyle = window.getComputedStyle($dropdown)
-    const viewportWidth = document.documentElement.clientWidth
-    const isFullWidth = $dropdown.classList.contains('w-full') || dropdownStyle.width === '100%'
-    const dropdownWidth = isFullWidth
-      ? element.rect.width
-      : Math.max(dropdown.rect.width, element.rect.width)
-    const maxLeft = Math.max(viewportWidth - dropdownWidth, 0)
-    const preferredLeft =
-      config.value.position === 'right' ? element.rect.right - dropdownWidth : element.rect.left
-    const left = Math.min(Math.max(preferredLeft, 0), maxLeft)
-    const maxHeight = itemHeight + borderWidth
-
-    $dropdown.style.height = `${maxHeight}px`
-    $dropdown.style.top = `${offsetTop - borderWidth * 2}px`
-    $dropdown.style.left = `${left - borderWidth}px`
-    $dropdown.style.width = isFullWidth ? `${element.rect.width}px` : ''
-
-    if (dropdown.rect.width < element.rect.width) {
-      $dropdown.style.minWidth = `${element.rect.width}px`
-    } else if (!isFullWidth) {
-      $dropdown.style.minWidth = ''
-    }
-
-    // console.log(dropdown.rect.width)
-
-    // if (config.value.dropdownWidth !== 'auto') {
-    //   $dropdown.style.maxWidth = `${config.value.dropdownWidth}px`
-    // }
-
-    console.log(selectedIndex.value)
-
-    if (model.value !== null && model.value !== '') {
-      const idx = options.value.findIndex(
-        (item) => item?.[config.value.schema.value] == model.value
-      )
-
-      // 沒找到就不要往下做
-      if (idx < 0) return
-
-      // refs 還沒就緒也不要做
-      const items = dropdownItemRef.value
-      const $selectedItem = items?.[idx]
-      if (!$selectedItem) return
-
-      selectedIndex.value = idx
-
-      const selectedItem = {
-        rect: $selectedItem.getBoundingClientRect(),
-      }
-
-      $dropdownContainer.scrollTop =
-        $selectedItem.offsetTop + selectedItem.rect.height / 2 - maxHeight / 2
-    }
-  }
-}
+const {
+  elenemtRef,
+  dropdownRef,
+  dropdownContainerRef,
+  dropdownBodyRef,
+  dropdownItemRef,
+  isFocus,
+  isActive,
+  isOpen,
+  onSwitchActive,
+  onCloseDropdown,
+  onElementClick,
+  onSelectResize,
+  isDropdownOutside,
+} = useDropdownCore({
+  config,
+  model,
+  options,
+  selectedIndex,
+})
 
 const onDropdownArrow = (e) => {
   const { code } = e
@@ -256,10 +168,12 @@ const onDropdownArrow = (e) => {
       selectedIndex.value = options.value.length - 1
     }
 
-    const $dropdown = dropdownRef.value
+    const $dropdown = dropdownBodyRef.value
     const $dropdownItemRef = dropdownItemRef.value[selectedIndex.value]
+    if (!$dropdown || !$dropdownItemRef) return
+
     const dropdown = {
-      rect: dropdownRef.value.getBoundingClientRect(),
+      rect: $dropdown.getBoundingClientRect(),
     }
     const dropdownItem = {
       rect: $dropdownItemRef.getBoundingClientRect(),
@@ -311,19 +225,9 @@ const onDropdownItemClick = (index) => {
 }
 
 const onOutSide = (e) => {
-  const $elenemt = elenemtRef.value
-  const $dropdown = dropdownRef.value
-  const isElenemtContains = $elenemt ? !$elenemt.contains(e.target) : true
-  const isDropdownContains = $dropdown ? !$dropdown.contains(e.target) : true
-  const isOutSide = isElenemtContains && isDropdownContains
-
-  if (isOutSide) {
+  if (isDropdownOutside(e)) {
     onSwitchActive(false)
   }
-}
-
-const onResize = () => {
-  onDropdownOpen()
 }
 
 watch(
@@ -345,14 +249,13 @@ watch(
 
 onMounted(() => {
   onSetSelectedIndex()
-  onResize()
   document.addEventListener('click', onOutSide, true)
-  window.addEventListener('resize', onResize)
+  window.addEventListener('resize', onSelectResize)
 })
 
 onUnmounted(() => {
   document.removeEventListener('click', onOutSide, true)
-  window.removeEventListener('resize', onResize)
+  window.removeEventListener('resize', onSelectResize)
 })
 </script>
 
@@ -368,7 +271,7 @@ onUnmounted(() => {
       <div class="m-form-container flex" :class="setClass.container">
         <button
           type="button"
-          class="m-form-element --select grow overflow-hidden text-left"
+          class="m-form-element --select"
           :class="[
             setClass.element,
             { '--focus': isFocus },
@@ -382,7 +285,7 @@ onUnmounted(() => {
           @keypress.enter="onDropdownEnter"
         >
           <div
-            class="m-form-type w-full cursor-pointer truncate leading-[1.33]"
+            class="m-form-type"
             :class="[
               setClass.type,
               {
@@ -400,14 +303,14 @@ onUnmounted(() => {
           </div>
           <CommonSvgIcon
             icon="caret_large_down"
-            class="m-form-icon h-[14px] w-[14px] shrink-0 p-[2px] transition-transform duration-300"
+            class="m-form-icon"
             :class="setClass.icon"
             v-if="config.arrowType === 'caret'"
           />
-          <i
+          <!-- <i
             class="m-form-icon-arrow h-[16px] w-[16px] shrink-0"
             v-if="config.arrowType === 'arrow'"
-          />
+          /> -->
         </button>
         <small class="m-form-suffix" :class="setClass.suffix" v-if="$slots.suffix">
           <slot name="suffix" />
@@ -425,89 +328,51 @@ onUnmounted(() => {
     </ErrorMessage>
   </div>
   <Teleport to="body">
-    <Transition name="select-dropdown" @after-leave="onCloseDropdown" appear>
+    <Transition name="dropdown" @afterLeave="onCloseDropdown" appear>
       <div
-        class="m-select-dropdown absolute z-[5] mt-[3px] overflow-hidden"
-        :class="setClass.dropdown"
+        class="m-select-dropdown"
+        :class="[setClass.dropdown, { '--open': isOpen }]"
         ref="dropdownRef"
         v-if="isActive && options && options.length !== 0 && !config.isDisabled"
       >
-        <ul
-          class="m-select-dropdown-container max-h-full bg-[--white]"
+        <div
+          class="m-select-dropdown-container"
           :class="setClass.dropdownContainer"
           ref="dropdownContainerRef"
         >
-          <li
-            class="m-select-dropdown-item"
-            v-for="(item, index) in options"
-            :key="`${item}_${index}`"
-            ref="dropdownItemRef"
-          >
-            <button
-              type="button"
-              class="m-select-dropdown-button block w-full px-[8px] text-left transition-colors duration-300"
-              :class="{
-                '--active': index === selectedIndex,
-              }"
-              :disabled="item[config.schema.isDisabled] === true"
-              @click="onDropdownItemClick(index)"
+          <ul class="m-select-dropdown-body" :class="setClass.dropdownBody" ref="dropdownBodyRef">
+            <li
+              class="m-select-dropdown-item"
+              v-for="(item, index) in options"
+              :key="`${item}_${index}`"
+              ref="dropdownItemRef"
             >
-              <em class="m-select-dropdown-label relative block grow py-[8px] text-[14px]">
-                <slot name="option" :item="item">
-                  {{ item[config.schema.label] }}
-                </slot>
-              </em>
-            </button>
-          </li>
-        </ul>
+              <button
+                type="button"
+                class="m-select-dropdown-button block w-full px-[8px] text-left transition-colors duration-300"
+                :class="{
+                  '--active': index === selectedIndex,
+                }"
+                :disabled="item[config.schema.isDisabled] === true"
+                @click="onDropdownItemClick(index)"
+              >
+                <em class="m-select-dropdown-label relative block grow py-[8px] text-[14px]">
+                  <slot name="option" :item="item">
+                    {{ item[config.schema.label] }}
+                  </slot>
+                </em>
+              </button>
+            </li>
+          </ul>
+        </div>
       </div>
     </Transition>
   </Teleport>
 </template>
 
 <style src="@css/_modules/buy/mForm.css"></style>
-<style src="@css/_modules/_vueTransition.css"></style>
+<style src="@css/_modules/buy/mFormSelect.css"></style>
 <style lang="postcss">
-.m-form-element {
-  &.\-\-select {
-    &.\-\-focus {
-      .m-form-icon {
-        @apply -rotate-180;
-      }
-
-      .m-form-icon-arrow {
-        &:before {
-          @apply -rotate-180;
-        }
-      }
-    }
-
-    &:not(:disabled) {
-      .m-form-icon {
-        @apply text-[--gray-999];
-      }
-    }
-
-    &:disabled {
-      .m-form-icon {
-        @apply text-[--gray-ccce];
-      }
-    }
-  }
-}
-
-.m-form-icon-arrow {
-  &:before {
-    @apply block h-0 w-0 border-x-[3px] border-t-[5px] border-transparent border-t-[--gray-222] transition-transform duration-300 content-default;
-  }
-}
-
-.m-select-dropdown {
-  box-shadow:
-    0px 4px 24px 0px #02041614,
-    0px 2px 16px -8px #02041633;
-}
-
 .m-select-dropdown-button {
   &:not(:disabled) {
     @apply text-[--gray-333];

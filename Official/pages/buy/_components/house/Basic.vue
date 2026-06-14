@@ -1,13 +1,4 @@
 <script setup>
-import AddressInfo from '@pages/buy/_components/house/_basic/AddressInfo.vue'
-import Media from '@pages/buy/_components/house/_basic/Media.vue'
-import PriceInfo from '@pages/buy/_components/house/_basic/PriceInfo.vue'
-import HouseInfo from '@pages/buy/_components/house/_basic/HouseInfo.vue'
-import LayoutInfo from '@pages/buy/_components/house/_basic/LayoutInfo.vue'
-import AccountInfo from '@pages/buy/_components/house/_basic/AccountInfo.vue'
-
-import { useBuyHouseStore } from '@stores/buy/house.js'
-
 const buyHouse = useBuyHouseStore()
 const { basic } = storeToRefs(buyHouse)
 </script>
@@ -26,20 +17,20 @@ const { basic } = storeToRefs(buyHouse)
               <strong class="tm:text-[20px] p:text-[30px]">{{ basic.title }}</strong>
             </h2>
           </header>
-          <AddressInfo />
+          <PageBuyHouseBasicAddressInfo />
         </div>
-        <Media />
+        <PageBuyHouseBasicMedia />
       </div>
       <div class="flex flex-col items-end m:px-[16px] pt:grow">
-        <PriceInfo />
+        <PageBuyHouseBasicPriceInfo />
         <div
           class="w-full m:px-[10px] m:py-[20px] t:p-[10px] tm:space-y-[8px] p:space-y-[12px] p:p-[15px]"
         >
-          <HouseInfo />
-          <LayoutInfo />
+          <PageBuyHouseBasicHouseInfo />
+          <PageBuyHouseBasicLayoutInfo />
         </div>
         <div class="w-full border-t-[1px] border-t-[--gray-e5] tm:pt-[20px] p:pt-[35px]">
-          <AccountInfo />
+          <PageBuyHouseBasicAccountInfo />
         </div>
         <!-- <pre>
           {{ house }}
