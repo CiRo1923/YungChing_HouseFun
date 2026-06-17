@@ -65,7 +65,7 @@ onUnmounted(() => {
     }"
     ref="selectDropdownRef"
   >
-    <ul class="m:grid m:grid-cols-3 m:gap-[15px] pt:space-y-[15px]">
+    <ul class="space-y-[15px]">
       <li
         v-for="(item, index) in options.casePurpose"
         :key="`${componentsName}_${item.code}_${index}`"
