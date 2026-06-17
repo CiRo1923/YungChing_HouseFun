@@ -18,112 +18,187 @@
 
 @screen p {
   .m-tab {
-    &.\-\-anchor-height-50,
-    &.\-\-p\:anchor-height-50,
-    &.\-\-pt\:anchor-height-50 {
+    &.\-\-anchor-h-50,
+    &.p\:\-\-anchor-h-50,
+    &.pt\:\-\-anchor-h-50 {
       .m-tab-anchor {
         @apply min-h-[50px];
       }
     }
 
-    /* &.\-\-body-px-40,
-    &.p\:\-\-body-px-40,
-    &.pt\:\-\-body-px-40 {
-      .m-table-body-content {
-        @apply border-x-[40px];
+    &.\-\-anchor-px-20,
+    &.p\:\-\-anchor-px-20,
+    &.pt\:\-\-anchor-px-20 {
+      .m-tab-anchor {
+        @apply px-[20px];
       }
-    } */
+    }
 
-    /* &.\-\-body-px-16,
-    &.p\:\-\-body-px-16,
-    &.pt\:\-\-body-px-16 {
-      .m-table-body-content {
-        @apply border-x-[16px];
+    &.\-\-anchor-px-15,
+    &.p\:\-\-anchor-px-15,
+    &.pt\:\-\-anchor-px-15 {
+      .m-tab-anchor {
+        @apply px-[15px];
       }
-    } */
+    }
 
-    /* &.\-\-body-py-32,
-    &.p\:\-\-body-py-32,
-    &.pt\:\-\-body-py-32 {
-      .m-table-body-content {
-        @apply border-y-[32px];
+    &.\-\-anchor-px-10,
+    &.p\:\-\-anchor-px-10,
+    &.pt\:\-\-anchor-px-10 {
+      .m-tab-anchor {
+        @apply px-[10px];
       }
-    } */
+    }
+
+    &.\-\-anchor-py-10,
+    &.p\:\-\-anchor-py-10,
+    &.pt\:\-\-anchor-py-10 {
+      .m-tab-anchor {
+        @apply py-[10px];
+      }
+    }
+
+    &.\-\-anchor-py-8,
+    &.p\:\-\-anchor-py-8,
+    &.pt\:\-\-anchor-py-8 {
+      .m-tab-anchor {
+        @apply py-[8px];
+      }
+    }
+
+    &.\-\-anchor-py-5,
+    &.p\:\-\-anchor-py-5,
+    &.pt\:\-\-anchor-py-5 {
+      .m-tab-anchor {
+        @apply py-[5px];
+      }
+    }
   }
 }
 
 @screen t {
   .m-tab {
-    &.\-\-anchor-height-50,
-    &.\-\-pt\:anchor-height-50,
-    &.\-\-tm\:anchor-height-50,
-    &.\-\-t\:anchor-height-50 {
+    &.\-\-anchor-h-50,
+    &.pt\:\-\-anchor-h-50,
+    &.tm\:\-\-anchor-h-50,
+    &.t\:\-\-anchor-h-50 {
       .m-tab-anchor {
         @apply min-h-[50px];
       }
     }
 
-    /* &.\-\-body-px-40,
-    &.pt\:\-\-body-px-40,
-    &.tm\:\-\-body-px-40,
-    &.t\:\-\-body-px-40 {
-      .m-table-body-content {
-        @apply border-x-[40px];
+    &.\-\-anchor-px-20,
+    &.pt\:\-\-anchor-px-20,
+    &.tm\:\-\-anchor-px-20,
+    &.t\:\-\-anchor-px-20 {
+      .m-tab-anchor {
+        @apply px-[20px];
       }
-    } */
+    }
 
-    /* &.\-\-body-px-16,
-    &.pt\:\-\-body-px-16,
-    &.tm\:\-\-body-px-16,
-    &.t\:\-\-body-px-16 {
-      .m-table-body-content {
-        @apply border-x-[16px];
+    &.\-\-anchor-px-15,
+    &.pt\:\-\-anchor-px-15,
+    &.tm\:\-\-anchor-px-15,
+    &.t\:\-\-anchor-px-15 {
+      .m-tab-anchor {
+        @apply px-[15px];
       }
-    } */
+    }
 
-    /* &.\-\-body-py-32,
-    &.pt\:\-\-body-py-32,
-    &.tm\:\-\-body-py-32,
-    &.t\:\-\-body-py-32 {
-      .m-table-body-content {
-        @apply border-y-[32px];
+    &.\-\-anchor-px-10,
+    &.pt\:\-\-anchor-px-10,
+    &.tm\:\-\-anchor-px-10,
+    &.t\:\-\-anchor-px-10 {
+      .m-tab-anchor {
+        @apply px-[10px];
       }
-    } */
+    }
+
+    &.\-\-anchor-py-10,
+    &.pt\:\-\-anchor-py-10,
+    &.tm\:\-\-anchor-py-10,
+    &.t\:\-\-anchor-py-10 {
+      .m-tab-anchor {
+        @apply py-[10px];
+      }
+    }
+
+    &.\-\-anchor-py-8,
+    &.pt\:\-\-anchor-py-8,
+    &.tm\:\-\-anchor-py-8,
+    &.t\:\-\-anchor-py-8 {
+      .m-tab-anchor {
+        @apply py-[8px];
+      }
+    }
+
+    &.\-\-anchor-py-5,
+    &.pt\:\-\-anchor-py-5,
+    &.tm\:\-\-anchor-py-5,
+    &.t\:\-\-anchor-py-5 {
+      .m-tab-anchor {
+        @apply py-[5px];
+      }
+    }
   }
 }
 
 @screen m {
   .m-tab {
-    &.\-\-anchor-height-50,
-    &.\-\-tm\:anchor-height-50,
-    &.\-\-m\:anchor-height-50 {
+    &.\-\-anchor-h-50,
+    &.tm\:\-\-anchor-h-50,
+    &.m\:\-\-anchor-h-50 {
       .m-tab-anchor {
         @apply min-h-[50px];
       }
     }
 
-    /* &.\-\-body-px-40,
-    &.tm\:\-\-body-px-40,
-    &.m\:\-\-body-px-40 {
-      .m-table-body-content {
-        @apply border-x-[40px];
+    &.\-\-anchor-px-20,
+    &.tm\:\-\-anchor-px-20,
+    &.m\:\-\-anchor-px-20 {
+      .m-tab-anchor {
+        @apply px-[20px];
       }
-    } */
+    }
 
-    /* &.\-\-body-px-16,
-    &.tm\:\-\-body-px-16,
-    &.m\:\-\-body-px-16 {
-      .m-table-body-content {
-        @apply border-x-[16px];
+    &.\-\-anchor-px-15,
+    &.tm\:\-\-anchor-px-15,
+    &.m\:\-\-anchor-px-15 {
+      .m-tab-anchor {
+        @apply px-[15px];
       }
-    } */
+    }
 
-    /* &.\-\-body-py-32,
-    &.tm\:\-\-body-py-32,
-    &.m\:\-\-body-py-32 {
-      .m-table-body-content {
-        @apply border-y-[32px];
+    &.\-\-anchor-px-10,
+    &.tm\:\-\-anchor-px-10,
+    &.m\:\-\-anchor-px-10 {
+      .m-tab-anchor {
+        @apply px-[10px];
       }
-    } */
+    }
+
+    &.\-\-anchor-py-10,
+    &.tm\:\-\-anchor-py-10,
+    &.m\:\-\-anchor-py-10 {
+      .m-tab-anchor {
+        @apply py-[10px];
+      }
+    }
+
+    &.\-\-anchor-py-8,
+    &.tm\:\-\-anchor-py-8,
+    &.m\:\-\-anchor-py-8 {
+      .m-tab-anchor {
+        @apply py-[8px];
+      }
+    }
+
+    &.\-\-anchor-py-5,
+    &.tm\:\-\-anchor-py-5,
+    &.m\:\-\-anchor-py-5 {
+      .m-tab-anchor {
+        @apply py-[5px];
+      }
+    }
   }
 }

@@ -39,16 +39,23 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <BuyMTabSeparator
+  <BuyMTabBorderBottom
     :items="options"
     :config="{
       active: apiSearchData.tab,
+      containerMode: multiple,
     }"
     :setClass="{
-      main: 'p:--gap-x-30 m:--gap-x-5 pt:--line pt:grow',
+      main: '--green-8b0d pt:--has-border-b p:--anchor-px-20 p:--anchor-py-10 tm:--anchor-px-15 tm:--anchor-py-5 pt:grow',
+      header: 'flex items-center',
+      anchor: 'tm:text-[14px] p:text-[16px]',
     }"
     @click="onClick"
-  />
+  >
+    <template #headerTools>
+      <slot name="headerTools" />
+    </template>
+  </BuyMTabBorderBottom>
 </template>
 
 <style></style>

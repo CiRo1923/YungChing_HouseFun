@@ -12,7 +12,7 @@ const { content } = storeToRefs(buyList)
     <li
       v-for="(item, index) in content"
       :key="`${item.id}_${index}`"
-      class="flex first:pt-0 m:flex-col-reverse t:gap-x-[15px] tm:pt-[15px] pt:flex-row-reverse p:gap-x-[20px] p:px-[30px] p:pt-[30px]"
+      class="flex first:pt-0 m:flex-col-reverse t:gap-x-[15px] tm:pt-[15px] pt:flex-row-reverse p:gap-x-[20px] p:pt-[30px]"
     >
       <PageBuyListContentItem
         :item="item"

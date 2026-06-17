@@ -25,3 +25,4 @@ logs
 !.env.example
 /Backstage/.nuxt
 /Backstage/.nuxt
+/Official/.nuxt

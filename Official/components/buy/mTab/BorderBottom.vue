@@ -53,7 +53,7 @@ const {
 </script>
 
 <template>
-  <div class="m-tab --oval-responsiv" :class="setClass.main">
+  <div class="m-tab --border-bottom" :class="setClass.main">
     <div class="m-tab-header" :class="setClass.header">
       <ul class="m-tab-header-items flex" :class="setClass.headerItems">
         <li
@@ -64,7 +64,7 @@ const {
         >
           <component
             :is="onHeaderAs(item)"
-            class="m-tab-anchor flex w-full items-center justify-center gap-x-[4px] transition-colors duration-300"
+            class="m-tab-anchor relative flex w-full items-center justify-center gap-x-[4px] transition-colors duration-300"
             :class="[
               {
                 '--active': index === activeIndex,
@@ -77,9 +77,10 @@ const {
             <CommonSvgIcon
               :icon="item.icon"
               class="m-tab-icon h-[22px] w-[22px] p-[2px] transition-colors duration-300"
+              v-if="item.icon"
             />
             <slot name="header" :item="item" :index="index">
-              <b class="font-semibold">{{ item[config.schema.label] }}</b>
+              <em class="m-tab-anchor-label">{{ item[config.schema.label] }}</em>
             </slot>
           </component>
         </li>
@@ -118,122 +119,125 @@ const {
 <style src="@css/_modules/buy/mTab.css"></style>
 <style lang="postcss">
 :root {
-  --tab-oval-responsiv-pc-border-h: 4px;
-  --tab-oval-responsiv-tablet-border-h: 4px;
-  /* --tab-oval-responsiv-mobile-border-h: 4px; */
+  --tab-border-bottom-pc-border-h: 3px;
+  --tab-border-bottom-tablet-border-h: 3px;
+  --tab-border-bottom-mobile-border-h: 3px;
 
-  --tab-oval-responsiv-header-items-pc-gap-x: 8px;
-  --tab-oval-responsiv-header-items-tablet-gap-x: 8px;
-  /* --tab-oval-responsiv-header-items-mobile-gap-x: 8px; */
-
-  --tab-oval-responsiv-anchor-pc-rounded-t: 15px;
-  --tab-oval-responsiv-anchor-tablet-rounded-t: 15px;
-  /* --tab-oval-responsiv-anchor-mobile-rounded-t: 15px; */
-
-  --tab-oval-responsiv-header-color: transparent; /* 給 mobile 使用 */
-
-  --tab-oval-responsiv-anchor-color: transparent;
-  --tab-oval-responsiv-anchor-icon-color: transparent;
-  --tab-oval-responsiv-anchor-bg-color: transparent;
-  --tab-oval-responsiv-body-border-color: transparent;
+  --tab-border-bottom-anchor-color: var(--gray-666);
+  --tab-border-bottom-anchor-active-color: transparent;
+  --tab-border-bottom-body-border-color: var(--gray-e5);
 }
 
 .m-tab {
-  &.\-\-oval-responsiv {
+  &.\-\-border-bottom {
+    --tab-border-bottom-border-h: 0;
+    --tab-border-bottom-border-w: 0;
+
     &.\-\-green-8b0d {
-      --tab-oval-responsiv-anchor-color: var(--gray-666);
-      --tab-oval-responsiv-anchor-icon-color: var(--gray-999);
-      --tab-oval-responsiv-anchor-bg-color: var(--gray-f7);
+      --tab-border-bottom-anchor-active-color: var(--green-8b0d);
+    }
 
-      .m-tab-anchor {
-        &.\-\-active {
-          --tab-oval-responsiv-anchor-color: var(--white);
-          --tab-oval-responsiv-anchor-icon-color: var(--white);
-          --tab-oval-responsiv-anchor-bg-color: var(--green-8b0d);
+    .m-tab-anchor {
+      &.\-\-active {
+        @apply text-[--tab-border-bottom-anchor-active-color];
+
+        &:after {
+          --tab-border-bottom-border-w: 100%;
         }
 
-        @apply bg-[--tab-oval-responsiv-anchor-bg-color] text-[--tab-oval-responsiv-anchor-color];
-      }
-    }
-  }
-}
-
-@screen pt {
-  .m-tab {
-    &.\-\-oval-responsiv {
-      &.\-\-green-8b0d {
-        --tab-oval-responsiv-body-border-color: var(--green-8b0d);
-      }
-
-      .m-tab-header-items {
-        @apply gap-x-[--tab-oval-responsiv-header-items-gap-x];
-      }
-
-      .m-tab-anchor {
-        @apply rounded-t-[--tab-oval-responsiv-anchor-rounded-t];
-
-        &.\-\-active {
-          @apply shadow-black-y2-b4;
+        .m-tab-anchor-label {
+          @apply font-medium;
         }
       }
 
-      .m-tab-icon {
-        @apply text-[--tab-oval-responsiv-anchor-icon-color];
+      &:not(.\-\-active) {
+        @apply text-[--tab-border-bottom-anchor-color];
       }
 
-      .m-tab-body {
-        border-top-width: var(--tab-oval-responsiv-border-h);
-
-        @apply mt-[calc(calc(var(--tab-oval-responsiv-border-h)_-_1px)_*_-1)] border-t-[--tab-oval-responsiv-body-border-color];
+      &:after {
+        @apply pointer-events-none absolute bottom-0 z-[1] h-[--tab-border-bottom-border-h] w-[--tab-border-bottom-border-w] bg-[--tab-border-bottom-anchor-active-color] transition-widths duration-300 content-default;
       }
     }
+
+    .m-tab-body {
+      border-top-width: var(--tab-border-bottom-border-h);
+
+      @apply mt-[calc(var(--tab-border-bottom-border-h)_*_-1)] border-solid border-t-[--tab-border-bottom-body-border-color];
+    }
+
+    /* .m-tab-anchor {
+      &:not(.\-\-active) {
+        @apply text-[--gray-666];
+
+        .m-tab-icon {
+          @apply text-[--gray-999];
+        }
+      }
+    } */
   }
 }
 
 @screen p {
   .m-tab {
-    &.\-\-oval-responsiv {
-      --tab-oval-responsiv-anchor-rounded-t: var(--tab-oval-responsiv-anchor-pc-rounded-t);
-      --tab-oval-responsiv-border-h: var(--tab-oval-responsiv-pc-border-h);
-      --tab-oval-responsiv-header-items-gap-x: var(--tab-oval-responsiv-header-items-pc-gap-x);
+    &.\-\-border-bottom {
+      &.\-\-has-border-b,
+      &.p\:\-\-has-border-b,
+      &.pt\:\-\-has-border-b {
+        --tab-border-bottom-border-h: var(--tab-border-bottom-pc-border-h);
+      }
     }
   }
 }
 
-@screen t {
+/* @screen pt {
   .m-tab {
     &.\-\-oval-responsiv {
-      --tab-oval-responsiv-anchor-rounded-t: var(--tab-oval-responsiv-anchor-tablet-rounded-t);
-      --tab-oval-responsiv-border-h: var(--tab-oval-responsiv-tablet-border-h);
-      --tab-oval-responsiv-header-items-gap-x: var(--tab-oval-responsiv-header-items-tablet-gap-x);
+      &.\-\-green-8b0d {
+        .m-tab-body {
+          @apply border-t-[--green-8b0d];
+        }
+      }
+
+      .m-tab-header {
+        @apply gap-x-[8px];
+      }
+
+      .m-tab-body {
+        @apply mt-[-3px] border-t-[4px];
+      }
+
+      .m-tab-anchor {
+        @apply rounded-t-[15px];
+
+        &:not(.\-\-active) {
+          @apply bg-[--gray-f7];
+        }
+
+        &.\-\-active {
+          @apply shadow-black-y2-b4;
+        }
+      }
+    }
+  }
+} */
+
+@screen t {
+  .m-tab {
+    &.\-\-border-bottom {
+      &.\-\-has-border-b,
+      &.pt\:\-\-has-border-b,
+      &.tm\:\-\-has-border-b,
+      &.t\:\-\-has-border-b {
+        --tab-border-bottom-border-h: var(--tab-border-bottom-tablet-border-h);
+      }
     }
   }
 }
 
 @screen m {
   .m-tab {
-    &.\-\-oval-responsiv {
-      &.\-\-green-8b0d {
-        --tab-oval-responsiv-header-color: var(--gray-f7);
-      }
-
-      .m-tab-header {
-        @apply bg-[--tab-oval-responsiv-header-color];
-      }
-
-      .m-tab-header-item {
-        &:not(:first-child) {
-          .m-tab-anchor {
-            @apply rounded-l-full;
-          }
-        }
-
-        &:not(:last-child) {
-          .m-tab-anchor {
-            @apply rounded-r-full;
-          }
-        }
-      }
+    &.\-\-border-bottom {
+      --tab-border-bottom-border-h: var(--tab-border-bottom-mobile-border-h);
     }
   }
 }

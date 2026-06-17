@@ -121,7 +121,11 @@ onUnmounted(() => {
     }"
     class="grow"
   >
-    <section class="flex h-full flex-col">
+    <!-- <pre>
+      {{ props.item }}
+
+    </pre> -->
+    <article class="flex h-full flex-col">
       <header class="p:mb-[5px]">
         <h2 class="text-[20px] leading-[1.5]">
           <strong class="tm:font-medium">{{ props.item.title }}</strong>
@@ -182,7 +186,7 @@ onUnmounted(() => {
           </p>
         </div>
       </div>
-    </section>
+    </article>
   </router-link>
   <div
     class="relative overflow-hidden rounded-[8px] bg-[--gray-999] m:mb-[6px] m:h-[270px] m:w-full pt:h-[190px] pt:w-[250px]"

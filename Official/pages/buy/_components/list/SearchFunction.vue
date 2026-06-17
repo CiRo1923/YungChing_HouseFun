@@ -137,7 +137,15 @@ onUnmounted(() => {
       >
         <li class="search-mode-item relative tm:w-[100px] pt:shrink-0 p:w-[155px]">
           <PageBuyListSearchRegion name="region" v-if="isChannelRegion" />
-          <PageBuyListSearchMrt name="mrt" v-if="isChannelMrt" />
+          <PageBuyListSearchMrt
+            name="mrt"
+            :config="{
+              areaAxis: {
+                m: 'x',
+              },
+            }"
+            v-if="isChannelMrt"
+          />
         </li>
         <li class="search-mode-item relative m:flex-1 pt:shrink-0 p:w-[155px]">
           <PageBuyListSearchPurpose name="purpose" />

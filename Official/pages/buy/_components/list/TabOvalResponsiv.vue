@@ -67,9 +67,9 @@ const active = computed(() => {
       containerMode: false,
     }"
     :setClass="{
-      main: '--anchor-height-50 --green-8b0d mx-auto p:max-w-[1200px]',
+      main: '--anchor-h-50 --anchor-px-10 --anchor-py-8 --green-8b0d mx-auto p:max-w-[1200px]',
       headerItem: 'm:flex-1',
-      anchor: 'm:w-full p:w-[160px]',
+      anchor: 'text-[16px] m:w-full p:w-[160px]',
     }"
   />
 </template>

@@ -102,7 +102,11 @@ const onClick = (item) => {
     :config="{
       index: 0,
       mode: 'dropdown',
+      position: 'right',
       symbol: '到',
+    }"
+    :setClass="{
+      main: 'ml-auto',
     }"
     @click="onClick"
   />

@@ -13,6 +13,10 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
+  setClass: {
+    type: Object,
+    default: () => ({}),
+  },
 })
 
 const defaultConfig = {
@@ -28,13 +32,15 @@ const sortConfig = computed(() => ({
   ...props.config,
 }))
 
-const currentMode = ref('button')
+const mode = ref('button')
 const sortOptions = ref([])
 const isActive = ref(false)
+const hasScrollbar = ref(false)
 const activeIndex = ref(null)
 const activeSortType = ref(null)
 const selectAnchorRef = ref(null)
 const dropdownRef = ref(null)
+const dropdownContainerRef = ref(null)
 const dropdownItemRef = ref(null)
 
 const normalizedOptions = computed(() => {
@@ -44,6 +50,13 @@ const normalizedOptions = computed(() => {
 
 const dropdownLabel = computed(() => {
   return sortOptions.value[activeIndex.value]?.label || sortOptions.value[0]?.label || ''
+})
+
+const setClass = computed(() => {
+  return {
+    main: '',
+    ...props.setClass,
+  }
 })
 
 const responsiveKeys = ['p', 'pt', 'tm', 't', 'm']
@@ -120,7 +133,7 @@ const onCreateSortOption = (item, sortType) => {
 
 const onSetSortOptions = () => {
   const { symbol } = sortConfig.value
-  if (currentMode.value === 'dropdown') {
+  if (mode.value === 'dropdown') {
     sortOptions.value = normalizedOptions.value.flatMap((item) => {
       const hasSortDirections = item.sort && typeof item.sort === 'object'
 
@@ -173,13 +186,21 @@ const onDropdownOpen = async () => {
       ? [dropdownItemRef.value]
       : []
   const hasItemsThanMax = maxItems <= items.length - 1
+  hasScrollbar.value = hasItemsThanMax
   const index = !hasItemsThanMax ? items.length - 1 : maxItems
   const $item = items[index]
-  const itemHeight = $item
-    ? hasItemsThanMax
-      ? $item.offsetTop
-      : $item.offsetTop + $item.offsetHeight
-    : $dropdown.scrollHeight
+  const $container = dropdownContainerRef.value
+  // offsetTop 是相對於有定位的 $dropdown，已包含 container 的 top border，
+  // 但未涵蓋 container 的 bottom border，需另外補上避免高度短少而裁切。
+  const containerBorderBottom = $container
+    ? parseFloat(window.getComputedStyle($container).borderBottomWidth) || 0
+    : 0
+  const itemHeight =
+    ($item
+      ? hasItemsThanMax
+        ? $item.offsetTop
+        : $item.offsetTop + $item.offsetHeight
+      : $dropdown.scrollHeight) + containerBorderBottom
   const rect = $element.getBoundingClientRect()
   const dropdownRect = $dropdown.getBoundingClientRect()
   const dropdownWidth = dropdownRect.width < rect.width ? rect.width : dropdownRect.width
@@ -200,8 +221,30 @@ const onDropdownOpen = async () => {
   $dropdown.style.left = `${left + (isFixed ? 0 : window.scrollX)}px`
   $dropdown.style.minWidth = `${rect.width}px`
   $dropdown.style.height = `${itemHeight}px`
-  $dropdown.style.overflowX = 'hidden'
-  $dropdown.style.overflowY = hasItemsThanMax ? 'auto' : ''
+
+  // 捲動交給內層 container（它才有 .scrollbar 樣式）。
+  // 動畫期間先維持 hidden，避免 height 動畫過程中閃出原生捲軸，
+  // 待 enter 動畫結束後（onDropdownAfterEnter）才開啟 auto。
+  if ($container) {
+    $container.style.overflowX = 'hidden'
+    $container.style.overflowY = 'hidden'
+  }
+}
+
+const onDropdownAfterEnter = () => {
+  const $container = dropdownContainerRef.value
+
+  if (!$container) return
+
+  $container.style.overflowY = hasScrollbar.value ? 'auto' : 'hidden'
+}
+
+const onDropdownBeforeLeave = () => {
+  const $container = dropdownContainerRef.value
+
+  if (!$container) return
+
+  $container.style.overflowY = 'hidden'
 }
 
 const onToggleDropdown = async () => {
@@ -276,7 +319,7 @@ const onOutSide = (e) => {
 }
 
 const onSortResize = () => {
-  currentMode.value = resolveResponsiveConfig(sortConfig.value.mode) || defaultConfig.mode
+  mode.value = resolveResponsiveConfig(sortConfig.value.mode) || defaultConfig.mode
 
   onSetSortOptions()
 }
@@ -322,8 +365,9 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="m-sort">
-    <ul class="m-sort-list flex items-center" v-if="currentMode === 'button'">
+  <div class="m-sort" :class="setClass.main">
+    <!-- 模式為攤平按鈕 -->
+    <ul class="m-sort-list flex items-center" v-if="mode === 'button'">
       <li
         class="m-sort-item"
         v-for="(item, index) in sortOptions"
@@ -349,6 +393,7 @@ onUnmounted(() => {
       </li>
     </ul>
 
+    <!-- 模式為下拉選單 -->
     <button
       type="button"
       class="m-sort-select-anchor flex items-center"
@@ -357,7 +402,7 @@ onUnmounted(() => {
       }"
       ref="selectAnchorRef"
       @click="onToggleDropdown"
-      v-if="currentMode === 'dropdown'"
+      v-if="mode === 'dropdown'"
     >
       <em class="m-sort-select-label">{{ dropdownLabel }}</em>
       <CommonSvgIcon
@@ -366,33 +411,42 @@ onUnmounted(() => {
       />
     </button>
   </div>
-  <template v-if="currentMode === 'dropdown'">
+  <template v-if="mode === 'dropdown'">
     <Teleport to="body">
-      <Transition name="dropdown" @afterLeave="onCloseDropdown" appear>
+      <Transition
+        name="dropdown"
+        @afterEnter="onDropdownAfterEnter"
+        @beforeLeave="onDropdownBeforeLeave"
+        @afterLeave="onCloseDropdown"
+        appear
+      >
         <div
-          class="m-sort-dropdown absolute z-[5] overflow-hidden"
+          class="m-sort-dropdown absolute z-[3] overflow-hidden"
+          :class="{ '--scrollbar': hasScrollbar }"
           ref="dropdownRef"
           v-if="isActive && sortOptions.length > 0"
         >
-          <ul class="m-sort-dropdown-list scrollbar --y max-h-full overflow-x-hidden">
-            <li
-              class="m-sort-dropdown-item"
-              v-for="(item, index) in sortOptions"
-              :key="`sort_dropdown_${item.value.key}_${item.value.sort || 0}_${index}`"
-              ref="dropdownItemRef"
-            >
-              <button
-                type="button"
-                class="m-sort-dropdown-anchor relative block w-full text-left transition-colors duration-300"
-                :class="{
-                  '--active': activeIndex === index,
-                }"
-                @click="onDropdownItemClick(item, index)"
+          <div class="m-sort-dropdown-container scrollbar --y h-full" ref="dropdownContainerRef">
+            <ul class="m-sort-dropdown-list">
+              <li
+                class="m-sort-dropdown-item"
+                v-for="(item, index) in sortOptions"
+                :key="`sort_dropdown_${item.value.key}_${item.value.sort || 0}_${index}`"
+                ref="dropdownItemRef"
               >
-                {{ item.label }}
-              </button>
-            </li>
-          </ul>
+                <button
+                  type="button"
+                  class="m-sort-dropdown-anchor relative block w-full text-left transition-colors duration-300"
+                  :class="{
+                    '--active': activeIndex === index,
+                  }"
+                  @click="onDropdownItemClick(item, index)"
+                >
+                  {{ item.label }}
+                </button>
+              </li>
+            </ul>
+          </div>
         </div>
       </Transition>
     </Teleport>
@@ -425,9 +479,9 @@ onUnmounted(() => {
   --sort-select-anchor-tablet-text: 14px;
   --sort-select-anchor-mobile-text: 14px;
 
-  --sort-select-anchor-pc-gap-x: 3px;
-  --sort-select-anchor-tablet-gap-x: 3px;
-  --sort-select-anchor-mobile-gap-x: 3px;
+  --sort-select-anchor-pc-gap-x: 5px;
+  --sort-select-anchor-tablet-gap-x: 5px;
+  --sort-select-anchor-mobile-gap-x: 5px;
 
   --sort-select-icon-pc-p: 2px;
   --sort-select-icon-tablet-p: 2px;
@@ -437,13 +491,21 @@ onUnmounted(() => {
   --sort-select-icon-tablet-size: 14px;
   --sort-select-icon-mobile-size: 14px;
 
-  --sort-dropdown-pc-my: 3px;
-  --sort-dropdown-tablet-my: 3px;
-  --sort-dropdown-mobile-my: 3px;
+  --sort-dropdown-pc-my: 10px;
+  --sort-dropdown-tablet-my: 10px;
+  --sort-dropdown-mobile-my: 10px;
 
-  --sort-dropdown-pc-rounded: 0;
-  --sort-dropdown-tablet-rounded: 0;
-  --sort-dropdown-mobile-rounded: 0;
+  --sort-dropdown-pc-rounded: 10px;
+  --sort-dropdown-tablet-rounded: 10px;
+  --sort-dropdown-mobile-rounded: 10px;
+
+  --sort-dropdown-container-pc-py: 10px;
+  --sort-dropdown-container-tablet-py: 10px;
+  --sort-dropdown-container-mobile-py: 10px;
+
+  --sort-dropdown-list-pc-gap-y: 5px;
+  --sort-dropdown-list-tablet-gap-y: 5px;
+  --sort-dropdown-list-mobile-gap-y: 5px;
 
   --sort-dropdown-item-pc-px: 0;
   --sort-dropdown-item-tablet-px: 0;
@@ -461,9 +523,9 @@ onUnmounted(() => {
   --sort-dropdown-anchor-tablet-text: 14px;
   --sort-dropdown-anchor-mobile-text: 14px;
 
-  --sort-dropdown-anchor-pc-border-b: 1px;
-  --sort-dropdown-anchor-tablet-border-b: 1px;
-  --sort-dropdown-anchor-mobile-border-b: 1px;
+  --sort-dropdown-anchor-pc-border-b: 0;
+  --sort-dropdown-anchor-tablet-border-b: 0;
+  --sort-dropdown-anchor-mobile-border-b: 0;
 
   --sort-anchor-color: var(--gray-666);
   --sort-anchor-hover-color: var(--orange-e646);
@@ -471,11 +533,11 @@ onUnmounted(() => {
 
   --sort-dropdown-bg-color: var(--white);
   --sort-dropdown-anchor-color: var(--gray-333);
-  --sort-dropdown-anchor-hover-color: var(--orange-e646);
-  --sort-dropdown-anchor-active-color: var(--orange-e646);
+  --sort-dropdown-anchor-hover-color: var(--green-8b0d);
+  --sort-dropdown-anchor-active-color: var(--white);
   --sort-dropdown-anchor-bg-color: tranparent;
   --sort-dropdown-anchor-hover-bg-color: tranparent;
-  --sort-dropdown-anchor-active-bg-color: tranparent;
+  --sort-dropdown-anchor-active-bg-color: var(--green-8b0d);
   --sort-dropdown-anchor-border-b-color: var(--gray-e5);
 }
 
@@ -528,9 +590,26 @@ onUnmounted(() => {
 }
 
 .m-sort-dropdown {
-  @apply my-[--sort-dropdown-my] bg-[--sort-dropdown-bg-color];
+  @apply my-[--sort-dropdown-my] rounded-[--sort-dropdown-rounded] bg-[--sort-dropdown-bg-color] shadow-dropdown;
 
-  @apply shadow-dropdown;
+  &.\-\-scrollbar {
+    @apply pr-[2px];
+
+    .m-sort-dropdown-container {
+      @apply pr-[2px];
+    }
+  }
+}
+
+.m-sort-dropdown-container {
+  border-top-width: var(--sort-dropdown-container-py);
+  border-bottom-width: var(--sort-dropdown-container-py);
+
+  @apply border-solid border-y-transparent;
+}
+
+.m-sort-dropdown-list {
+  @apply space-y-[--sort-dropdown-list-gap-y];
 }
 
 .m-sort-dropdown-item {
@@ -579,6 +658,8 @@ onUnmounted(() => {
   .m-sort-dropdown {
     --sort-dropdown-my: var(--sort-dropdown-pc-my);
     --sort-dropdown-rounded: var(--sort-dropdown-pc-rounded);
+    --sort-dropdown-container-py: var(--sort-dropdown-container-pc-py);
+    --sort-dropdown-list-gap-y: var(--sort-dropdown-list-pc-gap-y);
     --sort-dropdown-item-px: var(--sort-dropdown-item-pc-px);
     --sort-dropdown-anchor-px: var(--sort-dropdown-anchor-pc-px);
     --sort-dropdown-anchor-py: var(--sort-dropdown-anchor-pc-py);
@@ -603,6 +684,8 @@ onUnmounted(() => {
   .m-sort-dropdown {
     --sort-dropdown-my: var(--sort-dropdown-tablet-my);
     --sort-dropdown-rounded: var(--sort-dropdown-tablet-rounded);
+    --sort-dropdown-container-py: var(--sort-dropdown-container-tablet-py);
+    --sort-dropdown-list-gap-y: var(--sort-dropdown-list-tablet-gap-y);
     --sort-dropdown-item-px: var(--sort-dropdown-item-tablet-px);
     --sort-dropdown-anchor-px: var(--sort-dropdown-anchor-tablet-px);
     --sort-dropdown-anchor-py: var(--sort-dropdown-anchor-tablet-py);
@@ -627,6 +710,8 @@ onUnmounted(() => {
   .m-sort-dropdown {
     --sort-dropdown-my: var(--sort-dropdown-mobile-my);
     --sort-dropdown-rounded: var(--sort-dropdown-mobile-rounded);
+    --sort-dropdown-container-py: var(--sort-dropdown-container-mobile-py);
+    --sort-dropdown-list-gap-y: var(--sort-dropdown-list-mobile-gap-y);
     --sort-dropdown-item-px: var(--sort-dropdown-item-mobile-px);
     --sort-dropdown-anchor-px: var(--sort-dropdown-anchor-mobile-px);
     --sort-dropdown-anchor-py: var(--sort-dropdown-anchor-mobile-py);

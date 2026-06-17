@@ -97,7 +97,7 @@ onUnmounted(() => {
     <PageBuyListSearchFunction />
   </div>
   <CommonMContainer class="--inner p:mt-[20px]">
-    <CommonMContent class="pt:--rounded-20 p:--py-20">
+    <CommonMContent class="pt:--rounded-20 p:--py-20 p:--px-30">
       <PageBuyListSearchFilter @click="onSearch" v-if="!isDeviceM" />
       <!-- <pre>
         {{ options.caseType }}
