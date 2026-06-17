@@ -54,16 +54,18 @@ const onClick = (item) => {
         </li>
       </ul>
       <div
-        class="scrollbar --y h-full grow border-y-[35px] border-transparent tm:px-[20px] p:px-[30px]"
+        class="h-full grow overflow-hidden border-y-[20px] border-transparent m:px-[2px] pt:px-[5px]"
       >
-        <PageBuyListSearchMoreType v-if="activeID === 'type'" />
-        <PageBuyListSearchMorePin v-if="activeID === 'pin'" />
-        <PageBuyListSearchMoreParkingMode v-if="activeID === 'parking'" />
-        <PageBuyListSearchMoreAge v-if="activeID === 'age'" />
-        <PageBuyListSearchMoreFloor v-if="activeID === 'floor'" />
-        <PageBuyListSearchMoreUnitPrice v-if="activeID === 'unitPrice'" />
-        <PageBuyListSearchMoreFace v-if="activeID === 'face'" />
-        <PageBuyListSearchMoreNearBy v-if="activeID === 'nearBy'" />
+        <div class="scrollbar --y h-full tm:px-[10px] p:px-[15px]">
+          <PageBuyListSearchMoreType v-if="activeID === 'type'" />
+          <PageBuyListSearchMorePin v-if="activeID === 'pin'" />
+          <PageBuyListSearchMoreParkingMode v-if="activeID === 'parking'" />
+          <PageBuyListSearchMoreAge v-if="activeID === 'age'" />
+          <PageBuyListSearchMoreFloor v-if="activeID === 'floor'" />
+          <PageBuyListSearchMoreUnitPrice v-if="activeID === 'unitPrice'" />
+          <PageBuyListSearchMoreFace v-if="activeID === 'face'" />
+          <PageBuyListSearchMoreNearBy v-if="activeID === 'nearBy'" />
+        </div>
       </div>
     </div>
   </BuyMFormSelectDropdown>

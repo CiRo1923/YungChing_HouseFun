@@ -103,7 +103,7 @@ const onClick = (item) => {
       index: 0,
       mode: 'dropdown',
       position: 'right',
-      symbol: '到',
+      symbol: '→',
     }"
     :setClass="{
       main: 'ml-auto',

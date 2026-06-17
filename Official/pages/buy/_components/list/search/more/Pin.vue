@@ -19,9 +19,7 @@ const options = readonly([
 const onTypeChange = () => {
   const currentType = pin.value.type
   // 找出舊類型殘留的值，沿用到新選中的 type
-  const prevType = options.find(
-    ({ value }) => value !== currentType && apiSearchData.value[value]
-  )
+  const prevType = options.find(({ value }) => value !== currentType && apiSearchData.value[value])
   if (prevType) {
     apiSearchData.value[currentType] = apiSearchData.value[prevType.value]
   }
@@ -37,7 +35,7 @@ const onChange = () => {}
 </script>
 
 <template>
-  <div class="flex max-h-full flex-col">
+  <div class="flex max-h-full flex-col overflow-hidden">
     <ul
       class="mb-[15px] flex shrink-0 items-center gap-x-[20px] border-b-[1px] border-b-[--gray-ccce] pb-[15px]"
     >
@@ -53,7 +51,7 @@ const onChange = () => {}
         />
       </li>
     </ul>
-    <ul class="space-y-[20px]">
+    <ul class="scrollbar --y grow space-y-[20px]">
       <li v-for="(item, index) in pin.options" :key="`pin_${item.value}_${index}`">
         <BuyMFormRadio
           name="pin"

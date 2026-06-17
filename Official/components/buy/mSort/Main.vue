@@ -158,7 +158,7 @@ const onSetSortOptions = () => {
             : ''
 
           return {
-            label: `${item.label}${item.sort[sortType].label}${reverseLabel}`,
+            label: `${item.label} ${item.sort[sortType].label}${reverseLabel}`,
             value: {
               key: item.value,
               sort: item.sort[sortType].value,
@@ -436,13 +436,18 @@ onUnmounted(() => {
               >
                 <button
                   type="button"
-                  class="m-sort-dropdown-anchor relative block w-full text-left transition-colors duration-300"
+                  class="m-sort-dropdown-anchor relative flex w-full items-center text-left transition-colors duration-300"
                   :class="{
                     '--active': activeIndex === index,
                   }"
                   @click="onDropdownItemClick(item, index)"
                 >
-                  {{ item.label }}
+                  <CommonSvgIcon
+                    icon="icon_check_solid"
+                    class="m-sort-dropdown-anchor-icon transition-transform duration-300"
+                    v-if="activeIndex === index"
+                  />
+                  <em>{{ item.label }}</em>
                 </button>
               </li>
             </ul>
@@ -526,6 +531,18 @@ onUnmounted(() => {
   --sort-dropdown-anchor-pc-border-b: 0;
   --sort-dropdown-anchor-tablet-border-b: 0;
   --sort-dropdown-anchor-mobile-border-b: 0;
+
+  --sort-dropdown-anchor-pc-gap-x: 5px;
+  --sort-dropdown-anchor-tablet-gap-x: 5px;
+  --sort-dropdown-anchor-mobile-gap-x: 5px;
+
+  --sort-dropdown-anchor-icon-pc-p: 2px;
+  --sort-dropdown-anchor-tablet-p: 2px;
+  --sort-dropdown-anchor-mobile-p: 2px;
+
+  --sort-dropdown-anchor-icon-pc-size: 20px;
+  --sort-dropdown-anchor-icon-tablet-size: 20px;
+  --sort-dropdown-anchor-icon-mobile-size: 20px;
 
   --sort-anchor-color: var(--gray-666);
   --sort-anchor-hover-color: var(--orange-e646);
@@ -627,7 +644,7 @@ onUnmounted(() => {
 .m-sort-dropdown-anchor {
   font-size: var(--sort-dropdown-anchor-text);
 
-  @apply px-[--sort-dropdown-anchor-px] py-[--sort-dropdown-anchor-py];
+  @apply gap-x-[--sort-dropdown-anchor-gap-x] px-[--sort-dropdown-anchor-px] py-[--sort-dropdown-anchor-py];
 
   &:hover {
     @apply bg-[--sort-dropdown-anchor-hover-bg-color] text-[--sort-dropdown-anchor-hover-color];
@@ -640,6 +657,10 @@ onUnmounted(() => {
   &.\-\-active {
     @apply bg-[--sort-dropdown-anchor-active-bg-color] text-[--sort-dropdown-anchor-active-color];
   }
+}
+
+.m-sort-dropdown-anchor-icon {
+  @apply h-[--sort-dropdown-anchor-icon-size] w-[--sort-dropdown-anchor-icon-size] p-[--sort-dropdown-anchor-icon-p];
 }
 
 @screen p {
@@ -665,6 +686,9 @@ onUnmounted(() => {
     --sort-dropdown-anchor-py: var(--sort-dropdown-anchor-pc-py);
     --sort-dropdown-anchor-text: var(--sort-dropdown-anchor-pc-text);
     --sort-dropdown-anchor-border-b: var(--sort-dropdown-anchor-pc-border-b);
+    --sort-dropdown-anchor-gap-x: var(--sort-dropdown-anchor-pc-gap-x);
+    --sort-dropdown-anchor-icon-p: var(--sort-dropdown-anchor-icon-pc-p);
+    --sort-dropdown-anchor-icon-size: var(--sort-dropdown-anchor-icon-pc-size);
   }
 }
 
@@ -691,6 +715,9 @@ onUnmounted(() => {
     --sort-dropdown-anchor-py: var(--sort-dropdown-anchor-tablet-py);
     --sort-dropdown-anchor-text: var(--sort-dropdown-anchor-tablet-text);
     --sort-dropdown-anchor-border-b: var(--sort-dropdown-anchor-tablet-border-b);
+    --sort-dropdown-anchor-gap-x: var(--sort-dropdown-anchor-tablet-gap-x);
+    --sort-dropdown-anchor-icon-p: var(--sort-dropdown-anchor-icon-tablet-p);
+    --sort-dropdown-anchor-icon-size: var(--sort-dropdown-anchor-icon-tablet-size);
   }
 }
 
@@ -717,6 +744,9 @@ onUnmounted(() => {
     --sort-dropdown-anchor-py: var(--sort-dropdown-anchor-mobile-py);
     --sort-dropdown-anchor-text: var(--sort-dropdown-anchor-mobile-text);
     --sort-dropdown-anchor-border-b: var(--sort-dropdown-anchor-mobile-border-b);
+    --sort-dropdown-anchor-gap-x: var(--sort-dropdown-anchor-mobile-gap-x);
+    --sort-dropdown-anchor-icon-p: var(--sort-dropdown-anchor-icon-mobile-p);
+    --sort-dropdown-anchor-icon-size: var(--sort-dropdown-anchor-icon-mobile-size);
   }
 }
 </style>

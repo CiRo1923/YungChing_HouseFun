@@ -103,47 +103,54 @@ onGetLabel()
     }"
   >
     <div class="flex h-full items-start">
-      <ul
-        class="scrollbar --y max-h-full shrink-0 space-y-[5px] border-y-[20px] border-transparent bg-[--gray-f7] m:px-[5px] t:px-[10px] tm:min-w-[115px] p:min-w-[155px] p:px-[20px]"
+      <div
+        class="h-full shrink-0 border-y-[20px] border-transparent bg-[--gray-f7] m:px-[2px] pt:px-[5px]"
       >
-        <li v-for="(item, index) in region.options" :key="`${componentsName}_${item.id}_${index}`">
-          <BuyMAnchor
-            :text="item.name"
-            :setClass="{
-              main: [
-                'p:--px-20 tm:--px-10 --h-35 --rounded w-full',
-                activeCityID === item.id ? '--bg-green-8b0d --text-white' : '',
-              ],
-              text: 'font-normal',
-            }"
-            @click="onCityClick(item.id)"
-          />
-        </li>
-      </ul>
-      <ul
-        class="scrollbar --y grid max-h-full grow grid-cols-2 gap-y-[20px] border-y-[35px] border-transparent tm:px-[20px] p:px-[30px]"
-      >
-        <li
-          :class="{ 'col-span-2': item.id === activeCityID }"
-          v-for="(item, index) in areas"
-          :key="`${componentsName}_${item.id}_${index}`"
+        <ul
+          class="scrollbar --y max-h-full space-y-[5px] tm:min-w-[115px] tm:px-[10px] p:min-w-[155px] p:px-[15px]"
         >
-          <BuyMFormCheckBox
-            name="area"
-            v-model="region.ids"
-            :config="{
-              label: item.name,
-              value: item.id,
-              isJoin: true,
-              valueClickClear: {
-                value: activeCityID,
-                regex: `^${activeCityID}`,
-              },
-            }"
-            @change="onGetLabel"
-          />
-        </li>
-      </ul>
+          <li
+            v-for="(item, index) in region.options"
+            :key="`${componentsName}_${item.id}_${index}`"
+          >
+            <BuyMAnchor
+              :text="item.name"
+              :setClass="{
+                main: [
+                  'p:--px-20 tm:--px-10 --h-35 --rounded w-full',
+                  activeCityID === item.id ? '--bg-green-8b0d --text-white' : '',
+                ],
+                text: 'font-normal',
+              }"
+              @click="onCityClick(item.id)"
+            />
+          </li>
+        </ul>
+      </div>
+      <div class="h-full grow border-y-[20px] border-transparent m:px-[2px] pt:px-[5px]">
+        <ul class="scrollbar --y grid max-h-full grid-cols-2 gap-y-[20px] tm:px-[10px] p:px-[15px]">
+          <li
+            :class="{ 'col-span-2': item.id === activeCityID }"
+            v-for="(item, index) in areas"
+            :key="`${componentsName}_${item.id}_${index}`"
+          >
+            <BuyMFormCheckBox
+              name="area"
+              v-model="region.ids"
+              :config="{
+                label: item.name,
+                value: item.id,
+                isJoin: true,
+                valueClickClear: {
+                  value: activeCityID,
+                  regex: `^${activeCityID}`,
+                },
+              }"
+              @change="onGetLabel"
+            />
+          </li>
+        </ul>
+      </div>
     </div>
   </BuyMFormSelectDropdown>
 </template>
