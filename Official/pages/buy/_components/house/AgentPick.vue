@@ -1,10 +1,11 @@
 <script setup>
 const buyHouse = useBuyHouseStore()
 const { broker, agentPick } = storeToRefs(buyHouse)
+const hasAgentPick = computed(() => agentPick.value?.length !== 0)
 </script>
 
 <template>
-  <PageBuyHouseContent :title="`${broker.name}的精選物件`">
+  <PageBuyHouseContent :title="`${broker.name}的精選物件`" v-if="hasAgentPick">
     <BuyMSwiper12
       name="agentPick"
       :data="agentPick"

@@ -24,10 +24,11 @@ const useBuyHouseStores = () => {
         community: {},
         parking: {},
         pin: {},
-        actualPrice: {},
         broker: {},
         poi: {},
         highlights: {},
+        features: {},
+        actualPrice: {},
       }
 
       buyHouseStores.$patch({

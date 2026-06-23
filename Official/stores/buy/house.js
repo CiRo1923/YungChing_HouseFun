@@ -15,6 +15,7 @@ export const useBuyHouseStore = defineStore('buyHouse', () => {
   const broker = ref(null) // 經紀人
   const poi = ref(null)
   const highlights = ref(null) // 物件焦點
+  const features = ref(null) // 特色說明
   const agentPick = ref(null) // 精選物件
   const hotForYou = ref(null) // 這些物件也很適合你
   const apiCommentData = ref({
@@ -38,6 +39,7 @@ export const useBuyHouseStore = defineStore('buyHouse', () => {
     broker,
     poi,
     highlights,
+    features,
     agentPick,
     hotForYou,
     apiCommentData,

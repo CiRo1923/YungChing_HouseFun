@@ -30,7 +30,7 @@ const items = computed(() => {
 
 <template>
   <div class="m:mx-[15px] pt:flex pt:shrink-0 pt:flex-col pt:justify-center">
-    <ul class="flex t:w-[300px] t:gap-x-[10px] p:w-[340px] p:gap-x-[20px]">
+    <ul class="flex t:w-[300px] t:gap-x-[10px] p:w-[330px] p:gap-x-[20px]">
       <li class="flex-1" v-for="(data, index) in items" :key="`${data.value}_${index}`">
         <p class="text-[12px] text-[--gray-666]">
           <b class="text-[18px] text-[--red-e56a]">{{ data.value }}</b>
