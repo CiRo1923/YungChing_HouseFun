@@ -262,6 +262,9 @@ onUnmounted(() => {
                     regex: `^${activeLinesID}`,
                   },
                 }"
+                :setClass="{
+                  main: '--icon-size-20',
+                }"
                 @change="onGetLabel"
               />
             </li>

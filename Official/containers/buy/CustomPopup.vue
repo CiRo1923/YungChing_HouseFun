@@ -9,6 +9,10 @@ const props = defineProps({
     type: String,
     default: null,
   },
+  config: {
+    type: Object,
+    default: () => ({}),
+  },
   setClass: {
     type: Object,
     default: () => ({}),
@@ -37,43 +41,53 @@ const onClose = (item) => {
 
   // cancel 或允許 sureClose 的情況：照舊 resolve + close
   const isShouldClose = item.isClose !== false
-  customCheck.value(isSure)
+  customCheck.value(isSure, item)
 
   if (isShouldClose) onCustomClose()
 }
 </script>
 
 <template>
-  <BuyMPopup :id="props.id" :setClass="props.setClass">
-    <template #header v-if="$slots.header">
-      <slot name="header" />
-    </template>
-    <slot>
-      <div class="text-center leading-[1.7] m:text-[14px] pt:text-[20px]" v-html="custom.content" />
-    </slot>
-    <template #footer v-if="$slots.footer || footerBtns">
-      <slot name="footer">
-        <div class="text-center">
-          <ul class="inline-flex items-center p:gap-x-[16px]">
-            <li
-              class="p:w-[200px]"
-              v-for="(item, index) in footerBtns"
-              :key="`custom_${item.label}_${index}`"
-            >
-              <BuyMAnchor
-                :text="item.label"
-                :setClass="{
-                  main: [item.class, '--oval p:--h-45 w-full'],
-                  text: 'font-normal',
-                }"
-                @click="onClose(item)"
-              />
-            </li>
-          </ul>
-        </div>
+  <Teleport to="#box">
+    <BuyMPopupMain :id="props.id" :config="props.config" :setClass="props.setClass">
+      <template #header v-if="$slots.header">
+        <slot name="header" />
+      </template>
+      <slot>
+        <div
+          class="text-center leading-[1.7] m:text-[14px] pt:text-[20px]"
+          v-html="custom.content"
+        />
       </slot>
-    </template>
-  </BuyMPopup>
+      <template #footer v-if="$slots.footer || footerBtns">
+        <slot name="footer">
+          <div class="text-center">
+            <ul
+              class="m:flex m:justify-center m:gap-[8px] t:gap-x-[8px] pt:inline-flex pt:items-center p:gap-x-[16px]"
+            >
+              <li
+                class="m:max-w-[50%] m:flex-1 p:w-[200px]"
+                v-for="(item, index) in footerBtns"
+                :key="`custom_${item.label}_${index}`"
+              >
+                <BuyMAnchor
+                  :text="item.label"
+                  :setClass="{
+                    main: [item.class, '--oval --h-45 w-full'],
+                    text: 'font-normal',
+                  }"
+                  @click="onClose(item)"
+                />
+              </li>
+            </ul>
+          </div>
+        </slot>
+      </template>
+      <template #note v-if="$slots.note">
+        <slot name="note" />
+      </template>
+    </BuyMPopupMain>
+  </Teleport>
 </template>
 
 <style></style>

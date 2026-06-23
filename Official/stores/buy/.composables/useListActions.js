@@ -50,6 +50,16 @@ const useBuyListStores = () => {
 
     return result
   })
+  const commonQuery = computed(() => {
+    const queryOd = apiSearchData.value.od ? { od: apiSearchData.value.tag } : {}
+    const queryTag =
+      apiSearchData.value.tag.length !== 0 ? { tag: apiSearchData.value.tag.join(',') } : {}
+
+    return {
+      ...queryOd,
+      ...queryTag,
+    }
+  })
   // const { apiData, options: projectOptions } = storeToRefs(projectStores)
 
   const onApiRegion = async () => {
@@ -109,7 +119,6 @@ const useBuyListStores = () => {
       const { items, tabs, paging } = data
       const infoMap = tab.value.options.map((item) => {
         const value = tabs?.[item.id] ?? item.value ?? 0
-        const templateLabel = item.templateLabel ?? item.label
         const filters = params.filters.filter((item) => !item.includes('_tab'))
         const to = {
           name: buyListStore.basicRouteName,
@@ -120,17 +129,10 @@ const useBuyListStores = () => {
             pg: 1,
           },
         }
-        const label = Object.fromEntries(
-          Object.entries(templateLabel).map(([key, str]) => [
-            key,
-            str.replace(/{{\s*value\s*}}/g, value),
-          ])
-        )
 
         return {
           ...item,
-          templateLabel: templateLabel,
-          label: label,
+          count: value,
           to,
         }
       })
@@ -169,10 +171,11 @@ const useBuyListStores = () => {
     channel.value = hasRegion ? 'region' : hasMrt ? 'mrt' : ''
   }
   const onParseFilters = (targetRoute = route) => {
-    const filters = targetRoute.params.filters
+    const { filters } = targetRoute.params
     const list = Array.isArray(filters) ? filters : filters ? [filters] : []
 
-    return list.reduce((acc, item) => {
+    // 路徑 filters 為 value_key 字串陣列；解析成 { key: value }
+    const parsed = list.reduce((acc, item) => {
       const str = String(item)
       const index = str.lastIndexOf('_')
 
@@ -186,6 +189,9 @@ const useBuyListStores = () => {
       acc[key] = value
       return acc
     }, {})
+
+    // query (例如 tag、pg) 已是 { key: value } 物件，一併合併
+    return { ...parsed, ...targetRoute.query }
   }
 
   const onGetBuyListParams = (targetRoute = route) => {
@@ -239,12 +245,16 @@ const useBuyListStores = () => {
 
     // tab
     apiSearchData.value.tab = Number(parseFilters.tab) || tab.value.defaultID
+
+    // tag
+    apiSearchData.value.tag = parseFilters.tag?.split(',') ?? []
   }
 
   return {
     isChannelRegion,
     isChannelMrt,
     commonParams,
+    commonQuery,
     onApiRegion,
     onApiMrt,
     onApiBuyList,

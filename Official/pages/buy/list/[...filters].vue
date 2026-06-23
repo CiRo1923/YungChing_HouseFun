@@ -4,17 +4,30 @@ const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
 const { onUseMeta, onIsLoading, onWithLoadingAll } = useCommonActions()
 const buyList = useBuyListStore()
-const { pagination } = storeToRefs(buyList)
+const { region, mrt, pagination } = storeToRefs(buyList)
 const {
+  onApiGetCommonServerTime,
   onApiGETRealEstatePurposeCheckOptions,
   onApiGETRealEstateTypeSelectOptions,
   onApiGETRealEstateFaceSelectOptions,
   onApiGETRealEstateParkingModeSelectOptions,
   onApiGETRealEstateNearByCheckOptions,
+  onApiGETRealEstateFeatureCheckOptions,
 } = useBuyProjectActions()
-const { onGetBuyListParams, onApiRegion, onApiMrt, onApiBuyList, onChannel } = useBuyListActions()
+const {
+  isChannelRegion,
+  isChannelMrt,
+  commonParams,
+  commonQuery,
+  onGetBuyListParams,
+  onApiRegion,
+  onApiMrt,
+  onApiBuyList,
+  onChannel,
+} = useBuyListActions()
 const { onApiErrorServerToClient } = useBuyPopupActions()
 const route = useRoute()
+const router = useRouter()
 
 definePageMeta({
   layout: 'common',
@@ -22,11 +35,35 @@ definePageMeta({
 })
 
 const isDeviceM = computed(() => device.value === 'm')
+const channel = computed(() => {
+  if (isChannelRegion.value) return 'region'
+  if (isChannelMrt.value) return 'mrt'
+
+  return ''
+})
+const page = computed(() => route.query.pg || '1')
+const paramsRegion = computed(() => {
+  const { ids } = region.value
+
+  return ids ? [`${ids}_region`] : []
+})
+
+const paramsMrt = computed(() => {
+  const { ids } = mrt.value
+
+  return ids ? [`${ids}_mrt`] : []
+})
+const paramsChannel = computed(() =>
+  isChannelRegion.value ? paramsRegion.value : isChannelMrt.value ? paramsMrt.value : []
+)
 
 onChannel()
 onGetBuyListParams()
 
 await onWithLoadingAll([
+  useAsyncData('common-server-time', () => onApiGetCommonServerTime(), {
+    watch: [channel, page],
+  }),
   useAsyncData('region-options', () => onApiRegion()),
   useAsyncData('mrt-options', () => onApiMrt()),
   useAsyncData('purpose-options', () => onApiGETRealEstatePurposeCheckOptions()),
@@ -34,6 +71,7 @@ await onWithLoadingAll([
   useAsyncData('face-options', () => onApiGETRealEstateFaceSelectOptions()),
   useAsyncData('parking-options', () => onApiGETRealEstateParkingModeSelectOptions()),
   useAsyncData('near-options', () => onApiGETRealEstateNearByCheckOptions()),
+  useAsyncData('features-options', () => onApiGETRealEstateFeatureCheckOptions()),
   useAsyncData('buy-list-region', () => onApiBuyList()),
 ])
 
@@ -48,7 +86,7 @@ const onRouteChanged = async (to) => {
   onChannel(to)
   onGetBuyListParams(to)
 
-  await onSearch(to)
+  await onApiSearch(to)
 
   if (import.meta.client) {
     window.scrollTo({
@@ -58,10 +96,23 @@ const onRouteChanged = async (to) => {
   }
 }
 
-const onSearch = async (to) => {
+const onApiSearch = async (to) => {
   onIsLoading(true)
   await onApiBuyList(to)
   onIsLoading(false)
+}
+
+const onRoutePush = async () => {
+  await router.push({
+    name: buyList.basicRouteName,
+    params: {
+      filters: [...paramsChannel.value, ...commonParams.value],
+    },
+    query: {
+      pg: 1,
+      ...commonQuery.value,
+    },
+  })
 }
 
 onBeforeRouteUpdate(async (to, from) => {
@@ -94,11 +145,12 @@ onUnmounted(() => {
 
   <div class="bg-[--white] p:pt-[12px]">
     <PageBuyListTabOvalResponsiv />
-    <PageBuyListSearchFunction />
+    <PageBuyListSearchFunction @apiSearch="onApiSearch" @routerPush="onRoutePush" />
   </div>
   <CommonMContainer class="--inner p:mt-[20px]">
-    <CommonMContent class="pt:--rounded-20 p:--py-20 p:--px-30">
-      <PageBuyListSearchFilter @click="onSearch" v-if="!isDeviceM" />
+    <CommonMContent class="pt:--rounded-20 p:--py-20 p:--px-30 m:--pb-20">
+      <PageBuyListSearchFilter @click="onApiSearch" v-if="!isDeviceM" />
+      <PageBuyListSearchFeatures @routerPush="onRoutePush" />
       <!-- <pre>
         {{ options.caseType }}
       </pre> -->
@@ -116,11 +168,13 @@ onUnmounted(() => {
           queryKey: 'pg',
         }"
         :setClass="{
-          main: 'p:mt-[40px]',
+          main: 'mt-[20px]',
         }"
       />
     </CommonMContent>
   </CommonMContainer>
+  <PageBuyListPopupFeatures />
+  <PageBuyCommonPopupComment />
 </template>
 
 <style></style>

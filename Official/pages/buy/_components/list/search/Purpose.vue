@@ -10,7 +10,9 @@ const { apiSearchData, purpose } = storeToRefs(buyList)
 
 const componentsName = 'Purpose'
 
+const emits = defineEmits(['click:routePush'])
 const selectDropdownRef = ref(null)
+const isDeviceM = computed(() => device.value === 'm')
 const defaultLabel = computed(() => onResolveByDevice(purpose.value.defaultLabel, device.value))
 
 const onChange = (data) => {
@@ -18,6 +20,12 @@ const onChange = (data) => {
 
   purpose.value.label = value ? label : defaultLabel.value
   // selectDropdownRef.value.onClose()
+}
+
+const onClear = () => {}
+
+const onRoutePush = () => {
+  emits('click:routePush')
 }
 
 const onInit = () => {
@@ -61,26 +69,33 @@ onUnmounted(() => {
       main: '--rounded p:--py-10 p:--px-12 m:--h-40 pt:--h-45 tm:--py-8 tm:--px-8 w-full',
       type: 'tm:text-[14px] p:text-[16px]',
       dropdown: '--py-20 pt:--rounded pt:--px-20 m:--px-30 m:w-full',
-      dropdownContainer: 'p:w-[170px]',
+      dropdownContainer: 'm:flex m:flex-col p:w-[170px]',
     }"
     ref="selectDropdownRef"
   >
-    <ul class="space-y-[15px]">
-      <li
-        v-for="(item, index) in options.casePurpose"
-        :key="`${componentsName}_${item.code}_${index}`"
-      >
-        <BuyMFormRadio
-          :name="componentsName"
-          v-model="apiSearchData.purpose"
-          :config="{
-            label: item.text,
-            value: item.code,
-          }"
-          @change="onChange"
-        />
-      </li>
-    </ul>
+    <div class="m:min-h-0 m:grow m:overflow-y-auto pt:h-full">
+      <ul class="space-y-[15px]">
+        <li
+          v-for="(item, index) in options.casePurpose"
+          :key="`${componentsName}_${item.code}_${index}`"
+        >
+          <BuyMFormRadio
+            :name="componentsName"
+            v-model="apiSearchData.purpose"
+            :config="{
+              label: item.text,
+              value: item.code,
+            }"
+            @change="onChange"
+          />
+        </li>
+      </ul>
+    </div>
+    <PageBuyListActionButton
+      @click:clear="onClear"
+      @click:routePush="onRoutePush"
+      v-if="isDeviceM"
+    />
   </BuyMFormSelectDropdown>
 </template>
 

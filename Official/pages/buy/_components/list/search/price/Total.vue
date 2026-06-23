@@ -78,6 +78,9 @@ const onRadioChange = (data) => {
           valueClickClear: '',
           sort: 'asc',
         }"
+        :setClass="{
+          main: '--icon-size-20',
+        }"
         @change="onRadioChange"
       />
     </li>

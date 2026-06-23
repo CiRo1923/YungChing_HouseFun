@@ -1,21 +1,26 @@
 :root {
   --red-e56a: #e8536a;
   --red-e45c: #ef425c;
+  --red-e786: #ed7d86;
   --orange-e646: #ea6846;
+  --orange-f74c: #ff714c;
   --orange-feea: #feeeea;
   --yellow-feea: #f1ecea;
   --green-8b0d: #87b90d;
   --green-6a2d: #67a12d;
+  --green-4a7f: #49af7f;
   --green-ffe9: #f4f8e9;
-  --blue-4a7f: #49af7f;
   --blue-efef: #e6f3ef;
+  --blue-69c1: #6f9bc1;
   --white: #fff;
   --white-rgb: hexToRgb(#fff);
   --gray-f7: #f7f7f7;
   --gray-f2: #f2f2f2;
+  --gray-ed: #ededed;
   --gray-e5: #e5e5e5;
   --gray-feea: #f1ecea;
   --gray-ccce: #c3c8ce;
+  --gray-db: #dbdbdb;
   --gray-999: #999;
   --gray-666: #666;
   --gray-333: #333;

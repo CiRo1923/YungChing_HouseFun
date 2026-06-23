@@ -1,6 +1,7 @@
 <script setup>
 import { onMergeTabConfig, useTabCore } from './.composables/useTabCore.js'
 
+const emits = defineEmits(['click'])
 const props = defineProps({
   items: {
     type: Array,
@@ -50,6 +51,11 @@ const {
   onClick,
   onTrackTransitionEnd,
 } = useTabCore({ config })
+
+const onAnchorClick = (item, index) => {
+  onClick(item, index)
+  emits('click', { item, index })
+}
 </script>
 
 <template>
@@ -72,13 +78,13 @@ const {
               setClass.anchor,
             ]"
             v-bind="onHeaderBind(item)"
-            @click="onClick(item, index)"
+            @click="onAnchorClick(item, index)"
           >
             <CommonSvgIcon
               :icon="item.icon"
               class="m-tab-icon h-[22px] w-[22px] p-[2px] transition-colors duration-300"
             />
-            <slot name="header" :item="item" :index="index">
+            <slot name="anchor" :item="item" :index="index">
               <b class="font-semibold">{{ item[config.schema.label] }}</b>
             </slot>
           </component>

@@ -23,11 +23,14 @@ const addressInfo = computed(() => {
 </script>
 
 <template>
-  <ul class="pt:flex pt:items-center p:gap-x-[25px]">
+  <ul class="m:space-y-[5px] t:gap-x-[15px] pt:flex pt:items-center p:gap-x-[25px]">
     <template v-for="(data, index) in addressInfo" :key="`${data.id}_${index}`">
       <li v-if="data.value">
-        <p class="tracking-default flex items-center gap-x-[3px] text-[16px]">
-          <CommonSvgIcon :icon="data.icon" class="h-[18px] w-[18px] shrink-0 text-[--green-8b0d]" />
+        <p class="tracking-default flex items-center gap-x-[3px] tm:text-[14px] p:text-[16px]">
+          <CommonSvgIcon
+            :icon="data.icon"
+            class="h-[18px] w-[18px] shrink-0 p-[1px] text-[--gray-999]"
+          />
           <em class="grow">{{ data.value }}</em>
         </p>
       </li>

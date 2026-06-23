@@ -38,7 +38,7 @@ const onBind = (item) => {
 <template>
   <ol class="breadcrumbs flex items-center">
     <li
-      class="breadcrumbs-item flex items-center text-[14px]"
+      class="breadcrumbs-item flex items-center text-[14px] text-[--gray-666]"
       v-for="(item, index) in breadcrumb"
       :key="`${item.text}_${index}`"
     >

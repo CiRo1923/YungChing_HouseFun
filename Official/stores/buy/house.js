@@ -4,6 +4,7 @@ export const useBuyHouseStore = defineStore('buyHouse', () => {
   const detail = ref(null)
   const breadcrumb = ref(null) // 麵包屑
   const basic = ref(null) // 基本資訊
+  const badges = ref(null)
   const pricing = ref(null) // 價格資訊
   const media = ref(null) // 多媒體
   const floor = ref(null) // 樓層
@@ -14,11 +15,19 @@ export const useBuyHouseStore = defineStore('buyHouse', () => {
   const broker = ref(null) // 經紀人
   const poi = ref(null)
   const highlights = ref(null) // 物件焦點
+  const agentPick = ref(null) // 精選物件
+  const hotForYou = ref(null) // 這些物件也很適合你
+  const apiCommentData = ref({
+    name: null,
+    phone: null,
+    message: null,
+  })
 
   return {
     detail,
     breadcrumb,
     basic,
+    badges,
     pricing,
     media,
     floor,
@@ -29,5 +38,8 @@ export const useBuyHouseStore = defineStore('buyHouse', () => {
     broker,
     poi,
     highlights,
+    agentPick,
+    hotForYou,
+    apiCommentData,
   }
 })

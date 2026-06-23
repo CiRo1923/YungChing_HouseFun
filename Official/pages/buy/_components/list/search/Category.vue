@@ -7,8 +7,13 @@ const { apiSearchData, tab } = storeToRefs(buyList)
 
 const emits = defineEmits(['click'])
 
+const isDeviceM = computed(() => device.value === 'm')
 const options = computed(() => {
   return tab.value.options.map((item) => {
+    if (typeof item.label === 'string') {
+      return { ...item }
+    }
+
     const key =
       Object.keys(item.label).find((k) => k.includes(device.value)) || Object.keys(item.label)[0]
 
@@ -43,10 +48,10 @@ onUnmounted(() => {
     :items="options"
     :config="{
       active: apiSearchData.tab,
-      containerMode: multiple,
+      containerMode: 'single',
     }"
     :setClass="{
-      main: '--green-8b0d pt:--has-border-b p:--anchor-px-20 p:--anchor-py-10 tm:--anchor-px-15 tm:--anchor-py-5 pt:grow',
+      main: '--green-8b0d pt:--has-border-b p:--anchor-px-20 p:--anchor-py-10 tm:--anchor-px-15 t:--anchor-py-5 pt:grow',
       header: 'flex items-center',
       anchor: 'tm:text-[14px] p:text-[16px]',
     }"
@@ -54,6 +59,10 @@ onUnmounted(() => {
   >
     <template #headerTools>
       <slot name="headerTools" />
+    </template>
+    <template #anchor="{ item }">
+      {{ item.label }}
+      <small class="text-[12px]" v-if="!isDeviceM"> ({{ item.count }}) </small>
     </template>
   </BuyMTabBorderBottom>
 </template>

@@ -1,0 +1,91 @@
+@screen p {
+  .m-form {
+    &.\-\-icon-size-20,
+    &.p\:\-\-icon-size-20,
+    &.pt\:\-\-icon-size-20 {
+      .m-form-element {
+        &.\-\-checkbox,
+        &.\-\-radio {
+          .m-form-icon {
+            @apply h-[20px] w-[20px];
+          }
+        }
+      }
+    }
+
+    &.\-\-icon-size-16,
+    &.p\:\-\-icon-size-16,
+    &.pt\:\-\-icon-size-16 {
+      .m-form-element {
+        &.\-\-checkbox,
+        &.\-\-radio {
+          .m-form-icon {
+            @apply h-[16px] w-[16px];
+          }
+        }
+      }
+    }
+  }
+}
+
+@screen t {
+  .m-form {
+    &.\-\-icon-size-20,
+    &.pt\:\-\-icon-size-20,
+    &.tm\:\-\-icon-size-20,
+    &.t\:\-\-icon-size-20 {
+      .m-form-element {
+        &.\-\-checkbox,
+        &.\-\-radio {
+          .m-form-icon {
+            @apply h-[20px] w-[20px];
+          }
+        }
+      }
+    }
+
+    &.\-\-icon-size-16,
+    &.pt\:\-\-icon-size-16,
+    &.tm\:\-\-icon-size-16,
+    &.t\:\-\-icon-size-16 {
+      .m-form-element {
+        &.\-\-checkbox,
+        &.\-\-radio {
+          .m-form-icon {
+            @apply h-[16px] w-[16px];
+          }
+        }
+      }
+    }
+  }
+}
+
+@screen m {
+  .m-form {
+    &.\-\-icon-size-20,
+    &.tm\:\-\-icon-size-20,
+    &.m\:\-\-icon-size-20 {
+      .m-form-element {
+        &.\-\-checkbox,
+        &.\-\-radio {
+          .m-form-icon {
+            @apply h-[20px] w-[20px];
+          }
+        }
+      }
+    }
+
+    &.\-\-icon-size-16,
+    &.tm\:\-\-icon-size-16,
+    &.m\:\-\-icon-size-16 {
+      .m-form-element {
+        &.\-\-checkbox,
+        &.\-\-radio {
+          .m-form-icon {
+            @apply h-[16px] w-[16px];
+          }
+        }
+      }
+    }
+  }
+}

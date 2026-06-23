@@ -7,7 +7,7 @@ const onClick = () => {
 </script>
 
 <template>
-  <div class="m:bg-[--gray-f7] m:py-[10px] tm:mb-[20px] pt:flex p:mb-[30px]">
+  <div class="m:mt-[10px] pt:flex">
     <PageBuyListSearchCategory @click="onClick">
       <template #headerTools>
         <PageBuyListSearchSort />

@@ -1,18 +1,43 @@
 import {
+  apiGetCommonServerTime,
   apiGETRealEstatePurposeCheckOptions,
   apiGETRealEstateTypeSelectOptions,
   apiGETRealEstateFaceSelectOptions,
   apiGETRealEstateParkingModeSelectOptions,
   apiGETRealEstateNearByCheckOptions,
+  apiGETRealEstateFeatureCheckOptions,
 } from '@js/_api/buy/manage.js'
+
+import { onFormatDate } from '@js/_prototype.js'
 
 import { useBuyProjectStore } from '@stores/buy/project.js'
 import useBuyPopupActions from '@stores/buy/.composables/usePopupActions.js'
 
 const useBuyProjectStores = () => {
   const buyProject = useBuyProjectStore()
-  const { options } = storeToRefs(buyProject)
+  const { serverTime, options } = storeToRefs(buyProject)
   const { onApiError } = useBuyPopupActions()
+
+  const onApiGetCommonServerTime = async () => {
+    const { config, status, data } = await apiGetCommonServerTime()
+
+    if (status === 200) {
+      serverTime.value = {
+        value: onFormatDate(data.serverTime, 'YYYY-MM-DD'),
+        full: onFormatDate(data.serverTime, 'YYYY-MM-DD hh:mm:ss'),
+        year: onFormatDate(data.serverTime, 'YYYY'),
+        month: onFormatDate(data.serverTime, 'MM'),
+        day: onFormatDate(data.serverTime, 'DD'),
+        hours: onFormatDate(data.serverTime, 'hh'),
+        minute: onFormatDate(data.serverTime, 'mm'),
+        second: onFormatDate(data.serverTime, 'ss'),
+      }
+    } else {
+      onApiError(config, status, data)
+    }
+
+    return { config, status, data }
+  }
 
   const onApiGETRealEstatePurposeCheckOptions = async () => {
     if (options.value.casePurpose) return false
@@ -119,6 +144,20 @@ const useBuyProjectStores = () => {
     return { config, status, data }
   }
 
+  const onApiGETRealEstateFeatureCheckOptions = async () => {
+    if (options.value.features) return false
+
+    const { config, status, data } = await apiGETRealEstateFeatureCheckOptions()
+
+    if (status === 200) {
+      options.value.features = data
+    } else {
+      onApiError(config, status, data)
+    }
+
+    return { config, status, data }
+  }
+
   const onSearchParams = (path) => {
     const headers = useRequestHeaders(['host'])
     const domain = import.meta.server ? headers.host : window.location.host
@@ -169,6 +208,34 @@ const useBuyProjectStores = () => {
 
     return onGetText(value)
   }
+  const onReplaceImageSize = (data, size = {}, key) => {
+    const { width = '', height = '' } = size || {}
+    const onReplaceString = (str) =>
+      typeof str === 'string' ? str.replaceAll('{0}', width).replaceAll('{1}', height) : str
+
+    const onReplaceItem = (item) => {
+      // 字串：['xxxx?width={0}&height={1}']
+      if (typeof item === 'string') {
+        return onReplaceString(item)
+      }
+
+      // 物件：[{ key: 'xxxx?width={0}&height={1}' }] 或單一物件
+      if (typeof item === 'object' && item !== null) {
+        return {
+          ...item,
+          [key]: onReplaceString(item[key]),
+        }
+      }
+
+      return item
+    }
+
+    if (Array.isArray(data)) {
+      return data.map(onReplaceItem)
+    }
+
+    return onReplaceItem(data)
+  }
   const onResolveByDevice = (value, device) => {
     const breakpointDeviceKeys = {
       p: ['p', 'pt'],
@@ -185,13 +252,16 @@ const useBuyProjectStores = () => {
   }
 
   return {
+    onApiGetCommonServerTime,
     onApiGETRealEstatePurposeCheckOptions,
     onApiGETRealEstateTypeSelectOptions,
     onApiGETRealEstateFaceSelectOptions,
     onApiGETRealEstateParkingModeSelectOptions,
     onApiGETRealEstateNearByCheckOptions,
+    onApiGETRealEstateFeatureCheckOptions,
     onSearchParams,
     onValueGetText,
+    onReplaceImageSize,
     onResolveByDevice,
   }
 }

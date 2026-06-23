@@ -20,7 +20,7 @@ export const useBuyListStore = defineStore('buyList', () => {
     uniprice: '',
     dt: '',
     tab: 0,
-    tag: '',
+    tag: [],
     kw: '',
     od: '',
   })
@@ -329,34 +329,29 @@ export const useBuyListStore = defineStore('buyList', () => {
     options: [
       {
         id: 'all',
-        label: {
-          pt: '全部 ({{ value }})',
-          m: '全部',
-        },
+        label: '全部',
+        count: 0,
         value: 0,
       },
       {
         id: 'priceDrop',
         label: {
-          pt: '最近降價 ({{ value }})',
+          pt: '最近降價',
           m: '降價',
         },
+        count: 0,
         value: 1,
       },
       {
         id: 'new',
-        label: {
-          pt: '新上架 ({{ value }})',
-          m: '新上架',
-        },
+        label: '新上架',
+        count: 0,
         value: 2,
       },
       {
         id: 'vr',
-        label: {
-          pt: '實境找房 ({{ value }})',
-          m: '實境找房',
-        },
+        label: '實境找房',
+        count: 0,
         value: 3,
       },
     ],

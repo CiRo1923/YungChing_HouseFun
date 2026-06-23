@@ -551,7 +551,7 @@ onUnmounted(() => {
         v-if="isActive && dropdownItems && !config.isDisabled"
       >
         <div
-          class="m-autocomplete-dropdown-no-data bg-[--white] p-[8px] text-[14px] text-[--gray-333]"
+          class="m-autocomplete-dropdown-no-data bg-[--white] p-[8px] text-[14px]"
           v-if="dropdownItems.length === 0"
           ref="dropdownNoDataRef"
         >
@@ -659,7 +659,7 @@ onUnmounted(() => {
 
 .m-autocomplete-dropdown-button {
   &:not(:disabled) {
-    @apply text-[--gray-333];
+    /* @apply text-[--gray-333]; */
 
     &.\-\-active {
       @apply bg-[--orange-feea];

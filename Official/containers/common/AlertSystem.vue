@@ -12,10 +12,10 @@ const onClose = (item) => {
 </script>
 
 <template>
-  <BuyMPopup
+  <BuyMPopupMain
     id="alertSystem"
     :setClass="{
-      main: 'p:--w-615 t:--w-460',
+      main: 'p:--w-600 t:--w-460',
     }"
   >
     <div class="text-center" v-html="alert.content" />
@@ -38,7 +38,7 @@ const onClose = (item) => {
         </ul>
       </div>
     </template>
-  </BuyMPopup>
+  </BuyMPopupMain>
 </template>
 
 <style></style>

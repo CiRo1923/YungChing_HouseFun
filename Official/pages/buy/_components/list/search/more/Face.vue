@@ -37,6 +37,9 @@ onUnmounted(() => {
           valueClickClear: '',
           isJoin: true,
         }"
+        :setClass="{
+          main: '--icon-size-20',
+        }"
         @change="onChange"
       />
     </li>

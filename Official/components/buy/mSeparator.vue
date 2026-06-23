@@ -78,12 +78,12 @@ const setClass = computed(() => {
       @apply gap-x-[30px];
     }
 
-    &.\-\-gap-x-25,
-    &.p\:\-\-gap-x-25,
-    &.pt\:\-\-gap-x-25 {
-      --item-before-right: -13px;
+    &.\-\-gap-x-24,
+    &.p\:\-\-gap-x-24,
+    &.pt\:\-\-gap-x-24 {
+      --item-before-right: -12px;
 
-      @apply gap-x-[25px];
+      @apply gap-x-[24px];
     }
 
     &.\-\-gap-x-20,
@@ -144,13 +144,13 @@ const setClass = computed(() => {
       @apply gap-x-[30px];
     }
 
-    &.\-\-gap-x-25,
-    &.pt\:\-\-gap-x-25,
-    &.tm\:\-\-gap-x-25,
-    &.t\:\-\-gap-x-25 {
-      --item-before-right: -13px;
+    &.\-\-gap-x-24,
+    &.pt\:\-\-gap-x-24,
+    &.tm\:\-\-gap-x-24,
+    &.t\:\-\-gap-x-24 {
+      --item-before-right: -12px;
 
-      @apply gap-x-[25px];
+      @apply gap-x-[24px];
     }
 
     &.\-\-gap-x-20,
@@ -213,12 +213,12 @@ const setClass = computed(() => {
       @apply gap-x-[30px];
     }
 
-    &.\-\-gap-x-25,
-    &.tm\:\-\-gap-x-25,
-    &.m\:\-\-gap-x-25 {
-      --item-before-right: -13px;
+    &.\-\-gap-x-24,
+    &.tm\:\-\-gap-x-24,
+    &.m\:\-\-gap-x-24 {
+      --item-before-right: -12px;
 
-      @apply gap-x-[25px];
+      @apply gap-x-[24px];
     }
 
     &.\-\-gap-x-20,

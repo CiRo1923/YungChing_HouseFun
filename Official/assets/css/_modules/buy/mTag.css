@@ -1,125 +1,160 @@
+:root {
+  --tag-pc-text-shadow: 1px 1px 1px #00000033;
+  --tag-tablet-text-shadow: 1px 1px 1px #00000033;
+  --tag-mobile-text-shadow: 1px 1px 1px #00000033;
+}
+
 .m-tag {
-  @apply inline-flex items-center overflow-hidden rounded-full;
+  @apply inline-flex items-center overflow-hidden;
 
-  &.\-\-bg {
-    &.\-\-orange-e646 {
-      @apply bg-[--orange-e646];
-    }
+  &[class*='--border'] {
+    @apply border-[1px];
+  }
 
-    &.\-\-orange-feea {
-      @apply bg-[--orange-feea];
-    }
+  &.\-\-oval {
+    @apply rounded-full;
+  }
+
+  &.\-\-bg-red-e45c {
+    @apply bg-[--red-e45c];
+  }
+
+  &.\-\-bg-red-e786 {
+    @apply bg-[--red-e786];
+  }
+
+  &.\-\-bg-orange-feea {
+    @apply bg-[--orange-feea];
+  }
+
+  &.\-\-bg-orange-f74c {
+    @apply bg-[--orange-f74c];
+  }
+
+  &.\-\-bg-gray-f7 {
+    @apply bg-[--gray-f7];
+  }
+
+  &.\-\-border-blue-69c1 {
+    @apply border-[--blue-69c1];
+  }
+
+  &.\-\-border-gray-db {
+    @apply border-[--gray-db];
+  }
+
+  &.\-\-text-orange-e646 {
+    @apply text-[--orange-e646];
+  }
+
+  &.\-\-text-blue-69c1 {
+    @apply text-[--blue-69c1];
+  }
+
+  &.\-\-text-gray-666 {
+    @apply text-[--gray-666];
+  }
+
+  &.\-\-text-white {
+    @apply text-[--white];
   }
 }
 
 @screen p {
   .m-tag {
-    &.\-\-px-15,
-    &.p\:\-\-px-15,
-    &.pt\:\-\-px-15 {
-      @apply px-[15px];
+    &.\-\-text-shadow,
+    &.p\:\-\-text-shadow,
+    &.pt\:\-\-text-shadow {
+      .m-tag-label {
+        text-shadow: var(--tag-pc-text-shadow);
+      }
     }
 
-    &.\-\-px-12,
-    &.p\:\-\-px-12,
-    &.pt\:\-\-px-12 {
-      @apply px-[12px];
+    &.\-\-rounded-3,
+    &.p\:\-\-rounded-3,
+    &.pt\:\-\-rounded-3 {
+      @apply rounded-[3px];
     }
 
-    &.\-\-px-8,
-    &.p\:\-\-px-8,
-    &.pt\:\-\-px-8 {
-      @apply px-[8px];
+    &.\-\-px-10,
+    &.p\:\-\-px-10,
+    &.pt\:\-\-px-10 {
+      @apply px-[10px];
     }
 
-    &.\-\-px-5,
-    &.p\:\-\-px-5,
-    &.pt\:\-\-px-5 {
-      @apply px-[5px];
+    &.\-\-px-6,
+    &.p\:\-\-px-6,
+    &.pt\:\-\-px-6 {
+      @apply px-[6px];
     }
 
-    &.\-\-py-3,
-    &.p\:\-\-py-3,
-    &.pt\:\-\-py-3 {
-      @apply py-[3px];
+    &.\-\-py-4,
+    &.p\:\-\-py-4,
+    &.pt\:\-\-py-4 {
+      @apply py-[4px];
     }
 
-    /* &.\-\-h-35,
-    &.p\:\-\-h-35,
-    &.pt\:\-\-h-35 {
-      @apply h-[35px];
-    } */
-
-    /* &.\-\-h-30,
-    &.p\:\-\-h-30,
-    &.pt\:\-\-h-30 {
-      @apply h-[30px];
-    } */
+    &.\-\-py-2,
+    &.p\:\-\-py-2,
+    &.pt\:\-\-py-2 {
+      @apply py-[2px];
+    }
 
     &.\-\-h-20,
     &.p\:\-\-h-20,
     &.pt\:\-\-h-20 {
       @apply h-[20px];
     }
-
-    &.\-\-h-16,
-    &.p\:\-\-h-16,
-    &.pt\:\-\-h-16 {
-      @apply h-[16px];
-    }
   }
 }
 
 @screen t {
   .m-tag {
-    &.\-\-px-15,
-    &.pt\:\-\-px-15,
-    &.tm\:\-\-px-15,
-    &.t\:\-\-px-15 {
-      @apply px-[15px];
+    --tag-text-shadow: var(--tag-tablet-text-shadow);
+
+    &.\-\-text-shadow,
+    &.pt\:\-\-text-shadow,
+    &.tm\:\-\-text-shadow,
+    &.t\:\-\-text-shadow {
+      .m-tag-label {
+        text-shadow: var(--tag-tablet-text-shadow);
+      }
     }
 
-    &.\-\-px-12,
-    &.pt\:\-\-px-12,
-    &.tm\:\-\-px-12,
-    &.t\:\-\-px-12 {
-      @apply px-[12px];
+    &.\-\-rounded-3,
+    &.pt\:\-\-rounded-3,
+    &.tm\:\-\-rounded-3,
+    &.t\:\-\-rounded-3 {
+      @apply rounded-[3px];
     }
 
-    &.\-\-px-8,
-    &.pt\:\-\-px-8,
-    &.tm\:\-\-px-8,
-    &.t\:\-\-px-8 {
-      @apply px-[8px];
+    &.\-\-px-10,
+    &.pt\:\-\-px-10,
+    &.tm\:\-\-px-10,
+    &.t\:\-\-px-10 {
+      @apply px-[10px];
     }
 
-    &.\-\-px-5,
-    &.pt\:\-\-px-5,
-    &.tm\:\-\-px-5,
-    &.t\:\-\-px-5 {
-      @apply px-[5px];
+    &.\-\-px-6,
+    &.pt\:\-\-px-6,
+    &.tm\:\-\-px-6,
+    &.t\:\-\-px-6 {
+      @apply px-[6px];
     }
 
-    &.\-\-py-3,
-    &.pt\:\-\-py-3,
-    &.tm\:\-\-py-3,
-    &.t\:\-\-py-3 {
-      @apply py-[3px];
+    &.\-\-py-4,
+    &.pt\:\-\-py-4,
+    &.tm\:\-\-py-4,
+    &.t\:\-\-py-4 {
+      @apply py-[4px];
     }
 
-    /* &.\-\-h-35,
-    &.pt\:\-\-h-35,
-    &.tm\:\-\-h-35,
-    &.t\:\-\-h-35 {
-      @apply h-[35px];
-    } */
-
-    /* &.\-\-h-30,
-    &.pt\:\-\-h-30,
-    &.tm\:\-\-h-30,
-    &.t\:\-\-h-30 {
-      @apply h-[30px];
-    } */
+    &.\-\-py-2,
+    &.pt\:\-\-py-2,
+    &.tm\:\-\-py-2,
+    &.t\:\-\-py-2 {
+      @apply py-[2px];
+    }
 
     &.\-\-h-20,
     &.pt\:\-\-h-20,
@@ -127,70 +162,55 @@
     &.t\:\-\-h-20 {
       @apply h-[20px];
     }
-
-    &.\-\-h-16,
-    &.pt\:\-\-h-16,
-    &.tm\:\-\-h-16,
-    &.t\:\-\-h-16 {
-      @apply h-[16px];
-    }
   }
 }
 
 @screen m {
   .m-tag {
-    &.\-\-px-15,
-    &.tm\:\-\-px-15,
-    &.m\:\-\-px-15 {
-      @apply px-[15px];
+    --tag-text-shadow: var(--tag-mobile-text-shadow);
+
+    &.\-\-text-shadow,
+    &.tm\:\-\-text-shadow,
+    &.m\:\-\-text-shadow {
+      .m-tag-label {
+        text-shadow: var(--tag-mobile-text-shadow);
+      }
     }
 
-    &.\-\-px-12,
-    &.tm\:\-\-px-12,
-    &.m\:\-\-px-12 {
-      @apply px-[12px];
+    &.\-\-rounded-3,
+    &.tm\:\-\-rounded-3,
+    &.m\:\-\-rounded-3 {
+      @apply rounded-[3px];
     }
 
-    &.\-\-px-8,
-    &.tm\:\-\-px-8,
-    &.m\:\-\-px-8 {
-      @apply px-[8px];
+    &.\-\-px-10,
+    &.tm\:\-\-px-10,
+    &.m\:\-\-px-10 {
+      @apply px-[10px];
     }
 
-    &.\-\-px-5,
-    &.tm\:\-\-px-5,
-    &.m\:\-\-px-5 {
-      @apply px-[5px];
+    &.\-\-px-6,
+    &.tm\:\-\-px-6,
+    &.m\:\-\-px-6 {
+      @apply px-[6px];
     }
 
-    &.\-\-py-3,
-    &.tm\:\-\-py-3,
-    &.m\:\-\-py-3 {
-      @apply py-[3px];
+    &.\-\-py-4,
+    &.tm\:\-\-py-4,
+    &.m\:\-\-py-4 {
+      @apply py-[4px];
     }
 
-    /* &.\-\-h-35,
-    &.tm\:\-\-h-35,
-    &.m\:\-\-h-35 {
-      @apply h-[35px];
-    } */
-
-    /* &.\-\-h-30,
-    &.tm\:\-\-h-30,
-    &.m\:\-\-h-30 {
-      @apply h-[30px];
-    } */
+    &.\-\-py-2,
+    &.tm\:\-\-py-2,
+    &.m\:\-\-py-2 {
+      @apply py-[2px];
+    }
 
     &.\-\-h-20,
     &.tm\:\-\-h-20,
     &.m\:\-\-h-20 {
       @apply h-[20px];
-    }
-
-    &.\-\-h-16,
-    &.tm\:\-\-h-16,
-    &.m\:\-\-h-16 {
-      @apply h-[16px];
     }
   }
 }

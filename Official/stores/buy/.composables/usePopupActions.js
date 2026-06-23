@@ -24,7 +24,7 @@ export default () => {
 
     alertData.value.id = 'alertSystem'
     alertData.value.title = data.title
-    alertData.value.icon = data.icon || 'icon_circle_exclamation'
+    alertData.value.icon = data.icon
     alertData.value.content = data.content
     alertData.value.btns = onDeepMerge(buttons, data.btns)
     alertData.value.hasExistClose = data.hasExistClose !== undefined ? data.hasExistClose : true
@@ -59,7 +59,7 @@ export default () => {
 
     confirmData.value.id = 'confirmSystem'
     confirmData.value.title = data.title
-    confirmData.value.icon = data.icon || 'icon_circle_exclamation'
+    confirmData.value.icon = data.icon
     confirmData.value.content = data.content
     confirmData.value.btns = onMergeBtns(buttons, data.btns)
     confirmData.value.hasExistClose = data.hasExistClose !== undefined ? data.hasExistClose : true

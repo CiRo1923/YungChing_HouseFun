@@ -14,6 +14,7 @@ export default {
   boxShadow: {
     'black-y2-b4': '0 2px 4px #00000033',
     dropdown: '-2px -2px 10px 0 #0000001a, 3px 4px 10px 0 #0000001a',
+    card: '0 0 5px 0 #00000026',
   },
   letterSpacing: {
     default: '0.05rem',

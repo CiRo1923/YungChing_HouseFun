@@ -275,7 +275,7 @@ const onChange = async () => {
 
           <CommonSvgIcon
             icon="icon_check_solid"
-            class="m-form-icon relative mt-[2px] h-[20px] w-[20px] shrink-0 self-start rounded-[2px] border-[1px] text-[--green-8b0d] transition-colors duration-300"
+            class="m-form-icon relative mt-[2px] shrink-0 self-start border-solid transition-colors duration-300"
             :class="setClass.icon"
           />
 
@@ -301,24 +301,32 @@ const onChange = async () => {
 </template>
 
 <style src="@css/_modules/buy/mForm.css"></style>
+<style src="@css/_modules/buy/mFormCheckboxRadio.css"></style>
 <style lang="postcss">
+:root {
+  --form-checkbox-icon-pc-rounded: 2px;
+  --form-checkbox-icon-tablet-rounded: 2px;
+  --form-checkbox-icon-mobile-rounded: 2px;
+
+  --form-checkbox-icon-pc-border: 1px;
+  --form-checkbox-icon-tablet-border: 1px;
+  --form-checkbox-icon-mobile-border: 1px;
+
+  --form-checkbox-checked-color: inherit;
+  --form-checkbox-icon-color: var(--green-8b0d);
+  --form-checkbox-icon-border-color: var(--gray-999);
+}
+
 .m-form-element {
   &.\-\-checkbox {
     .m-form-type {
-      &:not(:checked) {
-        & + .m-form-icon {
-          @apply border-[--gray-999];
-        }
-      }
-
       &:checked {
-        & ~ .m-form-label {
-          @apply text-[--green-8b0d];
+        & + .m-form-icon {
+          --form-checkbox-checked-color: var(--green-8b0d);
+          --form-checkbox-icon-border-color: transparent;
         }
 
         & + .m-form-icon {
-          @apply border-transparent;
-
           > use {
             @apply opacity-100;
           }
@@ -326,10 +334,45 @@ const onChange = async () => {
       }
     }
 
+    .m-form-label {
+      @apply text-[--form-checkbox-checked-color];
+    }
+
     .m-form-icon {
+      border-width: var(--form-checkbox-icon-border);
+
+      @apply rounded-[--form-checkbox-icon-pc-rounded] border-[--form-checkbox-icon-border-color] text-[--form-checkbox-icon-color];
+
       > use {
         @apply opacity-0 transition-opacity duration-300;
       }
+    }
+  }
+}
+
+@screen p {
+  .m-form-element {
+    &.\-\-checkbox {
+      --form-checkbox-icon-rounded: var(--form-checkbox-icon-pc-rounded);
+      --form-checkbox-icon-border: var(--form-checkbox-icon-pc-border);
+    }
+  }
+}
+
+@screen t {
+  .m-form-element {
+    &.\-\-checkbox {
+      --form-checkbox-icon-rounded: var(--form-checkbox-icon-tablet-rounded);
+      --form-checkbox-icon-border: var(--form-checkbox-icon-tablet-border);
+    }
+  }
+}
+
+@screen m {
+  .m-form-element {
+    &.\-\-checkbox {
+      --form-checkbox-icon-rounded: var(--form-checkbox-icon-mobile-rounded);
+      --form-checkbox-icon-border: var(--form-checkbox-icon-mobile-border);
     }
   }
 }

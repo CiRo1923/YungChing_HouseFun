@@ -4,55 +4,22 @@ const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
 const { onValueGetText, onResolveByDevice } = useBuyProjectActions()
 const buyList = useBuyListStore()
-const {
-  apiSearchData,
-  region,
-  mrt,
-  price,
-  type,
-  pin,
-  parking,
-  age,
-  floor,
-  unitPrice,
-  face,
-  nearBy,
-  more,
-} = storeToRefs(buyList)
-const { isChannelRegion, isChannelMrt, commonParams } = useBuyListActions()
+const { apiSearchData, price, type, pin, parking, age, floor, unitPrice, face, nearBy, more } =
+  storeToRefs(buyList)
+const { isChannelRegion, isChannelMrt } = useBuyListActions()
 
 // const route = useRoute()
-const router = useRouter()
+
+const emits = defineEmits(['apiSearch', 'routerPush'])
 
 const isDeviceM = computed(() => device.value === 'm')
-const paramsRegion = computed(() => {
-  const { ids } = region.value
 
-  return ids ? [`${ids}_region`] : []
-})
+const onApiSearch = () => {
+  emits('apiSearch')
+}
 
-const paramsMrt = computed(() => {
-  const { ids } = mrt.value
-
-  return ids ? [`${ids}_mrt`] : []
-})
-
-const paramsChannel = computed(() =>
-  isChannelRegion.value ? paramsRegion.value : isChannelMrt.value ? paramsMrt.value : []
-)
-
-const onSearch = async () => {
-  console.log(commonParams.value)
-
-  await router.push({
-    name: buyList.basicRouteName,
-    params: {
-      filters: [...paramsChannel.value, ...commonParams.value],
-    },
-    query: {
-      pg: 1,
-    },
-  })
+const onRouterPush = async () => {
+  emits('routerPush')
 }
 
 const onInit = () => {
@@ -130,13 +97,13 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="search-funciton mx-auto p:max-w-[1200px]">
-    <div class="search-mode tm:py-[15px] p:space-y-[15px] p:py-[25px]">
-      <ul
-        class="search-mode-content relative flex flex-wrap gap-x-[5px] gap-y-[10px] m:px-[10px] pt:grow"
-      >
+  <div
+    class="search-funciton mx-auto m:border-b-[1px] m:border-b-[--gray-e5] m:px-[10px] m:py-[10px] p:max-w-[1200px]"
+  >
+    <div class="search-mode t:py-[15px] p:space-y-[15px] p:py-[25px]">
+      <ul class="search-mode-content relative flex flex-wrap gap-x-[5px] gap-y-[10px] pt:grow">
         <li class="search-mode-item relative tm:w-[100px] pt:shrink-0 p:w-[155px]">
-          <PageBuyListSearchRegion name="region" v-if="isChannelRegion" />
+          <PageBuyListSearchRegion @click:routePush="onRouterPush" v-if="isChannelRegion" />
           <PageBuyListSearchMrt
             name="mrt"
             :config="{
@@ -148,16 +115,16 @@ onUnmounted(() => {
           />
         </li>
         <li class="search-mode-item relative m:flex-1 pt:shrink-0 p:w-[155px]">
-          <PageBuyListSearchPurpose name="purpose" />
+          <PageBuyListSearchPurpose @click:routePush="onRouterPush" />
         </li>
         <li class="search-mode-item relative m:flex-1 pt:shrink-0 p:w-[155px]">
-          <PageBuyListSearchPrice name="price" />
+          <PageBuyListSearchPrice @click:routePush="onRouterPush" />
         </li>
         <li class="search-mode-item relative m:flex-1 pt:shrink-0 p:w-[155px]" v-if="!isDeviceM">
-          <PageBuyListSearchRoom name="room" />
+          <PageBuyListSearchRoom />
         </li>
         <li class="search-mode-item relative m:flex-1 pt:shrink-0 p:w-[155px]">
-          <PageBuyListSearchMore />
+          <PageBuyListSearchMore @click:routePush="onRouterPush" />
         </li>
         <li
           class="search-mode-item relative flex items-center gap-x-[5px] overflow-hidden m:w-full pt:grow"
@@ -172,15 +139,17 @@ onUnmounted(() => {
               },
             }"
             :setClass="{
-              main: '--bg-orange-e646 --text-white --oval pt:--h-45 tm:--px-10 p:--px-20 m:--h-40 shrink-0',
+              main: '--bg-orange-e646 --text-white --oval pt:--h-45 tm:--px-10 p:--px-20 m:--h-40 shrink-0 gap-x-[3px]',
               icon: 'h-[16px] w-[16px]',
             }"
-            @click="onSearch"
+            @click="onRouterPush"
+            v-if="!isDeviceM"
           />
         </li>
       </ul>
       <PageBuyListSearchCondition />
     </div>
+    <PageBuyListSearchFilter @click="onApiSearch" v-if="isDeviceM" />
   </div>
 </template>
 

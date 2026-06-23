@@ -75,7 +75,8 @@ const config = computed(() => {
     props.config
   )
 })
-const isNumeric = computed(() => /^(decimal|numeric)$/.test(config.value.inputMode))
+const isNumeric = computed(() => /^(decimal|numeric|tel)$/.test(config.value.inputMode))
+const isTel = computed(() => config.value.inputMode === 'tel')
 const formatLength = computed(() => {
   const { formatLength, maxlength } = config.value
 
@@ -127,7 +128,7 @@ const onInput = async (e) => {
   const { inputMode, checkNotIsZero, integer, inputChinese } = config.value
   const regex = {
     chinese: /[\u4e00-\u9fa5０-９Ａ-Ｚａ-ｚ～！＠＃＄％︿＆＊（）＿｜｛｝［］＜＞？／＊＼＋－]/g,
-    number: integer ? /[^0-9]/g : /[^0-9.]/g,
+    number: integer || isTel.value ? /[^0-9]/g : /[^0-9.]/g,
   }
 
   const isRemoveChinese =
@@ -176,7 +177,13 @@ const onEvent = async (e, errorMessage) => {
     // 如果有 comma 顯示，先用「去逗號後」的值來判斷
     const plain = isComma ? numberComma.remove(raw, false) : raw
 
-    if (isNumeric.value) {
+    if (isTel.value) {
+      // tel：只留數字、不可有小數點，且保留前導 0（電話號碼）
+      const normalized = String(plain ?? '').replace(/[^0-9]/g, '')
+
+      emits('update:modelValue', normalized)
+      model.value = isComma ? numberComma.add(normalized, false) : normalized
+    } else if (isNumeric.value) {
       // 1) 先把暫態輸入修正：'.' -> ''、'0.' -> '0'（或 ''，看你規則）
       //    你需求是 checkNotIsZero 時不能是 0，所以 '0.' 這種 blur 最後也不能留下
       let normalized = String(plain ?? '').trim()
@@ -290,7 +297,7 @@ watch(
       :type="props.type"
       :rules="config.isDisabled ? '' : props.rules"
     >
-      <div class="m-form-container" :class="setClass.container">
+      <div class="m-form-container overflow-hidden" :class="setClass.container">
         <div
           class="m-form-element"
           :class="[

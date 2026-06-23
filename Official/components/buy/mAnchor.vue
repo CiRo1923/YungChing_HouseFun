@@ -101,7 +101,7 @@ const onClick = (e) => {
 <template>
   <component
     :is="as"
-    class="m-anchor relative inline-flex items-center justify-center gap-x-[3px] tracking-[0.06em] transition-colors duration-300"
+    class="m-anchor inline-flex items-center justify-center tracking-[0.06em] transition-colors duration-300"
     :class="setClass.main"
     v-bind="bind"
     :disabled="config.isDisabled"
@@ -113,9 +113,9 @@ const onClick = (e) => {
         :class="setClass.icon"
         v-if="icon.position === 'left' && icon.name"
       />
-      <b class="m-anchor-text" :class="setClass.text">
+      <em class="m-anchor-text" :class="setClass.text">
         {{ props.text }}
-      </b>
+      </em>
       <CommonSvgIcon
         :icon="icon.name"
         :class="setClass.icon"
@@ -132,7 +132,7 @@ const onClick = (e) => {
   }
 
   &.\-\-rounded {
-    @apply rounded-[3px];
+    @apply rounded-[5px];
   }
 
   &.\-\-oval {
@@ -156,6 +156,10 @@ const onClick = (e) => {
       @apply text-[--orange-e646];
     }
 
+    &.\-\-text-orange-f74c {
+      @apply text-[--orange-f74c];
+    }
+
     /* &.\-\-bg-white {
       @apply bg-[--white];
     } */
@@ -168,13 +172,21 @@ const onClick = (e) => {
       @apply bg-[--orange-e646];
     }
 
+    &.\-\-bg-orange-f74c {
+      @apply bg-[--orange-f74c];
+    }
+
     &.\-\-bg-green-8b0d {
       @apply bg-[--green-8b0d];
     }
 
-    /* &.\-\-border-gray-e5 {
-      @apply border-[--gray-e5];
-    } */
+    &.\-\-border-gray-ccce {
+      @apply border-[--gray-ccce];
+    }
+
+    &.\-\-border-orange-f74c {
+      @apply border-[--orange-f74c];
+    }
   }
 
   &:disabled {
@@ -220,6 +232,12 @@ const onClick = (e) => {
       @apply py-[5px];
     }
 
+    &.\-\-h-55,
+    &.p\:\-\-h-55,
+    &.pt\:\-\-h-55 {
+      @apply h-[55px];
+    }
+
     &.\-\-h-50,
     &.p\:\-\-h-50,
     &.pt\:\-\-h-50 {
@@ -248,6 +266,12 @@ const onClick = (e) => {
     &.p\:\-\-h-30,
     &.pt\:\-\-h-30 {
       @apply h-[30px];
+    }
+
+    &.\-\-h-25,
+    &.p\:\-\-h-25,
+    &.pt\:\-\-h-25 {
+      @apply h-[25px];
     }
   }
 }
@@ -296,6 +320,13 @@ const onClick = (e) => {
       @apply py-[5px];
     }
 
+    &.\-\-h-55,
+    &.pt\:\-\-h-55,
+    &.tm\:\-\-h-55,
+    &.t\:\-\-h-55 {
+      @apply h-[55px];
+    }
+
     &.\-\-h-50,
     &.pt\:\-\-h-50,
     &.tm\:\-\-h-50,
@@ -329,6 +360,13 @@ const onClick = (e) => {
     &.tm\:\-\-h-30,
     &.t\:\-\-h-30 {
       @apply h-[30px];
+    }
+
+    &.\-\-h-25,
+    &.pt\:\-\-h-25,
+    &.tm\:\-\-h-25,
+    &.t\:\-\-h-25 {
+      @apply h-[25px];
     }
   }
 }
@@ -371,6 +409,12 @@ const onClick = (e) => {
       @apply py-[5px];
     }
 
+    &.\-\-h-55,
+    &.tm\:\-\-h-55,
+    &.m\:\-\-h-55 {
+      @apply h-[55px];
+    }
+
     &.\-\-h-50,
     &.tm\:\-\-h-50,
     &.m\:\-\-h-50 {
@@ -399,6 +443,12 @@ const onClick = (e) => {
     &.tm\:\-\-h-30,
     &.m\:\-\-h-30 {
       @apply h-[30px];
+    }
+
+    &.\-\-h-25,
+    &.tm\:\-\-h-25,
+    &.m\:\-\-h-25 {
+      @apply h-[25px];
     }
   }
 }

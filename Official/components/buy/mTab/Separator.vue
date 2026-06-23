@@ -145,7 +145,7 @@ onUnmounted(() => {
       }
 
       &.\-\-curr {
-        @apply font-bold text-[--gray-333];
+        @apply font-bold;
       }
     }
   }

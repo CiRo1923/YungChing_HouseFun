@@ -22,14 +22,15 @@ const onPopup = async (id) => {
 <template>
   <PageBuyHouseContent title="基本資料">
     <div
-      class="information-container divide-y-[1px] divide-[--gray-ccce] tm:space-y-[20px] p:space-y-[30px]"
+      class="information-container divide-y-[1px] divide-[--gray-f2] tm:space-y-[20px] p:space-y-[25px]"
     >
       <PageBuyHouseInformationBasic @popup="onPopup" />
       <PageBuyHouseInformationPin />
-      <PageBuyHouseInformationParking />
       <PageBuyHouseInformationPrice @popup="onPopup" />
       <PageBuyHouseInformationOther />
-      <PageBuyHouseInformationFunction />
+      <PageBuyHouseInformationBarrierfree />
+      <!-- <PageBuyHouseInformationFunction /> -->
+      <PageBuyHouseInformationParking />
     </div>
   </PageBuyHouseContent>
 </template>
@@ -39,7 +40,7 @@ const onPopup = async (id) => {
   .information-container {
     > * {
       &:not(:first-child) {
-        @apply pt-[30px];
+        @apply pt-[25px];
       }
     }
   }

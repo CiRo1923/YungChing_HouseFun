@@ -161,6 +161,27 @@
   /* 關閉時先跑 bomb */
 }
 
+/* bottomSheet 從底部滑出 */
+.popup-bottomSheet-enter-active,
+.popup-bottomSheet-leave-active {
+  transition: transform 0.15s ease;
+}
+
+/* 進場：delay 0.075s 等 overlay 先出現 */
+.popup-bottomSheet-enter-active {
+  transition-delay: 0.01s;
+}
+
+.popup-bottomSheet-enter-from,
+.popup-bottomSheet-leave-to {
+  @apply translate-y-full;
+}
+
+.popup-bottomSheet-enter-to,
+.popup-bottomSheet-leave-from {
+  @apply translate-y-0;
+}
+
 .datepicker-enter-active,
 .datepicker-leave-active {
   will-change: opacity;
@@ -224,6 +245,24 @@
 
 .popup-promise-overlay-enter-to,
 .popup-promise-overlay-leave-from {
+  @apply opacity-100;
+}
+
+/* tooltip（.m-tooltip-container） */
+.tooltip-enter-active,
+.tooltip-leave-active {
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.tooltip-enter-from,
+.tooltip-leave-to {
+  @apply opacity-0;
+}
+
+.tooltip-enter-to,
+.tooltip-leave-from {
   @apply opacity-100;
 }
 

@@ -19,6 +19,24 @@ const items = computed(() => {
   return [
     [
       {
+        id: 'caseType',
+        label: '型態',
+        values: [
+          {
+            content: caseType,
+          },
+        ],
+      },
+      {
+        id: 'usage',
+        label: '法定用途',
+        values: [
+          {
+            content: caseUsageToken,
+          },
+        ],
+      },
+      {
         id: 'mainLayout',
         label: '建物格局',
         values: [
@@ -36,15 +54,8 @@ const items = computed(() => {
           },
         ],
       },
-      {
-        id: 'buildAge',
-        label: '屋齡',
-        values: [
-          {
-            content: `${buildAge} 年`,
-          },
-        ],
-      },
+    ],
+    [
       {
         id: 'floor',
         label: '樓層',
@@ -65,29 +76,19 @@ const items = computed(() => {
           },
         ],
       },
-    ],
-    [
+
       {
-        id: 'usage',
-        label: '法定用途',
+        id: 'buildAge',
+        label: '屋齡',
         values: [
           {
-            content: caseUsageToken,
-          },
-        ],
-      },
-      {
-        id: 'type',
-        label: '型態',
-        values: [
-          {
-            content: caseType,
+            content: `${buildAge} 年`,
           },
         ],
       },
       {
         id: 'community',
-        label: '建物社區',
+        label: '社區',
         values: [
           {
             anchor: {
@@ -119,9 +120,6 @@ const items = computed(() => {
 </script>
 
 <template>
-  <!-- <pre>
-    {{ basic }}
-  </pre> -->
   <PageBuyHouseInformationContainer name="basic" :items="items" />
 </template>
 

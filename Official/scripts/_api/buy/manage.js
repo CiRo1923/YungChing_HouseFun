@@ -1,5 +1,8 @@
 import { version, fetchManageApi } from '@js/_api/fetchApi.js'
 
+export const apiGetCommonServerTime = async (data) =>
+  await fetchManageApi.get(`api/${version}/common/server-time`, data)
+
 export const apiGETRealEstatePurposeCheckOptions = async (data) =>
   await fetchManageApi.get(`api/${version}/buy/realEstatePurpose/check-options`, data)
 
@@ -14,3 +17,6 @@ export const apiGETRealEstateParkingModeSelectOptions = async (data) =>
 
 export const apiGETRealEstateNearByCheckOptions = async (data) =>
   await fetchManageApi.get(`api/${version}/buy/realEstateNearBy/check-options`, data)
+
+export const apiGETRealEstateFeatureCheckOptions = async (data) =>
+  await fetchManageApi.get(`api/${version}/buy/realEstateFeature/check-options`, data)

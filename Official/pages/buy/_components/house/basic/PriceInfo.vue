@@ -2,23 +2,20 @@
 import { numberComma } from '@js/_prototype.js'
 
 const buyHouse = useBuyHouseStore()
-const { pricing, parking } = storeToRefs(buyHouse)
+const { pricing } = storeToRefs(buyHouse)
 
 const priceInfo = computed(() => {
-  const { unitPrice } = pricing.value
-  const { price, isPriceInclude } = parking.value
+  const { unitPrice, parkPrice, isPriceIncludeParking } = pricing.value
 
   return [
     {
       id: 'unitPrice',
-      label: '單價',
-      value: `單價 <b class="text-[--gray-333]">${unitPrice}</b> 萬`,
+      value: `<b>${numberComma.add(unitPrice)}</b> 萬 / 坪`,
     },
     {
       id: 'parkingPrice',
-      label: '車位價',
-      value: `含車位 ${price} 萬`,
-      isHidden: !isPriceInclude,
+      value: `含車位價 ${numberComma.add(parkPrice)} 萬`,
+      isHidden: !isPriceIncludeParking,
     },
   ]
 })
@@ -26,41 +23,27 @@ const priceInfo = computed(() => {
 
 <template>
   <div class="text-right m:mt-[5px] t:space-y-[5px] p:space-y-[10px]">
-    <p class="relative text-[--red-e45c]">
-      <BuyMDialog
-        :label="`↓ ${pricing.priceDrop} 萬`"
-        :setClass="{
-          main: '--orange-e646 pt:--arrow-bottom m:--arrow-right p:--px-15 p:--h-34 tm:--h-20 tm:--px-10 m:mr-[5px] m:translate-y-[-5px] pt:absolute pt:right-[-10px] pt:top-0 pt:-translate-y-full',
-          label: 'font-bold tm:text-[12px] p:text-[14px]',
-        }"
-        v-if="pricing.priceDrop"
-      />
-      <del class="text-[--gray-999] tm:text-[12px] p:text-[14px]" v-if="pricing.lastPrice">
-        {{ pricing.lastPrice }} 萬
+    <p class="relative flex items-baseline gap-x-[10px]">
+      <span class="text-[14px] text-[--red-e45c]" v-if="pricing.priceDrop">
+        ↓ {{ numberComma.add(pricing.priceDrop) }} 萬
+      </span>
+      <del class="text-[14px] text-[--gray-999]" v-if="pricing.lastPrice">
+        {{ numberComma.add(pricing.lastPrice) }} 萬
       </del>
-      <b class="leading-[1.2] tm:text-[24px] p:text-[45px]">
-        {{ numberComma.add(pricing.price) }}
-      </b>
-      <small class="tm:text-[12px] p:text-[16px]">萬</small>
+      <span class="leading-[1.2] text-[--red-e45c] tm:text-[12px] p:text-[16px]">
+        <b class="tm:text-[24px] p:text-[36px]">
+          {{ numberComma.add(pricing.price) }}
+        </b>
+        萬
+      </span>
     </p>
-    <div
-      class="flex m:flex-row-reverse m:items-center m:gap-x-[6px] t:space-y-[6px] pt:flex-col pt:items-end p:space-y-[12px]"
-    >
-      <BuyMSeparator
-        :items="priceInfo"
-        :setClass="{
-          main: '--horizontal p:--gap-x-20 tm:--gap-x-12',
-          item: 'tracking-default text-[--gray-666] tm:text-[12px] p:text-[14px]',
-        }"
-      />
-      <BuyMTabCheck
-        :label="`每坪低於實價 5 萬`"
-        :setClass="{
-          main: '--bg --orange-feea p:--px-12 tm:--px-8',
-          label: 'font-bold text-[--orange-e646] tm:text-[12px] p:text-[14px]',
-        }"
-      />
-    </div>
+    <BuyMSeparator
+      :items="priceInfo"
+      :setClass="{
+        main: '--horizontal --gap-x-20 justify-end',
+        item: 'tracking-default text-[14px] text-[--gray-666]',
+      }"
+    />
   </div>
 </template>
 

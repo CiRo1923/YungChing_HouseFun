@@ -47,11 +47,11 @@ onUseMeta({
     <PageBuyHouseCommunity />
     <PageBuyHouseActualPrice />
     <PageBuyHouseSocialLife />
-    <PageBuyHouseSelections />
-    <PageBuyHouseRecommend />
+    <PageBuyHouseAgentPick />
+    <PageBuyHouseHotForYou />
     <PageBuyHouseConstruction />
   </CommonMContainer>
-  <PageBuyHousePopupAskMessage />
+  <!-- <PageBuyHousePopupAskMessage /> -->
 </template>
 
 <style></style>

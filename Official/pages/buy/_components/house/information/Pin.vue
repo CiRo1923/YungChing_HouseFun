@@ -22,6 +22,19 @@ const items = computed(() => {
   } = pin.value
   const isHidden = (value) => value === '0' || !value
 
+  const outbuildings = [
+    { label: '陽台', value: balcony },
+    { label: '平台', value: platform },
+    { label: '露臺', value: terrace },
+    { label: '電 / 樓梯間', value: stairwell },
+    { label: '夾層', value: mezzanine },
+    { label: '地下室', value: basement },
+    { label: '其他', value: other },
+  ]
+    .filter(({ value }) => !isHidden(value))
+    .map(({ label, value }) => `${label}${value} 坪`)
+    .join('、')
+
   return [
     [
       {
@@ -30,15 +43,6 @@ const items = computed(() => {
         values: [
           {
             content: `${build} ${unit}`,
-          },
-        ],
-      },
-      {
-        id: 'mainAddBalcony',
-        label: '主 + 陽',
-        values: [
-          {
-            content: `${onToFixed([main, balcony])} ${unit}`,
           },
         ],
       },
@@ -52,92 +56,23 @@ const items = computed(() => {
         ],
       },
       {
+        id: 'mainAddBalcony',
+        label: '共同使用',
+        values: [
+          {
+            content: `${onToFixed([main, balcony])} ${unit}`,
+          },
+        ],
+      },
+
+      {
         id: 'affiliated',
         label: '附屬建物',
         values: [
           {
-            content: `${totalAttached} ${unit}`,
-          },
-        ],
-        children: [
-          {
-            id: 'balcony',
-            label: '陽台',
-            values: [
-              {
-                content: `${balcony} ${unit}`,
-              },
-            ],
-            isHidden: isHidden(balcony),
-          },
-          {
-            id: 'platform',
-            label: '平台',
-            values: [
-              {
-                content: `${platform}  ${unit}`,
-              },
-            ],
-            isHidden: isHidden(platform),
-          },
-          {
-            id: 'terrace',
-            label: '露臺',
-            values: [
-              {
-                content: `${terrace} ${unit}`,
-              },
-            ],
-            isHidden: isHidden(terrace),
-          },
-          {
-            id: 'stairwell',
-            label: '電 / 樓梯間',
-            values: [
-              {
-                content: `${stairwell} ${unit}`,
-              },
-            ],
-            isHidden: isHidden(stairwell),
-          },
-          {
-            id: 'mezzanine',
-            label: '夾層',
-            values: [
-              {
-                content: `${mezzanine} ${unit}`,
-              },
-            ],
-            isHidden: isHidden(mezzanine),
-          },
-          {
-            id: 'basement',
-            label: '地下室',
-            values: [
-              {
-                content: `${basement} ${unit}`,
-              },
-            ],
-            isHidden: isHidden(basement),
-          },
-          {
-            id: 'other',
-            label: '其他',
-            values: [
-              {
-                content: `${other} ${unit}`,
-              },
-            ],
-            isHidden: isHidden(other),
-          },
-        ],
-      },
-      {
-        id: 'common',
-        label: '共用坪數',
-        values: [
-          {
-            content: '',
+            content: totalAttached
+              ? `${totalAttached} ${unit}${outbuildings ? ` (${outbuildings})` : ''}`
+              : null,
           },
         ],
       },
@@ -154,7 +89,7 @@ const items = computed(() => {
       },
       {
         id: 'zoingCity',
-        label: '土地使用分區',
+        label: '土地分區',
         values: [
           {
             content: caseZoingCity,

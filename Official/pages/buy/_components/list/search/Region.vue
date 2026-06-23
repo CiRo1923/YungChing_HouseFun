@@ -1,10 +1,15 @@
 <script setup>
+const common = useCommonStore()
+const { device } = storeToRefs(common)
+const { onResize } = useCommonActions()
 const buyList = useBuyListStore()
 const { region } = storeToRefs(buyList)
 
 const componentsName = 'Region'
 
+const emits = defineEmits(['click:routePush'])
 const activeCityID = ref(null)
+const isDeviceM = computed(() => device.value === 'm')
 
 const getData = computed(() => {
   const { ids, options } = region.value
@@ -70,6 +75,17 @@ const onCityClick = (value) => {
   activeCityID.value = value
 }
 
+const onClear = () => {
+  region.value.ids = region.value.defaultIDs
+  onCityClick(region.value.ids)
+  onGetLabel()
+  onRoutePush()
+}
+
+const onRoutePush = () => {
+  emits('click:routePush')
+}
+
 const onInit = () => {
   const datas = getData.value
 
@@ -80,6 +96,15 @@ const onInit = () => {
 
 onInit()
 onGetLabel()
+onResize()
+
+onMounted(() => {
+  window.addEventListener('resize', onResize)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', onResize)
+})
 </script>
 
 <template>
@@ -99,10 +124,10 @@ onGetLabel()
       main: '--rounded p:--py-10 p:--px-12 m:--h-40 pt:--h-45 tm:--py-8 tm:--px-8 w-full',
       type: 'tm:text-[14px] p:text-[16px]',
       dropdown: 'pt:--rounded m:w-full p:max-h-[420px]',
-      dropdownContainer: 'p:w-[490px]',
+      dropdownContainer: 'm:flex m:flex-col p:w-[490px]',
     }"
   >
-    <div class="flex h-full items-start">
+    <div class="flex items-start m:min-h-0 m:grow pt:h-full">
       <div
         class="h-full shrink-0 border-y-[20px] border-transparent bg-[--gray-f7] m:px-[2px] pt:px-[5px]"
       >
@@ -146,12 +171,20 @@ onGetLabel()
                   regex: `^${activeCityID}`,
                 },
               }"
+              :setClass="{
+                main: '--icon-size-20',
+              }"
               @change="onGetLabel"
             />
           </li>
         </ul>
       </div>
     </div>
+    <PageBuyListActionButton
+      @click:clear="onClear"
+      @click:routePush="onRoutePush"
+      v-if="isDeviceM"
+    />
   </BuyMFormSelectDropdown>
 </template>
 

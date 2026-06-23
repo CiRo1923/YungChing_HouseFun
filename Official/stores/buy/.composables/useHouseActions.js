@@ -3,25 +3,8 @@ import { apiBuyHouse } from '@js/_api/buy/house.js'
 import { useBuyHouseStore } from '@stores/buy/house.js'
 
 const useBuyHouseStores = () => {
-  // const projectStores = useProjectStore()
   const buyHouseStores = useBuyHouseStore()
   const route = useRoute()
-  // const { apiData, options: projectOptions } = storeToRefs(projectStores)
-  const {
-    detail,
-    breadcrumb,
-    basic,
-    pricing,
-    media,
-    floor,
-    community,
-    parking,
-    pin,
-    actualPrice,
-    broker,
-    poi,
-    highlights,
-  } = storeToRefs(buyHouseStores)
 
   const onApiBuyHouse = async () => {
     const { params } = route
@@ -30,21 +13,31 @@ const useBuyHouseStores = () => {
     })
 
     if (status === 200) {
-      detail.value = data
+      // key: store 欄位, value: 取不到資料時的預設值
+      const SECTION_DEFAULTS = {
+        breadcrumb: [],
+        basic: {},
+        badges: {},
+        pricing: {},
+        media: {},
+        floor: {},
+        community: {},
+        parking: {},
+        pin: {},
+        actualPrice: {},
+        broker: {},
+        poi: {},
+        highlights: {},
+      }
 
-      breadcrumb.value = data.breadcrumb || []
-      basic.value = data.basic || {}
-      pricing.value = data.pricing || {}
-      media.value = data.media || {}
-      floor.value = data.floor || {}
-      community.value = data.community || {}
-      parking.value = data.parking || {}
-      pin.value = data.pin || {}
-      actualPrice.value = data.actualPrice || {}
-      broker.value = data.broker || {}
-      poi.value = data.poi || {}
-      highlights.value = data.highlights || {}
-      // console.log(data)
+      buyHouseStores.$patch({
+        detail: data,
+        ...Object.fromEntries(
+          Object.entries(SECTION_DEFAULTS).map(([key, fallback]) => [key, data[key] ?? fallback])
+        ),
+        agentPick: data.recommend?.agentPick ?? {},
+        hotForYou: data.recommend?.hotForYou ?? {},
+      })
     }
 
     return { config, status, data }

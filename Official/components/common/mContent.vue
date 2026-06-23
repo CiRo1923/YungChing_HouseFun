@@ -51,6 +51,12 @@
       @apply py-[20px];
     }
 
+    &.\-\-pb-20,
+    &.p\:\-\-pb-20,
+    &.pt\:\-\-pb-20 {
+      @apply pb-[20px];
+    }
+
     &.\-\-rounded-20,
     &.p\:\-\-rounded-20,
     &.pt\:\-\-rounded-20 {
@@ -116,6 +122,13 @@
       @apply py-[20px];
     }
 
+    &.\-\-pb-20,
+    &.pt\:\-\-pb-20,
+    &.tm\:\-\-pb-20,
+    &.t\:\-\-pb-20 {
+      @apply pb-[20px];
+    }
+
     &.\-\-rounded-20,
     &.pt\:\-\-rounded-20,
     &.tm\:\-\-rounded-20,
@@ -174,6 +187,12 @@
     &.tm\:\-\-py-20,
     &.m\:\-\-py-20 {
       @apply py-[20px];
+    }
+
+    &.\-\-pb-20,
+    &.tm\:\-\-pb-20,
+    &.m\:\-\-pb-20 {
+      @apply pb-[20px];
     }
 
     &.\-\-rounded-20,

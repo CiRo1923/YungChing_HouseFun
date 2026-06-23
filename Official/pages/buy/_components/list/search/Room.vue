@@ -113,6 +113,9 @@ onUnmounted(() => {
             valueClickClear: '',
             sort: 'asc',
           }"
+          :setClass="{
+            main: '--icon-size-20',
+          }"
           @change="onChange"
         />
       </li>
@@ -141,6 +144,9 @@ onUnmounted(() => {
           :config="{
             mode: 'boolean',
             label: '房數不含加蓋',
+          }"
+          :setClass="{
+            main: '--icon-size-20',
           }"
         />
       </li>

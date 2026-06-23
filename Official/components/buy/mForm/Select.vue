@@ -375,7 +375,7 @@ onUnmounted(() => {
 <style lang="postcss">
 .m-select-dropdown-button {
   &:not(:disabled) {
-    @apply text-[--gray-333];
+    /* @apply text-[--gray-333]; */
 
     /* &:not(.\-\-active) {
     } */

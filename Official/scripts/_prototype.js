@@ -131,8 +131,25 @@ export const onEmptyData = (obj) => {
 }
 
 // 小數點設定
+// number 可傳單一數值，或傳陣列（會先加總）
 export const onToFixed = (number, fixed) => {
-  const length = number && /\./.test(number) ? (number + '').split('.')[1].length : 0
+  // 取單一值的小數位數
+  const decimalLength = (value) => (value && /\./.test(value) ? (value + '').split('.')[1].length : 0)
+
+  // fixed 未帶值時，用「傳入的值」的小數位數當預設（陣列取各值的最大位數）
+  // 避免加總後的浮點誤差（如 1.1 + 2.2 = 3.3000000000000003）影響位數判斷
+  const length = Array.isArray(number)
+    ? number.reduce((max, item) => Math.max(max, decimalLength(item)), 0)
+    : decimalLength(number)
+
+  // 陣列時先加總（忽略 null/undefined/空字串），其餘維持原本邏輯
+  if (Array.isArray(number)) {
+    number = number.reduce((sum, item) => {
+      const value = Number(item)
+      return item == null || item === '' || Number.isNaN(value) ? sum : sum + value
+    }, 0)
+  }
+
   const fix = fixed === undefined ? length : fixed
   let result = Number(`${Math.round(Number(`${number}e+${fix}`))}e-${fix}`) || 0
 

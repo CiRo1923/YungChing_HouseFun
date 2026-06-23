@@ -11,6 +11,25 @@ const items = computed(() => {
   return [
     [
       {
+        id: 'loan',
+        label: '房貨試算',
+        values: [
+          {
+            content: `約 ${numberComma.add(mortgageMonth)} 元`,
+            popupAnchor: {
+              text: '貸款試算',
+              icon: 'icon_calculator',
+              class: {
+                main: 'p:text-[16px] tm:text-[14px]',
+              },
+            },
+            isFlex: true,
+          },
+        ],
+      },
+    ],
+    [
+      {
         id: 'priceUnit',
         label: '單價',
         values: [
@@ -24,24 +43,6 @@ const items = computed(() => {
               },
               onClick: () => {
                 emits('popup', 'askMessage')
-              },
-            },
-          },
-        ],
-      },
-    ],
-    [
-      {
-        id: 'loan',
-        label: '房貸月付',
-        values: [
-          {
-            content: `約 ${numberComma.add(mortgageMonth)} 元`,
-            popupAnchor: {
-              text: '貸款試算',
-              icon: 'icon_calculator',
-              class: {
-                main: 'p:text-[16px] tm:text-[14px]',
               },
             },
             isFlex: true,

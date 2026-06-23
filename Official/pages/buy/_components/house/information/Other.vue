@@ -16,19 +16,10 @@ const items = computed(() => {
     [
       {
         id: 'structure',
-        label: '結構',
+        label: '建物結構',
         values: [
           {
             content: caseStructureToken,
-          },
-        ],
-      },
-      {
-        id: 'elevator',
-        label: '電梯',
-        values: [
-          {
-            content: isCaseHasElevator ? caseElevatorCount : null,
           },
         ],
       },
@@ -55,6 +46,15 @@ const items = computed(() => {
     ],
     [
       {
+        id: 'elevator',
+        label: '電梯數量',
+        values: [
+          {
+            content: isCaseHasElevator ? `${caseElevatorCount} 部` : null,
+          },
+        ],
+      },
+      {
         id: 'face',
         label: '朝向',
         values: [
@@ -62,11 +62,6 @@ const items = computed(() => {
             content: caseFaceToken,
           },
         ],
-      },
-      {
-        id: 'barrierfree',
-        label: '無障礙空間',
-        values: [],
       },
     ],
   ]
