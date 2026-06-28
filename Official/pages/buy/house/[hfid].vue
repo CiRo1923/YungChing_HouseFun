@@ -59,6 +59,7 @@ onUseMeta({
   <PageBuyCommonPopupCottonCandy />
   <PageBuyCommonPopupMessageSuccess />
   <PageBuyCommonPopupCottonCandySuccess />
+  <PageBuyCommonPopupMessageFailed />
 </template>
 
 <style></style>
