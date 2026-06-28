@@ -23,10 +23,13 @@ const items = shallowReadonly([
   },
 ])
 
-const isError = computed(() => {
-  const matchValue = items.filter((item) => !apiData.value.caseInfo[item.id])
+// 加總格局數量：有填 → 數字（required 通過）；加總 0 → null（required 擋）；開放式格局 → 免填
+const layoutValue = computed(() => {
+  if (apiData.value.caseInfo.isCaseOpenConcept) return 'openConcept'
 
-  return matchValue.length === items.length && !apiData.value.caseInfo.isCaseOpenConcept
+  const total = items.reduce((sum, item) => sum + (Number(apiData.value.caseInfo[item.id]) || 0), 0)
+
+  return total || null
 })
 
 const onIsCaseAddtionChange = () => {
@@ -51,16 +54,14 @@ const onIsCaseOpenConceptChange = () => {
 <template>
   <BuyMFormHidden
     name="HouseLayout"
-    v-model="isError"
+    v-model="layoutValue"
     :rules="{
-      custom: {
-        valid: !isError,
-        errorMessage: '請輸入格局',
-      },
+      required: '請輸入格局',
     }"
     :setClass="{
       error: 'mt-[4px]',
     }"
+    v-slot="{ isError }"
   >
     <ul class="flex flex-wrap tm:gap-x-[8px] p:gap-x-[24px]">
       <li>

@@ -23,26 +23,27 @@ const items = shallowReadonly([
   },
 ])
 
-const isError = computed(() => {
-  const matchValue = items.filter((item) => !apiData.value.caseInfo[item.id])
+// 加總加蓋格局數量：有填 → 數字（required 通過）；加總 0 → null（required 擋）；沒加蓋 → 免填
+const layoutValue = computed(() => {
+  if (!apiData.value.caseInfo.isCaseAddtion) return 'noAddtion'
 
-  return apiData.value.caseInfo.isCaseAddtion && matchValue.length === items.length
+  const total = items.reduce((sum, item) => sum + (Number(apiData.value.caseInfo[item.id]) || 0), 0)
+
+  return total || null
 })
 </script>
 
 <template>
   <BuyMFormHidden
     name="HouseAddLayout"
-    v-model="isError"
+    v-model="layoutValue"
     :rules="{
-      custom: {
-        valid: !isError,
-        errorMessage: '請輸入加蓋格局',
-      },
+      required: '請輸入加蓋格局',
     }"
     :setClass="{
       error: 'mt-[4px]',
     }"
+    v-slot="{ isError }"
   >
     <ul class="flex flex-wrap gap-x-[8px] gap-y-[12px]">
       <li

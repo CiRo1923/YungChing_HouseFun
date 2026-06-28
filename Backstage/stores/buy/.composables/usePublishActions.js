@@ -137,9 +137,7 @@ export default () => {
       caseType: 4, //  (1:直營, 2:加盟, 3:複製, 4:B端)
     })
 
-    if (status === 200) {
-      console.log(data)
-    } else {
+    if (status !== 200) {
       onApiError(config, status, data)
     }
 
@@ -173,10 +171,27 @@ export default () => {
         'caseAmenitieSq',
         'caseLandSq',
       ]
+      const layoutFields = [
+        'caseRoom',
+        'caseLivingRoom',
+        'caseBathroom',
+        'caseBalcony',
+        'caseAddRoom',
+        'caseAddLivingRoom',
+        'caseAddBathroom',
+        'caseAddBalcony',
+        'caseElevatorCount',
+      ]
+
       const casePictures = onReplaceImageSize(caseInfo.casePictures, 'url', imageSize)
       const caseLayout = onReplaceImageSize(caseInfo.caseLayout, 'url', imageSize)
 
       apiData.value.caseInfo = caseInfo
+
+      layoutFields.forEach((key) => {
+        apiData.value.caseInfo[key] = caseInfo[key] || null
+      })
+
       apiData.value.caseInfo.casePictures = casePictures // 替換 width  & height
       apiData.value.caseInfo.caseLayout = caseLayout // 替換 width  & height
       fields.forEach((key) => {
@@ -186,6 +201,8 @@ export default () => {
       if (hasArea) {
         options.value.area = caseAddrDistrictOptions
       }
+
+      console.log(apiData.value.caseInfo)
 
       // console.log(data)
     } else {

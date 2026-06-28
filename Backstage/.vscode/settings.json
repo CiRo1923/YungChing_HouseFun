@@ -2,20 +2,17 @@
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.codeActionsOnSave": {
-    "source.fixAll": "always",
-    "source.fixAll.eslint": "always"
+    "source.fixAll.eslint": "explicit"
   },
-  "eslint.format.enable": true,
+  "eslint.format.enable": false,
   "eslint.validate": ["javascript", "vue"],
-  "vetur.format.options.tabSize": 2,
-  "vetur.validation.template": false,
-  "vue.complete.casing.tags": "pascal",
-  "vue.complete.casing.props": "camel",
   "eslint.workingDirectories": [
     {
       "mode": "auto"
     }
   ],
+  "vue.complete.casing.tags": "pascal",
+  "vue.complete.casing.props": "camel",
   "[vue]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true
