@@ -2,6 +2,10 @@
 const common = useCommonStore()
 const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
+const buyProject = useBuyProjectStore()
+const { apiMessageData } = storeToRefs(buyProject)
+const { onResetMessage, onPopupVerifyCode } = useBuyProjectActions()
+const route = useRoute()
 
 const formRef = ref(null)
 const isDeviceM = computed(() => device.value === 'm')
@@ -11,10 +15,16 @@ const onSubmit = async () => {
   const { valid } = await validate()
 
   if (valid) {
-    console.log('submit')
+    await onPopupVerifyCode()
   }
 }
 
+const onInit = () => {
+  onResetMessage()
+  apiMessageData.value.houseId = route.params.hfid
+}
+
+onInit()
 onResize()
 
 onMounted(() => {

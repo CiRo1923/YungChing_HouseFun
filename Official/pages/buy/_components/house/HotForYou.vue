@@ -6,26 +6,31 @@ const hasHotForYou = computed(() => hotForYou.value?.length !== 0)
 
 <template>
   <PageBuyHouseContent title="這些物件也很適合你" v-if="hasHotForYou">
-    <BuyMSwiper12
+    <BuyMSwiperHorizontal
       name="hotForYou"
       :data="hotForYou"
       :config="{
         nav: false,
-        spaceBetween: {
-          p: '4px',
-        },
         slidesPerView: {
-          pt: 4,
+          p: 4,
+          t: 2.5,
           m: 1.2,
         },
       }"
       :setClass="{
         main: 'h-full',
+        container: 'pt:[--m-swiper-gap:4px]',
       }"
       v-slot="{ item }"
     >
-      <PageBuyCommonCard :item="item" />
-    </BuyMSwiper12>
+      <PageBuyCommonCard
+        :item="item"
+        :setClass="{
+          main: 'px-[3px] py-[5px]',
+          container: 'rounded-[5px]',
+        }"
+      />
+    </BuyMSwiperHorizontal>
   </PageBuyHouseContent>
 </template>
 

@@ -79,7 +79,7 @@ const onRadioChange = (data) => {
           sort: 'asc',
         }"
         :setClass="{
-          main: '--icon-size-20',
+          main: '--icon-size-20 --checkbox-green-8d0d',
         }"
         @change="onRadioChange"
       />

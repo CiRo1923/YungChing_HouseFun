@@ -1,0 +1,107 @@
+.m-swiper {
+  @apply relative mx-auto block;
+}
+
+.m-swiper-wrapper {
+  @apply overflow-hidden will-change-transform;
+
+  &.\-\-horizontal {
+    @apply touch-pan-y;
+  }
+}
+
+.m-swiper-container {
+  transform: translate3d(0, 0, 0);
+  transition-property: transform;
+  column-gap: var(--m-swiper-gap, 0px);
+
+  @apply relative box-content flex w-full select-none;
+
+  &.\-\-draggable {
+    &:not(:active) {
+      @apply cursor-grab;
+    }
+
+    &:active {
+      @apply cursor-grabbing;
+    }
+  }
+}
+
+.m-swiper-slide {
+  transition-property: transform;
+
+  @apply relative block h-full w-full shrink-0;
+}
+
+.m-swiper-nav {
+  @apply absolute top-1/2 z-[1] -translate-y-1/2 cursor-pointer transition-opacity duration-300;
+
+  &.\-\-disabled {
+    @apply cursor-not-allowed opacity-40;
+  }
+}
+
+.m-swiper-ctrl-anchor {
+  box-shadow: var(--swiper-ctrl-shadow);
+  border-width: var(--swiper-ctrl-border);
+
+  @apply flex h-[--swiper-ctrl-height] w-[--swiper-ctrl-width] items-center justify-center rounded-[--swiper-ctrl-rounded] border-solid transition-colors duration-300;
+
+  &:not(:disabled) {
+    border-color: var(--swiper-ctrl-border-color);
+
+    @apply bg-[--swiper-ctrl-bg-color] text-[--swiper-ctrl-color];
+  }
+
+  &:disabled {
+    border-color: var(--swiper-ctrl-disabled-border-color);
+
+    @apply cursor-not-allowed bg-[--swiper-ctrl-disabled-bg-color] text-[--swiper-ctrl-disabled-color];
+  }
+}
+
+.m-swiper-ctrl-icon {
+  @apply h-[--swiper-ctrl-icon-size] w-[--swiper-ctrl-icon-size];
+}
+
+.m-swiper-pagination-bullet {
+  @apply block h-[--swiper-pagination-bullet-height] w-[--swiper-pagination-bullet-width] rounded-full bg-[--swiper-pagination-bullet-bg-color] transition-all duration-300;
+}
+
+@screen p {
+  .m-swiper {
+    &.\-\-pagination-bar,
+    &.p\:\-\-pagination-bar,
+    &.pt\:\-\-pagination-bar {
+      .m-swiper-pagination-bullet {
+        @apply max-w-[--swiper-pagination-bar-pc-width];
+      }
+    }
+  }
+}
+
+@screen t {
+  .m-swiper {
+    &.\-\-pagination-bar,
+    &.pt\:\-\-pagination-bar,
+    &.tm\:\-\-pagination-bar,
+    &.t\:\-\-pagination-bar {
+      .m-swiper-pagination-bullet {
+        @apply max-w-[--swiper-pagination-bar-tablet-width];
+      }
+    }
+  }
+}
+
+@screen m {
+  .m-swiper {
+    &.\-\-pagination-bar,
+    &.tm\:\-\-pagination-bar,
+    &.m\:\-\-pagination-bar {
+      .m-swiper-pagination-bullet {
+        @apply max-w-[--swiper-pagination-bar-mobile-width];
+      }
+    }
+  }
+}

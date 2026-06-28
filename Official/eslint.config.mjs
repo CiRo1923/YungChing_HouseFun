@@ -155,6 +155,7 @@ export default createConfigForNuxt(
         useRuntimeConfig: 'readonly',
         useSlots: 'readonly',
         useState: 'readonly',
+        unref: 'unref',
         watch: 'readonly',
         watchEffect: 'readonly',
         useRequestHeaders: 'readonly',

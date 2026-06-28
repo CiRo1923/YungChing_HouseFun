@@ -45,7 +45,7 @@ const badgesItems = computed(() => {
 </script>
 
 <template>
-  <div class="relative h-[192px]">
+  <div class="relative h-[192px] bg-[--gray-999]">
     <PageBuyCommonFlags
       :ids="ids"
       :setClass="{

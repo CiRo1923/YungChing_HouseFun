@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>mChart — HouseFun 專案技術文件</title>
+  <link rel="stylesheet" href="../assets/doc.css">
+</head>
+<body>
+  <div class="layout">
+    <aside class="nav">
+      <div class="brand"><b>HouseFun</b><span>專案技術文件</span></div>
+      <div class="divider"></div>
+      <div class="cat">共用元件</div>
+      <nav>
+        <div class="nav-group">common</div>
+        <a class="nav-sub" href="SvgIcon.html">SvgIcon</a>
+        <div class="nav-group">buy</div>
+        <a class="nav-sub active" href="mChart.html">mChart</a>
+      </nav>
+    </aside>
+    <main>
+      <article class="doc">
+        <div class="cover">
+          <h1>mChart</h1>
+          <p class="subtitle">純 SVG、零依賴、Highcharts 風格 options API 的折線 / 平滑曲線圖元件</p>
+        </div>
+
+        <section>
+          <h2>適合閱讀對象</h2>
+          <p><strong>適合閱讀對象：</strong>UI / 設計、前端 F2E、QA。</p>
+          <table>
+            <thead><tr><th>角色</th><th>確認重點</th></tr></thead>
+            <tbody>
+              <tr><td>UI / 設計</td><td>線色 / 補值色（走專案 token）、頭尾留白、補值段虛線、tooltip 樣式</td></tr>
+              <tr><td>前端 F2E</td><td>options API（<code>config</code>/<code>xAxis</code>/<code>yAxis</code>/<code>tooltip</code>/<code>series</code>）、補值邏輯、座標 / 刻度演算、互動 tooltip</td></tr>
+              <tr><td>QA</td><td>缺月補值與虛線、頭尾標籤跨年繞回、hover 命中區邊界、虛線點不出 tooltip、可點擊 anchor</td></tr>
+            </tbody>
+          </table>
+          <div class="info-box">
+            <p>此元件由 Nuxt 自動匯入，元件名為 <code>BuyMChartMain</code>（對應 <code>components/buy/mChart/Main.vue</code>）。</p>
+            <p>核心設計：<strong>父系只丟原始資料 + config</strong>，補缺月 / 算類別軸 / 畫圖全部封裝在元件內。座標、路徑、補值三類可重用邏輯拆在 <code>components/buy/mChart/.composables/</code>（dot 開頭，不被 Nuxt 自動匯入，以相對路徑引入）。</p>
+          </div>
+        </section>
+
+        <section>
+          <h2>1. 元件介紹 <span class="aud aud-f2e">F2E</span></h2>
+          <p>
+            mChart 是一個<strong>不依賴任何第三方圖表庫</strong>的折線圖元件，用原生 SVG 繪製。設計動機是避免引入
+            ECharts / Highcharts 這類「全包式黑盒」帶來的維運與客製成本 —— 像「補值段落要畫虛線」這種需求，
+            自己刻反而最單純。API 命名刻意對齊 Highcharts（<code>config</code> / <code>xAxis</code> / <code>yAxis</code> /
+            <code>tooltip</code> / <code>series</code>），降低學習成本。
+          </p>
+          <ul>
+            <li><strong>線型</strong>：<code>line</code>（直線）/ <code>spline</code>（Catmull-Rom 平滑曲線），逐段渲染。</li>
+            <li><strong>補值</strong>：成交均價趨勢常缺月，元件可依設定補上缺月並以<strong>虛線</strong>標示推估段落。</li>
+            <li><strong>零依賴</strong>：座標轉換為國中數學的線性內插，全部手刻；顏色走專案 CSS token（<code>--green-8b0d</code> 等）。</li>
+            <li><strong>RWD</strong>：以 <code>ResizeObserver</code> 量測寬（<code>.m-chart</code>）與高（<code>.m-chart-container</code>），resize 自動重算，無固定 <code>height</code> 設定。</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>2. 檔案架構 <span class="aud aud-f2e">F2E</span></h2>
+          <table>
+            <thead><tr><th>檔案</th><th>職責</th></tr></thead>
+            <tbody>
+              <tr><td><code>mChart/Main.vue</code></td><td>主程式：合併 options 預設、量測寬度、組幾何、渲染 SVG、處理 hover / tooltip</td></tr>
+              <tr><td><code>.composables/useChartScale.js</code></td><td>座標轉換：<code>linear</code>（線性 scale）、<code>point</code>（等距 scale）、<code>niceTicks</code>（漂亮刻度）</td></tr>
+              <tr><td><code>.composables/useChartPath.js</code></td><td>逐段路徑：<code>lineSegments</code> / <code>splineSegments</code> / <code>buildSegments</code>，每段帶 <code>dashed</code></td></tr>
+              <tr><td><code>.composables/useChartFill.js</code></td><td>補值：<code>fillMonths</code>（缺月補值）、<code>monthShift</code>（前後月推算，給頭尾標籤用）</td></tr>
+            </tbody>
+          </table>
+          <div class="info-box">
+            職責分層：<strong>父系</strong>丟原始 <code>priceTrend</code> + <code>config</code> → <strong>Main.vue</strong> 依 <code>config.fillGap</code> 呼叫 <code>fillMonths</code> 補缺月、產生類別軸、畫圖 → <strong>useChartFill</strong> 是純補值演算法。圖表核心不認識「月份」這種特定領域邏輯，月份只是 <code>padFormatter</code> / <code>fillMonths</code> 的預設策略。
+          </div>
+        </section>
+
+        <section>
+          <h2>3. Props 總覽 <span class="aud aud-f2e">F2E</span></h2>
+          <p>五個 prop，皆為 options 物件 / 陣列。<strong><code>xAxis</code> / <code>yAxis</code> / <code>tooltip</code> 既可當獨立 prop，也可內嵌在 <code>config</code> 裡</strong>；同時存在時 <strong>獨立 prop 優先</strong>（覆蓋 <code>config</code> 內的同名設定）。</p>
+          <table>
+            <thead><tr><th>Prop</th><th>型別</th><th>說明</th></tr></thead>
+            <tbody>
+              <tr><td><code>config</code></td><td><span class="ty">Object</span></td><td>圖表主設定（線型、標題、尺寸、補值、留白…），可內嵌 <code>xAxis</code>/<code>yAxis</code>/<code>tooltip</code></td></tr>
+              <tr><td><code>xAxis</code></td><td><span class="ty">Object</span></td><td>x 軸：類別標籤、頭尾留白、邊界標籤</td></tr>
+              <tr><td><code>yAxis</code></td><td><span class="ty">Object</span></td><td>y 軸：值域、刻度、單位、格式</td></tr>
+              <tr><td><code>tooltip</code></td><td><span class="ty">Object</span></td><td>hover 提示：啟用、虛線點顯示、互動、格式</td></tr>
+              <tr><td><code>series</code></td><td><span class="ty">Array</span></td><td>資料系列 <code>[{ name, color, data }]</code></td></tr>
+              <tr><td><code>setClass</code></td><td><span class="ty">Object</span></td><td>各部位 class <code>{ main, container, title, xAxis, yAxis }</code></td></tr>
+            </tbody>
+          </table>
+          <h3>setClass 對應</h3>
+          <table>
+            <thead><tr><th>key</th><th>套用部位</th><th>備註</th></tr></thead>
+            <tbody>
+              <tr><td><code>main</code></td><td>最外層容器 <code>.m-chart</code></td><td>一般 HTML；可設整體高度來源</td></tr>
+              <tr><td><code>container</code></td><td>SVG <code>.m-chart-container</code></td><td>圖高來源：在此設高度（如 <code>h-full</code>），元件會量測它</td></tr>
+              <tr><td><code>title</code></td><td>標題 <code>&lt;h3&gt;</code></td><td>一般 HTML，<code>text-*</code> 即可改色</td></tr>
+              <tr><td><code>xAxis</code></td><td>x 軸刻度文字</td><td>SVG <code>&lt;text&gt;</code>，改色用 <code>fill-*</code>（非 <code>text-*</code>）</td></tr>
+              <tr><td><code>yAxis</code></td><td>y 軸刻度文字（含首尾值）</td><td>SVG <code>&lt;text&gt;</code>，改色用 <code>fill-*</code></td></tr>
+            </tbody>
+          </table>
+          <p>class 附加在<strong>預設樣式之後</strong>；SVG 文字顏色由 <code>fill</code> 控制，故改色要用 <code>fill-[--xxx]</code> 而非 <code>text-[--xxx]</code>。</p>
+          <div class="info-box">
+            <strong>尺寸</strong>：寬度量測自最外層 <code>.m-chart</code>、<strong>高度量測自 <code>.m-chart-container</code>（SVG）</strong>，皆由 <code>ResizeObserver</code> 在 resize 時自動重算，已無 <code>config.height</code>。要控制圖高，用 <code>setClass.container</code>（如 <code>h-full</code>）或外部 CSS 對 <code>.m-chart-container</code> 設高度；未設時用後備值 260px。
+          </div>
+        </section>
+
+        <section>
+          <h2>4. config 詳解 <span class="aud aud-f2e">F2E</span></h2>
+          <table>
+            <thead><tr><th>欄位</th><th>型別</th><th>預設</th><th>說明</th></tr></thead>
+            <tbody>
+              <tr><td><code>type</code></td><td><span class="ty">string</span></td><td><code>'line'</code></td><td>直角類 <code>line</code>/<code>spline</code>（已實作）、<code>column</code>/<code>bar</code>（預留）；環形類 <code>pie</code>/<code>donut</code>（預留，無軸）。擴充接點見 Main.vue 類型分類</td></tr>
+              <tr><td><code>title</code></td><td><span class="ty">string</span></td><td><code>''</code></td><td>標題，顯示在圖上方（置中）</td></tr>
+              <tr><td><code>color</code></td><td><span class="ty">string</span></td><td><code>var(--green-8b0d)</code></td><td>主色：實線 / 實心點</td></tr>
+              <tr><td><code>mutedColor</code></td><td><span class="ty">string</span></td><td><code>var(--gray-ccce)</code></td><td>補值色：虛線 / 推估點</td></tr>
+              <tr><td><code>fillGap</code></td><td><span class="ty">boolean</span></td><td><code>false</code></td><td>是否補缺月（補值點畫虛線）</td></tr>
+              <tr><td><code>fillValue</code></td><td><span class="ty">'interpolate'｜number</span></td><td><code>'interpolate'</code></td><td>補值方式：前後內插 或 固定數字</td></tr>
+              <tr><td><code>spacing</code></td><td><span class="ty">{top,right,bottom,left}</span></td><td>各邊 <code>null</code></td><td>繪圖區內距；某邊為 <code>null</code> 時依標籤文字<strong>自動算最貼邊</strong>，可只設某邊（深合併）其餘維持自動</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section>
+          <h2>5. xAxis 詳解 <span class="aud aud-f2e">F2E</span> <span class="aud aud-ui">UI</span></h2>
+          <table>
+            <thead><tr><th>欄位</th><th>型別</th><th>預設</th><th>說明</th></tr></thead>
+            <tbody>
+              <tr><td><code>categories</code></td><td><span class="ty">string[]</span></td><td><code>[]</code></td><td>類別標籤；不傳則用補值後自動算出的月份</td></tr>
+              <tr><td><code>padding</code></td><td><span class="ty">boolean｜number</span></td><td><code>false</code></td><td>頭尾留白距離：<code>false</code>/<code>0</code> 關、<code>true</code> 用 20px、數字直接當間距</td></tr>
+              <tr><td><code>padLabel</code></td><td><span class="ty">boolean</span></td><td><code>false</code></td><td>是否顯示頭尾 +- 邊界標籤（<code>padding:false</code> 時忽略）</td></tr>
+              <tr><td><code>padFormatter</code></td><td><span class="ty">(label,dir)=&gt;string</span></td><td><code>monthShift</code></td><td>邊界標籤文字策略；<code>dir=-1</code> 前界、<code>+1</code> 後界；回空字串則不補</td></tr>
+              <tr><td><code>min</code> / <code>max</code></td><td><span class="ty">number</span></td><td><code>null</code></td><td>自訂 index 值域上下界（覆寫 <code>padding</code> 的留白）</td></tr>
+              <tr><td><code>gap</code></td><td><span class="ty">number</span></td><td><code>0</code></td><td>x 標籤<strong>額外</strong>間距（px，加在預設之上）；<code>0</code>＝預設、<code>10</code>＝多 10px。會計入下方 <code>spacing.bottom</code>（自動時）</td></tr>
+            </tbody>
+          </table>
+          <h3>padding × padLabel 組合</h3>
+          <table>
+            <thead><tr><th><code>padding</code></th><th><code>padLabel</code></th><th>效果</th></tr></thead>
+            <tbody>
+              <tr><td><code>false</code></td><td>—</td><td>折線貼齊左右邊緣，無頭尾標籤</td></tr>
+              <tr><td><code>true</code>/數字</td><td><code>false</code></td><td>頭尾各內縮固定像素（<code>true</code>=20px、數字=該值），不顯示標籤</td></tr>
+              <tr><td><code>true</code></td><td><code>true</code></td><td>頭尾各留<strong>一整格</strong>並顯示前/後一月標籤（如 <code>10月</code>…<code>2月</code>）；此模式下 <code>padding</code> 數字被略過</td></tr>
+            </tbody>
+          </table>
+          <div class="info-box">
+            兩種留白機制不同：<strong>有 padLabel</strong> 用「index 值域 <code>-1 / +1</code>」撐出整格放標籤；<strong>只有 padding</strong> 用「像素內縮」。<code>padFormatter</code> 預設為月份策略 <code>monthShift</code>，對非 <code>N月</code> 格式的標籤回空字串（不亂補），所以任何類別的 x 軸都能用自己的策略覆寫。
+          </div>
+        </section>
+
+        <section>
+          <h2>6. yAxis 詳解 <span class="aud aud-f2e">F2E</span></h2>
+          <table>
+            <thead><tr><th>欄位</th><th>型別</th><th>預設</th><th>說明</th></tr></thead>
+            <tbody>
+              <tr><td><code>fromZero</code></td><td><span class="ty">boolean</span></td><td><code>true</code></td><td><strong>true</strong>：刻度＝<code>[0, 最高÷2, 最高(取整)]</code> 共 3 條；<strong>false</strong>：以 <code>tickInterval</code> 框住資料區間（如 <code>60/80</code>）</td></tr>
+              <tr><td><code>tickInterval</code></td><td><span class="ty">number</span></td><td><code>20</code></td><td><code>fromZero=false</code> 的刻度間距（向上/下取整框住資料）</td></tr>
+              <tr><td><code>tickAmount</code></td><td><span class="ty">number</span></td><td><code>5</code></td><td><code>fromZero=true</code> 推算「最高取整」用的概略刻度數</td></tr>
+              <tr><td><code>min</code> / <code>max</code></td><td><span class="ty">number</span></td><td><code>null</code></td><td>自訂值域上下界（覆寫 <code>fromZero</code> / 自動）</td></tr>
+              <tr><td><code>padding</code></td><td><span class="ty">boolean｜number</span></td><td><code>false</code></td><td>上下留白：<code>false</code>/<code>0</code> 關、<code>true</code> 用 20px、數字直接當間距（資料不貼頂/底）</td></tr>
+              <tr><td><code>padLabel</code></td><td><span class="ty">boolean</span></td><td><code>false</code></td><td>是否額外標出資料實際 min / max（首尾值），以主色顯示</td></tr>
+              <tr><td><code>unit</code></td><td><span class="ty">string</span></td><td><code>null</code></td><td>刻度單位（<code>null</code>＝無單位；<code>0</code> 不加單位）</td></tr>
+              <tr><td><code>format</code></td><td><span class="ty">(v)=&gt;string</span></td><td><code>null</code></td><td>自訂刻度文字</td></tr>
+            </tbody>
+          </table>
+          <h3>fromZero 範例（資料 62 ~ 79.5）</h3>
+          <table>
+            <thead><tr><th><code>fromZero</code></th><th>刻度</th><th>說明</th></tr></thead>
+            <tbody>
+              <tr><td><code>true</code></td><td><code>0 / 40 / 80</code></td><td>最高 79.5 取整 80，分上下兩半</td></tr>
+              <tr><td><code>false</code></td><td><code>60 / 80</code></td><td>以 interval 20 向上(80)/下(60) 取整框住資料</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section>
+          <h2>7. tooltip 詳解 <span class="aud aud-f2e">F2E</span> <span class="aud aud-qa">QA</span></h2>
+          <table>
+            <thead><tr><th>欄位</th><th>型別</th><th>預設</th><th>說明</th></tr></thead>
+            <tbody>
+              <tr><td><code>enabled</code></td><td><span class="ty">boolean</span></td><td><code>true</code></td><td>是否啟用 hover 提示</td></tr>
+              <tr><td><code>showDashed</code></td><td><span class="ty">boolean</span></td><td><code>false</code></td><td>補值 / 推估（虛線）點是否顯示 tooltip</td></tr>
+              <tr><td><code>interactive</code></td><td><span class="ty">boolean</span></td><td><code>false</code></td><td>可滑入 tooltip 點擊內容（如 anchor）；滑出 band 會延遲 200ms 關閉</td></tr>
+              <tr><td><code>formatter</code></td><td><span class="ty">(ctx)=&gt;string</span></td><td><code>null</code></td><td>自訂提示 HTML（走 <code>v-html</code>）</td></tr>
+            </tbody>
+          </table>
+          <p><code>formatter</code> 收到的 <code>ctx</code>：</p>
+          <pre><code>{
+  index,            // 類別索引
+  category,         // 該索引的 x 標籤
+  points: [         // 各 series 在此索引的點
+    { series, color, value, dashed, raw }   // raw＝原始資料點（date/yearMonth…）
+  ]
+}</code></pre>
+          <p>預設輸出 <code>&lt;b&gt;{category}&lt;/b&gt;</code> 後接每條 <code>{name}：{value} {unit}</code>，推估點補上「（推估）」。要顯示其他欄位（如單位「/坪」或日期），用 <code>formatter</code> 搭配 <code>raw</code>。</p>
+          <div class="warn-box">
+            <code>interactive:true</code> 時 tooltip 改 <code>pointer-events-auto</code> 才能點 anchor。但 <code>v-html</code> 內的 <code>&lt;a href&gt;</code> 是<strong>原生連結</strong>（點了整頁導向）；若要 SPA 路由（<code>NuxtLink</code> / <code>router.push</code> 不重整），需在 tooltip 容器上做 click 事件代理，<code>v-html</code> 無法直接渲染 <code>&lt;NuxtLink&gt;</code>。
+          </div>
+        </section>
+
+        <section>
+          <h2>8. series 與資料格式 <span class="aud aud-f2e">F2E</span></h2>
+          <p>每條 series：<code>{ name, color?, data }</code>。<strong>資料點統一契約只有 <code>label</code>（x 類別）與 <code>value</code>（y 值）</strong>；其餘欄位原樣保留，tooltip 由 <code>ctx.points[].raw</code> 取用。</p>
+          <pre><code>data: [
+  { label: '11月', value: 88.9, date: '2023-11-01', yearMonth: '112/11' },
+  { label: '1月',  value: 62.3, date: '2024-01-01', yearMonth: '113/01' },
+]</code></pre>
+          <ul>
+            <li><strong>圖表只認 <code>label</code> / <code>value</code></strong>；要顯示其他值（日期、單位…）在 <code>tooltip.formatter</code> 透過 <code>raw</code> 取得。</li>
+            <li><strong>補缺月</strong>：搭配 <code>config.fillGap</code> 時需要 <code>date</code> 欄位才能算間距；補出的月份標 <code>dashed:true</code>（畫虛線）。</li>
+            <li><strong>後備</strong>：仍容忍舊欄位 <code>monthLabel</code>→label、<code>unitPrice</code>→value，但建議統一用 <code>label</code>/<code>value</code>。</li>
+          </ul>
+          <div class="info-box">
+            <strong>虛線（dashed）語意</strong>：折線逐段渲染，某段兩端只要任一端 <code>dashed</code>，該段就畫成虛線（<code>mutedColor</code> + <code>stroke-dasharray</code>），端點也以 <code>mutedColor</code> 標示 —— 用來表達「這是補值 / 推估，非真實成交」。
+          </div>
+        </section>
+
+        <section>
+          <h2>9. 補值邏輯：useChartFill <span class="aud aud-f2e">F2E</span></h2>
+          <p><code>fillMonths(raw, { fillGap, value })</code> 把稀疏月資料整理成連續陣列，回傳 <code>{ categories, data }</code>。</p>
+          <ul>
+            <li><strong>缺月偵測</strong>：用 <code>date</code> 轉絕對月份索引（<code>年*12+月</code>，避開時區），排序後找出間距。</li>
+            <li><strong>補值</strong>：<code>value:'interpolate'</code> 以前後兩個月線性內插；<code>value:&lt;數字&gt;</code> 一律補該固定值。補出的點 <code>dashed:true</code>。</li>
+            <li><strong>容錯</strong>：值讀 <code>value ?? unitPrice ?? y</code>、標籤讀 <code>label ?? monthLabel ?? name ?? 月份</code>；每點保留 <code>raw</code> 供 tooltip；<strong>沒有 <code>date</code> 就只透傳、不補</strong>。</li>
+            <li><strong>monthShift(label, delta)</strong>：由 <code>'11月'</code> 推算前/後 N 個月（<code>'1月'→'12月'</code>），跨年自動繞回；非 <code>N月</code> 回空字串。作為 <code>xAxis.padFormatter</code> 預設。</li>
+          </ul>
+          <p>由 <code>config.fillGap</code> 決定要不要補：</p>
+          <pre><code>// Main.vue 內部，每條 series 都跑
+const { categories, data } = fillMonths(s.data ?? [], {
+  fillGap: cfg.value.fillGap,
+  value: cfg.value.fillValue,
+})</code></pre>
+        </section>
+
+        <section>
+          <h2>10. 座標與刻度：useChartScale <span class="aud aud-f2e">F2E</span></h2>
+          <ul>
+            <li><strong>linear(domain, range)</strong>：數值域 → 像素域 的線性映射（y 軸、x 軸都用它）。</li>
+            <li><strong>point(count, range)</strong>：等距 scale 工具（通用，目前 x 軸改用 domain + linear）。</li>
+            <li><strong>niceTicks({min,max,count,interval})</strong>：算出 <code>0 / 20 / 40 …</code> 這種漂亮刻度，回傳 <code>{ min, max, step, ticks }</code>。</li>
+          </ul>
+          <h3>x 軸 domain / range（Main.vue）</h3>
+          <ul>
+            <li><strong>xDomain</strong>（index 值域）：有 padLabel 時 <code>[-1, count]</code>（頭尾各留一格）；否則 <code>[0, count-1]</code>；<code>min</code>/<code>max</code> 可覆寫。</li>
+            <li><strong>xRange</strong>（像素範圍）：只有 padding 沒 padLabel 時頭尾各內縮 <code>padPx</code>；否則滿版。</li>
+            <li><strong>bandWidth</strong>：依 <code>xRange</code> 跨距 / domain 跨距 推算，兩種留白模式 tooltip 都對齊。</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>11. 互動 / hover 行為 <span class="aud aud-f2e">F2E</span> <span class="aud aud-qa">QA</span></h2>
+          <ul>
+            <li><strong>命中區（band）</strong>：每個類別一個透明 <code>&lt;rect&gt;</code>，以點為中心展開，但<strong>夾在繪圖區 <code>[innerLeft, innerRight]</code> 內</strong>，不溢出到 y 軸標籤區或右邊緣。</li>
+            <li><strong>進 / 出</strong>：band <code>mouseenter</code> 設 active、<code>mouseleave</code> 關閉；移到 y 軸區（離開 band）即時關閉。</li>
+            <li><strong>虛線點不出 tooltip</strong>：當前 hover 點若全為虛線（推估），且 <code>tooltip.showDashed=false</code>，則隱藏 tooltip。</li>
+            <li><strong>互動 tooltip</strong>：<code>interactive:true</code> 時滑出 band 延遲 200ms 關閉，游標移進 tooltip 取消關閉，可點內容；移出 tooltip 才關。</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>12. 使用範例 <span class="aud aud-f2e">F2E</span></h2>
+          <h3>社區成交均價趨勢（專案實際用例）</h3>
+          <pre><code>&lt;script setup&gt;
+const buyHouse = useBuyHouseStore()
+const { community } = storeToRefs(buyHouse)
+
+// 父系只丟原始資料；補缺月由元件內依 fillGap 處理
+const priceSeries = computed(() =&gt; [
+  { name: '成交均價', data: community.value.priceTrend ?? [] },
+])
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;BuyMChartMain
+    :series="priceSeries"
+    :config="{
+      type: 'line',
+      title: '近期成交均價趨勢 (萬/坪)',
+      fillGap: true,
+      xAxis: { padding: true, padLabel: true },
+    }"
+  /&gt;
+&lt;/template&gt;</code></pre>
+
+          <h3>平滑曲線 + 固定間距 40px</h3>
+          <pre><code>:config="{ type: 'spline', xAxis: { padding: 40 } }"</code></pre>
+
+          <h3>自訂 y 軸單位與刻度</h3>
+          <pre><code>:config="{ yAxis: { unit: '元', tickInterval: 1000 } }"</code></pre>
+
+          <h3>互動 tooltip + 可點擊連結</h3>
+          <pre><code>:config="{
+  tooltip: {
+    interactive: true,
+    formatter: (ctx) =&gt; `${ctx.category}&lt;br&gt;&lt;a href=&quot;/detail&quot;&gt;看詳情&lt;/a&gt;`,
+  },
+}"</code></pre>
+
+          <h3>非月份 x 軸（自訂邊界標籤策略）</h3>
+          <pre><code>:config="{
+  xAxis: {
+    categories: ['Q1','Q2','Q3','Q4'],
+    padding: true,
+    padLabel: true,
+    padFormatter: (label, dir) =&gt; '',  // 不補字、只留空格
+  },
+}"</code></pre>
+        </section>
+
+        <section>
+          <h2>13. 狀態 / 例外行為 <span class="aud aud-qa">QA</span></h2>
+          <ul>
+            <li><strong>無資料</strong>：<code>series[].data</code> 為空 → 無類別、無折線，圖面僅有 y 軸刻度，不報錯。</li>
+            <li><strong>單點</strong>：只有一個資料點時置中顯示。</li>
+            <li><strong>非月份 / 無 date 資料</strong>：<code>fillMonths</code> 偵測到缺 <code>date</code> 就不補、直接透傳；<code>padFormatter</code> 預設對非 <code>N月</code> 標籤回空字串。</li>
+            <li><strong>padLabel 但 padding 關</strong>：<code>padLabel</code> 被忽略（沒距離就沒空間放標籤）。</li>
+            <li><strong>SSR</strong>：首次渲染寬 600 / 高 260 後備值，掛載後由 <code>ResizeObserver</code> 更新為實際量測值。</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>14. 維護注意 <span class="aud aud-f2e">F2E</span></h2>
+          <ul>
+            <li>顏色一律走專案 token（<code>--green-8b0d</code> / <code>--gray-ccce</code> / <code>--gray-e5</code> / <code>--gray-666</code>），勿寫死色碼。</li>
+            <li><code>.composables</code> 是 dot 開頭資料夾，<strong>不會被 Nuxt 自動匯入</strong>；Main.vue 以相對路徑引入，外部要用 <code>useChartFill</code> 可走 <code>@components/buy/mChart/.composables/useChartFill.js</code>。</li>
+            <li>「補值」是資料層概念（<code>useChartFill</code>），圖表核心不該知道月份等領域邏輯；要支援新的類別軸，給對應的 <code>padFormatter</code> / 在資料層自備補值即可。</li>
+            <li>若要多 series：y 軸刻度、類別軸取所有 series 的聯集 / 最大長度；tooltip 會列出該索引所有有值的 series。</li>
+          </ul>
+        </section>
+      </article>
+    </main>
+    <div id="toc-sidebar"></div>
+  </div>
+  <script src="../assets/doc.js"></script>
+</body>
+</html>

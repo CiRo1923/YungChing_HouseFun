@@ -2,7 +2,7 @@
 const common = useCommonStore()
 const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
-const isDeviceM = computed(() => device.value === 'm')
+const isDeviceP = computed(() => device.value === 'p')
 
 const props = defineProps({
   ids: {
@@ -17,7 +17,7 @@ const items = computed(() => {
       id: 'gold',
       label: '黃金曝光',
       class: '--bg-red-e45c --text-white --text-shadow',
-      isHidden: !isDeviceM.value,
+      isHidden: isDeviceP.value,
     },
     {
       id: 'new',

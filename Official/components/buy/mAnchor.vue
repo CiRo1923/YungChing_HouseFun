@@ -148,9 +148,9 @@ const onClick = (e) => {
       @apply text-[--gray-666];
     }
 
-    /* &.\-\-text-green-6a2d {
+    &.\-\-text-green-6a2d {
       @apply text-[--green-6a2d];
-    } */
+    }
 
     &.\-\-text-orange-e646 {
       @apply text-[--orange-e646];
@@ -178,6 +178,10 @@ const onClick = (e) => {
 
     &.\-\-bg-green-8b0d {
       @apply bg-[--green-8b0d];
+    }
+
+    &.\-\-bg-green-8b0d66 {
+      @apply bg-[--green-8b0d66];
     }
 
     &.\-\-border-gray-ccce {

@@ -8,6 +8,8 @@ import {
   apiGETRealEstateFeatureCheckOptions,
 } from '@js/_api/buy/manage.js'
 
+import { apiMessagesVerifyCode, apiMessagesResendCode, apiMessages } from '@js/_api/common.js'
+
 import { onFormatDate } from '@js/_prototype.js'
 
 import { useBuyProjectStore } from '@stores/buy/project.js'
@@ -15,8 +17,17 @@ import useBuyPopupActions from '@stores/buy/.composables/usePopupActions.js'
 
 const useBuyProjectStores = () => {
   const buyProject = useBuyProjectStore()
-  const { serverTime, options } = storeToRefs(buyProject)
-  const { onApiError } = useBuyPopupActions()
+  const {
+    serverTime,
+    options,
+    messageData,
+    apiMessageData,
+    countdownData,
+    apiVerifyCodeData,
+    cottonCandyCheckbox,
+  } = storeToRefs(buyProject)
+  const { onCustom, onApiError } = useBuyPopupActions()
+  const { onPromise } = usePopupActions()
 
   const onApiGetCommonServerTime = async () => {
     const { config, status, data } = await apiGetCommonServerTime()
@@ -38,7 +49,6 @@ const useBuyProjectStores = () => {
 
     return { config, status, data }
   }
-
   const onApiGETRealEstatePurposeCheckOptions = async () => {
     if (options.value.casePurpose) return false
     const { config, status, data } = await apiGETRealEstatePurposeCheckOptions()
@@ -143,7 +153,6 @@ const useBuyProjectStores = () => {
 
     return { config, status, data }
   }
-
   const onApiGETRealEstateFeatureCheckOptions = async () => {
     if (options.value.features) return false
 
@@ -156,6 +165,159 @@ const useBuyProjectStores = () => {
     }
 
     return { config, status, data }
+  }
+  const onApiMessages = async (isReplaceMessage) => {
+    const { config, status, data } = await apiMessages(apiMessageData.value)
+
+    if (status === 200 || status === 201) {
+      const { verificationToken, developmentVerificationCode, verificationExpiresAt } = data
+
+      if (isReplaceMessage) {
+        messageData.value = data
+      }
+
+      countdownData.value.expires = verificationExpiresAt
+      apiVerifyCodeData.value.verificationToken = verificationToken
+      apiVerifyCodeData.value.verificationCode = developmentVerificationCode
+    } else {
+      onApiError(config, status, data)
+    }
+
+    return { config, status, data }
+  }
+  const onApiMessagesVerifyCode = async () => {
+    const { config, status, data } = await apiMessagesVerifyCode(apiVerifyCodeData.value)
+
+    if (status === 200) {
+      messageData.value = data // 如果沒有驗證過會需要驗證驗證完會回傳棉花糖資訊
+    } else {
+      onApiError(config, status, data)
+    }
+
+    return { config, status, data }
+  }
+  const onApiMessagesResendCode = async () => {
+    const { config, status, data } = await apiMessagesResendCode({
+      verificationToken: apiVerifyCodeData.value.verificationToken,
+    })
+
+    if (status === 200) {
+      const { verificationToken, developmentVerificationCode, verificationExpiresAt } = data
+
+      //重新發送驗證碼 所以資料再更新一次
+      countdownData.value.expires = verificationExpiresAt
+      apiVerifyCodeData.value.verificationToken = verificationToken
+      apiVerifyCodeData.value.verificationCode = developmentVerificationCode
+    } else {
+      onApiError(config, status, data)
+    }
+
+    return { config, status, data }
+  }
+  const onPopupVerifyCode = async () => {
+    onPromise('open')
+    const { status, data } = await onApiMessages(true)
+    await onApiGetCommonServerTime()
+    onPromise('close')
+
+    if (status === 201) {
+      const { cottonCandy, success, message, reason } = data
+      const hasCottonCandy = cottonCandy.items?.length !== 0
+      const isVerifyCode = reason === 'VerificationRequired'
+      const isDuplicate = reason === 'DuplicateWithin20Minutes'
+
+      if (success) {
+        if (!reason) {
+          if (!hasCottonCandy) {
+            await onPopupMessageSucess()
+          }
+
+          if (hasCottonCandy) {
+            await onPopupCottonCandy()
+          }
+        }
+
+        if (isVerifyCode) {
+          await onCustom({
+            id: 'popupVerifyCode',
+            title: '留言驗證',
+            btns: [
+              {
+                id: 'sure',
+                label: '送出留言',
+                type: 'sure',
+                class: '--bg-orange-f74c --text-white',
+                isClose: false,
+              },
+            ],
+          })
+        }
+      } else {
+        onCustom({
+          id: 'popupMessageFailed',
+          title: isDuplicate ? '已留過言' : '留言失敗',
+          data: message,
+          btns: 'alert',
+        })
+      }
+    }
+
+    // if (status === 200) {
+    //   await onPopupCottonCandy()
+    // }
+  }
+  const onPopupCottonCandy = async () => {
+    await onCustom({
+      id: 'popupCottonCandy',
+      title: '預約留言已送出，仲介將會儘速與您聯繫',
+      btns: [
+        {
+          id: 'cancel',
+          label: '下次再留',
+          type: 'cancel',
+          class: '--border-gray-e5 --text-gray-666',
+          isClose: true,
+        },
+        {
+          id: 'sure',
+          label: '一起預約',
+          type: 'sure',
+          class: '--bg-orange-f74c --text-white',
+          isClose: false,
+        },
+      ],
+    })
+  }
+  const onPopupMessageSucess = async () => {
+    const isMember = messageData.value?.isMember ?? false
+
+    await onCustom({
+      id: 'popupMessageSuccess',
+      title: '留言成功',
+      btns: isMember
+        ? 'alert'
+        : [
+            {
+              id: 'cancel',
+              label: '關閉',
+              class: '--border-gray-e5 --text-gray-666',
+              type: 'cancel',
+              isClose: true,
+            },
+            {
+              id: 'sure',
+              label: '立即註冊',
+              class: '--bg-orange-f74c --text-white',
+              type: 'sure',
+              isClose: true,
+            },
+          ],
+    })
+  }
+  const onResetMessage = () => {
+    apiMessageData.value = { ...buyProject.apiMessageDataDefault }
+    apiVerifyCodeData.value = { ...buyProject.apiVerifyCodeDataDefault }
+    cottonCandyCheckbox.value = []
   }
 
   const onSearchParams = (path) => {
@@ -259,6 +421,13 @@ const useBuyProjectStores = () => {
     onApiGETRealEstateParkingModeSelectOptions,
     onApiGETRealEstateNearByCheckOptions,
     onApiGETRealEstateFeatureCheckOptions,
+    onApiMessagesVerifyCode,
+    onApiMessagesResendCode,
+    onApiMessages,
+    onPopupVerifyCode,
+    onPopupCottonCandy,
+    onPopupMessageSucess,
+    onResetMessage,
     onSearchParams,
     onValueGetText,
     onReplaceImageSize,

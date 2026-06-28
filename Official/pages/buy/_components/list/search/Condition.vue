@@ -38,7 +38,7 @@ const labels = {
   face: face.value.label,
   nearBy: nearBy.value.label,
 }
-const isDeviceM = computed(() => device.value === 'm')
+const isDeviceP = computed(() => device.value === 'p')
 const datas = computed(() => {
   const parseFilters = onParseFilters()
   const onLabel = (name, key, data) => {
@@ -103,8 +103,8 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="flex m:hidden p:text-[14px]" v-if="!isDeviceM">
-    <b>您目前查詢的是：</b>
+  <div class="flex text-[14px]" v-if="isDeviceP">
+    <b class="shrink-0">您目前查詢的是：</b>
     <p>{{ datas }}</p>
   </div>
 </template>

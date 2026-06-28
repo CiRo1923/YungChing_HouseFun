@@ -98,11 +98,11 @@ onUnmounted(() => {
 
 <template>
   <div
-    class="search-funciton mx-auto m:border-b-[1px] m:border-b-[--gray-e5] m:px-[10px] m:py-[10px] p:max-w-[1200px]"
+    class="search-funciton mx-auto m:border-b-[1px] m:border-b-[--gray-e5] m:py-[10px] tm:px-[10px] p:max-w-[1200px]"
   >
     <div class="search-mode t:py-[15px] p:space-y-[15px] p:py-[25px]">
-      <ul class="search-mode-content relative flex flex-wrap gap-x-[5px] gap-y-[10px] pt:grow">
-        <li class="search-mode-item relative tm:w-[100px] pt:shrink-0 p:w-[155px]">
+      <ul class="search-mode-content relative flex flex-wrap gap-x-[5px] gap-y-[10px] p:grow">
+        <li class="search-mode-item relative tm:w-[100px] p:w-[155px] p:shrink-0">
           <PageBuyListSearchRegion @click:routePush="onRouterPush" v-if="isChannelRegion" />
           <PageBuyListSearchMrt
             name="mrt"
@@ -114,20 +114,20 @@ onUnmounted(() => {
             v-if="isChannelMrt"
           />
         </li>
-        <li class="search-mode-item relative m:flex-1 pt:shrink-0 p:w-[155px]">
+        <li class="search-mode-item relative tm:flex-1 p:w-[155px] p:shrink-0">
           <PageBuyListSearchPurpose @click:routePush="onRouterPush" />
         </li>
-        <li class="search-mode-item relative m:flex-1 pt:shrink-0 p:w-[155px]">
+        <li class="search-mode-item relative tm:flex-1 p:w-[155px] p:shrink-0">
           <PageBuyListSearchPrice @click:routePush="onRouterPush" />
         </li>
-        <li class="search-mode-item relative m:flex-1 pt:shrink-0 p:w-[155px]" v-if="!isDeviceM">
+        <li class="search-mode-item relative tm:flex-1 p:w-[155px] p:shrink-0" v-if="!isDeviceM">
           <PageBuyListSearchRoom />
         </li>
-        <li class="search-mode-item relative m:flex-1 pt:shrink-0 p:w-[155px]">
+        <li class="search-mode-item relative tm:flex-1 p:w-[155px] p:shrink-0">
           <PageBuyListSearchMore @click:routePush="onRouterPush" />
         </li>
         <li
-          class="search-mode-item relative flex items-center gap-x-[5px] overflow-hidden m:w-full pt:grow"
+          class="search-mode-item relative flex min-w-0 items-center gap-x-[5px] overflow-hidden tm:w-full p:grow"
         >
           <PageBuyListSearchKeyword />
           <BuyMAnchor
@@ -139,7 +139,7 @@ onUnmounted(() => {
               },
             }"
             :setClass="{
-              main: '--bg-orange-e646 --text-white --oval pt:--h-45 tm:--px-10 p:--px-20 m:--h-40 shrink-0 gap-x-[3px]',
+              main: '--bg-orange-e646 --text-white --oval p:--h-45 tm:--px-10 p:--px-20 tm:--h-40 shrink-0 gap-x-[3px]',
               icon: 'h-[16px] w-[16px]',
             }"
             @click="onRouterPush"

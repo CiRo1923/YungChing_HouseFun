@@ -42,7 +42,7 @@ const houseInfo = computed(() => {
 </script>
 
 <template>
-  <ul class="grid grid-cols-2 gap-y-[10px]">
+  <ul class="tm:space-y-[10px] p:grid p:grid-cols-2 p:gap-y-[10px]">
     <li
       class="flex items-center gap-x-[15px] text-[14px] text-[--gray-999]"
       v-for="(item, index) in houseInfo"

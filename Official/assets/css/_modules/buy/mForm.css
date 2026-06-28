@@ -6,7 +6,7 @@
   --form-element-border-color: var(--gray-e5);
   --form-element-border-focus-color: var(--green-8b0d);
   --form-element-border-disabled-color: var(--gray-f2);
-  --form-element-border-error-color: var(--red-e45c);
+  --form-element-border-error-color: var(--orange-e646);
 }
 
 .m-form-element {
@@ -20,6 +20,19 @@
     }
 
     &:not(:disabled):not(.\-\-disabled) {
+      &.\-\-focus {
+        @apply border-[--form-element-border-focus-color];
+      }
+
+      &.\-\-error {
+        @apply border-[--form-element-border-error-color];
+
+        .m-form-length,
+        .m-form-assist {
+          @apply text-[--orange-e646];
+        }
+      }
+
       .m-form-type {
         @apply text-[--gray-666];
 
@@ -28,14 +41,6 @@
           @apply text-[--gray-999];
         }
       }
-    }
-
-    &.\-\-focus {
-      @apply border-[--form-element-border-focus-color];
-    }
-
-    &.\-\-error {
-      @apply border-[--form-element-border-error-color];
     }
 
     &:disabled,
@@ -52,20 +57,15 @@
         }
       }
     }
-
-    &.\-\-error {
-      @apply border-[--orange-e646];
-
-      .m-form-length,
-      .m-form-assist {
-        @apply text-[--orange-e646];
-      }
-    }
   }
 }
 
 .m-form-type {
-  @apply h-full bg-transparent;
+  @apply bg-transparent;
+
+  &:not([type='checkbox']):not([type='radio']) {
+    @apply h-full;
+  }
 }
 
 .m-form-clear-button {

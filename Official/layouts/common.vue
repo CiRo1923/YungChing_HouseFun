@@ -1,8 +1,4 @@
 <script setup>
-import AlertSystem from '@containers/common/AlertSystem.vue'
-import ConfirmSystem from '@containers/common/ConfirmSystem.vue'
-// import ApiRunSystem from '@containers/common/ApiRunSystem.vue'
-
 const route = useRoute()
 const channel = computed(() => route.meta.title)
 const common = useCommonStore()
@@ -21,11 +17,17 @@ const { isLoading } = storeToRefs(common)
     <footer class="l-footer">
       <CommonMFooter />
     </footer>
-    <CommonMLoading v-if="isLoading" />
+    <CommonMLoadingMain
+      :config="{
+        isFixed: true,
+      }"
+      v-if="isLoading"
+    />
   </div>
   <div id="box">
-    <AlertSystem />
-    <ConfirmSystem />
+    <BuyCommonAlertSystem />
+    <BuyCommonConfirmSystem />
+    <BuyCommonApiPromiseSystem />
     <!-- <ApiRunSystem /> -->
   </div>
 </template>

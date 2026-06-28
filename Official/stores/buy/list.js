@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 export const useBuyListStore = defineStore('buyList', () => {
   const basicRouteName = 'buy-list-filters'
   const channel = ref('region')
+  const focus = ref(null)
   const content = ref(null)
   const apiSearchData = ref({
     purpose: '',
@@ -366,6 +367,7 @@ export const useBuyListStore = defineStore('buyList', () => {
     basicRouteName,
     channel,
     apiSearchData,
+    focus,
     content,
     region,
     mrt,

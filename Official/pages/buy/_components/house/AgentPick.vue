@@ -6,26 +6,31 @@ const hasAgentPick = computed(() => agentPick.value?.length !== 0)
 
 <template>
   <PageBuyHouseContent :title="`${broker.name}的精選物件`" v-if="hasAgentPick">
-    <BuyMSwiper12
+    <BuyMSwiperHorizontal
       name="agentPick"
       :data="agentPick"
       :config="{
         nav: false,
-        spaceBetween: {
-          p: '4px',
-        },
         slidesPerView: {
-          pt: 4,
+          p: 4,
+          t: 2.5,
           m: 1.2,
         },
       }"
       :setClass="{
         main: 'h-full',
+        container: 'pt:[--m-swiper-gap:4px]',
       }"
       v-slot="{ item }"
     >
-      <PageBuyCommonCard :item="item" />
-    </BuyMSwiper12>
+      <PageBuyCommonCard
+        :item="item"
+        :setClass="{
+          main: 'px-[3px] py-[5px]',
+          container: 'rounded-[5px]',
+        }"
+      />
+    </BuyMSwiperHorizontal>
   </PageBuyHouseContent>
 </template>
 

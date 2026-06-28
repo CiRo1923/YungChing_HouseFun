@@ -1,5 +1,5 @@
 import { apiRegion, apiMrt } from '@js/_api/common.js'
-import { apiBuyList, apiBuySuggest } from '@js/_api/buy/list.js'
+import { apiBuyList, apiBuyListFocus, apiBuySuggest } from '@js/_api/buy/list.js'
 
 import { useBuyListStore } from '@stores/buy/list.js'
 import useBuyPopupActions from '@stores/buy/.composables/usePopupActions.js'
@@ -7,7 +7,7 @@ import useBuyPopupActions from '@stores/buy/.composables/usePopupActions.js'
 const useBuyListStores = () => {
   // const projectStores = useProjectStore()
   const buyListStore = useBuyListStore()
-  const { channel, content, apiSearchData, region, mrt, pin, tab, pagination } =
+  const { channel, focus, content, apiSearchData, region, mrt, pin, tab, pagination } =
     storeToRefs(buyListStore)
   const { onApiError } = useBuyPopupActions()
   const route = useRoute()
@@ -105,11 +105,28 @@ const useBuyListStores = () => {
     return { config, status, data }
   }
 
+  const onApiBuyListFocus = async () => {
+    const { config, status, data } = await apiBuyListFocus({
+      purpose: apiSearchData.value.purpose,
+      ...(isChannelRegion.value ? { region: region.value.ids || region.value.all } : {}),
+      ...(isChannelMrt.value ? { mrt: mrt.value.ids || mrt.value.all } : {}),
+    })
+
+    if (status === 200) {
+      // console.log(data)
+      focus.value = data
+    } else {
+      onApiError(config, status, data)
+    }
+
+    return { config, status, data }
+  }
+
   const onApiBuyList = async (targetRoute = route) => {
     const { params, query } = targetRoute
     const { config, status, data } = await apiBuyList({
       ...(isChannelRegion.value ? { region: region.value.ids || region.value.all } : {}),
-      ...(isChannelMrt.value ? { mrt: mrt.value.mrt || mrt.value.all } : {}),
+      ...(isChannelMrt.value ? { mrt: mrt.value.ids || mrt.value.all } : {}),
       ...apiSearchData.value,
       pg: query.pg,
       pageSize: 12,
@@ -258,6 +275,7 @@ const useBuyListStores = () => {
     onApiRegion,
     onApiMrt,
     onApiBuyList,
+    onApiBuyListFocus,
     onApiBuySuggest,
     onChannel,
     onParseFilters,

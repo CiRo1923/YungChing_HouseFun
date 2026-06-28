@@ -1,5 +1,18 @@
 @screen p {
   .m-form {
+    &.\-\-icon-size-25,
+    &.p\:\-\-icon-size-25,
+    &.pt\:\-\-icon-size-25 {
+      .m-form-element {
+        &.\-\-checkbox,
+        &.\-\-radio {
+          .m-form-icon {
+            @apply h-[25px] w-[25px];
+          }
+        }
+      }
+    }
+
     &.\-\-icon-size-20,
     &.p\:\-\-icon-size-20,
     &.pt\:\-\-icon-size-20 {
@@ -30,6 +43,20 @@
 
 @screen t {
   .m-form {
+    &.\-\-icon-size-25,
+    &.pt\:\-\-icon-size-25,
+    &.tm\:\-\-icon-size-25,
+    &.t\:\-\-icon-size-25 {
+      .m-form-element {
+        &.\-\-checkbox,
+        &.\-\-radio {
+          .m-form-icon {
+            @apply h-[25px] w-[25px];
+          }
+        }
+      }
+    }
+
     &.\-\-icon-size-20,
     &.pt\:\-\-icon-size-20,
     &.tm\:\-\-icon-size-20,
@@ -62,6 +89,19 @@
 
 @screen m {
   .m-form {
+    &.\-\-icon-size-25,
+    &.tm\:\-\-icon-size-25,
+    &.m\:\-\-icon-size-25 {
+      .m-form-element {
+        &.\-\-checkbox,
+        &.\-\-radio {
+          .m-form-icon {
+            @apply h-[25px] w-[25px];
+          }
+        }
+      }
+    }
+
     &.\-\-icon-size-20,
     &.tm\:\-\-icon-size-20,
     &.m\:\-\-icon-size-20 {

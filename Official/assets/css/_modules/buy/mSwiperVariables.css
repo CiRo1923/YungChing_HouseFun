@@ -1,0 +1,204 @@
+:root {
+  --swiper-pagination-point-pc-size: 8px;
+  --swiper-pagination-point-tablet-size: 8px;
+  --swiper-pagination-point-mobile-size: 8px;
+
+  --swiper-pagination-bar-pc-width: 65px;
+  --swiper-pagination-bar-tablet-width: 65px;
+  --swiper-pagination-bar-mobile-width: 65px;
+
+  --swiper-pagination-bar-pc-height: 4px;
+  --swiper-pagination-bar-tablet-height: 4px;
+  --swiper-pagination-bar-mobile-height: 4px;
+
+  --swiper-pagination-point-pc-gap-x: 24px;
+  --swiper-pagination-point-tablet-gap-x: 24px;
+  --swiper-pagination-point-mobile-gap-x: 24px;
+
+  --swiper-pagination-bar-pc-gap-x: 12px;
+  --swiper-pagination-bar-tablet-gap-x: 12px;
+  --swiper-pagination-bar-mobile-gap-x: 12px;
+
+  --swiper-pagination-bullet-point-bg-color: var(--gray-c8);
+  --swiper-pagination-bullet-point-active-bg-color: var(--blue-08dc);
+
+  --swiper-pagination-bullet-bar-bg-color: var(--white);
+  --swiper-pagination-bullet-bar-active-bg-color: var(--blue-6dd7);
+
+  --swiper-ctrl-pc-width: 36px;
+  --swiper-ctrl-tablet-width: 36px;
+  --swiper-ctrl-mobile-width: 36px;
+
+  --swiper-ctrl-pc-height: 36px;
+  --swiper-ctrl-tablet-height: 36px;
+  --swiper-ctrl-mobile-height: 36px;
+
+  --swiper-ctrl-pc-rounded: 6px;
+  --swiper-ctrl-tablet-rounded: 6px;
+  --swiper-ctrl-mobile-rounded: 6px;
+
+  --swiper-ctrl-pc-gap-x: 8px;
+  --swiper-ctrl-tablet-gap-x: 8px;
+  --swiper-ctrl-mobile-gap-x: 8px;
+
+  --swiper-ctrl-pc-shadow: 0 2px 4px 0 rgba(var(--black-rgb), 0.1);
+  --swiper-ctrl-tablet-shadow: 0 2px 4px 0 rgba(var(--black-rgb), 0.1);
+  --swiper-ctrl-mobile-shadow: 0 2px 4px 0 rgba(var(--black-rgb), 0.1);
+
+  --swiper-ctrl-bg-color: var(--white);
+  --swiper-ctrl-disabled-bg-color: var(--white);
+
+  --swiper-ctrl-border: 1px;
+  --swiper-ctrl-border-color: transparent;
+  --swiper-ctrl-disabled-border-color: transparent;
+
+  --swiper-ctrl-color: var(--blue-08dc);
+  --swiper-ctrl-disabled-color: rgba(var(--blue-08dc-rgb), 0.1);
+
+  --swiper-ctrl-pc-icon-size: 12px;
+  --swiper-ctrl-tablet-icon-size: 12px;
+  --swiper-ctrl-mobile-icon-size: 12px;
+}
+
+@screen p {
+  .m-swiper {
+    &.\-\-pagination-point,
+    &.p\:\-\-pagination-point,
+    &.pt\:\-\-pagination-point {
+      --swiper-pagination-gap-x: var(--swiper-pagination-point-pc-gap-x);
+
+      .m-swiper-pagination-bullet {
+        --swiper-pagination-bullet-width: var(--swiper-pagination-point-pc-size);
+        --swiper-pagination-bullet-height: var(--swiper-pagination-point-pc-size);
+        --swiper-pagination-bullet-bg-color: var(--swiper-pagination-bullet-point-bg-color);
+
+        &.\-\-active {
+          --swiper-pagination-bullet-bg-color: var(
+            --swiper-pagination-bullet-point-active-bg-color
+          );
+        }
+      }
+    }
+
+    &.\-\-pagination-bar,
+    &.p\:\-\-pagination-bar,
+    &.pt\:\-\-pagination-bar {
+      --swiper-pagination-gap-x: var(--swiper-pagination-bar-pc-gap-x);
+
+      .m-swiper-pagination-bullet {
+        --swiper-pagination-bullet-width: 100%;
+        --swiper-pagination-bullet-height: var(--swiper-pagination-bar-pc-height);
+        --swiper-pagination-bullet-bg-color: var(--swiper-pagination-bullet-bar-bg-color);
+
+        &.\-\-active {
+          --swiper-pagination-bullet-bg-color: var(--swiper-pagination-bullet-bar-active-bg-color);
+        }
+      }
+    }
+  }
+
+  .m-swiper-ctrl {
+    --swiper-ctrl-width: var(--swiper-ctrl-pc-width);
+    --swiper-ctrl-height: var(--swiper-ctrl-pc-height);
+    --swiper-ctrl-rounded: var(--swiper-ctrl-pc-rounded);
+    --swiper-ctrl-shadow: var(--swiper-ctrl-pc-shadow);
+    --swiper-ctrl-gap-x: var(--swiper-ctrl-pc-gap-x);
+    --swiper-ctrl-icon-size: var(--swiper-ctrl-pc-icon-size);
+  }
+}
+
+@screen t {
+  .m-swiper {
+    &.\-\-pagination-point,
+    &.pt\:\-\-pagination-point,
+    &.tm\:\-\-pagination-point,
+    &.t\:\-\-pagination-point {
+      --swiper-pagination-gap-x: var(--swiper-pagination-point-tablet-gap-x);
+
+      .m-swiper-pagination-bullet {
+        --swiper-pagination-bullet-width: var(--swiper-pagination-point-tablet-size);
+        --swiper-pagination-bullet-height: var(--swiper-pagination-point-tablet-size);
+        --swiper-pagination-bullet-bg-color: var(--swiper-pagination-bullet-point-bg-color);
+
+        &.\-\-active {
+          --swiper-pagination-bullet-bg-color: var(
+            --swiper-pagination-bullet-point-active-bg-color
+          );
+        }
+      }
+    }
+
+    &.\-\-pagination-bar,
+    &.pt\:\-\-pagination-bar,
+    &.tm\:\-\-pagination-bar,
+    &.t\:\-\-pagination-bar {
+      --swiper-pagination-gap-x: var(--swiper-pagination-bar-tablet-gap-x);
+
+      .m-swiper-pagination-bullet {
+        --swiper-pagination-bullet-width: 100%;
+        --swiper-pagination-bullet-height: var(--swiper-pagination-bar-tablet-height);
+        --swiper-pagination-bullet-bg-color: var(--swiper-pagination-bullet-bar-bg-color);
+
+        &.\-\-active {
+          --swiper-pagination-bullet-bg-color: var(--swiper-pagination-bullet-bar-active-bg-color);
+        }
+      }
+    }
+  }
+
+  .m-swiper-ctrl {
+    --swiper-ctrl-width: var(--swiper-ctrl-tablet-width);
+    --swiper-ctrl-height: var(--swiper-ctrl-tablet-height);
+    --swiper-ctrl-rounded: var(--swiper-ctrl-tablet-rounded);
+    --swiper-ctrl-shadow: var(--swiper-ctrl-tablet-shadow);
+    --swiper-ctrl-gap-x: var(--swiper-ctrl-tablet-gap-x);
+    --swiper-ctrl-icon-size: var(--swiper-ctrl-tablet-icon-size);
+  }
+}
+
+@screen m {
+  .m-swiper {
+    &.\-\-pagination-point,
+    &.tm\:\-\-pagination-point,
+    &.m\:\-\-pagination-point {
+      --swiper-pagination-gap-x: var(--swiper-pagination-point-mobile-gap-x);
+
+      .m-swiper-pagination-bullet {
+        --swiper-pagination-bullet-width: var(--swiper-pagination-point-mobile-size);
+        --swiper-pagination-bullet-height: var(--swiper-pagination-point-mobile-size);
+        --swiper-pagination-bullet-bg-color: var(--swiper-pagination-bullet-point-bg-color);
+
+        &.\-\-active {
+          --swiper-pagination-bullet-bg-color: var(
+            --swiper-pagination-bullet-point-active-bg-color
+          );
+        }
+      }
+    }
+
+    &.\-\-pagination-bar,
+    &.tm\:\-\-pagination-bar,
+    &.m\:\-\-pagination-bar {
+      --swiper-pagination-gap-x: var(--swiper-pagination-bar-mobile-gap-x);
+
+      .m-swiper-pagination-bullet {
+        --swiper-pagination-bullet-width: 100%;
+        --swiper-pagination-bullet-height: var(--swiper-pagination-bar-mobile-height);
+        --swiper-pagination-bullet-bg-color: var(--swiper-pagination-bullet-bar-bg-color);
+
+        &.\-\-active {
+          --swiper-pagination-bullet-bg-color: var(--swiper-pagination-bullet-bar-active-bg-color);
+        }
+      }
+    }
+  }
+
+  .m-swiper-ctrl {
+    --swiper-ctrl-width: var(--swiper-ctrl-mobile-width);
+    --swiper-ctrl-height: var(--swiper-ctrl-mobile-height);
+    --swiper-ctrl-rounded: var(--swiper-ctrl-mobile-rounded);
+    --swiper-ctrl-shadow: var(--swiper-ctrl-mobile-shadow);
+    --swiper-ctrl-gap-x: var(--swiper-ctrl-mobile-gap-x);
+    --swiper-ctrl-icon-size: var(--swiper-ctrl-mobile-icon-size);
+  }
+}

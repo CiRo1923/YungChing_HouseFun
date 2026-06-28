@@ -18,11 +18,7 @@ export const useBuyHouseStore = defineStore('buyHouse', () => {
   const features = ref(null) // 特色說明
   const agentPick = ref(null) // 精選物件
   const hotForYou = ref(null) // 這些物件也很適合你
-  const apiCommentData = ref({
-    name: null,
-    phone: null,
-    message: null,
-  })
+  const lifeMap = ref(null) // 生活地圖
 
   return {
     detail,
@@ -42,6 +38,6 @@ export const useBuyHouseStore = defineStore('buyHouse', () => {
     features,
     agentPick,
     hotForYou,
-    apiCommentData,
+    lifeMap,
   }
 })

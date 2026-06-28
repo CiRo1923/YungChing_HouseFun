@@ -11,7 +11,7 @@ const features = computed(() => options.value.features ?? [])
 </script>
 
 <template>
-  <BuyCustomPopup
+  <BuyCommonCustomPopup
     id="popupFeatures"
     :config="{
       mode: {
@@ -19,10 +19,10 @@ const features = computed(() => options.value.features ?? [])
       },
     }"
     :setClass="{
-      main: 'p:--w-740',
+      main: 'p:--w-740 t:--w-600',
     }"
   >
-    <ul class="grid m:grid-cols-2 tm:gap-[10px] p:grid-cols-3 p:gap-[15px]">
+    <ul class="grid tm:grid-cols-2 tm:gap-[10px] p:grid-cols-3 p:gap-[15px]">
       <li v-for="(item, index) in features" :key="`${item.text}_${item.code}_${index}`">
         <BuyMFormCheckBox
           name="tag"
@@ -32,12 +32,12 @@ const features = computed(() => options.value.features ?? [])
             value: item.code,
           }"
           :setClass="{
-            main: '--icon-size-16',
+            main: '--icon-size-16 --checkbox-green-8d0d',
           }"
         />
       </li>
     </ul>
-  </BuyCustomPopup>
+  </BuyCommonCustomPopup>
 </template>
 
 <style lang="postcss"></style>

@@ -115,13 +115,13 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <Transition name="popup-overlay" appear @enter="onOverlayEnter">
+  <Transition name="popup-overlay" @enter="onOverlayEnter">
     <div
       class="m-popup fixed inset-0 z-[5] flex"
       :class="[modeClass, setClass.main]"
       v-if="isOpen || isShowOverlay"
     >
-      <Transition :name="transitionName" appear @afterLeave="onAfterLeave">
+      <Transition :name="transitionName" @afterLeave="onAfterLeave">
         <div
           class="m-popup-container relative flex max-h-[92%] flex-col overflow-hidden bg-[--white] py-[40px] tm:px-[30px] tm:py-[24px] p:px-[60px]"
           :class="setClass.container"
@@ -211,6 +211,16 @@ onUnmounted(() => {
 
 @screen p {
   .m-popup {
+    &.\-\-w-1200,
+    &.p\:\-\-w-1200,
+    &.pt\:\-\-w-1200 {
+      &.\-\-zoom {
+        .m-popup-container {
+          @apply w-[1200px];
+        }
+      }
+    }
+
     &.\-\-w-740,
     &.p\:\-\-w-740,
     &.pt\:\-\-w-740 {
@@ -245,6 +255,17 @@ onUnmounted(() => {
 
 @screen t {
   .m-popup {
+    &.\-\-w-1210,
+    &.pt\:\-\-w-1210,
+    &.tm\:\-\-w-1210,
+    &.t\:\-\-w-1210 {
+      &.\-\-zoom {
+        .m-popup-container {
+          @apply w-[1210px];
+        }
+      }
+    }
+
     &.\-\-w-740,
     &.pt\:\-\-w-740,
     &.tm\:\-\-w-740,

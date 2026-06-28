@@ -63,7 +63,7 @@ onUnmounted(() => {
               value: item.code,
             }"
             :setClass="{
-              main: '--icon-size-16',
+              main: '--icon-size-16 --checkbox-green-8d0d',
             }"
             @change="onRouterPush"
           />

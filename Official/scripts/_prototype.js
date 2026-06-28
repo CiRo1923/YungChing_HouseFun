@@ -134,7 +134,8 @@ export const onEmptyData = (obj) => {
 // number 可傳單一數值，或傳陣列（會先加總）
 export const onToFixed = (number, fixed) => {
   // 取單一值的小數位數
-  const decimalLength = (value) => (value && /\./.test(value) ? (value + '').split('.')[1].length : 0)
+  const decimalLength = (value) =>
+    value && /\./.test(value) ? (value + '').split('.')[1].length : 0
 
   // fixed 未帶值時，用「傳入的值」的小數位數當預設（陣列取各值的最大位數）
   // 避免加總後的浮點誤差（如 1.1 + 2.2 = 3.3000000000000003）影響位數判斷
@@ -829,6 +830,9 @@ export const timeFormat = {
 // 秒或毫秒的數字 → 毫秒（< 1e12 視為秒，例如 1770262224；>= 1e12 視為毫秒）
 const countdownNumberToMs = (n) => (n < 1e12 ? Math.round(n * 1000) : Math.round(n))
 
+// localStorage 只有瀏覽器才有，SSR（Nuxt server / Node）沒有 → 先判斷避免 ReferenceError
+const canUseStorage = () => typeof window !== 'undefined' && typeof localStorage !== 'undefined'
+
 // 解析 YYYY[-/.]MM[-/.]DD（可選時間）→ ms（本地時區），失敗回 null
 const parseCountdownDateString = (s) => {
   const m =
@@ -1019,8 +1023,10 @@ export const countdown = {
 
   /**
    * 存 countdown
-   * @param {*} startTime - 有值就用；無值就 new Date()
-   * @param {*} expireTime - duration (秒/毫秒/或帶單位字串)；到期時間 = start + duration
+   * @param {*} startTime - 任何時間格式（ISO / Date / YYYY-MM-DD / timestamp）；無值就 new Date()
+   * @param {*} expireTime - 兩種都吃：
+   *   1. 絕對到期時間點（任何時間格式）-> 自動換算成 expireTime - startTime
+   *   2. duration（秒/毫秒/或帶單位字串，例如 30 / "5m"）-> 到期時間 = start + duration
    * @param {string} format - 'hh:mm:ss' | 'mm:ss' | 'sss'
    * @param {string} storageName - localStorage key
    * @param {function} onTick - 每秒計算回傳的時間
@@ -1032,8 +1038,12 @@ export const countdown = {
     const startMs = startTime ? _parseToMs(startTime) : Date.now()
     if (!Number.isFinite(startMs)) throw new Error('onStart: invalid startTime')
 
-    const durationMs = _parseDurationToMs(expireTime)
-    if (!Number.isFinite(durationMs)) throw new Error('onStart: invalid expireTime (duration)')
+    // expireTime 可帶「絕對到期時間點」或「duration」
+    // 先試絕對時間：能解析成比 startMs 還晚的時間點 -> 視為到期時間，自動相減
+    const absMs = _parseToMs(expireTime)
+    const durationMs =
+      Number.isFinite(absMs) && absMs > startMs ? absMs - startMs : _parseDurationToMs(expireTime)
+    if (!Number.isFinite(durationMs)) throw new Error('onStart: invalid expireTime')
 
     const expireMs = startMs + durationMs
 
@@ -1045,7 +1055,8 @@ export const countdown = {
       v: 1,
     }
 
-    const hasStorage = typeof storageName === 'string' && storageName.trim() !== ''
+    const hasStorage =
+      canUseStorage() && typeof storageName === 'string' && storageName.trim() !== ''
     const key = hasStorage ? storageName.trim() : ''
 
     if (hasStorage) {
@@ -1116,6 +1127,18 @@ export const countdown = {
    */
   onGet(storageName) {
     if (!storageName) throw new Error('onGet: storageName is required')
+
+    // SSR 沒有 localStorage，直接當作查無資料回傳
+    if (!canUseStorage()) {
+      return {
+        ok: false,
+        reason: 'NO_STORAGE',
+        remainingMs: 0,
+        remainingSec: 0,
+        isExpired: true,
+        data: null,
+      }
+    }
 
     const raw = localStorage.getItem(storageName)
     if (!raw) {

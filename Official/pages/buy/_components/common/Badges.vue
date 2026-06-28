@@ -55,7 +55,7 @@ const setClass = computed(() => {
 <template>
   <ul class="absolute z-[1] flex items-center gap-x-[4px]" :class="setClass.main" v-if="hasItems">
     <template v-for="(item, index) in items" :key="`${item.id}_${index}`">
-      <li v-if="item.value">
+      <li v-if="!item.value">
         <BuyMTooltipMain
           :config="{
             icon: item.icon,
@@ -66,7 +66,7 @@ const setClass = computed(() => {
             container: 'text-[12px]',
           }"
         >
-          <template #content>{{ item.content }} {</template>
+          <template #content>{{ item.content }} </template>
         </BuyMTooltipMain>
       </li>
     </template>

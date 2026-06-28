@@ -22,7 +22,7 @@ export const useBuyPopupStore = defineStore('buyPopup', () => {
       {
         id: 'sure',
         label: '確認',
-        class: '--bg-green-6a2d --text-white',
+        class: '--bg-orange-f74c --text-white',
         type: 'sure',
         isClose: true,
       },

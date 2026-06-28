@@ -114,7 +114,7 @@ onUnmounted(() => {
             sort: 'asc',
           }"
           :setClass="{
-            main: '--icon-size-20',
+            main: '--icon-size-20 --checkbox-green-8d0d',
           }"
           @change="onChange"
         />
@@ -146,7 +146,7 @@ onUnmounted(() => {
             label: '房數不含加蓋',
           }"
           :setClass="{
-            main: '--icon-size-20',
+            main: '--icon-size-20 --checkbox-green-8d0d',
           }"
         />
       </li>

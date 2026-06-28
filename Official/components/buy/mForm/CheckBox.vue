@@ -40,6 +40,7 @@ const config = computed(() => {
       value: null, // group 用
       align: 'top',
       isDisabled: false,
+      isError: false,
       isJoin: null, // 只有 group 用
       valueClickClear: null,
     },
@@ -242,13 +243,16 @@ const onChange = async () => {
       :rules="config.isDisabled ? '' : props.rules"
       v-slot="{ field, errorMessage }"
     >
-      <div class="m-form-container" :class="setClass.container">
+      <div
+        class="m-form-container"
+        :class="[{ 'leading-none': !config.label }, setClass.container]"
+      >
         <label
           class="m-form-element --checkbox relative inline-flex gap-x-[6px] leading-[1.4]"
           :class="[
             config.align === 'top' ? 'items-baseline' : 'items-center',
             config.isDisabled ? 'cursor-not-allowed' : 'cursor-pointer',
-            { '--error': errorMessage },
+            { '--error': errorMessage || config.isError },
             setClass.element,
           ]"
         >
@@ -275,12 +279,21 @@ const onChange = async () => {
 
           <CommonSvgIcon
             icon="icon_check_solid"
-            class="m-form-icon relative mt-[2px] shrink-0 self-start border-solid transition-colors duration-300"
-            :class="setClass.icon"
+            class="m-form-icon relative shrink-0 self-start border-solid transition-colors duration-300"
+            :class="[
+              {
+                'mt-[2px]': config.label,
+              },
+              setClass.icon,
+            ]"
           />
 
           <slot>
-            <em class="m-form-label transition-colors duration-300" :class="setClass.label">
+            <em
+              class="m-form-label transition-colors duration-300"
+              :class="setClass.label"
+              v-if="config.label"
+            >
               {{ config.label }}
             </em>
           </slot>
@@ -313,12 +326,42 @@ const onChange = async () => {
   --form-checkbox-icon-mobile-border: 1px;
 
   --form-checkbox-checked-color: inherit;
-  --form-checkbox-icon-color: var(--green-8b0d);
-  --form-checkbox-icon-border-color: var(--gray-999);
+  --form-checkbox-icon-color: inherit;
+  --form-checkbox-icon-border-color: inherit;
+}
+
+.m-form {
+  &.\-\-checkbox-green-8d0d {
+    .m-form-element {
+      &.\-\-checkbox {
+        .m-form-icon {
+          --form-checkbox-icon-color: var(--green-8b0d);
+        }
+      }
+    }
+  }
+
+  &.\-\-checkbox-white {
+    .m-form-element {
+      &.\-\-checkbox {
+        .m-form-icon {
+          --form-checkbox-icon-color: var(--white);
+        }
+      }
+    }
+  }
 }
 
 .m-form-element {
   &.\-\-checkbox {
+    &:not(.\-\-error) {
+      --form-checkbox-icon-border-color: var(--gray-999);
+    }
+
+    &.\-\-error {
+      --form-checkbox-icon-border-color: var(--orange-e646);
+    }
+
     .m-form-type {
       &:checked {
         & + .m-form-icon {

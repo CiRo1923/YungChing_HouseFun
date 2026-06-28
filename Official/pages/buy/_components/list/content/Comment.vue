@@ -1,9 +1,21 @@
 <script setup>
+const buyProject = useBuyProjectStore()
+const { apiMessageData } = storeToRefs(buyProject)
+const { onResetMessage } = useBuyProjectActions()
 const { onCustom } = useBuyPopupActions()
+const props = defineProps({
+  item: {
+    type: Object,
+    default: () => ({}),
+  },
+})
 
 const onClick = async () => {
-  const { isSure } = await onCustom({
-    id: 'popupComment',
+  onResetMessage()
+  apiMessageData.value.houseId = props.item.hfid
+
+  await onCustom({
+    id: 'popupMessage',
     title: '詢問與留言',
     btns: [
       {
@@ -15,8 +27,6 @@ const onClick = async () => {
       },
     ],
   })
-
-  console.log(isSure)
 }
 </script>
 

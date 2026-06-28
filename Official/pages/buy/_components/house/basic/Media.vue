@@ -82,7 +82,7 @@ watch(
 
 <template>
   <div
-    class="relative w-full overflow-hidden bg-[--gray-999] m:mb-[6px] m:h-[270px] m:w-full pt:h-[570px] pt:rounded-[10px]"
+    class="relative w-full overflow-hidden bg-[--gray-999] m:mb-[6px] m:h-[270px] m:w-full t:h-[285px] pt:rounded-[10px] p:h-[570px]"
   >
     <!-- 黃金曝光 & NEW -->
     <PageBuyHouseBasicFlags :ids="ids" />
@@ -99,7 +99,7 @@ watch(
     <!-- 照片 -->
     <div class="media-images relative h-full" v-if="modeID === 'images'">
       <template v-if="hasImages">
-        <BuyMSwiper12
+        <BuyMSwiperHorizontal
           name="houseMediaImages"
           :data="images"
           :config="{
@@ -107,6 +107,8 @@ watch(
           }"
           :setClass="{
             main: 'h-full',
+            wrapper: 'h-full',
+            container: 'h-full',
             nav: 'h-[30px] w-[30px] p-[6px] text-[--white]',
           }"
           v-slot="{ item }"
@@ -116,7 +118,7 @@ watch(
             <!-- {{ onImageSize(item) }} -->
             <CommonImgSrc :src="item" />
           </div>
-        </BuyMSwiper12>
+        </BuyMSwiperHorizontal>
         <small
           class="absolute flex h-[20px] items-center rounded-full px-[8px] text-[12px] tracking-wider text-[--white] bg-hexa-[--black,0.6] m:bottom-[55px] tm:right-[10px] pt:bottom-[65px] p:right-[15px]"
         >

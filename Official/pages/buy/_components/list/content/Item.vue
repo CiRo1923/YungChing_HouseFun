@@ -62,7 +62,7 @@ onUnmounted(() => {
     />
     <div class="flex pt:grow pt:flex-col">
       <PageBuyListContentPrice :item="props.item" />
-      <PageBuyListContentComment />
+      <PageBuyListContentComment :item="props.item" />
     </div>
   </div>
   <PageBuyListContentMedia :item="props.item" />

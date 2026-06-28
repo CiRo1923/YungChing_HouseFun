@@ -4,13 +4,37 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
+  config: {
+    type: Object,
+    default: () => ({}),
+  },
+  setClass: {
+    type: Object,
+    default: () => ({}),
+  },
+})
+
+const config = computed(() => {
+  return {
+    target: null,
+    ...props.config,
+  }
+})
+
+const setClass = computed(() => {
+  return {
+    main: '',
+    container: '',
+    ...props.setClass,
+  }
 })
 </script>
 
 <template>
-  <div class="detail-card px-[3px] py-[5px]">
+  <div class="detail-card" :class="setClass.main">
     <div
-      class="detail-card-container shadow-card relative flex flex-col-reverse overflow-hidden rounded-[5px]"
+      class="detail-card-container relative flex flex-col-reverse overflow-hidden bg-[--white] shadow-card"
+      :class="setClass.container"
     >
       <BuyMAnchor
         :to="{
@@ -18,6 +42,9 @@ const props = defineProps({
           params: {
             hfid: props.item.hfid,
           },
+        }"
+        :config="{
+          target: config.target,
         }"
         :setClass="{
           main: 'absolute inset-0 z-[1]',

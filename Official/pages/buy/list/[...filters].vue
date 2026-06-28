@@ -1,4 +1,6 @@
 <script setup>
+import { awaitAllPromise } from '@js/_prototype.js'
+
 const common = useCommonStore()
 const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
@@ -22,6 +24,7 @@ const {
   onGetBuyListParams,
   onApiRegion,
   onApiMrt,
+  onApiBuyListFocus,
   onApiBuyList,
   onChannel,
 } = useBuyListActions()
@@ -41,7 +44,6 @@ const channel = computed(() => {
 
   return ''
 })
-const page = computed(() => route.query.pg || '1')
 const paramsRegion = computed(() => {
   const { ids } = region.value
 
@@ -60,10 +62,11 @@ const paramsChannel = computed(() =>
 onChannel()
 onGetBuyListParams()
 
+// buy-list / buy-list-focus 不掛 watch:初次載入抓一次,後續導航 / 搜尋一律由
+// 路由守衛 (onRouteChanged) 與 onApiSearch 顯式呼叫,避免 watch 與手動呼叫重複
 await onWithLoadingAll([
-  useAsyncData('common-server-time', () => onApiGetCommonServerTime(), {
-    watch: [channel, page],
-  }),
+  // server time 只用於「天」級距相對時間,初次載入抓一次即可,換頁不需重打
+  useAsyncData('common-server-time', () => onApiGetCommonServerTime()),
   useAsyncData('region-options', () => onApiRegion()),
   useAsyncData('mrt-options', () => onApiMrt()),
   useAsyncData('purpose-options', () => onApiGETRealEstatePurposeCheckOptions()),
@@ -72,7 +75,8 @@ await onWithLoadingAll([
   useAsyncData('parking-options', () => onApiGETRealEstateParkingModeSelectOptions()),
   useAsyncData('near-options', () => onApiGETRealEstateNearByCheckOptions()),
   useAsyncData('features-options', () => onApiGETRealEstateFeatureCheckOptions()),
-  useAsyncData('buy-list-region', () => onApiBuyList()),
+  useAsyncData('buy-list-focus', () => onApiBuyListFocus()),
+  useAsyncData('buy-list', () => onApiBuyList()),
 ])
 
 onUseMeta({
@@ -83,10 +87,13 @@ onUseMeta({
 })
 
 const onRouteChanged = async (to) => {
+  // 先同步 store(channel / 篩選參數),再以新路由 to 重打
   onChannel(to)
   onGetBuyListParams(to)
 
-  await onApiSearch(to)
+  onIsLoading(true)
+  await awaitAllPromise([onApiBuyList(to), onApiBuyListFocus()])
+  onIsLoading(false)
 
   if (import.meta.client) {
     window.scrollTo({
@@ -96,9 +103,10 @@ const onRouteChanged = async (to) => {
   }
 }
 
-const onApiSearch = async (to) => {
+// 原地搜尋(不改 URL):以目前路由重打 buy-list
+const onApiSearch = async () => {
   onIsLoading(true)
-  await onApiBuyList(to)
+  await onApiBuyList()
   onIsLoading(false)
 }
 
@@ -142,13 +150,15 @@ onUnmounted(() => {
       >{{ options.city }}
     </pre>
   </div> -->
+  {{ channel }}
 
-  <div class="bg-[--white] p:pt-[12px]">
+  <div class="bg-[--white] pt:pt-[12px]">
     <PageBuyListTabOvalResponsiv />
     <PageBuyListSearchFunction @apiSearch="onApiSearch" @routerPush="onRoutePush" />
   </div>
   <CommonMContainer class="--inner p:mt-[20px]">
-    <CommonMContent class="pt:--rounded-20 p:--py-20 p:--px-30 m:--pb-20">
+    <PageBuyListFocus />
+    <CommonMContent class="pt:--rounded-20 pt:--py-20 p:--px-30 m:--pb-20 t:--px-16 t:mx-[10px]">
       <PageBuyListSearchFilter @click="onApiSearch" v-if="!isDeviceM" />
       <PageBuyListSearchFeatures @routerPush="onRoutePush" />
       <!-- <pre>
@@ -174,7 +184,12 @@ onUnmounted(() => {
     </CommonMContent>
   </CommonMContainer>
   <PageBuyListPopupFeatures />
-  <PageBuyCommonPopupComment />
+  <PageBuyCommonPopupMessage />
+  <PageBuyCommonPopupVerifyCode />
+  <PageBuyCommonPopupCottonCandy />
+  <PageBuyCommonPopupMessageSuccess />
+  <PageBuyCommonPopupCottonCandySuccess />
+  <PageBuyCommonPopupMessageFailed />
 </template>
 
 <style></style>

@@ -21,6 +21,27 @@ const ids = computed(() => {
 
   return idsData.filter((key) => badges.value[key] === true)
 })
+
+const badgesItems = computed(() => {
+  return [
+    {
+      id: 'vr',
+      value: badges.value.vr,
+    },
+    {
+      id: 'aiTour',
+      value: badges.value.aiTour,
+    },
+    {
+      id: 'aiDecor',
+      value: badges.value.aiDecor,
+    },
+    {
+      id: 'video',
+      value: badges.value.videoTour,
+    },
+  ]
+})
 </script>
 
 <template>
@@ -28,8 +49,14 @@ const ids = computed(() => {
     class="relative order-1 shrink-0 overflow-hidden rounded-[8px] bg-[--gray-999] m:mb-[6px] m:h-[270px] m:w-full pt:h-[190px] pt:w-[250px]"
   >
     <PageBuyListContentFlags :ids="ids" />
+    <PageBuyCommonBadges
+      :data="badgesItems"
+      :setClass="{
+        main: 'bottom-[5px] left-[5px]',
+      }"
+    />
     <CommonImgSrc
-      :src="hasImages ? images[0] : 'common/default_image.jpg'"
+      :src="images[0]"
       :setClass="{
         main: 'relative h-full',
         img: 'absolute left-1/2 h-full -translate-x-1/2',

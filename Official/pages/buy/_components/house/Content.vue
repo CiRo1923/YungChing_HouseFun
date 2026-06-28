@@ -33,7 +33,7 @@ const setClass = computed(() => {
 
 <template>
   <CommonMContent
-    class="pt:--rounded-20 p:--px-40 p:--py-30 tm:--rounded-10 tm:--p-15 m:mx-[10px]"
+    class="pt:--rounded-20 p:--px-40 p:--py-30 tm:--rounded-10 tm:--p-15 m:mx-[10px] t:mx-[15px]"
     :class="setClass.main"
   >
     <BuyMTitleBorderBottom

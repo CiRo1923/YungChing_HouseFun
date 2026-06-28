@@ -1,9 +1,10 @@
-import { apiBuyHouse } from '@js/_api/buy/house.js'
+import { apiBuyHouse, apiBuyHousePoi } from '@js/_api/buy/house.js'
 
 import { useBuyHouseStore } from '@stores/buy/house.js'
 
 const useBuyHouseStores = () => {
   const buyHouseStores = useBuyHouseStore()
+  const { lifeMap } = storeToRefs(buyHouseStores)
   const route = useRoute()
 
   const onApiBuyHouse = async () => {
@@ -31,14 +32,29 @@ const useBuyHouseStores = () => {
         actualPrice: {},
       }
 
-      buyHouseStores.$patch({
-        detail: data,
-        ...Object.fromEntries(
-          Object.entries(SECTION_DEFAULTS).map(([key, fallback]) => [key, data[key] ?? fallback])
-        ),
-        agentPick: data.recommend?.agentPick ?? {},
-        hotForYou: data.recommend?.hotForYou ?? {},
+      // 注意：$patch 用物件形式會對巢狀物件做 deep merge，
+      // fallback 的空物件無法覆蓋上一筆資料，故改用 function 形式直接賦值取代。
+      buyHouseStores.$patch((state) => {
+        state.detail = data
+        Object.entries(SECTION_DEFAULTS).forEach(([key, fallback]) => {
+          state[key] = data[key] ?? fallback
+        })
+        state.agentPick = data.recommend?.agentPick ?? {}
+        state.hotForYou = data.recommend?.hotForYou ?? {}
       })
+    }
+
+    return { config, status, data }
+  }
+  const onApiBuyHousePoi = async () => {
+    const { params } = route
+    const { config, status, data } = await apiBuyHousePoi({
+      hfid: params.hfid,
+    })
+
+    if (status === 200) {
+      lifeMap.value = data
+      console.log(data)
     }
 
     return { config, status, data }
@@ -46,6 +62,7 @@ const useBuyHouseStores = () => {
 
   return {
     onApiBuyHouse,
+    onApiBuyHousePoi,
   }
 }
 

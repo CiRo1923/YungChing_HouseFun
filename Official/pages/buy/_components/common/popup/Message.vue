@@ -1,4 +1,5 @@
 <script setup>
+const { onPopupVerifyCode } = useBuyProjectActions()
 const popup = usePopupStore()
 const { customCheck } = storeToRefs(popup)
 const { onCustomClose } = useBuyPopupActions()
@@ -13,13 +14,15 @@ const onSure = async () => {
 
   // 驗證通過才真正 resolve + close
   customCheck.value(true)
-  onCustomClose()
+  // onCustomClose()
+
+  await onPopupVerifyCode()
 }
 </script>
 
 <template>
-  <BuyCustomPopup
-    id="popupComment"
+  <BuyCommonCustomPopup
+    id="popupMessage"
     :config="{
       mode: {
         m: 'bottomSheet',
@@ -44,7 +47,7 @@ const onSure = async () => {
         並成為本網站之會員
       </p>
     </template>
-  </BuyCustomPopup>
+  </BuyCommonCustomPopup>
 </template>
 
 <style lang="postcss"></style>

@@ -39,7 +39,7 @@ const setClass = computed(() => {
         :key="`${item.id}_${index}`"
         v-if="item.isHidden !== true || !config.isHiddenItem"
       >
-        <slot :name="`item_${index + 1}`" :item="item" :value="item.value">
+        <slot :name="item.id" :item="item" :value="item.value">
           <span v-html="item.value" />
         </slot>
       </li>

@@ -8,15 +8,17 @@ const { onUseMeta, onWithLoadingAll } = useCommonActions()
 const buyHouse = useBuyHouseStore()
 const { detail } = storeToRefs(buyHouse)
 // const popup = useBuyPopupStore()
-const { onApiBuyHouse } = useBuyHouseActions()
+const { onApiBuyHouse, onApiBuyHousePoi } = useBuyHouseActions()
 const { onApiGETRealEstateTypeSelectOptions } = useBuyProjectActions()
 
 const route = useRoute()
 const seo = computed(() => detail.value?.seo ?? {})
+const hfid = computed(() => route.params.hfid)
 
 await onWithLoadingAll([
   useAsyncData('type-options', () => onApiGETRealEstateTypeSelectOptions()),
-  useAsyncData(`buy-detail-${route.params.hfid}`, () => onApiBuyHouse()),
+  useAsyncData(`buy-detail-${hfid.value}`, () => onApiBuyHouse()),
+  useAsyncData(`buy-detail-poi-${hfid.value}`, () => onApiBuyHousePoi()),
 ])
 
 onUseMeta({
@@ -49,9 +51,14 @@ onUseMeta({
     <PageBuyHouseSocialLife />
     <PageBuyHouseAgentPick />
     <PageBuyHouseHotForYou />
-    <PageBuyHouseConstruction />
+    <!-- <PageBuyHouseConstruction /> -->
   </CommonMContainer>
   <!-- <PageBuyHousePopupAskMessage /> -->
+  <PageBuyCommonPopupMessage />
+  <PageBuyCommonPopupVerifyCode />
+  <PageBuyCommonPopupCottonCandy />
+  <PageBuyCommonPopupMessageSuccess />
+  <PageBuyCommonPopupCottonCandySuccess />
 </template>
 
 <style></style>
