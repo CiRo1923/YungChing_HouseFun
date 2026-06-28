@@ -79,7 +79,6 @@ const onSure = async () => {
   >
     <p class="mb-[8px] text-[18px]">我們發現這些好房也很適合你，趁現在一起預約 !</p>
     <Form as="div" ref="formRef">
-      {{ model }}
       <BuyMFormHidden
         v-model="model"
         :rules="{

@@ -150,7 +150,6 @@ onUnmounted(() => {
       >{{ options.city }}
     </pre>
   </div> -->
-  {{ channel }}
 
   <div class="bg-[--white] pt:pt-[12px]">
     <PageBuyListTabOvalResponsiv />
