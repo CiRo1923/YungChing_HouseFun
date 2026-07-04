@@ -464,9 +464,11 @@ const tipPos = computed(() => {
       ref="containerRef"
       class="m-chart-container block w-full"
       :class="setClass.container"
-      :width="width"
-      :height="height"
-      :viewBox="`0 0 ${width} ${height}`"
+      v-bind="{
+        '^width': width,
+        '^height': height,
+        '^viewBox': `0 0 ${width} ${height}`,
+      }"
       @mouseleave="hideTip"
     >
       <!-- 直角座標：格線 + y 軸文字（line/spline/column/bar） -->
@@ -474,18 +476,22 @@ const tipPos = computed(() => {
         <line
           v-for="(g, i) in gridLines"
           :key="`grid_${i}`"
-          :x1="innerLeft"
-          :x2="innerRight"
-          :y1="g.y"
-          :y2="g.y"
+          v-bind="{
+            '^x1': innerLeft,
+            '^x2': innerRight,
+            '^y1': g.y,
+            '^y2': g.y,
+          }"
           stroke="var(--gray-e5)"
           stroke-dasharray="4 4"
         />
         <text
           v-for="(g, i) in gridLines"
           :key="`ylabel_${i}`"
-          :x="innerLeft - 10"
-          :y="g.y"
+          v-bind="{
+            '^x': innerLeft - 10,
+            '^y': g.y,
+          }"
           text-anchor="end"
           dominant-baseline="central"
           class="fill-current"
@@ -497,8 +503,10 @@ const tipPos = computed(() => {
         <text
           v-for="(b, i) in yBoundaryLabels"
           :key="`ybound_${i}`"
-          :x="innerLeft - 10"
-          :y="b.y"
+          v-bind="{
+            '^x': innerLeft - 10,
+            '^y': b.y,
+          }"
           text-anchor="end"
           dominant-baseline="central"
           class="fill-current"
@@ -513,8 +521,10 @@ const tipPos = computed(() => {
         <text
           v-for="(x, i) in xLabels"
           :key="`xlabel_${i}`"
-          :x="x.x"
-          :y="height - X_LABEL_EDGE"
+          v-bind="{
+            '^x': x.x,
+            '^y': height - X_LABEL_EDGE,
+          }"
           text-anchor="middle"
           class="fill-current"
         >
@@ -529,22 +539,26 @@ const tipPos = computed(() => {
           <path
             v-for="(seg, gi) in s.segments"
             :key="`seg_${si}_${gi}`"
-            :d="seg.d"
+            v-bind="{
+              '^d': seg.d,
+              '^stroke': seg.dashed ? cfg.mutedColor : s.color,
+              '^stroke-dasharray': seg.dashed ? '5 5' : undefined,
+            }"
             fill="none"
-            :stroke="seg.dashed ? cfg.mutedColor : s.color"
             stroke-width="2.5"
             stroke-linecap="round"
-            :stroke-dasharray="seg.dashed ? '5 5' : undefined"
           />
           <circle
             v-for="(p, pi) in s.points"
             :key="`pt_${si}_${pi}`"
-            :cx="p.x"
-            :cy="p.y"
-            :r="activeIndex === pi ? 6 : 4"
-            :fill="p.dashed ? cfg.mutedColor : s.color"
+            v-bind="{
+              '^cx': p.x,
+              '^cy': p.y,
+              '^r': activeIndex === pi ? 6 : 4,
+              '^fill': p.dashed ? cfg.mutedColor : s.color,
+              '^stroke-width': activeIndex === pi ? 2 : 1,
+            }"
             stroke="var(--white)"
-            :stroke-width="activeIndex === pi ? 2 : 1"
           />
         </g>
       </g>
@@ -562,10 +576,12 @@ const tipPos = computed(() => {
         <rect
           v-for="b in bands"
           :key="`band_${b.index}`"
-          :x="b.x"
-          :y="innerTop"
-          :width="b.width"
-          :height="innerBottom - innerTop"
+          v-bind="{
+            '^x': b.x,
+            '^y': innerTop,
+            '^width': b.width,
+            '^height': innerBottom - innerTop,
+          }"
           fill="transparent"
           @mouseenter="showTip(b.index)"
           @mouseleave="hideTip"

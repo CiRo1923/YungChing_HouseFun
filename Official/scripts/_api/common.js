@@ -1,4 +1,4 @@
-import { version, fetchApi } from '@js/_api/fetchApi.js'
+import { version, fetchApi } from '@js/_api/.config.js'
 
 export const apiRegion = async (data) => await fetchApi.get(`api/${version}/region`, data)
 

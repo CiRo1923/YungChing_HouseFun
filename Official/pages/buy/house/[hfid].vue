@@ -48,7 +48,7 @@ onUseMeta({
     <PageBuyHouseEnvironment />
     <PageBuyHouseCommunity />
     <PageBuyHouseActualPrice />
-    <PageBuyHouseSocialLife />
+    <PageBuyHousePoi />
     <PageBuyHouseAgentPick />
     <PageBuyHouseHotForYou />
     <!-- <PageBuyHouseConstruction /> -->

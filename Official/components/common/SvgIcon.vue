@@ -37,7 +37,7 @@ const spriteHref = computed(() => {
 
 <template>
   <svg class="fill-current">
-    <use :href="spriteHref" />
+    <use v-bind="{ 'xlink:href': spriteHref }" />
   </svg>
 </template>
 

@@ -1,6 +1,6 @@
 export default {
   port: 26031,
-  https: true,
+  https: false,
   ieVersion: 11,
   desktopMinWidth: 1366,
   mobileMaxWidth: 740,

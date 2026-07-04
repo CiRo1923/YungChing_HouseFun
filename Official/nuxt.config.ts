@@ -20,6 +20,12 @@ const imageAssetDir = CONFIG.imgs.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace
 const imageAssetInclude = new RegExp(`${imageAssetDir}/(?!svg/spritemap\\.svg$)`)
 
 export default defineNuxtConfig({
+  // 開發除錯面板放在 plugins/dev/(子資料夾 → Nuxt 不自動註冊),於此明示載入 client / server 進入點。
+  // 好處:core.js 不必被 ignore,Vite 會照常監看它 → 改 core 只要 F5/HMR 即生效,不必重啟 dev。
+  plugins: [
+    { src: '~/plugins/dev/dev-debug-panel.client.js', mode: 'client' },
+    { src: '~/plugins/dev/dev-debug-panel.server.js', mode: 'server' },
+  ],
   experimental: {
     appManifest: false,
   },
@@ -221,7 +227,7 @@ export default defineNuxtConfig({
   devServer: {
     https: CONFIG.https,
     port: CONFIG.port,
-    host: '0.0.0.0',
+    host: '::',
   },
   nitro: {
     preset: 'node-server',

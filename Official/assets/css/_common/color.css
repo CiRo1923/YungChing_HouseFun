@@ -8,6 +8,7 @@
   --yellow-feea: #f1ecea;
   --green-8b0d: #87b90d;
   --green-8b0d66: #87b90d66;
+  --green-7b1c: #79b51c;
   --green-6a2d: #67a12d;
   --green-9c33: #98cb33;
   --green-4a7f: #49af7f;
@@ -26,6 +27,7 @@
   --gray-999: #999;
   --gray-666: #666;
   --gray-333: #333;
+  --gray-2338: #2f3338;
   --black: #000;
   --black-rgb: hexToRgb(#000);
 }

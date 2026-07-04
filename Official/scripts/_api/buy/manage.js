@@ -1,4 +1,4 @@
-import { version, fetchManageApi } from '@js/_api/fetchApi.js'
+import { version, fetchManageApi } from '@js/_api/.config.js'
 
 export const apiGetCommonServerTime = async (data) =>
   await fetchManageApi.get(`api/${version}/common/server-time`, data)
