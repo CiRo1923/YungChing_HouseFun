@@ -6,17 +6,56 @@ const buyHouse = useBuyHouseStore()
 const { lifeMap, poi } = storeToRefs(buyHouse)
 
 const categoryOptions = [
-  { id: 'traffic', label: '交通' },
-  { id: 'schools', label: '學校' },
-  { id: 'medical', label: '醫療' },
-  { id: 'dining', label: '餐飲' },
-  { id: 'shopping', label: '購物' },
-  { id: 'living', label: '生活' },
-  { id: 'parks', label: '公園' },
-  { id: 'parking', label: '停車' },
+  {
+    id: 'traffic',
+    label: '交通',
+    icon: 'icon_traffic',
+  },
+  {
+    id: 'schools',
+    label: '學校',
+    icon: 'icon_school',
+  },
+  {
+    id: 'medical',
+    label: '醫療',
+    icon: 'icon_medical',
+  },
+  {
+    id: 'dining',
+    label: '餐飲',
+    icon: 'icon_dining',
+  },
+  {
+    id: 'shopping',
+    label: '購物',
+    icon: 'icon_shopping',
+  },
+  {
+    id: 'living',
+    label: '生活',
+    icon: 'icon_living',
+  },
+  {
+    id: 'parks',
+    label: '公園',
+    icon: 'icon_parks',
+  },
+  {
+    id: 'parking',
+    label: '停車',
+    icon: 'icon_parking',
+  },
 ]
 
+const googleMapRef = ref(null)
 const activeID = ref(null)
+const anchorIndex = ref(null)
+
+// 點擊右側清單項目時,觸發地圖上對應 POI 的點擊行為(開啟 InfoWindow)
+const onGoogleMapFocusPlace = (index) => {
+  googleMapRef.value?.onFocusPlace(index)
+}
 const isDeviceM = computed(() => device.value === 'm')
 const hasPoi = computed(() => items.value.some((item) => item.data.length > 0))
 const items = computed(() =>
@@ -65,12 +104,32 @@ onUnmounted(() => {
     }"
   >
     <div class="overflow-hidden pt:rounded-[10px]">
-      <PageBuyHousePoiSwiperButton :items="items" v-model:activeID="activeID" v-if="!isDeviceM" />
-      <div class="relative tm:h-[380px] p:h-[420px] p:pr-[300px]">
-        <PageBuyHousePoiGoogleMap :items="items" :activeID="activeID" :source="source" />
-        <PageBuyHousePoiItemsAnchor :items="items" :activeID="activeID" />
+      <PageBuyHousePoiSwiperButton
+        :items="items"
+        v-model:activeID="activeID"
+        v-model:anchorIndex="anchorIndex"
+        v-if="!isDeviceM"
+      />
+      <div class="relative p:pr-[400px]">
+        <PageBuyHousePoiGoogleMap
+          ref="googleMapRef"
+          :items="items"
+          :activeID="activeID"
+          :source="source"
+        />
+        <PageBuyHousePoiSwiperButton
+          :items="items"
+          v-model:activeID="activeID"
+          v-model:anchorIndex="anchorIndex"
+          v-if="isDeviceM"
+        />
+        <PageBuyHousePoiItemsAnchor
+          :items="items"
+          :activeID="activeID"
+          v-model:anchorIndex="anchorIndex"
+          @focusPlace="onGoogleMapFocusPlace"
+        />
       </div>
-      <PageBuyHousePoiSwiperButton :items="items" v-model:activeID="activeID" v-if="isDeviceM" />
     </div>
   </PageBuyHouseContent>
 </template>

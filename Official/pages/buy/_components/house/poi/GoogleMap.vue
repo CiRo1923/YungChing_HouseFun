@@ -346,7 +346,7 @@ const createInfoContent = (place) => {
     : ''
 
   return `
-    <div class="poi-map-info min-w-[118px] max-w-[180px] px-[12px] py-[15px] text-left leading-[1.64] text-[--white] text-[14px] ">
+    <div class="poi-map-info min-w-[125px] max-w-[220px] px-[12px] py-[15px] text-left leading-[1.64] text-[--white] text-[14px] ">
       <strong class="block">${place.name}</strong>
       ${distance}
     </div>
@@ -364,7 +364,7 @@ const MARKER_VARIANTS = {
     html: () => `<img src="${homeIcon}" width="100%" height="100%" alt="" aria-hidden="true" />`,
   },
   poi: {
-    className: `${MARKER_BASE_CLASS} h-[30px] w-[30px] rounded-full bg-[--green-7b1c] font-[Arial,sans-serif] text-[14px] font-bold hover:scale-[1.06] hover:bg-[--gray-2338]  [&.is-active]:bg-[--gray-2338]`,
+    className: `${MARKER_BASE_CLASS} h-[30px] w-[30px] rounded-full bg-[--green-7b1c] text-[14px] hover:bg-[--gray-2338] [&.--active]:bg-[--gray-2338]`,
     text: (label) => label,
   },
 }
@@ -410,7 +410,7 @@ const createButtonOverlayMarker = ({
       })
 
       button.style.zIndex = String(zIndex)
-      button.classList.toggle('is-active', this.isActive)
+      button.classList.toggle('--active', this.isActive)
       this.button = button
       this.getPanes().overlayMouseTarget.appendChild(button)
     }
@@ -439,7 +439,7 @@ const createButtonOverlayMarker = ({
 
     setActive(isActive) {
       this.isActive = isActive
-      this.button?.classList.toggle('is-active', isActive)
+      this.button?.classList.toggle('--active', isActive)
     }
 
     setPixelOffset(value) {
@@ -712,10 +712,88 @@ onBeforeUnmount(() => {
   homeMarker?.setMap(null)
   infoWindow?.close()
 })
+
+// 地圖可放大的上限(避免無止境放大)
+const MAX_FOCUS_ZOOM = 20
+
+// 計算「讓某 POI 從群集中獨立出來」所需的最小整數 zoom;無法計算時回傳 null。
+// 群集判定為 Chebyshev 像素距離 ≤ CLUSTER_PIXEL_DISTANCE,像素距離 = 世界座標距離 × 2^zoom,
+// 故需 2^zoom > CLUSTER_PIXEL_DISTANCE / 最近鄰的世界座標距離。
+const getZoomToIsolatePlace = (place) => {
+  const projection = map?.getProjection?.()
+
+  if (!projection) {
+    return null
+  }
+
+  const toPoint = (position) =>
+    projection.fromLatLngToPoint(new window.google.maps.LatLng(position.lat, position.lng))
+  const target = toPoint(place.position)
+
+  let minWorldDistance = Infinity
+
+  placesWithPosition.value.forEach((other) => {
+    if (other.id === place.id) {
+      return
+    }
+
+    const point = toPoint(other.position)
+    const distance = Math.max(Math.abs(point.x - target.x), Math.abs(point.y - target.y))
+
+    if (distance < minWorldDistance) {
+      minWorldDistance = distance
+    }
+  })
+
+  if (!Number.isFinite(minWorldDistance) || minWorldDistance === 0) {
+    return null
+  }
+
+  return Math.ceil(Math.log2(CLUSTER_PIXEL_DISTANCE / minWorldDistance))
+}
+
+// 放大到足以拆開群集後,等 marker 重建完成(idle)再開啟該 POI
+const zoomInToIsolatePlace = (place) => {
+  const currentZoom = map.getZoom() ?? HOME_CENTER_ZOOM
+  const targetZoom = getZoomToIsolatePlace(place) ?? currentZoom + 2
+  const nextZoom = Math.min(Math.max(targetZoom, currentZoom + 1), MAX_FOCUS_ZOOM)
+
+  const listener = map.addListener('idle', () => {
+    listener.remove()
+    openPlace(place)
+  })
+
+  map.panTo(place.position)
+  map.setZoom(nextZoom)
+}
+
+// 供父層(ItemsAnchor 清單)點擊時,觸發與點擊地圖 POI marker 相同的行為;
+// 若該 POI 目前被群集折疊,先放大拆開再開啟。
+const onFocusPlace = (index) => {
+  const place = places.value[index]
+
+  if (!place?.position) {
+    return
+  }
+
+  const marker = markers.find((item) => item.__placeIDs?.includes(place.id))
+  const isClustered = (marker?.__placeIDs?.length ?? 0) > 1
+
+  if (isClustered) {
+    zoomInToIsolatePlace(place)
+    return
+  }
+
+  openPlace(place)
+}
+
+defineExpose({
+  onFocusPlace,
+})
 </script>
 
 <template>
-  <div class="h-full w-full" ref="mapRef" />
+  <div class="tm:h-[380px] p:h-[420px]" ref="mapRef" />
   <div
     v-if="overlayMessage"
     class="flex h-full w-full items-center justify-center bg-[--gray-f7] text-[14px]"

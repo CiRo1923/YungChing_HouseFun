@@ -69,7 +69,7 @@ const items = computed(() => {
                 main: '--text-orange-e646 text-[14px] ',
               },
               onClick: () => {
-                emits('popup', 'askMessage')
+                emits('popup', 'popupMessage')
               },
             },
             isFlex: true,
@@ -106,7 +106,7 @@ const items = computed(() => {
                     main: '--text-orange-e646 text-[14px] ',
                   },
                   onClick: () => {
-                    emits('popup', 'askMessage')
+                    emits('popup', 'popupMessage')
                   },
                 }
               : null,

@@ -2841,7 +2841,7 @@ export function initDevDebugPanel(options = {}) {
         .row.net.good .s { color: #7ee2a8; }
         .row.net.pending .s { color: #ffd479; }
         .navdiv { margin: 6px 2px; padding: 3px 6px; border-top: 1px dashed #4a5763; color: #8ab4f8; font-size: 11px; background: rgb(138 180 248 / 8%); }
-        .detail { margin: 0 4px 6px; padding: 6px 8px; background: #12151a; border-radius: 4px; max-height: 260px; overflow: auto; font-size: 11px; }
+        .detail { margin: 0 4px 6px; padding: 6px 8px; background: #12151a; border-radius: 4px; overflow-x: auto; font-size: 11px; }
         .sec-h { display: flex; align-items: center; gap: 8px; color: #9aa0a6; font-size: 10px; text-transform: uppercase; margin: 4px 0 2px; }
         .copy { margin-left: auto; padding: 2px 8px; border: 0; border-radius: 4px; cursor: pointer; background: #2f3338; color: #cfd3d7; font-size: 11px; }
         .raw { white-space: pre-wrap; word-break: break-all; color: #cfe3d0; }

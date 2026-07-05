@@ -22,7 +22,7 @@ const datas = computed(() => {
           :key="`${item.label}_${index}`"
         >
           <PageBuyHouseLabel :text="item.label" />
-          <p>{{ item.content }}</p>
+          <p class="tm:text-[14px] p:text-[18px]">{{ item.content }}</p>
         </li>
       </ul>
     </div>

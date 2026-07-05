@@ -3,7 +3,7 @@ const buyPopup = useBuyPopupStore()
 const { onMergeBtns } = usePopupActions()
 const { onCustom } = useBuyPopupActions()
 const onPopup = async (id) => {
-  if (id === 'askMessage') {
+  if (id === 'popupMessage') {
     await onCustom({
       id,
       title: '詢問與留言',
