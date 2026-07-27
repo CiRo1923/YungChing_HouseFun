@@ -1,0 +1,275 @@
+<script setup>
+import '@css/_modules/common/mForm/variables.css'
+import '@css/_modules/common/mForm/common.css'
+import '@js/_validation.js'
+
+import { Field, ErrorMessage } from 'vee-validate'
+
+const emits = defineEmits(['update:modelValue', 'change'])
+const props = defineProps({
+  name: {
+    type: String,
+    default: '',
+  },
+  options: {
+    type: Array,
+    default: () => [],
+  },
+  modelValue: {
+    type: [String, Number, Boolean, Array],
+    default: null,
+  },
+  rules: {
+    type: Object,
+    default: null,
+  },
+  config: {
+    type: Object,
+    default: () => {},
+  },
+  setClass: {
+    type: Object,
+    default: () => {},
+  },
+})
+const selected = ref(null)
+const model = computed({
+  get() {
+    return props.modelValue
+  },
+  set(value) {
+    emits('update:modelValue', value)
+  },
+})
+const config = computed(() => {
+  return {
+    modelMode: 'value',
+    // isReadonly: false,
+    // isDisabled: false,
+    // isError: false,
+    schema: {
+      label: 'label',
+      value: 'value',
+    },
+    ...props.config,
+  }
+})
+const setClass = computed(() => {
+  return {
+    ...{
+      main: '',
+      radios: '',
+      container: '',
+      element: '',
+      type: '',
+      error: '',
+    },
+    ...props.setClass,
+  }
+})
+const onSelected = () => {
+  const { schema } = config.value
+  const isModelData = typeof model.value === 'object'
+
+  selected.value =
+    model.value != null // != 同時包含 undefined 和 null
+      ? isModelData
+        ? model.value[schema.value]
+        : model.value
+      : ''
+}
+
+const onChange = (item) => {
+  const { modelMode, schema } = config.value
+  const isModelModeData = modelMode === 'data'
+
+  model.value = isModelModeData ? item : item[schema.value]
+  emits('change', item)
+}
+
+onSelected()
+</script>
+
+<template>
+  <div class="m-form --radios-oval overflow-hidden" :class="setClass.main">
+    <ul
+      class="m-form-radios inline-flex overflow-hidden rounded-[4px] border-[1px] bg-[--white]"
+      :class="setClass.radios"
+    >
+      <li
+        class="m-form-container"
+        :class="setClass.container"
+        v-for="(item, index) in props.options"
+        :key="`${item[config.schema.label]}_${index}`"
+      >
+        <!-- '--checked': item[config.schema.value] == selected 用 == 會有形態別問題 '1' (string) !== 1 (int) -->
+        <label
+          class="m-form-element relative flex h-full w-full cursor-pointer items-center justify-center transition-colors duration-300 tm:gap-x-[3px] p:gap-x-[5px]"
+          :class="[
+            {
+              '--checked': item[config.schema.value] == selected,
+            },
+            setClass.element,
+          ]"
+        >
+          <input
+            type="radio"
+            :name="props.name"
+            v-model="selected"
+            :value="item[config.schema.value]"
+            class="m-form-type sr-only"
+            :class="setClass.type"
+            @change="onChange(item)"
+          />
+          <!-- v-if="item[config.schema.value] == selected" 用 == 會有形態別問題 '1' (string) !== 1 (int) -->
+          <CommonSvgIcon
+            icon="icon_check_solid"
+            class="m-form-icon h-[16px] w-[16px]"
+            v-if="item[config.schema.value] == selected"
+          />
+          <em class="m-form-label text-[16px]">{{ item[config.schema.label] }}</em>
+        </label>
+      </li>
+    </ul>
+    <Field
+      :name="`${props.name}_radios`"
+      v-model="selected"
+      :rules="props.rules"
+      v-slot="{ field }"
+    >
+      <input type="hidden" :id="`${props.name}_radios`" v-bind="field" />
+    </Field>
+    <ErrorMessage
+      as="span"
+      :name="`${props.name}_radios`"
+      class="m-form-error"
+      :class="setClass.error"
+      v-slot="{ message }"
+    >
+      <CommonMErrorMessageElem :message="message" />
+    </ErrorMessage>
+  </div>
+</template>
+<style lang="postcss">
+.m-form {
+  &.\-\-radios-oval {
+    &.\-\-border {
+      .m-form-radios {
+        @apply border-[--gray-ccce];
+      }
+    }
+
+    &:not(.\-\-border) {
+      .m-form-radios {
+        @apply border-transparent;
+      }
+    }
+
+    .m-form-container {
+      &:not(:first-child) {
+        @apply border-l-[1px] border-l-[--gray-ccce];
+      }
+
+      &:not(:last-child) {
+        @apply border-r-[1px] border-r-[--gray-ccce];
+      }
+    }
+
+    .m-form-element {
+      &:not(&.\-\-checked) {
+        @apply bg-transparent;
+      }
+
+      &.\-\-checked {
+        @apply bg-[--green-8b0d] text-[--white];
+      }
+    }
+  }
+}
+
+@screen p {
+  .m-form {
+    &.\-\-radios-oval {
+      &.\-\-px-5,
+      &.p\:\-\-px-5,
+      &.pt\:\-\-px-5 {
+        .m-form-element {
+          @apply px-[5px];
+        }
+      }
+
+      &.\-\-h-45,
+      &.p\:\-\-h-45,
+      &.pt\:\-\-h-45 {
+        .m-form-radios {
+          @apply h-[45px];
+        }
+      }
+
+      /* .m-form-element {
+        &:not(&.\-\-checked) {
+          @apply px-[25px];
+        }
+      } */
+    }
+  }
+}
+
+/* @screen tm {
+  .m-form {
+    &.\-\-radios-oval {
+      .m-form-element {
+        &:not(&.\-\-checked) {
+          @apply pl-[19px] pr-[20px];
+        }
+      }
+    }
+  }
+} */
+
+@screen t {
+  .m-form {
+    &.\-\-radios-oval {
+      &.\-\-px-5,
+      &.pt\:\-\-px-5,
+      &.tm\:\-\-px-5,
+      &.t\:\-\-px-5 {
+        .m-form-element {
+          @apply px-[5px];
+        }
+      }
+
+      &.\-\-h-45,
+      &.pt\:\-\-h-45,
+      &.tm\:\-\-h-45,
+      &.t\:\-\-h-45 {
+        .m-form-radios {
+          @apply h-[45px];
+        }
+      }
+    }
+  }
+}
+
+@screen m {
+  .m-form {
+    &.\-\-radios-oval {
+      &.\-\-px-5,
+      &.tm\:\-\-px-5,
+      &.m\:\-\-px-5 {
+        .m-form-element {
+          @apply px-[5px];
+        }
+      }
+
+      &.\-\-h-45,
+      &.tm\:\-\-h-45,
+      &.m\:\-\-h-45 {
+        .m-form-radios {
+          @apply h-[45px];
+        }
+      }
+    }
+  }
+}
+</style>

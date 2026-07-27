@@ -36,7 +36,7 @@ const setClass = computed(() => {
       class="detail-card-container relative flex flex-col-reverse overflow-hidden bg-[--white] shadow-card"
       :class="setClass.container"
     >
-      <BuyMAnchor
+      <CommonMAnchor
         :to="{
           name: 'buy-house-hfid',
           params: {

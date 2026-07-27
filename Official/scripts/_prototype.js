@@ -195,6 +195,19 @@ export const onAddZero = (number) => {
   return value > 9 ? String(value) : `0${value}`
 }
 
+// 格局字串:房/廳/衛 為 0 或無資料時以 `--` 呈現(而非 0),跨頁一致(明細基本資料 / 主資訊)。
+export const onLayoutText = (layout = {}) => {
+  const dash = (value) => (value ? value : '--')
+  const { room, living, bath } = layout || {}
+
+  return `${dash(room)} 房 (室) ${dash(living)} 廳 ${dash(bath)} 衛`
+}
+
+// 帶單位字串:值為 null / undefined / '' 時回傳 null(讓欄位整列隱藏),避免印出「null 年」等。
+// 注意:保留 0(如建坪 0 坪)為有效值,不視為空。suffix 自帶前導空白,例如 ' 年'、' 坪'。
+export const onUnitText = (value, suffix = '') =>
+  value == null || value === '' ? null : `${value}${suffix}`
+
 // 格式化日期
 export const onFormatDate = (date, format) => {
   // ---- helpers ----
@@ -369,8 +382,7 @@ export const onFormatDate = (date, format) => {
   }
 
   // 組日期字串
-  let dateStr = ''
-  dateStr = dateFmt.replace(/YYYY|YYY|MM|M|DD|D/g, (token) => dateTokens[token])
+  const dateStr = dateFmt.replace(/YYYY|YYY|MM|M|DD|D/g, (token) => dateTokens[token])
 
   // 組時間字串（只在 format 有 hh/mm/ss 才開始帶時間）
   let timeStr = ''
@@ -573,57 +585,33 @@ export const onDevice = () => {
 
 // 取得裝置
 export const onOS = () => {
-  let userAgent = navigator.userAgent.toLocaleLowerCase()
-  let osName = null
+  const userAgent = navigator.userAgent.toLocaleLowerCase()
 
-  switch (true) {
-    case /android/.test(userAgent):
-      osName = 'Android'
-      break
-    case /iphone|ipad/.test(userAgent):
-      osName = 'IOS'
-      break
-    default:
-      osName = 'Unknown'
-      break
-  }
+  // 順序即優先序
+  const rules = [
+    { name: 'Android', re: /android/ },
+    { name: 'IOS', re: /iphone|ipad/ },
+  ]
 
-  return osName
+  return rules.find(({ re }) => re.test(userAgent))?.name ?? 'Unknown'
 }
 
 // 取得瀏覽器
 export const onBrowser = () => {
-  let userAgent = navigator.userAgent.toLocaleLowerCase()
-  let browserName = null
+  const userAgent = navigator.userAgent.toLocaleLowerCase()
 
-  switch (true) {
-    case /line/.test(userAgent):
-      browserName = 'Line'
-      break
-    case /fbav/.test(userAgent):
-      browserName = 'FaceBook'
-      break
-    case /chrome|chromium|crios/.test(userAgent):
-      browserName = 'Chrome'
-      break
-    case /firefox|fxios/.test(userAgent):
-      browserName = 'Firefox'
-      break
-    case /safari/.test(userAgent):
-      browserName = 'Safari'
-      break
-    case /opr/.test(userAgent):
-      browserName = 'Opera'
-      break
-    case /edg/.test(userAgent):
-      browserName = 'Edge'
-      break
-    default:
-      browserName = 'Unknown'
-      break
-  }
+  // 順序即優先序(例如 chrome 要在 safari 之前)
+  const rules = [
+    { name: 'Line', re: /line/ },
+    { name: 'FaceBook', re: /fbav/ },
+    { name: 'Chrome', re: /chrome|chromium|crios/ },
+    { name: 'Firefox', re: /firefox|fxios/ },
+    { name: 'Safari', re: /safari/ },
+    { name: 'Opera', re: /opr/ },
+    { name: 'Edge', re: /edg/ },
+  ]
 
-  return browserName
+  return rules.find(({ re }) => re.test(userAgent))?.name ?? 'Unknown'
 }
 
 // 產出 uuid
@@ -1152,7 +1140,7 @@ export const countdown = {
       }
     }
 
-    let data = null
+    let data
     try {
       data = JSON.parse(raw)
     } catch {

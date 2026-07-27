@@ -372,7 +372,7 @@ const createErrorResponse = ({
 })
 
 export const onFetchApi = (globalConfig = {}) => {
-  const { baseURL, headers, fetcher = fetch } = globalConfig
+  const { baseURL, headers, credentials, fetcher = fetch } = globalConfig
 
   const interceptors = {
     request: createInterceptorManager(),
@@ -434,7 +434,8 @@ export const onFetchApi = (globalConfig = {}) => {
         },
         body: opts.body,
         signal: requestConfig.signal,
-        credentials: requestConfig.credentials,
+        // 單一請求可覆寫;否則用父系(onFetchApi)帶入的預設。
+        credentials: requestConfig.credentials ?? credentials,
         responseType,
         config: safeConfig,
       }

@@ -1,4 +1,6 @@
 <script setup>
+import { onUnitText } from '@js/_prototype.js'
+
 const props = defineProps({
   item: {
     type: Object,
@@ -22,24 +24,27 @@ const items = computed(() => {
     {
       id: 'buildAge',
       label: '屋齡',
-      value: `${buildAge} 年`,
+      value: onUnitText(buildAge, ' 年'),
+      isHidden: onUnitText(buildAge, ' 年') == null,
     },
     {
       id: 'floor',
       label: '樓層',
       value: `${isSameFloorFromTo ? from : ` ~ ${to}`} 樓`,
+      isHidden: from == null,
     },
     {
       id: 'room',
       label: '房',
-      value: `${room} 房`,
+      value: onUnitText(room, ' 房'),
+      isHidden: onUnitText(room, ' 房') == null,
     },
   ]
 })
 </script>
 
 <template>
-  <BuyMSeparator
+  <CommonMSeparator
     :items="items"
     :setClass="{
       main: '--horizontal --gap-x-16',

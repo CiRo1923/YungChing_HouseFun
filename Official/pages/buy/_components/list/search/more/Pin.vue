@@ -40,7 +40,7 @@ const onChange = () => {}
       class="mb-[15px] flex shrink-0 items-center gap-x-[20px] border-b-[1px] border-b-[--gray-ccce] pb-[15px]"
     >
       <li v-for="(item, index) in options" :key="`pinType_${item.value}_${index}`">
-        <BuyMFormRadio
+        <CommonMFormRadio
           name="pinType"
           v-model="pin.type"
           :config="{
@@ -53,7 +53,7 @@ const onChange = () => {}
     </ul>
     <ul class="scrollbar --y grow space-y-[20px]">
       <li v-for="(item, index) in pin.options" :key="`pin_${item.value}_${index}`">
-        <BuyMFormRadio
+        <CommonMFormRadio
           name="pin"
           v-model="apiSearchData[pin.type]"
           :config="{

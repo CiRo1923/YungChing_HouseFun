@@ -27,20 +27,18 @@ export const useBuyPopupStore = defineStore('buyPopup', () => {
         isClose: true,
       },
     ],
-  })
-  const setClass = readonly({
-    alert: {
-      main: 'p:--w-450 t:--w-300',
-      content: 'text-center',
-    },
-    confirm: {
-      main: 'p:--w-450 t:--w-300',
-      content: 'text-center',
-    },
+    login: [
+      {
+        id: 'sure',
+        label: '登入',
+        class: '--bg-orange-f74c --text-white',
+        type: 'sure',
+        isClose: false,
+      },
+    ],
   })
 
   return {
     buttons,
-    setClass,
   }
 })

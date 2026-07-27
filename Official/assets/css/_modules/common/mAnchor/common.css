@@ -1,0 +1,38 @@
+.m-anchor {
+  border-width: var(--anchor-border);
+
+  @apply inline-flex h-[--anchor-h] items-center justify-center border-[--anchor-border-color] bg-[--anchor-bg-color] px-[--anchor-px] py-[--anchor-py] tracking-[0.06em] text-[--anchor-color] transition-colors duration-300;
+
+  &.\-\-rounded {
+    @apply rounded-[--anchor-rounded];
+  }
+
+  &.\-\-oval {
+    @apply rounded-full;
+  }
+
+  &:disabled {
+    @apply cursor-not-allowed;
+  }
+}
+
+@screen p {
+  .m-anchor {
+    --anchor-border: var(--anchor-pc-border);
+    --anchor-rounded: var(--anchor-pc-rounded);
+  }
+}
+
+@screen t {
+  .m-anchor {
+    --anchor-border: var(--anchor-tablet-border);
+    --anchor-rounded: var(--anchor-tablet-rounded);
+  }
+}
+
+@screen m {
+  .m-anchor {
+    --anchor-border: var(--anchor-mobile-border);
+    --anchor-rounded: var(--anchor-mobile-rounded);
+  }
+}

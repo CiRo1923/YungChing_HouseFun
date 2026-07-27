@@ -19,7 +19,7 @@ const onChange = (data) => {
 </script>
 
 <template>
-  <BuyMAutoComplete
+  <CommonMFormAutoComplete
     name="keyword"
     v-model="apiSearchData.kw"
     :config="{
@@ -36,12 +36,12 @@ const onChange = (data) => {
       },
     }"
     :setClass="{
-      main: 'p:--h-45 --px-12 --py-8 tm:--h-40 grow',
+      main: '--rounded p:--h-45 --px-12 --py-8 tm:--h-40 grow',
     }"
     @input="onInput"
     @change="onChange"
   />
-  <!-- <BuyMFormInput
+  <!-- <CommonMFormInput
     name="keyword"
     v-model="apiSearchData.kw"
     :config="{

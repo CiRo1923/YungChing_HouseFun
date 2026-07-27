@@ -1,4 +1,6 @@
 <script setup>
+import { onLayoutText } from '@js/_prototype.js'
+
 const buyHouse = useBuyHouseStore()
 const { basic, pin, floor } = storeToRefs(buyHouse)
 
@@ -7,7 +9,6 @@ const houseInfo = computed(() => {
   const { build } = pin.value
   const { from, to, up } = floor.value
   const isSameFloorFromTo = !to || !from || from === to
-  const { room, living, bath } = layout
   // const addonData = {
   //   room: addon.room ? ` ${addon.room} 房 (室)` : '',
   //   living: addon.living ? ` ${addon.living} 廳` : '',
@@ -35,7 +36,7 @@ const houseInfo = computed(() => {
     {
       id: 'layout',
       label: '格局',
-      value: `${room} 房 (室) ${living} 廳 ${bath} 衛`,
+      value: onLayoutText(layout),
     },
   ]
 })

@@ -14,12 +14,13 @@ const items = computed(() => {
   return [
     {
       id: 'unitPrice',
-      value: `${numberComma.add(unitPrice)} 萬 / 坪`,
+      value: unitPrice != null ? `${numberComma.add(unitPrice)} 萬 / 坪` : null,
+      isHidden: unitPrice == null,
     },
     {
       id: 'parkingPrice',
       value: `含車位價 ${numberComma.add(parkPrice)} 萬`,
-      isHidden: !isPriceIncludeParking,
+      isHidden: !isPriceIncludeParking || parkPrice == null,
     },
   ]
 })
@@ -41,7 +42,7 @@ const items = computed(() => {
         萬
       </span>
     </p>
-    <BuyMSeparator
+    <CommonMSeparator
       :items="items"
       :setClass="{
         main: '--horizontal --gap-x-20 justify-end',

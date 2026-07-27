@@ -2,7 +2,8 @@
 const common = useCommonStore()
 const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
-const { onValueGetText, onResolveByDevice } = useBuyProjectActions()
+const { onResolveByDevice } = useBuyProjectActions()
+const { onValueGetText } = useManageActions()
 const buyList = useBuyListStore()
 const { apiSearchData, price, type, pin, parking, age, floor, unitPrice, face, nearBy, more } =
   storeToRefs(buyList)
@@ -130,7 +131,7 @@ onUnmounted(() => {
           class="search-mode-item relative flex min-w-0 items-center gap-x-[5px] overflow-hidden tm:w-full p:grow"
         >
           <PageBuyListSearchKeyword />
-          <BuyMAnchor
+          <CommonMAnchor
             text="搜尋"
             :config="{
               icon: {
@@ -149,7 +150,11 @@ onUnmounted(() => {
       </ul>
       <PageBuyListSearchCondition />
     </div>
-    <PageBuyListSearchFilter @click="onApiSearch" v-if="isDeviceM" />
+    <PageBuyListSearchFilter
+      @click="onApiSearch"
+      @click:routePush="onRouterPush"
+      v-if="isDeviceM"
+    />
   </div>
 </template>
 

@@ -31,7 +31,7 @@ const items = computed(() => {
 </script>
 
 <template>
-  <BuyMSeparator
+  <CommonMSeparator
     :items="items"
     :setClass="{
       main: '--horizontal --gap-x-16',
@@ -39,7 +39,7 @@ const items = computed(() => {
     }"
   >
     <template #link="{ value }">
-      <BuyMAnchor
+      <CommonMAnchor
         :text="value"
         :config="{
           icon: 'chevron_right',
@@ -50,7 +50,7 @@ const items = computed(() => {
         }"
       />
     </template>
-  </BuyMSeparator>
+  </CommonMSeparator>
 </template>
 
 <style lang="postcss"></style>

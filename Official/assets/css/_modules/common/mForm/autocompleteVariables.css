@@ -1,0 +1,91 @@
+:root {
+  --form-autocomplete-icon-pc-p: 2px;
+  --form-autocomplete-icon-tablet-p: 2px;
+  --form-autocomplete-icon-mobile-p: 2px;
+
+  --form-autocomplete-icon-pc-size: 20px;
+  --form-autocomplete-icon-tablet-size: 20px;
+  --form-autocomplete-icon-mobile-size: 20px;
+
+  --form-autocomplete-dropdown-pc-my: 3px;
+  --form-autocomplete-dropdown-tablet-my: 3px;
+  --form-autocomplete-dropdown-mobile-my: 3px;
+
+  --form-autocomplete-dropdown-pc-rounded: 16px;
+  --form-autocomplete-dropdown-tablet-rounded: 16px;
+  --form-autocomplete-dropdown-mobile-rounded: 16px;
+
+  --form-autocomplete-dropdown-pc-shadow: 0 4px 24px 0 #02041614, 0 2px 16px -8px #02041633;
+  --form-autocomplete-dropdown-tablet-shadow: 0 4px 24px 0 #02041614, 0 2px 16px -8px #02041633;
+  --form-autocomplete-dropdown-mobile-shadow: 0 4px 24px 0 #02041614, 0 2px 16px -8px #02041633;
+
+  --form-autocomplete-dropdown-container-pc-px: 1px;
+  --form-autocomplete-dropdown-container-tablet-px: 1px;
+  --form-autocomplete-dropdown-container-mobile-px: 1px;
+
+  --form-autocomplete-dropdown-container-pc-py: 0;
+  --form-autocomplete-dropdown-container-tablet-py: 0;
+  --form-autocomplete-dropdown-container-mobile-py: 0;
+
+  --m-autocomplete-dropdown-common-pc-mx: 11px;
+  --m-autocomplete-dropdown-common-tablet-mx: 11px;
+  --m-autocomplete-dropdown-common-mobile-mx: 11px;
+
+  --m-autocomplete-dropdown-common-pc-py: 12px;
+  --m-autocomplete-dropdown-common-tablet-py: 12px;
+  --m-autocomplete-dropdown-common-mobile-py: 12px;
+
+  --form-autocomplete-dropdown-button-pc-border: 1px;
+  --form-autocomplete-dropdown-button-tablet-border: 1px;
+  --form-autocomplete-dropdown-button-mobile-border: 1px;
+
+  --m-autocomplete-dropdown-label-pc-px: 0;
+  --m-autocomplete-dropdown-label-tablet-px: 0;
+  --m-autocomplete-dropdown-label-mobile-px: 0;
+
+  --m-autocomplete-dropdown-label-pc-py: 0;
+  --m-autocomplete-dropdown-label-tablet-py: 0;
+  --m-autocomplete-dropdown-label-mobile-py: 0;
+
+  --form-autocomplete-elment-icon-color: var(--gray-999);
+  --form-autocomplete-elment-focus-icon-color: var(--green-8b0d);
+  --form-autocomplete-elment-disabled-icon-color: var(--gray-ccce);
+  --form-autocomplete-elment-error-icon-color: var(--red-d111);
+
+  --form-autocomplete-dropdown-container-bg-color: var(--white);
+
+  --form-autocomplete-dropdown-button-bg-color: var(--gray-e54d);
+  --form-autocomplete-dropdown-button-active-bg-color: var(--green-8b0d66);
+  --form-autocomplete-dropdown-button-disbaled-bg-color: var(--gray-f7);
+}
+
+@screen p {
+  .m-autocomplete-dropdown {
+    &.\-\-rounded,
+    &.p\:\-\-rounded,
+    &.pt\:\-\-rounded {
+      --form-autocomplete-dropdown-rounded: var(--form-autocomplete-dropdown-pc-rounded);
+    }
+  }
+}
+
+@screen t {
+  .m-autocomplete-dropdown {
+    &.\-\-rounded,
+    &.pt\:\-\-rounded,
+    &.tm\:\-\-rounded,
+    &.t\:\-\-rounded {
+      --form-autocomplete-dropdown-rounded: var(--form-autocomplete-dropdown-tablet-rounded);
+    }
+  }
+}
+
+@screen m {
+  .m-autocomplete-dropdown {
+    &.\-\-rounded,
+    &.tm\:\-\-rounded,
+    &.m\:\-\-rounded {
+      --form-autocomplete-dropdown-rounded: var(--form-autocomplete-dropdown-mobile-rounded);
+    }
+  }
+}

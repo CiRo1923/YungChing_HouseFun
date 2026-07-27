@@ -11,7 +11,7 @@ const features = computed(() => options.value.features ?? [])
 </script>
 
 <template>
-  <BuyCommonCustomPopup
+  <CommonCustomPopup
     id="popupFeatures"
     :config="{
       mode: {
@@ -24,7 +24,7 @@ const features = computed(() => options.value.features ?? [])
   >
     <ul class="grid tm:grid-cols-2 tm:gap-[10px] p:grid-cols-3 p:gap-[15px]">
       <li v-for="(item, index) in features" :key="`${item.text}_${item.code}_${index}`">
-        <BuyMFormCheckBox
+        <CommonMFormCheckBox
           name="tag"
           v-model="apiSearchData.tag"
           :config="{
@@ -37,7 +37,7 @@ const features = computed(() => options.value.features ?? [])
         />
       </li>
     </ul>
-  </BuyCommonCustomPopup>
+  </CommonCustomPopup>
 </template>
 
 <style lang="postcss"></style>

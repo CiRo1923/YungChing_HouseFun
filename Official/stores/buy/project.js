@@ -4,15 +4,7 @@ export const useBuyProjectStore = defineStore('buyProject', () => {
   const runtimeConfig = useRuntimeConfig()
   const isDevMode = runtimeConfig.public.NUXT_PUBLIC_APP_MODE === 'dev'
   const NAME = '好房網 買屋'
-  const serverTime = ref(null)
-  const options = ref({
-    casePurpose: null,
-    caseType: null,
-    face: null,
-    parkingMode: null,
-    nearBy: null,
-    features: null,
-  })
+  const accessData = ref(null)
   const apiMessageDataDefault = readonly({
     houseId: null,
     name: isDevMode ? '真測試' : null,
@@ -22,7 +14,6 @@ export const useBuyProjectStore = defineStore('buyProject', () => {
   const apiMessageData = ref({ ...apiMessageDataDefault })
   const messageData = ref(null)
   const countdownData = ref({
-    timeout: 0,
     expires: null,
   })
   const apiVerifyCodeDataDefault = readonly({
@@ -34,8 +25,7 @@ export const useBuyProjectStore = defineStore('buyProject', () => {
 
   return {
     NAME,
-    serverTime,
-    options,
+    accessData,
     apiMessageDataDefault,
     apiMessageData,
     messageData,

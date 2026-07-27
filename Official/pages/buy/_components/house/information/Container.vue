@@ -18,6 +18,13 @@ const onAnchorBind = (item) => {
 
   return { onClick }
 }
+
+// 無資料欄位整列隱藏(含 label),讓後方欄位自動遞補。
+// 判定「有內容」:任一 value 具有非空 content、或有文字的 anchor、或 tools。
+const isEmpty = (value) => value == null || value === ''
+const hasContent = (item) =>
+  Array.isArray(item.values) &&
+  item.values.some((value) => !isEmpty(value.content) || value.anchor?.text || value.tools)
 </script>
 
 <template>
@@ -30,7 +37,7 @@ const onAnchorBind = (item) => {
       :key="`ˋ${props.name}_${index}`"
     >
       <template v-for="(item, idx) in data" :key="`ˋ${props.name}_${item.id}_${idx}_${index}`">
-        <li v-if="!item.isHidden">
+        <li v-if="!item.isHidden && hasContent(item)">
           <div class="flex tm:gap-x-[10px] p:gap-x-[25px]">
             <PageBuyHouseLabel :text="item.label" />
             <ul
@@ -60,7 +67,7 @@ const onAnchorBind = (item) => {
                     <span v-html="value.tools.content" />
                   </p>
                 </div>
-                <BuyMAnchor
+                <CommonMAnchor
                   :text="value.anchor.text"
                   v-bind="onAnchorBind(value.anchor)"
                   :setClass="{
@@ -69,7 +76,7 @@ const onAnchorBind = (item) => {
                   }"
                   v-if="value.anchor"
                 />
-                <BuyMAnchor
+                <CommonMAnchor
                   :text="value.popupAnchor.text"
                   v-bind="onAnchorBind(value.popupAnchor)"
                   :config="{

@@ -19,7 +19,8 @@ export const useBuyListStore = defineStore('buyList', () => {
     age: '',
     floor: '',
     uniprice: '',
-    dt: '',
+    dt: '', // 朝向(face)
+    ft: '', // 環境(nearBy);須預先宣告為字串,否則 isJoin 多選 checkbox 無法初始化 → 環境搜尋無作用
     tab: 0,
     tag: [],
     kw: '',
@@ -238,7 +239,7 @@ export const useBuyListStore = defineStore('buyList', () => {
         value: '2-5',
       },
       {
-        label: '6 - 12 年',
+        label: '6 - 12 樓',
         value: '6-12',
       },
       {
@@ -359,7 +360,7 @@ export const useBuyListStore = defineStore('buyList', () => {
   })
   const pagination = ref({
     page: 1,
-    pageSize: 12,
+    pageSize: 20,
     total: 0,
   })
 

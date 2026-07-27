@@ -139,7 +139,7 @@ watch(
     >
       <template v-for="(item, index) in mode" :key="`${item.label}_${index}`">
         <li v-if="item.value">
-          <BuyMAnchor
+          <CommonMAnchor
             :text="item.label"
             :setClass="{
               main: [

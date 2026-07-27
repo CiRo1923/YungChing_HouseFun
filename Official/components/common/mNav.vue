@@ -98,7 +98,7 @@ onUnmounted(() => {
   <!-- <pre>
     {{ route.name }}
   </pre> -->
-  <nav class="m-nav ml-auto shrink-0 m:absolute">
+  <nav class="m-nav m:absolute pt:grow p:ml-[130px]">
     <div class="m-nav-container flex overflow-hidden m:max-h-0 pt:h-full">
       <ul class="m-nav-menu tracking-default t:gap-x-[15px] pt:flex pt:h-full p:gap-x-[30px]">
         <li
@@ -113,7 +113,7 @@ onUnmounted(() => {
         >
           <component
             :is="onAnchorAs(item)"
-            class="m-nav-anchor flex flex-col justify-end text-center text-[18px] t:gap-y-[4px] pt:h-full p:min-w-[75px] p:gap-y-[7px]"
+            class="m-nav-anchor flex flex-col justify-end text-center text-[18px] t:gap-y-[4px] pt:h-full p:min-w-[75px] p:gap-y-[6px]"
             :class="{ '--active': onAnchorActive(item) }"
             v-bind="onAnchorBind(item)"
           >
@@ -137,6 +137,7 @@ onUnmounted(() => {
           </div>
         </li>
       </ul>
+      <slot />
     </div>
   </nav>
 </template>
@@ -193,7 +194,7 @@ onUnmounted(() => {
     }
 
     &:after {
-      @apply w-full rounded-t-full transition-colors duration-300 content-default;
+      @apply w-full rounded-full transition-colors duration-300 content-default;
     }
   }
 }

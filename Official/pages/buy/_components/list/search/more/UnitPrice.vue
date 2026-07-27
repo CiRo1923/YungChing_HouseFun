@@ -31,7 +31,7 @@ onUnmounted(() => {
 <template>
   <ul class="space-y-[20px]">
     <li v-for="(item, index) in unitPrice.options" :key="`unitPrice_${item.value}_${index}`">
-      <BuyMFormRadio
+      <CommonMFormRadio
         name="uniprice"
         v-model="apiSearchData.uniprice"
         :config="{

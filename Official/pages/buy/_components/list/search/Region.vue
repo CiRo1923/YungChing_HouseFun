@@ -55,20 +55,21 @@ const areas = computed(() => {
 })
 
 const onGetLabel = () => {
-  const datas = getData.value
+  // 區域 → 「縣市-區域」;全區(無區域)→ 只顯示「縣市」;各項以「、」串接
+  region.value.label = getData.value
+    .map(({ city, area }) => (area ? `${city}-${area}` : city))
+    .join('、')
+}
 
-  region.value.label = ''
+// 下拉左欄縣市名稱後方的已選數量:選了 N 個具體區域 → (N);全區或未選 → 純縣市名
+const onCityLabel = (item) => {
+  const ids = region.value.ids ? region.value.ids.split(',') : []
 
-  for (let i = 0; i < datas.length; i += 1) {
-    const { city, area } = datas[i]
-    const areaName = area || ''
+  // 具體區域:比對該市底下被勾選的區域(排除代表全區的縣市碼本身)
+  const count = (item.areas || []).filter((area) => area.id !== item.id && ids.includes(area.id))
+    .length
 
-    if (region.value.label) {
-      region.value.label += `、${city}${areaName}`
-    } else {
-      region.value.label += `${city}${areaName}`
-    }
-  }
+  return count > 0 ? `${item.name}(${count})` : item.name
 }
 
 const onCityClick = (value) => {
@@ -108,7 +109,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <BuyMFormSelectDropdown
+  <CommonMFormSelectDropdown
     :name="`${componentsName}Dropdown`"
     v-model="region.label"
     :config="{
@@ -138,8 +139,8 @@ onUnmounted(() => {
             v-for="(item, index) in region.options"
             :key="`${componentsName}_${item.id}_${index}`"
           >
-            <BuyMAnchor
-              :text="item.name"
+            <CommonMAnchor
+              :text="onCityLabel(item)"
               :setClass="{
                 main: [
                   'p:--px-20 tm:--px-10 --h-35 --rounded w-full',
@@ -159,7 +160,7 @@ onUnmounted(() => {
             v-for="(item, index) in areas"
             :key="`${componentsName}_${item.id}_${index}`"
           >
-            <BuyMFormCheckBox
+            <CommonMFormCheckBox
               name="area"
               v-model="region.ids"
               :config="{
@@ -185,7 +186,7 @@ onUnmounted(() => {
       @click:routePush="onRoutePush"
       v-if="isDeviceM"
     />
-  </BuyMFormSelectDropdown>
+  </CommonMFormSelectDropdown>
 </template>
 
 <style></style>

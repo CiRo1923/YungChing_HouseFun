@@ -110,7 +110,7 @@ const onBlur = () => {
 
 <template>
   <div class="flex items-center gap-x-[10px]">
-    <BuyMFormInput
+    <CommonMFormInput
       :name="`${props.name}min`"
       v-model.number="modelMin"
       :config="{
@@ -128,7 +128,7 @@ const onBlur = () => {
       @blur="onBlur"
     />
     <span class="shrink-0">-</span>
-    <BuyMFormInput
+    <CommonMFormInput
       :name="`${props.name}max`"
       v-model.number="modelMax"
       :config="{

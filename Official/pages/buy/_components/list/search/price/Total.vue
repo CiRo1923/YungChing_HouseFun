@@ -69,7 +69,7 @@ const onRadioChange = (data) => {
 <template>
   <ul class="grow space-y-[15px]">
     <li v-for="(item, index) in price.options" :key="`${props.name}_${item.code}_${index}`">
-      <BuyMFormCheckBox
+      <CommonMFormCheckBox
         :name="props.name"
         v-model="price.range"
         :config="{

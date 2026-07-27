@@ -13,7 +13,7 @@ const onRoutePush = () => {
 <template>
   <ul class="flex gap-x-[10px] px-[30px] py-[15px]">
     <li class="flex-1">
-      <BuyMAnchor
+      <CommonMAnchor
         text="清除條件"
         :setClass="{
           main: '--h-45 --oval --border-gray-ccce --text-gray-666 w-full',
@@ -22,7 +22,7 @@ const onRoutePush = () => {
       />
     </li>
     <li class="flex-1">
-      <BuyMAnchor
+      <CommonMAnchor
         text="搜尋"
         :setClass="{
           main: '--h-45 --oval --bg-orange-f74c --text-white w-full',

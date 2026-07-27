@@ -3,19 +3,21 @@ import { awaitAllPromise } from '@js/_prototype.js'
 
 const common = useCommonStore()
 const { device } = storeToRefs(common)
-const { onResize } = useCommonActions()
-const { onUseMeta, onIsLoading, onWithLoadingAll } = useCommonActions()
+const { onUseMeta, onIsLoading, onWithLoadingAll, onResize } = useCommonActions()
+const { onApiGetCommonServerTime } = useProjectActions()
 const buyList = useBuyListStore()
 const { region, mrt, pagination } = storeToRefs(buyList)
+
+// H1 由共用 Header 讀 project.seo.h1 輸出:SSR 由 middleware/buySeo 預抓、
+// client 由本頁 onApiBuyList → onSetSeo 更新、換頁清空由 middleware/seoReset 處理。
 const {
-  onApiGetCommonServerTime,
   onApiGETRealEstatePurposeCheckOptions,
   onApiGETRealEstateTypeSelectOptions,
   onApiGETRealEstateFaceSelectOptions,
   onApiGETRealEstateParkingModeSelectOptions,
   onApiGETRealEstateNearByCheckOptions,
   onApiGETRealEstateFeatureCheckOptions,
-} = useBuyProjectActions()
+} = useManageActions()
 const {
   isChannelRegion,
   isChannelMrt,
@@ -28,22 +30,23 @@ const {
   onApiBuyList,
   onChannel,
 } = useBuyListActions()
-const { onApiErrorServerToClient } = useBuyPopupActions()
+const { onApiErrorServerToClient } = usePopupActions()
 const route = useRoute()
 const router = useRouter()
 
 definePageMeta({
-  layout: 'common',
+  layout: 'buy',
+  channel: 'buy',
   requiresAuth: false,
 })
 
 const isDeviceM = computed(() => device.value === 'm')
-const channel = computed(() => {
-  if (isChannelRegion.value) return 'region'
-  if (isChannelMrt.value) return 'mrt'
+// const channel = computed(() => {
+//   if (isChannelRegion.value) return 'region'
+//   if (isChannelMrt.value) return 'mrt'
 
-  return ''
-})
+//   return ''
+// })
 const paramsRegion = computed(() => {
   const { ids } = region.value
 
@@ -80,9 +83,6 @@ await onWithLoadingAll([
 ])
 
 onUseMeta({
-  title: '買屋、購屋、買房子 | 好房網買屋',
-  description:
-    '好房網教你用聰明、買好房!好房網每天更新待售房屋、租屋、實價登錄資訊，還有好房網 News 及好房網 TV，製作包羅萬象的房地產消息，讓你買房的路上不孤單，好房網陪你買房！',
   url: useRequestURL(),
 })
 
@@ -155,10 +155,14 @@ onUnmounted(() => {
     <PageBuyListTabOvalResponsiv />
     <PageBuyListSearchFunction @apiSearch="onApiSearch" @routerPush="onRoutePush" />
   </div>
-  <CommonMContainer class="--inner p:mt-[20px]">
+  <CommonMContainer class="p:--max-w-1220 p:--px-10 p:mt-[20px]">
     <PageBuyListFocus />
     <CommonMContent class="pt:--rounded-20 pt:--py-20 p:--px-30 m:--pb-20 t:--px-16 t:mx-[10px]">
-      <PageBuyListSearchFilter @click="onApiSearch" v-if="!isDeviceM" />
+      <PageBuyListSearchFilter
+        @click="onApiSearch"
+        @click:routePush="onRoutePush"
+        v-if="!isDeviceM"
+      />
       <PageBuyListSearchFeatures @routerPush="onRoutePush" />
       <!-- <pre>
         {{ options.caseType }}

@@ -1,10 +1,9 @@
 import { apiBuyHouse, apiBuyHousePoi } from '@js/_api/buy/house.js'
 
-import { useBuyHouseStore } from '@stores/buy/house.js'
-
-const useBuyHouseStores = () => {
+export default () => {
   const buyHouseStores = useBuyHouseStore()
   const { lifeMap } = storeToRefs(buyHouseStores)
+  const { onSetSeo } = useCommonActions()
   const route = useRoute()
 
   const onApiBuyHouse = async () => {
@@ -42,6 +41,9 @@ const useBuyHouseStores = () => {
         state.agentPick = data.recommend?.agentPick ?? {}
         state.hotForYou = data.recommend?.hotForYou ?? {}
       })
+
+      // SEO(明細 / 列表結構一致):整包交給 onSetSeo,驅動 Header 的 H1。
+      onSetSeo(data.seo)
     }
 
     return { config, status, data }
@@ -65,5 +67,3 @@ const useBuyHouseStores = () => {
     onApiBuyHousePoi,
   }
 }
-
-export default useBuyHouseStores

@@ -1,4 +1,6 @@
 <script setup>
+import { onLayoutText, onUnitText } from '@js/_prototype.js'
+
 const buyHouse = useBuyHouseStore()
 const { basic, floor, community } = storeToRefs(buyHouse)
 const { onSearchParams } = useBuyProjectActions()
@@ -7,9 +9,10 @@ const emits = defineEmits(['popup'])
 const items = computed(() => {
   const { caseType, layout, buildAge, caseUsageToken } = basic.value
   const { from, to, up } = floor.value // 樓層
-  const { room, living, bath, addon, hasAddon } = layout
+  const { addon, hasAddon } = layout
   const { name: communityName, cta } = community.value
-  const isSameFloorFromTo = from === to
+  // 樓層範圍只在 to 有值且與 from 不同時顯示;to 為 null(單樓)不可印出「~ null」
+  const hasFloorRange = to != null && to !== from
   const addonData = {
     room: addon.room ? ` ${addon.room} 房 (室)` : '',
     living: addon.living ? ` ${addon.living} 廳` : '',
@@ -41,7 +44,7 @@ const items = computed(() => {
         label: '建物格局',
         values: [
           {
-            content: `${room} 房 (室) ${living} 廳 ${bath} 衛`,
+            content: onLayoutText(layout),
           },
         ],
       },
@@ -61,7 +64,7 @@ const items = computed(() => {
         label: '樓層',
         values: [
           {
-            content: `${from}${!isSameFloorFromTo ? ` ~ ${to}` : ''} / ${up} 樓`,
+            content: `${from}${hasFloorRange ? ` ~ ${to}` : ''} / ${up} 樓`,
             popupAnchor: {
               text: '是否有其他樓層物件',
               icon: 'icon_question_dialog',
@@ -82,7 +85,7 @@ const items = computed(() => {
         label: '屋齡',
         values: [
           {
-            content: `${buildAge} 年`,
+            content: onUnitText(buildAge, ' 年'),
           },
         ],
       },

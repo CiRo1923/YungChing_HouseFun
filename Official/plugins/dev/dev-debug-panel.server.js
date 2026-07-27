@@ -77,10 +77,17 @@ export default defineNuxtPlugin(async (nuxtApp) => {
 
   // await import 讓 interceptor 於頁面 setup(useAsyncData)之前完成註冊,避免漏抓。
   // 用 runWithContext 保留 context,避免 .config.js 頂層 useRuntimeConfig() 在 context 外執行。
-  try {
-    const mod = await nuxtApp.runWithContext(() => import('@js/_api/.config.js'))
-    ;[mod.fetchApi, mod.fetchManageApi].forEach(registerInterceptors)
-  } catch {
-    /* 專案無此 client */
-  }
+  // 自動掃描所有 _api/**/.config.js(import.meta.glob 由 Vite 靜態展開,新增檔案免改此處);
+  // registerInterceptors 只認帶 .interceptors 的值,其餘匯出(version 等)自動略過。
+  const modules = import.meta.glob('@js/_api/**/.config.js')
+  await Promise.all(
+    Object.values(modules).map(async (load) => {
+      try {
+        const mod = await nuxtApp.runWithContext(() => load())
+        Object.values(mod).forEach(registerInterceptors)
+      } catch {
+        /* 專案無此 client 或載入失敗 */
+      }
+    })
+  )
 })

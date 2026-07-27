@@ -71,7 +71,7 @@ export const getStoreImports = (storesDir: string, relativeDir = ''): NuxtImport
       continue
     }
 
-    if (!relativeDir || !/\.[cm]?[jt]s$/.test(entry.name)) {
+    if (!/\.[cm]?[jt]s$/.test(entry.name)) {
       continue
     }
 

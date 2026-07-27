@@ -16,7 +16,7 @@ const props = defineProps({
     <time :datetime="props.item.date" class="text-[16px] tm:grow">
       {{ onFormatDate(props.item.date, 'YYY') }} / {{ onFormatDate(props.item.date, 'MM') }}
     </time>
-    <BuyMAnchor
+    <CommonMAnchor
       :text="`${props.item.recordCount} 筆交易記錄`"
       :config="{
         icon: 'chevron_right',

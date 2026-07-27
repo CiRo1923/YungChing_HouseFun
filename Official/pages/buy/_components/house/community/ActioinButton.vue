@@ -3,7 +3,7 @@
 <template>
   <ul class="flex items-center gap-x-[10px]">
     <li class="flex-1">
-      <BuyMAnchor
+      <CommonMAnchor
         text="好厝邊房價表"
         :config="{
           icon: {
@@ -19,7 +19,7 @@
       />
     </li>
     <li class="flex-1">
-      <BuyMAnchor
+      <CommonMAnchor
         text="看全部實價登錄"
         :setClass="{
           main: '--oval --border-gray-ccce --text-gray-666 --px-20 --h-35 w-full gap-x-[5px]',

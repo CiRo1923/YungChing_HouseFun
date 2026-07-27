@@ -2,9 +2,10 @@
 const common = useCommonStore()
 const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
-const buyProject = useBuyProjectStore()
-const { options } = storeToRefs(buyProject)
-const { onValueGetText, onResolveByDevice } = useBuyProjectActions()
+const { onResolveByDevice } = useBuyProjectActions()
+const manage = useManageStore()
+const { options } = storeToRefs(manage)
+const { onValueGetText } = useManageActions()
 const buyList = useBuyListStore()
 const { apiSearchData, purpose } = storeToRefs(buyList)
 
@@ -53,7 +54,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <BuyMFormSelectDropdown
+  <CommonMFormSelectDropdown
     :name="`${componentsName}Dropdown`"
     v-model="purpose.label"
     :config="{
@@ -79,7 +80,7 @@ onUnmounted(() => {
           v-for="(item, index) in options.casePurpose"
           :key="`${componentsName}_${item.code}_${index}`"
         >
-          <BuyMFormRadio
+          <CommonMFormRadio
             :name="componentsName"
             v-model="apiSearchData.purpose"
             :config="{
@@ -96,7 +97,7 @@ onUnmounted(() => {
       @click:routePush="onRoutePush"
       v-if="isDeviceM"
     />
-  </BuyMFormSelectDropdown>
+  </CommonMFormSelectDropdown>
 </template>
 
 <style></style>

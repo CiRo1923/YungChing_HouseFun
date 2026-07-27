@@ -90,9 +90,38 @@ const options = shallowReadonly([
   },
 ])
 
+const emits = defineEmits(['click:routePush'])
+
+// 攤平後的排序值序列(需與 BuyMSortMain dropdown 攤平邏輯一致):
+// 無方向的選項 → [sort];有方向 → 依 asc、desc 且有 value 者
+const flatValues = computed(() =>
+  options.flatMap((item) => {
+    const hasDirections = item.sort && typeof item.sort === 'object'
+
+    if (!hasDirections) return [item.sort]
+
+    return ['asc', 'desc']
+      .filter((type) => item.sort[type]?.value != null)
+      .map((type) => item.sort[type].value)
+  })
+)
+
+// 依 apiSearchData.od 反推攤平索引,讓重整 / 分享後排序下拉能還原選中狀態
+const activeIndex = computed(() => {
+  const od = apiSearchData.value.od
+
+  if (!od) return 0
+
+  const index = flatValues.value.findIndex((value) => value === Number(od))
+
+  return index === -1 ? 0 : index
+})
+
 const onClick = (item) => {
   const { value } = item
   apiSearchData.value.od = `${value.sort}`
+  // 排序改變 → 走 routePush,讓 od 以 querystring 寫入網址(可分享 / 重整還原)
+  emits('click:routePush')
 }
 </script>
 
@@ -100,7 +129,7 @@ const onClick = (item) => {
   <BuyMSortMain
     :options="options"
     :config="{
-      index: 0,
+      index: activeIndex,
       mode: 'dropdown',
       position: 'right',
       symbol: '→',

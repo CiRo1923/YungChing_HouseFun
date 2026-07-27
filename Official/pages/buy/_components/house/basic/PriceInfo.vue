@@ -37,7 +37,7 @@ const priceInfo = computed(() => {
         萬
       </span>
     </p>
-    <BuyMSeparator
+    <CommonMSeparator
       :items="priceInfo"
       :setClass="{
         main: '--horizontal --gap-x-20 justify-end',

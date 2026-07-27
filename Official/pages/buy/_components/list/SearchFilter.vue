@@ -1,8 +1,12 @@
 <script setup>
-const emits = defineEmits(['click'])
+const emits = defineEmits(['click', 'click:routePush'])
 
 const onClick = () => {
   emits('click')
+}
+
+const onRoutePush = () => {
+  emits('click:routePush')
 }
 </script>
 
@@ -10,7 +14,7 @@ const onClick = () => {
   <div class="m:mt-[10px] pt:flex">
     <PageBuyListSearchCategory @click="onClick">
       <template #headerTools>
-        <PageBuyListSearchSort />
+        <PageBuyListSearchSort @click:routePush="onRoutePush" />
       </template>
     </PageBuyListSearchCategory>
   </div>

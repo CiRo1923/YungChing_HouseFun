@@ -11,6 +11,14 @@ const onAs = (item) => {
   return 'em'
 }
 
+// 後端回傳的 url 可能夾帶 query(如 ?pg=1)且無結尾斜線;
+// 抽出 pathname 補上 `/`,query 另由 onSearchParams 解析後帶入。
+const onPath = (url) => {
+  const pathname = url.split(/[?#]/)[0]
+
+  return pathname.endsWith('/') ? pathname : `${pathname}/`
+}
+
 const onBind = (item) => {
   const { url } = item
   const params = onSearchParams(url)
@@ -27,7 +35,7 @@ const onBind = (item) => {
   return url
     ? {
         to: {
-          path: url,
+          path: onPath(url),
           query,
         },
       }

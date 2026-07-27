@@ -4,7 +4,7 @@ const { cottonCandyCheckbox } = storeToRefs(buyProject)
 </script>
 
 <template>
-  <BuyCommonCustomPopup
+  <CommonCustomPopup
     id="popupCottonCandySuccess"
     :config="{
       mode: {
@@ -20,7 +20,7 @@ const { cottonCandyCheckbox } = storeToRefs(buyProject)
       提醒您，您預約的物件可能由不同的房仲人員為您服務。
     </p>
     <PageBuyCommonPopupNotMember />
-  </BuyCommonCustomPopup>
+  </CommonCustomPopup>
 </template>
 
 <style lang="postcss"></style>

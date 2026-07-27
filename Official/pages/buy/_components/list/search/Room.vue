@@ -51,18 +51,27 @@ const onChange = (data) => {
 }
 
 const onInit = () => {
-  const roomArray = apiSearchData.value.room ? apiSearchData.value.room.split('-') : null
-  const roomLabel = roomArray ? `${roomArray[0]} - ${roomArray[1]}` : null
+  const roomValue = apiSearchData.value.room
 
-  room.value.label = apiSearchData.value.room
-    ? `${roomLabel} ${room.value.unit}`
-    : onResolveByDevice(room.value.defaultLabel, device.value)
-  room.value.range = apiSearchData.value.room
-    ? Array.from(
-        { length: Number(roomArray[1]) - Number(roomArray[0]) + 1 },
-        (_, i) => Number(roomArray[0]) + i
-      )
-    : room.value.range
+  // 無選取 → 預設 label,range 維持原值
+  if (!roomValue && roomValue !== 0) {
+    room.value.label = onResolveByDevice(room.value.defaultLabel, device.value)
+    return
+  }
+
+  // roomValue 可能為單一值(如 "3")或範圍(如 "1-3");單選時 roomArray[1] 為 undefined
+  const roomArray = String(roomValue).split('-')
+  const min = Number(roomArray[0])
+  const max = roomArray[1] != null && roomArray[1] !== '' ? Number(roomArray[1]) : min
+  const isSame = min === max
+
+  // 單選:用選項 label(含「房」),避免「N - undefined 房」;範圍:min - max
+  room.value.label = isSame
+    ? room.value.options.find((item) => item.value === max)?.label || String(max)
+    : `${min} - ${max} ${room.value.unit}`
+
+  // 單選時 range = [value],確保勾選狀態正確(再次開啟不會顯示為不限)
+  room.value.range = Array.from({ length: max - min + 1 }, (_, i) => min + i)
 }
 
 onResize()
@@ -84,7 +93,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <BuyMFormSelectDropdown
+  <CommonMFormSelectDropdown
     :name="`${componentsName}Dropdown`"
     v-model="room.label"
     :config="{
@@ -104,7 +113,7 @@ onUnmounted(() => {
   >
     <ul class="space-y-[15px]">
       <li v-for="(item, index) in room.options" :key="`${componentsName}_${item.code}_${index}`">
-        <BuyMFormCheckBox
+        <CommonMFormCheckBox
           :name="componentsName"
           v-model="room.range"
           :config="{
@@ -138,7 +147,7 @@ onUnmounted(() => {
         />
       </li>
       <li>
-        <BuyMFormCheckBox
+        <CommonMFormCheckBox
           :name="`${componentsName}_agree`"
           v-model="apiSearchData.addRoom"
           :config="{
@@ -151,7 +160,7 @@ onUnmounted(() => {
         />
       </li>
     </ul>
-  </BuyMFormSelectDropdown>
+  </CommonMFormSelectDropdown>
 </template>
 
 <style></style>

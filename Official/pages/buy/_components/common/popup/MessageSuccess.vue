@@ -1,7 +1,7 @@
 <script setup></script>
 
 <template>
-  <BuyCommonCustomPopup
+  <CommonCustomPopup
     id="popupMessageSuccess"
     :config="{
       mode: {
@@ -16,7 +16,7 @@
       已送出留言，房仲人員在收到留言後將會盡快與您聯繫。
     </p>
     <PageBuyCommonPopupNotMember />
-  </BuyCommonCustomPopup>
+  </CommonCustomPopup>
 </template>
 
 <style lang="postcss"></style>

@@ -1,0 +1,31 @@
+.m-form-element {
+  &.\-\-radio {
+    .m-form-type {
+      &:not(:checked) {
+        & + .m-form-icon {
+          @apply border-[--gray-999];
+        }
+      }
+
+      &:checked {
+        & ~ .m-form-label {
+          @apply text-[--green-8b0d];
+        }
+
+        & + .m-form-icon {
+          @apply border-[--green-8b0d];
+
+          &:before {
+            @apply opacity-100;
+          }
+        }
+      }
+    }
+
+    .m-form-icon {
+      &:before {
+        @apply pointer-events-none absolute left-[2px] top-[2px] h-[10px] w-[10px] rounded-full bg-[--green-8b0d] opacity-0 transition-opacity duration-300 content-default;
+      }
+    }
+  }
+}

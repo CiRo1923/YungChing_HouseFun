@@ -15,7 +15,7 @@ const items = computed(() => {
         label: '房貨試算',
         values: [
           {
-            content: `約 ${numberComma.add(mortgageMonth)} 元`,
+            content: mortgageMonth != null ? `約 ${numberComma.add(mortgageMonth)} 元` : null,
             popupAnchor: {
               text: '貸款試算',
               icon: 'icon_calculator',
@@ -34,7 +34,8 @@ const items = computed(() => {
         label: '單價',
         values: [
           {
-            content: `${numberComma.add(unitPrice)} 萬`,
+            // 規格:單價無資料時顯示「請洽房仲人員」,而非隱藏或 null
+            content: unitPrice != null ? `${numberComma.add(unitPrice)} 萬` : '請洽房仲人員',
             popupAnchor: {
               text: '有議價空間嗎',
               icon: 'icon_question_dialog',

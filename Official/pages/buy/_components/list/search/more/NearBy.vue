@@ -2,9 +2,9 @@
 const common = useCommonStore()
 const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
-const buyProject = useBuyProjectStore()
-const { options } = storeToRefs(buyProject)
 const { onResolveByDevice } = useBuyProjectActions()
+const manage = useManageStore()
+const { options } = storeToRefs(manage)
 const buyList = useBuyListStore()
 const { apiSearchData, nearBy } = storeToRefs(buyList)
 
@@ -27,13 +27,13 @@ onUnmounted(() => {
 
 <template>
   <ul class="space-y-[20px]">
-    <li v-for="(item, index) in options.nearBy" :key="`nearBy_${item.value}_${index}`">
-      <BuyMFormCheckBox
+    <li v-for="(item, index) in options.nearBy" :key="`nearBy_${item.code ?? item.value}_${index}`">
+      <CommonMFormCheckBox
         name="ft"
         v-model="apiSearchData.ft"
         :config="{
           label: item.text,
-          value: item.value,
+          value: item.code ?? item.value,
           valueClickClear: '',
           isJoin: true,
         }"

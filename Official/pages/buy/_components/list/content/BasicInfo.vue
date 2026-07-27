@@ -48,7 +48,7 @@ const basicInfo = computed(() => {
 </script>
 
 <template>
-  <BuyMSeparator
+  <CommonMSeparator
     :items="basicInfo"
     :setClass="{
       main: '--horizontal p:--gap-x-20 tm:--gap-x-12',

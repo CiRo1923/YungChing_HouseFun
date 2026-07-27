@@ -1,7 +1,6 @@
 <script setup>
 const buyPopup = useBuyPopupStore()
-const { onMergeBtns } = usePopupActions()
-const { onCustom } = useBuyPopupActions()
+const { onMergeBtns, onCustom } = usePopupActions()
 const onPopup = async (id) => {
   if (id === 'popupMessage') {
     await onCustom({

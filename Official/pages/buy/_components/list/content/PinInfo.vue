@@ -12,19 +12,21 @@ const pinInfo = computed(() => {
   const { purpose, pin, parking } = props.item
   const { build, main, balcony } = pin
   const { type } = parking
-  const mainBalconyText = main && balcony ? `主 + 陽 ${onToFixed([main, balcony])} 坪` : null
-  const pinLabel = { 土地: '地坪', 車位: '車坪' }[purpose] ?? '建坪'
-  const pinBuildText = `${pinLabel} ${build} 坪`
+  // D-19:「主 + 陽」→「主建」、「建坪」→「總建」(土地 / 車位 仍為 地坪 / 車坪)
+  const mainBalconyText = main && balcony ? `主建 ${onToFixed([main, balcony])} 坪` : null
+  const pinLabel = { 土地: '地坪', 車位: '車坪' }[purpose] ?? '總建'
+  const pinBuildText = build != null ? `${pinLabel} ${build} 坪` : null
 
   return [
     {
       id: 'pinBuild',
-      label: '建坪',
+      label: '總建',
       value: pinBuildText,
+      isHidden: !pinBuildText,
     },
     {
       id: 'pinMainBalcony',
-      label: '主陽',
+      label: '主建',
       value: mainBalconyText,
       isHidden: !mainBalconyText,
     },
@@ -39,7 +41,7 @@ const pinInfo = computed(() => {
 </script>
 
 <template>
-  <BuyMSeparator
+  <CommonMSeparator
     :items="pinInfo"
     :setClass="{
       main: '--horizontal p:--gap-x-20 tm:--gap-x-12',

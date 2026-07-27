@@ -35,7 +35,7 @@ defineExpose({
 
 <template>
   <Form as="div" :class="setClass.main" ref="formRef">
-    <BuyMFormHidden
+    <CommonMFormHidden
       v-model="model.isError"
       :rules="{
         custom: {
@@ -47,7 +47,7 @@ defineExpose({
     >
       <ul class="flex flex-wrap gap-[8px] overflow-hidden">
         <li class="min-w-0 flex-1">
-          <BuyMFormInput
+          <CommonMFormInput
             name="name"
             v-model="apiMessageData.name"
             :config="{
@@ -60,7 +60,7 @@ defineExpose({
           />
         </li>
         <li class="min-w-0 flex-1">
-          <BuyMFormInput
+          <CommonMFormInput
             name="phone"
             v-model="apiMessageData.phone"
             :config="{
@@ -77,7 +77,7 @@ defineExpose({
           />
         </li>
         <li class="w-full">
-          <BuyMFormTextArea
+          <CommonMFormTextArea
             name="message"
             v-model="apiMessageData.message"
             :config="{
@@ -91,7 +91,7 @@ defineExpose({
           />
         </li>
       </ul>
-    </BuyMFormHidden>
+    </CommonMFormHidden>
     <slot name="tools" />
   </Form>
 </template>

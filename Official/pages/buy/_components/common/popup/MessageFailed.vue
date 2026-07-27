@@ -4,7 +4,7 @@ const { customData } = storeToRefs(popup)
 </script>
 
 <template>
-  <BuyCommonCustomPopup
+  <CommonCustomPopup
     id="popupMessageFailed"
     :config="{
       mode: {
@@ -18,7 +18,7 @@ const { customData } = storeToRefs(popup)
     <p class="rounded-[8px] bg-[--gray-f7] p-[20px] text-[16px] tracking-wider">
       {{ customData.data }}
     </p>
-  </BuyCommonCustomPopup>
+  </CommonCustomPopup>
 </template>
 
 <style lang="postcss"></style>

@@ -2,7 +2,7 @@
 const { onPopupVerifyCode } = useBuyProjectActions()
 const popup = usePopupStore()
 const { customCheck } = storeToRefs(popup)
-const { onCustomClose } = useBuyPopupActions()
+// const { onCustomClose } = usePopupActions()
 
 const formRef = ref(null)
 
@@ -21,7 +21,7 @@ const onSure = async () => {
 </script>
 
 <template>
-  <BuyCommonCustomPopup
+  <CommonCustomPopup
     id="popupMessage"
     :config="{
       mode: {
@@ -47,7 +47,7 @@ const onSure = async () => {
         並成為本網站之會員
       </p>
     </template>
-  </BuyCommonCustomPopup>
+  </CommonCustomPopup>
 </template>
 
 <style lang="postcss"></style>

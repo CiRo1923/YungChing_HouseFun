@@ -1,5 +1,5 @@
 <script setup>
-import { onToFixed } from '@js/_prototype.js'
+import { onToFixed, onUnitText } from '@js/_prototype.js'
 
 const buyHouse = useBuyHouseStore()
 const { basic, pin } = storeToRefs(buyHouse)
@@ -42,7 +42,7 @@ const items = computed(() => {
         label: '建物坪數',
         values: [
           {
-            content: `${build} ${unit}`,
+            content: onUnitText(build, ` ${unit}`),
           },
         ],
       },
@@ -51,7 +51,7 @@ const items = computed(() => {
         label: '主建物',
         values: [
           {
-            content: `${main} ${unit}`,
+            content: onUnitText(main, ` ${unit}`),
           },
         ],
       },
@@ -60,7 +60,7 @@ const items = computed(() => {
         label: '共同使用',
         values: [
           {
-            content: `${onToFixed([main, balcony])} ${unit}`,
+            content: main != null ? `${onToFixed([main, balcony])} ${unit}` : null,
           },
         ],
       },
@@ -83,7 +83,7 @@ const items = computed(() => {
         label: '土地坪數',
         values: [
           {
-            content: `${land} ${unit}`,
+            content: onUnitText(land, ` ${unit}`),
           },
         ],
       },
@@ -101,7 +101,7 @@ const items = computed(() => {
         label: '公設比',
         values: [
           {
-            content: `${caseAmenitieSq} %`,
+            content: onUnitText(caseAmenitieSq, ' %'),
           },
         ],
       },

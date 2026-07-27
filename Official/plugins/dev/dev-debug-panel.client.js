@@ -19,8 +19,8 @@ export default defineNuxtPlugin(async (nuxtApp) => {
     enabled: true,
     router, // 換頁偵測(未給則核心自動用 History API)
     serverNets, // SSR 期間攔到的網路紀錄(標記為 SRV)
-    // 專案自訂 HTTP client(ofetch 包裝):runWithContext 保留 context;延到 app:mounted 才載入
-    loadApiClients: () => nuxtApp.runWithContext(() => import('@js/_api/.config.js')),
+    // 註:本專案自訂 client(onFetchApi)底層以原生 fetch 送出,已被核心的 window.fetch patch
+    // 完整攔到;若再掛 loadApiClients 的 interceptors 會讓「同一支請求」被記兩次,故不啟用。
     onMounted: (cb) => nuxtApp.hook('app:mounted', cb),
   })
 })

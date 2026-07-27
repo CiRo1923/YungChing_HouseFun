@@ -4,8 +4,8 @@ import { onFormatDate } from '@js/_prototype.js'
 const common = useCommonStore()
 const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
-const buyProject = useBuyProjectStore()
-const { serverTime } = storeToRefs(buyProject)
+const project = useProjectStore()
+const { serverTime } = storeToRefs(project)
 const isDeviceM = computed(() => device.value === 'm')
 const props = defineProps({
   item: {

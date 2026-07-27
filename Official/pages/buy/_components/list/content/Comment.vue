@@ -2,7 +2,7 @@
 const buyProject = useBuyProjectStore()
 const { apiMessageData } = storeToRefs(buyProject)
 const { onResetMessage } = useBuyProjectActions()
-const { onCustom } = useBuyPopupActions()
+const { onCustom } = usePopupActions()
 const props = defineProps({
   item: {
     type: Object,
@@ -32,7 +32,7 @@ const onClick = async () => {
 
 <template>
   <div class="relative z-[1] shrink-0 m:self-end">
-    <BuyMAnchor
+    <CommonMAnchor
       text="預約留言"
       :config="{
         icon: {

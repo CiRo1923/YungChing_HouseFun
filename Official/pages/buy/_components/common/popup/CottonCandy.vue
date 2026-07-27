@@ -6,8 +6,7 @@ const { apiMessageData, messageData, cottonCandyCheckbox } = storeToRefs(buyProj
 const { onApiMessages } = useBuyProjectActions()
 const popup = usePopupStore()
 const { customCheck } = storeToRefs(popup)
-const { onCustom, onCustomClose } = useBuyPopupActions()
-const { onPromise } = usePopupActions()
+const { onCustom, onCustomClose, onPromise } = usePopupActions()
 
 const formRef = ref(null)
 const cottonCandy = computed(() => messageData.value?.cottonCandy?.items ?? [])
@@ -65,7 +64,7 @@ const onSure = async () => {
 </script>
 
 <template>
-  <BuyCommonCustomPopup
+  <CommonCustomPopup
     id="popupCottonCandy"
     :config="{
       mode: {
@@ -79,7 +78,7 @@ const onSure = async () => {
   >
     <p class="mb-[8px] text-[18px]">我們發現這些好房也很適合你，趁現在一起預約 !</p>
     <Form as="div" ref="formRef">
-      <BuyMFormHidden
+      <CommonMFormHidden
         v-model="model"
         :rules="{
           required: '請選擇適合你的好房',
@@ -110,7 +109,7 @@ const onSure = async () => {
             class="space-y-[8px] rounded-[10px] px-[8px] py-[10px] transition-colors duration-300"
             :class="{ 'bg-[--green-9c33]': onCheck(item.id) }"
           >
-            <BuyMFormCheckBox
+            <CommonMFormCheckBox
               name="cottonCandyCheckbox"
               v-model="cottonCandyCheckbox"
               :config="{
@@ -133,9 +132,9 @@ const onSure = async () => {
             />
           </div>
         </BuyMSwiperHorizontal>
-      </BuyMFormHidden>
+      </CommonMFormHidden>
     </Form>
-  </BuyCommonCustomPopup>
+  </CommonCustomPopup>
 </template>
 
 <style lang="postcss"></style>

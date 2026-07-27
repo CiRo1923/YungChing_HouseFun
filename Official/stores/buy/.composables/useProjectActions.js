@@ -1,171 +1,143 @@
 import {
-  apiGetCommonServerTime,
-  apiGETRealEstatePurposeCheckOptions,
-  apiGETRealEstateTypeSelectOptions,
-  apiGETRealEstateFaceSelectOptions,
-  apiGETRealEstateParkingModeSelectOptions,
-  apiGETRealEstateNearByCheckOptions,
-  apiGETRealEstateFeatureCheckOptions,
-} from '@js/_api/buy/manage.js'
-
-import { apiMessagesVerifyCode, apiMessagesResendCode, apiMessages } from '@js/_api/common.js'
+  apiAuthTokenExchange,
+  apiAuthMe,
+  apiAuthLogout,
+  apiMessages,
+  apiMessagesVerifyCode,
+  apiMessagesResendCode,
+} from '@js/_api/buy/common.js'
 
 import { onFormatDate } from '@js/_prototype.js'
+import { BUYACCESSDATA } from '@js/_storage.js'
+import { enCrypto, deCryptoJSON } from '@js/_crypto/index.js'
 
-import { useBuyProjectStore } from '@stores/buy/project.js'
-import useBuyPopupActions from '@stores/buy/.composables/usePopupActions.js'
-
-const useBuyProjectStores = () => {
+export default () => {
+  const project = useProjectStore()
+  const { serverTime } = storeToRefs(project)
+  const { onApiGetCommonServerTime } = useProjectActions()
+  const memberProjct = useMemberProjectStore()
+  const { authToken, userData } = storeToRefs(memberProjct)
+  const { onApiAuthToken, onSetAuthTokenCookie, onReset } = useMemberProjectActions()
   const buyProject = useBuyProjectStore()
   const {
-    serverTime,
-    options,
+    accessData,
     messageData,
     apiMessageData,
     countdownData,
     apiVerifyCodeData,
     cottonCandyCheckbox,
   } = storeToRefs(buyProject)
-  const { onCustom, onApiError } = useBuyPopupActions()
-  const { onPromise } = usePopupActions()
+  const { onPromise, onCustom, onApiError, onApiPromise } = usePopupActions()
+  const { onLogin } = useBuyPopupActions()
 
-  const onApiGetCommonServerTime = async () => {
-    const { config, status, data } = await apiGetCommonServerTime()
+  const onApiAuthTokenExchange = async () => {
+    const { config, status, data } = await apiAuthTokenExchange({
+      encryptedToken: authToken.value.longToken,
+    })
 
     if (status === 200) {
-      serverTime.value = {
-        value: onFormatDate(data.serverTime, 'YYYY-MM-DD'),
-        full: onFormatDate(data.serverTime, 'YYYY-MM-DD hh:mm:ss'),
-        year: onFormatDate(data.serverTime, 'YYYY'),
-        month: onFormatDate(data.serverTime, 'MM'),
-        day: onFormatDate(data.serverTime, 'DD'),
-        hours: onFormatDate(data.serverTime, 'hh'),
-        minute: onFormatDate(data.serverTime, 'mm'),
-        second: onFormatDate(data.serverTime, 'ss'),
-      }
+      accessData.value = data
+      onSetAccessDataCookie(data)
     } else {
       onApiError(config, status, data)
     }
 
     return { config, status, data }
   }
-  const onApiGETRealEstatePurposeCheckOptions = async () => {
-    if (options.value.casePurpose) return false
-    const { config, status, data } = await apiGETRealEstatePurposeCheckOptions()
+  const onApiAuthMe = async () => {
+    const { config, status, data } = await apiAuthMe()
 
     if (status === 200) {
-      options.value.casePurpose = data
-        ? [
-            {
-              text: '不限',
-              code: '',
-            },
-            ...data,
-          ]
-        : []
+      userData.value = data
     } else {
       onApiError(config, status, data)
     }
 
     return { config, status, data }
   }
-  const onApiGETRealEstateTypeSelectOptions = async () => {
-    if (options.value.caseType) return false
-
-    const { config, status, data } = await apiGETRealEstateTypeSelectOptions()
+  const onApiAuthLogout = async () => {
+    const { config, status, data } = await apiAuthLogout()
 
     if (status === 200) {
-      options.value.caseType = data
-        ? [
-            {
-              text: '不限',
-              value: '',
-            },
-            ...data,
-          ]
-        : []
+      onReset()
+      onAccessReset()
+      onClearCookies()
     } else {
       onApiError(config, status, data)
     }
 
     return { config, status, data }
   }
-  const onApiGETRealEstateFaceSelectOptions = async () => {
-    if (options.value.face) return false
 
-    const { config, status, data } = await apiGETRealEstateFaceSelectOptions()
+  // accessData 存 cookie (SSR / client 皆可讀)。cookie 效期由 onSetAccessDataCookie 依 token 帶入。
+  const onAccessDataCookie = (options = {}) =>
+    useCookie(BUYACCESSDATA, {
+      path: '/',
+      sameSite: 'lax',
+      secure: !import.meta.dev,
+      ...options,
+    })
 
-    if (status === 200) {
-      options.value.face = data
-        ? [
-            {
-              text: '不限',
-              value: '',
-            },
-            ...data,
-          ]
-        : []
-    } else {
-      onApiError(config, status, data)
+  // 存:加密後寫入 cookie,cookie 效期跟隨 token 的 expiresAt(無效時退為 session cookie)。
+  const onSetAccessDataCookie = (data) => {
+    if (data == null) {
+      onAccessDataCookie().value = null
+      return
     }
 
-    return { config, status, data }
+    const expires = new Date(data.expiresAt)
+    const options = Number.isNaN(expires.getTime()) ? {} : { expires }
+
+    onAccessDataCookie(options).value = enCrypto(JSON.stringify(data))
   }
-  const onApiGETRealEstateParkingModeSelectOptions = async () => {
-    if (options.value.parkingMode) return false
 
-    const { config, status, data } = await apiGETRealEstateParkingModeSelectOptions()
+  // 取:讀 cookie 解密還原為物件;無值 / 解析失敗 / 已過期皆回傳 null。
+  // 效期以後端 serverTime 為準(不信任 client 系統時間)。
+  const onGetAccessDataCookie = async () => {
+    const raw = onAccessDataCookie().value
+    if (!raw) return null
 
-    if (status === 200) {
-      options.value.parkingMode = data
-        ? [
-            {
-              text: '不限',
-              value: '',
-            },
-            ...data,
-          ]
-        : []
-    } else {
-      onApiError(config, status, data)
+    const data = deCryptoJSON(raw)
+    // 竄改 / 解不出 → 清掉 cookie。
+    if (!data) {
+      onSetAccessDataCookie(null)
+      return null
     }
 
-    return { config, status, data }
-  }
-  const onApiGETRealEstateNearByCheckOptions = async () => {
-    if (options.value.nearBy) return false
+    // 每次都取最新 server time:換頁 / 重新判斷時效需以當下時間為準。
+    await onApiGetCommonServerTime()
 
-    const { config, status, data } = await apiGETRealEstateNearByCheckOptions()
+    const serverFull = serverTime.value?.full
+    const expiresFull = data.expiresAt ? onFormatDate(data.expiresAt, 'YYYY-MM-DD hh:mm:ss') : null
 
-    if (status === 200) {
-      options.value.nearBy = data
-        ? [
-            {
-              text: '不限',
-              code: '',
-            },
-            ...data,
-          ]
-        : []
-    } else {
-      onApiError(config, status, data)
+    // 皆為零補位的 'YYYY-MM-DD hh:mm:ss',字典序即時間序 → expires <= server 視為過期,清掉 cookie。
+    // accessData 過期只清自己;authToken(30 天)是否走 SSO 由呼叫端分開判斷。
+    if (serverFull && expiresFull && expiresFull <= serverFull) {
+      onSetAccessDataCookie(null)
+      return null
     }
 
-    return { config, status, data }
+    return data
   }
-  const onApiGETRealEstateFeatureCheckOptions = async () => {
-    if (options.value.features) return false
 
-    const { config, status, data } = await apiGETRealEstateFeatureCheckOptions()
+  // 還原:從 cookie 取回 accessData 寫回 store(SSR / 重新整理後 store 是空的才需要)。
+  const onRestoreAccessData = async () => {
+    const cached = await onGetAccessDataCookie()
+    if (cached) accessData.value = cached
 
-    if (status === 200) {
-      options.value.features = data
-    } else {
-      onApiError(config, status, data)
-    }
-
-    return { config, status, data }
+    return cached
   }
+
+  // 清除目前用到的所有 cookie(authToken / accessData)。
+  const onClearCookies = () => {
+    onSetAuthTokenCookie(null)
+    onSetAccessDataCookie(null)
+  }
+
+  const onAccessReset = () => {
+    accessData.value = null
+  }
+
   const onApiMessages = async (isReplaceMessage) => {
     const { config, status, data } = await apiMessages(apiMessageData.value)
 
@@ -213,6 +185,28 @@ const useBuyProjectStores = () => {
     }
 
     return { config, status, data }
+  }
+  const onPopupLogin = async () => {
+    const { isSure } = await onLogin()
+
+    if (!isSure) return
+
+    onApiPromise('open')
+
+    const { status } = await onApiAuthToken({
+      channel: 'buy',
+    })
+
+    let result = null
+
+    if (status === 200) {
+      await onApiAuthTokenExchange()
+      result = await onApiAuthMe()
+    }
+
+    onApiPromise('close')
+
+    return result
   }
   const onPopupVerifyCode = async () => {
     onPromise('open')
@@ -328,48 +322,6 @@ const useBuyProjectStores = () => {
     return url.searchParams.size !== 0 ? Object.fromEntries(url.searchParams) : null
   }
 
-  const onValueGetText = (option, value, key = 'text') => {
-    const isOptionString = typeof option === 'string'
-    const currOptions = isOptionString ? options.value[option] : option || []
-    const onRecursive = (list, targetValue) => {
-      if (list) {
-        for (const item of list) {
-          // 直接掃整個物件的值
-          if (Object.values(item).includes(targetValue)) {
-            return item
-          }
-
-          // recursion
-          for (const value of Object.values(item)) {
-            if (Array.isArray(value)) {
-              const found = onRecursive(value, targetValue)
-              if (found) return found
-            } else if (value && typeof value === 'object') {
-              const found = onRecursive([value], targetValue)
-              if (found) return found
-            }
-          }
-        }
-      }
-
-      return null
-    }
-
-    const onGetText = (targetValue) => {
-      const found = onRecursive(currOptions, targetValue)
-
-      return found ? found[key] : ''
-    }
-
-    if (Array.isArray(value)) {
-      return value
-        .map((val) => onGetText(val))
-        .filter(Boolean)
-        .join('、')
-    }
-
-    return onGetText(value)
-  }
   const onReplaceImageSize = (data, size = {}, key) => {
     const { width = '', height = '' } = size || {}
     const onReplaceString = (str) =>
@@ -414,25 +366,24 @@ const useBuyProjectStores = () => {
   }
 
   return {
-    onApiGetCommonServerTime,
-    onApiGETRealEstatePurposeCheckOptions,
-    onApiGETRealEstateTypeSelectOptions,
-    onApiGETRealEstateFaceSelectOptions,
-    onApiGETRealEstateParkingModeSelectOptions,
-    onApiGETRealEstateNearByCheckOptions,
-    onApiGETRealEstateFeatureCheckOptions,
+    onApiAuthTokenExchange,
+    onApiAuthMe,
+    onApiAuthLogout,
+    onSetAccessDataCookie,
+    onGetAccessDataCookie,
+    onRestoreAccessData,
+    onClearCookies,
+    onAccessReset,
+    onApiMessages,
     onApiMessagesVerifyCode,
     onApiMessagesResendCode,
-    onApiMessages,
+    onPopupLogin,
     onPopupVerifyCode,
     onPopupCottonCandy,
     onPopupMessageSucess,
     onResetMessage,
     onSearchParams,
-    onValueGetText,
     onReplaceImageSize,
     onResolveByDevice,
   }
 }
-
-export default useBuyProjectStores

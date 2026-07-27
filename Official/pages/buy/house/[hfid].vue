@@ -1,18 +1,19 @@
 <script setup>
 definePageMeta({
-  layout: 'common',
+  layout: 'buy',
+  channel: 'buy',
   requiresAuth: false,
 })
 
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
-const buyHouse = useBuyHouseStore()
-const { detail } = storeToRefs(buyHouse)
-// const popup = useBuyPopupStore()
 const { onApiBuyHouse, onApiBuyHousePoi } = useBuyHouseActions()
 const { onApiGETRealEstateTypeSelectOptions } = useBuyProjectActions()
 
+// H1 由共用 Header 讀 project.seo.h1 輸出:
+// SSR 由 middleware/buySeo 預抓、client 由本頁 onApiBuyHouse → onSetSeo 更新、
+// 換頁清空由 middleware/seoReset 處理(勿用 onUnmounted,會晚於新頁設值而誤清)。
+
 const route = useRoute()
-const seo = computed(() => detail.value?.seo ?? {})
 const hfid = computed(() => route.params.hfid)
 
 await onWithLoadingAll([
@@ -22,25 +23,17 @@ await onWithLoadingAll([
 ])
 
 onUseMeta({
-  title: seo.value.title,
-  description: seo.value.description,
   url: useRequestURL(),
 })
 </script>
 
 <template>
   <div class="bg-[--white] py-[12px] tm:px-[15px]">
-    <CommonMContainer class="--inner">
+    <CommonMContainer class="p:--max-w-1220 p:--px-10">
       <PageBuyHouseBreadcrumbs />
     </CommonMContainer>
   </div>
-  <!-- <pre>
-    {{ detail }}
-  </pre> -->
-  <!-- <pre>
-    {{ seo }}
-  </pre> -->
-  <CommonMContainer class="--inner tm:space-y-[8px] p:mt-[45px] p:space-y-[12px]">
+  <CommonMContainer class="p:--max-w-1220 p:--px-10 tm:space-y-[8px] p:mt-[45px] p:space-y-[12px]">
     <PageBuyHouseBasic />
     <PageBuyHouseFocus />
     <PageBuyHouseInformation />

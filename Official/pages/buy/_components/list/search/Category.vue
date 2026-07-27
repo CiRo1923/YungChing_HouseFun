@@ -44,7 +44,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <BuyMTabBorderBottom
+  <CommonMTabBorderBottom
     :items="options"
     :config="{
       active: apiSearchData.tab,
@@ -64,7 +64,7 @@ onUnmounted(() => {
       {{ item.label }}
       <small class="text-[12px]" v-if="!isDeviceM"> ({{ item.count }}) </small>
     </template>
-  </BuyMTabBorderBottom>
+  </CommonMTabBorderBottom>
 </template>
 
 <style></style>

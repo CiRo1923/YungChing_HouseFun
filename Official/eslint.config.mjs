@@ -1,4 +1,20 @@
 import { createConfigForNuxt } from '@nuxt/eslint-config/flat'
+import { fileURLToPath } from 'node:url'
+import { createJiti } from 'jiti'
+
+// scripts/nuxt/store-composable-imports.ts 為 TS,ESLint 的 .mjs 設定無法直接 import → 以 jiti 載入
+const jiti = createJiti(import.meta.url)
+const { getStoreComposableImports, getStoreImports } = await jiti.import(
+  './scripts/nuxt/store-composable-imports.ts'
+)
+
+const storesDir = fileURLToPath(new URL('./stores', import.meta.url))
+const storeGlobals = Object.fromEntries(
+  [...getStoreComposableImports(storesDir), ...getStoreImports(storesDir)].map((item) => [
+    item.as,
+    'readonly',
+  ])
+)
 
 const refValueAssignmentRule = {
   meta: {
@@ -42,6 +58,97 @@ const refValueAssignmentRule = {
           },
           fix(fixer) {
             return fixer.replaceText(node.left, `${node.left.name}.value`)
+          },
+        })
+      },
+    }
+  },
+}
+
+const refValueAccessRule = {
+  meta: {
+    type: 'problem',
+    docs: {
+      description:
+        'Require .value when reading properties of refs (ref/shallowRef/computed/storeToRefs/toRefs).',
+    },
+    fixable: 'code',
+    schema: [],
+    messages: {
+      requireValue:
+        "Read '{{ name }}.value.{{ prop }}' instead of '{{ name }}.{{ prop }}' — '{{ name }}' is a ref and needs .value.",
+    },
+  },
+  create(context) {
+    // 回傳「單一 ref」的工廠(const x = ref(...))
+    const REF_FACTORIES = new Set(['ref', 'shallowRef', 'computed', 'customRef', 'toRef'])
+    // 回傳「物件、每個屬性都是 ref」的工廠(const { a } = storeToRefs(...))
+    const REFS_FACTORIES = new Set(['storeToRefs', 'toRefs'])
+
+    // template 內 ref 會自動 unwrap(authToken.longToken 反而正確),故排除 vue-eslint-parser 的
+    // template 運算式。注意不能用 type.startsWith('V') —— 那會誤中標準 ESTree 的
+    // VariableDeclarator / VariableDeclaration;template 運算式一律包在 VExpressionContainer 內。
+    const isInsideTemplate = (node) => {
+      for (let n = node.parent; n; n = n.parent) {
+        if (n.type === 'VExpressionContainer') return true
+      }
+      return false
+    }
+
+    // 依「作用域鏈」由內而外解析識別字綁定,正確處理 shadowing(區域 let 遮蔽同名 ref)
+    const resolveVariable = (scope, name) => {
+      for (let s = scope; s; s = s.upper) {
+        const found = s.variables.find((v) => v.name === name)
+        if (found) return found
+      }
+      return null
+    }
+
+    // 該綁定是否由 ref 工廠 / storeToRefs 解構而來(逐一檢查其宣告 def,而非只看名字)
+    const isRefBinding = (variable) => {
+      if (!variable) return false
+      return variable.defs.some((def) => {
+        if (def.type !== 'Variable') return false
+        const decl = def.node // VariableDeclarator
+        const init = decl.init
+        if (init?.type !== 'CallExpression' || init.callee?.type !== 'Identifier') return false
+        const name = init.callee.name
+        if (decl.id?.type === 'Identifier' && REF_FACTORIES.has(name)) return true
+        if (decl.id?.type === 'ObjectPattern' && REFS_FACTORIES.has(name)) return true
+        return false
+      })
+    }
+
+    const sourceCode = context.sourceCode ?? context.getSourceCode()
+
+    return {
+      MemberExpression(node) {
+        if (node.object?.type !== 'Identifier') return
+        if (isInsideTemplate(node)) return
+
+        // 取屬性名:靜態存取用 property.name;computed 只認字面量(authToken['longToken']),
+        // 動態鍵(authToken[key])無法判斷,略過。
+        const propName = node.computed
+          ? node.property?.type === 'Literal'
+            ? String(node.property.value)
+            : null
+          : node.property?.name
+        if (propName == null) return
+        if (propName === 'value') return // 正確用法
+
+        // 解析 object 綁定,僅在它確實是 ref 時才報錯(避免區域變數 shadowing 造成誤報)
+        const variable = resolveVariable(sourceCode.getScope(node), node.object.name)
+        if (!isRefBinding(variable)) return
+
+        context.report({
+          node,
+          messageId: 'requireValue',
+          data: {
+            name: node.object.name,
+            prop: propName,
+          },
+          fix(fixer) {
+            return fixer.insertTextAfter(node.object, '.value')
           },
         })
       },
@@ -131,6 +238,8 @@ export default createConfigForNuxt(
   {
     languageOptions: {
       globals: {
+        ...storeGlobals,
+        callOnce: 'readonly',
         computed: 'readonly',
         defineNuxtPlugin: 'readonly',
         defineNuxtRouteMiddleware: 'readonly',
@@ -147,6 +256,7 @@ export default createConfigForNuxt(
         storeToRefs: 'readonly',
         toValue: 'readonly',
         useAsyncData: 'readonly',
+        useCookie: 'readonly',
         useNuxtApp: 'readonly',
         useRequestURL: 'readonly',
         useRoute: 'readonly',
@@ -155,7 +265,7 @@ export default createConfigForNuxt(
         useRuntimeConfig: 'readonly',
         useSlots: 'readonly',
         useState: 'readonly',
-        unref: 'unref',
+        unref: 'readonly',
         watch: 'readonly',
         watchEffect: 'readonly',
         useRequestHeaders: 'readonly',
@@ -166,12 +276,14 @@ export default createConfigForNuxt(
         rules: {
           'no-duplicate-object-key-values-in-array': noDuplicateObjectKeyValuesInArrayRule,
           'require-ref-value-assignment': refValueAssignmentRule,
+          'require-ref-value-access': refValueAccessRule,
         },
       },
     },
     rules: {
       'local/no-duplicate-object-key-values-in-array': 'warn',
       'local/require-ref-value-assignment': 'error',
+      'local/require-ref-value-access': 'error',
       'no-unused-vars': 'off',
       '@typescript-eslint/no-unused-vars': [
         'warn',
@@ -199,6 +311,7 @@ export default createConfigForNuxt(
       ],
       'vue/no-v-html': 'off',
       'vue/no-multiple-template-root': 'off',
+      'vue/multi-word-component-names': 'off',
       'vue/html-self-closing': [
         'error',
         {

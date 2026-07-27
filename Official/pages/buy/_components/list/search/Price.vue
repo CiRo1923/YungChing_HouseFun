@@ -45,11 +45,10 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <BuyMFormSelectDropdown
+  <CommonMFormSelectDropdown
     :name="`${componentsName}Dropdown`"
     v-model="price.label"
     :config="{
-      placeholder: '全區域',
       target: {
         m: '.search-mode',
       },
@@ -70,7 +69,7 @@ onUnmounted(() => {
         class="mb-[15px] flex shrink-0 items-center border-b-[1px] border-b-[--gray-ccce] pb-[15px] tm:gap-x-[20px] p:gap-x-[40px]"
       >
         <li v-for="(item, index) in options" :key="`${componentsName}_${item.value}_${index}`">
-          <BuyMFormRadio
+          <CommonMFormRadio
             name="priceType"
             v-model="type"
             :config="{
@@ -89,7 +88,7 @@ onUnmounted(() => {
       @click:routePush="onRoutePush"
       v-if="isDeviceM"
     />
-  </BuyMFormSelectDropdown>
+  </CommonMFormSelectDropdown>
 </template>
 
 <style></style>

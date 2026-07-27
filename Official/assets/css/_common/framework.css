@@ -16,7 +16,7 @@ body {
   min-height: 100vh;
   min-height: -webkit-fill-available;
 
-  @apply flex flex-col bg-[--yellow-feea];
+  @apply flex flex-col;
 }
 
 #__nuxt {

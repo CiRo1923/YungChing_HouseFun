@@ -1,6 +1,4 @@
-import { useBuyListStore } from '@stores/buy/list.js'
-
-const useNavStores = () => {
+export default () => {
   const buyListStore = useBuyListStore()
   const { region, mrt } = storeToRefs(buyListStore)
   const menu = computed(() => {
@@ -79,5 +77,3 @@ const useNavStores = () => {
     menu,
   }
 }
-
-export default useNavStores

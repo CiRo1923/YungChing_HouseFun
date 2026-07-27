@@ -28,6 +28,9 @@ export default defineNuxtConfig({
   ],
   experimental: {
     appManifest: false,
+    // 用 AsyncLocalStorage 保留 nuxtApp / pinia context,讓深層 async(fetch 攔截器等
+    // 非 setup/plugin 檔案)在 SSR 跨 await 後仍能安全呼叫 useRuntimeConfig / useXxxStore。
+    asyncContext: true,
   },
   devtools: {
     enabled: true,
@@ -66,6 +69,7 @@ export default defineNuxtConfig({
   css: [
     `@/${CONFIG.css}/tailwind.css`,
     `@/${CONFIG.css}/_common/framework.css`,
+    `@/${CONFIG.css}/_common/layout.css`,
     `@/${CONFIG.css}/_common/color.css`,
     `@/${CONFIG.css}/_common/basic.css`,
     `@/${CONFIG.css}/_common/vueTransition.css`,

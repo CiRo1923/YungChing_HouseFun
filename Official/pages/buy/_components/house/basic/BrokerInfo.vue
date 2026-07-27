@@ -52,7 +52,7 @@ const companyInfo = computed(() => {
         <ul class="flex items-center gap-x-[10px]">
           <template v-for="(item, index) in items" :key="`${item.id}_${index}`">
             <li class="flex items-center">
-              <BuyMAnchor
+              <CommonMAnchor
                 :text="item.label"
                 :href="item.href"
                 :config="{

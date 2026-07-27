@@ -6,35 +6,37 @@ const props = defineProps({
   },
 })
 
-const typeItems = computed(() => {
-  return [
+const isEmpty = (value) => value == null || value === ''
+
+const typeItems = computed(() =>
+  [
     {
       label: props.item.caseType,
       class: '--bg-red-e786 --text-white',
     },
     {
-      label: `相似 ${props.item.similarity} %`,
+      label: isEmpty(props.item.similarity) ? null : `相似 ${props.item.similarity} %`,
       class: '--border-blue-69c1 --text-blue-69c1',
     },
-  ]
-})
+  ].filter((item) => !isEmpty(item.label))
+)
 
-const infoItems = computed(() => {
-  return [
+const infoItems = computed(() =>
+  [
     {
-      label: `${props.item.room} 房`,
+      label: isEmpty(props.item.room) ? null : `${props.item.room} 房`,
       class: '--bg-gray-f7 --text-gray-666',
     },
     {
-      label: `屋齡 ${props.item.buildingAge} 年`,
+      label: isEmpty(props.item.buildingAge) ? null : `屋齡 ${props.item.buildingAge} 年`,
       class: '--bg-gray-f7 --text-gray-666',
     },
     {
-      label: `${props.item.floor} 樓`,
+      label: isEmpty(props.item.floor) ? null : `${props.item.floor} 樓`,
       class: '--bg-gray-f7 --text-gray-666',
     },
-  ]
-})
+  ].filter((item) => !isEmpty(item.label))
+)
 </script>
 
 <template>

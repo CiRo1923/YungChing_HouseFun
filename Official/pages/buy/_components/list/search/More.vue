@@ -35,7 +35,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <BuyMFormSelectDropdown
+  <CommonMFormSelectDropdown
     name="MoreDropdown"
     v-model="more.label"
     :config="{
@@ -60,7 +60,7 @@ onUnmounted(() => {
         class="scrollbar --y h-full shrink-0 space-y-[5px] border-y-[20px] border-transparent bg-[--gray-f7] m:px-[5px] t:px-[10px] tm:min-w-[115px] p:min-w-[150px] p:px-[20px]"
       >
         <li v-for="(item, index) in more.options" :key="`${componentsName}_${item.id}_${index}`">
-          <BuyMAnchor
+          <CommonMAnchor
             :text="item.label"
             :setClass="{
               main: [
@@ -93,7 +93,7 @@ onUnmounted(() => {
       @click:routePush="onRoutePush"
       v-if="isDeviceM"
     />
-  </BuyMFormSelectDropdown>
+  </CommonMFormSelectDropdown>
 </template>
 
 <style lang="postcss"></style>

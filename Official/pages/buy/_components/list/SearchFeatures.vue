@@ -2,11 +2,11 @@
 const common = useCommonStore()
 const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
-const buyProject = useBuyProjectStore()
-const { options } = storeToRefs(buyProject)
+const manage = useManageStore()
+const { options } = storeToRefs(manage)
 const buyList = useBuyListStore()
 const { apiSearchData } = storeToRefs(buyList)
-const { onCustom } = useBuyPopupActions()
+const { onCustom } = usePopupActions()
 
 const maxItems = 5
 
@@ -55,7 +55,7 @@ onUnmounted(() => {
     <ul class="flex items-center gap-x-[10px]">
       <template v-if="!isDeviceM">
         <li v-for="(item, index) in topFeatures" :key="`${item.text}_${item.code}_${index}`">
-          <BuyMFormCheckBox
+          <CommonMFormCheckBox
             name="tag"
             v-model="apiSearchData.tag"
             :config="{
@@ -73,7 +73,7 @@ onUnmounted(() => {
         class="relative pl-[11px] pt:before:absolute pt:before:left-0 pt:before:top-1/2 pt:before:h-[12px] pt:before:w-[1px] pt:before:-translate-y-1/2 pt:before:bg-[--gray-ccce] pt:before:content-default"
         v-if="hasMore"
       >
-        <BuyMAnchor
+        <CommonMAnchor
           :text="more.label"
           :setClass="{
             main: more.class,

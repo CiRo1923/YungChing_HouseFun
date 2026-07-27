@@ -1,15 +1,13 @@
-import { apiRegion, apiMrt } from '@js/_api/common.js'
+import { apiRegion, apiMrt } from '@js/_api/buy/common.js'
 import { apiBuyList, apiBuyListFocus, apiBuySuggest } from '@js/_api/buy/list.js'
 
-import { useBuyListStore } from '@stores/buy/list.js'
-import useBuyPopupActions from '@stores/buy/.composables/usePopupActions.js'
-
-const useBuyListStores = () => {
+export default () => {
   // const projectStores = useProjectStore()
   const buyListStore = useBuyListStore()
   const { channel, focus, content, apiSearchData, region, mrt, pin, tab, pagination } =
     storeToRefs(buyListStore)
-  const { onApiError } = useBuyPopupActions()
+  const { onApiError } = usePopupActions()
+  const { onSetSeo } = useCommonActions()
   const route = useRoute()
   const isChannelRegion = computed(() => channel.value === 'region')
   const isChannelMrt = computed(() => channel.value === 'mrt')
@@ -51,13 +49,16 @@ const useBuyListStores = () => {
     return result
   })
   const commonQuery = computed(() => {
-    const queryOd = apiSearchData.value.od ? { od: apiSearchData.value.tag } : {}
+    const queryOd = apiSearchData.value.od ? { od: apiSearchData.value.od } : {}
     const queryTag =
       apiSearchData.value.tag.length !== 0 ? { tag: apiSearchData.value.tag.join(',') } : {}
+    // D-29:關鍵字寫入 URL(query),重整 / 分享後才能還原
+    const queryKw = apiSearchData.value.kw ? { kw: apiSearchData.value.kw } : {}
 
     return {
       ...queryOd,
       ...queryTag,
+      ...queryKw,
     }
   })
   // const { apiData, options: projectOptions } = storeToRefs(projectStores)
@@ -91,9 +92,9 @@ const useBuyListStores = () => {
       const { items } = data
 
       mrt.value.all = items.map((item) => item.id).join(',')
-      mrt.value.options = items.map((mrt) => ({
-        ...mrt,
-        lines: mrt.lines.map((lines) => ({
+      mrt.value.options = items.map((item) => ({
+        ...item,
+        lines: item.lines.map((lines) => ({
           ...lines,
           stations: [{ id: lines.id, name: '全站' }, ...lines.stations],
         })),
@@ -129,11 +130,11 @@ const useBuyListStores = () => {
       ...(isChannelMrt.value ? { mrt: mrt.value.ids || mrt.value.all } : {}),
       ...apiSearchData.value,
       pg: query.pg,
-      pageSize: 12,
+      pageSize: 20,
     })
 
     if (status === 200) {
-      const { items, tabs, paging } = data
+      const { items, tabs, paging, seo: seoData } = data
       const infoMap = tab.value.options.map((item) => {
         const value = tabs?.[item.id] ?? item.value ?? 0
         const filters = params.filters.filter((item) => !item.includes('_tab'))
@@ -155,6 +156,7 @@ const useBuyListStores = () => {
       })
 
       content.value = items
+      onSetSeo(seoData)
       tab.value.options = infoMap
       pagination.value = paging
     } else {
@@ -265,6 +267,12 @@ const useBuyListStores = () => {
 
     // tag
     apiSearchData.value.tag = parseFilters.tag?.split(',') ?? []
+
+    // kw(D-29:從 URL query 還原關鍵字)
+    apiSearchData.value.kw = parseFilters.kw || ''
+
+    // od(D-37:排序以 querystring 帶入網址,重整 / 分享後還原)
+    apiSearchData.value.od = parseFilters.od || ''
   }
 
   return {
@@ -282,5 +290,3 @@ const useBuyListStores = () => {
     onGetBuyListParams,
   }
 }
-
-export default useBuyListStores

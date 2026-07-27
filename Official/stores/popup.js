@@ -4,9 +4,37 @@ export const usePopupStore = defineStore('popup', () => {
   let alertCheck = ref(null)
   let confirmCheck = ref(null)
   let customCheck = ref(null)
+
   const promise = ref({
     message: '資料處理中，請勿退出或關閉頁面<br />感謝您耐心等候！',
     status: 'close', // 'open' / 'close'
+  })
+  const buttons = readonly({
+    alert: [
+      {
+        id: 'sure',
+        label: '確認',
+        class: '',
+        type: 'sure',
+        isClose: true,
+      },
+    ],
+    confirm: [
+      {
+        id: 'cancel',
+        label: '取消',
+        class: '',
+        type: 'cancel',
+        isClose: true,
+      },
+      {
+        id: 'sure',
+        label: '確認',
+        class: '',
+        type: 'sure',
+        isClose: true,
+      },
+    ],
   })
   const alertData = reactive({
     id: null,
@@ -15,7 +43,6 @@ export const usePopupStore = defineStore('popup', () => {
     content: null,
     btns: null,
     hasExistClose: true,
-    setClass: null,
   })
   const confirmData = reactive({
     id: null,
@@ -24,7 +51,6 @@ export const usePopupStore = defineStore('popup', () => {
     content: null,
     btns: null,
     hasExistClose: true,
-    setClass: null,
   })
 
   const customData = reactive({
@@ -50,6 +76,7 @@ export const usePopupStore = defineStore('popup', () => {
     confirmCheck,
     customCheck,
     promise,
+    buttons,
     alertData,
     confirmData,
     customData,

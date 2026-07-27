@@ -2,9 +2,9 @@
 const common = useCommonStore()
 const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
-const buyProject = useBuyProjectStore()
-const { options } = storeToRefs(buyProject)
 const { onResolveByDevice } = useBuyProjectActions()
+const manage = useManageStore()
+const { options } = storeToRefs(manage)
 const buyList = useBuyListStore()
 const { apiSearchData, face } = storeToRefs(buyList)
 
@@ -28,7 +28,7 @@ onUnmounted(() => {
 <template>
   <ul class="space-y-[20px]">
     <li v-for="(item, index) in options.face" :key="`face_${item.value}_${index}`">
-      <BuyMFormCheckBox
+      <CommonMFormCheckBox
         name="dt"
         v-model="apiSearchData.dt"
         :config="{

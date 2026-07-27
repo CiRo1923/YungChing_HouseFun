@@ -182,7 +182,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <BuyMFormSelectDropdown
+  <CommonMFormSelectDropdown
     :name="`${componentsName}Dropdown`"
     v-model="mrt.label"
     :config="{
@@ -213,7 +213,7 @@ onUnmounted(() => {
             v-for="(item, index) in mrt.options"
             :key="`${componentsName}_area_${item.id}_${index}`"
           >
-            <BuyMAnchor
+            <CommonMAnchor
               :text="item.name"
               :setClass="{
                 main: onAnchorClass(item),
@@ -230,7 +230,7 @@ onUnmounted(() => {
         >
           <ul class="scrollbar --y max-h-full space-y-[5px] tm:px-[10px] p:w-[165px] p:px-[15px]">
             <li v-for="(item, index) in lines" :key="`${componentsName}_lines_${item.id}_${index}`">
-              <BuyMAnchor
+              <CommonMAnchor
                 :text="item.name"
                 :setClass="{
                   main: [
@@ -250,7 +250,7 @@ onUnmounted(() => {
               v-for="(item, index) in stations"
               :key="`${componentsName}_stations_${item.id}_${index}`"
             >
-              <BuyMFormCheckBox
+              <CommonMFormCheckBox
                 name="stations"
                 v-model="mrt.ids"
                 :config="{
@@ -272,7 +272,7 @@ onUnmounted(() => {
         </div>
       </div>
     </div>
-  </BuyMFormSelectDropdown>
+  </CommonMFormSelectDropdown>
   <!-- <pre>{{ mrt }}</pre> -->
   <!-- <pre>{{ lines }}</pre> -->
 </template>

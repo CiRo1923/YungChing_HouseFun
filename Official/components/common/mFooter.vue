@@ -2,7 +2,23 @@
 const common = useCommonStore()
 const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
+
+const props = defineProps({
+  setClass: {
+    type: Object,
+    default: () => ({}),
+  },
+})
+
 const isDeviceM = computed(() => device.value === 'm')
+
+const setClass = computed(() => {
+  return {
+    main: '',
+    ...props.setClass,
+  }
+})
+
 const stores = readonly([
   {
     id: 'appStore',
@@ -110,7 +126,8 @@ onUnmounted(() => {
 
 <template>
   <div
-    class="m-fooetr bg-[--white] tm:mt-[20px] tm:px-[16px] tm:pb-[24px] tm:pt-[16px] p:mt-[55px] p:py-[32px]"
+    class="m-fooetr tm:mt-[20px] tm:px-[16px] tm:pb-[24px] tm:pt-[16px] p:mt-[55px] p:py-[32px]"
+    :class="setClass.main"
   >
     <div class="m-footer-container mx-auto pt:flex p:max-w-[1200px]">
       <div class="m-footer-information tracking-default text-[12px] text-[--gray-666] pt:grow">
@@ -127,7 +144,7 @@ onUnmounted(() => {
           </li>
         </ul>
         <p class="mt-[16px]">好房國際股份有限公司 (統編 28006949) 負責建置及維護</p>
-        <BuyMSeparator
+        <CommonMSeparator
           :items="privacy"
           :config="{
             isHiddenItem: false,
@@ -141,7 +158,7 @@ onUnmounted(() => {
             {{ item.label }}
           </a>
           <p v-else>{{ item.label }}</p>
-        </BuyMSeparator>
+        </CommonMSeparator>
       </div>
       <div class="m-footer-links tracking-default space-y-[16px] pt:shrink-0" v-if="!isDeviceM">
         <p class="text-[16px] text-[--green-6a2d]">關注好房網</p>

@@ -29,7 +29,7 @@ onUnmounted(() => {
 <template>
   <ul class="space-y-[20px]">
     <li v-for="(item, index) in floor.options" :key="`floor_${item.value}_${index}`">
-      <BuyMFormRadio
+      <CommonMFormRadio
         name="age"
         v-model="apiSearchData.floor"
         :config="{

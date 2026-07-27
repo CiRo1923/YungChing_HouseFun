@@ -22,7 +22,7 @@ const config = computed(() => {
       </div>
     </div>
     <footer class="m-accordion-footer">
-      <BuyMAnchor :text="config.buttonText" />
+      <CommonMAnchor :text="config.buttonText" />
     </footer>
   </div>
 </template>

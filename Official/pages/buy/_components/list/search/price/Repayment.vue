@@ -59,7 +59,7 @@ onHousePrice()
   <ul class="tracking-default grow space-y-[15px] m:overflow-y-auto">
     <li class="space-y-[4px]">
       <span class="block text-[16px] leading-[1.56]">自備款</span>
-      <BuyMFormInput
+      <CommonMFormInput
         name="downPayment"
         v-model="repayment.downPayment"
         :config="{
@@ -72,11 +72,11 @@ onHousePrice()
         @blur="onHousePrice"
       >
         <template #rearAssist>萬</template>
-      </BuyMFormInput>
+      </CommonMFormInput>
     </li>
     <li class="space-y-[4px]">
       <span class="block text-[16px] leading-[1.56]">每月可負擔房貸</span>
-      <BuyMFormInput
+      <CommonMFormInput
         name="monthlyPayment"
         v-model="repayment.monthlyPayment"
         :config="{
@@ -89,11 +89,11 @@ onHousePrice()
         @blur="onHousePrice"
       >
         <template #rearAssist>萬</template>
-      </BuyMFormInput>
+      </CommonMFormInput>
     </li>
     <li class="space-y-[4px]">
       <span class="block text-[16px] leading-[1.56]">貸款年限</span>
-      <BuyMFormRadiosOval
+      <CommonMFormRadiosOval
         :options="loanYears"
         v-model="repayment.loanYears"
         :setClass="{
@@ -106,7 +106,7 @@ onHousePrice()
     </li>
     <li class="space-y-[4px]">
       <span class="block text-[16px] leading-[1.56]">貸款利率</span>
-      <BuyMFormInput
+      <CommonMFormInput
         name="annualInterestRate"
         v-model="repayment.annualInterestRate"
         :config="{
@@ -119,7 +119,7 @@ onHousePrice()
         @blur="onHousePrice"
       >
         <template #rearAssist>%</template>
-      </BuyMFormInput>
+      </CommonMFormInput>
     </li>
     <li>
       <span class="block text-[16px]">參考總價</span>
@@ -134,7 +134,7 @@ onHousePrice()
   </ul>
   <!-- <ul class="p:mt-[15px]">
     <li>
-      <BuyMAnchor
+      <CommonMAnchor
         text="確認"
         :setClass="{
           main: '--bg-orange-e646 --text-white --oval p:--h-35 p:--px-20 w-full',

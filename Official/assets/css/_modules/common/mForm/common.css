@@ -1,0 +1,111 @@
+.m-form,
+.m-form-container {
+  @apply overflow-hidden;
+}
+
+.m-form-container {
+  @apply flex;
+}
+
+.m-form-element {
+  &:not(label) {
+    border-width: var(--form-element-pc-border);
+
+    @apply flex h-[--form-element-h] grow items-center gap-x-[8px] overflow-hidden rounded-[--form-element-rounded] border-solid border-[--form-element-border-color] bg-[--form-element-bg-color] px-[--form-element-px] py-[--form-element-py] transition-colors duration-300;
+
+    &:not(:disabled):not(.\-\-disabled) {
+      &.\-\-focus {
+        --form-element-color: var(--form-element-focus-color);
+        --form-element-placeholder-color: var(--form-element-placeholder-focus-color);
+        --form-element-border-color: var(--form-element-border-focus-color);
+        --form-element-bg-color: var(--form-element-bg-focus-color);
+      }
+
+      &.\-\-error {
+        --form-element-color: var(--form-element-error-color);
+        --form-element-placeholder-color: var(--form-element-placeholder-error-color);
+        --form-element-border-color: var(--form-element-border-error-color);
+        --form-element-bg-color: var(--form-element-bg-error-color);
+
+        .m-form-length,
+        .m-form-assist {
+          @apply text-[--orange-e646];
+        }
+      }
+    }
+
+    &:disabled,
+    &.\-\-disabled {
+      --form-element-color: var(--form-element-disabled-color);
+      --form-element-placeholder-color: var(--form-element-placeholder-disabled-color);
+      --form-element-border-color: var(--form-element-border-disabled-color);
+      --form-element-bg-color: var(--form-element-bg-disabled-color);
+
+      @apply cursor-not-allowed;
+
+      .m-form-type {
+        @apply pointer-events-none;
+      }
+    }
+  }
+}
+
+.m-form-type {
+  @apply bg-transparent;
+
+  &:not([type='checkbox']):not([type='radio']) {
+    @apply flex h-full min-w-0 grow items-center text-[--form-element-color];
+
+    &::placeholder,
+    &.\-\-placeholder {
+      @apply text-[--form-element-placeholder-color];
+    }
+  }
+}
+
+.m-form-clear-button {
+  @apply transition-opacitys duration-300;
+
+  &:not(.\-\-show) {
+    @apply pointer-events-none invisible opacity-0;
+  }
+
+  &.\-\-show {
+    @apply visible opacity-100;
+  }
+}
+
+.m-form-clear-icon {
+  @apply h-[18px] w-[18px] p-[4px] text-[--gray-999];
+}
+
+.m-form-assist,
+.m-form-suffix {
+  @apply shrink-0;
+}
+
+.m-form-assist {
+  @apply transition-colors duration-300;
+}
+
+.m-form-error {
+  @apply mt-[4px] block text-[14px];
+}
+
+@screen p {
+  .m-form {
+    --form-element-border: var(--form-element-pc-border);
+  }
+}
+
+@screen t {
+  .m-form {
+    --form-element-border: var(--form-element-tablet-border);
+  }
+}
+
+@screen m {
+  .m-form {
+    --form-element-border: var(--form-element-mobile-border);
+  }
+}
