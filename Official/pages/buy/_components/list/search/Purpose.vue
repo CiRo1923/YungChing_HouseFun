@@ -58,7 +58,6 @@ onUnmounted(() => {
     :name="`${componentsName}Dropdown`"
     v-model="purpose.label"
     :config="{
-      placeholder: '全區域',
       target: {
         m: '.search-mode',
       },

@@ -36,19 +36,6 @@ const options = shallowReadonly([
     },
   },
   {
-    label: '主建物坪 + 陽台坪',
-    value: 'usepin',
-    sort: {
-      asc: {
-        label: '低',
-      },
-      desc: {
-        label: '高',
-        value: 4,
-      },
-    },
-  },
-  {
     label: '建坪',
     value: 'buildpin',
     sort: {

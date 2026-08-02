@@ -1,0 +1,17 @@
+:root {
+  --tag-clear-button-pc-gap-x: 5px;
+  --tag-clear-button-tablet-gap-x: 5px;
+  --tag-clear-button-mobile-gap-x: 5px;
+
+  --tag-clear-button-color: var(--gray-999);
+}
+
+/* .m-tag {
+  &.\-\-clear-button {
+    &:hover {
+      &.\-\-hover-border-green-9c33 {
+        --tag-clear-button-color: var(--green-9c33);
+      }
+    }
+  }
+} */

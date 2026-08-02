@@ -17,7 +17,7 @@ const onSearchClick = async () => {
 <template>
   <PageBuyListFilterCommonAccordion @search="onSearchClick">
     <PageBuyListFilterCommonPurpose />
-    <template #hide>
+    <template #hide="{ searchFun }">
       <PageBuyListFilterCommonArea />
       <BuyMFormSelect
         name="caseDealShowToken"
@@ -36,7 +36,7 @@ const onSearchClick = async () => {
         }"
       />
       <PageBuyListFilterCommonMore />
-      <PageBuyListFilterCommonSearch />
+      <PageBuyListFilterCommonSearch @search="searchFun" />
     </template>
   </PageBuyListFilterCommonAccordion>
 </template>

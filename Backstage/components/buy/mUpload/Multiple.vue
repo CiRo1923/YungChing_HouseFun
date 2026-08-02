@@ -1,7 +1,6 @@
 <script setup>
 import '@js/_validation.js'
 
-import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { validate as validateValue, Field, ErrorMessage } from 'vee-validate'
 
 const emit = defineEmits(['uploaded'])
@@ -32,7 +31,8 @@ const props = defineProps({
 
 const inputRef = ref(null)
 const innerList = ref([])
-const sortItemRefs = ref({})
+// 只在拖曳開始時同步讀取來量測位置，不需要響應式
+const sortItemRefs = new Map()
 const sortItemRects = ref({})
 const lastEmittedModelValue = ref(null)
 const hasMaxSizeError = ref(false)
@@ -43,7 +43,6 @@ const fieldValidate = ref(() => Promise.resolve())
 const isUploadDragging = ref(false)
 const dragItemIndex = ref(null)
 const sortTargetIndex = ref(null)
-const isSortDropCommitted = ref(false)
 const disableSortMotion = ref(false)
 const activePointerId = ref(null)
 
@@ -55,6 +54,7 @@ const config = computed(() => ({
   draggableUpload: true,
   accept: 'image/*',
   mode: 'multiple',
+  maxCountHiddenButton: false,
   ...props.config,
 }))
 
@@ -73,6 +73,7 @@ const isSingleMode = computed(() => config.value.mode === 'single')
 
 const setClass = computed(() => ({
   main: '',
+  item: '',
   error: '',
   ...props.setClass,
 }))
@@ -134,32 +135,29 @@ const normalizeRuleConfig = (rule, fallbackMessage) => {
   }
 }
 
-const getNormalizedRules = () => {
-  if (!props.rules || typeof props.rules !== 'object' || Array.isArray(props.rules)) {
-    return null
-  }
+// 物件型的 rules 才需要展開訊息中的 {maxSizeMB} 等參數，字串／陣列原樣交給 vee-validate
+const normalizedRules = computed(() => {
+  const { rules } = props
 
-  return mapRuleMessages(props.rules)
-}
+  if (!rules || typeof rules !== 'object' || Array.isArray(rules)) return null
+
+  return mapRuleMessages(rules)
+})
 
 const getCustomRuleMessage = (ruleName, fallbackMessage) => {
-  const normalizedRules = getNormalizedRules()
-  const rule = normalizedRules?.[ruleName]
-
-  return normalizeRuleConfig(rule, fallbackMessage).errorMessage
+  return normalizeRuleConfig(normalizedRules.value?.[ruleName], fallbackMessage).errorMessage
 }
 
 const rules = computed(() => {
-  const baseRules =
-    props.rules && typeof props.rules === 'object' && !Array.isArray(props.rules)
-      ? Object.entries(mapRuleMessages(props.rules)).reduce((result, [key, value]) => {
-          if (!customRuleKeys.includes(key)) {
-            result[key] = value
-          }
+  const baseRules = normalizedRules.value
+    ? Object.entries(normalizedRules.value).reduce((result, [key, value]) => {
+        if (!customRuleKeys.includes(key)) {
+          result[key] = value
+        }
 
-          return result
-        }, {})
-      : props.rules
+        return result
+      }, {})
+    : props.rules
 
   return async (value, ctx) => {
     if (hasAcceptRule.value && hasAcceptError.value) {
@@ -275,6 +273,13 @@ const isWithinMaxCount = (count) => {
 
   return count <= Number(maxCount)
 }
+
+// maxCountHiddenButton：已達張數上限時隱藏新增按鈕（未設定 maxCount 則永遠顯示）
+const hasAppendButton = computed(() => {
+  if (!config.value.maxCountHiddenButton) return true
+
+  return isWithinMaxCount(innerList.value.length + 1)
+})
 
 const hasFilesInDrag = (event) => {
   const dataTransfer = event.dataTransfer
@@ -431,13 +436,7 @@ const onAppendFiles = async (files, handleChange, validate) => {
 
   hasMaxCountError.value = hasMaxCountRule.value ? !isWithinMaxCount(nextCount) : false
 
-  if (!newItems.length) {
-    await nextTick()
-    await validate()
-    return
-  }
-
-  if (hasMaxCountError.value) {
+  if (!newItems.length || hasMaxCountError.value) {
     await nextTick()
     await validate()
     return
@@ -523,7 +522,6 @@ const onCheckItemChange = async (event, item, handleChange) => {
 const resetSortState = () => {
   dragItemIndex.value = null
   sortTargetIndex.value = null
-  isSortDropCommitted.value = false
   sortItemRects.value = {}
   activePointerId.value = null
 }
@@ -565,19 +563,17 @@ const shouldShowDraggedPreviewAt = (index) => {
 }
 
 const setSortItemRef = (itemId, element) => {
-  if (!element) {
-    const nextRefs = { ...sortItemRefs.value }
-    Reflect.deleteProperty(nextRefs, itemId)
-    sortItemRefs.value = nextRefs
+  if (element) {
+    sortItemRefs.set(itemId, element)
     return
   }
 
-  sortItemRefs.value[itemId] = element
+  sortItemRefs.delete(itemId)
 }
 
 const captureSortItemRects = () => {
   sortItemRects.value = innerList.value.reduce((result, item) => {
-    const element = sortItemRefs.value[item.id]
+    const element = sortItemRefs.get(item.id)
 
     if (element) {
       result[item.id] = element.getBoundingClientRect()
@@ -663,7 +659,6 @@ const onSortDragStart = (event, index) => {
 
   dragItemIndex.value = index
   sortTargetIndex.value = index
-  isSortDropCommitted.value = false
   isUploadDragging.value = false
   captureSortItemRects()
 
@@ -684,7 +679,6 @@ const onSortPointerDown = (event, index) => {
   activePointerId.value = event.pointerId
   dragItemIndex.value = index
   sortTargetIndex.value = index
-  isSortDropCommitted.value = false
   isUploadDragging.value = false
   captureSortItemRects()
 
@@ -756,7 +750,6 @@ const onSortPointerUp = async (event, handleChange) => {
   }
 
   event.currentTarget?.releasePointerCapture?.(event.pointerId)
-  isSortDropCommitted.value = true
   await commitSortOrder(handleChange)
 }
 
@@ -775,7 +768,6 @@ const onSortDropItem = async (event, index, handleChange) => {
   event.preventDefault()
   event.stopPropagation()
   sortTargetIndex.value = index
-  isSortDropCommitted.value = true
   await commitSortOrder(handleChange)
 }
 
@@ -812,7 +804,6 @@ const onSortDropAppend = async (event, handleChange) => {
   event.preventDefault()
   event.stopPropagation()
   sortTargetIndex.value = innerList.value.length - 1
-  isSortDropCommitted.value = true
   await commitSortOrder(handleChange)
 }
 
@@ -826,17 +817,7 @@ const onAppendButtonDrop = async (event, handleChange, validate) => {
   await onSortDropAppend(event, handleChange)
 }
 
-const onSortDragEnd = async () => {
-  if (dragItemIndex.value === null) {
-    resetSortState()
-    return
-  }
-
-  if (isSortDropCommitted.value) {
-    resetSortState()
-    return
-  }
-
+const onSortDragEnd = () => {
   resetSortState()
 }
 
@@ -908,12 +889,13 @@ watch(
 
       <div class="grid gap-x-[10px] gap-y-[16px] m:grid-cols-2 t:grid-cols-3 p:grid-cols-4">
         <div
-          class="cursor-move touch-none"
+          class="m-update-item cursor-move touch-none"
+          :class="setClass.item"
           :draggable="config.draggableSort"
           @dragstart="onSortDragStart($event, index)"
           @dragover="onSortDragOverItem($event)"
           @drop="(event) => onSortDropItem(event, index, handleChange)"
-          @dragend="() => onSortDragEnd(handleChange)"
+          @dragend="onSortDragEnd"
           @pointerdown="onSortPointerDown($event, index)"
           @pointermove="onSortPointerMove($event)"
           @pointerup="(event) => onSortPointerUp(event, handleChange)"
@@ -961,6 +943,7 @@ watch(
           @click="openFileDialog"
           @dragover="onAppendButtonDragOver"
           @drop="(event) => onAppendButtonDrop(event, handleChange, validate)"
+          v-if="hasAppendButton"
         >
           <div
             class="flex grow flex-col items-center justify-center gap-y-[10px] text-[16px] text-[--green-6a2d]"

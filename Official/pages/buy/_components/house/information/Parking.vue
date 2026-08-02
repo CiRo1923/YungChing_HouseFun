@@ -68,7 +68,7 @@ const items = computed(() => {
   </pre> -->
 
   <ul
-    class="m:space-y-[20px] t:gap-x-[40px] t:gap-y-[25px] tm:px-[15px] pt:flex p:gap-x-[80px] p:gap-y-[50px] p:px-[30px]"
+    class="m:space-y-[20px] t:gap-x-[40px] t:gap-y-[25px] tm:px-[10px] pt:flex p:gap-x-[80px] p:gap-y-[50px] p:px-[30px]"
     v-if="hasParking"
   >
     <li

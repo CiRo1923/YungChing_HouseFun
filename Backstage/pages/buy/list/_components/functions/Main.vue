@@ -6,7 +6,6 @@ const emits = defineEmits([
   'click:deal',
   'click:copy',
   'click:remove',
-  'sort:update',
 ])
 const props = defineProps({
   eventsItems: {
@@ -14,10 +13,6 @@ const props = defineProps({
     default: () => [],
   },
 })
-
-const onSortUpdate = () => {
-  emits('sort:update')
-}
 
 const onClick = (id) => {
   emits(`click:${id}`)
@@ -39,7 +34,7 @@ const onClick = (id) => {
       @click:remove="onClick('remove')"
     />
     <PageBuyListFunctionsSelectCount />
-    <PageBuyListFunctionsSort @update="onSortUpdate" />
+    <slot name="sort" />
   </div>
 </template>
 

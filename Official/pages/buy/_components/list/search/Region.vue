@@ -55,8 +55,10 @@ const areas = computed(() => {
 })
 
 const onGetLabel = () => {
-  // 區域 → 「縣市-區域」;全區(無區域)→ 只顯示「縣市」;各項以「、」串接
+  // 區域 → 「縣市-區域」;全區(無區域)→ 只顯示「縣市」;各項以「、」串接。
+  // 防禦:找不到對應縣市(city 為 null,例如無效代碼)時整段略過,避免顯示「null」。
   region.value.label = getData.value
+    .filter(({ city }) => city)
     .map(({ city, area }) => (area ? `${city}-${area}` : city))
     .join('、')
 }

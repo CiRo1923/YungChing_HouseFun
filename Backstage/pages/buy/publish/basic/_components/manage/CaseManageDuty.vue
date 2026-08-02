@@ -22,7 +22,7 @@ const { apiData } = storeToRefs(buyPublish)
         },
       },
       other: {
-        placeholder: '請輸入其他原因',
+        placeholder: '請輸入',
       },
     }"
     :otherRules="{

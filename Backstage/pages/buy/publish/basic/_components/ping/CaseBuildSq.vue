@@ -18,6 +18,9 @@ const casePurposeToken = computed(() => apiData.value.caseInfo.casePurposeToken)
           inputMode: 'numeric',
           inputChinese: false,
           checkNotIsZero: true,
+          maxlength: 5,
+          toFixed: 2,
+          comma: true,
         }"
         :rules="{
           required: '請輸入登記坪數',

@@ -70,10 +70,14 @@ onMounted(() => {
     <PageBuyListContent
       :funEventsItem="funEventsItem"
       :contentEventsItem="contentEventsItem"
-      v-slot="{ item, publishFun }"
       @update="onUpdate"
     >
-      <PageBuyListItemDraftInfo :data="item" @click:publish="publishFun" class="m:mt-[24px]" />
+      <!-- <template #sort="{ sortFun }">
+        <PageBuyListFunctionsSort @update="sortFun" />
+      </template> -->
+      <template #tools="{ item, publishFun }">
+        <PageBuyListItemDraftInfo :data="item" @click:publish="publishFun" class="m:mt-[24px]" />
+      </template>
     </PageBuyListContent>
   </BuyMContainer>
   <PageBuyListPopupRenewal />

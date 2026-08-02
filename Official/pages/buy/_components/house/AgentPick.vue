@@ -1,7 +1,7 @@
 <script setup>
 const buyHouse = useBuyHouseStore()
 const { broker, agentPick } = storeToRefs(buyHouse)
-const hasAgentPick = computed(() => agentPick.value?.length !== 0)
+const hasAgentPick = computed(() => Array.isArray(agentPick.value) && agentPick.value.length > 0)
 </script>
 
 <template>

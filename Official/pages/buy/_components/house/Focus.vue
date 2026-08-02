@@ -1,7 +1,7 @@
 <script setup>
 const buyHouse = useBuyHouseStore()
 const { highlights } = storeToRefs(buyHouse)
-const hasDatas = computed(() => highlights.value?.length !== 0)
+const hasDatas = computed(() => Array.isArray(highlights.value) && highlights.value.length > 0)
 const datas = computed(() => {
   return highlights.value.map((item) => ({
     label: item.title,

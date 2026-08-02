@@ -1,8 +1,10 @@
 <script setup>
 const emits = defineEmits(['search'])
 
-const onSearchClick = () => {
+// 按下搜尋一併收合搜尋條件（非手風琴裝置本來就恆為展開，收合不影響顯示）
+const onSearchClick = (onToggle) => {
   emits('search')
+  onToggle(false)
 }
 </script>
 
@@ -26,12 +28,13 @@ const onSearchClick = () => {
     }"
   >
     <slot />
-    <template #hide>
-      <slot name="hide" />
+    <!-- searchFun 讓插槽內容（例如搜尋欄按 Enter）觸發與「搜尋」按鈕完全相同的行為 -->
+    <template #hide="{ onToggle }">
+      <slot name="hide" :searchFun="() => onSearchClick(onToggle)" />
     </template>
-    <template #footer="{ device, toggleText, onToggle }">
+    <template #footer="{ isAccordion, toggleText, onToggle }">
       <ul class="flex items-center justify-between">
-        <li v-if="device === 'm'">
+        <li v-if="isAccordion">
           <BuyMAnchor
             :text="toggleText"
             :setClass="{
@@ -46,7 +49,7 @@ const onSearchClick = () => {
             :setClass="{
               main: '--bg-green-6a2d --oval --h-35 --px-20 --text-white',
             }"
-            @click="onSearchClick"
+            @click="onSearchClick(onToggle)"
           />
         </li>
       </ul>

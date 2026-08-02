@@ -2,30 +2,32 @@ import { defineStore } from 'pinia'
 
 export const useBuyListStore = defineStore('buyList', () => {
   const basicRouteName = 'buy-list-filters'
-  const channel = ref('region')
   const focus = ref(null)
   const content = ref(null)
-  const apiSearchData = ref({
-    purpose: '',
-    price: '',
-    room: '',
-    addRoom: false,
-    type: '',
-    buildpin: '',
-    usepin: '',
-    landpin: '',
-    npark: false,
-    parking: '',
-    age: '',
-    floor: '',
-    uniprice: '',
-    dt: '', // 朝向(face)
-    ft: '', // 環境(nearBy);須預先宣告為字串,否則 isJoin 多選 checkbox 無法初始化 → 環境搜尋無作用
-    tab: 0,
-    tag: [],
-    kw: '',
-    od: '',
+  const apiDataDefault = readonly({
+    search: {
+      purpose: '',
+      price: '',
+      room: '',
+      addRoom: false,
+      type: '',
+      buildpin: '',
+      usepin: '',
+      landpin: '',
+      npark: false,
+      parking: '',
+      age: '',
+      floor: '',
+      uniprice: '',
+      dt: '', // 朝向(face)
+      ft: '', // 環境(nearBy);須預先宣告為字串,否則 isJoin 多選 checkbox 無法初始化 → 環境搜尋無作用
+      tab: 0,
+      tag: [],
+      kw: '',
+      od: '',
+    },
   })
+  const apiSearchData = ref({ ...apiDataDefault.search })
   const region = ref({
     defaultIDs: '01',
     label: '',
@@ -99,7 +101,7 @@ export const useBuyListStore = defineStore('buyList', () => {
     annualInterestRate: null,
   })
   const room = ref({
-    defaultLabel: '格局不限',
+    defaultLabel: '房數不限',
     label: '',
     unit: '房',
     range: [],
@@ -366,10 +368,10 @@ export const useBuyListStore = defineStore('buyList', () => {
 
   return {
     basicRouteName,
-    channel,
-    apiSearchData,
     focus,
     content,
+    apiDataDefault,
+    apiSearchData,
     region,
     mrt,
     purpose,

@@ -29,6 +29,23 @@ const withTrailingSlash = (routes) =>
     return next
   })
 
+// 買屋列表對外網址由 /buy/list/... 改為 /buy/...(不動 pages 資料夾,只改 route path)。
+// route name(buy-list-filters)不變,故 NuxtLink 具名路由會自動產生新網址。
+const remapBuyListPath = (routes) =>
+  routes.map((route) => {
+    const next = { ...route }
+
+    if (typeof next.path === 'string' && next.path.startsWith('/buy/list')) {
+      next.path = `/buy${next.path.slice('/buy/list'.length)}`
+    }
+
+    if (Array.isArray(next.children)) {
+      next.children = remapBuyListPath(next.children)
+    }
+
+    return next
+  })
+
 export default {
   linkActiveClass: '--active',
   linkExactActiveClass: '--exact-active',
@@ -42,6 +59,6 @@ export default {
       homeRoute.name = 'HomeIndex'
     }
 
-    return withTrailingSlash(routes)
+    return withTrailingSlash(remapBuyListPath(routes))
   },
 }

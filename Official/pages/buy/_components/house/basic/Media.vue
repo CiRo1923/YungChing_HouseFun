@@ -1,7 +1,8 @@
 <script setup>
 const { onReplaceImageSize } = useBuyProjectActions()
 const buyHouse = useBuyHouseStore()
-const { media, badges } = storeToRefs(buyHouse)
+const { media, badges, basic } = storeToRefs(buyHouse)
+const caseName = computed(() => basic.value?.title ?? '')
 const size = {
   width: 760,
   height: 570,
@@ -90,6 +91,7 @@ watch(
     <div class="h-full" v-if="modeID === 'floorPlan'">
       <CommonImgSrc
         :src="media.floorPlan"
+        :alt="`${caseName} 格局圖`"
         :setClass="{
           main: 'relative h-full',
           img: 'absolute left-1/2 h-full -translate-x-1/2',
@@ -116,7 +118,7 @@ watch(
         >
           <div class="flex h-full flex-col items-center justify-center break-keep">
             <!-- {{ onImageSize(item) }} -->
-            <CommonImgSrc :src="item" />
+            <CommonImgSrc :src="item" :alt="`${caseName} 物件照片`" />
           </div>
         </BuyMSwiperHorizontal>
         <small
@@ -127,6 +129,7 @@ watch(
       </template>
       <CommonImgSrc
         src="common/default_image.jpg"
+        :alt="`${caseName} 物件照片`"
         :setClass="{
           main: 'relative h-full',
           img: 'absolute left-1/2 h-full -translate-x-1/2',

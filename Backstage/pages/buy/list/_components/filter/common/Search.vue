@@ -1,6 +1,12 @@
 <script setup>
+const emits = defineEmits(['search'])
+
 const buyList = useBuyListStore()
 const { apiSearchData } = storeToRefs(buyList)
+
+const onEnter = () => {
+  emits('search')
+}
 </script>
 
 <template>
@@ -13,6 +19,7 @@ const { apiSearchData } = storeToRefs(buyList)
     :setClass="{
       main: '--h-40 --px-12 --py-8 pt:flex-1',
     }"
+    @keydown.enter="onEnter"
   />
 </template>
 

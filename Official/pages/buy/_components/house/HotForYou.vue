@@ -1,7 +1,7 @@
 <script setup>
 const buyHouse = useBuyHouseStore()
 const { hotForYou } = storeToRefs(buyHouse)
-const hasHotForYou = computed(() => hotForYou.value?.length !== 0)
+const hasHotForYou = computed(() => Array.isArray(hotForYou.value) && hotForYou.value.length > 0)
 </script>
 
 <template>

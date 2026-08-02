@@ -116,7 +116,7 @@ const onClick = (e) => {
         :class="setClass.icon"
         v-if="icon.position === 'left' && icon.name"
       />
-      <em class="m-anchor-text" :class="setClass.text">
+      <em class="m-anchor-text" :class="setClass.text" v-if="props.text">
         {{ props.text }}
       </em>
       <CommonSvgIcon

@@ -34,18 +34,16 @@ const onCheckChange = (event) => {
 const onRemoveClick = () => {
   emit('remove')
 }
-
-const stopDragTrigger = (event) => {
-  event.stopPropagation()
-}
 </script>
 
 <template>
   <div
     class="relative"
-    :class="{
-      'opacity-30': config.isPreview,
-    }"
+    :class="[
+      {
+        'opacity-30': config.isPreview,
+      },
+    ]"
     :style="style"
   >
     <div
@@ -60,7 +58,7 @@ const stopDragTrigger = (event) => {
         type="button"
         class="absolute right-0 top-0 z-[1] flex h-[24px] w-[24px] items-center justify-center rounded-[5px] bg-[--gray-f2]"
         :tabindex="config.isPreview ? -1 : undefined"
-        @pointerdown.stop="stopDragTrigger"
+        @pointerdown.stop
         @click.stop="onRemoveClick"
       >
         <CommonSvgIcon icon="icon_xmark" class="h-[10px] w-[10px] text-[--gray-666]" />
@@ -69,15 +67,15 @@ const stopDragTrigger = (event) => {
 
     <label
       class="flex items-center justify-center m:absolute m:bottom-[5px] m:left-[5px] pt:mt-[6px]"
-      @pointerdown.stop="stopDragTrigger"
-      @click.stop="stopDragTrigger"
+      @pointerdown.stop
+      @click.stop
     >
       <input
         type="checkbox"
         class="m-upload-checkbox sr-only"
         :checked="props.item.checked"
         :tabindex="config.isPreview ? -1 : undefined"
-        @pointerdown.stop="stopDragTrigger"
+        @pointerdown.stop
         @change="onCheckChange"
       />
       <CommonSvgIcon

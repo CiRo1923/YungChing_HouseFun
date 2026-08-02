@@ -4,6 +4,8 @@ import {
   cbcDecrypt,
   bytesToHex,
   hexToBytes,
+  bytesToBase64url,
+  base64urlToBytes,
   utf8Encode,
   utf8Decode,
   shortHash,
@@ -36,6 +38,35 @@ export const deCrypto = (string) => {
 // CBC 無驗證標籤,竄改後可能解出亂碼,故連 JSON.parse 也一併保護。
 export const deCryptoJSON = (string) => {
   const text = deCrypto(string)
+  if (text == null) return null
+  try {
+    return JSON.parse(text)
+  } catch {
+    return null
+  }
+}
+
+// ---- 短版 API(同一套 AES + KEY / IV,只把輸出換成 Base64url)----
+// 長度約為 hex 版的 2/3、且為 URL-safe 字元,較不易被安全過濾器誤判為釣魚字串。
+// 與 hex 版彼此不通用(編碼不同),請成對使用。
+export const enCryptoShort = (string) => {
+  const cipher = cbcEncrypt(utf8Encode(String(string)), keyBytes, ivBytes)
+  return bytesToBase64url(cipher)
+}
+
+// 解密為字串;空值 / 格式錯誤 / 竄改一律回傳 null(不丟例外)。
+export const deCryptoShort = (string) => {
+  if (!string) return null
+  try {
+    return utf8Decode(cbcDecrypt(base64urlToBytes(String(string)), keyBytes, ivBytes))
+  } catch {
+    return null
+  }
+}
+
+// 解密並解析為物件:任何失敗皆回傳 null,絕不丟例外。
+export const deCryptoShortJSON = (string) => {
+  const text = deCryptoShort(string)
   if (text == null) return null
   try {
     return JSON.parse(text)

@@ -144,7 +144,7 @@ onUnmounted(() => {
         }"
       />
     </div>
-    <slot />
+    <slot name="tools" />
     <PageBuyListItemEvents
       :data="props.data"
       :items="eventsItems"

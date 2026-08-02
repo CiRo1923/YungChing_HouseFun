@@ -1,8 +1,10 @@
 <script setup>
 const emits = defineEmits(['click:search'])
 
-const onSearchClick = () => {
+// 按下搜尋一併收合搜尋條件（非手風琴裝置本來就恆為展開，收合不影響顯示）
+const onSearchClick = (onToggle) => {
   emits('click:search')
+  onToggle(false)
 }
 </script>
 
@@ -26,13 +28,13 @@ const onSearchClick = () => {
     }"
   >
     <PageBuyListPopupCommentFilterStatus />
-    <template #hide>
+    <template #hide="{ onToggle }">
       <PageBuyListPopupCommentFilterType />
-      <PageBuyListPopupCommentFilterSearch />
+      <PageBuyListPopupCommentFilterSearch @search="onSearchClick(onToggle)" />
     </template>
-    <template #footer="{ device, toggleText, onToggle }">
+    <template #footer="{ isAccordion, toggleText, onToggle }">
       <ul class="flex items-center justify-between">
-        <li v-if="device === 'm'">
+        <li v-if="isAccordion">
           <BuyMAnchor
             :text="toggleText"
             :setClass="{
@@ -47,7 +49,7 @@ const onSearchClick = () => {
             :setClass="{
               main: '--bg-green-6a2d --oval --h-35 --px-20 --text-white',
             }"
-            @click="onSearchClick"
+            @click="onSearchClick(onToggle)"
           />
         </li>
       </ul>

@@ -5,7 +5,6 @@ export default () => {
   const { lifeMap } = storeToRefs(buyHouseStores)
   const { onSetSeo } = useCommonActions()
   const route = useRoute()
-
   const onApiBuyHouse = async () => {
     const { params } = route
     const { config, status, data } = await apiBuyHouse({

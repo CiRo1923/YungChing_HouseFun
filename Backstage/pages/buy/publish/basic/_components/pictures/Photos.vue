@@ -71,6 +71,7 @@ const onUploaded = async (items, done) => {
         accept: '.jpg, .jpeg, .png, .gif',
         maxCount: buyPublish.pictures.maxCount,
         maxSizeMB: buyPublish.pictures.maxSizeMB,
+        maxCountHiddenButton: true,
         placeholder: {
           default: '點擊或拖曳圖片到這裡上傳',
           hasImages: '新增圖片',
@@ -78,15 +79,26 @@ const onUploaded = async (items, done) => {
       }"
       :rules="{
         accept: '僅支援 { accept } 格式',
-        maxCount: '圖片最多上傳限制為 { maxCount } 張',
+        // maxCount: '圖片最多上傳限制為 { maxCount } 張',
         maxSize: '圖片大小不可超過 { maxSizeMB } MB',
       }"
       :setClass="{
         main: 'm:mt-[24px] pt:mt-[16px]',
+        item: 'case-pictures',
       }"
       @uploaded="onUploaded"
     />
   </div>
 </template>
 
-<style></style>
+<style lang="postcss">
+.case-pictures {
+  @apply relative;
+
+  &:first-child {
+    &:before {
+      @apply pointer-events-none absolute left-0 top-0 z-[1] flex h-[22px] items-center rounded-l-[5px] rounded-r-full bg-[--gray-666] px-[12px] text-[14px] text-[--white] content-['封面照'];
+    }
+  }
+}
+</style>

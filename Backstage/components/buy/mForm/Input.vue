@@ -1,5 +1,5 @@
 <script setup>
-import { numberComma, onToFixed } from '@js/_prototype.js'
+import { numberComma, onToFixed, onUnicodLength, onUnicodSlice } from '@js/_prototype.js'
 import { useTextCore } from './.composables/useTextCore.js'
 
 import '@js/_validation.js'
@@ -41,6 +41,7 @@ const props = defineProps({
 
 const model = ref(null)
 const isFocus = ref(false)
+const isComposing = ref(false)
 
 const { config, setClass, onEnter } = useTextCore({
   props,
@@ -110,7 +111,7 @@ const formatLength = computed(() => {
 
   return formatLength && maxlength
     ? formatLength.replace(/\{\s*(length|maxlength)\s*\}/g, (_, key) => {
-        return key === 'length' ? (model.value ? String(model.value.length) : 0) : String(maxlength)
+        return key === 'length' ? String(onUnicodLength(model.value)) : String(maxlength)
       })
     : null
 })
@@ -151,11 +152,25 @@ const onInput = async (e) => {
       (checkNotIsZero && integer && /^0/.test(number)) || (checkNotIsZero && /^0\d/.test(number))
         ? number.replace(/^0+/, '')
         : number
-  } else if (isRemoveChinese) {
-    model.value = value.replace(regex.chinese, '')
+  } else if (!isComposing.value) {
+    // 原生 maxlength 以 UTF-16 計算，emoji、罕用字（surrogate pair）會佔 2 格，
+    // 這裡改以字素叢集截斷，讓「幾個字」與畫面計數、驗證規則三者一致
+    const text = isRemoveChinese ? value.replace(regex.chinese, '') : value
+    const limited = fieldMaxlength.value ? onUnicodSlice(text, Number(fieldMaxlength.value)) : text
+
+    if (limited !== value) model.value = limited
   }
 
   emits('input', e)
+}
+
+// IME 組字中不截斷，避免把注音／拼音打到一半的字砍掉，等 compositionend 再處理
+const onComposition = (e) => {
+  const isEnd = e.type === 'compositionend'
+
+  isComposing.value = !isEnd
+
+  if (isEnd) onInput(e)
 }
 
 const onEvent = (e, errorMessage) => {
@@ -297,7 +312,7 @@ watch(
             v-bind="onBind(field)"
             :inputMode="config.inputMode"
             :minlength="config.minlength || config.length"
-            :maxlength="fieldMaxlength"
+            :maxlength="isNumeric ? fieldMaxlength : null"
             :placeholder="config.placeholder"
             :readonly="config.isReadonly"
             :disabled="config.isDisabled"
@@ -305,6 +320,8 @@ watch(
             @focusin="onEvent($event)"
             @blur="onEvent($event, errorMessage)"
             @input="onInput($event)"
+            @compositionstart="onComposition($event)"
+            @compositionend="onComposition($event)"
             @keydown.enter="onEnter($event)"
           />
           <button
@@ -330,7 +347,7 @@ watch(
           <slot
             name="suffix"
             :maxlength="config.length || config.maxlength"
-            :length="model ? model.length : 0"
+            :length="onUnicodLength(model)"
           />
         </small>
       </div>

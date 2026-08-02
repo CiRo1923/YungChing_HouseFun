@@ -67,8 +67,9 @@ const setClass = computed(() => {
   }
 })
 
-const onToggle = () => {
-  isExpand.value = !isExpand.value
+// 不帶參數：切換；帶 boolean：直接指定展開狀態（@click 傳進來的事件物件會被忽略）
+const onToggle = (isShow) => {
+  isExpand.value = typeof isShow === 'boolean' ? isShow : !isExpand.value
 }
 
 onResize()
@@ -90,12 +91,17 @@ onUnmounted(() => {
       </div>
       <Transition name="accordion">
         <div v-show="isShow" class="m-accordion-hide" :class="setClass.hide">
-          <slot name="hide" />
+          <slot name="hide" :isAccordion="isAccordion" :onToggle="onToggle" />
         </div>
       </Transition>
     </div>
     <footer class="m-accordion-footer" :class="setClass.footer" v-if="$slots.footer">
-      <slot name="footer" :device="device" :toggleText="toggleText" :onToggle="onToggle" />
+      <slot
+        name="footer"
+        :isAccordion="isAccordion"
+        :toggleText="toggleText"
+        :onToggle="onToggle"
+      />
     </footer>
   </div>
 </template>

@@ -23,11 +23,13 @@ const stores = readonly([
   {
     id: 'appStore',
     src: 'common/app_store.svg',
+    alt: 'App Store 下載',
     href: 'javascript:;',
   },
   {
     id: 'googlePlay',
     src: 'common/google_play.svg',
+    alt: 'Google Play 下載',
     href: 'javascript:;',
   },
 ])
@@ -136,6 +138,7 @@ onUnmounted(() => {
             <a :href="item.href" class="block" target="_blank" rel="noopener">
               <CommonImgSrc
                 :src="item.src"
+                :alt="item.alt"
                 :setClass="{
                   main: 'h-[40px] w-[160px]',
                 }"

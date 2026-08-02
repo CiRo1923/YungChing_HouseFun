@@ -38,8 +38,8 @@ export default () => {
 
   const onUseMeta = (meta = {}) => {
     const { url } = meta
-    // canonical / og:url 仍沿用 D-01 的算法(由當前網址補結尾斜線);其餘 SEO 皆讀 project.seo。
-    const href = url ? onCanonicalHref(url) : undefined
+    // API 沒回 canonical 時的 fallback:由當前網址補結尾斜線。
+    const fallbackHref = url ? onCanonicalHref(url) : undefined
 
     useHead(() => {
       // 頁面顯式傳入的 meta 覆蓋全站 project.seo,相容未走 onSetSeo 的頁面(如會員頁)舊用法。
@@ -48,6 +48,13 @@ export default () => {
       const ogImage = seo.ogImage
         ? seo.ogImage.replaceAll('{0}', '1200').replaceAll('{1}', '630')
         : undefined
+      // canonical / og:url 優先綁 API 的 seo.canonical;相對路徑補上 origin 成絕對網址,
+      // 已是絕對網址則原樣使用;API 沒給才退回「當前網址補斜線」。
+      const canonical = seo.canonical
+        ? /^https?:\/\//.test(seo.canonical)
+          ? seo.canonical
+          : `${url?.origin ?? ''}${seo.canonical}`
+        : fallbackHref
 
       return {
         title: seo.title,
@@ -56,10 +63,11 @@ export default () => {
           { property: 'og:title', itemprop: 'name', content: seo.ogTitle ?? seo.title },
           { property: 'og:description', content: seo.ogDescription ?? seo.description },
           { property: 'og:image', content: ogImage },
-          { property: 'og:url', itemprop: 'url', content: href },
-          { name: 'robots', content: seo.robots },
+          { property: 'og:url', itemprop: 'url', content: canonical },
+          // robots 一律輸出;API 有給用其值(可為 noindex),沒給則預設 index, follow
+          { name: 'robots', content: seo.robots ?? 'index, follow' },
         ].filter((item) => item.content),
-        link: href ? [{ rel: 'canonical', href }] : [],
+        link: canonical ? [{ rel: 'canonical', href: canonical }] : [],
         script: seo.jsonLd
           ? [
               {

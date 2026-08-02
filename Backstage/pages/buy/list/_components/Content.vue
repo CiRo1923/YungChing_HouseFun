@@ -350,9 +350,12 @@ const onCommentClick = async (objectData) => {
         @click:deal="onDealClick"
         @click:remove="onRemoveClick"
         @click:copy="onCopyClick"
-        @sort:update="onSortUpdate"
         v-if="hasFunEventsItem"
-      />
+      >
+        <template #sort>
+          <slot name="sort" :sortFun="onSortUpdate" />
+        </template>
+      </PageBuyListFunctionsMain>
       <ul class="divide-y-[1px] divide-[--gray-e5] border-b-[1px] border-b-[--gray-e5]">
         <li
           class="transition-colors duration-300 tm:py-[24px] p:px-[16px] p:py-[40px]"
@@ -372,14 +375,17 @@ const onCommentClick = async (objectData) => {
             @click:view="onViewClick"
             @click:comment="onCommentClick"
           >
-            <slot
-              :item="item"
-              :renewalFun="onRenewalClick"
-              :publishFun="onPublishClick"
-              :dealFun="onDealClick"
-              :goldenFun="onGoldenClick"
-              :autoRefreshFun="onAutoRefreshClick"
-            />
+            <template #tools>
+              <slot
+                name="tools"
+                :item="item"
+                :renewalFun="onRenewalClick"
+                :publishFun="onPublishClick"
+                :dealFun="onDealClick"
+                :goldenFun="onGoldenClick"
+                :autoRefreshFun="onAutoRefreshClick"
+              />
+            </template>
           </PageBuyListItemMain>
           <!-- <pre>
             {{ item }}

@@ -1,5 +1,5 @@
 <script setup>
-import { onLayoutText } from '@js/_prototype.js'
+import { onLayoutText, onFloorText } from '@js/_prototype.js'
 
 const buyHouse = useBuyHouseStore()
 const { basic, pin, floor } = storeToRefs(buyHouse)
@@ -7,8 +7,6 @@ const { basic, pin, floor } = storeToRefs(buyHouse)
 const houseInfo = computed(() => {
   const { buildAge, layout } = basic.value
   const { build } = pin.value
-  const { from, to, up } = floor.value
-  const isSameFloorFromTo = !to || !from || from === to
   // const addonData = {
   //   room: addon.room ? ` ${addon.room} 房 (室)` : '',
   //   living: addon.living ? ` ${addon.living} 廳` : '',
@@ -31,7 +29,7 @@ const houseInfo = computed(() => {
     {
       id: 'floor',
       label: '樓層',
-      value: `${from}${!isSameFloorFromTo ? ` ~ ${to}` : ''} / ${up} 樓`,
+      value: onFloorText(floor.value),
     },
     {
       id: 'layout',

@@ -18,7 +18,9 @@ const onHighQualityWordCount = (length) => {
       placeholder: '請輸入物件特色說明',
       maxlength: 2500,
       toolbar:
-        'Bold, Underline, Italic, Strike, Subscript, Superscript, Uppercase, Lowercase, BulletedList, NumberedList',
+        'Bold, Underline, Italic, Strike, Subscript, Superscript, BulletedList, FontSize, TextColor, BGColor',
+      fontSizes: [14, 16, 18, 20, 24, 30, 36],
+      colors: ['黃/FFFF00', '紅/FF0000', '綠/00B050', '藍/0070C0', '黑/000000'],
     }"
     :setClass="{
       suffix: 'flex text-[14px] text-[--gray-999] m:flex-col tm:mt-[8px] p:mt-[4px]',

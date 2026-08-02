@@ -527,6 +527,22 @@ export const onUnicodLength = (text) => {
   return [...segmenter.segment(String(text))].length
 }
 
+// 依特殊字元長度截斷字串
+export const onUnicodSlice = (text, max) => {
+  if (!text) return ''
+
+  const value = String(text)
+  const segmenter = new Intl.Segmenter()
+  const segments = [...segmenter.segment(value)]
+
+  if (segments.length <= max) return value
+
+  return segments
+    .slice(0, max)
+    .map(({ segment }) => segment)
+    .join('')
+}
+
 // 取得裝置
 export const onDevice = () => {
   const angle = globalThis.screen.orientation ? globalThis.screen.orientation.angle : 0

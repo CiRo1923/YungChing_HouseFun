@@ -19,13 +19,13 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <CommonMContent class="pt:--rounded-20 p:--p-24 t:--p-15 t:mx-[15px]">
+  <CommonMContent class="pt:--rounded-20 p:--p-24 t:--p-15 m:rounded-b-[20px]">
     <div class="t:gap-x-[10px] pt:flex p:gap-x-[25px]">
       <div
         class="m:flex m:flex-col-reverse t:w-[380px] t:space-y-[10px] pt:shrink-0 p:w-[760px] p:space-y-[15px]"
       >
         <article
-          class="relative z-[1] space-y-[5px] m:mt-[-20px] m:rounded-[20px] m:bg-[--white] m:px-[20px] m:pt-[30px]"
+          class="relative z-[1] space-y-[5px] m:mt-[-20px] m:rounded-t-[20px] m:bg-[--white] m:px-[20px] m:pt-[30px]"
         >
           <header class="flex items-center t:gap-x-[5px] p:gap-x-[10px]">
             <h2 class="leading-[1.556] tm:text-[20px] p:text-[27px]">

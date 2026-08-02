@@ -9,6 +9,7 @@ const { community } = storeToRefs(buyHouse)
   >
     <CommonImgSrc
       :src="community.imageUrl"
+      :alt="`${community?.name ?? ''} 社區照片`"
       :setClass="{
         main: 'h-full w-full',
       }"

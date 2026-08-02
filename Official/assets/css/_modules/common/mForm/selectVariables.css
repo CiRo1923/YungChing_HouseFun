@@ -44,13 +44,13 @@
     &.\-\-px-30,
     &.p\:\-\-px-30,
     &.pt\:\-\-px-30 {
-      --form-select-dropdown-container-px: 30px;
+      --form-select-dropdown-container-mx: 30px;
     }
 
     &.\-\-px-20,
     &.p\:\-\-px-20,
     &.pt\:\-\-px-20 {
-      --form-select-dropdown-container-px: 20px;
+      --form-select-dropdown-container-mx: 20px;
     }
 
     &.\-\-py-20,
@@ -74,14 +74,14 @@
     &.pt\:\-\-px-30,
     &.tm\:\-\-px-30,
     &.t\:\-\-px-30 {
-      --form-select-dropdown-container-px: 30px;
+      --form-select-dropdown-container-mx: 30px;
     }
 
     &.\-\-px-20,
     &.pt\:\-\-px-20,
     &.tm\:\-\-px-20,
     &.t\:\-\-px-20 {
-      --form-select-dropdown-container-px: 20px;
+      --form-select-dropdown-container-mx: 20px;
     }
 
     &.\-\-py-20,
@@ -104,13 +104,13 @@
     &.\-\-px-30,
     &.tm\:\-\-px-30,
     &.m\:\-\-px-30 {
-      --form-select-dropdown-container-px: 30px;
+      --form-select-dropdown-container-mx: 30px;
     }
 
     &.\-\-px-20,
     &.tm\:\-\-px-20,
     &.m\:\-\-px-20 {
-      --form-select-dropdown-container-px: 20px;
+      --form-select-dropdown-container-mx: 20px;
     }
 
     &.\-\-py-20,

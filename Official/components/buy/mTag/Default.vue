@@ -1,4 +1,7 @@
 <script setup>
+import '@css/_modules/buy/mTag/variables.css'
+import '@css/_modules/buy/mTag/common.css'
+
 const props = defineProps({
   label: {
     type: String,
@@ -32,10 +35,9 @@ const setClass = computed(() => {
 <template>
   <span class="m-tag" :class="setClass.main">
     <slot>
-      <em class="m-tag-label tracking-default" :class="setClass.label">{{ props.label }}</em>
+      <em class="m-tag-label" :class="setClass.label">{{ props.label }}</em>
     </slot>
   </span>
 </template>
 
-<style src="@css/_modules/buy/mTag.css" />
 <style></style>

@@ -1,5 +1,5 @@
 <script setup>
-import { onFormatDate } from '@js/_prototype.js'
+import { onFormatDate, onTimeAgo } from '@js/_prototype.js'
 
 const common = useCommonStore()
 const { device } = storeToRefs(common)
@@ -16,13 +16,11 @@ const props = defineProps({
 
 const showMinute = 60
 const broker = computed(() => props.item.broker || {})
+// 刷新時間:不設上限,依時距顯示「N 分鐘前 / N 小時前 / N 天前」
 const lastUpdateTime = computed(() => {
-  if (!serverTime.value) return 0
+  if (!serverTime.value) return null
 
-  const time = onFormatDate(serverTime.value.full) - onFormatDate(props.item.lastUpdateTime)
-  const minute = time / 1000 / 60
-  const maxMinute = Math.max(0, Math.floor(minute))
-  return maxMinute <= showMinute ? maxMinute : 0
+  return onTimeAgo(props.item.lastUpdateTime, serverTime.value.full)
 })
 const latestMessageTime = computed(() => {
   if (!serverTime.value) return 0
@@ -47,7 +45,7 @@ onUnmounted(() => {
 <template>
   <ul class="mt-[5px] flex shrink-0 items-center t:gap-x-[10px] p:gap-x-[20px]" v-if="!isDeviceM">
     <li class="text-[14px]" v-if="broker.name">{{ broker.name }} / {{ broker.store }}</li>
-    <li class="text-[12px]" v-if="lastUpdateTime">{{ lastUpdateTime }} 分鐘前更新</li>
+    <li class="text-[12px]" v-if="lastUpdateTime">{{ lastUpdateTime }}更新</li>
     <li
       class="flex items-center gap-x-[3px] text-[12px] text-[--orange-f74c]"
       v-if="latestMessageTime"

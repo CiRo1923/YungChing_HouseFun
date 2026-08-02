@@ -13,7 +13,7 @@ const props = defineProps({
   >
     <PageBuyHouseActualPriceRecord :item="props.item" />
     <div
-      class="space-y-[5px] m:mx-[15px] t:ml-[10px] tm:pb-[10px] tm:pt-[20px] p:flex p:grow p:flex-col p:justify-center"
+      class="space-y-[5px] tm:mx-[10px] tm:pb-[10px] tm:pt-[20px] p:flex p:grow p:flex-col p:justify-center"
     >
       <PageBuyHouseActualPriceAddressInfo :item="props.item" />
       <PageBuyHouseActualPriceBasicInfo :item="props.item" />

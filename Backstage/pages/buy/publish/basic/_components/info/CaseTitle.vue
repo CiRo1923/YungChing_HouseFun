@@ -1,8 +1,16 @@
 <script setup>
 // const buyProject = useBuyProjectStore()
 // const { options } = storeToRefs(buyProject)
+import { onUnicodLength } from '@js/_prototype.js'
+
 const buyPublish = useBuyPublishStore()
 const { apiData } = storeToRefs(buyPublish)
+const highQualityWordCount = 15
+
+// 以字素叢集計算，emoji、罕用字（surrogate pair）皆算 1 字
+const remainingWordCount = computed(() => {
+  return highQualityWordCount - onUnicodLength(apiData.value.caseInfo.caseTitle)
+})
 </script>
 
 <template>
@@ -24,10 +32,14 @@ const { apiData } = storeToRefs(buyPublish)
       suffix: 'block text-[14px] text-[--gray-999] tm:mt-[8px] p:mt-[4px]',
     }"
   >
-    <template #suffix="{ maxlength, length }">
+    <template #suffix>
       <p class="before:content-[attr(data-label)]" data-label="•">
-        還差
-        <span class="text-[--orange-e646]">{{ maxlength - length }}</span> 個字符合優質排序
+        <template v-if="remainingWordCount > 0">
+          還差
+          <span class="text-[--orange-e646]">{{ remainingWordCount }}</span>
+          個字符合優質排序
+        </template>
+        <template v-else>已符合優質排序</template>
       </p>
     </template>
   </BuyMFormInput>

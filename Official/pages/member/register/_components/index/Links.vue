@@ -29,6 +29,7 @@ const memberRegister = useMemberRegisterStore()
           </header>
           <CommonImgSrc
             :src="item.image"
+            alt=""
             :setClass="{
               main: 'h-[68px] w-[90px] shrink-0',
             }"

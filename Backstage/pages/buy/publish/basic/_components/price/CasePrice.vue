@@ -29,6 +29,7 @@ const onIsCasePriceIncludeParkingChange = () => {
           inputMode: 'numeric',
           inputChinese: false,
           checkNotIsZero: true,
+          maxlength: 6,
           comma: true,
         }"
         :rules="{

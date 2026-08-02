@@ -378,7 +378,7 @@ onMounted(() => {
         integer: true,
         isExistClose: false,
         hasClearButton: false,
-        maxlength: 3,
+        maxlength: 4,
         isError: config.number.isError,
       }"
       :setClass="{

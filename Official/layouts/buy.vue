@@ -19,9 +19,16 @@ const {
   onRestoreAccessData,
   onGetAccessDataCookie,
 } = useBuyProjectActions()
+
+const footerRef = ref(null)
 const popupLoginContainerRef = ref(null)
+
 const route = useRoute()
 const nuxtApp = useNuxtApp()
+
+// footer 元素 ref,提供給子孫元件(如 BuyMTop)動態計算避開 footer 的位置
+
+provide('footerRef', footerRef)
 
 // 掛載 buy 頻道色票(同步 composable 一律放在 await 之前)
 useHead({
@@ -108,7 +115,7 @@ watch(
     <main class="l-body relative z-0">
       <slot />
     </main>
-    <footer class="l-footer">
+    <footer class="l-footer" ref="footerRef">
       <CommonMFooter
         :setClass="{
           main: 'bg-[--white]',

@@ -12,6 +12,8 @@ const { apiData } = storeToRefs(buyPublish)
         :config="{
           inputMode: 'tel',
           inputChinese: false,
+          checkNotIsZero: true,
+          maxlength: 10,
           isDisabled: apiData.caseInfo.posterDataSourceToken === 1,
         }"
         :rules="{

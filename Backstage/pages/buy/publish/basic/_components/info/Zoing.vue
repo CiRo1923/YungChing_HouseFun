@@ -42,7 +42,7 @@ const onCaseZoingChange = () => {
           },
         },
         other: {
-          placeholder: '請輸入其他原因',
+          placeholder: '請輸入',
         },
       }"
       :selectRules="{
@@ -77,7 +77,7 @@ const onCaseZoingChange = () => {
           },
         },
         other: {
-          placeholder: '請輸入其他原因',
+          placeholder: '請輸入',
         },
       }"
       :selectRules="{

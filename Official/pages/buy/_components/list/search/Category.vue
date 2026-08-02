@@ -5,8 +5,6 @@ const { onResize } = useCommonActions()
 const buyList = useBuyListStore()
 const { apiSearchData, tab } = storeToRefs(buyList)
 
-const emits = defineEmits(['click'])
-
 const isDeviceM = computed(() => device.value === 'm')
 const options = computed(() => {
   return tab.value.options.map((item) => {
@@ -24,12 +22,12 @@ const options = computed(() => {
   })
 })
 
+// tab 是 router-link,點擊已透過導航觸發 onRouteChanged → onApiBuyList;
+// 不再 emit 'click'(會再走 onApiSearch),避免同一次點擊打兩次 API。
 const onClick = (data) => {
   const { item } = data
 
   apiSearchData.value.tab = item.value
-
-  emits('click')
 }
 
 onResize()
@@ -51,7 +49,7 @@ onUnmounted(() => {
       containerMode: 'single',
     }"
     :setClass="{
-      main: '--green-8b0d pt:--has-border-b p:--anchor-px-20 p:--anchor-py-10 tm:--anchor-px-15 t:--anchor-py-5 pt:grow',
+      main: '--green-8b0d pt:--has-border-b p:--anchor-px-20 p:--anchor-py-10 tm:--anchor-px-10 t:--anchor-py-5 pt:grow',
       header: 'flex items-center',
       anchor: 'tm:text-[14px] p:text-[16px]',
     }"

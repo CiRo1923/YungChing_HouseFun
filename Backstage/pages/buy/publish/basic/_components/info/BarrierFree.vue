@@ -3,6 +3,13 @@ const buyProject = useBuyProjectStore()
 const { options } = storeToRefs(buyProject)
 const buyPublish = useBuyPublishStore()
 const { apiData } = storeToRefs(buyPublish)
+
+// caseBarrierfreeToken 是複選逗號串接（例：'1,999'），不可用相等比對
+const isOther = computed(() => {
+  const { caseBarrierfreeToken } = apiData.value.caseInfo
+
+  return `${caseBarrierfreeToken ?? ''}`.split(',').includes('999')
+})
 </script>
 
 <template>
@@ -42,7 +49,7 @@ const { apiData } = storeToRefs(buyPublish)
           name="caseBarrierfreeOther"
           v-model="apiData.caseInfo.caseBarrierfreeOther"
           :config="{
-            isDisabled: apiData.caseInfo.caseBarrierfreeToken !== '999',
+            isDisabled: !isOther,
           }"
           :rules="{
             required: '請輸入其他原因',

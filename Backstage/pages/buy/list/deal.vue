@@ -68,9 +68,13 @@ onMounted(() => {
       :funEventsItem="funEventsItem"
       :contentEventsItem="contentEventsItem"
       @update="onUpdate"
-      v-slot="{ item, dealFun }"
     >
-      <PageBuyListItemDealInfo :data="item" @click:deal="dealFun" />
+      <template #sort="{ sortFun }">
+        <PageBuyListFunctionsSort @update="sortFun" />
+      </template>
+      <template #tools="{ item, dealFun }">
+        <PageBuyListItemDealInfo :data="item" @click:deal="dealFun" />
+      </template>
     </PageBuyListContent>
   </BuyMContainer>
   <PageBuyListPopupDeal />

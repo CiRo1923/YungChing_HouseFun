@@ -1,5 +1,5 @@
 <script setup>
-import { onLayoutText, onUnitText } from '@js/_prototype.js'
+import { onLayoutText, onUnitText, onFloorText } from '@js/_prototype.js'
 
 const buyHouse = useBuyHouseStore()
 const { basic, floor, community } = storeToRefs(buyHouse)
@@ -11,8 +11,6 @@ const items = computed(() => {
   const { from, to, up } = floor.value // 樓層
   const { addon, hasAddon } = layout
   const { name: communityName, cta } = community.value
-  // 樓層範圍只在 to 有值且與 from 不同時顯示;to 為 null(單樓)不可印出「~ null」
-  const hasFloorRange = to != null && to !== from
   const addonData = {
     room: addon.room ? ` ${addon.room} 房 (室)` : '',
     living: addon.living ? ` ${addon.living} 廳` : '',
@@ -64,7 +62,7 @@ const items = computed(() => {
         label: '樓層',
         values: [
           {
-            content: `${from}${hasFloorRange ? ` ~ ${to}` : ''} / ${up} 樓`,
+            content: onFloorText({ from, to, up }),
             popupAnchor: {
               text: '是否有其他樓層物件',
               icon: 'icon_question_dialog',

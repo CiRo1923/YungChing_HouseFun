@@ -71,16 +71,20 @@ onMounted(() => {
     <PageBuyListContent
       :funEventsItem="funEventsItem"
       :contentEventsItem="contentEventsItem"
-      v-slot="{ item, renewalFun, goldenFun, autoRefreshFun }"
       @update="onUpdate"
     >
-      <PageBuyListItemSetting
-        :data="item"
-        @click:renewal="renewalFun"
-        @click:golden="goldenFun"
-        @click:autoRefresh="autoRefreshFun"
-        class="m:mt-[24px]"
-      />
+      <template #sort="{ sortFun }">
+        <PageBuyListFunctionsSort @update="sortFun" />
+      </template>
+      <template #tools="{ item, renewalFun, goldenFun, autoRefreshFun }">
+        <PageBuyListItemSetting
+          :data="item"
+          @click:renewal="renewalFun"
+          @click:golden="goldenFun"
+          @click:autoRefresh="autoRefreshFun"
+          class="m:mt-[24px]"
+        />
+      </template>
     </PageBuyListContent>
   </BuyMContainer>
   <PageBuyListPopupRenewal />

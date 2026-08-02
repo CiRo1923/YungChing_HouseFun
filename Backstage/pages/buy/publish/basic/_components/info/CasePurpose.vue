@@ -74,8 +74,8 @@ const onChange = async (item) => {
     apiData.value.caseInfo.caseOtherSqM = null // 其他
     apiData.value.caseInfo.caseAmenitieSqPin = null // 公設
     apiData.value.caseInfo.caseAmenitieSqM = null // 公設
-    apiData.value.caseInfo.caseAmenitieSqRqtio = null // 公設比
-    apiData.value.caseInfo.isCaseAmenitieSqRqtioAuto = true // 公設比自動計算
+    apiData.value.caseInfo.caseAmenitieSqRatio = null // 公設比
+    apiData.value.caseInfo.isAuto = true // 公設比自動計算
 
     // 管理資訊
     apiData.value.caseInfo.caseManageTypeToken = null // 管理方式

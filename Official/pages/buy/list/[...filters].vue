@@ -6,7 +6,7 @@ const { device } = storeToRefs(common)
 const { onUseMeta, onIsLoading, onWithLoadingAll, onResize } = useCommonActions()
 const { onApiGetCommonServerTime } = useProjectActions()
 const buyList = useBuyListStore()
-const { region, mrt, pagination } = storeToRefs(buyList)
+const { region, mrt, pagination, content } = storeToRefs(buyList)
 
 // H1 由共用 Header 讀 project.seo.h1 輸出:SSR 由 middleware/buySeo 預抓、
 // client 由本頁 onApiBuyList → onSetSeo 更新、換頁清空由 middleware/seoReset 處理。
@@ -61,6 +61,7 @@ const paramsMrt = computed(() => {
 const paramsChannel = computed(() =>
   isChannelRegion.value ? paramsRegion.value : isChannelMrt.value ? paramsMrt.value : []
 )
+const hasData = computed(() => content.value?.length !== 0 || false)
 
 onChannel()
 onGetBuyListParams()
@@ -155,9 +156,9 @@ onUnmounted(() => {
     <PageBuyListTabOvalResponsiv />
     <PageBuyListSearchFunction @apiSearch="onApiSearch" @routerPush="onRoutePush" />
   </div>
-  <CommonMContainer class="p:--max-w-1220 p:--px-10 p:mt-[20px]">
+  <CommonMContainer class="p:--max-w-1220 p:--px-10 t:mt-[10px] p:mt-[20px]">
     <PageBuyListFocus />
-    <CommonMContent class="pt:--rounded-20 pt:--py-20 p:--px-30 m:--pb-20 t:--px-16 t:mx-[10px]">
+    <CommonMContent class="pt:--rounded-20 pt:--py-20 p:--px-30 m:--pb-20 tm:--px-16 t:mx-[10px]">
       <PageBuyListSearchFilter
         @click="onApiSearch"
         @click:routePush="onRoutePush"
@@ -167,25 +168,29 @@ onUnmounted(() => {
       <!-- <pre>
         {{ options.caseType }}
       </pre> -->
-      <PageBuyListContent />
-      <BuyMPagination
-        :route="{
-          name: buyList.basicRouteName,
-          params: route.params,
-        }"
-        :config="{
-          nowPage: pagination.page,
-          itemsPage: pagination.pageSize,
-          pageNumber: 5,
-          total: pagination.total,
-          queryKey: 'pg',
-        }"
-        :setClass="{
-          main: 'mt-[20px]',
-        }"
-      />
+      <template v-if="hasData">
+        <PageBuyListContent />
+        <BuyMPagination
+          :route="{
+            name: buyList.basicRouteName,
+            params: route.params,
+          }"
+          :config="{
+            nowPage: pagination.page,
+            itemsPage: pagination.pageSize,
+            pageNumber: 5,
+            total: pagination.total,
+            queryKey: 'pg',
+          }"
+          :setClass="{
+            main: 'mt-[20px]',
+          }"
+        />
+      </template>
+      <PageBuyListNoData @routerPush="onRoutePush" v-if="!hasData" />
     </CommonMContent>
   </CommonMContainer>
+  <BuyMTop />
   <PageBuyListPopupFeatures />
   <PageBuyCommonPopupMessage />
   <PageBuyCommonPopupVerifyCode />

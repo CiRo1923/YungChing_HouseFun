@@ -14,6 +14,9 @@ const { apiData, pingData } = storeToRefs(buyPublish)
       inputMode: 'numeric',
       inputChinese: false,
       checkNotIsZero: true,
+      maxlength: 5,
+      toFixed: 2,
+      comma: true,
     }"
     :rules="{
       custom: {

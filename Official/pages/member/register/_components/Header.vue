@@ -54,6 +54,7 @@ const setClass = computed(() => {
     </div>
     <CommonImgSrc
       :src="config.image"
+      alt=""
       :setClass="{
         main: 'h-[68px] w-[90px] shrink-0',
         ...setClass.image,

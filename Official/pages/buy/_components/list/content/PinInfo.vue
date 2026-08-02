@@ -12,7 +12,7 @@ const pinInfo = computed(() => {
   const { purpose, pin, parking } = props.item
   const { build, main, balcony } = pin
   const { type } = parking
-  // D-19:「主 + 陽」→「主建」、「建坪」→「總建」(土地 / 車位 仍為 地坪 / 車坪)
+  // 「主 + 陽」→「主建」、「建坪」→「總建」(土地 / 車位 仍為 地坪 / 車坪)
   const mainBalconyText = main && balcony ? `主建 ${onToFixed([main, balcony])} 坪` : null
   const pinLabel = { 土地: '地坪', 車位: '車坪' }[purpose] ?? '總建'
   const pinBuildText = build != null ? `${pinLabel} ${build} 坪` : null

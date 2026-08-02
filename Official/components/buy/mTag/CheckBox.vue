@@ -1,4 +1,7 @@
 <script setup>
+import '@css/_modules/buy/mTag/variables.css'
+import '@css/_modules/buy/mTag/common.css'
+
 import { onDeepMerge } from '@js/_prototype.js'
 
 const emits = defineEmits(['update:modelValue', 'change'])
@@ -135,7 +138,6 @@ const onChange = () => {
   </label>
 </template>
 
-<style src="@css/_modules/buy/mTag.css" />
 <style lang="postcss">
 .m-tag {
   &.\-\-checkbox {

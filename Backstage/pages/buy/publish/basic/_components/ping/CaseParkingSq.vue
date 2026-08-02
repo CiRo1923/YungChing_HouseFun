@@ -20,6 +20,9 @@ const onParkingSqBlur = () => {
       inputMode: 'numeric',
       inputChinese: false,
       checkNotIsZero: true,
+      maxlength: 5,
+      toFixed: 2,
+      comma: true,
     }"
     :setClass="{
       main: '--h-40 --px-12 --py-8 t:w-[220px] p:w-[270px]',

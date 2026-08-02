@@ -94,6 +94,9 @@ watch(
             inputMode: 'numeric',
             inputChinese: false,
             checkNotIsZero: true,
+            maxlength: 5,
+            toFixed: 2,
+            comma: true,
             isDisabled: apiData.caseInfo.isCaseAttachedSqAutoCalculate,
           }"
           :setClass="{
@@ -142,6 +145,9 @@ watch(
             checkNotIsZero: true,
             isExistClose: false,
             hasClearButton: false,
+            maxlength: 5,
+            toFixed: 2,
+            comma: true,
           }"
           :setClass="{
             main: '--h-40 --px-12 --py-8 pt:grow',

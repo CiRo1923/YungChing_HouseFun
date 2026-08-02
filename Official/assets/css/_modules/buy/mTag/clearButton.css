@@ -1,0 +1,39 @@
+.m-tag {
+  &.\-\-clear-button {
+    @apply cursor-default gap-x-[--tag-clear-button-gap-x];
+
+    &:not(:hover) {
+      .m-tag-xmark-button {
+        @apply text-[--tag-clear-button-color];
+      }
+    }
+  }
+}
+
+/* .m-tag-xmark-button {
+  @apply transition-colors duration-300;
+} */
+
+@screen p {
+  .m-tag {
+    &.\-\-clear-button {
+      --tag-clear-button-gap-x: var(--tag-clear-button-pc-gap-x);
+    }
+  }
+}
+
+@screen t {
+  .m-tag {
+    &.\-\-clear-button {
+      --tag-clear-button-gap-x: var(--tag-clear-button-tablet-gap-x);
+    }
+  }
+}
+
+@screen m {
+  .m-tag {
+    &.\-\-clear-button {
+      --tag-clear-button-gap-x: var(--tag-clear-button-mobile-gap-x);
+    }
+  }
+}

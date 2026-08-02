@@ -1,6 +1,7 @@
 <script setup>
 const buyList = useBuyListStore()
 const { region, mrt } = storeToRefs(buyList)
+const buyProject = useBuyProjectStore()
 const { isChannelRegion, isChannelMrt, commonParams } = useBuyListActions()
 
 const paramsRegion = computed(() => {
@@ -15,41 +16,28 @@ const paramsMrt = computed(() => {
   return ids ? [`${ids}_mrt`] : []
 })
 
-const items = computed(() => [
-  {
-    id: 'region',
-    label: '區域找房',
-    icon: 'icon_loaction',
-    to: {
-      name: buyList.basicRouteName,
-      params: {
-        filters: [...paramsRegion.value, ...commonParams.value],
+// 基礎項(id / label / icon)由 store 提供;依 id 補上對應的路由 to(map 無 to)
+const items = computed(() =>
+  buyProject.channelTabs.map((item) => {
+    const params =
+      item.id === 'region' ? paramsRegion.value : item.id === 'mrt' ? paramsMrt.value : null
+
+    if (!params) return { ...item }
+
+    return {
+      ...item,
+      to: {
+        name: buyList.basicRouteName,
+        params: {
+          filters: [...params, ...commonParams.value],
+        },
+        query: {
+          pg: 1,
+        },
       },
-      query: {
-        pg: 1,
-      },
-    },
-  },
-  {
-    id: 'mrt',
-    label: '捷運找房',
-    icon: 'icon_mrt',
-    to: {
-      name: buyList.basicRouteName,
-      params: {
-        filters: [...paramsMrt.value, ...commonParams.value],
-      },
-      query: {
-        pg: 1,
-      },
-    },
-  },
-  {
-    id: 'map',
-    label: '地圖找房',
-    icon: 'icon_map',
-  },
-])
+    }
+  })
+)
 
 const active = computed(() => {
   if (isChannelRegion.value) return 0

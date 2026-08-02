@@ -24,12 +24,13 @@ const companyInfo = computed(() => {
     {
       id: 'company',
       label: '公司名',
-      value: broker.value.store,
+      value: broker.value.brand,
     },
     {
       id: 'branch',
       label: '分店',
-      value: broker.value.brand,
+      value: broker.value.store,
+      class: 'text-[--gray-999]',
     },
   ]
 })
@@ -42,6 +43,7 @@ const companyInfo = computed(() => {
   <div class="flex gap-x-[12px]">
     <CommonImgSrc
       :src="broker.imageUrl ?? 'buy/house/no_image.png'"
+      :alt="broker.name ?? '經紀人'"
       :setClass="{
         main: 'h-[80px] w-[80px] shrink-0 overflow-hidden rounded-full bg-[--gray-f2]',
       }"
@@ -81,7 +83,7 @@ const companyInfo = computed(() => {
         v-for="(item, index) in companyInfo"
         :key="`${item.id}_${index}`"
       >
-        <p class="text-[14px]">{{ item.value }}</p>
+        <p class="text-[14px]" :class="item.class">{{ item.value }}</p>
       </li>
       <li class="mt-[4px]">
         <p class="text-[20px] font-bold text-[--orange-e646]">

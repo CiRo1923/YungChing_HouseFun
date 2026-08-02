@@ -27,6 +27,7 @@ onUseMeta({
     <b class="block text-center font-medium tm:text-[24px] p:text-[30px]">完成註冊</b>
     <CommonImgSrc
       src="member/register/complete/icon_complete.svg"
+      alt=""
       :setClass="{
         main: 'mx-auto h-[170px] w-[160px]',
       }"

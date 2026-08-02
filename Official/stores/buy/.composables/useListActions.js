@@ -2,15 +2,37 @@ import { apiRegion, apiMrt } from '@js/_api/buy/common.js'
 import { apiBuyList, apiBuyListFocus, apiBuySuggest } from '@js/_api/buy/list.js'
 
 export default () => {
-  // const projectStores = useProjectStore()
+  const commonStore = useCommonStore()
+  const { device } = storeToRefs(commonStore)
+  const buyProjectStores = useBuyProjectStore()
+  // channel 已移至 buyProject store,onChannel 仍在此設定,判斷 computed 由 useBuyProjectActions 提供
+  const { channel } = storeToRefs(buyProjectStores)
   const buyListStore = useBuyListStore()
-  const { channel, focus, content, apiSearchData, region, mrt, pin, tab, pagination } =
-    storeToRefs(buyListStore)
+  const {
+    focus,
+    content,
+    apiSearchData,
+    region,
+    mrt,
+    purpose,
+    price,
+    room,
+    type,
+    pin,
+    parking,
+    age,
+    floor,
+    unitPrice,
+    face,
+    nearBy,
+    tab,
+    pagination,
+  } = storeToRefs(buyListStore)
   const { onApiError } = usePopupActions()
   const { onSetSeo } = useCommonActions()
+  const { onResolveByDevice, isChannelRegion, isChannelMrt, onSaveChannel } = useBuyProjectActions()
+  const { onValueGetText } = useManageActions()
   const route = useRoute()
-  const isChannelRegion = computed(() => channel.value === 'region')
-  const isChannelMrt = computed(() => channel.value === 'mrt')
   const commonParams = computed(() => {
     const paramsPurpose = apiSearchData.value.purpose
       ? `${apiSearchData.value.purpose}_purpose`
@@ -31,6 +53,9 @@ export default () => {
       : ''
     const paramsFace = apiSearchData.value.dt ? `${apiSearchData.value.dt}_dt` : ''
     const paramsNearBy = apiSearchData.value.ft ? `${apiSearchData.value.ft}_ft` : ''
+    // tab(降價 / 新上架 / 實境):預設 0(全部)不帶段;放最後與 infoMap 的 _tab 位置一致,
+    // 讓搜尋 / 切換頻道重組 URL 時保留當前分頁,不會被清掉。
+    const paramsTab = apiSearchData.value.tab ? `${apiSearchData.value.tab}_tab` : ''
 
     const result = []
 
@@ -45,6 +70,7 @@ export default () => {
     if (paramsUnitPrice) result.push(paramsUnitPrice)
     if (paramsFace) result.push(paramsFace)
     if (paramsNearBy) result.push(paramsNearBy)
+    if (paramsTab) result.push(paramsTab)
 
     return result
   })
@@ -52,7 +78,7 @@ export default () => {
     const queryOd = apiSearchData.value.od ? { od: apiSearchData.value.od } : {}
     const queryTag =
       apiSearchData.value.tag.length !== 0 ? { tag: apiSearchData.value.tag.join(',') } : {}
-    // D-29:關鍵字寫入 URL(query),重整 / 分享後才能還原
+    // 關鍵字寫入 URL(query),重整 / 分享後才能還原
     const queryKw = apiSearchData.value.kw ? { kw: apiSearchData.value.kw } : {}
 
     return {
@@ -61,6 +87,151 @@ export default () => {
       ...queryKw,
     }
   })
+  // 區間字串 → 文字:-X → 「X 以下」;X- → 「X 以上」;X-Y → 「X - Y」。
+  const onRangeText = (value, unit) => {
+    const [min, max] = String(value).split('-')
+
+    if (min && max) return `${min} - ${max} ${unit}`
+    if (max) return `${max} ${unit}以下`
+    if (min) return `${min} ${unit}以上`
+
+    return ''
+  }
+
+  // 房數字串 → 文字:單一值用選項 label(含「房」);範圍為「min - max 房」(比照 Room.vue)。
+  const onRoomText = (value) => {
+    const [minStr, maxStr] = String(value).split('-')
+    const min = Number(minStr)
+    const max = maxStr != null && maxStr !== '' ? Number(maxStr) : min
+
+    return min === max
+      ? room.value.options.find((item) => item.value === max)?.label || String(max)
+      : `${min} - ${max} ${room.value.unit}`
+  }
+
+  // 縣市 / 區域:ids 拆成多項 { label, value }(2碼=縣市、5碼=區域)。condition / label / 移除共用。
+  const onRegionItems = (ids) => {
+    const list = region.value.options || []
+    const idList = ids ? ids.split(',') : []
+
+    return idList
+      .map((id) => {
+        let city = null
+        let area = null
+
+        if (id.length === 2) city = list.find((item) => item.id === id)
+        if (id.length === 5) {
+          for (const item of list) {
+            const found = (item.areas || []).find((areaItem) => areaItem.id === id)
+            if (found) {
+              city = item
+              area = found
+              break
+            }
+          }
+        }
+
+        const label = area ? `${city?.name}-${area.name}` : city?.name
+
+        return label ? { label, value: id } : null
+      })
+      .filter(Boolean)
+  }
+
+  // 捷運:ids 拆項(2碼=區域、4碼=線、>4碼=站),label 比照 mrt 下拉。
+  const onMrtItems = (ids) => {
+    const list = mrt.value.options || []
+    const idList = ids ? ids.split(',') : []
+
+    return idList
+      .map((id) => {
+        let area = null
+        let line = null
+        let station = null
+
+        if (id.length === 2) area = list.find((item) => item.id === id)
+        if (id.length === 4) {
+          for (const item of list) {
+            const found = (item.lines || []).find((lineItem) => lineItem.id === id)
+            if (found) {
+              area = item
+              line = found
+              break
+            }
+          }
+        }
+        if (id.length > 4) {
+          for (const item of list) {
+            const found = (item.lines || []).find((lineItem) =>
+              (lineItem.stations || []).some((stationItem) => stationItem.id === id)
+            )
+            if (found) {
+              area = item
+              line = found
+              station = found.stations.find((stationItem) => stationItem.id === id)
+              break
+            }
+          }
+        }
+
+        const label = station?.name
+          ? station.name
+          : line?.name
+            ? line.name
+            : area?.name
+              ? `${area.name}全線`
+              : null
+
+        return label ? { label, value: id } : null
+      })
+      .filter(Boolean)
+  }
+
+  // ids → 顯示 label(多組以「、」串接),供下拉按鈕於移除 / 重置後同步顯示。
+  const onRegionLabel = (ids) =>
+    onRegionItems(ids)
+      .map((item) => item.label)
+      .join('、')
+  const onMrtLabel = (ids) =>
+    onMrtItems(ids)
+      .map((item) => item.label)
+      .join('、')
+
+  // 搜尋條件:一律以「網址(route)」為準 → 只有按搜尋(URL 改變)才更新,
+  // 不受下拉即時勾選(apiSearchData / label / ids 皆為 v-model,勾選當下就變)影響。
+  // 回傳 [{ label, value }] 陣列(縣市 / 區域 / 捷運多組會拆開)。
+  const condition = computed(() => {
+    const parsed = onParseFilters(route)
+
+    // 區域與捷運互斥,只會有一個 channel;各自把 route 上的選取拆成多項並標記 key
+    const channelItems = isChannelRegion.value
+      ? onRegionItems(parsed.region || region.value.defaultIDs).map((item) => ({
+          ...item,
+          key: 'region',
+        }))
+      : isChannelMrt.value
+        ? onMrtItems(parsed.mrt || mrt.value.defaultIDs).map((item) => ({ ...item, key: 'mrt' }))
+        : []
+
+    // 用途 / 總價 / 房數:由 route 值還原 label(空 → 顯示 defaultLabel)
+    const purposeLabel = parsed.purpose
+      ? onValueGetText('casePurpose', parsed.purpose)
+      : onResolveByDevice(purpose.value.defaultLabel, device.value)
+    const priceLabel = parsed.price
+      ? onRangeText(parsed.price, price.value.unit)
+      : onResolveByDevice(price.value.defaultLabel, device.value)
+    const roomLabel = parsed.room
+      ? onRoomText(parsed.room)
+      : onResolveByDevice(room.value.defaultLabel, device.value)
+
+    return [
+      ...channelItems,
+      { label: purposeLabel, value: parsed.purpose ?? '', key: 'purpose' },
+      { label: priceLabel, value: parsed.price ?? '', key: 'price' },
+      { label: roomLabel, value: parsed.room ?? '', key: 'room' },
+    ]
+  })
+
   // const { apiData, options: projectOptions } = storeToRefs(projectStores)
 
   const onApiRegion = async () => {
@@ -124,7 +295,7 @@ export default () => {
   }
 
   const onApiBuyList = async (targetRoute = route) => {
-    const { params, query } = targetRoute
+    const { query } = targetRoute
     const { config, status, data } = await apiBuyList({
       ...(isChannelRegion.value ? { region: region.value.ids || region.value.all } : {}),
       ...(isChannelMrt.value ? { mrt: mrt.value.ids || mrt.value.all } : {}),
@@ -135,25 +306,14 @@ export default () => {
 
     if (status === 200) {
       const { items, tabs, paging, seo: seoData } = data
-      const infoMap = tab.value.options.map((item) => {
-        const value = tabs?.[item.id] ?? item.value ?? 0
-        const filters = params.filters.filter((item) => !item.includes('_tab'))
-        const to = {
-          name: buyListStore.basicRouteName,
-          params: {
-            filters: [...filters, ...(item.value ? [`${item.value}_tab`] : [])],
-          },
-          query: {
-            pg: 1,
-          },
-        }
-
-        return {
-          ...item,
-          count: value,
-          to,
-        }
-      })
+      // tab 只更新數量;不給 `to`,避免變成 router-link「點擊即導航」。
+      // tab 改為純選取(Category onClick 設 apiSearchData.tab),按搜尋時經 commonParams 套用,
+      // 與其他篩選條件一致,避免「點 tab 打一次 + 搜尋再打一次」的重複請求。
+      const infoMap = tab.value.options.map((item) => ({
+        ...item,
+        count: tabs?.[item.id] ?? item.value ?? 0,
+        to: undefined,
+      }))
 
       content.value = items
       onSetSeo(seoData)
@@ -188,6 +348,8 @@ export default () => {
     const hasMrt = !!list.find((item) => /mrt/.test(item))
 
     channel.value = hasRegion ? 'region' : hasMrt ? 'mrt' : ''
+    // channel 一改變即存 storage,供明細頁 reload 後還原
+    onSaveChannel()
   }
   const onParseFilters = (targetRoute = route) => {
     const { filters } = targetRoute.params
@@ -268,11 +430,78 @@ export default () => {
     // tag
     apiSearchData.value.tag = parseFilters.tag?.split(',') ?? []
 
-    // kw(D-29:從 URL query 還原關鍵字)
+    // kw(從 URL query 還原關鍵字)
     apiSearchData.value.kw = parseFilters.kw || ''
 
-    // od(D-37:排序以 querystring 帶入網址,重整 / 分享後還原)
+    // od(排序以 querystring 帶入網址,重整 / 分享後還原)
     apiSearchData.value.od = parseFilters.od || ''
+  }
+  // 重置搜尋:清空所有篩選值與 label,回到 store 預設(區域 / 捷運回預設 id)。
+  // 導回預設列表由呼叫端負責(router.push),此處只還原 store 狀態。
+  const onResetSearch = () => {
+    apiSearchData.value = { ...buyListStore.apiDataDefault.search }
+
+    // 區域 / 捷運:id 回預設,label 由 helper 依 ids 重算。
+    // 路由切換不會重跑各下拉的 onInit,故 label 一律直接設定;設空字串會露出 placeholder。
+    region.value.ids = region.value.defaultIDs
+    region.value.label = onRegionLabel(region.value.defaultIDs)
+    mrt.value.ids = mrt.value.defaultIDs
+    mrt.value.label = onMrtLabel(mrt.value.defaultIDs)
+
+    // 純 label 型篩選:label 設回 defaultLabel(非空,避免下拉顯示 placeholder)
+    ;[purpose, type, parking, face, nearBy, pin].forEach((item) => {
+      item.value.label = onResolveByDevice(item.value.defaultLabel, device.value)
+    })
+
+    // 區間型篩選:label 回 defaultLabel,清 range / min / max
+    ;[price, room, age, floor, unitPrice].forEach((item) => {
+      item.value.label = onResolveByDevice(item.value.defaultLabel, device.value)
+      if ('range' in item.value) item.value.range = []
+      item.value.min = null
+      item.value.max = null
+    })
+  }
+
+  // 移除單一搜尋條件:依 condition 回傳項的 { key, value } 還原對應篩選。
+  // 區域 / 捷運 → 從 ids 逗號清單移除該筆(移光回預設);用途 / 總價 / 房數 → 清空。
+  // 只改 store 狀態(含 label 同步,避免下拉露 placeholder),實際套用由呼叫端 router.push 觸發。
+  const onRemoveCondition = ({ key, value } = {}) => {
+    const onRemoveId = (target, labelFn) => {
+      const next = (target.value.ids ? target.value.ids.split(',') : []).filter(
+        (id) => id !== value
+      )
+      target.value.ids = next.join(',') || target.value.defaultIDs
+      target.value.label = labelFn(target.value.ids)
+    }
+
+    const onClearLabel = (target) => {
+      target.value.label = onResolveByDevice(target.value.defaultLabel, device.value)
+
+      if ('range' in target.value) target.value.range = []
+      if ('min' in target.value) target.value.min = null
+      if ('max' in target.value) target.value.max = null
+    }
+
+    switch (key) {
+      case 'region':
+        onRemoveId(region, onRegionLabel)
+        break
+      case 'mrt':
+        onRemoveId(mrt, onMrtLabel)
+        break
+      case 'purpose':
+        apiSearchData.value.purpose = ''
+        onClearLabel(purpose)
+        break
+      case 'price':
+        apiSearchData.value.price = ''
+        onClearLabel(price)
+        break
+      case 'room':
+        apiSearchData.value.room = ''
+        onClearLabel(room)
+        break
+    }
   }
 
   return {
@@ -280,6 +509,7 @@ export default () => {
     isChannelMrt,
     commonParams,
     commonQuery,
+    condition,
     onApiRegion,
     onApiMrt,
     onApiBuyList,
@@ -288,5 +518,7 @@ export default () => {
     onChannel,
     onParseFilters,
     onGetBuyListParams,
+    onResetSearch,
+    onRemoveCondition,
   }
 }

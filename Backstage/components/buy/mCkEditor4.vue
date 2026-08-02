@@ -90,8 +90,26 @@ const config = computed(() => {
     toolbar: null,
     placeholder: '',
     maxlength: null,
+    // ACF 白名單，預設僅允許安全的排版標籤（不可設為 true，等同關閉過濾造成 XSS）
+    allowedContent: 'p br strong b em i u s strike sub sup ul ol li',
+    fontSizes: null,
+    colors: null,
     ...props.config,
   }
+})
+
+// 字級選項：[14, 16] → '14/14px;16/16px'
+const fontSizes = computed(() => {
+  const { fontSizes } = config.value
+
+  return fontSizes?.length ? fontSizes.map((size) => `${size}/${size}px`).join(';') : null
+})
+
+// 色票：['黃/FFFF00'] → '黃/FFFF00'，TextColor 與 BGColor 共用同一組
+const colors = computed(() => {
+  const { colors } = config.value
+
+  return colors?.length ? colors.join(',') : null
 })
 
 const toolbar = computed(() => {
@@ -141,12 +159,34 @@ const toolbar = computed(() => {
   return toolbar ? onBuildToolbar() : toolbarDefault
 })
 
+// 白名單依實際啟用的按鈕延伸，避免「開了按鈕卻被 ACF 剝掉，按了沒反應」。
+// FontSize / TextColor / BGColor 產生的都是帶 style 的 <span>，
+// 這裡逐一列出允許的 CSS 屬性而非直接開放 style，
+// 才不會讓 background:url(javascript:) 這類注入跟著進來
+const allowedContent = computed(() => {
+  const items = toolbar.value.flatMap((group) => group.items)
+  const styleMap = new Map([
+    ['FontSize', 'font-size'],
+    ['TextColor', 'color'],
+    ['BGColor', 'background-color'],
+  ])
+  const styles = [...styleMap]
+    .filter(([item]) => items.includes(item))
+    .map(([, style]) => style)
+
+  return styles.length
+    ? `${config.value.allowedContent}; span{${styles.join(',')}}`
+    : config.value.allowedContent
+})
+
 const editorConfig = computed(() => {
   const { height, placeholder, maxlength } = config.value
   return {
     height,
     toolbar: toolbar.value,
-    allowedContent: true,
+    allowedContent: allowedContent.value,
+    fontSize_sizes: fontSizes.value,
+    colorButton_colors: colors.value,
     editorplaceholder: placeholder,
     extraPlugins: 'editorplaceholder, texttransform, wordcount',
     removePlugins: 'resize, elementspath, exportpdf',
@@ -155,7 +195,7 @@ const editorConfig = computed(() => {
       showParagraphs: false,
       showWordCount: false,
       showCharCount: false,
-      maxCharCount: maxlength, // 👈 限制字數
+      maxCharCount: maxlength, // 限制字數
     },
     // contentsCss 的 css 檔案無法用 apply 編譯
     contentsCss: [

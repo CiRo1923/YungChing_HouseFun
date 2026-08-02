@@ -25,18 +25,20 @@ const isEmpty = (value) => value == null || value === ''
 const hasContent = (item) =>
   Array.isArray(item.values) &&
   item.values.some((value) => !isEmpty(value.content) || value.anchor?.text || value.tools)
+
+// 整欄(ul)/整個容器(div)無任何有內容欄位時不渲染,避免留下空殼 div/ul。
+const hasColumnContent = (data) => Array.isArray(data) && data.some((item) => hasContent(item))
+const hasAnyContent = computed(() => props.items.some((data) => hasColumnContent(data)))
 </script>
 
 <template>
   <div
     class="tracking-default m:space-y-[10px] t:gap-x-[25px] pt:flex p:gap-x-[50px] p:text-[18px]"
+    v-if="hasAnyContent"
   >
-    <ul
-      class="space-y-[10px] pt:flex-1"
-      v-for="(data, index) in props.items"
-      :key="`ˋ${props.name}_${index}`"
-    >
-      <template v-for="(item, idx) in data" :key="`ˋ${props.name}_${item.id}_${idx}_${index}`">
+    <template v-for="(data, index) in props.items" :key="`ˋ${props.name}_${index}`">
+      <ul class="space-y-[10px] pt:flex-1" v-if="hasColumnContent(data)">
+        <template v-for="(item, idx) in data" :key="`ˋ${props.name}_${item.id}_${idx}_${index}`">
         <li v-if="!item.isHidden && hasContent(item)">
           <div class="flex tm:gap-x-[10px] p:gap-x-[25px]">
             <PageBuyHouseLabel :text="item.label" />
@@ -125,7 +127,8 @@ const hasContent = (item) =>
         </ul> -->
         </li>
       </template>
-    </ul>
+      </ul>
+    </template>
   </div>
 </template>
 

@@ -84,6 +84,24 @@ defineRule('number', (value, message) => {
   return value && !/^\d+$/.test(value) ? message[0] : true
 })
 
+// 影音網址格式（host 由 API 提供，未給時只驗協定）
+defineRule('videoUrl', (value, object, elem) => {
+  if (!value) return true
+
+  try {
+    const { protocol, hostname } = new URL(value)
+
+    if (protocol !== 'https:') return onReplaceMessage(elem, object)
+
+    // 精確比對，不可用 endsWith，否則 youtube.com.evil.com 會通過
+    return !object.host?.length || object.host.includes(hostname)
+      ? true
+      : onReplaceMessage(elem, object)
+  } catch {
+    return onReplaceMessage(elem, object)
+  }
+})
+
 // email 格式
 defineRule('email', (value, message) => {
   return value && !/^\w+((-\w+)|(\.\w+))*@[A-Za-z0-9]+([.-][A-Za-z0-9]+)*\.[A-Za-z]+$/.test(value)

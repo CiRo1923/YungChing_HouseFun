@@ -1,9 +1,48 @@
 <script setup>
+import { onToFixed } from '@js/_prototype.js'
+
 // const buyProject = useBuyProjectStore()
 // const { options } = storeToRefs(buyProject)
 const buyPublish = useBuyPublishStore()
 const { pingUnitLabel, onPinSqMetersConvert } = useBuyPublishActions()
 const { apiData, pingData } = storeToRefs(buyPublish)
+
+const onIsCaseAmenitieSqRatioAuto = () => {
+  const {
+    isCaseAmenitieSqRatioAuto, // 自動計算
+    caseAmenitieSqPin, // 公設坪數
+    caseBuildSqPin, // 登記坪數
+    caseParkingSqPin, // 車位坪數
+    isCaseBuildSqIncludeParking, // 登記坪數含車位
+  } = apiData.value.caseInfo
+
+  if (!isCaseAmenitieSqRatioAuto || !caseAmenitieSqPin || !caseBuildSqPin) return
+
+  // 登記坪數含車位時先扣除車位，與單價自動計算的分母定義一致
+  const buildSq =
+    isCaseBuildSqIncludeParking && caseParkingSqPin
+      ? Number(caseBuildSqPin) - Number(caseParkingSqPin)
+      : Number(caseBuildSqPin)
+
+  if (!buildSq) return
+
+  apiData.value.caseInfo.caseAmenitieSqRatio = Number(
+    onToFixed((Number(caseAmenitieSqPin) / buildSq) * 100, 2)
+  )
+}
+
+watch(
+  () => [
+    apiData.value.caseInfo.caseAmenitieSqPin,
+    apiData.value.caseInfo.caseBuildSqPin,
+    apiData.value.caseInfo.caseParkingSqPin,
+    apiData.value.caseInfo.isCaseBuildSqIncludeParking,
+    apiData.value.caseInfo.isCaseAmenitieSqRatioAuto,
+  ],
+  () => {
+    onIsCaseAmenitieSqRatioAuto()
+  }
+)
 </script>
 
 <template>
@@ -31,13 +70,13 @@ const { apiData, pingData } = storeToRefs(buyPublish)
         </li>
         <li class="t:w-[220px] p:w-[270px]">
           <BuyMFormInput
-            name="caseAmenitieSqRqtio"
-            v-model.number="apiData.caseInfo.caseAmenitieSqRqtio"
+            name="caseAmenitieSqRatio"
+            v-model.number="apiData.caseInfo.caseAmenitieSqRatio"
             :config="{
               placeholder: '公設比',
               inputMode: 'numeric',
               inputChinese: false,
-              isDisabled: apiData.caseInfo.isCaseAmenitieSqRqtioAuto,
+              isDisabled: apiData.caseInfo.isCaseAmenitieSqRatioAuto,
             }"
             :setClass="{
               main: '--h-40 --px-12 --py-8',
@@ -52,8 +91,8 @@ const { apiData, pingData } = storeToRefs(buyPublish)
     </li>
     <li class="flex items-center pt:h-[40px]">
       <BuyMFormCheckBox
-        name="isCaseAmenitieSqRqtioAuto"
-        v-model="apiData.caseInfo.isCaseAmenitieSqRqtioAuto"
+        name="isCaseAmenitieSqRatioAuto"
+        v-model="apiData.caseInfo.isCaseAmenitieSqRatioAuto"
         :config="{
           mode: 'boolean',
           label: '自動計算',

@@ -8,8 +8,8 @@ import {
 } from '@js/_api/buy/common.js'
 
 import { onFormatDate } from '@js/_prototype.js'
-import { BUYACCESSDATA } from '@js/_storage.js'
-import { enCrypto, deCryptoJSON } from '@js/_crypto/index.js'
+import { BUYACCESSDATA, BUYCHANNEL } from '@js/_storage.js'
+import { enCrypto, deCryptoJSON, enCryptoShort, deCryptoShort } from '@js/_crypto/index.js'
 
 export default () => {
   const project = useProjectStore()
@@ -20,6 +20,7 @@ export default () => {
   const { onApiAuthToken, onSetAuthTokenCookie, onReset } = useMemberProjectActions()
   const buyProject = useBuyProjectStore()
   const {
+    channel,
     accessData,
     messageData,
     apiMessageData,
@@ -27,6 +28,33 @@ export default () => {
     apiVerifyCodeData,
     cottonCandyCheckbox,
   } = storeToRefs(buyProject)
+
+  // 頻道判斷:區域找房 / 捷運找房(原在 useListActions,移至此)
+  const isChannelRegion = computed(() => channel.value === 'region')
+  const isChannelMrt = computed(() => channel.value === 'mrt')
+
+  // 頻道持久化:列表頁 channel 隨 URL 而定;明細頁 URL 只有 hfid,reload 後拿不到 channel。
+  // 用「session cookie」(不設 expires / maxAge)→ 關瀏覽器即清除(仿 sessionStorage),
+  // 但 SSR 讀得到:明細頁在 server 端就能還原 channel、直接輸出正確 HTML,不會 client 端閃跳。
+  const onChannelCookie = () =>
+    useCookie(BUYCHANNEL, {
+      path: '/',
+      sameSite: 'lax',
+      secure: !import.meta.dev,
+    })
+
+  // channel 一改變即寫入(加密)。
+  const onSaveChannel = () => {
+    if (channel.value) onChannelCookie().value = enCryptoShort(channel.value)
+  }
+  // 讀回並還原 channel(明細頁用,SSR / client 皆可);無值 / 非法值不動,回傳當前 channel。
+  const onRestoreChannel = () => {
+    const value = deCryptoShort(onChannelCookie().value)
+    if (value === 'region' || value === 'mrt') channel.value = value
+
+    return channel.value
+  }
+
   const { onPromise, onCustom, onApiError, onApiPromise } = usePopupActions()
   const { onLogin } = useBuyPopupActions()
 
@@ -366,6 +394,10 @@ export default () => {
   }
 
   return {
+    isChannelRegion,
+    isChannelMrt,
+    onSaveChannel,
+    onRestoreChannel,
     onApiAuthTokenExchange,
     onApiAuthMe,
     onApiAuthLogout,
