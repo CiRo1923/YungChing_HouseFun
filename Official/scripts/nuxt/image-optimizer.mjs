@@ -59,8 +59,7 @@ async function collectFiles(dir) {
   return files.flat()
 }
 
-async function optimizeRaster(filePath, extension) {
-  const input = await readFile(filePath)
+function optimizeRaster(input, extension) {
   let transformer = sharp(input, { animated: extension === '.gif' })
 
   switch (extension) {
@@ -91,21 +90,22 @@ async function optimizeRaster(filePath, extension) {
   return transformer.toBuffer()
 }
 
+function optimizeSvg(input, filePath) {
+  const result = optimize(input.toString('utf8'), {
+    ...svgConfig,
+    path: filePath,
+  })
+
+  return Buffer.from(result.data)
+}
+
 async function optimizeFile(filePath) {
   const extension = path.extname(filePath).toLowerCase()
   const original = await readFile(filePath)
-  let optimized = null
-
-  if (extension === '.svg') {
-    const result = optimize(original.toString('utf8'), {
-      ...svgConfig,
-      path: filePath,
-    })
-
-    optimized = Buffer.from(result.data)
-  } else {
-    optimized = await optimizeRaster(filePath, extension)
-  }
+  const optimized =
+    extension === '.svg'
+      ? optimizeSvg(original, filePath)
+      : await optimizeRaster(original, extension)
 
   if (!optimized || optimized.length >= original.length) {
     return { changed: false, savedBytes: 0 }

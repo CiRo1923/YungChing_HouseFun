@@ -244,12 +244,14 @@ export default createConfigForNuxt(
         defineNuxtPlugin: 'readonly',
         defineNuxtRouteMiddleware: 'readonly',
         definePageMeta: 'readonly',
+        inject: 'readonly',
         navigateTo: 'readonly',
         nextTick: 'readonly',
         onBeforeMount: 'readonly',
         onBeforeUnmount: 'readonly',
         onMounted: 'readonly',
         onUnmounted: 'readonly',
+        provide: 'readonly',
         readonly: 'readonly',
         shallowReadonly: 'readonly',
         ref: 'readonly',
@@ -326,4 +328,14 @@ export default createConfigForNuxt(
       ],
     },
   }
-)
+).append({
+  // Nitro 在 server/ 下自動注入 h3 helpers(不經 import),ESLint 無從得知 → 明示宣告避免 no-undef
+  files: ['server/**/*.{js,mjs,ts}'],
+  languageOptions: {
+    globals: {
+      defineEventHandler: 'readonly',
+      getRequestURL: 'readonly',
+      sendRedirect: 'readonly',
+    },
+  },
+})

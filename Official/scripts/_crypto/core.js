@@ -258,13 +258,14 @@ export const base64urlToBytes = (str) => {
     out[oi++] = n & 0xff
     ci += 4
   }
+  // 尾端補寫:oi 之後不再被讀取,故直接以位移索引寫入,不再遞增
   if (rem === 2) {
     const n = (val(ci) << 18) | (val(ci + 1) << 12)
-    out[oi++] = (n >> 16) & 0xff
+    out[oi] = (n >> 16) & 0xff
   } else if (rem === 3) {
     const n = (val(ci) << 18) | (val(ci + 1) << 12) | (val(ci + 2) << 6)
-    out[oi++] = (n >> 16) & 0xff
-    out[oi++] = (n >> 8) & 0xff
+    out[oi] = (n >> 16) & 0xff
+    out[oi + 1] = (n >> 8) & 0xff
   }
 
   return out
