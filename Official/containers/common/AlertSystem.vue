@@ -34,7 +34,7 @@ const onClose = (item) => {
             <CommonMAnchor
               :text="item.label"
               :setClass="{
-                main: [item.class, '--oval --h-45 w-full justify-center'],
+                main: [item.class, '--oval --h-45 --text-center w-full'],
                 text: 'font-normal',
               }"
               @click="onClose(item)"
