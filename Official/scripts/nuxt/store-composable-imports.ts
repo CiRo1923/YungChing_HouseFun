@@ -79,9 +79,15 @@ export const getStoreImports = (storesDir: string, relativeDir = ''): NuxtImport
     const matches = content.matchAll(/export\s+const\s+(\w+)\s*=\s*defineStore/g)
 
     for (const match of matches) {
+      const storeName = match[1]
+
+      if (!storeName) {
+        continue
+      }
+
       imports.push({
-        name: match[1],
-        as: match[1],
+        name: storeName,
+        as: storeName,
         from: `@stores/${toImportPath(entryRelativePath)}`,
       })
     }
