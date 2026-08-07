@@ -55,14 +55,17 @@ const badgesItems = computed(() => {
     <PageBuyCommonFavorite
       :setClass="{
         main: 'absolute right-[5px] top-[5px] z-[1]',
-        button: 'text-[--white]',
+        button: {
+          default: 'text-[--white] group-hover:text-[--red-e45c]',
+          collect: 'text-[--red-e45c]',
+        },
       }"
     />
     <CommonImgSrc
       :src="images[0]"
       :alt="`${props.item.title} 物件封面圖`"
       :setClass="{
-        main: 'relative h-full',
+        main: 'group-hover:--image-scale relative h-full',
         img: 'absolute left-1/2 h-full -translate-x-1/2',
       }"
     />

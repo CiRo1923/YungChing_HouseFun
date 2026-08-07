@@ -12,7 +12,10 @@ const props = defineProps({
 const setClass = computed(() => {
   return {
     main: '',
-    button: '',
+    button: {
+      default: '',
+      collect: '',
+    },
     ...props.setClass,
   }
 })
@@ -35,7 +38,12 @@ const onClick = async () => {
 
 <template>
   <div :class="setClass.main">
-    <button type="button" class="inline-block" :class="setClass.button" @click="onClick">
+    <button
+      type="button"
+      class="inline-block transition-colors duration-300"
+      :class="setClass.button.default"
+      @click="onClick"
+    >
       <CommonSvgIcon icon="icon_love_o" class="h-[30px] w-[30px] p-[3px]" />
     </button>
   </div>

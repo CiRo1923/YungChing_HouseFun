@@ -1,12 +1,14 @@
 <script setup></script>
 
 <template>
-  <div class="m-header relative flex items-center bg-[--white] tm:h-[55px] p:h-[65px]">
+  <div
+    class="m-header flex items-center bg-[--white] m:h-[--header-mobile-h] t:h-[--header-tablet-h] p:h-[--header-pc-h]"
+  >
     <div
-      class="m-header-container mx-auto flex w-full tm:px-[15px] pt:h-full p:max-w-[1220px] p:px-[10px]"
+      class="m-header-container mx-auto flex w-full m:items-center tm:px-[15px] pt:h-full p:max-w-[1220px] p:px-[10px]"
     >
       <div
-        class="m-header-logo flex m:items-end m:gap-x-[3px] pt:shrink-0 pt:flex-col pt:justify-center"
+        class="m-header-logo flex m:grow m:items-end m:gap-x-[3px] pt:shrink-0 pt:flex-col pt:justify-center"
       >
         <CommonImgSrc
           src="buy/logo_text.svg"
@@ -30,4 +32,10 @@
   </div>
 </template>
 
-<style lang="postcss"></style>
+<style lang="postcss">
+:root {
+  --header-pc-h: 65px;
+  --header-tablet-h: 55px;
+  --header-mobile-h: 55px;
+}
+</style>

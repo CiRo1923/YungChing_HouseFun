@@ -48,6 +48,9 @@ const basicInfo = computed(() => {
 </script>
 
 <template>
+  <!-- <pre>
+    {{ props.item }}
+  </pre> -->
   <CommonMSeparator
     :items="basicInfo"
     :setClass="{

@@ -193,11 +193,11 @@ onMounted(() => {
 
 <style lang="postcss">
 :root {
-  --figuer-no-image-bg-color: var(--gray-f2);
+  --figuer-image-pc-scale: 1.1;
+  --figuer-image-tablet-scale: 1.1;
+  --figuer-image-mobile-scale: 1.1;
 
-  --figuer-image-pc-scale: 1.05;
-  --figuer-image-tablet-scale: 1.05;
-  --figuer-image-mobile-scale: 1.05;
+  --figuer-no-image-bg-color: var(--gray-f2);
 }
 
 .group:hover {
@@ -217,6 +217,10 @@ onMounted(() => {
     img {
       @apply h-[auto] w-[50%] max-w-[250px];
     }
+  }
+
+  img {
+    @apply transition-transform duration-300;
   }
 }
 

@@ -6,11 +6,17 @@ const { menu } = useNavActions()
 
 const route = useRoute()
 const isDevicePT = computed(() => /^(p|t)$/.test(device.value))
+const isDeviceM = computed(() => device.value === 'm')
 
 const itemRef = ref(null)
 const childernRef = ref([])
 const submenuRef = ref([])
+const isNavOpen = ref(false)
 const itemCurrIndex = ref(null)
+
+const onCtrlClick = () => {
+  isNavOpen.value = !isNavOpen.value
+}
 
 const onItemCurrIndex = (index) => {
   itemCurrIndex.value = index
@@ -98,8 +104,17 @@ onUnmounted(() => {
   <!-- <pre>
     {{ route.name }}
   </pre> -->
-  <nav class="m-nav m:absolute pt:grow p:ml-[130px]">
-    <div class="m-nav-container flex overflow-hidden m:max-h-0 pt:h-full">
+  <nav class="m-nav m:shrink-0 pt:grow p:ml-[130px]">
+    <button
+      type="button"
+      class="m-nav-ctrl"
+      :class="{ '--active': isNavOpen }"
+      @click="onCtrlClick"
+      v-if="isDeviceM"
+    >
+      <i />
+    </button>
+    <div class="m-nav-container" :class="{ '--open': isNavOpen }">
       <ul class="m-nav-menu tracking-default t:gap-x-[15px] pt:flex pt:h-full p:gap-x-[30px]">
         <li
           class="m-nav-item pt:h-full"
@@ -143,6 +158,10 @@ onUnmounted(() => {
 </template>
 
 <style lang="postcss">
+.m-nav-container {
+  @apply overflow-hidden;
+}
+
 @screen p {
   .m-nav-menu {
     &:hover {
@@ -178,6 +197,10 @@ onUnmounted(() => {
 }
 
 @screen pt {
+  .m-nav-container {
+    @apply flex h-full;
+  }
+
   .m-nav-item {
     &:not(.\-\-curr) {
       .m-nav-childern {
@@ -195,6 +218,76 @@ onUnmounted(() => {
 
     &:after {
       @apply w-full rounded-full transition-colors duration-300 content-default;
+    }
+  }
+}
+
+@screen m {
+  .m-nav-ctrl {
+    @apply relative block h-[35px] w-[35px];
+
+    &:before,
+    &:after,
+    > i {
+      @apply absolute left-1/2 top-1/2 h-[3px] w-[26px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[--gray-999];
+    }
+
+    /* delay 依 transition-property 順序對應:第 1 值 = margin-top,第 2 值 = transform */
+    &:before,
+    &:after {
+      @apply transition-[margin-top,transform] duration-150 content-default;
+    }
+
+    > i {
+      @apply transition-opacity duration-150;
+    }
+
+    /* 收合:先轉回水平,再展開上下距離 */
+    &:not(.\-\-active) {
+      &:before,
+      &:after {
+        @apply delay-[150ms,0ms];
+      }
+
+      &:before {
+        @apply mt-[-7px];
+      }
+
+      &:after {
+        @apply mt-[7px];
+      }
+    }
+
+    /* 展開:先合併到中央,再旋轉成 X */
+    &.\-\-active {
+      &:before,
+      &:after {
+        @apply mt-0 delay-[0ms,150ms];
+      }
+
+      &:before {
+        @apply rotate-45;
+      }
+
+      &:after {
+        @apply -rotate-45;
+      }
+
+      > i {
+        @apply opacity-0;
+      }
+    }
+  }
+
+  .m-nav-container {
+    @apply absolute left-0 top-[--header-mobile-h] z-[1] w-full bg-[--white] transition-heights duration-300;
+
+    &:not(.\-\-open) {
+      @apply h-0;
+    }
+
+    &.\-\-open {
+      @apply h-[calc(100vh_-_var(--header-mobile-h))];
     }
   }
 }

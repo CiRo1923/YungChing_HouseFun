@@ -37,7 +37,7 @@ onUnmounted(() => {
       :setClass="{
         main: 'h-full',
         container: 'pt:[--m-swiper-gap:6px]',
-        nav: 'text-[--white] p:h-[50px] p:w-[50px] p:p-[7px]',
+        nav: 'text-[--white] p:h-[50px] p:w-[50px] p:p-[7px] hover:[&:not(.--disabled)]:text-[--gray-999]',
         navPrev: 'left-0 -translate-x-full',
         navNext: 'right-0 translate-x-full',
       }"

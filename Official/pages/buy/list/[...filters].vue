@@ -174,7 +174,6 @@ onUnmounted(() => {
     />
   </div>
   <CommonMContainer class="p:--max-w-1220 p:--px-10 t:mt-[10px] p:mt-[20px]">
-    888
     <PageBuyListFocus />
     <CommonMContent class="pt:--rounded-20 pt:--py-20 p:--px-30 m:--pb-20 tm:--px-16 t:mx-[10px]">
       <PageBuyListSearchFilter

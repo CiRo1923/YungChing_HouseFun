@@ -35,10 +35,14 @@
 }
 
 .m-swiper-nav {
-  @apply absolute top-1/2 z-[1] -translate-y-1/2 cursor-pointer transition-opacity duration-300;
+  @apply absolute top-1/2 z-[1] -translate-y-1/2 cursor-pointer duration-300;
+
+  &:not(.\-\-disabled) {
+    @apply transition-colors;
+  }
 
   &.\-\-disabled {
-    @apply cursor-not-allowed opacity-40;
+    @apply cursor-not-allowed opacity-40 transition-opacity;
   }
 }
 

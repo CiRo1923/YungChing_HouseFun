@@ -72,6 +72,11 @@
   }
 
   &:hover {
+    /* color */
+    &.hover\:\-\-text-green-6a2d {
+      --anchor-color: var(--green-6a2d);
+    }
+
     /* bg color */
     &.hover\:\-\-bg-orange-e646 {
       --anchor-bg-color: var(--orange-e646);

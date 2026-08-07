@@ -31,7 +31,7 @@ const setClass = computed(() => {
 </script>
 
 <template>
-  <div class="detail-card" :class="setClass.main">
+  <div class="detail-card group" :class="setClass.main">
     <div
       class="detail-card-container relative flex flex-col-reverse overflow-hidden bg-[--white] shadow-card"
       :class="setClass.container"
@@ -52,7 +52,9 @@ const setClass = computed(() => {
       />
       <article class="my-[12px]">
         <header class="mx-[15px] mb-[5px]">
-          <h3 class="line-clamp-1 text-[18px]">
+          <h3
+            class="line-clamp-1 text-[18px] transition-colors duration-300 group-[:hover:not(:has(.card-community-anchor:hover))]:text-[--green-6a2d]"
+          >
             <strong>{{ props.item.title }}</strong>
           </h3>
         </header>

@@ -24,6 +24,9 @@ const items = computed(() => {
       id: 'community',
       label: community?.name,
       icon: 'icon_community',
+      to: {
+        name: 'HomeIndex',
+      },
     },
   ]
 })
@@ -33,13 +36,29 @@ const items = computed(() => {
   <ul class="flex items-center gap-x-[10px]">
     <template v-for="(data, index) in items" :key="`${data.id}_${index}`">
       <li v-if="data.label">
-        <p class="tracking-default flex items-center gap-x-[5px] text-[14px]">
+        <p class="tracking-default flex items-center gap-x-[5px]" v-if="!data.to">
           <CommonSvgIcon
             :icon="data.icon"
             class="h-[14px] w-[14px] shrink-0 p-[1px] text-[--gray-999]"
           />
-          <em class="grow">{{ data.label }}</em>
+          <em class="grow text-[14px]">{{ data.label }}</em>
         </p>
+        <CommonMAnchor
+          :text="data.label"
+          :to="data.to"
+          :config="{
+            icon: {
+              name: data.icon,
+              position: 'left',
+            },
+          }"
+          :setClass="{
+            main: 'card-community-anchor tracking-default hover:--text-green-6a2d relative z-[1] gap-x-[5px] underline',
+            text: 'text-[14px]',
+            icon: 'h-[14px] w-[14px] text-[--gray-999]',
+          }"
+          v-if="data.to"
+        />
       </li>
     </template>
   </ul>
