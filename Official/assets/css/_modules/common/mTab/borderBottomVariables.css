@@ -1,0 +1,26 @@
+:root {
+  --tab-border-bottom-pc-border-h: 3px;
+  --tab-border-bottom-tablet-border-h: 3px;
+  --tab-border-bottom-mobile-border-h: 3px;
+
+  --tab-border-bottom-anchor-color: transparent;
+  --tab-border-bottom-anchor-hover-color: transparent;
+  --tab-border-bottom-anchor-active-color: transparent;
+
+  --tab-border-bottom-anchor-bg-color: transparent;
+  --tab-border-bottom-anchor-hover-bg-color: transparent;
+  --tab-border-bottom-anchor-active-bg-color: transparent;
+
+  --tab-border-bottom-body-border-color: var(--gray-e5);
+}
+
+.m-tab {
+  &.\-\-border-bottom {
+    &.\-\-green-8b0d {
+      --tab-border-bottom-anchor-color: var(--gray-666);
+      --tab-border-bottom-anchor-hover-color: var(--green-6a2d);
+      --tab-border-bottom-anchor-active-color: var(--green-8b0d);
+      --tab-border-bottom-anchor-hover-bg-color: var(--gray-f7);
+    }
+  }
+}

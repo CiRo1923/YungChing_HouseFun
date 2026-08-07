@@ -1,0 +1,98 @@
+:root {
+  --sort-list-pc-gap-x: 16px;
+  --sort-list-tablet-gap-x: 16px;
+  --sort-list-mobile-gap-x: 16px;
+
+  --sort-anchor-pc-text: 14px;
+  --sort-anchor-tablet-text: 14px;
+  --sort-anchor-mobile-text: 14px;
+
+  --sort-anchor-pc-gap-x: 5px;
+  --sort-anchor-tablet-gap-x: 5px;
+  --sort-anchor-mobile-gap-x: 5px;
+
+  --sort-icon-pc-p: 2px;
+  --sort-icon-tablet-p: 2px;
+  --sort-icon-mobile-p: 2px;
+
+  --sort-icon-pc-size: 14px;
+  --sort-icon-tablet-size: 14px;
+  --sort-icon-mobile-size: 14px;
+
+  --sort-select-anchor-pc-text: 14px;
+  --sort-select-anchor-tablet-text: 14px;
+  --sort-select-anchor-mobile-text: 14px;
+
+  --sort-select-anchor-pc-gap-x: 5px;
+  --sort-select-anchor-tablet-gap-x: 5px;
+  --sort-select-anchor-mobile-gap-x: 5px;
+
+  --sort-select-icon-pc-p: 2px;
+  --sort-select-icon-tablet-p: 2px;
+  --sort-select-icon-mobile-p: 2px;
+
+  --sort-select-icon-pc-size: 14px;
+  --sort-select-icon-tablet-size: 14px;
+  --sort-select-icon-mobile-size: 14px;
+
+  --sort-dropdown-pc-my: 10px;
+  --sort-dropdown-tablet-my: 10px;
+  --sort-dropdown-mobile-my: 10px;
+
+  --sort-dropdown-pc-rounded: 10px;
+  --sort-dropdown-tablet-rounded: 10px;
+  --sort-dropdown-mobile-rounded: 10px;
+
+  --sort-dropdown-container-pc-py: 10px;
+  --sort-dropdown-container-tablet-py: 10px;
+  --sort-dropdown-container-mobile-py: 10px;
+
+  --sort-dropdown-list-pc-gap-y: 5px;
+  --sort-dropdown-list-tablet-gap-y: 5px;
+  --sort-dropdown-list-mobile-gap-y: 5px;
+
+  --sort-dropdown-item-pc-px: 0;
+  --sort-dropdown-item-tablet-px: 0;
+  --sort-dropdown-item-mobile-px: 0;
+
+  --sort-dropdown-anchor-pc-px: 8px;
+  --sort-dropdown-anchor-tablet-px: 8px;
+  --sort-dropdown-anchor-mobile-px: 8px;
+
+  --sort-dropdown-anchor-pc-py: 8px;
+  --sort-dropdown-anchor-tablet-py: 8px;
+  --sort-dropdown-anchor-mobile-py: 8px;
+
+  --sort-dropdown-anchor-pc-text: 14px;
+  --sort-dropdown-anchor-tablet-text: 14px;
+  --sort-dropdown-anchor-mobile-text: 14px;
+
+  --sort-dropdown-anchor-pc-border-b: 0;
+  --sort-dropdown-anchor-tablet-border-b: 0;
+  --sort-dropdown-anchor-mobile-border-b: 0;
+
+  --sort-dropdown-anchor-pc-gap-x: 5px;
+  --sort-dropdown-anchor-tablet-gap-x: 5px;
+  --sort-dropdown-anchor-mobile-gap-x: 5px;
+
+  --sort-dropdown-anchor-icon-pc-p: 2px;
+  --sort-dropdown-anchor-tablet-p: 2px;
+  --sort-dropdown-anchor-mobile-p: 2px;
+
+  --sort-dropdown-anchor-icon-pc-size: 20px;
+  --sort-dropdown-anchor-icon-tablet-size: 20px;
+  --sort-dropdown-anchor-icon-mobile-size: 20px;
+
+  --sort-anchor-color: var(--gray-666);
+  --sort-anchor-hover-color: var(--orange-e646);
+  --sort-anchor-active-color: var(--orange-e646);
+
+  --sort-dropdown-bg-color: var(--white);
+  --sort-dropdown-anchor-color: var(--gray-333);
+  --sort-dropdown-anchor-hover-color: var(--gray-333);
+  --sort-dropdown-anchor-active-color: var(--white);
+  --sort-dropdown-anchor-bg-color: tranparent;
+  --sort-dropdown-anchor-hover-bg-color: var(--gray-f7);
+  --sort-dropdown-anchor-active-bg-color: var(--green-8b0d);
+  --sort-dropdown-anchor-border-b-color: var(--gray-e5);
+}

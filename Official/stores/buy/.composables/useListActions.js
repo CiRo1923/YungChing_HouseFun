@@ -25,6 +25,7 @@ export default () => {
     unitPrice,
     face,
     nearBy,
+    keyword,
     tab,
     pagination,
   } = storeToRefs(buyListStore)
@@ -334,7 +335,10 @@ export default () => {
       limit: null,
     })
 
-    if (status !== 200) {
+    if (status === 200) {
+      const { items } = data
+      keyword.value.options = items
+    } else {
       onApiError(config, status, data)
     }
 

@@ -1,11 +1,4 @@
 :root {
-  /* padding 變數 base 預設:production 壓縮會把 padding-* 合併成 shorthand
-     `padding: var(--anchor-py) var(--anchor-px)`,shorthand 內任一 var() 未定義
-     (元素只帶 --px-XX、沒帶 --py-XX)就會使整條 padding 失效歸零。base 給 0 → 沒對應
-     modifier 時等同無 padding,且 shorthand 永遠有有效值;modifier(.--px-XX / .--py-XX)再覆蓋。 */
-  --anchor-px: 0;
-  --anchor-py: 0;
-
   --anchor-pc-border: 1px;
   --anchor-tablet-border: 1px;
   --anchor-mobile-border: 1px;
@@ -78,10 +71,11 @@
     }
   }
 
-  &:disabled {
-    --anchor-color: var(--anchor-disabled-color);
-    --anchor-bg-color: var(--anchor-disabled-bg-color);
-    --anchor-border-color: var(--anchor-disabled-border-color);
+  &:hover {
+    /* bg color */
+    &.hover\:\-\-bg-orange-e646 {
+      --anchor-bg-color: var(--orange-e646);
+    }
   }
 }
 

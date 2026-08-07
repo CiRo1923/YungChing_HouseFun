@@ -192,13 +192,49 @@ onMounted(() => {
 </template>
 
 <style lang="postcss">
+:root {
+  --figuer-no-image-bg-color: var(--gray-f2);
+
+  --figuer-image-pc-scale: 1.05;
+  --figuer-image-tablet-scale: 1.05;
+  --figuer-image-mobile-scale: 1.05;
+}
+
+.group:hover {
+  .m-figure {
+    &.group-hover\:\-\-image-scale {
+      img {
+        @apply scale-[--figuer-image-scale];
+      }
+    }
+  }
+}
+
 .m-figure {
   &.\-\-no-image {
-    @apply flex items-center justify-center bg-[--gray-f2];
+    @apply flex items-center justify-center bg-[--figuer-no-image-bg-color];
 
     img {
       @apply h-[auto] w-[50%] max-w-[250px];
     }
+  }
+}
+
+@screen p {
+  .m-figure {
+    --figuer-image-scale: var(--figuer-image-pc-scale);
+  }
+}
+
+@screen t {
+  .m-figure {
+    --figuer-image-scale: var(--figuer-image-tablet-scale);
+  }
+}
+
+@screen m {
+  .m-figure {
+    --figuer-image-scale: var(--figuer-image-mobile-scale);
   }
 }
 </style>

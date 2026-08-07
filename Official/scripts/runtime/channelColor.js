@@ -6,7 +6,9 @@
 // 造成 Vite 產生壞掉的 `?url?inline` id(build 會噴 vue/rollup 解析錯誤)。
 const channelColorMap = Object.fromEntries(
   Object.entries(
-    import.meta.glob('@css/_common/color*.css', {
+    // 排除共用 color.css:它已由 nuxt.config 的 css 陣列打進 entry,
+    // 若這裡再用 ?url 引用會多產生一份沒人用到的獨立檔案(還會被 preload)。
+    import.meta.glob(['@css/_common/color*.css', '!@css/_common/color.css'], {
       query: '?url',
       import: 'default',
       eager: true,

@@ -9,9 +9,8 @@ const props = defineProps({
 })
 
 const pinInfo = computed(() => {
-  const { purpose, pin, parking } = props.item
+  const { purpose, pin, hasParking } = props.item
   const { build, main, balcony } = pin
-  const { type } = parking
   // 「主 + 陽」→「主建」、「建坪」→「總建」(土地 / 車位 仍為 地坪 / 車坪)
   const mainBalconyText = main && balcony ? `主建 ${onToFixed([main, balcony])} 坪` : null
   const pinLabel = { 土地: '地坪', 車位: '車坪' }[purpose] ?? '總建'
@@ -31,10 +30,10 @@ const pinInfo = computed(() => {
       isHidden: !mainBalconyText,
     },
     {
-      id: 'parkingType',
-      label: '停車方式',
-      value: type,
-      isHidden: !type,
+      id: 'hasParking',
+      label: '有車位',
+      value: '有車位',
+      isHidden: !hasParking,
     },
   ]
 })

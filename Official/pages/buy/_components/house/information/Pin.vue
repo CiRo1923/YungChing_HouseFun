@@ -1,5 +1,6 @@
 <script setup>
-import { onToFixed, onUnitText } from '@js/_prototype.js'
+import { onToFixed } from '@js/_prototype.js'
+import { onUnitText } from '@js/_projectPrototype.js'
 
 const buyHouse = useBuyHouseStore()
 const { basic, pin } = storeToRefs(buyHouse)

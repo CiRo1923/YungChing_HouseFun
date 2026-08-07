@@ -1,0 +1,55 @@
+:root {
+  --tab-oval-responsiv-icon-pc-p: 2px;
+  --tab-oval-responsiv-icon-tablet-p: 2px;
+  --tab-oval-responsiv-icon-mobile-p: 2px;
+
+  --tab-oval-responsiv-icon-pc-size: 22px;
+  --tab-oval-responsiv-icon-tablet-size: 22px;
+  --tab-oval-responsiv-icon-mobile-size: 22px;
+
+  --tab-oval-responsiv-pc-border-h: 4px;
+  --tab-oval-responsiv-tablet-border-h: 4px;
+  /* --tab-oval-responsiv-mobile-border-h: 4px; */
+
+  --tab-oval-responsiv-header-items-pc-gap-x: 8px;
+  --tab-oval-responsiv-header-items-tablet-gap-x: 8px;
+  /* --tab-oval-responsiv-header-items-mobile-gap-x: 8px; */
+
+  --tab-oval-responsiv-anchor-pc-rounded-t: 15px;
+  --tab-oval-responsiv-anchor-tablet-rounded-t: 15px;
+  /* --tab-oval-responsiv-anchor-mobile-rounded-t: 15px; */
+
+  --tab-oval-responsiv-header-color: transparent; /* 給 mobile 使用 */
+
+  --tab-oval-responsiv-anchor-color: transparent;
+  --tab-oval-responsiv-anchor-hover-color: transparent;
+  --tab-oval-responsiv-anchor-active-color: transparent;
+
+  --tab-oval-responsiv-anchor-icon-color: transparent;
+  --tab-oval-responsiv-anchor-icon-hover-color: transparent;
+  --tab-oval-responsiv-anchor-icon-active-color: transparent;
+
+  --tab-oval-responsiv-anchor-bg-color: transparent;
+  --tab-oval-responsiv-anchor-hover-bg-color: transparent;
+  --tab-oval-responsiv-anchor-active-bg-color: transparent;
+
+  --tab-oval-responsiv-body-border-color: transparent;
+}
+
+.m-tab {
+  &.\-\-oval-responsiv {
+    &.\-\-green-8b0d {
+      --tab-oval-responsiv-anchor-color: var(--gray-666);
+      --tab-oval-responsiv-anchor-hover-color: var(--green-8b0d);
+      --tab-oval-responsiv-anchor-active-color: var(--white);
+
+      --tab-oval-responsiv-anchor-icon-color: var(--gray-999);
+      --tab-oval-responsiv-anchor-icon-hover-color: var(--green-8b0d);
+      --tab-oval-responsiv-anchor-icon-active-color: var(--white);
+
+      --tab-oval-responsiv-anchor-bg-color: var(--gray-f7);
+      --tab-oval-responsiv-anchor-hover-bg-color: var(--gray-f7);
+      --tab-oval-responsiv-anchor-active-bg-color: var(--green-8b0d);
+    }
+  }
+}

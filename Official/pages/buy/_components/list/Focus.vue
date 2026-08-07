@@ -4,7 +4,7 @@ const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
 const buyList = useBuyListStore()
 const { focus } = storeToRefs(buyList)
-const hasFocus = computed(() => focus.value?.length !== 0 ?? false)
+const hasFocus = computed(() => (focus.value?.length ?? 0) > 0)
 
 const isDeviceM = computed(() => device.value === 'm')
 

@@ -6,7 +6,7 @@ const { device } = storeToRefs(common)
 const { onUseMeta, onIsLoading, onWithLoadingAll, onResize } = useCommonActions()
 const { onApiGetCommonServerTime } = useProjectActions()
 const buyList = useBuyListStore()
-const { region, mrt, pagination, content } = storeToRefs(buyList)
+const { region, mrt, pagination, content, keyword } = storeToRefs(buyList)
 
 // H1 由共用 Header 讀 project.seo.h1 輸出:SSR 由 middleware/buySeo 預抓、
 // client 由本頁 onApiBuyList → onSetSeo 更新、換頁清空由 middleware/seoReset 處理。
@@ -28,6 +28,7 @@ const {
   onApiMrt,
   onApiBuyListFocus,
   onApiBuyList,
+  onApiBuySuggest,
   onChannel,
 } = useBuyListActions()
 const { onApiErrorServerToClient } = usePopupActions()
@@ -63,6 +64,17 @@ const paramsChannel = computed(() =>
 )
 const hasData = computed(() => content.value?.length !== 0 || false)
 
+// 關鍵字建議:選項由 onApiBuySuggest 寫進 store 的 keyword.options,子層自己讀。
+// 初次載入先抓一次當預設清單;輸入時 SearchKeyword 會把 AutoComplete 的
+// setOptions 傳上來,打完再回填以解除讀取中狀態
+const onBuySuggest = async (setOptions) => {
+  await onApiBuySuggest()
+
+  setOptions?.(keyword.value.options)
+
+  return keyword.value.options
+}
+
 onChannel()
 onGetBuyListParams()
 
@@ -81,6 +93,7 @@ await onWithLoadingAll([
   useAsyncData('features-options', () => onApiGETRealEstateFeatureCheckOptions()),
   useAsyncData('buy-list-focus', () => onApiBuyListFocus()),
   useAsyncData('buy-list', () => onApiBuyList()),
+  useAsyncData('buy-suggest', () => onBuySuggest()),
 ])
 
 onUseMeta({
@@ -154,9 +167,14 @@ onUnmounted(() => {
 
   <div class="bg-[--white] pt:pt-[12px]">
     <PageBuyListTabOvalResponsiv />
-    <PageBuyListSearchFunction @apiSearch="onApiSearch" @routerPush="onRoutePush" />
+    <PageBuyListSearchFunction
+      @apiSearch="onApiSearch"
+      @routerPush="onRoutePush"
+      @suggest="onBuySuggest"
+    />
   </div>
   <CommonMContainer class="p:--max-w-1220 p:--px-10 t:mt-[10px] p:mt-[20px]">
+    888
     <PageBuyListFocus />
     <CommonMContent class="pt:--rounded-20 pt:--py-20 p:--px-30 m:--pb-20 tm:--px-16 t:mx-[10px]">
       <PageBuyListSearchFilter

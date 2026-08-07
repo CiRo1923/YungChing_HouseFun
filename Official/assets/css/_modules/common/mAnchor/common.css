@@ -1,7 +1,18 @@
 .m-anchor {
+  /* padding 變數 base 預設:production 壓縮會把 padding-* 合併成 shorthand
+     `padding: var(--anchor-py) var(--anchor-px)`,shorthand 內任一 var() 未定義
+     (元素只帶 --px-XX、沒帶 --py-XX)就會使整條 padding 失效歸零。base 給 0 → 沒對應
+     modifier 時等同無 padding,且 shorthand 永遠有有效值;modifier(.--px-XX / .--py-XX)再覆蓋。 */
+  --anchor-px: 0;
+  --anchor-py: 0;
+
   border-width: var(--anchor-border);
 
-  @apply inline-flex h-[--anchor-h] items-center justify-center border-[--anchor-border-color] bg-[--anchor-bg-color] px-[--anchor-px] py-[--anchor-py] tracking-[0.06em] text-[--anchor-color] transition-colors duration-300;
+  @apply inline-flex h-[--anchor-h] items-center justify-center px-[--anchor-px] py-[--anchor-py] tracking-[0.06em] transition-colors duration-300;
+
+  &:not(:disabled) {
+    @apply border-[--anchor-border-color] bg-[--anchor-bg-color] text-[--anchor-color];
+  }
 
   &.\-\-rounded {
     @apply rounded-[--anchor-rounded];
@@ -12,7 +23,13 @@
   }
 
   &:disabled {
-    @apply cursor-not-allowed;
+    @apply cursor-not-allowed border-[--anchor-disabled-border-color] bg-[--anchor-disabled-bg-color] text-[--anchor-disabled-color];
+  }
+
+  &:hover {
+    &.hover\:\-\-underline {
+      @apply underline;
+    }
   }
 }
 

@@ -1,4 +1,7 @@
 <script setup>
+import '@css/_modules/common/mTab/variables.css'
+import '@css/_modules/common/mTab/common.css'
+
 import { onMergeTabConfig, useTabCore } from './.composables/useTabCore.js'
 
 const emits = defineEmits(['changed'])
@@ -61,25 +64,25 @@ const onTransitionEnd = async (e) => {
   <div class="m-tab --check" :class="setClass.main">
     <ul class="m-tab-header flex gap-x-[8px]" :class="setClass.header">
       <li
-        class="m-tab-header-item flex items-center"
+        class="m-tab-header-item"
         :class="[{ '--active': index === activeIndex }, setClass.headerItem]"
         v-for="(item, index) in props.options"
         :key="`tab_header_${item.label}_${index}`"
       >
         <component
           :is="onHeaderAs(item)"
-          class="m-tab-anchor flex w-full items-center justify-center gap-x-[4px] rounded-t-[15px] px-[9px] py-[8px] text-[16px] transition-colors duration-300"
+          class="m-tab-anchor rounded-t-[15px] px-[9px] py-[8px] text-[16px]"
           :class="setClass.anchor"
           v-bind="onHeaderBind(item)"
           @click="onClick(item, index)"
         >
           <CommonSvgIcon
             icon="icon_check_solid"
-            class="h-[16px] w-[16px]"
+            class="m-tab-icon h-[16px] w-[16px]"
             v-if="index === activeIndex"
           />
           <slot name="header" :item="item" :index="index">
-            <b class="font-semibold">{{ item.label }}</b>
+            <em class="m-tab-anchor-label font-semibold">{{ item.label }}</em>
           </slot>
         </component>
       </li>
@@ -107,7 +110,6 @@ const onTransitionEnd = async (e) => {
   </div>
 </template>
 
-<style src="@css/_modules/common/mTab/common.css"></style>
 <style lang="postcss">
 .m-tab {
   &.\-\-check {

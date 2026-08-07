@@ -58,6 +58,18 @@ export default defineNuxtConfig({
 
       imports.push(...getStoreImports(storesDir), ...getStoreComposableImports(storesDir))
     },
+    // 頻道色票(color{Channel}.css)以 ?url 引用,會被記進 chunk 的 assets,
+    // 導致 Nuxt 為「所有頻道」都吐 preload,但單一頁面只會用到一個 → 其餘皆為無效 preload。
+    // 這裡把色票從 manifest assets 移除,載入交回各 layout 的 useHead stylesheet(URL 已編進 JS,不受影響)。
+    'build:manifest'(manifest) {
+      const isChannelColor = (file: string) => /(^|\/)color[A-Za-z]*\.[^/]+\.css$/.test(file)
+
+      for (const entry of Object.values(manifest)) {
+        if (entry.assets?.length) {
+          entry.assets = entry.assets.filter((file) => !isChannelColor(file))
+        }
+      }
+    },
     'components:dirs'(dirs) {
       dirs.push({
         path: '~/containers',

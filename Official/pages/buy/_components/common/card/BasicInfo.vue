@@ -1,5 +1,5 @@
 <script setup>
-import { onUnitText } from '@js/_prototype.js'
+import { onUnitText } from '@js/_projectPrototype.js'
 
 const props = defineProps({
   item: {

@@ -11,7 +11,7 @@ const { isChannelRegion, isChannelMrt } = useBuyListActions()
 
 // const route = useRoute()
 
-const emits = defineEmits(['apiSearch', 'routerPush'])
+const emits = defineEmits(['apiSearch', 'routerPush', 'suggest'])
 
 const isDeviceM = computed(() => device.value === 'm')
 
@@ -21,6 +21,10 @@ const onApiSearch = () => {
 
 const onRouterPush = async () => {
   emits('routerPush')
+}
+
+const onSuggest = (setOptions) => {
+  emits('suggest', setOptions)
 }
 
 const onInit = () => {
@@ -130,7 +134,7 @@ onUnmounted(() => {
         <li
           class="search-mode-item relative flex min-w-0 items-center gap-x-[5px] overflow-hidden tm:w-full p:grow"
         >
-          <PageBuyListSearchKeyword />
+          <PageBuyListSearchKeyword @input="onSuggest" />
           <CommonMAnchor
             text="搜尋"
             :config="{
@@ -140,7 +144,7 @@ onUnmounted(() => {
               },
             }"
             :setClass="{
-              main: '--bg-orange-e646 --text-white --oval p:--h-45 tm:--px-10 p:--px-20 tm:--h-40 shrink-0 gap-x-[3px]',
+              main: '--bg-orange-f74c hover:--bg-orange-e646 --text-white --oval p:--h-45 tm:--px-10 p:--px-20 tm:--h-40 shrink-0 gap-x-[3px]',
               icon: 'h-[16px] w-[16px]',
             }"
             @click="onRouterPush"

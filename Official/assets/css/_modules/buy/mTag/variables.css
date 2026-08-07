@@ -21,6 +21,18 @@
     @apply bg-[--orange-f74c];
   }
 
+  &.\-\-bg-yellow-ffbc {
+    @apply bg-[--yellow-ffbc];
+  }
+
+  &.\-\-bg-green-efef {
+    @apply bg-[--green-efef];
+  }
+
+  &.\-\-bg-blue-efff {
+    @apply bg-[--blue-efff];
+  }
+
   &.\-\-bg-gray-f7 {
     @apply bg-[--gray-f7];
   }
@@ -43,6 +55,14 @@
 
   &.\-\-text-blue-69c1 {
     @apply text-[--blue-69c1];
+  }
+
+  &.\-\-text-green-4847 {
+    @apply text-[--green-4847];
+  }
+
+  &.\-\-text-blue-26e1 {
+    @apply text-[--blue-26e1];
   }
 
   &.\-\-text-gray-666 {
@@ -88,6 +108,12 @@
     &.p\:\-\-px-10,
     &.pt\:\-\-px-10 {
       --tag-px: 10px;
+    }
+
+    &.\-\-px-8,
+    &.p\:\-\-px-8,
+    &.pt\:\-\-px-8 {
+      --tag-px: 8px;
     }
 
     &.\-\-px-6,
@@ -152,6 +178,13 @@
       --tag-px: 10px;
     }
 
+    &.\-\-px-8,
+    &.pt\:\-\-px-8,
+    &.tm\:\-\-px-8,
+    &.t\:\-\-px-8 {
+      --tag-px: 8px;
+    }
+
     &.\-\-px-6,
     &.pt\:\-\-px-6,
     &.tm\:\-\-px-6,
@@ -213,6 +246,12 @@
     &.tm\:\-\-px-10,
     &.m\:\-\-px-10 {
       --tag-px: 10px;
+    }
+
+    &.\-\-px-8,
+    &.tm\:\-\-px-8,
+    &.m\:\-\-px-8 {
+      --tag-px: 8px;
     }
 
     &.\-\-px-6,

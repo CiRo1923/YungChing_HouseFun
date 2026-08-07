@@ -195,52 +195,6 @@ export const onAddZero = (number) => {
   return value > 9 ? String(value) : `0${value}`
 }
 
-// 格局字串:房/廳/衛 為 0 或無資料時以 `--` 呈現(而非 0),跨頁一致(明細基本資料 / 主資訊)。
-// 全空(房/廳/衛 皆無值或 0)→ 回 null,讓欄位整列隱藏;只要有任一格有值,空的格才顯示 `--`。
-export const onLayoutText = (layout = {}) => {
-  const { room, living, bath } = layout || {}
-
-  if (!room && !living && !bath) return null
-
-  const dash = (value) => (value ? value : '--')
-
-  return `${dash(room)} 房 (室) ${dash(living)} 廳 ${dash(bath)} 衛`
-}
-
-// 樓層字串:`{from} [~ {to}] / {up} 樓`。from/to/up 為 0 或無值時以 `--` 呈現(如「6 / -- 樓」)。
-// 範圍(~ to)只在 to 有值且與 from 不同時顯示。
-export const onFloorText = ({ from, to, up } = {}) => {
-  const dash = (value) => (value ? value : '--')
-  const hasRange = to != null && to !== '' && to !== from
-
-  return `${dash(from)}${hasRange ? ` ~ ${dash(to)}` : ''} / ${dash(up)} 樓`
-}
-
-// 帶單位字串:值為 null / undefined / '' 時回傳 null(讓欄位整列隱藏),避免印出「null 年」等。
-// 注意:保留 0(如建坪 0 坪)為有效值,不視為空。suffix 自帶前導空白,例如 ' 年'、' 坪'。
-export const onUnitText = (value, suffix = '') =>
-  value == null || value === '' ? null : `${value}${suffix}`
-
-// 相對時間:回傳「N 分鐘前 / N 小時前 / N 天前」(target 相對於 base)。
-// 無效日期或 target 晚於 base 時回傳 null。base 預設為現在(伺服器時間請顯式傳入)。
-export const onTimeAgo = (target, base) => {
-  const targetMs = Number(onFormatDate(target))
-  const baseMs = Number(onFormatDate(base))
-
-  if (!targetMs || !baseMs) return null
-
-  const diffMinute = Math.floor((baseMs - targetMs) / 60000)
-
-  if (diffMinute < 0) return null
-  if (diffMinute < 60) return `${diffMinute} 分鐘前`
-
-  const diffHour = Math.floor(diffMinute / 60)
-
-  if (diffHour < 24) return `${diffHour} 小時前`
-
-  return `${Math.floor(diffHour / 24)} 天前`
-}
-
 // 格式化日期
 export const onFormatDate = (date, format) => {
   // ---- helpers ----

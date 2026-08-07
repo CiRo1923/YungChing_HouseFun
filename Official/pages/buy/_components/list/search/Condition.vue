@@ -61,7 +61,7 @@ onUnmounted(() => {
             },
           }"
           :setClass="{
-            main: 'gap-x-[3px]',
+            main: 'hover:--underline gap-x-[3px]',
             text: 'text-[14px]',
             icon: 'h-[16px] w-[16px] p-[1px]',
           }"

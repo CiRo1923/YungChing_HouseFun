@@ -1,5 +1,5 @@
 <script setup>
-import { onLayoutText, onUnitText, onFloorText } from '@js/_prototype.js'
+import { onLayoutText, onUnitText, onFloorText } from '@js/_projectPrototype.js'
 
 const buyHouse = useBuyHouseStore()
 const { basic, floor, community } = storeToRefs(buyHouse)

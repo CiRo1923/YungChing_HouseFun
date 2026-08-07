@@ -1,0 +1,89 @@
+.m-tab {
+  &.\-\-border-bottom {
+    --tab-border-bottom-border-h: 0;
+    --tab-border-bottom-border-w: 0;
+
+    &.\-\-green-8b0d {
+      .m-tab-anchor {
+        &:not(.\-\-active) {
+          &:not(:hover) {
+            @apply bg-[--tab-border-bottom-anchor-bg-color] text-[--tab-border-bottom-anchor-color];
+          }
+
+          &:hover {
+            @apply bg-[--tab-border-bottom-anchor-hover-bg-color] text-[--tab-border-bottom-anchor-hover-color];
+          }
+        }
+
+        &.\-\-active {
+          @apply bg-[--tab-border-bottom-anchor-active-bg-color] text-[--tab-border-bottom-anchor-active-color];
+        }
+
+        &: not(: hover);
+      }
+    }
+
+    .m-tab-anchor {
+      &.\-\-active {
+        --tab-border-bottom-font-weight: 500;
+
+        &:after {
+          --tab-border-bottom-border-w: 100%;
+        }
+      }
+
+      &:after {
+        @apply pointer-events-none absolute bottom-0 z-[1] h-[--tab-border-bottom-border-h] w-[--tab-border-bottom-border-w] bg-[--tab-border-bottom-anchor-active-color] transition-widths duration-300 content-default;
+      }
+    }
+
+    .m-tab-anchor-label {
+      --tab-border-bottom-font-weight: 400;
+
+      font-weight: var(--tab-border-bottom-font-weight);
+    }
+
+    .m-tab-body {
+      border-top-width: var(--tab-border-bottom-border-h);
+
+      @apply mt-[calc(var(--tab-border-bottom-border-h)_*_-1)] border-solid border-t-[--tab-border-bottom-body-border-color];
+    }
+  }
+}
+
+@screen p {
+  .m-tab {
+    &.\-\-border-bottom {
+      &.\-\-has-border-b,
+      &.p\:\-\-has-border-b,
+      &.pt\:\-\-has-border-b {
+        --tab-border-bottom-border-h: var(--tab-border-bottom-pc-border-h);
+      }
+    }
+  }
+}
+
+@screen t {
+  .m-tab {
+    &.\-\-border-bottom {
+      &.\-\-has-border-b,
+      &.pt\:\-\-has-border-b,
+      &.tm\:\-\-has-border-b,
+      &.t\:\-\-has-border-b {
+        --tab-border-bottom-border-h: var(--tab-border-bottom-tablet-border-h);
+      }
+    }
+  }
+}
+
+@screen m {
+  .m-tab {
+    &.\-\-border-bottom {
+      &.\-\-has-border-b,
+      &.tm\:\-\-has-border-b,
+      &.m\:\-\-has-border-b {
+        --tab-border-bottom-border-h: var(--tab-border-bottom-mobile-border-h);
+      }
+    }
+  }
+}

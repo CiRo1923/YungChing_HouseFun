@@ -328,6 +328,9 @@ export const useBuyListStore = defineStore('buyList', () => {
       },
     ],
   })
+  const keyword = ref({
+    options: [],
+  })
   const tab = ref({
     defaultID: 0,
     options: [
@@ -387,6 +390,7 @@ export const useBuyListStore = defineStore('buyList', () => {
     face,
     nearBy,
     more,
+    keyword,
     tab,
     pagination,
   }
