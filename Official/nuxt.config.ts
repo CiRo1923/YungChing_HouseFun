@@ -35,6 +35,8 @@ export default defineNuxtConfig({
   devtools: {
     enabled: true,
   },
+  // postinstall 會跑 nuxt prepare,若未表態 telemetry 會跳互動詢問卡住安裝流程 → 直接關閉
+  telemetry: false,
   runtimeConfig: {
     public: {
       ...Object.fromEntries(
