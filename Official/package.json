@@ -6,7 +6,6 @@
     "node": "^20.19.0"
   },
   "scripts": {
-    "postinstall": "nuxt prepare",
     "compress:public": "node ./scripts/nuxt/compress-public-images.mjs",
     "start": "node .output/server/index.mjs",
     "dev": "nuxt dev --dotenv .env.dev",
