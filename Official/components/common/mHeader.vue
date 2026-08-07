@@ -25,9 +25,9 @@
           }"
         />
       </div>
-      <CommonMNav>
+      <CommonMNavMain>
         <slot name="nav" />
-      </CommonMNav>
+      </CommonMNavMain>
     </div>
   </div>
 </template>

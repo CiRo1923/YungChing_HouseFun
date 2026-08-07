@@ -8,7 +8,7 @@
 
   border-width: var(--anchor-border);
 
-  @apply inline-flex h-[--anchor-h] items-center justify-center px-[--anchor-px] py-[--anchor-py] tracking-[0.06em] transition-colors duration-300;
+  @apply inline-flex h-[--anchor-h] items-center px-[--anchor-px] py-[--anchor-py] tracking-[0.06em] transition-colors duration-300;
 
   &:not(:disabled) {
     @apply border-[--anchor-border-color] bg-[--anchor-bg-color] text-[--anchor-color];

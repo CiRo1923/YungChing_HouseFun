@@ -128,7 +128,7 @@ onUnmounted(() => {
         >
           <component
             :is="onAnchorAs(item)"
-            class="m-nav-anchor flex flex-col justify-end text-center text-[18px] t:gap-y-[4px] pt:h-full p:min-w-[75px] p:gap-y-[6px]"
+            class="m-nav-anchor flex text-[18px] m:px-[20px] m:py-[15px] t:gap-y-[4px] pt:h-full pt:flex-col pt:justify-end pt:text-center p:min-w-[75px] p:gap-y-[6px]"
             :class="{ '--active': onAnchorActive(item) }"
             v-bind="onAnchorBind(item)"
           >
@@ -152,6 +152,7 @@ onUnmounted(() => {
           </div>
         </li>
       </ul>
+      <CommonMNavApp />
       <slot />
     </div>
   </nav>
@@ -280,7 +281,7 @@ onUnmounted(() => {
   }
 
   .m-nav-container {
-    @apply absolute left-0 top-[--header-mobile-h] z-[1] w-full bg-[--white] transition-heights duration-300;
+    @apply absolute left-0 top-[--header-mobile-h] z-[1] w-full bg-[--white] px-[20px] transition-heights duration-300;
 
     &:not(.\-\-open) {
       @apply h-0;

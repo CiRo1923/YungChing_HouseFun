@@ -1,6 +1,10 @@
 <script setup>
+const common = useCommonStore()
+const { device } = storeToRefs(common)
+const { onResize } = useCommonActions()
 const memberProject = useMemberProjectStore()
 const { userData } = storeToRefs(memberProject)
+
 const emits = defineEmits(['login', 'logout'])
 const logout = readonly([
   {
@@ -32,6 +36,7 @@ const login = computed(() => {
   ]
 })
 
+const isDeviceM = computed(() => device.value === 'm')
 const items = computed(() => (userData.value ? login : logout))
 
 function onLogin() {
@@ -51,10 +56,22 @@ const onBind = (item) => {
       }
     : {}
 }
+
+onResize()
+
+onMounted(() => {
+  window.addEventListener('resize', onResize)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', onResize)
+})
 </script>
 
 <template>
-  <ul class="m-log-status pt:flex pt:items-center pt:gap-x-[24px]">
+  <ul
+    class="m-log-status m:border-t-[1px] m:border-t-[--gray-e5] pt:flex pt:items-center pt:gap-x-[24px]"
+  >
     <li
       class="m-log-status-item relative leading-[0]"
       v-for="(item, index) in items"
@@ -63,7 +80,7 @@ const onBind = (item) => {
       <CommonMAnchor
         :text="item.value"
         :config="
-          item.icon
+          item.icon && !isDeviceM
             ? {
                 icon: {
                   name: item.icon,
@@ -73,8 +90,8 @@ const onBind = (item) => {
             : {}
         "
         :setClass="{
-          main: 'gap-x-[3px]',
-          text: 'text-[14px] leading-[1.64]',
+          main: 'm:--px-20 m:--py-15 m:w-full pt:gap-x-[3px]',
+          text: 'leading-[1.64] m:text-[18px] pt:text-[14px]',
           icon: 'h-[18px] w-[18px] p-[1px]',
         }"
         v-bind="onBind(item)"
