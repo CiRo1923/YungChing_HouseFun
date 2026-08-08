@@ -34,7 +34,7 @@ const pinInfo = computed(() => {
       id: 'pinMainBalcony',
       label: '主建',
       value: mainBalconyText,
-      isHidden: isLand || isParking || !mainBalconyText,
+      isHidden: isLand || !mainBalconyText,
     },
     {
       id: 'hasParking',
