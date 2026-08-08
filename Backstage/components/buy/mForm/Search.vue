@@ -1,7 +1,7 @@
 <script setup>
 import { useTextCore } from './.composables/useTextCore.js'
 
-const emits = defineEmits(['update:modelValue', 'input', 'keydown.enter'])
+const emits = defineEmits(['update:modelValue', 'input', 'keydown.enter', 'enter'])
 
 const props = defineProps({
   name: {
@@ -47,6 +47,7 @@ const onEnter = (e) => {
   if (!config.value.isEnterSearch) return
 
   onTextEnter(e)
+  emits('enter', e)
 }
 
 const onFocus = (value) => {

@@ -211,6 +211,7 @@ const config = computed(() => {
   return {
     city: {
       options: null,
+      isDisabled: false,
       isError: false,
       schema: {
         label: 'label',
@@ -219,6 +220,7 @@ const config = computed(() => {
     },
     area: {
       options: null,
+      isDisabled: false,
       isError: false,
       schema: {
         label: 'label',
@@ -227,6 +229,7 @@ const config = computed(() => {
     },
     road: {
       options: null,
+      isDisabled: false,
       isError: false,
       schema: {
         label: 'label',
@@ -234,7 +237,28 @@ const config = computed(() => {
         model: 'label',
       },
     },
+    lane: {
+      isDisabled: false,
+      isError: false,
+    },
+    alley: {
+      isDisabled: false,
+      isError: false,
+    },
     number: {
+      isDisabled: false,
+      isError: false,
+    },
+    ofNumber: {
+      isDisabled: false,
+      isError: false,
+    },
+    floor: {
+      isDisabled: false,
+      isError: false,
+    },
+    ofFloor: {
+      isDisabled: false,
       isError: false,
     },
     ...props.config,
@@ -290,6 +314,7 @@ onMounted(() => {
         placeholder: '選擇縣市',
         schema: config.city.schema,
         isError: config.city.isError,
+        isDisabled: config.city.isDisabled,
       }"
       :setClass="{
         main: ['--h-40 --px-12 --py-8 m:w-full', setClass.city],
@@ -305,7 +330,7 @@ onMounted(() => {
         placeholder: '選擇區域',
         schema: config.area.schema,
         isError: config.area.isError,
-        isDisabled: !modelCity,
+        isDisabled: config.area.isDisabled || !modelCity,
       }"
       :setClass="{
         main: ['--h-40 --px-12 --py-8 m:w-full', setClass.area],
@@ -321,6 +346,7 @@ onMounted(() => {
         placeholder: '請選擇路段',
         schema: config.road.schema,
         isError: config.road.isError,
+        isDisabled: config.road.isDisabled,
         noMatchClearLabel: true,
       }"
       :setClass="{
@@ -339,6 +365,8 @@ onMounted(() => {
         isExistClose: false,
         hasClearButton: false,
         maxlength: 3,
+        isError: config.lane.isError,
+        isDisabled: config.lane.isDisabled,
       }"
       :setClass="{
         main: ['--h-40 --px-12 --py-8', setClass.lane],
@@ -359,6 +387,8 @@ onMounted(() => {
         isExistClose: false,
         hasClearButton: false,
         maxlength: 3,
+        isError: config.alley.isError,
+        isDisabled: config.alley.isDisabled,
       }"
       :setClass="{
         main: ['--h-40 --px-12 --py-8', setClass.alley],
@@ -380,6 +410,7 @@ onMounted(() => {
         hasClearButton: false,
         maxlength: 4,
         isError: config.number.isError,
+        isDisabled: config.number.isDisabled,
       }"
       :setClass="{
         main: ['--h-40 --px-12 --py-8', setClass.number],
@@ -401,6 +432,8 @@ onMounted(() => {
           integer: true,
           isExistClose: false,
           hasClearButton: false,
+          isError: config.ofNumber.isError,
+          isDisabled: config.ofNumber.isDisabled,
         }"
         :setClass="{
           main: ['--h-40 --px-12 --py-8', setClass.ofNumber],
@@ -419,6 +452,8 @@ onMounted(() => {
         isExistClose: false,
         hasClearButton: false,
         maxlength: 3,
+        isError: config.floor.isError,
+        isDisabled: config.floor.isDisabled,
       }"
       :setClass="{
         main: ['--h-40 --px-12 --py-8', setClass.floor],
@@ -440,6 +475,8 @@ onMounted(() => {
           integer: true,
           isExistClose: false,
           hasClearButton: false,
+          isError: config.ofFloor.isError,
+          isDisabled: config.ofFloor.isDisabled,
         }"
         :setClass="{
           main: ['--h-40 --px-12 --py-8', setClass.ofFloor],

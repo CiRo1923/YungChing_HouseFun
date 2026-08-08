@@ -12,7 +12,7 @@ const onSearchClick = (onToggle) => {
   <BuyMAccordionShowHide
     :config="{
       isAccordion: {
-        m: true,
+        tm: true,
       },
       toggleText: {
         expand: '展開更多搜尋',
@@ -20,11 +20,11 @@ const onSearchClick = (onToggle) => {
       },
     }"
     :setClass="{
-      main: 'm:space-y-[16px] pt:flex pt:items-center pt:gap-x-[8px]',
-      container: 'm:space-y-[16px] pt:flex pt:min-w-0 pt:grow pt:items-center pt:gap-x-[8px]',
-      show: 'pt:flex pt:shrink-0 pt:items-center pt:gap-x-[8px]',
-      hide: 'm:space-y-[16px] pt:flex pt:min-w-0 pt:grow pt:items-center pt:gap-x-[8px]',
-      footer: 'pt:shrink-0',
+      main: 'tm:space-y-[16px] p:flex p:items-center p:gap-x-[8px]',
+      container: 'tm:space-y-[16px] p:flex p:min-w-0 p:grow p:items-center p:gap-x-[8px]',
+      show: 'p:flex p:shrink-0 p:items-center p:gap-x-[8px]',
+      hide: 'tm:space-y-[16px] p:flex p:min-w-0 p:grow p:items-center p:gap-x-[8px]',
+      footer: 'p:shrink-0',
     }"
   >
     <slot />

@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 
 export const useBuyListStore = defineStore('buyList', () => {
   const apiSearchDataDefault = readonly({
+    is7DayExpirerFilterer: false,
     searchKey: '',
     purposeToken: '0', // '0' 為不限
     exchangeToken: '0', // '0' 為不限
@@ -39,6 +40,18 @@ export const useBuyListStore = defineStore('buyList', () => {
     commentIDList: [],
     isReply: null, // 1: 已回覆, 2: 未回覆
   })
+  const offline = ref({
+    expirer7DayOptions: [
+      {
+        label: '仍在刊登期內',
+        value: true,
+      },
+      {
+        label: '未在刊登期內',
+        value: false,
+      },
+    ],
+  })
   const serachOptions = ref({
     purpose: null,
     area: null,
@@ -68,6 +81,7 @@ export const useBuyListStore = defineStore('buyList', () => {
     apiDealData,
     apiCommentsData,
     apiCommentUpdateData,
+    offline,
     serachOptions,
     commentsOptions,
     planAggregate,

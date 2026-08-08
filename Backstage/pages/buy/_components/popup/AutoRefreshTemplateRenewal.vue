@@ -110,7 +110,7 @@ const onSure = async () => {
                     }}
                   </p>
                   <p class="shrink-0">
-                    剩餘額度：<b class="font-semibold text-[--orange-e646]">
+                    餘額：<b class="font-semibold text-[--orange-e646]">
                       {{ numberComma.add(item.availableCount) }}
                     </b>
                   </p>

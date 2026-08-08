@@ -43,7 +43,7 @@ const publishInfo = computed(() => {
   >
     <template #headerTools>
       <p>
-        剩餘自動刷新 <b class="text-[--orange-e646]">{{ numberComma.add(info.availableCount) }}</b>
+        餘額 <b class="text-[--orange-e646]">{{ numberComma.add(info.availableCount) }}</b>
       </p>
       <BuyMAnchor
         text="購買額度"

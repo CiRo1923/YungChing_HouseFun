@@ -17,7 +17,7 @@ const onEnter = () => {
       placeholder: '物件編號、地址、社區或案名',
     }"
     :setClass="{
-      main: '--h-40 --px-12 --py-8 pt:flex-1',
+      main: '--h-40 --px-12 --py-8 p:flex-1',
     }"
     @keydown.enter="onEnter"
   />

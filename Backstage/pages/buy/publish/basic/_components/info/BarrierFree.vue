@@ -50,6 +50,7 @@ const isOther = computed(() => {
           v-model="apiData.caseInfo.caseBarrierfreeOther"
           :config="{
             isDisabled: !isOther,
+            placeholder: '請輸入',
           }"
           :rules="{
             required: '請輸入其他原因',

@@ -3,10 +3,11 @@ definePageMeta({
   layout: 'buy',
   requiresAuth: true,
   title: '物件管理',
+  channel: 'offline',
 })
 
 const buyProject = useBuyProjectStore()
-const { onUseMeta, onWithLoadingAll } = useCommonActions()
+const { onUseMeta, onWithLoadingAll, onIsLoading } = useCommonActions()
 const { onApiGetPublishAvailablePlans, onApiGETGoldenGetPlanList } = useBuyProjectActions()
 const {
   onApiGETCommonPlanAggregate,
@@ -23,6 +24,28 @@ const funEventsItem = ['publish', 'deal']
 // editor (修改) / deal (成交)
 const contentEventsItem = ['editor', 'deal']
 
+// sort
+const options = [
+  // {
+  //   label: '預設',
+  //   value: 0,
+  // },
+  {
+    label: '下架日',
+    value: 0,
+    sort: {
+      asc: {
+        label: '舊',
+        value: 1,
+      },
+      desc: {
+        label: '新',
+        value: 2,
+      },
+    },
+  },
+]
+
 const onUpdate = async (done) => {
   const result = await onApiPOSTRealEstateSearch(4)
 
@@ -31,17 +54,24 @@ const onUpdate = async (done) => {
   return result
 }
 
+const listOffline = useAsyncData('list-offline', () => onUpdate(), {
+  watch: [page],
+})
+
 await onWithLoadingAll([
   useAsyncData('list-search-filter', () => onApiGETRealEstateSearchFilter()),
   useAsyncData('list-plan-aggergate-offline', () => onApiGETCommonPlanAggregate()),
   useAsyncData('list-case-aggregate-offline', () => onApiPOSTRealEstateCaseAggregate()),
-  useAsyncData('list-offline', () => onUpdate(), {
-    watch: [page],
-  }),
+  listOffline,
   useAsyncData('available-plans-offline', () => onApiGetPublishAvailablePlans()),
   useAsyncData('golden-planList-offline', () => onApiGETGoldenGetPlanList()),
   useAsyncData('comments-search-offline', () => onApiGETCommentssearchCommentFilter()),
 ])
+
+// 換頁 (pg) 時頁面元件不會重建,loading 改由這支 asyncData 的狀態驅動
+watch(listOffline.status, (value) => {
+  onIsLoading(value === 'pending')
+})
 
 onUseMeta({
   title: `物件管理 - 已下架 | ${buyProject.NAME}`,
@@ -73,7 +103,7 @@ onMounted(() => {
       @update="onUpdate"
     >
       <template #sort="{ sortFun }">
-        <PageBuyListFunctionsSort @update="sortFun" />
+        <PageBuyListFunctionsSort :options="options" @update="sortFun" />
       </template>
       <template #tools="{ item, publishFun }">
         <PageBuyListItemOfflineInfo :data="item" @click:publish="publishFun" class="m:mt-[24px]" />

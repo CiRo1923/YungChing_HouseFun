@@ -60,7 +60,7 @@ onInit()
           name="dealDatepicker"
           v-model="apiDealData.dateDeal"
           :config="{
-            defaultIsToday: false,
+            defaultIsToday: true,
             maxDate: serverTime.value,
           }"
           :rules="{

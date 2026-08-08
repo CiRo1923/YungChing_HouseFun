@@ -66,8 +66,8 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <section class="flex m:flex-col pt:items-center pt:gap-x-[24px]">
-    <div class="flex m:relative m:flex-col pt:grow pt:items-center p:gap-x-[16px]">
+  <section class="flex tm:flex-col p:items-center p:gap-x-[24px]">
+    <div class="flex m:relative m:flex-col t:gap-x-[12px] pt:grow pt:items-center p:gap-x-[16px]">
       <div class="order-3 grow">
         <header class="mb-[8px]">
           <h3 class="font-normal tracking-wider tm:text-[16px] p:text-[18px]">
@@ -86,7 +86,7 @@ onUnmounted(() => {
           />
         </div>
         <PageBuyListItemInformation :data="props.data" />
-        <div class="m:mt-[8px] pt:flex pt:items-center p:mt-[20px]">
+        <div class="tm:mt-[8px] pt:flex pt:items-center p:mt-[20px]">
           <PageBuyListItemHot
             :data="props.data"
             @click:view="(data) => onEventsClick('view', data)"
@@ -104,7 +104,7 @@ onUnmounted(() => {
         </div>
       </div>
       <div
-        class="relative order-2 shrink-0 overflow-hidden rounded-[10px] m:mb-[16px] m:h-[242px] t:h-[114px] t:w-[150px] p:h-[152px] p:w-[200px]"
+        class="relative order-2 shrink-0 overflow-hidden rounded-[10px] m:mb-[16px] m:h-[242px] pt:h-[152px] pt:w-[200px]"
       >
         <CommonImgSrc
           :src="props.data.picURLCover"

@@ -3,10 +3,11 @@ definePageMeta({
   layout: 'buy',
   requiresAuth: true,
   title: '物件管理',
+  channel: 'draft',
 })
 
 const buyProject = useBuyProjectStore()
-const { onUseMeta, onWithLoadingAll } = useCommonActions()
+const { onUseMeta, onWithLoadingAll, onIsLoading } = useCommonActions()
 const { onApiGetPublishAvailablePlans, onApiGETGoldenGetPlanList } = useBuyProjectActions()
 const {
   onApiGETCommonPlanAggregate,
@@ -31,17 +32,24 @@ const onUpdate = async (done) => {
   return result
 }
 
+const listDraft = useAsyncData('list-draft', () => onUpdate(), {
+  watch: [page],
+})
+
 await onWithLoadingAll([
   useAsyncData('list-search-filter', () => onApiGETRealEstateSearchFilter()),
   useAsyncData('list-plan-aggergate-draft', () => onApiGETCommonPlanAggregate()),
   useAsyncData('list-case-aggregate-draft', () => onApiPOSTRealEstateCaseAggregate()),
-  useAsyncData('list-draft', () => onUpdate(), {
-    watch: [page],
-  }),
+  listDraft,
   useAsyncData('available-plans-draft', () => onApiGetPublishAvailablePlans()),
   useAsyncData('golden-planList-draft', () => onApiGETGoldenGetPlanList()),
   useAsyncData('comments-search-draft', () => onApiGETCommentssearchCommentFilter()),
 ])
+
+// 換頁 (pg) 時頁面元件不會重建,loading 改由這支 asyncData 的狀態驅動
+watch(listDraft.status, (value) => {
+  onIsLoading(value === 'pending')
+})
 
 onUseMeta({
   title: `物件管理 - 草稿區 | ${buyProject.NAME}`,

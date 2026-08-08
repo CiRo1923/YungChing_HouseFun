@@ -3,7 +3,7 @@ const buyProject = useBuyProjectStore()
 const { options } = storeToRefs(buyProject)
 const { onApiGETDistrictSelectOptions, onApiGETRoad } = useBuyProjectActions()
 const buyPublish = useBuyPublishStore()
-const { apiData, address } = storeToRefs(buyPublish)
+const { apiData, address, statusData } = storeToRefs(buyPublish)
 const { onAddress } = useBuyPublishActions()
 
 const { onCustom } = useBuyPopupActions()
@@ -12,6 +12,8 @@ const areas = ref(options.value.area || [])
 const roads = ref([])
 
 const casePurposeToken = computed(() => apiData.value.caseInfo.casePurposeToken)
+// 1:刊登中 / 2:草稿 / 3:已成交 / 4:已下架 / 6:草稿(待刊登)
+const isAddressLocked = computed(() => [1, 4].includes(statusData.value?.caseStatus))
 const rules = computed(() => {
   const { cityID, districtID, road, addrNum } = apiData.value.caseInfo
 
@@ -117,6 +119,7 @@ const onPopupAddressGoogleMap = async () => {
         city: {
           options: options.city,
           isError,
+          isDisabled: isAddressLocked,
           schema: {
             label: 'text',
             value: 'value',
@@ -125,6 +128,7 @@ const onPopupAddressGoogleMap = async () => {
         area: {
           options: areas,
           isError,
+          isDisabled: isAddressLocked,
           schema: {
             label: 'text',
             value: 'value',
@@ -133,14 +137,31 @@ const onPopupAddressGoogleMap = async () => {
         road: {
           options: roads,
           isError,
+          isDisabled: isAddressLocked,
           schema: {
             label: 'roadName',
             value: 'roadID',
             model: 'roadName',
           },
         },
+        lane: {
+          isDisabled: isAddressLocked,
+        },
+        alley: {
+          isDisabled: isAddressLocked,
+        },
         number: {
           isError,
+          isDisabled: isAddressLocked,
+        },
+        ofNumber: {
+          isDisabled: isAddressLocked,
+        },
+        floor: {
+          isDisabled: isAddressLocked,
+        },
+        ofFloor: {
+          isDisabled: isAddressLocked,
         },
       }"
       :setClass="{
@@ -167,6 +188,7 @@ const onPopupAddressGoogleMap = async () => {
         city: {
           options: options.city,
           isError,
+          isDisabled: isAddressLocked,
           schema: {
             label: 'text',
             value: 'value',
@@ -175,6 +197,7 @@ const onPopupAddressGoogleMap = async () => {
         area: {
           options: areas,
           isError,
+          isDisabled: isAddressLocked,
           schema: {
             label: 'text',
             value: 'value',
@@ -183,6 +206,7 @@ const onPopupAddressGoogleMap = async () => {
         road: {
           options: roads,
           isError,
+          isDisabled: isAddressLocked,
           schema: {
             label: 'roadName',
             value: 'roadID',

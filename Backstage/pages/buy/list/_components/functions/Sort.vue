@@ -3,68 +3,12 @@ const buyList = useBuyListStore()
 const { apiSearchData } = storeToRefs(buyList)
 
 const emits = defineEmits(['update'])
-const options = shallowReadonly([
-  {
-    label: '預設',
-    value: 0,
+const props = defineProps({
+  options: {
+    type: Array,
+    default: () => [],
   },
-  {
-    label: '刊登日',
-    value: 1,
-    sort: {
-      asc: {
-        label: '舊',
-        value: 1,
-      },
-      desc: {
-        label: '新',
-        value: 2,
-      },
-    },
-  },
-  {
-    label: '到期日',
-    value: 2,
-    sort: {
-      asc: {
-        label: '舊',
-        value: 1,
-      },
-      desc: {
-        label: '新',
-        value: 2,
-      },
-    },
-  },
-  {
-    label: '留言數',
-    value: 3,
-    sort: {
-      asc: {
-        label: '少',
-        value: 1,
-      },
-      desc: {
-        label: '多',
-        value: 2,
-      },
-    },
-  },
-  {
-    label: '瀏覽數',
-    value: 4,
-    sort: {
-      asc: {
-        label: '少',
-        value: 1,
-      },
-      desc: {
-        label: '多',
-        value: 2,
-      },
-    },
-  },
-])
+})
 
 const onClick = (item) => {
   const { value } = item
@@ -84,7 +28,7 @@ const onClick = (item) => {
       排序
     </span>
     <BuyMSortMain
-      :options="options"
+      :options="props.options"
       :config="{
         index: 0,
         mode: {

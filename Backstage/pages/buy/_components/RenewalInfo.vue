@@ -56,7 +56,7 @@ const setClass = computed(() => {
               {{ item.isExchange ? `${item.expireDate} 到期` : `刊登期 ${item.durationDays} 天` }}
             </p>
             <p class="shrink-0">
-              剩餘額度：<b class="font-semibold text-[--orange-e646]">
+              餘額：<b class="font-semibold text-[--orange-e646]">
                 {{ numberComma.add(item.availableCount) }}
               </b>
             </p>

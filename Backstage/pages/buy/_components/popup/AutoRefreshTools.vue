@@ -20,7 +20,7 @@ const items = computed(() => {
     class="text-[14px] text-[--gray-666] m:w-full t:gap-x-[20px] t:px-[8px] pt:ml-auto pt:flex pt:h-[40px] pt:items-center pt:rounded-[15px] pt:bg-[--gray-f7] p:gap-x-[40px] p:px-[16px]"
   >
     <p class="flex flex-row-reverse items-center justify-center gap-x-[3px]">
-      <span>剩餘自動刷新</span>
+      <span>餘額</span>
       <CommonSvgIcon icon="icon_double_star" class="h-[18px] w-[18px]" />
     </p>
     <BuyMSeparator

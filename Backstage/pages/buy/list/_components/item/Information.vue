@@ -1,4 +1,6 @@
 <script setup>
+import { onLayoutText, onFloorText } from '@js/_projectPrototype.js'
+
 const common = useCommonStore()
 const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
@@ -23,6 +25,15 @@ const items = computed(() => {
     caseLayout,
   } = props.data
   const { room, livingRoom, bathroom } = caseLayout || {}
+  // 手機版只顯示「房(室)」單一值,null / 0 直接整列隱藏(不補 `--`)
+  // 桌機版為組合值,只要任一格有值就顯示,空的格以 `--` 呈現
+  const layoutText = isDeviceM.value
+    ? room
+      ? `${room} 房 (室)`
+      : null
+    : onLayoutText({ room, living: livingRoom, bath: bathroom })
+  // 樓層同為組合值,任一格缺值以 `--` 呈現,全空才整列隱藏
+  const floorText = onFloorText({ from: caseFloor, up: caseTotalFloor })
 
   const common = [
     {
@@ -42,15 +53,13 @@ const items = computed(() => {
     },
     {
       id: 'floor',
-      value: `${caseFloor} / ${caseTotalFloor} 樓`,
-      isHidden: !caseFloor || !caseTotalFloor,
+      value: floorText,
+      isHidden: !floorText,
     },
     {
       id: 'layout',
-      value: isDeviceM.value
-        ? `${room} 房 (室)`
-        : `${room} 房 (室) ${livingRoom} 廳 ${bathroom} 衛`,
-      isHidden: room + livingRoom + bathroom === 0,
+      value: layoutText,
+      isHidden: !layoutText,
     },
   ]
   const parking = [
@@ -71,8 +80,8 @@ const items = computed(() => {
     },
     {
       id: 'floor',
-      value: `${caseFloor} / ${caseTotalFloor} 樓`,
-      isHidden: !caseFloor || !caseTotalFloor,
+      value: floorText,
+      isHidden: !floorText,
     },
   ]
   const land = [

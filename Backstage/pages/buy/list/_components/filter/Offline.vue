@@ -1,6 +1,6 @@
 <script setup>
 const buyList = useBuyListStore()
-const { apiSearchData, serachOptions } = storeToRefs(buyList)
+const { apiSearchData, serachOptions, offline } = storeToRefs(buyList)
 const { onApiPromise } = useBuyPopupActions()
 
 const emits = defineEmits(['search'])
@@ -29,6 +29,18 @@ const onSearchClick = async () => {
             label: 'text',
             value: 'value',
           },
+        }"
+        :setClass="{
+          main: '--h-40 --px-12 --py-8 p:w-[150px]',
+          dropdown: 't:w-[300px] p:w-[400px]',
+        }"
+      />
+      <BuyMFormSelect
+        name="is7DayExpirerFilterer"
+        v-model="apiSearchData.is7DayExpirerFilterer"
+        :options="offline.expirer7DayOptions"
+        :config="{
+          placeholder: '選擇刊登期狀態',
         }"
         :setClass="{
           main: '--h-40 --px-12 --py-8 p:w-[150px]',

@@ -187,8 +187,8 @@
 
 @screen t {
   .m-form {
-    --form-clear-button-p: var(--form-clear-button-tabled-p);
-    --form-clear-button-size: var(--form-clear-button-tabled-size);
+    --form-clear-button-p: var(--form-clear-button-tablet-p);
+    --form-clear-button-size: var(--form-clear-button-tablet-size);
 
     &.\-\-p-16,
     &.pt\:\-\-p-16,

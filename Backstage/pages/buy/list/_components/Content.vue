@@ -9,7 +9,7 @@ const {
   onAutoRefreshPopup,
 } = useBuyProjectActions()
 const buyList = useBuyListStore()
-const { searchDatas, searchPagination, apiCommentsData } = storeToRefs(buyList)
+const { searchDatas, searchPagination, apiCommentsData, apiDealData } = storeToRefs(buyList)
 const {
   searchSelectItems,
   searchSelectCount,
@@ -38,7 +38,7 @@ const props = defineProps({
 const hasData = computed(() => searchDatas.value?.length !== 0)
 const hasFunEventsItem = computed(() => props.funEventsItem && props.funEventsItem.length !== 0)
 
-const onPopupRenewal = async (data) => {
+const onPopupRenewal = async (data, sureLabel = '確認續刊') => {
   return await onCustom({
     id: 'popupRenewal',
     title: '請選擇額度',
@@ -52,7 +52,7 @@ const onPopupRenewal = async (data) => {
         isClose: true,
       },
       {
-        label: '確認續刊',
+        label: sureLabel,
         class: '--bg-green-6a2d --text-white',
         type: 'sure',
         isClose: false,
@@ -118,7 +118,7 @@ const onPublishClick = async (objectData) => {
     : []
 
   onResetPojectData('renewal')
-  const { isSure } = await onPopupRenewal(objectData)
+  const { isSure } = await onPopupRenewal(objectData, '確認刊登')
 
   if (!isSure) return
 
@@ -225,6 +225,14 @@ const onOfflineClick = async (objectData) => {
 
 // 成交
 const onDealClick = async (objectData) => {
+  const { meta } = route
+  const isOfflineChannel = meta.channel === 'offline'
+
+  if (isOfflineChannel) {
+    apiDealData.value.dateDeal = null
+    apiDealData.value.isDealShow = null
+  }
+
   const { isSure: isDeal } = await onCustom({
     id: 'popupDeal',
     title: '成交設定',
@@ -287,7 +295,13 @@ const onCopyClick = () => {
 
 // 黃金曝光
 const onGoldenClick = async (objectData) => {
-  await onGoldenPopup(objectData)
+  const isCompleted = await onGoldenPopup(objectData)
+
+  if (isCompleted) {
+    await new Promise((resolve) => {
+      emits('update', resolve)
+    })
+  }
 }
 
 // 自動刷新
