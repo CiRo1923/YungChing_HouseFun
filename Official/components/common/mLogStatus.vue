@@ -37,7 +37,7 @@ const login = computed(() => {
 })
 
 const isDeviceM = computed(() => device.value === 'm')
-const items = computed(() => (userData.value ? login : logout))
+const items = computed(() => (userData.value ? login.value : logout))
 
 function onLogin() {
   emits('login')

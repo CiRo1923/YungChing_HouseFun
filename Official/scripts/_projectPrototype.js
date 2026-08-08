@@ -21,6 +21,19 @@ export const onFloorText = ({ from, to, up } = {}) => {
   return `${dash(from)}${hasRange ? ` ~ ${dash(to)}` : ''} / ${dash(up)} 樓`
 }
 
+// 用途代碼(後端 purposeID,D-39 新增):1 住宅 / 2 店面 / 3 住店 / 4 辦公 / 5 住辦 / 6 廠房 / 7 車位 / 8 土地 / 9 其他。
+// 卡片格式只需分辨土地與車位,其餘用途走一般格式,故僅列出這兩個代碼。
+export const PURPOSE_ID = {
+  PARKING: 7,
+  LAND: 8,
+}
+
+// 土地:型態欄固定顯示「土地」,不顯示 caseType / 樓層 / 格局;坪數只顯示地坪。
+export const onIsLand = (purposeID) => Number(purposeID) === PURPOSE_ID.LAND
+
+// 車位:型態欄固定顯示「車位」,不顯示 caseType;坪數標籤為車坪。
+export const onIsParking = (purposeID) => Number(purposeID) === PURPOSE_ID.PARKING
+
 // 帶單位字串:值為 null / undefined / '' 時回傳 null(讓欄位整列隱藏),避免印出「null 年」等。
 // 注意:保留 0(如建坪 0 坪)為有效值,不視為空。suffix 自帶前導空白,例如 ' 年'、' 坪'。
 export const onUnitText = (value, suffix = '') =>

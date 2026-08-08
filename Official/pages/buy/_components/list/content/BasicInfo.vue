@@ -6,8 +6,14 @@ const props = defineProps({
   },
 })
 
+// purposeID → 7: 車位(只顯示型態 / 屋齡 / 樓層)、8: 土地(不顯示樓層 / 格局),其餘用途走一般格式
+const PURPOSE_ID_PARKING = 7
+const PURPOSE_ID_LAND = 8
+
 const basicInfo = computed(() => {
-  const { caseType, buildAge, floor, layout } = props.item
+  const { purposeID, caseType, buildAge, floor, layout } = props.item
+  const isParking = Number(purposeID) === PURPOSE_ID_PARKING
+  const isLand = Number(purposeID) === PURPOSE_ID_LAND
   const { from, to, up } = floor // 樓層
   const { room, living, bath, addon, hasAddon } = layout
   const isSameFloorFromTo = !from || !to || from === to
@@ -25,6 +31,7 @@ const basicInfo = computed(() => {
       id: 'caseType',
       label: '型態',
       value: caseType,
+      isHidden: !caseType,
     },
     {
       id: 'buildAge',
@@ -36,12 +43,13 @@ const basicInfo = computed(() => {
       id: 'floor',
       label: '樓層',
       value: `${from}${!isSameFloorFromTo ? ` ~ ${to}` : ''}${up ? ` / ${up}` : ''} 樓`,
+      isHidden: isLand,
     },
     {
       id: 'layout',
       label: '格局',
       value: layoutValue,
-      isHidden: !layoutValue,
+      isHidden: isLand || isParking || !layoutValue,
     },
   ]
 })
