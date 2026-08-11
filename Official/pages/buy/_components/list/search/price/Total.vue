@@ -1,6 +1,6 @@
 <script setup>
 const buyList = useBuyListStore()
-const { apiSearchData, price } = storeToRefs(buyList)
+const { content, price } = storeToRefs(buyList)
 
 const props = defineProps({
   name: {
@@ -9,12 +9,15 @@ const props = defineProps({
   },
 })
 
+// const data = computed(() => content.value.data || [])
+const apiData = computed(() => content.value.apiData || {})
+
 const onRadioChange = (data) => {
   const { value } = data
 
   if (price.value.range.length === 0) {
     price.value.label = `總價${price.value.options[0].label}`
-    apiSearchData.value.price = ''
+    apiData.value.price = ''
     price.value.min = null
     price.value.max = null
     return
@@ -52,7 +55,7 @@ const onRadioChange = (data) => {
       : nextMin === 0
         ? `${nextMax} 萬以下`
         : `${/^\d+/.exec(minLabel.replace(/\s?萬/, ''))[0]} - ${/\d+$/.exec(maxLabel.replace(/\s?萬/, ''))[0]} 萬`
-  apiSearchData.value.price =
+  apiData.value.price =
     nextMax === 6001
       ? '6000-'
       : nextMin === 0 && nextMax

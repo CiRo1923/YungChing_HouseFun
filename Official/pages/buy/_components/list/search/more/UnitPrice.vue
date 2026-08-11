@@ -5,7 +5,10 @@ const common = useCommonStore()
 const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
 const buyList = useBuyListStore()
-const { apiSearchData, unitPrice } = storeToRefs(buyList)
+const { content, unitPrice } = storeToRefs(buyList)
+
+// const data = computed(() => content.value.data || [])
+const apiData = computed(() => content.value.apiData || {})
 
 const onChange = (data) => {
   const { value, label } = data
@@ -34,7 +37,7 @@ onUnmounted(() => {
     <li v-for="(item, index) in unitPrice.options" :key="`unitPrice_${item.value}_${index}`">
       <CommonMFormRadio
         name="uniprice"
-        v-model="apiSearchData.uniprice"
+        v-model="apiData.uniprice"
         :config="{
           label: item.label,
           value: item.value,

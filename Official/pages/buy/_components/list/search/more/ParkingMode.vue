@@ -7,7 +7,10 @@ const { onResize } = useCommonActions()
 const manage = useManageStore()
 const { options } = storeToRefs(manage)
 const buyList = useBuyListStore()
-const { apiSearchData, parking } = storeToRefs(buyList)
+const { content, parking } = storeToRefs(buyList)
+
+// const data = computed(() => content.value.data || [])
+const apiData = computed(() => content.value.apiData || {})
 
 const onChange = (data) => {
   const { value, label } = data
@@ -31,7 +34,7 @@ onUnmounted(() => {
     <li v-for="(item, index) in options.parkingMode" :key="`parking_${item.value}_${index}`">
       <CommonMFormCheckBox
         name="parking"
-        v-model="apiSearchData.parking"
+        v-model="apiData.parking"
         :config="{
           label: item.text,
           value: item.value,

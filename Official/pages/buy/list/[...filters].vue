@@ -62,7 +62,8 @@ const paramsMrt = computed(() => {
 const paramsChannel = computed(() =>
   isChannelRegion.value ? paramsRegion.value : isChannelMrt.value ? paramsMrt.value : []
 )
-const hasData = computed(() => content.value?.length !== 0 || false)
+const data = computed(() => content.value.data || [])
+const hasData = computed(() => data.value?.length !== 0 || false)
 
 // 關鍵字建議:選項由 onApiBuySuggest 寫進 store 的 keyword.options,子層自己讀。
 // 初次載入先抓一次當預設清單;輸入時 SearchKeyword 會把 AutoComplete 的

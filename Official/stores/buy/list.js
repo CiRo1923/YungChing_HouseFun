@@ -3,9 +3,8 @@ import { defineStore } from 'pinia'
 export const useBuyListStore = defineStore('buyList', () => {
   const basicRouteName = 'buy-list-filters'
   const focus = ref(null)
-  const content = ref(null)
-  const apiDataDefault = readonly({
-    search: {
+  const apiDefault = readonly({
+    content: {
       purpose: '',
       price: '',
       room: '',
@@ -27,7 +26,11 @@ export const useBuyListStore = defineStore('buyList', () => {
       od: '',
     },
   })
-  const apiSearchData = ref({ ...apiDataDefault.search })
+  const content = ref({
+    data: null,
+    apiData: { ...apiDefault.content },
+  })
+
   const region = ref({
     defaultIDs: '01',
     label: '',
@@ -373,8 +376,7 @@ export const useBuyListStore = defineStore('buyList', () => {
     basicRouteName,
     focus,
     content,
-    apiDataDefault,
-    apiSearchData,
+    apiDefault,
     region,
     mrt,
     purpose,

@@ -3,9 +3,12 @@ const common = useCommonStore()
 const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
 const buyList = useBuyListStore()
-const { apiSearchData, tab } = storeToRefs(buyList)
+const { content, tab } = storeToRefs(buyList)
 
 const isDeviceM = computed(() => device.value === 'm')
+// const data = computed(() => content.value.data || [])
+const apiData = computed(() => content.value.apiData || {})
+
 const options = computed(() => {
   return tab.value.options.map((item) => {
     if (typeof item.label === 'string') {
@@ -27,7 +30,7 @@ const options = computed(() => {
 const onClick = (data) => {
   const { item } = data
 
-  apiSearchData.value.tab = item.value
+  apiData.value.tab = item.value
 }
 
 onResize()
@@ -45,7 +48,7 @@ onUnmounted(() => {
   <CommonMTabBorderBottom
     :items="options"
     :config="{
-      active: apiSearchData.tab,
+      active: apiData.tab,
       containerMode: 'single',
     }"
     :setClass="{

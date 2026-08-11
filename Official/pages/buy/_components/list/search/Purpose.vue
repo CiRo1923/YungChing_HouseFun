@@ -8,13 +8,17 @@ const manage = useManageStore()
 const { options } = storeToRefs(manage)
 const { onValueGetText } = useManageActions()
 const buyList = useBuyListStore()
-const { apiSearchData, purpose } = storeToRefs(buyList)
+const { content, purpose } = storeToRefs(buyList)
 
 const componentsName = 'Purpose'
 
 const emits = defineEmits(['click:routePush'])
 const selectDropdownRef = ref(null)
+
 const isDeviceM = computed(() => device.value === 'm')
+// const data = computed(() => content.value.data || [])
+const apiData = computed(() => content.value.apiData || {})
+
 const defaultLabel = computed(() => onResolveByDevice(purpose.value.defaultLabel, device.value))
 
 const onChange = (data) => {
@@ -31,8 +35,8 @@ const onRoutePush = () => {
 }
 
 const onInit = () => {
-  purpose.value.label = apiSearchData.value.purpose
-    ? onValueGetText('casePurpose', apiSearchData.value.purpose)
+  purpose.value.label = apiData.value.purpose
+    ? onValueGetText('casePurpose', apiData.value.purpose)
     : defaultLabel.value
 }
 
@@ -82,7 +86,7 @@ onUnmounted(() => {
         >
           <CommonMFormRadio
             :name="componentsName"
-            v-model="apiSearchData.purpose"
+            v-model="apiData.purpose"
             :config="{
               label: item.text,
               value: item.code,

@@ -5,15 +5,18 @@ const common = useCommonStore()
 const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
 const buyList = useBuyListStore()
-const { apiSearchData, room } = storeToRefs(buyList)
+const { content, room } = storeToRefs(buyList)
 const componentsName = 'Room'
+
+// const data = computed(() => content.value.data || [])
+const apiData = computed(() => content.value.apiData || {})
 
 const onChange = (data) => {
   const { value } = data
 
   if (room.value.range.length === 0) {
     room.value.label = room.value.defaultLabel
-    apiSearchData.value.room = ''
+    apiData.value.room = ''
     room.value.min = null
     room.value.max = null
     return
@@ -45,14 +48,14 @@ const onChange = (data) => {
   room.value.label = isSame
     ? room.value.options.find((item) => item.value === nextMax)?.label || String(nextMax)
     : `${nextMin} - ${nextMax} ${room.value.unit}`
-  apiSearchData.value.room = isSame ? nextMax : `${nextMin}-${nextMax}`
+  apiData.value.room = isSame ? nextMax : `${nextMin}-${nextMax}`
 
   room.value.min = null
   room.value.max = null
 }
 
 const onInit = () => {
-  const roomValue = apiSearchData.value.room
+  const roomValue = apiData.value.room
 
   // 無選取 → 預設 label,range 維持原值
   if (!roomValue && roomValue !== 0) {
@@ -150,7 +153,7 @@ onUnmounted(() => {
       <li>
         <CommonMFormCheckBox
           :name="`${componentsName}_agree`"
-          v-model="apiSearchData.addRoom"
+          v-model="apiData.addRoom"
           :config="{
             mode: 'boolean',
             label: '房數不含加蓋',

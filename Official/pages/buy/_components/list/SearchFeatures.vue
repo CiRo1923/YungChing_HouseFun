@@ -9,7 +9,7 @@ const { onResize } = useCommonActions()
 const manage = useManageStore()
 const { options } = storeToRefs(manage)
 const buyList = useBuyListStore()
-const { apiSearchData } = storeToRefs(buyList)
+const { content } = storeToRefs(buyList)
 const { onCustom } = usePopupActions()
 
 const emits = defineEmits(['routerPush'])
@@ -27,6 +27,8 @@ const config = computed(() => onDeepMerge({}, props.config))
 // 例:{p, tm} / {pt, m})。響應式物件必須「整包取代」不可 deep-merge,否則預設 key 會蓋掉
 // 使用者的部分覆蓋(如預設 t:5 會讓使用者的 tm 在平板失效)。故未傳時才套預設 { pt:5, m:3 }。
 const isDeviceM = computed(() => device.value === 'm')
+// const data = computed(() => content.value.data || [])
+const apiData = computed(() => content.value.apiData || {})
 const maxItems = computed(
   () => onResolveByDevice(config.value.maxItems ?? { pt: 5, m: 3 }, device.value) ?? 5
 )
@@ -67,7 +69,7 @@ onUnmounted(() => {
       <li v-for="(item, index) in topFeatures" :key="`${item.text}_${item.code}_${index}`">
         <CommonMFormCheckBox
           name="tag"
-          v-model="apiSearchData.tag"
+          v-model="apiData.tag"
           :config="{
             label: item.text,
             value: item.code,

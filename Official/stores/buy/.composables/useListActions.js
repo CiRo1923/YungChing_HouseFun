@@ -12,7 +12,6 @@ export default () => {
   const {
     focus,
     content,
-    apiSearchData,
     region,
     mrt,
     purpose,
@@ -36,28 +35,28 @@ export default () => {
   const { onValueGetText } = useManageActions()
   const route = useRoute()
   const commonParams = computed(() => {
-    const paramsPurpose = apiSearchData.value.purpose
-      ? `${apiSearchData.value.purpose}_purpose`
+    const paramsPurpose = content.value.apiData.purpose
+      ? `${content.value.apiData.purpose}_purpose`
       : ''
-    const paramsPrice = apiSearchData.value.price ? `${apiSearchData.value.price}_price` : ''
-    const paramsRoom = apiSearchData.value.room ? `${apiSearchData.value.room}_room` : ''
-    const paramsType = apiSearchData.value.type ? `${apiSearchData.value.type}_type` : ''
-    const paramsPin = apiSearchData.value[pin.value.type]
-      ? `${apiSearchData.value[pin.value.type]}_${pin.value.type}`
+    const paramsPrice = content.value.apiData.price ? `${content.value.apiData.price}_price` : ''
+    const paramsRoom = content.value.apiData.room ? `${content.value.apiData.room}_room` : ''
+    const paramsType = content.value.apiData.type ? `${content.value.apiData.type}_type` : ''
+    const paramsPin = content.value.apiData[pin.value.type]
+      ? `${content.value.apiData[pin.value.type]}_${pin.value.type}`
       : ''
-    const paramsParkingMode = apiSearchData.value.parking
-      ? `${apiSearchData.value.parking}_parking`
+    const paramsParkingMode = content.value.apiData.parking
+      ? `${content.value.apiData.parking}_parking`
       : ''
-    const paramsAge = apiSearchData.value.age ? `${apiSearchData.value.age}_age` : ''
-    const paramsFloor = apiSearchData.value.floor ? `${apiSearchData.value.floor}_floor` : ''
-    const paramsUnitPrice = apiSearchData.value.uniprice
-      ? `${apiSearchData.value.uniprice}_uniprice`
+    const paramsAge = content.value.apiData.age ? `${content.value.apiData.age}_age` : ''
+    const paramsFloor = content.value.apiData.floor ? `${content.value.apiData.floor}_floor` : ''
+    const paramsUnitPrice = content.value.apiData.uniprice
+      ? `${content.value.apiData.uniprice}_uniprice`
       : ''
-    const paramsFace = apiSearchData.value.dt ? `${apiSearchData.value.dt}_dt` : ''
-    const paramsNearBy = apiSearchData.value.ft ? `${apiSearchData.value.ft}_ft` : ''
+    const paramsFace = content.value.apiData.dt ? `${content.value.apiData.dt}_dt` : ''
+    const paramsNearBy = content.value.apiData.ft ? `${content.value.apiData.ft}_ft` : ''
     // tab(降價 / 新上架 / 實境):預設 0(全部)不帶段;放最後與 infoMap 的 _tab 位置一致,
     // 讓搜尋 / 切換頻道重組 URL 時保留當前分頁,不會被清掉。
-    const paramsTab = apiSearchData.value.tab ? `${apiSearchData.value.tab}_tab` : ''
+    const paramsTab = content.value.apiData.tab ? `${content.value.apiData.tab}_tab` : ''
 
     const result = []
 
@@ -77,11 +76,11 @@ export default () => {
     return result
   })
   const commonQuery = computed(() => {
-    const queryOd = apiSearchData.value.od ? { od: apiSearchData.value.od } : {}
+    const queryOd = content.value.apiData.od ? { od: content.value.apiData.od } : {}
     const queryTag =
-      apiSearchData.value.tag.length !== 0 ? { tag: apiSearchData.value.tag.join(',') } : {}
+      content.value.apiData.tag.length !== 0 ? { tag: content.value.apiData.tag.join(',') } : {}
     // 關鍵字寫入 URL(query),重整 / 分享後才能還原
-    const queryKw = apiSearchData.value.kw ? { kw: apiSearchData.value.kw } : {}
+    const queryKw = content.value.apiData.kw ? { kw: content.value.apiData.kw } : {}
 
     return {
       ...queryOd,
@@ -200,7 +199,7 @@ export default () => {
       .join('、')
 
   // 搜尋條件:一律以「網址(route)」為準 → 只有按搜尋(URL 改變)才更新,
-  // 不受下拉即時勾選(apiSearchData / label / ids 皆為 v-model,勾選當下就變)影響。
+  // 不受下拉即時勾選(content.apiData / label / ids 皆為 v-model,勾選當下就變)影響。
   // 回傳 [{ label, value }] 陣列(縣市 / 區域 / 捷運多組會拆開)。
   const condition = computed(() => {
     const parsed = onParseFilters(route)
@@ -281,7 +280,7 @@ export default () => {
 
   const onApiBuyListFocus = async () => {
     const { config, status, data } = await apiBuyListFocus({
-      purpose: apiSearchData.value.purpose,
+      purpose: content.value.apiData.purpose,
       ...(isChannelRegion.value ? { region: region.value.ids || region.value.all } : {}),
       ...(isChannelMrt.value ? { mrt: mrt.value.ids || mrt.value.all } : {}),
     })
@@ -301,7 +300,7 @@ export default () => {
     const { config, status, data } = await apiBuyList({
       ...(isChannelRegion.value ? { region: region.value.ids || region.value.all } : {}),
       ...(isChannelMrt.value ? { mrt: mrt.value.ids || mrt.value.all } : {}),
-      ...apiSearchData.value,
+      ...content.value.apiData,
       pg: query.pg,
       pageSize: 20,
     })
@@ -309,15 +308,14 @@ export default () => {
     if (status === 200) {
       const { items, tabs, paging, seo: seoData } = data
       // tab 只更新數量;不給 `to`,避免變成 router-link「點擊即導航」。
-      // tab 改為純選取(Category onClick 設 apiSearchData.tab),按搜尋時經 commonParams 套用,
+      // tab 改為純選取(Category onClick 設 content.apiData.tab),按搜尋時經 commonParams 套用,
       // 與其他篩選條件一致,避免「點 tab 打一次 + 搜尋再打一次」的重複請求。
       const infoMap = tab.value.options.map((item) => ({
         ...item,
         count: tabs?.[item.id] ?? item.value ?? 0,
-        to: undefined,
       }))
 
-      content.value = items
+      content.value.data = items
       onSetSeo(seoData)
       tab.value.options = infoMap
       pagination.value = paging
@@ -329,7 +327,7 @@ export default () => {
   }
 
   const onApiBuySuggest = async () => {
-    const { kw, region } = apiSearchData.value
+    const { kw, region } = content.value.apiData
     const { config, status, data } = await apiBuySuggest({
       kw,
       region,
@@ -390,16 +388,16 @@ export default () => {
     mrt.value.ids = (isChannelMrt.value && parseFilters.mrt) || mrt.value.defaultIDs
 
     // purpose
-    apiSearchData.value.purpose = parseFilters.purpose || ''
+    content.value.apiData.purpose = parseFilters.purpose || ''
 
     // price
-    apiSearchData.value.price = parseFilters.price || ''
+    content.value.apiData.price = parseFilters.price || ''
 
     // room
-    apiSearchData.value.room = parseFilters.room || ''
+    content.value.apiData.room = parseFilters.room || ''
 
     // type
-    apiSearchData.value.type = parseFilters.type || ''
+    content.value.apiData.type = parseFilters.type || ''
 
     // pin
     const pinTypes = ['buildpin', 'usepin', 'landpin']
@@ -407,44 +405,44 @@ export default () => {
     pinTypes.forEach((type) => {
       if (parseFilters[type]) {
         pin.value.type = type
-        apiSearchData.value[type] = parseFilters[type]
+        content.value.apiData[type] = parseFilters[type]
       }
     })
 
     // parkingMode
-    apiSearchData.value.parking = parseFilters.parking || ''
+    content.value.apiData.parking = parseFilters.parking || ''
 
     // age
-    apiSearchData.value.age = parseFilters.age || ''
+    content.value.apiData.age = parseFilters.age || ''
 
     // floor
-    apiSearchData.value.floor = parseFilters.floor || ''
+    content.value.apiData.floor = parseFilters.floor || ''
 
     // unitPrice
-    apiSearchData.value.uniprice = parseFilters.uniprice || ''
+    content.value.apiData.uniprice = parseFilters.uniprice || ''
 
     // face
-    apiSearchData.value.dt = parseFilters.dt || ''
+    content.value.apiData.dt = parseFilters.dt || ''
 
     // nearBy
-    apiSearchData.value.ft = parseFilters.ft || ''
+    content.value.apiData.ft = parseFilters.ft || ''
 
     // tab
-    apiSearchData.value.tab = Number(parseFilters.tab) || tab.value.defaultID
+    content.value.apiData.tab = Number(parseFilters.tab) || tab.value.defaultID
 
     // tag
-    apiSearchData.value.tag = parseFilters.tag?.split(',') ?? []
+    content.value.apiData.tag = parseFilters.tag?.split(',') ?? []
 
     // kw(從 URL query 還原關鍵字)
-    apiSearchData.value.kw = parseFilters.kw || ''
+    content.value.apiData.kw = parseFilters.kw || ''
 
     // od(排序以 querystring 帶入網址,重整 / 分享後還原)
-    apiSearchData.value.od = parseFilters.od || ''
+    content.value.apiData.od = parseFilters.od || ''
   }
   // 重置搜尋:清空所有篩選值與 label,回到 store 預設(區域 / 捷運回預設 id)。
   // 導回預設列表由呼叫端負責(router.push),此處只還原 store 狀態。
   const onResetSearch = () => {
-    apiSearchData.value = { ...buyListStore.apiDataDefault.search }
+    content.value.apiData = { ...buyListStore.apiDefault.content }
 
     // 區域 / 捷運:id 回預設,label 由 helper 依 ids 重算。
     // 路由切換不會重跑各下拉的 onInit,故 label 一律直接設定;設空字串會露出 placeholder。
@@ -495,15 +493,15 @@ export default () => {
         onRemoveId(mrt, onMrtLabel)
         break
       case 'purpose':
-        apiSearchData.value.purpose = ''
+        content.value.apiData.purpose = ''
         onClearLabel(purpose)
         break
       case 'price':
-        apiSearchData.value.price = ''
+        content.value.apiData.price = ''
         onClearLabel(price)
         break
       case 'room':
-        apiSearchData.value.room = ''
+        content.value.apiData.room = ''
         onClearLabel(room)
         break
     }

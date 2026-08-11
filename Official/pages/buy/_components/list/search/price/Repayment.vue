@@ -2,7 +2,7 @@
 import { onToFixed } from '@js/_prototype.js'
 
 const buyList = useBuyListStore()
-const { apiSearchData, price, repayment } = storeToRefs(buyList)
+const { content, price, repayment } = storeToRefs(buyList)
 const loanYears = readonly([
   {
     label: '20 年',
@@ -18,6 +18,9 @@ const loanYears = readonly([
   },
 ])
 const totalPrice = ref(0)
+
+// const data = computed(() => content.value.data || [])
+const apiData = computed(() => content.value.apiData || {})
 
 const onHousePrice = () => {
   const { downPayment, monthlyPayment, loanYears, annualInterestRate } = repayment.value
@@ -50,11 +53,11 @@ const onHousePrice = () => {
   // const finalPrice = priceByMonthly
   totalPrice.value = Math.ceil(onToFixed(priceByMonthly, 0) / 10) * 10
 
-  // 以參考總價 ±10% 作為總價搜尋條件,寫入 apiSearchData.price(commonParams 實際讀取的欄位)
+  // 以參考總價 ±10% 作為總價搜尋條件,寫入 content.apiData.price(commonParams 實際讀取的欄位)
   const min = Math.floor((totalPrice.value * 0.9) / 10) * 10
   const max = Math.ceil((totalPrice.value * 1.1) / 10) * 10
 
-  apiSearchData.value.price = `${min}-${max}`
+  apiData.value.price = `${min}-${max}`
   price.value.label = `${min} - ${max} 萬`
 }
 

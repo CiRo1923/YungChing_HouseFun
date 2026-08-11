@@ -1,6 +1,6 @@
 <script setup>
 const buyList = useBuyListStore()
-const { apiSearchData, keyword } = storeToRefs(buyList)
+const { content, keyword } = storeToRefs(buyList)
 
 const emits = defineEmits(['input'])
 
@@ -23,6 +23,9 @@ const tag = readonly({
   },
 })
 
+// const data = computed(() => content.value.data || [])
+const apiData = computed(() => content.value.apiData || {})
+
 const onInput = (_value, setOptions) => {
   emits('input', setOptions)
 }
@@ -36,7 +39,7 @@ const onChange = (data) => {
 <template>
   <CommonMFormAutoComplete
     name="keyword"
-    v-model="apiSearchData.kw"
+    v-model="apiData.kw"
     :options="keyword.options"
     :config="{
       placeholder: '請輸入關鍵字或房屋編號',
@@ -67,10 +70,7 @@ const onChange = (data) => {
               label: 'text-[12px]',
             }"
           />
-          <em
-            class="grow"
-            v-html="item.text.replace(apiSearchData.kw, `<b>${apiSearchData.kw}</b>`)"
-          />
+          <em class="grow" v-html="item.text.replace(apiData.kw, `<b>${apiData.kw}</b>`)" />
           <span class="shrink-0 text-[--gray-999]">
             <b class="text-[--orange-e646]">{{ item.count }}</b> 筆房屋
           </span>

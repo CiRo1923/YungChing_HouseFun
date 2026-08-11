@@ -6,7 +6,7 @@ const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
 const { onValueGetText } = useManageActions()
 const buyList = useBuyListStore()
-const { apiSearchData, price, type, pin, parking, age, floor, unitPrice, face, nearBy, more } =
+const { content, price, type, pin, parking, age, floor, unitPrice, face, nearBy, more } =
   storeToRefs(buyList)
 const { isChannelRegion, isChannelMrt } = useBuyListActions()
 
@@ -15,6 +15,8 @@ const { isChannelRegion, isChannelMrt } = useBuyListActions()
 const emits = defineEmits(['apiSearch', 'routerPush', 'suggest'])
 
 const isDeviceM = computed(() => device.value === 'm')
+// const data = computed(() => content.value.data || [])
+const apiData = computed(() => content.value.apiData || {})
 
 const onApiSearch = () => {
   emits('apiSearch')
@@ -32,10 +34,10 @@ const onInit = () => {
   const onLable = (name, data, options) => {
     const isOptionsString = options && typeof options === 'string'
 
-    if (apiSearchData.value[name] && isOptionsString)
-      return onValueGetText(options, apiSearchData.value[name].split(','))
-    if (apiSearchData.value[name] && !isOptionsString) {
-      const value = apiSearchData.value[name]
+    if (apiData.value[name] && isOptionsString)
+      return onValueGetText(options, apiData.value[name].split(','))
+    if (apiData.value[name] && !isOptionsString) {
+      const value = apiData.value[name]
       const noMatch = !data.options.find((item) => item.value === value)
 
       if (noMatch) {
@@ -55,13 +57,13 @@ const onInit = () => {
         }
       }
 
-      return `${apiSearchData.value[name]} ${data.unit}`
+      return `${apiData.value[name]} ${data.unit}`
     }
 
     return onResolveByDevice(data.defaultLabel, device.value)
   }
   const onMinMax = (name, data) => {
-    const value = apiSearchData.value[name]
+    const value = apiData.value[name]
     const noMatch = !data.options.find((item) => item.value === value)
 
     if (value && noMatch) {

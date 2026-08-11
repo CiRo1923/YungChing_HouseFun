@@ -1,6 +1,6 @@
 <script setup>
 const buyList = useBuyListStore()
-const { apiSearchData, pin } = storeToRefs(buyList)
+const { content, pin } = storeToRefs(buyList)
 const options = readonly([
   {
     label: '建坪',
@@ -16,17 +16,20 @@ const options = readonly([
   },
 ])
 
+// const data = computed(() => content.value.data || [])
+const apiData = computed(() => content.value.apiData || {})
+
 const onTypeChange = () => {
   const currentType = pin.value.type
   // 找出舊類型殘留的值，沿用到新選中的 type
-  const prevType = options.find(({ value }) => value !== currentType && apiSearchData.value[value])
+  const prevType = options.find(({ value }) => value !== currentType && apiData.value[value])
   if (prevType) {
-    apiSearchData.value[currentType] = apiSearchData.value[prevType.value]
+    apiData.value[currentType] = apiData.value[prevType.value]
   }
   // 清空非當下選中的 key（保留 key，不移除）
   options.forEach(({ value }) => {
     if (value !== currentType) {
-      apiSearchData.value[value] = ''
+      apiData.value[value] = ''
     }
   })
 }
@@ -55,7 +58,7 @@ const onChange = () => {}
       <li v-for="(item, index) in pin.options" :key="`pin_${item.value}_${index}`">
         <CommonMFormRadio
           name="pin"
-          v-model="apiSearchData[pin.type]"
+          v-model="apiData[pin.type]"
           :config="{
             label: item.label,
             value: item.value,

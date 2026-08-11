@@ -1,6 +1,6 @@
 <script setup>
 const buyList = useBuyListStore()
-const { apiSearchData } = storeToRefs(buyList)
+const { content } = storeToRefs(buyList)
 
 const emits = defineEmits(['update:data', 'update:min', 'update:max'])
 const props = defineProps({
@@ -33,6 +33,10 @@ const props = defineProps({
     default: () => ({}),
   },
 })
+
+// const data = computed(() => content.value.data || [])
+const apiData = computed(() => content.value.apiData || {})
+
 const modelData = computed({
   get: () => props.data,
   set: (value) => {
@@ -95,15 +99,15 @@ const onBlur = () => {
   }
 
   if (isSame) {
-    apiSearchData.value[schema.api] = modelMin.value
+    apiData.value[schema.api] = modelMin.value
   }
 
   if (modelMax.value && modelMin.value) {
-    apiSearchData.value[schema.api] = `${modelMin.value}-${modelMax.value}`
+    apiData.value[schema.api] = `${modelMin.value}-${modelMax.value}`
   } else if (modelMin.value) {
-    apiSearchData.value[schema.api] = `${modelMin.value}-`
+    apiData.value[schema.api] = `${modelMin.value}-`
   } else if (modelMax.value) {
-    apiSearchData.value[schema.api] = `-${modelMax.value}`
+    apiData.value[schema.api] = `-${modelMax.value}`
   }
 }
 </script>

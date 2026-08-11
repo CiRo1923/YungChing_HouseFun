@@ -2,7 +2,10 @@
 const manage = useManageStore()
 const { options } = storeToRefs(manage)
 const buyList = useBuyListStore()
-const { apiSearchData } = storeToRefs(buyList)
+const { content } = storeToRefs(buyList)
+
+// const data = computed(() => content.value.data || [])
+const apiData = computed(() => content.value.apiData || {})
 
 const features = computed(() => options.value.features ?? [])
 // const popup = usePopupStore()
@@ -26,7 +29,7 @@ const features = computed(() => options.value.features ?? [])
       <li v-for="(item, index) in features" :key="`${item.text}_${item.code}_${index}`">
         <CommonMFormCheckBox
           name="tag"
-          v-model="apiSearchData.tag"
+          v-model="apiData.tag"
           :config="{
             label: item.text,
             value: item.code,

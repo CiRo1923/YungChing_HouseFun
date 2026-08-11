@@ -5,7 +5,10 @@ const common = useCommonStore()
 const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
 const buyList = useBuyListStore()
-const { apiSearchData, floor } = storeToRefs(buyList)
+const { content, floor } = storeToRefs(buyList)
+
+// const data = computed(() => content.value.data || [])
+const apiData = computed(() => content.value.apiData || {})
 
 const onChange = (data) => {
   const { value, label } = data
@@ -32,7 +35,7 @@ onUnmounted(() => {
     <li v-for="(item, index) in floor.options" :key="`floor_${item.value}_${index}`">
       <CommonMFormRadio
         name="age"
-        v-model="apiSearchData.floor"
+        v-model="apiData.floor"
         :config="{
           label: item.label,
           value: item.value,

@@ -7,7 +7,10 @@ const { onResize } = useCommonActions()
 const manage = useManageStore()
 const { options } = storeToRefs(manage)
 const buyList = useBuyListStore()
-const { apiSearchData, nearBy } = storeToRefs(buyList)
+const { content, nearBy } = storeToRefs(buyList)
+
+// const data = computed(() => content.value.data || [])
+const apiData = computed(() => content.value.apiData || {})
 
 const onChange = (data) => {
   const { value, label } = data
@@ -31,7 +34,7 @@ onUnmounted(() => {
     <li v-for="(item, index) in options.nearBy" :key="`nearBy_${item.code ?? item.value}_${index}`">
       <CommonMFormCheckBox
         name="ft"
-        v-model="apiSearchData.ft"
+        v-model="apiData.ft"
         :config="{
           label: item.text,
           value: item.code ?? item.value,

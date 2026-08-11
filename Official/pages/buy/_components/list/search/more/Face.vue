@@ -7,7 +7,10 @@ const { onResize } = useCommonActions()
 const manage = useManageStore()
 const { options } = storeToRefs(manage)
 const buyList = useBuyListStore()
-const { apiSearchData, face } = storeToRefs(buyList)
+const { content, face } = storeToRefs(buyList)
+
+// const data = computed(() => content.value.data || [])
+const apiData = computed(() => content.value.apiData || {})
 
 const onChange = (data) => {
   const { value, label } = data
@@ -31,7 +34,7 @@ onUnmounted(() => {
     <li v-for="(item, index) in options.face" :key="`face_${item.value}_${index}`">
       <CommonMFormCheckBox
         name="dt"
-        v-model="apiSearchData.dt"
+        v-model="apiData.dt"
         :config="{
           label: item.text,
           value: item.value,
