@@ -17,15 +17,16 @@
 ## 2. 前置引用
 
 ```js
+import { onResolveByDevice } from '@js/_projectPrototype.js'
+
 const common = useCommonStore()
 const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
-const { onResolveByDevice } = useBuyProjectActions()
 ```
 
 - `device`：目前裝置，**只會是 `p` | `t` | `m`**。
 - `onResize`：更新 `device`。
-- `onResolveByDevice(value, device)`：將「可依裝置設定的物件」解析成目前裝置對應的值（見第 5 節）。
+- `onResolveByDevice(value, device)`：將「可依裝置設定的物件」解析成目前裝置對應的值（見第 5 節）。純函式，由 `@js/_projectPrototype.js` 匯出。
 
 ---
 

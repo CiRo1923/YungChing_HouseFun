@@ -13,35 +13,24 @@ export default () => {
     apiPromiseData,
     apiError,
   } = storeToRefs(popup)
-  const onMergeBtns = (buttons, dataBtns) => {
-    let btns = buttons
+  // dataBtns 只需帶要覆寫的欄位,依 type 比對基準按鈕合併回完整資訊,順序一律以 dataBtns 為主
+  // buttons 有給時視為完整集合,dataBtns 未提到的按鈕接在後面
+  // buttons 未給時僅以 popup.buttons.confirm 補欄位,顆數由 dataBtns 決定(同 type 可重複)
+  const onMergeBtns = (dataBtns, buttons) => {
+    if (!dataBtns) return buttons || null
 
-    if (dataBtns) {
-      btns = []
+    const baseBtns = buttons || popup.buttons.confirm
+    const mergedBtns = dataBtns.map((btn) => {
+      const matchBtn = baseBtns.find(({ type }) => type === btn.type)
 
-      for (let i = 0; i < dataBtns.length; i += 1) {
-        const { type } = dataBtns[i]
-        const matchBtn = buttons.find((item) => item.type === type)
+      return matchBtn ? onDeepMerge({}, matchBtn, btn) : { ...btn }
+    })
 
-        btns.push({
-          ...matchBtn,
-          ...dataBtns[i],
-        })
-      }
+    if (!buttons) return mergedBtns
 
-      if (btns.length < 2) {
-        for (let i = 0; i < buttons.length; i += 1) {
-          const { type } = buttons[i]
-          const noMatchBtn = btns.find((item) => item.type !== type)
+    const restBtns = baseBtns.filter(({ type }) => !dataBtns.some((btn) => btn.type === type))
 
-          if (noMatchBtn) {
-            btns.push(buttons[i])
-          }
-        }
-      }
-    }
-
-    return btns
+    return [...mergedBtns, ...restBtns]
   }
   const onPromise = (status) => {
     promise.value.status = status

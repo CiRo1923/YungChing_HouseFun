@@ -25,35 +25,39 @@ export const useBuyProjectStore = defineStore('buyProject', () => {
       icon: 'icon_map',
     },
   ])
-  const accessData = ref(null)
-  const apiMessageDataDefault = readonly({
-    houseId: null,
-    name: isDevMode ? '真測試' : null,
-    phone: isDevMode ? '0912345678' : null,
-    message: isDevMode ? '測試測試' : null,
+  const apiDefault = readonly({
+    message: {
+      houseId: null,
+      name: isDevMode ? '真測試' : null,
+      phone: isDevMode ? '0912345678' : null,
+      message: isDevMode ? '測試測試' : null,
+    },
+    verifyCode: {
+      verificationToken: null,
+      verificationCode: null,
+    },
   })
-  const apiMessageData = ref({ ...apiMessageDataDefault })
-  const messageData = ref(null)
+  const access = ref({
+    data: null,
+  })
+  const message = ref({
+    data: null,
+    apiData: { ...apiDefault.message },
+  })
   const countdownData = ref({
     expires: null,
   })
-  const apiVerifyCodeDataDefault = readonly({
-    verificationToken: null,
-    verificationCode: null,
-  })
-  const apiVerifyCodeData = ref({ ...apiVerifyCodeDataDefault })
+  const apiVerifyCodeData = ref({ ...apiDefault.verifyCode })
   const cottonCandyCheckbox = ref([])
 
   return {
     NAME,
     channel,
     channelTabs,
-    accessData,
-    apiMessageDataDefault,
-    apiMessageData,
-    messageData,
+    apiDefault,
+    access,
+    message,
     countdownData,
-    apiVerifyCodeDataDefault,
     apiVerifyCodeData,
     cottonCandyCheckbox,
   }

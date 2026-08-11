@@ -2,7 +2,7 @@
 const popup = usePopupStore()
 const { customCheck, customData } = storeToRefs(popup)
 const buyPopup = useBuyPopupStore()
-const { onCustomClose } = usePopupActions()
+const { onMergeBtns, onCustomClose } = usePopupActions()
 const emits = defineEmits(['sure'])
 const props = defineProps({
   id: {
@@ -27,7 +27,7 @@ const footerBtns = computed(() => {
     ? buyPopup.buttons.alert
     : isConfirmBtns.value
       ? buyPopup.buttons.confirm
-      : customData.value.btns || null
+      : onMergeBtns(customData.value.btns)
 })
 
 const onClose = (item) => {

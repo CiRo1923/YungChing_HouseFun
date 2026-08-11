@@ -43,10 +43,10 @@ defineExpose({
       @changed="onChanged"
     >
       <template #content_password>
-        <CommonLoginPassword />
+        <LoginPassword />
       </template>
       <template #content_verifyCode>
-        <CommonLoginVerifyCode />
+        <LoginVerifyCode />
       </template>
     </CommonMTabBorderBottom>
   </Form>

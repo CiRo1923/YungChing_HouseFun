@@ -1,10 +1,11 @@
 <script setup>
+import { onResolveByDevice } from '@js/_projectPrototype.js'
+
 const common = useCommonStore()
 const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
 const buyList = useBuyListStore()
 const { apiSearchData, room } = storeToRefs(buyList)
-const { onResolveByDevice } = useBuyProjectActions()
 const componentsName = 'Room'
 
 const onChange = (data) => {

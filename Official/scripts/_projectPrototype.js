@@ -38,3 +38,52 @@ export const onIsParking = (purposeID) => Number(purposeID) === PURPOSE_ID.PARKI
 // 注意:保留 0(如建坪 0 坪)為有效值,不視為空。suffix 自帶前導空白,例如 ' 年'、' 坪'。
 export const onUnitText = (value, suffix = '') =>
   value == null || value === '' ? null : `${value}${suffix}`
+
+// 圖片網址的尺寸佔位符替換:{0} → width、{1} → height。
+// data 可為字串、物件或兩者的陣列;傳物件時以 key 指定要替換的欄位,其餘欄位原樣保留。
+export const onReplaceImageSize = (data, size = {}, key) => {
+  const { width = '', height = '' } = size || {}
+  const onReplaceString = (str) =>
+    typeof str === 'string' ? str.replaceAll('{0}', width).replaceAll('{1}', height) : str
+
+  const onReplaceItem = (item) => {
+    // 字串：['xxxx?width={0}&height={1}']
+    if (typeof item === 'string') {
+      return onReplaceString(item)
+    }
+
+    // 物件：[{ key: 'xxxx?width={0}&height={1}' }] 或單一物件
+    if (typeof item === 'object' && item !== null) {
+      return {
+        ...item,
+        [key]: onReplaceString(item[key]),
+      }
+    }
+
+    return item
+  }
+
+  if (Array.isArray(data)) {
+    return data.map(onReplaceItem)
+  }
+
+  return onReplaceItem(data)
+}
+
+// 把「可依裝置設定的物件」解析成目前裝置對應的值。device 只會是 p / t / m,
+// 故需把 pt / tm 區間對應進來;解析順序為先比單一 device、再比區間。
+// 非物件值直接原樣回傳;都沒對應到則回 null。
+export const onResolveByDevice = (value, device) => {
+  const breakpointDeviceKeys = {
+    p: ['p', 'pt'],
+    t: ['t', 'pt', 'tm'],
+    m: ['m', 'tm'],
+  }
+
+  if (value != null && typeof value !== 'object') return value
+
+  const keys = breakpointDeviceKeys[device] || []
+  const matchedKey = keys.find((key) => value[key] != null && value[key] !== false)
+
+  return matchedKey !== undefined ? value[matchedKey] : null
+}

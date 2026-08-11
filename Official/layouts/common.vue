@@ -4,7 +4,7 @@ import { getChannelColorHref } from '@js/runtime/channelColor.js'
 const common = useCommonStore()
 const { isLoading } = storeToRefs(common)
 const { onApiAuthToken } = useMemberProjectActions()
-const { onApiBuyAuthTokenExchange, onApiAuthMe } = useBuyProjectActions()
+const { onApiAuthTokenExchange, onApiAuthMe } = useBuyProjectActions()
 const { onPromise } = usePopupActions()
 const { onLogin } = useBuyPopupActions()
 const containerRef = ref(null)
@@ -31,7 +31,7 @@ const account = readonly([
 ])
 
 const authTokenExchangeMap = {
-  buy: onApiBuyAuthTokenExchange,
+  buy: onApiAuthTokenExchange,
   // rent: onApiRentAuthTokenExchange,
 }
 
@@ -145,9 +145,9 @@ useHead(() => {
     <CommonConfirmSystem />
     <CommonLoginSyetem :container="containerRef">
       <!-- 預留之後有不一樣的 login -->
-      <CommonLoginContainer ref="containerRef" />
+      <LoginContainer ref="containerRef" />
       <template #note>
-        <CommonLoginNote />
+        <LoginNote />
       </template>
     </CommonLoginSyetem>
     <CommonApiPromiseSystem />

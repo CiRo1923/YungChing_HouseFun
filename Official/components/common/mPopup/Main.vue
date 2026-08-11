@@ -21,9 +21,9 @@ const props = defineProps({
   },
 })
 
-const isShowOverlay = ref(false)
-const isShowPopup = ref(false)
-
+// 進出場的層次感(overlay 先進、popup 後進;popup 先出、overlay 後出)全由
+// assets/css/_common/vueTransition.css 的 animation / transition-delay 編排,
+// 這裡只需讓兩層都跟著 isOpen 走 → 在動畫任一階段重新開啟都是冪等的。
 const isOpen = computed(() => keyID.value && props.id === keyID.value)
 const keyID = computed(
   () =>
@@ -88,30 +88,9 @@ const setClass = computed(() => {
   }
 })
 
-const onOverlayEnter = () => {
-  // overlay 出現後 → 開 popup
-  if (isOpen.value) {
-    isShowPopup.value = true
-  }
-}
-
-// bomb 關閉完後，再把 overlay 收掉
-const onAfterLeave = () => {
-  isShowOverlay.value = false
-}
-
 const onExistClose = () => {
   onReset()
 }
-
-watchEffect(() => {
-  if (isOpen.value) {
-    isShowOverlay.value = true
-  } else {
-    // 關閉時先收 popup
-    isShowPopup.value = false
-  }
-})
 
 onResize()
 
@@ -125,17 +104,13 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <Transition name="popup-overlay" @enter="onOverlayEnter">
-    <div
-      class="m-popup fixed inset-0 z-[5] flex"
-      :class="[modeClass, setClass.main]"
-      v-if="isOpen || isShowOverlay"
-    >
-      <Transition :name="transitionName" @afterLeave="onAfterLeave">
+  <Transition name="popup-overlay">
+    <div class="m-popup fixed inset-0 z-[5] flex" :class="[modeClass, setClass.main]" v-if="isOpen">
+      <Transition :name="transitionName">
         <div
           class="m-popup-container relative flex max-h-[92%] flex-col overflow-hidden bg-[--white] py-[40px] tm:px-[30px] tm:py-[24px] p:px-[60px]"
           :class="setClass.container"
-          v-if="isShowPopup"
+          v-if="isOpen"
         >
           <div
             class="m-popup-header flex shrink-0 items-center border-b-[2px] border-b-[--green-8b0d] pb-[20px] m:flex-wrap"

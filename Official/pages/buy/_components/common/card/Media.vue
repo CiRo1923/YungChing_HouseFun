@@ -1,5 +1,6 @@
 <script setup>
-const { onReplaceImageSize } = useBuyProjectActions()
+import { onReplaceImageSize } from '@js/_projectPrototype.js'
+
 
 const props = defineProps({
   item: {

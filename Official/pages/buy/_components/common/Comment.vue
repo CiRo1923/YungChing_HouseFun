@@ -2,7 +2,7 @@
 import { Form } from 'vee-validate'
 
 const buyProject = useBuyProjectStore()
-const { apiMessageData } = storeToRefs(buyProject)
+const { message } = storeToRefs(buyProject)
 
 const props = defineProps({
   setClass: {
@@ -12,10 +12,11 @@ const props = defineProps({
 })
 
 const formRef = ref(null)
+const apiData = computed(() => message.value.apiData || {})
 const model = computed(() => {
-  const { name, phone, message } = apiMessageData.value
+  const { name, phone, message: apiMessage } = apiData.value
 
-  if (!name || !phone || !message) return { type: 'required', isError: true }
+  if (!name || !phone || !apiMessage) return { type: 'required', isError: true }
   if (!/^09\d{8}$/.test(phone)) return { type: 'phone', isError: true }
 
   return { type: 'success', isError: false }
@@ -49,10 +50,10 @@ defineExpose({
         <li class="min-w-0 flex-1">
           <CommonMFormInput
             name="name"
-            v-model="apiMessageData.name"
+            v-model="apiData.name"
             :config="{
               placeholder: '您的稱呼',
-              isError: isError,
+              isError,
             }"
             :setClass="{
               main: '--rounded --px-12 --py-8 p:--h-45',
@@ -62,14 +63,14 @@ defineExpose({
         <li class="min-w-0 flex-1">
           <CommonMFormInput
             name="phone"
-            v-model="apiMessageData.phone"
+            v-model="apiData.phone"
             :config="{
               placeholder: '聯絡手機',
               length: 10,
               inputMode: 'tel',
               integer: true,
               inputChinese: false,
-              isError: isError,
+              isError,
             }"
             :setClass="{
               main: '--rounded --px-12 --py-8 p:--h-45',
@@ -79,11 +80,11 @@ defineExpose({
         <li class="w-full">
           <CommonMFormTextArea
             name="message"
-            v-model="apiMessageData.message"
+            v-model="apiData.message"
             :config="{
               placeholder: '請輸入留言',
               rows: 3,
-              isError: isError,
+              isError,
             }"
             :setClass="{
               main: '--rounded --px-12 --py-8',

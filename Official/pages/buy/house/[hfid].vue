@@ -7,7 +7,8 @@ definePageMeta({
 
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
 const { onApiBuyHouse, onApiBuyHousePoi } = useBuyHouseActions()
-const { onApiGETRealEstateTypeSelectOptions, onRestoreChannel } = useBuyProjectActions()
+const { onApiGETRealEstateTypeSelectOptions } = useManageActions()
+const { onRestoreChannel } = useBuyProjectActions()
 
 // H1 由共用 Header 讀 project.seo.h1 輸出:
 // SSR 由 middleware/buySeo 預抓、client 由本頁 onApiBuyHouse → onSetSeo 更新、

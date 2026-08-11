@@ -21,9 +21,8 @@ export default () => {
   const buyProject = useBuyProjectStore()
   const {
     channel,
-    accessData,
-    messageData,
-    apiMessageData,
+    access,
+    message,
     countdownData,
     apiVerifyCodeData,
     cottonCandyCheckbox,
@@ -64,7 +63,7 @@ export default () => {
     })
 
     if (status === 200) {
-      accessData.value = data
+      access.value.data = data
       onSetAccessDataCookie(data)
     } else {
       onApiError(config, status, data)
@@ -88,7 +87,7 @@ export default () => {
 
     if (status === 200) {
       onReset()
-      onAccessReset()
+      reset.onAccess()
       onClearCookies()
     } else {
       onApiError(config, status, data)
@@ -151,7 +150,7 @@ export default () => {
   // 還原:從 cookie 取回 accessData 寫回 store(SSR / 重新整理後 store 是空的才需要)。
   const onRestoreAccessData = async () => {
     const cached = await onGetAccessDataCookie()
-    if (cached) accessData.value = cached
+    if (cached) access.value.data = cached
 
     return cached
   }
@@ -162,18 +161,14 @@ export default () => {
     onSetAccessDataCookie(null)
   }
 
-  const onAccessReset = () => {
-    accessData.value = null
-  }
-
   const onApiMessages = async (isReplaceMessage) => {
-    const { config, status, data } = await apiMessages(apiMessageData.value)
+    const { config, status, data } = await apiMessages(message.value.apiData)
 
     if (status === 200 || status === 201) {
       const { verificationToken, developmentVerificationCode, verificationExpiresAt } = data
 
       if (isReplaceMessage) {
-        messageData.value = data
+        message.value.data = data
       }
 
       countdownData.value.expires = verificationExpiresAt
@@ -189,7 +184,7 @@ export default () => {
     const { config, status, data } = await apiMessagesVerifyCode(apiVerifyCodeData.value)
 
     if (status === 200) {
-      messageData.value = data // 如果沒有驗證過會需要驗證驗證完會回傳棉花糖資訊
+      message.value.data = data // 如果沒有驗證過會需要驗證驗證完會回傳棉花糖資訊
     } else {
       onApiError(config, status, data)
     }
@@ -265,10 +260,8 @@ export default () => {
             title: '留言驗證',
             btns: [
               {
-                id: 'sure',
                 label: '送出留言',
                 type: 'sure',
-                class: '--bg-orange-f74c --text-white',
                 isClose: false,
               },
             ],
@@ -294,24 +287,19 @@ export default () => {
       title: '預約留言已送出，仲介將會儘速與您聯繫',
       btns: [
         {
-          id: 'cancel',
           label: '下次再留',
           type: 'cancel',
-          class: '--border-gray-e5 --text-gray-666',
-          isClose: true,
         },
         {
-          id: 'sure',
           label: '一起預約',
           type: 'sure',
-          class: '--bg-orange-f74c --text-white',
           isClose: false,
         },
       ],
     })
   }
   const onPopupMessageSucess = async () => {
-    const isMember = messageData.value?.isMember ?? false
+    const isMember = message.value.data?.isMember ?? false
 
     await onCustom({
       id: 'popupMessageSuccess',
@@ -336,61 +324,22 @@ export default () => {
           ],
     })
   }
-  const onResetMessage = () => {
-    apiMessageData.value = { ...buyProject.apiMessageDataDefault }
-    apiVerifyCodeData.value = { ...buyProject.apiVerifyCodeDataDefault }
-    cottonCandyCheckbox.value = []
+  const reset = {
+    onAccess() {
+      access.value.data = null
+    },
+    onMessage() {
+      message.value.apiData = { ...buyProject.apiDefault.message }
+      apiVerifyCodeData.value = { ...buyProject.apiDefault.verifyCode }
+      cottonCandyCheckbox.value = []
+    },
   }
-
   const onSearchParams = (path) => {
     const headers = useRequestHeaders(['host'])
     const domain = import.meta.server ? headers.host : window.location.host
     const url = new URL(path, `https://${domain}`)
 
     return url.searchParams.size !== 0 ? Object.fromEntries(url.searchParams) : null
-  }
-
-  const onReplaceImageSize = (data, size = {}, key) => {
-    const { width = '', height = '' } = size || {}
-    const onReplaceString = (str) =>
-      typeof str === 'string' ? str.replaceAll('{0}', width).replaceAll('{1}', height) : str
-
-    const onReplaceItem = (item) => {
-      // 字串：['xxxx?width={0}&height={1}']
-      if (typeof item === 'string') {
-        return onReplaceString(item)
-      }
-
-      // 物件：[{ key: 'xxxx?width={0}&height={1}' }] 或單一物件
-      if (typeof item === 'object' && item !== null) {
-        return {
-          ...item,
-          [key]: onReplaceString(item[key]),
-        }
-      }
-
-      return item
-    }
-
-    if (Array.isArray(data)) {
-      return data.map(onReplaceItem)
-    }
-
-    return onReplaceItem(data)
-  }
-  const onResolveByDevice = (value, device) => {
-    const breakpointDeviceKeys = {
-      p: ['p', 'pt'],
-      t: ['t', 'pt', 'tm'],
-      m: ['m', 'tm'],
-    }
-
-    if (value != null && typeof value !== 'object') return value
-
-    const keys = breakpointDeviceKeys[device] || []
-    const matchedKey = keys.find((key) => value[key] != null && value[key] !== false)
-
-    return matchedKey !== undefined ? value[matchedKey] : null
   }
 
   return {
@@ -405,7 +354,6 @@ export default () => {
     onGetAccessDataCookie,
     onRestoreAccessData,
     onClearCookies,
-    onAccessReset,
     onApiMessages,
     onApiMessagesVerifyCode,
     onApiMessagesResendCode,
@@ -413,9 +361,7 @@ export default () => {
     onPopupVerifyCode,
     onPopupCottonCandy,
     onPopupMessageSucess,
-    onResetMessage,
     onSearchParams,
-    onReplaceImageSize,
-    onResolveByDevice,
+    reset,
   }
 }

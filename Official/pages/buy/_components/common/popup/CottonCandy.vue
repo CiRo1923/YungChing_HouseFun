@@ -2,15 +2,15 @@
 import { Form } from 'vee-validate'
 
 const buyProject = useBuyProjectStore()
-const { apiMessageData, messageData, cottonCandyCheckbox } = storeToRefs(buyProject)
+const { message, cottonCandyCheckbox } = storeToRefs(buyProject)
 const { onApiMessages } = useBuyProjectActions()
 const popup = usePopupStore()
 const { customCheck } = storeToRefs(popup)
 const { onCustom, onCustomClose, onPromise } = usePopupActions()
 
 const formRef = ref(null)
-const cottonCandy = computed(() => messageData.value?.cottonCandy?.items ?? [])
-const isMember = computed(() => messageData.value?.isMember ?? false)
+const cottonCandy = computed(() => message.value.data?.cottonCandy?.items ?? [])
+const isMember = computed(() => message.value.data?.isMember ?? false)
 const model = computed(() =>
   cottonCandyCheckbox.value?.length === 0 ? null : cottonCandyCheckbox.value.join(',')
 )
@@ -29,7 +29,7 @@ const onSure = async () => {
 
   onPromise('open')
   for (let i = 0; i < cottonCandyCheckbox.value.length; i += 1) {
-    apiMessageData.value.houseId = cottonCandyCheckbox.value[i]
+    message.value.apiData.houseId = cottonCandyCheckbox.value[i]
 
     await onApiMessages()
   }

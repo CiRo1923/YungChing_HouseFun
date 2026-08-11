@@ -1,6 +1,6 @@
 <script setup>
-const buyProject = useBuyProjectStore()
-const { options } = storeToRefs(buyProject)
+const manage = useManageStore()
+const { options } = storeToRefs(manage)
 const buyList = useBuyListStore()
 const { apiSearchData } = storeToRefs(buyList)
 

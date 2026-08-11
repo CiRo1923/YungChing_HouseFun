@@ -11,7 +11,7 @@ export default () => {
   const memberProject = useMemberProjectStore()
   const { authToken, userData, login } = storeToRefs(memberProject)
   const buyProject = useBuyProjectStore()
-  const { accessData } = storeToRefs(buyProject)
+  const { access } = storeToRefs(buyProject)
   const { onApiError } = usePopupActions()
 
   const onApiAuthToken = async ({ channel, deviceId, rememberMe = true }) => {
@@ -114,7 +114,7 @@ export default () => {
 
   const onReset = () => {
     authToken.value = null
-    accessData.value = null
+    access.value.data = null
     userData.value = null
     login.value.auth.apiData.account = null
     login.value.auth.apiData.password = null

@@ -1,7 +1,7 @@
 <script setup>
 const buyProject = useBuyProjectStore()
-const { messageData } = storeToRefs(buyProject)
-const isMember = computed(() => messageData.value?.isMember ?? false)
+const { message } = storeToRefs(buyProject)
+const isMember = computed(() => message.value.data?.isMember ?? false)
 </script>
 
 <template>

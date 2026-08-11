@@ -1,5 +1,6 @@
 import { apiRegion, apiMrt } from '@js/_api/buy/common.js'
 import { apiBuyList, apiBuyListFocus, apiBuySuggest } from '@js/_api/buy/list.js'
+import { onResolveByDevice } from '@js/_projectPrototype.js'
 
 export default () => {
   const commonStore = useCommonStore()
@@ -31,7 +32,7 @@ export default () => {
   } = storeToRefs(buyListStore)
   const { onApiError } = usePopupActions()
   const { onSetSeo } = useCommonActions()
-  const { onResolveByDevice, isChannelRegion, isChannelMrt, onSaveChannel } = useBuyProjectActions()
+  const { isChannelRegion, isChannelMrt, onSaveChannel } = useBuyProjectActions()
   const { onValueGetText } = useManageActions()
   const route = useRoute()
   const commonParams = computed(() => {

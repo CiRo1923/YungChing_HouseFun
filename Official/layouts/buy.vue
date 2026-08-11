@@ -10,7 +10,7 @@ const { isLoading } = storeToRefs(common)
 const { onGetAuthTokenCookie, onApiAuthHandoffToken, onRestoreAuthToken } =
   useMemberProjectActions()
 const buyProject = useBuyProjectStore()
-const { accessData } = storeToRefs(buyProject)
+const { access } = storeToRefs(buyProject)
 const {
   onPopupLogin,
   onApiAuthTokenExchange,
@@ -47,7 +47,7 @@ const onInit = async () => {
   // 啟動還原一次:從 cookie 取回 accessData 寫回 store(取代原本的 restore-access-data plugin)。
   await onRestoreAccessData()
 
-  if (accessData.value) {
+  if (access.value.data) {
     await onApiAuthMe()
   }
 }
@@ -134,9 +134,9 @@ watch(
     <CommonConfirmSystem />
     <CommonLoginSyetem :container="popupLoginContainerRef">
       <!-- 預留之後有不一樣的 login -->
-      <CommonLoginContainer ref="popupLoginContainerRef" />
+      <LoginContainer ref="popupLoginContainerRef" />
       <template #note>
-        <CommonLoginNote />
+        <LoginNote />
       </template>
     </CommonLoginSyetem>
     <CommonApiPromiseSystem />

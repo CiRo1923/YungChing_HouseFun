@@ -1,4 +1,6 @@
 <script setup>
+import { onResolveByDevice } from '@js/_projectPrototype.js'
+
 import { onDeepMerge } from '@js/_prototype.js'
 
 const common = useCommonStore()
@@ -9,7 +11,6 @@ const { options } = storeToRefs(manage)
 const buyList = useBuyListStore()
 const { apiSearchData } = storeToRefs(buyList)
 const { onCustom } = usePopupActions()
-const { onResolveByDevice } = useBuyProjectActions()
 
 const emits = defineEmits(['routerPush'])
 const props = defineProps({

@@ -1,7 +1,7 @@
 <script setup>
 const buyProject = useBuyProjectStore()
-const { apiMessageData } = storeToRefs(buyProject)
-const { onResetMessage } = useBuyProjectActions()
+const { message } = storeToRefs(buyProject)
+const { reset } = useBuyProjectActions()
 const { onCustom } = usePopupActions()
 const props = defineProps({
   item: {
@@ -11,18 +11,16 @@ const props = defineProps({
 })
 
 const onClick = async () => {
-  onResetMessage()
-  apiMessageData.value.houseId = props.item.hfid
+  reset.onMessage()
+  message.value.apiData.houseId = props.item.hfid
 
   await onCustom({
     id: 'popupMessage',
     title: '詢問與留言',
     btns: [
       {
-        id: 'sure',
         label: '預約留言',
         type: 'sure',
-        class: '--bg-orange-f74c --text-white',
         isClose: false,
       },
     ],

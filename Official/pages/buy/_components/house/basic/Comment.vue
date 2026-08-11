@@ -3,8 +3,8 @@ const common = useCommonStore()
 const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
 const buyProject = useBuyProjectStore()
-const { apiMessageData } = storeToRefs(buyProject)
-const { onResetMessage, onPopupVerifyCode } = useBuyProjectActions()
+const { message } = storeToRefs(buyProject)
+const { reset, onPopupVerifyCode } = useBuyProjectActions()
 const route = useRoute()
 
 const formRef = ref(null)
@@ -20,8 +20,8 @@ const onSubmit = async () => {
 }
 
 const onInit = () => {
-  onResetMessage()
-  apiMessageData.value.houseId = route.params.hfid
+  reset.onMessage()
+  message.value.apiData.houseId = route.params.hfid
 }
 
 onInit()

@@ -88,22 +88,23 @@ export const onDeepMerge = (target, ...sources) => {
     return item && typeof item === 'object' && !Array.isArray(item)
   }
   const isShallow = (item) => {
-    return !(Array.isArray(item) && item.some((value) => typeof value === 'object'))
+    return !(Array.isArray(item) && item.find((item) => typeof item === 'object'))
   }
 
   if (isObject(target) && isObject(source)) {
     for (const key in source) {
       if (isObject(source[key])) {
         if (!target[key]) Object.assign(target, { [key]: {} })
-
         onDeepMerge(target[key], source[key])
-      } else if (isShallow(source[key])) {
-        Object.assign(target, { [key]: source[key] })
       } else {
-        if (!target[key]) Object.assign(target, { [key]: [] })
-        Object.assign(target, {
-          [key]: source[key].map((item, index) => onDeepMerge(target[key][index] || item, item)),
-        })
+        if (isShallow(source[key])) {
+          Object.assign(target, { [key]: source[key] })
+        } else {
+          if (!target[key]) Object.assign(target, { [key]: [] })
+          Object.assign(target, {
+            [key]: source[key].map((item, index) => onDeepMerge(target[key][index] || item, item)),
+          })
+        }
       }
     }
   }

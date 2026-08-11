@@ -16,8 +16,8 @@ export const fetchApi = onFetchApi({
 // 每次請求在 header 帶上 memberProjct 的 accessToken(Bearer)。
 fetchApi.interceptors.request.use((fetchConfig) => {
   const buyProject = useBuyProjectStore()
-  const { accessData } = storeToRefs(buyProject)
-  const accessToken = accessData.value?.accessToken
+  const { access } = storeToRefs(buyProject)
+  const accessToken = access.value.data?.accessToken
 
   if (accessToken) {
     fetchConfig.headers.Authorization = `Bearer ${accessToken}`
