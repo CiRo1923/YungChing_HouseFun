@@ -1,0 +1,224 @@
+:root {
+  --popup-width: 'auto';
+  --popup-mobile-width: 328px;
+
+  --popup-container-pc-rounded: 15px;
+  --popup-container-tablet-rounded: 15px;
+  --popup-container-mobile-rounded: 15px;
+
+  --popup-container-mobile-max-w: 343px;
+
+  --popup-header-pc-pb: 20px;
+  --popup-header-tablet-pb: 20px;
+  --popup-header-mobile-pb: 20px;
+
+  --popup-header-pc-border: 2px;
+  --popup-header-tablet-border: 2px;
+  --popup-header-mobile-border: 2px;
+
+  --popup-header-pc-text: 24px;
+  --popup-header-tablet-text: 20px;
+  --popup-header-mobile-text: 20px;
+
+  --popup-header-icon-pc-p: 3px;
+  --popup-header-icon-tablet-p: 3px;
+  --popup-header-icon-mobile-p: 3px;
+
+  --popup-header-icon-pc-size: 30px;
+  --popup-header-icon-tablet-size: 30px;
+  --popup-header-icon-mobile-size: 30px;
+
+  --popup-header-anchor-pc-p: 5px;
+  --popup-header-anchor-tablet-p: 5px;
+  --popup-header-anchor-mobile-p: 5px;
+
+  --popup-header-anchor-pc-size: 24px;
+  --popup-header-anchor-tablet-size: 24px;
+  --popup-header-anchor-mobile-size: 24px;
+
+  --popup-tools-pc-m: 24px;
+  --popup-tools-tablet-m: 12px;
+  --popup-tools-mobile-m: 12px;
+
+  --popup-body-pc-mt: 30px;
+  --popup-body-tablet-mt: 30px;
+  --popup-body-mobile-mt: 30px;
+
+  --popup-footer-pc-mt: 30px;
+  --popup-footer-tablet-mt: 30px;
+  --popup-footer-mobile-mt: 30px;
+
+  --popup-overlay-bg-color: #000000b3;
+  --popup-container-bg-color: var(--white);
+  --popup-header-border-color: var(--green-8b0d);
+  --popup-header-icon-color: var(--gray-666);
+  --popup-header-anchor-color: var(--gray-666);
+}
+
+@screen p {
+  .m-popup {
+    &.\-\-w-1200,
+    &.p\:\-\-w-1200,
+    &.pt\:\-\-w-1200 {
+      --popup-width: 1200px;
+    }
+
+    &.\-\-w-740,
+    &.p\:\-\-w-740,
+    &.pt\:\-\-w-740 {
+      --popup-width: 740px;
+    }
+
+    &.\-\-w-600,
+    &.p\:\-\-w-600,
+    &.pt\:\-\-w-600 {
+      --popup-width: 600px;
+    }
+
+    &.\-\-w-500,
+    &.p\:\-\-w-500,
+    &.pt\:\-\-w-500 {
+      --popup-width: 500px;
+    }
+
+    &.\-\-w-460,
+    &.p\:\-\-w-460,
+    &.pt\:\-\-w-460 {
+      --popup-width: 460px;
+    }
+
+    &.\-\-w-375,
+    &.p\:\-\-w-375,
+    &.pt\:\-\-w-375 {
+      --popup-width: 375px;
+    }
+
+    &.\-\-px-60,
+    &.p\:\-\-px-60,
+    &.pt\:\-\-px-60 {
+      --popup-px: 60px;
+    }
+
+    &.\-\-px-30,
+    &.p\:\-\-px-30,
+    &.pt\:\-\-px-30 {
+      --popup-px: 30px;
+    }
+
+    &.\-\-py-40,
+    &.p\:\-\-py-40,
+    &.pt\:\-\-py-40 {
+      --popup-py: 40px;
+    }
+
+    &.\-\-py-24,
+    &.p\:\-\-py-24,
+    &.pt\:\-\-py-24 {
+      --popup-py: 24px;
+    }
+  }
+}
+
+@screen t {
+  .m-popup {
+    &.\-\-w-1200,
+    &.pt\:\-\-w-1200,
+    &.tm\:\-\-w-1200,
+    &.t\:\-\-w-1200 {
+      --popup-width: 1200px;
+    }
+
+    &.\-\-w-740,
+    &.pt\:\-\-w-740,
+    &.tm\:\-\-w-740,
+    &.t\:\-\-w-740 {
+      --popup-width: 740px;
+    }
+
+    &.\-\-w-600,
+    &.pt\:\-\-w-600,
+    &.tm\:\-\-w-600,
+    &.t\:\-\-w-600 {
+      --popup-width: 600px;
+    }
+
+    &.\-\-w-500,
+    &.pt\:\-\-w-500,
+    &.tm\:\-\-w-500,
+    &.t\:\-\-w-500 {
+      --popup-width: 500px;
+    }
+
+    &.\-\-w-460,
+    &.pt\:\-\-w-460,
+    &.tm\:\-\-w-460,
+    &.t\:\-\-w-460 {
+      --popup-width: 460px;
+    }
+
+    &.\-\-w-375,
+    &.pt\:\-\-w-375,
+    &.tm\:\-\-w-375,
+    &.t\:\-\-w-375 {
+      --popup-width: 375px;
+    }
+
+    &.\-\-px-60,
+    &.pt\:\-\-px-60,
+    &.tm\:\-\-px-60,
+    &.t\:\-\-px-60 {
+      --popup-px: 60px;
+    }
+
+    &.\-\-px-30,
+    &.pt\:\-\-px-30,
+    &.tm\:\-\-px-30,
+    &.t\:\-\-px-30 {
+      --popup-px: 30px;
+    }
+
+    &.\-\-py-40,
+    &.pt\:\-\-py-40,
+    &.tm\:\-\-py-40,
+    &.t\:\-\-py-40 {
+      --popup-py: 40px;
+    }
+
+    &.\-\-py-24,
+    &.pt\:\-\-py-24,
+    &.tm\:\-\-py-24,
+    &.t\:\-\-py-24 {
+      --popup-py: 24px;
+    }
+  }
+}
+
+@screen m {
+  .m-popup {
+    --popup-width: var(--popup-mobile-width);
+
+    &.\-\-px-60,
+    &.tm\:\-\-px-60,
+    &.m\:\-\-px-60 {
+      --popup-px: 60px;
+    }
+
+    &.\-\-px-30,
+    &.tm\:\-\-px-30,
+    &.m\:\-\-px-30 {
+      --popup-px: 30px;
+    }
+
+    &.\-\-py-40,
+    &.tm\:\-\-py-40,
+    &.m\:\-\-py-40 {
+      --popup-py: 45px;
+    }
+
+    &.\-\-py-24,
+    &.tm\:\-\-py-24,
+    &.m\:\-\-py-24 {
+      --popup-py: 24px;
+    }
+  }
+}

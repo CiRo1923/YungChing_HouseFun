@@ -1,34 +1,36 @@
 import { defineStore } from 'pinia'
 
 export const useMemberRegisterStore = defineStore('memberRegister', () => {
-  const apiTypeDefault = readonly({
-    memberType: null,
-    mobilePhone: null,
-    password: null,
-    confirmPassword: null,
-    verificationToken: null,
-    verificationCode: null,
-    agreeTerms: false,
-    lastName: null,
-    firstName: null,
-    email: null,
-    identityNumber: null,
-    cityId: null,
-    districtId: null,
-    roadId: null,
-    address: null,
-    fullAddress: null,
-    workCityId: null,
-    workDistrictId: null,
-    brandId: null,
-    storeId: null,
-    companyName: null,
+  const apiDefault = readonly({
+    type: {
+      memberType: null,
+      mobilePhone: null,
+      password: null,
+      confirmPassword: null,
+      verificationToken: null,
+      verificationCode: null,
+      agreeTerms: false,
+      lastName: null,
+      firstName: null,
+      email: null,
+      identityNumber: null,
+      cityId: null,
+      districtId: null,
+      roadId: null,
+      address: null,
+      fullAddress: null,
+      workCityId: null,
+      workDistrictId: null,
+      brandId: null,
+      storeId: null,
+      companyName: null,
+    },
   })
   const type = ref({
     countdownData: {
       expires: null,
     },
-    apiData: { ...{}, ...apiTypeDefault },
+    apiData: { ...apiDefault.type },
   })
   const links = readonly([
     {
@@ -52,7 +54,7 @@ export const useMemberRegisterStore = defineStore('memberRegister', () => {
   ])
 
   return {
-    apiTypeDefault,
+    apiDefault,
     type,
     links,
   }

@@ -39,6 +39,54 @@ export const onIsParking = (purposeID) => Number(purposeID) === PURPOSE_ID.PARKI
 export const onUnitText = (value, suffix = '') =>
   value == null || value === '' ? null : `${value}${suffix}`
 
+// email 隱碼:只遮 @ 前的 local part,網域原樣保留。
+// 規則(依 local part 長度 → 頭 / 星 / 尾):
+//   1  *          全遮(只有 1 字,留了就等於沒遮)
+//   2  a*         1 / 1 / 0
+//   3  a*c        1 / 1 / 1
+//   4  a*cd       1 / 1 / 2
+//   5  a**de      1 / 2 / 2
+//   6  a***ef     1 / 3 / 2
+//   7  ab***fg    2 / 3 / 2
+//   8  abc***gh   3 / 3 / 2
+// 即:尾段固定 2(長度 3 時為 1),星號最多 3,剩下的全給頭段
+// → 長度 9 以上頭段會繼續變長(abcd***hi、abcde***ij …)。
+export const onMaskEmail = (email) => {
+  const value = String(email ?? '')
+
+  if (!value) return ''
+
+  // 沒有 @ 就整串視為 local part,避免非 email 的字串被原樣曝光
+  const atIndex = value.lastIndexOf('@')
+  const local = atIndex === -1 ? value : value.slice(0, atIndex)
+  const domain = atIndex === -1 ? '' : value.slice(atIndex)
+
+  if (!local) return value
+
+  const { length } = local
+
+  if (length === 1) return `*${domain}`
+  if (length === 2) return `${local.slice(0, 1)}*${domain}`
+
+  const tail = length === 3 ? 1 : 2
+  const star = Math.min(3, length - 1 - tail)
+  const head = length - star - tail
+
+  return `${local.slice(0, head)}${'*'.repeat(star)}${local.slice(length - tail)}${domain}`
+}
+
+// 手機隱碼:保留頭 4 碼與尾 3 碼,中間全部遮掉。
+//   0912345678 → 0912***678
+// 預期傳入純數字字串(表單存的就是這個格式);長度不足 8 時無法保留頭尾,一律全遮。
+export const onMaskPhone = (phone) => {
+  const value = String(phone ?? '')
+
+  if (!value) return ''
+  if (value.length < 8) return '*'.repeat(value.length)
+
+  return `${value.slice(0, 4)}${'*'.repeat(value.length - 7)}${value.slice(-3)}`
+}
+
 // 圖片網址的尺寸佔位符替換:{0} → width、{1} → height。
 // data 可為字串、物件或兩者的陣列;傳物件時以 key 指定要替換的欄位,其餘欄位原樣保留。
 export const onReplaceImageSize = (data, size = {}, key) => {

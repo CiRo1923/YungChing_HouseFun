@@ -4,8 +4,6 @@ import { Form } from 'vee-validate'
 const buyProject = useBuyProjectStore()
 const { message, cottonCandyCheckbox } = storeToRefs(buyProject)
 const { onApiMessages } = useBuyProjectActions()
-const popup = usePopupStore()
-const { customCheck } = storeToRefs(popup)
 const { onCustom, onCustomClose, onPromise } = usePopupActions()
 
 const formRef = ref(null)
@@ -35,8 +33,7 @@ const onSure = async () => {
   }
   onPromise('close')
 
-  customCheck.value(true)
-  onCustomClose()
+  onCustomClose(true)
 
   await onCustom({
     id: 'popupCottonCandySuccess',

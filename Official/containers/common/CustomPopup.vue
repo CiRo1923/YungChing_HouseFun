@@ -1,8 +1,8 @@
 <script setup>
 const popup = usePopupStore()
-const { customCheck, customData } = storeToRefs(popup)
+const { customData } = storeToRefs(popup)
 const buyPopup = useBuyPopupStore()
-const { onMergeBtns, onCustomClose } = usePopupActions()
+const { onMergeBtns, onCustomClose, onCustomSettle } = usePopupActions()
 const emits = defineEmits(['sure'])
 const props = defineProps({
   id: {
@@ -39,11 +39,14 @@ const onClose = (item) => {
     return
   }
 
-  // cancel 或允許 sureClose 的情況：照舊 resolve + close
-  const isShouldClose = item.isClose !== false
-  customCheck.value(isSure, item)
+  // 保持開啟但要回報結果
+  if (item.isClose === false) {
+    onCustomSettle(isSure, item)
+    return
+  }
 
-  if (isShouldClose) onCustomClose()
+  // cancel 或允許 sureClose 的情況：關閉時一併結算
+  onCustomClose(isSure, item)
 }
 </script>
 
@@ -56,7 +59,13 @@ const onClose = (item) => {
   -->
   <ClientOnly>
     <Teleport to="#box">
-      <CommonMPopupMain :id="props.id" :config="props.config" :setClass="props.setClass">
+      <CommonMPopupMain
+        :id="props.id"
+        :config="props.config"
+        :setClass="{
+          main: ['p:--py-40 tm:--py-24 p:--px-60 tm:--px-30', props.setClass.main],
+        }"
+      >
         <template #header v-if="$slots.header">
           <slot name="header" />
         </template>

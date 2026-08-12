@@ -42,6 +42,7 @@ export const usePopupStore = defineStore('popup', () => {
     content: null,
     btns: null,
     hasExistClose: true,
+    setClass: null,
   })
   const confirmData = reactive({
     id: null,
@@ -50,6 +51,7 @@ export const usePopupStore = defineStore('popup', () => {
     content: null,
     btns: null,
     hasExistClose: true,
+    setClass: null,
   })
 
   const customData = reactive({

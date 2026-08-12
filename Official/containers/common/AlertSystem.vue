@@ -1,15 +1,12 @@
 <script setup>
 const popup = usePopupStore()
-const { alertData, alertCheck } = storeToRefs(popup)
+const { alertData } = storeToRefs(popup)
 const { onAlertClose } = usePopupActions()
 const alert = computed(() => alertData.value || {})
+const setClass = computed(() => alert.value.setClass || {})
 
 const onClose = (item) => {
-  const { type } = item
-  const isSure = type === 'sure'
-
-  alertCheck.value(isSure)
-  onAlertClose()
+  onAlertClose(item.type === 'sure', item)
 }
 </script>
 
@@ -17,10 +14,14 @@ const onClose = (item) => {
   <CommonMPopupMain
     id="alertSystem"
     :setClass="{
-      main: 'p:--w-600 t:--w-460',
+      main: [setClass.main || 'p:--w-600 t:--w-460', 'p:--py-40 tm:--py-24 p:--px-60 tm:--px-30'],
     }"
   >
-    <div class="text-center leading-[1.7] m:text-[14px] pt:text-[20px]" v-html="alert.content" />
+    <div
+      class="text-center leading-[1.7]"
+      :class="setClass.container || 'm:text-[14px] pt:text-[20px]'"
+      v-html="alert.content"
+    />
     <template #footer>
       <div class="text-center">
         <ul

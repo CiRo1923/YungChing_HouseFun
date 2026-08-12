@@ -1,6 +1,8 @@
 <script setup>
 import { countdown, onDeepMerge } from '@js/_prototype.js'
 
+import '@js/_validation.js'
+
 const emits = defineEmits(['update:modelValue', 'submit'])
 const props = defineProps({
   name: {

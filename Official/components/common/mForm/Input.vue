@@ -57,6 +57,9 @@ const props = defineProps({
 })
 // const isOnComposition = ref(false)
 const model = ref(null)
+// 供外層操作原生 input(例如 mFormContinuous 要在填完一格後 focus 下一格)
+const inputRef = ref(null)
+
 const defaultConfig = {
   placeholder: '',
   length: null,
@@ -284,6 +287,13 @@ watch(
     immediate: true,
   }
 )
+
+defineExpose({
+  inputRef,
+  focus: () => inputRef.value?.focus(),
+  select: () => inputRef.value?.select(),
+  blur: () => inputRef.value?.blur(),
+})
 </script>
 
 <template>
@@ -310,6 +320,7 @@ watch(
             <slot name="frontAssist" />
           </div>
           <input
+            ref="inputRef"
             :id="props.name"
             :type="props.type"
             class="m-form-type"

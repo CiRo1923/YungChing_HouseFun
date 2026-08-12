@@ -9,8 +9,7 @@ const {
   onApiGETBranchSelectOptions,
   onApiGETBranchStoreSelectOptions,
 } = useManageActions()
-const { onApiAuthRegisterVerificationCode, onApiAuthRegister, onTypeReset } =
-  useMemberRegisterActions()
+const { onApiAuthRegisterVerificationCode, onApiAuthRegister, reset } = useMemberRegisterActions()
 const memberRegister = useMemberRegisterStore()
 const { type } = storeToRefs(memberRegister)
 const route = useRoute()
@@ -26,6 +25,8 @@ const memberType = computed(() => route.params.type)
 const information = computed(() =>
   memberRegister.links.find((item) => item.id === memberType.value)
 )
+
+await onWithLoadingAll([onApiGETCitySelectOptions()])
 
 onUseMeta({
   title: `${information.value.title} - 會員中心 | 好房 HouseFun`,
@@ -73,11 +74,9 @@ const onSumit = async (validate) => {
 }
 
 const onInit = () => {
-  onTypeReset()
+  reset.onType()
   type.value.apiData.memberType = memberType
 }
-
-await onWithLoadingAll([onApiGETCitySelectOptions()])
 
 onInit()
 </script>
@@ -131,7 +130,7 @@ onInit()
       <CommonMAnchor
         text="註冊"
         :setClass="{
-          main: '--oval --bg-orange-f74c --h-55 --text-white --px-20 w-full',
+          main: '--oval --bg-orange-f74c --h-55 --text-white --px-20 --text-center w-full',
           text: 'text-[16px]',
         }"
         @click="onSumit(validate)"

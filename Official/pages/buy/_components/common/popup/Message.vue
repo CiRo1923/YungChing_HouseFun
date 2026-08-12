@@ -1,8 +1,6 @@
 <script setup>
 const { onPopupVerifyCode } = useBuyProjectActions()
-const popup = usePopupStore()
-const { customCheck } = storeToRefs(popup)
-// const { onCustomClose } = usePopupActions()
+const { onCustomSettle } = usePopupActions()
 
 const formRef = ref(null)
 
@@ -12,9 +10,8 @@ const onSure = async () => {
 
   if (!valid) return
 
-  // 驗證通過才真正 resolve + close
-  customCheck.value(true)
-  // onCustomClose()
+  // 驗證通過才回報結果;此處不關閉,交由後續流程接手畫面
+  onCustomSettle(true)
 
   await onPopupVerifyCode()
 }

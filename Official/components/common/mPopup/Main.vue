@@ -1,4 +1,7 @@
 <script setup>
+import '@css/_modules/common/mPopup/variables.css'
+import '@css/_modules/common/mPopup/common.css'
+
 const common = useCommonStore()
 const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
@@ -21,16 +24,12 @@ const props = defineProps({
   },
 })
 
-// 進出場的層次感(overlay 先進、popup 後進;popup 先出、overlay 後出)全由
-// assets/css/_common/vueTransition.css 的 animation / transition-delay 編排,
-// 這裡只需讓兩層都跟著 isOpen 走 → 在動畫任一階段重新開啟都是冪等的。
+const isShowOverlay = ref(false)
+const isShowPopup = ref(false)
+
 const isOpen = computed(() => keyID.value && props.id === keyID.value)
 const keyID = computed(
-  () =>
-    alertData.value.id ||
-    confirmData.value.id ||
-    customData.value.id ||
-    apiPromiseData.value.id
+  () => alertData.value.id || confirmData.value.id || customData.value.id || apiPromiseData.value.id
 )
 
 const hasExistClose = computed(() => {
@@ -51,9 +50,7 @@ const title = computed(
   () => alertData.value.title || confirmData.value.title || customData.value.title
 )
 
-const icon = computed(
-  () => alertData.value.icon || confirmData.value.icon || customData.value.icon
-)
+const icon = computed(() => alertData.value.icon || confirmData.value.icon || customData.value.icon)
 
 const config = computed(() => {
   return {
@@ -88,9 +85,39 @@ const setClass = computed(() => {
   }
 })
 
+// container 退場完成後才收遮罩。
+// 必須確認「確實已關閉」:若在退場途中又被重新開啟(A → B → 上一步 → A),
+// 此時 isOpen 已回 true,遮罩不能收掉。
+const onAfterLeave = () => {
+  if (!isOpen.value) isShowOverlay.value = false
+}
+
 const onExistClose = () => {
   onReset()
 }
+
+// 開啟一律由這裡明確驅動,不靠 overlay 的 @enter。
+// 舊版靠 @enter 點亮 isShowPopup,一旦遮罩還在(重開時 v-if 沒有 false → true)
+// 就不會觸發,isShowPopup 永遠停在 false,該 popup 從此開不起來。
+watch(
+  isOpen,
+  async (open) => {
+    if (!open) {
+      // 先收 container,遮罩等它的 @afterLeave
+      isShowPopup.value = false
+      return
+    }
+
+    isShowOverlay.value = true
+
+    // 等遮罩掛上,內層 Transition 才存在;之後的 isShowPopup 切換才會播 enter
+    await nextTick()
+
+    // nextTick 之間可能又被關掉(快速開關),故再確認一次
+    if (isOpen.value) isShowPopup.value = true
+  },
+  { immediate: true }
+)
 
 onResize()
 
@@ -105,27 +132,16 @@ onUnmounted(() => {
 
 <template>
   <Transition name="popup-overlay">
-    <div class="m-popup fixed inset-0 z-[5] flex" :class="[modeClass, setClass.main]" v-if="isOpen">
-      <Transition :name="transitionName">
-        <div
-          class="m-popup-container relative flex max-h-[92%] flex-col overflow-hidden bg-[--white] py-[40px] tm:px-[30px] tm:py-[24px] p:px-[60px]"
-          :class="setClass.container"
-          v-if="isOpen"
-        >
-          <div
-            class="m-popup-header flex shrink-0 items-center border-b-[2px] border-b-[--green-8b0d] pb-[20px] m:flex-wrap"
-            :class="setClass.header"
-            v-if="title || $slots.headerTools"
-          >
+    <div class="m-popup" :class="[modeClass, setClass.main]" v-if="isShowOverlay">
+      <Transition :name="transitionName" @afterLeave="onAfterLeave">
+        <div class="m-popup-container" :class="setClass.container" v-if="isShowPopup">
+          <div class="m-popup-header" :class="setClass.header" v-if="title || $slots.headerTools">
             <slot name="header">
-              <p
-                class="order-1 flex shrink-0 items-center gap-x-[10px] tm:text-[20px] p:text-[24px]"
-                :class="setClass.headerTitle"
-              >
+              <p class="m-popup-title" :class="setClass.headerTitle">
                 <CommonSvgIcon
                   :icon="icon"
-                  class="h-[30px] w-[30px] p-[3px] text-[--gray-666]"
-                  :class="setClass.icon || 'text-[--gray-666]'"
+                  class="m-popup-icon"
+                  :class="[setClass.icon, { '--defaule-color': !setClass.icon }]"
                   v-if="icon"
                 />
                 <b class="font-medium" v-html="title" />
@@ -134,25 +150,21 @@ onUnmounted(() => {
 
             <button
               type="button"
-              class="ml-auto flex h-[24px] w-[24px] shrink-0 items-center justify-center p-[5px] text-[--gray-666] m:order-2 pt:order-3"
+              class="m-popup-anchor-close"
               @click="onExistClose"
               v-if="hasExistClose"
             >
               <CommonSvgIcon icon="icon_xmark" class="h-full w-full" />
             </button>
 
-            <div
-              class="flex grow items-center m:order-3 m:mt-[12px] t:mx-[12px] pt:order-2 p:mx-[24px]"
-              :class="setClass.headerTools"
-              v-if="$slots.headerTools"
-            >
+            <div class="m-popup-tools" :class="setClass.headerTools" v-if="$slots.headerTools">
               <slot name="headerTools" />
             </div>
           </div>
-          <div class="m-popup-body scrollbar --y grow overflow-hidden" :class="setClass.body">
+          <div class="m-popup-body scrollbar --y" :class="setClass.body">
             <slot />
           </div>
-          <footer class="m-popup-footer mt-[30px]" :class="setClass.footer" v-if="$slots.footer">
+          <footer class="m-popup-footer" :class="setClass.footer" v-if="$slots.footer">
             <slot name="footer" />
           </footer>
           <div class="m-popup-note" :class="setClass.note" v-if="$slots.note">
@@ -165,176 +177,4 @@ onUnmounted(() => {
   </Transition>
 </template>
 
-<style lang="postcss">
-.m-popup {
-  &:before {
-    @apply absolute inset-0 bg-[--black] opacity-40 content-default;
-  }
-
-  &.\-\-zoom {
-    @apply items-center justify-center;
-
-    .m-popup-container {
-      @apply rounded-[15px];
-    }
-  }
-
-  &.\-\-bottomSheet {
-    @apply flex-col justify-end;
-
-    .m-popup-container {
-      @apply w-full rounded-t-[15px];
-    }
-  }
-}
-
-.m-popup-body {
-  &:not(:only-child) {
-    @apply mt-[30px];
-  }
-}
-
-@screen p {
-  .m-popup {
-    &.\-\-w-1200,
-    &.p\:\-\-w-1200,
-    &.pt\:\-\-w-1200 {
-      &.\-\-zoom {
-        .m-popup-container {
-          @apply w-[1200px];
-        }
-      }
-    }
-
-    &.\-\-w-740,
-    &.p\:\-\-w-740,
-    &.pt\:\-\-w-740 {
-      &.\-\-zoom {
-        .m-popup-container {
-          @apply w-[740px];
-        }
-      }
-    }
-
-    &.\-\-w-600,
-    &.p\:\-\-w-600,
-    &.pt\:\-\-w-600 {
-      &.\-\-zoom {
-        .m-popup-container {
-          @apply w-[600px];
-        }
-      }
-    }
-
-    &.\-\-w-500,
-    &.p\:\-\-w-500,
-    &.pt\:\-\-w-500 {
-      &.\-\-zoom {
-        .m-popup-container {
-          @apply w-[500px];
-        }
-      }
-    }
-
-    &.\-\-w-460,
-    &.p\:\-\-w-460,
-    &.pt\:\-\-w-460 {
-      &.\-\-zoom {
-        .m-popup-container {
-          @apply w-[460px];
-        }
-      }
-    }
-
-    &.\-\-w-375,
-    &.p\:\-\-w-375,
-    &.pt\:\-\-w-375 {
-      &.\-\-zoom {
-        .m-popup-container {
-          @apply w-[375px];
-        }
-      }
-    }
-  }
-}
-
-@screen t {
-  .m-popup {
-    &.\-\-w-1210,
-    &.pt\:\-\-w-1210,
-    &.tm\:\-\-w-1210,
-    &.t\:\-\-w-1210 {
-      &.\-\-zoom {
-        .m-popup-container {
-          @apply w-[1210px];
-        }
-      }
-    }
-
-    &.\-\-w-740,
-    &.pt\:\-\-w-740,
-    &.tm\:\-\-w-740,
-    &.t\:\-\-w-740 {
-      &.\-\-zoom {
-        .m-popup-container {
-          @apply w-[740px];
-        }
-      }
-    }
-
-    &.\-\-w-600,
-    &.pt\:\-\-w-600,
-    &.tm\:\-\-w-600,
-    &.t\:\-\-w-600 {
-      &.\-\-zoom {
-        .m-popup-container {
-          @apply w-[600px];
-        }
-      }
-    }
-
-    &.\-\-w-500,
-    &.pt\:\-\-w-500,
-    &.tm\:\-\-w-500,
-    &.t\:\-\-w-500 {
-      &.\-\-zoom {
-        .m-popup-container {
-          @apply w-[500px];
-        }
-      }
-    }
-
-    &.\-\-w-460,
-    &.pt\:\-\-w-460,
-    &.tm\:\-\-w-460,
-    &.t\:\-\-w-460 {
-      &.\-\-zoom {
-        .m-popup-container {
-          @apply w-[460px];
-        }
-      }
-    }
-
-    &.\-\-w-375,
-    &.pt\:\-\-w-375,
-    &.tm\:\-\-w-375,
-    &.t\:\-\-w-375 {
-      &.\-\-zoom {
-        .m-popup-container {
-          @apply w-[375px];
-        }
-      }
-    }
-  }
-}
-
-@screen m {
-  .m-popup {
-    &.\-\-zoom {
-      .m-popup-container {
-        @apply mx-[16px];
-      }
-    }
-  }
-}
-</style>
+<style lang="postcss"></style>

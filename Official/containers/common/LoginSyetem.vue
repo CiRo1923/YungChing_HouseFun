@@ -1,7 +1,7 @@
 <script setup>
 const popup = usePopupStore()
-const { customCheck, customData } = storeToRefs(popup)
-const { onCustomClose } = usePopupActions()
+const { customData } = storeToRefs(popup)
+const { onCustomClose, onCustomSettle } = usePopupActions()
 const login = computed(() => customData.value || {})
 
 const props = defineProps({
@@ -20,15 +20,18 @@ const onClose = async (item) => {
 
     if (!valid) return
 
-    customCheck.value(true, item)
-    onCustomClose()
+    onCustomClose(true, item)
     return
   }
 
-  // 取消 / 允許直接關:照舊 resolve + close
-  customCheck.value(isSure, item)
+  // 保持開啟但要回報結果
+  if (item.isClose === false) {
+    onCustomSettle(isSure, item)
+    return
+  }
 
-  if (item.isClose !== false) onCustomClose()
+  // 取消 / 允許直接關:關閉時一併結算
+  onCustomClose(isSure, item)
 }
 </script>
 
@@ -41,7 +44,7 @@ const onClose = async (item) => {
       },
     }"
     :setClass="{
-      main: 'p:--w-500 t:--w-375',
+      main: 'p:--w-500 t:--w-375 p:--py-40 tm:--py-24 p:--px-60 tm:--px-30',
     }"
   >
     <slot />

@@ -36,13 +36,15 @@ export default () => {
 
     return { config, status, data }
   }
-  const onTypeReset = () => {
-    type.value.apiData = { ...{}, ...memberRegister.apiTypeDefault }
+  const reset = {
+    onType() {
+      type.value.apiData = { ...memberRegister.apiDefault.type }
+    },
   }
 
   return {
     onApiAuthRegisterVerificationCode,
     onApiAuthRegister,
-    onTypeReset,
+    reset,
   }
 }

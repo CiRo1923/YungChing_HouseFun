@@ -72,6 +72,29 @@ export default defineNuxtConfig({
         }
       }
     },
+    // pages/**/_components 只是「元件就近放在頁面旁」的慣例,由 components:dirs 註冊成元件;
+    // 但 Nuxt 的頁面掃描不認得這個約定,仍會把每個檔案掃成頁面 → 產生上百條可被直接訪問的
+    // 內部路由(如 /buy/_components/common/popup/Message)。這裡整批移除。
+    'pages:extend'(pages) {
+      const removeComponentRoutes = (routes: typeof pages) => {
+        for (let i = routes.length - 1; i >= 0; i -= 1) {
+          const route = routes[i]
+
+          if (!route) {
+            continue
+          }
+
+          if (route.path.includes('_components')) {
+            routes.splice(i, 1)
+            continue
+          }
+
+          if (route.children?.length) removeComponentRoutes(route.children)
+        }
+      }
+
+      removeComponentRoutes(pages)
+    },
     'components:dirs'(dirs) {
       dirs.push({
         path: '~/containers',

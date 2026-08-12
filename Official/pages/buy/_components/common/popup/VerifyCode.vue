@@ -11,9 +11,7 @@ const {
   onPopupCottonCandy,
   onPopupMessageSucess,
 } = useBuyProjectActions()
-const popup = usePopupStore()
-const { customCheck } = storeToRefs(popup)
-const { onPromise } = usePopupActions()
+const { onPromise, onCustomSettle } = usePopupActions()
 
 const formRef = ref(null)
 
@@ -31,9 +29,8 @@ const onSure = async () => {
 
   if (!valid) return
 
-  // 驗證通過才真正 resolve + close
-  customCheck.value(true)
-  // onCustomClose()
+  // 驗證通過才回報結果;此處不關閉,交由後續流程接手畫面
+  onCustomSettle(true)
   onPromise('open')
   const { status, data } = await onApiMessagesVerifyCode()
   onPromise('close')

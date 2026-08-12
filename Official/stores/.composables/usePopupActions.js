@@ -35,7 +35,24 @@ export default () => {
   const onPromise = (status) => {
     promise.value.status = status
   }
+  // popup 的 Promise 只能被結算一次。先取出 resolver 再清空、最後才呼叫:
+  // resolve 的續行若立刻再開一個 popup,新的 resolver 才不會被這裡的清空蓋掉。
+  // resolver 已是 null(例如關閉兩次)時靜靜跳過,不讓呼叫端炸掉。
+  const onSettle = (checkRef, isSure = false, item = null) => {
+    const resolve = checkRef.value
+
+    checkRef.value = null
+    resolve?.(isSure, item)
+  }
+  // 需要「回報結果但不關閉」時使用(例如 isClose: false 的按鈕自行驗證後回報)
+  const onCustomSettle = (isSure = false, item = null) => onSettle(customCheck, isSure, item)
+  // ⚠ 開啟時必須「無條件覆寫每一個欄位」:關閉只清 id,其餘資料留到這裡才被蓋掉,
+  //   否則退場動畫期間 popup 會瞬間變空(內容消失、寬度跳回預設)。
+  //   日後在 store 新增欄位時,這三個開啟函式也要一併補上賦值。
   const onAlert = (data) => {
+    // 前一個 alert 還沒結算就被蓋掉 → 先以「未確認」收掉,避免它的 await 永久卡住
+    onSettle(alertCheck)
+
     const buttons = popup.buttons.alert
 
     alertData.value.id = 'alertSystem'
@@ -44,6 +61,7 @@ export default () => {
     alertData.value.content = data.content
     alertData.value.btns = onDeepMerge(buttons, data.btns)
     alertData.value.hasExistClose = data.hasExistClose !== undefined ? data.hasExistClose : true
+    alertData.value.setClass = data.setClass
 
     onBodyOverflowHiddenToggle(true)
 
@@ -56,19 +74,17 @@ export default () => {
       }
     })
   }
-  const onAlertClose = () => {
+  // 只清 id(那是關閉訊號),其餘欄位留著讓退場動畫有完整內容可渲染,下次開啟時才被覆寫。
+  // isSure / item 會被回傳給 await 端;由 X 鈕或 onReset 呼叫時視為「未確認」
+  const onAlertClose = (isSure = false, item = null) => {
     alertData.value.id = null
-    alertData.value.title = null
-    alertData.value.icon = null
-    alertData.value.content = null
-    alertData.value.btns = popup.buttons.alert
-    alertData.value.hasExistClose = true
-    alertData.value.setClass = null
-    alertCheck.value = null
 
+    onSettle(alertCheck, isSure, item)
     onBodyOverflowHiddenToggle(false)
   }
   const onConfirm = (data) => {
+    onSettle(confirmCheck)
+
     const buttons = popup.buttons.confirm
 
     confirmData.value.id = 'confirmSystem'
@@ -77,6 +93,7 @@ export default () => {
     confirmData.value.content = data.content
     confirmData.value.btns = onMergeBtns(buttons, data.btns)
     confirmData.value.hasExistClose = data.hasExistClose !== undefined ? data.hasExistClose : true
+    confirmData.value.setClass = data.setClass
 
     onBodyOverflowHiddenToggle(true)
 
@@ -89,16 +106,10 @@ export default () => {
       }
     })
   }
-  const onConfirmClose = () => {
+  const onConfirmClose = (isSure = false, item = null) => {
     confirmData.value.id = null
-    confirmData.value.title = null
-    confirmData.value.icon = null
-    confirmData.value.content = null
-    confirmData.value.btns = popup.buttons.confirm
-    confirmData.value.hasExistClose = true
-    confirmData.value.setClass = null
-    confirmCheck.value = null
 
+    onSettle(confirmCheck, isSure, item)
     onBodyOverflowHiddenToggle(false)
   }
   const onCustom = async (data) => {
@@ -110,6 +121,9 @@ export default () => {
       onCustomClose()
       await nextTick()
     }
+
+    // 同 id 連續開啟時走不到上面那段,舊 resolver 仍在 → 一律先收掉
+    onSettle(customCheck)
 
     customData.value.id = data.id
     customData.value.title = data.title
@@ -130,16 +144,10 @@ export default () => {
       }
     })
   }
-  const onCustomClose = () => {
+  const onCustomClose = (isSure = false, item = null) => {
     customData.value.id = null
-    customData.value.title = null
-    customData.value.icon = null
-    customData.value.content = null
-    customData.value.data = null
-    customData.value.btns = null
-    customData.value.hasExistClose = true
-    customCheck.value = null
 
+    onSettle(customCheck, isSure, item)
     onBodyOverflowHiddenToggle(false)
   }
   const onApiPromise = (type) => {
@@ -197,6 +205,7 @@ export default () => {
     onConfirmClose,
     onCustom,
     onCustomClose,
+    onCustomSettle,
     onApiPromise,
     onApiError,
     onApiErrorServerToClient,
