@@ -2,14 +2,14 @@
 import { Form } from 'vee-validate'
 
 const memberUpgrade = useMemberUpgradeStore()
-const { emailVerify } = storeToRefs(memberUpgrade)
+const { phoneVerify } = storeToRefs(memberUpgrade)
 
 const emits = defineEmits(['reSend', 'submit'])
 const continuousRef = ref(null)
-const apiData = computed(() => emailVerify.value.apiData)
-const apiResult = computed(() => emailVerify.value.apiResult)
+const apiData = computed(() => phoneVerify.value.apiData)
+const apiResult = computed(() => phoneVerify.value.apiResult)
 // 兩個獨立維度:驗證碼是否過期、錯誤次數是否用完
-const isExpired = computed(() => !apiData.value.challengeToken)
+const isExpired = computed(() => !apiData.value.verificationToken)
 const isExceeded = computed(() => apiResult.value?.remainingAttempts === 0)
 
 // 由上面兩維組出三種互斥狀態。互斥交給 template 的 v-if / v-else-if 串接保證,
@@ -90,7 +90,7 @@ const onSumit = async (validate, setFieldError) => {
       }"
       ref="continuousRef"
     />
-    <PageMemberUpgradeEmailVerifyCountdown @click="onReSend(validateField, setFieldError)" />
+    <PageMemberUpgradePhoneVerifyCountdown @click="onReSend(validateField, setFieldError)" />
     <CommonMAnchor
       text="確認"
       :setClass="{

@@ -1,3 +1,12 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(node -p \"require\\('vee-validate/package.json'\\).version\")",
+      "PowerShell(npx eslint \"pages/member/upgrade/phone.vue\" 2>&1)",
+      "PowerShell(npx eslint \"pages/member/upgrade/phone-verify.vue\" 2>&1)",
+      "PowerShell(npx eslint \"stores/member/.composables/useUpgradeActions.js\" \"scripts/_api/member/upgrade.js\" \"pages/member/upgrade/phone-verify.vue\" 2>&1)",
+      "PowerShell(npx eslint \"pages/member/upgrade/phone-verify.vue\" \"stores/member/.composables/useUpgradeActions.js\" \"scripts/_storage.js\" 2>&1)"
+    ]
+  },
   "hooks": {}
 }

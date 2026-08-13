@@ -45,7 +45,7 @@ defineRule('required', (value, object, elem) => {
 // 最大字元長度
 defineRule('maxlength', (value, object, elem) => {
   const $elem = document.querySelector(`[name="${elem.name}"]`)
-  const maxlength = object.value || Number($elem.getAttribute('maxlength'))
+  const maxlength = Number($elem.getAttribute('maxlength'))
 
   return value && onUnicodLength(value) > maxlength ? onReplaceMessage(elem, object) : true
 })
@@ -53,7 +53,7 @@ defineRule('maxlength', (value, object, elem) => {
 // 最小字元長度
 defineRule('minlength', (value, object, elem) => {
   const $elem = document.querySelector(`[name="${elem.name}"]`)
-  const minlength = object.value || Number($elem.getAttribute('minlength'))
+  const minlength = Number($elem.getAttribute('minlength'))
 
   return value && onUnicodLength(value) < minlength ? onReplaceMessage(elem, object) : true
 })

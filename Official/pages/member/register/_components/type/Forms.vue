@@ -1,4 +1,6 @@
 <script setup>
+import { REGISTEREXPIRES } from '@js/_storage.js'
+
 const project = useProjectStore()
 const { serverTime } = storeToRefs(project)
 const manage = useManageStore()
@@ -155,7 +157,7 @@ const onWorkBrandChange = () => {
               placeholder: '請輸入 6 位數驗證碼',
               serverTime: serverTime?.full,
               expires: type.countdownData.expires,
-              storageName: 'REGISTEREXPIRES',
+              storageName: REGISTEREXPIRES,
               message: {
                 timeout: '{ timeout } 秒後重送',
                 reSend: '發送驗證碼',

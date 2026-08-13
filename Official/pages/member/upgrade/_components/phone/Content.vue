@@ -13,17 +13,17 @@ const onSumit = async (validate) => {
 </script>
 
 <template>
-  <Form as="div" class="mt-[30px] space-y-[15px]" v-slot="{ validate }">
-    <PageMemberUpgradeIndexEmail />
+  <Form as="div" class="space-y-[15px]" v-slot="{ validate }">
+    <PageMemberUpgradePhoneNote />
+    <PageMemberUpgradePhoneFormPhone @enter="onSumit(validate)" />
     <CommonMAnchor
-      text="進行驗證"
+      text="發送驗證碼"
       :setClass="{
         main: '--oval --bg-orange-f74c --h-55 --text-white --px-20 --text-center w-full',
         text: 'text-[16px]',
       }"
       @click="onSumit(validate)"
     />
-    <PageMemberUpgradeIndexRegister />
   </Form>
 </template>
 

@@ -18,7 +18,7 @@ const emits = defineEmits([
   // 'focusout',
   'blur',
   'input',
-  'keydown.enter',
+  'enter',
 ])
 
 const props = defineProps({
@@ -151,9 +151,18 @@ const onInput = async (e) => {
   emits('input', e)
 }
 
-const onEnter = (e) => {
+// 事件名用 enter 而非 keydown.enter:在元件上寫 @keydown.enter,Vue 會編成
+// onKeydown + withKeys(.enter 是 key modifier),接不到名為 'keydown.enter' 的 emit,
+// 只會靠原生事件冒泡到根元素才誤打誤撞觸發(且時序早於下面的回寫)。
+const onEnter = async (e) => {
   e.preventDefault()
-  emits('keydown.enter')
+
+  // update:modelValue 只在 blur 時回寫(見 onEvent),而 enter 不會觸發 blur →
+  // 先主動 blur 走完既有的正規化與回寫,父層在 enter 事件裡才讀得到最新值
+  e.target.blur()
+  await nextTick()
+
+  emits('enter', e)
 }
 
 const onEvent = async (e, errorMessage) => {

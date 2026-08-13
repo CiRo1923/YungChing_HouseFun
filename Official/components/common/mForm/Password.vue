@@ -9,7 +9,7 @@ import '@js/_validation.js'
 
 import { Field, ErrorMessage } from 'vee-validate'
 
-const emits = defineEmits(['update:modelValue', 'focusin', 'blur', 'input', 'keydown.enter'])
+const emits = defineEmits(['update:modelValue', 'focusin', 'blur', 'input', 'enter'])
 
 const props = defineProps({
   name: {
@@ -91,9 +91,15 @@ const onInput = (e) => {
   emits('input', e)
 }
 
-const onEnter = (e) => {
+// 與 Input.vue 同一套:事件名用 enter,並先 blur 讓 update:modelValue 回寫,
+// 父層在 enter 事件裡才讀得到最新值
+const onEnter = async (e) => {
   e.preventDefault()
-  emits('keydown.enter')
+  e.target.blur()
+
+  await nextTick()
+
+  emits('enter', e)
 }
 
 const onEvent = async (e, errorMessage) => {

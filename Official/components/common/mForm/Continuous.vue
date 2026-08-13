@@ -26,10 +26,22 @@ const props = defineProps({
     type: Object,
     default: null,
   },
+  setClass: {
+    type: Object,
+    default: () => {},
+  },
 })
 
+const inputHiddenRef = ref(null)
 // 每一格 CommonMFormInput 的元件實例(由 Input.vue 的 defineExpose 提供 focus / select / blur)
 const inputRefs = ref([])
+
+// modelValue 是單一字串,拆成每格一字(不足補空字串)供各欄位顯示
+const values = computed(() => {
+  const text = String(props.modelValue ?? '')
+
+  return Array.from({ length: config.value.length }, (_, index) => text[index] ?? '')
+})
 
 const config = computed(() => {
   return {
@@ -41,11 +53,14 @@ const config = computed(() => {
   }
 })
 
-// modelValue 是單一字串,拆成每格一字(不足補空字串)供各欄位顯示
-const values = computed(() => {
-  const text = String(props.modelValue ?? '')
-
-  return Array.from({ length: config.value.length }, (_, index) => text[index] ?? '')
+const setClass = computed(() => {
+  return {
+    main: '',
+    container: '',
+    error: '',
+    errorMessage: '',
+    ...props.setClass,
+  }
 })
 
 const onSetInputRef = (element, index) => {
@@ -127,7 +142,7 @@ const onPaste = async (event) => {
   onFocusAt(emptyIndex)
 }
 
-// 空格按退格時跳回前一格。Input.vue 只 emit keydown.enter,
+// 空格按退格時跳回前一格。Input.vue 只 emit enter,
 // 故在容器攔冒泡上來的 keydown。
 const onKeydown = (event) => {
   if (event.key !== 'Backspace') return
@@ -140,6 +155,11 @@ const onKeydown = (event) => {
   event.preventDefault()
   onFocusAt(index - 1)
 }
+
+defineExpose({
+  name: computed(() => inputHiddenRef.value?.name),
+  config: computed(() => config.value),
+})
 </script>
 
 <template>
@@ -147,13 +167,19 @@ const onKeydown = (event) => {
        到它的根 div,各欄位的事件冒泡上來一樣收得到,不必多包一層 -->
   <CommonMFormHidden
     :name="props.name"
+    :modelValue="props.modelValue"
+    :config="{
+      length: config.length,
+    }"
     :rules="props.rules"
     :setClass="{
-      container: 'flex items-center gap-x-[10px]',
+      main: setClass.main,
+      container: ['flex items-center justify-center', setClass.container],
     }"
     @keydown="onKeydown"
     @paste="onPaste"
     v-slot="{ isError }"
+    ref="inputHiddenRef"
   >
     <CommonMFormInput
       :ref="(element) => onSetInputRef(element, index)"
@@ -170,7 +196,7 @@ const onKeydown = (event) => {
         isError: config.isError || isError,
       }"
       :setClass="{
-        main: '--h-50 --px-12 --rounded flex-1',
+        main: '--h-50 --px-12 --rounded',
         type: 'text-center',
       }"
       @input="onInput(index, $event)"

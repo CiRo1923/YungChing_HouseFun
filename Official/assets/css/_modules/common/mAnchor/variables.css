@@ -24,6 +24,10 @@
       --anchor-color: var(--white);
     }
 
+    &.\-\-text-gray-333 {
+      --anchor-color: var(--gray-333);
+    }
+
     &.\-\-text-gray-666 {
       --anchor-color: var(--gray-666);
     }

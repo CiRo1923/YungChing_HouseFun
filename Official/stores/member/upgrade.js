@@ -2,34 +2,59 @@ import { defineStore } from 'pinia'
 
 export const useMemberUpgradeStore = defineStore('memberUpgrade', () => {
   const apiDefault = readonly({
-    index: {
+    email: {
       email: null,
     },
-    upgrade: {
-      emailVerify: {
-        challengeToken: null,
-        verificationCode: null,
-      },
-    },
-  })
-
-  const index = ref({
-    apiData: { ...apiDefault.index },
-  })
-
-  const upgrade = ref({
     emailVerify: {
-      // expires 放 API 的 resendAvailableAt(可重新發送的時間),供重送倒數用
-      countdownData: {
-        expires: null,
-      },
-      apiData: { ...apiDefault.upgrade.emailVerify },
+      challengeToken: null,
+      verificationCode: null,
     },
+    phone: {
+      mobilePhone: null,
+    },
+    phoneVerify: {
+      mobilePhone: null,
+      verificationToken: null,
+      verificationCode: null,
+    },
+  })
+
+  const email = ref({
+    apiData: { ...apiDefault.email },
+    apiResult: null,
+  })
+
+  const emailVerify = ref({
+    // expires 放 API 的 resendAvailableAt(可重新發送的時間),供重送倒數用
+    countdownData: {
+      expires: null,
+    },
+    apiData: { ...apiDefault.emailVerify },
+    apiResult: null,
+  })
+
+  const phone = ref({
+    // email 驗證成功拿到的 upgradeToken,由 EMAILVERIFYTOKEN cookie 還原;
+    // 打 mobile/check 時放進 header X-Upgrade-Token
+    token: null,
+    apiData: { ...apiDefault.phone },
+    apiResult: null,
+  })
+
+  const phoneVerify = ref({
+    // expires 放 API 的 expiresAt(可重新發送的時間),供重送倒數用
+    countdownData: {
+      expires: null,
+    },
+    apiData: { ...apiDefault.phoneVerify },
+    apiResult: null,
   })
 
   return {
     apiDefault,
-    index,
-    upgrade,
+    email,
+    emailVerify,
+    phone,
+    phoneVerify,
   }
 })

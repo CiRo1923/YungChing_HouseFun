@@ -28,6 +28,15 @@ const props = defineProps({
   },
 })
 
+const config = computed(() => {
+  return {
+    length: null,
+    minlength: null,
+    maxlength: null,
+    ...props.config,
+  }
+})
+
 const setClass = computed(() => {
   return {
     main: '',
@@ -36,6 +45,10 @@ const setClass = computed(() => {
     errorMessage: '',
     ...props.setClass,
   }
+})
+
+defineExpose({
+  name: `${props.name}_hidden`,
 })
 </script>
 
@@ -47,7 +60,13 @@ const setClass = computed(() => {
       :rules="props.config.isDisabled ? '' : props.rules"
       v-slot="{ field, errorMessage }"
     >
-      <input type="hidden" :id="`${props.name}_hidden`" v-bind="field" />
+      <input
+        type="hidden"
+        :id="`${props.name}_hidden`"
+        :minlength="config.minlength || config.length"
+        :maxlength="config.maxlength || config.length"
+        v-bind="field"
+      />
       <div class="m-form-hidden-container" :class="setClass.container">
         <slot :isError="!!errorMessage" />
       </div>

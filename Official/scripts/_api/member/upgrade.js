@@ -17,8 +17,29 @@ export const apiAuthEmailUpgradeVerificationCode = async (data) =>
 
 // 驗證 email 驗證碼
 // req  { challengeToken, verificationCode }
+// res  {
+//        upgradeToken: string,   // 存 cookie(EMAILVERIFYTOKEN),後續 mobile/* 要放進
+//                                // header X-Upgrade-Token
+//        expiresAt: string,      // ISO 8601,upgradeToken 的失效時間 → 即 cookie 效期
+//      }
 export const apiAuthEmailUpgradeVerificationCodeVerify = async (data) =>
   await fetchApi.post(
     `api/${version}/member/auth/email-upgrade/email/verification-code/verify`,
     data
+  )
+
+// 檢查手機號碼
+// req     { mobilePhone }
+// header  X-Upgrade-Token: email 驗證成功回傳的 upgradeToken(由呼叫端以 config 帶入)
+export const apiAuthEmailUpgradeMobileCheck = async (data, config) =>
+  await fetchApi.post(`api/${version}/member/auth/email-upgrade/mobile/check`, data, config)
+
+// 發送手機驗證碼
+// req     { mobilePhone }
+// header  X-Upgrade-Token: 同上,由呼叫端以 config 帶入
+export const apiAuthEmailUpgradeMobileVerificationCode = async (data, config) =>
+  await fetchApi.post(
+    `api/${version}/member/auth/email-upgrade/mobile/verification-code`,
+    data,
+    config
   )

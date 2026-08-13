@@ -7,6 +7,7 @@
   /* CommonMHeader(全頻道共用 header)用色 */
   --red-d111: #df1111;
 
+  --orange-feea: #feeeea;
   --orange-e646: #ea6846;
   --orange-f74c: #ff714c;
 
@@ -23,4 +24,5 @@
   --gray-ccce: #c3c8ce;
   --gray-999: #999;
   --gray-666: #666;
+  --gray-333: #333;
 }

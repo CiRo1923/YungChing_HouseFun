@@ -6,11 +6,11 @@ const emits = defineEmits(['click', 'done'])
 const project = useProjectStore()
 const { serverTime } = storeToRefs(project)
 const memberUpgrade = useMemberUpgradeStore()
-const { emailVerify } = storeToRefs(memberUpgrade)
+const { phoneVerify } = storeToRefs(memberUpgrade)
 const nuxtApp = useNuxtApp()
 
-// API 的 resendAvailableAt(可重新發送的時間);由 EMAILVERIFY cookie 還原,SSR 也讀得到
-const expires = computed(() => emailVerify.value.countdownData.expires)
+// API 的 expiresAt(驗證碼的失效時間),供重送倒數用
+const expires = computed(() => phoneVerify.value.countdownData.expires)
 
 // 距離可重送還剩幾秒。無值 / 值無效 / 已過期一律回 0(視為可重送)
 const onRemainingSec = (expireTime) => {
@@ -27,7 +27,8 @@ const onRemainingSec = (expireTime) => {
 // (不只是視覺,那一瞬間真的點得下去 → 白白吃掉一次發送額度),等 client 掛載後才修正。
 // 這裡在 SSR 先算好秒數寫進 payload,hydration 沿用同一個數字 → 不閃、也不會 mismatch。
 // client 端換頁(非 hydration)時 payload 是上一次 SSR 的舊值,改以當下重算。
-const ssrTimeout = useState('memberUpgradeResendTimeout', () => onRemainingSec(expires.value))
+// key 與 email 那支分開:同一份 payload 若共用,兩頁的倒數會互相蓋掉。
+const ssrTimeout = useState('memberUpgradePhoneResendTimeout', () => onRemainingSec(expires.value))
 const timeout = ref(
   import.meta.server || nuxtApp.isHydrating ? ssrTimeout.value : onRemainingSec(expires.value)
 )
@@ -43,7 +44,7 @@ const onTimeout = (expireTime) => {
     startTime: serverTime.value?.full,
     expireTime,
     format: 'sss',
-    // 不存 localStorage:續算所需的絕對到期時間已在 EMAILVERIFY cookie 裡(SSR 也讀得到),
+    // 不存 localStorage:續算所需的絕對到期時間由 API 回傳並寫進 store,
     // 再存一份 localStorage 只會多出一個會不同步的狀態來源
     onTick: ({ remainingSec }) => {
       timeout.value = remainingSec
@@ -51,9 +52,9 @@ const onTimeout = (expireTime) => {
     onDone: () => {
       timeout.value = 0
 
-      // 倒數結束表示 challengeToken 也失效了(cookie 效期同為 resendAvailableAt,
-      // 由瀏覽器自動清掉);store 一併清空,讓依賴它的判斷(如 isExpired)跟著翻轉
-      emailVerify.value.apiData.challengeToken = null
+      // 倒數結束表示 verificationToken 也失效了;store 一併清空,
+      // 讓依賴它的判斷(如 isExpired)跟著翻轉
+      phoneVerify.value.apiData.verificationToken = null
 
       emits('done')
     },
@@ -64,7 +65,7 @@ const onClick = () => {
   emits('click')
 }
 
-// 重送成功後 API 會回新的 resendAvailableAt → 用新的覆蓋重算
+// 重送成功後 API 會回新的 expiresAt → 用新的覆蓋重算
 watch(expires, (value) => onTimeout(value))
 
 // ticker 靠 requestAnimationFrame,只能在 client 起算;初始秒數已由 setup 算好,
