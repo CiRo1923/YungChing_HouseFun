@@ -33,7 +33,9 @@
       "Bash(node .claude/hooks/conventions.js)",
       "Bash(echo '{\"tool_input\":{\"file_path\":\"d:\\\\\\\\\\\\\\\\CiRo\\\\\\\\\\\\\\\\Project\\\\\\\\\\\\\\\\YungChing\\\\\\\\\\\\\\\\Dev\\\\\\\\\\\\\\\\HouseFun\\\\\\\\\\\\\\\\Official\\\\\\\\\\\\\\\\pages\\\\\\\\\\\\\\\\member\\\\\\\\\\\\\\\\upgrade\\\\\\\\\\\\\\\\VerifyCode.vue\"}}')",
       "PowerShell(npx eslint \"pages/member/upgrade/_components/complete/Content.vue\" 2>&1)",
-      "Read(//c/Users/CiRo/Desktop/**)"
+      "Read(//c/Users/CiRo/Desktop/**)",
+      "Bash(git rm *)",
+      "PowerShell(npx eslint \"pages/community/index.vue\" 2>&1)"
     ]
   },
   "hooks": {
