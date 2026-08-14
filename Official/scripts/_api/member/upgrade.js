@@ -59,3 +59,13 @@ export const apiAuthEmailUpgradeMobileVerificationCodeVerify = async (data, conf
     data,
     config
   )
+
+// 綁定(手機未被使用 → 直接綁上完成升級)
+// header  X-Upgrade-Token: 同上,由呼叫端以 config 帶入
+export const apiAuthEmailUpgradeBind = async (data, config) =>
+  await fetchApi.post(`api/${version}/member/auth/email-upgrade/bind`, data, config)
+
+// 合併(手機已有帳號 → 走 mobile/check 回 requiresMerge 的那條路)
+// header  X-Upgrade-Token: 同上,由呼叫端以 config 帶入
+export const apiAuthEmailUpgradeMerge = async (data, config) =>
+  await fetchApi.post(`api/${version}/member/auth/email-upgrade/merge`, data, config)

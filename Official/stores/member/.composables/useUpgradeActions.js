@@ -4,14 +4,27 @@ import {
   apiAuthEmailUpgradeMobileCheck,
   apiAuthEmailUpgradeMobileVerificationCode,
   apiAuthEmailUpgradeMobileVerificationCodeVerify,
+  apiAuthEmailUpgradeBind,
+  apiAuthEmailUpgradeMerge,
 } from '@js/_api/member/upgrade.js'
 import { enCrypto, deCryptoJSON } from '@js/_crypto/index.js'
-import { EMAILVALUE, EMAILVERIFY, EMAILVERIFYTOKEN, EXCEEDED, PHONE } from '@js/_storage.js'
+import {
+  EMAILVALUE,
+  EMAILVERIFY,
+  EMAILVERIFYTOKEN,
+  EMAILEXCEEDED,
+  PHONE,
+  PHONEEXCEEDED,
+  UPGRADECOMPLETE,
+} from '@js/_storage.js'
 
 export default () => {
   const memberUpgrade = useMemberUpgradeStore()
-  const { email, emailVerify, phone, phoneVerify } = storeToRefs(memberUpgrade)
-  const { onApiError, onAlert } = usePopupActions()
+  const { email, emailVerify, phone, phoneVerify, bind, merge } = storeToRefs(memberUpgrade)
+  const { onPromise, onApiError, onAlert, onCustom } = usePopupActions()
+  // 在 setup 期間先取好:action 是在事件處理器、且多半在 await 之後才執行,
+  // 那時直接呼叫 navigateTo / useRouter 可能已經沒有 Nuxt context。
+  const router = useRouter()
 
   const onApiAuthEmailUpgradeVerificationCode = async () => {
     const { apiData } = email.value
@@ -51,7 +64,7 @@ export default () => {
 
       // 發得出去就代表已解鎖(改用其他 email、或後端的鎖已過期)→ 清掉超限紀錄,
       // 否則 cookie 還在,回上一頁 / 重整會被 middleware 擋回去看到「已達上限」
-      onClearCookie(EXCEEDED)
+      onClearCookie(EMAILEXCEEDED)
     } else if (status === 400 || status === 404) {
       // 後端有給明確原因的可預期錯誤 → 只顯示 message,不套用通用錯誤彈窗
       const { message } = data
@@ -72,11 +85,15 @@ export default () => {
       const unlockAt = new Date(data.unlockAt)
       const isValidUnlockAt = !Number.isNaN(unlockAt.getTime())
 
-      onSetCookie(EXCEEDED, data, isValidUnlockAt ? { expires: unlockAt } : {})
+      onSetCookie(EMAILEXCEEDED, data, isValidUnlockAt ? { expires: unlockAt } : {})
 
       // 已超限就沒有可續用的驗證流程 → 一併清掉 email 與 challengeToken(重送倒數的
       // 到期時間就存在 EMAILVERIFY 裡,一起消失),避免下次進頁面又用舊資料把驗證畫面撐起來。
-      onClearCookie(EMAILVALUE, EMAILVERIFY)
+      //
+      // upgradeToken 也要清:超限代表「這一輪 email 流程作廢」,它發出的通行證不該還能用,
+      // 否則已驗證過的人回頭重送到超限後,仍能憑舊 token 前進到 phone 繼續升級。
+      // 清掉之後 phone / phone-verify 的 middleware 會自然把人退回 email,不必各自再判斷一次。
+      onClearCookie(EMAILVALUE, EMAILVERIFY, EMAILVERIFYTOKEN)
     } else {
       // 其餘皆為非預期錯誤 → 統一錯誤彈窗
       onApiError(config, status, data)
@@ -122,6 +139,8 @@ export default () => {
     return { config, status, data }
   }
   const onApiAuthEmailUpgradeMobileCheck = async () => {
+    if (!onCheckUpgradeToken()) return memberUpgrade.apiTokenInvalid
+
     const { apiData } = phone.value
     const { config, status, data } = await apiAuthEmailUpgradeMobileCheck(
       apiData,
@@ -130,12 +149,16 @@ export default () => {
 
     phone.value.apiResult = null
 
-    if (status === 400 || status === 404 || status === 409) {
+    if (status === 401 || status === 403) {
+      // upgradeToken 已失效 → 整條流程作廢,退回起點
+      onUpgradeTokenInvalid()
+    } else if (status === 400 || status === 404 || status === 409) {
       // 後端有給明確原因的可預期錯誤(格式不符 / 查無資料 / 號碼已被使用)→
-      // 只顯示 message,不套用通用錯誤彈窗
+      // 只顯示 message,不套用通用錯誤彈窗。
+      //
+      // 不寫進 apiResult:那是給「整頁換成超限呈現」用的,號碼打錯這種錯誤
+      // 若寫進去,輸入表單會整個被取代掉,使用者連改都沒得改。
       const { message } = data
-
-      phone.value.apiResult = data
 
       onAlert({
         content: message,
@@ -151,6 +174,8 @@ export default () => {
     return { config, status, data }
   }
   const onApiAuthEmailUpgradeMobileVerificationCode = async () => {
+    if (!onCheckUpgradeToken()) return memberUpgrade.apiTokenInvalid
+
     const { apiData } = phone.value
     const { config, status, data } = await apiAuthEmailUpgradeMobileVerificationCode(
       apiData,
@@ -159,7 +184,10 @@ export default () => {
 
     phone.value.apiResult = null
 
-    if (status === 200) {
+    if (status === 401 || status === 403) {
+      // upgradeToken 已失效 → 整條流程作廢,退回起點
+      onUpgradeTokenInvalid()
+    } else if (status === 200) {
       // 驗證時要帶回 verificationToken。
       //
       // 為什麼不用 expiresAt(verificationToken 的到期時間):倒數結束後使用者會重新發送,
@@ -180,11 +208,13 @@ export default () => {
       // 發得出去才寫 cookie:下一頁要顯示「驗證碼已發送至 09xx***xxx」,
       // 但 URL 不帶號碼 → 存 cookie 讓重整 / 換頁後還原得回來。
       onSetCookie(PHONE, apiData.mobilePhone)
-    } else if (status === 400 || status === 404) {
-      // 後端有給明確原因的可預期錯誤 → 只顯示 message,不套用通用錯誤彈窗
-      const { message } = data
 
-      phone.value.apiResult = data
+      // 發得出去就代表已解鎖(改用其他號碼、或後端的鎖已過期)→ 清掉超限紀錄
+      onClearCookie(PHONEEXCEEDED)
+    } else if (status === 400 || status === 404) {
+      // 後端有給明確原因的可預期錯誤 → 只顯示 message,不套用通用錯誤彈窗。
+      // 同上,不寫進 apiResult,免得輸入表單被超限呈現取代掉。
+      const { message } = data
 
       onAlert({
         content: message,
@@ -192,6 +222,19 @@ export default () => {
           main: 'pt:--w-460',
         },
       })
+    } else if (status === 429) {
+      // 太頻繁 → 不彈窗,交回頁面自行呈現(整頁換成超限畫面)。
+      // 用 PHONEEXCEEDED 而不是 email 那支 EMAILEXCEEDED:兩者共用會互相污染
+      // (email 超限會讓 phone 頁也顯示超限,反之亦然)。
+      phone.value.apiResult = data
+
+      const unlockAt = new Date(data.unlockAt)
+      const isValidUnlockAt = !Number.isNaN(unlockAt.getTime())
+
+      onSetCookie(PHONEEXCEEDED, data, isValidUnlockAt ? { expires: unlockAt } : {})
+
+      // 已超限就沒有可續用的驗證流程 → 清掉號碼,避免下次進頁面又用舊資料把驗證畫面撐起來
+      onClearCookie(PHONE)
     } else if (status !== 200) {
       // 其餘皆為非預期錯誤 → 統一錯誤彈窗
       onApiError(config, status, data)
@@ -200,6 +243,8 @@ export default () => {
     return { config, status, data }
   }
   const onApiAuthEmailUpgradeMobileVerificationCodeVerify = async () => {
+    if (!onCheckUpgradeToken()) return memberUpgrade.apiTokenInvalid
+
     const { apiData } = phoneVerify.value
     const { config, status, data } = await apiAuthEmailUpgradeMobileVerificationCodeVerify(
       apiData,
@@ -208,7 +253,20 @@ export default () => {
 
     phoneVerify.value.apiResult = null
 
-    if (status === 400) {
+    if (status === 401 || status === 403) {
+      // upgradeToken 已失效 → 整條流程作廢,退回起點
+      onUpgradeTokenInvalid()
+    } else if (status === 200) {
+      // 一次性的手機驗證權杖 → 接到下一步(bind / merge)的 apiData。
+      // 號碼也一併帶過去:bind / merge 的 req 都要 mobilePhone。
+      const { mobileVerificationToken } = data
+
+      bind.value.apiData.mobileVerificationToken = mobileVerificationToken
+      bind.value.apiData.mobilePhone = apiData.mobilePhone
+
+      merge.value.apiData.mobileVerificationToken = mobileVerificationToken
+      merge.value.apiData.mobilePhone = apiData.mobilePhone
+    } else if (status === 400) {
       // 後端有給明確原因的可預期錯誤 → 只顯示 message,不套用通用錯誤彈窗
       const { message } = data
 
@@ -227,6 +285,141 @@ export default () => {
 
     return { config, status, data }
   }
+  const onApiAuthEmailUpgradeBind = async () => {
+    if (!onCheckUpgradeToken()) return memberUpgrade.apiTokenInvalid
+
+    const { apiData } = bind.value
+    const { config, status, data } = await apiAuthEmailUpgradeBind(apiData, onUpgradeTokenConfig())
+
+    if (status === 200) {
+      onUpgradeCompleted(data)
+    } else if (status === 401 || status === 403) {
+      // upgradeToken 已失效 → 整條流程作廢,退回起點
+      onUpgradeTokenInvalid()
+    } else if (status === 400 || status === 404 || status === 409) {
+      // 後端有給明確原因的可預期錯誤 → 只顯示 message,不套用通用錯誤彈窗
+      const { message } = data
+
+      onAlert({
+        content: message,
+        setClass: {
+          main: 'pt:--w-460',
+        },
+      })
+    } else if (status !== 200) {
+      // 其餘皆為非預期錯誤 → 統一錯誤彈窗
+      onApiError(config, status, data)
+    }
+
+    return { config, status, data }
+  }
+  // 與 bind 的差別只在「號碼已有帳號」→ 改走整併。回應同型,成功處理共用 onUpgradeCompleted。
+  //
+  // loading 用 onPromise 而不是 onApiPromise:這支是從 custom popup 內按下去觸發的,
+  // onApiPromise 是獨立的 popup,keyID 優先序(alert > confirm > custom > apiPromise)
+  // 會讓它被還開著的 custom 蓋掉;onPromise 則是蓋在 popup 內部的遮罩,才看得到。
+  const onApiAuthEmailUpgradeMerge = async () => {
+    if (!onCheckUpgradeToken()) return memberUpgrade.apiTokenInvalid
+
+    const { apiData } = merge.value
+
+    onPromise('open')
+
+    const { config, status, data } = await apiAuthEmailUpgradeMerge(apiData, onUpgradeTokenConfig())
+
+    if (status === 200) {
+      onUpgradeCompleted(data)
+    } else if (status === 401 || status === 403) {
+      // upgradeToken 已失效 → 整條流程作廢,退回起點
+      onUpgradeTokenInvalid()
+    } else if (status === 400 || status === 404 || status === 409) {
+      // 後端有給明確原因的可預期錯誤 → 只顯示 message,不套用通用錯誤彈窗
+      const { message } = data
+
+      onAlert({
+        content: message,
+        setClass: {
+          main: 'pt:--w-460',
+        },
+      })
+    } else if (status !== 200) {
+      // 其餘皆為非預期錯誤 → 統一錯誤彈窗
+      onApiError(config, status, data)
+    }
+
+    onPromise('close')
+
+    return { config, status, data }
+  }
+  // bind / merge 的成功處理完全相同(兩支的 response 同型),抽出來共用。
+  const onUpgradeCompleted = (data) => {
+    // 回傳的 longToken 刻意不使用:完成頁的設計是請使用者到登入頁重新登入一次,
+    // 這裡若寫進 AUTHTOKEN,人已經是登入狀態卻還被要求登入,兩者互相矛盾。
+    // (它與 member/auth/token 回的是同一種 SSO 長 token,寫進去就等於直接登入。)
+    const { maskedMobile } = data
+
+    // 完成頁要顯示的遮罩號碼,同時兼作那頁的進入憑證:
+    // 只有這裡(bind / merge 成功)才寫得出來,所以有值就代表「剛完成升級」。
+    // 效期短,讓使用者重整還看得到,過了就自然失效、事後貼網址進不去。
+    const completeExpires = new Date(Date.now() + memberUpgrade.completeExpiresMinutes * 60 * 1000)
+
+    onSetCookie(UPGRADECOMPLETE, maskedMobile, { expires: completeExpires })
+
+    // 升級流程到此結束 → 清掉沿路寄放的 cookie,避免返回 / 重整又把流程撐起來
+    onClearCookie(EMAILVALUE, EMAILVERIFY, EMAILVERIFYTOKEN, EMAILEXCEEDED, PHONE, PHONEEXCEEDED)
+  }
+  // 無法繼續升級的統一出口:不論原因(不可延後、號碼狀態不允許 …)都導向同一個客服 popup,
+  // 標題與按鈕集中在這裡,各頁只負責決定「什麼時候該開」。
+  // 內容在 _components/popup/Customer.vue。
+  // TODO: 文案待確認
+  const onPopupCustomer = async () =>
+    await onCustom({
+      id: 'popupMemberCustomer',
+      title: '無法繼續升級',
+      hasExistClose: false,
+      btns: [
+        {
+          label: '聯繫客服',
+          type: 'cancel',
+        },
+      ],
+    })
+  // upgradeToken 失效的統一出口:整條 email 流程作廢 → 清掉沿路 cookie 並退回起點。
+  // 兩種情況會走到這裡:送出前發現 cookie 已被瀏覽器清掉、或後端回 401 / 403。
+  const onUpgradeTokenInvalid = () => {
+    phone.value.token = null
+
+    onClearCookie(EMAILVALUE, EMAILVERIFY, EMAILVERIFYTOKEN, PHONE)
+
+    onAlert({
+      content: '流程已逾時<br />請重新開始',
+      setClass: {
+        main: 'pt:--w-460',
+      },
+    })
+
+    router.replace({
+      name: 'member-upgrade-email',
+    })
+  }
+
+  // 送出前的防呆:middleware 只在「進入頁面」檢查一次,停留期間 cookie 可能已到期
+  // 被瀏覽器清掉,而 store 的 token 是進頁面時讀的、不會跟著消失。
+  // 這裡以 cookie 為準重新取值,順便把 store 補成最新。
+  const onCheckUpgradeToken = () => {
+    const token = onGetCookie(EMAILVERIFYTOKEN)
+
+    if (!token) {
+      onUpgradeTokenInvalid()
+
+      return false
+    }
+
+    phone.value.token = token
+
+    return true
+  }
+
   // upgradeToken 走 header 不走 body,mobile 開頭的 API 都要帶。
   // 無值時整個 headers 省略,免得送出 X-Upgrade-Token: null 讓後端
   // 當成無效 token 而非未帶。
@@ -273,7 +466,7 @@ export default () => {
     return data
   }
 
-  // 清除:可一次帶多個 key,例如 onClearCookie(EMAILVALUE, EMAILPHONE)
+  // 清除:可一次帶多個 key,例如 onClearCookie(EMAILVALUE, EMAILVERIFY)
   const onClearCookie = (...keys) => {
     keys.forEach((key) => {
       onCookie(key).value = null
@@ -313,6 +506,9 @@ export default () => {
     onApiAuthEmailUpgradeMobileCheck,
     onApiAuthEmailUpgradeMobileVerificationCode,
     onApiAuthEmailUpgradeMobileVerificationCodeVerify,
+    onApiAuthEmailUpgradeBind,
+    onApiAuthEmailUpgradeMerge,
+    onPopupCustomer,
     onSetCookie,
     onGetCookie,
     onClearCookie,

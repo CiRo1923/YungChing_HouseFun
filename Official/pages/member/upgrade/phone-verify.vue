@@ -1,5 +1,5 @@
 <script setup>
-import { EMAILVERIFYTOKEN, PHONE } from '@js/_storage.js'
+import { EMAILVERIFYTOKEN, PHONE, PHONEEXCEEDED } from '@js/_storage.js'
 import { onMaskPhone } from '@js/_projectPrototype.js'
 import { deCryptoJSON } from '@js/_crypto/index.js'
 
@@ -10,8 +10,10 @@ const {
   onGetCookie,
   onApiAuthEmailUpgradeMobileVerificationCode,
   onApiAuthEmailUpgradeMobileVerificationCodeVerify,
+  onApiAuthEmailUpgradeBind,
 } = useMemberUpgradeActions()
 const { onApiPromise } = usePopupActions()
+const router = useRouter()
 
 definePageMeta({
   layout: 'member',
@@ -20,10 +22,22 @@ definePageMeta({
   middleware: [
     () => {
       const raw = useCookie(EMAILVERIFYTOKEN).value
+      const exceededRaw = useCookie(PHONEEXCEEDED).value
+
+      // verificationToken 只活在 store(沒有寫 cookie),重整後必然是空的 →
+      // 本頁的驗證與重送都缺這個值,畫面只會停在「驗證碼已失效」。
+      // 與其讓使用者卡在死畫面,不如退回上一頁重新輸入號碼、重新發送。
+      const { phoneVerify } = useMemberUpgradeStore()
 
       // 沒有 upgradeToken(未經上一頁進來、或已過 expiresAt 被瀏覽器清掉)→
-      // 後續 mobile API 都缺 header X-Upgrade-Token,打不了,退回上一頁重跑
-      if (!raw || !deCryptoJSON(raw)) {
+      // 後續 mobile API 都缺 header X-Upgrade-Token,打不了,退回上一頁重跑。
+      // 已達發送上限也一樣退回,由上一頁呈現超限狀態。
+      if (
+        !raw ||
+        !deCryptoJSON(raw) ||
+        (exceededRaw && deCryptoJSON(exceededRaw)) ||
+        !phoneVerify.apiData.verificationToken
+      ) {
         return navigateTo(
           {
             name: 'member-upgrade-phone',
@@ -50,20 +64,62 @@ onUseMeta({
   url: useRequestURL(),
 })
 
-const onReSend = async () => {
+// 驗證手機驗證碼,回傳 true 才往下綁定。
+// loading 由這裡開啟;通過時「不關」,留給接續的綁定收尾,
+// 中間才不會閃一次關閉再開啟,失敗則在這裡自己關掉。
+const onAuthEmailUpgradeMobileVerificationCodeVerify = async () => {
   onApiPromise('open')
-  await onApiAuthEmailUpgradeMobileVerificationCode()
+
+  const { status } = await onApiAuthEmailUpgradeMobileVerificationCodeVerify()
+
+  if (status === 200) return true
+
   onApiPromise('close')
+
+  return false
 }
 
-const onSumit = async () => {
-  onApiPromise('open')
-  const { status } = await onApiAuthEmailUpgradeMobileVerificationCodeVerify()
+// 綁定完成升級 → 進完成頁。承接上一段未關的 loading。
+// 登入狀態(authToken + cookie)已由 store action 寫好,這裡只負責導頁。
+const onAuthEmailUpgradeBind = async () => {
+  const { status } = await onApiAuthEmailUpgradeBind()
+
   onApiPromise('close')
 
-  if (status === 200) {
-    // TODO: 驗證成功後的去向尚未確認,補上導頁
-  }
+  if (status !== 200) return
+
+  router.push({
+    name: 'member-upgrade-complete',
+  })
+}
+
+const onReSend = async () => {
+  onApiPromise('open')
+
+  const { status } = await onApiAuthEmailUpgradeMobileVerificationCode()
+
+  onApiPromise('close')
+
+  // 已達發送上限 → 退回上一頁呈現(PHONEEXCEEDED cookie 已由 store action 寫好)
+  if (status !== 429) return
+
+  await navigateTo(
+    {
+      name: 'member-upgrade-phone',
+    },
+    {
+      replace: true,
+    }
+  )
+}
+
+// 驗證通過 → 接著綁定完成升級。兩支是同一個動作的兩段,loading 一路包到底。
+const onSumit = async () => {
+  const isVerified = await onAuthEmailUpgradeMobileVerificationCodeVerify()
+
+  if (!isVerified) return
+
+  await onAuthEmailUpgradeBind()
 }
 
 // upgradeToken 與手機號碼都由上一頁寫進 cookie;本頁 URL 不帶這兩個值,

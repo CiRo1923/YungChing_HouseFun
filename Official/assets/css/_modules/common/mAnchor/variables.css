@@ -3,10 +3,6 @@
   --anchor-tablet-border: 1px;
   --anchor-mobile-border: 1px;
 
-  --anchor-pc-rounded: 5px;
-  --anchor-tablet-rounded: 5px;
-  --anchor-mobile-rounded: 5px;
-
   --anchor-color: initial;
   --anchor-disabled-color: var(--gray-ccce);
 
@@ -70,8 +66,16 @@
       --anchor-border-color: var(--gray-ccce);
     }
 
+    &.\-\-border-gray-e5 {
+      --anchor-border-color: var(--gray-e5);
+    }
+
     &.\-\-border-orange-f74c {
       --anchor-border-color: var(--orange-f74c);
+    }
+
+    &.\-\-border-green-9c33 {
+      --anchor-border-color: var(--green-9c33);
     }
   }
 
@@ -84,6 +88,10 @@
     /* bg color */
     &.hover\:\-\-bg-orange-e646 {
       --anchor-bg-color: var(--orange-e646);
+    }
+
+    &.hover\:\-\-bg-green-ffe9 {
+      --anchor-bg-color: var(--green-ffe9);
     }
   }
 }
@@ -172,6 +180,18 @@
     &.p\:\-\-h-25,
     &.pt\:\-\-h-25 {
       --anchor-h: 25px;
+    }
+
+    &.\-\-rounded-10,
+    &.p\:\-\-rounded-10,
+    &.pt\:\-\-rounded-10 {
+      --anchor-rounded: 10px;
+    }
+
+    &.\-\-rounded-5,
+    &.p\:\-\-rounded-5,
+    &.pt\:\-\-rounded-5 {
+      --anchor-rounded: 5px;
     }
   }
 }
@@ -275,6 +295,20 @@
     &.t\:\-\-h-25 {
       --anchor-h: 25px;
     }
+
+    &.\-\-rounded-10,
+    &.pt\:\-\-rounded-10,
+    &.tm\:\-\-rounded-10,
+    &.t\:\-\-rounded-10 {
+      --anchor-rounded: 10px;
+    }
+
+    &.\-\-rounded-5,
+    &.pt\:\-\-rounded-5,
+    &.tm\:\-\-rounded-5,
+    &.t\:\-\-rounded-5 {
+      --anchor-rounded: 5px;
+    }
   }
 }
 
@@ -362,6 +396,18 @@
     &.tm\:\-\-h-25,
     &.m\:\-\-h-25 {
       --anchor-h: 25px;
+    }
+
+    &.\-\-rounded-10,
+    &.tm\:\-\-rounded-10,
+    &.m\:\-\-rounded-10 {
+      --anchor-rounded: 10px;
+    }
+
+    &.\-\-rounded-5,
+    &.tm\:\-\-rounded-5,
+    &.m\:\-\-rounded-5 {
+      --anchor-rounded: 5px;
     }
   }
 }

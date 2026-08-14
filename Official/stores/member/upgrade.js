@@ -17,6 +17,32 @@ export const useMemberUpgradeStore = defineStore('memberUpgrade', () => {
       verificationToken: null,
       verificationCode: null,
     },
+    // channel 是「發起登入的頻道」,與 definePageMeta 的 channel(頻道色票)無關。
+    // 值比照既有登入流程的 `${頻道}-web`(buy 頻道送 buy-web)。
+    bind: {
+      mobilePhone: null,
+      mobileVerificationToken: null,
+      channel: 'member-web',
+      rememberMe: true,
+    },
+    merge: {
+      mobilePhone: null,
+      mobileVerificationToken: null,
+      channel: 'member-web',
+      rememberMe: true,
+    },
+  })
+
+  // upgradeToken 失效時,mobile 那幾支 action 給呼叫端的回傳值:
+  // 形狀與正常 API 回應一致,status 用 401 → 呼叫端既有的「!== 200 就停下」判斷不必改。
+  // UPGRADECOMPLETE cookie 的存活分鐘數。它同時是完成頁的顯示資料與進入憑證:
+  // 留一小段時間讓使用者重整仍看得到,過了就自然失效,事後貼網址進不去。
+  const completeExpiresMinutes = 5
+
+  const apiTokenInvalid = readonly({
+    config: {},
+    status: 401,
+    data: {},
   })
 
   const email = ref({
@@ -50,11 +76,23 @@ export const useMemberUpgradeStore = defineStore('memberUpgrade', () => {
     apiResult: null,
   })
 
+  const bind = ref({
+    apiData: { ...apiDefault.bind },
+  })
+
+  const merge = ref({
+    apiData: { ...apiDefault.merge },
+  })
+
   return {
     apiDefault,
+    apiTokenInvalid,
+    completeExpiresMinutes,
     email,
     emailVerify,
     phone,
     phoneVerify,
+    bind,
+    merge,
   }
 })

@@ -64,7 +64,7 @@ onUnmounted(() => {
             :text="item.label"
             :setClass="{
               main: [
-                'p:--px-20 tm:--px-10 --h-35 --rounded w-full',
+                'p:--px-20 tm:--px-10 --h-35 --rounded-5 w-full',
                 { '--bg-green-8b0d --text-white': activeID === item.id },
               ],
               text: 'font-normal',

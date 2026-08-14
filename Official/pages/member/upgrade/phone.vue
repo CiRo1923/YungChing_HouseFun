@@ -1,5 +1,5 @@
 <script setup>
-import { EMAILVERIFYTOKEN } from '@js/_storage.js'
+import { EMAILVERIFYTOKEN, PHONEEXCEEDED } from '@js/_storage.js'
 import { deCryptoJSON } from '@js/_crypto/index.js'
 
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
@@ -7,11 +7,13 @@ const memberUpgrade = useMemberUpgradeStore()
 const { phone } = storeToRefs(memberUpgrade)
 const {
   onGetCookie,
+  onClearCookie,
   onApiAuthEmailUpgradeMobileCheck,
   onApiAuthEmailUpgradeMobileVerificationCode,
+  onPopupCustomer,
   reset,
 } = useMemberUpgradeActions()
-const { onApiPromise } = usePopupActions()
+const { onApiPromise, onCustom } = usePopupActions()
 const router = useRouter()
 
 definePageMeta({
@@ -54,42 +56,99 @@ onUseMeta({
   url: useRequestURL(),
 })
 
-// 檢查號碼 → 需要合併帳號才發送驗證碼。兩支是同一個動作的兩段,
-// loading 一路包到底,中間不閃一次關閉再開啟。
-const onSumit = async () => {
+// 檢查號碼可不可以繼續,回傳 true 才往下發驗證碼。
+//
+// availability:0 新使用者 / 1 已有 email 帳號與手機(手機尚未綁定 email) / 2 已是手機會員
+//
+//   availability | requiresMerge | 動作
+//   0 或 1       | false         | 手機驗證流程
+//   0 或 1       | true          | 客服 popup
+//   2            | true          | 整併 popup(合併帳號 / 改用其他號碼)
+//   2            | false         | 客服 popup
+//
+// 以白名單判斷可繼續的組合:availability 若出現預期外的值,一律導向客服而不是放行。
+//
+// loading 由這裡開啟;可繼續時「不關」,留給接續的發送驗證碼收尾,
+// 中間才不會閃一次關閉再開啟,其餘出口都在這裡自己關掉。
+const onAuthEmailUpgradeMobileCheck = async () => {
+  const CAN_VERIFY_AVAILABILITY = [0, 1]
+
   onApiPromise('open')
 
   const { status, data } = await onApiAuthEmailUpgradeMobileCheck()
 
-  // requiresMerge 為 false 代表這支號碼不需要合併,沒有後續驗證碼流程
-  if (status !== 200 || data?.requiresMerge !== true) {
+  if (status !== 200) {
     onApiPromise('close')
-    return
+    return false
   }
 
-  const { status: verificationCodeStatus } = await onApiAuthEmailUpgradeMobileVerificationCode()
+  const { availability, requiresMerge } = data ?? {}
+
+  if (CAN_VERIFY_AVAILABILITY.includes(availability) && requiresMerge === false) return true
+
+  // popup 開啟前先收掉 loading:兩個 popup 同時在場會搶 #box 的 teleport 錨點
+  onApiPromise('close')
+
+  // 已是手機會員且需要整併 → 交給整併 popup 讓使用者選(合併帳號 / 改用其他號碼);
+  // 其餘無法繼續的組合一律轉客服(統一的 popup 在 useUpgradeActions)
+  if (availability === 2 && requiresMerge === true) {
+    await onCustom({
+      id: 'popupMemberPhoneMerge',
+      title: '此手機已註冊會員',
+      hasExistClose: false,
+    })
+
+    return false
+  }
+
+  await onPopupCustomer()
+
+  return false
+}
+
+// 發送驗證碼 → 成功才進驗證頁。承接上一段未關的 loading。
+const onAuthEmailUpgradeMobileVerificationCode = async () => {
+  const { status } = await onApiAuthEmailUpgradeMobileVerificationCode()
 
   onApiPromise('close')
 
-  if (verificationCodeStatus === 200) {
-    router.push({
-      name: 'member-upgrade-phone-verify',
-    })
-  }
+  if (status !== 200) return
+
+  router.push({
+    name: 'member-upgrade-phone-verify',
+  })
+}
+
+// 超限是綁「這支號碼」而不是綁人 → 給一個回到表單的出口,讓使用者改用其他帳號。
+// 清掉 cookie 只是把畫面切回輸入,沒有繞過限制:同一支號碼再送一次,
+// API 仍會回 429 並重新寫入 cookie。
+const onClearData = () => {
+  onClearCookie(PHONEEXCEEDED)
+
+  phone.value.apiResult = null
+}
+
+// 檢查號碼 → 可直接綁定才發送驗證碼。兩支是同一個動作的兩段,loading 一路包到底。
+const onSumit = async () => {
+  const canVerify = await onAuthEmailUpgradeMobileCheck()
+
+  if (!canVerify) return
+
+  await onAuthEmailUpgradeMobileVerificationCode()
 }
 
 // upgradeToken 由上一頁(email 驗證成功)寫進 cookie;本頁 URL 不帶這個值,
 // 改由 cookie 取回還原到 store,mobile/check 才有 header X-Upgrade-Token 可帶。
 // cookie SSR 讀得到 → 重整後仍在;未經上一頁進來或已失效時為 null。
 //
-// 當日發送次數已達上限(429)時會寫 EXCEEDED cookie(效期到今天 23:59:59),
+// 發送次數已達上限(429)時會寫 PHONEEXCEEDED cookie(效期到後端給的 unlockAt),
 // 一進頁面就取回還原到 apiResult,重整 / 換頁 / 返回都能保持「已超限」的呈現。
-// 未超限或已跨日(瀏覽器自動清掉 cookie)時為 null。
+// 未超限或已解鎖(瀏覽器自動清掉 cookie)時為 null。
 const onInit = () => {
   reset.onPhone()
 
   phone.value.token = onGetCookie(EMAILVERIFYTOKEN)
-  // phone.value.apiResult = onGetCookie(EXCEEDED)
+  phone.value.apiResult = onGetCookie(PHONEEXCEEDED)
 }
 
 onInit()
@@ -114,8 +173,19 @@ onInit()
       />
       <PageMemberUpgradePhoneContent @submit="onSumit" />
     </template>
-    <PageMemberUpgradeExceeded :message="exceededMessage" v-if="phone.apiResult" />
+    <PageMemberUpgradeExceeded :message="exceededMessage" v-if="phone.apiResult">
+      <CommonMAnchor
+        text="使用其他帳號升級"
+        :setClass="{
+          main: '--oval --bg-orange-f74c --h-55 --text-white --px-20 --text-center w-full',
+          text: 'text-[16px]',
+        }"
+        @click="onClearData()"
+      />
+    </PageMemberUpgradeExceeded>
   </CommonMContainer>
+  <PageMemberUpgradePhonePopupMerge />
+  <PageMemberUpgradePopupCustomer />
 </template>
 
 <style lang="postcss"></style>

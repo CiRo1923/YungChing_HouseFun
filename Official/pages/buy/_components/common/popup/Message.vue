@@ -26,7 +26,7 @@ const onSure = async () => {
       },
     }"
     :setClass="{
-      main: 'p:--w-600',
+      main: 'p:--w-600 t:--w-460',
       note: 'mt-[10px]',
     }"
     @sure="onSure"

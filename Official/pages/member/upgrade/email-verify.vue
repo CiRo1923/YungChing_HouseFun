@@ -1,5 +1,5 @@
 <script setup>
-import { EMAILVALUE, EMAILVERIFY, EXCEEDED } from '@js/_storage.js'
+import { EMAILVALUE, EMAILVERIFY, EMAILEXCEEDED } from '@js/_storage.js'
 import { onMaskEmail } from '@js/_projectPrototype.js'
 import { deCryptoJSON } from '@js/_crypto/index.js'
 
@@ -10,6 +10,7 @@ const {
   onGetCookie,
   onApiAuthEmailUpgradeVerificationCode,
   onApiAuthEmailUpgradeVerificationCodeVerify,
+  onPopupCustomer,
   reset,
 } = useMemberUpgradeActions()
 const { onApiPromise } = usePopupActions()
@@ -21,10 +22,13 @@ definePageMeta({
   requiresAuth: false,
   middleware: [
     () => {
-      const raw = useCookie(EXCEEDED).value
+      const exceededRaw = useCookie(EMAILEXCEEDED).value
+      const verifyRaw = useCookie(EMAILVERIFY).value
 
-      // 有超限紀錄 → 不進本頁,退回上一頁自行呈現
-      if (raw && deCryptoJSON(raw)) {
+      // 有超限紀錄 → 不進本頁,退回上一頁自行呈現。
+      // 沒有 challengeToken(未經上一頁進來、或倒數結束後被瀏覽器清掉)也一樣退回:
+      // 本頁的驗證與重送都需要它,留在這裡只會送出空值吃 400。
+      if ((exceededRaw && deCryptoJSON(exceededRaw)) || !verifyRaw || !deCryptoJSON(verifyRaw)) {
         return navigateTo(
           {
             name: 'member-upgrade-email',
@@ -51,34 +55,55 @@ onUseMeta({
   url: useRequestURL(),
 })
 
-const onReSend = async () => {
+// 重新寄送 email 驗證碼
+const onAuthEmailUpgradeVerificationCode = async () => {
   onApiPromise('open')
+
   const { status } = await onApiAuthEmailUpgradeVerificationCode()
+
   onApiPromise('close')
 
-  // 已達寄送上限 → 退回上一頁呈現(EXCEEDED cookie 已由 API 處理寫好)
-  if (status === 429) {
-    await navigateTo(
-      {
-        name: 'member-upgrade-email',
-      },
-      {
-        replace: true,
-      }
-    )
+  // 已達寄送上限 → 退回上一頁呈現(EMAILEXCEEDED cookie 已由 API 處理寫好)
+  if (status !== 429) return
+
+  await navigateTo(
+    {
+      name: 'member-upgrade-email',
+    },
+    {
+      replace: true,
+    }
+  )
+}
+
+// 驗證 email 驗證碼 → 通過才進手機那步。
+// canDefer 為 false 代表這個帳號不能延後升級 → 不往下走,改請使用者聯繫客服。
+const onAuthEmailUpgradeVerificationCodeVerify = async () => {
+  onApiPromise('open')
+
+  const { status, data } = await onApiAuthEmailUpgradeVerificationCodeVerify()
+
+  onApiPromise('close')
+
+  if (status !== 200) return
+
+  if (data?.canDefer !== true) {
+    await onPopupCustomer()
+
+    return
   }
+
+  router.push({
+    name: 'member-upgrade-phone',
+  })
+}
+
+const onReSend = async () => {
+  await onAuthEmailUpgradeVerificationCode()
 }
 
 const onSumit = async () => {
-  onApiPromise('open')
-  const { status } = await onApiAuthEmailUpgradeVerificationCodeVerify()
-  onApiPromise('close')
-
-  if (status === 200) {
-    router.push({
-      name: 'member-upgrade-phone',
-    })
-  }
+  await onAuthEmailUpgradeVerificationCodeVerify()
 }
 
 // email 與 challengeToken 都由上一頁寫進 cookie;本頁 URL 不帶這兩個值,
@@ -118,6 +143,7 @@ onInit()
     </PageMemberUpgradeHeader>
     <PageMemberUpgradeEmailVerifyContent @reSend="onReSend" @submit="onSumit" />
   </CommonMContainer>
+  <PageMemberUpgradePopupCustomer />
 </template>
 
 <style lang="postcss"></style>

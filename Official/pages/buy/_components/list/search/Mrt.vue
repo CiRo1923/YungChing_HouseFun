@@ -145,7 +145,7 @@ const onAnchorClass = (item) => {
         : ''
 
   if (isAreaAxisX.value) return `--oval --h-45 --px-20 ${isActive}`
-  if (isAreaAxisY.value) return `p:--px-20 tm:--px-10 --h-35 --rounded ${isActive}`
+  if (isAreaAxisY.value) return `p:--px-20 tm:--px-10 --h-35 --rounded-5 ${isActive}`
 
   return ''
 }
@@ -234,7 +234,7 @@ onUnmounted(() => {
                 :text="item.name"
                 :setClass="{
                   main: [
-                    'p:--px-20 tm:--px-10 --h-35 --rounded',
+                    'p:--px-20 tm:--px-10 --h-35 --rounded-5',
                     activeLinesID === item.id ? '--bg-green-8b0d --text-white' : '',
                   ],
                   text: 'font-normal',

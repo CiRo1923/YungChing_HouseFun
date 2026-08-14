@@ -59,7 +59,7 @@ const onSure = async () => {
       },
     }"
     :setClass="{
-      main: 'p:--w-600',
+      main: 'p:--w-600 t:--w-460',
     }"
     @sure="onSure"
   >

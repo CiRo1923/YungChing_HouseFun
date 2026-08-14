@@ -19,6 +19,11 @@ const props = defineProps({
     v-html="props.message"
   />
   <ul class="space-y-[20px]">
+    <!-- 各頁自己的脫離入口(email:改用其他 MAIL / phone:改用其他帳號)。
+         li 由這裡包,頁面只要給按鈕本身,不必知道清單結構。 -->
+    <li v-if="$slots.default">
+      <slot />
+    </li>
     <li>
       <CommonMAnchor
         text="聯繫客服"
@@ -31,6 +36,9 @@ const props = defineProps({
     <li>
       <CommonMAnchor
         text="返回登入頁"
+        :to="{
+          name: 'member-login',
+        }"
         :config="{
           icon: {
             name: 'chevron_left',

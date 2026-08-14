@@ -63,7 +63,10 @@ const onClose = (item) => {
         :id="props.id"
         :config="props.config"
         :setClass="{
-          main: ['p:--py-40 tm:--py-24 p:--px-60 tm:--px-30', props.setClass.main],
+          ...props.setClass,
+          ...{
+            main: ['p:--py-40 tm:--py-24 p:--px-60 tm:--px-30', props.setClass.main],
+          },
         }"
       >
         <template #header v-if="$slots.header">

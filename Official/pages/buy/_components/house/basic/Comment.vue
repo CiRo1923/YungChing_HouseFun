@@ -48,7 +48,7 @@ onUnmounted(() => {
       <CommonMAnchor
         text="預約留言"
         :setClass="{
-          main: '--bg-green-8b0d --rounded --text-center --text-white p:--h-55 w-full',
+          main: '--bg-green-8b0d --rounded-5 --text-center --text-white p:--h-55 w-full',
         }"
         @click="onSubmit(validate)"
       />

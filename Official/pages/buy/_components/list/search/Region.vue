@@ -145,7 +145,7 @@ onUnmounted(() => {
               :text="onCityLabel(item)"
               :setClass="{
                 main: [
-                  'p:--px-20 tm:--px-10 --h-35 --rounded w-full',
+                  'p:--px-20 tm:--px-10 --h-35 --rounded-5 w-full',
                   activeCityID === item.id ? '--bg-green-8b0d --text-white' : '',
                 ],
                 text: 'font-normal',
