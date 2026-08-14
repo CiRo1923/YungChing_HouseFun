@@ -42,7 +42,7 @@ export const useMemberUpgradeStore = defineStore('memberUpgrade', () => {
   })
 
   const phoneVerify = ref({
-    // expires 放 API 的 expiresAt(可重新發送的時間),供重送倒數用
+    // expires 放 API 的 resendAvailableAt(可重新發送的時間),供重送倒數用
     countdownData: {
       expires: null,
     },

@@ -5,7 +5,10 @@
       "PowerShell(npx eslint \"pages/member/upgrade/phone.vue\" 2>&1)",
       "PowerShell(npx eslint \"pages/member/upgrade/phone-verify.vue\" 2>&1)",
       "PowerShell(npx eslint \"stores/member/.composables/useUpgradeActions.js\" \"scripts/_api/member/upgrade.js\" \"pages/member/upgrade/phone-verify.vue\" 2>&1)",
-      "PowerShell(npx eslint \"pages/member/upgrade/phone-verify.vue\" \"stores/member/.composables/useUpgradeActions.js\" \"scripts/_storage.js\" 2>&1)"
+      "PowerShell(npx eslint \"pages/member/upgrade/phone-verify.vue\" \"stores/member/.composables/useUpgradeActions.js\" \"scripts/_storage.js\" 2>&1)",
+      "PowerShell(npx eslint \"stores/member/.composables/useUpgradeActions.js\" 2>&1)",
+      "PowerShell(npx eslint \"stores/member/.composables/useUpgradeActions.js\" \"stores/member/upgrade.js\" \"pages/member/upgrade/_components/phoneVerify/Countdown.vue\" 2>&1)",
+      "PowerShell(npx eslint \"stores/member/.composables/useUpgradeActions.js\" \"stores/member/upgrade.js\" \"scripts/_api/member/upgrade.js\" \"pages/member/upgrade/_components/phoneVerify/Countdown.vue\" 2>&1)"
     ]
   },
   "hooks": {}

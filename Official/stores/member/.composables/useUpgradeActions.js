@@ -3,6 +3,7 @@ import {
   apiAuthEmailUpgradeVerificationCodeVerify,
   apiAuthEmailUpgradeMobileCheck,
   apiAuthEmailUpgradeMobileVerificationCode,
+  apiAuthEmailUpgradeMobileVerificationCodeVerify,
 } from '@js/_api/member/upgrade.js'
 import { enCrypto, deCryptoJSON } from '@js/_crypto/index.js'
 import { EMAILVALUE, EMAILVERIFY, EMAILVERIFYTOKEN, EXCEEDED, PHONE } from '@js/_storage.js'
@@ -159,13 +160,22 @@ export default () => {
     phone.value.apiResult = null
 
     if (status === 200) {
-      // 驗證時要帶回 verificationToken;expiresAt 是驗證碼的失效時間,供重送倒數用
-      const { verificationToken, expiresAt } = data
+      // 驗證時要帶回 verificationToken。
+      //
+      // 為什麼不用 expiresAt(verificationToken 的到期時間):倒數結束後使用者會重新發送,
+      // 那時會拿到新的 verificationToken,舊的自然作廢 → token 的生命週期實際上由「重送」
+      // 決定。與 email 那支一致,一律以 resendAvailableAt 為準。
+      const { verificationToken, developmentVerificationCode, resendAvailableAt } = data
 
       phoneVerify.value.apiData.verificationToken = verificationToken
 
-      // 重送成功會拿到新的值 → 倒數元件 watch 到就覆蓋重算
-      phoneVerify.value.countdownData.expires = expiresAt
+      // 重送倒數的到期時間。重送成功會拿到新的值 → 倒數元件 watch 到就覆蓋重算
+      phoneVerify.value.countdownData.expires = resendAvailableAt
+
+      // 後端只在 dev 環境回 developmentVerificationCode(正式環境不回)→ 直接接,
+      // 不必自己判斷環境。沒有值時補 null,與 apiDefault 的型別一致
+      // (undefined 會讓 v-model 綁的輸入框變成非受控)
+      phoneVerify.value.apiData.verificationCode = developmentVerificationCode ?? null
 
       // 發得出去才寫 cookie:下一頁要顯示「驗證碼已發送至 09xx***xxx」,
       // 但 URL 不帶號碼 → 存 cookie 讓重整 / 換頁後還原得回來。
@@ -175,6 +185,34 @@ export default () => {
       const { message } = data
 
       phone.value.apiResult = data
+
+      onAlert({
+        content: message,
+        setClass: {
+          main: 'pt:--w-460',
+        },
+      })
+    } else if (status !== 200) {
+      // 其餘皆為非預期錯誤 → 統一錯誤彈窗
+      onApiError(config, status, data)
+    }
+
+    return { config, status, data }
+  }
+  const onApiAuthEmailUpgradeMobileVerificationCodeVerify = async () => {
+    const { apiData } = phoneVerify.value
+    const { config, status, data } = await apiAuthEmailUpgradeMobileVerificationCodeVerify(
+      apiData,
+      onUpgradeTokenConfig()
+    )
+
+    phoneVerify.value.apiResult = null
+
+    if (status === 400) {
+      // 後端有給明確原因的可預期錯誤 → 只顯示 message,不套用通用錯誤彈窗
+      const { message } = data
+
+      phoneVerify.value.apiResult = data
 
       onAlert({
         content: message,
@@ -274,6 +312,7 @@ export default () => {
     onApiAuthEmailUpgradeVerificationCodeVerify,
     onApiAuthEmailUpgradeMobileCheck,
     onApiAuthEmailUpgradeMobileVerificationCode,
+    onApiAuthEmailUpgradeMobileVerificationCodeVerify,
     onSetCookie,
     onGetCookie,
     onClearCookie,

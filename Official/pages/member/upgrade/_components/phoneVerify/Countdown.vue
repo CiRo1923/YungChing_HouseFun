@@ -9,7 +9,7 @@ const memberUpgrade = useMemberUpgradeStore()
 const { phoneVerify } = storeToRefs(memberUpgrade)
 const nuxtApp = useNuxtApp()
 
-// API 的 expiresAt(驗證碼的失效時間),供重送倒數用
+// API 的 resendAvailableAt(可重新發送的時間),供重送倒數用
 const expires = computed(() => phoneVerify.value.countdownData.expires)
 
 // 距離可重送還剩幾秒。無值 / 值無效 / 已過期一律回 0(視為可重送)
@@ -52,8 +52,8 @@ const onTimeout = (expireTime) => {
     onDone: () => {
       timeout.value = 0
 
-      // 倒數結束表示 verificationToken 也失效了;store 一併清空,
-      // 讓依賴它的判斷(如 isExpired)跟著翻轉
+      // 倒數結束表示 verificationToken 也失效了(重送會換一組新的,舊的自然作廢);
+      // store 一併清空,讓依賴它的判斷(如 isExpired)跟著翻轉
       phoneVerify.value.apiData.verificationToken = null
 
       emits('done')

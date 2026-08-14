@@ -6,7 +6,11 @@ import { deCryptoJSON } from '@js/_crypto/index.js'
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
 const memberUpgrade = useMemberUpgradeStore()
 const { phone, phoneVerify } = storeToRefs(memberUpgrade)
-const { onGetCookie, onApiAuthEmailUpgradeMobileVerificationCode } = useMemberUpgradeActions()
+const {
+  onGetCookie,
+  onApiAuthEmailUpgradeMobileVerificationCode,
+  onApiAuthEmailUpgradeMobileVerificationCodeVerify,
+} = useMemberUpgradeActions()
 const { onApiPromise } = usePopupActions()
 
 definePageMeta({
@@ -53,7 +57,13 @@ const onReSend = async () => {
 }
 
 const onSumit = async () => {
-  // TODO: 手機驗證碼的 verify API 尚未建立,確認後補上
+  onApiPromise('open')
+  const { status } = await onApiAuthEmailUpgradeMobileVerificationCodeVerify()
+  onApiPromise('close')
+
+  if (status === 200) {
+    // TODO: 驗證成功後的去向尚未確認,補上導頁
+  }
 }
 
 // upgradeToken 與手機號碼都由上一頁寫進 cookie;本頁 URL 不帶這兩個值,

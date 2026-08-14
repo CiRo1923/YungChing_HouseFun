@@ -37,9 +37,25 @@ export const apiAuthEmailUpgradeMobileCheck = async (data, config) =>
 // 發送手機驗證碼
 // req     { mobilePhone }
 // header  X-Upgrade-Token: 同上,由呼叫端以 config 帶入
+// res     {
+//           verificationToken: string,          // 驗證時要一併帶回
+//           expiresAt: string,                  // ISO 8601,不使用 —— 理由同上方 email 那支
+//           resendAvailableAt: string,          // ISO 8601,可重新發送的時間
+//           developmentVerificationCode: string, // 僅 dev 環境回傳,直接帶入輸入框
+//         }
 export const apiAuthEmailUpgradeMobileVerificationCode = async (data, config) =>
   await fetchApi.post(
     `api/${version}/member/auth/email-upgrade/mobile/verification-code`,
+    data,
+    config
+  )
+
+// 驗證手機驗證碼
+// req     { mobilePhone, verificationToken, verificationCode }
+// header  X-Upgrade-Token: 同上,由呼叫端以 config 帶入
+export const apiAuthEmailUpgradeMobileVerificationCodeVerify = async (data, config) =>
+  await fetchApi.post(
+    `api/${version}/member/auth/email-upgrade/mobile/verification-code/verify`,
     data,
     config
   )
