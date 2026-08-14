@@ -35,7 +35,27 @@
       "PowerShell(npx eslint \"pages/member/upgrade/_components/complete/Content.vue\" 2>&1)",
       "Read(//c/Users/CiRo/Desktop/**)",
       "Bash(git rm *)",
-      "PowerShell(npx eslint \"pages/community/index.vue\" 2>&1)"
+      "PowerShell(npx eslint \"pages/community/index.vue\" 2>&1)",
+      "Read(//d/CiRo/Project/YungChing/Public/**)",
+      "Read(//d/CiRo/Project/YungChing/Public/HouseFun/Official/**)",
+      "Read(//d/CiRo/Project/YungChing/Dev/**)",
+      "Read(//d/CiRo/Project/YungChing/Public/HouseFun/**)",
+      "Bash(git -C \"D:/CiRo/Project/YungChing/Public/HouseFun\" rev-parse --abbrev-ref HEAD)",
+      "Read(//d/CiRo/Project/YungChing/Dev/HouseFun/**)",
+      "Bash(cd \"d:/CiRo/Project/YungChing/Dev/HouseFun\" && echo \"=== repo root .gitignore ===\" && cat .gitignore && echo \"=== Official 內有無 .gitignore ===\" && ls -a Official/.gitignore 2>/dev/null || echo \"  \\(無\\)\")",
+      "Bash(node ./scripts/nuxt/sync-to-public.mjs)",
+      "Bash(cp d:/CiRo/Project/YungChing/Dev/HouseFun/Official/scripts/nuxt/sync-to-public.mjs C:/Users/CiRo/AppData/Local/Temp/claude/d--CiRo-Project-YungChing-Dev-HouseFun-Official/0cf79bd3-747a-40a2-b83b-593c33d91339/scratchpad/synctest/Dev/HouseFun/Official/sync.mjs)",
+      "Bash(node sync.mjs)",
+      "Bash(rm -rf \"C:/Users/CiRo/AppData/Local/Temp/claude/d--CiRo-Project-YungChing-Dev-HouseFun-Official/0cf79bd3-747a-40a2-b83b-593c33d91339/scratchpad/synctest\")",
+      "Read(//d/CiRo/Project/YungChing/Dev/HouseFun/Backstage/**)",
+      "Bash(node -e \"console.log\\(JSON.stringify\\(require\\('./package.json'\\).scripts,null,2\\)\\)\")",
+      "Bash(cp Official/scripts/nuxt/sync-to-public.mjs Backstage/scripts/nuxt/sync-to-public.mjs)",
+      "Bash(awk '{print $NF}')",
+      "PowerShell(npx eslint \"scripts/nuxt/sync-to-public.mjs\" 2>&1)"
+    ],
+    "additionalDirectories": [
+      "d:\\CiRo\\Project\\YungChing\\Dev\\HouseFun",
+      "d:\\CiRo\\Project\\YungChing\\Dev\\HouseFun\\Backstage"
     ]
   },
   "hooks": {
