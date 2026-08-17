@@ -13,7 +13,7 @@ const {
   onPopupCustomer,
   reset,
 } = useMemberUpgradeActions()
-const { onApiPromise, onCustom } = usePopupActions()
+const { onApiPromise } = usePopupActions()
 const router = useRouter()
 
 definePageMeta({
@@ -63,7 +63,7 @@ onUseMeta({
 //   availability | requiresMerge | 動作
 //   0 或 1       | false         | 手機驗證流程
 //   0 或 1       | true          | 客服 popup
-//   2            | true          | 整併 popup(合併帳號 / 改用其他號碼)
+//   2            | true          | 導到整併頁,由使用者選擇合併或改號碼
 //   2            | false         | 客服 popup
 //
 // 以白名單判斷可繼續的組合:availability 若出現預期外的值,一律導向客服而不是放行。
@@ -86,21 +86,19 @@ const onAuthEmailUpgradeMobileCheck = async () => {
 
   if (CAN_VERIFY_AVAILABILITY.includes(availability) && requiresMerge === false) return true
 
-  // popup 開啟前先收掉 loading:兩個 popup 同時在場會搶 #box 的 teleport 錨點
   onApiPromise('close')
 
-  // 已是手機會員且需要整併 → 交給整併 popup 讓使用者選(合併帳號 / 改用其他號碼);
-  // 其餘無法繼續的組合一律轉客服(統一的 popup 在 useUpgradeActions)
+  // 已是手機會員且需要整併 → 導到整併頁說明並讓使用者選(合併帳號 / 改用其他號碼)。
+  // 號碼已由 mobile/check 寫進 PHONE cookie,那頁重整時靠它還原並重新確認狀態。
   if (availability === 2 && requiresMerge === true) {
-    await onCustom({
-      id: 'popupMemberPhoneMerge',
-      title: '此手機已註冊會員',
-      hasExistClose: false,
+    router.push({
+      name: 'member-upgrade-merge',
     })
 
     return false
   }
 
+  // 其餘無法繼續的組合一律轉客服(統一的 popup 在 useUpgradeActions)
   await onPopupCustomer()
 
   return false
@@ -184,7 +182,6 @@ onInit()
       />
     </PageMemberUpgradeExceeded>
   </CommonMContainer>
-  <PageMemberUpgradePhonePopupMerge />
   <PageMemberUpgradePopupCustomer />
 </template>
 

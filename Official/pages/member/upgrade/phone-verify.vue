@@ -11,6 +11,7 @@ const {
   onApiAuthEmailUpgradeMobileVerificationCode,
   onApiAuthEmailUpgradeMobileVerificationCodeVerify,
   onApiAuthEmailUpgradeBind,
+  onApiAuthEmailUpgradeMerge,
 } = useMemberUpgradeActions()
 const { onApiPromise } = usePopupActions()
 const router = useRouter()
@@ -64,25 +65,29 @@ onUseMeta({
   url: useRequestURL(),
 })
 
-// 驗證手機驗證碼,回傳 true 才往下綁定。
-// loading 由這裡開啟;通過時「不關」,留給接續的綁定收尾,
+// 驗證手機驗證碼。回傳 availability 給下一段決定要綁定還是整併 —— 驗證失敗回 null。
+// loading 由這裡開啟;通過時「不關」,留給接續的綁定 / 整併收尾,
 // 中間才不會閃一次關閉再開啟,失敗則在這裡自己關掉。
 const onAuthEmailUpgradeMobileVerificationCodeVerify = async () => {
   onApiPromise('open')
 
-  const { status } = await onApiAuthEmailUpgradeMobileVerificationCodeVerify()
+  const { status, data } = await onApiAuthEmailUpgradeMobileVerificationCodeVerify()
 
-  if (status === 200) return true
+  if (status === 200) return data?.availability ?? null
 
   onApiPromise('close')
 
-  return false
+  return null
 }
 
-// 綁定完成升級 → 進完成頁。承接上一段未關的 loading。
-// 登入狀態(authToken + cookie)已由 store action 寫好,這裡只負責導頁。
-const onAuthEmailUpgradeBind = async () => {
-  const { status } = await onApiAuthEmailUpgradeBind()
+// 完成升級 → 進完成頁。承接上一段未關的 loading。
+//
+// 走綁定還是整併,看驗證當下回的 availability(2 = 已是手機會員 → 整併)。
+// 用它而不是把上一頁的 requiresMerge 傳過來:這是「驗證的那一刻」的最新狀態,
+// 也省掉一份要跨頁維護的旗標。能走到本頁的組合只有 0/1(綁定)與 2(整併),兩者互斥。
+const onAuthEmailUpgradeComplete = async (availability) => {
+  const { status } =
+    availability === 2 ? await onApiAuthEmailUpgradeMerge() : await onApiAuthEmailUpgradeBind()
 
   onApiPromise('close')
 
@@ -113,13 +118,13 @@ const onReSend = async () => {
   )
 }
 
-// 驗證通過 → 接著綁定完成升級。兩支是同一個動作的兩段,loading 一路包到底。
+// 驗證通過 → 接著綁定 / 整併完成升級。兩支是同一個動作的兩段,loading 一路包到底。
 const onSumit = async () => {
-  const isVerified = await onAuthEmailUpgradeMobileVerificationCodeVerify()
+  const availability = await onAuthEmailUpgradeMobileVerificationCodeVerify()
 
-  if (!isVerified) return
+  if (availability === null) return
 
-  await onAuthEmailUpgradeBind()
+  await onAuthEmailUpgradeComplete(availability)
 }
 
 // upgradeToken 與手機號碼都由上一頁寫進 cookie;本頁 URL 不帶這兩個值,

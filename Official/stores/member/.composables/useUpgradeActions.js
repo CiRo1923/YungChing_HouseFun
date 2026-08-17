@@ -21,7 +21,7 @@ import {
 export default () => {
   const memberUpgrade = useMemberUpgradeStore()
   const { email, emailVerify, phone, phoneVerify, bind, merge } = storeToRefs(memberUpgrade)
-  const { onPromise, onApiError, onAlert, onCustom } = usePopupActions()
+  const { onApiError, onAlert, onCustom } = usePopupActions()
   // 在 setup 期間先取好:action 是在事件處理器、且多半在 await 之後才執行,
   // 那時直接呼叫 navigateTo / useRouter 可能已經沒有 Nuxt context。
   const router = useRouter()
@@ -149,7 +149,14 @@ export default () => {
 
     phone.value.apiResult = null
 
-    if (status === 401 || status === 403) {
+    if (status === 200) {
+      // 結果留給整併頁判斷要不要重打一次 check(換頁時 store 還在,重整才會沒有)
+      phone.value.checkResult = data
+
+      // 號碼通過檢查就寫 cookie(不是等發驗證碼才寫):整併頁與驗證碼頁的 URL 都不帶號碼,
+      // 重整後要靠它還原,整併頁也需要它才能重新確認狀態。
+      onSetCookie(PHONE, apiData.mobilePhone)
+    } else if (status === 401 || status === 403) {
       // upgradeToken 已失效 → 整條流程作廢,退回起點
       onUpgradeTokenInvalid()
     } else if (status === 400 || status === 404 || status === 409) {
@@ -205,9 +212,7 @@ export default () => {
       // (undefined 會讓 v-model 綁的輸入框變成非受控)
       phoneVerify.value.apiData.verificationCode = developmentVerificationCode ?? null
 
-      // 發得出去才寫 cookie:下一頁要顯示「驗證碼已發送至 09xx***xxx」,
-      // 但 URL 不帶號碼 → 存 cookie 讓重整 / 換頁後還原得回來。
-      onSetCookie(PHONE, apiData.mobilePhone)
+      // 號碼 cookie 在 mobile/check 成功時就寫好了,這裡不用重寫。
 
       // 發得出去就代表已解鎖(改用其他號碼、或後端的鎖已過期)→ 清掉超限紀錄
       onClearCookie(PHONEEXCEEDED)
@@ -314,17 +319,11 @@ export default () => {
     return { config, status, data }
   }
   // 與 bind 的差別只在「號碼已有帳號」→ 改走整併。回應同型,成功處理共用 onUpgradeCompleted。
-  //
-  // loading 用 onPromise 而不是 onApiPromise:這支是從 custom popup 內按下去觸發的,
-  // onApiPromise 是獨立的 popup,keyID 優先序(alert > confirm > custom > apiPromise)
-  // 會讓它被還開著的 custom 蓋掉;onPromise 則是蓋在 popup 內部的遮罩,才看得到。
+  // loading 與 bind 一樣交給呼叫端(phone-verify)控制。
   const onApiAuthEmailUpgradeMerge = async () => {
     if (!onCheckUpgradeToken()) return memberUpgrade.apiTokenInvalid
 
     const { apiData } = merge.value
-
-    onPromise('open')
-
     const { config, status, data } = await apiAuthEmailUpgradeMerge(apiData, onUpgradeTokenConfig())
 
     if (status === 200) {
@@ -346,8 +345,6 @@ export default () => {
       // 其餘皆為非預期錯誤 → 統一錯誤彈窗
       onApiError(config, status, data)
     }
-
-    onPromise('close')
 
     return { config, status, data }
   }
@@ -497,6 +494,9 @@ export default () => {
       // token 一併清掉:store 是單例,重設後才由頁面從 EMAILVERIFYTOKEN cookie 還原,
       // 避免上一輪的舊 token 殘留下來被當成這次的
       phone.value.token = null
+
+      // 重新輸入號碼時,上一支號碼的檢查結果就作廢了
+      phone.value.checkResult = null
     },
   }
 

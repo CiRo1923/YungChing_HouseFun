@@ -63,6 +63,9 @@ export const useMemberUpgradeStore = defineStore('memberUpgrade', () => {
     // email 驗證成功拿到的 upgradeToken,由 EMAILVERIFYTOKEN cookie 還原;
     // 打 mobile/check 時放進 header X-Upgrade-Token
     token: null,
+    // mobile/check 的結果(availability / requiresMerge)。整併頁靠它判斷要不要重打一次
+    // check:從上一頁導過來時已經有值 → 直接用;重整後是 null → 那時才重新確認號碼狀態。
+    checkResult: null,
     apiData: { ...apiDefault.phone },
     apiResult: null,
   })
