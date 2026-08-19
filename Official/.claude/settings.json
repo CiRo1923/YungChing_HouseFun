@@ -51,7 +51,10 @@
       "Bash(node -e \"console.log\\(JSON.stringify\\(require\\('./package.json'\\).scripts,null,2\\)\\)\")",
       "Bash(cp Official/scripts/nuxt/sync-to-public.mjs Backstage/scripts/nuxt/sync-to-public.mjs)",
       "Bash(awk '{print $NF}')",
-      "PowerShell(npx eslint \"scripts/nuxt/sync-to-public.mjs\" 2>&1)"
+      "PowerShell(npx eslint \"scripts/nuxt/sync-to-public.mjs\" 2>&1)",
+      "Bash(cd \"d:/CiRo/Project/YungChing/Dev/HouseFun/Official\" *)",
+      "Read(//d/CiRo/Project/YungChing/Dev/HouseFun/Official/**)",
+      "Bash(node --input-type=module -e ' *)"
     ],
     "additionalDirectories": [
       "d:\\CiRo\\Project\\YungChing\\Dev\\HouseFun",

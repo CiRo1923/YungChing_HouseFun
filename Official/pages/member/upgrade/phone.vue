@@ -1,6 +1,6 @@
 <script setup>
 import { EMAILVERIFYTOKEN, PHONEEXCEEDED } from '@js/_storage.js'
-import { deCryptoJSON } from '@js/_crypto/index.js'
+import { deCrypto } from '@js/.crypto/index.js'
 
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
 const memberUpgrade = useMemberUpgradeStore()
@@ -26,7 +26,7 @@ definePageMeta({
 
       // 沒有 upgradeToken(未經 email 驗證進來、或已過 expiresAt 被瀏覽器清掉)→
       // mobile API 都缺 header X-Upgrade-Token,打不了,退回 email 那步重跑
-      if (!raw || !deCryptoJSON(raw)) {
+      if (!raw || !deCrypto(raw)) {
         return navigateTo(
           {
             name: 'member-upgrade-email',

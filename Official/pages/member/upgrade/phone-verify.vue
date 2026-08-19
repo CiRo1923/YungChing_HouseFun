@@ -1,7 +1,7 @@
 <script setup>
 import { EMAILVERIFYTOKEN, PHONE, PHONEEXCEEDED } from '@js/_storage.js'
 import { onMaskPhone } from '@js/_projectPrototype.js'
-import { deCryptoJSON } from '@js/_crypto/index.js'
+import { deCrypto } from '@js/.crypto/index.js'
 
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
 const memberUpgrade = useMemberUpgradeStore()
@@ -35,8 +35,8 @@ definePageMeta({
       // 已達發送上限也一樣退回,由上一頁呈現超限狀態。
       if (
         !raw ||
-        !deCryptoJSON(raw) ||
-        (exceededRaw && deCryptoJSON(exceededRaw)) ||
+        !deCrypto(raw) ||
+        (exceededRaw && deCrypto(exceededRaw)) ||
         !phoneVerify.apiData.verificationToken
       ) {
         return navigateTo(

@@ -2,7 +2,7 @@ import { apiAuthToken, apiAuthHandoffToken } from '@js/_api/member/common.js'
 
 import { onFormatDate } from '@js/_prototype.js'
 import { AUTHTOKEN } from '@js/_storage.js'
-import { enCrypto, deCryptoJSON } from '@js/_crypto/index.js'
+import { enCrypto, deCrypto } from '@js/.crypto/index.js'
 
 export default () => {
   const project = useProjectStore()
@@ -68,7 +68,8 @@ export default () => {
     const expires = new Date(data.expiresAt)
     const options = Number.isNaN(expires.getTime()) ? {} : { expires }
 
-    onAuthTokenCookie(options).value = enCrypto(JSON.stringify(data))
+    // 不自己 JSON.stringify:enCrypto 內部已依型別序列化
+    onAuthTokenCookie(options).value = enCrypto(data)
   }
 
   // 取:讀 cookie 解密還原為物件;無值 / 解析失敗 / 已過期皆回傳 null。
@@ -80,7 +81,7 @@ export default () => {
 
     if (!raw) return null
 
-    const data = deCryptoJSON(raw)
+    const data = deCrypto(raw)
     // 竄改 / 解不出 → 清掉 cookie。
     if (!data) {
       onSetAuthTokenCookie(null)

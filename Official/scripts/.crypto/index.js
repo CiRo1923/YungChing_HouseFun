@@ -8,6 +8,8 @@ import {
   base64urlToBytes,
   utf8Encode,
   utf8Decode,
+  serializeValue,
+  parseValue,
   shortHash,
 } from './core.js'
 
@@ -19,28 +21,19 @@ const keyBytes = utf8Encode(KEY)
 const ivBytes = utf8Encode(IV)
 
 // ---- 對外 API ----
-export const enCrypto = (string) => {
-  const cipher = cbcEncrypt(utf8Encode(String(string)), keyBytes, ivBytes)
+// 值可以是字串以外的型別(物件 / 陣列 / 布林),core 的 serializeValue 會處理,
+// 解密時由 parseValue 還原 —— 呼叫端不必自己 JSON.stringify / JSON.parse。
+export const enCrypto = (value) => {
+  const cipher = cbcEncrypt(utf8Encode(serializeValue(value)), keyBytes, ivBytes)
   return bytesToHex(cipher).toUpperCase()
 }
 
-// 解密為字串;空值 / 格式錯誤 / 竄改一律回傳 null(不丟例外),讓呼叫端能安全判斷失敗。
+// 解密並還原成原本的型別;空值 / 格式錯誤 / 竄改一律回傳 null(不丟例外),
+// 讓呼叫端能安全判斷失敗。
 export const deCrypto = (string) => {
   if (!string) return null
   try {
-    return utf8Decode(cbcDecrypt(hexToBytes(String(string)), keyBytes, ivBytes))
-  } catch {
-    return null
-  }
-}
-
-// 解密並解析為物件:任何失敗(空值 / 竄改 / 非 JSON 亂碼)皆回傳 null,絕不丟例外。
-// CBC 無驗證標籤,竄改後可能解出亂碼,故連 JSON.parse 也一併保護。
-export const deCryptoJSON = (string) => {
-  const text = deCrypto(string)
-  if (text == null) return null
-  try {
-    return JSON.parse(text)
+    return parseValue(utf8Decode(cbcDecrypt(hexToBytes(String(string)), keyBytes, ivBytes)))
   } catch {
     return null
   }
@@ -49,27 +42,16 @@ export const deCryptoJSON = (string) => {
 // ---- 短版 API(同一套 AES + KEY / IV,只把輸出換成 Base64url)----
 // 長度約為 hex 版的 2/3、且為 URL-safe 字元,較不易被安全過濾器誤判為釣魚字串。
 // 與 hex 版彼此不通用(編碼不同),請成對使用。
-export const enCryptoShort = (string) => {
-  const cipher = cbcEncrypt(utf8Encode(String(string)), keyBytes, ivBytes)
+export const enCryptoShort = (value) => {
+  const cipher = cbcEncrypt(utf8Encode(serializeValue(value)), keyBytes, ivBytes)
   return bytesToBase64url(cipher)
 }
 
-// 解密為字串;空值 / 格式錯誤 / 竄改一律回傳 null(不丟例外)。
+// 解密並還原成原本的型別;空值 / 格式錯誤 / 竄改一律回傳 null(不丟例外)。
 export const deCryptoShort = (string) => {
   if (!string) return null
   try {
-    return utf8Decode(cbcDecrypt(base64urlToBytes(String(string)), keyBytes, ivBytes))
-  } catch {
-    return null
-  }
-}
-
-// 解密並解析為物件:任何失敗皆回傳 null,絕不丟例外。
-export const deCryptoShortJSON = (string) => {
-  const text = deCryptoShort(string)
-  if (text == null) return null
-  try {
-    return JSON.parse(text)
+    return parseValue(utf8Decode(cbcDecrypt(base64urlToBytes(String(string)), keyBytes, ivBytes)))
   } catch {
     return null
   }

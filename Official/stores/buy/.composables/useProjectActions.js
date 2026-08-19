@@ -9,7 +9,7 @@ import {
 
 import { onFormatDate } from '@js/_prototype.js'
 import { BUYACCESSDATA, BUYCHANNEL } from '@js/_storage.js'
-import { enCrypto, deCryptoJSON, enCryptoShort, deCryptoShort } from '@js/_crypto/index.js'
+import { enCrypto, deCrypto, enCryptoShort, deCryptoShort } from '@js/.crypto/index.js'
 
 export default () => {
   const project = useProjectStore()
@@ -115,7 +115,8 @@ export default () => {
     const expires = new Date(data.expiresAt)
     const options = Number.isNaN(expires.getTime()) ? {} : { expires }
 
-    onAccessDataCookie(options).value = enCrypto(JSON.stringify(data))
+    // 不自己 JSON.stringify:enCrypto 內部已依型別序列化
+    onAccessDataCookie(options).value = enCrypto(data)
   }
 
   // 取:讀 cookie 解密還原為物件;無值 / 解析失敗 / 已過期皆回傳 null。
@@ -124,7 +125,7 @@ export default () => {
     const raw = onAccessDataCookie().value
     if (!raw) return null
 
-    const data = deCryptoJSON(raw)
+    const data = deCrypto(raw)
     // 竄改 / 解不出 → 清掉 cookie。
     if (!data) {
       onSetAccessDataCookie(null)

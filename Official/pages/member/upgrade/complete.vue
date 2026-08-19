@@ -1,6 +1,6 @@
 <script setup>
 import { UPGRADECOMPLETE } from '@js/_storage.js'
-import { deCryptoJSON } from '@js/_crypto/index.js'
+import { deCrypto } from '@js/.crypto/index.js'
 
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
 
@@ -14,7 +14,7 @@ definePageMeta({
 
       // 這支 cookie 只有 bind / merge 成功時寫得出來,有值即代表「剛完成升級」,
       // 效期一到就失效 → 沒有值就不是從流程走完進來的,導去登入頁
-      if (!raw || !deCryptoJSON(raw)) {
+      if (!raw || !deCrypto(raw)) {
         return navigateTo(
           {
             name: 'member-login',

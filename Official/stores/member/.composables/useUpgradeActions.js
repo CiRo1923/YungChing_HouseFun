@@ -7,7 +7,7 @@ import {
   apiAuthEmailUpgradeBind,
   apiAuthEmailUpgradeMerge,
 } from '@js/_api/member/upgrade.js'
-import { enCrypto, deCryptoJSON } from '@js/_crypto/index.js'
+import { enCrypto, deCrypto } from '@js/.crypto/index.js'
 import {
   EMAILVALUE,
   EMAILVERIFY,
@@ -436,24 +436,27 @@ export default () => {
       ...options,
     })
 
-  // 存:一律 JSON 序列化後加密再寫入。value 傳 null / undefined 等同清除。
+  // 存:加密後寫入。value 傳 null / undefined 等同清除。
   // options 可覆寫效期等設定,例如 { expires: new Date(...) }。
+  //
+  // 不自己 JSON.stringify:enCrypto 內部已依型別序列化(物件 / 陣列才轉 JSON,字串原樣送)。
+  // 多包一層會讓純字串被存成帶引號的 '"09xx"',解回來時 deCrypto 不會脫掉那層引號。
   const onSetCookie = (key, value, options = {}) => {
     if (value == null) {
       onCookie(key).value = null
       return
     }
 
-    onCookie(key, options).value = enCrypto(JSON.stringify(value))
+    onCookie(key, options).value = enCrypto(value)
   }
 
-  // 取:解密還原為物件。無值 / 竄改 / 非 JSON 一律回 null,並順手清掉壞掉的 cookie。
+  // 取:解密並還原成原本的型別。無值 / 竄改 / 非 JSON 一律回 null,並順手清掉壞掉的 cookie。
   const onGetCookie = (key) => {
     const raw = onCookie(key).value
 
     if (!raw) return null
 
-    const data = deCryptoJSON(raw)
+    const data = deCrypto(raw)
 
     if (!data) {
       onCookie(key).value = null

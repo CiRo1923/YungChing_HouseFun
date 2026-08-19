@@ -1,7 +1,7 @@
 <script setup>
 import { EMAILVALUE, EMAILVERIFY, EMAILEXCEEDED } from '@js/_storage.js'
 import { onMaskEmail } from '@js/_projectPrototype.js'
-import { deCryptoJSON } from '@js/_crypto/index.js'
+import { deCrypto } from '@js/.crypto/index.js'
 
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
 const memberUpgrade = useMemberUpgradeStore()
@@ -28,7 +28,7 @@ definePageMeta({
       // 有超限紀錄 → 不進本頁,退回上一頁自行呈現。
       // 沒有 challengeToken(未經上一頁進來、或倒數結束後被瀏覽器清掉)也一樣退回:
       // 本頁的驗證與重送都需要它,留在這裡只會送出空值吃 400。
-      if ((exceededRaw && deCryptoJSON(exceededRaw)) || !verifyRaw || !deCryptoJSON(verifyRaw)) {
+      if ((exceededRaw && deCrypto(exceededRaw)) || !verifyRaw || !deCrypto(verifyRaw)) {
         return navigateTo(
           {
             name: 'member-upgrade-email',

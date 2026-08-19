@@ -132,7 +132,7 @@ PHONEEXCEEDED    手機發送超限(效期 = unlockAt)
 
 2. **一律經 `onSetCookie` / `onGetCookie` / `onClearCookie`** —— 它們負責加解密與壞值清理,
    不要直接碰 `useCookie`。例外是 middleware:那裡只需要「有沒有有效值」這個判斷,
-   用 `useCookie` + `deCryptoJSON` 兩行就夠,不必為此初始化整個 store。
+   用 `useCookie` + `deCrypto` 兩行就夠,不必為此初始化整個 store。
    (Pinia 在 route middleware 執行前已就緒,composable 其實呼叫得到 ——
    真正的限制是 **server 端 store 沒有值**,所以判斷依據要放 cookie 而不是 store。)
 

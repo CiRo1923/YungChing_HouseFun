@@ -305,6 +305,30 @@ export const cbcDecrypt = (cipherBytes, keyBytes, ivBytes) => {
   return pkcs7Unpad(out)
 }
 
+// ---- 值的序列化 / 還原 ----
+// 加解密只吃字串,但呼叫端常要存物件、陣列、布林,所以在這一層來回轉換。
+
+// 字串原樣送出,其餘型別一律 JSON 序列化。
+export const serializeValue = (value) => (typeof value === 'string' ? value : JSON.stringify(value))
+
+// { 或 [ 開頭視為 JSON,true / false / null 視為原生值,其餘一律維持字串。
+// ⚠️ 純數字字串刻意不轉回數字 —— guid、商品代碼這類值本來就是字串,
+//    轉成數字會掉前導 0('007' → 7),也可能超過安全整數範圍。
+export const parseValue = (text) => {
+  if (typeof text !== 'string') return text
+
+  const trimmed = text.trim()
+
+  if (!/^[{[]/.test(trimmed) && !/^(true|false|null)$/.test(trimmed)) return text
+
+  try {
+    return JSON.parse(trimmed)
+  } catch {
+    // 竄改後可能解出「看起來像 JSON」的亂碼,解析失敗就當原字串
+    return text
+  }
+}
+
 // ---- 短雜湊(djb2):輸入穩定即可,不涉及加解密,供快取破壞等用途 ----
 export const shortHash = (text, length = 8) => {
   let hash = 5381

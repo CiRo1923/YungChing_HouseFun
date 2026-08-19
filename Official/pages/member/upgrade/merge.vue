@@ -1,7 +1,7 @@
 <script setup>
 import { EMAILVERIFYTOKEN, PHONE } from '@js/_storage.js'
 import { onMaskPhone } from '@js/_projectPrototype.js'
-import { deCryptoJSON } from '@js/_crypto/index.js'
+import { deCrypto } from '@js/.crypto/index.js'
 
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
 const memberUpgrade = useMemberUpgradeStore()
@@ -25,7 +25,7 @@ definePageMeta({
 
       // 沒有 upgradeToken 就打不了 mobile API,沒有號碼則無從確認狀態 →
       // 兩者缺一都退回上一頁重新輸入
-      if (!raw || !deCryptoJSON(raw) || !phoneRaw || !deCryptoJSON(phoneRaw)) {
+      if (!raw || !deCrypto(raw) || !phoneRaw || !deCrypto(phoneRaw)) {
         return navigateTo(
           {
             name: 'member-upgrade-phone',
