@@ -1,10 +1,14 @@
 <script setup>
-/* 單一日期選擇。自己實作,不依賴第三方套件。
+/* 單一時間選擇。與 Single(日期)是兩支獨立元件,共用 .composables 與同一份樣式。
 
-  這支只負責「輸入框 + 什麼時候展開」;日期怎麼算在 .composables,
-  日曆長什麼樣在 Calendar.vue,年月切換的兩種模式各自一支元件。
+  有哪幾欄可以選,由 config.format 決定:
+    hh:mm:ss  時 / 分 / 秒
+    hh:mm     時 / 分
+    hh        只有時
+    hh:00:00  只有時,輸出補 :00:00
+    hh:mm:00  時 / 分,輸出補 :00
 
-  config 的鍵見 .composables/useConfig.js —— 那份是對外契約,不要改名。 */
+  config 的鍵見 .composables/useConfig.js。 */
 
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 
@@ -12,9 +16,8 @@ import '@js/_validation.js'
 
 import { Field, ErrorMessage } from 'vee-validate'
 
-import { onGetYMDByFormat, onPickFormat, onGetFormatSep } from './.composables/useDateCore.js'
-import { onMergeDateConfig } from './.composables/useConfig.js'
-import { useCalendar } from './.composables/useCalendar.js'
+import { onFormatTime, onParseTime, onParseTimeFormat } from './.composables/useTimeCore.js'
+import { onMergeTimeConfig } from './.composables/useConfig.js'
 import { usePosition } from './.composables/usePosition.js'
 
 const common = useCommonStore()
@@ -53,7 +56,7 @@ const props = defineProps({
   },
 })
 
-const config = computed(() => onMergeDateConfig(props.config))
+const config = computed(() => onMergeTimeConfig(props.config))
 
 const containerRef = ref(null)
 const iconRef = ref(null)
@@ -63,49 +66,48 @@ const isFocus = ref(false)
 const isActive = ref(false)
 const isDeviceM = computed(() => device.value === 'm')
 
-// 手機且開啟 mobileSupport → 置中的 popup;關掉則交給原生 <input type="date">
 const isPopup = computed(() => isDeviceM.value && config.value.mobileSupport)
-const inputType = computed(() => (isDeviceM.value && !config.value.mobileSupport ? 'date' : 'tel'))
 
 const model = computed({
   get: () => props.modelValue,
   set: (value) => emits('update:modelValue', value),
 })
 
-const calendar = useCalendar(config, model)
+// 面板上目前停的值。model 空的時候依 defaultIsNow 決定要不要帶現在時間
+const time = ref({ hour: 0, minute: 0, second: 0 })
 
-const { onOpen, onClickOutside, onResizeDone } = usePosition(config, isPopup, {
-  container: containerRef,
-  icon: iconRef,
-  panel: panelRef,
-})
+const onGetNow = () => {
+  const now = new Date()
 
-const onGetInputValue = (value) => {
-  if (value?.target) return value.target.value
-  if (value == null) return ''
-  if (value instanceof Date) return value
-
-  return typeof value === 'string' || typeof value === 'number' ? value : ''
+  return { hour: now.getHours(), minute: now.getMinutes(), second: now.getSeconds() }
 }
 
-/* 畫面上顯示的值。model 存的格式與輸入框顯示的格式可以不同
-  (config.format 給 { model, datePicker } 時),所以中間要轉一手。 */
-const datePickerModel = computed({
-  get() {
-    const ymd = calendar.onGetYMDByConfig(model.value, 'model')
-    if (ymd) return calendar.onFormatBy(ymd.y, ymd.m, ymd.d, 'datePicker')
+const onSyncFromModel = () => {
+  const parsed = onParseTime(model.value)
 
-    if (model.value == null) return config.value.defaultIsToday ? calendar.today.value : ''
+  if (parsed) {
+    time.value = parsed
+    return
+  }
 
-    return onGetInputValue(model.value)
-  },
-  set(newValue) {
-    const value = onGetInputValue(newValue)
-    const ymd = onGetYMDByFormat(value, onPickFormat(config.value.format, 'datePicker'))
+  time.value = config.value.defaultIsNow ? onGetNow() : { hour: 0, minute: 0, second: 0 }
+}
 
-    model.value = ymd ? calendar.onFormatBy(ymd.y, ymd.m, ymd.d, 'model') : value
-  },
+// 畫面上顯示的字串。model 有值就照 format 正規化一次,免得存進來的精度與 format 不同
+const timeModel = computed(() => {
+  if (model.value == null || model.value === '') {
+    return config.value.defaultIsNow ? onFormatTime(time.value, config.value.format) : ''
+  }
+
+  const parsed = onParseTime(model.value)
+
+  return parsed ? onFormatTime(parsed, config.value.format) : String(model.value)
 })
+
+// 只有一欄可選時(format 是 hh 或 hh:00:00),選完就沒別的可選了,直接收起來
+const editableCount = computed(
+  () => onParseTimeFormat(config.value.format).parts.filter((part) => part.editable).length
+)
 
 const setClass = computed(() => ({
   main: '',
@@ -122,19 +124,23 @@ const setClass = computed(() => ({
   ...props.setClass,
 }))
 
+const { onOpen, onClickOutside, onResizeDone } = usePosition(config, isPopup, {
+  container: containerRef,
+  icon: iconRef,
+  panel: panelRef,
+})
+
 const onToggle = (value) => {
   isActive.value = value !== undefined ? value : !isActive.value
   isFocus.value = isActive.value
 }
 
-/* altInput = false 時輸入框不給打字,點它就是展開日曆,
-  所以要 preventDefault 擋掉 focus,不然手機會跳出鍵盤。 */
 const onInputPointerdown = (e) => {
   if (config.value.altInput) return
 
   e.preventDefault()
   e.stopPropagation()
-  calendar.onSyncFromModel()
+  onSyncFromModel()
   onToggle(true)
 }
 
@@ -142,18 +148,18 @@ const onInputClick = () => {
   if (!config.value.altInput || isActive.value) return
 
   onToggle(true)
-  calendar.onSyncFromModel()
+  onSyncFromModel()
 }
 
-const onCalendarButtonPointerdown = (e) => {
+const onIconPointerdown = (e) => {
   e.preventDefault()
   e.stopPropagation()
-  calendar.onSyncFromModel()
+  onSyncFromModel()
   onToggle(true)
 }
 
-// 手打時只放行數字與目前 format 用的分隔符
-const onKeydownDateMask = (e) => {
+// 手打時只放行數字與 format 用的分隔符
+const onKeydownTimeMask = (e) => {
   const key = e.key
   const isCtrlCombo = e.ctrlKey || e.metaKey
   const isNavKey =
@@ -168,40 +174,49 @@ const onKeydownDateMask = (e) => {
 
   if (isCtrlCombo || isNavKey) return
   if (/^\d$/.test(key)) return
-  if (key === onGetFormatSep(onPickFormat(config.value.format, 'datePicker'))) return
+  if (key === onParseTimeFormat(config.value.format).sep) return
 
   e.preventDefault()
+}
+
+const onSelect = (type, value) => {
+  time.value = { ...time.value, [type]: value }
+
+  const next = onFormatTime(time.value, config.value.format)
+  emits('update:modelValue', next)
+
+  if (editableCount.value <= 1) onToggle(false)
+
+  nextTick(() => emits('selected'))
+}
+
+const onInput = (e) => {
+  const parsed = onParseTime(e.target.value)
+  if (parsed) time.value = parsed
+
+  emits('input', e)
 }
 
 const onFocusin = (e) => {
   if (config.value.altInput) onToggle(true)
   else isFocus.value = true
 
-  calendar.onSyncFromModel()
+  onSyncFromModel()
   emits('focusin', e)
 }
 
-// 手打到一半離開時,把補完的合法日期寫回 model
+// 手打到一半離開時,把值照 format 正規化寫回(09:5 → 09:05)
 const onFocusout = (e) => {
-  calendar.onSyncFromModel()
+  const parsed = onParseTime(model.value)
 
-  if (calendar.formatDate.value && model.value !== calendar.formatDate.value) {
-    model.value = calendar.formatDate.value
+  if (parsed) {
+    const next = onFormatTime(parsed, config.value.format)
+    if (next !== model.value) model.value = next
   }
 
   if (!isActive.value) isFocus.value = false
 
   emits('focusout', e)
-}
-
-const onSelect = (dateStr) => {
-  const value = calendar.onSelectDate(dateStr)
-  if (!value) return
-
-  onToggle(false)
-  emits('update:modelValue', value)
-
-  nextTick(() => emits('selected'))
 }
 
 const onDocumentClick = (e) => onClickOutside(e, () => onToggle(false))
@@ -211,18 +226,16 @@ const onWindowResize = () => {
   onResizeDone(onOpen)()
 }
 
-watch(() => props.modelValue, calendar.onSyncFromModel, { immediate: true })
+watch(() => props.modelValue, onSyncFromModel, { immediate: true })
 
 onResize()
 
 onMounted(() => {
-  calendar.onSyncFromModel()
+  onSyncFromModel()
   document.addEventListener('click', onDocumentClick, true)
   window.addEventListener('resize', onWindowResize)
 })
 
-/* ⚠️ 這裡一定要移除的是「同一個」函式參照 —— 原本傳的是匿名箭頭函式,
-    removeEventListener 根本對不上,每掛載一次就多留一個 listener。 */
 onUnmounted(() => {
   document.removeEventListener('click', onDocumentClick, true)
   window.removeEventListener('resize', onWindowResize)
@@ -230,13 +243,8 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="m-datepicker --single" :class="setClass.main">
-    <Field
-      :name="props.name"
-      :rules="props.rules"
-      v-model="datePickerModel"
-      v-slot="{ field, errorMessage }"
-    >
+  <div class="m-datepicker --time" :class="setClass.main">
+    <Field :name="props.name" :rules="props.rules" v-slot="{ errorMessage }" v-model="timeModel">
       <div class="m-datepicker-container" ref="containerRef">
         <div
           class="m-datepicker-element"
@@ -249,30 +257,31 @@ onUnmounted(() => {
         >
           <input
             class="m-datepicker-type"
-            :type="inputType"
-            v-bind="field"
+            type="tel"
+            :name="props.name"
             :minlength="config.length"
             :maxlength="config.length"
             :placeholder="config.placeholder"
             :readonly="!config.altInput"
-            :value="datePickerModel"
+            :value="timeModel"
             autocomplete="off"
             @pointerdown="onInputPointerdown($event)"
-            @keydown="onKeydownDateMask($event)"
+            @keydown="onKeydownTimeMask($event)"
             @focusin="onFocusin($event)"
             @click="onInputClick()"
             @focusout="onFocusout($event)"
-            @input="emits('input', $event)"
+            @input="onInput($event)"
             @keydown.enter="emits('keydown.enter')"
           />
           <div class="m-datepicker-ctrl">
+            <!-- ⚠️ _svg 裡沒有時鐘圖示,所以預設沿用日曆的;要換就傳 config.icon -->
             <button
               type="button"
               class="m-datepicker-icon"
-              @pointerdown="onCalendarButtonPointerdown($event)"
+              @pointerdown="onIconPointerdown($event)"
               ref="iconRef"
             >
-              <CommonSvgIcon icon="icon_calendar" class="h-full w-full" />
+              <CommonSvgIcon :icon="config.icon" class="h-full w-full" />
             </button>
           </div>
         </div>
@@ -301,13 +310,16 @@ onUnmounted(() => {
         @click.self="isPopup ? onToggle(false) : null"
       >
         <Transition name="datepicker-bomb" appear>
-          <BuyMDatepickerCalendar
-            :name="props.name"
-            :config="config"
-            :calendar="calendar"
-            @select="onSelect"
-            v-if="isActive"
-          />
+          <div class="m-datepicker-calendar-container" v-if="isActive">
+            <BuyMDatepickerTimePanel
+              :format="config.format"
+              :value="time"
+              :step="config.step"
+              :minTime="config.minTime"
+              :maxTime="config.maxTime"
+              @select="onSelect"
+            />
+          </div>
         </Transition>
       </div>
     </Transition>
