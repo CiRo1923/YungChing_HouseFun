@@ -13,10 +13,9 @@ const model = ref({
   label: '不限',
 })
 
-const rafId = ref(null)
 const activePanel = ref('city')
-const direction = ref(null)
-const animating = ref(null)
+// 'left' = 進行政區(內容往左推)、'right' = 回縣市,只用來決定進出場的方向
+const direction = ref('left')
 
 const cityOptions = computed(() =>
   serachOptions.value.area.map(({ value, text }) => ({
@@ -45,32 +44,50 @@ const onGetKey = (area, index) => {
   return `${area.text}_${index}`
 }
 
-const onStartAnimate = (panel) => {
-  onCancelAnimationFram()
+// 切面板後把共用的捲動容器帶回定位:進行政區回到最頂端,回縣市則捲到目前選擇的那一個。
+// 只有進場的面板留在文件流裡(離場的是 absolute),所以這裡量到的高度就是新面板的高度。
+const onPanelScroll = async (panel) => {
+  await nextTick()
 
-  // 先清掉 animating，確保是「無 transition 的初始狀態」
-  animating.value = null
+  const $body = dropdownRef.value?.dropdownBodyRef
 
-  // 下一個 frame 再開啟 transition
-  direction.value = panel === 'district' ? '--left' : '--right'
-  animating.value = null
+  if (!$body) return
 
-  rafId.value = requestAnimationFrame(() => {
-    animating.value = '--animating'
-    activePanel.value = panel
-    rafId.value = null
+  if (panel === 'district') {
+    $body.scrollTop = 0
+
+    return
+  }
+
+  // 用 index 取項目而不是 querySelector('.--active') —— 避開 `--` 開頭的 class 選擇器
+  const activeIndex = cityOptions.value.findIndex((item) => item.value === model.value.city)
+  const $items = cityPanelRef.value?.querySelectorAll('.m-form-dropdown-item')
+  const $active = activeIndex > -1 ? $items?.[activeIndex] : null
+
+  if (!$active) {
+    $body.scrollTop = 0
+
+    return
+  }
+
+  // 讓選中的縣市落在可視範圍中間;上界交給瀏覽器自己夾
+  const bodyRect = $body.getBoundingClientRect()
+  const activeRect = $active.getBoundingClientRect()
+  const offset = activeRect.top - bodyRect.top - ($body.clientHeight - activeRect.height) / 2
+
+  $body.scrollTop = Math.max($body.scrollTop + offset, 0)
+}
+
+const onSwitchPanel = async (panel) => {
+  direction.value = panel === 'district' ? 'left' : 'right'
+  activePanel.value = panel
+
+  onPanelScroll(panel)
+
+  await dropdownRef.value?.onDropdownHeightUpdate({
+    frames: 2,
+    target: panel === 'district' ? districtPanelRef : cityPanelRef,
   })
-}
-
-const onCancelAnimationFram = () => {
-  if (rafId.value != null) cancelAnimationFrame(rafId.value)
-}
-
-const onTrackTransitionEnd = (e) => {
-  if (e.propertyName !== 'transform') return
-
-  animating.value = null
-  direction.value = null
 }
 
 const onCityClick = async (item) => {
@@ -94,23 +111,13 @@ const onCityClick = async (item) => {
   apiSearchData.value.districtToken = model.value.district
 
   await nextTick()
-  onStartAnimate('district')
-
-  await dropdownRef.value?.onDropdownHeightUpdate({
-    frames: 2,
-    target: districtPanelRef,
-  })
+  await onSwitchPanel('district')
 }
 
 const onBackToCity = async () => {
   if (activePanel.value === 'city') return
 
-  onStartAnimate('city')
-
-  await dropdownRef.value?.onDropdownHeightUpdate({
-    frames: 2,
-    target: cityPanelRef,
-  })
+  await onSwitchPanel('city')
 }
 
 const onAreaClick = (item) => {
@@ -136,10 +143,6 @@ const onAreaClick = (item) => {
         .filter(Boolean)
     : selectCityLabel.value
 }
-
-onUnmounted(() => {
-  onCancelAnimationFram()
-})
 </script>
 
 <template>
@@ -173,13 +176,14 @@ onUnmounted(() => {
       />
     </template>
     <template #dropdown>
-      <div class="area-dropdown overflow-hidden">
-        <div
-          class="area-dropdown-track flex w-[200%] will-change-transform"
-          :class="[animating, direction, `--${activePanel}`]"
-          @transitionend="onTrackTransitionEnd"
-        >
-          <div class="w-1/2 shrink-0" ref="cityPanelRef">
+      <!--
+        同一時間只有一個面板在文件流裡。兩個面板若並排,捲動容器的高度會等於「較長的那一個」,
+        切到較短的面板時下方就會露出一段空白(例如台北市 12 區 vs 22 個縣市)。
+        離場的面板改用 absolute 脫離文件流,高度只由進場的面板決定。
+      -->
+      <div class="area-dropdown relative overflow-hidden">
+        <Transition :name="`area-slide-${direction}`">
+          <div key="city" ref="cityPanelRef" v-if="activePanel === 'city'">
             <SelectDropdownOptions
               :options="cityOptions"
               :config="{
@@ -196,7 +200,7 @@ onUnmounted(() => {
               :getKey="onGetKey"
             />
           </div>
-          <div class="w-1/2 shrink-0" ref="districtPanelRef">
+          <div key="district" ref="districtPanelRef" v-else>
             <SelectDropdownOptions
               :options="districtOptions"
               :config="{
@@ -205,12 +209,15 @@ onUnmounted(() => {
                   value: 'value',
                 },
               }"
+              :setClass="{
+                dropdownOptions: 'w-full',
+              }"
               :isActiveOption="(area) => onActive(area, 'district')"
               :onItemClick="onAreaClick"
               :getKey="onGetKey"
             />
           </div>
-        </div>
+        </Transition>
       </div>
     </template>
     <template #dropdownFooter v-if="activePanel === 'district'">
@@ -220,17 +227,26 @@ onUnmounted(() => {
 </template>
 
 <style lang="postcss">
-.area-dropdown-track {
-  &.\-\-animating {
-    @apply transition-transform duration-300;
-  }
+.area-slide-left-enter-active,
+.area-slide-left-leave-active,
+.area-slide-right-enter-active,
+.area-slide-right-leave-active {
+  @apply transition-transform duration-300;
+}
 
-  &.\-\-district {
-    @apply -translate-x-1/2;
-  }
+/* 離場面板脫離文件流,容器高度才不會被它撐著 —— 這是空白問題的關鍵 */
+.area-slide-left-leave-active,
+.area-slide-right-leave-active {
+  @apply absolute inset-x-0 top-0;
+}
 
-  &.\-\-city {
-    @apply translate-x-0;
-  }
+.area-slide-left-enter-from,
+.area-slide-right-leave-to {
+  @apply translate-x-full;
+}
+
+.area-slide-left-leave-to,
+.area-slide-right-enter-from {
+  @apply -translate-x-full;
 }
 </style>
