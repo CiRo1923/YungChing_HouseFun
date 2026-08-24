@@ -11,7 +11,7 @@ const {
 const buyPublish = useBuyPublishStore()
 const { statusData } = storeToRefs(buyPublish)
 const { onApiGERealEstateCaseStatus } = useBuyPublishActions()
-const { onApiErrorServerToClient } = useBuyPopupActions()
+const { onApiErrorServerToClient } = usePopupActions()
 
 const route = useRoute()
 

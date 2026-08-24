@@ -52,7 +52,7 @@ import { onFormatDate } from '@js/_prototype.js'
 import { useBuyProjectStore } from '@stores/buy/project.js'
 import { useBuyPublishStore } from '@stores/buy/publish.js'
 
-import useBuyPopupActions from '@stores/buy/.composables/usePopupActions.js'
+import usePopupActions from '@stores/.composables/usePopupActions.js'
 
 // 套用範本流程的頁面更新 callback。「編輯」按鈕位於全域 popup 內無法透過 props 取得 update，
 // 故以模組層級保存，讓編輯後重新進入流程仍能於成功後刷新頁面。
@@ -60,7 +60,7 @@ let autoRefreshTemplateUpdate = null
 
 export default () => {
   const projectStores = useBuyProjectStore()
-  const { onAlert, onCustom, onApiPromise, onApiError } = useBuyPopupActions()
+  const { onAlert, onCustom, onApiPromise, onApiError } = usePopupActions()
   const { serverTime, renewal, autoRefresh, golden, options } = storeToRefs(projectStores)
   const buyPublish = useBuyPublishStore()
   const { apiData } = storeToRefs(buyPublish)

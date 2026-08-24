@@ -6,7 +6,7 @@ const buyPublish = useBuyPublishStore()
 const { apiData, address, statusData } = storeToRefs(buyPublish)
 const { onAddress } = useBuyPublishActions()
 
-const { onCustom } = useBuyPopupActions()
+const { onCustom } = usePopupActions()
 
 const areas = ref(options.value.area || [])
 const roads = ref([])

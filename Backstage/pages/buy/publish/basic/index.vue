@@ -14,7 +14,7 @@ const buyProject = useBuyProjectStore()
 // const buyPublish = useBuyPublishStore()
 // const { apiData } = storeToRefs(buyPublish)
 const { onApiPOSTRealEstateNewCase } = useBuyPublishActions()
-const { onApiPromise } = useBuyPopupActions()
+const { onApiPromise } = usePopupActions()
 const router = useRouter()
 // const newCaseAsync = useAsyncData('newCase', () => onApiPOSTRealEstateNewCase())
 

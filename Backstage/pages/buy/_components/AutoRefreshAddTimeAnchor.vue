@@ -9,7 +9,7 @@ const {
 } = useBuyProjectActions()
 const buyProject = useBuyProjectStore()
 const { autoRefresh } = storeToRefs(buyProject)
-const { onApiPromise } = useBuyPopupActions()
+const { onApiPromise } = usePopupActions()
 
 const props = defineProps({
   update: {

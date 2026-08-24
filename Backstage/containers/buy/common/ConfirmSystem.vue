@@ -1,21 +1,18 @@
 <script setup>
 const popup = usePopupStore()
-const { confirmData, confirmCheck } = storeToRefs(popup)
-const { onConfirmClose } = useBuyPopupActions()
+const { confirmData } = storeToRefs(popup)
+const { onConfirmClose } = usePopupActions()
 
 const confirm = computed(() => confirmData.value || {})
 
+// 關閉即結算,resolver 交給 onConfirmClose 內的 onSettle 處理
 const onClose = (item) => {
-  const { type } = item
-  const isSure = type === 'sure'
-
-  confirmCheck.value(isSure)
-  onConfirmClose()
+  onConfirmClose(item.type === 'sure', item)
 }
 </script>
 
 <template>
-  <BuyMPopupMain id="confirmSystem" :setClass="confirm.setClass">
+  <CommonMPopupMain id="confirmSystem" :setClass="confirm.setClass">
     <div class="text-[16px]" :class="confirm.setClass?.content" v-html="confirm.content" />
     <template #footer>
       <div class="text-center">
@@ -41,7 +38,7 @@ const onClose = (item) => {
         </ul>
       </div>
     </template>
-  </BuyMPopupMain>
+  </CommonMPopupMain>
 </template>
 
 <style></style>

@@ -4,8 +4,8 @@ import { Form } from 'vee-validate'
 const project = useBuyProjectStore()
 const { autoRefresh } = storeToRefs(project)
 const popup = usePopupStore()
-const { customData, customCheck } = storeToRefs(popup)
-const { onCustomClose } = useBuyPopupActions()
+const { customData } = storeToRefs(popup)
+const { onCustomClose } = usePopupActions()
 
 const formRef = ref(null)
 const maxSelectTime = computed(() => customData.value.data.maxSelectTime)
@@ -21,9 +21,8 @@ const onSure = async () => {
 
   if (!valid) return
 
-  // 驗證通過才真正 resolve + close
-  customCheck.value(true)
-  onCustomClose()
+  // 驗證通過才關閉,關閉時一併結算(resolver 由 onSettle 收掉)
+  onCustomClose(true)
 }
 </script>
 

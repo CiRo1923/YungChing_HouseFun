@@ -1,4 +1,4 @@
-﻿<script setup>
+<script setup>
 import { Form } from 'vee-validate'
 
 // const common = useCommonStore()
@@ -9,7 +9,7 @@ const buyPublish = useBuyPublishStore()
 const { statusData } = storeToRefs(buyPublish)
 const { onApiGetPublishAvailablePlans, onApiPOSTPublishSubmit } = useBuyProjectActions()
 const { onApiGERealEstateCaseStatus, onApiPOSTRealEstateReadToPublish } = useBuyPublishActions()
-const { onAlert, onApiPromise, onApiErrorServerToClient } = useBuyPopupActions()
+const { onAlert, onApiPromise, onApiErrorServerToClient } = usePopupActions()
 const route = useRoute()
 const router = useRouter()
 const nuxtApp = useNuxtApp()

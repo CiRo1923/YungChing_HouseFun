@@ -15,7 +15,7 @@ const {
   onApiPOSTRealEstateSearch,
   onApiGETCommentssearchCommentFilter,
 } = useBuyListActions()
-const { onApiErrorServerToClient } = useBuyPopupActions()
+const { onApiErrorServerToClient } = usePopupActions()
 const route = useRoute()
 const page = computed(() => route.query.pg)
 // remove (刪除)

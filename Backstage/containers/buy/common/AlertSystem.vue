@@ -1,21 +1,17 @@
 <script setup>
 const popup = usePopupStore()
-const { alertData, alertCheck } = storeToRefs(popup)
-// const buyPopup = useBuyPopupStore()
-const { onAlertClose } = useBuyPopupActions()
+const { alertData } = storeToRefs(popup)
+const { onAlertClose } = usePopupActions()
 const alert = computed(() => alertData.value || {})
 
+// 關閉即結算,resolver 交給 onAlertClose 內的 onSettle 處理
 const onClose = (item) => {
-  const { type } = item
-  const isSure = type === 'sure'
-
-  alertCheck.value(isSure)
-  onAlertClose()
+  onAlertClose(item.type === 'sure', item)
 }
 </script>
 
 <template>
-  <BuyMPopupMain id="alertSystem" :setClass="alert.setClass">
+  <CommonMPopupMain id="alertSystem" :setClass="alert.setClass">
     <div class="text-[16px]" :class="alert.setClass?.content" v-html="alert.content" />
     <template #footer>
       <div class="text-center">
@@ -36,7 +32,7 @@ const onClose = (item) => {
         </ul>
       </div>
     </template>
-  </BuyMPopupMain>
+  </CommonMPopupMain>
 </template>
 
 <style></style>

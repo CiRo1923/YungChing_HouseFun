@@ -19,7 +19,7 @@ const {
   onApiPOSTRealEstateRemove,
   onCommentPopup,
 } = useBuyListActions()
-const { onAlert, onCustom, onApiPromise } = useBuyPopupActions()
+const { onAlert, onCustom, onApiPromise } = usePopupActions()
 const route = useRoute()
 const router = useRouter()
 

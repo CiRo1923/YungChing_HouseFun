@@ -1,5 +1,5 @@
 <script setup>
-const { onCustom } = useBuyPopupActions()
+const { onCustom } = usePopupActions()
 const props = defineProps({
   setClass: {
     type: Object,

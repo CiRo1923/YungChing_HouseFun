@@ -15,7 +15,7 @@ import {
 // import { useBuyProjectStore } from '@stores/buy/project.js'
 import { useBuyListStore } from '@stores/buy/list.js'
 import useBuyProjectActions from '@stores/buy/.composables/useProjectActions.js'
-import useBuyPopupActions from '@stores/buy/.composables/usePopupActions.js'
+import usePopupActions from '@stores/.composables/usePopupActions.js'
 
 export default () => {
   // const buyProject = useBuyProjectStore()
@@ -36,7 +36,7 @@ export default () => {
     searchPagination,
     commentsPagination,
   } = storeToRefs(buyList)
-  const { onCustom, onApiPromise, onApiError } = useBuyPopupActions()
+  const { onCustom, onApiPromise, onApiError } = usePopupActions()
 
   const searchSelectItems = computed(() =>
     searchDatas.value

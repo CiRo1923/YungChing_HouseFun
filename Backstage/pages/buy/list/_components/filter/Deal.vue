@@ -1,7 +1,7 @@
 <script setup>
 const buyList = useBuyListStore()
 const { apiSearchData, serachOptions } = storeToRefs(buyList)
-const { onApiPromise } = useBuyPopupActions()
+const { onApiPromise } = usePopupActions()
 
 const emits = defineEmits(['search'])
 

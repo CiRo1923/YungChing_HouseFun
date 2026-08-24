@@ -14,7 +14,7 @@ import { useBuyProjectStore } from '@stores/buy/project.js'
 import { useBuyPublishStore } from '@stores/buy/publish.js'
 
 import useBuyProjectActions from '@stores/buy/.composables/useProjectActions.js'
-import useBuyPopupActions from '@stores/buy/.composables/usePopupActions.js'
+import usePopupActions from '@stores/.composables/usePopupActions.js'
 
 export default () => {
   const buyProject = useBuyProjectStore()
@@ -45,7 +45,7 @@ export default () => {
   } = useBuyProjectActions()
   const publishStores = useBuyPublishStore()
   const { apiData, statusData, address, pingData } = storeToRefs(publishStores)
-  const { onAlert, onApiError } = useBuyPopupActions()
+  const { onAlert, onApiError } = usePopupActions()
   const currentUnit = computed(() =>
     publishStores.options.unit.find((item) => item.value === apiData.value.caseInfo.isCaseSqUnitPin)
   )

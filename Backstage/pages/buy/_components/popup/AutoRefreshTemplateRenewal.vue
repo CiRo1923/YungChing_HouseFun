@@ -4,9 +4,7 @@ import { Form } from 'vee-validate'
 
 const buyProject = useBuyProjectStore()
 const { autoRefresh } = storeToRefs(buyProject)
-const popup = usePopupStore()
-const { customCheck } = storeToRefs(popup)
-const { onCustomClose } = useBuyPopupActions()
+const { onCustomClose } = usePopupActions()
 
 const formRef = ref(null)
 const info = computed(() => autoRefresh.value.info || null)
@@ -40,9 +38,8 @@ const onSure = async () => {
 
   if (!valid) return
 
-  // 驗證通過才真正 resolve + close
-  customCheck.value(true)
-  onCustomClose()
+  // 驗證通過才關閉,關閉時一併結算(resolver 由 onSettle 收掉)
+  onCustomClose(true)
 }
 </script>
 

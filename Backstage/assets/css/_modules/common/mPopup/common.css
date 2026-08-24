@@ -1,0 +1,117 @@
+.m-popup {
+  @apply fixed inset-0 z-[3] flex m:px-[16px];
+
+  &:before {
+    @apply absolute inset-0 bg-[--popup-overlay-bg-color] content-default;
+  }
+
+  /* 本專案只有 zoom(PC / 平板 / 手機一致),保留修飾符讓日後要加其他模式時有掛點 */
+  &.\-\-zoom {
+    @apply items-center justify-center;
+
+    .m-popup-container {
+      @apply max-w-full rounded-[--popup-container-rounded];
+    }
+  }
+}
+
+.m-popup-container {
+  @apply relative flex max-h-[92%] w-[--popup-width] flex-col overflow-hidden bg-[--popup-container-bg-color] px-[--popup-px] py-[--popup-py];
+}
+
+.m-popup-header {
+  border-bottom-width: var(--popup-header-border);
+
+  @apply flex shrink-0 items-center border-b-[--popup-header-border-color] pb-[--popup-header-pb] text-[--gray-333] m:flex-wrap;
+}
+
+.m-popup-title {
+  font-size: var(--popup-header-text);
+
+  @apply order-1 flex shrink-0 items-center gap-x-[--popup-header-gap-x];
+}
+
+.m-popup-icon {
+  @apply h-[--popup-header-icon-size] w-[--popup-header-icon-size] p-[--popup-header-icon-p];
+
+  &.\-\-defaule-color {
+    @apply text-[--popup-header-icon-color];
+  }
+}
+
+.m-popup-anchor-close {
+  @apply ml-auto flex h-[--popup-header-anchor-size] w-[--popup-header-anchor-size] shrink-0 items-center justify-center p-[--popup-header-anchor-p] text-[--popup-header-anchor-color] m:order-2 pt:order-3;
+}
+
+.m-popup-tools {
+  @apply flex grow items-center m:order-3 m:mt-[--popup-tools-m] pt:order-2 pt:mx-[--popup-tools-m];
+}
+
+.m-popup-body {
+  @apply grow overflow-hidden;
+
+  &:not(:only-child) {
+    @apply mt-[--popup-body-mt];
+  }
+}
+
+.m-popup-footer {
+  @apply mt-[--popup-footer-mt];
+}
+
+@screen p {
+  .m-popup {
+    --popup-container-rounded: var(--popup-container-pc-rounded);
+    --popup-px: var(--popup-container-pc-px);
+    --popup-py: var(--popup-container-pc-py);
+    --popup-header-pb: var(--popup-header-pc-pb);
+    --popup-header-border: var(--popup-header-pc-border);
+    --popup-header-text: var(--popup-header-pc-text);
+    --popup-header-gap-x: var(--popup-header-pc-gap-x);
+    --popup-header-icon-p: var(--popup-header-icon-pc-p);
+    --popup-header-icon-size: var(--popup-header-icon-pc-size);
+    --popup-header-anchor-p: var(--popup-header-anchor-pc-p);
+    --popup-header-anchor-size: var(--popup-header-anchor-pc-size);
+    --popup-tools-m: var(--popup-tools-pc-m);
+    --popup-body-mt: var(--popup-body-pc-mt);
+    --popup-footer-mt: var(--popup-footer-pc-mt);
+  }
+}
+
+@screen t {
+  .m-popup {
+    --popup-container-rounded: var(--popup-container-tablet-rounded);
+    --popup-px: var(--popup-container-tablet-px);
+    --popup-py: var(--popup-container-tablet-py);
+    --popup-header-pb: var(--popup-header-tablet-pb);
+    --popup-header-border: var(--popup-header-tablet-border);
+    --popup-header-text: var(--popup-header-tablet-text);
+    --popup-header-gap-x: var(--popup-header-tablet-gap-x);
+    --popup-header-icon-p: var(--popup-header-icon-tablet-p);
+    --popup-header-icon-size: var(--popup-header-icon-tablet-size);
+    --popup-header-anchor-p: var(--popup-header-anchor-tablet-p);
+    --popup-header-anchor-size: var(--popup-header-anchor-tablet-size);
+    --popup-tools-m: var(--popup-tools-tablet-m);
+    --popup-body-mt: var(--popup-body-tablet-mt);
+    --popup-footer-mt: var(--popup-footer-tablet-mt);
+  }
+}
+
+@screen m {
+  .m-popup {
+    --popup-container-rounded: var(--popup-container-mobile-rounded);
+    --popup-px: var(--popup-container-mobile-px);
+    --popup-py: var(--popup-container-mobile-py);
+    --popup-header-pb: var(--popup-header-mobile-pb);
+    --popup-header-border: var(--popup-header-mobile-border);
+    --popup-header-text: var(--popup-header-mobile-text);
+    --popup-header-gap-x: var(--popup-header-mobile-gap-x);
+    --popup-header-icon-p: var(--popup-header-icon-mobile-p);
+    --popup-header-icon-size: var(--popup-header-icon-mobile-size);
+    --popup-header-anchor-p: var(--popup-header-anchor-mobile-p);
+    --popup-header-anchor-size: var(--popup-header-anchor-mobile-size);
+    --popup-tools-m: var(--popup-tools-mobile-m);
+    --popup-body-mt: var(--popup-body-mobile-mt);
+    --popup-footer-mt: var(--popup-footer-mobile-mt);
+  }
+}

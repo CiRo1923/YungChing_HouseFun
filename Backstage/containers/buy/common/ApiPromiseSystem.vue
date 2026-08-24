@@ -4,11 +4,11 @@ const { apiPromiseData } = storeToRefs(popup)
 </script>
 
 <template>
-  <BuyMPopupMain id="apiPromiseSystem">
+  <CommonMPopupMain id="apiPromiseSystem">
     <CommonMLoadingContainer>
       <p class="text-center" v-html="apiPromiseData.content" />
     </CommonMLoadingContainer>
-  </BuyMPopupMain>
+  </CommonMPopupMain>
 </template>
 
 <style></style>

@@ -9,7 +9,7 @@ import {
   PageBuyPublishBasicPingCaseAmenitieSq,
 } from '#components'
 
-const { onCustom } = useBuyPopupActions()
+const { onCustom } = usePopupActions()
 const buyPublish = useBuyPublishStore()
 const { apiData } = storeToRefs(buyPublish)
 

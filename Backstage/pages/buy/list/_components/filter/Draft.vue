@@ -1,5 +1,5 @@
 <script setup>
-const { onApiPromise } = useBuyPopupActions()
+const { onApiPromise } = usePopupActions()
 
 const emits = defineEmits(['search'])
 

@@ -1,6 +1,6 @@
 ---
 name: popup-system
-description: 修改 popup(alert / confirm / custom / apiAwait)的顯示狀態機、Promise 結算、進出場動畫前必須先讀。記錄兩條不可違反的不變式、三個已知 bug(死鎖打不開、Promise 永久 pending、TypeError 連鎖),以及尚未套用的修復步驟。觸發時機 - 要改 components/buy/mPopup/Main.vue、stores/buy/.composables/usePopupActions.js、containers/buy/common/{CustomPopup,AlertSystem,ConfirmSystem}.vue、assets/css/_common/vueTransition.css 的 popup 段落;或使用者回報 popup「打不開 / 只剩遮罩 / 關不掉 / 動畫沒播 / 流程卡住不往下走」。
+description: 修改 popup(alert / confirm / custom / apiPromise)的顯示狀態機、Promise 結算、進出場動畫前必須先讀。記錄兩條不可違反的不變式,以及它們各自防住的三個 bug(死鎖打不開、Promise 永久 pending、TypeError 連鎖)。觸發時機 - 要改 components/common/mPopup/Main.vue、stores/.composables/usePopupActions.js、containers/buy/common/{CustomPopup,AlertSystem,ConfirmSystem}.vue、assets/css/_modules/common/mPopup/*.css、assets/css/_common/vueTransition.css 的 popup 段落;或使用者回報 popup「打不開 / 只剩遮罩 / 關不掉 / 動畫沒播 / 流程卡住不往下走」。
 ---
 
 # Popup 系統
@@ -8,23 +8,24 @@ description: 修改 popup(alert / confirm / custom / apiAwait)的顯示狀態機
 全站只有一個 popup 顯示層。**同一時間只會有一個 popup 可見**,由 `keyID` 的優先序決定:
 `alertData.id || confirmData.id || customData.id || apiPromiseData.id`。
 
-> ⚠ **本專案目前仍是舊版實作,下述「不變式」尚未套用。** 姊妹專案 Official
-> (`D:\CiRo\Project\YungChing\Dev\HouseFun\Official`)已完成修復並實測。
-> 動到 popup 時請一併套用文末的「待套用的修復步驟」。
+> 本專案已與姊妹專案 Official(`D:\CiRo\Project\YungChing\Dev\HouseFun\Official`)對齊:
+> 兩條不變式都已套用,popup 元件搬到共用層,store 與 composable 不再分 buy 專屬版本。
 
 ## 檔案分工
 
 | 檔案 | 負責 |
 |---|---|
-| `stores/popup.js` | 狀態:`alertData` / `confirmData` / `customData` / `apiPromiseData`(各含 `id`)、`alertCheck` / `confirmCheck` / `customCheck`(Promise 的 resolver) |
-| `stores/buy/.composables/usePopupActions.js` | 開啟 / 關閉 / 結算。**應是唯一能碰 `xxxCheck` 的地方** |
-| `components/buy/mPopup/Main.vue` | 顯示狀態機與兩層 Transition。每個 popup 實例比對 `props.id === keyID` |
-| `containers/buy/common/*.vue` | 各型別的外框(AlertSystem / ConfirmSystem / CustomPopup) |
+| `stores/popup.js` | 狀態:`alertData` / `confirmData` / `customData` / `apiPromiseData`(各含 `id`)、`alertCheck` / `confirmCheck` / `customCheck`(Promise 的 resolver)、`buttons` 與 `setClass`(alert / confirm 的預設按鈕與外觀) |
+| `stores/.composables/usePopupActions.js` | 開啟 / 關閉 / 結算。**是唯一能碰 `xxxCheck` 的地方** |
+| `components/common/mPopup/Main.vue` | 顯示狀態機與兩層 Transition。每個 popup 實例比對 `props.id === keyID` |
+| `containers/buy/common/*.vue` | 各型別的外框(AlertSystem / ConfirmSystem / CustomPopup / ApiPromiseSystem) |
+| `assets/css/_modules/common/mPopup/variables.css` | 尺寸 / 色彩變數與 `--w-1200` ~ `--w-300` 寬度修飾符。改樣式優先動這裡 |
+| `assets/css/_modules/common/mPopup/common.css` | `.m-popup*` 的版面規則(由 `Main.vue` import) |
 | `assets/css/_common/vueTransition.css` | `popup-overlay-*` / `popup-zoom-*`。**不得出現 `.m-xxx` 選擇器** |
 
-**與 Official 的差異**:本專案 `keyID` 的第四順位在 `hasExistClose` 判斷中寫作 `apiAwaitSystem`
-(Official 是 `apiPromiseSystem`);本專案**沒有 bottomSheet 模式**,只有 zoom,
-`<Transition name="popup-zoom">` 是寫死的(Official 有 `mode` 機制可依裝置切換)。
+**與 Official 的差異**:本專案**沒有 bottomSheet 模式**,PC / 平板 / 手機一律 zoom ——
+`Main.vue` 的 `--zoom` class 與 `<Transition name="popup-zoom">` 都是寫死的,
+不吃 Official 那套 `config.mode` + `device` 機制(`.--zoom` 修飾符保留著,日後要加模式才有掛點)。
 
 ---
 
@@ -59,10 +60,13 @@ const onAfterLeave = () => {
 2. **`if (isOpen.value)`(nextTick 後)** — 快速開關時 `nextTick` 之間可能已被關閉。
 3. **`if (!isOpen.value)`(onAfterLeave 內)** — A → B → 上一步 → A 時,返回 A 的退場可能還沒走完,此時 `isOpen` 已回 `true`,遮罩不能收。
 
-### 現行寫法(會死鎖,待改)
+另外兩層都必須維持 `v-if`,**不要改成 `v-show`**(會讓每個 popup 常駐一個 `.m-popup`
+在 DOM,污染 `querySelector`)。
+
+### 舊寫法為什麼會死鎖(勿回頭)
 
 ```js
-// ✗ components/buy/mPopup/Main.vue 目前的實作
+// ✗ 已移除的實作
 const onOverlayEnter = () => { if (isOpen.value) isShowPopup.value = true }
 // 外層 v-if="isOpen || isShowOverlay"
 ```
@@ -72,10 +76,9 @@ const onOverlayEnter = () => { if (isOpen.value) isShowPopup.value = true }
 `@afterLeave` 永遠不來 → `isShowOverlay` 永遠 `true` → 永遠不會再有 `@enter`。
 **該 popup 從此開不起來,只能重整頁面。**
 
-**本專案目前沒踩到,是運氣**:AutoRefresh 流程每次重開 popup 前都剛好有 `await` API
+當年沒被回報出來是運氣:AutoRefresh 流程每次重開 popup 前都剛好有 `await` API
 (`onAutoRefreshAddTimePopup` 開頭的 `onApiGETRefreshNewPlan`),加上 `onApiPromise('open')`
-會佔用 `keyID` 讓前一個 popup 確實走完退場。**只要哪天做出「純前端的上一步」(不打 API),
-就會立刻踩中。**
+會佔用 `keyID` 讓前一個 popup 確實走完退場。**做出「純前端的上一步」(不打 API)就會立刻踩中。**
 
 ---
 
@@ -117,44 +120,14 @@ console 有 `is not a function` → 第三條。
 
 ---
 
-## 待套用的修復步驟
-
-Official 已完成並實測過,照著搬即可。**建議一次做完,只做一半仍會壞。**
-
-### 1. `components/buy/mPopup/Main.vue`
-
-- 移除 `onOverlayEnter` 與 `watchEffect`
-- 改用不變式 1 的 `watch(isOpen, ...)`
-- `onAfterLeave` 加上 `if (!isOpen.value)` 保護
-- 外層 `v-if` 由 `isOpen || isShowOverlay` 改為 `isShowOverlay`
-- 移除 `<Transition>` 上的 `@enter`(`@afterLeave` 保留)
-- **兩層維持 `v-if`,不要改成 `v-show`**(會讓每個 popup 常駐一個 `.m-popup` 在 DOM,污染 `querySelector`)
-
-### 2. `stores/buy/.composables/usePopupActions.js`
-
-- 新增 `onSettle`,並 export `onCustomSettle`
-- 三個 `onXxxClose` 改為 `(isSure = false, item = null)` 簽章,把 `xxxCheck.value = null` 換成 `onSettle(xxxCheck, isSure, item)`
-- 三個開啟函式(`onAlert` / `onConfirm` / `onCustom`)開頭加 `onSettle(xxxCheck)`
-
-### 3. 呼叫端 — 移除全部 `xxxCheck.value(...)` 直接呼叫(共 12 處)
-
-| 檔案 | 改法 |
-|---|---|
-| `containers/buy/common/AlertSystem.vue` | → `onAlertClose(item.type === 'sure', item)` |
-| `containers/buy/common/ConfirmSystem.vue` | → `onConfirmClose(item.type === 'sure', item)` |
-| `containers/buy/common/CustomPopup.vue` | 關閉走 `onCustomClose(isSure, item)`;`isClose: false` 且非 sure 時走 `onCustomSettle(isSure, item)` |
-| `pages/buy/_components/popup/AutoRefresh{AddTime,EditTime,Renewal,Template,TemplateEditTime,TemplateRenewal}.vue`、`Golden.vue` | 原本是「驗證通過才 resolve」→ 若同時要關閉用 `onCustomClose(true)`,不關閉用 `onCustomSettle(true)` |
-| `pages/buy/list/_components/popup/{Deal,Renewal}.vue` | 同上 |
-
-完成後 `grep "Check\.value"` 應該**只剩** `usePopupActions.js` 內設定 resolver 的三處。
-
-### 4. 驗證
+## 動到 popup 後的驗證
 
 `npm run build` 通過只代表沒語法錯,**動畫與死鎖一定要在瀏覽器實測**:
 
-1. **A → B → 上一步 → A** — 用 AutoRefresh 流程,但**把中間的 API 等待拿掉**再測一次(那個延遲正是目前掩蓋 bug 的原因)
+1. **A → B → 上一步 → A** — 用 AutoRefresh 流程,但**把中間的 API 等待拿掉**再測一次(那個延遲會掩蓋死鎖)
 2. **連續開關同一個 popup**(退場動畫還在跑時就重開)
 3. **zoom 進出場**動畫是否正常
+4. `grep "Check\.value"` 應該**只剩** `stores/.composables/usePopupActions.js` 內設定 resolver 的三處
 
 判斷「死鎖」:DOM 裡找得到 `.m-popup` 但**沒有** `.m-popup-container`,且 console 無錯誤。
 
@@ -184,9 +157,10 @@ Official 已完成並實測過,照著搬即可。**建議一次做完,只做一�
 - [ ] `onAfterLeave` 內保留 `if (!isOpen.value)`
 - [ ] `watch` 內保留 `await nextTick()` 與後續的 `if (isOpen.value)`
 - [ ] 所有關閉路徑最終都會呼叫 `onSettle`(含 X 鈕的 `onReset()`)
-- [ ] `grep "Check\.value"` 只在 `usePopupActions.js` 有結果
+- [ ] `grep "Check\.value"` 只在 `stores/.composables/usePopupActions.js` 有結果
 - [ ] `vueTransition.css` 的 popup 段落沒有 `.m-xxx` 選擇器
 - [ ] 兩層都是 `v-if`
+- [ ] 尺寸 / 色彩改在 `_modules/common/mPopup/variables.css`,沒有把數值寫死回 `Main.vue` 的 template
 
 ## 多步流程的寫法
 

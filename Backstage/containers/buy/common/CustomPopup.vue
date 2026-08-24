@@ -1,8 +1,7 @@
 <script setup>
 const popup = usePopupStore()
-const { customCheck, customData } = storeToRefs(popup)
-const buyPopup = useBuyPopupStore()
-const { onCustomClose } = useBuyPopupActions()
+const { customData } = storeToRefs(popup)
+const { onMergeBtns, onCustomClose, onCustomSettle } = usePopupActions()
 const emits = defineEmits(['sure'])
 const props = defineProps({
   id: {
@@ -19,10 +18,10 @@ const isAlertBtns = computed(() => !!(customData.value.btns === 'alert'))
 const isConfirmBtns = computed(() => !!(customData.value.btns === 'confirm'))
 const footerBtns = computed(() => {
   return isAlertBtns.value
-    ? buyPopup.buttons.alert
+    ? popup.buttons.alert
     : isConfirmBtns.value
-      ? buyPopup.buttons.confirm
-      : customData.value.btns || null
+      ? popup.buttons.confirm
+      : onMergeBtns(customData.value.btns)
 })
 
 const onClose = (item) => {
@@ -34,16 +33,19 @@ const onClose = (item) => {
     return
   }
 
-  // cancel 或允許 sureClose 的情況：照舊 resolve + close
-  const isShouldClose = item.isClose !== false
-  customCheck.value(isSure, item)
+  // 保持開啟但要回報結果
+  if (item.isClose === false) {
+    onCustomSettle(isSure, item)
+    return
+  }
 
-  if (isShouldClose) onCustomClose()
+  // cancel 或允許 sureClose 的情況：關閉時一併結算
+  onCustomClose(isSure, item)
 }
 </script>
 
 <template>
-  <BuyMPopupMain :id="props.id" :setClass="props.setClass">
+  <CommonMPopupMain :id="props.id" :setClass="props.setClass">
     <template #header v-if="$slots.header">
       <slot name="header" />
     </template>
@@ -79,7 +81,7 @@ const onClose = (item) => {
         </div>
       </slot>
     </template>
-  </BuyMPopupMain>
+  </CommonMPopupMain>
 </template>
 
 <style></style>

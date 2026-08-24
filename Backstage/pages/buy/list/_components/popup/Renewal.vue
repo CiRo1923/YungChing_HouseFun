@@ -6,9 +6,9 @@ import { Form } from 'vee-validate'
 // const buyList = useBuyListStore()
 // const { searchDatas } = storeToRefs(buyList)
 const popup = usePopupStore()
-const { customData, customCheck } = storeToRefs(popup)
+const { customData } = storeToRefs(popup)
 const { searchSelectCount, renewalCanNotPublishData, renewalNotExpiredData } = useBuyListActions()
-const { onCustomClose } = useBuyPopupActions()
+const { onCustomClose } = usePopupActions()
 const formRef = ref(null)
 const publishInfo = computed(() => {
   const keyMap = {
@@ -53,9 +53,8 @@ const onSure = async () => {
     if (!valid) return
   }
 
-  // 驗證通過才真正 resolve + close
-  customCheck.value(true)
-  onCustomClose()
+  // 驗證通過才關閉,關閉時一併結算(resolver 由 onSettle 收掉)
+  onCustomClose(true)
 }
 </script>
 

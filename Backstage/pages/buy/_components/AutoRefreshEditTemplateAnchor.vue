@@ -6,7 +6,7 @@ const {
   onApiPOSTRefreshTemplateSaveTemplate,
   onAutoRefreshTemplateFlow,
 } = useBuyProjectActions()
-const { onCustom, onApiPromise } = useBuyPopupActions()
+const { onCustom, onApiPromise } = usePopupActions()
 
 const props = defineProps({
   data: {

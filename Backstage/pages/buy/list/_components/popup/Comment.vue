@@ -4,8 +4,7 @@ const { apiCommentsData, apiCommentUpdateData } = storeToRefs(buyList)
 const { onCommentPopup, onCommentSearch, onApiPOSTCommentsUpdateReplyStatue } = useBuyListActions()
 // const popup = usePopupStore()
 // const { promise } = storeToRefs(popup)
-const { onPromise } = usePopupActions()
-const { onCustom, onAlert, onApiPromise } = useBuyPopupActions()
+const { onPromise, onCustom, onAlert, onApiPromise } = usePopupActions()
 
 const REPLY_CONFIG = {
   reply: { statusText: '已回覆', isReply: 1 },

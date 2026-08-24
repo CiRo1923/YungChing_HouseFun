@@ -28,7 +28,7 @@ const {
   onApiPOSTRealEstateDraft,
   onApiPOSTRealEstate,
 } = useBuyPublishActions()
-const { onAlert, onConfirm, onApiPromise, onApiErrorServerToClient } = useBuyPopupActions()
+const { onAlert, onConfirm, onApiPromise, onApiErrorServerToClient } = usePopupActions()
 const route = useRoute()
 const router = useRouter()
 const hfID = computed(() => route.params.id)

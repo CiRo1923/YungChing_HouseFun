@@ -16,7 +16,7 @@ const {
   onApiPOSTRealEstateSearch,
   onApiGETCommentssearchCommentFilter,
 } = useBuyListActions()
-const { onApiErrorServerToClient } = useBuyPopupActions()
+const { onApiErrorServerToClient } = usePopupActions()
 const route = useRoute()
 // renewal (續刊) / offline (下架) / deal (成交)
 const funEventsItem = ['renewal', 'offline', 'deal']
