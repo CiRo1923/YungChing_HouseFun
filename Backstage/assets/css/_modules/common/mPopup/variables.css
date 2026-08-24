@@ -54,6 +54,11 @@
   --popup-body-tablet-mt: 24px;
   --popup-body-mobile-mt: 24px;
 
+  /* 捲軸與內容之間的間距(捲軸本身 4px,見 _common/basic.css 的 .scrollbar.--y) */
+  --popup-body-pc-px: 8px;
+  --popup-body-tablet-px: 8px;
+  --popup-body-mobile-px: 8px;
+
   --popup-footer-pc-mt: 24px;
   --popup-footer-tablet-mt: 24px;
   --popup-footer-mobile-mt: 24px;

@@ -48,7 +48,15 @@
 }
 
 .m-popup-body {
-  @apply grow overflow-hidden;
+  /*
+    捲軸貼著內容會顯得很擠(手機版尤其明顯)。body 往兩側擴張到 container 的 padding 區,
+    再用等寬的 padding 把內容推回原位 —— 內容位置與 header / footer 維持對齊,
+    捲軸則落進 padding 區,與內容之間空出 --popup-body-px。
+    不改 container 的 padding,是因為那會連帶把 header 的底線拉寬。
+  */
+  margin-inline: calc(var(--popup-body-px) * -1);
+
+  @apply grow overflow-hidden px-[--popup-body-px];
 
   &:not(:only-child) {
     @apply mt-[--popup-body-mt];
@@ -74,6 +82,7 @@
     --popup-header-anchor-size: var(--popup-header-anchor-pc-size);
     --popup-tools-m: var(--popup-tools-pc-m);
     --popup-body-mt: var(--popup-body-pc-mt);
+    --popup-body-px: var(--popup-body-pc-px);
     --popup-footer-mt: var(--popup-footer-pc-mt);
   }
 }
@@ -93,6 +102,7 @@
     --popup-header-anchor-size: var(--popup-header-anchor-tablet-size);
     --popup-tools-m: var(--popup-tools-tablet-m);
     --popup-body-mt: var(--popup-body-tablet-mt);
+    --popup-body-px: var(--popup-body-tablet-px);
     --popup-footer-mt: var(--popup-footer-tablet-mt);
   }
 }
@@ -112,6 +122,7 @@
     --popup-header-anchor-size: var(--popup-header-anchor-mobile-size);
     --popup-tools-m: var(--popup-tools-mobile-m);
     --popup-body-mt: var(--popup-body-mobile-mt);
+    --popup-body-px: var(--popup-body-mobile-px);
     --popup-footer-mt: var(--popup-footer-mobile-mt);
   }
 }

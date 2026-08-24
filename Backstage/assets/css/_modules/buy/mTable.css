@@ -2,6 +2,9 @@
   --table-pc-rounded: 15px;
   --table-tabled-rounded: 15px;
   --table-mobile-rounded: 15px;
+
+  /* 捲軸與內容之間的間距(捲軸本身 4px,見 _common/basic.css 的 .scrollbar.--y) */
+  --table-scroll-px: 8px;
 }
 
 .m-table {
@@ -39,6 +42,13 @@
     .m-table-thead-th {
       @apply bg-[--gray-f2];
     }
+  }
+}
+
+.m-table-container {
+  /* 捲軸貼著最後一欄會顯得太擠,內容往左讓出間距 */
+  &.scrollbar.\-\-y {
+    @apply pr-[--table-scroll-px];
   }
 }
 
