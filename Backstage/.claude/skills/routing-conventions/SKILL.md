@@ -35,7 +35,7 @@ Nuxt 的檔案路由直接拿檔名當 path segment,**不做任何大小寫轉�
 ## `_components` 應排除在路由之外(本專案尚未套用)
 
 `pages/**/_components/` 是「元件就近放在頁面旁」的慣例,由 `nuxt.config.ts` 的
-`components:dirs` + `scripts/nuxt/page-component-dirs.ts` 註冊成元件(前綴 `Page` + 路徑)。
+`components:dirs` + `.tools/page-component-dirs.ts` 註冊成元件(前綴 `Page` + 路徑)。
 
 **但 Nuxt 的頁面掃描不認得這個約定** —— 它照樣把每個 `.vue` 掃成頁面。
 

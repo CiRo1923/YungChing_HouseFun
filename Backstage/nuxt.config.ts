@@ -5,9 +5,9 @@ import POSTCSSFUNCTIONS from './postcss.function.js'
 
 import SvgSpritemapDevPlugin, {
   spritemapRoute as devSpritemapRoute,
-} from './scripts/vite/svg-spritemap-dev.mjs'
-import { getPageComponentDirs } from './scripts/nuxt/page-component-dirs'
-import { getStoreComposableImports, getStoreImports } from './scripts/nuxt/store-composable-imports'
+} from './.vite/svg-spritemap-dev.mjs'
+import { getPageComponentDirs } from './.tools/page-component-dirs'
+import { getStoreComposableImports, getStoreImports } from './.tools/store-composable-imports'
 import VitePluginSvgSpritemap from '@spiriit/vite-plugin-svg-spritemap'
 import { ViteImageOptimizer } from 'vite-plugin-image-optimizer'
 import { fileURLToPath } from 'node:url'
