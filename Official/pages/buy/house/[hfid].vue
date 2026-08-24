@@ -30,6 +30,9 @@ await onWithLoadingAll([
 onUseMeta({
   url: useRequestURL(),
 })
+
+// 傳給 FixedBar 判斷捲動是否已離開物件主資訊(照片)區塊
+const basicRef = ref(null)
 </script>
 
 <template>
@@ -44,7 +47,7 @@ onUseMeta({
     </CommonMContainer>
   </div>
   <CommonMContainer class="p:--max-w-1220 p:--px-10 tm:space-y-[8px] p:mt-[45px] p:space-y-[12px]">
-    <PageBuyHouseBasic />
+    <PageBuyHouseBasic ref="basicRef" />
     <PageBuyHouseFocus />
     <PageBuyHouseInformation />
     <PageBuyHouseFeatures />
@@ -57,6 +60,7 @@ onUseMeta({
     <!-- <PageBuyHouseConstruction /> -->
   </CommonMContainer>
   <!-- <PageBuyHousePopupAskMessage /> -->
+  <PageBuyHouseFixedBar :basicEl="basicRef?.$el" />
   <BuyMTop />
   <PageBuyCommonPopupMessage />
   <PageBuyCommonPopupVerifyCode />

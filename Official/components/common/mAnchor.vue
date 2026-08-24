@@ -60,7 +60,9 @@ const bind = computed(() => {
     : as.value === 'a'
       ? {
           href: props.href,
-          target: '_blank',
+          // 外連預設開新分頁;config.target 可覆寫(如 tel: / mailto: 傳 '_self',
+          // 不該先開空白分頁再交給系統處理)。用 ?? 而非 ||,才不會把 '' 也吃掉。
+          target: config.value.target ?? '_blank',
           rel: 'noopener',
         }
       : as.value !== 'div'

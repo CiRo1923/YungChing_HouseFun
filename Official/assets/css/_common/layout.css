@@ -1,3 +1,11 @@
+:root {
+  /* 底部常駐 fixed bar 的高度,由該 bar 於掛載時寫入實際量測值
+     (見 pages/buy/_components/house/FixedBar.vue)。
+     ⚠️ 預設 0px 是關鍵:沒有 bar 的頁面一律讀到 0,版面完全不受影響,
+        不需要任何頁面別的條件判斷。 */
+  --fixed-bottom-height: 0px;
+}
+
 .l-wrap {
   @apply flex grow flex-col;
 }
@@ -11,5 +19,6 @@
 }
 
 .l-footer {
-  @apply shrink-0;
+  /* fixed bar 不佔文檔流,補等高 padding 讓 footer 底部不被蓋住 */
+  @apply shrink-0 pb-[--fixed-bottom-height];
 }
