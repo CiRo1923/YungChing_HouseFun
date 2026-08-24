@@ -2,10 +2,10 @@ import { createConfigForNuxt } from '@nuxt/eslint-config/flat'
 import { fileURLToPath } from 'node:url'
 import { createJiti } from 'jiti'
 
-// scripts/nuxt/store-composable-imports.ts 為 TS,ESLint 的 .mjs 設定無法直接 import → 以 jiti 載入
+// .tools/store-composable-imports.ts 為 TS,ESLint 的 .mjs 設定無法直接 import → 以 jiti 載入
 const jiti = createJiti(import.meta.url)
 const { getStoreComposableImports, getStoreImports } = await jiti.import(
-  './scripts/nuxt/store-composable-imports.ts'
+  './.tools/store-composable-imports.ts'
 )
 
 const storesDir = fileURLToPath(new URL('./stores', import.meta.url))

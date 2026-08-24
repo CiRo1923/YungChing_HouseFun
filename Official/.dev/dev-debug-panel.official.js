@@ -1,7 +1,7 @@
 // 【外掛範例】為除錯面板注入「額外的網路 / API 攔截」——完全不必動 dev-debug-panel.client.js。
 //
 // 啟用方式:把本檔複製到 plugins/ 頂層(例:plugins/dev-debug-panel.myapi.client.js)即自動生效。
-// 目前放在子資料夾 plugins/dev-debug-panel/ 內,Nuxt 不會自動註冊,只作為範本。
+// 目前放在 .dev/ 內,Nuxt 不會自動註冊,只作為範本。
 //
 // 原理:核心(dev-debug-panel.core.js)init 時會在 window.__extDbg 開放註冊點;
 // 這裡用「順序安全」方式註冊 extension——不論本檔比核心早或晚執行都能生效。

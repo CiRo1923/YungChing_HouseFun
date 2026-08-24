@@ -1,6 +1,6 @@
-// 【Nuxt 進入點】放在 plugins/ 頂層 → Nuxt 自動註冊,無需設定;僅 import.meta.dev 生效。
-// 功能在 ./dev-debug-panel.core.js(三環境共用核心)。core 與本檔同層,但已於 nuxt.config 的
-// ignore 排除,不會被 Nuxt 當 plugin 自動註冊(避免弄壞具名匯出);本檔以動態 import 明確載入。
+// 【Nuxt 進入點】放在 .dev/(非 plugins/ 目錄),於 nuxt.config 的 plugins 陣列明示 src 掛載,
+// 不吃 Nuxt 目錄慣例。功能在 ./dev-debug-panel.core.js(三環境共用核心),core 與本檔同層,
+// 以動態 import 明確載入(避免被當 plugin 自動註冊而弄壞具名匯出)。
 // 換專案時通常只改本檔的 options(router / serverNets / loadApiClients);核心不動。
 export default defineNuxtPlugin(async (nuxtApp) => {
   if (!import.meta.dev) return

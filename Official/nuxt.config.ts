@@ -5,9 +5,9 @@ import POSTCSSFUNCTIONS from './postcss.function.js'
 
 import SvgSpritemapDevPlugin, {
   spritemapRoute as devSpritemapRoute,
-} from './scripts/vite/svg-spritemap-dev.mjs'
-import { getPageComponentDirs } from './scripts/nuxt/page-component-dirs'
-import { getStoreComposableImports, getStoreImports } from './scripts/nuxt/store-composable-imports'
+} from './.vite/svg-spritemap-dev.mjs'
+import { getPageComponentDirs } from './.tools/page-component-dirs'
+import { getStoreComposableImports, getStoreImports } from './.tools/store-composable-imports'
 import VitePluginSvgSpritemap from '@spiriit/vite-plugin-svg-spritemap'
 import { ViteImageOptimizer } from 'vite-plugin-image-optimizer'
 import { fileURLToPath } from 'node:url'
@@ -16,16 +16,21 @@ import { execSync } from 'node:child_process'
 const APP_HASH =
   process.env.NUXT_PUBLIC_APP_HASH || execSync('git rev-parse --short HEAD').toString().trim()
 
+const POSTCSS_FUNCTIONS_PLUGIN = new URL('./.tools/postcss/functions.js', import.meta.url).href
+
 const imageAssetDir = CONFIG.imgs.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\\/g, '/')
 const imageAssetInclude = new RegExp(`${imageAssetDir}/(?!svg/spritemap\\.svg$)`)
 
 export default defineNuxtConfig({
-  // 開發除錯面板放在 plugins/dev/(子資料夾 → Nuxt 不自動註冊),於此明示載入 client / server 進入點。
+  // 開發除錯面板放在 .dev/(非 plugins/ 目錄 → Nuxt 不會自動掃描),需於此明示載入進入點。
   // 好處:core.js 不必被 ignore,Vite 會照常監看它 → 改 core 只要 F5/HMR 即生效,不必重啟 dev。
-  plugins: [
-    { src: '~/plugins/dev/dev-debug-panel.client.js', mode: 'client' },
-    { src: '~/plugins/dev/dev-debug-panel.server.js', mode: 'server' },
-  ],
+  //
+  // ⚠️ 目前停用中。要恢復就取消下方註解(client / server 兩支要一起,server 那支負責 SSR
+  //    期間的 API 攔截,少了它面板看不到 SRV 來源的請求)。改完需重啟 dev server 才生效。
+  // plugins: [
+  //   { src: '~/.dev/dev-debug-panel.client.js', mode: 'client' },
+  //   { src: '~/.dev/dev-debug-panel.server.js', mode: 'server' },
+  // ],
   experimental: {
     appManifest: false,
     // 用 AsyncLocalStorage 保留 nuxtApp / pinia context,讓深層 async(fetch 攔截器等
@@ -115,7 +120,9 @@ export default defineNuxtConfig({
     plugins: {
       'tailwindcss/nesting': {},
       tailwindcss: {},
-      'postcss-functions': {
+      // 自寫外掛,取代停更於 2022 的 postcss-functions(見 .tools/postcss/functions.js)。
+      // ⚠️ 用絕對 file URL 當 key:Nuxt 是拿 key 去 import,而 `~` / `@` 指向 srcDir 而非 rootDir。
+      [POSTCSS_FUNCTIONS_PLUGIN]: {
         functions: POSTCSSFUNCTIONS,
       },
       'postcss-calc': {},

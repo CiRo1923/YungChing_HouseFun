@@ -6,12 +6,12 @@
     "node": ">=20.19"
   },
   "scripts": {
-    "compress:public": "node ./scripts/nuxt/compress-public-images.mjs",
+    "compress:public": "node ./.tools/compress-public-images.mjs",
     "start": "node .output/server/index.mjs",
     "dev": "nuxt dev --dotenv .env.dev",
-    "deploy": "node ./scripts/nuxt/run-nuxt-build-with-public-image-copy.mjs .env.deploy && npm run sync:public",
-    "build": "node ./scripts/nuxt/run-nuxt-build-with-public-image-copy.mjs .env.build && npm run sync:public",
-    "sync:public": "node ./scripts/nuxt/sync-to-public.mjs",
+    "deploy": "node ./.tools/run-nuxt-build-with-public-image-copy.mjs .env.deploy && npm run sync:public",
+    "build": "node ./.tools/run-nuxt-build-with-public-image-copy.mjs .env.build && npm run sync:public",
+    "sync:public": "node ./.tools/sync-to-public.mjs",
     "generate": "nuxt generate",
     "preview": "nuxt preview"
   },
@@ -26,8 +26,6 @@
     "eslint": "^10.8.0",
     "postcss": "^8.5.16",
     "postcss-calc": "^10.1.1",
-    "postcss-each": "^1.1.0",
-    "postcss-functions": "^4.0.2",
     "postcss-pxtorem": "^6.0.0",
     "prettier": "^3.9.6",
     "prettier-plugin-tailwindcss": "^0.8.1",
