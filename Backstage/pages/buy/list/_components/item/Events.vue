@@ -82,7 +82,6 @@ const result = computed(() => datas.filter((item) => props.items.includes(item.i
           },
         }"
         :setClass="{
-          main: 'underline',
           icon: 'h-[16px] w-[16px]',
         }"
         @click="item.onClick"

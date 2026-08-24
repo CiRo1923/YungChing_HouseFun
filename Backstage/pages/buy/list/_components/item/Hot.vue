@@ -55,7 +55,6 @@ const items = computed(() => {
             },
           }"
           :setClass="{
-            main: 'underline',
             icon: 'h-[16px] w-[16px]',
           }"
           @click="item.onClick"

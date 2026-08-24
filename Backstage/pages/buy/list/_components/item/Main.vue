@@ -37,6 +37,15 @@ const modelIsChecked = computed({
   },
 })
 const hasEventsItem = computed(() => props.eventsItems && props.eventsItems.length !== 0)
+// 案名連到編輯頁,目的地與「修改」同一個。已成交 TAB 的 eventsItems 只有 remove,
+// 本來就不給編輯入口,案名就維持純文字,不從標題多開一條路進去。
+const hasEditor = computed(() => props.eventsItems.includes('editor'))
+const editorTo = computed(() => ({
+  name: 'buy-publish-basic-id',
+  params: {
+    id: props.data.hfID,
+  },
+}))
 const addressData = computed(() => {
   const keyMap = {
     caseAddr: 'address',
@@ -71,7 +80,15 @@ onUnmounted(() => {
       <div class="order-3 grow">
         <header class="mb-[8px]">
           <h3 class="font-normal tracking-wider tm:text-[16px] p:text-[18px]">
-            <em class="underline">{{ props.data.caseTitle }}</em>
+            <BuyMAnchor
+              :text="props.data.caseTitle"
+              :to="editorTo"
+              :setClass="{
+                main: 'text-left tracking-wider',
+              }"
+              v-if="hasEditor"
+            />
+            <em v-else>{{ props.data.caseTitle }}</em>
           </h3>
         </header>
         <div class="m:mb-[8px] pt:mb-[4px] pt:flex pt:items-center">
