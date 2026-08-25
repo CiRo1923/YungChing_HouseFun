@@ -5,12 +5,19 @@
     @apply absolute inset-0 bg-[--popup-overlay-bg-color] content-default;
   }
 
-  /* 本專案只有 zoom(PC / 平板 / 手機一致),保留修飾符讓日後要加其他模式時有掛點 */
   &.\-\-zoom {
     @apply items-center justify-center;
 
     .m-popup-container {
       @apply max-w-full rounded-[--popup-container-rounded];
+    }
+  }
+
+  &.\-\-bottomSheet {
+    @apply flex-col justify-end;
+
+    .m-popup-container {
+      @apply w-full rounded-t-[--popup-container-rounded];
     }
   }
 }

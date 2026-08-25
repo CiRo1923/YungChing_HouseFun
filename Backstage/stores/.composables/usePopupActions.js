@@ -1,7 +1,5 @@
 import { onDeepMerge, onBodyOverflowHiddenToggle } from '@js/_prototype.js'
 
-import { usePopupStore } from '@stores/popup.js'
-
 export default () => {
   const popup = usePopupStore()
   const {
@@ -167,12 +165,13 @@ export default () => {
       apiError.value = { config, status, data }
     } else {
       const title = '錯誤訊息'
-      const message =
-        status === 404
-          ? '存取的對應的資料已被刪除、移動或從未存在'
-          : status === 503
-            ? '服務無法使用'
-            : data.Message || data.title
+      const statusMessages = {
+        404: '存取的對應的資料已被刪除、移動或從未存在',
+        503: '服務無法使用',
+      }
+      const apiMessage = data.Message || data.message || data.title
+      const message = statusMessages[status] || apiMessage
+      // 400 / 401 的 Message 是給使用者看的說明,不需要再附上 API 位址
       const content =
         /^(400|401)$/.test(status) && data.Message
           ? message

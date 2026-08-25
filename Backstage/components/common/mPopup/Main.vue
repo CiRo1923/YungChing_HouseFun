@@ -2,6 +2,9 @@
 import '@css/_modules/common/mPopup/variables.css'
 import '@css/_modules/common/mPopup/common.css'
 
+const common = useCommonStore()
+const { device } = storeToRefs(common)
+const { onResize } = useCommonActions()
 const popup = usePopupStore()
 const { alertData, confirmData, customData, apiPromiseData } = storeToRefs(popup)
 const { onReset } = usePopupActions()
@@ -10,6 +13,10 @@ const props = defineProps({
   id: {
     type: String,
     default: '',
+  },
+  config: {
+    type: Object,
+    default: () => ({}),
   },
   setClass: {
     type: Object,
@@ -25,25 +32,42 @@ const keyID = computed(
   () => alertData.value.id || confirmData.value.id || customData.value.id || apiPromiseData.value.id
 )
 
-const hasExistClose = computed(() => {
-  const alertClose = keyID.value === 'alertSystem' ? alertData.value.hasExistClose : false
-  const confirmClose = keyID.value === 'confirmSystem' ? confirmData.value.hasExistClose : false
-  const customClose =
-    keyID.value !== 'alertSystem' &&
-    keyID.value !== 'confirmSystem' &&
-    keyID.value !== 'apiPromiseSystem'
-      ? customData.value.hasExistClose
-      : false
-  const awaitClose = keyID.value === 'apiPromiseSystem' ? apiPromiseData.value.hasExistClose : null
+// 每個 popup 實例只渲染自己那一份資料。
+// ⚠ 用 props.id 判斷,不要用 keyID:關閉只清 id、其餘欄位留給退場動畫(見 usePopupActions),
+//   所以殘留值一定存在;而退場期間 keyID 已是 null,用 keyID 會 fallback 到別人的殘留值 ——
+//   apiPromise 沒有 title,就會把上一個 custom popup 的標題與 icon 撿來顯示。
+const activeData = computed(() => {
+  if (props.id === 'alertSystem') return alertData.value
+  if (props.id === 'confirmSystem') return confirmData.value
+  if (props.id === 'apiPromiseSystem') return apiPromiseData.value
 
-  return alertClose || confirmClose || customClose || awaitClose
+  return customData.value
 })
 
-const title = computed(
-  () => alertData.value.title || confirmData.value.title || customData.value.title
-)
+const hasExistClose = computed(() => activeData.value.hasExistClose)
 
-const icon = computed(() => alertData.value.icon || confirmData.value.icon || customData.value.icon)
+const title = computed(() => activeData.value.title)
+
+const icon = computed(() => activeData.value.icon)
+
+const config = computed(() => {
+  return {
+    mode: 'zoom', // 'zoom' | 'bottomSheet' : {p: 'zoom' | 'bottomSheet', pt: 'zoom' | 'bottomSheet', tm: 'zoom' | 'bottomSheet', t: 'zoom' | 'bottomSheet', m: 'zoom' | 'bottomSheet'}`
+    ...props.config,
+  }
+})
+
+// 依 config.mode 解析當前模式；mode 為物件時用 device (p | t | m) 取值
+const mode = computed(() => {
+  const { mode } = config.value
+  return typeof mode === 'object' && mode !== null ? mode[device.value] || 'zoom' : mode
+})
+
+// Transition name：popup-zoom | popup-bottomSheet
+const transitionName = computed(() => `popup-${mode.value}`)
+
+// container className：--zoom | --bottomSheet
+const modeClass = computed(() => `--${mode.value}`)
 
 const setClass = computed(() => {
   return {
@@ -92,12 +116,22 @@ watch(
   },
   { immediate: true }
 )
+
+onResize()
+
+onMounted(() => {
+  window.addEventListener('resize', onResize)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', onResize)
+})
 </script>
 
 <template>
   <Transition name="popup-overlay">
-    <div class="m-popup --zoom" :class="setClass.main" v-if="isShowOverlay">
-      <Transition name="popup-zoom" @afterLeave="onAfterLeave">
+    <div class="m-popup" :class="[modeClass, setClass.main]" v-if="isShowOverlay">
+      <Transition :name="transitionName" @afterLeave="onAfterLeave">
         <div class="m-popup-container" :class="setClass.container" v-if="isShowPopup">
           <div class="m-popup-header" :class="setClass.header" v-if="title || $slots.headerTools">
             <slot name="header">

@@ -8,6 +8,10 @@ const props = defineProps({
     type: String,
     default: null,
   },
+  config: {
+    type: Object,
+    default: () => ({}),
+  },
   setClass: {
     type: Object,
     default: () => ({}),
@@ -45,7 +49,7 @@ const onClose = (item) => {
 </script>
 
 <template>
-  <CommonMPopupMain :id="props.id" :setClass="props.setClass">
+  <CommonMPopupMain :id="props.id" :config="props.config" :setClass="props.setClass">
     <template #header v-if="$slots.header">
       <slot name="header" />
     </template>
