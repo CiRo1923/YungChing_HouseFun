@@ -77,7 +77,8 @@ const onClick = async () => {
 </script>
 
 <template>
-  <div class="m:text-center">
+  <!-- 同一列的時間 Badge 會撐開版面,這顆按鈕不能被壓縮,否則文字會被擠到換行 -->
+  <div class="m:text-center pt:shrink-0">
     <BuyMAnchor
       text="修改時間"
       :setClass="{

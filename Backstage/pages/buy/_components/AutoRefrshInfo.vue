@@ -51,10 +51,14 @@ const setClass = computed(() => {
         v-for="(item, index) in plans"
         :key="`${item.planName}_${index}`"
       >
-        <b class="block text-center text-[16px]">{{ item.planName }}</b>
-        <div class="flex justify-center pt:ml-auto">
+        <!-- 方案名固定寬度:不給的話會被時間 Badge 擠到斷行(「2026-09-10到期」變三行),
+             各列的起始位置也對不齊 -->
+        <b class="block text-center text-[16px] pt:w-[120px] pt:shrink-0">{{ item.planName }}</b>
+        <!-- 時間區塊佔滿剩餘寬度並靠左,時間少的那列才不會被推到右邊、與其他列不齊頭 -->
+        <div class="flex justify-center pt:grow pt:justify-start">
+          <!-- 時間一超過一行就會 wrap,垂直間距要一併給,否則兩排 Badge 會黏在一起 -->
           <ul
-            class="flex flex-wrap items-center justify-start m:gap-[6px] t:gap-x-[8px] p:gap-x-[16px]"
+            class="flex flex-wrap items-center justify-start m:gap-[6px] t:gap-[8px] p:gap-x-[16px] p:gap-y-[8px]"
           >
             <li v-for="(time, idx) in item.listTimeSpan" :key="`${time}_${idx}_${index}`">
               <BuyMTimeMain
