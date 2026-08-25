@@ -18,6 +18,10 @@ const props = defineProps({
 const defaultConfig = {
   mode: 'button',
   index: null,
+  // active: { key, sort } —— 外部提供「目前的排序」,元件重新掛載時據此還原選中狀態。
+  // 只靠 index 不行:dropdown 模式的選項會被攤平成 asc / desc 兩筆,索引與 button 模式對不上,
+  // 方向也無從表達。找不到對應項時才退回 index。
+  active: null,
   maxItems: 5,
   position: 'auto',
 }
@@ -95,8 +99,39 @@ const isFixedElement = (element) => {
   return false
 }
 
+// 依 { key, sort } 找回選中的項目。dropdown 的 sortOptions 已攤平,方向編碼在索引裡;
+// button 則是原始選項 + activeSortType 表示方向。找不到回 false,交給呼叫端退回 index。
+const onSyncActiveBySort = ({ key, sort }) => {
+  if (currentMode.value === 'dropdown') {
+    const index = sortOptions.value.findIndex(({ value }) => {
+      // 無 sort 的選項(例如「預設」)攤平後不帶 sort,只比對 key
+      return value?.key === key && (value.sort === undefined || value.sort === sort)
+    })
+
+    if (index < 0) return false
+
+    activeIndex.value = index
+    activeSortType.value = null
+
+    return true
+  }
+
+  const index = normalizedOptions.value.findIndex((item) => item.value === key)
+
+  if (index < 0) return false
+
+  const item = normalizedOptions.value[index]
+
+  activeIndex.value = index
+  activeSortType.value = item.sort ? (item.sort.asc.value === sort ? 'asc' : 'desc') : null
+
+  return true
+}
+
 const onSyncActiveIndex = () => {
-  const { index } = sortConfig.value
+  const { index, active } = sortConfig.value
+
+  if (active?.key != null && onSyncActiveBySort(active)) return
 
   activeIndex.value = index === null || index === undefined ? null : Number(index)
   activeSortType.value = null
@@ -252,6 +287,8 @@ const onSortResize = () => {
   currentMode.value = resolveResponsiveConfig(sortConfig.value.mode) || defaultConfig.mode
 
   onSetSortOptions()
+  // 切換模式會重排 sortOptions(dropdown 會攤平),選中的索引得跟著重算
+  onSyncActiveIndex()
 }
 
 const onWindowResize = async () => {
@@ -273,14 +310,17 @@ watch(
 )
 
 watch(
-  () => sortConfig.value.index,
+  () => [sortConfig.value.index, sortConfig.value.active],
   () => {
     onSyncActiveIndex()
+  },
+  {
+    deep: true,
   }
 )
 
-onSyncActiveIndex()
 onResize()
+// onSortResize 內會 onSyncActiveIndex,順序不能顛倒 —— 反查需要 sortOptions 先備妥
 onSortResize()
 
 onMounted(() => {

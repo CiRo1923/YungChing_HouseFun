@@ -10,6 +10,14 @@ const props = defineProps({
   },
 })
 
+// 搜尋無結果時整個功能列會被卸載(Content.vue 的 v-if="hasData"),排序元件的選中狀態
+// 是它自己的 ref,重新掛載就回到預設 —— 但 store 的 token 沒變,畫面會顯示「預設」卻仍照舊排序。
+// 把 store 的排序回傳給元件,讓它重新掛載時能還原。
+const activeSort = computed(() => ({
+  key: apiSearchData.value.listSortToken,
+  sort: apiSearchData.value.listOrderToken,
+}))
+
 const onClick = (item) => {
   const { value } = item
   const isObject = typeof value === 'object'
@@ -31,6 +39,7 @@ const onClick = (item) => {
       :options="props.options"
       :config="{
         index: 0,
+        active: activeSort,
         mode: {
           m: 'dropdown',
         },
