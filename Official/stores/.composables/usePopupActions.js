@@ -91,7 +91,7 @@ export default () => {
     confirmData.value.title = data.title
     confirmData.value.icon = data.icon
     confirmData.value.content = data.content
-    confirmData.value.btns = onMergeBtns(buttons, data.btns)
+    confirmData.value.btns = onMergeBtns(data.btns, buttons)
     confirmData.value.hasExistClose = data.hasExistClose !== undefined ? data.hasExistClose : true
     confirmData.value.setClass = data.setClass
 
@@ -207,6 +207,7 @@ export default () => {
     onCustomClose,
     onCustomSettle,
     onApiPromise,
+    onApiPromiseClose,
     onApiError,
     onApiErrorServerToClient,
     onApiErrorClear,

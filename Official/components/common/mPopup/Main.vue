@@ -32,25 +32,24 @@ const keyID = computed(
   () => alertData.value.id || confirmData.value.id || customData.value.id || apiPromiseData.value.id
 )
 
-const hasExistClose = computed(() => {
-  const alertClose = keyID.value === 'alertSystem' ? alertData.value.hasExistClose : false
-  const confirmClose = keyID.value === 'confirmSystem' ? confirmData.value.hasExistClose : false
-  const customClose =
-    keyID.value !== 'alertSystem' &&
-    keyID.value !== 'confirmSystem' &&
-    keyID.value !== 'apiPromiseSystem'
-      ? customData.value.hasExistClose
-      : false
-  const awaitClose = keyID.value === 'apiPromiseSystem' ? apiPromiseData.value.hasExistClose : null
+// 每個 popup 實例只渲染自己那一份資料。
+// ⚠ 用 props.id 判斷,不要用 keyID:關閉只清 id、其餘欄位留給退場動畫(見 usePopupActions),
+//   所以殘留值一定存在;而退場期間 keyID 已是 null,用 keyID 會 fallback 到別人的殘留值 ——
+//   apiPromise 沒有 title,就會把上一個 custom popup 的標題與 icon 撿來顯示
+//   (例如 onPopupLogin:關掉「會員登入」後,資料處理中的燈箱會頂著那個標題)。
+const activeData = computed(() => {
+  if (props.id === 'alertSystem') return alertData.value
+  if (props.id === 'confirmSystem') return confirmData.value
+  if (props.id === 'apiPromiseSystem') return apiPromiseData.value
 
-  return alertClose || confirmClose || customClose || awaitClose
+  return customData.value
 })
 
-const title = computed(
-  () => alertData.value.title || confirmData.value.title || customData.value.title
-)
+const hasExistClose = computed(() => activeData.value.hasExistClose)
 
-const icon = computed(() => alertData.value.icon || confirmData.value.icon || customData.value.icon)
+const title = computed(() => activeData.value.title)
+
+const icon = computed(() => activeData.value.icon)
 
 const config = computed(() => {
   return {
