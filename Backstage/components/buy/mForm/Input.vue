@@ -60,6 +60,9 @@ const { config, setClass, onEnter } = useTextCore({
     comma: false,
     checkNotIsZero: false,
     integer: false,
+    // 數字欄位預設連負號都剝掉(integer 只管小數點,不管正負)。
+    // 需要收負數的欄位才打開,負號不計入 maxlength。
+    allowNegative: false,
     toFixed: null,
   },
   setClass: {
@@ -76,14 +79,19 @@ const isNumeric = computed(() => /^(decimal|numeric)$/.test(config.value.inputMo
 // decimal 欄位：maxlength 只算小數點前位數，toFixed 算小數點後位數，
 // 但原生 <input> maxlength 會計算整串，所以這裡換算成「整數位 + 小數點 + 小數位」的總長度
 const fieldMaxlength = computed(() => {
-  const { maxlength, length, toFixed, integer } = config.value
+  const { maxlength, length, toFixed, integer, allowNegative } = config.value
   const base = maxlength || length
 
-  if (!base || integer || !isNumeric.value) return base
+  if (!base) return base
+
+  // 負號不該吃掉一位數字的額度
+  const sign = allowNegative && isNumeric.value ? 1 : 0
+
+  if (integer || !isNumeric.value) return sign ? Number(base) + sign : base
 
   const decimals = toFixed != null && toFixed !== '' ? Number(toFixed) : 0
 
-  return Number(base) + (decimals > 0 ? decimals + 1 : 0)
+  return Number(base) + (decimals > 0 ? decimals + 1 : 0) + sign
 })
 
 // 依 maxlength（小數點前）與 toFixed（小數點後）限制 decimal 字串長度
@@ -132,10 +140,17 @@ const onBind = (field) => {
 
 const onInput = async (e) => {
   const value = e.target.value
-  const { inputMode, checkNotIsZero, integer, inputChinese, maxlength, toFixed } = config.value
+  const { inputMode, checkNotIsZero, integer, inputChinese, maxlength, toFixed, allowNegative } =
+    config.value
   const regex = {
     chinese: /[\u4e00-\u9fa5０-９Ａ-Ｚａ-ｚ～！＠＃＄％︿＆＊（）＿｜｛｝［］＜＞？／＊＼＋－]/g,
-    number: integer ? /[^0-9]/g : /[^0-9.]/g,
+    number: allowNegative
+      ? integer
+        ? /[^0-9-]/g
+        : /[^0-9.-]/g
+      : integer
+        ? /[^0-9]/g
+        : /[^0-9.]/g,
   }
 
   const isRemoveChinese =
@@ -146,12 +161,20 @@ const onInput = async (e) => {
   if (isNumeric.value) {
     let number = regex.number.test(value) ? value.replace(regex.number, '') : value
 
+    // 負號先抽出來:只保留開頭一個(-1-2 → -12),且不佔 maxlength 與前導零判斷的額度,
+    // 處理完再接回去
+    const sign = allowNegative && number.startsWith('-') ? '-' : ''
+
+    if (allowNegative) number = number.replace(/-/g, '')
+
     if (!integer) number = onLimitDecimal(number, maxlength, toFixed)
 
-    model.value =
+    const digits =
       (checkNotIsZero && integer && /^0/.test(number)) || (checkNotIsZero && /^0\d/.test(number))
         ? number.replace(/^0+/, '')
         : number
+
+    model.value = `${sign}${digits}`
   } else if (!isComposing.value) {
     // 原生 maxlength 以 UTF-16 計算，emoji、罕用字（surrogate pair）會佔 2 格，
     // 這裡改以字素叢集截斷，讓「幾個字」與畫面計數、驗證規則三者一致
