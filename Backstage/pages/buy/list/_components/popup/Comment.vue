@@ -1,7 +1,8 @@
 <script setup>
 const buyList = useBuyListStore()
 const { apiCommentsData, apiCommentUpdateData } = storeToRefs(buyList)
-const { onCommentPopup, onCommentSearch, onApiPOSTCommentsUpdateReplyStatue } = useBuyListActions()
+const { commentsSelectItems, onCommentPopup, onCommentSearch, onApiPOSTCommentsUpdateReplyStatue } =
+  useBuyListActions()
 // const popup = usePopupStore()
 // const { promise } = storeToRefs(popup)
 const { onPromise, onCustom, onAlert, onApiPromise } = usePopupActions()
@@ -31,6 +32,10 @@ const onReplyClick = async (type, item) => {
     await onCommentPopup()
     return
   }
+
+  // 批次(沒帶 item)才依當下勾選填清單;單筆由 Datas 的 onActionClick 先填好那一筆。
+  // 不能靠全選 checkbox 的 @change 副作用 —— 逐列勾選不會經過它
+  if (!item) apiCommentUpdateData.value.commentIDList = [...commentsSelectItems.value]
 
   apiCommentUpdateData.value.isReply = isReply
   onApiPromise('open')

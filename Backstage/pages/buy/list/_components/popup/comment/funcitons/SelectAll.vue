@@ -1,6 +1,6 @@
 <script setup>
 const buyList = useBuyListStore()
-const { commentsDatas, apiCommentUpdateData } = storeToRefs(buyList)
+const { commentsDatas } = storeToRefs(buyList)
 const isSelectAll = computed({
   get() {
     return (
@@ -16,12 +16,6 @@ const isSelectAll = computed({
     }))
   },
 })
-
-const onChange = () => {
-  apiCommentUpdateData.value.commentIDList = commentsDatas.value
-    ? commentsDatas.value.filter((item) => item._checked).map((item) => item.commentID)
-    : []
-}
 </script>
 
 <template>
@@ -36,7 +30,6 @@ const onChange = () => {
       main: 'm:order-1',
       label: 'text-[16px]',
     }"
-    @change="onChange"
   />
 </template>
 

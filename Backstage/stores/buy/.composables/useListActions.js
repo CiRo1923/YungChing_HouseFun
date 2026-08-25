@@ -44,12 +44,15 @@ export default () => {
       : []
   )
   const searchSelectCount = computed(() => searchSelectItems.value.length)
-  // const commentsSelectItems = computed(() =>
-  //   commentsDatas.value
-  //     ? commentsDatas.value.filter((item) => item._checked).map((item) => item.commentID)
-  //     : []
-  // )
-  const commentsSelectCount = computed(() => apiCommentUpdateData.value?.commentIDList.length)
+  // 已勾選的留言。要從 commentsDatas 算,不能讀 apiCommentUpdateData.commentIDList ——
+  // 那是「送出用」的清單,只有全選與單筆操作會寫入,逐列勾選不會碰它,
+  // 於是勾了幾筆批次按鈕仍是 disabled(N-14),批次完成後筆數也清不掉(N-15)。
+  const commentsSelectItems = computed(() =>
+    commentsDatas.value
+      ? commentsDatas.value.filter((item) => item._checked).map((item) => item.commentID)
+      : []
+  )
+  const commentsSelectCount = computed(() => commentsSelectItems.value.length)
   const renewalCanNotPublishData = computed(() => {
     const selectedIds = new Set(searchSelectItems.value)
 
@@ -122,7 +125,7 @@ export default () => {
       is7DayExpirerFilterer: false,
       caseStatusToken, // 刊登中: 1、草稿: 2、已成交: 3、已下架: 4
       page,
-      pageSize: 12,
+      pageSize: 20, // 規格為每頁 20 筆
       ...apiSearchData.value,
     })
 
@@ -370,6 +373,7 @@ export default () => {
   return {
     searchSelectItems,
     searchSelectCount,
+    commentsSelectItems,
     commentsSelectCount,
     renewalCanNotPublishData,
     renewalNotExpiredData,

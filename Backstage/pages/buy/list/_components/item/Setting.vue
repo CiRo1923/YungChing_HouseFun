@@ -27,7 +27,9 @@ const items = computed(() => {
           is7DayExpired ? '--border-orange' : '--border-gray',
         ],
         label: is7DayExpired ? 'text-[--orange-e646]' : '',
-        container: is7DayExpired ? 'text-[--orange-e646]' : 'text-[--gray-666]',
+        // 不指定顏色就繼承 body 的 --black,與下方黃金曝光、自動刷新一致;
+        // 快到期仍要橘色警示,那是提示不是配色
+        container: is7DayExpired ? 'text-[--orange-e646]' : '',
         button: {
           main: '--border-gray-e5 --bg-white --text-gray-666',
         },
