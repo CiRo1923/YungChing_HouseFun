@@ -47,22 +47,33 @@ export const useDropdownCore = ({ config, model = ref(null), options, selectedIn
   const isOpen = ref(false)
 
   let scrollTargets = []
-  const onScrollClose = () => onSwitchActive(false)
+  const onDismiss = () => onSwitchActive(false)
+  // Escape 關閉下拉。掛在 document 上,焦點還留在觸發按鈕(而不是下拉內)時也收得到。
+  // 只在下拉開著時綁,關閉即解除,所以不會攔到其他元件的 Escape。
+  const onKeydownDismiss = (e) => {
+    if (e.key !== 'Escape') return
 
-  const onBindScroll = () => {
-    onUnbindScroll()
+    onDismiss()
+  }
+
+  const onBindDismiss = () => {
+    onUnbindDismiss()
 
     scrollTargets = onGetScrollParents(elenemtRef.value)
     scrollTargets.forEach((target) => {
-      target.addEventListener('scroll', onScrollClose, { passive: true })
+      target.addEventListener('scroll', onDismiss, { passive: true })
     })
+
+    document.addEventListener('keydown', onKeydownDismiss)
   }
 
-  const onUnbindScroll = () => {
+  const onUnbindDismiss = () => {
     scrollTargets.forEach((target) => {
-      target.removeEventListener('scroll', onScrollClose)
+      target.removeEventListener('scroll', onDismiss)
     })
     scrollTargets = []
+
+    document.removeEventListener('keydown', onKeydownDismiss)
   }
 
   const onSwitchActive = (value) => {
@@ -73,7 +84,7 @@ export const useDropdownCore = ({ config, model = ref(null), options, selectedIn
 
     if (!nextValue) {
       isOpen.value = false
-      onUnbindScroll()
+      onUnbindDismiss()
     }
   }
 
@@ -191,7 +202,7 @@ export const useDropdownCore = ({ config, model = ref(null), options, selectedIn
     onDropdownOpen()
 
     if (isActive.value) {
-      onBindScroll()
+      onBindDismiss()
     }
   }
 
@@ -216,7 +227,7 @@ export const useDropdownCore = ({ config, model = ref(null), options, selectedIn
   }
 
   onUnmounted(() => {
-    onUnbindScroll()
+    onUnbindDismiss()
   })
 
   const isDropdownOutside = (e) => {
