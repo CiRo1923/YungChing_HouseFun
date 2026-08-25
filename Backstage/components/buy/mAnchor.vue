@@ -58,7 +58,8 @@ const bind = computed(() => {
     : as.value === 'a'
       ? {
           href: props.href,
-          target: '_blank',
+          // 具名 target 會複用同一個分頁,不給就照舊每次開新的
+          target: config.value.target || '_blank',
           rel: 'noopener',
         }
       : as.value !== 'div'
