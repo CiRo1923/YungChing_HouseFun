@@ -43,6 +43,7 @@ const {
   hasTfoot,
   isTheadFixedActive,
   fixedTheadStyle,
+  isContainerScroll,
   getScopeValue,
   getSpan,
   getColumnClass,
@@ -51,7 +52,11 @@ const {
 
 <template>
   <div class="m-table --default" :class="[setClass.main, { '--thead-fixed': config.isTheadFixed }]">
-    <div class="m-table-container scrollbar --y" :class="setClass.container" ref="containerRef">
+    <div
+      class="m-table-container scrollbar --y"
+      :class="[setClass.container, { '--scrolling': isContainerScroll }]"
+      ref="containerRef"
+    >
       <table class="m-table-content w-full" :class="setClass.content" ref="tableContentRef">
         <thead
           class="m-table-thead"

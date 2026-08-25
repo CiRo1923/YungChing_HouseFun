@@ -82,6 +82,9 @@ export default (props, options = {}) => {
 
   const isTheadFixedActive = ref(false)
   const fixedTheadStyle = ref({})
+  // 容器是否真的捲得動。除了固定 thead 要用,也決定容器要不要留出捲軸與內容之間的間距 ——
+  // 沒有捲軸卻留間距,表格會平白內縮。
+  const isContainerScroll = ref(false)
 
   // 是否真的要啟用固定 thead：需開啟 config 且當前裝置允許（CheckboxResponsiv 手機版會關閉）
   const isTheadFixedEnabled = computed(() => {
@@ -105,7 +108,19 @@ export default (props, options = {}) => {
     fixedTheadStyle.value = {}
   }
 
+  const onSyncContainerScroll = () => {
+    const $container = containerRef.value
+
+    isContainerScroll.value = $container
+      ? $container.scrollHeight > $container.clientHeight
+      : false
+  }
+
   const onSyncFixedThead = () => {
+    // 擺在 isTheadFixedEnabled 的 early return 之前:沒開固定 thead 的表格
+    // 一樣要知道自己捲不捲得動
+    onSyncContainerScroll()
+
     if (!isTheadFixedEnabled.value) {
       onResetFixedThead()
       return
@@ -123,8 +138,7 @@ export default (props, options = {}) => {
     const containerRect = $container.getBoundingClientRect()
     const tableRect = $table.getBoundingClientRect()
     const theadHeight = $thead.offsetHeight
-    const isContainerScroll = $container.scrollHeight > $container.clientHeight
-    const isActive = isContainerScroll
+    const isActive = isContainerScroll.value
       ? $container.scrollTop > 0 && tableRect.bottom > containerRect.top + theadHeight
       : tableRect.top <= 0 && tableRect.bottom > theadHeight
 
@@ -135,7 +149,7 @@ export default (props, options = {}) => {
       return
     }
 
-    fixedTheadStyle.value = isContainerScroll
+    fixedTheadStyle.value = isContainerScroll.value
       ? {
           transform: `translateY(${$container.scrollTop}px)`,
         }
@@ -190,6 +204,7 @@ export default (props, options = {}) => {
     isTheadFixedActive,
     fixedTheadStyle,
     isTheadFixedEnabled,
+    isContainerScroll,
     getScopeValue,
     getSpan,
     getColumnClass,

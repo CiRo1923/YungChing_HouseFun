@@ -46,8 +46,12 @@
 }
 
 .m-table-container {
-  /* 捲軸貼著最後一欄會顯得太擠,內容往左讓出間距 */
-  &.scrollbar.\-\-y {
+  /*
+    捲軸貼著最後一欄會顯得太擠,內容往左讓出間距。
+    只在真的捲得動時才留 —— --scrolling 由 useTableCore 依 scrollHeight / clientHeight 掛上,
+    否則沒有捲軸的表格會平白內縮。
+  */
+  &.scrollbar.\-\-y.\-\-scrolling {
     @apply pr-[--table-scroll-px];
   }
 }

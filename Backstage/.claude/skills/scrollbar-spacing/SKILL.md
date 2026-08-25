@@ -1,6 +1,6 @@
 ---
 name: scrollbar-spacing
-description: 調整捲軸與內容之間的間距前必須先讀。說明 .scrollbar 的分層原則(basic.css 只管外觀,間距歸元件自己的 CSS 模組)、mPopup 與 mTable 兩種已實作的做法與各自的取捨,以及尚未實測 / 尚未處理的部分。觸發時機 - 要改 assets/css/_common/basic.css 的 .scrollbar、assets/css/_modules/common/mPopup/*.css、assets/css/_modules/buy/mTable.css;或使用者回報「捲軸貼著內容 / 太擠 / 表格右邊縮排怪怪的 / 內容沒對齊」。
+description: 調整捲軸與內容之間的間距前必須先讀。說明 .scrollbar 的分層原則(basic.css 只管外觀,間距歸元件自己的 CSS 模組)、mPopup 與 mTable 兩種已實作的做法與各自的取捨,以及尚未實測 / 尚未處理的部分。觸發時機 - 要改 assets/css/_common/basic.css 的 .scrollbar、assets/css/_modules/common/mPopup/*.css、assets/css/_modules/buy/mTable.css、components/buy/mTable/.composables/useTableCore.js 的 isContainerScroll;或使用者回報「捲軸貼著內容 / 太擠 / 表格右邊縮排怪怪的 / 內容沒對齊」。
 ---
 
 # 捲軸與內容的間距
@@ -43,13 +43,13 @@ container 的內容寬度,動 container 的 px 會把底線一起拉寬。改用
 - 捲軸落進 padding 區,與內容之間空出 `--popup-body-px`
 - container、header、footer 一行都沒動
 
-### 2. mTable —— 單純 padding-right
+### 2. mTable —— padding-right,但只在真的捲得動時
 
 `assets/css/_modules/buy/mTable.css`:
 
 ```css
 .m-table-container {
-  &.scrollbar.\-\-y {
+  &.scrollbar.\-\-y.\-\-scrolling {
     @apply pr-[--table-scroll-px];
   }
 }
@@ -58,12 +58,22 @@ container 的內容寬度,動 container 的 px 會把底線一起拉寬。改用
 值 `--table-scroll-px: 8px` 在同檔 `:root`(單一值,沒有分裝置)。
 `mTable.css` 由 `components/buy/mTable/{CheckboxResponsiv,Default}.vue` 各自 `<style src>` 引入。
 
-**副作用(重要)**:`m-table-container scrollbar --y` 是**寫死在兩個表格元件裡**的,
-所以**全站每個表格都會吃到這 8px 右內距** —— 包含沒有 `max-h`、根本不會捲動的表格。
-決策當下是刻意的(「統一都加」),但尚未逐一目視確認。
+**`--scrolling` 是必要的,不能拿掉**:`m-table-container scrollbar --y` 是寫死在兩個表格元件裡的,
+若只用 `.scrollbar.--y` 當條件,**全站每個表格都會吃到這 8px 右內距** —— 包含根本不會捲動的表格,
+平白內縮。
 
-另外表頭灰底(`--thead-gray-f2` / `--thead-gray-f7`)會跟著往左退 8px,
-捲軸落在退出來的白色區。這是肉眼看得出來的變化。
+`--scrolling` 由 `.composables/useTableCore.js` 掛上,依據是 `scrollHeight > clientHeight`:
+
+- `isContainerScroll` 這個 ref 原本就存在(固定 thead 要用),只是曝露出來給 template 綁 class
+- `onSyncContainerScroll()` 的呼叫點在 `isTheadFixedEnabled` 的 early return **之前** ——
+  沒開固定 thead 的表格一樣要知道自己捲不捲得動
+- 觸發時機沿用既有的 resize / 容器捲動 / `thead`、`tbody` 變動 / mounted,沒有新增監聽
+
+**不會來回震盪**:padding 只在已經有捲軸時才加,而加了 padding 只會讓內容更窄更高、更容易捲動,
+不會反過來讓捲軸消失。
+
+**一個看得出來的變化**:有捲軸時表頭灰底(`--thead-gray-f2` / `--thead-gray-f7`)會跟著往左退 8px,
+捲軸落在退出來的白色區。
 
 ---
 
@@ -86,7 +96,8 @@ container 的內容寬度,動 container 的 px 會把底線一起拉寬。改用
 
 - [ ] **手機版**留言管理燈箱實測間距是否足夠(8px = 捲軸 4px + 4px 餘裕,是估的值)
 - [ ] **PC 版**留言管理 / 瀏覽數兩個表格實測
-- [ ] **全站其他不捲動的表格**目視確認 8px 右內距有沒有讓版面變怪 —— 影響面最廣的一項
+- [ ] **不捲動的表格**確認已經不再內縮(`--scrolling` 沒掛上)
+- [ ] 資料筆數變化時(換頁、篩選)`--scrolling` 有正確跟著出現 / 消失
 - [ ] 其他 popup(自動刷新、成交等)確認內容沒跑位
 - [ ] `terms/Items.vue` 的條款捲動區要不要比照處理
 - [ ] 表頭灰底右退 8px,確認 PM 能接受

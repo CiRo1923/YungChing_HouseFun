@@ -53,6 +53,7 @@ const {
   hasTfoot,
   isTheadFixedActive,
   fixedTheadStyle,
+  isContainerScroll,
   getScopeValue,
   getSpan,
   getColumnClass,
@@ -124,7 +125,11 @@ onUnmounted(() => {
     class="m-table --checkbox-responsiv"
     :class="[setClass.main, { '--thead-fixed': config.isTheadFixed }]"
   >
-    <div class="m-table-container scrollbar --y" :class="setClass.container" ref="containerRef">
+    <div
+      class="m-table-container scrollbar --y"
+      :class="[setClass.container, { '--scrolling': isContainerScroll }]"
+      ref="containerRef"
+    >
       <table class="m-table-content w-full" :class="setClass.content" ref="tableContentRef">
         <thead
           class="m-table-thead"
