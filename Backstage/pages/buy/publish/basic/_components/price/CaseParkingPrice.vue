@@ -10,6 +10,14 @@ const { apiData } = storeToRefs(buyPublish)
 //     apiData.value.caseInfo.caseAddBalcony = ''
 //   }
 // }
+
+// 填了車位價就視為有車位,與車位坪數(ping/CaseParkingSq.vue)的行為一致。
+// 這兩個欄位是「輸入來源」而不是被 isCaseParking 控制的結果,所以不鎖輸入、改為反推。
+const onParkingPriceBlur = () => {
+  if (!apiData.value.caseInfo.caseParkingPrice) return
+
+  apiData.value.caseInfo.isCaseParking = true
+}
 </script>
 
 <template>
@@ -27,6 +35,7 @@ const { apiData } = storeToRefs(buyPublish)
       element: 'grow',
       rearAssist: 'text-[14px] text-[--gray-999]',
     }"
+    @blur="onParkingPriceBlur"
   >
     <template #rearAssist>萬</template>
   </BuyMFormInput>

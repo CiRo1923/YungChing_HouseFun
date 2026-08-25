@@ -44,8 +44,8 @@ export default () => {
     onReplaceImageSize,
   } = useBuyProjectActions()
   const publishStores = useBuyPublishStore()
-  const { apiData, statusData, address, pingData } = storeToRefs(publishStores)
-  const { onAlert, onApiError } = usePopupActions()
+  const { apiData, statusData, pingData } = storeToRefs(publishStores)
+  const { onAlert, onConfirm, onApiError } = usePopupActions()
   const currentUnit = computed(() =>
     publishStores.options.unit.find((item) => item.value === apiData.value.caseInfo.isCaseSqUnitPin)
   )
@@ -55,16 +55,50 @@ export default () => {
         (item) => item.value === apiData.value.caseInfo.isCaseSqUnitPin
       ).label
   )
-  const onAddress = () => {
-    if (address.value) {
-      const { city, area, road, lane, alley, number } = address.value
-      const laneText = lane ? `${lane}巷` : ''
-      const alleyText = alley ? `${alley}弄` : ''
-      const numberText = number ? `${number}號` : ''
+  // 離開頁面前,若表單有未儲存的變更就先問過使用者。
+  //
+  // dirty 用「快照比對」判定,不用 vee-validate 的 meta.dirty:後者只認得註冊成 Field 的欄位,
+  // 照片、地圖帶回的地址、CKEditor 這些改了不算數。
+  //
+  // 用法:資料載入完成後呼叫一次 onSnapshotSave() 當基準;每次儲存成功後再呼叫一次重設。
+  //   const { onSnapshotSave } = onUnsavedChanges(() => apiData.value)
+  const onUnsavedChanges = (getState) => {
+    const snapshot = ref(null)
+    const onSerialize = () => JSON.stringify(toValue(getState) ?? null)
 
-      return [city, area, road, laneText, alleyText, numberText].filter(Boolean).join('')
+    // 建立 / 重設基準。沒呼叫過就不會攔截,避免資料還沒載入完就誤判成有變更
+    const onSnapshotSave = () => {
+      snapshot.value = onSerialize()
     }
 
+    const isDirty = () => {
+      if (snapshot.value === null) return false
+
+      return snapshot.value !== onSerialize()
+    }
+
+    // 涵蓋瀏覽器上一頁與應用內導航(返回 / 取消按鈕)。
+    // 關閉分頁與重整要用 beforeunload,但那無法自訂文案,不在此處理。
+    onBeforeRouteLeave(async () => {
+      if (!isDirty()) return true
+
+      const { isSure } = await onConfirm({
+        title: '尚未儲存',
+        content: '您有未儲存的變更，如果現在離開，剛剛輸入的資料將不會被保留。',
+      })
+
+      return isSure
+    })
+
+    return {
+      onSnapshotSave,
+      isDirty,
+    }
+  }
+  // 一律以表單當前值組地址。
+  // ⚠ 不要回頭讀 address(地圖定位的回傳):那是一次性的填入來源,填完就該由表單接手。
+  //   以前只要定位過一次就永遠回傳那份快照,之後在表單改路段,顯示不會跟著變(N-01)。
+  const onAddress = () => {
     const caseInfo = apiData.value.caseInfo
     const cityID = caseInfo.cityID ? String(caseInfo.cityID) : ''
     const districtID = caseInfo.districtID ? String(caseInfo.districtID) : ''
@@ -306,6 +340,7 @@ export default () => {
   return {
     currentUnit,
     pingUnitLabel,
+    onUnsavedChanges,
     onAddress,
     onPingVaild,
     onPingUnitChange,

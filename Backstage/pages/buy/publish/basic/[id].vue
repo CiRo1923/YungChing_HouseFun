@@ -7,6 +7,9 @@ definePageMeta({
   layout: 'buy',
   requiresAuth: true,
   title: '物件資料編輯',
+  // hfID 一定是數字。validate 在元件載入前就攔下,不會帶著壞掉的 id 去打 API,
+  // 回 false 走的是共用的 404 頁(見專案根目錄 error.vue)
+  validate: (route) => /^\d+$/.test(route.params.id),
 })
 
 // const common = useCommonStore()
@@ -19,10 +22,11 @@ const {
   onApiGETRealEstateFeatureCheckOptions,
 } = useBuyProjectActions()
 const buyPublish = useBuyPublishStore()
-const { statusData } = storeToRefs(buyPublish)
+const { apiData, pingData, statusData } = storeToRefs(buyPublish)
 
 const {
   onAllPromise,
+  onUnsavedChanges,
   onApiGERealEstateCaseStatus,
   onApiGETRealEstate,
   onApiPOSTRealEstateDraft,
@@ -32,6 +36,12 @@ const { onAlert, onConfirm, onApiPromise, onApiErrorServerToClient } = usePopupA
 const route = useRoute()
 const router = useRouter()
 const hfID = computed(() => route.params.id)
+
+// 坪數在 pingData 另存一份(單位換算用),一起納入比對,否則只改坪數會被當成沒改過
+const { onSnapshotSave } = onUnsavedChanges(() => ({
+  caseInfo: apiData.value,
+  ping: pingData.value,
+}))
 
 const onTypeSelectOptionsUpdate = async () => {
   return await onApiGETRealEstateTypeSelectOptions()
@@ -58,13 +68,15 @@ const onAlertSuccess = async (content) => {
 }
 
 const onDraft = async () => {
-  onApiPromise('close')
+  onApiPromise('open')
 
   const { status } = await onApiPOSTRealEstateDraft(hfID.value)
 
   onApiPromise('close')
 
+  // 成功後留在原頁繼續編輯,不導頁
   if (status === 200) {
+    onSnapshotSave()
     await onAlertSuccess('儲存草稿成功')
   }
 }
@@ -80,6 +92,7 @@ const onSave = async (validate) => {
     onApiPromise('close')
 
     if (status === 200) {
+      onSnapshotSave()
       await onAlertSuccess('儲存成功')
     }
   } else {
@@ -108,6 +121,8 @@ const onRenewal = async (validate) => {
       onApiPromise('close')
 
       if (status === 200) {
+        onSnapshotSave()
+
         const { isSure } = await onAlertSuccess('儲存成功')
 
         if (isSure) {
@@ -156,6 +171,7 @@ const onRenewal = async (validate) => {
           onApiPromise('close')
 
           if (status === 200) {
+            onSnapshotSave()
             await onAlertSuccess('儲存成功')
             onToFinish()
           }
@@ -197,6 +213,9 @@ const { refresh: refreshOptions } = await useAsyncData(
   `publish-basic-options-${hfID.value}`,
   onOptionsUpdate
 )
+
+// 資料都就位後才立基準,否則載入途中的空值會被當成「使用者清空了欄位」
+onSnapshotSave()
 
 const onPurposeChange = async () => {
   await refreshOptions()

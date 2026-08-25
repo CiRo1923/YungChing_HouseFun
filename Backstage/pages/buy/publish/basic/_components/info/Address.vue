@@ -1,4 +1,6 @@
 <script setup>
+import { onNormalizeAddressText } from '@js/_projectPrototype.js'
+
 const buyProject = useBuyProjectStore()
 const { options } = storeToRefs(buyProject)
 const { onApiGETDistrictSelectOptions, onApiGETRoad } = useBuyProjectActions()
@@ -66,8 +68,16 @@ const onPopupAddressGoogleMap = async () => {
     const { city, area, road, lane, alley, number } = address.value
     const { caseInfo } = apiData.value
 
-    const cityOption = options.value.city.find((item) => item.text === city)
-    const districtOption = options.value.area.find((item) => item.text === area)
+    // Google 回官方寫法(臺北市),後端選項用台北市 —— 兩邊都正規化過再比,否則對不上、
+    // cityID 會被設成 null,地址就整個存不進去
+    const cityText = onNormalizeAddressText(city)
+    const areaText = onNormalizeAddressText(area)
+    const cityOption = options.value.city.find(
+      (item) => onNormalizeAddressText(item.text) === cityText
+    )
+    const districtOption = options.value.area.find(
+      (item) => onNormalizeAddressText(item.text) === areaText
+    )
     const [addrNum, addrNumOf = null] = String(number || '').split(/-|之/)
 
     caseInfo.cityID = cityOption ? Number(cityOption.value) : null
@@ -82,9 +92,11 @@ const onPopupAddressGoogleMap = async () => {
         addrNumOf,
       })
     }
-
-    console.log('地圖定位地址:', address)
   }
+
+  // 不論確認或取消都清掉:地圖回傳只是「填入表單」的一次性資料,留著會變成過期的顯示來源,
+  // 也會影響下一次開啟定位
+  address.value = null
 }
 </script>
 

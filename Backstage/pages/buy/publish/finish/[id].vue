@@ -19,6 +19,9 @@ definePageMeta({
   layout: 'buy',
   requiresAuth: true,
   title: '出售物件刊登',
+  // hfID 一定是數字。validate 在元件載入前就攔下,不會帶著壞掉的 id 去打 API,
+  // 回 false 走的是共用的 404 頁(見專案根目錄 error.vue)
+  validate: (route) => /^\d+$/.test(route.params.id),
 })
 
 const hfID = computed(() => route.params.id)

@@ -13,6 +13,12 @@ export const onLayoutText = (layout = {}) => {
   return `${dash(room)} 房 (室) ${dash(living)} 廳 ${dash(bath)} 衛`
 }
 
+// 地址文字正規化,供跨來源比對用。
+// Google Geocoding 回的是官方寫法「臺北市」,後端選項用的是「台北市」,直接 === 會對不上
+// (臺北 / 臺中 / 臺南 / 臺東 都中招)。比對時「兩邊」都要過一次 —— 只轉其中一邊,
+// 等於賭另一邊永遠不改寫法。
+export const onNormalizeAddressText = (value) => String(value ?? '').replace(/臺/g, '台')
+
 // 單一樓層的顯示字:負數為地下樓,以 B 表示(-2 → B2)。0 或無值回 null,交由呼叫端補 `--`。
 const onFloorValue = (value) => {
   if (!value) return null
