@@ -13,6 +13,10 @@ const props = defineProps({
 
 const isDeviceM = computed(() => device.value === 'm')
 
+// API 的樓層值是絕對值,地上 / 地下由對應的 type 決定(1 地上、-1 地下)。
+// type 沒給時視為地上,舊物件才不會整列消失。
+const onSignedFloor = (value, type) => (value ? value * (type || 1) : value)
+
 // 1: 住宅 2: 店面 3: 住店 4: 辦公 5: 住辦 6: 廠房 7: 車位 8: 土地 9: 其他
 const items = computed(() => {
   const {
@@ -21,6 +25,9 @@ const items = computed(() => {
     caseAge,
     caseAreaPin,
     caseFloor,
+    caseFloorTo,
+    caseFloorType,
+    caseFloorToType,
     caseTotalFloor,
     caseLayout,
   } = props.data
@@ -32,8 +39,13 @@ const items = computed(() => {
       ? `${room} 房 (室)`
       : null
     : onLayoutText({ room, living: livingRoom, bath: bathroom })
-  // 樓層同為組合值,任一格缺值以 `--` 呈現,全空才整列隱藏
-  const floorText = onFloorText({ from: caseFloor, up: caseTotalFloor })
+  // 樓層同為組合值,任一格缺值以 `--` 呈現,全空才整列隱藏。
+  // 多層物件要帶 to 才會顯示成範圍(2 ~ 3 / 15 樓),只給 from 會只剩單層。
+  const floorText = onFloorText({
+    from: onSignedFloor(caseFloor, caseFloorType),
+    to: onSignedFloor(caseFloorTo, caseFloorToType),
+    up: caseTotalFloor,
+  })
 
   const common = [
     {
