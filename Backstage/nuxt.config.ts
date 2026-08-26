@@ -13,6 +13,8 @@ import { ViteImageOptimizer } from 'vite-plugin-image-optimizer'
 import { fileURLToPath } from 'node:url'
 import { execSync } from 'node:child_process'
 
+const POSTCSS_FUNCTIONS_PLUGIN = new URL('./.tools/postcss/functions.js', import.meta.url).href
+
 const imageAssetDir = CONFIG.imgs.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\\/g, '/')
 const imageAssetInclude = new RegExp(`${imageAssetDir}/(?!svg/spritemap\\.svg$)`)
 
@@ -66,7 +68,9 @@ export default defineNuxtConfig({
     plugins: {
       'tailwindcss/nesting': {},
       tailwindcss: {},
-      'postcss-functions': {
+      // 自寫外掛，取代停更於 2022 的 postcss-functions(見 .tools/postcss/functions.js)。
+      // ⚠️ 用絕對 file URL 當 key:Nuxt 是拿 key 去 import,而 `~` / `@` 指向 srcDir 而非 rootDir。
+      [POSTCSS_FUNCTIONS_PLUGIN]: {
         functions: POSTCSSFUNCTIONS,
       },
       'postcss-calc': {},
@@ -93,7 +97,6 @@ export default defineNuxtConfig({
         '@vue/devtools-core',
         '@vue/devtools-kit',
         '@mayasabha/ckeditor4-vue3',
-        'crypto-js',
       ],
     },
     esbuild: {
