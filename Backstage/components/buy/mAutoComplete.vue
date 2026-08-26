@@ -456,7 +456,7 @@ onUnmounted(() => {
     <div class="m-autocomplete-container overflow-hidden" :class="setClass.container">
       <Field
         :name="props.name"
-        :rules="props.rules"
+        :rules="config.isDisabled ? '' : props.rules"
         v-model="model"
         v-slot="{ field, errorMessage }"
       >
@@ -567,6 +567,10 @@ onUnmounted(() => {
 .m-autocomplete-element {
   &.\-\-disabled {
     --autocomplete-bg-color: var(--gray-f2);
+    /* 文字色只定義在 :not(--disabled) 裡，停用時整個變數是空的，
+       顏色會掉回繼承值。這裡補上 mForm 停用時用的同一個灰 */
+    --autocomplete-text-color: var(--gray-ccce);
+    --autocomplete-text-placeholder-color: var(--gray-ccce);
 
     &,
     .m-autocomplete-type {
