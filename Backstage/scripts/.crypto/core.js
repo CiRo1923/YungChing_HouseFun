@@ -204,6 +204,73 @@ export const hexToBytes = (hex) => {
   return bytes
 }
 
+// ---- Base64url 編解碼(URL-safe:-、_,無 = padding;不依賴 btoa/atob,SSR / client 皆可用)----
+// 相較 Hex(每 byte 2 字元),Base64url 每 3 bytes 4 字元,長度約為 Hex 的 2/3,較不易被誤判為釣魚字串。
+const B64URL = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_'
+const B64URL_LOOKUP = (() => {
+  const table = new Int16Array(128).fill(-1)
+  for (let i = 0; i < B64URL.length; i += 1) table[B64URL.charCodeAt(i)] = i
+  return table
+})()
+
+export const bytesToBase64url = (bytes) => {
+  let out = ''
+  let i = 0
+
+  for (; i + 3 <= bytes.length; i += 3) {
+    const n = (bytes[i] << 16) | (bytes[i + 1] << 8) | bytes[i + 2]
+    out += B64URL[(n >> 18) & 63] + B64URL[(n >> 12) & 63] + B64URL[(n >> 6) & 63] + B64URL[n & 63]
+  }
+
+  const rem = bytes.length - i
+  if (rem === 1) {
+    const n = bytes[i] << 16
+    out += B64URL[(n >> 18) & 63] + B64URL[(n >> 12) & 63]
+  } else if (rem === 2) {
+    const n = (bytes[i] << 16) | (bytes[i + 1] << 8)
+    out += B64URL[(n >> 18) & 63] + B64URL[(n >> 12) & 63] + B64URL[(n >> 6) & 63]
+  }
+
+  return out
+}
+
+export const base64urlToBytes = (str) => {
+  const clean = String(str).trim()
+  const len = clean.length
+  const rem = len % 4
+  // 合法 Base64url 的長度 mod 4 只會是 0 / 2 / 3
+  if (rem === 1) throw new Error('Invalid base64url length')
+
+  const full = Math.floor(len / 4)
+  const out = new Uint8Array(full * 3 + (rem === 2 ? 1 : rem === 3 ? 2 : 0))
+  const val = (index) => {
+    const v = B64URL_LOOKUP[clean.charCodeAt(index)]
+    if (v < 0) throw new Error('Invalid base64url char')
+    return v
+  }
+
+  let oi = 0
+  let ci = 0
+  for (let b = 0; b < full; b += 1) {
+    const n = (val(ci) << 18) | (val(ci + 1) << 12) | (val(ci + 2) << 6) | val(ci + 3)
+    out[oi++] = (n >> 16) & 0xff
+    out[oi++] = (n >> 8) & 0xff
+    out[oi++] = n & 0xff
+    ci += 4
+  }
+  // 尾端補寫:oi 之後不再被讀取,故直接以位移索引寫入,不再遞增
+  if (rem === 2) {
+    const n = (val(ci) << 18) | (val(ci + 1) << 12)
+    out[oi] = (n >> 16) & 0xff
+  } else if (rem === 3) {
+    const n = (val(ci) << 18) | (val(ci + 1) << 12) | (val(ci + 2) << 6)
+    out[oi] = (n >> 16) & 0xff
+    out[oi + 1] = (n >> 8) & 0xff
+  }
+
+  return out
+}
+
 // ---- AES-CBC(金鑰 / IV 由呼叫端傳入 Uint8Array)----
 export const cbcEncrypt = (dataBytes, keyBytes, ivBytes) => {
   const { w, Nr } = expandKey(keyBytes)
@@ -236,6 +303,30 @@ export const cbcDecrypt = (cipherBytes, keyBytes, ivBytes) => {
   }
 
   return pkcs7Unpad(out)
+}
+
+// ---- 值的序列化 / 還原 ----
+// 加解密只吃字串,但呼叫端常要存物件、陣列、布林,所以在這一層來回轉換。
+
+// 字串原樣送出,其餘型別一律 JSON 序列化。
+export const serializeValue = (value) => (typeof value === 'string' ? value : JSON.stringify(value))
+
+// { 或 [ 開頭視為 JSON,true / false / null 視為原生值,其餘一律維持字串。
+// ⚠️ 純數字字串刻意不轉回數字 —— guid、商品代碼這類值本來就是字串,
+//    轉成數字會掉前導 0('007' → 7),也可能超過安全整數範圍。
+export const parseValue = (text) => {
+  if (typeof text !== 'string') return text
+
+  const trimmed = text.trim()
+
+  if (!/^[{[]/.test(trimmed) && !/^(true|false|null)$/.test(trimmed)) return text
+
+  try {
+    return JSON.parse(trimmed)
+  } catch {
+    // 竄改後可能解出「看起來像 JSON」的亂碼,解析失敗就當原字串
+    return text
+  }
 }
 
 // ---- 短雜湊(djb2):輸入穩定即可,不涉及加解密,供快取破壞等用途 ----
