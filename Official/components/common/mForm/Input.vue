@@ -75,6 +75,7 @@ const defaultConfig = {
   comma: false, // 啟用千分位功能
   checkNotIsZero: false, // 輸入欄位致不能為 0
   integer: false, // 整數功能 (不可使用小數點)
+  allowNegative: false, // 允許輸入負數（inputMode 為 tel 時不適用）
   toFixed: null, // 取得小數點第幾位
 }
 const defaultSetClass = {
@@ -94,6 +95,17 @@ const { isFocus, config, setClass } = useInputTextCore(props, {
 })
 const isNumeric = computed(() => /^(decimal|numeric|tel)$/.test(config.value.inputMode))
 const isTel = computed(() => config.value.inputMode === 'tel')
+// 電話號碼不會是負的，tel 一律不吃 allowNegative
+const canNegative = computed(() => config.value.allowNegative && !isTel.value)
+// 負號會多佔一個字元，maxlength 要跟著多留一位，否則實際能填的位數會少一位
+const fieldMaxlength = computed(() => {
+  const { maxlength, length } = config.value
+  const max = maxlength || length
+
+  if (!max) return null
+
+  return canNegative.value ? Number(max) + 1 : max
+})
 const formatLength = computed(() => {
   const { formatLength, maxlength } = config.value
 
@@ -129,7 +141,13 @@ const onInput = async (e) => {
   const { inputMode, checkNotIsZero, integer, inputChinese } = config.value
   const regex = {
     chinese: /[\u4e00-\u9fa5０-９Ａ-Ｚａ-ｚ～！＠＃＄％︿＆＊（）＿｜｛｝［］＜＞？／＊＼＋－]/g,
-    number: integer || isTel.value ? /[^0-9]/g : /[^0-9.]/g,
+    number: canNegative.value
+      ? integer
+        ? /[^0-9-]/g
+        : /[^0-9.-]/g
+      : integer || isTel.value
+        ? /[^0-9]/g
+        : /[^0-9.]/g,
   }
 
   const isRemoveChinese =
@@ -138,12 +156,18 @@ const onInput = async (e) => {
   await nextTick()
 
   if (isNumeric.value) {
-    const number = regex.number.test(value) ? value.replace(regex.number, '') : value
+    let number = regex.number.test(value) ? value.replace(regex.number, '') : value
+    // 負號只有放在最前面才有意義，先抽出來，中間打的 '-' 一律砍掉，處理完再接回去
+    const sign = canNegative.value && number.startsWith('-') ? '-' : ''
 
-    model.value =
+    if (canNegative.value) number = number.replace(/-/g, '')
+
+    const digits =
       (checkNotIsZero && integer && /^0/.test(number)) || (checkNotIsZero && /^0\d/.test(number))
         ? number.replace(/^0+/, '')
         : number
+
+    model.value = `${sign}${digits}`
   } else if (isRemoveChinese) {
     model.value = value.replace(regex.chinese, '')
   }
@@ -211,6 +235,12 @@ const onEvent = async (e, errorMessage) => {
       // 只打一個 '.' 的狀況
       if (normalized === '.') normalized = ''
 
+      // 負號先抽掉，後面的前導 0 修剪、checkNotIsZero 判斷都只針對數字本身
+      // （'-0123' 的前導 0 修剪原本會因為開頭是 '-' 而失效）
+      const sign = canNegative.value && normalized.startsWith('-') ? '-' : ''
+
+      if (canNegative.value) normalized = normalized.replace(/-/g, '')
+
       // 2) 若 integer：禁止小數點（blur 時直接砍掉小數部分）
       //    例：'12.34' -> '12'
       if (integer && normalized.includes('.')) {
@@ -244,6 +274,9 @@ const onEvent = async (e, errorMessage) => {
         // '0.' blur 時清掉
         if (/^0\.$/.test(normalized)) normalized = ''
       }
+
+      // 負號接回去，讓 toFixed / Number 直接處理帶號的值
+      if (sign && normalized !== '') normalized = `${sign}${normalized}`
 
       // 5) toFixed
       if (!integer && config.value.toFixed != null && config.value.toFixed !== '') {
@@ -337,7 +370,7 @@ defineExpose({
             v-bind="onBind(field)"
             :inputMode="config.inputMode"
             :minlength="config.minlength || config.length"
-            :maxlength="config.maxlength || config.length"
+            :maxlength="fieldMaxlength"
             :placeholder="config.placeholder"
             :readonly="config.isReadonly"
             :disabled="config.isDisabled"
