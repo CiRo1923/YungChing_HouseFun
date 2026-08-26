@@ -1,5 +1,17 @@
 {
   "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/movePermissionsToLocal.js 2>/dev/null || true",
+            "timeout": 30,
+            "statusMessage": "把 permissions 搬回 settings.local.json…"
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Write|Edit",
@@ -7,6 +19,18 @@
           {
             "type": "command",
             "command": "node .claude/hooks/conventions.js 2>/dev/null || true"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/movePermissionsToLocal.js 2>/dev/null || true",
+            "timeout": 30,
+            "async": true,
+            "statusMessage": "把 permissions 搬回 settings.local.json…"
           }
         ]
       }
