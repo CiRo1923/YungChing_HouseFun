@@ -3,6 +3,7 @@ import '@js/_validation.js'
 
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { validate as validateValue, Field, ErrorMessage } from 'vee-validate'
+import useValidateEvents from '../../common/mForm/.composables/useValidateEvents.js'
 
 const emit = defineEmits(['uploaded'])
 const props = defineProps({
@@ -45,8 +46,12 @@ const config = computed(() => ({
   draggableUpload: true,
   accept: 'image/*',
   isDisabled: false,
+  // 驗證時機。null = 沿用全域(等同 ['blur', 'change', 'modelUpdate']);
+  // 傳陣列為「完整指定」,詳見 common/mForm/.composables/useValidateEvents.js
+  validateEvents: null,
   ...props.config,
 }))
+const validateOn = useValidateEvents(() => config.value.validateEvents)
 
 const setClass = computed(() => ({
   main: '',
@@ -477,6 +482,7 @@ watch(
     :name="name"
     :rules="config.isDisabled ? '' : rules"
     v-model="model"
+    v-bind="validateOn"
     v-slot="{ field, handleChange, validate }"
   >
     <div class="m-upload-single w-full" :class="setClass.main">

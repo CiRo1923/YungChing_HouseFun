@@ -60,7 +60,7 @@ const onCommunityChange = (item) => {
       }"
       @change="onIsCaseCommunityChange"
     />
-    <BuyMAutoComplete
+    <CommonMFormAutoComplete
       name="caseCommunityName"
       v-model="apiData.caseInfo.caseCommunityName"
       :config="{

@@ -338,7 +338,7 @@ onMounted(() => {
       @change="onAreaChange()"
       v-if="props.area !== undefined"
     />
-    <BuyMAutoComplete
+    <CommonMFormAutoComplete
       :name="`${props.name}_address_road`"
       v-model="modelRoad"
       :options="config.road.options"

@@ -1,6 +1,7 @@
 <script setup>
 import { numberComma, onToFixed, onUnicodLength, onUnicodSlice } from '@js/_prototype.js'
 import { useTextCore } from './.composables/useTextCore.js'
+import useValidateEvents from './.composables/useValidateEvents.js'
 
 import '@js/_validation.js'
 
@@ -48,6 +49,9 @@ const { config, setClass, onEnter } = useTextCore({
   emits,
   model,
   config: {
+    // 驗證時機。null = 沿用全域(等同 ['blur', 'change', 'modelUpdate']);
+    // 傳陣列為「完整指定」,詳見 .composables/useValidateEvents.js
+    validateEvents: null,
     length: null,
     minlength: null,
     maxlength: null,
@@ -73,6 +77,7 @@ const { config, setClass, onEnter } = useTextCore({
     error: '',
   },
 })
+const validateOn = useValidateEvents(() => config.value.validateEvents)
 
 const isNumeric = computed(() => /^(decimal|numeric)$/.test(config.value.inputMode))
 
@@ -308,6 +313,7 @@ watch(
       :name="props.name"
       :type="props.type"
       :rules="config.isDisabled ? '' : props.rules"
+      v-bind="validateOn"
     >
       <div class="m-form-container" :class="setClass.container">
         <div

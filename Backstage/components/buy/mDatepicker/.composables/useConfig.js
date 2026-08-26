@@ -61,6 +61,9 @@ export const defaultDateConfig = {
   minDate: '',
   length: null,
   placeholder: null,
+  // 驗證時機。null = 沿用全域(等同 ['blur', 'change', 'modelUpdate']);
+  // 傳陣列為「完整指定」,詳見 components/common/mForm/.composables/useValidateEvents.js
+  validateEvents: null,
 }
 
 export const defaultTimeConfig = {
@@ -78,6 +81,9 @@ export const defaultTimeConfig = {
   icon: 'icon_calendar',
   length: null,
   placeholder: null,
+  // 驗證時機。null = 沿用全域(等同 ['blur', 'change', 'modelUpdate']);
+  // 傳陣列為「完整指定」,詳見 components/common/mForm/.composables/useValidateEvents.js
+  validateEvents: null,
 }
 
 /* ⚠️ format 要在合併「之後」再正規化一次 —— 呼叫端只給 { model: 'YYYYMMDD' } 時,

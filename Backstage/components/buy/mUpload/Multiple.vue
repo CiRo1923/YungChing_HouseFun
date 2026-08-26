@@ -2,6 +2,7 @@
 import '@js/_validation.js'
 
 import { validate as validateValue, Field, ErrorMessage } from 'vee-validate'
+import useValidateEvents from '../../common/mForm/.composables/useValidateEvents.js'
 
 const emit = defineEmits(['uploaded'])
 
@@ -55,8 +56,12 @@ const config = computed(() => ({
   accept: 'image/*',
   mode: 'multiple',
   maxCountHiddenButton: false,
+  // 驗證時機。null = 沿用全域(等同 ['blur', 'change', 'modelUpdate']);
+  // 傳陣列為「完整指定」,詳見 common/mForm/.composables/useValidateEvents.js
+  validateEvents: null,
   ...props.config,
 }))
+const validateOn = useValidateEvents(() => config.value.validateEvents)
 
 const placeholder = computed(() => {
   const { placeholder } = config.value
@@ -861,7 +866,13 @@ watch(
 </script>
 
 <template>
-  <Field :name="name" :rules="rules" v-model="model" v-slot="{ field, handleChange, validate }">
+  <Field
+    :name="name"
+    :rules="rules"
+    v-model="model"
+    v-bind="validateOn"
+    v-slot="{ field, handleChange, validate }"
+  >
     <div
       class="m-upload --drag w-full"
       :class="setClass.main"

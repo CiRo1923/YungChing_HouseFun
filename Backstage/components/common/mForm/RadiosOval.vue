@@ -2,6 +2,7 @@
 import '@js/_validation.js'
 
 import { Field, ErrorMessage } from 'vee-validate'
+import useValidateEvents from './.composables/useValidateEvents.js'
 
 const emits = defineEmits(['update:modelValue', 'change'])
 const props = defineProps({
@@ -41,6 +42,10 @@ const model = computed({
 })
 const config = computed(() => {
   return {
+    // 驗證時機。勾選類控制項刻意不吃 blur —— 用鍵盤 Tab 經過卻還沒選就跳紅字,
+    // 那是誤報。change 已涵蓋「使用者動了它」,submit 的主動 validate() 一律會驗、
+    // 不受此設定影響。詳見 .composables/useValidateEvents.js
+    validateEvents: ['change'],
     modelMode: 'value',
     // isReadonly: false,
     // isDisabled: false,
@@ -52,6 +57,7 @@ const config = computed(() => {
     ...props.config,
   }
 })
+const validateOn = useValidateEvents(() => config.value.validateEvents)
 const setClass = computed(() => {
   return {
     ...{
@@ -141,6 +147,7 @@ watch(
       :name="`${props.name}_radios`"
       v-model="selected"
       :rules="props.rules"
+      v-bind="validateOn"
       v-slot="{ field }"
     >
       <input type="hidden" :id="`${props.name}_radios`" v-bind="field" />

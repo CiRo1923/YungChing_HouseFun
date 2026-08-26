@@ -6,6 +6,7 @@ import SelectDropdownOptions from './SelectDropdownOptions.vue'
 import '@js/_validation.js'
 
 import { Field, ErrorMessage } from 'vee-validate'
+import useValidateEvents from './.composables/useValidateEvents.js'
 
 const { onResize } = useCommonActions()
 
@@ -57,6 +58,9 @@ const model = computed({
 
 const config = computed(() => {
   const defaultConfig = {
+    // 驗證時機。null = 沿用全域(等同 ['blur', 'change', 'modelUpdate']);
+    // 傳陣列為「完整指定」,詳見 .composables/useValidateEvents.js
+    validateEvents: null,
     startOption: null,
     placeholder: null,
     isError: false,
@@ -74,6 +78,7 @@ const config = computed(() => {
 
   return onMergeDropdownConfig(props.config, defaultConfig)
 })
+const validateOn = useValidateEvents(() => config.value.validateEvents)
 
 const setClass = computed(() => {
   return {
@@ -311,6 +316,7 @@ onUnmounted(() => {
       :name="props.name"
       v-model="model"
       :rules="config.isDisabled ? '' : props.rules"
+      v-bind="validateOn"
       v-slot="{ field, errorMessage }"
     >
       <input type="hidden" :id="props.name" v-bind="field" />

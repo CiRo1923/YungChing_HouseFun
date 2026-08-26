@@ -1,8 +1,9 @@
 <script setup>
 import { onDeepMerge } from '@js/_prototype.js'
 
-import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, getCurrentInstance, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { Field, ErrorMessage } from 'vee-validate'
+import useValidateEvents from './.composables/useValidateEvents.js'
 
 const emits = defineEmits(['change', 'input', 'update:modelValue'])
 const props = defineProps({
@@ -49,6 +50,11 @@ const dropdownItems = ref(null)
 const inputOptions = ref(null)
 const inputWaitRafId = ref(null)
 const inputWaitToken = ref(0)
+// 等待外部把選項餵回來的期間顯示 waitMessage,而不是先閃一下「無任何選項」
+const isWaiting = ref(false)
+// 只有掛了 @input 的呼叫端才會有人回填選項;沒掛就不該進入等待狀態(會永遠等下去)
+const instance = getCurrentInstance()
+const hasInputListener = computed(() => !!instance?.vnode?.props?.onInput)
 
 const model = computed({
   get() {
@@ -62,8 +68,12 @@ const model = computed({
 const config = computed(() => {
   const defaultConfig = {
     placeholder: '',
+    // 驗證時機。null = 沿用全域(等同 ['blur', 'change', 'modelUpdate']);
+    // 傳陣列為「完整指定」,詳見 common/mForm/.composables/useValidateEvents.js
+    validateEvents: null,
     noMatchClearLabel: false,
     noResult: '無任何選項。',
+    waitMessage: '資料讀取中',
     isDisabled: false,
     isExistClose: true,
     isError: false,
@@ -83,6 +93,7 @@ const config = computed(() => {
 
   return onDeepMerge(defaultConfig, props.config)
 })
+const validateOn = useValidateEvents(() => config.value.validateEvents)
 
 const setClass = computed(() => {
   return {
@@ -113,6 +124,7 @@ const isMinCharsReached = computed(() => {
 
 const onSetInputOptions = (options) => {
   inputOptions.value = Array.isArray(options) ? options : []
+  isWaiting.value = false
 }
 
 const cancelInputWait = () => {
@@ -159,6 +171,10 @@ const waitInputByRaf = (duration) => {
 }
 
 const emitInput = () => {
+  if (hasInputListener.value) {
+    isWaiting.value = true
+  }
+
   emits('input', inputLabel.value, onSetInputOptions)
 }
 
@@ -168,6 +184,7 @@ const emitInputWithWait = async () => {
   if (!isMinCharsReached.value) {
     cancelInputWait()
     inputOptions.value = null
+    isWaiting.value = false
     return
   }
 
@@ -177,6 +194,7 @@ const emitInputWithWait = async () => {
 
   if (!isMinCharsReached.value) {
     inputOptions.value = null
+    isWaiting.value = false
     return
   }
 
@@ -212,7 +230,13 @@ const onGetInputLabel = () => {
     return
   }
 
-  inputLabel.value = model.value
+  // model 存的是 schema.model 的值,不一定等於要顯示的文字 —— 兩者不同名時
+  // (例:model 存 id、label 顯示名稱)直接拿 model 當顯示值會在輸入框看到 id。
+  // 先回查 options 取對應的 label,查不到才退回 model 本身。
+  const { schema } = config.value
+  const matchData = resolvedOptions.value.find((item) => item[schema.model] == model.value)
+
+  inputLabel.value = matchData ? matchData[schema.label] : model.value
 }
 
 const onResetDropdownItems = () => {
@@ -236,6 +260,10 @@ const onFocus = async () => {
 const onInput = async () => {
   if (isComposing.value) return
 
+  // 邊打邊同步到 v-model:使用者可能自由輸入而不從清單選,少了這行時
+  // 只有「點選項目」才會寫回 model,直接送出會拿到空值。
+  model.value = inputLabel.value
+
   await emitInputWithWait()
 
   onFilter()
@@ -251,6 +279,10 @@ const onInput = async () => {
 
 const onCompositionEnd = async () => {
   onIsComposingChange(false)
+
+  // 同 onInput —— 注音/日文等組字結束才算真正輸入完成,這裡補一次同步
+  model.value = inputLabel.value
+
   await emitInputWithWait()
 
   onFilter()
@@ -382,6 +414,8 @@ const onClear = () => {
   selected.value.index = null
   dropdownItems.value = null
   emitInput()
+  // emitInput 會把 isWaiting 打開,但清空是使用者主動取消、不該卡在讀取中
+  isWaiting.value = false
   emits('change', null)
 }
 
@@ -430,8 +464,15 @@ watch(
 
 watch(
   inputOptions,
-  () => {
+  async () => {
     onFilter()
+
+    // 非同步選項回來時清單長度變了,dropdown 的高度與位置是開啟當下算的 ——
+    // 不重算的話會停在舊高度(選項變多被裁切、變少則留一段空白)。
+    if (!isActive.value || !isMinCharsReached.value) return
+
+    await nextTick()
+    onDropdownOpen()
   },
   { deep: true }
 )
@@ -458,6 +499,7 @@ onUnmounted(() => {
         :name="props.name"
         :rules="config.isDisabled ? '' : props.rules"
         v-model="model"
+        v-bind="validateOn"
         v-slot="{ field, errorMessage }"
       >
         <input type="hidden" v-bind="field" />
@@ -527,7 +569,7 @@ onUnmounted(() => {
           v-if="dropdownItems.length === 0"
           ref="dropdownNoDataRef"
         >
-          <p>{{ config.noResult }}</p>
+          <p>{{ isWaiting ? config.waitMessage : config.noResult }}</p>
         </div>
         <ul
           class="m-autocomplete-dropdown-container max-h-full bg-[--white]"

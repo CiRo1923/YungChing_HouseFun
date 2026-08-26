@@ -2,6 +2,7 @@
 import '@js/_validation.js'
 
 import { Field, ErrorMessage } from 'vee-validate'
+import useValidateEvents from './.composables/useValidateEvents.js'
 
 const props = defineProps({
   name: {
@@ -32,9 +33,13 @@ const config = computed(() => {
     length: null,
     minlength: null,
     maxlength: null,
+    // 驗證時機。null = 沿用全域(等同 ['blur', 'change', 'modelUpdate']);
+    // 傳陣列為「完整指定」,詳見 .composables/useValidateEvents.js
+    validateEvents: null,
     ...props.config,
   }
 })
+const validateOn = useValidateEvents(() => config.value.validateEvents)
 
 const setClass = computed(() => {
   return {
@@ -60,6 +65,7 @@ defineExpose({
       :name="`${props.name}_hidden`"
       :modelValue="props.modelValue"
       :rules="props.config.isDisabled ? '' : props.rules"
+      v-bind="validateOn"
       v-slot="{ field, errorMessage }"
     >
       <input

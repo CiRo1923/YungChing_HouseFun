@@ -11,6 +11,7 @@ import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import '@js/_validation.js'
 
 import { Field, ErrorMessage } from 'vee-validate'
+import useValidateEvents from '../../common/mForm/.composables/useValidateEvents.js'
 
 import { onGetYMDByFormat, onPickFormat, onGetFormatSep } from './.composables/useDateCore.js'
 import { onMergeDateConfig } from './.composables/useConfig.js'
@@ -54,6 +55,7 @@ const props = defineProps({
 })
 
 const config = computed(() => onMergeDateConfig(props.config))
+const validateOn = useValidateEvents(() => config.value.validateEvents)
 
 const containerRef = ref(null)
 const iconRef = ref(null)
@@ -235,6 +237,7 @@ onUnmounted(() => {
       :name="props.name"
       :rules="props.rules"
       v-model="datePickerModel"
+      v-bind="validateOn"
       v-slot="{ field, errorMessage }"
     >
       <div class="m-datepicker-container" ref="containerRef">
