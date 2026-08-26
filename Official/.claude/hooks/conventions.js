@@ -42,6 +42,24 @@ const onCheckPageFileName = (filePath) => {
   return `[routing-conventions] pages/ 下的檔名會原樣變成 URL(不轉大小寫):「${fileName}」含大寫字母,使用者手打小寫網址會 404。請改為全小寫、多字用連字號。`
 }
 
+// 規則 3:mForm / mPopup / ImgSrc / SvgIcon 是 Backstage / Official 兩邊共用的元件,
+// 功能必須一致(樣式各自照設計走)
+const SHARED_COMPONENTS = [
+  { pattern: /\/components\/common\/mForm\//, name: 'mForm' },
+  { pattern: /\/components\/common\/mPopup\//, name: 'mPopup' },
+  { pattern: /\/components\/common\/ImgSrc\.vue$/, name: 'ImgSrc' },
+  { pattern: /\/components\/common\/SvgIcon\.vue$/, name: 'SvgIcon' },
+]
+
+const onCheckSharedComponent = (filePath) => {
+  const path = filePath.replaceAll('\\', '/')
+  const matched = SHARED_COMPONENTS.find((item) => item.pattern.test(path))
+
+  if (!matched) return null
+
+  return `[shared-components-sync] ${matched.name} 是 Backstage / Official 共用元件。這次若動到「功能」(config / props / emits / 行為),要同步到另一個專案;純樣式調整則不用。規則見 .claude/skills/shared-components-sync/SKILL.md。`
+}
+
 let input = ''
 
 process.stdin
@@ -53,9 +71,11 @@ process.stdin
 
       if (!filePath) return
 
-      const messages = [onCheckActionsReadonly(filePath), onCheckPageFileName(filePath)].filter(
-        Boolean
-      )
+      const messages = [
+        onCheckActionsReadonly(filePath),
+        onCheckPageFileName(filePath),
+        onCheckSharedComponent(filePath),
+      ].filter(Boolean)
 
       if (!messages.length) return
 
