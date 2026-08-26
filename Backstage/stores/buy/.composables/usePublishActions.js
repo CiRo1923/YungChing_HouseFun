@@ -97,7 +97,7 @@ export default () => {
   }
   // 一律以表單當前值組地址。
   // ⚠ 不要回頭讀 address(地圖定位的回傳):那是一次性的填入來源,填完就該由表單接手。
-  //   以前只要定位過一次就永遠回傳那份快照,之後在表單改路段,顯示不會跟著變(N-01)。
+  //   以前只要定位過一次就永遠回傳那份快照,之後在表單改路段,顯示不會跟著變。
   const onAddress = () => {
     const caseInfo = apiData.value.caseInfo
     const cityID = caseInfo.cityID ? String(caseInfo.cityID) : ''

@@ -46,7 +46,7 @@ export default () => {
   const searchSelectCount = computed(() => searchSelectItems.value.length)
   // 已勾選的留言。要從 commentsDatas 算,不能讀 apiCommentUpdateData.commentIDList ——
   // 那是「送出用」的清單,只有全選與單筆操作會寫入,逐列勾選不會碰它,
-  // 於是勾了幾筆批次按鈕仍是 disabled(N-14),批次完成後筆數也清不掉(N-15)。
+  // 於是勾了幾筆批次按鈕仍是 disabled,批次完成後筆數也清不掉。
   const commentsSelectItems = computed(() =>
     commentsDatas.value
       ? commentsDatas.value.filter((item) => item._checked).map((item) => item.commentID)
