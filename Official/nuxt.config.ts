@@ -4,11 +4,11 @@ import CONFIG from './config.js'
 import POSTCSSFUNCTIONS from './postcss.function.js'
 
 import SvgSpritemapDevPlugin, {
+  SvgSpritemapBuildPlugin,
   spritemapRoute as devSpritemapRoute,
-} from './.vite/svg-spritemap-dev.mjs'
+} from './.vite/svg-spritemap.mjs'
 import { getPageComponentDirs } from './.tools/page-component-dirs'
 import { getStoreComposableImports, getStoreImports } from './.tools/store-composable-imports'
-import VitePluginSvgSpritemap from '@spiriit/vite-plugin-svg-spritemap'
 import { ViteImageOptimizer } from 'vite-plugin-image-optimizer'
 import { fileURLToPath } from 'node:url'
 import { execSync } from 'node:child_process'
@@ -147,7 +147,7 @@ export default defineNuxtConfig({
   },
   vite: {
     optimizeDeps: {
-      include: ['@vue/devtools-core', '@vue/devtools-kit', '@mayasabha/ckeditor4-vue3'],
+      include: ['@vue/devtools-core', '@vue/devtools-kit'],
     },
     esbuild: {
       drop: process.env.NUXT_PUBLIC_APP_MODE === 'build' ? ['console'] : [],
@@ -175,16 +175,7 @@ export default defineNuxtConfig({
       },
     },
     plugins: [
-      VitePluginSvgSpritemap(`${CONFIG.svg}/*.svg`, {
-        prefix: false,
-        route: `_nuxt/${CONFIG.imgs}/svg/spritemap.svg`,
-        output: {
-          filename: `${CONFIG.imgs}/svg/spritemap.svg`,
-          name: 'spritemap',
-          view: false,
-          use: true,
-        },
-      }) as never,
+      SvgSpritemapBuildPlugin(CONFIG.svg, `${CONFIG.imgs}/svg/spritemap.svg`) as never,
       SvgSpritemapDevPlugin(CONFIG.svg) as never,
       ViteImageOptimizer({
         include: imageAssetInclude,
