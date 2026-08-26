@@ -42,7 +42,9 @@ const items = computed(() => {
       },
     },
     {
-      label: '儲存，選擇刊登額度',
+      // 已下架是「恢復上架」,不經過選額度流程(見 [id].vue 的 onRenewal),
+      // 文案不該承諾要選額度
+      label: caseStatus === 4 ? '確認刊登' : '儲存，選擇刊登額度',
       class: {
         main: '--bg-green-6a2d --text-white',
       },
