@@ -149,12 +149,15 @@ export default defineNuxtConfig({
     optimizeDeps: {
       include: ['@vue/devtools-core', '@vue/devtools-kit'],
     },
-    esbuild: {
-      drop: process.env.NUXT_PUBLIC_APP_MODE === 'build' ? ['console'] : [],
-    },
     build: {
-      rollupOptions: {
+      rolldownOptions: {
         output: {
+          // Nuxt 4.5 起打包改用 oxc,vite.esbuild.drop 會被整組忽略(build 時會警告)。
+          // 移除 console 改由 oxc 的 minifier 負責。
+          minify:
+            process.env.NUXT_PUBLIC_APP_MODE === 'build'
+              ? { compress: { dropConsole: true } }
+              : undefined,
           chunkFileNames: `_nuxt/${CONFIG.js}/[name].[hash].js`,
           entryFileNames: `_nuxt/${CONFIG.js}/[name].[hash].js`,
           assetFileNames: (assetInfo) => {
