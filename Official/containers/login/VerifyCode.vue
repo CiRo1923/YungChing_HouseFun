@@ -15,6 +15,8 @@ const onSubmit = () => {}
         v-model="login.verify.apiData.account"
         :config="{
           placeholder: '手機號碼',
+          // 不吃 modelUpdate:切換 tab 時 onReset 會清值,若清值即驗就會跳紅字
+          validateEvents: ['blur', 'change'],
           inputMode: 'tel',
           length: 10,
           inputChinese: false,
@@ -36,6 +38,8 @@ const onSubmit = () => {}
         :config="{
           length: 6,
           placeholder: '請輸入 6 位數驗證碼',
+          // 不吃 modelUpdate:切換 tab 時 onReset 會清值,若清值即驗就會跳紅字
+          validateEvents: ['blur', 'change'],
           message: {
             timeout: '{timeout} 秒後重送',
             reSend: '發送驗證碼',

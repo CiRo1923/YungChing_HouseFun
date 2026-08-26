@@ -41,8 +41,15 @@ const onAuthToken = async () => {
 }
 
 // 驗證碼登入。
+// 先驗證再說 —— API 還沒接,但少了這段,使用者在這個 tab 按登入會完全沒有反應
+// (密碼 tab 與 popup 登入都會驗,只有這條路徑不驗,行為不一致)。
+//
 // TODO: 待 member 驗證碼「發送 / 驗證」API 就緒後接上(containers/login/VerifyCode.vue 同一組 TODO)。
-const onAuthVerifyCode = async () => {}
+const onAuthVerifyCode = async () => {
+  const { valid } = (await loginContainerRef.value?.form?.validate?.()) ?? {}
+
+  if (!valid) return
+}
 
 // 兩個 tab 的送出資料不同(帳密走 login.auth、驗證碼走 login.verify),
 // 所以要先問 Container 現在停在哪個 tab 再決定打哪一支。

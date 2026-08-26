@@ -18,20 +18,11 @@ const isExpiredOnly = computed(() => isExpired.value && !isExceeded.value)
 const isExceededOnly = computed(() => !isExpired.value && isExceeded.value)
 const isExpiredExceeded = computed(() => isExpired.value && isExceeded.value)
 
-const onReSend = async (validateField, setFieldError) => {
-  const { name } = continuousRef.value
-
-  // 重新發送會拿到新的驗證碼,已輸入的舊碼一定不對 → 直接清掉
+const onReSend = () => {
+  // 重新發送會拿到新的驗證碼,已輸入的舊碼一定不對 → 直接清掉。
+  // 欄位的 validateEvents 拿掉了 modelUpdate,清值不會觸發驗證,不必再清一次錯誤;
+  // 送出時的主動 validate() 不受影響。
   apiData.value.verificationCode = null
-
-  // 清值會讓 required 立刻報錯(Field 綁 modelValue,值一變就重新驗證),而那次驗證是
-  // 非同步的 —— 直接清錯誤會被它稍後回填的結果蓋回來(resetField 也一樣蓋不掉)。
-  // vee-validate 只採用「最後發起」的那次驗證結果,故先自己補驗一次搶下最新,
-  // 等它結束後再清錯誤,紅字才不會又冒出來。
-  await nextTick()
-  await validateField(name)
-
-  setFieldError(name, undefined)
 
   emits('reSend')
 }
@@ -64,7 +55,7 @@ const onSumit = async (validate, setFieldError) => {
   <Form
     as="div"
     class="space-y-[15px] text-center"
-    v-slot="{ validate, validateField, setFieldError }"
+    v-slot="{ validate, setFieldError }"
   >
     <PageMemberUpgradeExpired
       message="驗證碼已失效 (超過 1 分鐘有效時間並錯誤達 5 次)<br />請重新發送。"
@@ -84,13 +75,16 @@ const onSumit = async (validate, setFieldError) => {
       :rules="{
         required: '請輸入驗證碼',
       }"
+      :config="{
+        validateEvents: ['blur', 'change'],
+      }"
       :setClass="{
         main: 'mx-auto max-w-[302px]',
         container: 'gap-x-[10px]',
       }"
       ref="continuousRef"
     />
-    <PageMemberUpgradePhoneVerifyCountdown @click="onReSend(validateField, setFieldError)" />
+    <PageMemberUpgradePhoneVerifyCountdown @click="onReSend" />
     <CommonMAnchor
       text="確認"
       :setClass="{
