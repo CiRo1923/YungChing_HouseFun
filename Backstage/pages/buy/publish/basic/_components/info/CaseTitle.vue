@@ -14,7 +14,7 @@ const remainingWordCount = computed(() => {
 </script>
 
 <template>
-  <BuyMFormInput
+  <CommonMFormInput
     name="caseTitle"
     v-model="apiData.caseInfo.caseTitle"
     :config="{
@@ -42,7 +42,7 @@ const remainingWordCount = computed(() => {
         <template v-else>已符合優質排序</template>
       </p>
     </template>
-  </BuyMFormInput>
+  </CommonMFormInput>
 </template>
 
 <style></style>

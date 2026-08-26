@@ -52,7 +52,7 @@ const onIsCaseOpenConceptChange = () => {
 </script>
 
 <template>
-  <BuyMFormHidden
+  <CommonMFormHidden
     name="HouseLayout"
     v-model="layoutValue"
     :rules="{
@@ -71,7 +71,7 @@ const onIsCaseOpenConceptChange = () => {
             v-for="(item, index) in items"
             :key="`${item.id}_${index}`"
           >
-            <BuyMFormInput
+            <CommonMFormInput
               :name="item.id"
               v-model.number="apiData.caseInfo[item.id]"
               :config="{
@@ -92,12 +92,12 @@ const onIsCaseOpenConceptChange = () => {
               }"
             >
               <template #rearAssist>{{ item.label }}</template>
-            </BuyMFormInput>
+            </CommonMFormInput>
           </li>
         </ul>
       </li>
       <li class="flex h-[40px] items-center">
-        <BuyMFormCheckBox
+        <CommonMFormCheckBox
           name="isCaseOpenConcept"
           v-model="apiData.caseInfo.isCaseOpenConcept"
           :config="{
@@ -111,7 +111,7 @@ const onIsCaseOpenConceptChange = () => {
         />
       </li>
       <li class="flex h-[40px] items-center">
-        <BuyMFormCheckBox
+        <CommonMFormCheckBox
           name="isCaseAddtion"
           v-model="apiData.caseInfo.isCaseAddtion"
           :config="{
@@ -125,7 +125,7 @@ const onIsCaseOpenConceptChange = () => {
         />
       </li>
     </ul>
-  </BuyMFormHidden>
+  </CommonMFormHidden>
 </template>
 
 <style></style>

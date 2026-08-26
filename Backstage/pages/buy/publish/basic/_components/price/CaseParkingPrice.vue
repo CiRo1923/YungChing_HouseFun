@@ -21,7 +21,7 @@ const onParkingPriceBlur = () => {
 </script>
 
 <template>
-  <BuyMFormInput
+  <CommonMFormInput
     name="caseParkingPrice"
     v-model.number="apiData.caseInfo.caseParkingPrice"
     :config="{
@@ -38,7 +38,7 @@ const onParkingPriceBlur = () => {
     @blur="onParkingPriceBlur"
   >
     <template #rearAssist>萬</template>
-  </BuyMFormInput>
+  </CommonMFormInput>
 </template>
 
 <style></style>

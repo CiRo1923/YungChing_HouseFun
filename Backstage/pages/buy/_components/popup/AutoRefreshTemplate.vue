@@ -59,7 +59,7 @@ const onSure = async () => {
         class="tm:mt-[16px] pt:flex pt:grow pt:flex-col pt:overflow-hidden p:mt-[24px]"
         ref="formRef"
       >
-        <BuyMFormHidden
+        <CommonMFormHidden
           name="listSelectedtempalteID"
           v-model="autoRefresh.templateSave.apiData.templateID"
           :rules="{
@@ -71,7 +71,7 @@ const onSure = async () => {
           }"
         >
           <PageBuyAutoRefreshTemplateInfo />
-        </BuyMFormHidden>
+        </CommonMFormHidden>
       </Form>
     </div>
   </BuyCommonCustomPopup>

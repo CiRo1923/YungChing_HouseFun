@@ -4,7 +4,7 @@ const { apiData } = storeToRefs(buyPublish)
 </script>
 
 <template>
-  <BuyMFormCheckBox
+  <CommonMFormCheckBox
     name="isAgreeUserTerm"
     v-model="apiData.caseInfo.isAgreeUserTerm"
     :config="{
@@ -24,7 +24,7 @@ const { apiData } = storeToRefs(buyPublish)
       我已詳閱並同意
       <a href="javascript:;" class="text-[--green-6a2d] underline">好房會員服務使用條款</a>
     </p>
-  </BuyMFormCheckBox>
+  </CommonMFormCheckBox>
 </template>
 
 <style></style>

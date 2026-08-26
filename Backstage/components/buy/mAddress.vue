@@ -306,7 +306,7 @@ onMounted(() => {
     class="m-address flex flex-wrap gap-x-[8px] m:gap-y-[12px] pt:gap-y-[8px]"
     :class="setClass.main"
   >
-    <BuyMFormSelect
+    <CommonMFormSelect
       :name="`${props.name}_address_city`"
       v-model="modelCity"
       :options="config.city.options"
@@ -322,7 +322,7 @@ onMounted(() => {
       @change="onCityChange()"
       v-if="props.city !== undefined"
     />
-    <BuyMFormSelect
+    <CommonMFormSelect
       :name="`${props.name}_address_area`"
       v-model="modelArea"
       :options="config.area.options"
@@ -354,7 +354,7 @@ onMounted(() => {
       }"
       v-if="props.road !== undefined"
     />
-    <BuyMFormInput
+    <CommonMFormInput
       :name="`${props.name}_address_lane`"
       v-model="modelLane"
       :config="{
@@ -375,8 +375,8 @@ onMounted(() => {
       v-if="props.lane !== undefined"
     >
       <template #rearAssist>巷</template>
-    </BuyMFormInput>
-    <BuyMFormInput
+    </CommonMFormInput>
+    <CommonMFormInput
       :name="`${props.name}_address_alley`"
       v-model="modelAlley"
       :config="{
@@ -397,8 +397,8 @@ onMounted(() => {
       v-if="props.alley !== undefined"
     >
       <template #rearAssist>弄</template>
-    </BuyMFormInput>
-    <BuyMFormInput
+    </CommonMFormInput>
+    <CommonMFormInput
       :name="`${props.name}_address_number`"
       v-model="modelNumber"
       :config="{
@@ -419,10 +419,10 @@ onMounted(() => {
       v-if="props.number !== undefined"
     >
       <template #rearAssist>號</template>
-    </BuyMFormInput>
+    </CommonMFormInput>
     <template v-if="props.ofNumber !== undefined">
       <span class="h-40px flex items-center text-[16px] text-[--gray-666]">之</span>
-      <BuyMFormInput
+      <CommonMFormInput
         :name="`${props.name}_address_of_number`"
         v-model="modelOfNumber"
         :config="{
@@ -441,7 +441,7 @@ onMounted(() => {
         }"
       />
     </template>
-    <BuyMFormInput
+    <CommonMFormInput
       :name="`${props.name}_address_floor`"
       v-model="modelFloor"
       :config="{
@@ -462,10 +462,10 @@ onMounted(() => {
       v-if="props.floor !== undefined"
     >
       <template #rearAssist>樓</template>
-    </BuyMFormInput>
+    </CommonMFormInput>
     <template v-if="props.ofFloor !== undefined">
       <span class="h-40px flex items-center text-[16px] text-[--gray-666]">之</span>
-      <BuyMFormInput
+      <CommonMFormInput
         :name="`${props.name}_address_of_floor`"
         v-model="modelOfFloor"
         :config="{

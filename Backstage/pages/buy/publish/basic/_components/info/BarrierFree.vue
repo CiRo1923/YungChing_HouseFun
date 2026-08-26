@@ -15,7 +15,7 @@ const isOther = computed(() => {
 <template>
   <ul class="m:space-y-[16px] pt:flex pt:flex-wrap pt:gap-x-[24px] pt:gap-y-[8px]">
     <li v-for="(item, index) in options.barrierFree" :key="`${item.code}_${index}`">
-      <BuyMFormCheckBox
+      <CommonMFormCheckBox
         :name="`caseBarrierfreeToken[${index}]`"
         v-model="apiData.caseInfo.caseBarrierfreeToken"
         :config="{
@@ -31,7 +31,7 @@ const isOther = computed(() => {
         v-if="item.code !== '999'"
       />
       <div class="flex pt:gap-x-[8px]" v-if="item.code === '999'">
-        <BuyMFormCheckBox
+        <CommonMFormCheckBox
           :name="`caseBarrierfreeToken[${index}]`"
           v-model="apiData.caseInfo.caseBarrierfreeToken"
           :config="{
@@ -45,7 +45,7 @@ const isOther = computed(() => {
             label: 'text-[16px]',
           }"
         />
-        <BuyMFormInput
+        <CommonMFormInput
           name="caseBarrierfreeOther"
           v-model="apiData.caseInfo.caseBarrierfreeOther"
           :config="{

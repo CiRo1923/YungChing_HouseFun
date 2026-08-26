@@ -43,7 +43,7 @@ const onNormalizeVideoUrl = () => {
 <template>
   <ul class="m:space-y-[12px] pt:flex pt:gap-x-[8px]">
     <li class="pt:w-[160px] pt:shrink-0">
-      <BuyMFormSelect
+      <CommonMFormSelect
         name="caseVideoTypeToken"
         v-model.number="apiData.caseInfo.caseVideoTypeToken"
         :options="options.videoType"
@@ -63,7 +63,7 @@ const onNormalizeVideoUrl = () => {
       />
     </li>
     <li class="pt:grow">
-      <BuyMFormInput
+      <CommonMFormInput
         name="caseVideoUrl"
         v-model="apiData.caseInfo.caseVideoUrl"
         :config="{

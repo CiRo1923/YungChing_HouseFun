@@ -17,7 +17,7 @@ const videoPicture = computed(() => {
 
 <template>
   <PageBuyPublishBasicRadiosOval>
-    <BuyMFormRadiosOval
+    <CommonMFormRadiosOval
       name="caseVideoDisplayToken"
       v-model.number="apiData.caseInfo.caseVideoDisplayToken"
       :options="options.videoDisplay"

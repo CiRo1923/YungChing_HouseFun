@@ -45,7 +45,7 @@ const onIsCasePreSale = () => {
 
 <template>
   <PageBuyPublishBasicRadiosOval>
-    <BuyMFormRadiosOval
+    <CommonMFormRadiosOval
       name="caseAgeIdentifyToken"
       v-model.number="apiData.caseInfo.caseAgeIdentifyToken"
       :options="options.ageIdentify"
@@ -63,7 +63,7 @@ const onIsCasePreSale = () => {
     />
     <ul class="flex flex-wrap tm:gap-x-[8px] p:gap-x-[24px]">
       <li class="tm:w-[130px] p:w-[100px]" v-if="isModelAge">
-        <BuyMFormInput
+        <CommonMFormInput
           name="caseAge"
           v-model.number="apiData.caseInfo.caseAge"
           :config="{
@@ -89,12 +89,12 @@ const onIsCasePreSale = () => {
           @input="onClearCheckbox"
         >
           <template #rearAssist>年</template>
-        </BuyMFormInput>
+        </CommonMFormInput>
       </li>
       <li v-else>
         <ul class="gap-x-[8px] m:grid m:grid-cols-2 pt:flex">
           <li class="pt:w-[120px]">
-            <BuyMFormInput
+            <CommonMFormInput
               name="caseCompletedYear"
               v-model.number="apiData.caseInfo.caseCompletedYear"
               :config="{
@@ -122,10 +122,10 @@ const onIsCasePreSale = () => {
             >
               <template #frontAssist>民國</template>
               <template #rearAssist>年</template>
-            </BuyMFormInput>
+            </CommonMFormInput>
           </li>
           <li class="pt:w-[100px]">
-            <BuyMFormInput
+            <CommonMFormInput
               name="caseCompletedMonth"
               v-model.number="apiData.caseInfo.caseCompletedMonth"
               :config="{
@@ -151,12 +151,12 @@ const onIsCasePreSale = () => {
               @input="onClearCheckbox"
             >
               <template #rearAssist>月</template>
-            </BuyMFormInput>
+            </CommonMFormInput>
           </li>
         </ul>
       </li>
       <li class="flex h-[40px] items-center">
-        <BuyMFormCheckBox
+        <CommonMFormCheckBox
           name="isCaseUnknownAge"
           v-model="apiData.caseInfo.isCaseUnknownAge"
           :config="{
@@ -170,7 +170,7 @@ const onIsCasePreSale = () => {
         />
       </li>
       <li class="flex h-[40px] items-center">
-        <BuyMFormCheckBox
+        <CommonMFormCheckBox
           name="isCasePreSale"
           v-model="apiData.caseInfo.isCasePreSale"
           :config="{

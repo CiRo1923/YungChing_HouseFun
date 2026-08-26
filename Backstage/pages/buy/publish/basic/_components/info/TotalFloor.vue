@@ -6,7 +6,7 @@ const { apiData } = storeToRefs(buyPublish)
 </script>
 
 <template>
-  <BuyMFormInput
+  <CommonMFormInput
     name="caseFloorTotal"
     v-model.number="apiData.caseInfo.caseFloorTotal"
     :config="{
@@ -28,7 +28,7 @@ const { apiData } = storeToRefs(buyPublish)
     }"
   >
     <template #rearAssist>樓</template>
-  </BuyMFormInput>
+  </CommonMFormInput>
 </template>
 
 <style></style>

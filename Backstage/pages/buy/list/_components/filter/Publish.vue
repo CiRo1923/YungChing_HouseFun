@@ -19,7 +19,7 @@ const onSearchClick = async () => {
     <PageBuyListFilterCommonPurpose />
     <template #hide="{ searchFun }">
       <PageBuyListFilterCommonArea />
-      <BuyMFormSelect
+      <CommonMFormSelect
         name="exchangeToken"
         v-model="apiSearchData.exchangeToken"
         :options="serachOptions.exchange"
@@ -35,7 +35,7 @@ const onSearchClick = async () => {
           dropdown: 't:w-[300px] p:w-[400px]',
         }"
       />
-      <BuyMFormSelect
+      <CommonMFormSelect
         name="goldenToken"
         v-model="apiSearchData.goldenToken"
         :options="serachOptions.golden"

@@ -36,13 +36,13 @@ const onSure = async () => {
   >
     <Form as="div" class="tm:space-y-[16px] p:space-y-[30px]" ref="formRef">
       <div class="m:space-y-[16px] pt:flex pt:gap-x-[16px]">
-        <BuyMFormLabel
+        <CommonMFormLabel
           label="設定名稱"
           :setClass="{
             main: 'pt:shrink-0 p:flex p:h-[40px] p:items-center',
           }"
         />
-        <BuyMFormInput
+        <CommonMFormInput
           name="templateName"
           v-model="autoRefresh.templateSaveTime.apiData.templateName"
           :config="{
@@ -65,7 +65,7 @@ const onSure = async () => {
         :minSelectCount="minSelectCount"
         :count="selectedLength"
       />
-      <BuyMFormHidden
+      <CommonMFormHidden
         name="listSelectedRefreshTime"
         v-model="notMinCount"
         :rules="{
@@ -104,7 +104,7 @@ const onSure = async () => {
             </li>
           </ul>
         </div>
-      </BuyMFormHidden>
+      </CommonMFormHidden>
     </Form>
   </BuyCommonCustomPopup>
 </template>

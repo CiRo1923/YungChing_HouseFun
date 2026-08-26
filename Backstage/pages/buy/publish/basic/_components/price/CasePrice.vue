@@ -22,7 +22,7 @@ const onIsCasePriceIncludeParkingChange = () => {
 <template>
   <ul class="flex flex-wrap tm:gap-x-[8px] p:gap-x-[24px]">
     <li class="tm:w-[220px] p:w-[270px]">
-      <BuyMFormInput
+      <CommonMFormInput
         name="casePrice"
         v-model.number="apiData.caseInfo.casePrice"
         :config="{
@@ -42,11 +42,11 @@ const onIsCasePriceIncludeParkingChange = () => {
         }"
       >
         <template #rearAssist>萬</template>
-      </BuyMFormInput>
+      </CommonMFormInput>
     </li>
     <!-- 1: 住宅 2: 店面 3: 住店 4: 辦公 5: 住辦 6: 廠房 7: 車位 8: 土地 9: 其他 -->
     <li class="flex h-[40px] items-center" v-if="casePurposeToken !== '8'">
-      <BuyMFormCheckBox
+      <CommonMFormCheckBox
         name="isCasePriceIncludeParking"
         v-model="apiData.caseInfo.isCasePriceIncludeParking"
         :config="{

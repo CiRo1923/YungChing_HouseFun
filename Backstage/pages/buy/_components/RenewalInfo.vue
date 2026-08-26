@@ -21,7 +21,7 @@ const setClass = computed(() => {
 </script>
 
 <template>
-  <BuyMFormHidden
+  <CommonMFormHidden
     name="planID"
     v-model="renewal.apiData.planID"
     :rules="{
@@ -38,7 +38,7 @@ const setClass = computed(() => {
         v-for="(item, index) in renewal.data.listPlan"
         :key="`${item.planType}_${item.planID}_${index}`"
       >
-        <BuyMFormRadioItem
+        <CommonMFormRadioItem
           name="planID"
           v-model="renewal.apiData.planID"
           :config="{
@@ -61,10 +61,10 @@ const setClass = computed(() => {
               </b>
             </p>
           </div>
-        </BuyMFormRadioItem>
+        </CommonMFormRadioItem>
       </li>
     </ul>
-  </BuyMFormHidden>
+  </CommonMFormHidden>
 </template>
 
 <style lang="postcss"></style>

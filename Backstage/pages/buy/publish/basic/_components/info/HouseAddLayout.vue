@@ -34,7 +34,7 @@ const layoutValue = computed(() => {
 </script>
 
 <template>
-  <BuyMFormHidden
+  <CommonMFormHidden
     name="HouseAddLayout"
     v-model="layoutValue"
     :rules="{
@@ -51,7 +51,7 @@ const layoutValue = computed(() => {
         v-for="(item, index) in items"
         :key="`${item.id}_${index}`"
       >
-        <BuyMFormInput
+        <CommonMFormInput
           :name="item.id"
           v-model.number="apiData.caseInfo[item.id]"
           :config="{
@@ -72,10 +72,10 @@ const layoutValue = computed(() => {
           }"
         >
           <template #rearAssist>{{ item.label }}</template>
-        </BuyMFormInput>
+        </CommonMFormInput>
       </li>
     </ul>
-  </BuyMFormHidden>
+  </CommonMFormHidden>
 </template>
 
 <style></style>

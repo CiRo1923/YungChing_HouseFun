@@ -10,7 +10,7 @@ const onEnter = () => {
 </script>
 
 <template>
-  <BuyMFormSearch
+  <CommonMFormSearch
     name="commentsSearchKey"
     v-model="apiCommentsData.searchKey"
     :config="{

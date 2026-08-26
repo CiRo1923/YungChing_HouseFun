@@ -6,7 +6,7 @@ const { apiData } = storeToRefs(buyPublish)
 </script>
 
 <template>
-  <BuyMFormSelect
+  <CommonMFormSelect
     name="caseFaceToken"
     v-model.number="apiData.caseInfo.caseFaceToken"
     :options="options.face"

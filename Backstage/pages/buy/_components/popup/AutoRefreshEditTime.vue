@@ -82,7 +82,7 @@ const onSure = async () => {
           </li>
         </ul>
       </div>
-      <BuyMFormHidden
+      <CommonMFormHidden
         name="listSelectedRefreshTime"
         v-model="notSameCount"
         :rules="{

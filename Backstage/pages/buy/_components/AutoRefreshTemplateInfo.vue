@@ -49,7 +49,7 @@ const onItemClick = async (item, index) => {
         v-for="(item, index) in template"
         :key="`${item.tempalteID}_${item.templateName}_${index}`"
       >
-        <BuyMFormRadioItem
+        <CommonMFormRadioItem
           name="tempalteID"
           v-model="autoRefresh.templateSave.apiData.templateID"
           :config="{
@@ -70,7 +70,7 @@ const onItemClick = async (item, index) => {
             </p>
             <PageBuyAutoRefreshEditTemplateAnchor :data="item" />
           </div>
-        </BuyMFormRadioItem>
+        </CommonMFormRadioItem>
       </li>
     </ul>
   </div>

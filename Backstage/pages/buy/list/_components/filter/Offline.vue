@@ -19,7 +19,7 @@ const onSearchClick = async () => {
     <PageBuyListFilterCommonPurpose />
     <template #hide="{ searchFun }">
       <PageBuyListFilterCommonArea />
-      <BuyMFormSelect
+      <CommonMFormSelect
         name="caseDownToken"
         v-model="apiSearchData.caseDownToken"
         :options="serachOptions.down"
@@ -35,7 +35,7 @@ const onSearchClick = async () => {
           dropdown: 't:w-[300px] p:w-[400px]',
         }"
       />
-      <BuyMFormSelect
+      <CommonMFormSelect
         name="is7DayExpirerFilterer"
         v-model="apiSearchData.is7DayExpirerFilterer"
         :options="offline.expirer7DayOptions"

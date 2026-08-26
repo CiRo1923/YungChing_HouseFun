@@ -15,8 +15,12 @@ const props = defineProps({
     type: [Boolean, String, Array],
     default: undefined,
   },
-  rules: {
+  modelModifiers: {
     type: Object,
+    default: () => ({}),
+  },
+  rules: {
+    type: [String, Object, Function],
     default: null,
   },
   config: {
@@ -66,12 +70,14 @@ const model = computed({
 
     // group：可 join 才 join
     const sep = joinSep.value
-    if (sep && Array.isArray(val)) {
-      emits('update:modelValue', val.join(sep))
+    const sortedValue = onSortGroupValue(val)
+
+    if (sep && Array.isArray(sortedValue)) {
+      emits('update:modelValue', sortedValue.join(sep))
       return
     }
 
-    emits('update:modelValue', val)
+    emits('update:modelValue', sortedValue)
   },
 })
 
@@ -79,11 +85,14 @@ const config = computed(() => {
   return onDeepMerge(
     {
       mode: 'group', // 'boolean' | 'group' | 'value'
+      sort: null, // null | 'desc' (大到小) | 'asc' (小到大)，只有 group 用
       label: null,
       value: null,
       align: 'top',
       isDisabled: false,
-      isJoin: null,
+      isError: false,
+      isJoin: null, // 只有 group 用
+      valueClickClear: null,
     },
     props.config
   )
@@ -97,6 +106,69 @@ const joinSep = computed(() => {
   if (typeof isJoin === 'string' && isJoin.length) return isJoin
   return null
 })
+
+// 「點了就清掉其他選項」的那一項（例如「不限」）。
+// 給字串＝只比對值；給物件則可再帶 regex，用來清掉符合樣式的同群組選項。
+const valueClear = computed(() => {
+  const { mode, valueClickClear } = config.value
+  const hasValueClickClear = valueClickClear !== null
+  const isString = hasValueClickClear ? typeof valueClickClear === 'string' : false
+  const isClearItem = mode === 'group' && !!(valueClickClear || valueClickClear === '')
+
+  return hasValueClickClear && isClearItem
+    ? {
+        value: isString ? valueClickClear : valueClickClear.value,
+        regex: isString ? null : valueClickClear.regex,
+      }
+    : null
+})
+
+// group 的值排序。數字能轉就用數字比，否則退回字串（localeCompare 帶 numeric）
+const onSortGroupValue = (list) => {
+  const { mode, sort } = config.value
+
+  if (mode !== 'group') return list
+  if (!Array.isArray(list)) return []
+  if (!sort) return list
+
+  const nextList = [...list]
+
+  nextList.sort((a, b) => {
+    const aNum = Number(a)
+    const bNum = Number(b)
+    const isANumber = !Number.isNaN(aNum) && a !== '' && a !== null
+    const isBNumber = !Number.isNaN(bNum) && b !== '' && b !== null
+
+    if (isANumber && isBNumber) {
+      return sort === 'asc' ? aNum - bNum : bNum - aNum
+    }
+
+    const aStr = String(a)
+    const bStr = String(b)
+
+    return sort === 'asc'
+      ? aStr.localeCompare(bStr, undefined, { numeric: true })
+      : bStr.localeCompare(aStr, undefined, { numeric: true })
+  })
+
+  return nextList
+}
+
+// join 模式下，外部塞進來的 array 也要照 sort 排好再併回字串，
+// 否則畫面已排序、送出的字串卻還是原順序
+watch(
+  () => [config.value.mode, joinSep.value, props.modelValue],
+  ([mode, sep, modelValue]) => {
+    if (mode !== 'group' || !sep || !Array.isArray(modelValue)) return
+
+    const joinedValue = onSortGroupValue(modelValue).join(sep)
+
+    if (joinedValue !== props.modelValue) {
+      emits('update:modelValue', joinedValue)
+    }
+  },
+  { immediate: true }
+)
 
 const bind = computed(() => {
   const { mode, value } = config.value
@@ -134,8 +206,42 @@ const setClass = computed(() => {
   }
 })
 
-const onChange = () => {
-  emits('change')
+const onChange = async () => {
+  const { mode, label, value } = config.value
+
+  if (valueClear.value) {
+    // 等 vee-validate 的 update:modelValue 經由 props 回流後再讀 model，
+    // 否則會讀到點擊前的舊值（要點兩次才生效）。
+    // 沒用 valueClickClear 就不延遲，維持既有呼叫端的 emit 時機。
+    await nextTick()
+
+    const isMatched = valueClear.value.value === value
+
+    if (valueClear.value.regex && isMatched) {
+      const regex = new RegExp(valueClear.value.regex)
+
+      model.value = model.value.filter((item) => {
+        if (item === valueClear.value.value) return true
+
+        return !regex.test(String(item))
+      })
+    } else if (isMatched) {
+      // 點到「清除項」本身：只留它
+      model.value = valueClear.value.value ? [valueClear.value.value] : []
+    } else {
+      // 點到其他項：把「清除項」移除
+      const valueClearIndex = model.value.findIndex((item) => item === valueClear.value.value)
+
+      if (valueClearIndex !== -1) {
+        const nextValue = [...model.value]
+
+        nextValue.splice(valueClearIndex, 1)
+        model.value = nextValue
+      }
+    }
+  }
+
+  emits('change', { mode, label, value })
 }
 </script>
 
@@ -164,7 +270,7 @@ const onChange = () => {
             v-bind="bind"
             class="m-form-type sr-only"
             :class="{
-              '--error': errorMessage,
+              '--error': errorMessage || config.isError,
             }"
             :disabled="config.isDisabled"
             @change="onChange"

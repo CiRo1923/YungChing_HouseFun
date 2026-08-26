@@ -7,7 +7,7 @@ const { apiData, pingData } = storeToRefs(buyPublish)
 </script>
 
 <template>
-  <BuyMFormInput
+  <CommonMFormInput
     name="caseMainSq"
     v-model.number="pingData.caseMainSq"
     :config="{
@@ -34,7 +34,7 @@ const { apiData, pingData } = storeToRefs(buyPublish)
     @blur="onPinSqMetersConvert('caseMainSq')"
   >
     <template #rearAssist>{{ pingUnitLabel }}</template>
-  </BuyMFormInput>
+  </CommonMFormInput>
 </template>
 
 <style></style>

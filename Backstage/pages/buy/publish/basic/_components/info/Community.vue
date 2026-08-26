@@ -50,7 +50,7 @@ const onCommunityChange = (item) => {
 
 <template>
   <PageBuyPublishBasicRadiosOval>
-    <BuyMFormRadiosOval
+    <CommonMFormRadiosOval
       name="isCaseCommunity"
       v-model="apiData.caseInfo.isCaseCommunity"
       :options="radioOptions"

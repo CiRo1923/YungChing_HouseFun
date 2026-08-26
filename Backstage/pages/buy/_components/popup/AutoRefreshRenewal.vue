@@ -67,7 +67,7 @@ const onSure = async () => {
         個自動刷新額度
       </p>
       <Form as="div" class="mx-auto tm:mt-[16px] p:mt-[24px] p:max-w-[800px]" ref="formRef">
-        <BuyMFormHidden
+        <CommonMFormHidden
           name="planID"
           v-model="autoRefresh.save.apiData.planID"
           :rules="{
@@ -82,7 +82,7 @@ const onSure = async () => {
               v-for="(item, index) in listPlans"
               :key="`${item.planType}_${item.planID}_${index}`"
             >
-              <BuyMFormRadioItem
+              <CommonMFormRadioItem
                 name="planID"
                 v-model="autoRefresh.save.apiData.planID"
                 :config="{
@@ -107,10 +107,10 @@ const onSure = async () => {
                     </b>
                   </p>
                 </div>
-              </BuyMFormRadioItem>
+              </CommonMFormRadioItem>
             </li>
           </ul>
-        </BuyMFormHidden>
+        </CommonMFormHidden>
       </Form>
     </div>
   </BuyCommonCustomPopup>

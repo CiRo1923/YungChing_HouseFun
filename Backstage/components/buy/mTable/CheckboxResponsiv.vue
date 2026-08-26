@@ -170,7 +170,7 @@ onUnmounted(() => {
               <!-- 勾選欄 -->
               <td class="m-table-tbody-td" :class="setClass.tbodyTd">
                 <div class="m:flex m:items-center m:gap-x-[4px]">
-                  <BuyMFormCheckBox
+                  <CommonMFormCheckBox
                     :name="getCheckboxName(rowIndex)"
                     v-model="item[isCheckedKey]"
                     :config="{

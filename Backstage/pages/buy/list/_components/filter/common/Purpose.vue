@@ -4,7 +4,7 @@ const { apiSearchData, serachOptions } = storeToRefs(buyList)
 </script>
 
 <template>
-  <BuyMFormSelect
+  <CommonMFormSelect
     name="purposeToken"
     v-model="apiSearchData.purposeToken"
     :options="serachOptions.purpose"

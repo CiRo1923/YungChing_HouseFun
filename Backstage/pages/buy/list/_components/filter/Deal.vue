@@ -19,7 +19,7 @@ const onSearchClick = async () => {
     <PageBuyListFilterCommonPurpose />
     <template #hide="{ searchFun }">
       <PageBuyListFilterCommonArea />
-      <BuyMFormSelect
+      <CommonMFormSelect
         name="caseDealShowToken"
         v-model="apiSearchData.caseDealShowToken"
         :options="serachOptions.dealShow"

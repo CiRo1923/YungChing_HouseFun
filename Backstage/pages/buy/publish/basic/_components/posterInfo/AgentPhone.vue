@@ -6,7 +6,7 @@ const { apiData } = storeToRefs(buyPublish)
 <template>
   <ul class="m:space-y-[12px] t:gap-x-[16px] pt:flex p:gap-x-[24px]">
     <li class="t:w-[220px] p:w-[270px]">
-      <BuyMFormInput
+      <CommonMFormInput
         name="agentPhone"
         v-model="apiData.caseInfo.posterInfo.agentPhone"
         :config="{
@@ -27,7 +27,7 @@ const { apiData } = storeToRefs(buyPublish)
       />
     </li>
     <li class="flex items-center pt:h-[40px]">
-      <BuyMFormCheckBox
+      <CommonMFormCheckBox
         name="isAgentDND"
         v-model="apiData.caseInfo.posterInfo.isAgentDND"
         :config="{

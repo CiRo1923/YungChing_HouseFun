@@ -19,7 +19,7 @@ const isSelectAll = computed({
 </script>
 
 <template>
-  <BuyMFormCheckBox
+  <CommonMFormCheckBox
     name="isCommentsSelectAll"
     v-model="isSelectAll"
     :config="{

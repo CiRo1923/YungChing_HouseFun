@@ -4,7 +4,7 @@ const { apiData } = storeToRefs(buyPublish)
 </script>
 
 <template>
-  <BuyMFormInput
+  <CommonMFormInput
     name="agentLine"
     v-model="apiData.caseInfo.posterInfo.agentLine"
     :config="{

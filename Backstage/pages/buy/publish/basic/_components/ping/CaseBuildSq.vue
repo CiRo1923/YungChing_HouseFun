@@ -11,7 +11,7 @@ const casePurposeToken = computed(() => apiData.value.caseInfo.casePurposeToken)
 <template>
   <ul class="flex overflow-hidden tm:gap-x-[16px] p:gap-x-[24px]">
     <li class="m:min-w-0 m:grow t:w-[220px] p:w-[270px]">
-      <BuyMFormInput
+      <CommonMFormInput
         name="caseBuildSq"
         v-model.number="pingData.caseBuildSq"
         :config="{
@@ -39,11 +39,11 @@ const casePurposeToken = computed(() => apiData.value.caseInfo.casePurposeToken)
         @blur="onPinSqMetersConvert('caseBuildSq')"
       >
         <template #rearAssist>{{ pingUnitLabel }}</template>
-      </BuyMFormInput>
+      </CommonMFormInput>
     </li>
     <!-- 1: 住宅 2: 店面 3: 住店 4: 辦公 5: 住辦 6: 廠房 7: 車位 8: 土地 9: 其他 -->
     <li class="flex h-[40px] items-center m:shrink-0" v-if="casePurposeToken !== '7'">
-      <BuyMFormCheckBox
+      <CommonMFormCheckBox
         name="isCaseBuildSqIncludeParking"
         v-model="apiData.caseInfo.isCaseBuildSqIncludeParking"
         :config="{

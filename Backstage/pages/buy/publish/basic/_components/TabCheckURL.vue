@@ -29,7 +29,7 @@ const onClick = async (validate) => {
 <template>
   <Form as="div" v-slot="{ validate }">
     <div class="p:flex p:gap-x-[16px]">
-      <BuyMFormLabel
+      <CommonMFormLabel
         label="網址匯入"
         :config="{
           isRequired: false,
@@ -38,7 +38,7 @@ const onClick = async (validate) => {
           main: 'shrink-0 p:ml-[12px] p:flex p:h-[40px] p:items-center',
         }"
       />
-      <BuyMFormInput
+      <CommonMFormInput
         name="URL"
         v-model="url"
         :config="{

@@ -1,5 +1,5 @@
 <script setup>
-import SelectDropdownOptions from '@components/buy/mForm/SelectDropdownOptions.vue'
+import SelectDropdownOptions from '@components/common/mForm/SelectDropdownOptions.vue'
 
 const buyList = useBuyListStore()
 const { apiSearchData, serachOptions } = storeToRefs(buyList)
@@ -146,7 +146,7 @@ const onAreaClick = (item) => {
 </script>
 
 <template>
-  <BuyMFormDropdown
+  <CommonMFormDropdown
     name="addr"
     v-model="model.label"
     :setClass="{
@@ -223,7 +223,7 @@ const onAreaClick = (item) => {
     <template #dropdownFooter v-if="activePanel === 'district'">
       <p class="text-[16px] text-[--gray-666]">目前選擇{{ selectCityLabel }}</p>
     </template>
-  </BuyMFormDropdown>
+  </CommonMFormDropdown>
 </template>
 
 <style lang="postcss">

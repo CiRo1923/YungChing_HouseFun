@@ -124,7 +124,7 @@ const setClass = computed(() => {
 
 <template>
   <div :class="setClass.main">
-    <BuyMFormSelect
+    <CommonMFormSelect
       :name="props.selectName"
       v-model="modelSelect"
       :options="config.select.options"
@@ -135,7 +135,7 @@ const setClass = computed(() => {
       :rules="props.selectRules"
       :setClass="setClass.select"
     />
-    <BuyMFormInput
+    <CommonMFormInput
       v-if="isOtherSelect(modelSelect)"
       :name="props.otherName"
       v-model="modelOther"

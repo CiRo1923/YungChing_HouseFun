@@ -13,7 +13,7 @@ const onParkingSqBlur = () => {
 </script>
 
 <template>
-  <BuyMFormInput
+  <CommonMFormInput
     name="caseParkingSq"
     v-model.number="pingData.caseParkingSq"
     :config="{
@@ -32,7 +32,7 @@ const onParkingSqBlur = () => {
     @blur="onParkingSqBlur"
   >
     <template #rearAssist>{{ pingUnitLabel }}</template>
-  </BuyMFormInput>
+  </CommonMFormInput>
 </template>
 
 <style></style>

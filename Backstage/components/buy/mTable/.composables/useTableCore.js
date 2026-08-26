@@ -22,7 +22,7 @@ const defaultSetClass = {
   tfootTd: '',
   footer: '',
   noData: '',
-  checkbox: {}, // 傳給 BuyMFormCheckBox 的 setClass，需為物件
+  checkbox: {}, // 傳給 CommonMFormCheckBox 的 setClass，需為物件
 }
 
 /**

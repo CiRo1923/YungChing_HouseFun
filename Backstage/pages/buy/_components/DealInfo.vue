@@ -50,7 +50,7 @@ onInit()
       class="space-y-[16px] rounded-[15px] bg-[--gray-f7] py-[32px] text-center tm:px-[16px] p:px-[40px]"
     >
       <div class="m:space-y-[16px] pt:inline-flex pt:gap-x-[16px]">
-        <BuyMFormLabel
+        <CommonMFormLabel
           label="成交日期"
           :setClass="{
             main: 'pt:shrink-0 p:flex p:h-[40px] p:items-center',
@@ -89,7 +89,7 @@ onInit()
         中，並顯示物件成交頁
         <small class="text-[14px]">(僅顯示部份資料)</small>？
       </p>
-      <BuyMFormRadiosOval
+      <CommonMFormRadiosOval
         name="isDealShow"
         v-model="apiDealData.isDealShow"
         :options="dealShow"

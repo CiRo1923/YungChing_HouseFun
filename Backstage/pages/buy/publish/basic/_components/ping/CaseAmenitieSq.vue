@@ -50,7 +50,7 @@ watch(
     <li>
       <ul class="m:space-y-[12px] pt:flex pt:gap-x-[8px]">
         <li class="t:w-[220px] p:w-[270px]">
-          <BuyMFormInput
+          <CommonMFormInput
             name="caseAmenitieSq"
             v-model.number="pingData.caseAmenitieSq"
             :config="{
@@ -66,10 +66,10 @@ watch(
             @blur="onPinSqMetersConvert('caseAmenitieSq')"
           >
             <template #rearAssist>{{ pingUnitLabel }}</template>
-          </BuyMFormInput>
+          </CommonMFormInput>
         </li>
         <li class="t:w-[220px] p:w-[270px]">
-          <BuyMFormInput
+          <CommonMFormInput
             name="caseAmenitieSqRatio"
             v-model.number="apiData.caseInfo.caseAmenitieSqRatio"
             :config="{
@@ -85,12 +85,12 @@ watch(
             }"
           >
             <template #rearAssist>%</template>
-          </BuyMFormInput>
+          </CommonMFormInput>
         </li>
       </ul>
     </li>
     <li class="flex items-center pt:h-[40px]">
-      <BuyMFormCheckBox
+      <CommonMFormCheckBox
         name="isCaseAmenitieSqRatioAuto"
         v-model="apiData.caseInfo.isCaseAmenitieSqRatioAuto"
         :config="{

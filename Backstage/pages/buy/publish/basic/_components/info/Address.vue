@@ -101,7 +101,7 @@ const onPopupAddressGoogleMap = async () => {
 </script>
 
 <template>
-  <BuyMFormHidden
+  <CommonMFormHidden
     name="address"
     v-model="rules"
     :rules="{
@@ -235,7 +235,7 @@ const onPopupAddressGoogleMap = async () => {
       @change:area="onAreaChange"
       v-if="casePurposeToken === '8'"
     />
-  </BuyMFormHidden>
+  </CommonMFormHidden>
   <div
     class="mt-[8px] flex m:flex-col-reverse m:items-start m:gap-y-[12px] m:text-[16px] t:gap-x-[12px] pt:items-center pt:text-[14px] p:gap-x-[16px]"
   >

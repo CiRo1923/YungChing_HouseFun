@@ -87,7 +87,7 @@ watch(
   <div class="m:space-y-[16px] pt:space-y-[8px]">
     <ul class="flex overflow-hidden tm:gap-x-[16px] p:gap-x-[24px]">
       <li class="m:min-w-0 m:grow t:w-[220px] p:w-[270px]">
-        <BuyMFormInput
+        <CommonMFormInput
           name="caseAffiliatedSqPin"
           v-model.number="pingData.caseAffiliatedSq"
           :config="{
@@ -107,10 +107,10 @@ watch(
           @blur="onPinSqMetersConvert('caseAffiliatedSq')"
         >
           <template #rearAssist>{{ pingUnitLabel }}</template>
-        </BuyMFormInput>
+        </CommonMFormInput>
       </li>
       <li class="flex h-[40px] items-center m:shrink-0">
-        <BuyMFormCheckBox
+        <CommonMFormCheckBox
           name="isCaseAttachedSqAutoCalculate"
           v-model="apiData.caseInfo.isCaseAttachedSqAutoCalculate"
           :config="{
@@ -136,7 +136,7 @@ watch(
           class="text-[16px] leading-[1.2] text-[--gray-666] pt:flex pt:h-[40px] pt:min-w-[48px] pt:shrink-0 pt:items-center"
           v-html="item.label"
         />
-        <BuyMFormInput
+        <CommonMFormInput
           :name="item.id"
           v-model.number="pingData[item.id]"
           :config="{
@@ -157,7 +157,7 @@ watch(
           @blur="onPinSqMetersConvert(item.id)"
         >
           <template #rearAssist>{{ pingUnitLabel }}</template>
-        </BuyMFormInput>
+        </CommonMFormInput>
       </li>
     </ul>
   </div>

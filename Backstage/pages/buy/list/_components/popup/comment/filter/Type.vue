@@ -4,7 +4,7 @@ const { apiCommentsData, commentsOptions } = storeToRefs(buyList)
 </script>
 
 <template>
-  <BuyMFormSelect
+  <CommonMFormSelect
     name="caseCommentTypeToken"
     v-model="apiCommentsData.caseCommentTypeToken"
     :options="commentsOptions.type"

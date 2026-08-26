@@ -157,7 +157,7 @@ onInit()
   <!-- 1: 住宅 2: 店面 3: 住店 4: 辦公 5: 住辦 6: 廠房 7: 車位 8: 土地 9: 其他 -->
   <PageBuyPublishBasicRadiosOval>
     <!-- {{ apiData.caseInfo.parkingInfos }} -->
-    <BuyMFormRadiosOval
+    <CommonMFormRadiosOval
       name="isCaseParking"
       v-model="apiData.caseInfo.isCaseParking"
       :options="radioOptions"
@@ -235,7 +235,7 @@ onInit()
                 v-if="key === 'select'"
               />
 
-              <BuyMFormInput
+              <CommonMFormInput
                 :name="`parkingInfos[${index}].${value.id}`"
                 v-model.number="data[value.id]"
                 :config="value.config"
@@ -248,8 +248,8 @@ onInit()
                 v-if="key === 'text'"
               >
                 <template #rearAssist v-if="value.rearAssist">{{ value.rearAssist }}</template>
-              </BuyMFormInput>
-              <BuyMFormCheckBox
+              </CommonMFormInput>
+              <CommonMFormCheckBox
                 :name="`parkingInfos[${index}].${value.id}`"
                 v-model="data[value.id]"
                 :config="value.config"

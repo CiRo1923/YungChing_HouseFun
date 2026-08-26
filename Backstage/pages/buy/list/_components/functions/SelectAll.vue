@@ -22,7 +22,7 @@ const isSelectAll = computed({
 </script>
 
 <template>
-  <BuyMFormCheckBox
+  <CommonMFormCheckBox
     name="isSelectAll"
     v-model="isSelectAll"
     :config="{

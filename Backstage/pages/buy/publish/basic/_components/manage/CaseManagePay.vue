@@ -8,7 +8,7 @@ const { apiData } = storeToRefs(buyPublish)
 <template>
   <ul class="m:space-y-[12px] pt:flex pt:gap-x-[8px]">
     <li class="t:w-[220px] p:w-[270px]">
-      <BuyMFormSelect
+      <CommonMFormSelect
         name="caseManageFeePeriodToken"
         v-model.number="apiData.caseInfo.caseManageFeePeriodToken"
         :options="options.managePay"
@@ -28,7 +28,7 @@ const { apiData } = storeToRefs(buyPublish)
       />
     </li>
     <li class="t:w-[220px] p:w-[270px]">
-      <BuyMFormInput
+      <CommonMFormInput
         name="caseManageFee"
         v-model.number="apiData.caseInfo.caseManageFee"
         :config="{
@@ -47,7 +47,7 @@ const { apiData } = storeToRefs(buyPublish)
         }"
       >
         <template #rearAssist>元</template>
-      </BuyMFormInput>
+      </CommonMFormInput>
     </li>
   </ul>
 </template>

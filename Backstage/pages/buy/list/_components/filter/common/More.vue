@@ -55,7 +55,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <BuyMFormSelectMultiple
+  <CommonMFormSelectMultiple
     :items="items"
     :config="{
       schema: {
@@ -76,7 +76,7 @@ onUnmounted(() => {
     </template>
     <template #dropdownFooter="{ data }">
       <div class="flex items-center gap-x-[4px] overflow-hidden">
-        <BuyMFormInput
+        <CommonMFormInput
           :name="`${data.key}RangeMin`"
           :modelValue="apiSearchData[`${data.key}RangeMin`]"
           @update:modelValue="onRangeUpdate(data, `${data.key}RangeMin`, $event)"
@@ -89,9 +89,9 @@ onUnmounted(() => {
           }"
         >
           <template #rearAssist>{{ data.rearAssist }}</template>
-        </BuyMFormInput>
+        </CommonMFormInput>
         <small>-</small>
-        <BuyMFormInput
+        <CommonMFormInput
           :name="`${data.key}RangeMax`"
           :modelValue="apiSearchData[`${data.key}RangeMax`]"
           @update:modelValue="onRangeUpdate(data, `${data.key}RangeMax`, $event)"
@@ -104,12 +104,12 @@ onUnmounted(() => {
           }"
         >
           <template #rearAssist>{{ data.rearAssist }}</template>
-        </BuyMFormInput>
+        </CommonMFormInput>
       </div>
     </template>
-  </BuyMFormSelectMultiple>
+  </CommonMFormSelectMultiple>
   <template v-if="isDeviceM">
-    <BuyMFormSelect
+    <CommonMFormSelect
       :name="item.name"
       v-model="apiSearchData[item.name]"
       :options="item.options"

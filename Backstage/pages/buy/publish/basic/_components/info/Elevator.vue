@@ -24,7 +24,7 @@ const onIsCaseHasElevatorChnage = () => {
 
 <template>
   <PageBuyPublishBasicRadiosOval>
-    <BuyMFormRadiosOval
+    <CommonMFormRadiosOval
       name="isCaseHasElevator"
       v-model="apiData.caseInfo.isCaseHasElevator"
       :options="radioOptions"
@@ -36,7 +36,7 @@ const onIsCaseHasElevatorChnage = () => {
     />
     <ul>
       <li class="t:w-[90px] p:w-[100px]">
-        <BuyMFormInput
+        <CommonMFormInput
           name="caseElevatorCount"
           v-model.number="apiData.caseInfo.caseElevatorCount"
           :config="{
@@ -62,7 +62,7 @@ const onIsCaseHasElevatorChnage = () => {
           }"
         >
           <template #rearAssist>部</template>
-        </BuyMFormInput>
+        </CommonMFormInput>
       </li>
     </ul>
   </PageBuyPublishBasicRadiosOval>

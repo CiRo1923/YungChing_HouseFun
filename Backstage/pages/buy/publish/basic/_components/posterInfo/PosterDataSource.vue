@@ -6,7 +6,7 @@ const { apiData } = storeToRefs(buyPublish)
 </script>
 
 <template>
-  <BuyMFormRadiosOval
+  <CommonMFormRadiosOval
     name="posterDataSourceToken"
     v-model.number="apiData.caseInfo.posterDataSourceToken"
     :options="options.posterDataSource"

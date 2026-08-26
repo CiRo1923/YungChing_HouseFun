@@ -54,7 +54,7 @@ const onFloorVaild = () => {
 
 <template>
   <PageBuyPublishBasicRadiosOval>
-    <BuyMFormRadiosOval
+    <CommonMFormRadiosOval
       name="isSingleFloor"
       v-model="apiData.caseInfo.isSingleFloor"
       :options="radioOptions"
@@ -64,7 +64,7 @@ const onFloorVaild = () => {
       }"
       @change="onIsSingleFloorChange"
     />
-    <BuyMFormHidden
+    <CommonMFormHidden
       name="caseFloor"
       v-model="floorRange"
       :rules="{
@@ -80,7 +80,7 @@ const onFloorVaild = () => {
     >
       <ul class="m:space-y-[8px] pt:flex pt:gap-x-[8px]">
         <li class="flex grow gap-x-[8px] overflow-hidden">
-          <BuyMFormSelect
+          <CommonMFormSelect
             name="floorFromToken"
             v-model.number="apiData.caseInfo.floorFromToken"
             :options="options.floor"
@@ -96,7 +96,7 @@ const onFloorVaild = () => {
               main: '--h-40 --px-12 --py-8 shrink-0',
             }"
           />
-          <BuyMFormInput
+          <CommonMFormInput
             name="caseFloorFrom"
             v-model.number="apiData.caseInfo.caseFloorFrom"
             :config="{
@@ -119,13 +119,13 @@ const onFloorVaild = () => {
             }"
           >
             <template #rearAssist>樓</template>
-          </BuyMFormInput>
+          </CommonMFormInput>
         </li>
         <li class="m:hidden pt:shrink-0" v-if="!apiData.caseInfo.isSingleFloor">
           <span class="text-[16px] text-[--gray-666] pt:flex pt:h-[40px] pt:items-center">~</span>
         </li>
         <li class="flex grow gap-x-[8px] overflow-hidden" v-if="!apiData.caseInfo.isSingleFloor">
-          <BuyMFormSelect
+          <CommonMFormSelect
             name="floorToToken"
             v-model.number="apiData.caseInfo.floorToToken"
             :options="options.floor"
@@ -141,7 +141,7 @@ const onFloorVaild = () => {
               main: '--h-40 --px-12 --py-8 shrink-0',
             }"
           />
-          <BuyMFormInput
+          <CommonMFormInput
             name="caseFloorTo"
             v-model.number="apiData.caseInfo.caseFloorTo"
             :config="{
@@ -164,10 +164,10 @@ const onFloorVaild = () => {
             }"
           >
             <template #rearAssist>樓</template>
-          </BuyMFormInput>
+          </CommonMFormInput>
         </li>
       </ul>
-    </BuyMFormHidden>
+    </CommonMFormHidden>
   </PageBuyPublishBasicRadiosOval>
 </template>
 

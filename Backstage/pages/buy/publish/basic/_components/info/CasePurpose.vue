@@ -151,7 +151,7 @@ const onChange = async (item) => {
 </script>
 
 <template>
-  <BuyMFormRadiosOval
+  <CommonMFormRadiosOval
     name="casePurposeToken"
     v-model="apiData.caseInfo.casePurposeToken"
     :options="options.casePurpose"

@@ -11,7 +11,7 @@ const onCaseZoingChange = () => {
 
 <template>
   <PageBuyPublishBasicRadiosOval>
-    <BuyMFormRadiosOval
+    <CommonMFormRadiosOval
       name="caseZoingToken"
       v-model.number="apiData.caseInfo.caseZoingToken"
       :options="options.caseZoing"

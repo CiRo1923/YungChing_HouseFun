@@ -154,7 +154,7 @@ onUnmounted(() => {
           </span>
         </div>
       </div>
-      <BuyMFormCheckBox
+      <CommonMFormCheckBox
         :name="`checked[${props.data.hfID}]`"
         v-model="modelIsChecked"
         :config="{

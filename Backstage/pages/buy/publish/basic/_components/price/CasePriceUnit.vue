@@ -49,7 +49,7 @@ watch(
 <template>
   <ul class="flex flex-wrap tm:gap-x-[8px] p:gap-x-[24px]">
     <li class="t:w-[220px] p:w-[270px]">
-      <BuyMFormInput
+      <CommonMFormInput
         name="casePriceUnit"
         v-model.number="apiData.caseInfo.casePriceUnit"
         :config="{
@@ -69,12 +69,12 @@ watch(
       >
         <template #rearAssist>萬 / 坪</template>
         <template #suffix>單價 = 總價 / 建物登記坪數</template>
-      </BuyMFormInput>
+      </CommonMFormInput>
     </li>
     <li class="flex h-[40px] items-center">
       <ul class="flex tm:gap-x-[16px] p:gap-x-[24px]">
         <li class="flex h-[40px] items-center">
-          <BuyMFormCheckBox
+          <CommonMFormCheckBox
             name="isCasePriceUnitAuto"
             v-model="apiData.caseInfo.isCasePriceUnitAuto"
             :config="{
@@ -87,7 +87,7 @@ watch(
           />
         </li>
         <li class="flex h-[40px] items-center">
-          <BuyMFormCheckBox
+          <CommonMFormCheckBox
             name="isCasePricePerPinDeductParking"
             v-model="apiData.caseInfo.isCasePricePerPinDeductParking"
             :config="{

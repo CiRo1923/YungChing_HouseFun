@@ -6,7 +6,7 @@ const { onPingUnitChange } = useBuyPublishActions()
 </script>
 
 <template>
-  <BuyMFormRadiosOval
+  <CommonMFormRadiosOval
     name="isCaseSqUnitPin"
     v-model="apiData.caseInfo.isCaseSqUnitPin"
     :options="buyPublish.options.unit"
