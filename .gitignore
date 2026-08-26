@@ -26,6 +26,10 @@ logs
 .env
 .env.*
 !.env.example
+
+# Claude Code 的個人授權清單:每台機器不同、還混著 scratchpad 的絕對路徑。
+# settings.json 只留 hooks(專案共用),permissions 由 .claude/hooks/movePermissionsToLocal.js 搬到這裡。
+.claude/settings.local.json
 /Backstage/.nuxt
 /Backstage/.nuxt
 /Official/.nuxt
