@@ -26,7 +26,6 @@
     "eslint": "^10.8.0",
     "postcss": "^8.5.16",
     "postcss-calc": "^10.1.1",
-    "postcss-pxtorem": "^6.0.0",
     "prettier": "^3.9.6",
     "prettier-plugin-tailwindcss": "^0.8.1",
     "sharp": "^0.35.3",
@@ -38,7 +37,6 @@
     "@googlemaps/js-api-loader": "^2.1.1",
     "@mayasabha/ckeditor4-vue3": "^1.0.9",
     "@vee-validate/rules": "^4.15.1",
-    "crypto-js": "^4.2.0",
     "nuxt": "^4.4.8",
     "pinia": "^4.0.2"
   }

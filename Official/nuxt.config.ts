@@ -17,6 +17,7 @@ const APP_HASH =
   process.env.NUXT_PUBLIC_APP_HASH || execSync('git rev-parse --short HEAD').toString().trim()
 
 const POSTCSS_FUNCTIONS_PLUGIN = new URL('./.tools/postcss/functions.js', import.meta.url).href
+const POSTCSS_PXTOREM_PLUGIN = new URL('./.tools/postcss/pxtorem.js', import.meta.url).href
 
 const imageAssetDir = CONFIG.imgs.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\\/g, '/')
 const imageAssetInclude = new RegExp(`${imageAssetDir}/(?!svg/spritemap\\.svg$)`)
@@ -126,7 +127,8 @@ export default defineNuxtConfig({
         functions: POSTCSSFUNCTIONS,
       },
       'postcss-calc': {},
-      'postcss-pxtorem': {
+      // 自寫外掛,取代已停更的 postcss-pxtorem(見 .tools/postcss/pxtorem.js)
+      [POSTCSS_PXTOREM_PLUGIN]: {
         propList: ['*', '!box-shadow', '!z-index', '!border-width'],
         minPixelValue: 2,
       },
@@ -145,12 +147,7 @@ export default defineNuxtConfig({
   },
   vite: {
     optimizeDeps: {
-      include: [
-        '@vue/devtools-core',
-        '@vue/devtools-kit',
-        '@mayasabha/ckeditor4-vue3',
-        'crypto-js',
-      ],
+      include: ['@vue/devtools-core', '@vue/devtools-kit', '@mayasabha/ckeditor4-vue3'],
     },
     esbuild: {
       drop: process.env.NUXT_PUBLIC_APP_MODE === 'build' ? ['console'] : [],
