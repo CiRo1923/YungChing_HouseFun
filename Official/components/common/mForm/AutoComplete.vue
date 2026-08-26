@@ -6,6 +6,7 @@ import '@css/_modules/common/mForm/autocomplete.css'
 
 import { Field, ErrorMessage } from 'vee-validate'
 import { useInputTextCore } from './.composables/useInputTextCore.js'
+import useValidateEvents from './.composables/useValidateEvents.js'
 import { useDropdownCore } from './.composables/useDropdownCore.js'
 
 const emits = defineEmits(['change', 'input', 'update:modelValue'])
@@ -60,6 +61,9 @@ const model = computed({
 
 const defaultConfig = {
   placeholder: '',
+  // 驗證時機。null = 沿用全域(等同 ['blur', 'change', 'modelUpdate']);
+  // 傳陣列為「完整指定」,詳見 .composables/useValidateEvents.js
+  validateEvents: null,
   noMatchClearLabel: false,
   waitMessage: '資料讀取中',
   noResult: '無任何選項。',
@@ -92,6 +96,7 @@ const { config, setClass } = useInputTextCore(props, {
   defaultConfig,
   defaultSetClass,
 })
+const validateOn = useValidateEvents(() => config.value.validateEvents)
 
 const resolvedOptions = computed(() => {
   if (Array.isArray(inputOptions.value)) {
@@ -388,7 +393,13 @@ onUnmounted(() => {
 
 <template>
   <div class="m-form overflow-hidden" :class="setClass.main">
-    <Field :name="props.name" :rules="props.rules" v-model="model" v-slot="{ field, errorMessage }">
+    <Field
+      :name="props.name"
+      :rules="props.rules"
+      v-model="model"
+      v-bind="validateOn"
+      v-slot="{ field, errorMessage }"
+    >
       <input type="hidden" v-bind="field" />
       <div class="m-form-container" :class="setClass.container">
         <div

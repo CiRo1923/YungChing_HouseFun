@@ -49,6 +49,8 @@ const config = computed(() => {
     isReadonly: false,
     isDisabled: false,
     isError: false,
+    // 驗證時機:本元件不自己驗證,原樣轉給底層的 Hidden(真正掛 Field 的地方)
+    validateEvents: null,
     ...props.config,
   }
 })
@@ -170,6 +172,7 @@ defineExpose({
     :modelValue="props.modelValue"
     :config="{
       length: config.length,
+      validateEvents: config.validateEvents,
     }"
     :rules="props.rules"
     :setClass="{

@@ -8,6 +8,7 @@ import { onMergeDropdownConfig, useDropdownCore } from './.composables/useDropdo
 import '@js/_validation.js'
 
 import { Field, ErrorMessage } from 'vee-validate'
+import useValidateEvents from './.composables/useValidateEvents.js'
 
 const props = defineProps({
   name: {
@@ -41,12 +42,16 @@ const model = computed({
 })
 const config = computed(() => {
   const defaultConfig = {
+    // 驗證時機。null = 沿用全域(等同 ['blur', 'change', 'modelUpdate']);
+    // 傳陣列為「完整指定」,詳見 .composables/useValidateEvents.js
+    validateEvents: null,
     placeholder: null,
     isError: false,
   }
 
   return onMergeDropdownConfig(props.config, defaultConfig)
 })
+const validateOn = useValidateEvents(() => config.value.validateEvents)
 
 const setClass = computed(() => {
   return {
@@ -127,6 +132,7 @@ defineExpose({
       :name="props.name"
       v-model="model"
       :rules="config.isDisabled ? '' : props.rules"
+      v-bind="validateOn"
       v-slot="{ field, errorMessage }"
     >
       <input type="hidden" :id="props.name" v-bind="field" />

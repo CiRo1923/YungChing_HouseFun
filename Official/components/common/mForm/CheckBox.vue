@@ -1,6 +1,7 @@
 <script setup>
 import { onDeepMerge } from '@js/_prototype.js'
 import { Field, ErrorMessage } from 'vee-validate'
+import useValidateEvents from './.composables/useValidateEvents.js'
 
 import '@css/_modules/common/mForm/variables.css'
 import '@css/_modules/common/mForm/selectionVariables.css'
@@ -41,6 +42,10 @@ const props = defineProps({
 const config = computed(() => {
   return onDeepMerge(
     {
+      // 驗證時機。勾選類控制項刻意不吃 blur —— 用鍵盤 Tab 經過卻還沒選就跳紅字,
+      // 那是誤報。change 已涵蓋「使用者動了它」,submit 的主動 validate() 一律會驗、
+      // 不受此設定影響。詳見 .composables/useValidateEvents.js
+      validateEvents: ['change'],
       mode: 'group', // 'group' | 'boolean'
       sort: null, // null | 'desc' (大到小) | 'asc' (小到大)
       label: null,
@@ -54,6 +59,7 @@ const config = computed(() => {
     props.config
   )
 })
+const validateOn = useValidateEvents(() => config.value.validateEvents)
 
 const model = computed({
   get() {
@@ -248,6 +254,7 @@ const onChange = async () => {
       :uncheckedValue="config.mode === 'boolean' ? false : undefined"
       v-model="model"
       :rules="config.isDisabled ? '' : props.rules"
+      v-bind="validateOn"
       v-slot="{ field, errorMessage }"
     >
       <div

@@ -8,6 +8,7 @@ import { onDeepMerge } from '@js/_prototype.js'
 import '@js/_validation.js'
 
 import { Field, ErrorMessage } from 'vee-validate'
+import useValidateEvents from './.composables/useValidateEvents.js'
 
 const emits = defineEmits(['update:modelValue', 'focusin', 'blur', 'input', 'enter'])
 
@@ -45,6 +46,9 @@ const config = computed(() => {
   return onDeepMerge(
     {
       placeholder: '',
+      // 驗證時機。null = 沿用全域(等同 ['blur', 'change', 'modelUpdate']);
+      // 傳陣列為「完整指定」,詳見 .composables/useValidateEvents.js
+      validateEvents: null,
       length: null,
       minlength: null,
       maxlength: null,
@@ -56,6 +60,7 @@ const config = computed(() => {
     props.config
   )
 })
+const validateOn = useValidateEvents(() => config.value.validateEvents)
 // 明碼時 type=text，遮罩時 type=password
 const inputType = computed(() => (isVisible.value ? 'text' : 'password'))
 const setClass = computed(() => {
@@ -149,6 +154,7 @@ watch(
       :name="props.name"
       type="password"
       :rules="config.isDisabled ? '' : props.rules"
+      v-bind="validateOn"
     >
       <div class="m-form-container overflow-hidden" :class="setClass.container">
         <div

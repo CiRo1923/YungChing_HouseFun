@@ -51,6 +51,9 @@ const config = computed(() => {
     {
       placeholder: null,
       length: null,
+      // 驗證時機:本元件不自己驗證,原樣轉給底層的 Input(真正掛 Field 的地方)。
+      // null = 沿用全域,詳見 .composables/useValidateEvents.js
+      validateEvents: null,
       serverTime: +new Date(),
       expires: null,
       storageName: null,
@@ -150,6 +153,7 @@ defineExpose({
     :config="{
       placeholder: config.placeholder,
       length: config.length,
+      validateEvents: config.validateEvents,
       integer: true,
       inputChinese: false,
       isDisabled: config.isDisabled.type,

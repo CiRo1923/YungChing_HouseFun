@@ -10,6 +10,7 @@ import '@js/_validation.js'
 
 import { Field, ErrorMessage } from 'vee-validate'
 import { useInputTextCore } from './.composables/useInputTextCore.js'
+import useValidateEvents from './.composables/useValidateEvents.js'
 
 // const user = userStore()
 const emits = defineEmits([
@@ -62,6 +63,9 @@ const inputRef = ref(null)
 
 const defaultConfig = {
   placeholder: '',
+  // 驗證時機。null = 沿用全域(等同 ['blur', 'change', 'modelUpdate']);
+  // 傳陣列為「完整指定」,詳見 .composables/useValidateEvents.js
+  validateEvents: null,
   length: null,
   minlength: null,
   maxlength: null,
@@ -93,6 +97,7 @@ const { isFocus, config, setClass } = useInputTextCore(props, {
   defaultConfig,
   defaultSetClass,
 })
+const validateOn = useValidateEvents(() => config.value.validateEvents)
 const isNumeric = computed(() => /^(decimal|numeric|tel)$/.test(config.value.inputMode))
 const isTel = computed(() => config.value.inputMode === 'tel')
 // 電話號碼不會是負的，tel 一律不吃 allowNegative
@@ -346,6 +351,7 @@ defineExpose({
       :name="props.name"
       :type="props.type"
       :rules="config.isDisabled ? '' : props.rules"
+      v-bind="validateOn"
     >
       <div class="m-form-container" :class="setClass.container">
         <div
