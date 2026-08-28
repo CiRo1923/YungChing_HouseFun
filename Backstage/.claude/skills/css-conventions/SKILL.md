@@ -131,7 +131,7 @@ import '…/mForm/checkbox.css'            // 變體樣式
 
 ## hover 的固定寫法
 
-參考實作 [common/mAnchor/variables.css](../../../../Official/assets/css/_modules/common/mAnchor/variables.css):
+參考實作是參考專案的 `mAnchor/variables.css`(連結見規則檔的「本專案的座標」章):
 
 ```css
 /* variables.css —— hover 是獨立 modifier,包在 &:hover 裡 */

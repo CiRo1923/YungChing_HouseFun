@@ -1,6 +1,6 @@
 # CSS 撰寫規範
 
-本規則為 Backstage 專案專用,每次對話都必須遵守。
+本規則為本專案專用,每次對話都必須遵守。
 摘要與觸發時機見 skill [css-conventions](../skills/css-conventions/SKILL.md)。
 
 **違規一律只警告不阻擋** —— 擋下來只會逼人繞過(加 `--no-verify`),反而讓守門機制形同虛設。
@@ -121,18 +121,15 @@
 > pre-commit 經 `core.hooksPath` 生效,`npm install` 的 postinstall 會自動設定;
 > 手動安裝為 `npm run hooks:install`([.tools/install-git-hooks.mjs](../../.tools/install-git-hooks.mjs))。
 > 擴充檢查為 `npm run check:extensions`。
-> ⚠️ **hook 本體在本專案的 [.githooks/pre-commit](../../.githooks/pre-commit)**,兩種擺法都能動:
-> 開發機的 repo 根是 `Dev/HouseFun`(底下放 Official 與 Backstage),staged 路徑長
-> `Backstage/assets/…`,hook 依第一層目錄分派;拆成獨立 repo 後專案自己就是根,
-> 路徑長 `assets/…`,直接處理不分派。判斷依據是 repo 根有沒有 `.tools/css/lint-css.mjs`。
+> ⚠️ **hook 本體在 [.githooks/pre-commit](../../.githooks/pre-commit)**,兩種擺法都能動:
+> 專案自己就是 repo 根時,staged 路徑長 `assets/…`,直接處理;
+> 與別的專案共用一個 repo 時,路徑會多一層專案名前綴,hook 依第一層目錄分派。
+> 判斷依據是 repo 根有沒有 `.tools/css/lint-css.mjs`。
 >
-> ⚠️ 但 `core.hooksPath` 是 **repo 層級設定、只能指一個目錄** —— 開發機上兩個專案都跑
-> `hooks:install` 的話,**誰最後跑誰生效**。所以這支與 `Official/.githooks/pre-commit`
-> **內容要保持一致**(各自一份複本),誰生效結果都一樣。改它之前先對照:
->
-> ```powershell
-> diff --strip-trailing-cr ../Official/.githooks/pre-commit .githooks/pre-commit
-> ```
+> ⚠️ 共用 repo 時要注意 `core.hooksPath` 是 **repo 層級設定、只能指一個目錄** ——
+> 每個專案都跑 `hooks:install` 的話,**誰最後跑誰生效**。所以各專案的 `pre-commit`
+> **內容要保持一致**(各自一份複本),誰生效結果都一樣。
+> 本專案目前的鄰居與對照指令見文末「本專案的座標」。
 
 ---
 
@@ -173,10 +170,10 @@
 2. 沒有就依下面的命名規則新增,**排序不用管**(存檔 / 寫檔 / commit 都會自動修正)。
 3. 使用端改成 `var(--色名-色碼)` 或 `text-[--色名-色碼]` / `bg-[--色名-色碼]`。
 
-> 工具支援 `color<Channel>.css` 這種**頻道色票檔**與跨頻道收攏檢查(`findSharedColors`)——
-> 姊妹專案 Official 有 `colorBuy.css` / `colorMember.css`。Backstage 目前只有 buy 一個頻道,
-> 還用不到,等 rent 之類的第二個頻道做出來再拆。屆時規則是:只有一個頻道用就進該頻道檔,
-> **兩個以上頻道用到就收回共用的 `color.css`**;工具會比對後警告,但不自動搬家。
+> 工具支援 `color<Channel>.css` 這種**頻道色票檔**與跨頻道收攏檢查(`findSharedColors`)。
+> 本專案目前只有一個頻道所以用不到 —— 有第二個頻道時再拆,屆時規則是:
+> 只有一個頻道用就進該頻道檔,**兩個以上頻道用到就收回共用的 `color.css`**;
+> 工具會比對後警告,但不自動搬家。
 
 ### 違規寫法
 
@@ -386,9 +383,8 @@ alpha 兩碼的換算為 `Math.round(透明度 × 255).toString(16)`,與
 
 判斷方式:組件檔案放在 `components/<頻道>/<母體>/` 底下 → 它就是 `<母體>` 的變體。
 
-參考實作:[assets/css/_modules/common/mTab/](../../../Official/assets/css/_modules/common/mTab/)、
-[common/mAnchor/](../../../Official/assets/css/_modules/common/mAnchor/)、
-[common/mForm/](../../../Official/assets/css/_modules/common/mForm/)。
+參考實作看參考專案的 `mTab`(有變體)、`mAnchor`(無變體)、`mForm`(有群組共用層),
+連結見文末「本專案的座標」。
 
 ### 引入方式
 
@@ -531,7 +527,7 @@ modifier 名稱就是 **tailwind 的 utility 名前面加 `--`**,不要自己另
   *,:after,:before{box-sizing:border-box;border:0 solid #e5e7eb}
   ```
 
-  寫了是多餘的。(參考專案 EFOfficial 是關掉內建 preflight、靠自家 `preflight.css` 設同一件事,
+  寫了是多餘的。(參考專案是關掉內建 preflight、靠自家 `preflight.css` 設同一件事,
   結論一樣但來源不同 —— 之後若本專案也改成自訂 preflight,要回頭確認那邊有沒有設。)
 
 #### 變數的 base 與粒度
@@ -662,7 +658,7 @@ modifier 名稱就是 **tailwind 的 utility 名前面加 `--`**,不要自己另
   就解析完再繼承,`:root` 當下 `--x-color` 還是 `initial`,後面再怎麼覆寫都救不回來,
   結果是「hover 時顏色整個掉光」。組件若有 `.group` 版本的 hover,要補一組 `.group:hover .m-xxx`。
 
-  **hover 的寫法固定成這個形狀**(參考實作:[common/mAnchor/variables.css](../../../Official/assets/css/_modules/common/mAnchor/variables.css)):
+  **hover 的寫法固定成這個形狀**(參考實作:參考專案的 `mAnchor/variables.css`,連結見文末座標章):
 
   ```css
   /* variables.css —— hover 是獨立的 modifier,包在 &:hover 裡 */
@@ -765,7 +761,7 @@ modifier 名稱就是 **tailwind 的 utility 名前面加 `--`**,不要自己另
 - **`transition` 也走 tailwind**:`@apply [transition:transform_0.3s_ease,opacity_0.2s_ease]`(空格用 `_`)。
 - modifier 的斷點寫法:`p` 段收 `--x`、`p:--x`、`pt:--x`;`t` 段收 `--x`、`pt:--x`、`tm:--x`、`t:--x`;
   `m` 段收 `--x`、`tm:--x`、`m:--x`。
-- 看起來像 typo 的既有 class 名**先確認參考專案**([D:\Projects\Delta\EFOfficial](file:///D:/Projects/Delta/EFOfficial)),
+- 看起來像 typo 的既有 class 名**先確認參考專案**(位置見文末「本專案的座標」),
   兩邊一致就是既有命名,不要順手改。
 
 ---
@@ -792,7 +788,7 @@ modifier 名稱就是 **tailwind 的 utility 名前面加 `--`**,不要自己另
 同一組 module 裡不同元素撞名時,**維持原本的 class 不要改**,在 variables 檔頭註明原因。
 例如 `mForm/` 的 `.m-form-label` 已經被 CheckBox / Radio / RadiosOval 用在「選項文字」上,
 所以 Label 組件維持 `.m-label` —— 兩者是不同元素,合併命名會讓樣式互相汙染。
-(參考專案 EFOfficial 也踩過同一個坑,處理方式一致。)
+(參考專案也踩過同一個坑,處理方式一致。)
 
 ### 命名慣例
 
@@ -917,7 +913,7 @@ template 常常只有 `p:min-w-[265px]` 這種只寫桌機的 class,直接搬進
 在該行或上一行寫 `/* lint-breakpoint-exempt: 理由 */` 就會跳過 —— **理由一定要寫**。
 分不出來是例外還是漏寫就**直接問使用者**。
 
-> 移植自參考專案 EFOfficial(2026-08-28),判斷邏輯與那邊一致。
+> 移植自參考專案(2026-08-28),判斷邏輯與那邊一致。
 
 ---
 
@@ -957,6 +953,21 @@ import { Field, ErrorMessage } from 'vee-validate'
 ---
 
 ## 檢查工具
+
+### ⚠️ 掃描範圍以外的檔案 —— 寫死色碼不會被抓到
+
+`SCAN_TARGETS` 只涵蓋 `components` / `containers` / `pages` / `layouts` / `assets/css` / `error.vue`。
+**根目錄的設定檔不在裡面**,所以下面這些地方的顏色一律要人自己守規矩:
+
+| 檔案 | 曾經藏過什麼 |
+|---|---|
+| [tailwind.extend.js](../../tailwind.extend.js) | `boxShadow.dropdown` 與 `dropShadow.text` 的值裡各有寫死色碼,躲了很久(2026-08-28 移除) |
+| [tailwind.config.js](../../tailwind.config.js) / [tailwind.function.js](../../tailwind.function.js) | 同理,`theme` 底下的任何色值 |
+
+**陰影不要放進 tailwind preset** —— 值裡一定帶顏色,而 preset 又掃不到。
+一律走原生 `box-shadow` + module 自己的 `--x-pc-shadow` / `-tablet-` / `-mobile-` 變數,
+色值取色票變數。參考 [mFormDropdown](../../assets/css/_modules/buy/mFormDropdown.css) 與
+[mSort](../../assets/css/_modules/buy/mSort/variables.css)。
 
 ```powershell
 npm run lint:css                              # 全專案掃描(四條規則)
@@ -1005,70 +1016,86 @@ template 綁了但沒有對應 CSS 的 class 是刻意不做還是漏掉。
 
 ---
 
-## 目前的違規存量
+## 本專案現況
 
-2026-08-28 的全專案掃描:243 個檔案,**708 筆**。規則 1 已清乾淨,其餘是既有程式碼:
+> ⚠️ **這一章以上的內容不綁任何專案,移植時整份複製即可 —— 要換掉的只有這一章。**
+> 另外檢查一件事:規則本體寫的是 `assets/css/…` / `components/…` / `pages/…`,
+> 原始碼放在 `src/` 底下的專案要整批加上前綴(頁面在 `src/views/` 的也一併對照),
+> 並同步改 [lint-core.mjs](../../.tools/css/lint-core.mjs) 的 `SCAN_TARGETS`。
+
+### 這份規範用在哪
+
+`Backstage` —— 原始碼在專案根,所以路徑不帶前綴。
+色票只有單一 [color.css](../../assets/css/_common/color.css)(沒有頻道色票),
+module 一樣分頻道目錄(`_modules/<頻道>/<組件>/`),目前只有 `buy` 與 `common` 兩個。
+
+**參考專案**是同一個 repo 的姊妹專案 [Official](../../../Official/) —— 規則本體提到
+「先確認參考專案」時指的就是它。它自己再往上移植自更早的專案。
+
+> 兩個專案的正式站是不同的 git 位置,而且共用 repo 正在拆成兩個獨立 repo ——
+> 所以工具與規範**各留一份、不共用**,`.githooks/` 也是。
+> 共用 repo 期間 `core.hooksPath` 只能指一邊,兩支 `pre-commit` 內容要一致:
+>
+> ```powershell
+> diff --strip-trailing-cr ../Official/.githooks/pre-commit .githooks/pre-commit
+> ```
+
+### 違規存量
+
+2026-08-28 的掃描:248 個檔案,**672 筆**。規則 1 是清乾淨的,其餘是既有程式碼:
 
 | 規則 | 筆數 / 檔案 | 主要分布 |
 |---|---|---|
-| 1 顏色 | **0** | 導入當天一併清完(見下方) |
-| 2 tailwind class | 585 / 51 | components 幾乎全數仍用 tailwind class |
-| 3 module 結構 | 55 / 37 | components 自己留 `<style>` 區塊,樣式還沒拆進 `_modules/` |
-| 4 module 變數 | 54 / 5 | `_modules/buy/mDatepicker.css` 39、`mTable.css` 6、`common/mPopup/` 7、`mFormDropdown.css` 2 |
-| 5 import 順序 | 14 / 13 | `./.composables` 排在 `vee-validate` / `@js` 之後,集中在 `mForm/` 與 `mUpload/` |
+| 1 顏色 | **0** | 導入時一併清完(見下方) |
+| 2 tailwind class | 553 / 48 | mUpload、mForm/AutoComplete、mLoading 等尚未拆的組件 |
+| 3 module 結構 | 51 / 34 | 組件自己留 `<style>` 區塊 |
+| 4 module 變數 | 54 / 5 | `buy/mDatepicker.css` 45、`common/mPopup/` 7、`buy/mTable.css` 6、`buy/mFormDropdown.css` 2 |
+| 5 import 順序 | 14 / 13 | `./.composables` 排在 `vee-validate` / `@js` 之後 |
 
-⚠️ **這裡與姊妹專案 Official 的狀態相反,不要照抄它的說法。**
-Official 兩天內把 module 全部拆完、存量歸零,所以它的規則檔寫著
-「看到紅字就是剛動的那幾行有問題」—— **Backstage 還沒走到那一步**:
-規則 2 / 3 / 4 / 5 跳出來的絕大多數是既有存量。
+⚠️ **存量還沒清完,所以跳出來的警告不一定是這次改壞的** —— 回報時要分清楚。
+存量歸零的專案(例如參考專案)規則檔會寫「看到紅字就是剛動的那幾行有問題」,
+**那句話在這裡還不成立,不要照抄**。
 
-這不影響「每一輪都要列出違規」那條 —— 清單照列,但**動手時要說清楚哪些是存量**,
-不要讓使用者誤以為都是這次改壞的,也不要自行大範圍重構。
+### 參考實作
 
-### 已拆成資料夾的 module
+本專案 `components/` 才拆了三支,更完整的範例要看參考專案:
 
-目前只有 [common/mPopup/](../../assets/css/_modules/common/mPopup/) —— 其餘仍是單檔,
-或根本還留在組件自己的 `<style>` 區塊裡(規則 3 那 55 筆就是這個)。
+| 情境 | 看哪一支 |
+|---|---|
+| **有變體的完整拆法** | [buy/mCard/](../../assets/css/_modules/buy/mCard/) — `variables` / `common` + `filter*`,`--default` 無專屬樣式只當標記 |
+| **Teleport 浮層的斷點** | [buy/mSort/](../../assets/css/_modules/buy/mSort/) — dropdown `Teleport to="body"`,DOM 上不在組件內,`@screen` 各段要自己再掛一份 |
+| **變數建在最小單位** | 同 mCard — pc 是 `p-40`、tablet / mobile 是 `px-16 py-32`,兩個層級併存所以拆成 `-pt` / `-pr` / `-pb` / `-pl` |
+| **box-shadow 的寫法** | 同 mSort 與 [buy/mFormDropdown.css](../../assets/css/_modules/buy/mFormDropdown.css) — 走原生 CSS 屬性 + `--x-*-shadow` 三斷點變數 |
+| **最標準的一支**(共用 + 變體兩層) | 參考專案的 [common/mTab/](../../../Official/assets/css/_modules/common/mTab/) |
+| **群組層**(兩個以上變體共用) | 參考專案的 [common/mForm/](../../../Official/assets/css/_modules/common/mForm/) 的 `selection.*` |
+| **hover 的固定寫法** | 參考專案的 [common/mAnchor/variables.css](../../../Official/assets/css/_modules/common/mAnchor/variables.css) |
 
-拆分流程與踩過的坑見規則 3。參考實作看 Official 已拆完的
-[mTab](../../../Official/assets/css/_modules/common/mTab/)(有變體)、
-[mAnchor](../../../Official/assets/css/_modules/common/mAnchor/)(無變體)、
-[mForm](../../../Official/assets/css/_modules/common/mForm/)(有群組共用層)。
+> 少數確實無法符合規範的地方,一律用 `/* lint-breakpoint-exempt: 理由 */` 就地標註,
+> 不集中列在這裡 —— 清單會過期,註解不會。目前有標的是 mCard 的 filter 變體
+> (pc 橫排、tablet / mobile 直排,不少值本來就只存在於其中一端)。
 
-### 導入時做了什麼(規則 1)
+### 導入時已修掉的(2026-08-27 / 28)
 
-- **補上 `--red-f00`** —— `components/common/mForm/AutoComplete.vue` 與
-  `_modules/buy/mDatepicker.css` 的錯誤文字早就在用它,但色票檔從來沒有這個變數,
-  **那兩處的紅色一直沒生效**,CSS 也不會報錯,只能靠 lint 抓。
-- `--gray-3334d` 依命名規則更名為 `--gray-33-4d`(純灰取前 2 碼 + `-` + alpha 兩碼),
-  同步 `mFormDropdown.css` 與 `AutoComplete.vue` 兩個使用端。
-- **刪掉 `hexToRgb()` 衍生變數** `--white-rgb` / `--black-rgb`:前者全專案沒有使用端,
-  後者只有 `mDatepicker.css` 的陰影用 `rgba(var(--black-rgb), 0.2)`,改成 `var(--black-33)`。
+- **補上 `--red-f00`** —— `mForm/AutoComplete.vue` 與 `buy/mDatepicker.css` 的錯誤文字
+  早就在用它,但色票檔從來沒有這個變數,**那兩處的紅色一直沒生效**,CSS 也不會報錯。
+- `--gray-3334d` 依命名規則更名為 `--gray-33-4d`(2026-08-28 alpha 加了連字號),同步兩個使用端。
+- **刪掉死變數 `--white-rgb` / `--black-rgb`** —— 前者沒有使用端,後者只有一處陰影用
+  `rgba(var(--black-rgb), 0.2)`,改成 `var(--black-33)`。
   `hexToRgb` 的 postcss 機制([postcss.function.js](../../postcss.function.js))保留但**已無任何呼叫**。
-- 其餘寫死色碼各自建色票:`--black-1f`(dropdown 陰影)、`--black-33`(datepicker 陰影 /
-  loading 遮罩,原本是 `bg-black/20`)、`--black-66`(popup 遮罩)、
-  `--blue-0016-14` / `--blue-0016-33`(autocomplete 陰影)、
-  `--blue-6afa` / `--blue-efff`(mUpload 拖曳中,原本直接用 tailwind 的 `border-blue-400 bg-blue-50`)。
+- 其餘寫死色碼各自建了色票:`--black-1f` / `--black-33` / `--black-66`、
+  `--blue-0016-14` / `--blue-0016-33`、`--blue-6afa` / `--blue-efff`。
 - `pages/buy/publish/basic/_components/Nav.vue` 的 `bg-[#ccc] bg-[--white]` —— 兩個 `bg` 疊著,
   `#ccc` 是被蓋掉的死碼,直接刪。
 
-## 與姊妹專案 Official 的關係
+> ⚠️ [tailwind.extend.js](../../tailwind.extend.js) 的 `boxShadow.dropdown` 與 `dropShadow.text`
+> 各藏了寫死色碼,躲了很久 —— **那支檔案不在掃描範圍內**,五層守門一層都抓不到。
+> 兩個都已移除(見「檢查工具」章的警告)。
 
-這份規則與 `.tools/css/`、`.vite/css-guard.mjs`、兩支 Claude hook、`check-vscode-extensions.mjs`
-**移植自同一個 repo 的 [Official](../../../Official/.claude/rules/css-conventions.md)**
-(它自己再往上移植自 [D:\Projects\Delta\EFOfficial](file:///D:/Projects/Delta/EFOfficial))。
-**最近一次對照為 2026-08-28**,那次收的是「每一輪都列、但不主動彈問句」的新流程
-與 `pending.json` 的語意修正(不是讀走就清空,而是只移除已通過的檔案)。
+### 與參考專案的關係
 
-### ⚠️ 為什麼不共用一份
-
-兩個專案**上正式站時是不同的 git 位置**,而且 2026-08-28 起
-**共用的 `YungChing_HouseFun` repo 正在拆成 Official / Backstage 兩個獨立 repo** ——
-所以任何東西都不能放在 repo 根給兩邊共用,工具一律各專案自備一份,`.githooks/` 也是。
-
-### ⚠️ 動之前先 diff —— 發散得比想像中快
-
-2026-08-27 從 Official 複製過來,**隔天就對照了兩次**:
+`.tools/css/`、`.vite/css-guard.mjs`、兩支 Claude hook 與 `check-vscode-extensions.mjs`
+都是參考專案的逐字複本,**最近一次對照 2026-08-28**。兩邊不會自動同步,而且發散得比想像中快 ——
+2026-08-27 複製過來,隔天就對照了兩次:
 
 | 那次收了什麼 | |
 |---|---|
@@ -1078,17 +1105,17 @@ Official 兩天內把 module 全部拆完、存量歸零,所以它的規則檔�
 **所以動 CSS 工具或規則前,先跑一次 diff 對照**,不要假設兩邊一致:
 
 ```powershell
-# 逐檔比對(--strip-trailing-cr 排除行尾差異)
 diff --strip-trailing-cr ../Official/.tools/css/lint-core.mjs .tools/css/lint-core.mjs
 diff --strip-trailing-cr ../Official/.claude/rules/css-conventions.md .claude/rules/css-conventions.md
 ```
 
-### 兩邊目前的差異
+對照時的三個目錄:`.claude/`(rules + skills + hooks)、`.tools/css/`、`.vite/`。
 
-| 面向 | 差異 |
+#### 目前的差異
+
+| 面向 | 本專案 |
 |---|---|
-| 色票檔 | 本專案只有單一 `color.css`;Official 有頻道色票(`colorBuy.css` / `colorMember.css`)與跨頻道收攏檢查 |
-| 存量 | Official 為 0,本專案規則 2 / 3 / 4 / 5 尚有 708 筆(見上面) |
-| module | `_modules/<頻道>/<組件>/` 的路徑分層兩邊一致,但本專案只拆了 `common/mPopup/` |
-| `.githooks` | 本專案那支保留「依第一層目錄分派」的判斷(還在共用 repo 裡);Official 抽出去的新 repo 版本已拿掉分派迴圈 |
-| 工具 | `.tools/css/` 六支、`.vite/css-guard.mjs`、兩支 hook 完全一致(2026-08-28 第二次對照) |
+| 色票 | 只有單一 `color.css`;參考專案有頻道色票(`color<Channel>.css`)與跨頻道收攏檢查 |
+| 存量 | 尚有 672 筆;參考專案已歸零 |
+| module | 路徑分層一致,但本專案只拆了 `common/mPopup/`、`buy/mCard/`、`buy/mSort/` |
+| `.githooks` | 本專案那支保留「依第一層目錄分派」的判斷(還在共用 repo 裡);參考專案抽出去的獨立 repo 版本已拿掉分派迴圈 |
