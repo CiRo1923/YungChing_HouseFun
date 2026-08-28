@@ -33,9 +33,25 @@ export const SCAN_TARGETS = [
   'assets/css',
   'app.vue',
   'error.vue',
+  ...['tailwind.extend.js', 'tailwind.config.js'],
 ]
 
 export const SCAN_EXT = new Set(['.vue', '.css'])
+
+/**
+ * 副檔名不是 .vue / .css,但**會產生 CSS** 的設定檔 —— 只檢查顏色。
+ *
+ * tailwind 的 theme 設定(boxShadow / colors 等)最後會變成產物裡的宣告,
+ * 所以「顏色一律走色票」對它一樣成立;寫死在這裡的色碼一樣是規則 1 違規,
+ * 只是它躲在 .js 裡,不掃就永遠看不到。
+ *
+ * ⚠️ 不要把 .js 整個放進 SCAN_EXT —— 一般 js 裡的 hex(雜湊、id、二進位遮罩)
+ *    會全部變成誤報。只有這份白名單裡的設定檔要看。
+ */
+export const SCAN_CONFIG_FILES = new Set(['tailwind.extend.js', 'tailwind.config.js'])
+
+export const isScannable = (abs) =>
+  SCAN_EXT.has(path.extname(abs)) || SCAN_CONFIG_FILES.has(path.basename(abs))
 
 // --- 顏色偵測用的樣式 -------------------------------------------------------
 
@@ -362,10 +378,21 @@ function maskComments(text) {
   return text.replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
 }
 
+/**
+ * 遮掉 js 的 `//` 行註解 —— 只給設定檔(SCAN_CONFIG_FILES)用。
+ *
+ * 註解裡的色碼是說明不是樣式,跟 maskComments 對 CSS 做的事一樣。
+ * `https://` 這種也會被遮掉,但網址裡不會有色碼,對顏色檢查沒有影響。
+ * 保留換行,行號才不會跑掉。
+ */
+function maskLineComments(text) {
+  return text.replace(/\/\/[^\n]*/g, (m) => ' '.repeat(m.length))
+}
+
 export function listFiles(projectRoot, target) {
   const abs = path.join(projectRoot, target)
   if (!fs.existsSync(abs)) return []
-  if (fs.statSync(abs).isFile()) return SCAN_EXT.has(path.extname(abs)) ? [abs] : []
+  if (fs.statSync(abs).isFile()) return isScannable(abs) ? [abs] : []
   const out = []
   for (const entry of fs.readdirSync(abs, { withFileTypes: true })) {
     if (entry.name.startsWith('.') && entry.isDirectory()) continue
@@ -865,8 +892,11 @@ export function checkModuleVariables(relPath, text) {
  * 之後想調某個斷點就得翻兩個檔案,而且 modifier 沒有走變數,版型層也就取不到。
  * 正確寫法是 modifier 只設 `--x-size: 25px`,套用交給 common.css / <變體>.css。
  */
+/** `variables.css` 或 `<變體>Variables.css` —— 放「值」的那一層 */
+const isVariablesFile = (relPath) => /(^|\/)([a-z][A-Za-z]*)?[Vv]ariables\.css$/.test(relPath)
+
 export function checkVariablesFile(relPath, text) {
-  if (!/(^|\/)([a-z][A-Za-z]*)?[Vv]ariables\.css$/.test(relPath)) return []
+  if (!isVariablesFile(relPath)) return []
 
   const issues = []
   const masked = maskComments(text)
@@ -916,6 +946,95 @@ export function checkVariablesFile(relPath, text) {
         '把 module 自己的變數指向自己另一個變數要寫在版型檔',
       snippet: name,
     })
+  }
+
+  return issues
+}
+
+/**
+ * 4-e 反過來:版型檔不可直接宣告常值。
+ *
+ * `common.css` 裡寫 `--tag-px: 0` 會讓「值」散在兩個檔案 —— 要調一個預設值
+ * 得先猜它在 variables 還是版型檔。規則很好記:
+ * **variables.css / *Variables.css 以外的檔案,變數宣告右邊一定是 `var(…)`**。
+ *
+ * 版型檔裡合法的變數宣告只有兩種,右邊都是 var():
+ *   斷點對應 `--x-size: var(--x-pc-size)` / 狀態切換 `--x-bg: var(--x-checked-bg)`
+ */
+export function checkLayoutFileValues(relPath, text) {
+  if (isVariablesFile(relPath)) return []
+
+  const issues = []
+  const masked = maskComments(text)
+
+  for (const m of masked.matchAll(/(--[a-z0-9-]+)\s*:\s*([^;{}]+);/g)) {
+    const [, name, rawValue] = m
+    const value = rawValue.trim()
+
+    // tailwind 自己的 --tw-* 是它產的,不是我們宣告的
+    if (name.startsWith('--tw-')) continue
+    if (value.includes('var(')) continue
+
+    issues.push({
+      rule: 'variable',
+      file: relPath,
+      line: lineOf(text, m.index),
+      detail:
+        `${name}: ${value.slice(0, 30)} —— 版型檔的變數宣告右邊一定是 var(…),` +
+        'base 值屬於 variables.css 的 :root(斷點對應與狀態切換才寫在這裡)',
+      snippet: name,
+    })
+  }
+
+  return issues
+}
+
+/**
+ * tailwind 推斷不出型別的三個屬性 —— **全部靜默失效,不報錯**,只能靠 lint。
+ *
+ *   text-[--x]    → 被當成 color,`font-size` 根本不出現
+ *   shadow-[--x]  → 被當成 shadow color,`box-shadow` 根本不出現
+ *   border-[--x]  → production 壓成 `border` shorthand,值是 var() 時整條失效
+ *
+ * 判斷靠規則 4 的命名慣例:字級一律 `-text-size`、顏色一律 `-color`,
+ * 所以 `text-[--x-color]` 與 `border-[--x-border-color]` 是合法的顏色用法,不要抓。
+ */
+export function checkTailwindPitfalls(relPath, text) {
+  const issues = []
+  const masked = maskComments(text)
+  const add = (index, detail, snippet) =>
+    issues.push({ rule: 'module', file: relPath, line: lineOf(text, index), detail, snippet })
+
+  // font-size —— 少了 length: 就變成 color
+  for (const m of masked.matchAll(/(?<![\w-])text-\[(--[a-z0-9-]*-text-size)\]/g)) {
+    add(
+      m.index,
+      `text-[${m[1]}] 會被當成 color,font-size 不會生效 —— 改用 text-[length:${m[1]}]`,
+      m[0]
+    )
+  }
+
+  // box-shadow —— shadow-[…] 一律被當成陰影「顏色」,shadow-[var(--x)] 也一樣沒救
+  for (const m of masked.matchAll(/(?<![\w-])shadow-\[([^\]]*--[^\]]*)\]/g)) {
+    add(
+      m.index,
+      `shadow-[${m[1].slice(0, 30)}] 會被當成 shadow color,box-shadow 不會出現 —— ` +
+        '改寫原生屬性 box-shadow: var(--x-shadow)',
+      m[0]
+    )
+  }
+
+  // border-width —— production 會壓成 border shorthand,值是 var() 時整條失效
+  for (const m of masked.matchAll(/(?<![\w-])border(?:-[xytrbl])?-\[(--[a-z0-9-]+)\]/g)) {
+    // border-color 沒這個問題:module 自己的 -color 變數,或直接指色票(--gray-e5)
+    if (m[1].endsWith('-color')) continue
+    if (hueOf(m[1])) continue
+    add(
+      m.index,
+      `${m[0]} 在 production 會被壓成 border shorthand 而整條失效 —— ` +
+        '改寫原生屬性 border-width: var(…)',
+      m[0]
+    )
   }
 
   return issues
@@ -1240,8 +1359,18 @@ export function lintFile(projectRoot, absPath, definedVars) {
     ]
   }
 
-  const text = fs.readFileSync(absPath, 'utf8')
+  const raw = fs.readFileSync(absPath, 'utf8')
+
+  // 設定檔(tailwind.extend.js 等)只檢查顏色 —— 下面那些規則講的是 CSS 的結構,
+  // 對 js 不成立。先遮掉 // 註解,免得說明文字裡的色碼被當成違規。
+  const text = SCAN_CONFIG_FILES.has(path.basename(absPath)) ? maskLineComments(raw) : raw
+
   const issues = [...checkColors(rel, text, definedVars), ...checkColorMechanism(rel, text)]
+
+  // tailwind 推斷不出型別的三個屬性 —— 在哪裡寫都是錯的,所以不限目錄
+  if (rel.endsWith('.vue') || rel.endsWith('.css')) {
+    issues.push(...checkTailwindPitfalls(rel, text))
+  }
 
   if (rel.endsWith('.vue')) {
     issues.push(...checkModuleImports(rel, text))
@@ -1253,6 +1382,7 @@ export function lintFile(projectRoot, absPath, definedVars) {
     issues.push(...checkModuleVariables(rel, text))
     issues.push(...checkVariableUsage(rel, text))
     issues.push(...checkVariablesFile(rel, text))
+    issues.push(...checkLayoutFileValues(rel, text))
     issues.push(...checkBreakpointCoverage(rel, text))
   }
 

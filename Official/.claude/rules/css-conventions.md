@@ -194,6 +194,30 @@
 
 正確寫法:先到色票檔建立變數,再於使用端 `var(--blue-26e1)` / `text-[--gray-666]` / `bg-[--white]`。
 
+### ⚠️ tailwind 的設定檔也算使用端
+
+`tailwind.extend.js` / `tailwind.config.js` 的 `theme` 設定(`boxShadow`、`colors` …)
+**最後會變成產物裡的 CSS 宣告**,所以規則 1 對它一樣成立 —— 寫死色碼同樣是違規:
+
+```js
+// ✗ 色碼寫死在設定檔裡
+boxShadow: { card: '0 0 5px 0 #00000026' }
+
+// ✓ 走色票變數
+boxShadow: { card: '0 0 5px 0 var(--black-26)' }
+```
+
+`var()` 在這裡是安全的 —— 色票檔由 [nuxt.config.ts](../../nuxt.config.ts) 全域載入、定義在 `:root`,
+tailwind 產出的 `--tw-shadow: 0 0 .3125rem 0 var(--black-26)` 執行時解析得到,
+`--tw-shadow-colored` 的機制也不受影響(實測過產物)。
+
+**這類設定檔以前完全沒有守門** —— lint 只掃 `.vue` / `.css`,
+色碼躲在 `.js` 裡就永遠不會被發現。現在由 `SCAN_CONFIG_FILES` 白名單納入(**只檢查顏色**,
+其餘規則講的是 CSS 結構,對 js 不成立)。
+
+> ⚠️ **不要把 `.js` 整個加進掃描範圍** —— 一般 js 裡的 hex(雜湊、id、二進位遮罩)
+> 會全部變成誤報。要納入新的設定檔就加進那份白名單。
+
 > 透明色一律用 **8 碼 hex**(`--black-1a: #0000001a`),不要寫 `rgba(0,0,0,0.2)`,
 > 也不要寫 `rgba(var(--black-rgb), 0.1)` —— **後者也會被抓**,改用對應的 8 碼 hex 變數。
 > `hexToRgb`([postcss.function.js](../../postcss.function.js) / [.tools/postcss/functions.js](../../.tools/postcss/functions.js))
@@ -344,6 +368,8 @@ alpha 兩碼的換算為 `Math.round(透明度 × 255).toString(16)`,與
 **為什麼**:值散在兩個檔案時,要調一個預設值得先猜它在哪裡。
 規則很好記 —— **`variables.css` 與 `*Variables.css` 以外的檔案,
 變數宣告右邊一定是 `var(…)`**,看到常值就是放錯地方了。
+
+這條由 `checkLayoutFileValues` 檢查(`checkVariablesFile` 的反向)。
 
 > ⚠️ 順帶一提,`--tag-h: ''` 這種**空字串是無效的 CSS 值**,
 > 整條宣告會被丟棄。行為上剛好等同「沒設定」所以看不出問題,
@@ -623,6 +649,11 @@ modifier 名稱就是 **tailwind 的 utility 名前面加 `--`**,不要自己另
   | `border-color` | `@apply border-[--x-border-color]` ✓ | 產出正確的 `border-color`,沒問題 |
   | `font-size` | `@apply text-[length:--x-text-size]` | 不寫 `length:` 會變成 `color` |
   | `column-gap` | `@apply gap-x-[var(--x-gap,0px)]` ✓ | arbitrary value 內可帶 `var()` fallback |
+
+  前三條由 `checkTailwindPitfalls` 檢查(`.vue` 與 `.css` 都掃,寫在哪裡都是錯的)。
+  它靠規則 4 的命名慣例分辨合法用法:**字級一律 `-text-size`、顏色一律 `-color`**,
+  所以 `text-[--x-color]` 與 `border-[--x-border-color]` 會放行;
+  直接指色票的 `border-t-[--gray-e5]` 也放行(那本來就是 `border-color`)。
 
   另外 `transition-property: transform` **不要換成 tailwind 的 `transition-transform`** ——
   後者會連帶塞進 `transition-duration: 150ms` 與 `transition-timing-function: cubic-bezier(.4,0,.2,1)`。
