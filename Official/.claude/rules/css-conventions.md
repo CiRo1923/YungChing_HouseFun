@@ -1,7 +1,10 @@
 # CSS 撰寫規範
 
-本規則為 Official 專案專用,每次對話都必須遵守。
-摘要與觸發時機見 skill [css-conventions](../skills/css-conventions/SKILL.md)。
+本規則每次對話都必須遵守。摘要與觸發時機見 skill [css-conventions](../skills/css-conventions/SKILL.md)。
+
+> **規則本體(到「檢查工具」為止)不綁任何專案** —— 要移植到別的專案時整份複製,
+> 只需要調整最後的「[本專案現況](#本專案現況)」一章,以及路徑前綴
+> (有些專案的原始碼在 `src/` 底下,`assets/css/…` 就要寫成 `src/assets/css/…`)。
 
 **違規一律只警告不阻擋** —— 擋下來只會逼人繞過(加 `--no-verify`),反而讓守門機制形同虛設。
 
@@ -121,10 +124,11 @@
 > pre-commit 經 `core.hooksPath` 生效,`npm install` 的 postinstall 會自動設定;
 > 手動安裝為 `npm run hooks:install`([.tools/install-git-hooks.mjs](../../.tools/install-git-hooks.mjs))。
 > 擴充檢查為 `npm run check:extensions`。
-> ⚠️ 這個 repo 同時放 Official 與 Backstage,而 `core.hooksPath` 是 repo 層級設定、只能指一個目錄 ——
-> 所以 **hook 本體收在 repo 根的 `.githooks/`**,由它依 staged 路徑的第一層目錄分派到各專案的
-> `.tools/css/`。沒有這套工具的專案(目前的 Backstage)會自動略過,兩邊各自跑
-> `hooks:install` 設的也是同一個值,不會互相覆蓋。
+>
+> ⚠️ `core.hooksPath` 是 **repo 層級**的設定、只能指向一個目錄。
+> 一個 repo 裡放了多個專案時,pre-commit 要能**依 staged 路徑的第一層目錄分派**到各專案的
+> `.tools/css/`,沒有這套工具的專案自動略過 —— 否則誰後跑 `hooks:install` 就蓋掉誰。
+> 每個專案一個 repo 時不需要這層,hook 直接處理根目錄即可。
 
 ---
 
@@ -527,7 +531,7 @@ modifier 名稱就是 **tailwind 的 utility 名前面加 `--`**,不要自己另
   *,:after,:before{box-sizing:border-box;border:0 solid #e5e7eb}
   ```
 
-  寫了是多餘的。(參考專案 EFOfficial 是關掉內建 preflight、靠自家 `preflight.css` 設同一件事,
+  寫了是多餘的。(參考專案是關掉內建 preflight、靠自家 `preflight.css` 設同一件事,
   結論一樣但來源不同 —— 之後若本專案也改成自訂 preflight,要回頭確認那邊有沒有設。)
 
 #### 變數的 base 與粒度
@@ -761,7 +765,7 @@ modifier 名稱就是 **tailwind 的 utility 名前面加 `--`**,不要自己另
 - **`transition` 也走 tailwind**:`@apply [transition:transform_0.3s_ease,opacity_0.2s_ease]`(空格用 `_`)。
 - modifier 的斷點寫法:`p` 段收 `--x`、`p:--x`、`pt:--x`;`t` 段收 `--x`、`pt:--x`、`tm:--x`、`t:--x`;
   `m` 段收 `--x`、`tm:--x`、`m:--x`。
-- 看起來像 typo 的既有 class 名**先確認參考專案**([D:\Projects\Delta\EFOfficial](file:///D:/Projects/Delta/EFOfficial)),
+- 看起來像 typo 的既有 class 名**先確認參考專案**(位置見「[本專案現況](#本專案現況)」),
   兩邊一致就是既有命名,不要順手改。
 
 ---
@@ -788,7 +792,7 @@ modifier 名稱就是 **tailwind 的 utility 名前面加 `--`**,不要自己另
 同一組 module 裡不同元素撞名時,**維持原本的 class 不要改**,在 variables 檔頭註明原因。
 例如 `mForm/` 的 `.m-form-label` 已經被 CheckBox / Radio / RadiosOval 用在「選項文字」上,
 所以 Label 組件維持 `.m-label` —— 兩者是不同元素,合併命名會讓樣式互相汙染。
-(參考專案 EFOfficial 也踩過同一個坑,處理方式一致。)
+(參考專案也踩過同一個坑,處理方式一致。)
 
 ### 命名慣例
 
@@ -913,7 +917,7 @@ template 常常只有 `p:min-w-[265px]` 這種只寫桌機的 class,直接搬進
 在該行或上一行寫 `/* lint-breakpoint-exempt: 理由 */` 就會跳過 —— **理由一定要寫**。
 分不出來是例外還是漏寫就**直接問使用者**。
 
-> 移植自參考專案 EFOfficial(2026-08-28),判斷邏輯與那邊一致。
+> 移植自參考專案,判斷邏輯與那邊一致。
 
 ---
 
@@ -1001,7 +1005,22 @@ template 綁了但沒有對應 CSS 的 class 是刻意不做還是漏掉。
 
 ---
 
-## 目前的違規存量
+## 本專案現況
+
+> ⚠️ **這一章以上的內容不綁任何專案,移植時整份複製即可 —— 要換掉的只有這一章。**
+> 另外檢查一件事:規則本體寫的是 `assets/css/…` / `components/…` / `pages/…`,
+> 原始碼放在 `src/` 底下的專案要整批加上前綴。
+
+### 這份規範用在哪
+
+`Official` —— 原始碼在 repo 根,所以路徑不帶前綴。
+色票依頻道切分(`color.css` 共用,`colorBuy.css` / `colorMember.css` 各自專屬),
+module 也多一層頻道目錄(`_modules/<頻道>/<組件>/`)。
+
+**參考專案**([D:\Projects\Delta\EFOfficial](file:///D:/Projects/Delta/EFOfficial))——
+規則本體提到「先確認參考專案」時指的就是它。
+
+### 違規存量
 
 **2026-08-28 起為 0 筆** —— `npm run lint:css` 掃描 289 個檔案全數通過。
 
@@ -1020,7 +1039,9 @@ template 綁了但沒有對應 CSS 的 class 是刻意不做還是漏掉。
 > mNav(漢堡按鈕與側邊選單只有手機版)、mPopup(工具列手機用 `mt`、桌機用 `mx`)、
 > mTab/ovalResponsiv(mobile 是膠囊形按鈕組,另一套設計)。
 
-**參考實作** —— `components/` 底下全部拆完了,遇到類似情境時照著這幾支看:
+### 參考實作
+
+`components/` 底下全部拆完了,遇到類似情境時照著這幾支看:
 
 | 情境 | 看哪一支 |
 |---|---|
@@ -1032,7 +1053,7 @@ template 綁了但沒有對應 CSS 的 class 是刻意不做還是漏掉。
 | **資料夾名跟著 class 走** | [common/mFigure/](../../assets/css/_modules/common/mFigure/) — 組件檔叫 `ImgSrc.vue`,class 是 `m-figure` |
 | **modifier 的斷點三段** | [common/mContainer/](../../assets/css/_modules/common/mContainer/) — `@screen t` / `m` 段不能刪,使用端的 `tm:--px-10` 要靠那兩段收 |
 
-**導入時已修掉的**(2026-08-27):
+### 導入時已修掉的(2026-08-27)
 
 - 補上 5 個缺失的色票變數 —— `--gray-c8`、`--blue-08dc`、`--blue-08dc-1a`、`--blue-6dd7`
   進 `colorBuy.css`,`--gray-33-4d`、`--black-1a` 進 `color.css`。
@@ -1041,7 +1062,7 @@ template 綁了但沒有對應 CSS 的 class 是刻意不做還是漏掉。
 - `Select.vue` 的 `--gray-3334d` 更名為符合規則的 `--gray-33-4d`(2026-08-28 alpha 加了連字號)。
 - 刪掉死變數 `--white-rgb` / `--black-rgb`,`mSwiper` 三行 shadow 改用 `--black-1a`。
 
-> ⚠️ `--blue-08dc`(#0087dc)、`--blue-6dd7`(#64d7d7)是照參考專案 EFOfficial 的色值補的,
+> ⚠️ `--blue-08dc`(#0087dc)、`--blue-6dd7`(#64d7d7)是照參考專案的色值補的,
 > 補上後 buy 頻道 swiper 的分頁點與左右鈕**會從「沒顏色」變成顯示這兩個藍** ——
 > 若設計上 buy 頻道該用自家主色(`--blue-26e1`),要回頭跟設計確認後改值。
 
@@ -1053,13 +1074,12 @@ template 綁了但沒有對應 CSS 的 class 是刻意不做還是漏掉。
 > **教訓**:「第三方套件的樣式」不等於「不能用變數」。
 > 判斷依據是**這段是不是 CSS** —— 是 CSS 就走規範,是 JS 設定物件才另當別論。
 
-## 與參考專案的關係
+### 與參考專案的關係
 
-這套規則與工具移植自 [D:\Projects\Delta\EFOfficial](file:///D:/Projects/Delta/EFOfficial)
-(`.claude/rules/css-conventions.md` + `.tools/css/`),**最近一次對照為 2026-08-28**
-(對方 commit `32bd943`)。兩邊是各自的複本,不會自動同步:
+這套規則與工具移植自參考專案(`.claude/rules/css-conventions.md` + `.tools/css/`),
+**最近一次對照為 2026-08-28**(對方 commit `32bd943`)。兩邊是各自的複本,不會自動同步:
 
-### 2026-08-28 那次對照收了什麼
+#### 2026-08-28 那次對照收了什麼
 
 | 項目 | 來源 |
 |---|---|
@@ -1076,9 +1096,9 @@ modifier 下輸出」與「顏色 modifier 不適合用變數覆寫模式」—�
 本專案的決定相反(見規則 3「顏色是組件的職責」),兩邊在這點上分歧,不要照抄。
 
 對方獨有但**不適用**本專案的:`rules/commit-then-deploy-sit.md`、`docs-then-sync-f2e.md`、
-`hooks/dev-debug-panel.cjs` 等(EFOfficial 專屬流程)、`.vite/pinia-auto-hmr.mjs`(非 CSS)。
+`hooks/dev-debug-panel.cjs` 等(對方專屬流程)、`.vite/pinia-auto-hmr.mjs`(非 CSS)。
 
-### 兩邊目前的差異
+#### 比較差異
 
 本專案多出來的:
 
