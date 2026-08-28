@@ -52,7 +52,9 @@ for PROJECT in $PROJECTS; do
   # shellcheck disable=SC2086
   if ! (cd "$PROJECT" && node .tools/css/lint-css.mjs $REL); then
     printf "\n${YELLOW}⚠ 以上為 %s 本次 commit 檔案的 CSS 規範違規,commit 照常繼續。${RESET}\n" "$PROJECT"
-    printf "${YELLOW}  規範見 %s/.claude/rules/css-conventions.md${RESET}\n\n" "$PROJECT"
+    printf "${YELLOW}  規範見 %s/.claude/rules/css-conventions.md${RESET}\n" "$PROJECT"
+    printf "${YELLOW}  ⚠️ Claude 讀到這段就必須呼叫 AskUserQuestion 詢問使用者要不要現在修正 ——${RESET}\n"
+    printf "${YELLOW}     這一層不能互動所以由你來問,不可以用「等做到它再處理」帶過。${RESET}\n\n"
   fi
 done
 

@@ -123,7 +123,7 @@ watch(
           </div>
         </BuyMSwiperHorizontal>
         <small
-          class="absolute flex h-[20px] items-center rounded-full px-[8px] text-[12px] tracking-wider text-[--white] bg-hexa-[--black,0.6] m:bottom-[55px] tm:right-[10px] pt:bottom-[65px] p:right-[15px]"
+          class="absolute flex h-[20px] items-center rounded-full bg-[--black-99] px-[8px] text-[12px] tracking-wider text-[--white] m:bottom-[55px] tm:right-[10px] pt:bottom-[65px] p:right-[15px]"
         >
           {{ imageIndex }} / {{ images.length }}
         </small>
@@ -139,7 +139,7 @@ watch(
       />
     </div>
     <ul
-      class="absolute left-1/2 z-[1] flex w-[calc(100%_-_20px)] -translate-x-1/2 items-center justify-center rounded-full px-[10px] bg-hexa-[--gray-333,0.8] m:bottom-[20px] tm:py-[2px] pt:bottom-[10px] p:py-[4px]"
+      class="absolute left-1/2 z-[1] flex w-[calc(100%_-_20px)] -translate-x-1/2 items-center justify-center rounded-full bg-[--gray-33-cc] px-[10px] m:bottom-[20px] tm:py-[2px] pt:bottom-[10px] p:py-[4px]"
     >
       <template v-for="(item, index) in mode" :key="`${item.label}_${index}`">
         <li v-if="item.value">

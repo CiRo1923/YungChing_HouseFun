@@ -73,8 +73,8 @@
       --anchor-bg-color: var(--green-8b0d);
     }
 
-    &.\-\-bg-green-8b0d66 {
-      --anchor-bg-color: var(--green-8b0d66);
+    &.\-\-bg-green-8b0d-66 {
+      --anchor-bg-color: var(--green-8b0d-66);
     }
 
     /* border color */

@@ -1,4 +1,7 @@
 <script setup>
+import '@css/_modules/buy/mPagination/variables.css'
+import '@css/_modules/buy/mPagination/common.css'
+
 const props = defineProps({
   route: {
     type: Object,
@@ -124,37 +127,29 @@ const onBind = (page) => {
 </script>
 
 <template>
-  <div class="m-pagination text-center" :class="setClass.main" v-if="totalPages > 0">
-    <div class="inline-flex items-center tm:gap-x-[5px] p:gap-x-[8px]">
+  <div class="m-pagination" :class="setClass.main" v-if="totalPages > 0">
+    <div class="m-pagination-container">
       <component
         :is="config.nowPage <= 1 ? 'button' : as"
-        class="m-pagination-arrow flex items-center justify-center transition-colors duration-300"
+        class="m-pagination-arrow"
         :class="{ '--disabled': config.nowPage <= 1 }"
         v-bind="config.nowPage <= 1 ? { type: 'button', disabled: true } : onBind(1)"
         aria-label="第一頁"
       >
         <CommonSvgIcon icon="chevron_left" class="m-pagination-arrow-icon" />
       </component>
-      <ol class="inline-flex items-center tm:gap-x-[5px] p:gap-x-[8px]">
+      <ol class="m-pagination-list">
         <li v-for="(page, index) in visiblePages" :key="`${page}_${index}`">
           <span
             v-if="page === 'start-ellipsis' || page === 'end-ellipsis'"
-            class="m-pagination-ellipsis flex items-center justify-center text-[--gray-666]"
+            class="m-pagination-ellipsis"
           >
             …
           </span>
-          <span
-            v-else-if="page === config.nowPage"
-            class="m-pagination-anchor --curr flex items-center justify-center transition-colors duration-300"
-          >
+          <span v-else-if="page === config.nowPage" class="m-pagination-anchor --curr">
             {{ page }}
           </span>
-          <component
-            v-else
-            :is="as"
-            class="m-pagination-anchor flex items-center justify-center transition-colors duration-300"
-            v-bind="onBind(page)"
-          >
+          <component v-else :is="as" class="m-pagination-anchor" v-bind="onBind(page)">
             {{ page }}
           </component>
         </li>
@@ -162,7 +157,7 @@ const onBind = (page) => {
       <!-- 最後一頁 -->
       <component
         :is="config.nowPage >= totalPages ? 'button' : as"
-        class="m-pagination-arrow flex items-center justify-center transition-colors duration-300"
+        class="m-pagination-arrow"
         :class="{ '--disabled': config.nowPage >= totalPages }"
         v-bind="
           config.nowPage >= totalPages ? { type: 'button', disabled: true } : onBind(totalPages)
@@ -174,56 +169,3 @@ const onBind = (page) => {
     </div>
   </div>
 </template>
-
-<style lang="postcss">
-.m-pagination-arrow,
-.m-pagination-anchor,
-.m-pagination-ellipsis {
-  @apply h-[30px] w-[30px];
-}
-
-.m-pagination-arrow,
-.m-pagination-anchor {
-  @apply rounded-[3px];
-}
-
-.m-pagination-arrow {
-  &:not(:disabled) {
-    @apply text-[--gray-666];
-
-    &:hover {
-      @apply bg-[--gray-f7];
-    }
-  }
-
-  &:disabled {
-    @apply cursor-not-allowed text-[--gray-e5];
-  }
-}
-
-.m-pagination-arrow-icon {
-  @apply h-[20px] w-[20px] p-[2px];
-}
-
-.m-pagination-anchor {
-  &:not(.\-\-disabled) {
-    &:not(.\-\-curr) {
-      &:not(:hover) {
-        @apply bg-[--gray-f7] text-[--gray-666];
-      }
-
-      &:hover {
-        @apply bg-[--green-8b0d] text-[--white];
-      }
-    }
-
-    &.\-\-curr {
-      @apply bg-[--gray-666] text-[--white];
-    }
-  }
-
-  &.\-\-disabled {
-    @apply cursor-not-allowed bg-transparent text-[--gray-ccce];
-  }
-}
-</style>

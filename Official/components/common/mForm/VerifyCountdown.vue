@@ -172,7 +172,7 @@ defineExpose({
         :setClass="{
           main: [
             setClass.button,
-            { '--bg-green-8b0d66': !isTimeout },
+            { '--bg-green-8b0d-66': !isTimeout },
             { '--bg-green-8b0d': isTimeout },
             '--oval --text-white',
           ],

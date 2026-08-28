@@ -3,11 +3,14 @@
 // dev server(.vite/css-guard.mjs)與 Run on Save 只能自動排序色票檔、在終端機印警告 ——
 // 那兩層沒辦法「問」使用者要不要修。這支補上最後一段:
 //
-//   1. 掃出工作區有改動的 .vue / .css(git status),色票檔順手自動排序
-//   2. 跑規範檢查,只報「上次還沒報過」的違規
+//   1. 掃出工作區有改動的 .vue / .css(git status)與剛存過的檔,色票檔順手自動排序
+//   2. 跑規範檢查
 //   3. 要求 Claude 主動用 AskUserQuestion 詢問要不要現在修
 //
-// 報過的違規會記在 node_modules/.cache/ 裡,不會每輪對話重複煩人。
+// ⚠️ **只要還有違規就每一輪都問**,不做「問過了就跳過」的去重 ——
+// 使用者明確要求過:沉默會讓違規靜靜留著,以為已經處理完了。
+// 要它安靜下來的唯一方式就是把違規修掉。
+//
 // 一律不阻擋(exit 0),hook 自己壞掉時安靜結束。
 
 import { execFileSync } from 'node:child_process'
@@ -17,9 +20,14 @@ import { fileURLToPath } from 'node:url'
 
 const PROJECT_ROOT = path.resolve(fileURLToPath(import.meta.url), '../../..')
 const CACHE_DIR = path.join(PROJECT_ROOT, 'node_modules/.cache/cssGuard')
-const CACHE_FILE = path.join(CACHE_DIR, 'reported.json')
 
-/** 存檔那層(.tools/css/guard-file.mjs)留下的待問清單 —— 讀走就清空 */
+/**
+ * 存檔那層(.tools/css/guard-file.mjs)留下的追蹤清單。
+ *
+ * **不是讀走就清空** —— 檔案一旦被存過而且有違規,就一直留在這裡,
+ * 每一輪對話都重新檢查一次;直到它通過了才移除。
+ * 這樣「有違規就每次問」才成立:不修掉就會一直被問。
+ */
 const PENDING_FILE = path.join(CACHE_DIR, 'pending.json')
 
 const MAX_LISTED = 10
@@ -87,26 +95,6 @@ const onLint = (files) => {
   }
 }
 
-/** 讀 / 寫「已回報過」的違規指紋 */
-const readReported = () => {
-  try {
-    return new Set(JSON.parse(fs.readFileSync(CACHE_FILE, 'utf8')))
-  } catch {
-    return new Set()
-  }
-}
-
-const writeReported = (set) => {
-  try {
-    fs.mkdirSync(path.dirname(CACHE_FILE), { recursive: true })
-    fs.writeFileSync(CACHE_FILE, JSON.stringify([...set]), 'utf8')
-  } catch {
-    // 寫不進快取只會變成重複提醒,不是錯誤
-  }
-}
-
-const fingerprint = (i) => `${i.file}:${i.line}:${i.detail}`
-
 const RULE_TITLE = {
   color: '規則 1 —— 顏色沒有定義在色票檔',
   colorFile: '規則 1 —— 色票檔的命名 / 排序 / 頻道歸屬',
@@ -117,13 +105,15 @@ const RULE_TITLE = {
 }
 
 /**
- * 讀走存檔那層留下的待問清單並清空。
+ * 讀存檔那層留下的追蹤清單(**不清空**)。
  *
  * 為什麼需要:git status 只看得到「內容有變」的檔案,而使用者可能存了檔卻沒改動內容,
- * 或改動早已 commit —— 那些存檔一樣該被問。存檔那層會把檔案記進 pending.json,
- * 這裡接手,讀完就清掉(沒再存檔就不會重複問)。
+ * 或改動早已 commit —— 那些存檔一樣該被追蹤。
+ *
+ * 清單只在「該檔案已經沒有違規」時才移除(見 onDropClean),
+ * 所以違規沒修掉之前,每一輪對話都會再問一次。
  */
-const onTakePendingFiles = () => {
+const onReadPendingFiles = () => {
   let list = []
 
   try {
@@ -132,33 +122,45 @@ const onTakePendingFiles = () => {
     return []
   }
 
-  try {
-    fs.rmSync(PENDING_FILE, { force: true })
-  } catch {
-    // 清不掉只會多問一次,不是錯誤
-  }
-
   return Array.isArray(list)
     ? list.filter((p) => typeof p === 'string' && fs.existsSync(path.join(PROJECT_ROOT, p)))
     : []
 }
 
+/** 把「已經通過」的檔案從追蹤清單移除 —— 修好了就不必再看它 */
+const onDropClean = (pending, issues) => {
+  const dirty = new Set(issues.map((i) => i.file))
+  const keep = pending.filter((f) => dirty.has(f))
+
+  try {
+    if (keep.length) {
+      fs.mkdirSync(path.dirname(PENDING_FILE), { recursive: true })
+      fs.writeFileSync(PENDING_FILE, JSON.stringify(keep), 'utf8')
+    } else {
+      fs.rmSync(PENDING_FILE, { force: true })
+    }
+  } catch {
+    // 寫不進快取只會變成多問一次,不是錯誤
+  }
+}
+
 const main = () => {
-  // 存檔清單優先 —— 那是使用者剛動過的檔案,一定要問
-  const files = [...new Set([...onTakePendingFiles(), ...onListChangedFiles()])]
+  // 追蹤清單(存過檔且還沒修好的)+ 工作區有改動的
+  const pending = onReadPendingFiles()
+  const files = [...new Set([...pending, ...onListChangedFiles()])]
   if (!files.length) return
 
   const sorted = onSortColorFiles(files)
   const issues = onLint(files)
 
-  const reported = readReported()
-  const fresh = issues.filter((i) => !reported.has(fingerprint(i)))
+  // 修好的檔案退出追蹤;還有違規的留著,下一輪繼續問
+  onDropClean(pending, issues)
 
-  if (!sorted.length && !fresh.length) return
+  // ⚠️ 不做去重 —— 只要還有違規就每一輪都報。
+  // 使用者要求過:沉默會讓人以為已經處理完了,要它安靜的唯一方式是把違規修掉。
+  if (!sorted.length && !issues.length) return
 
-  for (const i of fresh) reported.add(fingerprint(i))
-  writeReported(reported)
-
+  const fresh = issues
   const blocks = []
 
   if (sorted.length) {
@@ -190,31 +192,49 @@ const main = () => {
       hookSpecificOutput: {
         hookEventName: 'UserPromptSubmit',
         additionalContext:
-          '⚠️ **這一輪一定要做的事**:下面有紅色警告,回答使用者當下的問題之後,' +
-          '**必須用 AskUserQuestion 工具**詢問要不要現在協助調整 —— ' +
-          '不是在回覆末尾用文字帶一句,是真的呼叫那個工具。\n' +
-          '附上你打算怎麼改(哪個檔案、加哪個變數、搬哪些 class),讓使用者能直接判斷。\n' +
-          '使用者說過「不管任何狀況都要先詢問」,所以這條**沒有例外**:\n' +
-          '先前說過「繼續」「整批授權」都不算免問(那是授權做這件工作,不是授權不用問);' +
-          '既有存量也要問,只是要講清楚它是存量;' +
-          '只有他針對這一筆說過不用,才不再問第二次。\n\n' +
+          '📋 下面是 CSS 規範違規清單 —— **這是背景資訊,不要主動跳 AskUserQuestion 打斷使用者**。\n' +
+          '同一份警告使用者存檔時已經在終端機 / 輸出面板看過了,那裡寫著「要修就打『修正』」。\n\n' +
+          '**你要做的事**:把清單記著,照常回答使用者當下的問題。\n' +
+          '等他說「修正」「好」「幫我改」之類的話,就直接動手修下面列出的違規 —— ' +
+          '不用再問一次是哪個檔案,清單就在下面。\n' +
+          '他沒開口就不要修、也不要催 —— 主動權在他手上。\n\n' +
           `[CSS 規範檢查 —— 剛存檔 / 工作區有改動的 .vue / .css]\n${blocks.join('\n\n')}\n\n` +
           '規範見 .claude/rules/css-conventions.md。這是警告不是阻擋。\n\n' +
+          '⚠️ **判斷不出來就問,不要猜** —— 不只「要不要修」要問,' +
+          '「這件事該怎麼做」不確定時也要問。一律問、不要自己決定的岔路:' +
+          '屬性要不要開 modifier、字級歸 module 還是父系 setClass、語意標籤要不要給 class、' +
+          '某斷點沒設定是例外還是漏寫、非 px 值(duration-* / rounded-full)要不要變數化、' +
+          '死檔要重寫還是刪、沒人用的 modifier 要留還是刪、' +
+          'template 綁了 class 但沒有對應 CSS 是刻意還是漏掉。\n' +
+          '猜錯的代價不對稱:要回頭改 module + template + 每一個使用端。' +
+          '問法是直說「這個我判斷不出來」並列出選項與後果,' +
+          '不要假裝有把握然後埋一句「暫時這樣」。\n\n' +
           '顏色是 module 的職責:使用端在 setClass.main 寫 text-[--gray-999] 是錯的,' +
           '要在 module 補顏色 modifier(--text-gray-999)讓使用端改用,' +
           '不要把 module 的顏色宣告條件化來讓使用端自訂。\n\n' +
           'module 變數的規則:前綴跟著 class / 資料夾走(mForm/ → --form-*,不要塞 m-);' +
-          '命名用 -w / -h / -p / -m / -border / -text-size;尺寸值拆 pc / tablet / mobile 三份;' +
+          '命名用 -w / -h / -p / -m / -border / -text-size,寬高相同的元素(icon 多半是正方形)用 -size 一個變數、不同才拆 -w / -h;帶 px 的值一律開變數(1px / 2px 也算,例外是 z-index、0/auto/none、font-weight(不是父系帶入就是寫死);100% 直接用 w-full / h-full / max-w-full 等,不要繞變數),拆 pc / tablet / mobile 三份且要成套(有 -pc-X 就必須有 -tablet-X / -mobile-X);版型檔不可直接吃 --x-pc-y,要吃中性變數再由 @screen 各段對應(已包在 @screen p 裡面直接吃 -pc- 是合理的),同一支檔案的 @screen p / t / m 各自只寫一組;' +
           'px-[--x] / py- / mx- / my- 的 base 給 0(沒 base 整條讀不到),高度給 auto,顏色給 initial;' +
-          'hover / focus 覆寫基礎變數而非在 :root 做 var() fallback;' +
+          'hover / focus 覆寫基礎變數而非在 :root 做 var() fallback,且 hover 用帶 hover: 前綴的 modifier 包在 variables.css 的 &:hover 內、不建 hover 專用變數、版型檔不寫 &:hover(參考 mAnchor);' +
           '同組 module 內不同元素撞 class 名時不要硬合併。\n' +
           'variables 檔只放「值」(:root 預設值、modifier 的具體值、指向色票的 var(--white));' +
           '「行為」放版型檔 —— 狀態切換(--checked { --x-bg: var(--x-checked-bg) })與' +
-          '斷點對應(--x-size: var(--x-pc-size))都要寫在 common.css / <變體>.css。\n\n' +
+          '斷點對應(--x-size: var(--x-pc-size))都要寫在 common.css / <變體>.css。\n' +
+          '反過來也成立:variables.css / *Variables.css 以外的檔案,變數宣告右邊一定是 var(…),' +
+          '看到 --tag-px: 0 這種常值就是放錯地方(base 值屬於 variables 的 :root)。' +
+          '另外空字串是無效 CSS 值、整條宣告會被丟棄,高度寫 auto、圓角寫 0、陰影寫 none。\n\n' +
+          '搬 template 時,沒有自己 class 的 div / span 要補一個;但 strong / em / small ' +
+          '這種語意標籤**先問使用者要不要給 class** —— 後代選擇器 .m-x > strong 是 (0,1,1),' +
+          '會蓋掉使用端 setClass 傳的 (0,1,0) utility,使用端就再也改不動。' +
+          '要能傳就補 setClass key 用 :class 綁、module 不設那個屬性。\n\n' +
           'modifier 的命名 = tailwind utility 加 -- 前綴(--border-b 不是 --has-border-b);' +
           '--oval / --checked 這種 tailwind 沒有對應的狀態開關才用專案自己的說法。' +
           '狀態一律 -- 開頭(--readonly / --error / --disabled / --active / --curr),' +
           '不要用 is-active / has-label 這種裸前綴。\n\n' +
+          '資料夾名跟著 class 前綴走不是組件檔名;組件放在某個 module 的子資料夾底下時' +
+          '(components/buy/mItem/SwitchItem.vue),它是那個母體的變體 —— 資料夾用 mItem/、' +
+          '檔名用 switchItem.css、class 也要收斂成 m-item-switch-*,三者要對齊,' +
+          '只搬資料夾而 class 不動就失去「看到 class 就找到檔案」的意義。\n' +
           'module 分共用 / 群組 / 變體三層:兩個以上變體共用的放群組層(mForm 的 selection.* ' +
           '是 checkbox + radio 共用),import 順序為 共用變數 → 群組變數 → 變體變數 → ' +
           '共用版型 → 群組版型 → 變體樣式。\n' +
@@ -222,19 +242,19 @@ const main = () => {
           '只要用到一個以上的層級(整體 / 軸向 / 單邊 / 單角),就拆到最細那層 —— ' +
           '--p-* 與 --px-* 併存就建 -pt / -pr / -pb / -pl,--rounded-* 與 --rounded-b-* ' +
           '併存就建 -rounded-t / -rounded-b;使用端已用 tailwind 傳細粒度時要補對應 modifier。\n' +
-          '字級:固定位置的組件(麵包屑 / 分頁器 / mNav / mFooter)可在 module 用 :root 變數定;' +
-          '到處複用的組件(按鈕 / mForm / mTag)一律由父系 setClass 傳,沒有 key 就補一個,' +
+          '字級一律 text-[length:--x-text-size],不要寫原生 font-size: var()(少了 length: 會被當成 color)。一支檔案有多個變數要分斷點就吃中性變數、@screen 各段集中對應;只有一個就直接在 @screen 內吃 -pc- / -tablet- / -mobile-。字級:固定位置的組件(麵包屑 / 分頁器 / mNav / mFooter)可在 module 用 :root 變數定;' +
+          '非固定位置(到處複用)的組件(按鈕 / mForm / mTag)一律由父系 setClass 傳,沒有 key 就補一個,而且**連 --x-text-size 變數都不要建** —— 建了 module 就會 @apply 它,一輸出就蓋掉使用端傳的 text-*,交給父系等於白做;' +
           '並把原本的值補回每一個使用端。\n' +
           '有幾個屬性不能用 tailwind 寫、而且都不報錯:border-width 與 box-shadow 一律寫原生 CSS 屬性' +
           '(shadow-[--x] 會被當成 shadow color,box-shadow 根本不出現);font-size 要寫 ' +
           'text-[length:--x];border-color 與 gap-x-[var(--x,0px)] 則沒問題。' +
           'transition-property: transform 不要換成 transition-transform(會連帶塞 duration-150 與 ' +
           'cubic-bezier,timing-function 蓋不掉、手感會變),transform: translate3d(0,0,0) 同理維持原生。\n\n' +
-          '**接下來要做的事**:先回答使用者當下的問題,然後用 AskUserQuestion 詢問要不要現在' +
+          '**再說一次順序**:AskUserQuestion 先呼叫,回覆文字後寫 —— 用它詢問要不要現在' +
           '協助把上面這些調整成符合規範 —— 附上你打算怎麼改(具體到哪個檔案、加哪個變數、' +
           '搬哪些 class),讓使用者能直接判斷。\n' +
           '若違規是「碰到的舊檔案既有存量」而不是這次改出來的,說明清楚是存量再問。\n' +
-          '同一筆違規只會出現一次,使用者說不用就不要再追問。',
+          '只要違規還在,每一輪都會出現、也都要問 —— 不修掉就不會停。',
       },
     })
   )

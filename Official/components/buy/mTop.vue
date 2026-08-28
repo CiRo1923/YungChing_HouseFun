@@ -1,4 +1,7 @@
 <script setup>
+import '@css/_modules/buy/mTop/variables.css'
+import '@css/_modules/buy/mTop/common.css'
+
 const footerRef = inject('footerRef', ref(null))
 
 const isHidden = ref(true)
@@ -43,15 +46,13 @@ onUnmounted(() => {
 <template>
   <button
     type="button"
-    class="fixed left-1/2 z-[2] flex h-[50px] w-[50px] items-center justify-center rounded-full text-[--white] transition-opacitys duration-300 bg-hexa-[--black,0.6] m:translate-x-[calc(355px_/2_-_100%)] t:translate-x-[calc(748px_/2_-_100%)] p:translate-x-[calc(600px_+_25px)]"
-    :class="[{ 'invisible opacity-0': isHidden }, { 'visible opacity-100': !isHidden }]"
+    class="m-top"
+    :class="{ '--hidden': isHidden }"
     :style="{
       bottom: `calc(10px + max(${footerOverlap}px, var(--fixed-bottom-height, 0px)))`,
     }"
     @click="onCkick"
   >
-    <CommonSvgIcon icon="icon_top_arrow" class="h-[20px] w-[20px]" />
+    <CommonSvgIcon icon="icon_top_arrow" class="m-top-icon" />
   </button>
 </template>
-
-<style lang="postcss"></style>

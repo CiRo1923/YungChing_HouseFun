@@ -1,76 +1,91 @@
 :root {
-  --tag-pc-text-shadow: 1px 1px 1px #00000033;
-  --tag-tablet-text-shadow: 1px 1px 1px #00000033;
-  --tag-mobile-text-shadow: 1px 1px 1px #00000033;
+  /*
+   * base 值 —— 沒帶 modifier 時等同「沒設定」。
+   * px / py 給 0(不給的話 px-[--x] 會整條讀不到);高度給 auto(給 0 會塌);
+   * text-shadow 給 none。原本這三個寫成空字串 '',那是無效的 CSS 值,
+   * 宣告會被整條丟棄 —— 結果雖然一樣,但看不出意圖也騙不過 lint。
+   */
+  --tag-px: 0;
+  --tag-py: 0;
+  --tag-h: auto;
+  --tag-rounded: 0;
+  --tag-text-shadow: none;
+  --tag-bg-color: initial;
+  --tag-text-color: initial;
+  --tag-border-color: transparent;
+
+  --tag-pc-border: 1px;
+  --tag-tablet-border: 1px;
+  --tag-mobile-border: 1px;
 }
 
 .m-tag {
   &.\-\-bg-red-e45c {
-    @apply bg-[--red-e45c];
+    --tag-bg-color: var(--red-e45c);
   }
 
   &.\-\-bg-red-e786 {
-    @apply bg-[--red-e786];
+    --tag-bg-color: var(--red-e786);
   }
 
   &.\-\-bg-orange-feea {
-    @apply bg-[--orange-feea];
+    --tag-bg-color: var(--orange-feea);
   }
 
   &.\-\-bg-orange-f74c {
-    @apply bg-[--orange-f74c];
+    --tag-bg-color: var(--orange-f74c);
   }
 
   &.\-\-bg-yellow-ffbc {
-    @apply bg-[--yellow-ffbc];
+    --tag-bg-color: var(--yellow-ffbc);
   }
 
   &.\-\-bg-green-efef {
-    @apply bg-[--green-efef];
+    --tag-bg-color: var(--green-efef);
   }
 
   &.\-\-bg-blue-efff {
-    @apply bg-[--blue-efff];
+    --tag-bg-color: var(--blue-efff);
   }
 
   &.\-\-bg-gray-f7 {
-    @apply bg-[--gray-f7];
+    --tag-bg-color: var(--gray-f7);
   }
 
   &.\-\-bg-gray-f2 {
-    @apply bg-[--gray-f2];
+    --tag-bg-color: var(--gray-f2);
   }
 
   &.\-\-border-blue-69c1 {
-    @apply border-[--blue-69c1];
+    --tag-border-color: var(--blue-69c1);
   }
 
   &.\-\-border-gray-db {
-    @apply border-[--gray-db];
+    --tag-border-color: var(--gray-db);
   }
 
   &.\-\-text-orange-e646 {
-    @apply text-[--orange-e646];
+    --tag-text-color: var(--orange-e646);
   }
 
   &.\-\-text-blue-69c1 {
-    @apply text-[--blue-69c1];
+    --tag-text-color: var(--blue-69c1);
   }
 
   &.\-\-text-green-4847 {
-    @apply text-[--green-4847];
+    --tag-text-color: var(--green-4847);
   }
 
   &.\-\-text-blue-26e1 {
-    @apply text-[--blue-26e1];
+    --tag-text-color: var(--blue-26e1);
   }
 
   &.\-\-text-gray-666 {
-    @apply text-[--gray-666];
+    --tag-text-color: var(--gray-666);
   }
 
   &.\-\-text-white {
-    @apply text-[--white];
+    --tag-text-color: var(--white);
   }
 
   &:hover {
@@ -89,7 +104,7 @@
     &.\-\-text-shadow,
     &.p\:\-\-text-shadow,
     &.pt\:\-\-text-shadow {
-      --tag-text-shadow: var(--tag-pc-text-shadow);
+      --tag-text-shadow: 1px 1px 1px var(--black-33);
     }
 
     &.\-\-rounded-4,
@@ -154,7 +169,7 @@
     &.pt\:\-\-text-shadow,
     &.tm\:\-\-text-shadow,
     &.t\:\-\-text-shadow {
-      --tag-text-shadow: var(--tag-tablet-text-shadow);
+      --tag-text-shadow: 1px 1px 1px var(--black-33);
     }
 
     &.\-\-rounded-4,
@@ -227,7 +242,7 @@
     &.\-\-text-shadow,
     &.tm\:\-\-text-shadow,
     &.m\:\-\-text-shadow {
-      --tag-text-shadow: var(--tag-mobile-text-shadow);
+      --tag-text-shadow: 1px 1px 1px var(--black-33);
     }
 
     &.\-\-rounded-4,

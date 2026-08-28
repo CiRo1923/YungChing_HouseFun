@@ -110,8 +110,12 @@ export function relativeLuminance({ r, g, b }) {
  *   6 碼、純灰     → 前 2 碼                        #f9f9f9 → f9
  *   3 碼 hex       → 原樣                           #eee    → eee
  *   純黑白         → 不加色碼                       #fff    → (空)
- *   帶 alpha       → 上述縮寫再接 alpha 兩碼        #0087dc1a → 08dc1a
+ *   帶 alpha       → 上述縮寫再「-」接 alpha 兩碼   #0087dc1a → 08dc-1a
  *                    純黑白則只留 alpha 兩碼        #0000001a → 1a
+ *
+ * alpha 之所以用連字號隔開,是因為黏在一起會分不出哪幾碼是色碼、哪幾碼是透明度 ——
+ * --gray-33-4d 到底是「#33334d」還是「#333333 + 4d」?加了 - 就沒有歧義。
+ * 純黑白本來就沒有色碼縮寫,不會混淆,維持 --black-1a 不加。
  */
 export function expectedSuffix(rawHex) {
   const raw = rawHex.replace(/^#/, '').toLowerCase()
@@ -137,7 +141,7 @@ export function expectedSuffix(rawHex) {
   const six = raw.slice(0, 6)
   // 純灰:取前 2 碼
   const base = isGray ? six.slice(0, 2) : six[0] + six[2] + six[4] + six[5]
-  return hasAlpha ? base + alphaHex : base
+  return hasAlpha ? `${base}-${alphaHex}` : base
 }
 
 /** 由變數名取出色系,不在清單內回傳 null */

@@ -50,7 +50,7 @@
     /* border-width 直接寫 CSS 屬性 —— @apply border-t-[…] 會被壓成 shorthand,值是 var() 時整條失效 */
     border-top-width: var(--log-status-border-t);
 
-    @apply border-solid border-t-[--log-status-border-color];
+    @apply border-t-[--log-status-border-color];
 
     --log-status-border-t: var(--log-status-mobile-border-t);
   }

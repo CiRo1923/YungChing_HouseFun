@@ -1,0 +1,87 @@
+.m-tag {
+  &.\-\-checkbox {
+    @apply relative;
+
+    /* 底色只在可點時出現 —— disabled 保留使用端或 --bg-* modifier 給的顏色 */
+    &:not(.\-\-disabled) {
+      @apply cursor-pointer bg-[--tag-checkbox-bg-color];
+
+      &.\-\-checked {
+        --tag-checkbox-bg-color: var(--tag-checkbox-checked-bg-color);
+
+        .m-tag-icon {
+          @apply visible opacity-100;
+        }
+
+        .m-tag-assist-label {
+          @apply invisible opacity-0;
+        }
+
+        .m-tag-label {
+          @apply font-semibold;
+        }
+      }
+
+      &:not(.\-\-checked) {
+        .m-tag-icon {
+          @apply invisible opacity-0;
+        }
+
+        .m-tag-assist-label {
+          @apply visible opacity-100;
+        }
+      }
+    }
+
+    &.\-\-disabled {
+      @apply cursor-not-allowed;
+    }
+  }
+}
+
+.m-tag-type {
+  @apply sr-only;
+}
+
+.m-tag-assist {
+  @apply relative h-[--tag-checkbox-assist-h] w-[--tag-checkbox-assist-w] shrink-0;
+}
+
+.m-tag-icon {
+  @apply absolute right-0 top-0 h-full w-[--tag-checkbox-icon-w] text-[--tag-checkbox-icon-color]
+    transition-opacitys duration-300;
+}
+
+.m-tag-assist-label {
+  @apply relative block text-right leading-[1] transition-opacitys duration-300;
+}
+
+@screen p {
+  .m-tag {
+    &.\-\-checkbox {
+      --tag-checkbox-assist-w: var(--tag-checkbox-pc-assist-w);
+      --tag-checkbox-assist-h: var(--tag-checkbox-pc-assist-h);
+      --tag-checkbox-icon-w: var(--tag-checkbox-pc-icon-w);
+    }
+  }
+}
+
+@screen t {
+  .m-tag {
+    &.\-\-checkbox {
+      --tag-checkbox-assist-w: var(--tag-checkbox-tablet-assist-w);
+      --tag-checkbox-assist-h: var(--tag-checkbox-tablet-assist-h);
+      --tag-checkbox-icon-w: var(--tag-checkbox-tablet-icon-w);
+    }
+  }
+}
+
+@screen m {
+  .m-tag {
+    &.\-\-checkbox {
+      --tag-checkbox-assist-w: var(--tag-checkbox-mobile-assist-w);
+      --tag-checkbox-assist-h: var(--tag-checkbox-mobile-assist-h);
+      --tag-checkbox-icon-w: var(--tag-checkbox-mobile-icon-w);
+    }
+  }
+}

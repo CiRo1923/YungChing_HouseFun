@@ -12,6 +12,10 @@
   --tab-border-bottom-tablet-border-h: 3px;
   --tab-border-bottom-mobile-border-h: 3px;
 
+  /* 底線的 base:沒有高度、寬度為 0，選中時才由下面的 modifier 撐開 */
+  --tab-border-bottom-border-h: 0;
+  --tab-border-bottom-border-w: 0;
+
   --tab-border-bottom-anchor-color: transparent;
   --tab-border-bottom-anchor-hover-color: transparent;
   --tab-border-bottom-anchor-active-color: transparent;

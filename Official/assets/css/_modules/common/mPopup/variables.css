@@ -2,13 +2,13 @@
   --popup-px: 0;
   --popup-py: 0;
   --popup-w: auto;
-  --popup-mobile-w: 328px;
+  --popup-mobile-w: 328px; /* lint-breakpoint-exempt: 桌機平板寬度自適應(base auto),只有手機固定寬 */
 
   --popup-container-pc-rounded: 15px;
   --popup-container-tablet-rounded: 15px;
   --popup-container-mobile-rounded: 15px;
 
-  --popup-container-mobile-max-w: 343px;
+  --popup-container-mobile-max-w: 343px; /* lint-breakpoint-exempt: 只有手機限制最大寬 */
 
   --popup-header-pc-pb: 20px;
   --popup-header-tablet-pb: 20px;
@@ -18,9 +18,9 @@
   --popup-header-tablet-border: 2px;
   --popup-header-mobile-border: 2px;
 
-  --popup-header-pc-text: 24px;
-  --popup-header-tablet-text: 20px;
-  --popup-header-mobile-text: 20px;
+  --popup-header-pc-text-size: 24px;
+  --popup-header-tablet-text-size: 20px;
+  --popup-header-mobile-text-size: 20px;
 
   --popup-header-icon-pc-p: 3px;
   --popup-header-icon-tablet-p: 3px;
@@ -38,9 +38,10 @@
   --popup-header-anchor-tablet-size: 24px;
   --popup-header-anchor-mobile-size: 24px;
 
-  --popup-tools-pc-mx: 24px;
-  --popup-tools-tablet-mx: 12px;
-  --popup-tools-mobile-mt: 12px;
+  /* 工具列:手機是上下排(用 mt)、桌機平板是左右排(用 mx),兩組刻意不成套 */
+  --popup-tools-pc-mx: 24px; /* lint-breakpoint-exempt: 手機改用 mt */
+  --popup-tools-tablet-mx: 12px; /* lint-breakpoint-exempt: 同上 */
+  --popup-tools-mobile-mt: 12px; /* lint-breakpoint-exempt: 桌機平板改用 mx */
 
   --popup-body-pc-mt: 30px;
   --popup-body-tablet-mt: 30px;

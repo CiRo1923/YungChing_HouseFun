@@ -61,7 +61,7 @@ const setClass = computed(() => {
             icon: item.icon,
           }"
           :setClass="{
-            main: '--h-24 --px-6 --bg-hexa-75-gray-333 --text-white',
+            main: '--h-24 --px-6 --bg-gray-33-bf hover:--bg-gray-333 --text-white',
             icon: 'h-[14px] w-[14px]',
             container: 'text-[12px]',
           }"

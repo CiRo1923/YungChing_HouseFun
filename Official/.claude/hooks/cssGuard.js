@@ -45,7 +45,7 @@ const FIX_HINTS = {
     '排序執行 npm run sort:color 即可。',
   tailwind:
     '規則 2:把 template 的 tailwind class 搬進 assets/css/_modules/<頻道>/<組件>/,' +
-    'template 只留組件自身 class 與 --modifier。沒有自己 class 的元素要補一個。' +
+    'template 只留組件自身 class 與 --modifier。沒有自己 class 的 div / span 要補一個。但 strong / em / small 這種語意標籤**先問使用者要不要給 class** —— 後代選擇器 .m-x > strong 是 (0,1,1),會蓋掉使用端 setClass 傳的 (0,1,0) utility,使用端就再也改不動;要能傳就補 setClass key 用 :class 綁、module 不設那個屬性。' +
     'modifier 的命名 = tailwind utility 加 -- 前綴(--border-b 不是 --has-border-b、' +
     '--rounded-20、--px-15);--oval / --checked / --align-top 這種 tailwind 沒有對應的' +
     '狀態或語意開關才用專案自己的說法。' +
@@ -64,7 +64,7 @@ const FIX_HINTS = {
     '使用端若已用 tailwind 傳細粒度(m:rounded-b-[20px]),要補對應 modifier 給它,' +
     '不要讓兩邊在同一個優先權上打架。' +
     '字級看組件性質:固定位置的組件(麵包屑 / 分頁器 / mNav / mFooter)可以在 module 用 ' +
-    ':root 變數定;到處複用的組件(按鈕 / mForm / mTag)一律由父系 setClass 傳,' +
+    ':root 變數定;非固定位置(到處複用)的組件(按鈕 / mForm / mTag)一律由父系 setClass 傳,而且**連 --x-text-size 變數都不要建**(建了就會蓋掉使用端),' +
     'module 不要定 text-*,沒有對應 setClass key 就補一個並把值補回每一個使用端。' +
     '有幾個屬性不能用 tailwind 寫、而且都不報錯:border-width 與 box-shadow 一律寫原生 CSS 屬性' +
     '(shadow-[--x] 會被當成 shadow color,box-shadow 根本不出現);font-size 要寫 ' +
@@ -76,15 +76,18 @@ const FIX_HINTS = {
     '類別之間空一行;同類別內維持既有順序(css 之間的先後有意義)。' +
     '@stores / @components 等不參與排序檢查。',
   variable:
-    '規則 4:命名改成 -w / -h / -p / -m / -border / -text-size;' +
-    '尺寸類的值拆成 pc / tablet / mobile 三份。這條多半是機械式改名,可以直接動手。' +
+    '規則 4:命名改成 -w / -h / -p / -m / -border / -text-size,寬高相同的元素(icon 多半是正方形)用 -size 一個變數、不同才拆 -w / -h;' +
+    '帶 px 的值一律開變數(1px 線寬、2px 內距也算,「感覺是造型」不是豁免理由;明確不開的:z-index、0/auto/none、以及 font-weight(不是父系帶入就是寫死,直接 @apply font-medium / font-normal)。100% 三個斷點沒差別時直接用 tailwind 的 w-full / h-full / max-w-full / min-w-full / min-h-full,不要寫 w-[100%] 也不要繞變數,只有真的分斷點不同才開變數),值拆成 pc / tablet / mobile 三份,而且要成套(有 -pc-X 就必須有 -tablet-X / -mobile-X,漏一個那斷點會靜靜讀不到值);版型檔不可直接吃 --x-pc-y,要吃中性變數再由 @screen 各段對應(但已包在 @screen p 裡面直接吃 -pc- 是合理的,只抓斷點對不上與沒包在斷點區塊裡;複合斷點 pt / tm 裡一律不能直接吃單一斷點的值),同一支檔案的 @screen p / t / m 各自只寫一組,例外寫 /* lint-breakpoint-exempt: 理由 */。這條多半是機械式改名,可以直接動手。' +
     '順便檢查同一支檔案的其他變數規則:前綴要跟著 class / 資料夾走(mForm/ → --form-*,' +
     '不要在變數名塞 m-);px-[--x] / py- / mx- / my- 的 base 要給 0(沒 base 整條讀不到),' +
     '高度的 base 要給 auto(給 0 會塌),顏色沒有時給 initial;' +
-    'hover / focus 一律覆寫基礎變數,不要在 :root 用 var() 做 fallback。' +
+    'hover / focus 一律覆寫基礎變數,不要在 :root 用 var() 做 fallback。hover 的固定寫法(參考 mAnchor):modifier 帶 hover: 前綴、包在 variables.css 的 &:hover 內(hover:--bg-gray-333),不要建 --x-hover-bg-color 專用變數(直接覆寫 --x-bg-color 本身),版型檔也不要寫 &:hover(否則使用端沒帶 modifier 也會觸發)。' +
     'variables 檔只放「值」(:root 預設值、modifier 的具體值、指向色票的 var(--white));' +
     '「行為」放版型檔 —— 狀態切換(--checked { --x-bg: var(--x-checked-bg) })與' +
     '斷點對應(--x-size: var(--x-pc-size))都要寫在 common.css / <變體>.css。' +
+    '反過來也成立:variables.css / *Variables.css 以外的檔案,變數宣告右邊一定是 var(…),' +
+    '看到 --tag-px: 0 這種常值就是放錯地方(base 值屬於 variables 的 :root)。' +
+    '另外空字串是無效 CSS 值、整條宣告會被丟棄,高度寫 auto、圓角寫 0、陰影寫 none。' +
     '判斷方式:這行是在給一個值,還是在切換成自己 module 的另一個變數?',
 }
 
@@ -175,21 +178,29 @@ process.stdin
           hookSpecificOutput: {
             hookEventName: 'PostToolUse',
             additionalContext:
-              '⚠️ **這一輪一定要做的事**:下面有紅色警告,把手上這件事講完之後,' +
-              '**必須用 AskUserQuestion 工具**詢問要不要現在協助調整 —— ' +
-              '不是在回覆末尾用文字帶一句,是真的呼叫那個工具。\n' +
-              '使用者說過「不管任何狀況都要先詢問」,所以這條**沒有例外**:\n' +
-              '先前說過「繼續」「整批授權」都不算免問(那是授權做這件工作,不是授權不用問);' +
-              '既有存量也要問,只是要講清楚它是存量;' +
-              '只有他針對這一筆說過不用,才不再問第二次。\n\n' +
+              '📋 下面是 CSS 規範違規清單 —— **這是背景資訊,不要主動跳 AskUserQuestion 打斷使用者**。\n' +
+              '同一份警告使用者存檔時已經在終端機 / 輸出面板看過了,那裡寫著「要修就打『修正』」。\n\n' +
+              '**你要做的事**:把清單記著,照常回答使用者當下的問題。\n' +
+              '等他說「修正」「好」「幫我改」之類的話,就直接動手修下面列出的違規 —— ' +
+              '不用再問一次是哪個檔案,清單就在下面。\n' +
+              '他沒開口就不要修、也不要催 —— 主動權在他手上。\n\n' +
               `[CSS 規範檢查] ${rel}\n${text}\n\n` +
               (hints.length ? `修正方式:\n${hints.map((h) => `- ${h}`).join('\n')}\n\n` : '') +
               '規範見 .claude/rules/css-conventions.md。這是警告不是阻擋。\n\n' +
-              '**接下來要做的事**:先把手上這件事講完,然後用 AskUserQuestion 詢問使用者' +
+              '⚠️ **判斷不出來就問,不要猜** —— 不只「要不要修」要問,' +
+              '「這件事該怎麼做」不確定時也要問。一律問、不要自己決定的岔路:' +
+              '屬性要不要開 modifier、字級歸 module 還是父系 setClass、語意標籤要不要給 class、' +
+              '某斷點沒設定是例外還是漏寫、非 px 值(duration-* / rounded-full)要不要變數化、' +
+              '死檔要重寫還是刪、沒人用的 modifier 要留還是刪、' +
+              'template 綁了 class 但沒有對應 CSS 是刻意還是漏掉。\n' +
+              '猜錯的代價不對稱:要回頭改 module + template + 每一個使用端。' +
+              '問法是直說「這個我判斷不出來」並列出選項與後果,' +
+              '不要假裝有把握然後埋一句「暫時這樣」。\n\n' +
+              '**再說一次順序**:AskUserQuestion 先呼叫,回覆文字後寫 —— 用它詢問使用者' +
               '要不要現在協助調整成符合規範 —— 附上你打算怎麼改(具體到哪個檔案、加哪個變數、' +
               '搬哪些 class),讓使用者能直接判斷。\n' +
               '若這些違規是「碰到的舊檔案既有存量」而不是這次改出來的,說明清楚是存量再問,' +
-              '不要讓使用者誤以為是新問題。使用者說不用就不要再問第二次。',
+              '不要讓使用者誤以為是新問題。只要違規還在,下一輪照樣要問。',
           },
         })
       )

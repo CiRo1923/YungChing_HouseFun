@@ -1,0 +1,105 @@
+.m-pagination {
+  @apply text-center;
+}
+
+.m-pagination-container,
+.m-pagination-list {
+  @apply inline-flex items-center gap-x-[--pagination-gap-x];
+}
+
+.m-pagination-arrow,
+.m-pagination-anchor,
+.m-pagination-ellipsis {
+  @apply flex h-[--pagination-size] w-[--pagination-size] items-center justify-center;
+}
+
+.m-pagination-arrow,
+.m-pagination-anchor {
+  @apply rounded-[--pagination-rounded] transition-colors duration-300;
+}
+
+.m-pagination-ellipsis {
+  @apply text-[--pagination-ellipsis-color];
+}
+
+.m-pagination-arrow {
+  @apply bg-[--pagination-arrow-bg-color] text-[--pagination-arrow-color];
+
+  &:not(:disabled) {
+    &:hover {
+      --pagination-arrow-bg-color: var(--pagination-arrow-hover-bg-color);
+    }
+  }
+
+  /*
+   * 兩種寫法都收：元素是 button 時走 :disabled 屬性，
+   * 是連結（as 傳進來的 NuxtLink 等）時只有 --disabled class。
+   * template 兩者同時綁，所以結果一致，這裡只是不依賴標籤是什麼。
+   */
+  &:disabled,
+  &.\-\-disabled {
+    --pagination-arrow-color: var(--pagination-arrow-disabled-color);
+
+    @apply cursor-not-allowed;
+  }
+}
+
+.m-pagination-arrow-icon {
+  @apply h-[--pagination-arrow-icon-size] w-[--pagination-arrow-icon-size]
+    p-[--pagination-arrow-icon-p];
+}
+
+.m-pagination-anchor {
+  @apply bg-[--pagination-anchor-bg-color] text-[--pagination-anchor-color];
+
+  &:not(.\-\-disabled) {
+    &:not(.\-\-curr) {
+      &:hover {
+        --pagination-anchor-bg-color: var(--pagination-anchor-hover-bg-color);
+        --pagination-anchor-color: var(--pagination-anchor-hover-color);
+      }
+    }
+
+    &.\-\-curr {
+      --pagination-anchor-bg-color: var(--pagination-anchor-curr-bg-color);
+      --pagination-anchor-color: var(--pagination-anchor-curr-color);
+    }
+  }
+
+  &.\-\-disabled {
+    --pagination-anchor-bg-color: var(--pagination-anchor-disabled-bg-color);
+    --pagination-anchor-color: var(--pagination-anchor-disabled-color);
+
+    @apply cursor-not-allowed;
+  }
+}
+
+@screen p {
+  .m-pagination {
+    --pagination-gap-x: var(--pagination-pc-gap-x);
+    --pagination-size: var(--pagination-pc-size);
+    --pagination-rounded: var(--pagination-pc-rounded);
+    --pagination-arrow-icon-size: var(--pagination-arrow-icon-pc-size);
+    --pagination-arrow-icon-p: var(--pagination-arrow-icon-pc-p);
+  }
+}
+
+@screen t {
+  .m-pagination {
+    --pagination-gap-x: var(--pagination-tablet-gap-x);
+    --pagination-size: var(--pagination-tablet-size);
+    --pagination-rounded: var(--pagination-tablet-rounded);
+    --pagination-arrow-icon-size: var(--pagination-arrow-icon-tablet-size);
+    --pagination-arrow-icon-p: var(--pagination-arrow-icon-tablet-p);
+  }
+}
+
+@screen m {
+  .m-pagination {
+    --pagination-gap-x: var(--pagination-mobile-gap-x);
+    --pagination-size: var(--pagination-mobile-size);
+    --pagination-rounded: var(--pagination-mobile-rounded);
+    --pagination-arrow-icon-size: var(--pagination-arrow-icon-mobile-size);
+    --pagination-arrow-icon-p: var(--pagination-arrow-icon-mobile-p);
+  }
+}

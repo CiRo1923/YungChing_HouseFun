@@ -12,7 +12,7 @@
     &.\-\-anchor-h-50,
     &.p\:\-\-anchor-h-50,
     &.pt\:\-\-anchor-h-50 {
-      --tab-anchor-h: 50px;
+      --tab-anchor-min-h: 50px;
     }
 
     &.\-\-anchor-px-20,
@@ -59,7 +59,7 @@
     &.pt\:\-\-anchor-h-50,
     &.tm\:\-\-anchor-h-50,
     &.t\:\-\-anchor-h-50 {
-      --tab-anchor-h: 50px;
+      --tab-anchor-min-h: 50px;
     }
 
     &.\-\-anchor-px-20,
@@ -111,7 +111,7 @@
     &.\-\-anchor-h-50,
     &.tm\:\-\-anchor-h-50,
     &.m\:\-\-anchor-h-50 {
-      --tab-anchor-h: 50px;
+      --tab-anchor-min-h: 50px;
     }
 
     &.\-\-anchor-px-20,

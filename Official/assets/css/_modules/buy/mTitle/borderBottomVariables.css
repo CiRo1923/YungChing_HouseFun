@@ -1,0 +1,12 @@
+:root {
+  --title-border-bottom-pc-h: 5px;
+  --title-border-bottom-tablet-h: 5px;
+  --title-border-bottom-mobile-h: 5px;
+
+  /*
+   * 底線顏色的 base 就是綠色 —— 目前唯一的使用端傳的也是 --border-green。
+   * modifier 保留下來是為了讓那個 class 有實際對應(原本 template 綁了卻沒有樣式),
+   * 之後要加別的顏色時照著補 --border-<色名> 即可。
+   */
+  --title-border-bottom-color: var(--green-8b0d);
+}

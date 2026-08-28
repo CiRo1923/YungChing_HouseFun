@@ -7,17 +7,19 @@
   --tab-oval-responsiv-icon-tablet-size: 22px;
   --tab-oval-responsiv-icon-mobile-size: 22px;
 
-  --tab-oval-responsiv-pc-border-h: 4px;
+  /*
+   * 下面三組刻意只有 pc / tablet ——
+   * mobile 是完全不同的設計:膠囊形按鈕組(rounded-l-full / rounded-r-full),
+   * 沒有底線、上圓角與項目間距,所以 @screen m 那段根本不設這些變數。
+   */
+  --tab-oval-responsiv-pc-border-h: 4px; /* lint-breakpoint-exempt: mobile 是膠囊形,沒有底線 */
   --tab-oval-responsiv-tablet-border-h: 4px;
-  /* --tab-oval-responsiv-mobile-border-h: 4px; */
 
-  --tab-oval-responsiv-header-items-pc-gap-x: 8px;
+  --tab-oval-responsiv-header-items-pc-gap-x: 8px; /* lint-breakpoint-exempt: mobile 的按鈕相連,無間距 */
   --tab-oval-responsiv-header-items-tablet-gap-x: 8px;
-  /* --tab-oval-responsiv-header-items-mobile-gap-x: 8px; */
 
-  --tab-oval-responsiv-anchor-pc-rounded-t: 15px;
+  --tab-oval-responsiv-anchor-pc-rounded-t: 15px; /* lint-breakpoint-exempt: mobile 用 rounded-l/r-full */
   --tab-oval-responsiv-anchor-tablet-rounded-t: 15px;
-  /* --tab-oval-responsiv-anchor-mobile-rounded-t: 15px; */
 
   --tab-oval-responsiv-header-color: transparent; /* 給 mobile 使用 */
 

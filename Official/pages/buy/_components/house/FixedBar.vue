@@ -198,7 +198,7 @@ onUnmounted(() => {
             前一項的 padding-right 與本項的 padding-left —— 等寬、對稱。
             若讓 ::before 留在文檔流內,它會被推到 padding-left 之後,線就偏右了。 */
       &::before {
-        @apply absolute left-0 top-1/2 h-[50px] w-[1px] -translate-y-1/2 content-default bg-hexa-[--white,0.3];
+        @apply absolute left-0 top-1/2 h-[50px] w-[1px] -translate-y-1/2 bg-[--white-4d] content-default;
       }
     }
 

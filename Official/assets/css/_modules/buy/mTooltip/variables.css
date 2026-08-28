@@ -1,0 +1,118 @@
+/*
+ * 浮層的字級由使用端傳(Badges.vue 傳 container: 'text-[12px]'),
+ * 所以這裡刻意沒有 --tooltip-container-text-size —— 建了就會蓋掉使用端。
+ */
+:root {
+  --tooltip-pc-rounded: 3px;
+  --tooltip-tablet-rounded: 3px;
+  --tooltip-mobile-rounded: 3px;
+
+  /* px 沒 base 會讓 px-[--x] 整條讀不到;高度的 base 要給 auto,給 0 會塌 */
+  --tooltip-px: 0;
+  --tooltip-h: auto;
+
+  /* 沒帶顏色 modifier 時等同沒設定;hover 由 hover:--bg-* modifier 覆寫這兩個,不另建變數 */
+  --tooltip-color: initial;
+  --tooltip-bg-color: initial;
+
+  --tooltip-container-pc-m: 2px;
+  --tooltip-container-tablet-m: 2px;
+  --tooltip-container-mobile-m: 2px;
+
+  --tooltip-container-pc-px: 6px;
+  --tooltip-container-tablet-px: 6px;
+  --tooltip-container-mobile-px: 6px;
+
+  --tooltip-container-pc-py: 2px;
+  --tooltip-container-tablet-py: 2px;
+  --tooltip-container-mobile-py: 2px;
+
+  --tooltip-container-pc-rounded: 3px;
+  --tooltip-container-tablet-rounded: 3px;
+  --tooltip-container-mobile-rounded: 3px;
+
+  --tooltip-container-pc-shadow: none;
+  --tooltip-container-tablet-shadow: none;
+  --tooltip-container-mobile-shadow: none;
+
+  --tooltip-container-arrow-pc-size: 5px;
+  --tooltip-container-arrow-tablet-size: 5px;
+  --tooltip-container-arrow-mobile-size: 5px;
+
+  /* 箭頭靠左 / 靠右時距浮層邊緣的距離 */
+  --tooltip-container-arrow-pc-inset-x: 16px;
+  --tooltip-container-arrow-tablet-inset-x: 16px;
+  --tooltip-container-arrow-mobile-inset-x: 16px;
+
+  --tooltip-container-color: var(--white);
+  --tooltip-container-bg-color: var(--gray-333);
+}
+
+.m-tooltip {
+  /* color */
+  &.\-\-text-white {
+    --tooltip-color: var(--white);
+  }
+
+  /* bg color */
+  &.\-\-bg-gray-33-bf {
+    --tooltip-bg-color: var(--gray-33-bf);
+  }
+
+  &:hover {
+    /* bg color */
+    &.hover\:\-\-bg-gray-333 {
+      --tooltip-bg-color: var(--gray-333);
+    }
+  }
+}
+
+@screen p {
+  .m-tooltip {
+    &.\-\-px-6,
+    &.p\:\-\-px-6,
+    &.pt\:\-\-px-6 {
+      --tooltip-px: 6px;
+    }
+
+    &.\-\-h-24,
+    &.p\:\-\-h-24,
+    &.pt\:\-\-h-24 {
+      --tooltip-h: 24px;
+    }
+  }
+}
+
+@screen t {
+  .m-tooltip {
+    &.\-\-px-6,
+    &.pt\:\-\-px-6,
+    &.tm\:\-\-px-6,
+    &.t\:\-\-px-6 {
+      --tooltip-px: 6px;
+    }
+
+    &.\-\-h-24,
+    &.pt\:\-\-h-24,
+    &.tm\:\-\-h-24,
+    &.t\:\-\-h-24 {
+      --tooltip-h: 24px;
+    }
+  }
+}
+
+@screen m {
+  .m-tooltip {
+    &.\-\-px-6,
+    &.tm\:\-\-px-6,
+    &.m\:\-\-px-6 {
+      --tooltip-px: 6px;
+    }
+
+    &.\-\-h-24,
+    &.tm\:\-\-h-24,
+    &.m\:\-\-h-24 {
+      --tooltip-h: 24px;
+    }
+  }
+}

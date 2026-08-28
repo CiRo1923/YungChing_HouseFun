@@ -93,11 +93,7 @@ defineExpose({
       </div>
       <slot name="content" />
 
-      <div
-        v-if="paginationConfig"
-        class="m-swiper-pagination"
-        :class="setClass.pagination"
-      >
+      <div v-if="paginationConfig" class="m-swiper-pagination" :class="setClass.pagination">
         <button
           v-for="(_, index) in paginationLength"
           :key="index"

@@ -11,13 +11,9 @@
   --form-select-dropdown-tablet-my: 5px;
   --form-select-dropdown-mobile-my: 1px;
 
-  --form-select-dropdown-pc-rounded: 4px;
-  --form-select-dropdown-tablet-rounded: 4px;
-  --form-select-dropdown-mobile-rounded: 4px;
-
-  --form-select-dropdown-pc-shadow: 0px 4px 24px 0px var(--blue-001614), 0px 2px 16px -8px var(--blue-001633);
-  --form-select-dropdown-tablet-shadow: 0px 4px 24px 0px var(--blue-001614), 0px 2px 16px -8px var(--blue-001633);
-  --form-select-dropdown-mobile-shadow: 0px 4px 24px 0px var(--blue-001614), 0px 2px 16px -8px var(--blue-001633);
+  --form-select-dropdown-pc-shadow: 0px 4px 24px 0px var(--blue-0016-14), 0px 2px 16px -8px var(--blue-0016-33);
+  --form-select-dropdown-tablet-shadow: 0px 4px 24px 0px var(--blue-0016-14), 0px 2px 16px -8px var(--blue-0016-33);
+  --form-select-dropdown-mobile-shadow: 0px 4px 24px 0px var(--blue-0016-14), 0px 2px 16px -8px var(--blue-0016-33);
 
   --form-select-dropdown-container-pc-px: 1px;
   --form-select-dropdown-container-tablet-px: 1px;
@@ -41,7 +37,7 @@
 
   --form-select-dropdown-button-bg-color: var(--gray-e5);
   --form-select-dropdown-button-active-bg-color: var(--orange-feea);
-  --form-select-dropdown-button-disabled-color: var(--gray-334d);
+  --form-select-dropdown-button-disabled-color: var(--gray-33-4d);
 
   --form-select-dropdown-label-pc-py: 8px;
   --form-select-dropdown-label-tablet-py: 8px;
@@ -58,7 +54,7 @@
     &.\-\-rounded,
     &.p\:\-\-rounded,
     &.pt\:\-\-rounded {
-      --form-select-dropdown-rounded: var(--form-select-dropdown-pc-rounded);
+      --form-select-dropdown-rounded: 4px;
     }
 
     &.\-\-px-30,
@@ -87,7 +83,7 @@
     &.pt\:\-\-rounded,
     &.tm\:\-\-rounded,
     &.t\:\-\-rounded {
-      --form-select-dropdown-rounded: var(--form-select-dropdown-tablet-rounded);
+      --form-select-dropdown-rounded: 4px;
     }
 
     &.\-\-px-30,
@@ -118,7 +114,7 @@
     &.\-\-rounded,
     &.tm\:\-\-rounded,
     &.m\:\-\-rounded {
-      --form-select-dropdown-rounded: var(--form-select-dropdown-mobile-rounded);
+      --form-select-dropdown-rounded: 4px;
     }
 
     &.\-\-px-30,

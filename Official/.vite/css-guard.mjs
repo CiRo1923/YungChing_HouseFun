@@ -38,10 +38,16 @@ const toPosix = (p) => p.replaceAll('\\', '/')
  * 兩道保險:
  *   1. 每個檔案 300ms 內的事件合併成一次
  *   2. 內容沒變就不重複報(hash 比對)
+ *
+ * ⚠️ 第 2 道有時效(ECHO_WINDOW_MS)—— 只用來擋「同一次存檔的回音」。
+ * 沒有時效的話,你按 Ctrl+S 但內容沒改動時會**完全沒有反應**,
+ * 看起來就像守門員壞了;而「存檔後想確認有沒有過」正是最常見的用法。
+ * 超過這個窗口再存同一份內容,一律視為新的一次存檔,照常回報。
  */
 const DEBOUNCE_MS = 300
+const ECHO_WINDOW_MS = 2000
 const timers = new Map()
-const lastHash = new Map()
+const lastSeen = new Map() // file -> { hash, at }
 
 const hashOf = (text) => createHash('sha1').update(text).digest('hex')
 
@@ -77,10 +83,23 @@ function onSortColorCss(absPath) {
   return true
 }
 
+/**
+ * 存檔時間,格式 HH:MM:SS。
+ *
+ * 每次存檔都要印出來 —— 沒有它就分不出「這是剛剛那次存檔的結果」還是
+ * 「上一次留在畫面上沒被捲掉的舊訊息」。
+ */
+const timeOf = () => new Date().toTimeString().slice(0, 8)
+
+/** 沒有違規時也要說一聲 —— 靜默會讓上一次的紅字被誤讀成「還沒處理」 */
+function onReportPass(rel) {
+  console.log(`${TAG} ${GREEN}✔ ${rel} 通過${RESET} ${DIM}${timeOf()}${RESET}`)
+}
+
 /** 把 issues 印成紅色警告 */
 function onReportIssues(rel, issues) {
   console.log('')
-  console.log(`${TAG} ${RED}${BOLD}⛔ ${rel}${RESET}`)
+  console.log(`${TAG} ${RED}${BOLD}⛔ ${rel}${RESET} ${DIM}${timeOf()}${RESET}`)
 
   const printList = (title, rule, hint) => {
     const list = issues.filter((i) => i.rule === rule)
@@ -97,6 +116,10 @@ function onReportIssues(rel, issues) {
   printList('規則 2 template 使用 tailwind class', 'tailwind', '樣式移到 assets/css/_modules/')
   printList('規則 3 module css 的引入方式或順序', 'module', '<script setup> 最上方 JS import')
   printList('規則 4 module 變數的命名或斷點', 'variable', '-w / -h / -p,尺寸分三個斷點')
+  console.log(
+    `  ${YELLOW}👉 要協助修正的話,到 Claude Code 對話框打「修正」或「好」就會處理` +
+      `(它已經知道是哪個檔案、哪幾行)。${RESET}`
+  )
   console.log('')
 }
 
@@ -109,16 +132,18 @@ function onFileChange(projectRoot, file) {
   if (!fs.existsSync(file)) return
 
   try {
-    // 內容跟上次處理時一樣 → 是重複事件(formatOnSave / 原子替換),不必再報一次
+    // 內容跟「剛剛」處理過的一樣 → 是同一次存檔的回音(formatOnSave / 原子替換),跳過。
+    // 隔了一段時間才又存同一份內容,那是使用者刻意再存一次,要照常回報。
     const hash = hashOf(fs.readFileSync(file, 'utf8'))
-    if (lastHash.get(file) === hash) return
-    lastHash.set(file, hash)
+    const seen = lastSeen.get(file)
+    if (seen?.hash === hash && Date.now() - seen.at < ECHO_WINDOW_MS) return
+    lastSeen.set(file, { hash, at: Date.now() })
 
     // 色票檔:先自動排序,再檢查命名與頻道歸屬
     if (isColorCssPath(rel)) {
       if (onSortColorCss(file)) {
         // 排序寫檔會再觸發一次 watcher —— 先把排序後的 hash 記下來,省掉那一輪
-        lastHash.set(file, hashOf(fs.readFileSync(file, 'utf8')))
+        lastSeen.set(file, { hash: hashOf(fs.readFileSync(file, 'utf8')), at: Date.now() })
         console.log('')
         console.log(
           `${TAG} ${GREEN}🔧 ${rel} 排序不符規則,已自動依「紅澄黃綠藍紫金白灰黑 + 由淺至深」重新排序。${RESET}`
@@ -131,12 +156,14 @@ function onFileChange(projectRoot, file) {
         ...checkSharedColors(projectRoot),
       ]
       if (issues.length) onReportIssues(rel, issues)
+      else onReportPass(rel)
       return
     }
 
     // 其他 .vue / .css:規範檢查
     const issues = lintFile(projectRoot, file, loadDefinedColorVars(projectRoot))
     if (issues.length) onReportIssues(rel, issues)
+    else onReportPass(rel)
   } catch (err) {
     console.log(`${TAG} ${YELLOW}檢查失敗:${err.message}${RESET}`)
   }

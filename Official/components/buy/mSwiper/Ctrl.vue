@@ -100,11 +100,7 @@ onUnmounted(() => {
 
 <template>
   <ClientOnly>
-    <ul
-      class="m-swiper-ctrl"
-      :class="setClass.main"
-      v-if="config.show"
-    >
+    <ul class="m-swiper-ctrl" :class="setClass.main" v-if="config.show">
       <li>
         <button
           type="button"

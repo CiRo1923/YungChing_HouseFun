@@ -240,6 +240,12 @@ export function checkColors(relPath, rawText, definedVars) {
     // 色名後面若接著 - 再接非數字(例如 --gray-eeee 的 gray-eeee),屬於專案色票命名
     const tail = text.slice(m.index + m[0].length)
     if (/^-[0-9a-f]{2,6}\b/i.test(tail) && !/^-\d{2,3}\b/.test(tail)) continue
+
+    // 色名後面還接著別的字段 —— tailwind 內建只有 `bg-black` 或 `text-red-500`
+    // 這兩種形狀,再多接就是專案自訂的 utility(shadow-black-y2-b4 定義在
+    // tailwind.extend.js 的 boxShadow),不是內建色票。
+    if (/^-(?!(?:50|\d{3})\b)/.test(tail)) continue
+
     add(lineOf(text, m.index), `使用 tailwind 內建色票 ${m[0]}`, m[0])
   }
 
@@ -266,6 +272,43 @@ export function checkColors(relPath, rawText, definedVars) {
       lineOf(text, m.index),
       `取用未定義的色票變數 ${name} —— 要先在色票檔建立,否則畫面上不會有顏色也不會報錯`,
       name
+    )
+  }
+
+  return issues
+}
+
+/**
+ * 檢查已淘汰的透明色寫法。與 checkColors 分開,是因為這兩條**連色票檔也要看** ——
+ * checkColors 遇到色票檔會整個跳過(色票檔本來就該有顏色),
+ * 但 hexToRgb() 與 -rgb 衍生變數在色票檔裡出現同樣是錯的,那正是它們的原生棲地。
+ *
+ * 規則檔早就寫明「hexToRgb 機制保留但不要新增」、「-rgb 變數已於 2026-08-27 刪除」,
+ * 這裡補上工具端的把關,避免只靠人記得。
+ *
+ * 移植自參考專案 EFOfficial 的 checkColorMechanism(2026-08-28)。
+ */
+export function checkColorMechanism(relPath, rawText) {
+  const text = maskComments(rawText)
+  const issues = []
+  const add = (line, detail, snippet) =>
+    issues.push({ rule: 'color', file: relPath, line, detail, snippet })
+
+  // 1-g hexToRgb() —— 機制保留但不該再有呼叫端
+  for (const m of text.matchAll(/\bhexToRgb\s*\(/g)) {
+    add(
+      lineOf(text, m.index),
+      'hexToRgb() 已淘汰 —— 透明色改用 8 碼 hex(例如 #0087dc1a)並在色票檔建立變數',
+      'hexToRgb('
+    )
+  }
+
+  // 1-h --xxx-rgb 變數的「定義端」—— 1-f2 抓的是使用端
+  for (const m of text.matchAll(/(--[a-z0-9-]*-rgb)\s*:/gi)) {
+    add(
+      lineOf(text, m.index),
+      `${m[1]} 是已淘汰的 -rgb 衍生變數 —— 透明色直接在色票檔定義 8 碼 hex(例如 --black-1a)`,
+      m[1]
     )
   }
 
@@ -519,8 +562,17 @@ const NAMING_FIXES = [
 /** 尺寸類的值(需要分斷點);顏色、auto/0/transparent 等不算 */
 const SIZE_VALUE_RE = /^-?\d*\.?\d+(px|rem|em|%|vh|vw)$/
 
-/** 這些值即使是尺寸也不必分斷點 —— 純結構性、不隨裝置調整 */
+/** 這些值即使長得像尺寸也不必分斷點 —— 純結構性、不隨裝置調整 */
 const STRUCTURAL_VALUES = new Set(['0', '0px', 'auto', 'inherit', 'initial', 'none', 'transparent'])
+
+/**
+ * `100%` 不該出現在 module 變數裡 —— tailwind 已經有 `-full`。
+ *
+ * 語意是「撐滿容器」而不是某個尺寸,繞一層變數只是讓人多查一次;
+ * 拆三斷點更是只會得到三個一模一樣的值。
+ * 真的分斷點不同(pc 50% / mobile 100%)才需要變數,那時值不會全是 100%。
+ */
+const FULL_UTILITY_HINT = 'w-full / h-full / max-w-full / min-w-full / min-h-full'
 
 /**
  * 檢查 module 的 variables:
@@ -555,6 +607,12 @@ export function checkModuleVariables(relPath, text) {
         add(line, `${name} 命名不符慣例,應為 ${name.replace(pattern, replacement)}`, name)
         break
       }
+    }
+
+    // 4-c 100% 不繞變數 —— tailwind 有 -full
+    if (value === '100%') {
+      add(line, `${name}: 100% —— 撐滿直接用 tailwind 的 ${FULL_UTILITY_HINT},不要繞變數`, name)
+      continue
     }
 
     // 4-b 尺寸類要分斷點
@@ -690,6 +748,127 @@ export function checkVariableUsage(relPath, text) {
   return issues
 }
 
+const BREAKPOINT_KINDS = ['pc', 'tablet', 'mobile']
+
+/**
+ * 斷點名稱 -> 該區塊內可以直接取用的變數斷點。
+ *
+ * 複合斷點(pt / tm)刻意不列 —— `pt` 同時涵蓋 p 與 t,
+ * 在裡面直接吃 pc 的值,平板也會跟著吃到,那正是要抓的錯。
+ */
+const SCREEN_OF = { p: 'pc', t: 'tablet', m: 'mobile' }
+
+/** 標了這個註解就跳過 —— 例外一定要在註解裡寫清楚理由 */
+const EXEMPT_RE = /lint-breakpoint-exempt/
+
+/** 斷點對應本身:  --中性變數: var(--帶斷點的變數); */
+const BREAKPOINT_MAP_RE = /^\s*--[a-z0-9-]+:\s*var\(--[a-z0-9-]+\)\s*;?\s*$/
+
+/** 變數定義行:  --x-pc-y: 值;  (含組件以 inline style 帶入的 --pc-xxx) */
+const BREAKPOINT_DECL_RE = /^\s*--[a-z0-9-]*?-?(pc|tablet|mobile)-[a-z0-9-]+\s*:/
+
+/**
+ * 規則 4 的斷點面向:斷點要成套,不要只做某一端。
+ *
+ *   6-a 版型不可直接吃 -pc- / -tablet- / -mobile- 變數,
+ *       要在 @screen p / t / m 各自對應到中性變數再用
+ *   6-b :root 有 -pc-X 就要有 -tablet-X 與 -mobile-X
+ *
+ * 6-b 補的是既有檢查的死角:checkModuleVariables 只抓「完全沒分斷點的單值」,
+ * 分了三份卻漏掉其中一個(最常見的是只寫 pc + tablet)完全沒人會發現 ——
+ * 那個斷點會靜靜地讀不到值,畫面不會報錯。
+ *
+ * 真的只有某一端才成立的樣式(例如手機版刻意不給 padding,讓使用端自己控制)
+ * 屬於例外,在該行或上一行寫 `lint-breakpoint-exempt: 理由` 就會跳過。
+ *
+ * 移植自參考專案 EFOfficial(2026-08-28),判斷邏輯保持一致。
+ */
+export function checkBreakpointCoverage(relPath, text) {
+  const issues = []
+  const add = (line, detail, snippet) =>
+    issues.push({ rule: 'variable', file: relPath, line, detail, snippet })
+
+  const masked = maskComments(text)
+  const rawLines = text.split('\n')
+  const maskedLines = masked.split('\n')
+
+  const isExempt = (i) =>
+    EXEMPT_RE.test(rawLines[i] || '') || EXEMPT_RE.test(rawLines[i - 1] || '')
+
+  // 6-a —— 但「在 p 斷點區塊裡面吃 -pc- 的值」是直接且正確的,不算違規。
+  //        追蹤目前所在的斷點區塊,只報「斷點對不上」與「根本沒包在斷點區塊裡」的。
+  let depth = 0
+  const screenStack = [] // { name: 'p' | 't' | 'm' | 'pt' | …, depth }
+
+  maskedLines.forEach((line, i) => {
+    const screenMatch = line.match(/@screen\s+([a-z]+)/)
+
+    if (screenMatch) screenStack.push({ name: screenMatch[1], depth })
+
+    depth += (line.match(/\{/g) || []).length
+    depth -= (line.match(/\}/g) || []).length
+
+    while (screenStack.length && depth <= screenStack.at(-1).depth) screenStack.pop()
+
+    // tailwind 自己的斷點前綴也算數:`m:max-w-[--x-mobile-max-w]` 等同包在 @screen m 裡,
+    // 先把這種「前綴與變數斷點相符」的 utility 從該行拿掉,剩下的才檢查。
+    const cleaned = line.replace(
+      /(?<![\w-])(p|t|m):[a-z-]+-\[--[a-z0-9-]*-(pc|tablet|mobile)-[a-z0-9-]*\]/g,
+      (utility, prefix, bp) => (SCREEN_OF[prefix] === bp ? '' : utility)
+    )
+
+    const m = cleaned.match(/-(pc|tablet|mobile)-/)
+    if (!m) return
+    if (BREAKPOINT_MAP_RE.test(line) || BREAKPOINT_DECL_RE.test(line)) return
+    if (isExempt(i)) return
+
+    // 所在的斷點區塊正好對應這個變數的斷點 → 直接取值沒問題
+    if (screenStack.length && SCREEN_OF[screenStack.at(-1).name] === m[1]) return
+
+    const where = screenStack.length ? `@screen ${screenStack.at(-1).name} 內` : '沒有包在 @screen 裡'
+    add(
+      i + 1,
+      `版型吃了 ${m[1]} 的變數但${where} —— ` +
+        '要嘛放進對應的 @screen,要嘛改吃中性變數由三個斷點各自對應',
+      line.trim().slice(0, 90)
+    )
+  })
+
+  // 6-b
+  const declared = new Map()
+  for (const rm of masked.matchAll(/:root\s*\{([\s\S]*?)\n\}/g)) {
+    const body = rm[1]
+    const bodyStart = rm.index + rm[0].indexOf(body)
+    for (const v of body.matchAll(/(--[a-z0-9-]+)\s*:/g)) {
+      declared.set(v[1], bodyStart + v.index)
+    }
+  }
+
+  const groups = new Map()
+  for (const [name, index] of declared) {
+    const m = name.match(/^(--.*?)-(pc|tablet|mobile)-(.*)$/)
+    if (!m) continue
+    const key = `${m[1]}|${m[3]}`
+    if (!groups.has(key)) groups.set(key, { kinds: new Set(), index })
+    groups.get(key).kinds.add(m[2])
+  }
+
+  for (const [key, { kinds, index }] of groups) {
+    const lack = BREAKPOINT_KINDS.filter((k) => !kinds.has(k))
+    if (!lack.length) continue
+    const line = lineOf(text, index)
+    if (isExempt(line - 1)) continue
+    const [prefix, suffix] = key.split('|')
+    add(
+      line,
+      `${prefix}-*-${suffix} 只有 ${[...kinds].join(' / ')},缺 ${lack.join(' / ')} —— 斷點要成套(即使三個值一樣)`,
+      `${prefix}-${[...kinds][0]}-${suffix}`
+    )
+  }
+
+  return issues
+}
+
 // --- 色票檔自身:命名、排序、頻道歸屬 ---------------------------------------
 
 /**
@@ -806,11 +985,17 @@ export function checkSharedColors(projectRoot) {
 export function lintFile(projectRoot, absPath, definedVars) {
   const rel = path.relative(projectRoot, absPath).split(path.sep).join('/')
   if (!fs.existsSync(absPath)) return []
-  // 色票檔本來就該有顏色 —— 它要檢查的是自己的命名與排序,不是「有沒有寫死色碼」
-  if (isColorCssPath(rel)) return checkColorFile(projectRoot, rel)
+  // 色票檔本來就該有顏色 —— 它要檢查的是自己的命名與排序,不是「有沒有寫死色碼」。
+  // 但已淘汰的 hexToRgb / -rgb 變數連色票檔也不該有,那兩條照跑。
+  if (isColorCssPath(rel)) {
+    return [
+      ...checkColorFile(projectRoot, rel),
+      ...checkColorMechanism(rel, fs.readFileSync(absPath, 'utf8')),
+    ]
+  }
 
   const text = fs.readFileSync(absPath, 'utf8')
-  const issues = checkColors(rel, text, definedVars)
+  const issues = [...checkColors(rel, text, definedVars), ...checkColorMechanism(rel, text)]
 
   if (rel.endsWith('.vue')) {
     issues.push(...checkModuleImports(rel, text))
@@ -822,6 +1007,7 @@ export function lintFile(projectRoot, absPath, definedVars) {
     issues.push(...checkModuleVariables(rel, text))
     issues.push(...checkVariableUsage(rel, text))
     issues.push(...checkVariablesFile(rel, text))
+    issues.push(...checkBreakpointCoverage(rel, text))
   }
 
   if (rel.startsWith('components/') && rel.endsWith('.vue')) {

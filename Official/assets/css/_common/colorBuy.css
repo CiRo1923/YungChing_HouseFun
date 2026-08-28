@@ -17,14 +17,22 @@
   --blue-efff: #eef4ff;
   --blue-6dd7: #64d7d7;
   --blue-69c1: #6f9bc1;
-  --blue-08dc1a: #0087dc1a;
+  --blue-08dc-1a: #0087dc1a;
   --blue-08dc: #0087dc;
   --blue-26e1: #276ee1;
+
+  /* 白色 */
+  --white-4d: #ffffff4d;
 
   /* 灰色 */
   --gray-ed: #ededed;
   --gray-feea: #f1ecea;
   --gray-db: #dbdbdb;
   --gray-c8: #c8c8c8;
+  --gray-33-bf: #333333bf;
+  --gray-33-cc: #333333cc;
   --gray-2338: #2f3338;
+
+  /* 黑色 */
+  --black-99: #00000099;
 }

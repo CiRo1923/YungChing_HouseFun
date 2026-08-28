@@ -35,12 +35,16 @@
     "autoClearConsole": true,
     "commands": [
       {
-        // 存檔 .vue / .css → 色票檔自動排序 + 四條規範全部檢查,逐筆印出。
-        //
-        // **刻意不設 autoShowOutputPanel** —— 訊息留在「Run On Save」輸出面板,
-        // 不會每次存檔都跳出來搶畫面;把那個面板開在旁邊就看得到。
+        // 存檔 .vue / .css → 色票檔自動排序 + 五條規範全部檢查,逐筆印出。
         "match": "\\.(vue|css)$",
         "cmd": "node \"${workspaceFolder}/.tools/css/guard-file.mjs\" \"${file}\""
+
+        // ⚠️ 刻意不設 autoShowOutputPanel —— 存檔時把焦點搶去輸出面板太干擾,
+        //    正在打字的游標會跑掉。訊息留在「Run On Save」面板,要看的時候自己切過去。
+        //
+        //    真的想要自動彈的話是 "autoShowOutputPanel": "error",
+        //    但**必須寫在這個 command 物件裡**,寫在外層(與 commands 同級)無效 ——
+        //    擴充是逐個 command 讀這個值的(out/extension.js 的 statusCode !== 0 判斷)。
       }
     ]
   }

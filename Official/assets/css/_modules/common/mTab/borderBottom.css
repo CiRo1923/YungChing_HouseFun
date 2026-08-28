@@ -13,9 +13,6 @@
 
 .m-tab {
   &.\-\-border-bottom {
-    --tab-border-bottom-border-h: 0;
-    --tab-border-bottom-border-w: 0;
-
     &.\-\-green-8b0d {
       .m-tab-anchor {
         &:not(.\-\-active) {
@@ -36,10 +33,14 @@
 
     .m-tab-anchor {
       &.\-\-active {
-        --tab-border-bottom-font-weight: 500;
-
+        /* 撐滿用 tailwind 的 w-full,不繞變數 —— 三個斷點沒差別 */
         &:after {
-          --tab-border-bottom-border-w: 100%;
+          @apply w-full;
+        }
+
+        /* 字重不開變數 —— 不是父系帶入就是寫死,這裡是 module 自己的狀態 */
+        .m-tab-anchor-label {
+          @apply font-medium;
         }
       }
 
@@ -49,15 +50,13 @@
     }
 
     .m-tab-anchor-label {
-      --tab-border-bottom-font-weight: 400;
-
-      font-weight: var(--tab-border-bottom-font-weight);
+      @apply font-normal;
     }
 
     .m-tab-body {
       border-top-width: var(--tab-border-bottom-border-h);
 
-      @apply mt-[calc(var(--tab-border-bottom-border-h)_*_-1)] border-solid border-t-[--tab-border-bottom-body-border-color];
+      @apply mt-[calc(var(--tab-border-bottom-border-h)_*_-1)] border-t-[--tab-border-bottom-body-border-color];
     }
   }
 }

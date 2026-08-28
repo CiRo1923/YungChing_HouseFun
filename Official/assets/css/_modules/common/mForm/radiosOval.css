@@ -12,7 +12,7 @@
          border shorthand,值是 var() 時整條失效。 */
       border-width: var(--form-radios-oval-border);
 
-      @apply inline-flex h-[--form-radios-oval-h] overflow-hidden rounded-[--form-radios-oval-rounded] border-solid border-[--form-radios-oval-border-color] bg-[--form-radios-oval-bg-color];
+      @apply inline-flex h-[--form-radios-oval-h] overflow-hidden rounded-[--form-radios-oval-rounded] border-[--form-radios-oval-border-color] bg-[--form-radios-oval-bg-color];
     }
 
     /* 選項之間的分隔線 —— 相鄰兩側各畫一半 */
@@ -20,13 +20,13 @@
       &:not(:first-child) {
         border-left-width: var(--form-radios-oval-divider-border);
 
-        @apply border-solid border-l-[--form-radios-oval-divider-color];
+        @apply border-l-[--form-radios-oval-divider-color];
       }
 
       &:not(:last-child) {
         border-right-width: var(--form-radios-oval-divider-border);
 
-        @apply border-solid border-r-[--form-radios-oval-divider-color];
+        @apply border-r-[--form-radios-oval-divider-color];
       }
     }
 

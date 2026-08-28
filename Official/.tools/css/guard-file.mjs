@@ -7,10 +7,11 @@
 //   2. 任何 .vue / .css → 四條規範全部檢查,違規逐筆印出
 //
 // 輸出**不上色**(見 colors.mjs —— 非 TTY 自動關色),VSCode 的輸出面板不吃 ANSI。
-// 也**不主動彈出面板**(.vscode/settings.json 沒設 autoShowOutputPanel)——
-// 訊息留在「Run On Save」輸出面板,要看的時候自己切過去。
 //
-// 有違規時 exit 1,方便之後想改回自動彈面板時直接用。
+// ⚠️ exit code 有意義,不要改:
+//   違規 → exit 1、通過 → exit 0。
+// .vscode/settings.json 的 "autoShowOutputPanel": "error" 就是靠這個決定要不要把
+// 「Run On Save」面板彈出來 —— 有違規才跳出來打擾你,通過只默默印一行 ✔。
 
 import fs from 'node:fs'
 import path from 'node:path'
@@ -22,16 +23,19 @@ import {
   parseColorCss,
   sortDecls,
 } from './color-order.mjs'
+import { RESET, YELLOW } from './colors.mjs'
 import { checkSharedColors, lintFile } from './lint-core.mjs'
 
 const projectRoot = path.resolve(fileURLToPath(import.meta.url), '../../..')
 const CACHE_DIR = path.join(projectRoot, 'node_modules/.cache/cssGuard')
 
-/** 存檔後待 Claude 詢問的檔案清單(由 .claude/hooks/cssGuardPrompt.js 讀走並清空) */
+/**
+ * 存檔後待 Claude 詢問的檔案清單。
+ *
+ * .claude/hooks/cssGuardPrompt.js 每一輪對話都會讀它、重新檢查一次,
+ * **只有該檔案已經沒有違規時才會被移除** —— 所以違規沒修掉之前會一直被問。
+ */
 const PENDING_FILE = path.join(CACHE_DIR, 'pending.json')
-
-/** 已回報過的違規指紋(同一筆不重複問) */
-const REPORTED_FILE = path.join(CACHE_DIR, 'reported.json')
 
 const RULE_TITLE = {
   color: '規則 1 顏色未定義在色票檔',
@@ -50,6 +54,14 @@ const RULE_HINT = {
   variable: '-w / -h / -p,尺寸分 pc / tablet / mobile 三份',
   import: 'css → ./.composables → @js → 其他套件',
 }
+
+/**
+ * 存檔時間,格式 HH:MM:SS。
+ *
+ * 通過與違規都要印 —— 輸出面板不會自己清空,沒有時間戳就分不出
+ * 「這是剛剛那次存檔的結果」還是「上一次留著沒被捲掉的舊訊息」。
+ */
+const timeOf = () => new Date().toTimeString().slice(0, 8)
 
 const target = process.argv.slice(2).find((a) => !a.startsWith('--'))
 if (!target) process.exit(0)
@@ -103,21 +115,13 @@ const writeJson = (file, value) => {
  * hook(.claude/hooks/cssGuardPrompt.js),它跑的時機是「你送出訊息」而不是存檔。
  * 這份 pending 清單就是兩者之間的接力棒。
  *
- * 同時把這個檔案的舊指紋從 reported 移除 —— 你又存了它一次,視為重新關注,
- * 即使同一筆違規之前問過也該再問一次。沒再存檔就不會重複吵。
+ * 檔案會**一直留在清單裡**,每一輪對話重新檢查一次,直到違規修掉才移除 ——
+ * 「有違規就每次問」靠的就是這個,不做「問過了就跳過」的去重。
  */
 const onMarkPending = () => {
   const pending = new Set(readJson(PENDING_FILE, []))
   pending.add(rel)
   writeJson(PENDING_FILE, [...pending])
-
-  const reported = readJson(REPORTED_FILE, [])
-  if (Array.isArray(reported) && reported.length) {
-    writeJson(
-      REPORTED_FILE,
-      reported.filter((fp) => typeof fp === 'string' && !fp.startsWith(`${rel}:`))
-    )
-  }
 }
 
 /** 四條規範檢查 —— 逐筆印出,不過濾 */
@@ -127,7 +131,7 @@ const onLint = () => {
     : lintFile(projectRoot, abs, loadDefinedColorVars(projectRoot))
 
   if (!issues.length) {
-    lines.push(`✔ ${rel} CSS 規範檢查通過`)
+    lines.push(`✔ ${rel} CSS 規範檢查通過  ${timeOf()}`)
     return
   }
 
@@ -139,12 +143,17 @@ const onLint = () => {
 
   onMarkPending()
 
-  lines.push(`⛔ ${rel}(共 ${issues.length} 筆)`)
+  lines.push(`⛔ ${rel}(共 ${issues.length} 筆)  ${timeOf()}`)
   for (const [rule, list] of byRule) {
     lines.push(`  ${RULE_TITLE[rule] ?? rule}(${list.length} 筆) —— ${RULE_HINT[rule] ?? ''}`)
     for (const i of list) lines.push(`    ✗ L${i.line} ${i.detail}`)
   }
   lines.push('')
+  lines.push(
+    `  ${YELLOW}👉 要協助修正的話,到 Claude Code 對話框打「修正」或「好」就會處理` +
+      `(它已經知道是哪個檔案、哪幾行)。${RESET}`
+  )
+  lines.push('     不想修就不用理它 —— 主動權在你手上。')
   lines.push('  規範見 .claude/rules/css-conventions.md(只警告不阻擋)')
 }
 

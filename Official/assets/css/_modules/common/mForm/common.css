@@ -9,9 +9,9 @@
 
 .m-form-element {
   &:not(label) {
-    border-width: var(--form-element-pc-border);
+    border-width: var(--form-element-border);
 
-    @apply flex h-[--form-element-h] grow items-center gap-x-[8px] overflow-hidden rounded-[--form-element-rounded] border-solid border-[--form-element-border-color] bg-[--form-element-bg-color] px-[--form-element-px] py-[--form-element-py] transition-colors duration-300;
+    @apply flex h-[--form-element-h] grow items-center gap-x-[8px] overflow-hidden rounded-[--form-element-rounded] border-[--form-element-border-color] bg-[--form-element-bg-color] px-[--form-element-px] py-[--form-element-py] transition-colors duration-300;
 
     &:not(:disabled):not(.\-\-disabled) {
       &.\-\-focus {

@@ -1,4 +1,7 @@
 :root {
+  /* point 模式不限寬,base 給 none —— 只有 bar 模式會覆寫成實際的 max-w */
+  --swiper-pagination-bullet-max-w: none;
+
   --swiper-pagination-point-pc-size: 8px;
   --swiper-pagination-point-tablet-size: 8px;
   --swiper-pagination-point-mobile-size: 8px;
@@ -55,7 +58,7 @@
   --swiper-ctrl-disabled-border-color: transparent;
 
   --swiper-ctrl-color: var(--blue-08dc);
-  --swiper-ctrl-disabled-color: var(--blue-08dc1a);
+  --swiper-ctrl-disabled-color: var(--blue-08dc-1a);
 
   --swiper-ctrl-pc-icon-size: 12px;
   --swiper-ctrl-tablet-icon-size: 12px;

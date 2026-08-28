@@ -3,9 +3,9 @@
   --sort-list-tablet-gap-x: 16px;
   --sort-list-mobile-gap-x: 16px;
 
-  --sort-anchor-pc-text: 14px;
-  --sort-anchor-tablet-text: 14px;
-  --sort-anchor-mobile-text: 14px;
+  --sort-anchor-pc-text-size: 14px;
+  --sort-anchor-tablet-text-size: 14px;
+  --sort-anchor-mobile-text-size: 14px;
 
   --sort-anchor-pc-gap-x: 5px;
   --sort-anchor-tablet-gap-x: 5px;
@@ -19,9 +19,9 @@
   --sort-icon-tablet-size: 14px;
   --sort-icon-mobile-size: 14px;
 
-  --sort-select-anchor-pc-text: 14px;
-  --sort-select-anchor-tablet-text: 14px;
-  --sort-select-anchor-mobile-text: 14px;
+  --sort-select-anchor-pc-text-size: 14px;
+  --sort-select-anchor-tablet-text-size: 14px;
+  --sort-select-anchor-mobile-text-size: 14px;
 
   --sort-select-anchor-pc-gap-x: 5px;
   --sort-select-anchor-tablet-gap-x: 5px;
@@ -63,9 +63,14 @@
   --sort-dropdown-anchor-tablet-py: 8px;
   --sort-dropdown-anchor-mobile-py: 8px;
 
-  --sort-dropdown-anchor-pc-text: 14px;
-  --sort-dropdown-anchor-tablet-text: 14px;
-  --sort-dropdown-anchor-mobile-text: 14px;
+  /* 有捲軸時右側留給捲軸的空間 */
+  --sort-dropdown-scrollbar-pc-pr: 2px;
+  --sort-dropdown-scrollbar-tablet-pr: 2px;
+  --sort-dropdown-scrollbar-mobile-pr: 2px;
+
+  --sort-dropdown-anchor-pc-text-size: 14px;
+  --sort-dropdown-anchor-tablet-text-size: 14px;
+  --sort-dropdown-anchor-mobile-text-size: 14px;
 
   --sort-dropdown-anchor-pc-border-b: 0;
   --sort-dropdown-anchor-tablet-border-b: 0;
@@ -76,8 +81,8 @@
   --sort-dropdown-anchor-mobile-gap-x: 5px;
 
   --sort-dropdown-anchor-icon-pc-p: 2px;
-  --sort-dropdown-anchor-tablet-p: 2px;
-  --sort-dropdown-anchor-mobile-p: 2px;
+  --sort-dropdown-anchor-icon-tablet-p: 2px;
+  --sort-dropdown-anchor-icon-mobile-p: 2px;
 
   --sort-dropdown-anchor-icon-pc-size: 20px;
   --sort-dropdown-anchor-icon-tablet-size: 20px;

@@ -1,0 +1,59 @@
+.m-chart {
+  @apply relative;
+
+  svg text {
+    @apply select-none;
+  }
+}
+
+.m-chart-title {
+  @apply text-center;
+}
+
+.m-chart-container {
+  @apply block w-full;
+}
+
+.m-chart-y-label,
+.m-chart-x-label {
+  @apply fill-current;
+}
+
+.m-chart-tip {
+  @apply absolute z-[1] -translate-x-1/2 -translate-y-full whitespace-nowrap rounded-[--chart-tip-rounded] bg-[--chart-tip-bg-color] px-[--chart-tip-px] py-[--chart-tip-py] text-[length:--chart-tip-text-size] leading-[1.5] text-[--chart-tip-color];
+
+  &.\-\-interactive {
+    @apply pointer-events-auto;
+  }
+
+  &:not(.\-\-interactive) {
+    @apply pointer-events-none;
+  }
+}
+
+@screen p {
+  .m-chart {
+    --chart-tip-px: var(--chart-tip-pc-px);
+    --chart-tip-py: var(--chart-tip-pc-py);
+    --chart-tip-rounded: var(--chart-tip-pc-rounded);
+    --chart-tip-text-size: var(--chart-tip-pc-text-size);
+  }
+}
+
+@screen t {
+  .m-chart {
+    --chart-tip-px: var(--chart-tip-tablet-px);
+    --chart-tip-py: var(--chart-tip-tablet-py);
+    --chart-tip-rounded: var(--chart-tip-tablet-rounded);
+    --chart-tip-text-size: var(--chart-tip-tablet-text-size);
+  }
+}
+
+@screen m {
+  .m-chart {
+    --chart-tip-px: var(--chart-tip-mobile-px);
+    --chart-tip-py: var(--chart-tip-mobile-py);
+    --chart-tip-rounded: var(--chart-tip-mobile-rounded);
+    --chart-tip-text-size: var(--chart-tip-mobile-text-size);
+  }
+}

@@ -26,7 +26,7 @@
     .m-form-icon {
       border-width: var(--form-radio-icon-border);
 
-      @apply rounded-full border-solid border-[--form-radio-icon-border-color];
+      @apply rounded-full border-[--form-radio-icon-border-color];
 
       /* 圓點用 margin: auto + inset-0 置中 —— 框的尺寸由 --icon-size-XX modifier 決定,
          寫死 left / top 的話換一個尺寸就偏掉了。 */

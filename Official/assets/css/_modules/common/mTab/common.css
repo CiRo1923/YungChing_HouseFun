@@ -43,7 +43,7 @@
 }
 
 .m-tab-anchor {
-  @apply min-h-[--tab-anchor-h] px-[--tab-anchor-px] py-[--tab-anchor-py];
+  @apply min-h-[--tab-anchor-min-h] px-[--tab-anchor-px] py-[--tab-anchor-py];
 }
 
 @screen p {

@@ -32,9 +32,8 @@
 }
 
 .m-popup-title {
-  font-size: var(--popup-header-text);
-
-  @apply order-1 flex shrink-0 items-center gap-x-[--popup-header-gap-x];
+  @apply order-1 flex shrink-0 items-center gap-x-[--popup-header-gap-x]
+    text-[length:--popup-header-text-size];
 }
 
 /* 標題文字 —— 字重是固定的,不隨斷點調整 */
@@ -81,7 +80,7 @@
     --popup-container-rounded-b: var(--popup-container-pc-rounded);
     --popup-header-pb: var(--popup-header-pc-pb);
     --popup-header-border: var(--popup-header-pc-border);
-    --popup-header-text: var(--popup-header-pc-text);
+    --popup-header-text-size: var(--popup-header-pc-text-size);
     --popup-header-gap-x: var(--popup-header-pc-gap-x);
     --popup-header-icon-p: var(--popup-header-icon-pc-p);
     --popup-header-icon-size: var(--popup-header-icon-pc-size);
@@ -99,7 +98,7 @@
     --popup-container-rounded-b: var(--popup-container-tablet-rounded);
     --popup-header-pb: var(--popup-header-tablet-pb);
     --popup-header-border: var(--popup-header-tablet-border);
-    --popup-header-text: var(--popup-header-tablet-text);
+    --popup-header-text-size: var(--popup-header-tablet-text-size);
     --popup-header-gap-x: var(--popup-header-tablet-gap-x);
     --popup-header-icon-p: var(--popup-header-icon-tablet-p);
     --popup-header-icon-size: var(--popup-header-icon-tablet-size);
@@ -118,7 +117,7 @@
     --popup-container-rounded-b: var(--popup-container-mobile-rounded);
     --popup-header-pb: var(--popup-header-mobile-pb);
     --popup-header-border: var(--popup-header-mobile-border);
-    --popup-header-text: var(--popup-header-mobile-text);
+    --popup-header-text-size: var(--popup-header-mobile-text-size);
     --popup-header-gap-x: var(--popup-header-mobile-gap-x);
     --popup-header-icon-p: var(--popup-header-icon-mobile-p);
     --popup-header-icon-size: var(--popup-header-icon-mobile-size);

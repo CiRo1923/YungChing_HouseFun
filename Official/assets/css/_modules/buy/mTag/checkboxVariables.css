@@ -1,0 +1,22 @@
+/*
+ * icon 比 assist 容器還寬（15px vs 12px）是刻意的 —— 打勾圖示靠右溢出，
+ * 讓它和右對齊的 assist 文字疊在同一個位置上互相替換。
+ */
+:root {
+  --tag-checkbox-pc-assist-w: 12px;
+  --tag-checkbox-tablet-assist-w: 12px;
+  --tag-checkbox-mobile-assist-w: 12px;
+
+  --tag-checkbox-pc-assist-h: 15px;
+  --tag-checkbox-tablet-assist-h: 15px;
+  --tag-checkbox-mobile-assist-h: 15px;
+
+  --tag-checkbox-pc-icon-w: 15px;
+  --tag-checkbox-tablet-icon-w: 15px;
+  --tag-checkbox-mobile-icon-w: 15px;
+
+  --tag-checkbox-icon-color: var(--orange-e646);
+
+  --tag-checkbox-bg-color: var(--gray-f2);
+  --tag-checkbox-checked-bg-color: var(--orange-feea);
+}

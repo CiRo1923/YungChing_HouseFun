@@ -1,0 +1,17 @@
+{
+  // 第一次開這個工作區時，VSCode 右下角會提示安裝這些。
+  // 不裝也能開發，但會少掉對應的自動化（見各行說明）。
+  "recommendations": [
+    // 存檔時即時跑 CSS 規範檢查（.vscode/settings.json 的 emeraldwalk.runonsave）——
+    // 色票檔自動排序、違規逐筆列出並自動彈出輸出面板。
+    // 沒裝的話違規要等到下次跟 Claude 說話或 git commit 才會浮出來。
+    "emeraldwalk.runonsave",
+
+    // 格式化與 lint，settings.json 已設為存檔時自動執行
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+
+    // Vue 3 官方語言支援
+    "vue.volar"
+  ]
+}

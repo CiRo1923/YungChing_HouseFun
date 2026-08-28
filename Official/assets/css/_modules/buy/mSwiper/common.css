@@ -49,7 +49,7 @@
   box-shadow: var(--swiper-ctrl-shadow);
   border-width: var(--swiper-ctrl-border);
 
-  @apply flex h-[--swiper-ctrl-h] w-[--swiper-ctrl-w] items-center justify-center rounded-[--swiper-ctrl-rounded] border-solid transition-colors duration-300;
+  @apply flex h-[--swiper-ctrl-h] w-[--swiper-ctrl-w] items-center justify-center rounded-[--swiper-ctrl-rounded] transition-colors duration-300;
 
   &:not(:disabled) {
     @apply border-[--swiper-ctrl-border-color] bg-[--swiper-ctrl-bg-color] text-[--swiper-ctrl-color];
@@ -66,44 +66,9 @@
 }
 
 .m-swiper-pagination-bullet {
-  @apply block h-[--swiper-pagination-bullet-h] w-[--swiper-pagination-bullet-w] rounded-full bg-[--swiper-pagination-bullet-bg-color] transition-all duration-300;
-}
-
-@screen p {
-  .m-swiper {
-    &.\-\-pagination-bar,
-    &.p\:\-\-pagination-bar,
-    &.pt\:\-\-pagination-bar {
-      .m-swiper-pagination-bullet {
-        @apply max-w-[--swiper-pagination-bar-pc-max-w];
-      }
-    }
-  }
-}
-
-@screen t {
-  .m-swiper {
-    &.\-\-pagination-bar,
-    &.pt\:\-\-pagination-bar,
-    &.tm\:\-\-pagination-bar,
-    &.t\:\-\-pagination-bar {
-      .m-swiper-pagination-bullet {
-        @apply max-w-[--swiper-pagination-bar-tablet-max-w];
-      }
-    }
-  }
-}
-
-@screen m {
-  .m-swiper {
-    &.\-\-pagination-bar,
-    &.tm\:\-\-pagination-bar,
-    &.m\:\-\-pagination-bar {
-      .m-swiper-pagination-bullet {
-        @apply max-w-[--swiper-pagination-bar-mobile-max-w];
-      }
-    }
-  }
+  @apply block h-[--swiper-pagination-bullet-h] w-[--swiper-pagination-bullet-w]
+    max-w-[--swiper-pagination-bullet-max-w] rounded-full
+    bg-[--swiper-pagination-bullet-bg-color] transition-all duration-300;
 }
 
 /* 以下四條原本寫在 Horizontal.vue / Ctrl.vue 的 template */
@@ -149,9 +114,11 @@
       --swiper-pagination-gap-x: var(--swiper-pagination-bar-pc-gap-x);
 
       .m-swiper-pagination-bullet {
-        --swiper-pagination-bullet-w: 100%;
         --swiper-pagination-bullet-h: var(--swiper-pagination-bar-pc-h);
+        --swiper-pagination-bullet-max-w: var(--swiper-pagination-bar-pc-max-w);
         --swiper-pagination-bullet-bg-color: var(--swiper-pagination-bullet-bar-bg-color);
+
+        @apply w-full;
 
         &.\-\-active {
           --swiper-pagination-bullet-bg-color: var(--swiper-pagination-bullet-bar-active-bg-color);
@@ -199,9 +166,11 @@
       --swiper-pagination-gap-x: var(--swiper-pagination-bar-tablet-gap-x);
 
       .m-swiper-pagination-bullet {
-        --swiper-pagination-bullet-w: 100%;
         --swiper-pagination-bullet-h: var(--swiper-pagination-bar-tablet-h);
+        --swiper-pagination-bullet-max-w: var(--swiper-pagination-bar-tablet-max-w);
         --swiper-pagination-bullet-bg-color: var(--swiper-pagination-bullet-bar-bg-color);
+
+        @apply w-full;
 
         &.\-\-active {
           --swiper-pagination-bullet-bg-color: var(--swiper-pagination-bullet-bar-active-bg-color);
@@ -247,9 +216,11 @@
       --swiper-pagination-gap-x: var(--swiper-pagination-bar-mobile-gap-x);
 
       .m-swiper-pagination-bullet {
-        --swiper-pagination-bullet-w: 100%;
         --swiper-pagination-bullet-h: var(--swiper-pagination-bar-mobile-h);
+        --swiper-pagination-bullet-max-w: var(--swiper-pagination-bar-mobile-max-w);
         --swiper-pagination-bullet-bg-color: var(--swiper-pagination-bullet-bar-bg-color);
+
+        @apply w-full;
 
         &.\-\-active {
           --swiper-pagination-bullet-bg-color: var(--swiper-pagination-bullet-bar-active-bg-color);

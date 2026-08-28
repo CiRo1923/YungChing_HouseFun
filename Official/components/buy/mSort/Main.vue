@@ -370,7 +370,7 @@ onUnmounted(() => {
 <template>
   <div class="m-sort" :class="setClass.main">
     <!-- 模式為攤平按鈕 -->
-    <ul class="m-sort-list flex items-center" v-if="mode === 'button'">
+    <ul class="m-sort-list" v-if="mode === 'button'">
       <li
         class="m-sort-item"
         v-for="(item, index) in sortOptions"
@@ -378,7 +378,7 @@ onUnmounted(() => {
       >
         <button
           type="button"
-          class="m-sort-anchor flex items-center transition-colors duration-300"
+          class="m-sort-anchor"
           :class="{
             '--active': activeIndex === index,
             '--asc': activeIndex === index && activeSortType === 'asc',
@@ -387,11 +387,7 @@ onUnmounted(() => {
           @click="onButtonClick(item, index)"
         >
           <em class="m-sort-label">{{ item.label }}</em>
-          <CommonSvgIcon
-            icon="caret_large_down"
-            class="m-sort-icon transition-transform duration-300"
-            v-if="item.sort"
-          />
+          <CommonSvgIcon icon="caret_large_down" class="m-sort-icon" v-if="item.sort" />
         </button>
       </li>
     </ul>
@@ -399,7 +395,7 @@ onUnmounted(() => {
     <!-- 模式為下拉選單 -->
     <button
       type="button"
-      class="m-sort-select-anchor flex items-center"
+      class="m-sort-select-anchor"
       :class="{
         '--active': isActive,
       }"
@@ -408,10 +404,7 @@ onUnmounted(() => {
       v-if="mode === 'dropdown'"
     >
       <em class="m-sort-select-label">{{ dropdownLabel }}</em>
-      <CommonSvgIcon
-        icon="caret_large_down"
-        class="m-sort-select-icon transition-transform duration-300"
-      />
+      <CommonSvgIcon icon="caret_large_down" class="m-sort-select-icon" />
     </button>
   </div>
   <template v-if="mode === 'dropdown'">
@@ -424,12 +417,12 @@ onUnmounted(() => {
         appear
       >
         <div
-          class="m-sort-dropdown absolute z-[3] overflow-hidden"
+          class="m-sort-dropdown"
           :class="{ '--scrollbar': hasScrollbar }"
           ref="dropdownRef"
           v-if="isActive && sortOptions.length > 0"
         >
-          <div class="m-sort-dropdown-container scrollbar --y h-full" ref="dropdownContainerRef">
+          <div class="m-sort-dropdown-container scrollbar --y" ref="dropdownContainerRef">
             <ul class="m-sort-dropdown-list">
               <li
                 class="m-sort-dropdown-item"
@@ -439,7 +432,7 @@ onUnmounted(() => {
               >
                 <button
                   type="button"
-                  class="m-sort-dropdown-anchor relative flex w-full items-center text-left transition-colors duration-300"
+                  class="m-sort-dropdown-anchor"
                   :class="{
                     '--active': activeIndex === index,
                   }"
@@ -447,7 +440,7 @@ onUnmounted(() => {
                 >
                   <CommonSvgIcon
                     icon="icon_check_solid"
-                    class="m-sort-dropdown-anchor-icon transition-transform duration-300"
+                    class="m-sort-dropdown-anchor-icon"
                     v-if="activeIndex === index"
                   />
                   <em>{{ item.label }}</em>
@@ -460,5 +453,3 @@ onUnmounted(() => {
     </Teleport>
   </template>
 </template>
-
-<style lang="postcss"></style>

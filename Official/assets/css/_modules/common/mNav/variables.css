@@ -60,16 +60,16 @@
   --nav-submenu-tablet-py: 0;
   --nav-submenu-mobile-py: 0;
 
-  /* mobile 的漢堡按鈕 */
-  --nav-ctrl-mobile-size: 35px;
-  --nav-ctrl-bar-mobile-w: 26px;
-  --nav-ctrl-bar-mobile-h: 3px;
+  /* mobile 的漢堡按鈕 —— 這個元素只有手機版有,pc / tablet 不存在 */
+  --nav-ctrl-mobile-size: 35px; /* lint-breakpoint-exempt: 漢堡按鈕只有 mobile */
+  --nav-ctrl-bar-mobile-w: 26px; /* lint-breakpoint-exempt: 同上 */
+  --nav-ctrl-bar-mobile-h: 3px; /* lint-breakpoint-exempt: 同上 */
   --nav-ctrl-bar-bg-color: var(--gray-999);
 
   /* 收合時上下兩條的距離(展開時歸零並旋轉成 X) */
-  --nav-ctrl-bar-mobile-offset: 7px;
+  --nav-ctrl-bar-mobile-offset: 7px; /* lint-breakpoint-exempt: 漢堡按鈕只有 mobile */
 
-  /* mobile 的側邊選單 */
-  --nav-container-mobile-px: 20px;
+  /* mobile 的側邊選單 —— 同樣只有手機版有 */
+  --nav-container-mobile-px: 20px; /* lint-breakpoint-exempt: 側邊選單只有 mobile */
   --nav-container-bg-color: var(--white);
 }

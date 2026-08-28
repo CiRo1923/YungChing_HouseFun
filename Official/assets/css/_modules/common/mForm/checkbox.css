@@ -32,7 +32,7 @@
     .m-form-icon {
       border-width: var(--form-checkbox-icon-border);
 
-      @apply rounded-[--form-checkbox-icon-rounded] border-solid border-[--form-checkbox-icon-border-color] text-[--form-checkbox-icon-color];
+      @apply rounded-[--form-checkbox-icon-rounded] border-[--form-checkbox-icon-border-color] text-[--form-checkbox-icon-color];
 
       /* 勾號預設藏起來,:checked 時淡入 */
       > use {

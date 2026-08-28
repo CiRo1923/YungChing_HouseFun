@@ -1,0 +1,38 @@
+.m-title {
+  &.\-\-border-bottom {
+    .m-title-text {
+      &:after {
+        @apply block h-[--title-border-bottom-h] w-full rounded-full
+          bg-[--title-border-bottom-color] content-default;
+      }
+    }
+
+    &.\-\-border-green {
+      --title-border-bottom-color: var(--green-8b0d);
+    }
+  }
+}
+
+@screen p {
+  .m-title {
+    &.\-\-border-bottom {
+      --title-border-bottom-h: var(--title-border-bottom-pc-h);
+    }
+  }
+}
+
+@screen t {
+  .m-title {
+    &.\-\-border-bottom {
+      --title-border-bottom-h: var(--title-border-bottom-tablet-h);
+    }
+  }
+}
+
+@screen m {
+  .m-title {
+    &.\-\-border-bottom {
+      --title-border-bottom-h: var(--title-border-bottom-mobile-h);
+    }
+  }
+}

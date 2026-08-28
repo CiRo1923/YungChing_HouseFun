@@ -1,4 +1,7 @@
 <script setup>
+import '@css/_modules/buy/mChart/variables.css'
+import '@css/_modules/buy/mChart/common.css'
+
 import useChartScale from './.composables/useChartScale.js'
 import useChartPath from './.composables/useChartPath.js'
 import useChartFill from './.composables/useChartFill.js'
@@ -453,14 +456,14 @@ const tipPos = computed(() => {
 </script>
 
 <template>
-  <div ref="chartRef" class="m-chart relative" :class="setClass.main">
-    <p v-if="cfg.title" class="text-center" :class="setClass.title">
+  <div ref="chartRef" class="m-chart" :class="setClass.main">
+    <p v-if="cfg.title" class="m-chart-title" :class="setClass.title">
       {{ cfg.title }}
     </p>
 
     <svg
       ref="containerRef"
-      class="m-chart-container block w-full"
+      class="m-chart-container"
       :class="setClass.container"
       v-bind="{
         '^width': width,
@@ -492,7 +495,7 @@ const tipPos = computed(() => {
           }"
           text-anchor="end"
           dominant-baseline="central"
-          class="fill-current"
+          class="m-chart-y-label"
           :class="setClass.yAxis"
         >
           {{ g.label }}
@@ -507,7 +510,7 @@ const tipPos = computed(() => {
           }"
           text-anchor="end"
           dominant-baseline="central"
-          class="fill-current"
+          class="m-chart-y-label"
           :class="setClass.yAxis"
         >
           {{ b.label }}
@@ -524,7 +527,7 @@ const tipPos = computed(() => {
             '^y': height - X_LABEL_EDGE,
           }"
           text-anchor="middle"
-          class="fill-current"
+          class="m-chart-x-label"
         >
           {{ x.label }}
         </text>
@@ -590,8 +593,8 @@ const tipPos = computed(() => {
     <!-- tooltip（HTML 疊層，定位到 active 點上方） -->
     <div
       v-if="tip.enabled && activeIndex !== null && tipContent && (tip.showDashed || !activeDashed)"
-      class="m-chart-tip absolute z-[1] -translate-x-1/2 -translate-y-full whitespace-nowrap rounded-[6px] bg-[--gray-333] px-[10px] py-[6px] text-[12px] leading-[1.5] text-[--white]"
-      :class="tip.interactive ? 'pointer-events-auto' : 'pointer-events-none'"
+      class="m-chart-tip"
+      :class="{ '--interactive': tip.interactive }"
       :style="{ left: `${tipPos.x}px`, top: `${tipPos.y - 12 + (cfg.title ? 31 : 0)}px` }"
       v-html="tipContent"
       @mouseenter="cancelHide"
@@ -599,11 +602,3 @@ const tipPos = computed(() => {
     />
   </div>
 </template>
-
-<style lang="postcss">
-.m-chart {
-  svg text {
-    @apply select-none;
-  }
-}
-</style>

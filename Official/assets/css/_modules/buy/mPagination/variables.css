@@ -1,0 +1,41 @@
+/*
+ * 分頁器是固定位置的組件（全站長一樣），尺寸與顏色都由 module 自己定，
+ * 不走使用端的 setClass。
+ */
+:root {
+  --pagination-pc-gap-x: 8px;
+  --pagination-tablet-gap-x: 5px;
+  --pagination-mobile-gap-x: 5px;
+
+  --pagination-pc-size: 30px;
+  --pagination-tablet-size: 30px;
+  --pagination-mobile-size: 30px;
+
+  --pagination-pc-rounded: 3px;
+  --pagination-tablet-rounded: 3px;
+  --pagination-mobile-rounded: 3px;
+
+  --pagination-arrow-icon-pc-size: 20px;
+  --pagination-arrow-icon-tablet-size: 20px;
+  --pagination-arrow-icon-mobile-size: 20px;
+
+  --pagination-arrow-icon-pc-p: 2px;
+  --pagination-arrow-icon-tablet-p: 2px;
+  --pagination-arrow-icon-mobile-p: 2px;
+
+  --pagination-ellipsis-color: var(--gray-666);
+
+  --pagination-arrow-color: var(--gray-666);
+  --pagination-arrow-bg-color: transparent;
+  --pagination-arrow-hover-bg-color: var(--gray-f7);
+  --pagination-arrow-disabled-color: var(--gray-e5);
+
+  --pagination-anchor-color: var(--gray-666);
+  --pagination-anchor-bg-color: var(--gray-f7);
+  --pagination-anchor-hover-color: var(--white);
+  --pagination-anchor-hover-bg-color: var(--green-8b0d);
+  --pagination-anchor-curr-color: var(--white);
+  --pagination-anchor-curr-bg-color: var(--gray-666);
+  --pagination-anchor-disabled-color: var(--gray-ccce);
+  --pagination-anchor-disabled-bg-color: transparent;
+}

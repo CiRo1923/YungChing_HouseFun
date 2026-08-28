@@ -1,0 +1,25 @@
+/*
+ * tooltip 的字級留在 module 而不是交給父系 setClass —— 使用端沒有管道可傳:
+ * setClass 只有 main / container / title / xAxis / yAxis 五個 key，
+ * tooltip 是組件自己疊出來的圖層，不在其中。
+ */
+:root {
+  --chart-tip-pc-px: 10px;
+  --chart-tip-tablet-px: 10px;
+  --chart-tip-mobile-px: 10px;
+
+  --chart-tip-pc-py: 6px;
+  --chart-tip-tablet-py: 6px;
+  --chart-tip-mobile-py: 6px;
+
+  --chart-tip-pc-rounded: 6px;
+  --chart-tip-tablet-rounded: 6px;
+  --chart-tip-mobile-rounded: 6px;
+
+  --chart-tip-pc-text-size: 12px;
+  --chart-tip-tablet-text-size: 12px;
+  --chart-tip-mobile-text-size: 12px;
+
+  --chart-tip-bg-color: var(--gray-333);
+  --chart-tip-color: var(--white);
+}

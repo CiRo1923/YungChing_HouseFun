@@ -1,0 +1,13 @@
+/*
+ * 區塊標題,全站長一樣 —— 字級由 module 自己定,不走使用端的 setClass.title。
+ * (使用端 pages/buy/_components/house/Content.vue 也確實沒有傳字級。)
+ */
+:root {
+  --title-pc-gap-x: 5px;
+  --title-tablet-gap-x: 5px;
+  --title-mobile-gap-x: 5px;
+
+  --title-pc-text-size: 24px;
+  --title-tablet-text-size: 18px;
+  --title-mobile-text-size: 18px;
+}

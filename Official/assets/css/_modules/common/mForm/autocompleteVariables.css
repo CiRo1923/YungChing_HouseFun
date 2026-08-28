@@ -11,16 +11,12 @@
   --form-autocomplete-dropdown-tablet-my: 3px;
   --form-autocomplete-dropdown-mobile-my: 3px;
 
-  --form-autocomplete-dropdown-pc-rounded: 16px;
-  --form-autocomplete-dropdown-tablet-rounded: 16px;
-  --form-autocomplete-dropdown-mobile-rounded: 16px;
-
   --form-autocomplete-dropdown-pc-shadow:
-    0 4px 24px 0 var(--blue-001614), 0 2px 16px -8px var(--blue-001633);
+    0 4px 24px 0 var(--blue-0016-14), 0 2px 16px -8px var(--blue-0016-33);
   --form-autocomplete-dropdown-tablet-shadow:
-    0 4px 24px 0 var(--blue-001614), 0 2px 16px -8px var(--blue-001633);
+    0 4px 24px 0 var(--blue-0016-14), 0 2px 16px -8px var(--blue-0016-33);
   --form-autocomplete-dropdown-mobile-shadow:
-    0 4px 24px 0 var(--blue-001614), 0 2px 16px -8px var(--blue-001633);
+    0 4px 24px 0 var(--blue-0016-14), 0 2px 16px -8px var(--blue-0016-33);
 
   --form-autocomplete-dropdown-container-pc-px: 1px;
   --form-autocomplete-dropdown-container-tablet-px: 1px;
@@ -57,8 +53,8 @@
 
   --form-autocomplete-dropdown-container-bg-color: var(--white);
 
-  --form-autocomplete-dropdown-button-bg-color: var(--gray-e54d);
-  --form-autocomplete-dropdown-button-active-bg-color: var(--green-8b0d66);
+  --form-autocomplete-dropdown-button-bg-color: var(--gray-e5-4d);
+  --form-autocomplete-dropdown-button-active-bg-color: var(--green-8b0d-66);
   --form-autocomplete-dropdown-button-disbaled-bg-color: var(--gray-f7);
 }
 
@@ -67,7 +63,7 @@
     &.\-\-rounded,
     &.p\:\-\-rounded,
     &.pt\:\-\-rounded {
-      --form-autocomplete-dropdown-rounded: var(--form-autocomplete-dropdown-pc-rounded);
+      --form-autocomplete-dropdown-rounded: 16px;
     }
   }
 }
@@ -78,7 +74,7 @@
     &.pt\:\-\-rounded,
     &.tm\:\-\-rounded,
     &.t\:\-\-rounded {
-      --form-autocomplete-dropdown-rounded: var(--form-autocomplete-dropdown-tablet-rounded);
+      --form-autocomplete-dropdown-rounded: 16px;
     }
   }
 }
@@ -88,7 +84,7 @@
     &.\-\-rounded,
     &.tm\:\-\-rounded,
     &.m\:\-\-rounded {
-      --form-autocomplete-dropdown-rounded: var(--form-autocomplete-dropdown-mobile-rounded);
+      --form-autocomplete-dropdown-rounded: 16px;
     }
   }
 }

@@ -1,0 +1,107 @@
+.m-tooltip {
+  @apply inline-flex h-[--tooltip-h] items-center rounded-[--tooltip-rounded]
+    bg-[--tooltip-bg-color] px-[--tooltip-px] text-[--tooltip-color]
+    transition-colors duration-300;
+}
+
+.m-tooltip-container {
+  box-shadow: var(--tooltip-container-shadow);
+
+  /* 基底先 fixed，避免第一次開啟時為 static block（寬度撐滿 viewport）導致量測 width 錯誤、定位偏移 */
+  @apply fixed left-0 top-0 z-[3] m-[--tooltip-container-m]
+    rounded-[--tooltip-container-rounded] bg-[--tooltip-container-bg-color]
+    px-[--tooltip-container-px] py-[--tooltip-container-py] text-[--tooltip-container-color];
+
+  /* 指向觸發點的小箭頭 */
+  &::after {
+    border-width: var(--tooltip-container-arrow-size);
+
+    @apply absolute h-0 w-0 border-transparent content-default;
+  }
+
+  /* y 軸：tooltip 在觸發點上方，箭頭朝下 */
+  &.--top-y::after {
+    @apply top-full border-b-0 border-t-[--tooltip-container-bg-color];
+  }
+
+  /* y 軸：tooltip 在觸發點下方，箭頭朝上 */
+  &.--bottom-y::after {
+    @apply bottom-full border-t-0 border-b-[--tooltip-container-bg-color];
+  }
+
+  /* x 軸：箭頭水平位置（套用於 top-y / bottom-y） */
+  &.--left-x::after {
+    @apply left-[--tooltip-container-arrow-inset-x];
+  }
+
+  &.--center-x::after {
+    @apply left-1/2 -translate-x-1/2;
+  }
+
+  &.--right-x::after {
+    @apply right-[--tooltip-container-arrow-inset-x];
+  }
+
+  /* y 軸置中：tooltip 與觸發點垂直對齊，箭頭改為朝左 / 右 */
+  &.--center-y::after {
+    @apply top-1/2 -translate-y-1/2;
+  }
+
+  /* tooltip 在觸發點左側：箭頭在右緣朝右 */
+  &.--center-y.--left-x::after {
+    @apply left-full right-auto translate-x-0 border-r-0 border-l-[--tooltip-container-bg-color];
+  }
+
+  /* tooltip 在觸發點右側：箭頭在左緣朝左 */
+  &.--center-y.--right-x::after {
+    @apply left-auto right-full translate-x-0 border-r-[--tooltip-container-bg-color] border-l-0;
+  }
+}
+
+@screen p {
+  .m-tooltip {
+    --tooltip-rounded: var(--tooltip-pc-rounded);
+  }
+
+  .m-tooltip-container {
+    --tooltip-container-m: var(--tooltip-container-pc-m);
+    --tooltip-container-px: var(--tooltip-container-pc-px);
+    --tooltip-container-py: var(--tooltip-container-pc-py);
+    --tooltip-container-rounded: var(--tooltip-container-pc-rounded);
+    --tooltip-container-shadow: var(--tooltip-container-pc-shadow);
+    --tooltip-container-arrow-size: var(--tooltip-container-arrow-pc-size);
+    --tooltip-container-arrow-inset-x: var(--tooltip-container-arrow-pc-inset-x);
+  }
+}
+
+@screen t {
+  .m-tooltip {
+    --tooltip-rounded: var(--tooltip-tablet-rounded);
+  }
+
+  .m-tooltip-container {
+    --tooltip-container-m: var(--tooltip-container-tablet-m);
+    --tooltip-container-px: var(--tooltip-container-tablet-px);
+    --tooltip-container-py: var(--tooltip-container-tablet-py);
+    --tooltip-container-rounded: var(--tooltip-container-tablet-rounded);
+    --tooltip-container-shadow: var(--tooltip-container-tablet-shadow);
+    --tooltip-container-arrow-size: var(--tooltip-container-arrow-tablet-size);
+    --tooltip-container-arrow-inset-x: var(--tooltip-container-arrow-tablet-inset-x);
+  }
+}
+
+@screen m {
+  .m-tooltip {
+    --tooltip-rounded: var(--tooltip-mobile-rounded);
+  }
+
+  .m-tooltip-container {
+    --tooltip-container-m: var(--tooltip-container-mobile-m);
+    --tooltip-container-px: var(--tooltip-container-mobile-px);
+    --tooltip-container-py: var(--tooltip-container-mobile-py);
+    --tooltip-container-rounded: var(--tooltip-container-mobile-rounded);
+    --tooltip-container-shadow: var(--tooltip-container-mobile-shadow);
+    --tooltip-container-arrow-size: var(--tooltip-container-arrow-mobile-size);
+    --tooltip-container-arrow-inset-x: var(--tooltip-container-arrow-mobile-inset-x);
+  }
+}

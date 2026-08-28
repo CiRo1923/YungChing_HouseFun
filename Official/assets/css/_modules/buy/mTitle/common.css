@@ -1,0 +1,33 @@
+.m-title {
+  @apply relative flex items-center gap-x-[--title-gap-x];
+}
+
+.m-title-text {
+  @apply text-[length:--title-text-size];
+
+  /* 語意標籤直接用後代選擇器,不必為了掛樣式硬給它一個 class */
+  > strong {
+    @apply font-medium;
+  }
+}
+
+@screen p {
+  .m-title {
+    --title-gap-x: var(--title-pc-gap-x);
+    --title-text-size: var(--title-pc-text-size);
+  }
+}
+
+@screen t {
+  .m-title {
+    --title-gap-x: var(--title-tablet-gap-x);
+    --title-text-size: var(--title-tablet-text-size);
+  }
+}
+
+@screen m {
+  .m-title {
+    --title-gap-x: var(--title-mobile-gap-x);
+    --title-text-size: var(--title-mobile-text-size);
+  }
+}

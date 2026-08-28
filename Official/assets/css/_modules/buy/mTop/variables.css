@@ -1,0 +1,20 @@
+/*
+ * 三個斷點的水平位移互不相同 —— 這支是釘在版心右側的浮動按鈕，
+ * 位移量跟著各斷點的版心寬度走（mobile 355px / tablet 748px / pc 600px + 25px）。
+ */
+:root {
+  --top-pc-size: 50px;
+  --top-tablet-size: 50px;
+  --top-mobile-size: 50px;
+
+  --top-pc-icon-size: 20px;
+  --top-tablet-icon-size: 20px;
+  --top-mobile-icon-size: 20px;
+
+  --top-pc-translate-x: calc(600px + 25px);
+  --top-tablet-translate-x: calc(748px / 2 - 100%);
+  --top-mobile-translate-x: calc(355px / 2 - 100%);
+
+  --top-color: var(--white);
+  --top-bg-color: var(--black-99);
+}
