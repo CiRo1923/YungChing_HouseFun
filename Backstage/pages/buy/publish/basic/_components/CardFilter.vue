@@ -68,7 +68,12 @@ onMounted(() => {
 </script>
 
 <template>
-  <BuyMCardFilter :title="props.title">
+  <BuyMCardFilter
+    :title="props.title"
+    :setClass="{
+      title: 'tm:text-[20px] p:text-[24px]',
+    }"
+  >
     <template #tools v-if="$slots.tools">
       <slot name="tools" />
     </template>

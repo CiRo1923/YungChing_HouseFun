@@ -1,0 +1,31 @@
+.m-card {
+  @apply pb-[--card-pb] pl-[--card-pl] pr-[--card-pr] pt-[--card-pt];
+  @apply rounded-[--card-rounded] bg-[--card-bg-color];
+}
+
+@screen p {
+  .m-card {
+    --card-pt: var(--card-pc-pt);
+    --card-pr: var(--card-pc-pr);
+    --card-pb: var(--card-pc-pb);
+    --card-pl: var(--card-pc-pl);
+  }
+}
+
+@screen t {
+  .m-card {
+    --card-pt: var(--card-tablet-pt);
+    --card-pr: var(--card-tablet-pr);
+    --card-pb: var(--card-tablet-pb);
+    --card-pl: var(--card-tablet-pl);
+  }
+}
+
+@screen m {
+  .m-card {
+    --card-pt: var(--card-mobile-pt);
+    --card-pr: var(--card-mobile-pr);
+    --card-pb: var(--card-mobile-pb);
+    --card-pl: var(--card-mobile-pl);
+  }
+}

@@ -1,0 +1,65 @@
+:root {
+  /* base —— px-[--x] 這類軸向 utility 沒有預設值會整條讀不到,所以給 0 */
+  --card-pt: 0;
+  --card-pr: 0;
+  --card-pb: 0;
+  --card-pl: 0;
+  --card-rounded: 0;
+  --card-bg-color: initial;
+
+  /*
+   * pc 是四邊 40、tablet / mobile 是 px 16 + py 32 —— 兩個層級併存,
+   * 所以拆到最細的四個方向,common.css 也用 pt / pr / pb / pl 分開取。
+   */
+  --card-pc-pt: 40px;
+  --card-pc-pr: 40px;
+  --card-pc-pb: 40px;
+  --card-pc-pl: 40px;
+
+  --card-tablet-pt: 32px;
+  --card-tablet-pr: 16px;
+  --card-tablet-pb: 32px;
+  --card-tablet-pl: 16px;
+
+  --card-mobile-pt: 32px;
+  --card-mobile-pr: 16px;
+  --card-mobile-pb: 32px;
+  --card-mobile-pl: 16px;
+}
+
+.m-card {
+  &.\-\-bg-white {
+    --card-bg-color: var(--white);
+  }
+}
+
+@screen p {
+  .m-card {
+    &.\-\-rounded-15,
+    &.p\:\-\-rounded-15,
+    &.pt\:\-\-rounded-15 {
+      --card-rounded: 15px;
+    }
+  }
+}
+
+@screen t {
+  .m-card {
+    &.\-\-rounded-15,
+    &.pt\:\-\-rounded-15,
+    &.tm\:\-\-rounded-15,
+    &.t\:\-\-rounded-15 {
+      --card-rounded: 15px;
+    }
+  }
+}
+
+@screen m {
+  .m-card {
+    &.\-\-rounded-15,
+    &.tm\:\-\-rounded-15,
+    &.m\:\-\-rounded-15 {
+      --card-rounded: 15px;
+    }
+  }
+}

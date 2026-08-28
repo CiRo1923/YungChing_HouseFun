@@ -1,4 +1,7 @@
 <script setup>
+import '@css/_modules/buy/mCard/variables.css'
+import '@css/_modules/buy/mCard/common.css'
+
 const props = defineProps({
   setClass: {
     type: Object,
@@ -15,13 +18,7 @@ const setClass = computed(() => {
 </script>
 
 <template>
-  <div
-    class="m-card --default --bg-white --rounded-15 tm:px-[16px] tm:py-[32px] p:p-[40px]"
-    :class="setClass.main"
-  >
+  <div class="m-card --default --bg-white --rounded-15" :class="setClass.main">
     <slot />
   </div>
 </template>
-
-<style src="@css/_modules/buy/mCard.css"></style>
-<style lang="postcss"></style>

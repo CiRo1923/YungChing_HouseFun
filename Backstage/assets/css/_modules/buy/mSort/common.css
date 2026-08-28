@@ -1,0 +1,164 @@
+.m-sort-list {
+  @apply flex items-center gap-x-[--sort-list-gap-x];
+}
+
+.m-sort-anchor {
+  @apply flex items-center gap-x-[--sort-anchor-gap-x] text-[length:--sort-anchor-text-size];
+  @apply transition-colors duration-300;
+
+  &:hover {
+    @apply text-[--sort-anchor-hover-color];
+  }
+
+  &:not(:hover):not(.\-\-active) {
+    @apply text-[--sort-anchor-color];
+  }
+
+  &.\-\-active {
+    @apply text-[--sort-anchor-active-color];
+  }
+
+  &.\-\-asc {
+    .m-sort-icon {
+      @apply -rotate-180;
+    }
+  }
+}
+
+.m-sort-icon {
+  @apply h-[--sort-icon-size] w-[--sort-icon-size] p-[--sort-icon-p];
+  @apply transition-transform duration-300;
+}
+
+.m-sort-select-anchor {
+  @apply flex items-center gap-x-[--sort-select-anchor-gap-x];
+  @apply text-[length:--sort-select-anchor-text-size] text-[--sort-anchor-color];
+
+  &.\-\-active {
+    .m-sort-select-icon {
+      @apply -rotate-180;
+    }
+  }
+}
+
+.m-sort-select-icon {
+  @apply h-[--sort-select-icon-size] w-[--sort-select-icon-size] p-[--sort-select-icon-p];
+  @apply transition-transform duration-300;
+}
+
+/* Teleport to="body" —— DOM 上不在 .m-sort 內,斷點對應要自己再掛一份(見下面 @screen) */
+.m-sort-dropdown {
+  @apply absolute z-[5] overflow-hidden;
+  box-shadow: var(--sort-dropdown-shadow);
+
+  @apply my-[--sort-dropdown-my] rounded-[--sort-dropdown-rounded] bg-[--sort-dropdown-bg-color];
+}
+
+.m-sort-dropdown-list {
+  @apply max-h-full overflow-x-hidden;
+}
+
+.m-sort-dropdown-item {
+  @apply px-[--sort-dropdown-item-px];
+
+  &:not(:last-child) {
+    .m-sort-dropdown-anchor {
+      &:after {
+        @apply absolute bottom-0 block h-[--sort-dropdown-anchor-border-b] w-full bg-[--sort-dropdown-anchor-border-b-color] content-default;
+      }
+    }
+  }
+}
+
+.m-sort-dropdown-anchor {
+  @apply relative block w-full text-left;
+  @apply px-[--sort-dropdown-anchor-px] py-[--sort-dropdown-anchor-py] text-[length:--sort-dropdown-anchor-text-size];
+  @apply transition-colors duration-300;
+
+  &:hover {
+    @apply bg-[--sort-dropdown-anchor-hover-bg-color] text-[--sort-dropdown-anchor-hover-color];
+  }
+
+  &:not(:hover):not(.\-\-active) {
+    @apply bg-[--sort-dropdown-anchor-bg-color] text-[--sort-dropdown-anchor-color];
+  }
+
+  &.\-\-active {
+    @apply bg-[--sort-dropdown-anchor-active-bg-color] text-[--sort-dropdown-anchor-active-color];
+  }
+}
+
+@screen p {
+  .m-sort {
+    --sort-list-gap-x: var(--sort-list-pc-gap-x);
+    --sort-anchor-text-size: var(--sort-anchor-pc-text-size);
+    --sort-anchor-gap-x: var(--sort-anchor-pc-gap-x);
+    --sort-icon-p: var(--sort-icon-pc-p);
+    --sort-icon-size: var(--sort-icon-pc-size);
+    --sort-select-anchor-text-size: var(--sort-select-anchor-pc-text-size);
+    --sort-select-anchor-gap-x: var(--sort-select-anchor-pc-gap-x);
+    --sort-select-icon-p: var(--sort-select-icon-pc-p);
+    --sort-select-icon-size: var(--sort-select-icon-pc-size);
+  }
+
+  .m-sort-dropdown {
+    --sort-dropdown-my: var(--sort-dropdown-pc-my);
+    --sort-dropdown-rounded: var(--sort-dropdown-pc-rounded);
+    --sort-dropdown-shadow: var(--sort-dropdown-pc-shadow);
+    --sort-dropdown-item-px: var(--sort-dropdown-item-pc-px);
+    --sort-dropdown-anchor-px: var(--sort-dropdown-anchor-pc-px);
+    --sort-dropdown-anchor-py: var(--sort-dropdown-anchor-pc-py);
+    --sort-dropdown-anchor-text-size: var(--sort-dropdown-anchor-pc-text-size);
+    --sort-dropdown-anchor-border-b: var(--sort-dropdown-anchor-pc-border-b);
+  }
+}
+
+@screen t {
+  .m-sort {
+    --sort-list-gap-x: var(--sort-list-tablet-gap-x);
+    --sort-anchor-text-size: var(--sort-anchor-tablet-text-size);
+    --sort-anchor-gap-x: var(--sort-anchor-tablet-gap-x);
+    --sort-icon-p: var(--sort-icon-tablet-p);
+    --sort-icon-size: var(--sort-icon-tablet-size);
+    --sort-select-anchor-text-size: var(--sort-select-anchor-tablet-text-size);
+    --sort-select-anchor-gap-x: var(--sort-select-anchor-tablet-gap-x);
+    --sort-select-icon-p: var(--sort-select-icon-tablet-p);
+    --sort-select-icon-size: var(--sort-select-icon-tablet-size);
+  }
+
+  .m-sort-dropdown {
+    --sort-dropdown-my: var(--sort-dropdown-tablet-my);
+    --sort-dropdown-rounded: var(--sort-dropdown-tablet-rounded);
+    --sort-dropdown-shadow: var(--sort-dropdown-tablet-shadow);
+    --sort-dropdown-item-px: var(--sort-dropdown-item-tablet-px);
+    --sort-dropdown-anchor-px: var(--sort-dropdown-anchor-tablet-px);
+    --sort-dropdown-anchor-py: var(--sort-dropdown-anchor-tablet-py);
+    --sort-dropdown-anchor-text-size: var(--sort-dropdown-anchor-tablet-text-size);
+    --sort-dropdown-anchor-border-b: var(--sort-dropdown-anchor-tablet-border-b);
+  }
+}
+
+@screen m {
+  .m-sort {
+    --sort-list-gap-x: var(--sort-list-mobile-gap-x);
+    --sort-anchor-text-size: var(--sort-anchor-mobile-text-size);
+    --sort-anchor-gap-x: var(--sort-anchor-mobile-gap-x);
+    --sort-icon-p: var(--sort-icon-mobile-p);
+    --sort-icon-size: var(--sort-icon-mobile-size);
+    --sort-select-anchor-text-size: var(--sort-select-anchor-mobile-text-size);
+    --sort-select-anchor-gap-x: var(--sort-select-anchor-mobile-gap-x);
+    --sort-select-icon-p: var(--sort-select-icon-mobile-p);
+    --sort-select-icon-size: var(--sort-select-icon-mobile-size);
+  }
+
+  .m-sort-dropdown {
+    --sort-dropdown-my: var(--sort-dropdown-mobile-my);
+    --sort-dropdown-rounded: var(--sort-dropdown-mobile-rounded);
+    --sort-dropdown-shadow: var(--sort-dropdown-mobile-shadow);
+    --sort-dropdown-item-px: var(--sort-dropdown-item-mobile-px);
+    --sort-dropdown-anchor-px: var(--sort-dropdown-anchor-mobile-px);
+    --sort-dropdown-anchor-py: var(--sort-dropdown-anchor-mobile-py);
+    --sort-dropdown-anchor-text-size: var(--sort-dropdown-anchor-mobile-text-size);
+    --sort-dropdown-anchor-border-b: var(--sort-dropdown-anchor-mobile-border-b);
+  }
+}

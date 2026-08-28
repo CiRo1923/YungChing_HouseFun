@@ -11,12 +11,9 @@ export default {
       'sans-serif',
     ],
   },
-  boxShadow: {
-    dropdown: '0 4px 24px 0 #02041614, 0 2px 16px -8px #02041633',
-  },
-  dropShadow: {
-    text: '0 8px 3px #0000008c',
-  },
+  // 這裡不要放陰影 —— 值裡會帶色碼,而這支檔案不在 lint 的掃描範圍內,寫死了也不會被抓到。
+  // 陰影一律走原生 box-shadow + module 自己的 --x-*-shadow 變數(參考 mFormDropdown / mSort),
+  // 色值取色票變數。boxShadow.dropdown 與 dropShadow.text 都是這樣移除的。
   // letterSpacing: {
   //   default: '0.1em',
   // },

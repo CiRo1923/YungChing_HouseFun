@@ -1,0 +1,84 @@
+:root {
+  --sort-list-pc-gap-x: 16px;
+  --sort-list-tablet-gap-x: 16px;
+  --sort-list-mobile-gap-x: 16px;
+
+  --sort-anchor-pc-text-size: 14px;
+  --sort-anchor-tablet-text-size: 14px;
+  --sort-anchor-mobile-text-size: 14px;
+
+  --sort-anchor-pc-gap-x: 5px;
+  --sort-anchor-tablet-gap-x: 5px;
+  --sort-anchor-mobile-gap-x: 5px;
+
+  --sort-icon-pc-p: 2px;
+  --sort-icon-tablet-p: 2px;
+  --sort-icon-mobile-p: 2px;
+
+  --sort-icon-pc-size: 14px;
+  --sort-icon-tablet-size: 14px;
+  --sort-icon-mobile-size: 14px;
+
+  --sort-select-anchor-pc-text-size: 14px;
+  --sort-select-anchor-tablet-text-size: 14px;
+  --sort-select-anchor-mobile-text-size: 14px;
+
+  --sort-select-anchor-pc-gap-x: 3px;
+  --sort-select-anchor-tablet-gap-x: 3px;
+  --sort-select-anchor-mobile-gap-x: 3px;
+
+  --sort-select-icon-pc-p: 2px;
+  --sort-select-icon-tablet-p: 2px;
+  --sort-select-icon-mobile-p: 2px;
+
+  --sort-select-icon-pc-size: 14px;
+  --sort-select-icon-tablet-size: 14px;
+  --sort-select-icon-mobile-size: 14px;
+
+  --sort-dropdown-pc-my: 3px;
+  --sort-dropdown-tablet-my: 3px;
+  --sort-dropdown-mobile-my: 3px;
+
+  --sort-dropdown-pc-rounded: 0;
+  --sort-dropdown-tablet-rounded: 0;
+  --sort-dropdown-mobile-rounded: 0;
+
+  /* box-shadow 整條當一個值(同 mFormDropdown)—— 走原生 CSS 屬性,不用 @apply shadow-[…] */
+  --sort-dropdown-pc-shadow: 0 4px 24px 0 var(--blue-0016-14), 0 2px 16px -8px var(--blue-0016-33);
+  --sort-dropdown-tablet-shadow: 0 4px 24px 0 var(--blue-0016-14), 0 2px 16px -8px var(--blue-0016-33);
+  --sort-dropdown-mobile-shadow: 0 4px 24px 0 var(--blue-0016-14), 0 2px 16px -8px var(--blue-0016-33);
+
+  --sort-dropdown-item-pc-px: 0;
+  --sort-dropdown-item-tablet-px: 0;
+  --sort-dropdown-item-mobile-px: 0;
+
+  --sort-dropdown-anchor-pc-px: 8px;
+  --sort-dropdown-anchor-tablet-px: 8px;
+  --sort-dropdown-anchor-mobile-px: 8px;
+
+  --sort-dropdown-anchor-pc-py: 8px;
+  --sort-dropdown-anchor-tablet-py: 8px;
+  --sort-dropdown-anchor-mobile-py: 8px;
+
+  --sort-dropdown-anchor-pc-text-size: 14px;
+  --sort-dropdown-anchor-tablet-text-size: 14px;
+  --sort-dropdown-anchor-mobile-text-size: 14px;
+
+  /* ::after 模擬的分隔線,吃的是 h-[] —— 叫 -border 才讀得出語意 */
+  --sort-dropdown-anchor-pc-border-b: 1px;
+  --sort-dropdown-anchor-tablet-border-b: 1px;
+  --sort-dropdown-anchor-mobile-border-b: 1px;
+
+  --sort-anchor-color: var(--gray-666);
+  --sort-anchor-hover-color: var(--orange-e646);
+  --sort-anchor-active-color: var(--orange-e646);
+
+  --sort-dropdown-bg-color: var(--white);
+  --sort-dropdown-anchor-color: var(--gray-333);
+  --sort-dropdown-anchor-hover-color: var(--orange-e646);
+  --sort-dropdown-anchor-active-color: var(--orange-e646);
+  --sort-dropdown-anchor-bg-color: transparent;
+  --sort-dropdown-anchor-hover-bg-color: transparent;
+  --sort-dropdown-anchor-active-bg-color: transparent;
+  --sort-dropdown-anchor-border-b-color: var(--gray-e5);
+}

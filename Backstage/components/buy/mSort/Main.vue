@@ -1,4 +1,7 @@
 <script setup>
+import '@css/_modules/buy/mSort/variables.css'
+import '@css/_modules/buy/mSort/common.css'
+
 const common = useCommonStore()
 const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
@@ -336,7 +339,7 @@ onUnmounted(() => {
 
 <template>
   <div class="m-sort">
-    <ul class="m-sort-list flex items-center" v-if="currentMode === 'button'">
+    <ul class="m-sort-list" v-if="currentMode === 'button'">
       <li
         class="m-sort-item"
         v-for="(item, index) in sortOptions"
@@ -344,7 +347,7 @@ onUnmounted(() => {
       >
         <button
           type="button"
-          class="m-sort-anchor flex items-center transition-colors duration-300"
+          class="m-sort-anchor"
           :class="{
             '--active': activeIndex === index,
             '--asc': activeIndex === index && activeSortType === 'asc',
@@ -355,7 +358,7 @@ onUnmounted(() => {
           <em class="m-sort-label">{{ item.label }}</em>
           <CommonSvgIcon
             icon="caret_large_down"
-            class="m-sort-icon transition-transform duration-300"
+            class="m-sort-icon"
             v-if="item.sort"
           />
         </button>
@@ -364,7 +367,7 @@ onUnmounted(() => {
 
     <button
       type="button"
-      class="m-sort-select-anchor flex items-center"
+      class="m-sort-select-anchor"
       :class="{
         '--active': isActive,
       }"
@@ -375,7 +378,7 @@ onUnmounted(() => {
       <em class="m-sort-select-label">{{ dropdownLabel }}</em>
       <CommonSvgIcon
         icon="caret_large_down"
-        class="m-sort-select-icon transition-transform duration-300"
+        class="m-sort-select-icon"
       />
     </button>
   </div>
@@ -383,11 +386,11 @@ onUnmounted(() => {
     <Teleport to="body">
       <Transition name="dropdown" @afterLeave="onCloseDropdown" appear>
         <div
-          class="m-sort-dropdown absolute z-[5] overflow-hidden"
+          class="m-sort-dropdown"
           ref="dropdownRef"
           v-if="isActive && sortOptions.length > 0"
         >
-          <ul class="m-sort-dropdown-list scrollbar --y max-h-full overflow-x-hidden">
+          <ul class="m-sort-dropdown-list scrollbar --y">
             <li
               class="m-sort-dropdown-item"
               v-for="(item, index) in sortOptions"
@@ -396,7 +399,7 @@ onUnmounted(() => {
             >
               <button
                 type="button"
-                class="m-sort-dropdown-anchor relative block w-full text-left transition-colors duration-300"
+                class="m-sort-dropdown-anchor"
                 :class="{
                   '--active': activeIndex === index,
                 }"
@@ -411,240 +414,3 @@ onUnmounted(() => {
     </Teleport>
   </template>
 </template>
-
-<style lang="postcss">
-:root {
-  --sort-list-pc-gap-x: 16px;
-  --sort-list-tablet-gap-x: 16px;
-  --sort-list-mobile-gap-x: 16px;
-
-  --sort-anchor-pc-text: 14px;
-  --sort-anchor-tablet-text: 14px;
-  --sort-anchor-mobile-text: 14px;
-
-  --sort-anchor-pc-gap-x: 5px;
-  --sort-anchor-tablet-gap-x: 5px;
-  --sort-anchor-mobile-gap-x: 5px;
-
-  --sort-icon-pc-p: 2px;
-  --sort-icon-tablet-p: 2px;
-  --sort-icon-mobile-p: 2px;
-
-  --sort-icon-pc-size: 14px;
-  --sort-icon-tablet-size: 14px;
-  --sort-icon-mobile-size: 14px;
-
-  --sort-select-anchor-pc-text: 14px;
-  --sort-select-anchor-tablet-text: 14px;
-  --sort-select-anchor-mobile-text: 14px;
-
-  --sort-select-anchor-pc-gap-x: 3px;
-  --sort-select-anchor-tablet-gap-x: 3px;
-  --sort-select-anchor-mobile-gap-x: 3px;
-
-  --sort-select-icon-pc-p: 2px;
-  --sort-select-icon-tablet-p: 2px;
-  --sort-select-icon-mobile-p: 2px;
-
-  --sort-select-icon-pc-size: 14px;
-  --sort-select-icon-tablet-size: 14px;
-  --sort-select-icon-mobile-size: 14px;
-
-  --sort-dropdown-pc-my: 3px;
-  --sort-dropdown-tablet-my: 3px;
-  --sort-dropdown-mobile-my: 3px;
-
-  --sort-dropdown-pc-rounded: 0;
-  --sort-dropdown-tablet-rounded: 0;
-  --sort-dropdown-mobile-rounded: 0;
-
-  --sort-dropdown-item-pc-px: 0;
-  --sort-dropdown-item-tablet-px: 0;
-  --sort-dropdown-item-mobile-px: 0;
-
-  --sort-dropdown-anchor-pc-px: 8px;
-  --sort-dropdown-anchor-tablet-px: 8px;
-  --sort-dropdown-anchor-mobile-px: 8px;
-
-  --sort-dropdown-anchor-pc-py: 8px;
-  --sort-dropdown-anchor-tablet-py: 8px;
-  --sort-dropdown-anchor-mobile-py: 8px;
-
-  --sort-dropdown-anchor-pc-text: 14px;
-  --sort-dropdown-anchor-tablet-text: 14px;
-  --sort-dropdown-anchor-mobile-text: 14px;
-
-  --sort-dropdown-anchor-pc-border-b: 1px;
-  --sort-dropdown-anchor-tablet-border-b: 1px;
-  --sort-dropdown-anchor-mobile-border-b: 1px;
-
-  --sort-anchor-color: var(--gray-666);
-  --sort-anchor-hover-color: var(--orange-e646);
-  --sort-anchor-active-color: var(--orange-e646);
-
-  --sort-dropdown-bg-color: var(--white);
-  --sort-dropdown-anchor-color: var(--gray-333);
-  --sort-dropdown-anchor-hover-color: var(--orange-e646);
-  --sort-dropdown-anchor-active-color: var(--orange-e646);
-  --sort-dropdown-anchor-bg-color: tranparent;
-  --sort-dropdown-anchor-hover-bg-color: tranparent;
-  --sort-dropdown-anchor-active-bg-color: tranparent;
-  --sort-dropdown-anchor-border-b-color: var(--gray-e5);
-}
-
-.m-sort-list {
-  @apply gap-x-[--sort-list-gap-x];
-}
-
-.m-sort-anchor {
-  font-size: var(--sort-anchor-text);
-
-  @apply gap-x-[--sort-anchor-gap-x];
-
-  &:hover {
-    @apply text-[--sort-anchor-hover-color];
-  }
-
-  &:not(:hover):not(.\-\-active) {
-    @apply text-[--sort-anchor-color];
-  }
-
-  &.\-\-active {
-    @apply text-[--sort-anchor-active-color];
-  }
-
-  &.\-\-asc {
-    .m-sort-icon {
-      @apply -rotate-180;
-    }
-  }
-}
-
-.m-sort-icon {
-  @apply h-[--sort-icon-size] w-[--sort-icon-size] p-[--sort-icon-p];
-}
-
-.m-sort-select-anchor {
-  font-size: var(--sort-select-anchor-text);
-
-  @apply gap-x-[--sort-select-anchor-gap-x] text-[--sort-anchor-color];
-
-  &.\-\-active {
-    .m-sort-select-icon {
-      @apply -rotate-180;
-    }
-  }
-}
-
-.m-sort-select-icon {
-  @apply h-[--sort-select-icon-size] w-[--sort-select-icon-size] p-[--sort-select-icon-p];
-}
-
-.m-sort-dropdown {
-  @apply my-[--sort-dropdown-my] bg-[--sort-dropdown-bg-color];
-
-  @apply shadow-dropdown;
-}
-
-.m-sort-dropdown-item {
-  @apply px-[--sort-dropdown-item-px];
-
-  &:not(:last-child) {
-    .m-sort-dropdown-anchor {
-      &:after {
-        @apply absolute bottom-0 block h-[--sort-dropdown-anchor-border-b] w-full bg-[--sort-dropdown-anchor-border-b-color] content-default;
-      }
-    }
-  }
-}
-
-.m-sort-dropdown-anchor {
-  font-size: var(--sort-dropdown-anchor-text);
-
-  @apply px-[--sort-dropdown-anchor-px] py-[--sort-dropdown-anchor-py];
-
-  &:hover {
-    @apply bg-[--sort-dropdown-anchor-hover-bg-color] text-[--sort-dropdown-anchor-hover-color];
-  }
-
-  &:not(:hover):not(.\-\-active) {
-    @apply bg-[--sort-dropdown-anchor-bg-color] text-[--sort-dropdown-anchor-color];
-  }
-
-  &.\-\-active {
-    @apply bg-[--sort-dropdown-anchor-active-bg-color] text-[--sort-dropdown-anchor-active-color];
-  }
-}
-
-@screen p {
-  .m-sort {
-    --sort-list-gap-x: var(--sort-list-pc-gap-x);
-    --sort-anchor-text: var(--sort-anchor-pc-text);
-    --sort-anchor-gap-x: var(--sort-anchor-pc-gap-x);
-    --sort-icon-p: var(--sort-icon-pc-p);
-    --sort-icon-size: var(--sort-icon-pc-size);
-    --sort-select-anchor-text: var(--sort-select-anchor-pc-text);
-    --sort-select-anchor-gap-x: var(--sort-select-anchor-pc-gap-x);
-    --sort-select-icon-p: var(--sort-select-icon-pc-p);
-    --sort-select-icon-size: var(--sort-select-icon-pc-size);
-  }
-
-  .m-sort-dropdown {
-    --sort-dropdown-my: var(--sort-dropdown-pc-my);
-    --sort-dropdown-rounded: var(--sort-dropdown-pc-rounded);
-    --sort-dropdown-item-px: var(--sort-dropdown-item-pc-px);
-    --sort-dropdown-anchor-px: var(--sort-dropdown-anchor-pc-px);
-    --sort-dropdown-anchor-py: var(--sort-dropdown-anchor-pc-py);
-    --sort-dropdown-anchor-text: var(--sort-dropdown-anchor-pc-text);
-    --sort-dropdown-anchor-border-b: var(--sort-dropdown-anchor-pc-border-b);
-  }
-}
-
-@screen t {
-  .m-sort {
-    --sort-list-gap-x: var(--sort-list-tablet-gap-x);
-    --sort-anchor-text: var(--sort-anchor-tablet-text);
-    --sort-anchor-gap-x: var(--sort-anchor-tablet-gap-x);
-    --sort-icon-p: var(--sort-icon-tablet-p);
-    --sort-icon-size: var(--sort-icon-tablet-size);
-    --sort-select-anchor-text: var(--sort-select-anchor-tablet-text);
-    --sort-select-anchor-gap-x: var(--sort-select-anchor-tablet-gap-x);
-    --sort-select-icon-p: var(--sort-select-icon-tablet-p);
-    --sort-select-icon-size: var(--sort-select-icon-tablet-size);
-  }
-
-  .m-sort-dropdown {
-    --sort-dropdown-my: var(--sort-dropdown-tablet-my);
-    --sort-dropdown-rounded: var(--sort-dropdown-tablet-rounded);
-    --sort-dropdown-item-px: var(--sort-dropdown-item-tablet-px);
-    --sort-dropdown-anchor-px: var(--sort-dropdown-anchor-tablet-px);
-    --sort-dropdown-anchor-py: var(--sort-dropdown-anchor-tablet-py);
-    --sort-dropdown-anchor-text: var(--sort-dropdown-anchor-tablet-text);
-    --sort-dropdown-anchor-border-b: var(--sort-dropdown-anchor-tablet-border-b);
-  }
-}
-
-@screen m {
-  .m-sort {
-    --sort-list-gap-x: var(--sort-list-mobile-gap-x);
-    --sort-anchor-text: var(--sort-anchor-mobile-text);
-    --sort-anchor-gap-x: var(--sort-anchor-mobile-gap-x);
-    --sort-icon-p: var(--sort-icon-mobile-p);
-    --sort-icon-size: var(--sort-icon-mobile-size);
-    --sort-select-anchor-text: var(--sort-select-anchor-mobile-text);
-    --sort-select-anchor-gap-x: var(--sort-select-anchor-mobile-gap-x);
-    --sort-select-icon-p: var(--sort-select-icon-mobile-p);
-    --sort-select-icon-size: var(--sort-select-icon-mobile-size);
-  }
-
-  .m-sort-dropdown {
-    --sort-dropdown-my: var(--sort-dropdown-mobile-my);
-    --sort-dropdown-rounded: var(--sort-dropdown-mobile-rounded);
-    --sort-dropdown-item-px: var(--sort-dropdown-item-mobile-px);
-    --sort-dropdown-anchor-px: var(--sort-dropdown-anchor-mobile-px);
-    --sort-dropdown-anchor-py: var(--sort-dropdown-anchor-mobile-py);
-    --sort-dropdown-anchor-text: var(--sort-dropdown-anchor-mobile-text);
-    --sort-dropdown-anchor-border-b: var(--sort-dropdown-anchor-mobile-border-b);
-  }
-}
-</style>
