@@ -1,4 +1,7 @@
 <script setup>
+import '@css/_modules/common/mFigure/variables.css'
+import '@css/_modules/common/mFigure/common.css'
+
 import blankUrl from '@imgs/common/blank.svg'
 import noImageUrl from '@imgs/common/no_image.svg'
 
@@ -181,64 +184,9 @@ onMounted(() => {
     />
   </component>
 
-  <div class="m-figure flex items-center justify-center" :class="setClass.main" v-else>
-    <div class="m-figure-error flex items-center justify-center">
-      <CommonSvgIcon
-        class="h-[30%] max-h-[120px] w-[30%] max-w-[120px] text-[--white]"
-        icon="icon_image_error"
-      />
+  <div class="m-figure --error" :class="setClass.main" v-else>
+    <div class="m-figure-error">
+      <CommonSvgIcon class="m-figure-error-icon" icon="icon_image_error" />
     </div>
   </div>
 </template>
-
-<style lang="postcss">
-:root {
-  --figuer-image-pc-scale: 1.1;
-  --figuer-image-tablet-scale: 1.1;
-  --figuer-image-mobile-scale: 1.1;
-
-  --figuer-no-image-bg-color: var(--gray-f2);
-}
-
-.group:hover {
-  .m-figure {
-    &.group-hover\:\-\-image-scale {
-      img {
-        @apply scale-[--figuer-image-scale];
-      }
-    }
-  }
-}
-
-.m-figure {
-  &.\-\-no-image {
-    @apply flex items-center justify-center bg-[--figuer-no-image-bg-color];
-
-    img {
-      @apply h-[auto] w-[50%] max-w-[250px];
-    }
-  }
-
-  img {
-    @apply transition-transform duration-300;
-  }
-}
-
-@screen p {
-  .m-figure {
-    --figuer-image-scale: var(--figuer-image-pc-scale);
-  }
-}
-
-@screen t {
-  .m-figure {
-    --figuer-image-scale: var(--figuer-image-tablet-scale);
-  }
-}
-
-@screen m {
-  .m-figure {
-    --figuer-image-scale: var(--figuer-image-mobile-scale);
-  }
-}
-</style>

@@ -1,29 +1,34 @@
 :root {
-  --white: #fff;
-  --white-rgb: hexToRgb(#fff);
-  --black: #000;
-  --black-rgb: hexToRgb(#000);
-
   /* CommonMHeader(全頻道共用 header)用色 */
   --red-d111: #df1111;
 
   --orange-feea: #feeeea;
-  --orange-e646: #ea6846;
   --orange-f74c: #ff714c;
+  --orange-e646: #ea6846;
 
   --green-ffe9: #f4f8e9;
   --green-9c33: #98cb33;
-  --green-8b0d: #87b90d;
   --green-8b0d66: #87b90d66;
+  --green-8b0d: #87b90d;
   --green-6a2d: #67a12d;
+
+  /* mForm 的 dropdown 陰影用色 */
+  --blue-001614: #02041614;
+  --blue-001633: #02041633;
+
+  --white: #fff;
 
   --gray-f7: #f7f7f7;
   --gray-f2: #f2f2f2;
-  --gray-e5: #e5e5e5;
   --gray-e54d: #e5e5e54d;
+  --gray-e5: #e5e5e5;
   --gray-d8: #d8d8d8;
   --gray-ccce: #c3c8ce;
   --gray-999: #999;
   --gray-666: #666;
+  --gray-334d: #3333334d;
   --gray-333: #333;
+
+  --black-1a: #0000001a;
+  --black: #000;
 }

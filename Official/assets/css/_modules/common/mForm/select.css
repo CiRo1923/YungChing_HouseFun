@@ -46,18 +46,48 @@
   }
 } */
 
-.m-select-dropdown {
+.m-form-select-dropdown {
   box-shadow: var(--form-select-dropdown-shadow);
 
   @apply absolute z-[2] my-[--form-select-dropdown-my] overflow-hidden rounded-[--form-select-dropdown-rounded];
 }
 
-.m-select-dropdown-container {
-  @apply h-full bg-[--white] px-[--form-select-dropdown-container-mx] py-[--form-select-dropdown-container-py];
+.m-form-select-dropdown-container {
+  @apply h-full bg-[--form-select-dropdown-container-bg-color] px-[--form-select-dropdown-container-px] py-[--form-select-dropdown-container-py];
 }
 
-.m-select-dropdown-body {
+.m-form-select-dropdown-body {
   @apply max-h-full;
+}
+
+/* dropdown 的選項 —— 原本在 Select.vue 的 <style> 區塊裡 */
+.m-form-select-dropdown-item {
+  &:not(:last-child) {
+    .m-form-select-dropdown-button {
+      &:after {
+        @apply block h-[--form-select-dropdown-button-border] w-full bg-[--form-select-dropdown-button-bg-color] opacity-30 content-default;
+      }
+    }
+  }
+}
+
+.m-form-select-dropdown-button {
+  @apply block w-full px-[--form-select-dropdown-button-px] text-left transition-colors duration-300;
+
+  &:not(:disabled) {
+    &.\-\-active {
+      @apply bg-[--form-select-dropdown-button-active-bg-color];
+    }
+  }
+
+  &:disabled {
+    @apply text-[--form-select-dropdown-button-disabled-color];
+  }
+}
+
+/* 字級不定在這裡 —— 由使用端 setClass.dropdownLabel 傳 */
+.m-form-select-dropdown-label {
+  @apply relative block grow py-[--form-select-dropdown-label-py];
 }
 
 @screen p {
@@ -66,11 +96,14 @@
     --form-select-icon-size: var(--form-select-icon-pc-size);
   }
 
-  .m-select-dropdown {
+  .m-form-select-dropdown {
     --form-select-dropdown-my: var(--form-select-dropdown-pc-my);
     --form-select-dropdown-shadow: var(--form-select-dropdown-pc-shadow);
-    --form-select-dropdown-container-mx: var(--form-select-dropdown-container-pc-mx);
+    --form-select-dropdown-container-px: var(--form-select-dropdown-container-pc-px);
     --form-select-dropdown-container-py: var(--form-select-dropdown-container-pc-py);
+    --form-select-dropdown-button-px: var(--form-select-dropdown-button-pc-px);
+    --form-select-dropdown-button-border: var(--form-select-dropdown-button-pc-border);
+    --form-select-dropdown-label-py: var(--form-select-dropdown-label-pc-py);
   }
 }
 
@@ -80,11 +113,14 @@
     --form-select-icon-size: var(--form-select-icon-tablet-size);
   }
 
-  .m-select-dropdown {
+  .m-form-select-dropdown {
     --form-select-dropdown-my: var(--form-select-dropdown-tablet-my);
     --form-select-dropdown-shadow: var(--form-select-dropdown-tablet-shadow);
-    --form-select-dropdown-container-mx: var(--form-select-dropdown-container-tablet-mx);
+    --form-select-dropdown-container-px: var(--form-select-dropdown-container-tablet-px);
     --form-select-dropdown-container-py: var(--form-select-dropdown-container-tablet-py);
+    --form-select-dropdown-button-px: var(--form-select-dropdown-button-tablet-px);
+    --form-select-dropdown-button-border: var(--form-select-dropdown-button-tablet-border);
+    --form-select-dropdown-label-py: var(--form-select-dropdown-label-tablet-py);
   }
 }
 
@@ -94,10 +130,13 @@
     --form-select-icon-size: var(--form-select-icon-mobile-size);
   }
 
-  .m-select-dropdown {
+  .m-form-select-dropdown {
     --form-select-dropdown-my: var(--form-select-dropdown-mobile-my);
     --form-select-dropdown-shadow: var(--form-select-dropdown-mobile-shadow);
-    --form-select-dropdown-container-mx: var(--form-select-dropdown-container-mobile-mx);
+    --form-select-dropdown-container-px: var(--form-select-dropdown-container-mobile-px);
     --form-select-dropdown-container-py: var(--form-select-dropdown-container-mobile-py);
+    --form-select-dropdown-button-px: var(--form-select-dropdown-button-mobile-px);
+    --form-select-dropdown-button-border: var(--form-select-dropdown-button-mobile-border);
+    --form-select-dropdown-label-py: var(--form-select-dropdown-label-mobile-py);
   }
 }

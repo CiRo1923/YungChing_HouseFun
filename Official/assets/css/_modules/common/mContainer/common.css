@@ -1,0 +1,6 @@
+/* mContainer(components/common/mContainer.vue)版型。
+   值由 modifier 決定,定義在 variables.css。 */
+
+.m-container {
+  @apply mx-auto max-w-[--container-max-w] px-[--container-px];
+}

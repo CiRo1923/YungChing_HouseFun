@@ -3,13 +3,14 @@ import '@css/_modules/common/mForm/variables.css'
 import '@css/_modules/common/mForm/selectVariables.css'
 import '@css/_modules/common/mForm/common.css'
 import '@css/_modules/common/mForm/select.css'
+
 import { onMergeDropdownConfig, useDropdownCore } from './.composables/useDropdownCore.js'
+import useValidateEvents from './.composables/useValidateEvents.js'
 
 import { onDeepClone, onEmptyData } from '@js/_prototype.js'
 import '@js/_validation.js'
 
 import { Field, ErrorMessage } from 'vee-validate'
-import useValidateEvents from './.composables/useValidateEvents.js'
 
 const emits = defineEmits(['update:modelValue', 'change'])
 const props = defineProps({
@@ -90,6 +91,7 @@ const setClass = computed(() => {
       dropdown: '',
       dropdownContainer: '',
       dropdownBody: '',
+      dropdownLabel: '',
     },
     ...props.setClass,
   }
@@ -341,37 +343,37 @@ onUnmounted(() => {
   <Teleport to="body">
     <Transition name="dropdown" @afterLeave="onCloseDropdown" appear>
       <div
-        class="m-select-dropdown"
+        class="m-form-select-dropdown"
         :class="[setClass.dropdown, { '--open': isOpen }]"
         ref="dropdownRef"
         v-if="isActive && options && options.length !== 0 && !config.isDisabled"
       >
         <div
-          class="m-select-dropdown-container"
+          class="m-form-select-dropdown-container"
           :class="setClass.dropdownContainer"
           ref="dropdownContainerRef"
         >
           <ul
-            class="m-select-dropdown-body scrollbar --y"
+            class="m-form-select-dropdown-body scrollbar --y"
             :class="setClass.dropdownBody"
             ref="dropdownBodyRef"
           >
             <li
-              class="m-select-dropdown-item"
+              class="m-form-select-dropdown-item"
               v-for="(item, index) in options"
               :key="`${item}_${index}`"
               ref="dropdownItemRef"
             >
               <button
                 type="button"
-                class="m-select-dropdown-button block w-full px-[8px] text-left transition-colors duration-300"
+                class="m-form-select-dropdown-button"
                 :class="{
                   '--active': index === selectedIndex,
                 }"
                 :disabled="item[config.schema.isDisabled] === true"
                 @click="onDropdownItemClick(index)"
               >
-                <em class="m-select-dropdown-label relative block grow py-[8px] text-[14px]">
+                <em class="m-form-select-dropdown-label" :class="setClass.dropdownLabel">
                   <slot name="option" :item="item">
                     {{ item[config.schema.label] }}
                   </slot>
@@ -384,31 +386,3 @@ onUnmounted(() => {
     </Transition>
   </Teleport>
 </template>
-<style lang="postcss">
-.m-select-dropdown-button {
-  &:not(:disabled) {
-    /* @apply text-[--gray-333]; */
-
-    /* &:not(.\-\-active) {
-    } */
-
-    &.\-\-active {
-      @apply bg-[--orange-feea];
-    }
-  }
-
-  &:disabled {
-    @apply text-[--gray-3334d];
-  }
-}
-
-.m-select-dropdown-item {
-  &:not(:last-child) {
-    .m-select-dropdown-button {
-      &:after {
-        @apply block h-[1px] w-full bg-[--gray-e5] opacity-30 content-default;
-      }
-    }
-  }
-}
-</style>

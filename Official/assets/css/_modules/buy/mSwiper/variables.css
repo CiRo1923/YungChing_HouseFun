@@ -41,9 +41,9 @@
   --swiper-ctrl-tablet-gap-x: 8px;
   --swiper-ctrl-mobile-gap-x: 8px;
 
-  --swiper-ctrl-pc-shadow: 0 2px 4px 0 rgba(var(--black-rgb), 0.1);
-  --swiper-ctrl-tablet-shadow: 0 2px 4px 0 rgba(var(--black-rgb), 0.1);
-  --swiper-ctrl-mobile-shadow: 0 2px 4px 0 rgba(var(--black-rgb), 0.1);
+  --swiper-ctrl-pc-shadow: 0 2px 4px 0 var(--black-1a);
+  --swiper-ctrl-tablet-shadow: 0 2px 4px 0 var(--black-1a);
+  --swiper-ctrl-mobile-shadow: 0 2px 4px 0 var(--black-1a);
 
   --swiper-ctrl-bg-color: var(--white);
   --swiper-ctrl-disabled-bg-color: var(--white);
@@ -53,7 +53,7 @@
   --swiper-ctrl-disabled-border-color: transparent;
 
   --swiper-ctrl-color: var(--blue-08dc);
-  --swiper-ctrl-disabled-color: rgba(var(--blue-08dc-rgb), 0.1);
+  --swiper-ctrl-disabled-color: var(--blue-08dc1a);
 
   --swiper-ctrl-pc-icon-size: 12px;
   --swiper-ctrl-tablet-icon-size: 12px;

@@ -1,19 +1,16 @@
+/* radio 專屬樣式 —— 圓框 + 圓點。
+   共用結構(排列、間距、隱藏原生 input、勾選框尺寸)在 selection.css。 */
+
 .m-form-element {
   &.\-\-radio {
     .m-form-type {
-      &:not(:checked) {
-        & + .m-form-icon {
-          @apply border-[--gray-999];
-        }
-      }
-
       &:checked {
         & ~ .m-form-label {
-          @apply text-[--green-8b0d];
+          --form-radio-label-color: var(--form-radio-label-checked-color);
         }
 
         & + .m-form-icon {
-          @apply border-[--green-8b0d];
+          --form-radio-icon-border-color: var(--form-radio-icon-border-checked-color);
 
           &:before {
             @apply opacity-100;
@@ -22,10 +19,47 @@
       }
     }
 
+    .m-form-label {
+      @apply text-[--form-radio-label-color] transition-colors duration-300;
+    }
+
     .m-form-icon {
+      border-width: var(--form-radio-icon-border);
+
+      @apply rounded-full border-solid border-[--form-radio-icon-border-color];
+
+      /* 圓點用 margin: auto + inset-0 置中 —— 框的尺寸由 --icon-size-XX modifier 決定,
+         寫死 left / top 的話換一個尺寸就偏掉了。 */
       &:before {
-        @apply pointer-events-none absolute left-[2px] top-[2px] h-[10px] w-[10px] rounded-full bg-[--green-8b0d] opacity-0 transition-opacity duration-300 content-default;
+        @apply pointer-events-none absolute inset-0 m-auto h-[--form-radio-dot-size] w-[--form-radio-dot-size] rounded-full bg-[--form-radio-dot-bg-color] opacity-0 transition-opacity duration-300 content-default;
       }
+    }
+  }
+}
+
+@screen p {
+  .m-form-element {
+    &.\-\-radio {
+      --form-radio-icon-border: var(--form-radio-icon-pc-border);
+      --form-radio-dot-size: var(--form-radio-dot-pc-size);
+    }
+  }
+}
+
+@screen t {
+  .m-form-element {
+    &.\-\-radio {
+      --form-radio-icon-border: var(--form-radio-icon-tablet-border);
+      --form-radio-dot-size: var(--form-radio-dot-tablet-size);
+    }
+  }
+}
+
+@screen m {
+  .m-form-element {
+    &.\-\-radio {
+      --form-radio-icon-border: var(--form-radio-icon-mobile-border);
+      --form-radio-dot-size: var(--form-radio-dot-mobile-size);
     }
   }
 }

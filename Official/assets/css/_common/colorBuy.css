@@ -1,26 +1,30 @@
 :root {
   /* 紅色 */
+  --red-e786: #ed7d86;
   --red-e56a: #e8536a;
   --red-e45c: #ef425c;
-  --red-e786: #ed7d86;
 
   /* 黃色 */
   --yellow-ffbc: #fff7bc;
 
   /* 綠色 */
-  --green-7b1c: #79b51c;
-  --green-4847: #478947;
-  --green-4a7f: #49af7f;
   --green-efef: #e6f3ef;
+  --green-7b1c: #79b51c;
+  --green-4a7f: #49af7f;
+  --green-4847: #478947;
 
   /* 藍色 */
-  --blue-26e1: #276ee1;
-  --blue-69c1: #6f9bc1;
   --blue-efff: #eef4ff;
+  --blue-6dd7: #64d7d7;
+  --blue-69c1: #6f9bc1;
+  --blue-08dc1a: #0087dc1a;
+  --blue-08dc: #0087dc;
+  --blue-26e1: #276ee1;
 
   /* 灰色 */
   --gray-ed: #ededed;
   --gray-feea: #f1ecea;
   --gray-db: #dbdbdb;
+  --gray-c8: #c8c8c8;
   --gray-2338: #2f3338;
 }

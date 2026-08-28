@@ -1,0 +1,287 @@
+/* mContent(components/common/mContent.vue)的變數。
+   內距與圓角各處都不同,由使用端逐頁指定 → 開 modifier。
+
+   **內距一律拆成 pt / pr / pb / pl 四個方向**,modifier 只設它負責的那幾個方向:
+
+     --p-24   → 四個方向都設
+     --px-30  → pr / pl
+     --py-20  → pt / pb
+     --pb-20  → 只有 pb
+
+   這樣 `--py-*` 與 `--pb-*` 這種「範圍有包含關係」的 modifier 就不會互相打架 ——
+   誰設哪個方向寫得很清楚,不必依賴宣告順序或 shorthand 的覆寫規則。 */
+
+:root {
+  --content-bg-color: var(--white);
+
+  /* base —— modifier 沒帶到時的值。
+     一定要給 0:tailwind 的 pt-[--x] 在變數未定義時整條失效,
+     畫面完全沒效果也不會報錯。 */
+  --content-pt: 0;
+  --content-pr: 0;
+  --content-pb: 0;
+  --content-pl: 0;
+
+  --content-rounded-t: 0;
+  --content-rounded-b: 0;
+}
+
+@screen p {
+  .m-content {
+    &.\-\-p-24,
+    &.p\:\-\-p-24,
+    &.pt\:\-\-p-24 {
+      --content-pt: 24px;
+      --content-pr: 24px;
+      --content-pb: 24px;
+      --content-pl: 24px;
+    }
+
+    &.\-\-p-15,
+    &.p\:\-\-p-15,
+    &.pt\:\-\-p-15 {
+      --content-pt: 15px;
+      --content-pr: 15px;
+      --content-pb: 15px;
+      --content-pl: 15px;
+    }
+
+    &.\-\-px-40,
+    &.p\:\-\-px-40,
+    &.pt\:\-\-px-40 {
+      --content-pr: 40px;
+      --content-pl: 40px;
+    }
+
+    &.\-\-px-30,
+    &.p\:\-\-px-30,
+    &.pt\:\-\-px-30 {
+      --content-pr: 30px;
+      --content-pl: 30px;
+    }
+
+    &.\-\-px-16,
+    &.p\:\-\-px-16,
+    &.pt\:\-\-px-16 {
+      --content-pr: 16px;
+      --content-pl: 16px;
+    }
+
+    &.\-\-py-30,
+    &.p\:\-\-py-30,
+    &.pt\:\-\-py-30 {
+      --content-pt: 30px;
+      --content-pb: 30px;
+    }
+
+    &.\-\-py-20,
+    &.p\:\-\-py-20,
+    &.pt\:\-\-py-20 {
+      --content-pt: 20px;
+      --content-pb: 20px;
+    }
+
+    &.\-\-pb-20,
+    &.p\:\-\-pb-20,
+    &.pt\:\-\-pb-20 {
+      --content-pb: 20px;
+    }
+
+    &.\-\-rounded-20,
+    &.p\:\-\-rounded-20,
+    &.pt\:\-\-rounded-20 {
+      --content-rounded-t: 20px;
+      --content-rounded-b: 20px;
+    }
+
+    &.\-\-rounded-10,
+    &.p\:\-\-rounded-10,
+    &.pt\:\-\-rounded-10 {
+      --content-rounded-t: 10px;
+      --content-rounded-b: 10px;
+    }
+
+    &.\-\-rounded-b-20,
+    &.p\:\-\-rounded-b-20,
+    &.pt\:\-\-rounded-b-20 {
+      --content-rounded-b: 20px;
+    }
+  }
+}
+
+@screen t {
+  .m-content {
+    &.\-\-p-24,
+    &.pt\:\-\-p-24,
+    &.tm\:\-\-p-24,
+    &.t\:\-\-p-24 {
+      --content-pt: 24px;
+      --content-pr: 24px;
+      --content-pb: 24px;
+      --content-pl: 24px;
+    }
+
+    &.\-\-p-15,
+    &.pt\:\-\-p-15,
+    &.tm\:\-\-p-15,
+    &.t\:\-\-p-15 {
+      --content-pt: 15px;
+      --content-pr: 15px;
+      --content-pb: 15px;
+      --content-pl: 15px;
+    }
+
+    &.\-\-px-16,
+    &.pt\:\-\-px-16,
+    &.tm\:\-\-px-16,
+    &.t\:\-\-px-16 {
+      --content-pr: 16px;
+      --content-pl: 16px;
+    }
+
+    &.\-\-px-40,
+    &.pt\:\-\-px-40,
+    &.tm\:\-\-px-40,
+    &.t\:\-\-px-40 {
+      --content-pr: 40px;
+      --content-pl: 40px;
+    }
+
+    &.\-\-px-30,
+    &.pt\:\-\-px-30,
+    &.tm\:\-\-px-30,
+    &.t\:\-\-px-30 {
+      --content-pr: 30px;
+      --content-pl: 30px;
+    }
+
+    &.\-\-py-30,
+    &.pt\:\-\-py-30,
+    &.tm\:\-\-py-30,
+    &.t\:\-\-py-30 {
+      --content-pt: 30px;
+      --content-pb: 30px;
+    }
+
+    &.\-\-py-20,
+    &.pt\:\-\-py-20,
+    &.tm\:\-\-py-20,
+    &.t\:\-\-py-20 {
+      --content-pt: 20px;
+      --content-pb: 20px;
+    }
+
+    &.\-\-pb-20,
+    &.pt\:\-\-pb-20,
+    &.tm\:\-\-pb-20,
+    &.t\:\-\-pb-20 {
+      --content-pb: 20px;
+    }
+
+    &.\-\-rounded-20,
+    &.pt\:\-\-rounded-20,
+    &.tm\:\-\-rounded-20,
+    &.t\:\-\-rounded-20 {
+      --content-rounded-t: 20px;
+      --content-rounded-b: 20px;
+    }
+
+    &.\-\-rounded-10,
+    &.pt\:\-\-rounded-10,
+    &.tm\:\-\-rounded-10,
+    &.t\:\-\-rounded-10 {
+      --content-rounded-t: 10px;
+      --content-rounded-b: 10px;
+    }
+
+    &.\-\-rounded-b-20,
+    &.pt\:\-\-rounded-b-20,
+    &.tm\:\-\-rounded-b-20,
+    &.t\:\-\-rounded-b-20 {
+      --content-rounded-b: 20px;
+    }
+  }
+}
+
+@screen m {
+  .m-content {
+    &.\-\-p-24,
+    &.tm\:\-\-p-24,
+    &.m\:\-\-p-24 {
+      --content-pt: 24px;
+      --content-pr: 24px;
+      --content-pb: 24px;
+      --content-pl: 24px;
+    }
+
+    &.\-\-p-15,
+    &.tm\:\-\-p-15,
+    &.m\:\-\-p-15 {
+      --content-pt: 15px;
+      --content-pr: 15px;
+      --content-pb: 15px;
+      --content-pl: 15px;
+    }
+
+    &.\-\-px-16,
+    &.tm\:\-\-px-16,
+    &.m\:\-\-px-16 {
+      --content-pr: 16px;
+      --content-pl: 16px;
+    }
+
+    &.\-\-px-40,
+    &.tm\:\-\-px-40,
+    &.m\:\-\-px-40 {
+      --content-pr: 40px;
+      --content-pl: 40px;
+    }
+
+    &.\-\-px-30,
+    &.tm\:\-\-px-30,
+    &.m\:\-\-px-30 {
+      --content-pr: 30px;
+      --content-pl: 30px;
+    }
+
+    &.\-\-py-30,
+    &.tm\:\-\-py-30,
+    &.m\:\-\-py-30 {
+      --content-pt: 30px;
+      --content-pb: 30px;
+    }
+
+    &.\-\-py-20,
+    &.tm\:\-\-py-20,
+    &.m\:\-\-py-20 {
+      --content-pt: 20px;
+      --content-pb: 20px;
+    }
+
+    &.\-\-pb-20,
+    &.tm\:\-\-pb-20,
+    &.m\:\-\-pb-20 {
+      --content-pb: 20px;
+    }
+
+    &.\-\-rounded-20,
+    &.tm\:\-\-rounded-20,
+    &.m\:\-\-rounded-20 {
+      --content-rounded-t: 20px;
+      --content-rounded-b: 20px;
+    }
+
+    &.\-\-rounded-10,
+    &.tm\:\-\-rounded-10,
+    &.m\:\-\-rounded-10 {
+      --content-rounded-t: 10px;
+      --content-rounded-b: 10px;
+    }
+
+    &.\-\-rounded-b-20,
+    &.tm\:\-\-rounded-b-20,
+    &.m\:\-\-rounded-b-20 {
+      --content-rounded-b: 20px;
+    }
+  }
+}

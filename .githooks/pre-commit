@@ -1,0 +1,59 @@
+#!/bin/sh
+# CSS 規範的最後一道關卡 —— 不依賴 dev server,也不依賴編輯器擴充。
+#
+#   1. 色票檔排序不對 → 自動排序並重新 git add(無害的純順序調整)
+#   2. 本次 staged 的 .vue / .css → 跑規範檢查,印紅色警告
+#
+# 只警告不阻擋 commit(與各專案的 .claude/hooks/cssGuard.js、.vite/css-guard.mjs 一致)——
+# 既有存量還沒清完,擋下來只會逼人加 --no-verify,反而讓守門機制形同虛設。
+#
+# ⚠️ 這個 repo 同時放 Official 與 Backstage,而 core.hooksPath 是 repo 層級的設定,
+#    只能指向一個目錄 —— 所以 hook 收在 repo 根共用一份,由這裡依 staged 路徑
+#    分派給各專案的 .tools/css/。沒有那套工具的專案會自動略過。
+#
+# 由 <專案>/.tools/install-git-hooks.mjs 設定 core.hooksPath 生效(npm postinstall 會跑)。
+
+RED='\033[31m'
+YELLOW='\033[33m'
+GREEN='\033[32m'
+RESET='\033[0m'
+
+# 本次 staged 的 .vue / .css(路徑相對 repo 根)
+STAGED=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(vue|css)$')
+
+[ -z "$STAGED" ] && exit 0
+
+# 依第一層目錄(= 專案)分組處理
+PROJECTS=$(echo "$STAGED" | cut -d/ -f1 | sort -u)
+
+for PROJECT in $PROJECTS; do
+  # 沒有這套 css 工具的專案直接略過
+  [ -f "$PROJECT/.tools/css/lint-css.mjs" ] || continue
+
+  # 這個專案本次 staged 的檔案,轉成相對專案目錄的路徑
+  REL=$(echo "$STAGED" | grep -E "^$PROJECT/" | sed "s|^$PROJECT/||")
+  [ -z "$REL" ] && continue
+
+  # --- 1. 色票檔自動排序 ----------------------------------------------------
+
+  for f in $(echo "$REL" | grep -E '^assets/css/_common/color[A-Za-z]*\.css$'); do
+    BEFORE=$(git hash-object "$PROJECT/$f")
+    (cd "$PROJECT" && node .tools/css/sort-color-css.mjs --write "$f" >/dev/null 2>&1)
+    AFTER=$(git hash-object "$PROJECT/$f")
+
+    if [ "$BEFORE" != "$AFTER" ]; then
+      git add "$PROJECT/$f"
+      printf "${GREEN}🔧 %s 排序不符規則,已自動重新排序並加入本次 commit。${RESET}\n" "$PROJECT/$f"
+    fi
+  done
+
+  # --- 2. 規範檢查(只看 staged 的檔案)-------------------------------------
+
+  # shellcheck disable=SC2086
+  if ! (cd "$PROJECT" && node .tools/css/lint-css.mjs $REL); then
+    printf "\n${YELLOW}⚠ 以上為 %s 本次 commit 檔案的 CSS 規範違規,commit 照常繼續。${RESET}\n" "$PROJECT"
+    printf "${YELLOW}  規範見 %s/.claude/rules/css-conventions.md${RESET}\n\n" "$PROJECT"
+  fi
+done
+
+exit 0

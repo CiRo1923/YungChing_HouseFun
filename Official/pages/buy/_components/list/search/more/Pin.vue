@@ -50,6 +50,9 @@ const onChange = () => {}
             label: item.label,
             value: item.value,
           }"
+          :setClass="{
+            element: 'p:text-[16px]',
+          }"
           @change="onTypeChange"
         />
       </li>
@@ -62,6 +65,9 @@ const onChange = () => {}
           :config="{
             label: item.label,
             value: item.value,
+          }"
+          :setClass="{
+            element: 'p:text-[16px]',
           }"
           @change="onChange"
         />

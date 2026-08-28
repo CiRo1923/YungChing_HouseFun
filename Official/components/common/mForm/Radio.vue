@@ -1,15 +1,16 @@
 ﻿<script setup>
-import { onDeepMerge } from '@js/_prototype.js'
-
-import { Field, ErrorMessage } from 'vee-validate'
-import useValidateEvents from './.composables/useValidateEvents.js'
-
 import '@css/_modules/common/mForm/variables.css'
 import '@css/_modules/common/mForm/selectionVariables.css'
 import '@css/_modules/common/mForm/radioVariables.css'
 import '@css/_modules/common/mForm/common.css'
 import '@css/_modules/common/mForm/selection.css'
 import '@css/_modules/common/mForm/radio.css'
+
+import useValidateEvents from './.composables/useValidateEvents.js'
+
+import { onDeepMerge } from '@js/_prototype.js'
+
+import { Field, ErrorMessage } from 'vee-validate'
 
 const emits = defineEmits(['update:modelValue', 'change'])
 const props = defineProps({
@@ -88,7 +89,7 @@ const onChange = () => {
 </script>
 
 <template>
-  <div class="m-form overflow-hidden" :class="setClass.main">
+  <div class="m-form" :class="setClass.main">
     <Field
       :name="props.name"
       type="radio"
@@ -97,12 +98,16 @@ const onChange = () => {
       v-bind="validateOn"
       v-slot="{ field, errorMessage }"
     >
-      <div class="m-form-container" :class="setClass.container">
+      <div
+        class="m-form-container"
+        :class="[{ '--no-label': !config.label }, setClass.container]"
+      >
         <label
-          class="m-form-element --radio relative inline-flex gap-x-[6px] leading-[1.4] p:text-[16px]"
+          class="m-form-element --radio"
           :class="[
-            config.align === 'top' ? 'items-baseline' : 'items-center',
-            config.isDisabled ? 'cursor-not-allowed' : 'cursor-pointer',
+            { '--align-top': config.align === 'top' },
+            { '--disabled': config.isDisabled },
+            { '--has-label': config.label || $slots.default },
             { '--error': errorMessage },
             setClass.element,
           ]"
@@ -112,12 +117,12 @@ const onChange = () => {
             v-bind="field"
             :value="config.value"
             :checked="isChecked"
-            class="m-form-type jFormValid sr-only"
+            class="m-form-type jFormValid"
             :disabled="config.isDisabled"
             @change="onChange"
           />
           <i
-            class="m-form-icon relative mt-[2px] h-[18px] w-[18px] shrink-0 self-start rounded-full border-[2px] transition-colors duration-300"
+            class="m-form-icon"
             :class="setClass.icon"
           />
           <slot>

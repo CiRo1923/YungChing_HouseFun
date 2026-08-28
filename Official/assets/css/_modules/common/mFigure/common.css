@@ -1,0 +1,76 @@
+/* mFigure(components/common/ImgSrc.vue)版型。
+   可調的尺寸與顏色走 var(),值定義在 variables.css;純結構性的置中、transition 直接寫。 */
+
+.m-figure {
+  img {
+    @apply transition-transform duration-300;
+  }
+
+  /* 沒有圖片來源時的佔位 —— 置中顯示 no_image.svg */
+  &.\-\-no-image {
+    @apply flex items-center justify-center bg-[--figure-no-image-bg-color];
+
+    img {
+      /* img 標籤帶了 height="100%",這裡要覆寫回 auto 才能等比縮放 */
+      @apply h-[auto] w-[--figure-no-image-img-w] max-w-[--figure-no-image-img-max-w];
+    }
+  }
+
+  /* 圖片載入失敗時的外層 */
+  &.\-\-error {
+    @apply flex items-center justify-center;
+  }
+}
+
+/* 圖片載入失敗(status 404)時的佔位 */
+.m-figure-error {
+  @apply flex items-center justify-center;
+}
+
+.m-figure-error-icon {
+  @apply h-[--figure-404-icon-size] max-h-[--figure-404-icon-max-size] w-[--figure-404-icon-size] max-w-[--figure-404-icon-max-size] text-[--figure-404-color];
+}
+
+/* 外層容器 hover 時圖片放大 —— 由使用端在父層掛 .group 觸發。 */
+.group:hover {
+  .m-figure {
+    &.group-hover\:\-\-image-scale {
+      img {
+        @apply scale-[--figure-image-scale];
+      }
+    }
+  }
+}
+
+/* 斷點對應 —— 各斷點該吃哪一組變數是固定的,屬於版型的一部分;
+   變數本身的值定義在 variables.css。 */
+
+@screen p {
+  .m-figure {
+    --figure-404-icon-size: var(--figure-404-icon-pc-size);
+    --figure-404-icon-max-size: var(--figure-404-icon-pc-max-size);
+    --figure-no-image-img-w: var(--figure-no-image-img-pc-w);
+    --figure-no-image-img-max-w: var(--figure-no-image-img-pc-max-w);
+    --figure-image-scale: var(--figure-image-pc-scale);
+  }
+}
+
+@screen t {
+  .m-figure {
+    --figure-404-icon-size: var(--figure-404-icon-tablet-size);
+    --figure-404-icon-max-size: var(--figure-404-icon-tablet-max-size);
+    --figure-no-image-img-w: var(--figure-no-image-img-tablet-w);
+    --figure-no-image-img-max-w: var(--figure-no-image-img-tablet-max-w);
+    --figure-image-scale: var(--figure-image-tablet-scale);
+  }
+}
+
+@screen m {
+  .m-figure {
+    --figure-404-icon-size: var(--figure-404-icon-mobile-size);
+    --figure-404-icon-max-size: var(--figure-404-icon-mobile-max-size);
+    --figure-no-image-img-w: var(--figure-no-image-img-mobile-w);
+    --figure-no-image-img-max-w: var(--figure-no-image-img-mobile-max-w);
+    --figure-image-scale: var(--figure-image-mobile-scale);
+  }
+}

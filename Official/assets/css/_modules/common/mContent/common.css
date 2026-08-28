@@ -1,0 +1,9 @@
+/* mContent(components/common/mContent.vue)版型。
+   值由 modifier 決定,定義在 variables.css。 */
+
+.m-content {
+  /* 內距四個方向、圓角上下各取各的變數 —— 不要用 p- / px- / py- / rounded- 的 shorthand,
+     那會讓覆寫關係取決於 tailwind 的輸出順序。
+     圓角建在 t / b 這層是因為使用端會單獨指定下方(--rounded-b-20)。 */
+  @apply rounded-b-[--content-rounded-b] rounded-t-[--content-rounded-t] bg-[--content-bg-color] pb-[--content-pb] pl-[--content-pl] pr-[--content-pr] pt-[--content-pt];
+}

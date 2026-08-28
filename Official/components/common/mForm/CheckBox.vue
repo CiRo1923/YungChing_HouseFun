@@ -1,14 +1,16 @@
 <script setup>
-import { onDeepMerge } from '@js/_prototype.js'
-import { Field, ErrorMessage } from 'vee-validate'
-import useValidateEvents from './.composables/useValidateEvents.js'
-
 import '@css/_modules/common/mForm/variables.css'
 import '@css/_modules/common/mForm/selectionVariables.css'
 import '@css/_modules/common/mForm/checkboxVariables.css'
 import '@css/_modules/common/mForm/common.css'
 import '@css/_modules/common/mForm/selection.css'
 import '@css/_modules/common/mForm/checkbox.css'
+
+import useValidateEvents from './.composables/useValidateEvents.js'
+
+import { onDeepMerge } from '@js/_prototype.js'
+
+import { Field, ErrorMessage } from 'vee-validate'
 
 const emits = defineEmits(['update:modelValue', 'change'])
 
@@ -246,7 +248,7 @@ const onChange = async () => {
 </script>
 
 <template>
-  <div class="m-form overflow-hidden" :class="setClass.main">
+  <div class="m-form" :class="setClass.main">
     <Field
       :name="props.name"
       type="checkbox"
@@ -259,13 +261,14 @@ const onChange = async () => {
     >
       <div
         class="m-form-container"
-        :class="[{ 'leading-none': !config.label }, setClass.container]"
+        :class="[{ '--no-label': !config.label }, setClass.container]"
       >
         <label
-          class="m-form-element --checkbox relative inline-flex gap-x-[6px] leading-[1.4]"
+          class="m-form-element --checkbox"
           :class="[
-            config.align === 'top' ? 'items-baseline' : 'items-center',
-            config.isDisabled ? 'cursor-not-allowed' : 'cursor-pointer',
+            { '--align-top': config.align === 'top' },
+            { '--disabled': config.isDisabled },
+            { '--has-label': config.label || $slots.default },
             { '--error': errorMessage || config.isError },
             setClass.element,
           ]"
@@ -274,7 +277,7 @@ const onChange = async () => {
             type="checkbox"
             v-bind="field"
             :value="config.value"
-            class="m-form-type jFormValid sr-only"
+            class="m-form-type jFormValid"
             :disabled="config.isDisabled"
             @change="onChange"
             v-if="config.mode === 'group'"
@@ -285,7 +288,7 @@ const onChange = async () => {
             v-bind="field"
             :value="true"
             :unchecked-value="false"
-            class="m-form-type jFormValid sr-only"
+            class="m-form-type jFormValid"
             :disabled="config.isDisabled"
             @change="onChange"
             v-else
@@ -293,18 +296,13 @@ const onChange = async () => {
 
           <CommonSvgIcon
             icon="icon_check_solid"
-            class="m-form-icon relative shrink-0 self-start border-solid transition-colors duration-300"
-            :class="[
-              {
-                'mt-[2px]': config.label || $slots.default,
-              },
-              setClass.icon,
-            ]"
+            class="m-form-icon"
+            :class="setClass.icon"
           />
 
           <slot>
             <em
-              class="m-form-label transition-colors duration-300"
+              class="m-form-label"
               :class="setClass.label"
               v-if="config.label"
             >

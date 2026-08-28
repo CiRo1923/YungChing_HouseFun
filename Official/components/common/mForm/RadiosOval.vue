@@ -1,10 +1,14 @@
 <script setup>
 import '@css/_modules/common/mForm/variables.css'
+import '@css/_modules/common/mForm/radiosOvalVariables.css'
 import '@css/_modules/common/mForm/common.css'
+import '@css/_modules/common/mForm/radiosOval.css'
+
+import useValidateEvents from './.composables/useValidateEvents.js'
+
 import '@js/_validation.js'
 
 import { Field, ErrorMessage } from 'vee-validate'
-import useValidateEvents from './.composables/useValidateEvents.js'
 
 const emits = defineEmits(['update:modelValue', 'change'])
 const props = defineProps({
@@ -68,6 +72,7 @@ const setClass = computed(() => {
       container: '',
       element: '',
       type: '',
+      label: '',
       error: '',
     },
     ...props.setClass,
@@ -97,9 +102,9 @@ onSelected()
 </script>
 
 <template>
-  <div class="m-form --radios-oval overflow-hidden" :class="setClass.main">
+  <div class="m-form --radios-oval" :class="setClass.main">
     <ul
-      class="m-form-radios inline-flex overflow-hidden rounded-[4px] border-[1px] bg-[--white]"
+      class="m-form-radios"
       :class="setClass.radios"
     >
       <li
@@ -110,7 +115,7 @@ onSelected()
       >
         <!-- '--checked': item[config.schema.value] == selected 用 == 會有形態別問題 '1' (string) !== 1 (int) -->
         <label
-          class="m-form-element relative flex h-full w-full cursor-pointer items-center justify-center transition-colors duration-300 tm:gap-x-[3px] p:gap-x-[5px]"
+          class="m-form-element"
           :class="[
             {
               '--checked': item[config.schema.value] == selected,
@@ -123,17 +128,17 @@ onSelected()
             :name="props.name"
             v-model="selected"
             :value="item[config.schema.value]"
-            class="m-form-type sr-only"
+            class="m-form-type"
             :class="setClass.type"
             @change="onChange(item)"
           />
           <!-- v-if="item[config.schema.value] == selected" 用 == 會有形態別問題 '1' (string) !== 1 (int) -->
           <CommonSvgIcon
             icon="icon_check_solid"
-            class="m-form-icon h-[16px] w-[16px]"
+            class="m-form-icon"
             v-if="item[config.schema.value] == selected"
           />
-          <em class="m-form-label text-[16px]">{{ item[config.schema.label] }}</em>
+          <em class="m-form-label" :class="setClass.label">{{ item[config.schema.label] }}</em>
         </label>
       </li>
     </ul>
@@ -157,126 +162,3 @@ onSelected()
     </ErrorMessage>
   </div>
 </template>
-<style lang="postcss">
-.m-form {
-  &.\-\-radios-oval {
-    &.\-\-border {
-      .m-form-radios {
-        @apply border-[--gray-ccce];
-      }
-    }
-
-    &:not(.\-\-border) {
-      .m-form-radios {
-        @apply border-transparent;
-      }
-    }
-
-    .m-form-container {
-      &:not(:first-child) {
-        @apply border-l-[1px] border-l-[--gray-ccce];
-      }
-
-      &:not(:last-child) {
-        @apply border-r-[1px] border-r-[--gray-ccce];
-      }
-    }
-
-    .m-form-element {
-      &:not(&.\-\-checked) {
-        @apply bg-transparent;
-      }
-
-      &.\-\-checked {
-        @apply bg-[--green-8b0d] text-[--white];
-      }
-    }
-  }
-}
-
-@screen p {
-  .m-form {
-    &.\-\-radios-oval {
-      &.\-\-px-5,
-      &.p\:\-\-px-5,
-      &.pt\:\-\-px-5 {
-        .m-form-element {
-          @apply px-[5px];
-        }
-      }
-
-      &.\-\-h-45,
-      &.p\:\-\-h-45,
-      &.pt\:\-\-h-45 {
-        .m-form-radios {
-          @apply h-[45px];
-        }
-      }
-
-      /* .m-form-element {
-        &:not(&.\-\-checked) {
-          @apply px-[25px];
-        }
-      } */
-    }
-  }
-}
-
-/* @screen tm {
-  .m-form {
-    &.\-\-radios-oval {
-      .m-form-element {
-        &:not(&.\-\-checked) {
-          @apply pl-[19px] pr-[20px];
-        }
-      }
-    }
-  }
-} */
-
-@screen t {
-  .m-form {
-    &.\-\-radios-oval {
-      &.\-\-px-5,
-      &.pt\:\-\-px-5,
-      &.tm\:\-\-px-5,
-      &.t\:\-\-px-5 {
-        .m-form-element {
-          @apply px-[5px];
-        }
-      }
-
-      &.\-\-h-45,
-      &.pt\:\-\-h-45,
-      &.tm\:\-\-h-45,
-      &.t\:\-\-h-45 {
-        .m-form-radios {
-          @apply h-[45px];
-        }
-      }
-    }
-  }
-}
-
-@screen m {
-  .m-form {
-    &.\-\-radios-oval {
-      &.\-\-px-5,
-      &.tm\:\-\-px-5,
-      &.m\:\-\-px-5 {
-        .m-form-element {
-          @apply px-[5px];
-        }
-      }
-
-      &.\-\-h-45,
-      &.tm\:\-\-h-45,
-      &.m\:\-\-h-45 {
-        .m-form-radios {
-          @apply h-[45px];
-        }
-      }
-    }
-  }
-}
-</style>

@@ -91,6 +91,9 @@ onUnmounted(() => {
               label: item.text,
               value: item.code,
             }"
+            :setClass="{
+              element: 'p:text-[16px]',
+            }"
             @change="onChange"
           />
         </li>

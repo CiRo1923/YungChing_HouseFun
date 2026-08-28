@@ -1,4 +1,7 @@
 <script setup>
+import '@css/_modules/common/mForm/labelVariables.css'
+import '@css/_modules/common/mForm/label.css'
+
 const props = defineProps({
   label: {
     type: String,
@@ -35,13 +38,3 @@ const dataRequired = computed(() => {
     <slot>{{ props.label }}</slot>
   </component>
 </template>
-
-<style lang="postcss">
-.m-label {
-  &[data-required]:not([data-required='']) {
-    &::before {
-      @apply ml-[2px] text-[--orange-e646] content-[attr(data-required)];
-    }
-  }
-}
-</style>

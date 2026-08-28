@@ -1,0 +1,98 @@
+/* mContainer(components/common/mContainer.vue)的變數。
+   最大寬與左右內距各處都不同,由使用端逐頁指定 → 開 modifier。 */
+
+:root {
+  /* base —— modifier 沒帶到時的值。
+     px 的 base 一定要給 0:tailwind 的 px-[--x] 會展開成 padding-left / padding-right
+     兩條,變數未定義時兩條一起失效,畫面完全沒效果也不會報錯。 */
+  --container-max-w: none;
+  --container-px: 0;
+}
+
+@screen p {
+  .m-container {
+    &.\-\-max-w-1220,
+    &.p\:\-\-max-w-1220,
+    &.pt\:\-\-max-w-1220 {
+      --container-max-w: 1220px;
+    }
+
+    &.\-\-max-w-500,
+    &.p\:\-\-max-w-500,
+    &.pt\:\-\-max-w-500 {
+      --container-max-w: 500px;
+    }
+
+    &.\-\-max-w-400,
+    &.p\:\-\-max-w-400,
+    &.pt\:\-\-max-w-400 {
+      --container-max-w: 400px;
+    }
+
+    &.\-\-px-10,
+    &.p\:\-\-px-10,
+    &.pt\:\-\-px-10 {
+      --container-px: 10px;
+    }
+  }
+}
+
+@screen t {
+  .m-container {
+    &.\-\-max-w-1220,
+    &.pt\:\-\-max-w-1220,
+    &.tm\:\-\-max-w-1220,
+    &.t\:\-\-max-w-1220 {
+      --container-max-w: 1220px;
+    }
+
+    &.\-\-max-w-500,
+    &.pt\:\-\-max-w-500,
+    &.tm\:\-\-max-w-500,
+    &.t\:\-\-max-w-500 {
+      --container-max-w: 500px;
+    }
+
+    &.\-\-max-w-400,
+    &.pt\:\-\-max-w-400,
+    &.tm\:\-\-max-w-400,
+    &.t\:\-\-max-w-400 {
+      --container-max-w: 400px;
+    }
+
+    &.\-\-px-10,
+    &.pt\:\-\-px-10,
+    &.tm\:\-\-px-10,
+    &.t\:\-\-px-10 {
+      --container-px: 10px;
+    }
+  }
+}
+
+@screen m {
+  .m-container {
+    &.\-\-max-w-1220,
+    &.tm\:\-\-max-w-1220,
+    &.m\:\-\-max-w-1220 {
+      --container-max-w: 1220px;
+    }
+
+    &.\-\-max-w-500,
+    &.tm\:\-\-max-w-500,
+    &.m\:\-\-max-w-500 {
+      --container-max-w: 500px;
+    }
+
+    &.\-\-max-w-400,
+    &.tm\:\-\-max-w-400,
+    &.m\:\-\-max-w-400 {
+      --container-max-w: 400px;
+    }
+
+    &.\-\-px-10,
+    &.tm\:\-\-px-10,
+    &.m\:\-\-px-10 {
+      --container-px: 10px;
+    }
+  }
+}

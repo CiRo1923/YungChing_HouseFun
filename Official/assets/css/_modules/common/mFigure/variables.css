@@ -1,0 +1,36 @@
+/* mFigure(components/common/ImgSrc.vue)的變數預設值。
+   全專案都是同一種樣式、沒有逐頁指定的需求,所以不開 modifier,只分 pc / tablet / mobile。
+   唯一的 modifier 是 group-hover:--image-scale(外層容器 hover 時放大圖片)。 */
+
+:root {
+  /* 圖片載入失敗(status 404)的佔位 ------------------------------------- */
+
+  --figure-404-color: var(--white);
+
+  /* 圖示是正方形,寬高同值,所以用 size 一個變數帶兩個屬性。 */
+  --figure-404-icon-pc-size: 30%;
+  --figure-404-icon-tablet-size: 30%;
+  --figure-404-icon-mobile-size: 30%;
+
+  --figure-404-icon-pc-max-size: 120px;
+  --figure-404-icon-tablet-max-size: 120px;
+  --figure-404-icon-mobile-max-size: 120px;
+
+  /* 沒有圖片來源的佔位 --------------------------------------------------- */
+
+  --figure-no-image-bg-color: var(--gray-f2);
+
+  --figure-no-image-img-pc-w: 50%;
+  --figure-no-image-img-tablet-w: 50%;
+  --figure-no-image-img-mobile-w: 50%;
+
+  --figure-no-image-img-pc-max-w: 250px;
+  --figure-no-image-img-tablet-max-w: 250px;
+  --figure-no-image-img-mobile-max-w: 250px;
+
+  /* 外層 .group hover 時的圖片放大倍率 ----------------------------------- */
+
+  --figure-image-pc-scale: 1.1;
+  --figure-image-tablet-scale: 1.1;
+  --figure-image-mobile-scale: 1.1;
+}

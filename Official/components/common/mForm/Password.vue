@@ -3,12 +3,13 @@ import '@css/_modules/common/mForm/variables.css'
 import '@css/_modules/common/mForm/passwordVariables.css'
 import '@css/_modules/common/mForm/common.css'
 import '@css/_modules/common/mForm/password.css'
-import { onDeepMerge } from '@js/_prototype.js'
 
+import useValidateEvents from './.composables/useValidateEvents.js'
+
+import { onDeepMerge } from '@js/_prototype.js'
 import '@js/_validation.js'
 
 import { Field, ErrorMessage } from 'vee-validate'
-import useValidateEvents from './.composables/useValidateEvents.js'
 
 const emits = defineEmits(['update:modelValue', 'focusin', 'blur', 'input', 'enter'])
 
@@ -147,7 +148,7 @@ watch(
 </script>
 
 <template>
-  <div class="m-form overflow-hidden" :class="setClass.main">
+  <div class="m-form" :class="setClass.main">
     <Field
       v-slot="{ field, errorMessage }"
       v-model="model"
@@ -156,7 +157,7 @@ watch(
       :rules="config.isDisabled ? '' : props.rules"
       v-bind="validateOn"
     >
-      <div class="m-form-container overflow-hidden" :class="setClass.container">
+      <div class="m-form-container" :class="setClass.container">
         <div
           class="m-form-element --password"
           :class="[
@@ -169,7 +170,7 @@ watch(
         >
           <div
             v-if="$slots.frontAssist"
-            class="m-form-assist shrink-0"
+            class="m-form-assist"
             :class="setClass.frontAssist"
           >
             <slot name="frontAssist" />
@@ -177,7 +178,7 @@ watch(
           <input
             :id="props.name"
             :type="inputType"
-            class="m-form-type min-w-0 grow leading-[1]"
+            class="m-form-type"
             :class="setClass.type"
             v-bind="onBind(field)"
             :minlength="config.minlength || config.length"
@@ -215,11 +216,11 @@ watch(
             />
           </button>
 
-          <div v-if="$slots.rearAssist" class="m-form-assist shrink-0" :class="setClass.rearAssist">
+          <div v-if="$slots.rearAssist" class="m-form-assist" :class="setClass.rearAssist">
             <slot name="rearAssist" />
           </div>
         </div>
-        <small v-if="$slots.suffix" class="m-form-suffix shrink-0" :class="setClass.suffix">
+        <small v-if="$slots.suffix" class="m-form-suffix" :class="setClass.suffix">
           <slot
             name="suffix"
             :maxlength="config.length || config.maxlength"

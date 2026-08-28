@@ -1,16 +1,4 @@
 .m-anchor {
-  /* padding 變數 base 預設:production 壓縮會把 padding-* 合併成 shorthand
-     `padding: var(--anchor-py) var(--anchor-px)`,shorthand 內任一 var() 未定義
-     (元素只帶 --px-XX、沒帶 --py-XX)就會使整條 padding 失效歸零。base 給 0 → 沒對應
-     modifier 時等同無 padding,且 shorthand 永遠有有效值;modifier(.--px-XX / .--py-XX)再覆蓋。 */
-  --anchor-px: 0;
-  --anchor-py: 0;
-
-  /* rounded 同上:base 給 0(等同無圓角),.--rounded-XX 再覆蓋成實際值。
-     直接寫在 base 而不綁一個 .--rounded 開關 —— 圓角大小已由 modifier 決定,
-     沒帶 modifier 就是 0,不需要額外的「要不要圓角」旗標。 */
-  --anchor-rounded: 0;
-
   border-width: var(--anchor-border);
 
   @apply inline-flex h-[--anchor-h] items-center rounded-[--anchor-rounded] px-[--anchor-px] py-[--anchor-py] tracking-[0.06em] transition-colors duration-300;

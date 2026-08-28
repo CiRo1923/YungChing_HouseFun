@@ -15,17 +15,37 @@
   --form-select-dropdown-tablet-rounded: 4px;
   --form-select-dropdown-mobile-rounded: 4px;
 
-  --form-select-dropdown-pc-shadow: 0px 4px 24px 0px #02041614, 0px 2px 16px -8px #02041633;
-  --form-select-dropdown-tablet-shadow: 0px 4px 24px 0px #02041614, 0px 2px 16px -8px #02041633;
-  --form-select-dropdown-mobile-shadow: 0px 4px 24px 0px #02041614, 0px 2px 16px -8px #02041633;
+  --form-select-dropdown-pc-shadow: 0px 4px 24px 0px var(--blue-001614), 0px 2px 16px -8px var(--blue-001633);
+  --form-select-dropdown-tablet-shadow: 0px 4px 24px 0px var(--blue-001614), 0px 2px 16px -8px var(--blue-001633);
+  --form-select-dropdown-mobile-shadow: 0px 4px 24px 0px var(--blue-001614), 0px 2px 16px -8px var(--blue-001633);
 
-  --form-select-dropdown-container-pc-mx: 1px;
-  --form-select-dropdown-container-tablet-mx: 1px;
-  --form-select-dropdown-container-mobile-mx: 1px;
+  --form-select-dropdown-container-pc-px: 1px;
+  --form-select-dropdown-container-tablet-px: 1px;
+  --form-select-dropdown-container-mobile-px: 1px;
 
   --form-select-dropdown-container-pc-py: 0;
   --form-select-dropdown-container-tablet-py: 0;
   --form-select-dropdown-container-mobile-py: 0;
+
+  --form-select-dropdown-container-bg-color: var(--white);
+
+  /* dropdown 的選項按鈕 —— 命名對齊 autocompleteVariables.css 那組 */
+  --form-select-dropdown-button-pc-px: 8px;
+  --form-select-dropdown-button-tablet-px: 8px;
+  --form-select-dropdown-button-mobile-px: 8px;
+
+  /* 選項之間的分隔線(畫在 button 的 ::after) */
+  --form-select-dropdown-button-pc-border: 1px;
+  --form-select-dropdown-button-tablet-border: 1px;
+  --form-select-dropdown-button-mobile-border: 1px;
+
+  --form-select-dropdown-button-bg-color: var(--gray-e5);
+  --form-select-dropdown-button-active-bg-color: var(--orange-feea);
+  --form-select-dropdown-button-disabled-color: var(--gray-334d);
+
+  --form-select-dropdown-label-pc-py: 8px;
+  --form-select-dropdown-label-tablet-py: 8px;
+  --form-select-dropdown-label-mobile-py: 8px;
 
   --form-select-elment-icon-color: var(--gray-999);
   --form-select-elment-focus-icon-color: var(--green-8b0d);
@@ -34,7 +54,7 @@
 }
 
 @screen p {
-  .m-select-dropdown {
+  .m-form-select-dropdown {
     &.\-\-rounded,
     &.p\:\-\-rounded,
     &.pt\:\-\-rounded {
@@ -44,13 +64,13 @@
     &.\-\-px-30,
     &.p\:\-\-px-30,
     &.pt\:\-\-px-30 {
-      --form-select-dropdown-container-mx: 30px;
+      --form-select-dropdown-container-px: 30px;
     }
 
     &.\-\-px-20,
     &.p\:\-\-px-20,
     &.pt\:\-\-px-20 {
-      --form-select-dropdown-container-mx: 20px;
+      --form-select-dropdown-container-px: 20px;
     }
 
     &.\-\-py-20,
@@ -62,7 +82,7 @@
 }
 
 @screen t {
-  .m-select-dropdown {
+  .m-form-select-dropdown {
     &.\-\-rounded,
     &.pt\:\-\-rounded,
     &.tm\:\-\-rounded,
@@ -74,14 +94,14 @@
     &.pt\:\-\-px-30,
     &.tm\:\-\-px-30,
     &.t\:\-\-px-30 {
-      --form-select-dropdown-container-mx: 30px;
+      --form-select-dropdown-container-px: 30px;
     }
 
     &.\-\-px-20,
     &.pt\:\-\-px-20,
     &.tm\:\-\-px-20,
     &.t\:\-\-px-20 {
-      --form-select-dropdown-container-mx: 20px;
+      --form-select-dropdown-container-px: 20px;
     }
 
     &.\-\-py-20,
@@ -94,7 +114,7 @@
 }
 
 @screen m {
-  .m-select-dropdown {
+  .m-form-select-dropdown {
     &.\-\-rounded,
     &.tm\:\-\-rounded,
     &.m\:\-\-rounded {
@@ -104,13 +124,13 @@
     &.\-\-px-30,
     &.tm\:\-\-px-30,
     &.m\:\-\-px-30 {
-      --form-select-dropdown-container-mx: 30px;
+      --form-select-dropdown-container-px: 30px;
     }
 
     &.\-\-px-20,
     &.tm\:\-\-px-20,
     &.m\:\-\-px-20 {
-      --form-select-dropdown-container-mx: 20px;
+      --form-select-dropdown-container-px: 20px;
     }
 
     &.\-\-py-20,

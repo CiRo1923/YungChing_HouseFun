@@ -1,0 +1,68 @@
+/* mForm 的 textarea 變體 —— 原本在 TextArea.vue 的 <style> 區塊裡。
+   只有「能不能拉伸」這一個開關,沒有值要調,所以不需要 textareaVariables.css。 */
+
+textarea.m-form-type {
+  @apply resize-none;
+}
+
+@screen p {
+  .m-form {
+    &.\-\-resize-x,
+    &.p\:\-\-resize-x,
+    &.pt\:\-\-resize-x {
+      textarea.m-form-type {
+        @apply resize-x;
+      }
+    }
+
+    &.\-\-resize-y,
+    &.p\:\-\-resize-y,
+    &.pt\:\-\-resize-y {
+      textarea.m-form-type {
+        @apply resize-y;
+      }
+    }
+  }
+}
+
+@screen t {
+  .m-form {
+    &.\-\-resize-x,
+    &.pt\:\-\-resize-x,
+    &.tm\:\-\-resize-x,
+    &.t\:\-\-resize-x {
+      textarea.m-form-type {
+        @apply resize-x;
+      }
+    }
+
+    &.\-\-resize-y,
+    &.pt\:\-\-resize-y,
+    &.tm\:\-\-resize-y,
+    &.t\:\-\-resize-y {
+      textarea.m-form-type {
+        @apply resize-y;
+      }
+    }
+  }
+}
+
+@screen m {
+  .m-form {
+    &.\-\-resize-x,
+    &.tm\:\-\-resize-x,
+    &.m\:\-\-resize-x {
+      textarea.m-form-type {
+        @apply resize-x;
+      }
+    }
+
+    &.\-\-resize-y,
+    &.tm\:\-\-resize-y,
+    &.m\:\-\-resize-y {
+      textarea.m-form-type {
+        @apply resize-y;
+      }
+    }
+  }
+}

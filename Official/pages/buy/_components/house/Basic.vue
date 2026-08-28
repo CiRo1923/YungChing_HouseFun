@@ -19,7 +19,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <CommonMContent class="pt:--rounded-20 p:--p-24 t:--p-15 m:rounded-b-[20px]">
+  <CommonMContent class="pt:--rounded-20 p:--p-24 t:--p-15 m:--rounded-b-20">
     <div class="t:gap-x-[10px] pt:flex p:gap-x-[25px]">
       <div
         class="m:flex m:flex-col-reverse t:w-[380px] t:space-y-[10px] pt:shrink-0 p:w-[760px] p:space-y-[15px]"

@@ -4,10 +4,11 @@ import '@css/_modules/common/mForm/autocompleteVariables.css'
 import '@css/_modules/common/mForm/common.css'
 import '@css/_modules/common/mForm/autocomplete.css'
 
-import { Field, ErrorMessage } from 'vee-validate'
 import { useInputTextCore } from './.composables/useInputTextCore.js'
 import useValidateEvents from './.composables/useValidateEvents.js'
 import { useDropdownCore } from './.composables/useDropdownCore.js'
+
+import { Field, ErrorMessage } from 'vee-validate'
 
 const emits = defineEmits(['change', 'input', 'update:modelValue'])
 const props = defineProps({
@@ -91,6 +92,7 @@ const defaultSetClass = {
   error: '',
   dropdown: '',
   dropdownContainer: '',
+  dropdownLabel: '',
 }
 const { config, setClass } = useInputTextCore(props, {
   defaultConfig,
@@ -392,7 +394,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="m-form overflow-hidden" :class="setClass.main">
+  <div class="m-form" :class="setClass.main">
     <Field
       :name="props.name"
       :rules="props.rules"
@@ -445,7 +447,7 @@ onUnmounted(() => {
     </Field>
     <ErrorMessage
       as="span"
-      class="m-autocomplete-error"
+      class="m-form-autocomplete-error"
       :class="setClass.error"
       :name="props.name"
       v-slot="{ message }"
@@ -456,36 +458,36 @@ onUnmounted(() => {
   <Teleport to="body">
     <Transition name="autocomplete" @afterLeave="onCloseDropdown" appear>
       <div
-        class="m-autocomplete-dropdown"
+        class="m-form-autocomplete-dropdown"
         :class="setClass.dropdown"
         ref="dropdownRef"
         v-if="isActive && dropdownItems && !config.isDisabled"
       >
         <div
-          class="m-autocomplete-dropdown-container"
+          class="m-form-autocomplete-dropdown-container"
           :class="setClass.dropdownContainer"
           ref="dropdownContainerRef"
         >
-          <div class="m-autocomplete-dropdown-no-data" v-if="dropdownItems.length === 0">
+          <div class="m-form-autocomplete-dropdown-no-data" v-if="dropdownItems.length === 0">
             <p>{{ isWaiting ? config.waitMessage : config.noResult }}</p>
           </div>
-          <ul class="m-autocomplete-dropdown-body scrollbar --y" v-else>
+          <ul class="m-form-autocomplete-dropdown-body scrollbar --y" v-else>
             <li
-              class="m-autocomplete-dropdown-item"
+              class="m-form-autocomplete-dropdown-item"
               v-for="(item, index) in dropdownItems"
               :key="`${item}_${index}`"
               ref="dropdownItemRef"
             >
               <button
                 type="button"
-                class="m-autocomplete-dropdown-button"
+                class="m-form-autocomplete-dropdown-button"
                 :class="{
                   '--active': index === selectedIndex,
                 }"
                 @mousedown="onDropdownItemMousedown"
                 @click="onDropdownItemClick(item)"
               >
-                <em class="m-autocomplete-dropdown-label">
+                <em class="m-form-autocomplete-dropdown-label" :class="setClass.dropdownLabel">
                   <slot name="option" :item="item">
                     {{ item[config.schema.label] }}
                   </slot>
@@ -499,4 +501,3 @@ onUnmounted(() => {
   </Teleport>
 </template>
 
-<style lang="postcss"></style>

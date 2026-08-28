@@ -7,6 +7,7 @@ import SvgSpritemapDevPlugin, {
   SvgSpritemapBuildPlugin,
   spritemapRoute as devSpritemapRoute,
 } from './.vite/svg-spritemap.mjs'
+import CssGuardPlugin from './.vite/css-guard.mjs'
 import { getPageComponentDirs } from './.tools/page-component-dirs'
 import { getStoreComposableImports, getStoreImports } from './.tools/store-composable-imports'
 import { ViteImageOptimizer } from 'vite-plugin-image-optimizer'
@@ -23,6 +24,8 @@ const imageAssetDir = CONFIG.imgs.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace
 const imageAssetInclude = new RegExp(`${imageAssetDir}/(?!svg/spritemap\\.svg$)`)
 
 export default defineNuxtConfig({
+  // 鎖定 Nuxt 的預設行為基準日 —— 不設會 fallback 到 2025-07-15 並每次啟動都跳 NUXT_B5001 警告。
+  compatibilityDate: '2026-08-27',
   // 開發除錯面板放在 .dev/(非 plugins/ 目錄 → Nuxt 不會自動掃描),需於此明示載入進入點。
   // 好處:core.js 不必被 ignore,Vite 會照常監看它 → 改 core 只要 F5/HMR 即生效,不必重啟 dev。
   //
@@ -178,6 +181,8 @@ export default defineNuxtConfig({
       },
     },
     plugins: [
+      // 存檔時檢查 CSS 規範:色票檔自動排序,其他檔案印警告(見 .claude/rules/css-conventions.md)
+      CssGuardPlugin() as never,
       SvgSpritemapBuildPlugin(CONFIG.svg, `${CONFIG.imgs}/svg/spritemap.svg`) as never,
       SvgSpritemapDevPlugin(CONFIG.svg) as never,
       ViteImageOptimizer({

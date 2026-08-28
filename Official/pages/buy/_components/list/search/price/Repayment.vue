@@ -109,6 +109,7 @@ onHousePrice()
           main: '--border --px-5 --h-45',
           radios: 'w-full',
           container: 'flex-1',
+          label: 'text-[16px]',
         }"
         @change="onHousePrice"
       />

@@ -3,14 +3,14 @@ import '@css/_modules/common/mForm/variables.css'
 import '@css/_modules/common/mForm/common.css'
 import '@css/_modules/common/mForm/inputText.css'
 
-import { numberComma, onToFixed } from '@js/_prototype.js'
+import { useInputTextCore } from './.composables/useInputTextCore.js'
+import useValidateEvents from './.composables/useValidateEvents.js'
 
+import { numberComma, onToFixed } from '@js/_prototype.js'
 import '@js/_validation.js'
 // import { userStore } from '@store/user.js'
 
 import { Field, ErrorMessage } from 'vee-validate'
-import { useInputTextCore } from './.composables/useInputTextCore.js'
-import useValidateEvents from './.composables/useValidateEvents.js'
 
 // const user = userStore()
 const emits = defineEmits([

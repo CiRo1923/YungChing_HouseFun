@@ -1,8 +1,9 @@
 <script setup>
-import { onDeepMerge } from '@js/_prototype.js'
 import useChartScale from './.composables/useChartScale.js'
 import useChartPath from './.composables/useChartPath.js'
 import useChartFill from './.composables/useChartFill.js'
+
+import { onDeepMerge } from '@js/_prototype.js'
 
 /**
  * Highcharts 風格的折線圖元件（純 SVG、零依賴）。

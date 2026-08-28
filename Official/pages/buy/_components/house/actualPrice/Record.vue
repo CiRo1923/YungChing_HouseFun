@@ -22,7 +22,7 @@ const props = defineProps({
         icon: 'chevron_right',
       }"
       :setClass="{
-        main: 'gap-x-[3px] text-[--gray-999] underline tm:shrink-0',
+        main: '--text-gray-999 gap-x-[3px] underline tm:shrink-0',
         text: 'text-[14px]',
         icon: 'h-[16px] w-[16px] p-[2px]',
       }"

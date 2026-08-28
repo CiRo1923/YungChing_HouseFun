@@ -1,18 +1,23 @@
+/* checkbox 專屬樣式 —— 方框 + 勾號。
+   共用結構(排列、間距、隱藏原生 input、勾選框尺寸)在 selection.css。 */
+
 .m-form-element {
   &.\-\-checkbox {
     &.\-\-error {
-      --form-checkbox-color: var(--form-checkbox-error-color);
+      --form-checkbox-label-color: var(--form-checkbox-label-error-color);
       --form-checkbox-icon-border-color: var(--form-checkbox-icon-border-error-color);
     }
 
     .m-form-type {
       &:checked {
-        & + .m-form-icon {
-          --form-checkbox-color: var(--green-8b0d);
-          --form-checkbox-icon-border-color: var(--form-checkbox-icon-border-checked-color);
+        /* 文字用兄弟選擇器 —— 變數設在 .m-form-icon 上的話,旁邊的 label 取不到 */
+        & ~ .m-form-label {
+          --form-checkbox-label-color: var(--form-checkbox-label-checked-color);
         }
 
         & + .m-form-icon {
+          --form-checkbox-icon-border-color: var(--form-checkbox-icon-border-checked-color);
+
           > use {
             @apply opacity-100;
           }
@@ -21,14 +26,15 @@
     }
 
     .m-form-label {
-      @apply text-[--form-checkbox-color];
+      @apply text-[--form-checkbox-label-color] transition-colors duration-300;
     }
 
     .m-form-icon {
       border-width: var(--form-checkbox-icon-border);
 
-      @apply rounded-[--form-checkbox-icon-pc-rounded] border-[--form-checkbox-icon-border-color] text-[--form-checkbox-icon-color];
+      @apply rounded-[--form-checkbox-icon-rounded] border-solid border-[--form-checkbox-icon-border-color] text-[--form-checkbox-icon-color];
 
+      /* 勾號預設藏起來,:checked 時淡入 */
       > use {
         @apply opacity-0 transition-opacity duration-300;
       }

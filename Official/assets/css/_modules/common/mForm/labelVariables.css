@@ -1,0 +1,15 @@
+/* mForm 的 label 變體專屬變數。
+
+   ⚠️ class 是 `.m-label` 不是 `.m-form-label` —— `.m-form-label` 已經被
+   CheckBox / Radio / RadiosOval 用在「選項文字」上,兩者是不同元素,不能合併命名。
+
+   字級不定在這裡 —— 欄位標題會有大有小,由使用端 setClass 傳 tailwind class。 */
+
+:root {
+  /* 必填標記(data-required 的內容,預設是 *) */
+  --form-label-required-color: var(--orange-e646);
+
+  --form-label-required-pc-ml: 2px;
+  --form-label-required-tablet-ml: 2px;
+  --form-label-required-mobile-ml: 2px;
+}

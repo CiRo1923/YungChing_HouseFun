@@ -1,1 +1,72 @@
-/* checkbox / radio 共用 selection 樣式 */
+/* checkbox / radio 的**群組共用版型**。
+   值定義在 selectionVariables.css;各自的外框造型(圓角 / 圓形、勾號 / 圓點)在
+   checkbox.css 與 radio.css。 */
+
+/* 沒有文字時不撐行高 */
+.m-form-container {
+  &.\-\-no-label {
+    @apply leading-none;
+  }
+}
+
+.m-form-element {
+  &.\-\-checkbox,
+  &.\-\-radio {
+    @apply relative inline-flex items-center gap-x-[--form-selection-gap-x] leading-[1.4];
+
+    /* 文字採上緣對齊(多行文字時勾選框跟第一行對齊) */
+    &.\-\-align-top {
+      @apply items-baseline;
+    }
+
+    &.\-\-disabled {
+      @apply cursor-not-allowed;
+    }
+
+    &:not(.\-\-disabled) {
+      @apply cursor-pointer;
+    }
+
+    /* 原生 input 只留給鍵盤與螢幕閱讀器,外觀由 .m-form-icon 畫 */
+    .m-form-type {
+      @apply sr-only;
+    }
+
+    .m-form-icon {
+      @apply relative h-[--form-selection-icon-size] w-[--form-selection-icon-size] shrink-0 self-start transition-colors duration-300;
+    }
+
+    /* 有文字時勾選框往下對齊字身;單獨一個框時不用 */
+    &.\-\-has-label {
+      .m-form-icon {
+        @apply mt-[--form-selection-icon-mt];
+      }
+    }
+  }
+}
+
+/* 斷點對應 —— 掛在 .m-form 上,底下的 element / icon 靠繼承取值 */
+
+@screen p {
+  .m-form {
+    --form-selection-icon-size: var(--form-selection-icon-pc-size);
+    --form-selection-gap-x: var(--form-selection-pc-gap-x);
+    --form-selection-icon-mt: var(--form-selection-icon-pc-mt);
+  }
+}
+
+@screen t {
+  .m-form {
+    --form-selection-icon-size: var(--form-selection-icon-tablet-size);
+    --form-selection-gap-x: var(--form-selection-tablet-gap-x);
+    --form-selection-icon-mt: var(--form-selection-icon-tablet-mt);
+  }
+}
+
+@screen m {
+  .m-form {
+    --form-selection-icon-size: var(--form-selection-icon-mobile-size);
+    --form-selection-gap-x: var(--form-selection-mobile-gap-x);
+    --form-selection-icon-mt: var(--form-selection-icon-mobile-mt);
+  }
+}

@@ -3,12 +3,13 @@ import '@css/_modules/common/mForm/variables.css'
 import '@css/_modules/common/mForm/selectVariables.css'
 import '@css/_modules/common/mForm/common.css'
 import '@css/_modules/common/mForm/select.css'
+
 import { onMergeDropdownConfig, useDropdownCore } from './.composables/useDropdownCore.js'
+import useValidateEvents from './.composables/useValidateEvents.js'
 
 import '@js/_validation.js'
 
 import { Field, ErrorMessage } from 'vee-validate'
-import useValidateEvents from './.composables/useValidateEvents.js'
 
 const props = defineProps({
   name: {
@@ -190,13 +191,13 @@ defineExpose({
   <Teleport to="body">
     <Transition name="dropdown" @afterLeave="onCloseDropdown" appear>
       <div
-        class="m-select-dropdown"
+        class="m-form-select-dropdown"
         :class="setClass.dropdown"
         ref="dropdownRef"
         v-if="isActive && !config.isDisabled"
       >
         <div
-          class="m-select-dropdown-container"
+          class="m-form-select-dropdown-container"
           :class="setClass.dropdownContainer"
           ref="dropdownContainerRef"
         >
@@ -206,4 +207,3 @@ defineExpose({
     </Transition>
   </Teleport>
 </template>
-<style lang="postcss"></style>

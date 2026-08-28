@@ -1,0 +1,103 @@
+/* radiosOval 變體專屬變數 —— 一整排相連的選項(像分段控制項)。
+   它的 .m-form-element 是 label,不吃 common.css 的 `.m-form-element:not(label)`,
+   所以外框、內距、狀態色都要自己定。 */
+
+:root {
+  /* 外框 */
+  --form-radios-oval-pc-rounded: 4px;
+  --form-radios-oval-tablet-rounded: 4px;
+  --form-radios-oval-mobile-rounded: 4px;
+
+  --form-radios-oval-pc-border: 1px;
+  --form-radios-oval-tablet-border: 1px;
+  --form-radios-oval-mobile-border: 1px;
+
+  --form-radios-oval-bg-color: var(--white);
+
+  /* 外框線預設透明,帶 --border modifier 才顯示 */
+  --form-radios-oval-border-color: transparent;
+  --form-radios-oval-border-on-color: var(--gray-ccce);
+
+  /* 選項之間的分隔線 */
+  --form-radios-oval-divider-pc-border: 1px;
+  --form-radios-oval-divider-tablet-border: 1px;
+  --form-radios-oval-divider-mobile-border: 1px;
+
+  --form-radios-oval-divider-color: var(--gray-ccce);
+
+  /* 高度 —— base 給 auto(給 0 會塌),--h-XX modifier 再覆寫 */
+  --form-radios-oval-h: auto;
+
+  /* 選項 */
+  --form-radios-oval-element-pc-gap-x: 5px;
+  --form-radios-oval-element-tablet-gap-x: 3px;
+  --form-radios-oval-element-mobile-gap-x: 3px;
+
+  /* 內距 base 給 0 —— 沒帶 --px-XX 時等同無內距 */
+  --form-radios-oval-element-px: 0;
+
+  --form-radios-oval-element-bg-color: transparent;
+  --form-radios-oval-element-color: inherit;
+  --form-radios-oval-element-checked-bg-color: var(--green-8b0d);
+  --form-radios-oval-element-checked-color: var(--white);
+
+  --form-radios-oval-icon-pc-size: 16px;
+  --form-radios-oval-icon-tablet-size: 16px;
+  --form-radios-oval-icon-mobile-size: 16px;
+}
+
+@screen p {
+  .m-form {
+    &.\-\-radios-oval {
+      &.\-\-px-5,
+      &.p\:\-\-px-5,
+      &.pt\:\-\-px-5 {
+        --form-radios-oval-element-px: 5px;
+      }
+
+      &.\-\-h-45,
+      &.p\:\-\-h-45,
+      &.pt\:\-\-h-45 {
+        --form-radios-oval-h: 45px;
+      }
+    }
+  }
+}
+
+@screen t {
+  .m-form {
+    &.\-\-radios-oval {
+      &.\-\-px-5,
+      &.pt\:\-\-px-5,
+      &.tm\:\-\-px-5,
+      &.t\:\-\-px-5 {
+        --form-radios-oval-element-px: 5px;
+      }
+
+      &.\-\-h-45,
+      &.pt\:\-\-h-45,
+      &.tm\:\-\-h-45,
+      &.t\:\-\-h-45 {
+        --form-radios-oval-h: 45px;
+      }
+    }
+  }
+}
+
+@screen m {
+  .m-form {
+    &.\-\-radios-oval {
+      &.\-\-px-5,
+      &.tm\:\-\-px-5,
+      &.m\:\-\-px-5 {
+        --form-radios-oval-element-px: 5px;
+      }
+
+      &.\-\-h-45,
+      &.tm\:\-\-h-45,
+      &.m\:\-\-h-45 {
+        --form-radios-oval-h: 45px;
+      }
+    }
+  }
+}

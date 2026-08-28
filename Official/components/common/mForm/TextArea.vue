@@ -1,12 +1,14 @@
 <script setup>
 import '@css/_modules/common/mForm/variables.css'
 import '@css/_modules/common/mForm/common.css'
-import { onDeepMerge } from '@js/_prototype.js'
+import '@css/_modules/common/mForm/textarea.css'
 
+import useValidateEvents from './.composables/useValidateEvents.js'
+
+import { onDeepMerge } from '@js/_prototype.js'
 import '@js/_validation.js'
 
 import { Field, ErrorMessage } from 'vee-validate'
-import useValidateEvents from './.composables/useValidateEvents.js'
 
 const emits = defineEmits([
   'update:modelValue',
@@ -150,7 +152,7 @@ watch(
 </script>
 
 <template>
-  <div class="m-form overflow-hidden" :class="setClass.main">
+  <div class="m-form" :class="setClass.main">
     <Field
       v-slot="{ field, errorMessage }"
       v-model="model"
@@ -158,7 +160,7 @@ watch(
       :rules="config.isDisabled ? '' : props.rules"
       v-bind="validateOn"
     >
-      <div class="m-form-container overflow-hidden" :class="setClass.container">
+      <div class="m-form-container" :class="setClass.container">
         <div
           class="m-form-element --textarea"
           :class="[
@@ -171,13 +173,13 @@ watch(
         >
           <div
             v-if="$slots.frontAssist"
-            class="m-form-assist shrink-0"
+            class="m-form-assist"
             :class="setClass.frontAssist"
           >
             <slot name="frontAssist" />
           </div>
           <textarea
-            class="m-form-type min-w-0 grow"
+            class="m-form-type"
             :class="setClass.type"
             v-bind="onBind(field)"
             :rows="config.rows"
@@ -192,14 +194,14 @@ watch(
             @input="onInput($event)"
           />
 
-          <span v-if="formatLength" class="m-form-length shrink-0" :class="setClass.length">
+          <span v-if="formatLength" class="m-form-length" :class="setClass.length">
             {{ formatLength }}
           </span>
-          <div v-if="$slots.rearAssist" class="m-form-assist shrink-0" :class="setClass.rearAssist">
+          <div v-if="$slots.rearAssist" class="m-form-assist" :class="setClass.rearAssist">
             <slot name="rearAssist" />
           </div>
         </div>
-        <small v-if="$slots.suffix" class="m-form-suffix shrink-0" :class="setClass.suffix">
+        <small v-if="$slots.suffix" class="m-form-suffix" :class="setClass.suffix">
           <slot
             name="suffix"
             :maxlength="config.length || config.maxlength"
@@ -219,70 +221,3 @@ watch(
     </ErrorMessage>
   </div>
 </template>
-<style lang="postcss">
-textarea.m-form-type {
-  @apply resize-none;
-}
-
-@screen p {
-  .m-form {
-    &.\-\-resize-x,
-    &.p\:\-\-resize-x,
-    &.pt\:\-\-resize-x {
-      textarea.m-form-type {
-        @apply resize-x;
-      }
-    }
-
-    &.\-\-resize-y,
-    &.p\:\-\-resize-y,
-    &.pt\:\-\-resize-y {
-      textarea.m-form-type {
-        @apply resize-y;
-      }
-    }
-  }
-}
-
-@screen t {
-  .m-form {
-    &.\-\-resize-x,
-    &.pt\:\-\-resize-x,
-    &.tm\:\-\-resize-x,
-    &.t\:\-\-resize-x {
-      textarea.m-form-type {
-        @apply resize-x;
-      }
-    }
-
-    &.\-\-resize-y,
-    &.pt\:\-\-resize-y,
-    &.tm\:\-\-resize-y,
-    &.t\:\-\-resize-y {
-      textarea.m-form-type {
-        @apply resize-y;
-      }
-    }
-  }
-}
-
-@screen m {
-  .m-form {
-    &.\-\-resize-x,
-    &.tm\:\-\-resize-x,
-    &.m\:\-\-resize-x {
-      textarea.m-form-type {
-        @apply resize-x;
-      }
-    }
-
-    &.\-\-resize-y,
-    &.tm\:\-\-resize-y,
-    &.m\:\-\-resize-y {
-      textarea.m-form-type {
-        @apply resize-y;
-      }
-    }
-  }
-}
-</style>

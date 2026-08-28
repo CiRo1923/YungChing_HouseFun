@@ -1,0 +1,29 @@
+/* mForm 的 label —— 欄位標題,data-required 有值時在前面補上必填標記。
+   字級由使用端傳(標題會有大有小)。 */
+
+.m-label {
+  /* data-required 有值才顯示標記,內容取自屬性值本身 */
+  &[data-required]:not([data-required='']) {
+    &::before {
+      @apply ml-[--form-label-required-ml] text-[--form-label-required-color] content-[attr(data-required)];
+    }
+  }
+}
+
+@screen p {
+  .m-label {
+    --form-label-required-ml: var(--form-label-required-pc-ml);
+  }
+}
+
+@screen t {
+  .m-label {
+    --form-label-required-ml: var(--form-label-required-tablet-ml);
+  }
+}
+
+@screen m {
+  .m-label {
+    --form-label-required-ml: var(--form-label-required-mobile-ml);
+  }
+}

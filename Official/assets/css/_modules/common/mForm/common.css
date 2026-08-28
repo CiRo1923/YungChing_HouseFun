@@ -79,8 +79,10 @@
   @apply h-[18px] w-[18px] p-[4px] text-[--gray-999];
 }
 
+/* 字數計數與前後綴不參與壓縮 —— 空間不夠時要擠的是輸入區(.m-form-type 有 grow) */
 .m-form-assist,
-.m-form-suffix {
+.m-form-suffix,
+.m-form-length {
   @apply shrink-0;
 }
 

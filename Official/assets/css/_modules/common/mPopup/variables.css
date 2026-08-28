@@ -1,4 +1,6 @@
 :root {
+  --popup-px: 0;
+  --popup-py: 0;
   --popup-width: 'auto';
   --popup-mobile-width: 328px;
 

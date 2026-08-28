@@ -1,10 +1,12 @@
 <script setup>
 import '@css/_modules/common/mForm/variables.css'
 import '@css/_modules/common/mForm/common.css'
+
+import useValidateEvents from './.composables/useValidateEvents.js'
+
 import '@js/_validation.js'
 
 import { Field, ErrorMessage } from 'vee-validate'
-import useValidateEvents from './.composables/useValidateEvents.js'
 
 const props = defineProps({
   name: {

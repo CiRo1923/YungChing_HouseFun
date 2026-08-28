@@ -277,6 +277,7 @@ const onWorkBrandChange = () => {
               }"
               :setClass="{
                 main: '--rounded --h-55 --px-12',
+                dropdownLabel: 'text-[14px]',
               }"
               @change="onCityChange"
             />
@@ -295,6 +296,7 @@ const onWorkBrandChange = () => {
               }"
               :setClass="{
                 main: '--rounded --h-55 --px-12',
+                dropdownLabel: 'text-[14px]',
               }"
             />
             <CommonMFormInput
@@ -335,6 +337,7 @@ const onWorkBrandChange = () => {
               }"
               :setClass="{
                 main: '--rounded --h-55 --px-12',
+                dropdownLabel: 'text-[14px]',
               }"
               @change="onWorkCityChange"
             />
@@ -353,6 +356,7 @@ const onWorkBrandChange = () => {
               }"
               :setClass="{
                 main: '--rounded --h-55 --px-12',
+                dropdownLabel: 'text-[14px]',
               }"
               @change="onWorkAreaChange"
             />
@@ -371,6 +375,7 @@ const onWorkBrandChange = () => {
               }"
               :setClass="{
                 main: '--rounded --h-55 --px-12 col-span-2',
+                dropdownLabel: 'text-[14px]',
               }"
               @change="onWorkBrandChange"
             />
@@ -395,6 +400,7 @@ const onWorkBrandChange = () => {
               }"
               :setClass="{
                 main: '--rounded --h-55 --px-12 col-span-2',
+                dropdownLabel: 'text-[14px]',
               }"
             />
           </CommonMFormHidden>

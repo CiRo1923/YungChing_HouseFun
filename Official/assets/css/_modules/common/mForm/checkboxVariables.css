@@ -1,3 +1,5 @@
+/* checkbox 專屬變數。勾選框尺寸 / 間距 / 對齊在 selectionVariables.css(與 radio 共用)。 */
+
 :root {
   --form-checkbox-icon-pc-rounded: 2px;
   --form-checkbox-icon-tablet-rounded: 2px;
@@ -7,14 +9,16 @@
   --form-checkbox-icon-tablet-border: 1px;
   --form-checkbox-icon-mobile-border: 1px;
 
+  /* 勾號本身的顏色(框內的 ✓) */
   --form-checkbox-icon-color: inherit;
   --form-checkbox-icon-border-color: var(--gray-999);
-
-  --form-checkbox-checked-color: var(--green-8b0d);
   --form-checkbox-icon-border-checked-color: transparent;
-
-  --form-checkbox-error-color: inherit;
   --form-checkbox-icon-border-error-color: var(--red-d111);
+
+  /* 文字顏色 —— 平常跟著父系走,勾選後轉綠 */
+  --form-checkbox-label-color: inherit;
+  --form-checkbox-label-checked-color: var(--green-8b0d);
+  --form-checkbox-label-error-color: inherit;
 }
 
 .m-form {

@@ -15,9 +15,12 @@
   --form-autocomplete-dropdown-tablet-rounded: 16px;
   --form-autocomplete-dropdown-mobile-rounded: 16px;
 
-  --form-autocomplete-dropdown-pc-shadow: 0 4px 24px 0 #02041614, 0 2px 16px -8px #02041633;
-  --form-autocomplete-dropdown-tablet-shadow: 0 4px 24px 0 #02041614, 0 2px 16px -8px #02041633;
-  --form-autocomplete-dropdown-mobile-shadow: 0 4px 24px 0 #02041614, 0 2px 16px -8px #02041633;
+  --form-autocomplete-dropdown-pc-shadow:
+    0 4px 24px 0 var(--blue-001614), 0 2px 16px -8px var(--blue-001633);
+  --form-autocomplete-dropdown-tablet-shadow:
+    0 4px 24px 0 var(--blue-001614), 0 2px 16px -8px var(--blue-001633);
+  --form-autocomplete-dropdown-mobile-shadow:
+    0 4px 24px 0 var(--blue-001614), 0 2px 16px -8px var(--blue-001633);
 
   --form-autocomplete-dropdown-container-pc-px: 1px;
   --form-autocomplete-dropdown-container-tablet-px: 1px;
@@ -27,25 +30,25 @@
   --form-autocomplete-dropdown-container-tablet-py: 0;
   --form-autocomplete-dropdown-container-mobile-py: 0;
 
-  --m-autocomplete-dropdown-common-pc-mx: 11px;
-  --m-autocomplete-dropdown-common-tablet-mx: 11px;
-  --m-autocomplete-dropdown-common-mobile-mx: 11px;
+  --form-autocomplete-dropdown-common-pc-mx: 11px;
+  --form-autocomplete-dropdown-common-tablet-mx: 11px;
+  --form-autocomplete-dropdown-common-mobile-mx: 11px;
 
-  --m-autocomplete-dropdown-common-pc-py: 12px;
-  --m-autocomplete-dropdown-common-tablet-py: 12px;
-  --m-autocomplete-dropdown-common-mobile-py: 12px;
+  --form-autocomplete-dropdown-common-pc-py: 12px;
+  --form-autocomplete-dropdown-common-tablet-py: 12px;
+  --form-autocomplete-dropdown-common-mobile-py: 12px;
 
   --form-autocomplete-dropdown-button-pc-border: 1px;
   --form-autocomplete-dropdown-button-tablet-border: 1px;
   --form-autocomplete-dropdown-button-mobile-border: 1px;
 
-  --m-autocomplete-dropdown-label-pc-px: 0;
-  --m-autocomplete-dropdown-label-tablet-px: 0;
-  --m-autocomplete-dropdown-label-mobile-px: 0;
+  --form-autocomplete-dropdown-label-pc-px: 0;
+  --form-autocomplete-dropdown-label-tablet-px: 0;
+  --form-autocomplete-dropdown-label-mobile-px: 0;
 
-  --m-autocomplete-dropdown-label-pc-py: 0;
-  --m-autocomplete-dropdown-label-tablet-py: 0;
-  --m-autocomplete-dropdown-label-mobile-py: 0;
+  --form-autocomplete-dropdown-label-pc-py: 0;
+  --form-autocomplete-dropdown-label-tablet-py: 0;
+  --form-autocomplete-dropdown-label-mobile-py: 0;
 
   --form-autocomplete-elment-icon-color: var(--gray-999);
   --form-autocomplete-elment-focus-icon-color: var(--green-8b0d);
@@ -60,7 +63,7 @@
 }
 
 @screen p {
-  .m-autocomplete-dropdown {
+  .m-form-autocomplete-dropdown {
     &.\-\-rounded,
     &.p\:\-\-rounded,
     &.pt\:\-\-rounded {
@@ -70,7 +73,7 @@
 }
 
 @screen t {
-  .m-autocomplete-dropdown {
+  .m-form-autocomplete-dropdown {
     &.\-\-rounded,
     &.pt\:\-\-rounded,
     &.tm\:\-\-rounded,
@@ -81,7 +84,7 @@
 }
 
 @screen m {
-  .m-autocomplete-dropdown {
+  .m-form-autocomplete-dropdown {
     &.\-\-rounded,
     &.tm\:\-\-rounded,
     &.m\:\-\-rounded {

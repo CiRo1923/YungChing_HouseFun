@@ -1,0 +1,20 @@
+/* radio 專屬變數。勾選框尺寸 / 間距 / 對齊在 selectionVariables.css(與 checkbox 共用)。 */
+
+:root {
+  --form-radio-icon-pc-border: 2px;
+  --form-radio-icon-tablet-border: 2px;
+  --form-radio-icon-mobile-border: 2px;
+
+  /* 選中時框內的圓點 */
+  --form-radio-dot-pc-size: 10px;
+  --form-radio-dot-tablet-size: 10px;
+  --form-radio-dot-mobile-size: 10px;
+
+  --form-radio-icon-border-color: var(--gray-999);
+  --form-radio-icon-border-checked-color: var(--green-8b0d);
+  --form-radio-dot-bg-color: var(--green-8b0d);
+
+  /* 文字顏色 —— 平常跟著父系走,選中後轉綠 */
+  --form-radio-label-color: inherit;
+  --form-radio-label-checked-color: var(--green-8b0d);
+}

@@ -1,6 +1,4 @@
 .m-popup {
-  --popup-px: 0;
-  --popup-py: 0;
   @apply fixed inset-0 z-[5] flex;
 
   &:before {
