@@ -1,4 +1,7 @@
 <script setup>
+import '@css/_modules/common/mNav/appVariables.css'
+import '@css/_modules/common/mNav/app.css'
+
 const common = useCommonStore()
 const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
@@ -26,7 +29,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <ul class="border-t-[1px] border-t-[--gray-e5]" v-if="isDeviceM">
+  <ul class="m-nav-app" v-if="isDeviceM">
     <li v-for="(item, index) in items" :key="`${item.label}_${index}`">
       <CommonMAnchor
         :text="item.label"
@@ -45,5 +48,3 @@ onUnmounted(() => {
     </li>
   </ul>
 </template>
-
-<style lang="postcss"></style>

@@ -9,7 +9,7 @@
     @apply items-center justify-center;
 
     .m-popup-container {
-      @apply rounded-[--popup-container-rounded] m:max-w-[--popup-container-mobile-max-w];
+      @apply rounded-b-[--popup-container-rounded-b] rounded-t-[--popup-container-rounded-t] m:max-w-[--popup-container-mobile-max-w];
     }
   }
 
@@ -17,13 +17,13 @@
     @apply flex-col justify-end;
 
     .m-popup-container {
-      @apply w-full rounded-t-[--popup-container-rounded];
+      @apply w-full rounded-t-[--popup-container-rounded-t];
     }
   }
 }
 
 .m-popup-container {
-  @apply relative flex max-h-[92%] w-[--popup-width] flex-col overflow-hidden bg-[--popup-container-bg-color] px-[--popup-px] py-[--popup-py];
+  @apply relative flex max-h-[92%] w-[--popup-w] flex-col overflow-hidden bg-[--popup-container-bg-color] px-[--popup-px] py-[--popup-py];
 }
 
 .m-popup-header {
@@ -35,6 +35,11 @@
   font-size: var(--popup-header-text);
 
   @apply order-1 flex shrink-0 items-center gap-x-[--popup-header-gap-x];
+}
+
+/* 標題文字 —— 字重是固定的,不隨斷點調整 */
+.m-popup-title-text {
+  @apply font-medium;
 }
 
 .m-popup-icon {
@@ -49,8 +54,13 @@
   @apply ml-auto flex h-[--popup-header-anchor-size] w-[--popup-header-anchor-size] shrink-0 items-center justify-center p-[--popup-header-anchor-p] text-[--popup-header-anchor-color] m:order-2 pt:order-3;
 }
 
+/* 關閉鈕的圖示撐滿按鈕(尺寸由 .m-popup-anchor-close 決定) */
+.m-popup-anchor-close-icon {
+  @apply h-full w-full;
+}
+
 .m-popup-tools {
-  @apply flex grow items-center m:order-3 m:mt-[--popup-tools-m] pt:order-2 pt:mx-[--popup-tools-m];
+  @apply flex grow items-center m:order-3 m:mt-[--popup-tools-mt] pt:order-2 pt:mx-[--popup-tools-mx];
 }
 
 .m-popup-body {
@@ -65,15 +75,10 @@
   @apply mt-[--popup-footer-mt];
 }
 
-.m-popup-promise {
-  &::before {
-    @apply absolute inset-0 z-0 bg-[--popup-overlay-bg-color] content-default;
-  }
-}
-
 @screen p {
   .m-popup {
-    --popup-container-rounded: var(--popup-container-pc-rounded);
+    --popup-container-rounded-t: var(--popup-container-pc-rounded);
+    --popup-container-rounded-b: var(--popup-container-pc-rounded);
     --popup-header-pb: var(--popup-header-pc-pb);
     --popup-header-border: var(--popup-header-pc-border);
     --popup-header-text: var(--popup-header-pc-text);
@@ -83,14 +88,15 @@
     --popup-header-anchor-p: var(--popup-header-anchor-pc-p);
     --popup-header-anchor-size: var(--popup-header-anchor-pc-size);
     --popup-body-mt: var(--popup-body-pc-mt);
-    --popup-tools-m: var(--popup-tools-pc-m);
+    --popup-tools-mx: var(--popup-tools-pc-mx);
     --popup-footer-mt: var(--popup-footer-pc-mt);
   }
 }
 
 @screen t {
   .m-popup {
-    --popup-container-rounded: var(--popup-container-tablet-rounded);
+    --popup-container-rounded-t: var(--popup-container-tablet-rounded);
+    --popup-container-rounded-b: var(--popup-container-tablet-rounded);
     --popup-header-pb: var(--popup-header-tablet-pb);
     --popup-header-border: var(--popup-header-tablet-border);
     --popup-header-text: var(--popup-header-tablet-text);
@@ -100,14 +106,16 @@
     --popup-header-anchor-p: var(--popup-header-anchor-tablet-p);
     --popup-header-anchor-size: var(--popup-header-anchor-tablet-size);
     --popup-body-mt: var(--popup-body-tablet-mt);
-    --popup-tools-m: var(--popup-tools-tablet-m);
+    --popup-tools-mx: var(--popup-tools-tablet-mx);
     --popup-footer-mt: var(--popup-footer-tablet-mt);
   }
 }
 
 @screen m {
   .m-popup {
-    --popup-container-rounded: var(--popup-container-mobile-rounded);
+    --popup-w: var(--popup-mobile-w);
+    --popup-container-rounded-t: var(--popup-container-mobile-rounded);
+    --popup-container-rounded-b: var(--popup-container-mobile-rounded);
     --popup-header-pb: var(--popup-header-mobile-pb);
     --popup-header-border: var(--popup-header-mobile-border);
     --popup-header-text: var(--popup-header-mobile-text);
@@ -117,7 +125,7 @@
     --popup-header-anchor-p: var(--popup-header-anchor-mobile-p);
     --popup-header-anchor-size: var(--popup-header-anchor-mobile-size);
     --popup-body-mt: var(--popup-body-mobile-mt);
-    --popup-tools-m: var(--popup-tools-mobile-m);
+    --popup-tools-mt: var(--popup-tools-mobile-mt);
     --popup-footer-mt: var(--popup-footer-mobile-mt);
   }
 }

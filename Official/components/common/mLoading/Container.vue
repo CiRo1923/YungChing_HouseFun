@@ -1,4 +1,7 @@
 <script setup>
+import '@css/_modules/common/mLoading/variables.css'
+import '@css/_modules/common/mLoading/common.css'
+
 const props = defineProps({
   setClass: {
     type: Object,
@@ -9,7 +12,7 @@ const props = defineProps({
 
 <template>
   <div
-    class="m-loading-container relative text-[14px] text-[--gray-999]"
+    class="m-loading-container"
     :class="props.setClass?.container"
   >
     <p class="m-loading-text">
@@ -17,5 +20,3 @@ const props = defineProps({
     </p>
   </div>
 </template>
-
-<style lang="postcss"></style>

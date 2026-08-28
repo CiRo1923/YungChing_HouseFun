@@ -1,0 +1,46 @@
+/* mHeader(components/common/mHeader.vue)的變數。
+
+   ⚠️ --header-*-h 有跨 module 的使用端:mNav 的 mobile 選單要靠它算出
+   「從 header 底下展開、高度扣掉 header」(見 mNav/common.css)。改名前先搜過。 */
+
+:root {
+  --header-pc-h: 65px;
+  --header-tablet-h: 55px;
+  --header-mobile-h: 55px;
+
+  --header-bg-color: var(--white);
+
+  /* 內容區的最大寬與左右內距 */
+  --header-container-pc-max-w: 1220px;
+  --header-container-tablet-max-w: none;
+  --header-container-mobile-max-w: none;
+
+  --header-container-pc-px: 10px;
+  --header-container-tablet-px: 15px;
+  --header-container-mobile-px: 15px;
+
+  /* logo 的兩張圖 —— 尺寸由 mHeader 決定(它是固定位置的組件) */
+  --header-logo-pc-gap-x: 0;
+  --header-logo-tablet-gap-x: 3px;
+  --header-logo-mobile-gap-x: 3px;
+
+  --header-logo-text-pc-w: 88px;
+  --header-logo-text-tablet-w: 69px;
+  --header-logo-text-mobile-w: 69px;
+
+  --header-logo-text-pc-h: 30px;
+  --header-logo-text-tablet-h: 24px;
+  --header-logo-text-mobile-h: 24px;
+
+  --header-logo-icon-pc-w: 105px;
+  --header-logo-icon-tablet-w: 78px;
+  --header-logo-icon-mobile-w: 78px;
+
+  --header-logo-icon-pc-h: 16px;
+  --header-logo-icon-tablet-h: 12px;
+  --header-logo-icon-mobile-h: 12px;
+
+  --header-logo-icon-pc-mt: -3px;
+  --header-logo-icon-tablet-mt: 0;
+  --header-logo-icon-mobile-mt: 0;
+}

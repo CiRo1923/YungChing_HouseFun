@@ -1,0 +1,75 @@
+/* mNav(components/common/mNav/Main.vue)的變數。
+
+   pc / tablet 是橫向選單(hover 展開子選單),mobile 是漢堡按鈕 + 全高側邊選單,
+   兩者差異大到很多宣告是「只在某個斷點才存在」,不是同一個值換數字。
+
+   字級定在這裡 —— 導覽列全站長一樣,屬於「固定位置」的組件。
+
+   ⚠️ mobile 的選單靠 mHeader 的 --header-mobile-h 定位(從 header 底下展開、
+   高度扣掉 header),見 common.css。 */
+
+:root {
+  /* 導覽列本身與 header 的距離(只有 pc 有) */
+  --nav-pc-ml: 130px;
+  --nav-tablet-ml: 0;
+  --nav-mobile-ml: 0;
+
+  /* 選單項目間距 */
+  --nav-menu-pc-gap-x: 30px;
+  --nav-menu-tablet-gap-x: 15px;
+  --nav-menu-mobile-gap-x: 0;
+
+  /* 連結 */
+  --nav-anchor-pc-text-size: 18px;
+  --nav-anchor-tablet-text-size: 18px;
+  --nav-anchor-mobile-text-size: 18px;
+
+  --nav-anchor-pc-gap-y: 6px;
+  --nav-anchor-tablet-gap-y: 4px;
+  --nav-anchor-mobile-gap-y: 0;
+
+  --nav-anchor-pc-min-w: 75px;
+  --nav-anchor-tablet-min-w: auto;
+  --nav-anchor-mobile-min-w: auto;
+
+  --nav-anchor-pc-px: 0;
+  --nav-anchor-tablet-px: 0;
+  --nav-anchor-mobile-px: 20px;
+
+  --nav-anchor-pc-py: 0;
+  --nav-anchor-tablet-py: 0;
+  --nav-anchor-mobile-py: 15px;
+
+  /* 連結底下那條狀態線(pc / tablet 才有) */
+  --nav-anchor-line-pc-h: 6px;
+  --nav-anchor-line-tablet-h: 6px;
+  --nav-anchor-line-mobile-h: 0;
+
+  --nav-anchor-line-bg-color: transparent;
+  --nav-anchor-line-active-bg-color: var(--green-8b0d);
+  --nav-anchor-line-hover-bg-color: var(--gray-e5);
+
+  /* 展開的子選單 */
+  --nav-children-bg-color: var(--gray-e5);
+
+  --nav-children-pc-pl: 590px;
+  --nav-children-tablet-pl: 0;
+  --nav-children-mobile-pl: 0;
+
+  --nav-submenu-pc-py: 25px;
+  --nav-submenu-tablet-py: 0;
+  --nav-submenu-mobile-py: 0;
+
+  /* mobile 的漢堡按鈕 */
+  --nav-ctrl-mobile-size: 35px;
+  --nav-ctrl-bar-mobile-w: 26px;
+  --nav-ctrl-bar-mobile-h: 3px;
+  --nav-ctrl-bar-bg-color: var(--gray-999);
+
+  /* 收合時上下兩條的距離(展開時歸零並旋轉成 X) */
+  --nav-ctrl-bar-mobile-offset: 7px;
+
+  /* mobile 的側邊選單 */
+  --nav-container-mobile-px: 20px;
+  --nav-container-bg-color: var(--white);
+}

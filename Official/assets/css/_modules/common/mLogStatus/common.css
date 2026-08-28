@@ -1,0 +1,57 @@
+/* mLogStatus(components/common/mLogStatus.vue)版型。值定義在 variables.css。
+
+   ⚠️ 橫向排列(flex / gap / 分隔線)與 mobile 的上邊框**各自收在有值的斷點裡** ——
+   寫成無條件宣告再靠變數給 0,會多出 `border-top: 0` 這種宣告去跟使用端打架。 */
+
+.m-log-status-item {
+  @apply relative leading-[0];
+}
+
+@screen p {
+  .m-log-status {
+    @apply flex items-center gap-x-[--log-status-gap-x];
+
+    --log-status-gap-x: var(--log-status-pc-gap-x);
+    --log-status-divider-h: var(--log-status-divider-pc-h);
+    --log-status-divider-w: var(--log-status-divider-pc-w);
+    --log-status-divider-right: var(--log-status-divider-pc-right);
+  }
+
+  .m-log-status-item {
+    &:not(:last-child) {
+      &:after {
+        @apply pointer-events-none absolute right-[--log-status-divider-right] top-1/2 h-[--log-status-divider-h] w-[--log-status-divider-w] -translate-y-1/2 bg-[--log-status-divider-bg-color] content-default;
+      }
+    }
+  }
+}
+
+@screen t {
+  .m-log-status {
+    @apply flex items-center gap-x-[--log-status-gap-x];
+
+    --log-status-gap-x: var(--log-status-tablet-gap-x);
+    --log-status-divider-h: var(--log-status-divider-tablet-h);
+    --log-status-divider-w: var(--log-status-divider-tablet-w);
+    --log-status-divider-right: var(--log-status-divider-tablet-right);
+  }
+
+  .m-log-status-item {
+    &:not(:last-child) {
+      &:after {
+        @apply pointer-events-none absolute right-[--log-status-divider-right] top-1/2 h-[--log-status-divider-h] w-[--log-status-divider-w] -translate-y-1/2 bg-[--log-status-divider-bg-color] content-default;
+      }
+    }
+  }
+}
+
+@screen m {
+  .m-log-status {
+    /* border-width 直接寫 CSS 屬性 —— @apply border-t-[…] 會被壓成 shorthand,值是 var() 時整條失效 */
+    border-top-width: var(--log-status-border-t);
+
+    @apply border-solid border-t-[--log-status-border-color];
+
+    --log-status-border-t: var(--log-status-mobile-border-t);
+  }
+}

@@ -132,7 +132,7 @@ onUnmounted(() => {
     :class="setClass.main"
   >
     <div class="m-footer-container mx-auto pt:flex p:max-w-[1200px]">
-      <div class="m-footer-information tracking-default text-[12px] text-[--gray-666] pt:grow">
+      <div class="m-footer-information tracking-wider text-[12px] text-[--gray-666] pt:grow">
         <ul class="flex items-center gap-x-[8px]">
           <li v-for="(item, index) in stores" :key="`${item.id}_${index}`">
             <a :href="item.href" class="block" target="_blank" rel="noopener">
@@ -163,7 +163,7 @@ onUnmounted(() => {
           <p v-else>{{ item.label }}</p>
         </CommonMSeparator>
       </div>
-      <div class="m-footer-links tracking-default space-y-[16px] pt:shrink-0" v-if="!isDeviceM">
+      <div class="m-footer-links tracking-wider space-y-[16px] pt:shrink-0" v-if="!isDeviceM">
         <p class="text-[16px] text-[--green-6a2d]">關注好房網</p>
         <ul class="flex gap-x-[32px] text-[12px] leading-[1.33] text-[--gray-999]">
           <li v-for="(link, index) in links" :key="`links_${index}`">

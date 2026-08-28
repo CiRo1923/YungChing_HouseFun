@@ -1,0 +1,90 @@
+/* mHeader(components/common/mHeader.vue)版型。值定義在 variables.css。 */
+
+.m-header {
+  @apply flex h-[--header-h] items-center bg-[--header-bg-color];
+}
+
+.m-header-container {
+  @apply mx-auto flex w-full max-w-[--header-container-max-w] px-[--header-container-px];
+}
+
+.m-header-logo {
+  @apply flex gap-x-[--header-logo-gap-x];
+}
+
+.m-header-logo-text {
+  @apply h-[--header-logo-text-h] w-[--header-logo-text-w];
+}
+
+.m-header-logo-icon {
+  @apply mt-[--header-logo-icon-mt] h-[--header-logo-icon-h] w-[--header-logo-icon-w];
+}
+
+@screen p {
+  .m-header {
+    --header-h: var(--header-pc-h);
+    --header-container-max-w: var(--header-container-pc-max-w);
+    --header-container-px: var(--header-container-pc-px);
+    --header-logo-gap-x: var(--header-logo-pc-gap-x);
+    --header-logo-text-w: var(--header-logo-text-pc-w);
+    --header-logo-text-h: var(--header-logo-text-pc-h);
+    --header-logo-icon-w: var(--header-logo-icon-pc-w);
+    --header-logo-icon-h: var(--header-logo-icon-pc-h);
+    --header-logo-icon-mt: var(--header-logo-icon-pc-mt);
+  }
+
+  /* pc 的 logo 兩張圖靠右對齊(文字圖推到最右) */
+  .m-header-logo-text {
+    @apply ml-auto;
+  }
+}
+
+@screen t {
+  .m-header {
+    --header-h: var(--header-tablet-h);
+    --header-container-max-w: var(--header-container-tablet-max-w);
+    --header-container-px: var(--header-container-tablet-px);
+    --header-logo-gap-x: var(--header-logo-tablet-gap-x);
+    --header-logo-text-w: var(--header-logo-text-tablet-w);
+    --header-logo-text-h: var(--header-logo-text-tablet-h);
+    --header-logo-icon-w: var(--header-logo-icon-tablet-w);
+    --header-logo-icon-h: var(--header-logo-icon-tablet-h);
+    --header-logo-icon-mt: var(--header-logo-icon-tablet-mt);
+  }
+}
+
+@screen m {
+  .m-header {
+    --header-h: var(--header-mobile-h);
+    --header-container-max-w: var(--header-container-mobile-max-w);
+    --header-container-px: var(--header-container-mobile-px);
+    --header-logo-gap-x: var(--header-logo-mobile-gap-x);
+    --header-logo-text-w: var(--header-logo-text-mobile-w);
+    --header-logo-text-h: var(--header-logo-text-mobile-h);
+    --header-logo-icon-w: var(--header-logo-icon-mobile-w);
+    --header-logo-icon-h: var(--header-logo-icon-mobile-h);
+    --header-logo-icon-mt: var(--header-logo-icon-mobile-mt);
+  }
+}
+
+/* 版面在 pc / tablet 是整欄等高、mobile 是靠下對齊,差異大到分開寫比較清楚 */
+
+@screen pt {
+  .m-header-container {
+    @apply h-full;
+  }
+
+  .m-header-logo {
+    @apply shrink-0 flex-col justify-center;
+  }
+}
+
+@screen m {
+  .m-header-container {
+    @apply items-center;
+  }
+
+  .m-header-logo {
+    @apply grow items-end;
+  }
+}

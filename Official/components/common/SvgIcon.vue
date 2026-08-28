@@ -1,4 +1,6 @@
 <script setup>
+import '@css/_modules/common/mSvgIcon/common.css'
+
 const runtimeConfig = useRuntimeConfig()
 
 const props = defineProps({
@@ -36,9 +38,7 @@ const spriteHref = computed(() => {
 </script>
 
 <template>
-  <svg class="fill-current">
+  <svg class="m-svg-icon">
     <use v-bind="{ 'xlink:href': spriteHref }" />
   </svg>
 </template>
-
-<style lang="postcss"></style>

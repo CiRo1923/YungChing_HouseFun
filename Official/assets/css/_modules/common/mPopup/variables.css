@@ -1,8 +1,8 @@
 :root {
   --popup-px: 0;
   --popup-py: 0;
-  --popup-width: 'auto';
-  --popup-mobile-width: 328px;
+  --popup-w: auto;
+  --popup-mobile-w: 328px;
 
   --popup-container-pc-rounded: 15px;
   --popup-container-tablet-rounded: 15px;
@@ -38,9 +38,9 @@
   --popup-header-anchor-tablet-size: 24px;
   --popup-header-anchor-mobile-size: 24px;
 
-  --popup-tools-pc-m: 24px;
-  --popup-tools-tablet-m: 12px;
-  --popup-tools-mobile-m: 12px;
+  --popup-tools-pc-mx: 24px;
+  --popup-tools-tablet-mx: 12px;
+  --popup-tools-mobile-mt: 12px;
 
   --popup-body-pc-mt: 30px;
   --popup-body-tablet-mt: 30px;
@@ -50,7 +50,7 @@
   --popup-footer-tablet-mt: 30px;
   --popup-footer-mobile-mt: 30px;
 
-  --popup-overlay-bg-color: #000000b3;
+  --popup-overlay-bg-color: var(--black-b3);
   --popup-container-bg-color: var(--white);
   --popup-header-border-color: var(--green-8b0d);
   --popup-header-icon-color: var(--gray-666);
@@ -62,37 +62,37 @@
     &.\-\-w-1200,
     &.p\:\-\-w-1200,
     &.pt\:\-\-w-1200 {
-      --popup-width: 1200px;
+      --popup-w: 1200px;
     }
 
     &.\-\-w-740,
     &.p\:\-\-w-740,
     &.pt\:\-\-w-740 {
-      --popup-width: 740px;
+      --popup-w: 740px;
     }
 
     &.\-\-w-600,
     &.p\:\-\-w-600,
     &.pt\:\-\-w-600 {
-      --popup-width: 600px;
+      --popup-w: 600px;
     }
 
     &.\-\-w-500,
     &.p\:\-\-w-500,
     &.pt\:\-\-w-500 {
-      --popup-width: 500px;
+      --popup-w: 500px;
     }
 
     &.\-\-w-460,
     &.p\:\-\-w-460,
     &.pt\:\-\-w-460 {
-      --popup-width: 460px;
+      --popup-w: 460px;
     }
 
     &.\-\-w-375,
     &.p\:\-\-w-375,
     &.pt\:\-\-w-375 {
-      --popup-width: 375px;
+      --popup-w: 375px;
     }
 
     &.\-\-px-60,
@@ -127,42 +127,42 @@
     &.pt\:\-\-w-1200,
     &.tm\:\-\-w-1200,
     &.t\:\-\-w-1200 {
-      --popup-width: 1200px;
+      --popup-w: 1200px;
     }
 
     &.\-\-w-740,
     &.pt\:\-\-w-740,
     &.tm\:\-\-w-740,
     &.t\:\-\-w-740 {
-      --popup-width: 740px;
+      --popup-w: 740px;
     }
 
     &.\-\-w-600,
     &.pt\:\-\-w-600,
     &.tm\:\-\-w-600,
     &.t\:\-\-w-600 {
-      --popup-width: 600px;
+      --popup-w: 600px;
     }
 
     &.\-\-w-500,
     &.pt\:\-\-w-500,
     &.tm\:\-\-w-500,
     &.t\:\-\-w-500 {
-      --popup-width: 500px;
+      --popup-w: 500px;
     }
 
     &.\-\-w-460,
     &.pt\:\-\-w-460,
     &.tm\:\-\-w-460,
     &.t\:\-\-w-460 {
-      --popup-width: 460px;
+      --popup-w: 460px;
     }
 
     &.\-\-w-375,
     &.pt\:\-\-w-375,
     &.tm\:\-\-w-375,
     &.t\:\-\-w-375 {
-      --popup-width: 375px;
+      --popup-w: 375px;
     }
 
     &.\-\-px-60,
@@ -197,8 +197,6 @@
 
 @screen m {
   .m-popup {
-    --popup-width: var(--popup-mobile-width);
-
     &.\-\-px-60,
     &.tm\:\-\-px-60,
     &.m\:\-\-px-60 {

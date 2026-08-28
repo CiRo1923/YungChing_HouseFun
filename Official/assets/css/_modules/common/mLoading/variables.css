@@ -1,0 +1,21 @@
+/* mLoading(components/common/mLoading/)的變數。
+   Main 是外層容器(可切成全螢幕遮罩),Container 是裡面的文字區塊。
+
+   字級定在這裡而不是交給使用端 —— 讀取提示全站長一樣,屬於「固定位置」的組件。
+   卡片外觀(圓角 / 底色 / 內距)才由使用端 setClass.container 傳,
+   因為全螢幕遮罩與內嵌兩種情境長得不一樣。 */
+
+:root {
+  --loading-color: var(--gray-999);
+
+  --loading-pc-text-size: 14px;
+  --loading-tablet-text-size: 14px;
+  --loading-mobile-text-size: 14px;
+
+  /* 全螢幕遮罩(--fixed) */
+  --loading-overlay-bg-color: var(--black-33);
+
+  --loading-overlay-pc-blur: 2px;
+  --loading-overlay-tablet-blur: 2px;
+  --loading-overlay-mobile-blur: 2px;
+}

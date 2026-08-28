@@ -1,0 +1,43 @@
+/* mLoading(components/common/mLoading/)版型。值定義在 variables.css。 */
+
+.m-loading {
+  @apply flex items-center justify-center;
+
+  /* 全螢幕遮罩 —— 蓋住整個畫面並把底下的內容模糊掉 */
+  &.\-\-fixed {
+    @apply fixed inset-0 z-[5];
+
+    &:before {
+      @apply pointer-events-none absolute inset-0 bg-[--loading-overlay-bg-color] backdrop-blur-[--loading-overlay-blur] content-default;
+    }
+  }
+}
+
+.m-loading-container {
+  /* text-[--var] 會被 tailwind 當成 color,字級一定要加 length: 型別提示 */
+  @apply relative text-[length:--loading-text-size] text-[--loading-color];
+}
+
+@screen p {
+  .m-loading,
+  .m-loading-container {
+    --loading-text-size: var(--loading-pc-text-size);
+    --loading-overlay-blur: var(--loading-overlay-pc-blur);
+  }
+}
+
+@screen t {
+  .m-loading,
+  .m-loading-container {
+    --loading-text-size: var(--loading-tablet-text-size);
+    --loading-overlay-blur: var(--loading-overlay-tablet-blur);
+  }
+}
+
+@screen m {
+  .m-loading,
+  .m-loading-container {
+    --loading-text-size: var(--loading-mobile-text-size);
+    --loading-overlay-blur: var(--loading-overlay-mobile-blur);
+  }
+}

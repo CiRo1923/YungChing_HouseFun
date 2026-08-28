@@ -33,7 +33,7 @@ const hasAnyContent = computed(() => props.items.some((data) => hasColumnContent
 
 <template>
   <div
-    class="tracking-default m:space-y-[10px] t:gap-x-[25px] pt:flex p:gap-x-[50px] p:text-[18px]"
+    class="tracking-wider m:space-y-[10px] t:gap-x-[25px] pt:flex p:gap-x-[50px] p:text-[18px]"
     v-if="hasAnyContent"
   >
     <template v-for="(data, index) in props.items" :key="`ˋ${props.name}_${index}`">

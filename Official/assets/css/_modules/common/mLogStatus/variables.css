@@ -1,0 +1,32 @@
+/* mLogStatus(components/common/mLogStatus.vue)的變數。
+   pc / tablet 是一列橫向、項目之間畫分隔線;mobile 改成直向清單,只在最上面一條線。 */
+
+:root {
+  /* 橫向排列時的項目間距 */
+  --log-status-pc-gap-x: 24px;
+  --log-status-tablet-gap-x: 24px;
+  --log-status-mobile-gap-x: 0;
+
+  /* mobile 的上邊框 */
+  --log-status-pc-border-t: 0;
+  --log-status-tablet-border-t: 0;
+  --log-status-mobile-border-t: 1px;
+
+  --log-status-border-color: var(--gray-e5);
+
+  /* 項目之間的分隔線(只有橫向排列時才畫) */
+  --log-status-divider-bg-color: var(--gray-999);
+
+  --log-status-divider-pc-h: 55%;
+  --log-status-divider-tablet-h: 55%;
+  --log-status-divider-mobile-h: 55%;
+
+  --log-status-divider-pc-w: 1px;
+  --log-status-divider-tablet-w: 1px;
+  --log-status-divider-mobile-w: 1px;
+
+  /* 分隔線靠右的位移 —— 間距的一半 */
+  --log-status-divider-pc-right: -12px;
+  --log-status-divider-tablet-right: -12px;
+  --log-status-divider-mobile-right: -12px;
+}

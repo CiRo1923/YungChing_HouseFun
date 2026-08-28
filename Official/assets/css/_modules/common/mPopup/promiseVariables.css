@@ -1,0 +1,38 @@
+/* mPopup 的 promise 變體(components/common/mPopup/Promise.vue)——
+   API 等待時蓋在 popup 內部的提示。
+
+   遮罩比一般 popup 淡(--black-40 對 --black-b3)—— 它蓋的是自己的內容,
+   不是整個畫面,太暗會看不出底下還在。
+
+   字級定在這裡:等待提示全站長一樣,屬於「固定位置」的組件。 */
+
+:root {
+  --popup-promise-overlay-bg-color: var(--black-40);
+
+  --popup-promise-message-bg-color: var(--white);
+  --popup-promise-message-color: var(--gray-999);
+
+  --popup-promise-message-pc-text-size: 14px;
+  --popup-promise-message-tablet-text-size: 14px;
+  --popup-promise-message-mobile-text-size: 14px;
+
+  --popup-promise-message-pc-rounded: 15px;
+  --popup-promise-message-tablet-rounded: 15px;
+  --popup-promise-message-mobile-rounded: 15px;
+
+  /* 內距四個方向 —— pc 是左右 72px / 上下 30px,tablet 與 mobile 四邊都 32px */
+  --popup-promise-message-pc-pt: 30px;
+  --popup-promise-message-pc-pr: 72px;
+  --popup-promise-message-pc-pb: 30px;
+  --popup-promise-message-pc-pl: 72px;
+
+  --popup-promise-message-tablet-pt: 32px;
+  --popup-promise-message-tablet-pr: 32px;
+  --popup-promise-message-tablet-pb: 32px;
+  --popup-promise-message-tablet-pl: 32px;
+
+  --popup-promise-message-mobile-pt: 32px;
+  --popup-promise-message-mobile-pr: 32px;
+  --popup-promise-message-mobile-pb: 32px;
+  --popup-promise-message-mobile-pl: 32px;
+}

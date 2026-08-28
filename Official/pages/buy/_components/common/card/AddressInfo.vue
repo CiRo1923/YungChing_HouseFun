@@ -36,7 +36,7 @@ const items = computed(() => {
   <ul class="flex items-center gap-x-[10px]">
     <template v-for="(data, index) in items" :key="`${data.id}_${index}`">
       <li v-if="data.label">
-        <p class="tracking-default flex items-center gap-x-[5px]" v-if="!data.to">
+        <p class="tracking-wider flex items-center gap-x-[5px]" v-if="!data.to">
           <CommonSvgIcon
             :icon="data.icon"
             class="h-[14px] w-[14px] shrink-0 p-[1px] text-[--gray-999]"
@@ -53,7 +53,7 @@ const items = computed(() => {
             },
           }"
           :setClass="{
-            main: 'card-community-anchor tracking-default hover:--text-green-6a2d relative z-[1] gap-x-[5px] underline',
+            main: 'card-community-anchor tracking-wider hover:--text-green-6a2d relative z-[1] gap-x-[5px] underline',
             text: 'text-[14px]',
             icon: 'h-[14px] w-[14px] text-[--gray-999]',
           }"

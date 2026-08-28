@@ -1,0 +1,10 @@
+/* mNav 的 app 變體(components/common/mNav/App.vue)—— mobile 的側邊選單清單。
+   共用層(variables.css / common.css)等 mNav/Main.vue 拆分時再開。 */
+
+:root {
+  --nav-app-pc-border-t: 1px;
+  --nav-app-tablet-border-t: 1px;
+  --nav-app-mobile-border-t: 1px;
+
+  --nav-app-border-color: var(--gray-e5);
+}

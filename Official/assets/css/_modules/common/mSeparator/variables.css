@@ -1,0 +1,166 @@
+/* mSeparator(components/common/mSeparator.vue)的變數。
+   項目之間用 ::after 畫一條分隔線,線的位置跟著 gap 的一半走 ——
+   所以 --gap-x-XX 這個 modifier 要同時設「間距」與「線的位移」兩個變數。 */
+
+:root {
+  /* 分隔線 */
+  --separator-divider-bg-color: var(--gray-999);
+
+  --separator-divider-pc-h: 55%;
+  --separator-divider-tablet-h: 55%;
+  --separator-divider-mobile-h: 55%;
+
+  --separator-divider-pc-w: 1px;
+  --separator-divider-tablet-w: 1px;
+  --separator-divider-mobile-w: 1px;
+
+  /* 間距 base 給 0 —— 沒帶 --gap-x-XX 時等同沒有間距 */
+  --separator-gap-x: 0;
+
+  /* --separator-divider-right 刻意不給 base —— 它只在 --horizontal 時才有宣告
+     (直向排列的分隔線不需要靠右定位),給了 base 反而會多一條 right: 0。 */
+}
+
+@screen p {
+  .m-separator {
+    &.\-\-gap-x-30,
+    &.p\:\-\-gap-x-30,
+    &.pt\:\-\-gap-x-30 {
+      --separator-gap-x: 30px;
+      --separator-divider-right: -15px;
+    }
+
+    &.\-\-gap-x-24,
+    &.p\:\-\-gap-x-24,
+    &.pt\:\-\-gap-x-24 {
+      --separator-gap-x: 24px;
+      --separator-divider-right: -12px;
+    }
+
+    &.\-\-gap-x-20,
+    &.p\:\-\-gap-x-20,
+    &.pt\:\-\-gap-x-20 {
+      --separator-gap-x: 20px;
+      --separator-divider-right: -10px;
+    }
+
+    &.\-\-gap-x-16,
+    &.p\:\-\-gap-x-16,
+    &.pt\:\-\-gap-x-16 {
+      --separator-gap-x: 16px;
+      --separator-divider-right: -8px;
+    }
+
+    &.\-\-gap-x-12,
+    &.p\:\-\-gap-x-12,
+    &.pt\:\-\-gap-x-12 {
+      --separator-gap-x: 12px;
+      --separator-divider-right: -6px;
+    }
+
+    &.\-\-gap-x-10,
+    &.p\:\-\-gap-x-10,
+    &.pt\:\-\-gap-x-10 {
+      --separator-gap-x: 10px;
+      --separator-divider-right: -5px;
+    }
+  }
+}
+
+@screen t {
+  .m-separator {
+    &.\-\-gap-x-30,
+    &.pt\:\-\-gap-x-30,
+    &.tm\:\-\-gap-x-30,
+    &.t\:\-\-gap-x-30 {
+      --separator-gap-x: 30px;
+      --separator-divider-right: -15px;
+    }
+
+    &.\-\-gap-x-24,
+    &.pt\:\-\-gap-x-24,
+    &.tm\:\-\-gap-x-24,
+    &.t\:\-\-gap-x-24 {
+      --separator-gap-x: 24px;
+      --separator-divider-right: -12px;
+    }
+
+    &.\-\-gap-x-20,
+    &.pt\:\-\-gap-x-20,
+    &.tm\:\-\-gap-x-20,
+    &.t\:\-\-gap-x-20 {
+      --separator-gap-x: 20px;
+      --separator-divider-right: -10px;
+    }
+
+    &.\-\-gap-x-16,
+    &.pt\:\-\-gap-x-16,
+    &.tm\:\-\-gap-x-16,
+    &.t\:\-\-gap-x-16 {
+      --separator-gap-x: 16px;
+      --separator-divider-right: -8px;
+    }
+
+    &.\-\-gap-x-12,
+    &.pt\:\-\-gap-x-12,
+    &.tm\:\-\-gap-x-12,
+    &.t\:\-\-gap-x-12 {
+      --separator-gap-x: 12px;
+      --separator-divider-right: -6px;
+    }
+
+    &.\-\-gap-x-10,
+    &.pt\:\-\-gap-x-10,
+    &.tm\:\-\-gap-x-10,
+    &.t\:\-\-gap-x-10 {
+      --separator-gap-x: 10px;
+      --separator-divider-right: -5px;
+    }
+  }
+}
+
+@screen m {
+  .m-separator {
+    &.\-\-gap-x-30,
+    &.tm\:\-\-gap-x-30,
+    &.m\:\-\-gap-x-30 {
+      --separator-gap-x: 30px;
+      --separator-divider-right: -15px;
+    }
+
+    &.\-\-gap-x-24,
+    &.tm\:\-\-gap-x-24,
+    &.m\:\-\-gap-x-24 {
+      --separator-gap-x: 24px;
+      --separator-divider-right: -12px;
+    }
+
+    &.\-\-gap-x-20,
+    &.tm\:\-\-gap-x-20,
+    &.m\:\-\-gap-x-20 {
+      --separator-gap-x: 20px;
+      --separator-divider-right: -10px;
+    }
+
+    &.\-\-gap-x-16,
+    &.tm\:\-\-gap-x-16,
+    &.m\:\-\-gap-x-16 {
+      --separator-gap-x: 16px;
+      --separator-divider-right: -8px;
+    }
+
+    &.\-\-gap-x-12,
+    &.tm\:\-\-gap-x-12,
+    &.m\:\-\-gap-x-12 {
+      --separator-gap-x: 12px;
+      --separator-divider-right: -6px;
+    }
+
+    &.\-\-gap-x-10,
+    &.tm\:\-\-gap-x-10,
+    &.m\:\-\-gap-x-10 {
+      --separator-gap-x: 10px;
+      --separator-divider-right: -5px;
+    }
+  }
+}

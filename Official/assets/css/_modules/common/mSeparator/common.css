@@ -1,0 +1,78 @@
+/* mSeparator(components/common/mSeparator.vue)版型。
+   值定義在 variables.css。 */
+
+.m-separator {
+  @apply gap-x-[--separator-gap-x];
+}
+
+.m-separator-item {
+  @apply relative;
+
+  /* 最後一項後面不畫線 */
+  &:not(:last-child) {
+    &:after {
+      @apply pointer-events-none absolute top-1/2 h-[--separator-divider-h] w-[--separator-divider-w] -translate-y-1/2 bg-[--separator-divider-bg-color] content-default;
+    }
+  }
+}
+
+/* 橫向排列 —— 分隔線靠右定位,位移量是 gap 的一半(見 variables.css)。
+   直向排列時沒有 right 這條宣告,由 absolute 的預設位置決定。 */
+
+@screen p {
+  .m-separator {
+    --separator-divider-h: var(--separator-divider-pc-h);
+    --separator-divider-w: var(--separator-divider-pc-w);
+
+    &.\-\-horizontal,
+    &.p\:\-\-horizontal,
+    &.pt\:\-\-horizontal {
+      @apply flex;
+
+      .m-separator-item {
+        &:after {
+          @apply right-[--separator-divider-right];
+        }
+      }
+    }
+  }
+}
+
+@screen t {
+  .m-separator {
+    --separator-divider-h: var(--separator-divider-tablet-h);
+    --separator-divider-w: var(--separator-divider-tablet-w);
+
+    &.\-\-horizontal,
+    &.pt\:\-\-horizontal,
+    &.tm\:\-\-horizontal,
+    &.t\:\-\-horizontal {
+      @apply flex;
+
+      .m-separator-item {
+        &:after {
+          @apply right-[--separator-divider-right];
+        }
+      }
+    }
+  }
+}
+
+@screen m {
+  .m-separator {
+    --separator-divider-h: var(--separator-divider-mobile-h);
+    --separator-divider-w: var(--separator-divider-mobile-w);
+
+    &.\-\-horizontal,
+    &.tm\:\-\-horizontal,
+    &.m\:\-\-horizontal {
+      @apply flex;
+
+      .m-separator-item {
+        &:after {
+          @apply right-[--separator-divider-right];
+        }
+      }
+    }
+  }
+}

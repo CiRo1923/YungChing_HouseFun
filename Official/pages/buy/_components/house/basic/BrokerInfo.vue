@@ -48,7 +48,7 @@ const companyInfo = computed(() => {
         main: 'h-[80px] w-[80px] shrink-0 overflow-hidden rounded-full bg-[--gray-f2]',
       }"
     />
-    <ul class="tracking-default grow">
+    <ul class="tracking-wider grow">
       <li class="mb-[4px] flex items-center gap-x-[10px]">
         <p class="text-[20px]">{{ broker.name }}</p>
         <ul class="flex items-center gap-x-[10px]">

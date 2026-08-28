@@ -1,0 +1,26 @@
+/* mNav 的 app 變體版型。值定義在 appVariables.css。 */
+
+.m-nav-app {
+  /* border-width 直接寫 CSS 屬性 —— @apply border-t-[…] 會被壓成 shorthand,值是 var() 時整條失效 */
+  border-top-width: var(--nav-app-border-t);
+
+  @apply border-solid border-t-[--nav-app-border-color];
+}
+
+@screen p {
+  .m-nav-app {
+    --nav-app-border-t: var(--nav-app-pc-border-t);
+  }
+}
+
+@screen t {
+  .m-nav-app {
+    --nav-app-border-t: var(--nav-app-tablet-border-t);
+  }
+}
+
+@screen m {
+  .m-nav-app {
+    --nav-app-border-t: var(--nav-app-mobile-border-t);
+  }
+}

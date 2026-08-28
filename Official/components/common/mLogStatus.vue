@@ -1,4 +1,7 @@
 <script setup>
+import '@css/_modules/common/mLogStatus/variables.css'
+import '@css/_modules/common/mLogStatus/common.css'
+
 const common = useCommonStore()
 const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
@@ -69,11 +72,9 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <ul
-    class="m-log-status m:border-t-[1px] m:border-t-[--gray-e5] pt:flex pt:items-center pt:gap-x-[24px]"
-  >
+  <ul class="m-log-status">
     <li
-      class="m-log-status-item relative leading-[0]"
+      class="m-log-status-item"
       v-for="(item, index) in items"
       :key="`${item.id}_${index}`"
     >
@@ -99,15 +100,3 @@ onUnmounted(() => {
     </li>
   </ul>
 </template>
-
-<style lang="postcss">
-@screen pt {
-  .m-log-status-item {
-    &:not(:last-child) {
-      &:after {
-        @apply pointer-events-none absolute right-[-12px] top-1/2 h-[55%] w-[1px] -translate-y-1/2 bg-[--gray-999] content-default;
-      }
-    }
-  }
-}
-</style>

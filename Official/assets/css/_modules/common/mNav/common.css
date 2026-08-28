@@ -1,0 +1,233 @@
+/* mNav(components/common/mNav/Main.vue)版型。值定義在 variables.css。
+
+   pc / tablet 與 mobile 是兩套版面,所以很多宣告**只寫在該斷點裡** ——
+   寫成無條件宣告再靠變數給 0,會多出一堆用不到的屬性去干擾另一個斷點。 */
+
+.m-nav-container {
+  @apply overflow-hidden;
+}
+
+/* 字距原本寫 tracking-default,但 tailwind.config.js 的 letterSpacing 是註解掉的 ——
+   那個 class 不存在,字距從來沒生效過(無效 class 在 template 會被靜默忽略,
+   只有 @apply 會報錯)。2026-08-28 全站 15 處改用 tailwind 內建的 tracking-wider(0.05em)。 */
+.m-nav-menu {
+  @apply tracking-wider gap-x-[--nav-menu-gap-x];
+}
+
+.m-nav-anchor {
+  /* text-[--var] 會被 tailwind 當成 color,字級一定要加 length: 型別提示 */
+  @apply flex px-[--nav-anchor-px] py-[--nav-anchor-py] text-[length:--nav-anchor-text-size];
+}
+
+.m-nav-children {
+  @apply transition-heights absolute left-0 z-[1] w-full overflow-hidden bg-[--nav-children-bg-color] pl-[--nav-children-pl] duration-300;
+}
+
+/* 斷點值 —— 掛在 .m-nav 上,底下的元素靠繼承取用 */
+
+@screen p {
+  .m-nav {
+    --nav-ml: var(--nav-pc-ml);
+    --nav-menu-gap-x: var(--nav-menu-pc-gap-x);
+    --nav-anchor-text-size: var(--nav-anchor-pc-text-size);
+    --nav-anchor-gap-y: var(--nav-anchor-pc-gap-y);
+    --nav-anchor-min-w: var(--nav-anchor-pc-min-w);
+    --nav-anchor-px: var(--nav-anchor-pc-px);
+    --nav-anchor-py: var(--nav-anchor-pc-py);
+    --nav-anchor-line-h: var(--nav-anchor-line-pc-h);
+    --nav-children-pl: var(--nav-children-pc-pl);
+    --nav-submenu-py: var(--nav-submenu-pc-py);
+
+    @apply ml-[--nav-ml];
+  }
+
+  .m-nav-anchor {
+    @apply min-w-[--nav-anchor-min-w] gap-y-[--nav-anchor-gap-y];
+  }
+
+  .m-nav-submenu {
+    @apply py-[--nav-submenu-py];
+  }
+
+  /* 滑到選單上時,沒被指到的項目把狀態線淡掉,指到的那個換成 hover 色 */
+  .m-nav-menu {
+    &:hover {
+      .m-nav-anchor {
+        &:after {
+          --nav-anchor-line-current-bg-color: var(--nav-anchor-line-bg-color);
+        }
+
+        &.\-\-active {
+          &:after {
+            --nav-anchor-line-current-bg-color: var(--nav-anchor-line-active-bg-color);
+          }
+        }
+      }
+
+      .m-nav-item {
+        &:hover {
+          .m-nav-anchor {
+            &:after {
+              --nav-anchor-line-current-bg-color: var(--nav-anchor-line-hover-bg-color);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .m-nav-anchor {
+    &:after {
+      @apply h-[--nav-anchor-line-h];
+    }
+  }
+}
+
+@screen t {
+  .m-nav {
+    --nav-ml: var(--nav-tablet-ml);
+    --nav-menu-gap-x: var(--nav-menu-tablet-gap-x);
+    --nav-anchor-text-size: var(--nav-anchor-tablet-text-size);
+    --nav-anchor-gap-y: var(--nav-anchor-tablet-gap-y);
+    --nav-anchor-min-w: var(--nav-anchor-tablet-min-w);
+    --nav-anchor-px: var(--nav-anchor-tablet-px);
+    --nav-anchor-py: var(--nav-anchor-tablet-py);
+    --nav-anchor-line-h: var(--nav-anchor-line-tablet-h);
+    --nav-children-pl: var(--nav-children-tablet-pl);
+    --nav-submenu-py: var(--nav-submenu-tablet-py);
+  }
+
+  .m-nav-anchor {
+    @apply gap-y-[--nav-anchor-gap-y];
+  }
+}
+
+/* pc + tablet 共通的橫向版面 */
+
+@screen pt {
+  .m-nav {
+    @apply grow;
+  }
+
+  .m-nav-container {
+    @apply flex h-full;
+  }
+
+  .m-nav-menu {
+    @apply flex h-full;
+  }
+
+  .m-nav-item {
+    @apply h-full;
+
+    /* 沒指到的項目把子選單收起來 —— max-height 由 JS 量完內容後寫進 style */
+    &:not(.\-\-curr) {
+      .m-nav-children {
+        @apply !max-h-0;
+      }
+    }
+  }
+
+  .m-nav-anchor {
+    @apply h-full flex-col justify-end text-center;
+
+    &.\-\-active {
+      &:after {
+        --nav-anchor-line-current-bg-color: var(--nav-anchor-line-active-bg-color);
+      }
+    }
+
+    &:after {
+      @apply w-full rounded-full bg-[--nav-anchor-line-current-bg-color] transition-colors duration-300 content-default;
+    }
+  }
+}
+
+@screen m {
+  .m-nav {
+    --nav-menu-gap-x: var(--nav-menu-mobile-gap-x);
+    --nav-anchor-text-size: var(--nav-anchor-mobile-text-size);
+    --nav-anchor-px: var(--nav-anchor-mobile-px);
+    --nav-anchor-py: var(--nav-anchor-mobile-py);
+    --nav-children-pl: var(--nav-children-mobile-pl);
+
+    @apply shrink-0;
+  }
+
+  /* 漢堡按鈕 —— 三條線,展開時上下兩條合併並旋轉成 X、中間那條淡出 */
+  .m-nav-ctrl {
+    @apply relative block h-[--nav-ctrl-size] w-[--nav-ctrl-size];
+
+    --nav-ctrl-size: var(--nav-ctrl-mobile-size);
+    --nav-ctrl-bar-w: var(--nav-ctrl-bar-mobile-w);
+    --nav-ctrl-bar-h: var(--nav-ctrl-bar-mobile-h);
+    --nav-ctrl-bar-offset: var(--nav-ctrl-bar-mobile-offset);
+
+    &:before,
+    &:after,
+    > i {
+      @apply absolute left-1/2 top-1/2 h-[--nav-ctrl-bar-h] w-[--nav-ctrl-bar-w] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[--nav-ctrl-bar-bg-color];
+    }
+
+    /* delay 依 transition-property 順序對應:第 1 值 = margin-top,第 2 值 = transform */
+    &:before,
+    &:after {
+      @apply transition-[margin-top,transform] duration-150 content-default;
+    }
+
+    > i {
+      @apply transition-opacity duration-150;
+    }
+
+    /* 收合:先轉回水平,再展開上下距離 */
+    &:not(.\-\-active) {
+      &:before,
+      &:after {
+        @apply delay-[150ms,0ms];
+      }
+
+      &:before {
+        margin-top: calc(var(--nav-ctrl-bar-offset) * -1);
+      }
+
+      &:after {
+        @apply mt-[--nav-ctrl-bar-offset];
+      }
+    }
+
+    /* 展開:先合併到中央,再旋轉成 X */
+    &.\-\-active {
+      &:before,
+      &:after {
+        @apply mt-0 delay-[0ms,150ms];
+      }
+
+      &:before {
+        @apply rotate-45;
+      }
+
+      &:after {
+        @apply -rotate-45;
+      }
+
+      > i {
+        @apply opacity-0;
+      }
+    }
+  }
+
+  /* 從 header 底下展開,高度扣掉 header —— --header-mobile-h 來自 mHeader */
+  .m-nav-container {
+    @apply transition-heights absolute left-0 top-[--header-mobile-h] z-[1] w-full bg-[--nav-container-bg-color] px-[--nav-container-px] duration-300;
+
+    --nav-container-px: var(--nav-container-mobile-px);
+
+    &:not(.\-\-open) {
+      @apply h-0;
+    }
+
+    &.\-\-open {
+      @apply h-[calc(100vh_-_var(--header-mobile-h))];
+    }
+  }
+}

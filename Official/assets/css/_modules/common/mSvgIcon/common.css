@@ -1,0 +1,6 @@
+/* SvgIcon 版型 —— 只有「跟著文字顏色走」這一件事。
+   尺寸與顏色由使用端決定(setClass / 父層的 text color),所以沒有 variables.css。 */
+
+.m-svg-icon {
+  @apply fill-current;
+}

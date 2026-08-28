@@ -1,4 +1,7 @@
 <script setup>
+import '@css/_modules/common/mNav/variables.css'
+import '@css/_modules/common/mNav/common.css'
+
 const common = useCommonStore()
 const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
@@ -9,7 +12,7 @@ const isDevicePT = computed(() => /^(p|t)$/.test(device.value))
 const isDeviceM = computed(() => device.value === 'm')
 
 const itemRef = ref(null)
-const childernRef = ref([])
+const childrenRef = ref([])
 const submenuRef = ref([])
 const isNavOpen = ref(false)
 const itemCurrIndex = ref(null)
@@ -73,10 +76,10 @@ const onGetChildernHeight = () => {
     const submenuElem = submenuRef.value[i]
 
     if (submenuElem) {
-      const childernElem = childernRef.value[i]
+      const childrenElem = childrenRef.value[i]
       const rect = submenuElem.getBoundingClientRect()
 
-      childernElem.style.maxHeight = `${rect.height}px`
+      childrenElem.style.maxHeight = `${rect.height}px`
     }
   }
 }
@@ -104,7 +107,7 @@ onUnmounted(() => {
   <!-- <pre>
     {{ route.name }}
   </pre> -->
-  <nav class="m-nav m:shrink-0 pt:grow p:ml-[130px]">
+  <nav class="m-nav">
     <button
       type="button"
       class="m-nav-ctrl"
@@ -115,9 +118,9 @@ onUnmounted(() => {
       <i />
     </button>
     <div class="m-nav-container" :class="{ '--open': isNavOpen }">
-      <ul class="m-nav-menu tracking-default t:gap-x-[15px] pt:flex pt:h-full p:gap-x-[30px]">
+      <ul class="m-nav-menu">
         <li
-          class="m-nav-item pt:h-full"
+          class="m-nav-item"
           :class="{ '--curr': itemCurrIndex === index }"
           @click="onItemCurrIndex(index)"
           @mouseover="onItemCurrIndex(index)"
@@ -128,18 +131,18 @@ onUnmounted(() => {
         >
           <component
             :is="onAnchorAs(item)"
-            class="m-nav-anchor flex text-[18px] m:px-[20px] m:py-[15px] t:gap-y-[4px] pt:h-full pt:flex-col pt:justify-end pt:text-center p:min-w-[75px] p:gap-y-[6px]"
+            class="m-nav-anchor"
             :class="{ '--active': onAnchorActive(item) }"
             v-bind="onAnchorBind(item)"
           >
             <em>{{ item.label }}</em>
           </component>
           <div
-            class="m-nav-childern absolute left-0 z-[1] w-full overflow-hidden bg-[--gray-e5] transition-heights duration-300 p:pl-[590px]"
-            ref="childernRef"
+            class="m-nav-children"
+            ref="childrenRef"
             v-if="isDevicePT && item.children && item.children.submenu"
           >
-            <ul class="p:py-[25px]" ref="submenuRef">
+            <ul class="m-nav-submenu" ref="submenuRef">
               <li
                 v-for="(submenu, idx) in item.children.submenu"
                 :key="`${submenu.label}_${idx}_${index}`"
@@ -157,139 +160,3 @@ onUnmounted(() => {
     </div>
   </nav>
 </template>
-
-<style lang="postcss">
-.m-nav-container {
-  @apply overflow-hidden;
-}
-
-@screen p {
-  .m-nav-menu {
-    &:hover {
-      .m-nav-item {
-        &:hover {
-          .m-nav-anchor {
-            &:after {
-              @apply bg-[--gray-e5];
-            }
-          }
-        }
-      }
-
-      .m-nav-anchor {
-        &:after {
-          @apply bg-transparent;
-        }
-
-        &.\-\-active {
-          &:after {
-            @apply bg-[--green-8b0d];
-          }
-        }
-      }
-    }
-  }
-
-  .m-nav-anchor {
-    &:after {
-      @apply h-[6px];
-    }
-  }
-}
-
-@screen pt {
-  .m-nav-container {
-    @apply flex h-full;
-  }
-
-  .m-nav-item {
-    &:not(.\-\-curr) {
-      .m-nav-childern {
-        @apply !max-h-0;
-      }
-    }
-  }
-
-  .m-nav-anchor {
-    &.\-\-active {
-      &:after {
-        @apply bg-[--green-8b0d];
-      }
-    }
-
-    &:after {
-      @apply w-full rounded-full transition-colors duration-300 content-default;
-    }
-  }
-}
-
-@screen m {
-  .m-nav-ctrl {
-    @apply relative block h-[35px] w-[35px];
-
-    &:before,
-    &:after,
-    > i {
-      @apply absolute left-1/2 top-1/2 h-[3px] w-[26px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[--gray-999];
-    }
-
-    /* delay 依 transition-property 順序對應:第 1 值 = margin-top,第 2 值 = transform */
-    &:before,
-    &:after {
-      @apply transition-[margin-top,transform] duration-150 content-default;
-    }
-
-    > i {
-      @apply transition-opacity duration-150;
-    }
-
-    /* 收合:先轉回水平,再展開上下距離 */
-    &:not(.\-\-active) {
-      &:before,
-      &:after {
-        @apply delay-[150ms,0ms];
-      }
-
-      &:before {
-        @apply mt-[-7px];
-      }
-
-      &:after {
-        @apply mt-[7px];
-      }
-    }
-
-    /* 展開:先合併到中央,再旋轉成 X */
-    &.\-\-active {
-      &:before,
-      &:after {
-        @apply mt-0 delay-[0ms,150ms];
-      }
-
-      &:before {
-        @apply rotate-45;
-      }
-
-      &:after {
-        @apply -rotate-45;
-      }
-
-      > i {
-        @apply opacity-0;
-      }
-    }
-  }
-
-  .m-nav-container {
-    @apply absolute left-0 top-[--header-mobile-h] z-[1] w-full bg-[--white] px-[20px] transition-heights duration-300;
-
-    &:not(.\-\-open) {
-      @apply h-0;
-    }
-
-    &.\-\-open {
-      @apply h-[calc(100vh_-_var(--header-mobile-h))];
-    }
-  }
-}
-</style>
