@@ -958,6 +958,42 @@ import { Field, ErrorMessage } from 'vee-validate'
 
 ## 檢查工具
 
+### ⚠️ 掃描範圍以外的檔案 —— 寫死色碼一層都抓不到
+
+[lint-core.mjs](../../.tools/css/lint-core.mjs) 的 `SCAN_TARGETS` 只涵蓋
+`components` / `containers` / `pages` / `layouts` / `assets/css` / `app.vue` / `error.vue`,
+`SCAN_EXT` 只有 `.vue` 與 `.css`。**根目錄的設定檔兩個條件都不符**,
+而五層守門共用同一份判斷邏輯 —— 所以那些檔案是**五層都讀不到**,不是讀了以後判定沒問題。
+
+親自確認:
+
+```powershell
+node .tools/css/lint-css.mjs tailwind.extend.js
+# ✔ CSS 規範檢查通過(掃描 0 個檔案)   ← 括號裡是 0,檔案根本沒被打開
+```
+
+**這代表「存量 0 筆」只涵蓋掃得到的範圍。** 本專案目前就有三個藏在盲區的色碼,
+都在 [tailwind.extend.js](../../tailwind.extend.js) 的 `boxShadow`:
+
+| preset | 色碼 | 使用端 |
+|---|---|---|
+| `black-y2-b4` | `#00000033` | `containers/common/Header.vue`、`_modules/common/mTab/ovalResponsiv.css` |
+| `dropdown` | `#0000001a` ×2 | `_modules/buy/mSort/common.css` |
+| `card` | `#00000026` | `pages/buy/_components/common/Card.vue` |
+
+`tailwind.config.js` / `tailwind.function.js` / `postcss.function.js` / `config.js` 同理 ——
+`theme` 底下任何吃顏色的 key(`colors` / `borderColor` / `boxShadow` / `dropShadow`)都在盲區。
+
+**修法不是擴大掃描範圍**(把 `.js` 拉進來會開始誤報一堆字串),而是切斷需求:
+**陰影不要放進 tailwind preset** —— 值裡必定帶顏色,而 preset 又掃不到。
+改走原生 `box-shadow` + module 自己的 `--x-pc-shadow` / `-tablet-` / `-mobile-` 變數,
+色值取色票變數;那些檔案在 `assets/css/` 底下就掃得到了。
+本專案已經有四支是這樣寫的:[common/mForm/autocomplete.css](../../assets/css/_modules/common/mForm/autocomplete.css)、
+[common/mForm/select.css](../../assets/css/_modules/common/mForm/select.css)、
+[buy/mSwiper/common.css](../../assets/css/_modules/buy/mSwiper/common.css)、
+[buy/mTooltip/common.css](../../assets/css/_modules/buy/mTooltip/common.css) ——
+上面那三個 preset 照這個模式收掉即可。
+
 ```powershell
 npm run lint:css                              # 全專案掃描(四條規則)
 node .tools/css/lint-css.mjs <檔案或目錄>      # 只檢查指定範圍
@@ -1023,6 +1059,9 @@ module 也多一層頻道目錄(`_modules/<頻道>/<組件>/`)。
 ### 違規存量
 
 **2026-08-28 起為 0 筆** —— `npm run lint:css` 掃描 289 個檔案全數通過。
+
+> ⚠️ 這個 0 只涵蓋**掃得到的範圍**。`tailwind.extend.js` 的三個 `boxShadow` preset
+> 仍藏著寫死色碼,那支檔案在掃描範圍外(見「檢查工具」章),lint 永遠不會報它們。
 
 導入當天(2026-08-27)是 414 筆 / 258 個檔案,分兩批清完:
 
