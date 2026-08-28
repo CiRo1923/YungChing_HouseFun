@@ -13,9 +13,8 @@
 .m-swiper-container {
   transform: translate3d(0, 0, 0);
   transition-property: transform;
-  column-gap: var(--m-swiper-gap, 0px);
 
-  @apply relative box-content flex w-full select-none;
+  @apply relative box-content flex w-full select-none gap-x-[var(--swiper-gap,0px)];
 
   &.\-\-draggable {
     &:not(:active) {
@@ -31,7 +30,7 @@
 .m-swiper-slide {
   transition-property: transform;
 
-  @apply relative block h-full w-full shrink-0;
+  @apply relative block h-full w-full shrink-0 overflow-hidden;
 }
 
 .m-swiper-nav {
@@ -50,18 +49,15 @@
   box-shadow: var(--swiper-ctrl-shadow);
   border-width: var(--swiper-ctrl-border);
 
-  @apply flex h-[--swiper-ctrl-height] w-[--swiper-ctrl-width] items-center justify-center rounded-[--swiper-ctrl-rounded] border-solid transition-colors duration-300;
+  @apply flex h-[--swiper-ctrl-h] w-[--swiper-ctrl-w] items-center justify-center rounded-[--swiper-ctrl-rounded] border-solid transition-colors duration-300;
 
   &:not(:disabled) {
-    border-color: var(--swiper-ctrl-border-color);
-
-    @apply bg-[--swiper-ctrl-bg-color] text-[--swiper-ctrl-color];
+    @apply border-[--swiper-ctrl-border-color] bg-[--swiper-ctrl-bg-color] text-[--swiper-ctrl-color];
   }
 
   &:disabled {
-    border-color: var(--swiper-ctrl-disabled-border-color);
-
-    @apply cursor-not-allowed bg-[--swiper-ctrl-disabled-bg-color] text-[--swiper-ctrl-disabled-color];
+    @apply cursor-not-allowed border-[--swiper-ctrl-disabled-border-color]
+      bg-[--swiper-ctrl-disabled-bg-color] text-[--swiper-ctrl-disabled-color];
   }
 }
 
@@ -70,7 +66,7 @@
 }
 
 .m-swiper-pagination-bullet {
-  @apply block h-[--swiper-pagination-bullet-height] w-[--swiper-pagination-bullet-width] rounded-full bg-[--swiper-pagination-bullet-bg-color] transition-all duration-300;
+  @apply block h-[--swiper-pagination-bullet-h] w-[--swiper-pagination-bullet-w] rounded-full bg-[--swiper-pagination-bullet-bg-color] transition-all duration-300;
 }
 
 @screen p {
@@ -79,7 +75,7 @@
     &.p\:\-\-pagination-bar,
     &.pt\:\-\-pagination-bar {
       .m-swiper-pagination-bullet {
-        @apply max-w-[--swiper-pagination-bar-pc-width];
+        @apply max-w-[--swiper-pagination-bar-pc-max-w];
       }
     }
   }
@@ -92,7 +88,7 @@
     &.tm\:\-\-pagination-bar,
     &.t\:\-\-pagination-bar {
       .m-swiper-pagination-bullet {
-        @apply max-w-[--swiper-pagination-bar-tablet-width];
+        @apply max-w-[--swiper-pagination-bar-tablet-max-w];
       }
     }
   }
@@ -104,8 +100,171 @@
     &.tm\:\-\-pagination-bar,
     &.m\:\-\-pagination-bar {
       .m-swiper-pagination-bullet {
-        @apply max-w-[--swiper-pagination-bar-mobile-width];
+        @apply max-w-[--swiper-pagination-bar-mobile-max-w];
       }
     }
+  }
+}
+
+/* 以下四條原本寫在 Horizontal.vue / Ctrl.vue 的 template */
+
+.m-swiper-pagination {
+  @apply flex flex-wrap justify-center gap-x-[--swiper-pagination-gap-x];
+}
+
+.m-swiper-nav-icon {
+  @apply h-full w-full;
+}
+
+.m-swiper-ctrl {
+  @apply flex items-center gap-x-[--swiper-ctrl-gap-x];
+}
+
+/* 斷點對應與 modifier 的組別切換 —— 這些是「切換成另一個變數」,屬於版型層,
+   原本誤放在 variables.css。值本身仍在 variables.css 的 :root。 */
+
+@screen p {
+  .m-swiper {
+    &.\-\-pagination-point,
+    &.p\:\-\-pagination-point,
+    &.pt\:\-\-pagination-point {
+      --swiper-pagination-gap-x: var(--swiper-pagination-point-pc-gap-x);
+
+      .m-swiper-pagination-bullet {
+        --swiper-pagination-bullet-w: var(--swiper-pagination-point-pc-size);
+        --swiper-pagination-bullet-h: var(--swiper-pagination-point-pc-size);
+        --swiper-pagination-bullet-bg-color: var(--swiper-pagination-bullet-point-bg-color);
+
+        &.\-\-active {
+          --swiper-pagination-bullet-bg-color: var(
+            --swiper-pagination-bullet-point-active-bg-color
+          );
+        }
+      }
+    }
+
+    &.\-\-pagination-bar,
+    &.p\:\-\-pagination-bar,
+    &.pt\:\-\-pagination-bar {
+      --swiper-pagination-gap-x: var(--swiper-pagination-bar-pc-gap-x);
+
+      .m-swiper-pagination-bullet {
+        --swiper-pagination-bullet-w: 100%;
+        --swiper-pagination-bullet-h: var(--swiper-pagination-bar-pc-h);
+        --swiper-pagination-bullet-bg-color: var(--swiper-pagination-bullet-bar-bg-color);
+
+        &.\-\-active {
+          --swiper-pagination-bullet-bg-color: var(--swiper-pagination-bullet-bar-active-bg-color);
+        }
+      }
+    }
+  }
+
+  .m-swiper-ctrl {
+    --swiper-ctrl-w: var(--swiper-ctrl-pc-w);
+    --swiper-ctrl-h: var(--swiper-ctrl-pc-h);
+    --swiper-ctrl-rounded: var(--swiper-ctrl-pc-rounded);
+    --swiper-ctrl-shadow: var(--swiper-ctrl-pc-shadow);
+    --swiper-ctrl-gap-x: var(--swiper-ctrl-pc-gap-x);
+    --swiper-ctrl-icon-size: var(--swiper-ctrl-pc-icon-size);
+    --swiper-ctrl-border: var(--swiper-ctrl-pc-border);
+  }
+}
+
+@screen t {
+  .m-swiper {
+    &.\-\-pagination-point,
+    &.pt\:\-\-pagination-point,
+    &.tm\:\-\-pagination-point,
+    &.t\:\-\-pagination-point {
+      --swiper-pagination-gap-x: var(--swiper-pagination-point-tablet-gap-x);
+
+      .m-swiper-pagination-bullet {
+        --swiper-pagination-bullet-w: var(--swiper-pagination-point-tablet-size);
+        --swiper-pagination-bullet-h: var(--swiper-pagination-point-tablet-size);
+        --swiper-pagination-bullet-bg-color: var(--swiper-pagination-bullet-point-bg-color);
+
+        &.\-\-active {
+          --swiper-pagination-bullet-bg-color: var(
+            --swiper-pagination-bullet-point-active-bg-color
+          );
+        }
+      }
+    }
+
+    &.\-\-pagination-bar,
+    &.pt\:\-\-pagination-bar,
+    &.tm\:\-\-pagination-bar,
+    &.t\:\-\-pagination-bar {
+      --swiper-pagination-gap-x: var(--swiper-pagination-bar-tablet-gap-x);
+
+      .m-swiper-pagination-bullet {
+        --swiper-pagination-bullet-w: 100%;
+        --swiper-pagination-bullet-h: var(--swiper-pagination-bar-tablet-h);
+        --swiper-pagination-bullet-bg-color: var(--swiper-pagination-bullet-bar-bg-color);
+
+        &.\-\-active {
+          --swiper-pagination-bullet-bg-color: var(--swiper-pagination-bullet-bar-active-bg-color);
+        }
+      }
+    }
+  }
+
+  .m-swiper-ctrl {
+    --swiper-ctrl-w: var(--swiper-ctrl-tablet-w);
+    --swiper-ctrl-h: var(--swiper-ctrl-tablet-h);
+    --swiper-ctrl-rounded: var(--swiper-ctrl-tablet-rounded);
+    --swiper-ctrl-shadow: var(--swiper-ctrl-tablet-shadow);
+    --swiper-ctrl-gap-x: var(--swiper-ctrl-tablet-gap-x);
+    --swiper-ctrl-icon-size: var(--swiper-ctrl-tablet-icon-size);
+    --swiper-ctrl-border: var(--swiper-ctrl-tablet-border);
+  }
+}
+
+@screen m {
+  .m-swiper {
+    &.\-\-pagination-point,
+    &.tm\:\-\-pagination-point,
+    &.m\:\-\-pagination-point {
+      --swiper-pagination-gap-x: var(--swiper-pagination-point-mobile-gap-x);
+
+      .m-swiper-pagination-bullet {
+        --swiper-pagination-bullet-w: var(--swiper-pagination-point-mobile-size);
+        --swiper-pagination-bullet-h: var(--swiper-pagination-point-mobile-size);
+        --swiper-pagination-bullet-bg-color: var(--swiper-pagination-bullet-point-bg-color);
+
+        &.\-\-active {
+          --swiper-pagination-bullet-bg-color: var(
+            --swiper-pagination-bullet-point-active-bg-color
+          );
+        }
+      }
+    }
+
+    &.\-\-pagination-bar,
+    &.tm\:\-\-pagination-bar,
+    &.m\:\-\-pagination-bar {
+      --swiper-pagination-gap-x: var(--swiper-pagination-bar-mobile-gap-x);
+
+      .m-swiper-pagination-bullet {
+        --swiper-pagination-bullet-w: 100%;
+        --swiper-pagination-bullet-h: var(--swiper-pagination-bar-mobile-h);
+        --swiper-pagination-bullet-bg-color: var(--swiper-pagination-bullet-bar-bg-color);
+
+        &.\-\-active {
+          --swiper-pagination-bullet-bg-color: var(--swiper-pagination-bullet-bar-active-bg-color);
+        }
+      }
+    }
+  }
+
+  .m-swiper-ctrl {
+    --swiper-ctrl-w: var(--swiper-ctrl-mobile-w);
+    --swiper-ctrl-h: var(--swiper-ctrl-mobile-h);
+    --swiper-ctrl-rounded: var(--swiper-ctrl-mobile-rounded);
+    --swiper-ctrl-shadow: var(--swiper-ctrl-mobile-shadow);
+    --swiper-ctrl-gap-x: var(--swiper-ctrl-mobile-gap-x);
+    --swiper-ctrl-icon-size: var(--swiper-ctrl-mobile-icon-size);
+    --swiper-ctrl-border: var(--swiper-ctrl-mobile-border);
   }
 }

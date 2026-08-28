@@ -1,0 +1,16 @@
+/* mErrorMessage(components/common/mErrorMessageElem.vue)的變數。
+   資料夾名跟著 class 前綴 .m-error-message 走,不是組件檔名。
+
+   顏色由組件決定 —— 錯誤訊息全站都是同一個紅,不開 modifier。 */
+
+:root {
+  --error-message-color: var(--red-d111);
+
+  --error-message-pc-gap-x: 4px;
+  --error-message-tablet-gap-x: 4px;
+  --error-message-mobile-gap-x: 4px;
+
+  --error-message-icon-pc-size: 18px;
+  --error-message-icon-tablet-size: 18px;
+  --error-message-icon-mobile-size: 18px;
+}

@@ -389,9 +389,9 @@ export const useSwiperCore = ({ props, emits }) => {
 
     // SSR / 尚未量到容器寬度時的 fallback：先用 slidesPerView 以 CSS calc 算欄寬，
     // 避免套到 .m-swiper-slide 預設的 w-full 而出現「先單欄、ready 後才多欄」的閃動。
-    // gap 以容器 column-gap 為準（--m-swiper-gap，預設 0px），量到寬度後即被上方精確值取代。
+    // gap 以容器 column-gap 為準（--swiper-gap，預設 0px），量到寬度後即被上方精確值取代。
     const visibleGapCount = Math.max(slidesPerView.value - 1, 0)
-    const fallbackWidth = `calc((100% - ${visibleGapCount} * var(--m-swiper-gap, 0px)) / ${slidesPerView.value})`
+    const fallbackWidth = `calc((100% - ${visibleGapCount} * var(--swiper-gap, 0px)) / ${slidesPerView.value})`
 
     return {
       width: fallbackWidth,

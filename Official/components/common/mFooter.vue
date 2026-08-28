@@ -1,4 +1,7 @@
 <script setup>
+import '@css/_modules/common/mFooter/variables.css'
+import '@css/_modules/common/mFooter/common.css'
+
 const common = useCommonStore()
 const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
@@ -128,25 +131,25 @@ onUnmounted(() => {
 
 <template>
   <div
-    class="m-fooetr tm:mt-[20px] tm:px-[16px] tm:pb-[24px] tm:pt-[16px] p:mt-[55px] p:py-[32px]"
+    class="m-footer"
     :class="setClass.main"
   >
-    <div class="m-footer-container mx-auto pt:flex p:max-w-[1200px]">
-      <div class="m-footer-information tracking-wider text-[12px] text-[--gray-666] pt:grow">
-        <ul class="flex items-center gap-x-[8px]">
+    <div class="m-footer-container">
+      <div class="m-footer-information">
+        <ul class="m-footer-stores">
           <li v-for="(item, index) in stores" :key="`${item.id}_${index}`">
-            <a :href="item.href" class="block" target="_blank" rel="noopener">
+            <a :href="item.href" class="m-footer-store-anchor" target="_blank" rel="noopener">
               <CommonImgSrc
                 :src="item.src"
                 :alt="item.alt"
                 :setClass="{
-                  main: 'h-[40px] w-[160px]',
+                  main: 'm-footer-store-image',
                 }"
               />
             </a>
           </li>
         </ul>
-        <p class="mt-[16px]">好房國際股份有限公司 (統編 28006949) 負責建置及維護</p>
+        <p class="m-footer-company">好房國際股份有限公司 (統編 28006949) 負責建置及維護</p>
         <CommonMSeparator
           :items="privacy"
           :config="{
@@ -163,19 +166,19 @@ onUnmounted(() => {
           <p v-else>{{ item.label }}</p>
         </CommonMSeparator>
       </div>
-      <div class="m-footer-links tracking-wider space-y-[16px] pt:shrink-0" v-if="!isDeviceM">
-        <p class="text-[16px] text-[--green-6a2d]">關注好房網</p>
-        <ul class="flex gap-x-[32px] text-[12px] leading-[1.33] text-[--gray-999]">
+      <div class="m-footer-links" v-if="!isDeviceM">
+        <p class="m-footer-links-title">關注好房網</p>
+        <ul class="m-footer-links-group">
           <li v-for="(link, index) in links" :key="`links_${index}`">
-            <ul class="space-y-[8px]">
+            <ul class="m-footer-links-items">
               <li v-for="(item, idx) in link" :key="`links_${link.label}_${idx}_${index}`">
                 <a
                   :href="item.href"
-                  class="inline-flex items-center gap-x-[4px]"
+                  class="m-footer-link"
                   target="_blank"
                   rel="noopener"
                 >
-                  <CommonSvgIcon :icon="item.icon" class="h-[16px] w-[16px]" />
+                  <CommonSvgIcon :icon="item.icon" class="m-footer-link-icon" />
                   <em>{{ item.label }}</em>
                 </a>
               </li>
@@ -186,5 +189,3 @@ onUnmounted(() => {
     </div>
   </div>
 </template>
-
-<style></style>

@@ -45,7 +45,12 @@ const FIX_HINTS = {
     '排序執行 npm run sort:color 即可。',
   tailwind:
     '規則 2:把 template 的 tailwind class 搬進 assets/css/_modules/<頻道>/<組件>/,' +
-    'template 只留組件自身 class 與 --modifier。沒有自己 class 的元素要補一個。',
+    'template 只留組件自身 class 與 --modifier。沒有自己 class 的元素要補一個。' +
+    'modifier 的命名 = tailwind utility 加 -- 前綴(--border-b 不是 --has-border-b、' +
+    '--rounded-20、--px-15);--oval / --checked / --align-top 這種 tailwind 沒有對應的' +
+    '狀態或語意開關才用專案自己的說法。' +
+    '狀態一律 -- 開頭(--readonly / --error / --disabled / --active / --curr / --checked),' +
+    '不要用 is-active / has-label 這種裸前綴;jFormValid 那類純給 JS 抓的 hook class 不在此限。',
   module:
     '規則 3:樣式拆進 assets/css/_modules/<頻道>/<組件>/,' +
     '在 <script setup> 最上方 JS import(順序:共用變數 → 群組變數 → 變體變數 → ' +
@@ -60,7 +65,12 @@ const FIX_HINTS = {
     '不要讓兩邊在同一個優先權上打架。' +
     '字級看組件性質:固定位置的組件(麵包屑 / 分頁器 / mNav / mFooter)可以在 module 用 ' +
     ':root 變數定;到處複用的組件(按鈕 / mForm / mTag)一律由父系 setClass 傳,' +
-    'module 不要定 text-*,沒有對應 setClass key 就補一個並把值補回每一個使用端。',
+    'module 不要定 text-*,沒有對應 setClass key 就補一個並把值補回每一個使用端。' +
+    '有幾個屬性不能用 tailwind 寫、而且都不報錯:border-width 與 box-shadow 一律寫原生 CSS 屬性' +
+    '(shadow-[--x] 會被當成 shadow color,box-shadow 根本不出現);font-size 要寫 ' +
+    'text-[length:--x];border-color 與 gap-x-[var(--x,0px)] 則沒問題。' +
+    'transition-property: transform 不要換成 transition-transform(會連帶塞 duration-150 與 ' +
+    'cubic-bezier,timing-function 蓋不掉、手感會變),transform: translate3d(0,0,0) 同理維持原生。',
   import:
     '規則 5:<script setup> 的 import 順序為 css → ./.composables → @js → 其他套件,' +
     '類別之間空一行;同類別內維持既有順序(css 之間的先後有意義)。' +
@@ -165,6 +175,13 @@ process.stdin
           hookSpecificOutput: {
             hookEventName: 'PostToolUse',
             additionalContext:
+              '⚠️ **這一輪一定要做的事**:下面有紅色警告,把手上這件事講完之後,' +
+              '**必須用 AskUserQuestion 工具**詢問要不要現在協助調整 —— ' +
+              '不是在回覆末尾用文字帶一句,是真的呼叫那個工具。\n' +
+              '使用者說過「不管任何狀況都要先詢問」,所以這條**沒有例外**:\n' +
+              '先前說過「繼續」「整批授權」都不算免問(那是授權做這件工作,不是授權不用問);' +
+              '既有存量也要問,只是要講清楚它是存量;' +
+              '只有他針對這一筆說過不用,才不再問第二次。\n\n' +
               `[CSS 規範檢查] ${rel}\n${text}\n\n` +
               (hints.length ? `修正方式:\n${hints.map((h) => `- ${h}`).join('\n')}\n\n` : '') +
               '規範見 .claude/rules/css-conventions.md。這是警告不是阻擋。\n\n' +

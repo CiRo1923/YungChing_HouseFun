@@ -52,7 +52,7 @@ onUnmounted(() => {
       containerMode: 'single',
     }"
     :setClass="{
-      main: '--green-8b0d pt:--has-border-b p:--anchor-px-20 p:--anchor-py-10 tm:--anchor-px-10 t:--anchor-py-5 pt:grow',
+      main: '--green-8b0d pt:--border-b p:--anchor-px-20 p:--anchor-py-10 tm:--anchor-px-10 t:--anchor-py-5 pt:grow',
       header: 'flex items-center',
       anchor: 'tm:text-[14px] p:text-[16px]',
     }"

@@ -190,6 +190,14 @@ const main = () => {
       hookSpecificOutput: {
         hookEventName: 'UserPromptSubmit',
         additionalContext:
+          '⚠️ **這一輪一定要做的事**:下面有紅色警告,回答使用者當下的問題之後,' +
+          '**必須用 AskUserQuestion 工具**詢問要不要現在協助調整 —— ' +
+          '不是在回覆末尾用文字帶一句,是真的呼叫那個工具。\n' +
+          '附上你打算怎麼改(哪個檔案、加哪個變數、搬哪些 class),讓使用者能直接判斷。\n' +
+          '使用者說過「不管任何狀況都要先詢問」,所以這條**沒有例外**:\n' +
+          '先前說過「繼續」「整批授權」都不算免問(那是授權做這件工作,不是授權不用問);' +
+          '既有存量也要問,只是要講清楚它是存量;' +
+          '只有他針對這一筆說過不用,才不再問第二次。\n\n' +
           `[CSS 規範檢查 —— 剛存檔 / 工作區有改動的 .vue / .css]\n${blocks.join('\n\n')}\n\n` +
           '規範見 .claude/rules/css-conventions.md。這是警告不是阻擋。\n\n' +
           '顏色是 module 的職責:使用端在 setClass.main 寫 text-[--gray-999] 是錯的,' +
@@ -203,6 +211,10 @@ const main = () => {
           'variables 檔只放「值」(:root 預設值、modifier 的具體值、指向色票的 var(--white));' +
           '「行為」放版型檔 —— 狀態切換(--checked { --x-bg: var(--x-checked-bg) })與' +
           '斷點對應(--x-size: var(--x-pc-size))都要寫在 common.css / <變體>.css。\n\n' +
+          'modifier 的命名 = tailwind utility 加 -- 前綴(--border-b 不是 --has-border-b);' +
+          '--oval / --checked 這種 tailwind 沒有對應的狀態開關才用專案自己的說法。' +
+          '狀態一律 -- 開頭(--readonly / --error / --disabled / --active / --curr),' +
+          '不要用 is-active / has-label 這種裸前綴。\n\n' +
           'module 分共用 / 群組 / 變體三層:兩個以上變體共用的放群組層(mForm 的 selection.* ' +
           '是 checkbox + radio 共用),import 順序為 共用變數 → 群組變數 → 變體變數 → ' +
           '共用版型 → 群組版型 → 變體樣式。\n' +
@@ -212,7 +224,12 @@ const main = () => {
           '併存就建 -rounded-t / -rounded-b;使用端已用 tailwind 傳細粒度時要補對應 modifier。\n' +
           '字級:固定位置的組件(麵包屑 / 分頁器 / mNav / mFooter)可在 module 用 :root 變數定;' +
           '到處複用的組件(按鈕 / mForm / mTag)一律由父系 setClass 傳,沒有 key 就補一個,' +
-          '並把原本的值補回每一個使用端。\n\n' +
+          '並把原本的值補回每一個使用端。\n' +
+          '有幾個屬性不能用 tailwind 寫、而且都不報錯:border-width 與 box-shadow 一律寫原生 CSS 屬性' +
+          '(shadow-[--x] 會被當成 shadow color,box-shadow 根本不出現);font-size 要寫 ' +
+          'text-[length:--x];border-color 與 gap-x-[var(--x,0px)] 則沒問題。' +
+          'transition-property: transform 不要換成 transition-transform(會連帶塞 duration-150 與 ' +
+          'cubic-bezier,timing-function 蓋不掉、手感會變),transform: translate3d(0,0,0) 同理維持原生。\n\n' +
           '**接下來要做的事**:先回答使用者當下的問題,然後用 AskUserQuestion 詢問要不要現在' +
           '協助把上面這些調整成符合規範 —— 附上你打算怎麼改(具體到哪個檔案、加哪個變數、' +
           '搬哪些 class),讓使用者能直接判斷。\n' +

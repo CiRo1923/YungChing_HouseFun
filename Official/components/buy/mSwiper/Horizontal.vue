@@ -81,7 +81,7 @@ defineExpose({
         <div
           v-for="(item, index) in displayData"
           :key="`${swiperName || 'mSwiper'}_${renderKey}_${index}`"
-          class="m-swiper-slide overflow-hidden"
+          class="m-swiper-slide"
           :class="setClass.slide"
           :style="slideStyle"
           :data-swiper-autoplay="getSlideAutoplayAttr(item)"
@@ -95,7 +95,7 @@ defineExpose({
 
       <div
         v-if="paginationConfig"
-        class="m-swiper-pagination flex flex-wrap justify-center gap-x-[--swiper-pagination-gap-x]"
+        class="m-swiper-pagination"
         :class="setClass.pagination"
       >
         <button
@@ -118,7 +118,7 @@ defineExpose({
         :disabled="isBeginning"
         @click="onPrev"
       >
-        <CommonSvgIcon :icon="navConfig.icon.prev" class="h-full w-full" />
+        <CommonSvgIcon :icon="navConfig.icon.prev" class="m-swiper-nav-icon" />
       </button>
 
       <button
@@ -128,10 +128,8 @@ defineExpose({
         :disabled="isEnd"
         @click="onNext"
       >
-        <CommonSvgIcon :icon="navConfig.icon.next" class="h-full w-full" />
+        <CommonSvgIcon :icon="navConfig.icon.next" class="m-swiper-nav-icon" />
       </button>
     </template>
   </div>
 </template>
-
-<style lang="postcss"></style>

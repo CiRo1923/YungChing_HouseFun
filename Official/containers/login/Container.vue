@@ -43,7 +43,7 @@ defineExpose({
         containerMode: 'multiple',
       }"
       :setClass="{
-        main: '--green-8b0d pt:--has-border-b p:--anchor-px-20 p:--anchor-py-10 tm:--anchor-px-15 t:--anchor-py-5',
+        main: '--green-8b0d pt:--border-b p:--anchor-px-20 p:--anchor-py-10 tm:--anchor-px-15 t:--anchor-py-5',
         header: 'flex items-center',
         headerItems: 'w-full',
         headerItem: 'flex-1',

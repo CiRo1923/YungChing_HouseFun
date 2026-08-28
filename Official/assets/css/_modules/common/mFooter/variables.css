@@ -1,0 +1,88 @@
+/* mFooter(components/common/mFooter.vue)的變數。
+
+   字級定在這裡 —— 頁尾全站長一樣,屬於「固定位置」的組件。
+
+   外距與內距同時用到 mt / px / pt / pb / py 幾種層級(pc 是 py、tablet 以下是
+   px + pt + pb),所以內距拆成四個方向,各斷點只設它有的那幾個。 */
+
+:root {
+  --footer-pc-mt: 55px;
+  --footer-tablet-mt: 20px;
+  --footer-mobile-mt: 20px;
+
+  --footer-pc-pt: 32px;
+  --footer-tablet-pt: 16px;
+  --footer-mobile-pt: 16px;
+
+  --footer-pc-pr: 0;
+  --footer-tablet-pr: 16px;
+  --footer-mobile-pr: 16px;
+
+  --footer-pc-pb: 32px;
+  --footer-tablet-pb: 24px;
+  --footer-mobile-pb: 24px;
+
+  --footer-pc-pl: 0;
+  --footer-tablet-pl: 16px;
+  --footer-mobile-pl: 16px;
+
+  --footer-container-pc-max-w: 1200px;
+  --footer-container-tablet-max-w: none;
+  --footer-container-mobile-max-w: none;
+
+  /* 左半:公司資訊 */
+  --footer-information-color: var(--gray-666);
+
+  --footer-information-pc-text-size: 12px;
+  --footer-information-tablet-text-size: 12px;
+  --footer-information-mobile-text-size: 12px;
+
+  --footer-stores-pc-gap-x: 8px;
+  --footer-stores-tablet-gap-x: 8px;
+  --footer-stores-mobile-gap-x: 8px;
+
+  --footer-store-image-pc-w: 160px;
+  --footer-store-image-tablet-w: 160px;
+  --footer-store-image-mobile-w: 160px;
+
+  --footer-store-image-pc-h: 40px;
+  --footer-store-image-tablet-h: 40px;
+  --footer-store-image-mobile-h: 40px;
+
+  --footer-company-pc-mt: 16px;
+  --footer-company-tablet-mt: 16px;
+  --footer-company-mobile-mt: 16px;
+
+  /* 右半:關注好房網(mobile 不顯示) */
+  --footer-links-color: var(--gray-999);
+
+  --footer-links-pc-text-size: 12px;
+  --footer-links-tablet-text-size: 12px;
+  --footer-links-mobile-text-size: 12px;
+
+  --footer-links-pc-gap-y: 16px;
+  --footer-links-tablet-gap-y: 16px;
+  --footer-links-mobile-gap-y: 16px;
+
+  --footer-links-title-color: var(--green-6a2d);
+
+  --footer-links-title-pc-text-size: 16px;
+  --footer-links-title-tablet-text-size: 16px;
+  --footer-links-title-mobile-text-size: 16px;
+
+  --footer-links-group-pc-gap-x: 32px;
+  --footer-links-group-tablet-gap-x: 32px;
+  --footer-links-group-mobile-gap-x: 32px;
+
+  --footer-links-items-pc-gap-y: 8px;
+  --footer-links-items-tablet-gap-y: 8px;
+  --footer-links-items-mobile-gap-y: 8px;
+
+  --footer-link-pc-gap-x: 4px;
+  --footer-link-tablet-gap-x: 4px;
+  --footer-link-mobile-gap-x: 4px;
+
+  --footer-link-icon-pc-size: 16px;
+  --footer-link-icon-tablet-size: 16px;
+  --footer-link-icon-mobile-size: 16px;
+}

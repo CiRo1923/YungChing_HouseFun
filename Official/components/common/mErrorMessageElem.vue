@@ -1,4 +1,7 @@
 <script setup>
+import '@css/_modules/common/mErrorMessage/variables.css'
+import '@css/_modules/common/mErrorMessage/common.css'
+
 const props = defineProps({
   message: {
     type: String,
@@ -8,10 +11,8 @@ const props = defineProps({
 </script>
 
 <template>
-  <small class="m-error-message flex items-center gap-x-[4px] text-[--red-d111]">
-    <CommonSvgIcon icon="icon_exclamation_o" class="h-[18px] w-[18px]" />
+  <small class="m-error-message">
+    <CommonSvgIcon icon="icon_exclamation_o" class="m-error-message-icon" />
     <em>{{ props.message }}</em>
   </small>
 </template>
-
-<style></style>

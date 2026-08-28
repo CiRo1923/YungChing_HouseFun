@@ -1,4 +1,13 @@
 :root {
+  /* header 的 icon —— borderBottom 專屬,Check 那支是另一個尺寸 */
+  --tab-border-bottom-icon-pc-size: 22px;
+  --tab-border-bottom-icon-tablet-size: 22px;
+  --tab-border-bottom-icon-mobile-size: 22px;
+
+  --tab-border-bottom-icon-pc-p: 2px;
+  --tab-border-bottom-icon-tablet-p: 2px;
+  --tab-border-bottom-icon-mobile-p: 2px;
+
   --tab-border-bottom-pc-border-h: 3px;
   --tab-border-bottom-tablet-border-h: 3px;
   --tab-border-bottom-mobile-border-h: 3px;

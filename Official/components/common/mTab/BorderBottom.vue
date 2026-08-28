@@ -76,7 +76,7 @@ const onTransitionEnd = async (e) => {
 <template>
   <div class="m-tab --border-bottom" :class="setClass.main">
     <div class="m-tab-header" :class="setClass.header">
-      <ul class="m-tab-header-items flex" :class="setClass.headerItems">
+      <ul class="m-tab-header-items" :class="setClass.headerItems">
         <li
           class="m-tab-header-item"
           :class="setClass.headerItem"
@@ -97,7 +97,7 @@ const onTransitionEnd = async (e) => {
           >
             <CommonSvgIcon
               :icon="item.icon"
-              class="m-tab-icon h-[22px] w-[22px] p-[2px]"
+              class="m-tab-icon"
               v-if="item.icon"
             />
             <slot name="anchor" :item="item" :index="index">
@@ -136,5 +136,3 @@ const onTransitionEnd = async (e) => {
     </div>
   </div>
 </template>
-
-<style lang="postcss"></style>

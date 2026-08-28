@@ -431,10 +431,7 @@ const tipContent = computed(() => {
   const head = `<b>${ctx.category}</b>`
   const rows = ctx.points
     .filter((p) => p.value != null)
-    .map(
-      (p) =>
-        `${p.series ? `${p.series}：` : ''}${p.value} ${unit}${p.dashed ? '（推估）' : ''}`
-    )
+    .map((p) => `${p.series ? `${p.series}：` : ''}${p.value} ${unit}${p.dashed ? '（推估）' : ''}`)
     .join('<br>')
   return `${head}<br>${rows}`
 })

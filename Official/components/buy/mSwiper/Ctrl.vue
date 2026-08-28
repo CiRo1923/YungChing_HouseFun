@@ -101,15 +101,14 @@ onUnmounted(() => {
 <template>
   <ClientOnly>
     <ul
-      class="m-swiper-ctrl flex items-center gap-x-[--swiper-ctrl-gap-x]"
+      class="m-swiper-ctrl"
       :class="setClass.main"
       v-if="config.show"
     >
-      <li class="">
+      <li>
         <button
           type="button"
           class="m-swiper-ctrl-anchor --prev"
-          :class="{ disabled: isPrevDisabled }"
           :disabled="isPrevDisabled"
           @click="onPrev"
         >
@@ -120,7 +119,6 @@ onUnmounted(() => {
         <button
           type="button"
           class="m-swiper-ctrl-anchor --next"
-          :class="{ disabled: isNextDisabled }"
           :disabled="isNextDisabled"
           @click="onNext"
         >
@@ -130,5 +128,3 @@ onUnmounted(() => {
     </ul>
   </ClientOnly>
 </template>
-
-<style lang="postcss"></style>

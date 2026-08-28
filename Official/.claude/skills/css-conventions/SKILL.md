@@ -28,6 +28,19 @@ description: 動到任何 css、顏色、module 樣式前必須先讀。四條�
 | **狀態** | hover / focus / active 一律「覆寫基礎變數」,不要在 `:root` 寫 `--x-hover-color: var(--x-color)` 當 fallback —— 那在 `:root` 當下就解析完了,永遠是無效值。 |
 | **撞名** | 同組 module 內不同元素撞 class 名時**不要硬合併**(`.m-label` vs `.m-form-label`),在 variables 檔頭註明原因。 |
 
+## 狀態一律 `--` 開頭,沒有 `is-*`
+
+`--readonly` / `--error` / `--disabled` / `--active` / `--curr` / `--checked` / `--open` / `--has-label`。
+**不要用 `is-active`、`has-label` 這種裸前綴** —— 專案只有 `--` 一種寫法。
+(`jFormValid` 那類純給 JS 抓、不帶樣式的 hook class 不在此限。)
+
+## modifier 命名 = tailwind utility + `--` 前綴
+
+`--border-b`(不是 `--has-border-b`)、`--rounded-20`、`--px-15`、`--text-white` ——
+對得上 tailwind utility 的一律照它的名字,只多 `--` 前綴。
+`--oval` / `--checked` / `--align-top` / `--no-label` 這種狀態或語意開關 tailwind 沒有對應,
+維持專案自己的說法。
+
 ## variables 檔只放「值」,版型檔放「行為」
 
 判斷方式:**這行是在「給一個值」,還是在「切換成另一個變數」?**
@@ -62,6 +75,22 @@ import '…/mForm/checkbox.css'            // 變體樣式
 ```
 
 兩個以上變體共用的結構 → 進群組層,不要在各變體檔各寫一份,更不要留在 template。
+
+## ⚠️ 這幾個屬性不能用 tailwind 寫,而且都不會報錯
+
+| 屬性 | 寫法 | 用 tailwind 會怎樣 |
+|---|---|---|
+| `border-width` | 原生 `border-width: var(--x-border)` | production 壓成 `border` shorthand,`var()` 讓整條失效 |
+| `box-shadow` | 原生 `box-shadow: var(--x-shadow)` | `shadow-[--x]` 被當成 shadow **color**,`box-shadow` 根本不出現 |
+| `font-size` | `text-[length:--x-text-size]` | 少了 `length:` 會變成 `color: var(…)` |
+| `border-color` | `border-[--x-border-color]` ✓ | 沒問題,正常產出 |
+| `column-gap` | `gap-x-[var(--x-gap,0px)]` ✓ | 沒問題,`var()` fallback 可用 |
+
+共通原因:**tailwind 推斷不出 arbitrary value 的型別時一律當成顏色**。
+
+`transition-property: transform` 也**不要**換成 `transition-transform` ——
+會連帶塞 `duration-150` 與 `cubic-bezier(.4,0,.2,1)`,timing-function 蓋不掉、手感會變,
+原本沒 duration 的元素還會憑空多出動畫。`transform: translate3d(0,0,0)` 同理維持原生。
 
 ## 顏色是組件的職責,使用端不得自訂
 
@@ -109,6 +138,15 @@ padding / margin / border-radius 的 modifier 有層級(整體 → 軸向 → �
 3. 頻道檔與 `color.css` 撞到同一個色值 → 頻道檔那份多餘,刪掉改用共用變數。
 
 第 2、3 點工具會比對後警告,但**不自動搬**(牽動使用端)。
+
+## ⚠️ 有違規就一定要問 —— 沒有例外
+
+只要偵測到違規,**必須呼叫 AskUserQuestion 工具**問使用者要不要現在協助調整,並附上具體方案。
+
+- 在回覆末尾用文字問「要不要順手修?」**不算數**,要真的呼叫工具
+- 使用者說過「繼續」/「整批授權」**都不算免問** —— 那是授權做這件工作,不是授權不用問
+- 既有存量也要問,只是要講清楚它是存量
+- 只有「使用者針對這一筆說過不用」才不再問
 
 ## 四層守門都只警告不阻擋
 

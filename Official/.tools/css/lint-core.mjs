@@ -105,9 +105,15 @@ const TW_PREFIX = [
   'float-', 'clear-', 'box-', 'table-', 'caption-', 'border-spacing-',
 ]
 
-/** 專案自訂 class 的樣式:m- 開頭的組件 class,以及 --modifier */
+/**
+ * 專案自訂 class:`m-` 開頭的組件 class、`--` 開頭的 modifier / 狀態,
+ * 以及 `j` 開頭純給 JS 抓的 hook class(jFormValid,不帶樣式)。
+ *
+ * `is-*` / `has-*` 這種裸前綴**不算合法** —— 狀態一律寫成 `--active` / `--has-label`,
+ * 由 checkStateClassNaming 另外抓出來。
+ */
 const isProjectClass = (name) =>
-  name.startsWith('--') || /^m-[a-z]/.test(name) || /^is-|^has-|^js-/.test(name)
+  name.startsWith('--') || /^m-[a-z]/.test(name) || /^j[A-Z]/.test(name)
 
 /** 去掉 variant 前綴(p: / t: / m: / hover: / group-hover: ...),回傳 utility 本體 */
 function stripVariants(cls) {
@@ -385,6 +391,57 @@ export function checkModuleImports(relPath, text) {
           curr.file
         )
       }
+    }
+  }
+
+  return issues
+}
+
+/**
+ * 2-b 狀態 class 一律 `--` 開頭。
+ *
+ * `is-active` / `has-label` 這種裸前綴不要用 —— 專案只有 `--active` / `--has-label` 一種寫法,
+ * 看到 `--` 就知道是這個組件的狀態或變體。`jFormValid` 那類純給 JS 抓的 hook class 不在此限。
+ */
+/** 常見的狀態字 —— 這些出現在 :class 物件的 key 上,幾乎都是忘了加 `--` */
+const STATE_WORDS = [
+  'active', 'curr', 'current', 'checked', 'selected', 'disabled', 'readonly',
+  'focus', 'open', 'opened', 'close', 'closed', 'show', 'hidden', 'error',
+  'loading', 'draggable', 'fixed',
+]
+
+export function checkStateClassNaming(relPath, text) {
+  const tpl = extractTemplate(text)
+  const body = tpl
+    ? tpl.body.replace(/<!--[\s\S]*?-->/g, (m) => m.replace(/[^\n]/g, ' '))
+    : maskComments(text)
+  const offset = tpl ? tpl.offset : 0
+
+  const issues = []
+  const seen = new Set()
+
+  const add = (name, index, detail) => {
+    if (seen.has(name)) return
+    seen.add(name)
+    issues.push({ rule: 'tailwind', file: relPath, line: lineOf(text, offset + index), detail, snippet: name })
+  }
+
+  // is-x / has-x 這種裸前綴,不論在 class 屬性還是 css 選擇器裡
+  for (const m of body.matchAll(/(?<![-\w.])(is|has)-([a-z][a-z0-9-]*)/g)) {
+    const name = `${m[1]}-${m[2]}`
+    add(name, m.index, `狀態 class ${name} 要寫成 --${name}(狀態一律 -- 開頭,不用裸的 is- / has- 前綴)`)
+  }
+
+  // :class="{ disabled: x }" / :class="{ 'active': x }" —— 物件的 key 是裸狀態字
+  for (const attr of body.matchAll(/(?::|v-bind:)class\s*=\s*"([^"]*)"/g)) {
+    for (const pair of attr[1].matchAll(/(['"]?)([a-z][a-z0-9-]*)\1\s*:/g)) {
+      const key = pair[2]
+      if (!STATE_WORDS.includes(key)) continue
+      add(
+        key,
+        attr.index + pair.index,
+        `狀態 class ${key} 要寫成 --${key}(狀態一律 -- 開頭;裸的狀態字會跟第三方或全域樣式撞名)`
+      )
     }
   }
 
@@ -769,6 +826,7 @@ export function lintFile(projectRoot, absPath, definedVars) {
 
   if (rel.startsWith('components/') && rel.endsWith('.vue')) {
     issues.push(...checkTailwindInComponents(rel, text))
+    issues.push(...checkStateClassNaming(rel, text))
   }
 
   return issues

@@ -1,0 +1,31 @@
+/* mErrorMessage(components/common/mErrorMessageElem.vue)版型。
+   值定義在 variables.css。字級不定在這裡 —— 由使用端(mForm 的 .m-form-error 等)決定。 */
+
+.m-error-message {
+  @apply flex items-center gap-x-[--error-message-gap-x] text-[--error-message-color];
+}
+
+.m-error-message-icon {
+  @apply h-[--error-message-icon-size] w-[--error-message-icon-size];
+}
+
+@screen p {
+  .m-error-message {
+    --error-message-gap-x: var(--error-message-pc-gap-x);
+    --error-message-icon-size: var(--error-message-icon-pc-size);
+  }
+}
+
+@screen t {
+  .m-error-message {
+    --error-message-gap-x: var(--error-message-tablet-gap-x);
+    --error-message-icon-size: var(--error-message-icon-tablet-size);
+  }
+}
+
+@screen m {
+  .m-error-message {
+    --error-message-gap-x: var(--error-message-mobile-gap-x);
+    --error-message-icon-size: var(--error-message-icon-mobile-size);
+  }
+}

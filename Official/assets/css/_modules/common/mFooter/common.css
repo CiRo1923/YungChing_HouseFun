@@ -1,0 +1,132 @@
+/* mFooter(components/common/mFooter.vue)版型。值定義在 variables.css。 */
+
+.m-footer {
+  @apply mt-[--footer-mt] pb-[--footer-pb] pl-[--footer-pl] pr-[--footer-pr] pt-[--footer-pt];
+}
+
+.m-footer-container {
+  @apply mx-auto max-w-[--footer-container-max-w];
+}
+
+.m-footer-information {
+  /* text-[--var] 會被 tailwind 當成 color,字級一定要加 length: 型別提示 */
+  @apply tracking-wider text-[length:--footer-information-text-size] text-[--footer-information-color];
+}
+
+.m-footer-stores {
+  @apply flex items-center gap-x-[--footer-stores-gap-x];
+}
+
+.m-footer-store-anchor {
+  @apply block;
+}
+
+.m-footer-store-image {
+  @apply h-[--footer-store-image-h] w-[--footer-store-image-w];
+}
+
+.m-footer-company {
+  @apply mt-[--footer-company-mt];
+}
+
+.m-footer-links {
+  @apply tracking-wider space-y-[--footer-links-gap-y];
+}
+
+.m-footer-links-title {
+  @apply text-[length:--footer-links-title-text-size] text-[--footer-links-title-color];
+}
+
+.m-footer-links-group {
+  @apply flex gap-x-[--footer-links-group-gap-x] text-[length:--footer-links-text-size] leading-[1.33] text-[--footer-links-color];
+}
+
+.m-footer-links-items {
+  @apply space-y-[--footer-links-items-gap-y];
+}
+
+.m-footer-link {
+  @apply inline-flex items-center gap-x-[--footer-link-gap-x];
+}
+
+.m-footer-link-icon {
+  @apply h-[--footer-link-icon-size] w-[--footer-link-icon-size];
+}
+
+@screen p {
+  .m-footer {
+    --footer-mt: var(--footer-pc-mt);
+    --footer-pt: var(--footer-pc-pt);
+    --footer-pr: var(--footer-pc-pr);
+    --footer-pb: var(--footer-pc-pb);
+    --footer-pl: var(--footer-pc-pl);
+    --footer-container-max-w: var(--footer-container-pc-max-w);
+    --footer-information-text-size: var(--footer-information-pc-text-size);
+    --footer-stores-gap-x: var(--footer-stores-pc-gap-x);
+    --footer-store-image-w: var(--footer-store-image-pc-w);
+    --footer-store-image-h: var(--footer-store-image-pc-h);
+    --footer-company-mt: var(--footer-company-pc-mt);
+    --footer-links-gap-y: var(--footer-links-pc-gap-y);
+    --footer-links-text-size: var(--footer-links-pc-text-size);
+    --footer-links-title-text-size: var(--footer-links-title-pc-text-size);
+    --footer-links-group-gap-x: var(--footer-links-group-pc-gap-x);
+    --footer-links-items-gap-y: var(--footer-links-items-pc-gap-y);
+    --footer-link-gap-x: var(--footer-link-pc-gap-x);
+    --footer-link-icon-size: var(--footer-link-icon-pc-size);
+  }
+}
+
+@screen t {
+  .m-footer {
+    --footer-mt: var(--footer-tablet-mt);
+    --footer-pt: var(--footer-tablet-pt);
+    --footer-pr: var(--footer-tablet-pr);
+    --footer-pb: var(--footer-tablet-pb);
+    --footer-pl: var(--footer-tablet-pl);
+    --footer-container-max-w: var(--footer-container-tablet-max-w);
+    --footer-information-text-size: var(--footer-information-tablet-text-size);
+    --footer-stores-gap-x: var(--footer-stores-tablet-gap-x);
+    --footer-store-image-w: var(--footer-store-image-tablet-w);
+    --footer-store-image-h: var(--footer-store-image-tablet-h);
+    --footer-company-mt: var(--footer-company-tablet-mt);
+    --footer-links-gap-y: var(--footer-links-tablet-gap-y);
+    --footer-links-text-size: var(--footer-links-tablet-text-size);
+    --footer-links-title-text-size: var(--footer-links-title-tablet-text-size);
+    --footer-links-group-gap-x: var(--footer-links-group-tablet-gap-x);
+    --footer-links-items-gap-y: var(--footer-links-items-tablet-gap-y);
+    --footer-link-gap-x: var(--footer-link-tablet-gap-x);
+    --footer-link-icon-size: var(--footer-link-icon-tablet-size);
+  }
+}
+
+@screen m {
+  .m-footer {
+    --footer-mt: var(--footer-mobile-mt);
+    --footer-pt: var(--footer-mobile-pt);
+    --footer-pr: var(--footer-mobile-pr);
+    --footer-pb: var(--footer-mobile-pb);
+    --footer-pl: var(--footer-mobile-pl);
+    --footer-container-max-w: var(--footer-container-mobile-max-w);
+    --footer-information-text-size: var(--footer-information-mobile-text-size);
+    --footer-stores-gap-x: var(--footer-stores-mobile-gap-x);
+    --footer-store-image-w: var(--footer-store-image-mobile-w);
+    --footer-store-image-h: var(--footer-store-image-mobile-h);
+    --footer-company-mt: var(--footer-company-mobile-mt);
+  }
+}
+
+/* pc / tablet 才是左右兩欄,mobile 只有左半(links 整塊 v-if 掉) */
+
+@screen pt {
+  .m-footer-container {
+    @apply flex;
+  }
+
+  .m-footer-information {
+    @apply grow;
+  }
+
+  .m-footer-links {
+    @apply shrink-0;
+  }
+}

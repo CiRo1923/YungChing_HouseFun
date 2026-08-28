@@ -5,13 +5,21 @@
 
 **違規一律只警告不阻擋** —— 擋下來只會逼人繞過(加 `--no-verify`),反而讓守門機制形同虛設。
 
-**但警告完要主動問**:偵測到違規時,除了跳警告,還要**用 AskUserQuestion 詢問使用者要不要現在協助調整**,
+**但警告完一定要問 —— 不管任何狀況**:只要偵測到違規,除了跳警告,
+**必須呼叫 AskUserQuestion 工具**詢問使用者要不要現在協助調整,
 並附上具體的修正方案(哪個檔案、加哪個變數、搬哪些 class),讓使用者能直接判斷。
 
-- 若違規是「碰到的舊檔案既有存量」而非這次改出來的,**要說明清楚是存量再問**,
-  不要讓使用者誤以為是新問題。
-- 使用者說不用就不要再問第二次。
-- dev server 與 pre-commit 那兩層無法互動,只印警告。
+⚠️ 這條沒有例外:
+
+- **在回覆末尾用文字問「要不要順手修?」不算數** —— 要真的呼叫那個工具。
+- 使用者先前說過「繼續」、「整批授權」、「一路做下去」**都不算免問**。
+  那是授權「做這件工作」,不是授權「不用問」。
+- 手上正在做別的事也一樣 —— 先把當下的事講完,然後問。
+- 違規是既有存量而非這次改出來的,**照樣要問**,只是要說明清楚它是存量。
+- 只有「使用者針對這一筆說過不用」才不再問第二次。
+
+dev server 與 pre-commit 那兩層無法互動,只印警告;
+提問由 [.claude/hooks/cssGuardPrompt.js](../hooks/cssGuardPrompt.js) 帶進對話後執行。
 
 ## 四層守門
 
@@ -263,6 +271,32 @@ import '@css/_modules/common/mForm/checkbox.css'            // 變體樣式
 
 > 不要用 `<style src="…">`,也不要用 `<style>` 裡的 `@import`。
 
+### 狀態一律用 `--` 開頭,不要 `is-*`
+
+元素的附屬狀態全部寫成 `--` 開頭的 modifier:
+
+```
+--readonly   --error   --disabled   --active   --curr
+--checked    --focus   --open       --show     --has-label
+```
+
+**不要用 `is-active` / `has-label` 這種裸前綴** —— 專案只有 `--` 一種寫法,
+看到 `--` 就知道是這個組件的狀態或變體,不必再分辨是哪一套命名。
+(`jFormValid` 這類純粹給 JS 抓的 hook class 不在此限,它不帶樣式。)
+
+### modifier 的命名對齊 tailwind
+
+modifier 名稱就是 **tailwind 的 utility 名前面加 `--`**,不要自己另外發明說法:
+
+| ✗ | ✓ | tailwind |
+|---|---|---|
+| `--has-border-b` | `--border-b` | `border-b` |
+| `--is-rounded-20` | `--rounded-20` | `rounded-20` |
+
+這樣看到 modifier 就知道它會影響哪個屬性,也不必記兩套詞彙。
+`--oval`、`--checked`、`--align-top`、`--no-label` 這類**狀態或語意開關**在 tailwind 裡沒有對應,
+維持專案自己的說法即可 —— 這條只約束「對得上 tailwind utility」的那些。
+
 ### 變數要不要開 modifier
 
 拆 module 時**最基礎的判斷**,決定每個屬性寫成哪一種形式:
@@ -351,6 +385,25 @@ import '@css/_modules/common/mForm/checkbox.css'            // 變體樣式
   production 會壓成 `border` shorthand,值是 `var()` 時整條失效。`border-color` 沒這問題。
 - **`text-[--var]` 會被當成 color**,必須寫 `text-[length:--x-text-size]`。
   tailwind 推斷不出型別時一律當 color,產生 `color: var(…)` 而不是 `font-size`,**完全不會報錯**。
+- **`box-shadow` 直接寫 CSS 屬性**(`box-shadow: var(--x-shadow)`),不要 `@apply shadow-[…]` ——
+  和 `text-[--var]` 同一個病:tailwind 推斷不出型別就當成**陰影顏色**,產出
+  `--tw-shadow-color: var(…); --tw-shadow: var(--tw-shadow-colored)`,
+  **`box-shadow` 這條根本不會出現**,一樣不報錯。`shadow-[var(--x)]` 也一樣沒救。
+
+  | 屬性 | 寫法 | 為什麼 |
+  |---|---|---|
+  | `border-width` | 原生 `border-width: var(--x-border)` | production 壓成 `border` shorthand,值是 `var()` 時整條失效 |
+  | `box-shadow` | 原生 `box-shadow: var(--x-shadow)` | `shadow-[…]` 被當成 shadow **color** |
+  | `border-color` | `@apply border-[--x-border-color]` ✓ | 產出正確的 `border-color`,沒問題 |
+  | `font-size` | `@apply text-[length:--x-text-size]` | 不寫 `length:` 會變成 `color` |
+  | `column-gap` | `@apply gap-x-[var(--x-gap,0px)]` ✓ | arbitrary value 內可帶 `var()` fallback |
+
+  另外 `transition-property: transform` **不要換成 tailwind 的 `transition-transform`** ——
+  後者會連帶塞進 `transition-duration: 150ms` 與 `transition-timing-function: cubic-bezier(.4,0,.2,1)`。
+  duration 若由 JS inline 控制還蓋得掉,timing-function 蓋不掉,**動畫手感會變**;
+  原本沒有 duration 的元素則會憑空多出 150ms 動畫。要換之前先確認 duration 由誰決定。
+  `transform: translate3d(0,0,0)` 這種 GPU 提示同理,維持原生寫法就好
+  (`transform-gpu` 展開成一整串 `--tw-translate-*` 鏈,反而更繞)。
 - ⚠️ **字級定在哪,看組件是不是「固定位置」**:
 
   | 組件性質 | 字級放哪 | 例子 |

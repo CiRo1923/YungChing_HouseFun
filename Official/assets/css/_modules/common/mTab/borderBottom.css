@@ -1,3 +1,16 @@
+/* header 的項目橫排 + icon 尺寸 —— 原本寫在 BorderBottom.vue 的 template */
+.m-tab {
+  &.\-\-border-bottom {
+    .m-tab-header-items {
+      @apply flex;
+    }
+
+    .m-tab-icon {
+      @apply h-[--tab-border-bottom-icon-size] w-[--tab-border-bottom-icon-size] p-[--tab-border-bottom-icon-p];
+    }
+  }
+}
+
 .m-tab {
   &.\-\-border-bottom {
     --tab-border-bottom-border-h: 0;
@@ -52,9 +65,12 @@
 @screen p {
   .m-tab {
     &.\-\-border-bottom {
-      &.\-\-has-border-b,
-      &.p\:\-\-has-border-b,
-      &.pt\:\-\-has-border-b {
+      --tab-border-bottom-icon-size: var(--tab-border-bottom-icon-pc-size);
+      --tab-border-bottom-icon-p: var(--tab-border-bottom-icon-pc-p);
+
+      &.\-\-border-b,
+      &.p\:\-\-border-b,
+      &.pt\:\-\-border-b {
         --tab-border-bottom-border-h: var(--tab-border-bottom-pc-border-h);
       }
     }
@@ -64,10 +80,13 @@
 @screen t {
   .m-tab {
     &.\-\-border-bottom {
-      &.\-\-has-border-b,
-      &.pt\:\-\-has-border-b,
-      &.tm\:\-\-has-border-b,
-      &.t\:\-\-has-border-b {
+      --tab-border-bottom-icon-size: var(--tab-border-bottom-icon-tablet-size);
+      --tab-border-bottom-icon-p: var(--tab-border-bottom-icon-tablet-p);
+
+      &.\-\-border-b,
+      &.pt\:\-\-border-b,
+      &.tm\:\-\-border-b,
+      &.t\:\-\-border-b {
         --tab-border-bottom-border-h: var(--tab-border-bottom-tablet-border-h);
       }
     }
@@ -77,9 +96,12 @@
 @screen m {
   .m-tab {
     &.\-\-border-bottom {
-      &.\-\-has-border-b,
-      &.tm\:\-\-has-border-b,
-      &.m\:\-\-has-border-b {
+      --tab-border-bottom-icon-size: var(--tab-border-bottom-icon-mobile-size);
+      --tab-border-bottom-icon-p: var(--tab-border-bottom-icon-mobile-p);
+
+      &.\-\-border-b,
+      &.tm\:\-\-border-b,
+      &.m\:\-\-border-b {
         --tab-border-bottom-border-h: var(--tab-border-bottom-mobile-border-h);
       }
     }
