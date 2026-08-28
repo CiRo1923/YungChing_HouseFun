@@ -7,13 +7,13 @@ const props = defineProps({
   },
 })
 const items = computed(() => {
-  const { is7DayExpired, dateExpired, isGolden, amountAutoRefresh, _checked } = props.data
+  const { is10DayExpired, dateExpired, isGolden, amountAutoRefresh, _checked } = props.data
 
   return [
     {
-      icon: is7DayExpired ? 'icon_exclamation_o' : 'icon_check_solid',
+      icon: is10DayExpired ? 'icon_exclamation_o' : 'icon_check_solid',
       label: '刊登資訊',
-      content: is7DayExpired ? `${dateExpired} 即到期` : `${dateExpired} 到期`,
+      content: is10DayExpired ? `${dateExpired} 即到期` : `${dateExpired} 到期`,
       button: {
         text: '續刊',
         onClick: () => {
@@ -24,12 +24,12 @@ const items = computed(() => {
       class: {
         main: [
           _checked.value ? '--bg-white' : '--bg-gray',
-          is7DayExpired ? '--border-orange' : '--border-gray',
+          is10DayExpired ? '--border-orange' : '--border-gray',
         ],
-        label: is7DayExpired ? 'text-[--orange-e646]' : '',
+        label: is10DayExpired ? 'text-[--orange-e646]' : '',
         // 不指定顏色就繼承 body 的 --black,與下方黃金曝光、自動刷新一致;
         // 快到期仍要橘色警示,那是提示不是配色
-        container: is7DayExpired ? 'text-[--orange-e646]' : '',
+        container: is10DayExpired ? 'text-[--orange-e646]' : '',
         button: {
           main: '--border-gray-e5 --bg-white --text-gray-666',
         },
