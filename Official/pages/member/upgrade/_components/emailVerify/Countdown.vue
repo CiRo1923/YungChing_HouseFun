@@ -91,7 +91,7 @@ onUnmounted(() => {
     }"
     :setClass="{
       main: [
-        { '--bg-green-8b0d66': !isTimeout },
+        { '--bg-green-8b0d-66': !isTimeout },
         { '--bg-green-8b0d': isTimeout },
         '--oval --text-white --h-35 --px-15',
       ],
