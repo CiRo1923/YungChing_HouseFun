@@ -7,6 +7,7 @@ import SvgSpritemapDevPlugin, {
   SvgSpritemapBuildPlugin,
   spritemapRoute as devSpritemapRoute,
 } from './.vite/svg-spritemap.mjs'
+import CssGuardPlugin from './.vite/css-guard.mjs'
 import { getPageComponentDirs } from './.tools/page-component-dirs'
 import { getStoreComposableImports, getStoreImports } from './.tools/store-composable-imports'
 import { ViteImageOptimizer } from 'vite-plugin-image-optimizer'
@@ -130,6 +131,8 @@ export default defineNuxtConfig({
       },
     },
     plugins: [
+      // dev 存檔時檢查 CSS 規範並自動排序 color.css(見 .claude/rules/css-conventions.md)
+      CssGuardPlugin() as never,
       SvgSpritemapBuildPlugin(CONFIG.svg, `${CONFIG.imgs}/svg/spritemap.svg`) as never,
       SvgSpritemapDevPlugin(CONFIG.svg) as never,
       ViteImageOptimizer({

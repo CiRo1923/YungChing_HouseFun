@@ -32,7 +32,7 @@ const config = computed(() => {
     @apply fixed inset-0 z-[5];
 
     &:before {
-      @apply pointer-events-none absolute inset-0 bg-black/20 backdrop-blur-[2px] content-default;
+      @apply pointer-events-none absolute inset-0 bg-[--black-33] backdrop-blur-[2px] content-default;
     }
   }
 }

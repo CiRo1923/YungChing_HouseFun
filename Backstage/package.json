@@ -13,7 +13,12 @@
     "build": "node ./.tools/run-nuxt-build-with-public-image-copy.mjs .env.build && npm run sync:public",
     "sync:public": "node ./.tools/sync-to-public.mjs",
     "generate": "nuxt generate",
-    "preview": "nuxt preview"
+    "preview": "nuxt preview",
+    "lint:css": "node ./.tools/css/lint-css.mjs",
+    "sort:color": "node ./.tools/css/sort-color-css.mjs --write",
+    "hooks:install": "node ./.tools/install-git-hooks.mjs",
+    "check:extensions": "node ./.tools/check-vscode-extensions.mjs",
+    "postinstall": "npm run hooks:install --silent && npm run check:extensions --silent"
   },
   "devDependencies": {
     "@nuxt/devtools": "^3.4.2",

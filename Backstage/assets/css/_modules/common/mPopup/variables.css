@@ -63,7 +63,7 @@
   --popup-footer-tablet-mt: 24px;
   --popup-footer-mobile-mt: 24px;
 
-  --popup-overlay-bg-color: #00000066;
+  --popup-overlay-bg-color: var(--black-66);
   --popup-container-bg-color: var(--white);
   --popup-header-border-color: var(--orange-e646);
   --popup-header-icon-color: var(--gray-666);

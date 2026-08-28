@@ -949,7 +949,7 @@ watch(
           :class="{
             'min-h-[130px] w-full m:col-span-2 t:col-span-3 p:col-span-4': !hasImages,
             'm:h-[114px] p:h-[152px] p:w-[200px]': hasImages,
-            'border-blue-400 bg-blue-50': isUploadDragging,
+            'border-[--blue-6afa] bg-[--blue-efff]': isUploadDragging,
           }"
           @click="openFileDialog"
           @dragover="onAppendButtonDragOver"

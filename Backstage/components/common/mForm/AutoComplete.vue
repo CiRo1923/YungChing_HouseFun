@@ -661,8 +661,8 @@ onUnmounted(() => {
 
 .m-autocomplete-dropdown {
   box-shadow:
-    0 4px 24px 0 #02041614,
-    0 2px 16px -8px #02041633;
+    0 4px 24px 0 var(--blue-0016-14),
+    0 2px 16px -8px var(--blue-0016-33);
 }
 
 .m-autocomplete-dropdown-item {
@@ -685,7 +685,7 @@ onUnmounted(() => {
   }
 
   &:disabled {
-    @apply text-[--gray-3334d];
+    @apply text-[--gray-33-4d];
   }
 }
 

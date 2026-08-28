@@ -19,9 +19,9 @@
   --form-dropdown-tablet-border: 1px;
   --form-dropdown-mobile-border: 1px;
 
-  --form-dropdown-pc-shadow: 0 3px 3px 0px #0000001f;
-  --form-dropdown-tablet-shadow: 0 3px 3px 0px #0000001f;
-  --form-dropdown-mobile-shadow: 0 3px 3px 0px #0000001f;
+  --form-dropdown-pc-shadow: 0 3px 3px 0px var(--black-1f);
+  --form-dropdown-tablet-shadow: 0 3px 3px 0px var(--black-1f);
+  --form-dropdown-mobile-shadow: 0 3px 3px 0px var(--black-1f);
 
   --form-dropdown-container-pc-px: 16px;
   --form-dropdown-container-tablet-px: 16px;
@@ -95,7 +95,7 @@
 
   --form-dropdown-button-color: var(--gray-333);
   --form-dropdown-button-active-color: var(--gray-333);
-  --form-dropdown-button-disabled-color: var(--gray-3334d);
+  --form-dropdown-button-disabled-color: var(--gray-33-4d);
 
   --form-dropdown-button-bg-color: var(--gray-f2);
   --form-dropdown-button-active-bg-color: var(--orange-feea);

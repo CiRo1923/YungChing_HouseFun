@@ -12,6 +12,18 @@
         ]
       }
     ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/cssGuardPrompt.js 2>/dev/null || true",
+            "timeout": 30,
+            "statusMessage": "檢查存檔後的 CSS 規範…"
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Write|Edit",
@@ -19,6 +31,12 @@
           {
             "type": "command",
             "command": "node .claude/hooks/conventions.js 2>/dev/null || true"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/cssGuard.js 2>/dev/null || true",
+            "timeout": 30,
+            "statusMessage": "檢查 CSS 規範…"
           }
         ]
       },

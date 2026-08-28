@@ -155,7 +155,7 @@ onUnmounted(() => {
 <template>
   <ul
     ref="navRef"
-    class="absolute right-0 rounded-[15px] bg-[#ccc] bg-[--white] p:translate-x-[calc(100%_+40px)] p:space-y-[8px] p:p-[10px]"
+    class="absolute right-0 rounded-[15px] bg-[--white] p:translate-x-[calc(100%_+40px)] p:space-y-[8px] p:p-[10px]"
     :style="{ top: `${top}px` }"
     v-if="!isHide"
   >

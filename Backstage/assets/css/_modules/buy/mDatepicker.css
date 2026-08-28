@@ -135,7 +135,7 @@
 }
 
 .m-datepicker-calendar-container {
-  box-shadow: 0 0 8px 0 rgba(var(--black-rgb), 0.2);
+  box-shadow: 0 0 8px 0 var(--black-33);
 
   @apply relative z-[1] my-[--datepicker-calendar-margin-y] overflow-hidden;
   @apply rounded-[--datepicker-calendar-rounded] border-[1px] border-[--datepicker-calendar-border-color];

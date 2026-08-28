@@ -26,5 +26,26 @@
   "[javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "prettier.requireConfig": true
+  "prettier.requireConfig": true,
+
+  // CSS 規範守門(見 .claude/rules/css-conventions.md)。
+  // 需要擴充 emeraldwalk.RunOnSave —— 沒裝也不影響開發,dev server 執行中時
+  // .vite/css-guard.mjs 一樣會做同樣的事;這裡是給「沒跑 dev 也要生效」的情境。
+  "emeraldwalk.runonsave": {
+    "autoClearConsole": true,
+    "commands": [
+      {
+        // 存檔 .vue / .css → 色票檔自動排序 + 五條規範全部檢查,逐筆印出。
+        "match": "\\.(vue|css)$",
+        "cmd": "node \"${workspaceFolder}/.tools/css/guard-file.mjs\" \"${file}\""
+
+        // ⚠️ 刻意不設 autoShowOutputPanel —— 存檔時把焦點搶去輸出面板太干擾,
+        //    正在打字的游標會跑掉。訊息留在「Run On Save」面板,要看的時候自己切過去。
+        //
+        //    真的想要自動彈的話是 "autoShowOutputPanel": "error",
+        //    但**必須寫在這個 command 物件裡**,寫在外層(與 commands 同級)無效 ——
+        //    擴充是逐個 command 讀這個值的(out/extension.js 的 statusCode !== 0 判斷)。
+      }
+    ]
+  }
 }

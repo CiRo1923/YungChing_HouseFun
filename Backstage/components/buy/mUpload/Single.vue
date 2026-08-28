@@ -508,7 +508,7 @@ watch(
         :class="{
           'flex min-h-[130px] w-full': !hasImage,
           'inline-flex p:w-[200px]': hasImage,
-          'border-blue-400 bg-blue-50': isUploadDragging,
+          'border-[--blue-6afa] bg-[--blue-efff]': isUploadDragging,
         }"
         role="button"
         :disabled="config.isDisabled"
@@ -529,7 +529,7 @@ watch(
               draggable="false"
             />
             <div
-              class="relative z-[1] flex flex-col items-center justify-center gap-y-[10px] text-[16px] text-white"
+              class="relative z-[1] flex flex-col items-center justify-center gap-y-[10px] text-[16px] text-[--white]"
             >
               <CommonSvgIcon icon="icon_upload" class="h-[24px] w-[24px] shrink-0" />
               <span>點擊或拖曳重新上傳</span>
