@@ -41,24 +41,92 @@ export const SCAN_EXT = new Set(['.vue', '.css'])
 
 /** CSS 具名色(常見的一批;完整 148 色沒必要,誤報成本高於漏報) */
 const NAMED_COLORS = new Set([
-  'white', 'black', 'red', 'green', 'blue', 'yellow', 'orange', 'purple',
-  'pink', 'gray', 'grey', 'brown', 'cyan', 'magenta', 'lime', 'navy',
-  'teal', 'olive', 'maroon', 'silver', 'aqua', 'fuchsia', 'gold', 'beige',
-  'ivory', 'khaki', 'salmon', 'coral', 'crimson', 'indigo', 'violet',
-  'turquoise', 'tan', 'plum', 'orchid', 'lavender', 'wheat', 'azure',
+  'white',
+  'black',
+  'red',
+  'green',
+  'blue',
+  'yellow',
+  'orange',
+  'purple',
+  'pink',
+  'gray',
+  'grey',
+  'brown',
+  'cyan',
+  'magenta',
+  'lime',
+  'navy',
+  'teal',
+  'olive',
+  'maroon',
+  'silver',
+  'aqua',
+  'fuchsia',
+  'gold',
+  'beige',
+  'ivory',
+  'khaki',
+  'salmon',
+  'coral',
+  'crimson',
+  'indigo',
+  'violet',
+  'turquoise',
+  'tan',
+  'plum',
+  'orchid',
+  'lavender',
+  'wheat',
+  'azure',
 ])
 
 /** tailwind 內建色票的色名(搭配數字階層或直接使用) */
 const TW_PALETTE = [
-  'slate', 'gray', 'zinc', 'neutral', 'stone', 'red', 'orange', 'amber',
-  'yellow', 'lime', 'green', 'emerald', 'teal', 'cyan', 'sky', 'blue',
-  'indigo', 'violet', 'purple', 'fuchsia', 'pink', 'rose', 'white', 'black',
+  'slate',
+  'gray',
+  'zinc',
+  'neutral',
+  'stone',
+  'red',
+  'orange',
+  'amber',
+  'yellow',
+  'lime',
+  'green',
+  'emerald',
+  'teal',
+  'cyan',
+  'sky',
+  'blue',
+  'indigo',
+  'violet',
+  'purple',
+  'fuchsia',
+  'pink',
+  'rose',
+  'white',
+  'black',
 ]
 
 /** 會吃顏色的 tailwind utility 前綴 */
 const TW_COLOR_UTIL = [
-  'text', 'bg', 'border', 'ring', 'divide', 'outline', 'shadow', 'accent',
-  'caret', 'decoration', 'fill', 'stroke', 'from', 'via', 'to', 'placeholder',
+  'text',
+  'bg',
+  'border',
+  'ring',
+  'divide',
+  'outline',
+  'shadow',
+  'accent',
+  'caret',
+  'decoration',
+  'fill',
+  'stroke',
+  'from',
+  'via',
+  'to',
+  'placeholder',
 ]
 
 /** 會吃顏色的 CSS 屬性 */
@@ -72,37 +140,170 @@ const COLOR_PROP_RE =
  * 也不要把 m-nav / --px-15 這類專案自訂 class 誤報成違規。
  */
 const TW_EXACT = new Set([
-  'flex', 'grid', 'block', 'inline', 'inline-block', 'inline-flex', 'inline-grid',
-  'hidden', 'contents', 'table', 'flow-root', 'list-item',
-  'absolute', 'relative', 'fixed', 'sticky', 'static',
-  'truncate', 'italic', 'underline', 'overline', 'uppercase', 'lowercase',
-  'capitalize', 'invisible', 'visible', 'collapse', 'isolate',
-  'grow', 'shrink', 'antialiased', 'subpixel-antialiased',
-  'sr-only', 'not-sr-only', 'container', 'group', 'peer',
-  'border', 'rounded', 'shadow', 'ring', 'outline', 'filter', 'blur',
-  'transition', 'transform', 'appearance-none', 'resize', 'overflow-hidden',
-  'overflow-auto', 'overflow-visible', 'overflow-scroll',
+  'flex',
+  'grid',
+  'block',
+  'inline',
+  'inline-block',
+  'inline-flex',
+  'inline-grid',
+  'hidden',
+  'contents',
+  'table',
+  'flow-root',
+  'list-item',
+  'absolute',
+  'relative',
+  'fixed',
+  'sticky',
+  'static',
+  'truncate',
+  'italic',
+  'underline',
+  'overline',
+  'uppercase',
+  'lowercase',
+  'capitalize',
+  'invisible',
+  'visible',
+  'collapse',
+  'isolate',
+  'grow',
+  'shrink',
+  'antialiased',
+  'subpixel-antialiased',
+  'sr-only',
+  'not-sr-only',
+  'container',
+  'group',
+  'peer',
+  'border',
+  'rounded',
+  'shadow',
+  'ring',
+  'outline',
+  'filter',
+  'blur',
+  'transition',
+  'transform',
+  'appearance-none',
+  'resize',
+  'overflow-hidden',
+  'overflow-auto',
+  'overflow-visible',
+  'overflow-scroll',
 ])
 
 const TW_PREFIX = [
-  'w-', 'h-', 'min-w-', 'max-w-', 'min-h-', 'max-h-', 'size-',
-  'p-', 'px-', 'py-', 'pt-', 'pr-', 'pb-', 'pl-', 'ps-', 'pe-',
-  'm-', 'mx-', 'my-', 'mt-', 'mr-', 'mb-', 'ml-', 'ms-', 'me-',
-  'text-', 'bg-', 'border-', 'rounded-', 'shadow-', 'ring-', 'outline-',
-  'gap-', 'gap-x-', 'gap-y-', 'space-x-', 'space-y-', 'divide-',
-  'items-', 'justify-', 'content-', 'self-', 'place-', 'order-',
-  'flex-', 'basis-', 'grow-', 'shrink-', 'col-', 'row-', 'grid-',
-  'top-', 'right-', 'bottom-', 'left-', 'inset-', 'z-',
-  'opacity-', 'overflow-', 'object-', 'aspect-',
-  'font-', 'leading-', 'tracking-', 'align-', 'whitespace-', 'break-',
-  'list-', 'indent-', 'decoration-', 'underline-',
-  'transition-', 'duration-', 'delay-', 'ease-', 'animate-',
-  'translate-', 'rotate-', 'scale-', 'skew-', 'origin-',
-  'cursor-', 'pointer-events-', 'select-', 'touch-', 'will-change-',
-  'fill-', 'stroke-', 'backdrop-', 'blur-', 'brightness-', 'contrast-',
-  'grayscale-', 'invert-', 'saturate-', 'sepia-', 'drop-shadow-',
-  'accent-', 'caret-', 'placeholder-', 'from-', 'via-', 'to-',
-  'float-', 'clear-', 'box-', 'table-', 'caption-', 'border-spacing-',
+  'w-',
+  'h-',
+  'min-w-',
+  'max-w-',
+  'min-h-',
+  'max-h-',
+  'size-',
+  'p-',
+  'px-',
+  'py-',
+  'pt-',
+  'pr-',
+  'pb-',
+  'pl-',
+  'ps-',
+  'pe-',
+  'm-',
+  'mx-',
+  'my-',
+  'mt-',
+  'mr-',
+  'mb-',
+  'ml-',
+  'ms-',
+  'me-',
+  'text-',
+  'bg-',
+  'border-',
+  'rounded-',
+  'shadow-',
+  'ring-',
+  'outline-',
+  'gap-',
+  'gap-x-',
+  'gap-y-',
+  'space-x-',
+  'space-y-',
+  'divide-',
+  'items-',
+  'justify-',
+  'content-',
+  'self-',
+  'place-',
+  'order-',
+  'flex-',
+  'basis-',
+  'grow-',
+  'shrink-',
+  'col-',
+  'row-',
+  'grid-',
+  'top-',
+  'right-',
+  'bottom-',
+  'left-',
+  'inset-',
+  'z-',
+  'opacity-',
+  'overflow-',
+  'object-',
+  'aspect-',
+  'font-',
+  'leading-',
+  'tracking-',
+  'align-',
+  'whitespace-',
+  'break-',
+  'list-',
+  'indent-',
+  'decoration-',
+  'underline-',
+  'transition-',
+  'duration-',
+  'delay-',
+  'ease-',
+  'animate-',
+  'translate-',
+  'rotate-',
+  'scale-',
+  'skew-',
+  'origin-',
+  'cursor-',
+  'pointer-events-',
+  'select-',
+  'touch-',
+  'will-change-',
+  'fill-',
+  'stroke-',
+  'backdrop-',
+  'blur-',
+  'brightness-',
+  'contrast-',
+  'grayscale-',
+  'invert-',
+  'saturate-',
+  'sepia-',
+  'drop-shadow-',
+  'accent-',
+  'caret-',
+  'placeholder-',
+  'from-',
+  'via-',
+  'to-',
+  'float-',
+  'clear-',
+  'box-',
+  'table-',
+  'caption-',
+  'border-spacing-',
 ]
 
 /**
@@ -336,9 +537,7 @@ export function checkTailwindInComponents(relPath, text) {
     const isDynamic = m[0].trimStart().startsWith(':') || m[0].trimStart().startsWith('v-bind')
 
     // 動態綁定只取引號包住的字面 class,其餘(變數、三元運算)無法靜態判讀
-    const candidates = isDynamic
-      ? [...raw.matchAll(/['"]([^'"]+)['"]/g)].map((x) => x[1])
-      : [raw]
+    const candidates = isDynamic ? [...raw.matchAll(/['"]([^'"]+)['"]/g)].map((x) => x[1]) : [raw]
 
     for (const chunk of candidates) {
       for (const cls of chunk.split(/\s+/)) {
@@ -411,9 +610,7 @@ export function checkModuleImports(relPath, text) {
 
   // 3-b JS import 的順序。本專案的 module 路徑含頻道層(_modules/<頻道>/<組件>/),
   //     以「頻道/組件」為單位分組比較。
-  const imports = [
-    ...text.matchAll(/^\s*import\s+["'][^"']*_modules\/(.+)\/([^/"']+\.css)["']/gm),
-  ]
+  const imports = [...text.matchAll(/^\s*import\s+["'][^"']*_modules\/(.+)\/([^/"']+\.css)["']/gm)]
 
   const byModule = new Map()
   for (const m of imports) {
@@ -448,9 +645,24 @@ export function checkModuleImports(relPath, text) {
  */
 /** 常見的狀態字 —— 這些出現在 :class 物件的 key 上,幾乎都是忘了加 `--` */
 const STATE_WORDS = [
-  'active', 'curr', 'current', 'checked', 'selected', 'disabled', 'readonly',
-  'focus', 'open', 'opened', 'close', 'closed', 'show', 'hidden', 'error',
-  'loading', 'draggable', 'fixed',
+  'active',
+  'curr',
+  'current',
+  'checked',
+  'selected',
+  'disabled',
+  'readonly',
+  'focus',
+  'open',
+  'opened',
+  'close',
+  'closed',
+  'show',
+  'hidden',
+  'error',
+  'loading',
+  'draggable',
+  'fixed',
 ]
 
 export function checkStateClassNaming(relPath, text) {
@@ -466,13 +678,23 @@ export function checkStateClassNaming(relPath, text) {
   const add = (name, index, detail) => {
     if (seen.has(name)) return
     seen.add(name)
-    issues.push({ rule: 'tailwind', file: relPath, line: lineOf(text, offset + index), detail, snippet: name })
+    issues.push({
+      rule: 'tailwind',
+      file: relPath,
+      line: lineOf(text, offset + index),
+      detail,
+      snippet: name,
+    })
   }
 
   // is-x / has-x 這種裸前綴,不論在 class 屬性還是 css 選擇器裡
   for (const m of body.matchAll(/(?<![-\w.])(is|has)-([a-z][a-z0-9-]*)/g)) {
     const name = `${m[1]}-${m[2]}`
-    add(name, m.index, `狀態 class ${name} 要寫成 --${name}(狀態一律 -- 開頭,不用裸的 is- / has- 前綴)`)
+    add(
+      name,
+      m.index,
+      `狀態 class ${name} 要寫成 --${name}(狀態一律 -- 開頭,不用裸的 is- / has- 前綴)`
+    )
   }
 
   // :class="{ disabled: x }" / :class="{ 'active': x }" —— 物件的 key 是裸狀態字
@@ -675,7 +897,7 @@ export function checkVariablesFile(relPath, text) {
   }
 
   /*
-   * variables 檔放的是「值」:`:root` 的預設值、modifier 對應的具體值、@screen 的斷點值。
+   * variables 檔放的是「值」:`:root` 的預設值、modifier 對應的具體值、@screen p / t / m 的斷點值。
    * 把 module 自己的變數指向自己的另一個變數(`--border { --x-border-color: var(--x-border-on-color) }`)
    * 是**狀態切換**不是值,屬於版型檔。
    * 指向色票變數(`var(--white)` / `var(--gray-333)`)則是在設定值,留在 variables 是對的。
@@ -690,7 +912,7 @@ export function checkVariablesFile(relPath, text) {
       line: lineOf(text, m.index),
       detail:
         `${name}: var(${source}) 是狀態切換不是值 —— variables 檔只放「值」` +
-        '(:root 預設值、modifier 的具體值、@screen 斷點值),' +
+        '(:root 預設值、modifier 的具體值、@screen p / t / m 斷點值),' +
         '把 module 自己的變數指向自己另一個變數要寫在版型檔',
       snippet: name,
     })
@@ -709,12 +931,35 @@ export function checkVariablesFile(relPath, text) {
  * 這類泛用命名一律略過,避免誤報。
  */
 const PROP_SUFFIXES = [
-  'rounded-t', 'rounded-r', 'rounded-b', 'rounded-l', 'rounded',
-  'min-w', 'max-w', 'min-h', 'max-h',
-  'gap-x', 'gap-y', 'gap',
-  'px', 'py', 'pt', 'pr', 'pb', 'pl', 'p',
-  'mx', 'my', 'mt', 'mr', 'mb', 'ml', 'm',
-  'w', 'h', 'border',
+  'rounded-t',
+  'rounded-r',
+  'rounded-b',
+  'rounded-l',
+  'rounded',
+  'min-w',
+  'max-w',
+  'min-h',
+  'max-h',
+  'gap-x',
+  'gap-y',
+  'gap',
+  'px',
+  'py',
+  'pt',
+  'pr',
+  'pb',
+  'pl',
+  'p',
+  'mx',
+  'my',
+  'mt',
+  'mr',
+  'mb',
+  'ml',
+  'm',
+  'w',
+  'h',
+  'border',
 ]
 
 export function checkVariableUsage(relPath, text) {
@@ -792,8 +1037,7 @@ export function checkBreakpointCoverage(relPath, text) {
   const rawLines = text.split('\n')
   const maskedLines = masked.split('\n')
 
-  const isExempt = (i) =>
-    EXEMPT_RE.test(rawLines[i] || '') || EXEMPT_RE.test(rawLines[i - 1] || '')
+  const isExempt = (i) => EXEMPT_RE.test(rawLines[i] || '') || EXEMPT_RE.test(rawLines[i - 1] || '')
 
   // 6-a —— 但「在 p 斷點區塊裡面吃 -pc- 的值」是直接且正確的,不算違規。
   //        追蹤目前所在的斷點區塊,只報「斷點對不上」與「根本沒包在斷點區塊裡」的。
@@ -825,7 +1069,9 @@ export function checkBreakpointCoverage(relPath, text) {
     // 所在的斷點區塊正好對應這個變數的斷點 → 直接取值沒問題
     if (screenStack.length && SCREEN_OF[screenStack.at(-1).name] === m[1]) return
 
-    const where = screenStack.length ? `@screen ${screenStack.at(-1).name} 內` : '沒有包在 @screen 裡'
+    const where = screenStack.length
+      ? `@screen ${screenStack.at(-1).name} 內`
+      : '沒有包在 @screen p / t / m 裡'
     add(
       i + 1,
       `版型吃了 ${m[1]} 的變數但${where} —— ` +

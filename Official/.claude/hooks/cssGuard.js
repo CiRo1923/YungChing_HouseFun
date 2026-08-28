@@ -77,7 +77,7 @@ const FIX_HINTS = {
     '@stores / @components 等不參與排序檢查。',
   variable:
     '規則 4:命名改成 -w / -h / -p / -m / -border / -text-size,寬高相同的元素(icon 多半是正方形)用 -size 一個變數、不同才拆 -w / -h;' +
-    '帶 px 的值一律開變數(1px 線寬、2px 內距也算,「感覺是造型」不是豁免理由;明確不開的:z-index、0/auto/none、以及 font-weight(不是父系帶入就是寫死,直接 @apply font-medium / font-normal)。100% 三個斷點沒差別時直接用 tailwind 的 w-full / h-full / max-w-full / min-w-full / min-h-full,不要寫 w-[100%] 也不要繞變數,只有真的分斷點不同才開變數),值拆成 pc / tablet / mobile 三份,而且要成套(有 -pc-X 就必須有 -tablet-X / -mobile-X,漏一個那斷點會靜靜讀不到值);版型檔不可直接吃 --x-pc-y,要吃中性變數再由 @screen 各段對應(但已包在 @screen p 裡面直接吃 -pc- 是合理的,只抓斷點對不上與沒包在斷點區塊裡;複合斷點 pt / tm 裡一律不能直接吃單一斷點的值),同一支檔案的 @screen p / t / m 各自只寫一組,例外寫 /* lint-breakpoint-exempt: 理由 */。這條多半是機械式改名,可以直接動手。' +
+    '帶 px 的值一律開變數(1px 線寬、2px 內距也算,「感覺是造型」不是豁免理由;明確不開的:z-index、0/auto/none、以及 font-weight(不是父系帶入就是寫死,直接 @apply font-medium / font-normal)。100% 三個斷點沒差別時直接用 tailwind 的 w-full / h-full / max-w-full / min-w-full / min-h-full,不要寫 w-[100%] 也不要繞變數,只有真的分斷點不同才開變數),值拆成 pc / tablet / mobile 三份,而且要成套(有 -pc-X 就必須有 -tablet-X / -mobile-X,漏一個那斷點會靜靜讀不到值);版型檔不可直接吃 --x-pc-y,要吃中性變數再由 @screen p / t / m 各段對應(但已包在 @screen p 裡面直接吃 -pc- 是合理的,只抓斷點對不上與沒包在斷點區塊裡;複合斷點 pt / tm 裡一律不能直接吃單一斷點的值),同一支檔案的 @screen p / t / m 各自只寫一組,例外寫 /* lint-breakpoint-exempt: 理由 */。這條多半是機械式改名,可以直接動手。' +
     '順便檢查同一支檔案的其他變數規則:前綴要跟著 class / 資料夾走(mForm/ → --form-*,' +
     '不要在變數名塞 m-);px-[--x] / py- / mx- / my- 的 base 要給 0(沒 base 整條讀不到),' +
     '高度的 base 要給 auto(給 0 會塌),顏色沒有時給 initial;' +
@@ -196,11 +196,10 @@ process.stdin
               '猜錯的代價不對稱:要回頭改 module + template + 每一個使用端。' +
               '問法是直說「這個我判斷不出來」並列出選項與後果,' +
               '不要假裝有把握然後埋一句「暫時這樣」。\n\n' +
-              '**再說一次順序**:AskUserQuestion 先呼叫,回覆文字後寫 —— 用它詢問使用者' +
-              '要不要現在協助調整成符合規範 —— 附上你打算怎麼改(具體到哪個檔案、加哪個變數、' +
-              '搬哪些 class),讓使用者能直接判斷。\n' +
-              '若這些違規是「碰到的舊檔案既有存量」而不是這次改出來的,說明清楚是存量再問,' +
-              '不要讓使用者誤以為是新問題。只要違規還在,下一輪照樣要問。',
+              '**再說一次**:不要主動彈 AskUserQuestion 問「要不要修」—— 等使用者開口。\n' +
+              '他說「修正」時就直接動手,不用再確認一次;修的時候要說清楚哪些是這次改出來的、' +
+              '哪些是碰到的舊檔案既有存量,不要讓他誤以為都是新問題。\n' +
+              '只要違規還在,下一輪這份清單照樣會出現 —— 修掉才會停。',
           },
         })
       )
