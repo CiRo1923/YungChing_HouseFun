@@ -813,7 +813,7 @@ defineExpose({
 .gm-style .gm-style-iw-c:has(.poi-map-info) {
   padding: 0;
   border-radius: 5px;
-  background: #2f3338;
+  background: var(--gray-2338);
   box-shadow: none;
 }
 
@@ -828,7 +828,7 @@ defineExpose({
 .gm-style .gm-style-iw-c:has(.poi-map-info) + .gm-style-iw-tc::after {
   width: 30px;
   height: 20px;
-  background: #2f3338;
+  background: var(--gray-2338);
 }
 
 .gm-style .gm-style-iw-c:has(.poi-map-info) .gm-ui-hover-effect {

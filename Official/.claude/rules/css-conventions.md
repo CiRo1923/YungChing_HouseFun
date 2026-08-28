@@ -1018,25 +1018,34 @@ template 綁了但沒有對應 CSS 的 class 是刻意不做還是漏掉。
 
 ## 目前的違規存量
 
-2026-08-27 導入後的全專案掃描結果(共 414 筆 / 258 個檔案),**這些是既有程式碼,尚未修正**:
+**2026-08-28 起為 0 筆** —— `npm run lint:css` 掃描 289 個檔案全數通過。
 
-| 規則 | 筆數 | 主要分布 |
-|---|---|---|
-| 規則 1(顏色) | 22 | `_modules/common/mForm/{autocomplete,select}Variables.css`(寫死 `#02041614` 等)、`_modules/buy/mTag/variables.css`(`#00000033`)、`_modules/common/mPopup/variables.css`(`#000000b3`)、`pages/buy/_components/house/poi/GoogleMap.vue`(地圖 styler 的 `#2f3338`) |
-| 規則 2(tailwind) | 356 / 37 個檔案 | components 幾乎全數仍用 tailwind class |
-| 規則 3(module) | 20 | components 自己留 `<style>` 區塊 |
-| 規則 4(變數) | 16 | `-width` / `-height` 命名、尺寸單值未分斷點 |
-| 色票檔本身 | **0** | 排序、命名、頻道歸屬、`-rgb` 衍生變數皆已清乾淨 |
+導入當天(2026-08-27)是 414 筆 / 258 個檔案,分兩批清完:
 
-碰到這些檔案時會跳警告,**那是既有存量不是這次改壞的**;是否順手修正由使用者決定,不要自行大範圍重構。
+| 批次 | 內容 |
+|---|---|
+| 08-27 | common 組件全數拆進 `_modules/common/`;色票檔的排序、命名、頻道歸屬、`-rgb` 衍生變數 |
+| 08-28 | buy 組件全數拆進 `_modules/buy/`;刪掉 5 支沒有使用端的組件(見 [deleted-components.md](./deleted-components.md));`bg-hexa` 全面改 8 碼 hex 色票;alpha 命名加連字號;module 變數的斷點、命名、base 值 |
 
-**已拆完的 module**:
+**所以現在跳出來的警告都是「這次改出來的」,不是存量。**
+既有程式碼已經沒有可以推給前人的違規了 —— 看到紅字就是剛動的那幾行有問題。
 
-| 組件 | 資料夾 | 備註 |
-|---|---|---|
-| `components/common/mContent.vue` | [common/mContent/](../../assets/css/_modules/common/mContent/) | 2026-08-28 拆完,三條規則皆通過。它同時有 `--p-*` / `--px-*` / `--py-*` / `--pb-*` 四種內距 modifier,所以**變數拆成 `--content-pt` / `-pr` / `-pb` / `-pl` 四個方向**,每個 modifier 只設它負責的方向,`common.css` 也用 `pt-` / `pr-` / `pb-` / `pl-` 四條分開取(見上面規則 3 的要點)。`bg` 與 `rounded` 各一個變數,base 都給 0。 |
-| `components/common/mContainer.vue` | [common/mContainer/](../../assets/css/_modules/common/mContainer/) | 2026-08-27 拆完,三條規則皆通過。樣式原本就是 modifier 形式(`--max-w-1220 / 500 / 400`、`--px-10`),只是值寫死在 modifier 裡;改成 modifier 只設 `--container-max-w` / `--container-px`,版型統一取用。`--container-px` 的 base 給 `0`(不給會讓 `px-[--x]` 整條讀不到)。`@screen t` / `m` 段的定義不能刪 —— 使用端的 `tm:--px-10` 要靠那兩段收。 |
-| `components/common/ImgSrc.vue` | [common/mFigure/](../../assets/css/_modules/common/mFigure/) | 2026-08-27 拆完,三條規則皆通過。**資料夾名跟著 class `m-figure` 走,不是組件檔名**。無變體,只有 `variables.css` + `common.css`。404 佔位補了 `--error` modifier 與 `m-figure-error-icon` class;內部變數的既有 typo `--figuer-*` 一併更名為 `--figure-*`(參考專案早已是正確拼字,只在這支檔案內用,無使用端受影響)。modifier `group-hover:--image-scale` 名稱不變(使用端在 [Media.vue](../../pages/buy/_components/common/card/Media.vue))。 |
+> 少數確實無法符合規範的地方,一律用 `/* lint-breakpoint-exempt: 理由 */` 就地標註,
+> 不集中列在這裡 —— 清單會過期,註解不會。目前有標的是
+> mNav(漢堡按鈕與側邊選單只有手機版)、mPopup(工具列手機用 `mt`、桌機用 `mx`)、
+> mTab/ovalResponsiv(mobile 是膠囊形按鈕組,另一套設計)。
+
+**參考實作** —— `components/` 底下全部拆完了,遇到類似情境時照著這幾支看:
+
+| 情境 | 看哪一支 |
+|---|---|
+| **最標準的一支**(共用 + 變體兩層) | [common/mTab/](../../assets/css/_modules/common/mTab/) — `variables` / `common` + `borderBottom*` |
+| **群組層**(兩個以上變體共用) | [common/mForm/](../../assets/css/_modules/common/mForm/) 的 `selection.*` — checkbox + radio 共用 |
+| **hover 的固定寫法** | [common/mAnchor/variables.css](../../assets/css/_modules/common/mAnchor/variables.css) — `hover:--bg-*` modifier 包在 `&:hover` 裡 |
+| **顏色 modifier 只設變數** | [buy/mTag/variables.css](../../assets/css/_modules/buy/mTag/variables.css) — 17 個顏色 modifier,`common.css` 無條件取用 |
+| **變數建在最小單位** | [common/mContent/](../../assets/css/_modules/common/mContent/) — `--p-*` 與 `--px-*` 併存,所以拆成 `-pt` / `-pr` / `-pb` / `-pl` 四向 |
+| **資料夾名跟著 class 走** | [common/mFigure/](../../assets/css/_modules/common/mFigure/) — 組件檔叫 `ImgSrc.vue`,class 是 `m-figure` |
+| **modifier 的斷點三段** | [common/mContainer/](../../assets/css/_modules/common/mContainer/) — `@screen t` / `m` 段不能刪,使用端的 `tm:--px-10` 要靠那兩段收 |
 
 **導入時已修掉的**(2026-08-27):
 
@@ -1051,8 +1060,13 @@ template 綁了但沒有對應 CSS 的 class 是刻意不做還是漏掉。
 > 補上後 buy 頻道 swiper 的分頁點與左右鈕**會從「沒顏色」變成顯示這兩個藍** ——
 > 若設計上 buy 頻道該用自家主色(`--blue-26e1`),要回頭跟設計確認後改值。
 
-> **`pages/buy/_components/house/poi/GoogleMap.vue` 的寫死色碼是已知例外** ——
-> Google Maps 的 styler 吃 JS 物件,沒有 CSS 變數的管道,只能維持寫死。
+> ~~`GoogleMap.vue` 的寫死色碼是已知例外~~ —— **這條當初就判斷錯了,2026-08-28 已修掉。**
+> 那兩處 `#2f3338` 在 `<style>` 區塊裡,是覆蓋 Google Maps 注入 DOM(`.gm-*`)的普通 CSS,
+> 變數當然讀得到;同一支檔案的 L367 本來就在用 `var(--gray-2338)`。
+> 真正吃 JS 物件的 styler 只設了 `visibility: off`,根本沒有顏色。
+>
+> **教訓**:「第三方套件的樣式」不等於「不能用變數」。
+> 判斷依據是**這段是不是 CSS** —— 是 CSS 就走規範,是 JS 設定物件才另當別論。
 
 ## 與參考專案的關係
 
