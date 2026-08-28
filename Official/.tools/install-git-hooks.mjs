@@ -1,10 +1,15 @@
 #!/usr/bin/env node
-// 把 git 的 hooksPath 指到 repo 根的 .githooks/,讓 pre-commit 進版控、跨電腦一致。
+// 把 git 的 hooksPath 指到本專案的 .githooks/,讓 pre-commit 進版控、跨電腦一致。
 // 由 npm run hooks:install 呼叫,postinstall 也會自動跑一次。
 //
-// ⚠️ 這個 repo 同時放 Official 與 Backstage,而 core.hooksPath 是 repo 層級的設定,
-//    只能指向一個目錄 —— 所以 hook 收在 repo 根共用一份,由它依 staged 路徑分派給
-//    各專案的 .tools/css/。兩邊都執行這支不會互相覆蓋,設的是同一個值。
+// hooksPath 的相對路徑是相對 **repo 根**,不是相對專案 —— 所以兩種擺法算出來的值不同:
+//
+//   a. 開發機:repo 根是 Dev/HouseFun,底下放 Official/ 與 Backstage/ → `Backstage/.githooks`
+//   b. 正式站:專案自己就是一個 repo(兩邊的 git 位置不同)         → `.githooks`
+//
+// ⚠️ a 的情況下 core.hooksPath 是 repo 層級設定、**只能指向一個目錄** ——
+//    兩個專案都跑這支的話,**誰最後跑誰生效**。所以兩邊的 .githooks/pre-commit
+//    內容要保持一致(各自一份複本),誰生效結果都一樣;被改掉時這裡會印訊息說明。
 //
 // 不是 git repo、或 git 不可用時安靜跳過 —— 裝不上 hook 不該讓 npm install 失敗。
 
@@ -15,8 +20,6 @@ import { fileURLToPath } from 'node:url'
 
 const projectRoot = path.resolve(fileURLToPath(import.meta.url), '../..')
 
-const HOOKS_DIR = '.githooks' // 相對 repo 根 —— hooksPath 的相對路徑就是相對 repo 根
-
 const onGit = (args) =>
   execFileSync('git', args, {
     cwd: projectRoot,
@@ -26,10 +29,12 @@ const onGit = (args) =>
 
 try {
   const repoRoot = onGit(['rev-parse', '--show-toplevel'])
+  const prefix = path.relative(repoRoot, projectRoot).split(path.sep).filter(Boolean).join('/')
+  const hooksDir = prefix ? `${prefix}/.githooks` : '.githooks'
 
   // hook 本體不在就不要設 —— 設了只會讓 git 找不到 hook 而靜靜什麼都不做
-  if (!fs.existsSync(path.join(repoRoot, HOOKS_DIR, 'pre-commit'))) {
-    console.log(`⚠ 找不到 ${HOOKS_DIR}/pre-commit,略過 git hooks 安裝`)
+  if (!fs.existsSync(path.join(projectRoot, '.githooks', 'pre-commit'))) {
+    console.log(`⚠ 找不到 ${hooksDir}/pre-commit,略過 git hooks 安裝`)
     process.exit(0)
   }
 
@@ -41,14 +46,17 @@ try {
     }
   })()
 
-  if (current === HOOKS_DIR) process.exit(0)
+  if (current === hooksDir) process.exit(0)
 
   if (current) {
-    console.log(`⚠ git core.hooksPath 目前是 ${current},將改為 ${HOOKS_DIR}(repo 根共用一份)`)
+    console.log(
+      `⚠ git core.hooksPath 目前是 ${current},改為 ${hooksDir} ——` +
+        ' 這個 repo 只能有一份 hook,兩個專案的 pre-commit 內容一致,誰生效結果都一樣'
+    )
   }
 
-  onGit(['config', 'core.hooksPath', HOOKS_DIR])
-  console.log(`✔ git hooks 已指向 ${HOOKS_DIR}`)
+  onGit(['config', 'core.hooksPath', hooksDir])
+  console.log(`✔ git hooks 已指向 ${hooksDir}`)
 } catch {
   // 不是 git repo / 沒有 git,安靜結束
 }

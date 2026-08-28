@@ -4,34 +4,51 @@
 #   1. 色票檔排序不對 → 自動排序並重新 git add(無害的純順序調整)
 #   2. 本次 staged 的 .vue / .css → 跑規範檢查,印紅色警告
 #
-# 只警告不阻擋 commit(與各專案的 .claude/hooks/cssGuard.js、.vite/css-guard.mjs 一致)——
-# 既有存量還沒清完,擋下來只會逼人加 --no-verify,反而讓守門機制形同虛設。
+# 只警告不阻擋 commit(與 .claude/hooks/cssGuard.js、.vite/css-guard.mjs 一致)——
+# 存量還沒清完,擋下來只會逼人加 --no-verify,反而讓守門機制形同虛設。
 #
-# ⚠️ 這個 repo 同時放 Official 與 Backstage,而 core.hooksPath 是 repo 層級的設定,
-#    只能指向一個目錄 —— 所以 hook 收在 repo 根共用一份,由這裡依 staged 路徑
-#    分派給各專案的 .tools/css/。沒有那套工具的專案會自動略過。
+# ⚠️ 兩種擺法都要能動,所以先判斷「repo 根是不是就是專案根」:
 #
-# 由 <專案>/.tools/install-git-hooks.mjs 設定 core.hooksPath 生效(npm postinstall 會跑)。
+#   a. 開發機:repo 根是 Dev/HouseFun,底下放 Official/ 與 Backstage/
+#      → staged 路徑長 `Backstage/assets/…`,依第一層目錄分派
+#   b. 正式站:專案自己就是一個 repo(兩邊的 git 位置不同)
+#      → staged 路徑長 `assets/…`,直接處理、不分派
+#
+# ⚠️ core.hooksPath 是 repo 層級設定、**只能指向一個目錄** ——
+#    a 的情況下誰最後跑 `npm run hooks:install` 就指誰。所以這支與 Official 的那支
+#    **內容要保持一致**(兩邊各自一份複本),誰生效結果都一樣。
+#    改這個檔案時記得對照:diff --strip-trailing-cr ../Backstage/.githooks/pre-commit .githooks/pre-commit
+#
+# 此 hook 由 .githooks/ 進版控,經 core.hooksPath 生效(npm run hooks:install,postinstall 會跑)。
 
 RED='\033[31m'
 YELLOW='\033[33m'
 GREEN='\033[32m'
 RESET='\033[0m'
 
-# 本次 staged 的 .vue / .css(路徑相對 repo 根)
+# 本次 staged 的 .vue / .css(路徑一律相對 repo 根)
 STAGED=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(vue|css)$')
 
 [ -z "$STAGED" ] && exit 0
 
-# 依第一層目錄(= 專案)分組處理
-PROJECTS=$(echo "$STAGED" | cut -d/ -f1 | sort -u)
+# repo 根就有這套工具 → 專案自己是一個 repo,不必分派
+if [ -f ".tools/css/lint-css.mjs" ]; then
+  PROJECTS="."
+else
+  PROJECTS=$(echo "$STAGED" | cut -d/ -f1 | sort -u)
+fi
 
 for PROJECT in $PROJECTS; do
   # 沒有這套 css 工具的專案直接略過
   [ -f "$PROJECT/.tools/css/lint-css.mjs" ] || continue
 
   # 這個專案本次 staged 的檔案,轉成相對專案目錄的路徑
-  REL=$(echo "$STAGED" | grep -E "^$PROJECT/" | sed "s|^$PROJECT/||")
+  if [ "$PROJECT" = "." ]; then
+    REL="$STAGED"
+  else
+    REL=$(echo "$STAGED" | grep -E "^$PROJECT/" | sed "s|^$PROJECT/||")
+  fi
+
   [ -z "$REL" ] && continue
 
   # --- 1. 色票檔自動排序 ----------------------------------------------------
@@ -51,7 +68,7 @@ for PROJECT in $PROJECTS; do
 
   # shellcheck disable=SC2086
   if ! (cd "$PROJECT" && node .tools/css/lint-css.mjs $REL); then
-    printf "\n${YELLOW}⚠ 以上為 %s 本次 commit 檔案的 CSS 規範違規,commit 照常繼續。${RESET}\n" "$PROJECT"
+    printf "\n${YELLOW}⚠ 以上為本次 commit 檔案的 CSS 規範違規,commit 照常繼續。${RESET}\n"
     printf "${YELLOW}  規範見 %s/.claude/rules/css-conventions.md${RESET}\n" "$PROJECT"
     printf "${YELLOW}  👉 要協助修正的話,到 Claude Code 對話框打「修正」或「好」就會處理${RESET}\n"
     printf "${YELLOW}     (它已經知道是哪個檔案、哪幾行)。不想修就不用理它 —— 主動權在你手上。${RESET}\n\n"
