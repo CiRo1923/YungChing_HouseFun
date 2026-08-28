@@ -191,6 +191,30 @@
 
 正確寫法:先到色票檔建立變數,再於使用端 `var(--blue-26e1)` / `text-[--gray-666]` / `bg-[--white]`。
 
+### ⚠️ tailwind 的設定檔也算使用端
+
+`tailwind.extend.js` / `tailwind.config.js` 的 `theme` 設定(`boxShadow`、`colors` …)
+**最後會變成產物裡的 CSS 宣告**,所以規則 1 對它一樣成立 —— 寫死色碼同樣是違規:
+
+```js
+// ✗ 色碼寫死在設定檔裡
+boxShadow: { card: '0 0 5px 0 #00000026' }
+
+// ✓ 走色票變數
+boxShadow: { card: '0 0 5px 0 var(--black-26)' }
+```
+
+`var()` 在這裡是安全的 —— 色票檔由 [nuxt.config.ts](../../nuxt.config.ts) 全域載入、定義在 `:root`,
+tailwind 產出的 `--tw-shadow: 0 0 .3125rem 0 var(--black-26)` 執行時解析得到,
+`--tw-shadow-colored` 的機制也不受影響(參考專案實測過產物)。
+
+**這類設定檔以前完全沒有守門** —— lint 只掃 `.vue` / `.css`,
+色碼躲在 `.js` 裡就永遠不會被發現。現在由 `SCAN_CONFIG_FILES` 白名單納入(**只檢查顏色**,
+其餘規則講的是 CSS 結構,對 js 不成立)。
+
+> ⚠️ **不要把 `.js` 整個加進掃描範圍** —— 一般 js 裡的 hex(雜湊、id、二進位遮罩)
+> 會全部變成誤報。要納入新的設定檔就加進那份白名單。
+
 > 透明色一律用 **8 碼 hex**(`--black-1a: #0000001a`),不要寫 `rgba(0,0,0,0.2)`,
 > 也不要寫 `rgba(var(--black-rgb), 0.1)` —— **後者也會被抓**,改用對應的 8 碼 hex 變數。
 > `hexToRgb`([postcss.function.js](../../postcss.function.js) / [.tools/postcss/functions.js](../../.tools/postcss/functions.js))
@@ -954,20 +978,36 @@ import { Field, ErrorMessage } from 'vee-validate'
 
 ## 檢查工具
 
-### ⚠️ 掃描範圍以外的檔案 —— 寫死色碼不會被抓到
+### ⚠️ 掃描範圍以內、以外分別是什麼
 
-`SCAN_TARGETS` 只涵蓋 `components` / `containers` / `pages` / `layouts` / `assets/css` / `error.vue`。
-**根目錄的設定檔不在裡面**,所以下面這些地方的顏色一律要人自己守規矩:
+判斷一個檔案會不會被檢查,看 [lint-core.mjs](../../.tools/css/lint-core.mjs) 的兩份清單:
 
-| 檔案 | 曾經藏過什麼 |
-|---|---|
-| [tailwind.extend.js](../../tailwind.extend.js) | `boxShadow.dropdown` 與 `dropShadow.text` 的值裡各有寫死色碼,躲了很久(2026-08-28 移除) |
-| [tailwind.config.js](../../tailwind.config.js) / [tailwind.function.js](../../tailwind.function.js) | 同理,`theme` 底下的任何色值 |
+| 清單 | 內容 | 檢查什麼 |
+|---|---|---|
+| `SCAN_TARGETS` + `SCAN_EXT` | `components` / `containers` / `pages` / `layouts` / `assets/css` / `error.vue` 底下的 `.vue` `.css` | 全部規則 |
+| `SCAN_CONFIG_FILES` | `tailwind.extend.js` / `tailwind.config.js` | **只有顏色**(其餘規則講的是 CSS 結構,對 js 不成立) |
 
-**陰影不要放進 tailwind preset** —— 值裡一定帶顏色,而 preset 又掃不到。
-一律走原生 `box-shadow` + module 自己的 `--x-pc-shadow` / `-tablet-` / `-mobile-` 變數,
-色值取色票變數。參考 [mFormDropdown](../../assets/css/_modules/buy/mFormDropdown.css) 與
-[mSort](../../assets/css/_modules/buy/mSort/variables.css)。
+**兩份都不符的檔案是「讀都沒讀」,不是「讀了沒問題」。** 這個差別看得出來 ——
+指名檢查一支範圍外的檔案,它會回報通過,但括號裡的檔案數是 0:
+
+```powershell
+node .tools/css/lint-css.mjs postcss.function.js
+# ✔ CSS 規範檢查通過(掃描 0 個檔案)   ← 是 0,檔案根本沒被打開
+```
+
+而五層守門共用同一份判斷邏輯,所以「掃不到」是五層一起掃不到。
+
+**目前仍在盲區的**:`postcss.function.js`、`config.js`、`tailwind.function.js`,
+以及任何其他根目錄 `.js`。那些地方的顏色只能靠人守規矩 ——
+真的需要納入就加進 `SCAN_CONFIG_FILES`,**不要把 `.js` 整個拉進掃描範圍**(見規則 1)。
+
+> 這個盲區曾經藏過東西:`tailwind.extend.js` 的 `boxShadow.dropdown` 與 `dropShadow.text`
+> 各有寫死色碼,躲到 2026-08-28 才被發現(兩個 preset 都已移除,該檔現在只剩 `fontFamily`)。
+> 陰影改走原生 `box-shadow` + module 的 `--x-pc-shadow` 三斷點變數,
+> 參考 [mFormDropdown](../../assets/css/_modules/buy/mFormDropdown.css) 與
+> [mSort](../../assets/css/_modules/buy/mSort/variables.css) ——
+> 那是比留在 preset 更好的寫法(值能分斷點),但**不是**因為 preset 抓不到,
+> preset 現在也在檢查範圍內了。
 
 ```powershell
 npm run lint:css                              # 全專案掃描(四條規則)
@@ -1042,15 +1082,23 @@ module 一樣分頻道目錄(`_modules/<頻道>/<組件>/`),目前只有 `buy` �
 
 ### 違規存量
 
-2026-08-28 的掃描:248 個檔案,**672 筆**。規則 1 是清乾淨的,其餘是既有程式碼:
+2026-08-28 的掃描:250 個檔案,**785 筆**。規則 1 是清乾淨的,其餘是既有程式碼:
 
 | 規則 | 筆數 / 檔案 | 主要分布 |
 |---|---|---|
 | 1 顏色 | **0** | 導入時一併清完(見下方) |
 | 2 tailwind class | 553 / 48 | mUpload、mForm/AutoComplete、mLoading 等尚未拆的組件 |
 | 3 module 結構 | 51 / 34 | 組件自己留 `<style>` 區塊 |
-| 4 module 變數 | 54 / 5 | `buy/mDatepicker.css` 45、`common/mPopup/` 7、`buy/mTable.css` 6、`buy/mFormDropdown.css` 2 |
+| 4 module 變數 | 167 / 6 | 見下方說明 |
 | 5 import 順序 | 14 / 13 | `./.composables` 排在 `vee-validate` / `@js` 之後 |
+
+規則 4 那 167 筆裡有 **113 筆是 `checkLayoutFileValues`**(「版型檔的變數宣告右邊一定是 `var(…)`」),
+集中在四支**還沒拆成資料夾的單檔 module**:`buy/mFormDropdown.css` 61、`buy/mDatepicker.css` 42、
+`buy/mForm.css` 6、`buy/mTable.css` 4。
+
+那條規則要求「值」與「版型」分家,而單檔 module 的 `:root` 與版型本來就寫在同一支 ——
+**所以這 113 筆是「還沒拆」的衍生結果,不是四散各處的獨立問題,拆完資料夾會一起消失**,
+不需要也不該單獨去修。剩下的 54 筆才是命名與斷點本身的問題。
 
 ⚠️ **存量還沒清完,所以跳出來的警告不一定是這次改壞的** —— 回報時要分清楚。
 存量歸零的專案(例如參考專案)規則檔會寫「看到紅字就是剛動的那幾行有問題」,

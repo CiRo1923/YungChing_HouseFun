@@ -21,9 +21,9 @@ import {
   loadDefinedColorVars,
 } from './color-order.mjs'
 import {
-  SCAN_EXT,
   SCAN_TARGETS,
   checkSharedColors,
+  isScannable,
   lintFile,
   listFiles,
 } from './lint-core.mjs'
@@ -46,7 +46,7 @@ const files = fileArgs.length
       if (fs.statSync(abs).isDirectory()) {
         return listFiles(projectRoot, path.relative(projectRoot, abs))
       }
-      return SCAN_EXT.has(path.extname(abs)) ? [abs] : []
+      return isScannable(abs) ? [abs] : []
     })
   : SCAN_TARGETS.flatMap((t) => listFiles(projectRoot, t))
 

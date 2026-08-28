@@ -10,7 +10,7 @@ description: 動到任何 css、顏色、module 樣式前必須先讀。四條�
 
 | 規則 | 一句話 | 工具會自動抓 |
 |---|---|---|
-| 1 | 顏色一律定義在 `assets/css/_common/color*.css`,依 hex 型態命名、依色系與亮度排序 | ✅(排序會**自動修正**) |
+| 1 | 顏色一律定義在 `assets/css/_common/color.css`,依 hex 型態命名、依色系與亮度排序 | ✅(排序會**自動修正**) |
 | 2 | `components/` 的 `<template>` 不得使用 tailwind class,只能用 `m-xxx` 與 `--modifier` | ✅ |
 | 3 | module 拆成 `_modules/<頻道>/<組件>/`,在 `<script setup>` 最上方按固定順序 JS import | ✅(引入方式與順序) |
 | 4 | module 變數用 `-w` / `-h` / `-p` / `-m` / `-border`,尺寸類拆 pc / tablet / mobile 三份 | ✅ |
@@ -131,7 +131,7 @@ import '…/mForm/checkbox.css'            // 變體樣式
 
 ## hover 的固定寫法
 
-參考實作是參考專案的 `mAnchor/variables.css`(連結見規則檔的「本專案的座標」章):
+參考實作是參考專案的 `mAnchor/variables.css`(連結見規則檔的「本專案現況」章):
 
 ```css
 /* variables.css —— hover 是獨立 modifier,包在 &:hover 裡 */
