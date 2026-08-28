@@ -37,6 +37,11 @@ export default () => {
     commentsPagination,
   } = storeToRefs(buyList)
   const { onCustom, onApiPromise, onApiError } = usePopupActions()
+  // 這三個必須在 composable 頂層取得。列表查詢會從 popup 完成後、await 之後被呼叫，
+  // 那時已經不在 setup 的同步流程裡，就地呼叫 useRoute / navigateTo 會拿不到 Nuxt instance
+  const route = useRoute()
+  const router = useRouter()
+  const nuxtApp = useNuxtApp()
 
   const searchSelectItems = computed(() =>
     searchDatas.value
@@ -117,7 +122,6 @@ export default () => {
   }
 
   const onApiPOSTRealEstateSearch = async (caseStatusToken) => {
-    const route = useRoute()
     // pg 可能被手動改成非數字或 0 / 負數，一律回退第 1 頁（NaN >= 1 為 false）
     const queryPage = Number.parseInt(route.query.pg, 10)
     const page = queryPage >= 1 ? queryPage : 1
@@ -128,9 +132,6 @@ export default () => {
       pageSize: 20, // 規格為每頁 20 筆
       ...apiSearchData.value,
     })
-
-    console.log(status)
-    console.log(data)
 
     if (status === 200) {
       const { casesList, page, pageSize, totalCount } = data
@@ -190,23 +191,17 @@ export default () => {
       // 初次載入是使用者自己輸入了不存在的頁數 → 導向 404 頁；
       // 操作後重新查詢（例如把該頁物件全部刪光）不該把人踢出列表 → 退回第 1 頁
       if (import.meta.server) {
-        showError({
-          statusCode: 404,
-          statusMessage: '找不到頁面',
-        })
+        // 文案由 error.vue 依 statusCode 決定，這裡不帶 statusMessage
+        //（h3 會警告長訊息該用 message，而且未來預設會被 sanitize）
+        nuxtApp.runWithContext(() => showError({ statusCode: 404 }))
       } else {
-        await navigateTo(
-          {
-            path: route.path,
-            query: {
-              ...route.query,
-              pg: 1,
-            },
+        await router.replace({
+          path: route.path,
+          query: {
+            ...route.query,
+            pg: 1,
           },
-          {
-            replace: true,
-          }
-        )
+        })
       }
     } else {
       onApiError(config, status, data)

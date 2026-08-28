@@ -35,7 +35,10 @@ const props = defineProps({
   },
 })
 
-const hasData = computed(() => searchDatas.value?.length !== 0)
+// searchDatas / searchPagination 的初始值是 null，API 沒回 200 時也會維持 null。
+// 寫成 `?.length !== 0` 會讓 null 判成「有資料」，接著在分頁區塊讀 null.page 直接 SSR 500，
+// 使用者根本等不到 API 的結果（例如超出頁數該回的 404）。null 一律當成沒資料。
+const hasData = computed(() => !!searchDatas.value?.length)
 const hasFunEventsItem = computed(() => props.funEventsItem && props.funEventsItem.length !== 0)
 
 const onPopupRenewal = async (data, sureLabel = '確認續刊') => {
