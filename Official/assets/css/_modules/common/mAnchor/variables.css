@@ -15,7 +15,8 @@
   --anchor-tablet-border: 1px;
   --anchor-mobile-border: 1px;
 
-  --anchor-color: initial;
+  /* 沒帶 --text-* modifier 時跟父層走 —— 不要寫 initial */
+  --anchor-color: inherit;
   --anchor-disabled-color: var(--gray-ccce);
 
   --anchor-bg-color: transparent;
@@ -50,10 +51,6 @@
 
     &.\-\-text-orange-e646 {
       --anchor-color: var(--orange-e646);
-    }
-
-    &.\-\-text-orange-f74c {
-      --anchor-color: var(--orange-f74c);
     }
 
     /* bg color */

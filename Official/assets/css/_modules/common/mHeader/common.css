@@ -65,9 +65,16 @@
     --header-logo-icon-h: var(--header-logo-icon-mobile-h);
     --header-logo-icon-mt: var(--header-logo-icon-mobile-mt);
   }
-}
 
-/* 版面在 pc / tablet 是整欄等高、mobile 是靠下對齊,差異大到分開寫比較清楚 */
+  /* 版面在 pc / tablet 是整欄等高、mobile 是靠下對齊 —— pc / tablet 那半在下面的 @screen pt */
+  .m-header-container {
+    @apply items-center;
+  }
+
+  .m-header-logo {
+    @apply grow items-end;
+  }
+}
 
 @screen pt {
   .m-header-container {
@@ -76,15 +83,5 @@
 
   .m-header-logo {
     @apply shrink-0 flex-col justify-center;
-  }
-}
-
-@screen m {
-  .m-header-container {
-    @apply items-center;
-  }
-
-  .m-header-logo {
-    @apply grow items-end;
   }
 }

@@ -11,7 +11,7 @@
   &:not(label) {
     border-width: var(--form-element-border);
 
-    @apply flex h-[--form-element-h] grow items-center gap-x-[8px] overflow-hidden rounded-[--form-element-rounded] border-[--form-element-border-color] bg-[--form-element-bg-color] px-[--form-element-px] py-[--form-element-py] transition-colors duration-300;
+    @apply flex h-[--form-element-h] grow items-center gap-x-[--form-element-gap-x] overflow-hidden rounded-[--form-element-rounded] border-[--form-element-border-color] bg-[--form-element-bg-color] px-[--form-element-px] py-[--form-element-py] transition-colors duration-300;
 
     &:not(:disabled):not(.\-\-disabled) {
       &.\-\-focus {
@@ -76,7 +76,7 @@
 }
 
 .m-form-clear-icon {
-  @apply h-[18px] w-[18px] p-[4px] text-[--gray-999];
+  @apply h-[--form-clear-icon-size] w-[--form-clear-icon-size] p-[--form-clear-icon-p] text-[--gray-999];
 }
 
 /* 字數計數與前後綴不參與壓縮 —— 空間不夠時要擠的是輸入區(.m-form-type 有 grow) */
@@ -91,23 +91,38 @@
 }
 
 .m-form-error {
-  @apply mt-[4px] block text-[14px];
+  @apply mt-[--form-error-mt] block text-[length:--form-error-text-size];
 }
 
 @screen p {
   .m-form {
     --form-element-border: var(--form-element-pc-border);
+    --form-element-gap-x: var(--form-element-pc-gap-x);
+    --form-clear-icon-size: var(--form-clear-icon-pc-size);
+    --form-clear-icon-p: var(--form-clear-icon-pc-p);
+    --form-error-mt: var(--form-error-pc-mt);
+    --form-error-text-size: var(--form-error-pc-text-size);
   }
 }
 
 @screen t {
   .m-form {
     --form-element-border: var(--form-element-tablet-border);
+    --form-element-gap-x: var(--form-element-tablet-gap-x);
+    --form-clear-icon-size: var(--form-clear-icon-tablet-size);
+    --form-clear-icon-p: var(--form-clear-icon-tablet-p);
+    --form-error-mt: var(--form-error-tablet-mt);
+    --form-error-text-size: var(--form-error-tablet-text-size);
   }
 }
 
 @screen m {
   .m-form {
     --form-element-border: var(--form-element-mobile-border);
+    --form-element-gap-x: var(--form-element-mobile-gap-x);
+    --form-clear-icon-size: var(--form-clear-icon-mobile-size);
+    --form-clear-icon-p: var(--form-clear-icon-mobile-p);
+    --form-error-mt: var(--form-error-mobile-mt);
+    --form-error-text-size: var(--form-error-mobile-text-size);
   }
 }

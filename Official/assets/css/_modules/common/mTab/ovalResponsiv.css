@@ -36,6 +36,7 @@
   .m-tab {
     &.\-\-oval-responsiv {
       --tab-oval-responsiv-anchor-rounded-t: var(--tab-oval-responsiv-anchor-pc-rounded-t);
+      --tab-oval-responsiv-body-border-visible: var(--tab-oval-responsiv-body-pc-border-visible);
       --tab-oval-responsiv-border-h: var(--tab-oval-responsiv-pc-border-h);
       --tab-oval-responsiv-header-items-gap-x: var(--tab-oval-responsiv-header-items-pc-gap-x);
       --tab-oval-responsiv-icon-p: var(--tab-oval-responsiv-icon-pc-p);
@@ -84,7 +85,7 @@
       .m-tab-body {
         border-top-width: var(--tab-oval-responsiv-border-h);
 
-        @apply mt-[calc(calc(var(--tab-oval-responsiv-border-h)_-_1px)_*_-1)] border-t-[--tab-oval-responsiv-body-border-color];
+        @apply mt-[calc(calc(var(--tab-oval-responsiv-border-h)_-_var(--tab-oval-responsiv-body-border-visible))_*_-1)] border-t-[--tab-oval-responsiv-body-border-color];
       }
     }
   }
@@ -94,6 +95,7 @@
   .m-tab {
     &.\-\-oval-responsiv {
       --tab-oval-responsiv-anchor-rounded-t: var(--tab-oval-responsiv-anchor-tablet-rounded-t);
+      --tab-oval-responsiv-body-border-visible: var(--tab-oval-responsiv-body-tablet-border-visible);
       --tab-oval-responsiv-border-h: var(--tab-oval-responsiv-tablet-border-h);
       --tab-oval-responsiv-header-items-gap-x: var(--tab-oval-responsiv-header-items-tablet-gap-x);
       --tab-oval-responsiv-icon-p: var(--tab-oval-responsiv-icon-tablet-p);

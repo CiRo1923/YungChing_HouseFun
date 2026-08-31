@@ -1,6 +1,9 @@
 /* mSeparator(components/common/mSeparator.vue)的變數。
    項目之間用 ::after 畫一條分隔線,線的位置跟著 gap 的一半走 ——
-   所以 --gap-x-XX 這個 modifier 要同時設「間距」與「線的位移」兩個變數。 */
+   所以 --gap-x-XX 這個 modifier 要同時設「間距」與「線的位移」兩個變數。
+
+   2026-08-31 刪掉 --gap-x-30 / -24 / -10 三組(三個斷點各一份)—— 全案沒有使用端。
+   要加回來時從 git 歷史撈,格式照現存的 20 / 16 / 12 那三組(位移是間距的一半取負)。 */
 
 :root {
   /* 分隔線 */
@@ -23,20 +26,6 @@
 
 @screen p {
   .m-separator {
-    &.\-\-gap-x-30,
-    &.p\:\-\-gap-x-30,
-    &.pt\:\-\-gap-x-30 {
-      --separator-gap-x: 30px;
-      --separator-divider-right: -15px;
-    }
-
-    &.\-\-gap-x-24,
-    &.p\:\-\-gap-x-24,
-    &.pt\:\-\-gap-x-24 {
-      --separator-gap-x: 24px;
-      --separator-divider-right: -12px;
-    }
-
     &.\-\-gap-x-20,
     &.p\:\-\-gap-x-20,
     &.pt\:\-\-gap-x-20 {
@@ -57,34 +46,11 @@
       --separator-gap-x: 12px;
       --separator-divider-right: -6px;
     }
-
-    &.\-\-gap-x-10,
-    &.p\:\-\-gap-x-10,
-    &.pt\:\-\-gap-x-10 {
-      --separator-gap-x: 10px;
-      --separator-divider-right: -5px;
-    }
   }
 }
 
 @screen t {
   .m-separator {
-    &.\-\-gap-x-30,
-    &.pt\:\-\-gap-x-30,
-    &.tm\:\-\-gap-x-30,
-    &.t\:\-\-gap-x-30 {
-      --separator-gap-x: 30px;
-      --separator-divider-right: -15px;
-    }
-
-    &.\-\-gap-x-24,
-    &.pt\:\-\-gap-x-24,
-    &.tm\:\-\-gap-x-24,
-    &.t\:\-\-gap-x-24 {
-      --separator-gap-x: 24px;
-      --separator-divider-right: -12px;
-    }
-
     &.\-\-gap-x-20,
     &.pt\:\-\-gap-x-20,
     &.tm\:\-\-gap-x-20,
@@ -108,33 +74,11 @@
       --separator-gap-x: 12px;
       --separator-divider-right: -6px;
     }
-
-    &.\-\-gap-x-10,
-    &.pt\:\-\-gap-x-10,
-    &.tm\:\-\-gap-x-10,
-    &.t\:\-\-gap-x-10 {
-      --separator-gap-x: 10px;
-      --separator-divider-right: -5px;
-    }
   }
 }
 
 @screen m {
   .m-separator {
-    &.\-\-gap-x-30,
-    &.tm\:\-\-gap-x-30,
-    &.m\:\-\-gap-x-30 {
-      --separator-gap-x: 30px;
-      --separator-divider-right: -15px;
-    }
-
-    &.\-\-gap-x-24,
-    &.tm\:\-\-gap-x-24,
-    &.m\:\-\-gap-x-24 {
-      --separator-gap-x: 24px;
-      --separator-divider-right: -12px;
-    }
-
     &.\-\-gap-x-20,
     &.tm\:\-\-gap-x-20,
     &.m\:\-\-gap-x-20 {
@@ -154,13 +98,6 @@
     &.m\:\-\-gap-x-12 {
       --separator-gap-x: 12px;
       --separator-divider-right: -6px;
-    }
-
-    &.\-\-gap-x-10,
-    &.tm\:\-\-gap-x-10,
-    &.m\:\-\-gap-x-10 {
-      --separator-gap-x: 10px;
-      --separator-divider-right: -5px;
     }
   }
 }

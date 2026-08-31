@@ -10,6 +10,30 @@
   --form-element-tablet-border: 1px;
   --form-element-mobile-border: 1px;
 
+  /* 元素內各區塊(前後綴 / 輸入區 / 清除鈕 / 字數)之間的間距 */
+  --form-element-pc-gap-x: 8px;
+  --form-element-tablet-gap-x: 8px;
+  --form-element-mobile-gap-x: 8px;
+
+  --form-clear-icon-pc-size: 18px;
+  --form-clear-icon-tablet-size: 18px;
+  --form-clear-icon-mobile-size: 18px;
+
+  --form-clear-icon-pc-p: 4px;
+  --form-clear-icon-tablet-p: 4px;
+  --form-clear-icon-mobile-p: 4px;
+
+  --form-error-pc-mt: 4px;
+  --form-error-tablet-mt: 4px;
+  --form-error-mobile-mt: 4px;
+
+  /* ⚠️ 字級變數的特例 —— mForm 是複用型組件,規則上「字級由使用端 setClass 傳、module 連
+     -text-size 變數都不要建」。錯誤訊息是刻意的例外:它全站長一樣,不隨使用位置變化,
+     由 module 統一決定。setClass.error 仍然存在,但不該用來調字級。 */
+  --form-error-pc-text-size: 14px;
+  --form-error-tablet-text-size: 14px;
+  --form-error-mobile-text-size: 14px;
+
   --form-element-color: var(--gray-666);
   --form-element-focus-color: var(--green-8b0d);
   --form-element-disabled-color: var(--gray-999);

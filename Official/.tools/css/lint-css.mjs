@@ -5,6 +5,7 @@
 //   規則 3 —— module css 的引入方式與順序
 //   規則 4 —— module 變數的命名與斷點
 //   規則 5 —— .vue 的 import 順序(css → ./.composables → @js → 其他套件)
+//   規則 6 —— 不要用被 theme 整組覆寫掉而不存在的 tailwind class
 //
 //   node .tools/css/lint-css.mjs                 # 全專案掃描
 //   node .tools/css/lint-css.mjs <file> [file..] # 只檢查指定檔案 / 目錄
@@ -74,6 +75,7 @@ const twIssues = issues.filter((i) => i.rule === 'tailwind')
 const moduleIssues = issues.filter((i) => i.rule === 'module')
 const variableIssues = issues.filter((i) => i.rule === 'variable')
 const importIssues = issues.filter((i) => i.rule === 'import')
+const themeIssues = issues.filter((i) => i.rule === 'theme')
 
 if (!issues.length) {
   console.log(`${GREEN}✔ CSS 規範檢查通過(掃描 ${files.length} 個檔案)${RESET}`)
@@ -135,12 +137,18 @@ printGroup(
   '順序為 css → ./.composables → @js → 其他套件(@stores / @components 等不參與排序)。'
 )
 
+printGroup(
+  '規則 6 違規:用到本專案不存在或已淘汰的 tailwind class',
+  themeIssues,
+  'theme 的 screens / fontSize / boxShadow / fontFamily 是整組覆寫,內建的 key 全部不存在 —— 寫了不報錯但產不出 CSS。'
+)
+
 console.error('')
 console.error(
   `${YELLOW}共 ${issues.length} 筆違規` +
     `(顏色 ${colorIssues.length} / 色票檔 ${colorFileIssues.length} / tailwind ${twIssues.length}` +
     ` / module ${moduleIssues.length} / 變數 ${variableIssues.length}` +
-    ` / import ${importIssues.length})` +
+    ` / import ${importIssues.length} / theme ${themeIssues.length})` +
     `,掃描 ${files.length} 個檔案。${RESET}`
 )
 

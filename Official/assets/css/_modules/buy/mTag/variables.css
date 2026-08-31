@@ -4,14 +4,18 @@
    * px / py 給 0(不給的話 px-[--x] 會整條讀不到);高度給 auto(給 0 會塌);
    * text-shadow 給 none。原本這三個寫成空字串 '',那是無效的 CSS 值,
    * 宣告會被整條丟棄 —— 結果雖然一樣,但看不出意圖也騙不過 lint。
+   *
+   * 顏色的 base 分兩種:**文字色給 inherit**(沒指定就跟父層走),
+   * **背景 / 邊框色給 transparent**(沒指定就是沒有顏色,不該去繼承父層的背景)。
+   * 都不要寫 initial —— 那是「不設定」的繞路寫法,意圖讀不出來。
    */
   --tag-px: 0;
   --tag-py: 0;
   --tag-h: auto;
   --tag-rounded: 0;
   --tag-text-shadow: none;
-  --tag-bg-color: initial;
-  --tag-text-color: initial;
+  --tag-bg-color: transparent;
+  --tag-text-color: inherit;
   --tag-border-color: transparent;
 
   --tag-pc-border: 1px;
@@ -58,10 +62,6 @@
 
   &.\-\-border-blue-69c1 {
     --tag-border-color: var(--blue-69c1);
-  }
-
-  &.\-\-border-gray-db {
-    --tag-border-color: var(--gray-db);
   }
 
   &.\-\-text-orange-e646 {

@@ -88,6 +88,22 @@
 /* 斷點對應與 modifier 的組別切換 —— 這些是「切換成另一個變數」,屬於版型層,
    原本誤放在 variables.css。值本身仍在 variables.css 的 :root。 */
 
+/*
+ * ⚠️ --pagination-point / --pagination-bar 目前**全案沒有使用端**,但**刻意保留**
+ *    (2026-08-31 稽核時確認過並決定保留,不要再列成待清項目)。
+ *
+ * 為什麼不刪:它們不是「多餘的選項」,而是分頁點的兩種造型本體 ——
+ * 刪掉會連帶讓 variables.css 的 19 個變數變孤兒
+ * (--swiper-pagination-point-*-size / -gap-x、--swiper-pagination-bar-*-h / -max-w / -gap-x、
+ *  4 個 bullet 顏色、以及 --swiper-pagination-bullet-max-w 這個 base),
+ * 而 .m-swiper-pagination-bullet 與 .m-swiper-pagination 的 @apply 也會全部讀不到值,
+ * 得一起清掉 —— 實質是「移除分頁點功能」,不是清死碼。
+ *
+ * Horizontal.vue 的 v-if="paginationConfig" 顯示分頁功能是活的,
+ * 只是目前沒有頁面選用造型(所以 bullet 現在吃 base、看不見)。
+ * 要啟用時在使用端加 --pagination-point 或 --pagination-bar 即可,不需要動 module。
+ */
+
 @screen p {
   .m-swiper {
     &.\-\-pagination-point,

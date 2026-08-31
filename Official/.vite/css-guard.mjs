@@ -116,6 +116,8 @@ function onReportIssues(rel, issues) {
   printList('規則 2 template 使用 tailwind class', 'tailwind', '樣式移到 assets/css/_modules/')
   printList('規則 3 module css 的引入方式或順序', 'module', '<script setup> 最上方 JS import')
   printList('規則 4 module 變數的命名或斷點', 'variable', '-w / -h / -p,尺寸分三個斷點')
+  printList('規則 5 .vue 的 import 順序', 'import', 'css → ./.composables → @js → 其他套件')
+  printList('規則 6 用到不存在的 tailwind class', 'theme', 'text-sm / shadow-md / md: 都產不出 CSS')
   console.log(
     `  ${YELLOW}👉 要協助修正的話,到 Claude Code 對話框打「修正」或「好」就會處理` +
       `(它已經知道是哪個檔案、哪幾行)。${RESET}`

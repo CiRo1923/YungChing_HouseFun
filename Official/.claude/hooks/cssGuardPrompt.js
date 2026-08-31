@@ -105,6 +105,7 @@ const RULE_TITLE = {
   module: '規則 3 —— module css 的結構或引入方式不對',
   variable: '規則 4 —— module 變數的命名或斷點不對',
   import: '規則 5 —— .vue 的 import 順序不對',
+  theme: '規則 6 —— 用到本專案不存在或已淘汰的 tailwind class(產不出任何 CSS)',
 }
 
 /**
@@ -117,7 +118,7 @@ const RULE_TITLE = {
  * 所以違規沒修掉之前,每一輪對話都會再問一次。
  */
 const onReadPendingFiles = () => {
-  let list = []
+  let list
 
   try {
     list = JSON.parse(fs.readFileSync(PENDING_FILE, 'utf8'))
@@ -216,8 +217,8 @@ const main = () => {
           '要在 module 補顏色 modifier(--text-gray-999)讓使用端改用,' +
           '不要把 module 的顏色宣告條件化來讓使用端自訂。\n\n' +
           'module 變數的規則:前綴跟著 class / 資料夾走(mForm/ → --form-*,不要塞 m-);' +
-          '命名用 -w / -h / -p / -m / -border / -text-size,寬高相同的元素(icon 多半是正方形)用 -size 一個變數、不同才拆 -w / -h;帶 px 的值一律開變數(1px / 2px 也算,例外是 z-index、0/auto/none、font-weight(不是父系帶入就是寫死);100% 直接用 w-full / h-full / max-w-full 等,不要繞變數),拆 pc / tablet / mobile 三份且要成套(有 -pc-X 就必須有 -tablet-X / -mobile-X);版型檔不可直接吃 --x-pc-y,要吃中性變數再由 @screen p / t / m 各段對應(已包在 @screen p 裡面直接吃 -pc- 是合理的),同一支檔案的 @screen p / t / m 各自只寫一組;' +
-          'px-[--x] / py- / mx- / my- 的 base 給 0(沒 base 整條讀不到),高度給 auto,顏色給 initial;' +
+          '命名用 -w / -h / -p / -m / -border / -text-size,寬高相同的元素(icon 多半是正方形)用 -size 一個變數、不同才拆 -w / -h;帶 px 的值一律開變數(1px / 2px 也算,例外是 z-index、0/auto/none、font-weight(不是父系帶入就是寫死);100% 直接用 w-full / h-full / max-w-full 等,不要繞變數),拆 pc / tablet / mobile 三份且要成套(有 -pc-X 就必須有 -tablet-X / -mobile-X);版型檔不可直接吃 --x-pc-y,要吃中性變數再由 @screen p / t / m 各段對應(已包在 @screen p 裡面直接吃 -pc- 是合理的),同一支檔案的頂層 @screen p / t / m 各自只寫一組(checkScreenGrouping 會抓;巢狀寫法不受限,真要分開就標 /* lint-screen-group-exempt: 理由 */);' +
+          'px-[--x] / py- / mx- / my- 的 base 給 0(沒 base 整條讀不到),高度給 auto,顏色的 base 不要用 initial —— 文字色給 inherit(沒指定就跟父層)、背景 / 邊框色給 transparent(沒指定就是沒有顏色);' +
           'hover / focus 覆寫基礎變數而非在 :root 做 var() fallback,且 hover 用帶 hover: 前綴的 modifier 包在 variables.css 的 &:hover 內、不建 hover 專用變數、版型檔不寫 &:hover(參考 mAnchor);' +
           '同組 module 內不同元素撞 class 名時不要硬合併。\n' +
           'variables 檔只放「值」(:root 預設值、modifier 的具體值、指向色票的 var(--white));' +
@@ -247,7 +248,21 @@ const main = () => {
           '併存就建 -rounded-t / -rounded-b;使用端已用 tailwind 傳細粒度時要補對應 modifier。\n' +
           '字級一律 text-[length:--x-text-size],不要寫原生 font-size: var()(少了 length: 會被當成 color)。一支檔案有多個變數要分斷點就吃中性變數、@screen p / t / m 各段集中對應;只有一個就直接在 @screen p / t / m 內吃 -pc- / -tablet- / -mobile-。字級:固定位置的組件(麵包屑 / 分頁器 / mNav / mFooter)可在 module 用 :root 變數定;' +
           '非固定位置(到處複用)的組件(按鈕 / mForm / mTag)一律由父系 setClass 傳,沒有 key 就補一個,而且**連 --x-text-size 變數都不要建** —— 建了 module 就會 @apply 它,一輸出就蓋掉使用端傳的 text-*,交給父系等於白做;' +
-          '並把原本的值補回每一個使用端。\n' +
+          '並把原本的值補回每一個使用端。' +
+          '(唯一的特例是 mForm 的 .m-form-error —— 全系列統一、又是 module 自己渲染的節點,' +
+          '字級留在 module 用 --form-error-text-size。)\n' +
+          'z-index 一律直接寫數字(@apply z-[3]),不開變數也不分斷點 —— 疊層是整站一套秩序,' +
+          '寫成常數才能 grep 一眼看出誰蓋誰;lint 會抓 --x-z / z-[--x] / z-index: var(…) 三種寫法。' +
+          'leading 與 tracking 同理不開變數(行高跟著字級走、值多半是無單位比例),' +
+          '直接寫 @apply leading-[1.5] / tracking-[0.06em]。\n' +
+          '**動 CSS 前先讀 tailwind.config.js**:本專案把 screens / fontSize / boxShadow / fontFamily ' +
+          '直接寫在 theme(不是 extend),tailwind 預設整組被換掉 —— 沒有 text-sm / text-base、' +
+          '沒有 sm / md / lg / xl、沒有 shadow-sm / shadow-md / shadow-none、沒有 font-sans,' +
+          '字級一律 arbitrary value;斷點是 m / t / p / tm / pt / pMin / pMax / mLandscape,' +
+          '全部是 raw media query;陰影只有 shadow-black-y2-b4 / shadow-dropdown / shadow-card 三個。' +
+          '這些由規則 6 守門(checkTailwindTheme)。\n' +
+          '同一個 @apply 裡字級與文字顏色**可以併存**(text-[length:--a] text-[--b] 會產出 ' +
+          'font-size 與 color 兩條,已用 npx tailwindcss 驗過實際產物),不要為此退回原生 color:。\n' +
           '有幾個屬性不能用 tailwind 寫、而且都不報錯:border-width 與 box-shadow 一律寫原生 CSS 屬性' +
           '(shadow-[--x] 會被當成 shadow color,box-shadow 根本不出現);font-size 要寫 ' +
           'text-[length:--x];border-color 與 gap-x-[var(--x,0px)] 則沒問題。' +

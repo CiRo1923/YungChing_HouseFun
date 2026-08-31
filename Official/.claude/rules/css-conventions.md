@@ -156,6 +156,134 @@
 **問的方式**:直接說「這個我判斷不出來」,把兩三個選項與各自的後果列出來,
 不要假裝有把握然後埋一個註解說「暫時這樣」。
 
+### 「沒使用端的 modifier」刪之前先做三件事
+
+2026-08-31 稽核 Official 找出 9 個沒有使用端的 modifier,決定**刪 7 個、留 2 個** ——
+差別在「刪掉之後失去什麼」:
+
+| | 判斷 | 實例 |
+|---|---|---|
+| **可以刪** | 它只是一個**選項**,刪掉不影響任何現有畫面,也不會讓其他宣告變成死碼 | `--border-gray-db`(mTag)、`--text-orange-f74c`(mAnchor)、`--resize-x` / `-y`(mForm)、`--gap-x-30` / `-24` / `-10`(mSeparator) |
+| **先問再說** | 刪掉等於**移除一個功能**:會連帶讓一批變數變孤兒、讓版型檔的 `@apply` 讀不到值 | `--pagination-point` / `--pagination-bar`(mSwiper)—— 連帶 19 個變數與 bullet 的整段版型,實質是移除分頁點的兩種造型。**已決定保留,見那支檔案的註解** |
+
+**刪之前一定要查的三件事**(缺一件就可能刪錯):
+
+1. **有沒有動態拼接的 class** —— 樣板字面值拼出來的 modifier(`--` 接變數)grep 抓不到。
+   先全案搜 `'--'` 與 `--` 後面接變數的寫法,確認哪些組件會拼 class
+   (Official 只有 mTooltip 的 `--<align>-x` / `--<side>-y` 與 mPopup 的 `--<mode>`)。
+2. **組件本身有沒有對應的 props / 綁定** —— `--resize-x` 那組就是查了才發現
+   TextArea.vue **完全沒有 resize 相關程式碼**,不是「使用端還沒用」而是功能沒接上。
+3. **刪掉會不會讓別的東西變孤兒** —— 那些 modifier 設定的 `-pc-` / `-tablet-` / `-mobile-`
+   值變數、以及版型檔取用它們的 `@apply`,都要一起清掉,否則留下讀不到值的死宣告。
+
+**刪掉後在檔頭留紀錄**(照 [deleted-components.md](./deleted-components.md) 的慣例):
+刪了什麼、為什麼、要加回來時從 git 撈、格式照哪一組寫。
+mForm/textarea.css 與 mSeparator/variables.css 的檔頭就是這樣寫的。
+
+### 「沒有對應 CSS 的 class」先查這四種正當理由,再問
+
+這條岔路**大多數情況是刻意的**,不是漏掉 —— 2026-08-31 全案稽核 Official,
+找出 15 個沒有對應 CSS 的 `m-*` class,查完發現**一個都不用補**。
+所以遇到時先照下面判斷,只有四種都不符合才需要問。
+
+| 正當理由 | 怎麼認 | 稽核時的實例 |
+|---|---|---|
+| **1. 根本不是 class** | 字串長得像 class,其實是事件名 / 常數 | `new Event('m-swiper-update')` —— 自訂事件名 |
+| **2. `setClass` 的掛載點** | 同一個標籤上有 `:class="setClass.xxx"` | `.m-anchor-text` + `setClass.text`、`.m-popup-note` + `setClass.note` 等 7 個 |
+| **3. 樣式在父層,靠繼承或容器** | 字級 / 顏色定在父容器,子元素繼承;或間距由父層的 `gap` 負責 | `.m-loading-text` 的字級在 `.m-loading-container`;`.m-sort-item` 的間距在 `.m-sort-list` 的 `gap-x` |
+| **4. 純結構標記** | SVG 的 `<g>` 群組、只為包住一組元素的容器,樣式在子元素上 | `.m-chart-grid` / `.m-chart-radial` |
+
+**怎麼確認「本來就沒有」而不是「拆 module 時漏掉」** —— 兩條都要查:
+
+```powershell
+# 1. 歷史上有沒有存在過這個選擇器(注意前面的點,只會命中 CSS 不會命中 template)
+git log --all --oneline -S ".m-chart-grid"
+
+# 2. 該 class 首次出現時,template 那一行有沒有夾著 tailwind class
+git show <首次出現的 commit>:<檔案> | Select-String "m-chart-grid"
+```
+
+第 1 條 0 筆 **且** 第 2 條顯示當時就只有這個 class(沒有 tailwind 混在一起)——
+那就是**本來就沒有樣式**,不是拆的時候搬走 tailwind 卻忘了寫 CSS。
+
+> ⚠️ 第 1 條的搜尋字串**一定要帶點**(`.m-chart-grid`)。不帶點會連 template 的
+> `class="m-chart-grid"` 一起命中,每個 class 都有一堆 commit,查了等於沒查。
+
+這幾種都留著沒有壞處:class 在,將來要上樣式時選擇器已經就位;
+而 `setClass` 掛載點與「樣式在父層」兩種**本來就該沒有 CSS**,補了反而會蓋掉使用端。
+
+---
+
+## 動手前先讀 tailwind.config.js
+
+⚠️ **本專案改過 tailwind 的預設,不讀 config 就會照 tailwind 官方的直覺寫錯。**
+動 CSS 之前先看 [tailwind.config.js](../../tailwind.config.js),重點如下。
+
+### `theme` 底下哪些是「覆寫」而不是 `extend`
+
+`screens` / `fontFamily` / `fontSize` / `boxShadow` 直接寫在 `theme`,**tailwind 的預設值整組被換掉**;
+只有 `content` / `width` / `dropShadow` / `transitionProperty` 在 `extend` 裡是「加上去」。
+
+| 被覆寫的 | 後果 |
+|---|---|
+| `fontSize` | **沒有 `text-sm` / `text-base` / `text-lg`**,只剩 `vmp` / `vmt` / `vmm` / `vmmls` 四個 vw 級距。字級一律寫 arbitrary value(`text-[16px]` / `text-[length:--x-text-size]`) |
+| `screens` | 沒有 `sm` / `md` / `lg` / `xl`,全部換成本專案的斷點(見下) |
+| `boxShadow` | 沒有 `shadow-sm` / `shadow-md` / `shadow-none`,只有 [tailwind.extend.js](../../tailwind.extend.js) 的三個:`shadow-black-y2-b4` / `shadow-dropdown` / `shadow-card` |
+| `fontFamily` | 沒有 `font-sans` / `font-serif` / `font-mono`,只有 `font-default` |
+
+`letterSpacing` / `lineHeight` 在 config 裡是**註解掉的**,所以內建保留 ——
+`tracking-wider` / `leading-*` 都是合法的。
+
+**這一節由 [規則 6](#規則-6不要用本專案不存在的-tailwind-class) 守門** ——
+`checkTailwindTheme` 會把這些寫法抓出來,不必靠記憶。
+
+### 斷點
+
+全部是 `raw` media query(不是單純的 min-width),所以**順序不遵守 tailwind 的行動優先直覺**,
+要靠 media query 本身判斷誰蓋誰。斷點的寬度來自 [config.js](../../config.js)
+(`mobileMaxWidth` / `desktopMinWidth`),不是寫死在 config 裡。
+
+| 斷點 | 涵蓋 |
+|---|---|
+| `m` | 手機(含橫向的矮螢幕) |
+| `t` | 平板 |
+| `p` | `min-width: 1024px` |
+| `tm` | 平板 + 手機 |
+| `pt` | PC + 平板 |
+| `pMin` / `pMax` | PC 的窄 / 寬兩段 |
+| `mLandscape` | 手機橫向 |
+| `notsupport` / `firefox` / `IE` | 瀏覽器偵測用 |
+
+模組的三段 `@screen p` / `@screen t` / `@screen m` 就是對應 `p` / `t` / `m`;
+`pt` 與 `tm` 是複合斷點,**會同時落在兩段裡**,寫 modifier 時要一起收(見規則 4)。
+
+### plugin 提供的自訂 utility
+
+`text-hexa` / `bg-hexa` / `border-hexa` / `divide-hexa` 走 `onColorWithAlpha`,
+語法是 `bg-hexa-[--black,0.7]`(色票變數 + alpha),不是 tailwind 原生的 `/70`。
+
+⚠️ **本專案已淘汰這四個**(2026-08-28 全面改用 8 碼 hex 色票),plugin 還留著但不要再用,
+規則 6 會抓。**Backstage 那邊還在用**,對照時不要把這條抄過去。
+
+`.imeMode-disabled` 是 `addComponents` 加的,仍在使用。
+
+### `theme.extend.transitionProperty` 是複數
+
+`widths` / `heights` / `sizes` / `opacitys` / `margin` / `filter` ——
+所以 module 裡的 `transition-opacitys`、`transition-heights` **不是 typo**。
+寫單數(`transition-width`)則不存在,規則 6 會抓。
+
+### `content` 的掃描範圍
+
+只掃 `components` / `containers` / `layouts` / `pages` / `static` / `app.vue` / `error.vue`。
+`assets/css/` **不在裡面** —— 但那不影響 `@apply`(它在 PostCSS 階段處理,不經過 content 掃描)。
+真正的影響是:**只寫在 CSS 檔字串裡、template 沒出現過的 class 不會被產生**。
+
+### `corePlugins.preflight` 沒有關掉
+
+所以 tailwind 內建的 preflight 生效,`*, ::before, ::after` 已經是 `border: 0 solid` ——
+**不用寫 `border-solid`**(見規則 3)。
+
 ---
 
 ## 規則 1:顏色一律定義在色票檔,且分頻道
@@ -498,7 +626,7 @@ modifier 名稱就是 **tailwind 的 utility 名前面加 `--`**,不要自己另
 | [變數的 base 與粒度](#變數的-base-與粒度) | 沒 base 整條讀不到、無效 `var()` 仍會參與 cascade、變數建在最小單位 |
 | [這些屬性不能用 tailwind 寫](#這些屬性不能用-tailwind-寫) | `border-width` / `box-shadow` / `font-size` / `transition` |
 | [誰決定這個屬性](#誰決定這個屬性) | 字級、顏色、hover 各自歸誰管 |
-| [值要不要開變數](#值要不要開變數) | 帶 px 一律開;`z-index` / `100%` / `font-weight` 不開 |
+| [值要不要開變數](#值要不要開變數) | 帶 px 一律開;`z-index` / `leading` / `tracking` / `100%` / `font-weight` 不開 |
 
 #### 斷點與 DOM 結構
 
@@ -684,7 +812,14 @@ modifier 名稱就是 **tailwind 的 utility 名前面加 `--`**,不要自己另
   字級變數只能出現在**固定位置**的組件裡。目前全案有 `-text-size` 變數的只有六支,
   全都屬於這類:mTitle / mFooter / mNav / mLoading / mPopup,以及 mChart 的 tooltip
   (它是組件自己疊出來的圖層,`setClass` 沒有對應的 key,使用端根本沒有管道可傳)。
-  複用型的 mForm / mTag / mAnchor **一個字級變數都沒有**,那是對的。
+  複用型的 mTag / mAnchor **一個字級變數都沒有**,那是對的。
+
+  **例外:`.m-form-error`(2026-08-31 決定)。** mForm 整體是複用型,但錯誤訊息的字級
+  **全站長一樣、不隨使用位置變化**,所以由 module 統一決定,建了
+  `--form-error-pc-text-size` / `-tablet-` / `-mobile-`(原本是寫死的 `text-[14px]`)。
+  判斷依據是「這個**元素**是不是固定樣貌」,不是「這支組件是不是複用型」——
+  同一支 module 裡可以一部分交給使用端、一部分自己定。
+  `setClass.error` 仍然存在(要傳其他樣式),但**不該用來調字級**。
 
   另一個例外是使用端根本沒有管道可傳(後台編輯器存進 HTML 的 class),那就留在 module。
   **分不出來就問使用者。**
@@ -730,7 +865,26 @@ modifier 名稱就是 **tailwind 的 utility 名前面加 `--`**,不要自己另
   3. **版型檔不要寫 `&:hover`** —— 那會變成「module 自己決定 hover 行為」,
      使用端沒帶 modifier 時也會觸發。狀態切換由 variables 的 modifier 表達就夠了。
 - ⚠️ **顏色是組件的職責,使用端不得自訂**。modifier 只設 `--x-color`,
-  `common.css` **無條件**套用 `text-[--x-color]`;沒有顏色時用 `--x-color: initial`。
+  `common.css` **無條件**套用 `text-[--x-color]`;沒有顏色時用 **`--x-color: inherit`**。
+
+  ⚠️ **base 一定寫出真正想要的值,不要用 `initial`**,而且分兩種:
+
+  | 變數 | base | 意思 |
+  |---|---|---|
+  | 文字色 `--x-color` | `inherit` | 沒指定就跟父層走(等同拆 module 前的行為) |
+  | 背景 / 邊框色 `--x-bg-color` / `--x-border-color` | `transparent` | 沒指定就是**沒有顏色** —— 背景不該去繼承父層 |
+
+  **為什麼不用 `initial`**:它其實**能運作**,但靠的是繞路 ——
+  custom property 的值寫成 CSS-wide keyword 時,它的計算值是 guaranteed-invalid,
+  於是 `color: var(--x-color)` 成為 **IACVT**(invalid at computed-value time):
+  繼承屬性(`color`)表現為 `inherit`、非繼承屬性(`background-color`)表現為
+  `initial`(即 transparent)。結果剛好符合直覺,所以 mAnchor 用了很久也沒出事。
+
+  真正的問題是**意圖讀不出來**:下一個人會以為 initial 就是 `color` 的初始值(黑色)而不敢動,
+  或反過來以為 `-bg-color: initial` 會繼承父層背景。寫 `inherit` / `transparent` 就沒有這層猜測。
+
+  2026-08-31 清完存量(mTag ×2、mTooltip ×2、mAnchor),由 `checkColorBase` 檢查
+  (依變數名判斷該建議 `inherit` 還是 `transparent`)。
 
   使用端在 `setClass.main`(或 `class`)寫 `text-[--gray-999]` 這種 tailwind 顏色**本身就是錯的** ——
   它會被 module 的宣告蓋掉,而且**本來就該被蓋掉**。正確做法是:
@@ -764,10 +918,22 @@ modifier 名稱就是 **tailwind 的 utility 名前面加 `--`**,不要自己另
   mSort 的捲軸留白寫死 `pr-[2px]`,當時都以為「這是造型不會變」而略過。
   真要調的時候(例如高解析度螢幕想加粗)就得回頭改版型檔,而不是只動一個值。
 
-  **明確不開變數的三個**:
+  **明確不開變數的這幾個**(每一條都有對應的檢查函式,不必靠記憶):
 
+  - **`letter-spacing`(`tracking`)** —— 字距是組件的字體造型設定,全站一個值走到底,
+    沒有「各頁面各自指定」或「各斷點不同」的需求。直接寫 `@apply tracking-[0.06em]`
+    或 tailwind 內建的 `tracking-wider`。
+    由 `checkTrackingVariable` 檢查(抓 `--x-tracking:` / `tracking-[--x]` / `letter-spacing: var(…)`)。
+  - **`line-height`(`leading`)** —— 理由同上:行高跟著字級走,而且值多半是**無單位比例**
+    (`1.5` / `1`),本來就不隨斷點改變,拆三份只會得到三個一樣的數字。
+    直接寫 `@apply leading-[1.5]`。
+    由 `checkLeadingVariable` 檢查(2026-08-31 加,抓 `--x-leading:` / `--x-line-height:` /
+    `leading-[--x]` / `line-height: var(…)`)。
   - **`z-index`** —— 層級是版型結構的一部分,`z-[1]` / `z-[3]` 直接寫,
-    抽成變數只會讓「誰疊在誰上面」更難看懂。
+    抽成變數只會讓「誰疊在誰上面」更難看懂:要回頭查三個斷點的值才知道順序。
+    而且**層級不會因為斷點而改變**,拆三份只會得到三個一樣的數字。
+    這條由 `checkZIndexVariable` 檢查(2026-08-31 加),抓三種寫法:
+    變數定義(`--x-z:` / `--x-z-index:`)、tailwind 取用(`z-[--x]`)、原生(`z-index: var(…)`)。
   - **`100%`** —— 三個斷點沒差別時直接用 tailwind 的 `-full`,
     不要寫成 `w-[100%]`,更不要繞一層變數:
 
@@ -787,7 +953,17 @@ modifier 名稱就是 **tailwind 的 utility 名前面加 `--`**,不要自己另
 
   `0` / `auto` / `none` 這種「歸零或不設定」也直接寫,那不是尺寸。
 
-  > 目前 `_modules/` 內還有一批既有存量沒有變數化:`duration-*` 43 處、
+  **時間值(`duration-*` / `delay-*`)不開變數**(2026-08-31 決定)——
+  `delay-[0ms,150ms]` 這種直接寫就好,理由同 `duration-*`:它是動畫手感的一部分,
+  不是尺寸,也沒有「各頁面各自指定」或「各斷點不同」的需求。
+
+  ⚠️ **`calc()` 裡的抵銷值仍然要開變數。** 那是尺寸,不因為包在算式裡就豁免 ——
+  實際踩過:mTab/ovalResponsiv 的 `mt-[calc(calc(var(--x-border-h)_-_1px)_*_-1)]`,
+  那個 `1px` 是「底線露出的厚度」,已改成 `--tab-oval-responsiv-body-*-border-visible`。
+  順帶一個容易漏的點:**那條宣告在 `@screen pt` 內,所以不能吃 `-pc-`**(規則 4 的 6-a),
+  要吃中性變數再由 `@screen p` / `t` 兩段各自對應。
+
+  > 目前 `_modules/` 內還有一批既有存量沒有變數化:
   > `rounded-full` 9 處、`w-full` / `h-full` 36 處、`-1/2` 25 處、`opacity-*` 15 處。
   > 這些是不是也該開變數,**碰到時問使用者**,不要自行決定。
 
@@ -911,6 +1087,21 @@ icon、圓點、方形按鈕這類**寬高一致**的元素,只建一個 `-size`
 **同一支檔案的 `@screen p` / `t` / `m` 各自只寫一組**,不要拆散成好幾處 ——
 同一個斷點的設定散在檔案各處,改的時候很容易漏掉其中一組。
 
+這條由 `checkScreenGrouping` 檢查(2026-08-31 加),但**只看頂層的 `@screen`**:
+
+| 寫法 | 算不算違規 |
+|---|---|
+| 頂層出現兩個 `@screen m` | ⛔ 違規 —— 合併成一組 |
+| 巢狀(`.m-x { @screen p { … } }`)在多個選擇器內各寫一次 | ✅ 合法 —— 那是另一種組織方式,每個選擇器自己收三段 |
+
+真的需要分開(變數對應與子元素版型差異大)就在該行或上一行標
+`/* lint-screen-group-exempt: 理由 */`,**理由一定要寫**。
+
+> 導入當天兩邊各有一筆存量,都用**合併**解決而不是標豁免:
+> mHeader 的第二段 `@screen m` 併回第一段(選擇器不重疊、`@screen pt` 的相對順序不變),
+> Backstage 的 mTable/checkboxResponsiv 同理。合併前確認過兩件事:
+> **選擇器有沒有重疊**(有就要注意宣告順序)、**與複合斷點(`pt` / `tm`)的先後有沒有被改動**。
+
 ```css
 /* ✓ 版型吃中性變數，@screen p / t / m 各段負責對應 */
 .m-x { @apply gap-x-[--x-gap-x]; }
@@ -984,6 +1175,44 @@ import { Field, ErrorMessage } from 'vee-validate'
 但習慣上排在 `@js` 之後、第三方套件之前。
 
 這條由工具檢查([lint-core.mjs](../../.tools/css/lint-core.mjs) 的 `checkImportOrder`)。
+
+---
+
+## 規則 6:不要用「本專案不存在」的 tailwind class
+
+> ⚠️ 這裡的「規則 6」與規則 4 章節內的 `6-a` / `6-b` 編號無關,那是另一組代號。
+
+[tailwind.config.js](../../tailwind.config.js) 有四組寫在 **`theme`** 而不是 `theme.extend`,
+也就是**整組覆寫** —— tailwind 內建的那些 key 因此**完全消失**:
+
+| theme 的組 | 本專案剩下什麼 | 因此不存在的 |
+|---|---|---|
+| `screens` | `m` / `t` / `p` / `tm` / `pt` / `pMin` / `pMax` / `mLandscape` / `notsupport` / `firefox` / `IE` | **`sm:` `md:` `lg:` `xl:` `2xl:`** |
+| `fontSize` | `vmp` / `vmt` / `vmm` / `vmmls`(四個 vw 值) | **`text-xs` ~ `text-9xl`、`text-base`** |
+| `boxShadow` | [tailwind.extend.js](../../tailwind.extend.js) 的三個 preset | **`shadow` `shadow-sm` `shadow-md` … `shadow-none`** |
+| `fontFamily` | `default` | **`font-sans` `font-serif` `font-mono`** |
+
+**寫了不會報錯,class 就靜靜地不生效** —— 和拼錯字一個症狀,但更難發現,
+因為 `text-sm` 看起來完全正常。實測(`npx tailwindcss` 對一份含這些 class 的檔案跑產物):
+`text-sm` / `text-3xl` / `shadow-md` / `shadow-none` / `font-sans` / `md:flex` / `2xl:hidden`
+**一條 CSS 都沒有產出**。
+
+另外兩類也一併抓:
+
+| 寫法 | 為什麼錯 |
+|---|---|
+| `text-hexa` / `bg-hexa` / `border-hexa` / `divide-hexa` | 2026-08-28 起全面改用 8 碼 hex 色票。plugin 還留著(還沒移除)但**不要再用** |
+| `transition-width` / `-height` / `-size`(單數) | `theme.extend.transitionProperty` 定義的是**複數**:`widths` / `heights` / `sizes` |
+
+`letterSpacing` / `lineHeight` 在 config 裡是**註解掉的**,所以內建保留 ——
+`tracking-wider` / `leading-*` 都是合法的(規範也要求字距用 `tracking-wider`)。
+`dropShadow` / `width` / `content` / `transitionProperty` 在 `extend` 底下,內建也都還在。
+
+這條由 [lint-core.mjs](../../.tools/css/lint-core.mjs) 的 `checkTailwindTheme` 檢查,
+`.vue` 與 `.css` 都掃(寫在哪裡都是錯的)。
+
+> ⚠️ **改了 `theme` 就要回頭同步 `UNAVAILABLE_CLASSES`** ——
+> 把某一組從 `theme` 移進 `theme.extend`(內建復活)時,對應那段要刪掉,否則會變成誤報。
 
 ---
 

@@ -11,9 +11,10 @@
   --tooltip-px: 0;
   --tooltip-h: auto;
 
-  /* 沒帶顏色 modifier 時等同沒設定;hover 由 hover:--bg-* modifier 覆寫這兩個,不另建變數 */
-  --tooltip-color: initial;
-  --tooltip-bg-color: initial;
+  /* 沒帶顏色 modifier 時等同沒設定 —— 文字色跟父層(inherit)、背景色沒有顏色(transparent);
+     hover 由 hover:--bg-* modifier 覆寫這兩個,不另建變數 */
+  --tooltip-color: inherit;
+  --tooltip-bg-color: transparent;
 
   --tooltip-container-pc-m: 2px;
   --tooltip-container-tablet-m: 2px;

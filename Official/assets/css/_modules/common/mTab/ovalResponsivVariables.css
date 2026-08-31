@@ -15,6 +15,12 @@
   --tab-oval-responsiv-pc-border-h: 4px; /* lint-breakpoint-exempt: mobile 是膠囊形,沒有底線 */
   --tab-oval-responsiv-tablet-border-h: 4px;
 
+  /* body 用負 margin 往上疊,蓋住 header 底線後**露出**的厚度。
+     mt 的算式是 -(border-h - 這個值),所以它決定底線最後看得到多厚。
+     只有 pc / tablet 有這條宣告(mobile 沒有底線),值不分斷點。 */
+  --tab-oval-responsiv-body-pc-border-visible: 1px; /* lint-breakpoint-exempt: mobile 是膠囊形,沒有底線 */
+  --tab-oval-responsiv-body-tablet-border-visible: 1px;
+
   --tab-oval-responsiv-header-items-pc-gap-x: 8px; /* lint-breakpoint-exempt: mobile 的按鈕相連,無間距 */
   --tab-oval-responsiv-header-items-tablet-gap-x: 8px;
 

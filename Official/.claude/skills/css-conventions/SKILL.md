@@ -1,12 +1,12 @@
 ---
 name: css-conventions
-description: 動到任何 css、顏色、module 樣式前必須先讀。四條規則 —— 顏色一律定義在色票檔(分頻道)且依規則命名與排序、components 的 template 不寫 tailwind class、module 拆資料夾與引入順序、module 變數的命名與斷點。含四層自動守門與檢查工具的用法。觸發時機 - 要加新顏色 / 改 assets/css/_common/color*.css、要拆或改 assets/css/_modules/**、要動 components/**/*.vue 的 class 或 <style>、或使用者問到「顏色要放哪 / 色票命名 / 色系排序 / 為什麼跳 CSS 警告」。
+description: 動到任何 css、顏色、module 樣式前必須先讀。六條規則 —— 顏色一律定義在色票檔(分頻道)且依規則命名與排序、components 的 template 不寫 tailwind class、module 拆資料夾與引入順序、module 變數的命名與斷點、.vue 的 import 順序、不要用被 theme 整組覆寫掉而不存在的 tailwind class(text-sm / shadow-md / md: 都產不出 CSS)。含四層自動守門與檢查工具的用法。觸發時機 - 要加新顏色 / 改 assets/css/_common/color*.css、要拆或改 assets/css/_modules/**、要動 components/**/*.vue 的 class 或 <style>、要寫任何 tailwind class(先確認它在本專案存不存在)、或使用者問到「顏色要放哪 / 色票命名 / 色系排序 / 為什麼跳 CSS 警告 / 這個 class 為什麼沒效果」。
 ---
 
 # CSS 規範(摘要)
 
 **完整規則見 [.claude/rules/css-conventions.md](../../rules/css-conventions.md) —— 動手前一定要讀那份。**
-這裡只列四條規則的重點與工具指令,細節、踩過的坑、違規存量都在規則檔裡。
+這裡只列六條規則的重點與工具指令,細節、踩過的坑、違規存量都在規則檔裡。
 
 | 規則 | 一句話 | 工具會自動抓 |
 |---|---|---|
@@ -15,6 +15,7 @@ description: 動到任何 css、顏色、module 樣式前必須先讀。四條�
 | 3 | module 拆成 `_modules/<頻道>/<組件>/`,在 `<script setup>` 最上方按固定順序 JS import | ✅(引入方式與順序) |
 | 4 | module 變數用 `-w` / `-h` / `-p` / `-m` / `-border`,尺寸類拆 pc / tablet / mobile 三份 | ✅ |
 | 5 | `<script setup>` 的 import 順序:**css → `./.composables` → `@js` → 其他套件** | ✅ |
+| 6 | 不要用被 `theme` 整組覆寫掉而不存在的 class:`text-sm` / `shadow-md` / `font-sans` / `md:` / `*-hexa` / `transition-width`(單數) | ✅ |
 
 ## ⚠️ 判斷不出來就問 —— 不要猜
 
@@ -279,7 +280,7 @@ padding / margin / border-radius 的 modifier 有層級(整體 → 軸向 → �
 ## 指令
 
 ```powershell
-npm run lint:css                              # 全專案掃描(四條規則)
+npm run lint:css                              # 全專案掃描(六條規則)
 node .tools/css/lint-css.mjs <檔案或目錄>      # 只檢查指定範圍
 npm run sort:color                            # 色票檔自動排序
 node .tools/css/sort-color-css.mjs            # 色票檔:只檢查排序 / 命名 / 頻道歸屬
