@@ -6,16 +6,20 @@
  */
 const useChartScale = () => {
   // 線性 scale：domain [d0,d1] → range [r0,r1]
-  const linear = ([d0, d1], [r0, r1]) => (value) => {
-    if (d1 === d0) return r0
-    return r0 + ((value - d0) / (d1 - d0)) * (r1 - r0)
-  }
+  const linear =
+    ([d0, d1], [r0, r1]) =>
+    (value) => {
+      if (d1 === d0) return r0
+      return r0 + ((value - d0) / (d1 - d0)) * (r1 - r0)
+    }
 
   // 等距 point scale：count 個點平均分佈在 range 上，回傳第 i 個的座標
-  const point = (count, [r0, r1]) => (index) => {
-    if (count <= 1) return (r0 + r1) / 2
-    return r0 + (index / (count - 1)) * (r1 - r0)
-  }
+  const point =
+    (count, [r0, r1]) =>
+    (index) => {
+      if (count <= 1) return (r0 + r1) / 2
+      return r0 + (index / (count - 1)) * (r1 - r0)
+    }
 
   // 自動刻度：給定資料 min/max，回傳 { min, max, step, ticks }
   // 可用 interval 指定固定間距、用 count 指定大約幾條刻度

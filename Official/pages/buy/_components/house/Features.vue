@@ -7,5 +7,3 @@ const hasFeatures = computed(() => Array.isArray(features.value) && features.val
 <template>
   <PageBuyHouseContent title="特色說明" v-if="hasFeatures" />
 </template>
-
-<style></style>

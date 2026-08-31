@@ -183,5 +183,3 @@ defineExpose({
     </template>
   </CommonMFormInput>
 </template>
-
-<style lang="postcss"></style>

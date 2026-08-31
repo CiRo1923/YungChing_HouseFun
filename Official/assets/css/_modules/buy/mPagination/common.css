@@ -45,8 +45,7 @@
 }
 
 .m-pagination-arrow-icon {
-  @apply h-[--pagination-arrow-icon-size] w-[--pagination-arrow-icon-size]
-    p-[--pagination-arrow-icon-p];
+  @apply h-[--pagination-arrow-icon-size] w-[--pagination-arrow-icon-size] p-[--pagination-arrow-icon-p];
 }
 
 .m-pagination-anchor {

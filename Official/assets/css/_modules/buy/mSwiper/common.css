@@ -56,8 +56,7 @@
   }
 
   &:disabled {
-    @apply cursor-not-allowed border-[--swiper-ctrl-disabled-border-color]
-      bg-[--swiper-ctrl-disabled-bg-color] text-[--swiper-ctrl-disabled-color];
+    @apply cursor-not-allowed border-[--swiper-ctrl-disabled-border-color] bg-[--swiper-ctrl-disabled-bg-color] text-[--swiper-ctrl-disabled-color];
   }
 }
 
@@ -66,9 +65,7 @@
 }
 
 .m-swiper-pagination-bullet {
-  @apply block h-[--swiper-pagination-bullet-h] w-[--swiper-pagination-bullet-w]
-    max-w-[--swiper-pagination-bullet-max-w] rounded-full
-    bg-[--swiper-pagination-bullet-bg-color] transition-all duration-300;
+  @apply block h-[--swiper-pagination-bullet-h] w-[--swiper-pagination-bullet-w] max-w-[--swiper-pagination-bullet-max-w] rounded-full bg-[--swiper-pagination-bullet-bg-color] transition-all duration-300;
 }
 
 /* 以下四條原本寫在 Horizontal.vue / Ctrl.vue 的 template */

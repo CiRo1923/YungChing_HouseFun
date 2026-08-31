@@ -1,8 +1,9 @@
 #!/bin/sh
-# CSS 規範的最後一道關卡 —— 不依賴 dev server,也不依賴編輯器擴充。
+# 規範檢查的最後一道關卡 —— 不依賴 dev server,也不依賴編輯器擴充。
 #
 #   1. 色票檔排序不對 → 自動排序並重新 git add(無害的純順序調整)
-#   2. 本次 staged 的 .vue / .css → 跑規範檢查,印紅色警告
+#   2. 本次 staged 的 .vue / .css → 跑 CSS 規範檢查,印紅色警告
+#   3. 本次 staged 的 .js / .mjs / .vue → 跑 ESLint,印警告
 #
 # 只警告不阻擋 commit(與 .claude/hooks/cssGuard.js、.vite/css-guard.mjs 一致)——
 # 存量還沒清完,擋下來只會逼人加 --no-verify,反而讓守門機制形同虛設。
@@ -15,7 +16,7 @@
 #      → staged 路徑長 `assets/…`,直接處理、不分派
 #
 # ⚠️ core.hooksPath 是 repo 層級設定、**只能指向一個目錄** ——
-#    a 的情況下誰最後跑 `npm run hooks:install` 就指誰。所以這支與 Official 的那支
+#    a 的情況下誰最後跑 `npm run hooks:install` 就指誰。所以這支與 Backstage 的那支
 #    **內容要保持一致**(兩邊各自一份複本),誰生效結果都一樣。
 #    改這個檔案時記得對照:diff --strip-trailing-cr ../Backstage/.githooks/pre-commit .githooks/pre-commit
 #
@@ -26,52 +27,72 @@ YELLOW='\033[33m'
 GREEN='\033[32m'
 RESET='\033[0m'
 
-# 本次 staged 的 .vue / .css(路徑一律相對 repo 根)
-STAGED=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(vue|css)$')
+# 本次 staged 的檔案(路徑一律相對 repo 根)
+# CSS 規範檢查看 .vue / .css;ESLint 看 .js / .mjs / .vue —— .vue 兩邊都要,職責不同
+STAGED_ALL=$(git diff --cached --name-only --diff-filter=ACM)
+STAGED=$(echo "$STAGED_ALL" | grep -E '\.(vue|css)$')
+STAGED_JS=$(echo "$STAGED_ALL" | grep -E '\.(js|mjs|vue)$')
 
-[ -z "$STAGED" ] && exit 0
+[ -z "$STAGED" ] && [ -z "$STAGED_JS" ] && exit 0
 
 # repo 根就有這套工具 → 專案自己是一個 repo,不必分派
 if [ -f ".tools/css/lint-css.mjs" ]; then
   PROJECTS="."
 else
-  PROJECTS=$(echo "$STAGED" | cut -d/ -f1 | sort -u)
+  PROJECTS=$(printf '%s\n%s\n' "$STAGED" "$STAGED_JS" | grep -v '^$' | cut -d/ -f1 | sort -u)
 fi
 
 for PROJECT in $PROJECTS; do
-  # 沒有這套 css 工具的專案直接略過
-  [ -f "$PROJECT/.tools/css/lint-css.mjs" ] || continue
-
   # 這個專案本次 staged 的檔案,轉成相對專案目錄的路徑
   if [ "$PROJECT" = "." ]; then
     REL="$STAGED"
+    REL_JS="$STAGED_JS"
   else
     REL=$(echo "$STAGED" | grep -E "^$PROJECT/" | sed "s|^$PROJECT/||")
+    REL_JS=$(echo "$STAGED_JS" | grep -E "^$PROJECT/" | sed "s|^$PROJECT/||")
   fi
-
-  [ -z "$REL" ] && continue
 
   # --- 1. 色票檔自動排序 ----------------------------------------------------
 
-  for f in $(echo "$REL" | grep -E '^assets/css/_common/color[A-Za-z]*\.css$'); do
-    BEFORE=$(git hash-object "$PROJECT/$f")
-    (cd "$PROJECT" && node .tools/css/sort-color-css.mjs --write "$f" >/dev/null 2>&1)
-    AFTER=$(git hash-object "$PROJECT/$f")
+  if [ -f "$PROJECT/.tools/css/sort-color-css.mjs" ] && [ -n "$REL" ]; then
+    for f in $(echo "$REL" | grep -E '^assets/css/_common/color[A-Za-z]*\.css$'); do
+      BEFORE=$(git hash-object "$PROJECT/$f")
+      (cd "$PROJECT" && node .tools/css/sort-color-css.mjs --write "$f" >/dev/null 2>&1)
+      AFTER=$(git hash-object "$PROJECT/$f")
 
-    if [ "$BEFORE" != "$AFTER" ]; then
-      git add "$PROJECT/$f"
-      printf "${GREEN}🔧 %s 排序不符規則,已自動重新排序並加入本次 commit。${RESET}\n" "$PROJECT/$f"
+      if [ "$BEFORE" != "$AFTER" ]; then
+        git add "$PROJECT/$f"
+        printf "${GREEN}🔧 %s 排序不符規則,已自動重新排序並加入本次 commit。${RESET}\n" "$PROJECT/$f"
+      fi
+    done
+  fi
+
+  # --- 2. CSS 規範檢查(只看 staged 的檔案)---------------------------------
+
+  if [ -f "$PROJECT/.tools/css/lint-css.mjs" ] && [ -n "$REL" ]; then
+    # shellcheck disable=SC2086
+    if ! (cd "$PROJECT" && node .tools/css/lint-css.mjs $REL); then
+      printf "\n${YELLOW}⚠ 以上為本次 commit 檔案的 CSS 規範違規,commit 照常繼續。${RESET}\n"
+      printf "${YELLOW}  規範見 %s/.claude/rules/css-conventions.md${RESET}\n" "$PROJECT"
+      printf "${YELLOW}  👉 要協助修正的話,到 Claude Code 對話框打「修正」或「好」就會處理${RESET}\n"
+      printf "${YELLOW}     (它已經知道是哪個檔案、哪幾行)。不想修就不用理它 —— 主動權在你手上。${RESET}\n\n"
     fi
-  done
+  fi
 
-  # --- 2. 規範檢查(只看 staged 的檔案)-------------------------------------
+  # --- 3. ESLint(只看 staged 的檔案)---------------------------------------
+  #
+  # 自製規則裡 require-ref-value-access 最有價值:storeToRefs 解構後漏 .value 會靜默
+  # 取到 undefined,不噴錯也不警告,通常要到畫面空白才發現。
+  #
+  # 用 --no-install 是刻意的 —— 沒裝依賴時安靜跳過,不要在 commit 當下才去抓套件。
 
-  # shellcheck disable=SC2086
-  if ! (cd "$PROJECT" && node .tools/css/lint-css.mjs $REL); then
-    printf "\n${YELLOW}⚠ 以上為本次 commit 檔案的 CSS 規範違規,commit 照常繼續。${RESET}\n"
-    printf "${YELLOW}  規範見 %s/.claude/rules/css-conventions.md${RESET}\n" "$PROJECT"
-    printf "${YELLOW}  👉 要協助修正的話,到 Claude Code 對話框打「修正」或「好」就會處理${RESET}\n"
-    printf "${YELLOW}     (它已經知道是哪個檔案、哪幾行)。不想修就不用理它 —— 主動權在你手上。${RESET}\n\n"
+  if [ -f "$PROJECT/eslint.config.mjs" ] && [ -n "$REL_JS" ]; then
+    # shellcheck disable=SC2086
+    if ! (cd "$PROJECT" && npx --no-install eslint $REL_JS); then
+      printf "\n${YELLOW}⚠ 以上為本次 commit 檔案的 ESLint 問題,commit 照常繼續。${RESET}\n"
+      printf "${YELLOW}  多數可自動修正:cd %s && npm run lint:fix${RESET}\n" "$PROJECT"
+      printf "${YELLOW}  👉 要協助處理的話,到 Claude Code 對話框說一聲就好。${RESET}\n\n"
+    fi
   fi
 done
 

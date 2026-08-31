@@ -138,5 +138,3 @@ onInit()
     </Form>
   </CommonMContainer>
 </template>
-
-<style lang="postcss"></style>

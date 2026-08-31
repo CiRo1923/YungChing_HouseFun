@@ -16,10 +16,7 @@ const pascalCase = (value: string) =>
 
 const toImportPath = (value: string) => value.split(sep).join('/')
 
-export const getStoreComposableImports = (
-  storesDir: string,
-  relativeDir = ''
-): NuxtImport[] => {
+export const getStoreComposableImports = (storesDir: string, relativeDir = ''): NuxtImport[] => {
   const imports: NuxtImport[] = []
   const dir = relativeDir ? `${storesDir}/${relativeDir}` : storesDir
 

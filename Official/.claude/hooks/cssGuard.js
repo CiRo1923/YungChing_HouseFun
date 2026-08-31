@@ -144,7 +144,10 @@ const onLint = (rel) => {
 
     messages.push(
       `⛔ ${RULE_TITLE[rule]}(${rel},${list.length} 筆):\n` +
-        list.slice(0, MAX_LISTED).map((i) => `   L${i.line} ${i.detail}`).join('\n') +
+        list
+          .slice(0, MAX_LISTED)
+          .map((i) => `   L${i.line} ${i.detail}`)
+          .join('\n') +
         (list.length > MAX_LISTED ? `\n   …另有 ${list.length - MAX_LISTED} 筆` : '')
     )
   }

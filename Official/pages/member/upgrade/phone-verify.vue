@@ -172,5 +172,3 @@ onInit()
     <PageMemberUpgradePhoneVerifyContent @reSend="onReSend" @submit="onSumit" />
   </CommonMContainer>
 </template>
-
-<style lang="postcss"></style>

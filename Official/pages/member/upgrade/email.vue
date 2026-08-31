@@ -4,12 +4,8 @@ import { EMAILEXCEEDED } from '@js/_storage.js'
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
 const memberUpgrade = useMemberUpgradeStore()
 const { email } = storeToRefs(memberUpgrade)
-const {
-  onGetCookie,
-  onClearCookie,
-  onApiAuthEmailUpgradeVerificationCode,
-  reset,
-} = useMemberUpgradeActions()
+const { onGetCookie, onClearCookie, onApiAuthEmailUpgradeVerificationCode, reset } =
+  useMemberUpgradeActions()
 const { onApiPromise } = usePopupActions()
 const router = useRouter()
 
@@ -106,5 +102,3 @@ onInit()
     </PageMemberUpgradeExceeded>
   </CommonMContainer>
 </template>
-
-<style lang="postcss"></style>

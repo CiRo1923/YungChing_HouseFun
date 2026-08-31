@@ -433,5 +433,3 @@ const onWorkBrandChange = () => {
     </li>
   </ul>
 </template>
-
-<style lang="postcss"></style>

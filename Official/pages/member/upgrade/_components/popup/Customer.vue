@@ -1,5 +1,3 @@
-<script setup></script>
-
 <template>
   <CommonCustomPopup
     id="popupMemberCustomer"
@@ -17,5 +15,3 @@
     </p>
   </CommonCustomPopup>
 </template>
-
-<style lang="postcss"></style>

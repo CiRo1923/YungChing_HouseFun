@@ -1,16 +1,12 @@
 .m-tooltip {
-  @apply inline-flex h-[--tooltip-h] items-center rounded-[--tooltip-rounded]
-    bg-[--tooltip-bg-color] px-[--tooltip-px] text-[--tooltip-color]
-    transition-colors duration-300;
+  @apply inline-flex h-[--tooltip-h] items-center rounded-[--tooltip-rounded] bg-[--tooltip-bg-color] px-[--tooltip-px] text-[--tooltip-color] transition-colors duration-300;
 }
 
 .m-tooltip-container {
   box-shadow: var(--tooltip-container-shadow);
 
   /* 基底先 fixed，避免第一次開啟時為 static block（寬度撐滿 viewport）導致量測 width 錯誤、定位偏移 */
-  @apply fixed left-0 top-0 z-[3] m-[--tooltip-container-m]
-    rounded-[--tooltip-container-rounded] bg-[--tooltip-container-bg-color]
-    px-[--tooltip-container-px] py-[--tooltip-container-py] text-[--tooltip-container-color];
+  @apply fixed left-0 top-0 z-[3] m-[--tooltip-container-m] rounded-[--tooltip-container-rounded] bg-[--tooltip-container-bg-color] px-[--tooltip-container-px] py-[--tooltip-container-py] text-[--tooltip-container-color];
 
   /* 指向觸發點的小箭頭 */
   &::after {
@@ -54,7 +50,7 @@
 
   /* tooltip 在觸發點右側：箭頭在左緣朝左 */
   &.--center-y.--right-x::after {
-    @apply left-auto right-full translate-x-0 border-r-[--tooltip-container-bg-color] border-l-0;
+    @apply left-auto right-full translate-x-0 border-l-0 border-r-[--tooltip-container-bg-color];
   }
 }
 

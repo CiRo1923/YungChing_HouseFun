@@ -350,5 +350,3 @@ const onClearLog = () => {
     </p>
   </CommonCustomPopup>
 </template>
-
-<style lang="postcss"></style>

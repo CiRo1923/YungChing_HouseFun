@@ -11,7 +11,7 @@
    那個 class 不存在,字距從來沒生效過(無效 class 在 template 會被靜默忽略,
    只有 @apply 會報錯)。2026-08-28 全站 15 處改用 tailwind 內建的 tracking-wider(0.05em)。 */
 .m-nav-menu {
-  @apply tracking-wider gap-x-[--nav-menu-gap-x];
+  @apply gap-x-[--nav-menu-gap-x] tracking-wider;
 }
 
 .m-nav-anchor {
@@ -20,7 +20,7 @@
 }
 
 .m-nav-children {
-  @apply transition-heights absolute left-0 z-[1] w-full overflow-hidden bg-[--nav-children-bg-color] pl-[--nav-children-pl] duration-300;
+  @apply absolute left-0 z-[1] w-full overflow-hidden bg-[--nav-children-bg-color] pl-[--nav-children-pl] transition-heights duration-300;
 }
 
 /* 斷點值 —— 掛在 .m-nav 上,底下的元素靠繼承取用 */
@@ -218,7 +218,7 @@
 
   /* 從 header 底下展開,高度扣掉 header —— --header-mobile-h 來自 mHeader */
   .m-nav-container {
-    @apply transition-heights absolute left-0 top-[--header-mobile-h] z-[1] w-full bg-[--nav-container-bg-color] px-[--nav-container-px] duration-300;
+    @apply absolute left-0 top-[--header-mobile-h] z-[1] w-full bg-[--nav-container-bg-color] px-[--nav-container-px] transition-heights duration-300;
 
     --nav-container-px: var(--nav-container-mobile-px);
 

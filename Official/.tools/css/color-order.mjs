@@ -71,7 +71,11 @@ export function listColorCssFiles(projectRoot) {
 /** #abc / #aabbcc / #aabbccdd → { r, g, b, a }(a 為 0-255,無 alpha 時 255) */
 export function parseHex(hex) {
   let h = hex.replace(/^#/, '').toLowerCase()
-  if (h.length === 3 || h.length === 4) h = h.split('').map((c) => c + c).join('')
+  if (h.length === 3 || h.length === 4)
+    h = h
+      .split('')
+      .map((c) => c + c)
+      .join('')
   if (h.length === 6) h += 'ff'
   if (h.length !== 8 || !/^[0-9a-f]{8}$/.test(h)) return null
   return {
@@ -86,10 +90,7 @@ export function parseHex(hex) {
 export function normalizeHex(hex) {
   const rgba = parseHex(hex)
   if (!rgba) return null
-  return (
-    '#' +
-    [rgba.r, rgba.g, rgba.b, rgba.a].map((v) => v.toString(16).padStart(2, '0')).join('')
-  )
+  return '#' + [rgba.r, rgba.g, rgba.b, rgba.a].map((v) => v.toString(16).padStart(2, '0')).join('')
 }
 
 /** WCAG 相對亮度(0=黑 1=白)。跨色相比較用,不會把黃色誤判成深色。 */
@@ -171,8 +172,17 @@ const DECL_RE = /^(\s*)(--[a-z0-9-]+)\s*:\s*([^;]+);\s*$/i
 
 /** 色系標籤註解的中文對照(colorBuy.css 用 `/* 紅色 *\/` 這種分組標頭) */
 const HUE_LABEL_ALIAS = {
-  紅: 'red', 澄: 'orange', 橙: 'orange', 黃: 'yellow', 綠: 'green',
-  藍: 'blue', 紫: 'purple', 金: 'gold', 白: 'white', 灰: 'gray', 黑: 'black',
+  紅: 'red',
+  澄: 'orange',
+  橙: 'orange',
+  黃: 'yellow',
+  綠: 'green',
+  藍: 'blue',
+  紫: 'purple',
+  金: 'gold',
+  白: 'white',
+  灰: 'gray',
+  黑: 'black',
 }
 
 /**
@@ -184,7 +194,7 @@ function hueLabelOf(commentLine) {
   const m = commentLine.match(/^\s*\/\*\s*([^*\s]+?)\s*(?:色)?\s*\*\/\s*$/)
   if (!m) return null
   const key = m[1]
-  return HUE_LABEL_ALIAS[key] ?? (HUE_ALIAS[key.toLowerCase()] ?? null)
+  return HUE_LABEL_ALIAS[key] ?? HUE_ALIAS[key.toLowerCase()] ?? null
 }
 
 /**

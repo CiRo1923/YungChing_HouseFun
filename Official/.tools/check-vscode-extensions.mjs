@@ -36,7 +36,10 @@ const extensionDirs = () =>
 const installedIds = (dirs) =>
   dirs.flatMap((dir) => {
     try {
-      return fs.readdirSync(dir, { withFileTypes: true }).filter((e) => e.isDirectory()).map((e) => e.name)
+      return fs
+        .readdirSync(dir, { withFileTypes: true })
+        .filter((e) => e.isDirectory())
+        .map((e) => e.name)
     } catch {
       return []
     }

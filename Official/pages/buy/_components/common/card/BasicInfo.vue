@@ -58,5 +58,3 @@ const items = computed(() => {
     }"
   />
 </template>
-
-<style></style>

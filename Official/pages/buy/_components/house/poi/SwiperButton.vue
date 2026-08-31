@@ -66,5 +66,3 @@ onUnmounted(() => {
     </button>
   </BuyMSwiperHorizontal>
 </template>
-
-<style lang="postcss"></style>

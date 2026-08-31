@@ -11,9 +11,12 @@
   --form-select-dropdown-tablet-my: 5px;
   --form-select-dropdown-mobile-my: 1px;
 
-  --form-select-dropdown-pc-shadow: 0px 4px 24px 0px var(--blue-0016-14), 0px 2px 16px -8px var(--blue-0016-33);
-  --form-select-dropdown-tablet-shadow: 0px 4px 24px 0px var(--blue-0016-14), 0px 2px 16px -8px var(--blue-0016-33);
-  --form-select-dropdown-mobile-shadow: 0px 4px 24px 0px var(--blue-0016-14), 0px 2px 16px -8px var(--blue-0016-33);
+  --form-select-dropdown-pc-shadow:
+    0px 4px 24px 0px var(--blue-0016-14), 0px 2px 16px -8px var(--blue-0016-33);
+  --form-select-dropdown-tablet-shadow:
+    0px 4px 24px 0px var(--blue-0016-14), 0px 2px 16px -8px var(--blue-0016-33);
+  --form-select-dropdown-mobile-shadow:
+    0px 4px 24px 0px var(--blue-0016-14), 0px 2px 16px -8px var(--blue-0016-33);
 
   --form-select-dropdown-container-pc-px: 1px;
   --form-select-dropdown-container-tablet-px: 1px;

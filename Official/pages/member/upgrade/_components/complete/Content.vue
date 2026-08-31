@@ -24,5 +24,3 @@ const maskPhone = onGetCookie(UPGRADECOMPLETE)
     原 Email 將作為聯絡與帳號找回用途
   </p>
 </template>
-
-<style lang="postcss"></style>

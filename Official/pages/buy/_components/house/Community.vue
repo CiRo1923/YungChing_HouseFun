@@ -40,5 +40,3 @@ onUnmounted(() => {
     </div>
   </PageBuyHouseContent>
 </template>
-
-<style></style>

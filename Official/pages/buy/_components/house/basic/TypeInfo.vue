@@ -9,5 +9,3 @@ const { basic } = storeToRefs(buyHouse)
     {{ basic.caseType }}
   </div>
 </template>
-
-<style lang="postcss"></style>

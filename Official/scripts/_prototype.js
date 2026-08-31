@@ -88,23 +88,24 @@ export const onDeepMerge = (target, ...sources) => {
     return item && typeof item === 'object' && !Array.isArray(item)
   }
   const isShallow = (item) => {
-    return !(Array.isArray(item) && item.find((item) => typeof item === 'object'))
+    // 用 some 不用 find —— typeof null === 'object'，find 找到 null 會回傳 falsy，
+    // 導致 [null, {…}] 這種含物件的陣列被誤判成 shallow。
+    return !(Array.isArray(item) && item.some((value) => typeof value === 'object'))
   }
 
   if (isObject(target) && isObject(source)) {
     for (const key in source) {
       if (isObject(source[key])) {
         if (!target[key]) Object.assign(target, { [key]: {} })
+
         onDeepMerge(target[key], source[key])
+      } else if (isShallow(source[key])) {
+        Object.assign(target, { [key]: source[key] })
       } else {
-        if (isShallow(source[key])) {
-          Object.assign(target, { [key]: source[key] })
-        } else {
-          if (!target[key]) Object.assign(target, { [key]: [] })
-          Object.assign(target, {
-            [key]: source[key].map((item, index) => onDeepMerge(target[key][index] || item, item)),
-          })
-        }
+        if (!target[key]) Object.assign(target, { [key]: [] })
+        Object.assign(target, {
+          [key]: source[key].map((item, index) => onDeepMerge(target[key][index] || item, item)),
+        })
       }
     }
   }
@@ -543,6 +544,22 @@ export const onUnicodLength = (text) => {
 
   const segmenter = new Intl.Segmenter()
   return [...segmenter.segment(String(text))].length
+}
+
+// 依特殊字元長度截斷字串
+export const onUnicodSlice = (text, max) => {
+  if (!text) return ''
+
+  const value = String(text)
+  const segmenter = new Intl.Segmenter()
+  const segments = [...segmenter.segment(value)]
+
+  if (segments.length <= max) return value
+
+  return segments
+    .slice(0, max)
+    .map(({ segment }) => segment)
+    .join('')
 }
 
 // 取得裝置

@@ -88,5 +88,3 @@ const onCityChange = (cityid) => {
     @cityChange="onCityChange"
   />
 </template>
-
-<style lang="postcss"></style>

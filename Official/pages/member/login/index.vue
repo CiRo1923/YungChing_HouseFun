@@ -82,5 +82,3 @@ const onLogin = async () => {
     <LoginNote />
   </CommonMContainer>
 </template>
-
-<style lang="postcss"></style>

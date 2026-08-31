@@ -22,5 +22,3 @@ const props = defineProps({
     <PageBuyHouseActualPriceNote :item="props.item" />
   </div>
 </template>
-
-<style lang="postcss"></style>

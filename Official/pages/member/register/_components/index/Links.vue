@@ -39,5 +39,3 @@ const memberRegister = useMemberRegisterStore()
     </li>
   </ul>
 </template>
-
-<style lang="postcss"></style>

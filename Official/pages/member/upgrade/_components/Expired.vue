@@ -13,5 +13,3 @@ const props = defineProps({
     v-html="props.message"
   />
 </template>
-
-<style lang="postcss"></style>

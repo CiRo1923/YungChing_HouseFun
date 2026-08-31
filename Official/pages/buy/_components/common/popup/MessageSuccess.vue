@@ -1,5 +1,3 @@
-<script setup></script>
-
 <template>
   <CommonCustomPopup
     id="popupMessageSuccess"
@@ -18,5 +16,3 @@
     <PageBuyCommonPopupNotMember />
   </CommonCustomPopup>
 </template>
-
-<style lang="postcss"></style>

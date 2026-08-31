@@ -108,5 +108,3 @@ const onBrandChange = ({ cityId, areaId, brandId }) => {
     @workBrandChange="onBrandChange"
   />
 </template>
-
-<style lang="postcss"></style>

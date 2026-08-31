@@ -1,9 +1,7 @@
 .m-tag {
   border-width: var(--tag-border);
 
-  @apply inline-flex h-[--tag-h] items-center overflow-hidden rounded-[--tag-rounded]
-    border-[--tag-border-color] bg-[--tag-bg-color] px-[--tag-px] py-[--tag-py]
-    text-[--tag-text-color] transition-colors duration-300;
+  @apply inline-flex h-[--tag-h] items-center overflow-hidden rounded-[--tag-rounded] border-[--tag-border-color] bg-[--tag-bg-color] px-[--tag-px] py-[--tag-py] text-[--tag-text-color] transition-colors duration-300;
 
   &.\-\-oval {
     @apply rounded-full;

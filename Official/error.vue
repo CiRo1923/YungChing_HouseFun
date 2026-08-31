@@ -51,5 +51,3 @@ const onBackClick = () => clearError({ redirect: '/home' })
     </div>
   </div>
 </template>
-
-<style></style>

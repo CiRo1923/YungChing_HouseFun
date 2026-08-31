@@ -92,5 +92,3 @@ const onSure = async () => {
     </Form>
   </CommonCustomPopup>
 </template>
-
-<style lang="postcss"></style>

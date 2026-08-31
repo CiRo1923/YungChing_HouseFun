@@ -15,5 +15,3 @@ const hasActualPrice = computed(
     </ul>
   </PageBuyHouseContent>
 </template>
-
-<style></style>

@@ -61,5 +61,3 @@ const active = computed(() => {
     }"
   />
 </template>
-
-<style lang="postcss"></style>

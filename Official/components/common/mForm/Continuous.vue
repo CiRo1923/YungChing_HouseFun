@@ -209,5 +209,3 @@ defineExpose({
     />
   </CommonMFormHidden>
 </template>
-
-<style lang="postcss"></style>

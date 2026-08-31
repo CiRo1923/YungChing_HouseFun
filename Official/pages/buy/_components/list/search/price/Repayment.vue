@@ -65,7 +65,7 @@ onHousePrice()
 </script>
 
 <template>
-  <ul class="tracking-wider grow space-y-[15px] m:overflow-y-auto">
+  <ul class="grow space-y-[15px] tracking-wider m:overflow-y-auto">
     <li class="space-y-[4px]">
       <span class="block text-[16px] leading-[1.56]">自備款</span>
       <CommonMFormInput
@@ -153,5 +153,3 @@ onHousePrice()
     </li>
   </ul> -->
 </template>
-
-<style></style>

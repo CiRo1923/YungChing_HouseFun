@@ -145,5 +145,3 @@ onInit()
   </CommonMContainer>
   <PageMemberUpgradePopupCustomer />
 </template>
-
-<style lang="postcss"></style>

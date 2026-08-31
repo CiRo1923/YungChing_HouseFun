@@ -123,5 +123,3 @@ const items = computed(() => {
 <template>
   <PageBuyHouseInformationContainer name="basic" :items="items" />
 </template>
-
-<style></style>

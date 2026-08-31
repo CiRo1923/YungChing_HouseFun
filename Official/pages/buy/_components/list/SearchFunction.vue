@@ -242,11 +242,7 @@ onUnmounted(() => {
       v-if="isDeviceM && !isFixed"
     />
   </div>
-  <div
-    class="search-function-placeholder"
-    :style="{ height: `${fixedHeight}px` }"
-    v-if="isFixed"
-  />
+  <div class="search-function-placeholder" :style="{ height: `${fixedHeight}px` }" v-if="isFixed" />
 </template>
 
 <style lang="postcss">

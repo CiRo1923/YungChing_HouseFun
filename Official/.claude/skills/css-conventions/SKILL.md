@@ -47,14 +47,14 @@ description: 動到任何 css、顏色、module 樣式前必須先讀。六條�
 | **寬高** | **相同用 `-size`,不同才拆 `-w` / `-h`**。icon 多半是正方形 → `--x-icon-size` 一個就好。`-w` 的變數被套到 `h-[]` 上是命名錯誤(工具會抓),之後想單獨調高度會連寬度一起動到。 |
 | **斷點** | `:root` 裡的尺寸值(px / rem / % / vh / vw)一律拆 `pc` / `tablet` / `mobile` 三份,即使三個值一樣。顏色不用拆。 |
 | **斷點成套** | 有 `-pc-X` 就**必須**有 `-tablet-X` / `-mobile-X`(漏一個那斷點會靜靜讀不到值);版型檔**不可直接吃** `--x-pc-y`,要吃中性變數、由 `@screen` 各段對應。**但已經包在 `@screen p` 裡面的直接吃 `-pc-` 是合理的**,工具只抓「斷點對不上」與「沒包在斷點區塊裡」;複合斷點(`pt` / `tm`)裡一律不能直接吃單一斷點的值。例外寫 `/* lint-breakpoint-exempt: 理由 */`。 |
-| **`@screen` 別拆散** | 同一支檔案的 `@screen p` / `t` / `m` **各自只寫一組**,散在好幾處很容易改漏其中一組。 |
+| **`@screen` 別拆散** | 同一支檔案的 `@screen p` / `t` / `m` **各自只寫一組** —— **頂層與巢狀都算**(`.m-x { @screen p }` 在多個選擇器內各寫一次同樣違規)。散在好幾處時,要調某個斷點得逐一確認有沒有漏。例外寫 `/* lint-screen-group-exempt: 理由 */`。 |
 | **粒度** | 建在「用到的最小單位」上(見下一節)。 |
 | **px 就開變數** | **帶 px 的值一律開變數拆三斷點**,`1px` 線寬、`2px` 內距也算 —— 「感覺是造型」不是豁免理由,判斷看單位。`duration-*` / `rounded-full` / `w-full` / `-1/2` 目前是存量,碰到時問使用者。 |
-| **不開變數的** | `z-index`(`z-[1]` 直接寫)、`0` / `auto` / `none`、以及 **`font-weight`** —— 字重不是父系帶入就是寫死(`@apply font-medium` / `font-normal`),值域小又固定。 |
+| **不開變數的** | **`z-index`**(`z-[3]` 直接寫)、**`leading`**(行高跟著字級走,值多半是無單位比例)、**`tracking`**(字距全站一個值)、`0` / `auto` / `none`、以及 **`font-weight`**(不是父系帶入就是寫死,值域小又固定)。前三個各有對應的檢查函式(`checkZIndexVariable` / `checkLeadingVariable` / `checkTrackingVariable`)。 |
 | **`100%` 用 `-full`** | 三個斷點沒差別時直接寫 tailwind 的 `w-full` / `h-full` / `max-w-full` / `min-w-full` / `min-h-full` —— 不要 `w-[100%]`,更不要繞變數。只有**真的分斷點不同**(pc `50%` / mobile `100%`)才開變數。 |
 | **中性變數** | 一支檔案有**多個**變數要分斷點 → 版型吃中性變數、`@screen` 各段集中對應;**只有一個** → 版型直接寫在 `@screen` 內吃 `-pc-` / `-tablet-` / `-mobile-`,不用多繞一層。 |
 | **字級寫法** | `text-[length:--x-text-size]`,**不要原生 `font-size: var(…)`**;`length:` 省略會被當成 color(靜默失效)。 |
-| **base** | `px-[--x]` / `py-` / `mx-` / `my-` 沒 base 會**整條讀不到**,base 給 `0`;**高度的 base 要給 `auto`**(給 0 會塌);顏色沒有時給 `initial`。 |
+| **base** | `px-[--x]` / `py-` / `mx-` / `my-` 沒 base 會**整條讀不到**,base 給 `0`;**高度的 base 要給 `auto`**(給 0 會塌);**顏色不要用 `initial`** —— 文字色給 `inherit`、背景 / 邊框色給 `transparent`(`checkColorBase` 會抓)。 |
 | **狀態** | hover / focus / active 一律「覆寫基礎變數」,不要在 `:root` 寫 `--x-hover-color: var(--x-color)` 當 fallback —— 那在 `:root` 當下就解析完了,永遠是無效值。 |
 | **hover** | modifier 帶 `hover:` 前綴、包在 variables.css 的 `&:hover` 裡(見下節),**不要建 `--x-hover-bg-color` 專用變數**,也**不要在版型檔寫 `&:hover`**。 |
 | **撞名** | 同組 module 內不同元素撞 class 名時**不要硬合併**(`.m-label` vs `.m-form-label`),在 variables 檔頭註明原因。 |

@@ -82,5 +82,3 @@ const onChange = (data) => {
     >0
   </CommonMFormAutoComplete>
 </template>
-
-<style></style>

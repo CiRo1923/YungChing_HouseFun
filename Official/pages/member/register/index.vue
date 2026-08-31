@@ -36,5 +36,3 @@ onUseMeta({
     <PageMemberRegisterIndexLinks />
   </CommonMContainer>
 </template>
-
-<style lang="postcss"></style>

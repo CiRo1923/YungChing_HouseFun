@@ -25,7 +25,7 @@ const useChartFill = () => {
   const monthShift = (label, delta) => {
     const n = parseInt(label, 10)
     if (Number.isNaN(n)) return ''
-    return `${(((n - 1 + delta) % 12) + 12) % 12 + 1}月`
+    return `${((((n - 1 + delta) % 12) + 12) % 12) + 1}月`
   }
 
   /**

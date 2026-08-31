@@ -96,5 +96,3 @@ defineExpose({
     <slot name="tools" />
   </Form>
 </template>
-
-<style lang="postcss"></style>

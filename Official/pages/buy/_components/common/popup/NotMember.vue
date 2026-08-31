@@ -15,5 +15,3 @@ const isMember = computed(() => message.value.data?.isMember ?? false)
     </p>
   </div>
 </template>
-
-<style lang="postcss"></style>

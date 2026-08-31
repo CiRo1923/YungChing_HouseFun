@@ -43,5 +43,3 @@ const series = computed(() => {
     }"
   />
 </template>
-
-<style lang="postcss"></style>

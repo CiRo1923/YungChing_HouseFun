@@ -2,8 +2,7 @@
   &.\-\-border-bottom {
     .m-title-text {
       &:after {
-        @apply block h-[--title-border-bottom-h] w-full rounded-full
-          bg-[--title-border-bottom-color] content-default;
+        @apply block h-[--title-border-bottom-h] w-full rounded-full bg-[--title-border-bottom-color] content-default;
       }
     }
 

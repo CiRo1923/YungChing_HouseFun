@@ -47,5 +47,3 @@ const setClass = computed(() => {
     </div>
   </CommonMContent>
 </template>
-
-<style></style>

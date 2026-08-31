@@ -98,10 +98,7 @@ const onChange = () => {
       v-bind="validateOn"
       v-slot="{ field, errorMessage }"
     >
-      <div
-        class="m-form-container"
-        :class="[{ '--no-label': !config.label }, setClass.container]"
-      >
+      <div class="m-form-container" :class="[{ '--no-label': !config.label }, setClass.container]">
         <label
           class="m-form-element --radio"
           :class="[
@@ -121,10 +118,7 @@ const onChange = () => {
             :disabled="config.isDisabled"
             @change="onChange"
           />
-          <i
-            class="m-form-icon"
-            :class="setClass.icon"
-          />
+          <i class="m-form-icon" :class="setClass.icon" />
           <slot>
             <em class="m-form-label" :class="setClass.label">{{ config.label }}</em>
           </slot>

@@ -33,5 +33,3 @@ const hasHotForYou = computed(() => Array.isArray(hotForYou.value) && hotForYou.
     </BuyMSwiperHorizontal>
   </PageBuyHouseContent>
 </template>
-
-<style></style>

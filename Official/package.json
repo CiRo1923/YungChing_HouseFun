@@ -14,8 +14,12 @@
     "sync:public": "node ./.tools/sync-to-public.mjs",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "lint:css": "node ./.tools/css/lint-css.mjs",
     "sort:color": "node ./.tools/css/sort-color-css.mjs --write",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "hooks:install": "node ./.tools/install-git-hooks.mjs",
     "check:extensions": "node ./.tools/check-vscode-extensions.mjs",
     "postinstall": "npm run hooks:install --silent && npm run check:extensions --silent"

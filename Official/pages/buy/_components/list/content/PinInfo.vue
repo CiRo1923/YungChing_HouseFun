@@ -54,5 +54,3 @@ const pinInfo = computed(() => {
     }"
   />
 </template>
-
-<style lang="postcss"></style>

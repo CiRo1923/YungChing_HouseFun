@@ -1,5 +1,3 @@
-<script setup></script>
-
 <template>
   <ul class="flex items-center gap-x-[10px]">
     <li class="flex-1">
@@ -30,5 +28,3 @@
     </li>
   </ul>
 </template>
-
-<style lang="postcss"></style>

@@ -41,10 +41,8 @@ const priceInfo = computed(() => {
       :items="priceInfo"
       :setClass="{
         main: '--horizontal --gap-x-20 justify-end',
-        item: 'tracking-wider text-[14px] text-[--gray-666]',
+        item: 'text-[14px] tracking-wider text-[--gray-666]',
       }"
     />
   </div>
 </template>
-
-<style></style>

@@ -72,5 +72,3 @@ const setClass = computed(() => {
     </template>
   </ul>
 </template>
-
-<style lang="postcss"></style>

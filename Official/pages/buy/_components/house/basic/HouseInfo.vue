@@ -57,5 +57,3 @@ const houseInfo = computed(() => {
     </li>
   </ul>
 </template>
-
-<style lang="postcss"></style>

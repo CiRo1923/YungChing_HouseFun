@@ -166,5 +166,3 @@ onUnmounted(() => {
     </ul>
   </CommonMFormSelectDropdown>
 </template>
-
-<style></style>

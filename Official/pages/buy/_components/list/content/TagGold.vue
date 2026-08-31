@@ -19,5 +19,3 @@ const badges = computed(() => props.item.badges || {})
     v-if="badges.gold"
   />
 </template>
-
-<style lang="postcss"></style>

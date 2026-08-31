@@ -13,5 +13,3 @@ const { badges } = storeToRefs(buyHouse)
     v-if="badges.gold"
   />
 </template>
-
-<style lang="postcss"></style>

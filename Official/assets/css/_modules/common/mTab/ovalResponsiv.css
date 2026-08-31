@@ -95,7 +95,9 @@
   .m-tab {
     &.\-\-oval-responsiv {
       --tab-oval-responsiv-anchor-rounded-t: var(--tab-oval-responsiv-anchor-tablet-rounded-t);
-      --tab-oval-responsiv-body-border-visible: var(--tab-oval-responsiv-body-tablet-border-visible);
+      --tab-oval-responsiv-body-border-visible: var(
+        --tab-oval-responsiv-body-tablet-border-visible
+      );
       --tab-oval-responsiv-border-h: var(--tab-oval-responsiv-tablet-border-h);
       --tab-oval-responsiv-header-items-gap-x: var(--tab-oval-responsiv-header-items-tablet-gap-x);
       --tab-oval-responsiv-icon-p: var(--tab-oval-responsiv-icon-tablet-p);

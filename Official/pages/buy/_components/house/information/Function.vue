@@ -52,5 +52,3 @@ const items = computed(() => {
 <template>
   <PageBuyHouseInformationContainer name="function" :items="items" />
 </template>
-
-<style></style>

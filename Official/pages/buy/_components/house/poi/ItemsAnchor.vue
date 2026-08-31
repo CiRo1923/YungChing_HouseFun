@@ -48,5 +48,3 @@ const onClick = (index) => {
     </li>
   </ul>
 </template>
-
-<style lang="postcss"></style>

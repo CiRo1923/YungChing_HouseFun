@@ -52,11 +52,7 @@ const onSumit = async (validate, setFieldError) => {
 </script>
 
 <template>
-  <Form
-    as="div"
-    class="space-y-[15px] text-center"
-    v-slot="{ validate, setFieldError }"
-  >
+  <Form as="div" class="space-y-[15px] text-center" v-slot="{ validate, setFieldError }">
     <PageMemberUpgradeExpired
       message="驗證碼已失效 (超過 1 分鐘有效時間並錯誤達 5 次)<br />請重新發送。"
       v-if="isExpiredExceeded"
@@ -95,5 +91,3 @@ const onSumit = async (validate, setFieldError) => {
     />
   </Form>
 </template>
-
-<style lang="postcss"></style>

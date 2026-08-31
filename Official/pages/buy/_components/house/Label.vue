@@ -18,5 +18,3 @@ const props = defineProps({
     </em>
   </span>
 </template>
-
-<style></style>

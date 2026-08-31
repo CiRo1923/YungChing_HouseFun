@@ -68,8 +68,9 @@ const onCityLabel = (item) => {
   const ids = region.value.ids ? region.value.ids.split(',') : []
 
   // 具體區域:比對該市底下被勾選的區域(排除代表全區的縣市碼本身)
-  const count = (item.areas || []).filter((area) => area.id !== item.id && ids.includes(area.id))
-    .length
+  const count = (item.areas || []).filter(
+    (area) => area.id !== item.id && ids.includes(area.id)
+  ).length
 
   return count > 0 ? `${item.name}(${count})` : item.name
 }
@@ -190,5 +191,3 @@ onUnmounted(() => {
     />
   </CommonMFormSelectDropdown>
 </template>
-
-<style></style>

@@ -93,5 +93,3 @@ const onChange = () => {}
     </ul>
   </div>
 </template>
-
-<style lang="postcss"></style>

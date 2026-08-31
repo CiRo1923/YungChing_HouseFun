@@ -53,6 +53,22 @@ export const SCAN_CONFIG_FILES = new Set(['tailwind.extend.js', 'tailwind.config
 export const isScannable = (abs) =>
   SCAN_EXT.has(path.extname(abs)) || SCAN_CONFIG_FILES.has(path.basename(abs))
 
+/**
+ * 文件用的路徑 —— 一律**不檢查**(2026-08-31 加)。
+ *
+ * `docs/` 是獨立的文件系統(doc.css + 各組件的 html 範例頁),它的樣式只服務那幾頁,
+ * 不進產物、也沒有色票變數可用 —— 硬套規則 1 會報出上百筆寫死色碼,全是噪音。
+ * `.docs/` 與 `.acceptance/` 同理,那裡是說明與驗收紀錄。
+ *
+ * ⚠️ 為什麼不是只從 SCAN_TARGETS 排除就好:`docs/` 本來就不在 SCAN_TARGETS 裡,
+ *    所以 `npm run lint:css` 的全站掃描碰不到它。**但 hook 那層是靠 git status
+ *    找「工作區有改動的 .vue / .css」再逐檔跑 lintFile**,完全繞過 SCAN_TARGETS ——
+ *    docs 的檔案一改動就會被報。擋在 lintFile 開頭,五層才會一致。
+ */
+const IGNORED_PATH = /(^|\/)(docs|\.docs|\.acceptance)\//
+
+export const isIgnoredPath = (rel) => IGNORED_PATH.test(rel)
+
 // --- 顏色偵測用的樣式 -------------------------------------------------------
 
 /** CSS 具名色(常見的一批;完整 148 色沒必要,誤報成本高於漏報) */
@@ -1167,17 +1183,18 @@ export function checkTrackingVariable(relPath, text) {
 }
 
 /**
- * 同一支檔案的頂層 `@screen X` 只能寫一組。
+ * 同一支檔案的 `@screen X` 只能寫一組 —— **頂層與巢狀都算**。
  *
  * 同一個斷點的設定散在檔案各處時,改的時候很容易漏掉其中一組 ——
  * 而漏掉的那一組不會報錯,只會在某個斷點靜靜地少一段樣式。
  *
- * ⚠️ **只看頂層(行首沒有縮排)的 `@screen`。** 巢狀寫法
- * (`.m-x { @screen p { … } }`)是另一種合法組織:每個選擇器自己收三段,
- * 同一支檔案自然會出現多個 `@screen p`,那不是「散落」——
- * 參考 Backstage 的 mCard/filter.css,整支都是這個寫法。
+ * ⚠️ **巢狀寫法也要抓**(2026-08-31 決定)。
+ * `.m-x { @screen p { … } } .m-y { @screen p { … } }` 這種「每個選擇器自己收三段」
+ * 讀起來很順,但同一個斷點還是散在檔案各處 —— 要調整 pc 的版型時,
+ * 得逐一檢查每個選擇器有沒有 `@screen p`,漏掉哪一個不會有任何提示。
+ * 集中成一組 `@screen p { .m-x { … } .m-y { … } }` 才能一眼看完該斷點的全部設定。
  *
- * 真的需要分開寫(例如變數對應與子元素版型差異大)就在該行或上一行標
+ * 真的需要分開寫就在該行或上一行標
  * `/* lint-screen-group-exempt: 理由 *\/`,理由一定要寫。
  */
 export function checkScreenGrouping(relPath, text) {
@@ -1187,7 +1204,8 @@ export function checkScreenGrouping(relPath, text) {
   const seen = new Map()
 
   lines.forEach((line, i) => {
-    const m = /^@screen\s+([a-zA-Z]+)\s*\{/.exec(line)
+    // 不綁行首 —— 有縮排的(巢狀)也要算進來
+    const m = /^\s*@screen\s+([a-zA-Z]+)\s*\{/.exec(line)
     if (!m) return
 
     const exempt = /lint-screen-group-exempt\s*:/.test(
@@ -1640,6 +1658,8 @@ export function checkSharedColors(projectRoot) {
 export function lintFile(projectRoot, absPath, definedVars) {
   const rel = path.relative(projectRoot, absPath).split(path.sep).join('/')
   if (!fs.existsSync(absPath)) return []
+  // 文件路徑(docs / .docs / .acceptance)一律不檢查 —— 見 IGNORED_PATH 的說明
+  if (isIgnoredPath(rel)) return []
   // 色票檔本來就該有顏色 —— 它要檢查的是自己的命名與排序,不是「有沒有寫死色碼」。
   // 但已淘汰的 hexToRgb / -rgb 變數連色票檔也不該有,那兩條照跑。
   if (isColorCssPath(rel)) {

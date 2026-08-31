@@ -32,8 +32,7 @@
 }
 
 .m-popup-title {
-  @apply order-1 flex shrink-0 items-center gap-x-[--popup-header-gap-x]
-    text-[length:--popup-header-text-size];
+  @apply order-1 flex shrink-0 items-center gap-x-[--popup-header-gap-x] text-[length:--popup-header-text-size];
 }
 
 /* 標題文字 —— 字重是固定的,不隨斷點調整 */

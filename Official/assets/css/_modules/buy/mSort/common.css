@@ -3,8 +3,7 @@
 }
 
 .m-sort-anchor {
-  @apply flex items-center gap-x-[--sort-anchor-gap-x]
-    text-[length:--sort-anchor-text-size] transition-colors duration-300;
+  @apply flex items-center gap-x-[--sort-anchor-gap-x] text-[length:--sort-anchor-text-size] transition-colors duration-300;
 
   &:hover {
     @apply text-[--sort-anchor-hover-color];
@@ -30,8 +29,7 @@
 }
 
 .m-sort-select-anchor {
-  @apply flex items-center gap-x-[--sort-select-anchor-gap-x] text-[--sort-anchor-color]
-    text-[length:--sort-select-anchor-text-size];
+  @apply flex items-center gap-x-[--sort-select-anchor-gap-x] text-[length:--sort-select-anchor-text-size] text-[--sort-anchor-color];
 
   &.\-\-active {
     .m-sort-select-icon {
@@ -80,9 +78,7 @@
 }
 
 .m-sort-dropdown-anchor {
-  @apply relative flex w-full items-center gap-x-[--sort-dropdown-anchor-gap-x]
-    px-[--sort-dropdown-anchor-px] py-[--sort-dropdown-anchor-py] text-left
-    text-[length:--sort-dropdown-anchor-text-size] transition-colors duration-300;
+  @apply relative flex w-full items-center gap-x-[--sort-dropdown-anchor-gap-x] px-[--sort-dropdown-anchor-px] py-[--sort-dropdown-anchor-py] text-left text-[length:--sort-dropdown-anchor-text-size] transition-colors duration-300;
 
   &:hover {
     @apply bg-[--sort-dropdown-anchor-hover-bg-color] text-[--sort-dropdown-anchor-hover-color];

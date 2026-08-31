@@ -153,10 +153,7 @@ function onFileChange(projectRoot, file) {
         console.log('')
       }
 
-      const issues = [
-        ...lintFile(projectRoot, file, new Map()),
-        ...checkSharedColors(projectRoot),
-      ]
+      const issues = [...lintFile(projectRoot, file, new Map()), ...checkSharedColors(projectRoot)]
       if (issues.length) onReportIssues(rel, issues)
       else onReportPass(rel)
       return
@@ -185,9 +182,7 @@ export default function CssGuardPlugin() {
     // 用 watcher 而不是 handleHotUpdate —— 後者只對「已進模組圖」的檔案觸發,
     // 存到當前頁面沒載入的組件時完全不會有反應;watcher 收得到所有存檔。
     configureServer(server) {
-      server.watcher.on('change', (file) =>
-        debounce(file, () => onFileChange(projectRoot, file))
-      )
+      server.watcher.on('change', (file) => debounce(file, () => onFileChange(projectRoot, file)))
     },
   }
 }

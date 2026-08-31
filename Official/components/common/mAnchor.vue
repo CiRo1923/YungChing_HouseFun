@@ -129,5 +129,3 @@ const onClick = (e) => {
     </slot>
   </component>
 </template>
-
-<style lang="postcss"></style>

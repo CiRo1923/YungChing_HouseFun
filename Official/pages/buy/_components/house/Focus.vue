@@ -28,5 +28,3 @@ const datas = computed(() => {
     </div>
   </PageBuyHouseContent>
 </template>
-
-<style></style>

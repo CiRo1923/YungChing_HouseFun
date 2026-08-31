@@ -58,5 +58,3 @@ const onClick = () => {
     />
   </div>
 </template>
-
-<style></style>

@@ -100,5 +100,3 @@ onUnmounted(() => {
     @click="isTimeout ? onClick() : null"
   />
 </template>
-
-<style lang="postcss"></style>

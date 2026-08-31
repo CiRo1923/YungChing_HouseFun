@@ -162,5 +162,3 @@ const btns = readonly([
     </ul>
   </CommonMContainer>
 </template>
-
-<style lang="postcss"></style>

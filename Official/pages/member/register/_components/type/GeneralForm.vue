@@ -58,5 +58,3 @@ const onVerifySubmit = () => {
 <template>
   <PageMemberRegisterTypeForms :items="items" @verifySubmit="onVerifySubmit" />
 </template>
-
-<style lang="postcss"></style>

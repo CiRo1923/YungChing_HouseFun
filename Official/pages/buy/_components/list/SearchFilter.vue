@@ -19,5 +19,3 @@ const onRoutePush = () => {
     </PageBuyListSearchCategory>
   </div>
 </template>
-
-<style></style>

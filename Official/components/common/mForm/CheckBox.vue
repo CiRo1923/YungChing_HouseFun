@@ -259,10 +259,7 @@ const onChange = async () => {
       v-bind="validateOn"
       v-slot="{ field, errorMessage }"
     >
-      <div
-        class="m-form-container"
-        :class="[{ '--no-label': !config.label }, setClass.container]"
-      >
+      <div class="m-form-container" :class="[{ '--no-label': !config.label }, setClass.container]">
         <label
           class="m-form-element --checkbox"
           :class="[
@@ -294,18 +291,10 @@ const onChange = async () => {
             v-else
           />
 
-          <CommonSvgIcon
-            icon="icon_check_solid"
-            class="m-form-icon"
-            :class="setClass.icon"
-          />
+          <CommonSvgIcon icon="icon_check_solid" class="m-form-icon" :class="setClass.icon" />
 
           <slot>
-            <em
-              class="m-form-label"
-              :class="setClass.label"
-              v-if="config.label"
-            >
+            <em class="m-form-label" :class="setClass.label" v-if="config.label">
               {{ config.label }}
             </em>
           </slot>

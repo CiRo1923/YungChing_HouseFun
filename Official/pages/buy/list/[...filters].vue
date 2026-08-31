@@ -217,5 +217,3 @@ onUnmounted(() => {
   <PageBuyCommonPopupCottonCandySuccess />
   <PageBuyCommonPopupMessageFailed />
 </template>
-
-<style></style>

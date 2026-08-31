@@ -130,10 +130,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div
-    class="m-footer"
-    :class="setClass.main"
-  >
+  <div class="m-footer" :class="setClass.main">
     <div class="m-footer-container">
       <div class="m-footer-information">
         <ul class="m-footer-stores">
@@ -172,12 +169,7 @@ onUnmounted(() => {
           <li v-for="(link, index) in links" :key="`links_${index}`">
             <ul class="m-footer-links-items">
               <li v-for="(item, idx) in link" :key="`links_${link.label}_${idx}_${index}`">
-                <a
-                  :href="item.href"
-                  class="m-footer-link"
-                  target="_blank"
-                  rel="noopener"
-                >
+                <a :href="item.href" class="m-footer-link" target="_blank" rel="noopener">
                   <CommonSvgIcon :icon="item.icon" class="m-footer-link-icon" />
                   <em>{{ item.label }}</em>
                 </a>

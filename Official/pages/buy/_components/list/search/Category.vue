@@ -67,5 +67,3 @@ onUnmounted(() => {
     </template>
   </CommonMTabBorderBottom>
 </template>
-
-<style></style>

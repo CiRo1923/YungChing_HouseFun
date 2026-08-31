@@ -43,8 +43,7 @@ const useChartPath = () => {
     return segs
   }
 
-  const buildSegments = (type, pts) =>
-    type === 'spline' ? splineSegments(pts) : lineSegments(pts)
+  const buildSegments = (type, pts) => (type === 'spline' ? splineSegments(pts) : lineSegments(pts))
 
   return { lineSegments, splineSegments, buildSegments }
 }

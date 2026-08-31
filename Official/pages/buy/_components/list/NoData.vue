@@ -57,5 +57,3 @@ const onRemove = (item) => {
     </div>
   </div>
 </template>
-
-<style lang="postcss"></style>

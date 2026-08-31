@@ -109,5 +109,3 @@ const onClose = (item) => {
     </Teleport>
   </ClientOnly>
 </template>
-
-<style></style>

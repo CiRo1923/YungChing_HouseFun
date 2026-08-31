@@ -58,5 +58,3 @@ onUnmounted(() => {
     </template>
   </PageBuyCommonComment>
 </template>
-
-<style lang="postcss"></style>

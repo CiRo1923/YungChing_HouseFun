@@ -26,5 +26,3 @@ const onSumit = async (validate) => {
     />
   </Form>
 </template>
-
-<style lang="postcss"></style>

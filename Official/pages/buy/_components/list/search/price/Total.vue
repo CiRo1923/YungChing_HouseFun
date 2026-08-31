@@ -108,5 +108,3 @@ const onRadioChange = (data) => {
     </li>
   </ul>
 </template>
-
-<style></style>

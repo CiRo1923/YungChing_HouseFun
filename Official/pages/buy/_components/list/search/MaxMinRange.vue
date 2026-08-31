@@ -152,5 +152,3 @@ const onBlur = () => {
     <span class="shrink-0">{{ config.suffix }}</span>
   </div>
 </template>
-
-<style lang="postcss"></style>

@@ -1,5 +1,3 @@
-<script setup></script>
-
 <template>
   <ul class="mt-[20px] text-center text-[14px]">
     <li>
@@ -24,5 +22,3 @@
     </li>
   </ul>
 </template>
-
-<style lang="postcss"></style>

@@ -10,7 +10,7 @@
 
 .m-footer-information {
   /* text-[--var] 會被 tailwind 當成 color,字級一定要加 length: 型別提示 */
-  @apply tracking-wider text-[length:--footer-information-text-size] text-[--footer-information-color];
+  @apply text-[length:--footer-information-text-size] tracking-wider text-[--footer-information-color];
 }
 
 .m-footer-stores {
@@ -30,7 +30,7 @@
 }
 
 .m-footer-links {
-  @apply tracking-wider space-y-[--footer-links-gap-y];
+  @apply space-y-[--footer-links-gap-y] tracking-wider;
 }
 
 .m-footer-links-title {

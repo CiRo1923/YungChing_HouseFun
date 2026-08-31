@@ -10,5 +10,3 @@ definePageMeta({
 </script>
 
 <template>Community Index</template>
-
-<style></style>

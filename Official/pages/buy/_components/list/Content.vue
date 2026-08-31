@@ -23,5 +23,3 @@ const data = computed(() => content.value.data || [])
     </li>
   </ul>
 </template>
-
-<style></style>

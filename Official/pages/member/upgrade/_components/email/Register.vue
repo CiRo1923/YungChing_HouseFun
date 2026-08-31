@@ -1,5 +1,3 @@
-<script setup></script>
-
 <template>
   <p class="flex items-center justify-center gap-x-[10px]">
     還不是會員?
@@ -14,5 +12,3 @@
     />
   </p>
 </template>
-
-<style lang="postcss"></style>

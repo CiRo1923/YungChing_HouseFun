@@ -10,5 +10,3 @@ const { community } = storeToRefs(buyHouse)
     </h3>
   </header>
 </template>
-
-<style lang="postcss"></style>

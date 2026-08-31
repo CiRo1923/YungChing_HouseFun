@@ -73,11 +73,7 @@ onUnmounted(() => {
 
 <template>
   <ul class="m-log-status">
-    <li
-      class="m-log-status-item"
-      v-for="(item, index) in items"
-      :key="`${item.id}_${index}`"
-    >
+    <li class="m-log-status-item" v-for="(item, index) in items" :key="`${item.id}_${index}`">
       <CommonMAnchor
         :text="item.value"
         :config="

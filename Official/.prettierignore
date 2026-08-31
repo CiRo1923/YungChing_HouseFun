@@ -3,3 +3,9 @@
 dist
 node_modules
 coverage
+
+# 文件不進 prettier —— 中文的 md 表格被重排後每一欄都會補到等寬,
+# 一行動輒兩三百字元,既難讀又製造大量假 diff(對齊變動而非內容變動)。
+# 涵蓋 docs/、**/.docs/、.acceptance/、.claude/ 的規範與 skill,以及 README。
+# .claude/hooks/ 底下的 .js 不受影響,照常格式化。
+*.md

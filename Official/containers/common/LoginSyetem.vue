@@ -75,5 +75,3 @@ const onClose = async (item) => {
     </template>
   </CommonMPopupMain>
 </template>
-
-<style lang="postcss"></style>

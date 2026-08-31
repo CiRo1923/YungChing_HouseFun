@@ -61,5 +61,3 @@ onUnmounted(() => {
     </template>
   </ul>
 </template>
-
-<style lang="postcss"></style>

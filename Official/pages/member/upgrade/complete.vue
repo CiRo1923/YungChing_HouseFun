@@ -64,5 +64,3 @@ onUseMeta({
     />
   </CommonMContainer>
 </template>
-
-<style lang="postcss"></style>

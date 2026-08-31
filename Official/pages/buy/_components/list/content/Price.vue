@@ -28,18 +28,16 @@ const props = defineProps({
       <b class="tm:text-[20px] p:text-[30px]">{{ numberComma.add(props.item.price) }}</b> 萬
     </p>
     <small
-      class="tracking-wider block text-[--gray-999] m:order-2 m:mb-[1px] m:self-end tm:text-[12px] p:text-[14px]"
+      class="block tracking-wider text-[--gray-999] m:order-2 m:mb-[1px] m:self-end tm:text-[12px] p:text-[14px]"
       v-if="props.item.unitPrice"
     >
       {{ numberComma.add(props.item.unitPrice) }} 萬 / 坪
     </small>
     <small
-      class="tracking-wider relative block text-[--gray-999] m:order-4 m:pl-[6px] m:before:absolute m:before:left-0 m:before:top-1/2 m:before:h-[12px] m:before:w-[1px] m:before:-translate-y-1/2 m:before:bg-[--gray-999] m:before:content-default tm:text-[12px] p:text-[14px]"
+      class="relative block tracking-wider text-[--gray-999] m:order-4 m:pl-[6px] m:before:absolute m:before:left-0 m:before:top-1/2 m:before:h-[12px] m:before:w-[1px] m:before:-translate-y-1/2 m:before:bg-[--gray-999] m:before:content-default tm:text-[12px] p:text-[14px]"
       v-if="props.item.isPriceIncludeParking"
     >
       含車位價 {{ props.item.parkPrice }} 萬元
     </small>
   </div>
 </template>
-
-<style lang="postcss"></style>

@@ -15,5 +15,3 @@ const onClick = () => {
     @click="onClick"
   />
 </template>
-
-<style lang="postcss"></style>

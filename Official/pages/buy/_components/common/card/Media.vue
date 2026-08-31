@@ -1,7 +1,6 @@
 <script setup>
 import { onReplaceImageSize } from '@js/_projectPrototype.js'
 
-
 const props = defineProps({
   item: {
     type: Object,
@@ -78,5 +77,3 @@ const badgesItems = computed(() => {
     />
   </div>
 </template>
-
-<style></style>

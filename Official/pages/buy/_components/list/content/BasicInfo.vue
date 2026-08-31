@@ -66,5 +66,3 @@ const basicInfo = computed(() => {
     }"
   />
 </template>
-
-<style lang="postcss"></style>

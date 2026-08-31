@@ -222,7 +222,7 @@ async function removeOldArchives() {
 // 同時也是排除規則的落點 —— 被排除的項目根本不會出現在參數裡。
 async function createArchive(zipPath) {
   const entries = (await readdir(projectDir)).filter(
-    (name) => !isExcluded(name, ARCHIVE_EXCLUDE_NAMES),
+    (name) => !isExcluded(name, ARCHIVE_EXCLUDE_NAMES)
   )
 
   if (!entries.length) throw new Error('壓縮失敗:沒有可打包的內容。')
@@ -287,7 +287,8 @@ async function main() {
   }
 
   // 分支不一致就先把目標端對齊,再開始同步 —— 不然會把 B 分支的內容蓋到 A 分支上。
-  const branchAction = sourceBranch === targetBranch ? null : await alignBranch(targetDir, sourceBranch)
+  const branchAction =
+    sourceBranch === targetBranch ? null : await alignBranch(targetDir, sourceBranch)
 
   // 先壓縮再同步:壓縮直接讀專案目錄,萬一失敗就不會動到目標端的工作區。
   // zip 放專案根目錄。它已列在排除規則裡,不會被打包進下一次的壓縮檔,也不會同步到目標端;
@@ -327,12 +328,18 @@ async function main() {
   // 同步只把檔案放到目標端的工作區,推不推上去是另一個決定,問過再說。
   const source = await describeSource()
 
-  if (!(await confirm(`\n要把 ${PUBLIC_SEGMENT} 側的變更 commit + push 到 origin/${sourceBranch} 嗎?`))) {
+  if (
+    !(await confirm(
+      `\n要把 ${PUBLIC_SEGMENT} 側的變更 commit + push 到 origin/${sourceBranch} 嗎?`
+    ))
+  ) {
     console.log(`  發布:略過。變更留在 ${targetDir},可自行提交。`)
     return
   }
 
-  const message = source ? `Sync ${projectName} from ${DEV_SEGMENT} @ ${source}` : `Sync ${projectName}`
+  const message = source
+    ? `Sync ${projectName} from ${DEV_SEGMENT} @ ${source}`
+    : `Sync ${projectName}`
 
   console.log(`  發布:${await commitAndPush(targetDir, sourceBranch, message)}`)
 }

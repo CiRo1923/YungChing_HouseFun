@@ -22,5 +22,3 @@ const { cottonCandyCheckbox } = storeToRefs(buyProject)
     <PageBuyCommonPopupNotMember />
   </CommonCustomPopup>
 </template>
-
-<style lang="postcss"></style>

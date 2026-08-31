@@ -29,5 +29,3 @@ const props = defineProps({
     />
   </div>
 </template>
-
-<style lang="postcss"></style>

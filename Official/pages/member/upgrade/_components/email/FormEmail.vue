@@ -29,5 +29,3 @@ const onEnter = () => {
     @enter="onEnter"
   />
 </template>
-
-<style lang="postcss"></style>

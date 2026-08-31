@@ -45,4 +45,3 @@ const { login } = storeToRefs(memberProjct)
     </li>
   </ul>
 </template>
-<style lang="postcss"></style>

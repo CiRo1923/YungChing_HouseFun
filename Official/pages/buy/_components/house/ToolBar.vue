@@ -65,5 +65,3 @@ function onSubscription() {
     />
   </div>
 </template>
-
-<style lang="postcss"></style>

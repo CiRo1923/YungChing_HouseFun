@@ -18,5 +18,3 @@ const items = computed(() => {
 <template>
   <PageBuyHouseInformationContainer name="other" :items="items" />
 </template>
-
-<style></style>

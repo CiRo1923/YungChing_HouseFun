@@ -95,5 +95,3 @@ onUnmounted(() => {
     />
   </CommonMFormSelectDropdown>
 </template>
-
-<style lang="postcss"></style>

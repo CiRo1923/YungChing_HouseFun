@@ -32,5 +32,3 @@ const onRoutePush = () => {
     </li>
   </ul>
 </template>
-
-<style lang="postcss"></style>

@@ -45,7 +45,7 @@ onUnmounted(() => {
       </h2>
       <PageBuyListContentTagGold :item="props.item" v-if="!isDeviceM" />
     </header>
-    <div class="tracking-wider grow text-[14px] leading-[1.64] p:space-y-[5px]">
+    <div class="grow text-[14px] leading-[1.64] tracking-wider p:space-y-[5px]">
       <PageBuyListContentAddressInfo :item="props.item" />
       <PageBuyListContentBasicInfo :item="props.item" />
       <PageBuyListContentPinInfo :item="props.item" />
@@ -67,5 +67,3 @@ onUnmounted(() => {
   </div>
   <PageBuyListContentMedia :item="props.item" />
 </template>
-
-<style></style>

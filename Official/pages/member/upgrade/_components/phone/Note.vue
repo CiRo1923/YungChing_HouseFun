@@ -29,5 +29,3 @@ const items = readonly([
     </ul>
   </div>
 </template>
-
-<style lang="postcss"></style>

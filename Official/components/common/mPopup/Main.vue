@@ -175,5 +175,3 @@ onUnmounted(() => {
     </div>
   </Transition>
 </template>
-
-<style lang="postcss"></style>

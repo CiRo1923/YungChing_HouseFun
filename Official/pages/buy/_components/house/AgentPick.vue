@@ -33,5 +33,3 @@ const hasAgentPick = computed(() => Array.isArray(agentPick.value) && agentPick.
     </BuyMSwiperHorizontal>
   </PageBuyHouseContent>
 </template>
-
-<style></style>

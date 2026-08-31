@@ -133,5 +133,3 @@ onUnmounted(() => {
     </div>
   </PageBuyHouseContent>
 </template>
-
-<style lang="postcss"></style>

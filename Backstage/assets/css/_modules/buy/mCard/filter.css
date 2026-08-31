@@ -1,33 +1,11 @@
-.m-card {
-  &.\-\-filter {
-    /* pc 橫排、tablet / mobile 直排 —— 兩端的宣告本來就不同,收進各自的 @screen */
-    @screen p {
-      @apply flex gap-x-[--card-filter-pc-gap-x];
-    }
-  }
-}
+/* mCard 的 filter 變體。
+
+   2026-08-31 把原本「每個選擇器自己收三段 @screen」的巢狀寫法改成頂層集中 ——
+   同一個斷點只寫一組,要調 pc 的版型時一眼就看得完,不必逐個選擇器確認有沒有漏。
+   原本的寫法讀起來順,但 @screen p 散在四個地方,漏掉一個不會有任何提示。 */
 
 .m-card-filter-header {
   @apply border-[--card-filter-header-border-color];
-
-  @screen p {
-    /* border-width 走原生 CSS —— production 會把 @apply border-r-[…] 壓成 shorthand,var() 讓整條失效 */
-    border-right-width: var(--card-filter-header-pc-border-r);
-
-    @apply shrink-0 pr-[--card-filter-header-pc-pr];
-  }
-
-  @screen t {
-    border-bottom-width: var(--card-filter-header-tablet-border-b);
-
-    @apply pb-[--card-filter-header-tablet-pb];
-  }
-
-  @screen m {
-    border-bottom-width: var(--card-filter-header-mobile-border-b);
-
-    @apply pb-[--card-filter-header-mobile-pb];
-  }
 }
 
 /*
@@ -38,30 +16,60 @@
 .m-card-filter-title {
   @apply text-[--card-filter-title-color];
 
-  @screen t {
-    @apply text-center;
-  }
-
-  @screen m {
-    @apply text-center;
-  }
-
   /* 標題內只有這一個 strong,後代選擇器就夠;字重不是父系帶入就是寫死,不開變數 */
   & > strong {
     @apply font-medium;
   }
 }
 
-.m-card-filter-body {
-  @screen p {
+@screen p {
+  /* pc 橫排、tablet / mobile 直排 —— 直排是預設,所以只有 p 段需要 flex */
+  .m-card {
+    &.\-\-filter {
+      @apply flex gap-x-[--card-filter-pc-gap-x];
+    }
+  }
+
+  .m-card-filter-header {
+    /* border-width 走原生 CSS —— production 會把 @apply border-r-[…] 壓成 shorthand,var() 讓整條失效 */
+    border-right-width: var(--card-filter-header-pc-border-r);
+
+    @apply shrink-0 pr-[--card-filter-header-pc-pr];
+  }
+
+  .m-card-filter-body {
     @apply grow;
   }
+}
 
-  @screen t {
-    @apply pt-[--card-filter-body-tablet-pt];
+@screen t {
+  .m-card-filter-header {
+    border-bottom-width: var(--card-filter-header-tablet-border-b);
+
+    @apply pb-[--card-filter-header-tablet-pb];
   }
 
-  @screen m {
+  .m-card-filter-title {
+    @apply text-center;
+  }
+
+  .m-card-filter-body {
+    @apply pt-[--card-filter-body-tablet-pt];
+  }
+}
+
+@screen m {
+  .m-card-filter-header {
+    border-bottom-width: var(--card-filter-header-mobile-border-b);
+
+    @apply pb-[--card-filter-header-mobile-pb];
+  }
+
+  .m-card-filter-title {
+    @apply text-center;
+  }
+
+  .m-card-filter-body {
     @apply pt-[--card-filter-body-mobile-pt];
   }
 }

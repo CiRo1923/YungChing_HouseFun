@@ -10,10 +10,7 @@ const { promise } = storeToRefs(popup)
 
 <template>
   <Transition name="popup-promise-overlay">
-    <div
-      class="m-popup-promise"
-      v-if="promise.status === 'open'"
-    >
+    <div class="m-popup-promise" v-if="promise.status === 'open'">
       <Transition name="popup-promise">
         <p
           class="m-popup-promise-message"

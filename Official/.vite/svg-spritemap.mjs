@@ -69,7 +69,10 @@ const isSkippedSymbolAttribute = (name) => {
   const lower = name.toLowerCase()
 
   return (
-    SYMBOL_SKIP_ATTRIBUTES.has(lower) || lower === 'xmlns' || lower.startsWith('xmlns:') || lower.startsWith('data-')
+    SYMBOL_SKIP_ATTRIBUTES.has(lower) ||
+    lower === 'xmlns' ||
+    lower.startsWith('xmlns:') ||
+    lower.startsWith('data-')
   )
 }
 
@@ -84,7 +87,9 @@ const isSvgFileInDir = (file, svgDir) => {
 
 /** viewBox="0 0 24 24" → { width: '24', height: '24' } */
 const sizeFromViewBox = (viewBox) => {
-  const parts = String(viewBox).trim().split(/[\s,]+/)
+  const parts = String(viewBox)
+    .trim()
+    .split(/[\s,]+/)
 
   return { width: parts[2], height: parts[3] }
 }

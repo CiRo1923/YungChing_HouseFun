@@ -1,7 +1,5 @@
 .m-top {
-  @apply fixed left-1/2 z-[2] flex h-[--top-size] w-[--top-size] translate-x-[--top-translate-x]
-    items-center justify-center rounded-full bg-[--top-bg-color] text-[--top-color]
-    transition-opacitys duration-300;
+  @apply fixed left-1/2 z-[2] flex h-[--top-size] w-[--top-size] translate-x-[--top-translate-x] items-center justify-center rounded-full bg-[--top-bg-color] text-[--top-color] transition-opacitys duration-300;
 
   &.\-\-hidden {
     @apply invisible opacity-0;

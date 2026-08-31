@@ -42,5 +42,3 @@ const features = computed(() => options.value.features ?? [])
     </ul>
   </CommonCustomPopup>
 </template>
-
-<style lang="postcss"></style>

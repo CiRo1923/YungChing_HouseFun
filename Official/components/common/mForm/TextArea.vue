@@ -171,11 +171,7 @@ watch(
             { '--error': errorMessage || config.isError },
           ]"
         >
-          <div
-            v-if="$slots.frontAssist"
-            class="m-form-assist"
-            :class="setClass.frontAssist"
-          >
+          <div v-if="$slots.frontAssist" class="m-form-assist" :class="setClass.frontAssist">
             <slot name="frontAssist" />
           </div>
           <textarea

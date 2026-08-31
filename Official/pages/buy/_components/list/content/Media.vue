@@ -66,5 +66,3 @@ const badgesItems = computed(() => {
     />
   </div>
 </template>
-
-<style></style>

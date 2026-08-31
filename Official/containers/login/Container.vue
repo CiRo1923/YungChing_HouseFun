@@ -61,5 +61,3 @@ defineExpose({
     </CommonMTabBorderBottom>
   </Form>
 </template>
-
-<style lang="postcss"></style>

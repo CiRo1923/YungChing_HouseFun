@@ -58,5 +58,3 @@ onUnmounted(() => {
     </div>
   </CommonMContent>
 </template>
-
-<style></style>

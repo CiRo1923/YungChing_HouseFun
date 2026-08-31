@@ -48,5 +48,3 @@ const onClick = async () => {
     </button>
   </div>
 </template>
-
-<style lang="postcss"></style>

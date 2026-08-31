@@ -46,10 +46,8 @@ const items = computed(() => {
       :items="items"
       :setClass="{
         main: '--horizontal --gap-x-20 justify-end',
-        item: 'tracking-wider text-[12px]',
+        item: 'text-[12px] tracking-wider',
       }"
     />
   </div>
 </template>
-
-<style></style>

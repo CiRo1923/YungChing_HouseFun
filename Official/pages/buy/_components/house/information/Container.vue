@@ -39,69 +39,73 @@ const hasAnyContent = computed(() => props.items.some((data) => hasColumnContent
     <template v-for="(data, index) in props.items" :key="`ˋ${props.name}_${index}`">
       <ul class="space-y-[10px] pt:flex-1" v-if="hasColumnContent(data)">
         <template v-for="(item, idx) in data" :key="`ˋ${props.name}_${item.id}_${idx}_${index}`">
-        <li v-if="!item.isHidden && hasContent(item)">
-          <div class="flex tm:gap-x-[10px] p:gap-x-[25px]">
-            <PageBuyHouseLabel :text="item.label" />
-            <ul
-              class="m:space-y-[6px] t:space-y-[9px] pt:grow p:space-y-[12px]"
-              v-if="item.values && item.values.length !== 0"
-            >
-              <li
-                :class="[
-                  value.isFlex
-                    ? 'flex m:gap-x-[5px] t:gap-x-[10px] p:gap-x-[15px]'
-                    : 'space-y-[5px]',
-                ]"
-                v-for="(value, i) in item.values"
-                :key="`${props.name}_values_${item.id}_${i}`"
+          <li v-if="!item.isHidden && hasContent(item)">
+            <div class="flex tm:gap-x-[10px] p:gap-x-[25px]">
+              <PageBuyHouseLabel :text="item.label" />
+              <ul
+                class="m:space-y-[6px] t:space-y-[9px] pt:grow p:space-y-[12px]"
+                v-if="item.values && item.values.length !== 0"
               >
-                <div
-                  class="flex items-center m:gap-x-[5px] t:gap-x-[10px] tm:text-[14px] p:gap-x-[15px] p:text-[18px]"
-                  v-if="value.content || value.tools"
+                <li
+                  :class="[
+                    value.isFlex
+                      ? 'flex m:gap-x-[5px] t:gap-x-[10px] p:gap-x-[15px]'
+                      : 'space-y-[5px]',
+                  ]"
+                  v-for="(value, i) in item.values"
+                  :key="`${props.name}_values_${item.id}_${i}`"
                 >
-                  <p v-html="value.content" v-if="value.content" />
-                  <p class="flex items-center" :class="value.tools.class?.main" v-if="value.tools">
-                    <CommonSvgIcon
-                      :icon="value.tools.icon"
-                      :class="value.tools.class?.icon"
-                      v-if="value.tools.icon"
-                    />
-                    <span v-html="value.tools.content" />
-                  </p>
-                </div>
-                <CommonMAnchor
-                  :text="value.anchor.text"
-                  v-bind="onAnchorBind(value.anchor)"
-                  :setClass="{
-                    main: ['tm:text-[14px] p:text-[18px]', value.anchor.class?.main],
-                    text: ['font-normal underline', value.anchor.class?.text],
-                  }"
-                  v-if="value.anchor"
-                />
-                <CommonMAnchor
-                  :text="value.popupAnchor.text"
-                  v-bind="onAnchorBind(value.popupAnchor)"
-                  :config="{
-                    icon: {
-                      name: value.popupAnchor.icon,
-                      position: 'left',
-                    },
-                  }"
-                  :setClass="{
-                    main: ['gap-x-[3px]', value.popupAnchor.class?.main],
-                    text: ['font-normal underline', value.popupAnchor.class?.text],
-                    icon: [
-                      'tm:h-[16px] tm:w-[16px] p:h-[18px] p:w-[18px]',
-                      value.popupAnchor.class?.icon,
-                    ],
-                  }"
-                  v-if="value.popupAnchor"
-                />
-              </li>
-            </ul>
-          </div>
+                  <div
+                    class="flex items-center m:gap-x-[5px] t:gap-x-[10px] tm:text-[14px] p:gap-x-[15px] p:text-[18px]"
+                    v-if="value.content || value.tools"
+                  >
+                    <p v-html="value.content" v-if="value.content" />
+                    <p
+                      class="flex items-center"
+                      :class="value.tools.class?.main"
+                      v-if="value.tools"
+                    >
+                      <CommonSvgIcon
+                        :icon="value.tools.icon"
+                        :class="value.tools.class?.icon"
+                        v-if="value.tools.icon"
+                      />
+                      <span v-html="value.tools.content" />
+                    </p>
+                  </div>
+                  <CommonMAnchor
+                    :text="value.anchor.text"
+                    v-bind="onAnchorBind(value.anchor)"
+                    :setClass="{
+                      main: ['tm:text-[14px] p:text-[18px]', value.anchor.class?.main],
+                      text: ['font-normal underline', value.anchor.class?.text],
+                    }"
+                    v-if="value.anchor"
+                  />
+                  <CommonMAnchor
+                    :text="value.popupAnchor.text"
+                    v-bind="onAnchorBind(value.popupAnchor)"
+                    :config="{
+                      icon: {
+                        name: value.popupAnchor.icon,
+                        position: 'left',
+                      },
+                    }"
+                    :setClass="{
+                      main: ['gap-x-[3px]', value.popupAnchor.class?.main],
+                      text: ['font-normal underline', value.popupAnchor.class?.text],
+                      icon: [
+                        'tm:h-[16px] tm:w-[16px] p:h-[18px] p:w-[18px]',
+                        value.popupAnchor.class?.icon,
+                      ],
+                    }"
+                    v-if="value.popupAnchor"
+                  />
+                </li>
+              </ul>
+            </div>
 
-          <!-- <ul class="p:ml-[15px] p:mt-[12px] p:space-y-[12px]" v-if="item.children">
+            <!-- <ul class="p:ml-[15px] p:mt-[12px] p:space-y-[12px]" v-if="item.children">
           <template
             v-for="(children, i) in item.children"
             :key="`${props.name}_children_${item.id}_${i}`"
@@ -125,11 +129,9 @@ const hasAnyContent = computed(() => props.items.some((data) => hasColumnContent
             </li>
           </template>
         </ul> -->
-        </li>
-      </template>
+          </li>
+        </template>
       </ul>
     </template>
   </div>
 </template>
-
-<style></style>

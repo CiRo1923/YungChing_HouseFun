@@ -48,8 +48,7 @@
 }
 
 .m-tag-icon {
-  @apply absolute right-0 top-0 h-full w-[--tag-checkbox-icon-w] text-[--tag-checkbox-icon-color]
-    transition-opacitys duration-300;
+  @apply absolute right-0 top-0 h-full w-[--tag-checkbox-icon-w] text-[--tag-checkbox-icon-color] transition-opacitys duration-300;
 }
 
 .m-tag-assist-label {

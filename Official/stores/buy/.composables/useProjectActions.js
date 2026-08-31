@@ -19,14 +19,8 @@ export default () => {
   const { authToken, userData } = storeToRefs(memberProjct)
   const { onApiAuthToken, onSetAuthTokenCookie, onReset } = useMemberProjectActions()
   const buyProject = useBuyProjectStore()
-  const {
-    channel,
-    access,
-    message,
-    countdownData,
-    apiVerifyCodeData,
-    cottonCandyCheckbox,
-  } = storeToRefs(buyProject)
+  const { channel, access, message, countdownData, apiVerifyCodeData, cottonCandyCheckbox } =
+    storeToRefs(buyProject)
 
   // 頻道判斷:區域找房 / 捷運找房(原在 useListActions,移至此)
   const isChannelRegion = computed(() => channel.value === 'region')

@@ -39,5 +39,3 @@ const setClass = computed(() => {
     </slot>
   </span>
 </template>
-
-<style></style>

@@ -69,5 +69,3 @@ const basicRef = ref(null)
   <PageBuyCommonPopupCottonCandySuccess />
   <PageBuyCommonPopupMessageFailed />
 </template>
-
-<style></style>

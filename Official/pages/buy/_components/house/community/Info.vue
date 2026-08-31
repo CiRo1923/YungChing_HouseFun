@@ -52,5 +52,3 @@ const items = computed(() => {
     </template>
   </CommonMSeparator>
 </template>
-
-<style lang="postcss"></style>
