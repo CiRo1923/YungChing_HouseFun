@@ -182,6 +182,14 @@ const allowedContent = computed(() => {
 const editorConfig = computed(() => {
   const { height, placeholder, maxlength } = config.value
   return {
+    /*
+     * 鎖定繁體中文。
+     *
+     * ⚠️ 不能拿掉 —— CKEditor 預設依瀏覽器語言載入 lang/<代碼>.js,
+     * 而這包只留了 zh 與 en(其餘 60 幾個語言檔已刪除)。
+     * 沒有這行,非繁中的瀏覽器會去要一個不存在的檔案。
+     */
+    language: 'zh',
     height,
     toolbar: toolbar.value,
     allowedContent: allowedContent.value,
