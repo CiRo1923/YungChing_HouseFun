@@ -1,0 +1,41 @@
+/* mLoading 的共用變數 —— 只放「值」,斷點對應與狀態切換寫在 common.css。 */
+:root {
+  --loading-overlay-bg-color: var(--black-33);
+  --loading-container-color: var(--gray-999);
+  --loading-container-bg-color: inherit;
+
+  --loading-container-text-size: inherit;
+  --loading-container-pc-text-size: 14px;
+  --loading-container-tablet-text-size: 14px;
+  --loading-container-mobile-text-size: 14px;
+
+  /*
+   * --card 是「浮在遮罩上的卡片」外觀(Main.vue 用),
+   * 直接放在 popup 裡的 ApiPromiseSystem 不帶它,所以底下這些的 base 都是「沒有」。
+   */
+  --loading-container-rounded: 0;
+  --loading-container-pc-rounded: 15px;
+  --loading-container-tablet-rounded: 15px;
+  --loading-container-mobile-rounded: 15px;
+
+  /* 內距 pc 是上下 30 / 左右 72,tablet 與 mobile 四邊都 32 —— 兩個層級併存,拆到四個方向 */
+  --loading-container-pt: 0;
+  --loading-container-pr: 0;
+  --loading-container-pb: 0;
+  --loading-container-pl: 0;
+
+  --loading-container-pc-pt: 30px;
+  --loading-container-pc-pr: 72px;
+  --loading-container-pc-pb: 30px;
+  --loading-container-pc-pl: 72px;
+
+  --loading-container-tablet-pt: 32px;
+  --loading-container-tablet-pr: 32px;
+  --loading-container-tablet-pb: 32px;
+  --loading-container-tablet-pl: 32px;
+
+  --loading-container-mobile-pt: 32px;
+  --loading-container-mobile-pr: 32px;
+  --loading-container-mobile-pb: 32px;
+  --loading-container-mobile-pl: 32px;
+}

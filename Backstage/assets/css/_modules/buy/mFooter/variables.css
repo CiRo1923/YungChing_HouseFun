@@ -1,0 +1,87 @@
+/*
+ * mFooter 的變數 —— 對應 components/buy/mFooter.vue。
+ *
+ * mFooter 是「固定位置」組件(全站頁尾只有一種長相),
+ * 所以字級由 module 自己定,不交給使用端。
+ */
+:root {
+  --footer-mt: 0;
+  --footer-pc-mt: 32px;
+  --footer-tablet-mt: 32px;
+  --footer-mobile-mt: 32px;
+
+  --footer-px: 0;
+  --footer-pc-px: 16px;
+  --footer-tablet-px: 16px;
+  --footer-mobile-px: 16px;
+
+  --footer-max-w: none;
+  --footer-pc-max-w: 1232px;
+  --footer-tablet-max-w: none;
+  --footer-mobile-max-w: none;
+
+  /* 內層灰底區塊 */
+  --footer-container-bg-color: var(--gray-f7);
+
+  --footer-container-rounded-t: 0;
+  --footer-container-pc-rounded-t: 15px;
+  --footer-container-tablet-rounded-t: 15px;
+  --footer-container-mobile-rounded-t: 15px;
+
+  --footer-container-py: 0;
+  --footer-container-pc-py: 40px;
+  --footer-container-tablet-py: 40px;
+  --footer-container-mobile-py: 40px;
+
+  --footer-container-px: 0;
+  --footer-container-pc-px: 40px;
+  --footer-container-tablet-px: 16px;
+  --footer-container-mobile-px: 16px;
+
+  /*
+   * 左右兩欄的間距 —— PC 靠 grow / shrink-0 分配寬度不需要 gap,
+   * 手機是直向堆疊也用不到,只有平板需要。
+   */
+  --footer-container-gap-x: 0;
+  --footer-container-pc-gap-x: 0;
+  --footer-container-tablet-gap-x: 40px;
+  --footer-container-mobile-gap-x: 0;
+
+  /* logo 下方的連結列 */
+  --footer-links-gap-x: 0;
+  --footer-links-pc-gap-x: 8px;
+  --footer-links-tablet-gap-x: 8px;
+  --footer-links-mobile-gap-x: 8px;
+
+  /* PC 時 logo 與連結列同欄靠 grow 撐開,不需要上距 */
+  --footer-links-mt: 0;
+  --footer-links-pc-mt: 0;
+  --footer-links-tablet-mt: 16px;
+  --footer-links-mobile-mt: 16px;
+
+  --footer-link-color: var(--green-6a2d);
+
+  --footer-link-text-size: inherit;
+  --footer-link-pc-text-size: 14px;
+  --footer-link-tablet-text-size: 14px;
+  --footer-link-mobile-text-size: 14px;
+
+  /* 右側公司資訊 */
+  --footer-information-color: var(--gray-999);
+
+  --footer-information-text-size: inherit;
+  --footer-information-pc-text-size: 14px;
+  --footer-information-tablet-text-size: 14px;
+  --footer-information-mobile-text-size: 14px;
+
+  --footer-information-space-y: 0;
+  --footer-information-pc-space-y: 16px;
+  --footer-information-tablet-space-y: 16px;
+  --footer-information-mobile-space-y: 16px;
+
+  /* 手機是上下堆疊,要與上方的 logo 區隔開 */
+  --footer-information-mt: 0;
+  --footer-information-pc-mt: 0;
+  --footer-information-tablet-mt: 0;
+  --footer-information-mobile-mt: 24px;
+}

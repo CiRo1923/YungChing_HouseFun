@@ -1,6 +1,8 @@
 <script setup>
-import '@css/_modules/buy/mForm.css'
-import '@css/_modules/buy/mFormDropdown.css'
+import '@css/_modules/common/mForm/variables.css'
+import '@css/_modules/common/mForm/dropdownVariables.css'
+import '@css/_modules/common/mForm/common.css'
+import '@css/_modules/common/mForm/dropdown.css'
 
 import { onMergeDropdownConfig, useDropdownCore } from './.composables/useDropdownCore.js'
 import SelectDropdownOptions from './SelectDropdownOptions.vue'
@@ -283,8 +285,8 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="m-form overflow-hidden" :class="setClass.main">
-    <div class="m-form-container flex" :class="setClass.container">
+  <div class="m-form" :class="setClass.main">
+    <div class="m-form-container" :class="setClass.container">
       <button
         type="button"
         class="m-form-element --select"
@@ -324,9 +326,9 @@ onUnmounted(() => {
           :class="setClass.dropdownContainer"
           ref="dropdownContainerRef"
         >
-          <div class="m-form-dropdown-datas flex w-full">
+          <div class="m-form-dropdown-datas">
             <div
-              class="m-form-dropdown-data min-w-0 flex-1"
+              class="m-form-dropdown-data"
               v-for="(data, dataIndex) in dropdownDatas"
               :key="data.key || data.name || dataIndex"
             >
@@ -371,6 +373,3 @@ onUnmounted(() => {
   </Teleport>
 </template>
 
-<style lang="postcss">
-@import '@css/_common/vueTransition.css';
-</style>

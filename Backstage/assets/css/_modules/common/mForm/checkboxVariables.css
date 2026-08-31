@@ -1,0 +1,26 @@
+/* checkbox 變體的變數 —— 方框本身的配色,打勾圖示的行為在 selection 群組。 */
+:root {
+  --form-checkbox-icon-border-color: var(--gray-ccce);
+  --form-checkbox-icon-bg-color: var(--white);
+
+  --form-checkbox-icon-disabled-border-color: var(--gray-e5);
+  --form-checkbox-icon-disabled-bg-color: var(--gray-f2);
+
+  /* 標籤本身的顏色(整塊 label,不只文字) */
+  --form-checkbox-color: var(--gray-999);
+
+  /* checkbox 是方框,radio 是圓框 —— 只有圓角不同 */
+  --form-checkbox-icon-rounded: 0;
+  --form-checkbox-icon-pc-rounded: 2px;
+  --form-checkbox-icon-tablet-rounded: 2px;
+  --form-checkbox-icon-mobile-rounded: 2px;
+
+  /*
+   * 有標籤文字時,方框要往下挪一點才會對齊文字的視覺中線
+   * (文字有 line-height,純靠 items-center 會看起來偏高)。
+   */
+  --form-checkbox-icon-mt: 0;
+  --form-checkbox-icon-pc-mt: 2px;
+  --form-checkbox-icon-tablet-mt: 2px;
+  --form-checkbox-icon-mobile-mt: 2px;
+}

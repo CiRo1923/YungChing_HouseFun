@@ -31,6 +31,7 @@ const onParkingPriceBlur = () => {
       comma: true,
     }"
     :setClass="{
+      type: 'text-[16px]',
       main: '--h-40 --px-12 --py-8 t:w-[220px] p:w-[270px]',
       element: 'grow',
       rearAssist: 'text-[14px] text-[--gray-999]',

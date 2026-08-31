@@ -1,0 +1,13 @@
+/* search 變體的變數 —— 輸入框左側的放大鏡圖示。 */
+:root {
+  --form-search-icon-color: var(--gray-ccce);
+  --form-search-icon-focus-color: var(--green-6a2d);
+
+  --form-search-icon-pc-p: 2px;
+  --form-search-icon-tablet-p: 2px;
+  --form-search-icon-mobile-p: 2px;
+
+  --form-search-icon-pc-size: 20px;
+  --form-search-icon-tablet-size: 20px;
+  --form-search-icon-mobile-size: 20px;
+}

@@ -35,7 +35,7 @@ const onClick = async (validate) => {
           isRequired: false,
         }"
         :setClass="{
-          main: 'shrink-0 p:ml-[12px] p:flex p:h-[40px] p:items-center',
+          main: 'text-[16px] shrink-0 p:ml-[12px] p:flex p:h-[40px] p:items-center',
         }"
       />
       <CommonMFormInput
@@ -51,6 +51,7 @@ const onClick = async (validate) => {
           },
         }"
         :setClass="{
+          type: 'text-[16px]',
           main: '--h-40 --px-12 --py-8 grow',
         }"
       />

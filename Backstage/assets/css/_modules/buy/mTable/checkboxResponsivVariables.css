@@ -1,0 +1,52 @@
+/* checkboxResponsiv 變體的變數 —— 手機會改成一列一卡的排版,所以間距與桌機差很多。 */
+:root {
+  --table-checkbox-responsiv-thtd-first-last-pl: 0;
+  --table-checkbox-responsiv-thtd-first-last-pr: 0;
+
+  /* lint-breakpoint-exempt: 手機改成一列一卡的排版,沒有表格欄位也就沒有首末欄內距 */
+  --table-checkbox-responsiv-thtd-first-last-pc-px: 16px;
+  --table-checkbox-responsiv-thtd-first-last-tablet-px: 10px;
+
+  --table-checkbox-responsiv-thtd-pl: 0;
+  --table-checkbox-responsiv-thtd-pr: 0;
+
+  /* lint-breakpoint-exempt: 手機改成一列一卡的排版,這些表格欄位的間距用不到 */
+  --table-checkbox-responsiv-thtd-pc-px: 5px;
+  --table-checkbox-responsiv-thtd-tablet-px: 4px;
+
+  /* lint-breakpoint-exempt: 手機改成一列一卡的排版,這些表格欄位的間距用不到 */
+  --table-checkbox-responsiv-thead-th-pc-py: 8px;
+  --table-checkbox-responsiv-thead-th-tablet-py: 5px;
+  /* lint-breakpoint-exempt: 手機改成一列一卡的排版,這些表格欄位的間距用不到 */
+  --table-checkbox-responsiv-thead-th-pc-text-size: 16px;
+  --table-checkbox-responsiv-thead-th-tablet-text-size: 14px;
+
+  --table-checkbox-responsiv-tbody-tr-pc-border-b: 1px;
+  --table-checkbox-responsiv-tbody-tr-tablet-border-b: 1px;
+  --table-checkbox-responsiv-tbody-tr-mobile-border-b: 1px;
+
+  /* lint-breakpoint-exempt: 只有手機是一列一卡,桌機 / 平板走表格排版沒有這個間距 */
+  --table-checkbox-responsiv-tbody-tr-mobile-py: 24px;
+
+  /* lint-breakpoint-exempt: 只有手機是一列一卡,桌機 / 平板走表格排版沒有這個間距 */
+  --table-checkbox-responsiv-tbody-tr-mobile-px: 16px;
+
+  /* lint-breakpoint-exempt: 手機改成一列一卡的排版,這些表格欄位的間距用不到 */
+  --table-checkbox-responsiv-tbody-td-pc-py: 15px;
+  --table-checkbox-responsiv-tbody-td-tablet-py: 10px;
+
+  --table-checkbox-responsiv-thead-th-color: var(--gray-333);
+  --table-checkbox-responsiv-tbody-tr-border-color: var(--gray-e5);
+  --table-checkbox-responsiv-tbody-tr-background-color: transparent;
+  --table-checkbox-responsiv-tbody-tr-checked-background-color: var(--gray-f7);
+  --table-checkbox-responsiv-tbody-td-color: var(--gray-666);
+
+  /*
+   * 手機版勾選欄的橫排間距。
+   * PC / 平板沒有這個佈局(那兩端勾選欄只有 checkbox 本身),
+   * 所以三份裡只有 mobile 真的會被取用 —— 另外兩份給 0 是為了讓斷點成套。
+   */
+  --table-checkbox-responsiv-tbody-checkbox-pc-gap-x: 0;
+  --table-checkbox-responsiv-tbody-checkbox-tablet-gap-x: 0;
+  --table-checkbox-responsiv-tbody-checkbox-mobile-gap-x: 4px;
+}

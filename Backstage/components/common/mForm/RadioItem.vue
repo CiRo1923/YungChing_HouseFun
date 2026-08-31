@@ -1,5 +1,10 @@
 <script setup>
-import '@css/_modules/buy/mForm.css'
+import '@css/_modules/common/mForm/variables.css'
+import '@css/_modules/common/mForm/selectionVariables.css'
+import '@css/_modules/common/mForm/radioItemVariables.css'
+import '@css/_modules/common/mForm/common.css'
+import '@css/_modules/common/mForm/selection.css'
+import '@css/_modules/common/mForm/radioItem.css'
 
 import useValidateEvents from './.composables/useValidateEvents.js'
 
@@ -80,7 +85,7 @@ const onChange = () => {
 </script>
 
 <template>
-  <div class="m-form overflow-hidden" :class="setClass.main">
+  <div class="m-form" :class="setClass.main">
     <Field
       :name="props.name"
       type="radio"
@@ -89,17 +94,17 @@ const onChange = () => {
       v-bind="validateOn"
       v-slot="{ errorMessage }"
     >
-      <div class="m-form-container overflow-hidden" :class="setClass.container">
+      <div class="m-form-container" :class="setClass.container">
         <label
-          class="m-form-element --radio-item relative flex gap-x-[8px] rounded-[15px] border-[1px] align-middle leading-[1.35] transition-colors duration-300"
+          class="m-form-element --radio-item"
           :class="[
             setClass.element,
-            config.align === 'top' && (config.label || $slots.default)
-              ? 'items-baseline'
-              : 'items-center',
-            { '--error': config.isError },
-            { '--disabled': config.isDisabled },
-            { '--checked': model === config.value },
+            {
+              '--align-top': config.align === 'top' && (config.label || $slots.default),
+              '--error': config.isError,
+              '--disabled': config.isDisabled,
+              '--checked': model === config.value,
+            },
           ]"
         >
           <input
@@ -107,7 +112,7 @@ const onChange = () => {
             type="radio"
             v-model="model"
             :value="config.value"
-            class="m-form-type sr-only"
+            class="m-form-type --visually-hidden"
             :class="{
               '--error': errorMessage,
             }"
@@ -116,10 +121,10 @@ const onChange = () => {
           />
           <CommonSvgIcon
             icon="icon_check_solid"
-            class="m-form-icon relative h-[18px] w-[18px] shrink-0 rounded-full border-[1px] text-[--orange-e646] transition-colors duration-300"
+            class="m-form-icon"
             :class="setClass.icon"
           />
-          <div class="grow" :class="setClass.label">
+          <div class="m-form-radio-item-label" :class="setClass.label">
             <slot />
           </div>
         </label>
@@ -128,7 +133,7 @@ const onChange = () => {
     <ErrorMessage
       as="span"
       :name="props.name"
-      class="m-form-error block"
+      class="m-form-error"
       :class="setClass.error"
       v-slot="{ message }"
     >
@@ -137,60 +142,3 @@ const onChange = () => {
   </div>
 </template>
 
-<style lang="postcss">
-.m-form-element {
-  &.\-\-radio-item {
-    &.items-baseline {
-      .m-form-icon {
-        @apply mt-[2px] self-start;
-      }
-    }
-
-    &:not(.-\-\disabled) {
-      @apply cursor-pointer;
-
-      &.\-\-error {
-        @apply border-[--orange-e646];
-      }
-
-      &.\-\-checked {
-        @apply border-transparent bg-[--orange-feea];
-      }
-    }
-
-    &.\-\-disabled {
-      @apply cursor-not-allowed;
-
-      @apply border-transparent bg-[--gray-f2];
-
-      * {
-        @apply text-[--gray-ccce];
-      }
-    }
-
-    .m-form-type {
-      &:not(:checked) {
-        & + .m-form-icon {
-          @apply border-[--gray-ccce];
-        }
-      }
-
-      &:checked {
-        & + .m-form-icon {
-          @apply border-transparent;
-
-          > use {
-            @apply opacity-100;
-          }
-        }
-      }
-    }
-
-    .m-form-icon {
-      > use {
-        @apply opacity-0 transition-opacity duration-300;
-      }
-    }
-  }
-}
-</style>

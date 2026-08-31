@@ -1,0 +1,91 @@
+/*
+ * mContainer 的版型 —— 頁面的外框與主標題。
+ *
+ * modifier 目前只有 --px-16。每個 @screen 段都要列出該斷點收得到的前綴寫法:
+ * p 段收 --px-16 / p:--px-16 / pt:--px-16,t 段多收 tm: 與 t:,m 段收 tm: 與 m:。
+ * 少寫一組,使用端帶那個前綴時就會靜靜沒有效果。
+ */
+.m-container {
+  @apply mx-auto;
+  @apply max-w-[--container-max-w] px-[--container-px] pt-[--container-pt];
+}
+
+/* PC 版標題與右側工具並排,平板以下堆疊 */
+.m-container-header {
+  @apply p:flex p:items-center;
+}
+
+.m-container-title {
+  @apply tm:text-center p:grow;
+  @apply text-[length:--container-title-text-size] text-[--container-title-color];
+
+  /*
+   * 標題文字的粗體。用後代選擇器而不給 class 是刻意的 ——
+   * 全站頁面主標題的字重一致,由 module 全權決定。
+   * ⚠️ 這條是 (0,1,1),使用端 setClass 的 utility 是 (0,1,0),蓋不過它。
+   */
+  > strong {
+    @apply font-semibold;
+  }
+}
+
+.m-container-header-tools {
+  @apply p:shrink-0;
+}
+
+.m-container-body {
+  @apply mt-[--container-body-mt];
+}
+
+.m-container-tools {
+  @apply mb-[--container-tools-mb];
+}
+
+@screen p {
+  .m-container {
+    --container-max-w: var(--container-pc-max-w);
+    --container-pt: var(--container-pc-pt);
+    --container-body-mt: var(--container-body-pc-mt);
+    --container-tools-mb: var(--container-tools-pc-mb);
+    --container-title-text-size: var(--container-title-pc-text-size);
+
+    &.\-\-px-16,
+    &.p\:\-\-px-16,
+    &.pt\:\-\-px-16 {
+      --container-px: var(--container-pc-px);
+    }
+  }
+}
+
+@screen t {
+  .m-container {
+    --container-max-w: var(--container-tablet-max-w);
+    --container-pt: var(--container-tablet-pt);
+    --container-body-mt: var(--container-body-tablet-mt);
+    --container-tools-mb: var(--container-tools-tablet-mb);
+    --container-title-text-size: var(--container-title-tablet-text-size);
+
+    &.\-\-px-16,
+    &.pt\:\-\-px-16,
+    &.tm\:\-\-px-16,
+    &.t\:\-\-px-16 {
+      --container-px: var(--container-tablet-px);
+    }
+  }
+}
+
+@screen m {
+  .m-container {
+    --container-max-w: var(--container-mobile-max-w);
+    --container-pt: var(--container-mobile-pt);
+    --container-body-mt: var(--container-body-mobile-mt);
+    --container-tools-mb: var(--container-tools-mobile-mb);
+    --container-title-text-size: var(--container-title-mobile-text-size);
+
+    &.\-\-px-16,
+    &.tm\:\-\-px-16,
+    &.m\:\-\-px-16 {
+      --container-px: var(--container-mobile-px);
+    }
+  }
+}

@@ -1,4 +1,7 @@
 <script setup>
+import '@css/_modules/common/mLoading/variables.css'
+import '@css/_modules/common/mLoading/common.css'
+
 const props = defineProps({
   config: {
     type: Object,
@@ -15,25 +18,14 @@ const config = computed(() => {
 </script>
 
 <template>
-  <div class="m-loading flex items-center justify-center" :class="{ '--fixed': config.isFixed }">
+  <div class="m-loading" :class="{ '--fixed': config.isFixed }">
+    <!-- --card:浮在遮罩上時要有卡片外觀;直接放在 popup 裡的情境不帶它 -->
     <CommonMLoadingContainer
       :setClass="{
-        container: 'rounded-[15px] bg-[--white] py-[30px] tm:p-[32px] p:px-[72px]',
+        container: '--card',
       }"
     >
       <slot />
     </CommonMLoadingContainer>
   </div>
 </template>
-
-<style lang="postcss">
-.m-loading {
-  &.\-\-fixed {
-    @apply fixed inset-0 z-[5];
-
-    &:before {
-      @apply pointer-events-none absolute inset-0 bg-[--black-33] backdrop-blur-[2px] content-default;
-    }
-  }
-}
-</style>

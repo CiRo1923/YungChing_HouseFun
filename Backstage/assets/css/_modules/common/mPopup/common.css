@@ -17,13 +17,13 @@
     @apply flex-col justify-end;
 
     .m-popup-container {
-      @apply w-full rounded-t-[--popup-container-rounded];
+      @apply w-full rounded-t-[--popup-container-rounded-t];
     }
   }
 }
 
 .m-popup-container {
-  @apply relative flex max-h-[92%] w-[--popup-width] flex-col overflow-hidden bg-[--popup-container-bg-color] px-[--popup-px] py-[--popup-py];
+  @apply relative flex max-h-[92%] w-[--popup-w] flex-col overflow-hidden bg-[--popup-container-bg-color] px-[--popup-px] py-[--popup-py];
 }
 
 .m-popup-header {
@@ -33,9 +33,17 @@
 }
 
 .m-popup-title {
-  font-size: var(--popup-header-text);
-
   @apply order-1 flex shrink-0 items-center gap-x-[--popup-header-gap-x];
+  @apply text-[length:--popup-header-text];
+
+  /*
+   * 標題裡的粗體字。用後代選擇器而不給 class 是刻意的 ——
+   * 全站 popup 標題的字重一致,由 module 全權決定。
+   * ⚠️ 這條是 (0,1,1),使用端 setClass 的 utility 是 (0,1,0),蓋不過它。
+   */
+  > b {
+    @apply font-medium;
+  }
 }
 
 .m-popup-icon {
@@ -48,10 +56,15 @@
 
 .m-popup-anchor-close {
   @apply ml-auto flex h-[--popup-header-anchor-size] w-[--popup-header-anchor-size] shrink-0 items-center justify-center p-[--popup-header-anchor-p] text-[--popup-header-anchor-color] m:order-2 pt:order-3;
+
+  /* 圖示撐滿按鈕 —— 尺寸由上面那個變數決定,svg 只是跟著長 */
+  > .m-svg-icon {
+    @apply h-full w-full;
+  }
 }
 
 .m-popup-tools {
-  @apply flex grow items-center m:order-3 m:mt-[--popup-tools-m] pt:order-2 pt:mx-[--popup-tools-m];
+  @apply flex grow items-center m:order-3 m:mt-[--popup-tools-mt] pt:order-2 pt:mx-[--popup-tools-mx];
 }
 
 .m-popup-body {
@@ -77,6 +90,7 @@
 @screen p {
   .m-popup {
     --popup-container-rounded: var(--popup-container-pc-rounded);
+    --popup-container-rounded-t: var(--popup-container-pc-rounded-t);
     --popup-px: var(--popup-container-pc-px);
     --popup-py: var(--popup-container-pc-py);
     --popup-header-pb: var(--popup-header-pc-pb);
@@ -87,7 +101,7 @@
     --popup-header-icon-size: var(--popup-header-icon-pc-size);
     --popup-header-anchor-p: var(--popup-header-anchor-pc-p);
     --popup-header-anchor-size: var(--popup-header-anchor-pc-size);
-    --popup-tools-m: var(--popup-tools-pc-m);
+    --popup-tools-mx: var(--popup-tools-pc-mx);
     --popup-body-mt: var(--popup-body-pc-mt);
     --popup-body-px: var(--popup-body-pc-px);
     --popup-footer-mt: var(--popup-footer-pc-mt);
@@ -97,6 +111,7 @@
 @screen t {
   .m-popup {
     --popup-container-rounded: var(--popup-container-tablet-rounded);
+    --popup-container-rounded-t: var(--popup-container-tablet-rounded-t);
     --popup-px: var(--popup-container-tablet-px);
     --popup-py: var(--popup-container-tablet-py);
     --popup-header-pb: var(--popup-header-tablet-pb);
@@ -107,7 +122,7 @@
     --popup-header-icon-size: var(--popup-header-icon-tablet-size);
     --popup-header-anchor-p: var(--popup-header-anchor-tablet-p);
     --popup-header-anchor-size: var(--popup-header-anchor-tablet-size);
-    --popup-tools-m: var(--popup-tools-tablet-m);
+    --popup-tools-mx: var(--popup-tools-tablet-mx);
     --popup-body-mt: var(--popup-body-tablet-mt);
     --popup-body-px: var(--popup-body-tablet-px);
     --popup-footer-mt: var(--popup-footer-tablet-mt);
@@ -117,6 +132,7 @@
 @screen m {
   .m-popup {
     --popup-container-rounded: var(--popup-container-mobile-rounded);
+    --popup-container-rounded-t: var(--popup-container-mobile-rounded-t);
     --popup-px: var(--popup-container-mobile-px);
     --popup-py: var(--popup-container-mobile-py);
     --popup-header-pb: var(--popup-header-mobile-pb);
@@ -127,7 +143,8 @@
     --popup-header-icon-size: var(--popup-header-icon-mobile-size);
     --popup-header-anchor-p: var(--popup-header-anchor-mobile-p);
     --popup-header-anchor-size: var(--popup-header-anchor-mobile-size);
-    --popup-tools-m: var(--popup-tools-mobile-m);
+    --popup-w: var(--popup-mobile-w);
+    --popup-tools-mt: var(--popup-tools-mobile-mt);
     --popup-body-mt: var(--popup-body-mobile-mt);
     --popup-body-px: var(--popup-body-mobile-px);
     --popup-footer-mt: var(--popup-footer-mobile-mt);

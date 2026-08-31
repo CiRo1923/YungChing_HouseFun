@@ -39,7 +39,7 @@ const onSure = async () => {
         <CommonMFormLabel
           label="設定名稱"
           :setClass="{
-            main: 'pt:shrink-0 p:flex p:h-[40px] p:items-center',
+            main: 'text-[16px] pt:shrink-0 p:flex p:h-[40px] p:items-center',
           }"
         />
         <CommonMFormInput
@@ -54,6 +54,7 @@ const onSure = async () => {
             required: '請輸入自定義範本名稱',
           }"
           :setClass="{
+            type: 'text-[16px]',
             main: '--h-40 --px-12 --py-8 pt:grow',
             element: 'grow',
             length: 'text-[14px] text-[--gray-999]',

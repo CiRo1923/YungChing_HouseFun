@@ -159,6 +159,58 @@
 
 ---
 
+## 動手前先讀 tailwind.config.js
+
+⚠️ **本專案改過 tailwind 的預設,不讀 config 就會照 tailwind 官方的直覺寫錯。**
+動 CSS 之前先看 [tailwind.config.js](../../tailwind.config.js),重點如下。
+
+### `theme` 底下哪些是「覆寫」而不是 `extend`
+
+`screens` / `fontFamily` / `fontSize` / `boxShadow` 直接寫在 `theme`,**tailwind 的預設值整組被換掉**;
+只有 `content` / `width` / `dropShadow` / `transitionProperty` 在 `extend` 裡是「加上去」。
+
+| 被覆寫的 | 後果 |
+|---|---|
+| `fontSize` | **沒有 `text-sm` / `text-base` / `text-lg`**,只剩 `vmp` / `vmt` / `vmm` / `vmmls` 四個 vw 級距。字級一律寫 arbitrary value(`text-[16px]` / `text-[length:--x-text-size]`) |
+| `screens` | 沒有 `sm` / `md` / `lg` / `xl`,全部換成本專案的斷點(見下) |
+| `boxShadow` | **一個 preset 都沒有** —— `tailwind.extend.js` 刻意不放陰影(值裡必定帶色碼,而那支檔案在 lint 掃描範圍外)。所以 `shadow-sm` / `shadow-md` / `shadow-card` 全部無效,陰影一律走原生 `box-shadow: var(--x-shadow)` + module 自己的斷點變數 |
+| `fontFamily` | 沒有 `font-sans` / `font-serif` / `font-mono`,只有 `font-default` |
+
+**這一節由 [規則 6](#規則-6不要用本專案不存在的-tailwind-class) 守門** ——
+`checkTailwindTheme` 會把這些寫法抓出來,不必靠記憶。
+
+### 斷點
+
+全部是 `raw` media query(不是單純的 min-width),所以**順序不遵守 tailwind 的行動優先直覺**,
+要靠 media query 本身判斷誰蓋誰。
+
+| 斷點 | 涵蓋 |
+|---|---|
+| `m` | 手機(含橫向的矮螢幕) |
+| `t` | 平板 |
+| `p` | `min-width: 1024px` |
+| `tm` | 平板 + 手機 |
+| `pt` | PC + 平板 |
+| `pMin` / `pMax` | PC 的窄 / 寬兩段 |
+| `mLandscape` | 手機橫向 |
+| `notsupport` / `firefox` / `IE` | 瀏覽器偵測用 |
+
+模組的三段 `@screen p` / `@screen t` / `@screen m` 就是對應 `p` / `t` / `m`;
+`pt` 與 `tm` 是複合斷點,**會同時落在兩段裡**,寫 modifier 時要一起收(見規則 4)。
+
+### plugin 提供的自訂 utility
+
+`text-hexa` / `bg-hexa` / `border-hexa` / `divide-hexa` 走 `onColorWithAlpha`,
+語法是 `bg-hexa-[--black,0.7]`(色票變數 + alpha),不是 tailwind 原生的 `/70`。
+
+### `content` 的掃描範圍
+
+只掃 `components` / `containers` / `layouts` / `pages` / `static` / `app.vue` / `error.vue`。
+`assets/css/` **不在裡面** —— 但那不影響 `@apply`(它在 PostCSS 階段處理,不經過 content 掃描)。
+真正的影響是:**只寫在 CSS 檔字串裡、template 沒出現過的 class 不會被產生**。
+
+---
+
 ## 規則 1:顏色一律定義在色票檔
 
 **本專案目前只有一支色票檔**:[assets/css/_common/color.css](../../assets/css/_common/color.css),
@@ -492,7 +544,7 @@ modifier 名稱就是 **tailwind 的 utility 名前面加 `--`**,不要自己另
 | [變數的 base 與粒度](#變數的-base-與粒度) | 沒 base 整條讀不到、無效 `var()` 仍會參與 cascade、變數建在最小單位 |
 | [這些屬性不能用 tailwind 寫](#這些屬性不能用-tailwind-寫) | `border-width` / `box-shadow` / `font-size` / `transition` |
 | [誰決定這個屬性](#誰決定這個屬性) | 字級、顏色、hover 各自歸誰管 |
-| [值要不要開變數](#值要不要開變數) | 帶 px 一律開;`z-index` / `100%` / `font-weight` 不開 |
+| [值要不要開變數](#值要不要開變數) | 帶 px 一律開;`z-index` / `leading` / `tracking` / `100%` / `font-weight` 不開 |
 
 #### 斷點與 DOM 結構
 
@@ -644,24 +696,32 @@ modifier 名稱就是 **tailwind 的 utility 名前面加 `--`**,不要自己另
   | `font-size` | `@apply text-[length:--x-text-size]` | 不寫 `length:` 會變成 `color` |
   | `column-gap` | `@apply gap-x-[var(--x-gap,0px)]` ✓ | arbitrary value 內可帶 `var()` fallback |
 
-  ⚠️ **同一個 `@apply` 裡不能同時出現字級與文字顏色** —— 兩個都是 `text-*`,
-  tailwind 只會保留其中一個,而且**不報錯**。加型別提示(`text-[length:14px]`
-  搭 `text-[color:--orange-e646]`)也救不了,拆成兩行 `@apply` 一樣沒用。
+  ✅ **同一個 `@apply` 裡字級與文字顏色可以併存** —— 兩個都是 `text-*` 但不會互相蓋掉,
+  只要字級帶 `length:` 提示讓 tailwind 分得出型別即可。
 
   ```css
-  /* ✗ 產物只剩 font-size,顏色整條消失 */
-  .m-form-error { @apply mt-[4px] text-[14px] text-[--orange-e646]; }
-
-  /* ✓ 顏色寫原生屬性,字級留在 @apply */
+  /* ✓ 產物:font-size 與 color 都在 */
   .m-form-error {
-    color: var(--orange-e646);
-
-    @apply mt-[4px] text-[14px];
+    @apply mt-[--form-error-mt] text-[length:--form-error-text-size] text-[--form-error-color];
   }
   ```
 
-  只有其中一個要設的時候維持 `@apply` 就好 —— 這條只約束「兩者併存」的情況。
-  查產物確認的指令見「拆完 module 的驗證」。
+  > **這條原本寫反了,值得記一下。**
+  >
+  > 舊版寫的是「兩者併存時 tailwind 只會保留其中一個,顏色要退回原生 `color:`」,
+  > 還把 `.m-form-error` 當成範例。實際跑 `npx tailwindcss` 產出來的是:
+  >
+  > ```css
+  > .m-form-error { margin-top: 4px; font-size: 14px; color: var(--orange-e646) }
+  > ```
+  >
+  > 字面值 + 變數、雙型別提示、變數 + 變數 —— 四種組合全部正確。
+  > **沒有理由為了這條退回原生 `color:`**,那反而違反「版型統一走 `@apply`」。
+  >
+  > 教訓:規範裡「tailwind 會靜默吃掉某個宣告」這類斷言,寫進來之前先跑一次
+  > `npx tailwindcss -c tailwind.config.js -i 測試.css -o 產物.css` 看產物。
+  > 靜默失敗確實存在(`border-width` / `box-shadow` / 少了 `length:` 的字級都是真的),
+  > 但不能靠推論擴張到其他屬性。
 
   另外 `transition-property: transform` **不要換成 tailwind 的 `transition-transform`** ——
   後者會連帶塞進 `transition-duration: 150ms` 與 `transition-timing-function: cubic-bezier(.4,0,.2,1)`。
@@ -740,10 +800,26 @@ modifier 名稱就是 **tailwind 的 utility 名前面加 `--`**,不要自己另
 - ⚠️ **顏色是組件的職責,使用端不得自訂**。modifier 只設 `--x-color`,
   `common.css` **無條件**套用 `text-[--x-color]`;沒有顏色時用 **`--x-color: inherit`**。
 
-  ⚠️ **base 一定是 `inherit`,不是 `initial`** —— `color` 的 initial 值是**黑色**,不是「不設定」。
-  寫 `initial` 會讓所有沒帶顏色 modifier 的元素從「繼承父層」變成黑字,
-  而那通常是全案一大半的使用端(mAnchor 就有一半以上沒帶顏色 modifier)。
-  `inherit` 才是「module 沒指定就跟著父層走」,也才等同拆 module 前的行為。
+  ⚠️ **base 一定寫出真正想要的值,不要用 `initial`**,而且分兩種:
+
+  | 變數 | base | 意思 |
+  |---|---|---|
+  | 文字色 `--x-color` | `inherit` | 沒指定就跟父層走(等同拆 module 前的行為) |
+  | 背景 / 邊框色 `--x-bg-color` / `--x-border-color` | `transparent` | 沒指定就是**沒有顏色** —— 背景不該去繼承父層 |
+
+  **為什麼不用 `initial`**(2026-08-31 更正過理由,原本寫的不精確):
+  `initial` 其實**能運作**,但靠的是繞路 —— custom property 的值寫成 CSS-wide keyword 時,
+  它的計算值是 guaranteed-invalid,於是 `color: var(--x-color)` 成為
+  **IACVT**(invalid at computed-value time):繼承屬性(`color`)表現為 `inherit`、
+  非繼承屬性(`background-color`)表現為 `initial`(即 transparent)。結果剛好符合直覺。
+
+  > 所以原本那句「`color` 的 initial 是黑色,寫 initial 會讓元素全變黑」**是錯的** ——
+  > 那只在直接寫 `color: initial` 時成立,透過 `var()` 不成立。
+  > 實務也對得上:Official 的 mAnchor 長期用 `initial`、50 個檔案在用它,從來沒有變黑。
+
+  真正的問題是**意圖讀不出來**:下一個人會以為 initial 就是「黑色」而不敢動它,
+  或反過來以為 `-bg-color: initial` 會繼承父層背景。寫 `inherit` / `transparent` 就沒有這層猜測。
+  由 `checkColorBase` 檢查(依變數名判斷該建議哪一個)。
 
   使用端在 `setClass.main`(或 `class`)寫 `text-[--gray-999]` 這種 tailwind 顏色**本身就是錯的** ——
   它會被 module 的宣告蓋掉,而且**本來就該被蓋掉**。正確做法是:
@@ -777,10 +853,8 @@ modifier 名稱就是 **tailwind 的 utility 名前面加 `--`**,不要自己另
   mSort 的捲軸留白寫死 `pr-[2px]`,當時都以為「這是造型不會變」而略過。
   真要調的時候(例如高解析度螢幕想加粗)就得回頭改版型檔,而不是只動一個值。
 
-  **明確不開變數的四個**:
+  **明確不開變數的這幾個**(每一條都有對應的檢查函式,不必靠記憶):
 
-  - **`z-index`** —— 層級是版型結構的一部分,`z-[1]` / `z-[3]` 直接寫,
-    抽成變數只會讓「誰疊在誰上面」更難看懂。
   - **`100%`** —— 三個斷點沒差別時直接用 tailwind 的 `-full`,
     不要寫成 `w-[100%]`,更不要繞一層變數:
 
@@ -801,6 +875,27 @@ modifier 名稱就是 **tailwind 的 utility 名前面加 `--`**,不要自己另
     不開變數、也不分斷點:`@apply tracking-[0.06em]`。
     字距是組件的字體造型設定,全站一個值走到底,沒有「各頁面各自指定」或「各斷點不同」的需求;
     值本身也不是 px(通常是 `em`),不受「帶 px 一律開變數」約束。
+    由 `checkTrackingVariable` 檢查(抓 `--x-tracking:` / `tracking-[--x]` / `letter-spacing: var(…)`)。
+  - **`line-height`(`leading-*`)** —— 理由同 tracking:行高跟著字級走,
+    而且值多半是**無單位比例**(`1.5` / `1`),本來就不隨斷點改變,
+    拆三份只會得到三個一樣的數字。直接寫 `@apply leading-[1.5]`。
+    由 `checkLeadingVariable` 檢查(2026-08-31 加,抓 `--x-leading:` / `--x-line-height:` /
+    `leading-[--x]` / `line-height: var(…)`)。
+  - **`z-index`(`z-*`)** —— 一律**直接寫數字**:`@apply z-[3]`。不開變數、不分斷點。
+    由 `checkZIndexVariable` 檢查(抓 `--x-z:` / `--x-z-index:` / `z-[--x]` / `z-index: var(…)`)。
+
+    疊層順序是**整站共用的一套秩序** ——「遮罩要蓋在下拉選單上面」這種關係一旦決定就不會變,
+    也不隨斷點或使用端改變。開成變數只是把常數多轉一手,還要憑空拆三個一樣的斷點值;
+    更糟的是它讓「這一層到底排第幾」變成要跨檔案追,而疊層問題最需要的正是**一眼看到數字**。
+
+    要盤點全站層級就 `grep -rn "z-\[" assets/css/`,現況如下(全部是字面值):
+
+    | 層級 | 用在哪 |
+    |---|---|
+    | `z-[5]` | mLoading 全螢幕遮罩、mSort / AutoComplete 的下拉 |
+    | `z-[3]` | mPopup 遮罩、mDatepicker 浮層、mForm dropdown 的展開態 |
+    | `z-[2]` | mUpload 的多檔進度條、mPopup 的 promise 內層 |
+    | `z-[1]` | 各組件內部把某個子元素抬到同層之上 |
 
   `0` / `auto` / `none` 這種「歸零或不設定」也直接寫,那不是尺寸。
 
@@ -1001,6 +1096,43 @@ import { Field, ErrorMessage } from 'vee-validate'
 但習慣上排在 `@js` 之後、第三方套件之前。
 
 這條由工具檢查([lint-core.mjs](../../.tools/css/lint-core.mjs) 的 `checkImportOrder`)。
+
+---
+
+## 規則 6:不要用「本專案不存在」的 tailwind class
+
+> ⚠️ 這裡的「規則 6」與規則 4 章節內的 `6-a` / `6-b` 編號無關,那是另一組代號。
+
+這條是「[動手前先讀 tailwind.config.js](#動手前先讀-tailwindconfigjs)」那一節的**守門版** ——
+`theme` 底下整組覆寫的那幾組,內建 key 全部消失:
+
+| theme 的組 | 本專案剩下什麼 | 因此不存在的 |
+|---|---|---|
+| `screens` | `m` / `t` / `p` / `tm` / `pt` / `pMin` / `pMax` / `mLandscape` / `notsupport` / `firefox` / `IE` | **`sm:` `md:` `lg:` `xl:` `2xl:`** |
+| `fontSize` | `vmp` / `vmt` / `vmm` / `vmmls` | **`text-xs` ~ `text-9xl`、`text-base`** |
+| `boxShadow` | **一個都沒有** | **所有 `shadow-*`**(`shadow-[…]` 的 arbitrary value 除外) |
+| `fontFamily` | `default` | **`font-sans` `font-serif` `font-mono`** |
+
+**寫了不會報錯,class 就靜靜地不生效** —— 和拼錯字一個症狀,但更難發現。
+實測方式(不要靠推論,`theme` 的值是 import 進來的,改過就會變):
+
+```powershell
+echo '<div class="text-sm shadow-md md:flex"></div>' > probe.html
+npx tailwindcss -c tailwind.config.js -i in.css --content probe.html -o out.css
+# 產物裡一條都沒有 → 這些 class 全部無效
+```
+
+另外 `transition-width` / `-height` / `-size`(單數)也會被抓 ——
+`theme.extend.transitionProperty` 定義的是**複數**:`widths` / `heights` / `sizes`。
+
+⚠️ **`*-hexa` 在這個專案是合法用法**(`bg-hexa-[--black,0.7]`),所以規則 6 不抓它。
+Official 那邊已經全面改用 8 碼 hex 色票、會抓 —— **兩邊在這點上不同,對照時不要照抄**。
+
+這條由 [lint-core.mjs](../../.tools/css/lint-core.mjs) 的 `checkTailwindTheme` 檢查,
+`.vue` 與 `.css` 都掃(寫在哪裡都是錯的)。
+
+> ⚠️ **改了 `theme` 就要回頭同步 `UNAVAILABLE_CLASSES`** ——
+> 把某一組從 `theme` 移進 `theme.extend`(內建復活)時,對應那段要刪掉,否則會變成誤報。
 
 ---
 

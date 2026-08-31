@@ -1,5 +1,8 @@
 <script setup>
-import '@css/_modules/buy/mTable.css'
+import '@css/_modules/buy/mTable/variables.css'
+import '@css/_modules/buy/mTable/checkboxResponsivVariables.css'
+import '@css/_modules/buy/mTable/common.css'
+import '@css/_modules/buy/mTable/checkboxResponsiv.css'
 
 import useTableCore from './.composables/useTableCore'
 
@@ -132,7 +135,7 @@ onUnmounted(() => {
       :class="[setClass.container, { '--scrolling': isContainerScroll }]"
       ref="containerRef"
     >
-      <table class="m-table-content w-full" :class="setClass.content" ref="tableContentRef">
+      <table class="m-table-content" :class="setClass.content" ref="tableContentRef">
         <thead
           class="m-table-thead"
           :class="[setClass.thead, { '--fixed': isTheadFixedActive }]"
@@ -140,11 +143,11 @@ onUnmounted(() => {
           ref="theadRef"
           v-if="!isDeviceM"
         >
-          <tr class="m-table-thead-tr text-center" :class="setClass.theadTr">
+          <tr class="m-table-thead-tr" :class="setClass.theadTr">
             <!-- 勾選欄：表頭留空 -->
             <th class="m-table-thead-th" />
             <th
-              class="m-table-thead-th font-normal"
+              class="m-table-thead-th"
               :class="[setClass.theadTh, getColumnClass(column, 'thead')]"
               :colspan="getSpan(column, 'thead', 'colspan')"
               :rowspan="getSpan(column, 'thead', 'rowspan')"
@@ -159,11 +162,13 @@ onUnmounted(() => {
         <tbody class="m-table-tbody" :class="setClass.tbody">
           <template v-if="hasTbody">
             <tr
-              class="m-table-tbody-tr transition-colors duration-300"
+              class="m-table-tbody-tr"
               :class="[
                 setClass.tbodyTr,
-                getCheckboxDisabled(item) ? 'cursor-not-allowed' : 'cursor-pointer',
-                { '--checked': item[isCheckedKey] },
+                {
+                  '--disabled': getCheckboxDisabled(item),
+                  '--checked': item[isCheckedKey],
+                },
               ]"
               v-for="(item, rowIndex) in tbody"
               :key="`tbody_tr_${rowIndex}`"
@@ -171,7 +176,7 @@ onUnmounted(() => {
             >
               <!-- 勾選欄 -->
               <td class="m-table-tbody-td" :class="setClass.tbodyTd">
-                <div class="m:flex m:items-center m:gap-x-[4px]">
+                <div class="m-table-tbody-checkbox">
                   <CommonMFormCheckBox
                     :name="getCheckboxName(rowIndex)"
                     v-model="item[isCheckedKey]"
@@ -301,150 +306,3 @@ onUnmounted(() => {
   </div>
 </template>
 
-<style lang="postcss">
-:root {
-  --table-checkbox-responsiv-thtd-first-last-pc-px: 16px;
-  --table-checkbox-responsiv-thtd-first-last-tabled-px: 10px;
-
-  --table-checkbox-responsiv-thtd-pc-px: 5px;
-  --table-checkbox-responsiv-thtd-tabled-px: 4px;
-
-  --table-checkbox-responsiv-thead-th-pc-py: 8px;
-  --table-checkbox-responsiv-thead-th-tabled-py: 5px;
-  --table-checkbox-responsiv-thead-th-pc-text: 16px;
-  --table-checkbox-responsiv-thead-th-tabled-text: 14px;
-
-  --table-checkbox-responsiv-tbody-tr-pc-border-b: 1px;
-  --table-checkbox-responsiv-tbody-tr-tabled-border-b: 1px;
-  --table-checkbox-responsiv-tbody-tr-mobile-border-b: 1px;
-
-  --table-checkbox-responsiv-tbody-tr-mobile-py: 24px;
-
-  --table-checkbox-responsiv-tbody-tr-mobile-px: 16px;
-
-  --table-checkbox-responsiv-tbody-td-pc-py: 15px;
-  --table-checkbox-responsiv-tbody-td-tabled-py: 10px;
-
-  --table-checkbox-responsiv-thead-th-color: var(--gray-333);
-  --table-checkbox-responsiv-tbody-tr-border-color: var(--gray-e5);
-  --table-checkbox-responsiv-tbody-tr-background-color: transparent;
-  --table-checkbox-responsiv-tbody-tr-checked-background-color: var(--gray-f7);
-  --table-checkbox-responsiv-tbody-td-color: var(--gray-666);
-}
-
-.m-table {
-  &.\-\-checkbox-responsiv {
-    .m-table-tbody-tr {
-      border-bottom: var(--table-checkbox-responsiv-tbody-tr-border-b) solid
-        var(--table-checkbox-responsiv-tbody-tr-border-color);
-
-      &:not(.--checked) {
-        @apply bg-[--table-checkbox-responsiv-tbody-tr-background-color];
-      }
-
-      &.\-\-checked {
-        @apply bg-[--table-checkbox-responsiv-tbody-tr-checked-background-color];
-      }
-    }
-
-    .m-table-tbody-td {
-      @apply text-[--table-checkbox-responsiv-tbody-td-color];
-    }
-  }
-}
-
-@screen p {
-  .m-table {
-    &.\-\-checkbox-responsiv {
-      --table-checkbox-responsiv-thtd-first-last-px: var(
-        --table-checkbox-responsiv-thtd-first-last-pc-px
-      );
-      --table-checkbox-responsiv-thtd-px: var(--table-checkbox-responsiv-thtd-pc-px);
-      --table-checkbox-responsiv-thead-th-py: var(--table-checkbox-responsiv-thead-th-pc-py);
-      --table-checkbox-responsiv-thead-th-text: var(--table-checkbox-responsiv-thead-th-pc-text);
-
-      --table-checkbox-responsiv-tbody-tr-border-b: var(
-        --table-checkbox-responsiv-tbody-tr-pc-border-b
-      );
-      --table-checkbox-responsiv-tbody-td-py: var(--table-checkbox-responsiv-tbody-td-pc-py);
-      /* --table-checkbox-responsiv-tbody-td-text: var(--table-checkbox-responsiv-tbody-td-pc-text); */
-    }
-  }
-}
-
-@screen pt {
-  .m-table {
-    &.\-\-checkbox-responsiv {
-      .m-table-thead-th,
-      .m-table-tbody-td {
-        &:not(:first-child) {
-          @apply pl-[--table-checkbox-responsiv-thtd-px];
-        }
-
-        &:first-child {
-          @apply w-[calc(var(--table-checkbox-responsiv-thtd-px)_+_var(--table-checkbox-responsiv-thtd-first-last-pc-px)_+_18px)] pl-[--table-checkbox-responsiv-thtd-first-last-pc-px];
-        }
-
-        &:not(:last-child) {
-          @apply pr-[--table-checkbox-responsiv-thtd-px];
-        }
-
-        &:last-child {
-          @apply pr-[--table-checkbox-responsiv-thtd-first-last-pc-px];
-        }
-      }
-
-      .m-table-thead-th {
-        font-size: var(--table-checkbox-responsiv-thead-th-text);
-
-        @apply py-[--table-checkbox-responsiv-thead-th-py] text-[--table-checkbox-responsiv-thead-th-color];
-      }
-
-      .m-table-tbody-td {
-        @apply py-[--table-checkbox-responsiv-tbody-td-py];
-      }
-    }
-  }
-}
-
-@screen t {
-  .m-table {
-    &.\-\-checkbox-responsiv {
-      --table-checkbox-responsiv-thtd-first-last-px: var(
-        --table-checkbox-responsiv-thtd-first-last-tabled-px
-      );
-      --table-checkbox-responsiv-thtd-px: var(--table-checkbox-responsiv-thtd-tabled-px);
-      --table-checkbox-responsiv-thead-th-py: var(--table-checkbox-responsiv-thead-th-tabled-py);
-      --table-checkbox-responsiv-thead-th-text: var(
-        --table-checkbox-responsiv-thead-th-tabled-text
-      );
-
-      --table-checkbox-responsiv-tbody-tr-border-b: var(
-        --table-checkbox-responsiv-tbody-tr-tabled-border-b
-      );
-      --table-checkbox-responsiv-tbody-td-py: var(--table-checkbox-responsiv-tbody-td-tabled-py);
-      /* --table-checkbox-responsiv-tbody-td-text: var(--table-checkbox-responsiv-tbody-td-tabled-text); */
-    }
-  }
-}
-
-@screen m {
-  .m-table {
-    --table-checkbox-responsiv-tbody-tr-border-b: var(
-      --table-checkbox-responsiv-tbody-tr-mobile-border-b
-    );
-
-    &.\-\-checkbox-responsiv {
-      .m-table-tbody,
-      .m-table-tbody-tr,
-      .m-table-tbody-td {
-        @apply block;
-      }
-
-      .m-table-tbody-tr {
-        @apply px-[--table-checkbox-responsiv-tbody-tr-mobile-px] py-[--table-checkbox-responsiv-tbody-tr-mobile-py];
-      }
-    }
-  }
-}
-</style>

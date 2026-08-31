@@ -1,4 +1,7 @@
 <script setup>
+import '@css/_modules/buy/mHeader/variables.css'
+import '@css/_modules/buy/mHeader/common.css'
+
 const common = useCommonStore()
 const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
@@ -17,9 +20,9 @@ onUnmounted(() => {
 
 <template>
   <div
-    class="m-header mx-auto flex items-center tm:h-[50px] tm:px-[15px] p:h-[60px] p:max-w-[1920px] p:px-[50px]"
+    class="m-header"
   >
-    <div class="m-header-logo flex shrink-0 items-center">
+    <div class="m-header-logo">
       <CommonImgSrc
         src="buy/logo_text.svg"
         :setClass="{
@@ -33,7 +36,7 @@ onUnmounted(() => {
         }"
         v-if="isDeviceP"
       />
-      <em class="text-[--white] p:ml-[10px] p:text-[24px]" v-if="isDeviceP">管理後台</em>
+      <em v-if="isDeviceP">管理後台</em>
     </div>
   </div>
 </template>

@@ -1,0 +1,125 @@
+/* multiple 變體的變數 —— 多張上傳的清單與每一張的卡片。 */
+:root {
+  /* 拖曳排序時,被拖走那張留在原位的殘影 */
+  --upload-multiple-item-opacity: 1;
+  --upload-multiple-item-preview-opacity: 0.3;
+
+  --upload-multiple-item-rounded: 0;
+  --upload-multiple-item-pc-rounded: 5px;
+  --upload-multiple-item-tablet-rounded: 5px;
+  --upload-multiple-item-mobile-rounded: 5px;
+
+  --upload-multiple-item-h: auto;
+  --upload-multiple-item-pc-h: 152px;
+  --upload-multiple-item-tablet-h: 114px;
+  --upload-multiple-item-mobile-h: 114px;
+
+  /* 右上角的移除鈕 */
+  --upload-multiple-remove-bg-color: var(--gray-f2);
+  --upload-multiple-remove-icon-color: var(--gray-666);
+
+  --upload-multiple-remove-size: 0;
+  --upload-multiple-remove-pc-size: 24px;
+  --upload-multiple-remove-tablet-size: 24px;
+  --upload-multiple-remove-mobile-size: 24px;
+
+  --upload-multiple-remove-rounded: 0;
+  --upload-multiple-remove-pc-rounded: 5px;
+  --upload-multiple-remove-tablet-rounded: 5px;
+  --upload-multiple-remove-mobile-rounded: 5px;
+
+  --upload-multiple-remove-icon-size: 0;
+  --upload-multiple-remove-icon-pc-size: 10px;
+  --upload-multiple-remove-icon-tablet-size: 10px;
+  --upload-multiple-remove-icon-mobile-size: 10px;
+
+  /* 勾選框的位置:手機疊在圖片左下角,桌機與平板排到圖片下方 —— 兩端是不同的定位方式 */
+
+  /* lint-breakpoint-exempt: 只有手機是絕對定位疊在圖上,桌機 / 平板沒有這個 inset */
+  --upload-multiple-check-mobile-inset: 5px;
+
+  /* lint-breakpoint-exempt: 只有桌機 / 平板排在圖片下方需要推開,手機是疊上去的 */
+  --upload-multiple-check-pc-mt: 6px;
+  --upload-multiple-check-tablet-mt: 6px;
+
+  /* 勾選框本身 */
+  --upload-multiple-check-icon-bg-color: var(--white);
+  --upload-multiple-check-icon-color: var(--orange-e646);
+
+  --upload-multiple-check-icon-size: 0;
+  --upload-multiple-check-icon-pc-size: 18px;
+  --upload-multiple-check-icon-tablet-size: 18px;
+  --upload-multiple-check-icon-mobile-size: 18px;
+
+  --upload-multiple-check-icon-p: 0;
+  --upload-multiple-check-icon-pc-p: 1px;
+  --upload-multiple-check-icon-tablet-p: 1px;
+  --upload-multiple-check-icon-mobile-p: 1px;
+
+  --upload-multiple-check-icon-rounded: 0;
+  --upload-multiple-check-icon-pc-rounded: 2px;
+  --upload-multiple-check-icon-tablet-rounded: 2px;
+  --upload-multiple-check-icon-mobile-rounded: 2px;
+
+  --upload-multiple-check-icon-border: 0;
+  --upload-multiple-check-icon-pc-border: 1px;
+  --upload-multiple-check-icon-tablet-border: 1px;
+  --upload-multiple-check-icon-mobile-border: 1px;
+
+  --upload-multiple-check-icon-mt: 0;
+  --upload-multiple-check-icon-pc-mt: 2px;
+  --upload-multiple-check-icon-tablet-mt: 2px;
+  --upload-multiple-check-icon-mobile-mt: 2px;
+}
+
+/* 清單與新增鈕(Multiple.vue) */
+:root {
+  --upload-multiple-list-gap-x: 0;
+  --upload-multiple-list-pc-gap-x: 10px;
+  --upload-multiple-list-tablet-gap-x: 10px;
+  --upload-multiple-list-mobile-gap-x: 10px;
+
+  --upload-multiple-list-gap-y: 0;
+  --upload-multiple-list-pc-gap-y: 16px;
+  --upload-multiple-list-tablet-gap-y: 16px;
+  --upload-multiple-list-mobile-gap-y: 16px;
+
+  /* lint-breakpoint-exempt: 卡片寬度只在桌機收斂,平板與手機是網格自動撐開 */
+  --upload-multiple-slot-pc-w: 200px;
+
+  --upload-multiple-append-bg-color: var(--gray-f7);
+  --upload-multiple-append-border-color: var(--gray-e5);
+  --upload-multiple-append-color: var(--green-6a2d);
+  --upload-multiple-append-icon-color: var(--gray-666);
+
+  --upload-multiple-append-rounded: 0;
+  --upload-multiple-append-pc-rounded: 10px;
+  --upload-multiple-append-tablet-rounded: 10px;
+  --upload-multiple-append-mobile-rounded: 10px;
+
+  --upload-multiple-append-border: 0;
+  --upload-multiple-append-pc-border: 1px;
+  --upload-multiple-append-tablet-border: 1px;
+  --upload-multiple-append-mobile-border: 1px;
+
+  /* 還沒有任何圖片時,新增鈕獨占一整列 */
+  --upload-multiple-append-min-h: 0;
+  --upload-multiple-append-pc-min-h: 130px;
+  --upload-multiple-append-tablet-min-h: 130px;
+  --upload-multiple-append-mobile-min-h: 130px;
+
+  --upload-multiple-append-gap-y: 0;
+  --upload-multiple-append-pc-gap-y: 10px;
+  --upload-multiple-append-tablet-gap-y: 10px;
+  --upload-multiple-append-mobile-gap-y: 10px;
+
+  --upload-multiple-append-text-size: inherit;
+  --upload-multiple-append-pc-text-size: 16px;
+  --upload-multiple-append-tablet-text-size: 16px;
+  --upload-multiple-append-mobile-text-size: 16px;
+
+  --upload-multiple-append-icon-size: 0;
+  --upload-multiple-append-icon-pc-size: 24px;
+  --upload-multiple-append-icon-tablet-size: 24px;
+  --upload-multiple-append-icon-mobile-size: 24px;
+}

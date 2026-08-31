@@ -150,6 +150,7 @@ const onAreaClick = (item) => {
     name="addr"
     v-model="model.label"
     :setClass="{
+      type: 'text-[16px]',
       main: '--h-40 --px-12 --py-8 p:w-[160px]',
       dropdown: 't:w-[250px] p:w-[300px]',
       dropdownBody: 'm:max-h-[258px] pt:max-h-[208px]',

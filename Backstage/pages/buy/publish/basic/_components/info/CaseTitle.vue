@@ -26,6 +26,7 @@ const remainingWordCount = computed(() => {
       required: '請輸入物件標題',
     }"
     :setClass="{
+      type: 'text-[16px]',
       main: '--h-40 --px-12 --py-8',
       element: 'grow',
       length: 'text-[14px] text-[--gray-999]',

@@ -1,0 +1,97 @@
+/* radiosOval 變體的版型,以及 @screen 的斷點對應。 */
+.m-form {
+  &.\-\-radios-oval {
+    .m-form-radios {
+      @apply inline-flex overflow-hidden;
+      @apply gap-x-[--form-radios-oval-list-gap-x] gap-y-[--form-radios-oval-list-gap-y];
+      @apply rounded-[--form-radios-oval-list-rounded] bg-[--form-radios-oval-list-bg-color];
+    }
+
+    .m-form-container {
+      @apply rounded-[--form-radios-oval-item-rounded] bg-[--form-radios-oval-item-bg-color];
+
+      height: var(--form-radios-oval-item-h);
+    }
+
+    .m-form-element {
+      @apply relative flex h-full w-full cursor-pointer items-center justify-center;
+      @apply gap-x-[--form-radios-oval-gap-x] text-[--form-radios-oval-color];
+      @apply transition-colors duration-300;
+
+      &:not(.\-\-checked) {
+        @apply bg-[--form-radios-oval-bg-color];
+        @apply pl-[--form-radios-oval-pl] pr-[--form-radios-oval-pr];
+      }
+
+      &.\-\-checked {
+        @apply bg-[--form-radios-oval-checked-bg-color];
+        @apply px-[--form-radios-oval-checked-px];
+
+        .m-form-label {
+          @apply font-semibold;
+        }
+      }
+    }
+
+    .m-form-icon {
+      @apply h-[--form-radios-oval-icon-size] w-[--form-radios-oval-icon-size];
+      @apply text-[--form-radios-oval-icon-color];
+    }
+
+    .m-form-label {
+      @apply text-[length:--form-radios-oval-text-size];
+    }
+  }
+}
+
+@screen p {
+  .m-form {
+    &.\-\-radios-oval {
+      --form-radios-oval-list-rounded: var(--form-radios-oval-list-pc-rounded);
+      --form-radios-oval-list-bg-color: var(--form-radios-oval-list-pc-bg-color);
+      --form-radios-oval-item-h: var(--form-radios-oval-item-pc-h);
+      --form-radios-oval-gap-x: var(--form-radios-oval-pc-gap-x);
+      --form-radios-oval-pl: var(--form-radios-oval-pc-pl);
+      --form-radios-oval-pr: var(--form-radios-oval-pc-pr);
+      --form-radios-oval-checked-px: var(--form-radios-oval-checked-pc-px);
+      --form-radios-oval-icon-size: var(--form-radios-oval-icon-pc-size);
+      --form-radios-oval-text-size: var(--form-radios-oval-pc-text-size);
+    }
+  }
+}
+
+@screen t {
+  .m-form {
+    &.\-\-radios-oval {
+      --form-radios-oval-list-gap-x: var(--form-radios-oval-list-tablet-gap-x);
+      --form-radios-oval-list-gap-y: var(--form-radios-oval-list-tablet-gap-y);
+      --form-radios-oval-item-bg-color: var(--form-radios-oval-item-tablet-bg-color);
+      --form-radios-oval-item-rounded: var(--form-radios-oval-item-tablet-rounded);
+      --form-radios-oval-item-h: var(--form-radios-oval-item-tablet-h);
+      --form-radios-oval-gap-x: var(--form-radios-oval-tablet-gap-x);
+      --form-radios-oval-pl: var(--form-radios-oval-tablet-pl);
+      --form-radios-oval-pr: var(--form-radios-oval-tablet-pr);
+      --form-radios-oval-checked-px: var(--form-radios-oval-checked-tablet-px);
+      --form-radios-oval-icon-size: var(--form-radios-oval-icon-tablet-size);
+      --form-radios-oval-text-size: var(--form-radios-oval-tablet-text-size);
+    }
+  }
+}
+
+@screen m {
+  .m-form {
+    &.\-\-radios-oval {
+      --form-radios-oval-list-gap-x: var(--form-radios-oval-list-mobile-gap-x);
+      --form-radios-oval-list-gap-y: var(--form-radios-oval-list-mobile-gap-y);
+      --form-radios-oval-item-bg-color: var(--form-radios-oval-item-mobile-bg-color);
+      --form-radios-oval-item-rounded: var(--form-radios-oval-item-mobile-rounded);
+      --form-radios-oval-item-h: var(--form-radios-oval-item-mobile-h);
+      --form-radios-oval-gap-x: var(--form-radios-oval-mobile-gap-x);
+      --form-radios-oval-pl: var(--form-radios-oval-mobile-pl);
+      --form-radios-oval-pr: var(--form-radios-oval-mobile-pr);
+      --form-radios-oval-checked-px: var(--form-radios-oval-checked-mobile-px);
+      --form-radios-oval-icon-size: var(--form-radios-oval-icon-mobile-size);
+      --form-radios-oval-text-size: var(--form-radios-oval-mobile-text-size);
+    }
+  }
+}

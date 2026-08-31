@@ -1,5 +1,8 @@
 <script setup>
+import '@css/_modules/buy/mUpload/variables.css'
+import '@css/_modules/buy/mUpload/multipleVariables.css'
 import '@css/_modules/buy/mUpload/common.css'
+import '@css/_modules/buy/mUpload/multiple.css'
 
 import useValidateEvents from '../../common/mForm/.composables/useValidateEvents.js'
 
@@ -877,7 +880,7 @@ watch(
     v-slot="{ field, handleChange, validate }"
   >
     <div
-      class="m-upload --drag w-full"
+      class="m-upload --drag"
       :class="setClass.main"
       @dragenter="onUploadDragEnter"
       @dragover="onUploadDragOver"
@@ -895,15 +898,15 @@ watch(
         ref="inputRef"
         :name="name"
         type="file"
-        class="hidden"
+        class="m-upload-multiple-input"
         :accept="config.accept"
         :multiple="!isSingleMode"
         @change="(event) => onFileChange(event, handleChange, validate)"
       />
 
-      <div class="grid gap-x-[10px] gap-y-[16px] m:grid-cols-2 t:grid-cols-3 p:grid-cols-4">
+      <div class="m-upload-multiple-list">
         <div
-          class="m-update-item cursor-move touch-none"
+          class="m-upload-multiple-sortable"
           :class="setClass.item"
           :draggable="config.draggableSort"
           @dragstart="onSortDragStart($event, index)"
@@ -918,10 +921,10 @@ watch(
           :key="item.id"
           :ref="(element) => setSortItemRef(item.id, element)"
         >
-          <div class="relative p:w-[200px]">
+          <div class="m-upload-multiple-slot">
             <div
               v-if="draggedPreviewItem && shouldShowDraggedPreviewAt(index)"
-              class="pointer-events-none absolute inset-x-0 top-0 z-[2]"
+              class="m-upload-multiple-ghost"
             >
               <BuyMUploadMultipleItem
                 :item="draggedPreviewItem"
@@ -948,11 +951,10 @@ watch(
         <button
           key="append-button"
           type="button"
-          class="flex items-center justify-center rounded-[10px] border-[1px] border-[--gray-e5] bg-[--gray-f7]"
+          class="m-upload-multiple-append"
           :class="{
-            'min-h-[130px] w-full m:col-span-2 t:col-span-3 p:col-span-4': !hasImages,
-            'm:h-[114px] p:h-[152px] p:w-[200px]': hasImages,
-            'border-[--blue-6afa] bg-[--blue-efff]': isUploadDragging,
+            '--filled': hasImages,
+            '--dragging': isUploadDragging,
           }"
           @click="openFileDialog"
           @dragover="onAppendButtonDragOver"
@@ -960,13 +962,13 @@ watch(
           v-if="hasAppendButton"
         >
           <div
-            class="flex grow flex-col items-center justify-center gap-y-[10px] text-[16px] text-[--green-6a2d]"
+            class="m-upload-multiple-append-body"
           >
             <CommonSvgIcon
-              class="h-[24px] w-[24px] shrink-0 text-[--gray-666]"
+              class="m-upload-multiple-append-icon"
               :icon="hasImages ? 'icon_plus_circle' : 'icon_upload'"
             />
-            <span class="grow text-[16px]">
+            <span class="m-upload-multiple-append-text">
               {{ hasImages ? placeholder.hasImages : placeholder.default }}
             </span>
           </div>
@@ -985,31 +987,3 @@ watch(
   </ErrorMessage>
 </template>
 
-<style lang="postcss">
-.m-upload-checkbox {
-  &:not(:checked) {
-    & + .m-upload-checkbox-icon {
-      @apply border-[--gray-ccce];
-    }
-  }
-
-  &:checked {
-    & + .m-upload-checkbox-icon {
-      @apply border-transparent;
-
-      > use {
-        @apply opacity-100;
-      }
-    }
-  }
-}
-.m-upload-checkbox-icon {
-  > use {
-    @apply opacity-0 transition-opacity duration-300;
-  }
-}
-
-.m-upload-drag-preview {
-  transition: transform 0.22s ease;
-}
-</style>

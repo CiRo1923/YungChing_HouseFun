@@ -1,5 +1,8 @@
 <script setup>
+import '@css/_modules/buy/mUpload/variables.css'
+import '@css/_modules/buy/mUpload/singleVariables.css'
 import '@css/_modules/buy/mUpload/common.css'
+import '@css/_modules/buy/mUpload/single.css'
 
 import useValidateEvents from '../../common/mForm/.composables/useValidateEvents.js'
 
@@ -487,7 +490,7 @@ watch(
     v-bind="validateOn"
     v-slot="{ field, handleChange, validate }"
   >
-    <div class="m-upload-single w-full" :class="setClass.main">
+    <div class="m-upload-single" :class="setClass.main">
       <input
         v-bind="field"
         :value="undefined"
@@ -499,18 +502,17 @@ watch(
         ref="inputRef"
         :name="name"
         type="file"
-        class="hidden"
+        class="m-upload-single-input"
         :accept="config.accept"
         :disabled="config.isDisabled"
         @change="(event) => onFileChange(event, handleChange, validate)"
       />
 
       <div
-        class="relative flex-col"
+        class="m-upload-single-dropzone"
         :class="{
-          'flex min-h-[130px] w-full': !hasImage,
-          'inline-flex p:w-[200px]': hasImage,
-          'border-[--blue-6afa] bg-[--blue-efff]': isUploadDragging,
+          '--filled': hasImage,
+          '--dragging': isUploadDragging,
         }"
         role="button"
         :disabled="config.isDisabled"
@@ -522,36 +524,36 @@ watch(
       >
         <template v-if="hasImage">
           <div
-            class="relative flex items-center justify-center overflow-hidden rounded-[10px] bg-[--gray-f7] m:h-[114px] p:h-[152px]"
+            class="m-upload-single-preview"
           >
             <img
               :src="innerItem.previewUrl"
               alt=""
-              class="absolute inset-0 h-full w-full object-cover"
+              class="m-upload-single-image"
               draggable="false"
             />
             <div
-              class="relative z-[1] flex flex-col items-center justify-center gap-y-[10px] text-[16px] text-[--white]"
+              class="m-upload-single-overlay"
             >
-              <CommonSvgIcon icon="icon_upload" class="h-[24px] w-[24px] shrink-0" />
+              <CommonSvgIcon icon="icon_upload" class="m-upload-single-icon" />
               <span>點擊或拖曳重新上傳</span>
             </div>
           </div>
           <button
             type="button"
-            class="absolute right-0 top-0 z-[1] flex h-[24px] w-[24px] items-center justify-center rounded-[5px] bg-[--gray-f2]"
+            class="m-upload-single-remove"
             @click.stop="onRemoveImage(handleChange, validate)"
           >
-            <CommonSvgIcon icon="icon_xmark" class="h-[12px] w-[12px] text-[--gray-666]" />
+            <CommonSvgIcon icon="icon_xmark" class="m-upload-single-remove-icon" />
           </button>
         </template>
 
         <div
-          class="flex w-full grow flex-col items-center justify-center gap-y-[10px] rounded-[10px] border-[1px] border-[--gray-e5] bg-[--gray-f7] text-[--green-6a2d]"
+          class="m-upload-single-empty"
           v-else
         >
-          <CommonSvgIcon icon="icon_upload" class="h-[24px] w-[24px] shrink-0 text-[--gray-666]" />
-          <span class="text-[16px]">{{ config.placeholder }}</span>
+          <CommonSvgIcon icon="icon_upload" class="m-upload-single-icon" />
+          <span class="m-upload-single-text">{{ config.placeholder }}</span>
         </div>
       </div>
     </div>
@@ -568,4 +570,3 @@ watch(
   </ErrorMessage>
 </template>
 
-<style lang="postcss"></style>

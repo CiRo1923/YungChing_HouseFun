@@ -1,4 +1,7 @@
 <script setup>
+import '@css/_modules/buy/mAddress/variables.css'
+import '@css/_modules/buy/mAddress/common.css'
+
 const emits = defineEmits([
   'update:city',
   'update:area',
@@ -302,10 +305,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div
-    class="m-address flex flex-wrap gap-x-[8px] m:gap-y-[12px] pt:gap-y-[8px]"
-    :class="setClass.main"
-  >
+  <div class="m-address" :class="setClass.main">
     <CommonMFormSelect
       :name="`${props.name}_address_city`"
       v-model="modelCity"
@@ -317,6 +317,7 @@ onMounted(() => {
         isDisabled: config.city.isDisabled,
       }"
       :setClass="{
+        type: 'text-[16px]',
         main: ['--h-40 --px-12 --py-8 m:w-full', setClass.city],
       }"
       @change="onCityChange()"
@@ -333,6 +334,7 @@ onMounted(() => {
         isDisabled: config.area.isDisabled || !modelCity,
       }"
       :setClass="{
+        type: 'text-[16px]',
         main: ['--h-40 --px-12 --py-8 m:w-full', setClass.area],
       }"
       @change="onAreaChange()"
@@ -350,6 +352,7 @@ onMounted(() => {
         noMatchClearLabel: true,
       }"
       :setClass="{
+        type: 'text-[16px]',
         main: ['--h-40 --px-12 --py-8 m:w-full', setClass.road],
       }"
       v-if="props.road !== undefined"
@@ -369,6 +372,7 @@ onMounted(() => {
         isDisabled: config.lane.isDisabled,
       }"
       :setClass="{
+        type: 'text-[16px]',
         main: ['--h-40 --px-12 --py-8', setClass.lane],
         rearAssist: 'text-[14px] text-[--gray-999]',
       }"
@@ -391,6 +395,7 @@ onMounted(() => {
         isDisabled: config.alley.isDisabled,
       }"
       :setClass="{
+        type: 'text-[16px]',
         main: ['--h-40 --px-12 --py-8', setClass.alley],
         rearAssist: 'text-[14px] text-[--gray-999]',
       }"
@@ -413,6 +418,7 @@ onMounted(() => {
         isDisabled: config.number.isDisabled,
       }"
       :setClass="{
+        type: 'text-[16px]',
         main: ['--h-40 --px-12 --py-8', setClass.number],
         rearAssist: 'text-[14px] text-[--gray-999]',
       }"
@@ -421,7 +427,7 @@ onMounted(() => {
       <template #rearAssist>號</template>
     </CommonMFormInput>
     <template v-if="props.ofNumber !== undefined">
-      <span class="h-40px flex items-center text-[16px] text-[--gray-666]">之</span>
+      <span class="m-address-separator">之</span>
       <CommonMFormInput
         :name="`${props.name}_address_of_number`"
         v-model="modelOfNumber"
@@ -436,6 +442,7 @@ onMounted(() => {
           isDisabled: config.ofNumber.isDisabled,
         }"
         :setClass="{
+          type: 'text-[16px]',
           main: ['--h-40 --px-12 --py-8', setClass.ofNumber],
           rearAssist: 'text-[14px] text-[--gray-999]',
         }"
@@ -456,6 +463,7 @@ onMounted(() => {
         isDisabled: config.floor.isDisabled,
       }"
       :setClass="{
+        type: 'text-[16px]',
         main: ['--h-40 --px-12 --py-8', setClass.floor],
         rearAssist: 'text-[14px] text-[--gray-999]',
       }"
@@ -464,7 +472,7 @@ onMounted(() => {
       <template #rearAssist>樓</template>
     </CommonMFormInput>
     <template v-if="props.ofFloor !== undefined">
-      <span class="h-40px flex items-center text-[16px] text-[--gray-666]">之</span>
+      <span class="m-address-separator">之</span>
       <CommonMFormInput
         :name="`${props.name}_address_of_floor`"
         v-model="modelOfFloor"
@@ -479,6 +487,7 @@ onMounted(() => {
           isDisabled: config.ofFloor.isDisabled,
         }"
         :setClass="{
+          type: 'text-[16px]',
           main: ['--h-40 --px-12 --py-8', setClass.ofFloor],
           rearAssist: 'text-[14px] text-[--gray-999]',
         }"
@@ -486,5 +495,3 @@ onMounted(() => {
     </template>
   </div>
 </template>
-
-<style></style>

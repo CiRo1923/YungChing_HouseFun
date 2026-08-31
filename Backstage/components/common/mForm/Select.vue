@@ -1,6 +1,8 @@
 <script setup>
-import '@css/_modules/buy/mForm.css'
-import '@css/_modules/buy/mFormDropdown.css'
+import '@css/_modules/common/mForm/variables.css'
+import '@css/_modules/common/mForm/dropdownVariables.css'
+import '@css/_modules/common/mForm/common.css'
+import '@css/_modules/common/mForm/dropdown.css'
 
 import { onMergeDropdownConfig, useDropdownCore } from './.composables/useDropdownCore.js'
 import useValidateEvents from './.composables/useValidateEvents.js'
@@ -314,7 +316,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="m-form overflow-hidden" :class="setClass.main">
+  <div class="m-form" :class="setClass.main">
     <Field
       :name="props.name"
       v-model="model"
@@ -323,7 +325,7 @@ onUnmounted(() => {
       v-slot="{ field, errorMessage }"
     >
       <input type="hidden" :id="props.name" v-bind="field" />
-      <div class="m-form-container flex" :class="setClass.container">
+      <div class="m-form-container" :class="setClass.container">
         <button
           type="button"
           class="m-form-element --select"
@@ -369,7 +371,7 @@ onUnmounted(() => {
     <ErrorMessage
       as="span"
       :name="props.name"
-      class="m-form-error block"
+      class="m-form-error"
       :class="setClass.error"
       v-slot="{ message }"
     >
@@ -422,6 +424,3 @@ onUnmounted(() => {
   </Teleport>
 </template>
 
-<style lang="postcss">
-@import '@css/_common/vueTransition.css';
-</style>

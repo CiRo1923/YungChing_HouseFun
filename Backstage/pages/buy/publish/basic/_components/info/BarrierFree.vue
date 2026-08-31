@@ -56,6 +56,7 @@ const isOther = computed(() => {
             required: '請輸入其他原因',
           }"
           :setClass="{
+            type: 'text-[16px]',
             main: '--h-40 --px-12 --py-8',
           }"
         />

@@ -1,0 +1,10 @@
+/* mUpload 的變數 —— 只放「值」,行為寫在 common.css。 */
+:root {
+  --upload-error-color: var(--orange-e646);
+
+  --upload-checkbox-icon-border-color: var(--gray-ccce);
+
+  /* 勾選圖示:選中才顯示 */
+  --upload-checkbox-icon-opacity: 0;
+  --upload-checkbox-icon-checked-opacity: 1;
+}

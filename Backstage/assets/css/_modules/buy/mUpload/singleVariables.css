@@ -1,0 +1,77 @@
+/* single 變體的變數 —— 單張上傳。 */
+:root {
+  --upload-single-dropzone-bg-color: inherit;
+  --upload-single-dropzone-border-color: inherit;
+
+  /* 拖曳到範圍內時整塊變色,提示可以放開 */
+  --upload-single-dragging-bg-color: var(--blue-efff);
+  --upload-single-dragging-border-color: var(--blue-6afa);
+
+  /* lint-breakpoint-exempt: 沒有圖時撐滿容器,寬度只在桌機需要收斂 */
+  --upload-single-dropzone-pc-w: 200px;
+
+  --upload-single-dropzone-min-h: 0;
+  --upload-single-dropzone-pc-min-h: 130px;
+  --upload-single-dropzone-tablet-min-h: 130px;
+  --upload-single-dropzone-mobile-min-h: 130px;
+
+  /* 預覽區與空狀態共用同一組圓角與底色 */
+  --upload-single-box-bg-color: var(--gray-f7);
+
+  --upload-single-box-rounded: 0;
+  --upload-single-box-pc-rounded: 10px;
+  --upload-single-box-tablet-rounded: 10px;
+  --upload-single-box-mobile-rounded: 10px;
+
+  --upload-single-box-h: auto;
+  --upload-single-box-pc-h: 152px;
+  --upload-single-box-tablet-h: 114px;
+  --upload-single-box-mobile-h: 114px;
+
+  /* 蓋在圖片上的「點擊或拖曳重新上傳」 */
+  --upload-single-overlay-color: var(--white);
+
+  --upload-single-overlay-gap-y: 0;
+  --upload-single-overlay-pc-gap-y: 10px;
+  --upload-single-overlay-tablet-gap-y: 10px;
+  --upload-single-overlay-mobile-gap-y: 10px;
+
+  --upload-single-overlay-text-size: inherit;
+  --upload-single-overlay-pc-text-size: 16px;
+  --upload-single-overlay-tablet-text-size: 16px;
+  --upload-single-overlay-mobile-text-size: 16px;
+
+  --upload-single-icon-size: 0;
+  --upload-single-icon-pc-size: 24px;
+  --upload-single-icon-tablet-size: 24px;
+  --upload-single-icon-mobile-size: 24px;
+
+  /* 右上角的移除鈕 */
+  --upload-single-remove-bg-color: var(--gray-f2);
+  --upload-single-remove-icon-color: var(--gray-666);
+
+  --upload-single-remove-size: 0;
+  --upload-single-remove-pc-size: 24px;
+  --upload-single-remove-tablet-size: 24px;
+  --upload-single-remove-mobile-size: 24px;
+
+  --upload-single-remove-rounded: 0;
+  --upload-single-remove-pc-rounded: 5px;
+  --upload-single-remove-tablet-rounded: 5px;
+  --upload-single-remove-mobile-rounded: 5px;
+
+  --upload-single-remove-icon-size: 0;
+  --upload-single-remove-icon-pc-size: 12px;
+  --upload-single-remove-icon-tablet-size: 12px;
+  --upload-single-remove-icon-mobile-size: 12px;
+
+  /* 還沒選圖時的空狀態 */
+  --upload-single-empty-color: var(--green-6a2d);
+  --upload-single-empty-border-color: var(--gray-e5);
+  --upload-single-empty-icon-color: var(--gray-666);
+
+  --upload-single-empty-border: 0;
+  --upload-single-empty-pc-border: 1px;
+  --upload-single-empty-tablet-border: 1px;
+  --upload-single-empty-mobile-border: 1px;
+}

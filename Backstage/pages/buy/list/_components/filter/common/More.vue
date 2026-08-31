@@ -64,6 +64,7 @@ onUnmounted(() => {
       },
     }"
     :setClass="{
+      type: 'text-[16px]',
       main: '--h-40 --px-12 --py-8 p:w-[140px]',
       dropdown: 'p:w-[665px]',
     }"
@@ -84,6 +85,7 @@ onUnmounted(() => {
             hasClearButton: false,
           }"
           :setClass="{
+            type: 'text-[16px]',
             main: '--h-40 --px-12 --py-8 grow',
             rearAssist: 'text-[14px] text-[--gray-999]',
           }"
@@ -99,6 +101,7 @@ onUnmounted(() => {
             hasClearButton: false,
           }"
           :setClass="{
+            type: 'text-[16px]',
             main: '--h-40 --px-12 --py-8 grow',
             rearAssist: 'text-[14px] text-[--gray-999]',
           }"
@@ -121,6 +124,7 @@ onUnmounted(() => {
         },
       }"
       :setClass="{
+        type: 'text-[16px]',
         main: '--h-40 --px-12 --py-8',
       }"
       v-for="(item, index) in items"

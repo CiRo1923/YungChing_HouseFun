@@ -1,5 +1,6 @@
 <script setup>
-import '@css/_modules/buy/mDatepicker.css'
+import '@css/_modules/buy/mDatepicker/variables.css'
+import '@css/_modules/buy/mDatepicker/common.css'
 
 /* 單一時間選擇。與 Single(日期)是兩支獨立元件,共用 .composables 與同一份樣式。
 
@@ -289,7 +290,7 @@ onUnmounted(() => {
               @pointerdown="onIconPointerdown($event)"
               ref="iconRef"
             >
-              <CommonSvgIcon :icon="config.icon" class="h-full w-full" />
+              <CommonSvgIcon :icon="config.icon" />
             </button>
           </div>
         </div>

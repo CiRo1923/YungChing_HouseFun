@@ -58,6 +58,7 @@ const onNormalizeVideoUrl = () => {
           },
         }"
         :setClass="{
+          type: 'text-[16px]',
           main: '--h-40 --px-12 --py-8',
         }"
       />
@@ -77,6 +78,7 @@ const onNormalizeVideoUrl = () => {
           videoUrl: videoUrlRule,
         }"
         :setClass="{
+          type: 'text-[16px]',
           main: '--h-40 --px-12 --py-8',
           element: 'grow',
         }"

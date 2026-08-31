@@ -1,5 +1,10 @@
 <script setup>
-import '@css/_modules/buy/mForm.css'
+import '@css/_modules/common/mForm/variables.css'
+import '@css/_modules/common/mForm/selectionVariables.css'
+import '@css/_modules/common/mForm/checkboxVariables.css'
+import '@css/_modules/common/mForm/common.css'
+import '@css/_modules/common/mForm/selection.css'
+import '@css/_modules/common/mForm/checkbox.css'
 
 import useValidateEvents from './.composables/useValidateEvents.js'
 
@@ -254,7 +259,7 @@ const onChange = async () => {
 </script>
 
 <template>
-  <div class="m-form overflow-hidden" :class="setClass.main">
+  <div class="m-form" :class="setClass.main">
     <Field
       :name="props.name"
       type="checkbox"
@@ -263,12 +268,15 @@ const onChange = async () => {
       v-bind="validateOn"
       v-slot="{ errorMessage }"
     >
-      <div class="m-form-container overflow-hidden leading-none" :class="setClass.container">
+      <div class="m-form-container --checkbox" :class="setClass.container">
         <label
-          class="m-form-element --checkbox relative inline-flex gap-x-[8px] align-middle leading-[1.35] text-[--gray-999]"
+          class="m-form-element --checkbox"
           :class="[
-            config.align === 'top' && config.label ? 'items-baseline' : 'items-center',
-            config.isDisabled ? 'cursor-not-allowed' : 'cursor-pointer',
+            {
+              '--align-top': config.align === 'top' && config.label,
+              '--has-label': config.label,
+              '--disabled': config.isDisabled,
+            },
             setClass.element,
           ]"
         >
@@ -277,7 +285,7 @@ const onChange = async () => {
             type="checkbox"
             v-model="model"
             v-bind="bind"
-            class="m-form-type sr-only"
+            class="m-form-type --visually-hidden"
             :class="{
               '--error': errorMessage || config.isError,
             }"
@@ -286,12 +294,8 @@ const onChange = async () => {
           />
           <CommonSvgIcon
             icon="icon_check_solid"
-            class="m-form-icon relative h-[18px] w-[18px] shrink-0 rounded-[2px] border-[1px] leading-[0] text-[--orange-e646] transition-colors duration-300"
-            :class="[
-              { 'mt-[2px]': config.label },
-              { 'self-start': config.align === 'top' },
-              setClass.icon,
-            ]"
+            class="m-form-icon"
+            :class="setClass.icon"
           />
           <slot>
             <em :class="setClass.label" v-if="config.label">
@@ -304,7 +308,7 @@ const onChange = async () => {
     <ErrorMessage
       as="span"
       :name="props.name"
-      class="m-form-error block"
+      class="m-form-error"
       :class="setClass.error"
       v-slot="{ message }"
     >
@@ -313,40 +317,3 @@ const onChange = async () => {
   </div>
 </template>
 
-<style lang="postcss">
-.m-form-element {
-  &.\-\-checkbox {
-    .m-form-type {
-      &:not(:disabled) {
-        &:not(:checked) {
-          & + .m-form-icon {
-            @apply border-[--gray-ccce] bg-[--white];
-          }
-        }
-
-        &:checked {
-          & + .m-form-icon {
-            @apply border-transparent;
-
-            > use {
-              @apply opacity-100;
-            }
-          }
-        }
-      }
-
-      &:disabled {
-        & + .m-form-icon {
-          @apply border-[--gray-e5] bg-[--gray-f2];
-        }
-      }
-    }
-
-    .m-form-icon {
-      > use {
-        @apply opacity-0 transition-opacity duration-300;
-      }
-    }
-  }
-}
-</style>

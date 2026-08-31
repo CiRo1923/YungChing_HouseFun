@@ -1,0 +1,27 @@
+/*
+ * selection 群組的變數 —— CheckBox 與 RadioItem 共用。
+ * 兩者都是「打勾圖示疊在方框 / 圓框上,選中才顯示」的結構,只有外框樣式不同。
+ */
+:root {
+  /* icon 的淡入淡出:選中才顯示 */
+  --form-selection-icon-opacity: 0;
+  --form-selection-icon-checked-opacity: 1;
+
+  /* 兩個變體的圖示大小、線寬一致,只有圓角不同(方框 vs 圓框) */
+  --form-selection-icon-size: 0;
+  --form-selection-icon-pc-size: 18px;
+  --form-selection-icon-tablet-size: 18px;
+  --form-selection-icon-mobile-size: 18px;
+
+  --form-selection-icon-border: 0;
+  --form-selection-icon-pc-border: 1px;
+  --form-selection-icon-tablet-border: 1px;
+  --form-selection-icon-mobile-border: 1px;
+
+  --form-selection-icon-color: var(--orange-e646);
+
+  --form-selection-gap-x: 0;
+  --form-selection-pc-gap-x: 8px;
+  --form-selection-tablet-gap-x: 8px;
+  --form-selection-mobile-gap-x: 8px;
+}

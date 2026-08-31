@@ -1,0 +1,67 @@
+/* mLoading 的共用版型,以及 @screen 的斷點對應。 */
+.m-loading {
+  @apply flex items-center justify-center;
+
+  &.\-\-fixed {
+    @apply fixed inset-0 z-[5];
+
+    &:before {
+      @apply pointer-events-none absolute inset-0 bg-[--loading-overlay-bg-color] backdrop-blur-[2px] content-default;
+    }
+  }
+}
+
+.m-loading-container {
+  @apply relative;
+  @apply text-[length:--loading-container-text-size] text-[--loading-container-color];
+
+  /* 卡片外觀只有帶 --card 時才輸出,否則 container 是裸的(直接放在 popup 裡的情境) */
+  &.\-\-card {
+    @apply rounded-[--loading-container-rounded] bg-[--loading-container-bg-color];
+    @apply pb-[--loading-container-pb] pl-[--loading-container-pl] pr-[--loading-container-pr] pt-[--loading-container-pt];
+
+    --loading-container-bg-color: var(--white);
+  }
+}
+
+@screen p {
+  .m-loading-container {
+    --loading-container-text-size: var(--loading-container-pc-text-size);
+
+    &.\-\-card {
+      --loading-container-rounded: var(--loading-container-pc-rounded);
+      --loading-container-pt: var(--loading-container-pc-pt);
+      --loading-container-pr: var(--loading-container-pc-pr);
+      --loading-container-pb: var(--loading-container-pc-pb);
+      --loading-container-pl: var(--loading-container-pc-pl);
+    }
+  }
+}
+
+@screen t {
+  .m-loading-container {
+    --loading-container-text-size: var(--loading-container-tablet-text-size);
+
+    &.\-\-card {
+      --loading-container-rounded: var(--loading-container-tablet-rounded);
+      --loading-container-pt: var(--loading-container-tablet-pt);
+      --loading-container-pr: var(--loading-container-tablet-pr);
+      --loading-container-pb: var(--loading-container-tablet-pb);
+      --loading-container-pl: var(--loading-container-tablet-pl);
+    }
+  }
+}
+
+@screen m {
+  .m-loading-container {
+    --loading-container-text-size: var(--loading-container-mobile-text-size);
+
+    &.\-\-card {
+      --loading-container-rounded: var(--loading-container-mobile-rounded);
+      --loading-container-pt: var(--loading-container-mobile-pt);
+      --loading-container-pr: var(--loading-container-mobile-pr);
+      --loading-container-pb: var(--loading-container-mobile-pb);
+      --loading-container-pl: var(--loading-container-mobile-pl);
+    }
+  }
+}

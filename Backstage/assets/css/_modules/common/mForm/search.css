@@ -1,0 +1,50 @@
+/* search 變體的版型,以及 @screen 的斷點對應。 */
+.m-form-element {
+  &.\-\-search {
+    &:not(.\-\-focus) {
+      .m-form-search-icon {
+        @apply text-[--form-search-icon-color];
+      }
+    }
+
+    &.\-\-focus {
+      .m-form-search-icon {
+        @apply text-[--form-search-icon-focus-color];
+      }
+    }
+
+    .m-form-search-icon {
+      @apply h-[--form-search-icon-size] w-[--form-search-icon-size] p-[--form-search-icon-p];
+
+      /* 輸入框變窄時圖示不跟著縮;顏色隨 focus 切換,所以要有過渡 */
+      @apply shrink-0 transition-colors duration-300;
+    }
+  }
+}
+
+@screen p {
+  .m-form-element {
+    &.\-\-search {
+      --form-search-icon-p: var(--form-search-icon-pc-p);
+      --form-search-icon-size: var(--form-search-icon-pc-size);
+    }
+  }
+}
+
+@screen t {
+  .m-form-element {
+    &.\-\-search {
+      --form-search-icon-p: var(--form-search-icon-tablet-p);
+      --form-search-icon-size: var(--form-search-icon-tablet-size);
+    }
+  }
+}
+
+@screen m {
+  .m-form-element {
+    &.\-\-search {
+      --form-search-icon-p: var(--form-search-icon-mobile-p);
+      --form-search-icon-size: var(--form-search-icon-mobile-size);
+    }
+  }
+}

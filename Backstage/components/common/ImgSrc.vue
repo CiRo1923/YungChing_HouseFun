@@ -1,4 +1,7 @@
 <script setup>
+import '@css/_modules/common/mFigure/variables.css'
+import '@css/_modules/common/mFigure/common.css'
+
 import blankUrl from '@imgs/common/blank.svg'
 import noImageUrl from '@imgs/common/no_image.svg'
 
@@ -181,28 +184,10 @@ onMounted(() => {
     />
   </component>
 
-  <div
-    class="m-figure flex items-center justify-center rounded-[10px] border-[1px] border-[--gray-e5]"
-    :class="setClass.main"
-    v-else
-  >
-    <div class="m-figure-error flex items-center justify-center">
-      <CommonSvgIcon
-        class="h-[30%] max-h-[120px] w-[30%] max-w-[120px] text-[--gray-999]"
-        icon="icon_image_error"
-      />
+  <div class="m-figure --error" :class="setClass.main" v-else>
+    <div class="m-figure-error">
+      <CommonSvgIcon class="m-figure-error-icon" icon="icon_image_error" />
     </div>
   </div>
 </template>
 
-<style lang="postcss">
-.m-figure {
-  &.\-\-no-image {
-    @apply flex items-center justify-center bg-[--gray-f2];
-
-    img {
-      @apply h-[auto] w-[50%] max-w-[250px];
-    }
-  }
-}
-</style>

@@ -61,6 +61,7 @@ watch(
           isDisabled: apiData.caseInfo.isCasePriceUnitAuto,
         }"
         :setClass="{
+          type: 'text-[16px]',
           main: '--h-40 --px-12 --py-8',
           element: 'grow',
           rearAssist: 'text-[14px] text-[--gray-999]',

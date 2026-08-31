@@ -1,5 +1,8 @@
 <script setup>
-import '@css/_modules/buy/mTable.css'
+import '@css/_modules/buy/mTable/variables.css'
+import '@css/_modules/buy/mTable/defaultVariables.css'
+import '@css/_modules/buy/mTable/common.css'
+import '@css/_modules/buy/mTable/default.css'
 
 import useTableCore from './.composables/useTableCore'
 
@@ -59,14 +62,14 @@ const {
       :class="[setClass.container, { '--scrolling': isContainerScroll }]"
       ref="containerRef"
     >
-      <table class="m-table-content w-full" :class="setClass.content" ref="tableContentRef">
+      <table class="m-table-content" :class="setClass.content" ref="tableContentRef">
         <thead
           class="m-table-thead"
           :class="[setClass.thead, { '--fixed': isTheadFixedActive }]"
           :style="fixedTheadStyle"
           ref="theadRef"
         >
-          <tr class="m-table-thead-tr text-center" :class="setClass.theadTr">
+          <tr class="m-table-thead-tr" :class="setClass.theadTr">
             <th
               class="m-table-thead-th"
               :class="[setClass.theadTh, getColumnClass(column, 'thead')]"
@@ -153,102 +156,3 @@ const {
   </div>
 </template>
 
-<style lang="postcss">
-:root {
-  --table-default-thtd-pc-px: 5px;
-  --table-default-thtd-tabled-px: 5px;
-  --table-default-thtd-mobile-px: 5px;
-
-  --table-default-tbody-tr-pc-border-b: 1px;
-  --table-default-tbody-tr-tabled-border-b: 1px;
-  --table-default-tbody-tr-mobile-border-b: 1px;
-
-  --table-default-thead-th-pc-py: 8px;
-  --table-default-thead-th-tabled-py: 5px;
-  --table-default-thead-th-mobile-py: 5px;
-
-  --table-default-thead-th-pc-text: 16px;
-  --table-default-thead-th-tabled-text: 14px;
-  --table-default-thead-th-mobile-text: 14px;
-
-  --table-default-tbody-td-pc-py: 15px;
-  --table-default-tbody-td-tabled-py: 10px;
-  --table-default-tbody-td-mobile-py: 10px;
-
-  --table-default-tbody-td-pc-text: 16px;
-  --table-default-tbody-td-tabled-text: 14px;
-  --table-default-tbody-td-mobile-text: 14px;
-
-  --table-default-thead-th-color: var(--gray-666);
-  --table-default-tbody-td-color: var(--gray-666);
-  --table-default-tbody-tr-border-color: var(--gray-e5);
-}
-
-.m-table {
-  &.\-\-default {
-    .m-table-thead-th,
-    .m-table-tbody-td {
-      @apply px-[--table-default-thtd-px];
-    }
-
-    .m-table-thead-th {
-      font-size: var(--table-default-thead-th-text);
-
-      @apply py-[--table-default-thead-th-py] text-[--table-default-thead-th-color];
-    }
-
-    .m-table-tbody-tr {
-      border-bottom: var(--table-default-tbody-tr-border-b) solid
-        var(--table-default-tbody-tr-border-color);
-    }
-
-    .m-table-tbody-td {
-      font-size: var(--table-default-tbody-td-text);
-
-      @apply py-[--table-default-tbody-td-py] text-[--table-default-tbody-td-color];
-    }
-  }
-}
-
-@screen p {
-  .m-table {
-    &.\-\-default {
-      --table-default-thtd-px: var(--table-default-thtd-pc-px);
-      --table-default-thead-th-py: var(--table-default-thead-th-pc-py);
-      --table-default-thead-th-text: var(--table-default-thead-th-pc-text);
-
-      --table-default-tbody-tr-border-b: var(--table-default-tbody-tr-pc-border-b);
-      --table-default-tbody-td-py: var(--table-default-tbody-td-pc-py);
-      --table-default-tbody-td-text: var(--table-default-tbody-td-pc-text);
-    }
-  }
-}
-
-@screen t {
-  .m-table {
-    &.\-\-default {
-      --table-default-thtd-px: var(--table-default-thtd-tabled-px);
-      --table-default-thead-th-py: var(--table-default-thead-th-tabled-py);
-      --table-default-thead-th-text: var(--table-default-thead-th-tabled-text);
-
-      --table-default-tbody-tr-border-b: var(--table-default-tbody-tr-tabled-border-b);
-      --table-default-tbody-td-py: var(--table-default-tbody-td-tabled-py);
-      --table-default-tbody-td-text: var(--table-default-tbody-td-tabled-text);
-    }
-  }
-}
-
-@screen m {
-  .m-table {
-    &.\-\-default {
-      --table-default-thtd-px: var(--table-default-thtd-mobile-px);
-      --table-default-thead-th-py: var(--table-default-thead-th-mobile-py);
-      --table-default-thead-th-text: var(--table-default-thead-th-mobile-text);
-      --table-default-tbody-tr-border-b: var(--table-default-tbody-tr-mobile-border-b);
-
-      --table-default-tbody-td-py: var(--table-default-tbody-td-mobile-py);
-      --table-default-tbody-td-text: var(--table-default-tbody-td-mobile-text);
-    }
-  }
-}
-</style>

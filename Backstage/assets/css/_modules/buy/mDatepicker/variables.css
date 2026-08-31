@@ -1,0 +1,175 @@
+/* mDatepicker(Single 日期 / Time 時間)共用的變數。
+
+  只放「值」:root 預設值與各斷點的值;斷點對應與狀態切換屬於「行為」,寫在 common.css。
+
+  ⚠️ 原本變數名是 --datepacker-(拼錯),class 也 datapicker / datepicker 混用,
+      重構時一併正名為 datepicker;外部沒有任何地方引用舊名。 */
+:root {
+  --datepicker-px: 0;
+  --datepicker-pc-px: 12px;
+  --datepicker-tablet-px: 12px;
+  --datepicker-mobile-px: 12px;
+  --datepicker-rounded: 0;
+  --datepicker-pc-rounded: 5px;
+  --datepicker-tablet-rounded: 5px;
+  --datepicker-mobile-rounded: 5px;
+  --datepicker-type-size: 0;
+  --datepicker-type-pc-size: 16px;
+  --datepicker-type-tablet-size: 16px;
+  --datepicker-type-mobile-size: 16px;
+  --datepicker-icon-size: 0;
+  --datepicker-icon-pc-size: 16px;
+  --datepicker-icon-tablet-size: 16px;
+  --datepicker-icon-mobile-size: 16px;
+  --datepicker-bg-color: var(--white);
+  --datepicker-color: var(--gray-999);
+  --datepicker-border-color: var(--gray-e5);
+  --datepicker-focus-color: var(--green-6a2d);
+  --datepicker-focus-border-color: var(--green-6a2d);
+  --datepicker-error-color: var(--orange-e646);
+  --datepicker-error-border-color: var(--orange-e646);
+
+  --datepicker-calendar-my: 0;
+  --datepicker-calendar-pc-my: 10px;
+  --datepicker-calendar-tablet-my: 10px;
+  --datepicker-calendar-mobile-my: 10px;
+  --datepicker-calendar-px: 0;
+  --datepicker-calendar-pc-px: 24px;
+  --datepicker-calendar-tablet-px: 24px;
+  --datepicker-calendar-mobile-px: 24px;
+  --datepicker-calendar-py: 0;
+  --datepicker-calendar-pc-py: 24px;
+  --datepicker-calendar-tablet-py: 24px;
+  --datepicker-calendar-mobile-py: 24px;
+  --datepicker-calendar-border-color: var(--green-6a2d);
+  --datepicker-calendar-rounded: 0;
+  --datepicker-calendar-pc-rounded: 5px;
+  --datepicker-calendar-tablet-rounded: 5px;
+  --datepicker-calendar-mobile-rounded: 5px;
+
+  --datepicker-arrow-size: 0;
+  --datepicker-arrow-pc-size: 35px;
+  --datepicker-arrow-tablet-size: 35px;
+  --datepicker-arrow-mobile-size: 35px;
+  --datepicker-arrow-rounded: 0;
+  --datepicker-arrow-pc-rounded: 5px;
+  --datepicker-arrow-tablet-rounded: 5px;
+  --datepicker-arrow-mobile-rounded: 5px;
+  --datepicker-arrow-bg-color: var(--gray-f7);
+  --datepicker-arrow-color: var(--gray-666);
+  --datepicker-arrow-icon-size: 0;
+  --datepicker-arrow-icon-pc-size: 18px;
+  --datepicker-arrow-icon-tablet-size: 18px;
+  --datepicker-arrow-icon-mobile-size: 18px;
+
+  --datepicker-calendar-cell-size: 0;
+  --datepicker-calendar-cell-pc-size: 35px;
+  --datepicker-calendar-cell-tablet-size: 35px;
+  --datepicker-calendar-cell-mobile-size: 35px;
+  --datepicker-calendar-cell-p: 0;
+  --datepicker-calendar-header-text-size: 0;
+  --datepicker-calendar-header-text-pc-size: 14px;
+  --datepicker-calendar-header-text-tablet-size: 14px;
+  --datepicker-calendar-header-text-mobile-size: 14px;
+  --datepicker-calendar-header-color: var(--gray-333);
+  --datepicker-calendar-week-text-size: 0;
+  --datepicker-calendar-week-text-pc-size: 14px;
+  --datepicker-calendar-week-text-tablet-size: 14px;
+  --datepicker-calendar-week-text-mobile-size: 14px;
+  --datepicker-calendar-week-bg-color: transparent;
+  --datepicker-calendar-week-color: var(--gray-666);
+  --datepicker-calendar-date-text-size: 0;
+  --datepicker-calendar-date-text-pc-size: 14px;
+  --datepicker-calendar-date-text-tablet-size: 14px;
+  --datepicker-calendar-date-text-mobile-size: 14px;
+  --datepicker-calendar-date-color: var(--gray-666);
+  --datepicker-calendar-date-rounded: 0;
+  --datepicker-calendar-date-pc-rounded: 10px;
+  --datepicker-calendar-date-tablet-rounded: 10px;
+  --datepicker-calendar-date-mobile-rounded: 10px;
+
+  --datepicker-calendar-today-bg-color: var(--green-8b0d);
+  --datepicker-calendar-today-color: var(--white);
+  --datepicker-calendar-today-border: 0;
+  --datepicker-calendar-today-border-color: transparent;
+  --datepicker-calendar-curr-bg-color: var(--orange-e646);
+  --datepicker-calendar-curr-color: var(--white);
+  --datepicker-calendar-curr-border: 0;
+  --datepicker-calendar-curr-border-color: transparent;
+  --datepicker-calendar-last-bg-color: transparent;
+  --datepicker-calendar-last-color: var(--gray-ccce);
+  --datepicker-calendar-last-border: 0;
+  --datepicker-calendar-last-border-color: transparent;
+  --datepicker-calendar-next-bg-color: transparent;
+  --datepicker-calendar-next-color: var(--gray-ccce);
+  --datepicker-calendar-next-border: 0;
+  --datepicker-calendar-next-border-color: transparent;
+  --datepicker-calendar-disabled-bg-color: transparent;
+  --datepicker-calendar-disabled-color: var(--gray-e5);
+  --datepicker-calendar-disabled-border: 0;
+  --datepicker-calendar-disabled-border-color: transparent;
+
+  /* headerMode: 'panel' 的年 / 月面板 */
+  --datepicker-panel-h: auto;
+  --datepicker-panel-pc-h: 245px;
+  --datepicker-panel-tablet-h: 245px;
+  --datepicker-panel-mobile-h: 245px;
+  --datepicker-panel-gap: 0;
+  --datepicker-panel-pc-gap: 4px;
+  --datepicker-panel-tablet-gap: 4px;
+  --datepicker-panel-mobile-gap: 4px;
+  --datepicker-panel-ctrl-h: auto;
+  --datepicker-panel-ctrl-pc-h: 35px;
+  --datepicker-panel-ctrl-tablet-h: 35px;
+  --datepicker-panel-ctrl-mobile-h: 35px;
+  --datepicker-panel-rounded: 0;
+  --datepicker-panel-pc-rounded: 5px;
+  --datepicker-panel-tablet-rounded: 5px;
+  --datepicker-panel-mobile-rounded: 5px;
+  --datepicker-panel-color: var(--gray-666);
+  --datepicker-panel-hover-bg-color: var(--gray-f7);
+  --datepicker-panel-curr-bg-color: var(--orange-e646);
+  --datepicker-panel-curr-color: var(--white);
+  --datepicker-panel-label-rounded: 0;
+  --datepicker-panel-label-pc-rounded: 5px;
+  --datepicker-panel-label-tablet-rounded: 5px;
+  --datepicker-panel-label-mobile-rounded: 5px;
+  --datepicker-panel-label-px: 0;
+  --datepicker-panel-label-pc-px: 8px;
+  --datepicker-panel-label-tablet-px: 8px;
+  --datepicker-panel-label-mobile-px: 8px;
+  --datepicker-panel-label-active-bg-color: var(--gray-f7);
+
+  /* Time 的時 / 分 / 秒滾動欄 */
+  --datepicker-time-h: auto;
+  --datepicker-time-pc-h: 210px;
+  --datepicker-time-tablet-h: 210px;
+  --datepicker-time-mobile-h: 210px;
+  --datepicker-time-column-w: 0;
+  --datepicker-time-column-pc-w: 64px;
+  --datepicker-time-column-tablet-w: 64px;
+  --datepicker-time-column-mobile-w: 64px;
+  --datepicker-time-gap-x: 0;
+  --datepicker-time-gap-pc-x: 4px;
+  --datepicker-time-gap-tablet-x: 4px;
+  --datepicker-time-gap-mobile-x: 4px;
+  --datepicker-time-ctrl-h: auto;
+  --datepicker-time-ctrl-pc-h: 32px;
+  --datepicker-time-ctrl-tablet-h: 32px;
+  --datepicker-time-ctrl-mobile-h: 32px;
+  --datepicker-time-rounded: 0;
+  --datepicker-time-pc-rounded: 5px;
+  --datepicker-time-tablet-rounded: 5px;
+  --datepicker-time-mobile-rounded: 5px;
+  --datepicker-time-color: var(--gray-666);
+  --datepicker-time-hover-bg-color: var(--gray-f7);
+  --datepicker-time-curr-bg-color: var(--orange-e646);
+  --datepicker-time-curr-color: var(--white);
+  --datepicker-time-disabled-color: var(--gray-e5);
+
+  /* headerMode: panel 的年 / 月兩顆按鈕之間 */
+  --datepicker-calendar-header-group-gap-x: 0;
+  --datepicker-calendar-header-group-pc-gap-x: 8px;
+  --datepicker-calendar-header-group-tablet-gap-x: 8px;
+  --datepicker-calendar-header-group-mobile-gap-x: 8px;
+}

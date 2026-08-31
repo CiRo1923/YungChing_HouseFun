@@ -1,0 +1,71 @@
+/*
+ * selection 群組的版型 —— CheckBox 與 RadioItem 共用。
+ *
+ * 兩者的差別在外框(方 / 圓)與各自的狀態配色,那些留在 checkbox.css / radioItem.css;
+ * 這裡只放「選中就顯示打勾圖示」這段共通行為。
+ */
+.m-form-element {
+  &.\-\-checkbox,
+  &.\-\-radio-item {
+    .m-form-type {
+      &:checked {
+        & + .m-form-icon {
+          @apply border-transparent;
+
+          > use {
+            opacity: var(--form-selection-icon-checked-opacity);
+          }
+        }
+      }
+    }
+
+    .m-form-icon {
+      > use {
+        opacity: var(--form-selection-icon-opacity);
+
+        @apply transition-opacity duration-300;
+      }
+    }
+  }
+}
+
+/* 兩個變體共用的排版與圖示尺寸 */
+.m-form-element {
+  &.\-\-checkbox,
+  &.\-\-radio-item {
+    @apply relative align-middle;
+    @apply gap-x-[--form-selection-gap-x];
+
+    .m-form-icon {
+      @apply relative shrink-0 transition-colors duration-300;
+      @apply h-[--form-selection-icon-size] w-[--form-selection-icon-size];
+      @apply text-[--form-selection-icon-color];
+
+      border-width: var(--form-selection-icon-border);
+    }
+  }
+}
+
+@screen p {
+  .m-form {
+    --form-selection-icon-size: var(--form-selection-icon-pc-size);
+    --form-selection-icon-border: var(--form-selection-icon-pc-border);
+    --form-selection-gap-x: var(--form-selection-pc-gap-x);
+  }
+}
+
+@screen t {
+  .m-form {
+    --form-selection-icon-size: var(--form-selection-icon-tablet-size);
+    --form-selection-icon-border: var(--form-selection-icon-tablet-border);
+    --form-selection-gap-x: var(--form-selection-tablet-gap-x);
+  }
+}
+
+@screen m {
+  .m-form {
+    --form-selection-icon-size: var(--form-selection-icon-mobile-size);
+    --form-selection-icon-border: var(--form-selection-icon-mobile-border);
+    --form-selection-gap-x: var(--form-selection-mobile-gap-x);
+  }
+}

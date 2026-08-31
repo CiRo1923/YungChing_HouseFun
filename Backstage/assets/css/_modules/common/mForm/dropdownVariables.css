@@ -1,0 +1,118 @@
+/*
+ * dropdown 群組的變數 —— Dropdown / Select / SelectMultiple 三支共用。
+ * 群組層而非變體層:這三支長得一樣,只有取值與多選行為不同。
+ */
+:root {
+  --form-select-icon-arrow-pc-p: 2px;
+  --form-select-icon-arrow-tablet-p: 2px;
+  --form-select-icon-arrow-mobile-p: 2px;
+
+  --form-select-icon-arrow-pc-size: 14px;
+  --form-select-icon-arrow-tablet-size: 14px;
+  --form-select-icon-arrow-mobile-size: 14px;
+
+  --form-dropdown-pc-my: 8px;
+  --form-dropdown-tablet-my: 8px;
+  --form-dropdown-mobile-my: 8px;
+
+  --form-dropdown-pc-rounded: 5px;
+  --form-dropdown-tablet-rounded: 5px;
+  --form-dropdown-mobile-rounded: 5px;
+
+  --form-dropdown-pc-border: 1px;
+  --form-dropdown-tablet-border: 1px;
+  --form-dropdown-mobile-border: 1px;
+
+  --form-dropdown-pc-shadow: 0 3px 3px 0px var(--black-1f);
+  --form-dropdown-tablet-shadow: 0 3px 3px 0px var(--black-1f);
+  --form-dropdown-mobile-shadow: 0 3px 3px 0px var(--black-1f);
+
+  --form-dropdown-container-pc-px: 16px;
+  --form-dropdown-container-tablet-px: 16px;
+  --form-dropdown-container-mobile-px: 16px;
+
+  --form-dropdown-container-pc-py: 16px;
+  --form-dropdown-container-tablet-py: 16px;
+  --form-dropdown-container-mobile-py: 16px;
+
+  --form-dropdown-datas-pc-gap-x: 16px;
+  --form-dropdown-datas-tablet-gap-x: 16px;
+  --form-dropdown-datas-mobile-gap-x: 16px;
+
+  --form-dropdown-header-pc-mb: 8px;
+  --form-dropdown-header-tablet-mb: 8px;
+  --form-dropdown-header-mobile-mb: 8px;
+
+  /* footer 推開的方向與 header 相反,值目前一樣但不共用變數 —— 之後要各自調才不用回頭拆 */
+  --form-dropdown-footer-pc-mt: 8px;
+  --form-dropdown-footer-tablet-mt: 8px;
+  --form-dropdown-footer-mobile-mt: 8px;
+
+  --form-dropdown-options-pc-gap-y: 8px;
+  --form-dropdown-options-tablet-gap-y: 8px;
+  --form-dropdown-options-mobile-gap-y: 8px;
+
+  --form-dropdown-item-pc-border-bottom: 0;
+  --form-dropdown-item-tablet-border-bottom: 0;
+  --form-dropdown-item-mobile-border-bottom: 0;
+
+  --form-dropdown-button-pc-px: 8px;
+  --form-dropdown-button-tablet-px: 8px;
+  --form-dropdown-button-mobile-px: 8px;
+
+  --form-dropdown-button-pc-py: 5px;
+  --form-dropdown-button-tablet-py: 5px;
+  --form-dropdown-button-mobile-py: 10px;
+
+  --form-dropdown-button-pc-rounded: 5px;
+  --form-dropdown-button-tablet-rounded: 5px;
+  --form-dropdown-button-mobile-rounded: 5px;
+
+  --form-dropdown-button-pc-gap-x: 3px;
+  --form-dropdown-button-tablet-gap-x: 3px;
+  --form-dropdown-button-mobile-gap-x: 3px;
+
+  --form-dropdown-icon-pc-p: 2px;
+  --form-dropdown-icon-tablet-p: 2px;
+  --form-dropdown-icon-mobile-p: 2px;
+
+  --form-dropdown-icon-pc-size: 16px;
+  --form-dropdown-icon-tablet-size: 16px;
+  --form-dropdown-icon-mobile-size: 16px;
+
+  --form-dropdown-label-pc-text: 16px;
+  --form-dropdown-label-tablet-text: 16px;
+  --form-dropdown-label-mobile-text: 16px;
+
+  --form-dropdown-footer-pc-mt: 8px;
+  --form-dropdown-footer-tablet-mt: 8px;
+  --form-dropdown-footer-mobile-mt: 8px;
+
+  --form-select-focus-color: var(--green-6a2d);
+
+  --form-select-icon-color: var(--gray-999);
+  --form-select-icon-focus-color: var(--green-6a2d);
+  --form-select-icon-disabled-color: var(--gray-ccce);
+
+  --form-dropdown-pc-default-px: 4px;
+  --form-dropdown-tablet-default-px: 4px;
+  --form-dropdown-mobile-default-px: 4px;
+  --form-dropdown-default-px: 0;
+  --form-dropdown-footer-mt: 0;
+  --form-dropdown-bg-color: var(--white);
+  --form-dropdown-border-color: var(--green-6a2d);
+
+  --form-dropdown-item-border-bottom-color: transparent;
+
+  --form-dropdown-button-align: center;
+
+  --form-dropdown-button-color: var(--gray-333);
+  --form-dropdown-button-active-color: var(--gray-333);
+  --form-dropdown-button-disabled-color: var(--gray-33-4d);
+
+  --form-dropdown-button-bg-color: var(--gray-f2);
+  --form-dropdown-button-active-bg-color: var(--orange-feea);
+  --form-dropdown-button-disabled-bg-color: transparent;
+
+  --form-dropdown-icon-color: var(--orange-e646);
+}

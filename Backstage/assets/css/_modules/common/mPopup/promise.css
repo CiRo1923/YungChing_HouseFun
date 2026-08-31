@@ -1,0 +1,48 @@
+/* apiPromise 變體的版型,以及 @screen 的斷點對應。 */
+.m-popup-promise {
+  @apply absolute inset-0 z-[2] flex items-center justify-center;
+
+  &::before {
+    @apply absolute inset-0 z-0 bg-[--popup-promise-overlay-bg-color] content-default;
+  }
+}
+
+.m-popup-promise-message {
+  @apply relative z-[1] text-center;
+  @apply rounded-[--popup-promise-message-rounded] bg-[--popup-promise-message-bg-color];
+  @apply text-[length:--popup-promise-message-text-size] text-[--popup-promise-message-color];
+  @apply pb-[--popup-promise-message-pb] pl-[--popup-promise-message-pl] pr-[--popup-promise-message-pr] pt-[--popup-promise-message-pt];
+}
+
+@screen p {
+  .m-popup-promise-message {
+    --popup-promise-message-rounded: var(--popup-promise-message-pc-rounded);
+    --popup-promise-message-text-size: var(--popup-promise-message-pc-text-size);
+    --popup-promise-message-pt: var(--popup-promise-message-pc-pt);
+    --popup-promise-message-pr: var(--popup-promise-message-pc-pr);
+    --popup-promise-message-pb: var(--popup-promise-message-pc-pb);
+    --popup-promise-message-pl: var(--popup-promise-message-pc-pl);
+  }
+}
+
+@screen t {
+  .m-popup-promise-message {
+    --popup-promise-message-rounded: var(--popup-promise-message-tablet-rounded);
+    --popup-promise-message-text-size: var(--popup-promise-message-tablet-text-size);
+    --popup-promise-message-pt: var(--popup-promise-message-tablet-pt);
+    --popup-promise-message-pr: var(--popup-promise-message-tablet-pr);
+    --popup-promise-message-pb: var(--popup-promise-message-tablet-pb);
+    --popup-promise-message-pl: var(--popup-promise-message-tablet-pl);
+  }
+}
+
+@screen m {
+  .m-popup-promise-message {
+    --popup-promise-message-rounded: var(--popup-promise-message-mobile-rounded);
+    --popup-promise-message-text-size: var(--popup-promise-message-mobile-text-size);
+    --popup-promise-message-pt: var(--popup-promise-message-mobile-pt);
+    --popup-promise-message-pr: var(--popup-promise-message-mobile-pr);
+    --popup-promise-message-pb: var(--popup-promise-message-mobile-pb);
+    --popup-promise-message-pl: var(--popup-promise-message-mobile-pl);
+  }
+}

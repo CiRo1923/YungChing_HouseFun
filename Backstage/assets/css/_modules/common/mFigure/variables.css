@@ -1,0 +1,41 @@
+/*
+ * mFigure 的變數 —— 對應 components/common/ImgSrc.vue。
+ * 資料夾名跟著 class(m-figure)走,不是組件檔名。
+ */
+:root {
+  --figure-no-image-bg-color: var(--gray-f2);
+
+  /* 404 佔位圖:等比縮在容器中間,不要撐滿 */
+  --figure-no-image-img-w: auto;
+  --figure-no-image-img-pc-w: 50%;
+  --figure-no-image-img-tablet-w: 50%;
+  --figure-no-image-img-mobile-w: 50%;
+
+  --figure-no-image-img-max-w: none;
+  --figure-no-image-img-pc-max-w: 250px;
+  --figure-no-image-img-tablet-max-w: 250px;
+  --figure-no-image-img-mobile-max-w: 250px;
+
+  /* 圖片載入失敗時的外框 */
+  --figure-error-border-color: var(--gray-e5);
+  --figure-error-icon-color: var(--gray-999);
+
+  --figure-error-rounded: 0;
+  --figure-error-pc-rounded: 10px;
+  --figure-error-tablet-rounded: 10px;
+  --figure-error-mobile-rounded: 10px;
+
+  --figure-error-border: 0;
+  --figure-error-pc-border: 1px;
+  --figure-error-tablet-border: 1px;
+  --figure-error-mobile-border: 1px;
+
+  /*
+   * 失敗圖示佔容器的 30%(比例不分斷點,直接寫在版型檔),
+   * 但容器很大時要有上限 —— 寬高同值所以只開一個 -size。
+   */
+  --figure-error-icon-max-size: none;
+  --figure-error-icon-pc-max-size: 120px;
+  --figure-error-icon-tablet-max-size: 120px;
+  --figure-error-icon-mobile-max-size: 120px;
+}

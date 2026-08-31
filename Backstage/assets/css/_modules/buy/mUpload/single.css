@@ -1,0 +1,134 @@
+/* single 變體的版型,以及 @screen 的斷點對應。 */
+.m-upload-single {
+  @apply w-full;
+}
+
+/* 隱藏的 file input —— 點擊整塊拖放區才會觸發它 */
+.m-upload-single-input {
+  @apply hidden;
+}
+
+.m-upload-single-dropzone {
+  @apply relative flex-col;
+  @apply bg-[--upload-single-dropzone-bg-color];
+
+  border-color: var(--upload-single-dropzone-border-color);
+
+  /* 還沒選圖:撐滿容器 */
+  &:not(.\-\-filled) {
+    @apply flex w-full;
+
+    min-height: var(--upload-single-dropzone-min-h);
+  }
+
+  /* 已經有圖:縮成縮圖大小 */
+  &.\-\-filled {
+    @apply inline-flex;
+  }
+
+  &.\-\-dragging {
+    --upload-single-dropzone-bg-color: var(--upload-single-dragging-bg-color);
+    --upload-single-dropzone-border-color: var(--upload-single-dragging-border-color);
+  }
+}
+
+.m-upload-single-preview {
+  @apply relative flex items-center justify-center overflow-hidden;
+  @apply rounded-[--upload-single-box-rounded] bg-[--upload-single-box-bg-color];
+
+  height: var(--upload-single-box-h);
+}
+
+.m-upload-single-image {
+  @apply absolute inset-0 h-full w-full object-cover;
+}
+
+.m-upload-single-overlay {
+  @apply relative z-[1] flex flex-col items-center justify-center;
+  @apply gap-y-[--upload-single-overlay-gap-y];
+  @apply text-[length:--upload-single-overlay-text-size] text-[--upload-single-overlay-color];
+}
+
+.m-upload-single-icon {
+  @apply shrink-0 h-[--upload-single-icon-size] w-[--upload-single-icon-size];
+}
+
+.m-upload-single-remove {
+  @apply absolute right-0 top-0 z-[1] flex items-center justify-center;
+  @apply h-[--upload-single-remove-size] w-[--upload-single-remove-size];
+  @apply rounded-[--upload-single-remove-rounded] bg-[--upload-single-remove-bg-color];
+}
+
+.m-upload-single-remove-icon {
+  @apply h-[--upload-single-remove-icon-size] w-[--upload-single-remove-icon-size];
+  @apply text-[--upload-single-remove-icon-color];
+}
+
+.m-upload-single-empty {
+  @apply flex w-full grow flex-col items-center justify-center;
+  @apply gap-y-[--upload-single-overlay-gap-y];
+  @apply rounded-[--upload-single-box-rounded] bg-[--upload-single-box-bg-color];
+  @apply text-[--upload-single-empty-color];
+
+  border-width: var(--upload-single-empty-border);
+  border-color: var(--upload-single-empty-border-color);
+
+  .m-upload-single-icon {
+    @apply text-[--upload-single-empty-icon-color];
+  }
+}
+
+.m-upload-single-text {
+  @apply text-[length:--upload-single-overlay-text-size];
+}
+
+@screen p {
+  .m-upload-single {
+    --upload-single-dropzone-min-h: var(--upload-single-dropzone-pc-min-h);
+    --upload-single-box-rounded: var(--upload-single-box-pc-rounded);
+    --upload-single-box-h: var(--upload-single-box-pc-h);
+    --upload-single-overlay-gap-y: var(--upload-single-overlay-pc-gap-y);
+    --upload-single-overlay-text-size: var(--upload-single-overlay-pc-text-size);
+    --upload-single-icon-size: var(--upload-single-icon-pc-size);
+    --upload-single-remove-size: var(--upload-single-remove-pc-size);
+    --upload-single-remove-rounded: var(--upload-single-remove-pc-rounded);
+    --upload-single-remove-icon-size: var(--upload-single-remove-icon-pc-size);
+    --upload-single-empty-border: var(--upload-single-empty-pc-border);
+  }
+
+  .m-upload-single-dropzone {
+    &.\-\-filled {
+      width: var(--upload-single-dropzone-pc-w);
+    }
+  }
+}
+
+@screen t {
+  .m-upload-single {
+    --upload-single-dropzone-min-h: var(--upload-single-dropzone-tablet-min-h);
+    --upload-single-box-rounded: var(--upload-single-box-tablet-rounded);
+    --upload-single-box-h: var(--upload-single-box-tablet-h);
+    --upload-single-overlay-gap-y: var(--upload-single-overlay-tablet-gap-y);
+    --upload-single-overlay-text-size: var(--upload-single-overlay-tablet-text-size);
+    --upload-single-icon-size: var(--upload-single-icon-tablet-size);
+    --upload-single-remove-size: var(--upload-single-remove-tablet-size);
+    --upload-single-remove-rounded: var(--upload-single-remove-tablet-rounded);
+    --upload-single-remove-icon-size: var(--upload-single-remove-icon-tablet-size);
+    --upload-single-empty-border: var(--upload-single-empty-tablet-border);
+  }
+}
+
+@screen m {
+  .m-upload-single {
+    --upload-single-dropzone-min-h: var(--upload-single-dropzone-mobile-min-h);
+    --upload-single-box-rounded: var(--upload-single-box-mobile-rounded);
+    --upload-single-box-h: var(--upload-single-box-mobile-h);
+    --upload-single-overlay-gap-y: var(--upload-single-overlay-mobile-gap-y);
+    --upload-single-overlay-text-size: var(--upload-single-overlay-mobile-text-size);
+    --upload-single-icon-size: var(--upload-single-icon-mobile-size);
+    --upload-single-remove-size: var(--upload-single-remove-mobile-size);
+    --upload-single-remove-rounded: var(--upload-single-remove-mobile-rounded);
+    --upload-single-remove-icon-size: var(--upload-single-remove-icon-mobile-size);
+    --upload-single-empty-border: var(--upload-single-empty-mobile-border);
+  }
+}

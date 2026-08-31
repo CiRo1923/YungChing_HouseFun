@@ -1,0 +1,10 @@
+/*
+ * mSvgIcon 的共用版型。
+ *
+ * 這支組件只負責把 sprite 的 <use> 指出去,尺寸與顏色都由使用端決定 ——
+ * 所以 module 只留一條:讓圖示跟著父層的文字顏色走。
+ * 使用端用 text-[--x] 換色、w-/h- 給尺寸,都不必碰這裡。
+ */
+.m-svg-icon {
+  @apply fill-current;
+}

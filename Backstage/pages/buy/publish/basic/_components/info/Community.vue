@@ -78,6 +78,7 @@ const onCommunityChange = (item) => {
         },
       }"
       :setClass="{
+        type: 'text-[16px]',
         main: '--h-40 --px-12 --py-8 m:w-full',
       }"
       @input="onCommunities"

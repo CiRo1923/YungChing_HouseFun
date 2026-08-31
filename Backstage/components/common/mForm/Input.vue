@@ -1,5 +1,6 @@
 <script setup>
-import '@css/_modules/buy/mForm.css'
+import '@css/_modules/common/mForm/variables.css'
+import '@css/_modules/common/mForm/common.css'
 
 import { useTextCore } from './.composables/useTextCore.js'
 import useValidateEvents from './.composables/useValidateEvents.js'
@@ -308,7 +309,7 @@ watch(
 </script>
 
 <template>
-  <div class="m-form overflow-hidden" :class="setClass.main">
+  <div class="m-form" :class="setClass.main">
     <Field
       v-slot="{ field, errorMessage }"
       v-model="model"
@@ -330,7 +331,7 @@ watch(
         >
           <div
             v-if="$slots.frontAssist"
-            class="m-form-assist shrink-0"
+            class="m-form-assist"
             :class="setClass.frontAssist"
           >
             <slot name="frontAssist" />
@@ -338,7 +339,7 @@ watch(
           <input
             :id="props.name"
             :type="props.type"
-            class="m-form-type min-w-0 grow leading-[1]"
+            class="m-form-type"
             :class="setClass.type"
             v-bind="onBind(field)"
             :inputMode="config.inputMode"
@@ -367,14 +368,14 @@ watch(
           >
             <CommonSvgIcon icon="icon_xmark" class="m-form-clear-icon" />
           </button>
-          <span v-if="formatLength" class="m-form-length shrink-0" :class="setClass.length">
+          <span v-if="formatLength" class="m-form-length" :class="setClass.length">
             {{ formatLength }}
           </span>
-          <div v-if="$slots.rearAssist" class="m-form-assist shrink-0" :class="setClass.rearAssist">
+          <div v-if="$slots.rearAssist" class="m-form-assist" :class="setClass.rearAssist">
             <slot name="rearAssist" />
           </div>
         </div>
-        <small v-if="$slots.suffix" class="m-form-suffix shrink-0" :class="setClass.suffix">
+        <small v-if="$slots.suffix" class="m-form-suffix" :class="setClass.suffix">
           <slot
             name="suffix"
             :maxlength="config.length || config.maxlength"
@@ -387,7 +388,7 @@ watch(
       v-slot="{ message }"
       as="span"
       :name="props.name"
-      class="m-form-error block"
+      class="m-form-error"
       :class="setClass.error"
     >
       <BuyMErrorMessageElem :message="message" />

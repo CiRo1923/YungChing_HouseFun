@@ -20,7 +20,7 @@ defineEmits(['prev', 'next'])
 
 <template>
   <ul class="m-datepicker-calendar-header">
-    <li class="shrink-0">
+    <li class="m-datepicker-calendar-header-side">
       <button
         type="button"
         class="m-datepicker-calendar-arrow"
@@ -32,10 +32,10 @@ defineEmits(['prev', 'next'])
     </li>
 
     <li class="m-datepicker-calendar-header-container">
-      <span class="block text-center">{{ props.label }}</span>
+      <span class="m-datepicker-calendar-header-text">{{ props.label }}</span>
     </li>
 
-    <li class="shrink-0">
+    <li class="m-datepicker-calendar-header-side">
       <button
         type="button"
         class="m-datepicker-calendar-arrow"

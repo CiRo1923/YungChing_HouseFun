@@ -1,0 +1,77 @@
+/*
+ * radiosOval 變體的變數 —— 一整排膠囊形的單選按鈕。
+ * 這個變體掛在 .m-form(容器)上,不是 .m-form-element,因為它管的是整組的排版。
+ *
+ * 桌機是一條連在一起的長膠囊(外層有底色與圓角),平板與手機則是拆成一顆一顆
+ * 可換行的膠囊(底色與圓角改掛在每一顆上)—— 所以不少值只存在於其中一端。
+ */
+:root {
+  --form-radios-oval-bg-color: transparent;
+  --form-radios-oval-checked-bg-color: var(--orange-feea);
+  --form-radios-oval-color: var(--gray-666);
+  --form-radios-oval-icon-color: var(--orange-e646);
+
+  /* lint-breakpoint-exempt: 只有桌機的外層是一條連在一起的膠囊,才需要底色 */
+  --form-radios-oval-list-pc-bg-color: var(--gray-f2);
+
+  /* lint-breakpoint-exempt: 只有桌機的外層是一條連在一起的膠囊,才需要圓角 */
+  --form-radios-oval-list-pc-rounded: 5px;
+
+  /* lint-breakpoint-exempt: 只有平板 / 手機會換行,才需要欄距 */
+  --form-radios-oval-list-tablet-gap-x: 9px;
+  --form-radios-oval-list-mobile-gap-x: 9px;
+
+  /* lint-breakpoint-exempt: 同上,只有會換行的那兩端才需要行距 */
+  --form-radios-oval-list-tablet-gap-y: 12px;
+  --form-radios-oval-list-mobile-gap-y: 12px;
+
+  /* lint-breakpoint-exempt: 平板 / 手機的底色改掛在每一顆上(桌機在外層) */
+  --form-radios-oval-item-tablet-bg-color: var(--gray-f2);
+  --form-radios-oval-item-mobile-bg-color: var(--gray-f2);
+
+  /* lint-breakpoint-exempt: 平板 / 手機的圓角改掛在每一顆上(桌機在外層) */
+  --form-radios-oval-item-tablet-rounded: 5px;
+  --form-radios-oval-item-mobile-rounded: 5px;
+
+  --form-radios-oval-item-h: auto;
+  --form-radios-oval-item-pc-h: 35px;
+  --form-radios-oval-item-tablet-h: 50px;
+  --form-radios-oval-item-mobile-h: 50px;
+
+  --form-radios-oval-gap-x: 0;
+  --form-radios-oval-pc-gap-x: 5px;
+  --form-radios-oval-tablet-gap-x: 3px;
+  --form-radios-oval-mobile-gap-x: 3px;
+
+  /*
+   * 未選中時左右內距要補回選中狀態的邊框寬度,所以 pc 是左右對稱、
+   * tablet 與 mobile 兩邊差 1px —— 拆成 pl / pr 才寫得出來。
+   */
+  --form-radios-oval-pl: 0;
+  --form-radios-oval-pr: 0;
+
+  --form-radios-oval-pc-pl: 25px;
+  --form-radios-oval-pc-pr: 25px;
+
+  --form-radios-oval-tablet-pl: 19px;
+  --form-radios-oval-tablet-pr: 20px;
+
+  --form-radios-oval-mobile-pl: 19px;
+  --form-radios-oval-mobile-pr: 20px;
+
+  /* 選中時的內距(沒有補邊框的那 1px) */
+  --form-radios-oval-checked-px: 0;
+  --form-radios-oval-checked-pc-px: 12px;
+  --form-radios-oval-checked-tablet-px: 10px;
+  --form-radios-oval-checked-mobile-px: 10px;
+
+  --form-radios-oval-icon-size: 0;
+  --form-radios-oval-icon-pc-size: 16px;
+  --form-radios-oval-icon-tablet-size: 16px;
+  --form-radios-oval-icon-mobile-size: 16px;
+
+  --form-radios-oval-text-size: inherit;
+  --form-radios-oval-pc-text-size: 16px;
+  --form-radios-oval-tablet-text-size: 16px;
+  --form-radios-oval-mobile-text-size: 16px;
+}

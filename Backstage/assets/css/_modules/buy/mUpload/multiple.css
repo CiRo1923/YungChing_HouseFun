@@ -1,0 +1,254 @@
+/* multiple 變體的版型,以及 @screen 的斷點對應。 */
+
+/* ===== 每一張卡片(MultipleItem.vue)===== */
+
+.m-upload-multiple-item {
+  @apply relative;
+
+  opacity: var(--upload-multiple-item-opacity);
+
+  /* 拖曳排序時,原位留一張半透明的殘影 */
+  &.\-\-preview {
+    --upload-multiple-item-opacity: var(--upload-multiple-item-preview-opacity);
+  }
+}
+
+.m-upload-multiple-figure {
+  @apply relative overflow-hidden;
+  @apply rounded-[--upload-multiple-item-rounded];
+
+  height: var(--upload-multiple-item-h);
+
+  /* 拖曳中不要讓圖片攔截事件,否則放開的位置會判斷錯 */
+  &.\-\-dragging {
+    @apply pointer-events-none;
+  }
+}
+
+.m-upload-multiple-image {
+  @apply h-full w-full object-cover;
+}
+
+.m-upload-multiple-remove {
+  @apply absolute right-0 top-0 z-[1] flex items-center justify-center;
+  @apply h-[--upload-multiple-remove-size] w-[--upload-multiple-remove-size];
+  @apply rounded-[--upload-multiple-remove-rounded] bg-[--upload-multiple-remove-bg-color];
+}
+
+.m-upload-multiple-remove-icon {
+  @apply h-[--upload-multiple-remove-icon-size] w-[--upload-multiple-remove-icon-size];
+  @apply text-[--upload-multiple-remove-icon-color];
+}
+
+.m-upload-multiple-check {
+  @apply flex items-center justify-center;
+}
+
+.m-upload-multiple-check-icon {
+  @apply relative block shrink-0 self-start transition-colors duration-300;
+  @apply h-[--upload-multiple-check-icon-size] w-[--upload-multiple-check-icon-size];
+  @apply rounded-[--upload-multiple-check-icon-rounded] bg-[--upload-multiple-check-icon-bg-color];
+  @apply p-[--upload-multiple-check-icon-p] text-[--upload-multiple-check-icon-color];
+
+  border-width: var(--upload-multiple-check-icon-border);
+  margin-top: var(--upload-multiple-check-icon-mt);
+}
+
+/* ===== 清單與新增鈕(Multiple.vue)===== */
+
+.m-upload-multiple-input {
+  @apply hidden;
+}
+
+.m-upload-multiple-list {
+  @apply grid;
+  @apply gap-x-[--upload-multiple-list-gap-x] gap-y-[--upload-multiple-list-gap-y];
+}
+
+.m-upload-multiple-sortable {
+  @apply cursor-move touch-none;
+}
+
+.m-upload-multiple-slot {
+  @apply relative;
+}
+
+/* 拖曳排序時跟著游標走的那一張 */
+.m-upload-multiple-ghost {
+  @apply pointer-events-none absolute inset-x-0 top-0 z-[2];
+}
+
+.m-upload-multiple-append {
+  @apply flex items-center justify-center;
+  @apply rounded-[--upload-multiple-append-rounded] bg-[--upload-multiple-append-bg-color];
+
+  border-width: var(--upload-multiple-append-border);
+  border-color: var(--upload-multiple-append-border-color);
+
+  /* 還沒有圖片時獨占一整列 */
+  &:not(.\-\-filled) {
+    @apply w-full;
+
+    min-height: var(--upload-multiple-append-min-h);
+  }
+
+  &.\-\-dragging {
+    --upload-multiple-append-bg-color: var(--upload-single-dragging-bg-color);
+    --upload-multiple-append-border-color: var(--upload-single-dragging-border-color);
+  }
+}
+
+.m-upload-multiple-append-body {
+  @apply flex grow flex-col items-center justify-center;
+  @apply gap-y-[--upload-multiple-append-gap-y];
+  @apply text-[length:--upload-multiple-append-text-size] text-[--upload-multiple-append-color];
+}
+
+.m-upload-multiple-append-icon {
+  @apply shrink-0;
+  @apply h-[--upload-multiple-append-icon-size] w-[--upload-multiple-append-icon-size];
+  @apply text-[--upload-multiple-append-icon-color];
+}
+
+.m-upload-multiple-append-text {
+  @apply grow text-[length:--upload-multiple-append-text-size];
+}
+
+/* ===== 斷點對應 ===== */
+
+@screen p {
+  .m-upload {
+    --upload-multiple-list-gap-x: var(--upload-multiple-list-pc-gap-x);
+    --upload-multiple-list-gap-y: var(--upload-multiple-list-pc-gap-y);
+    --upload-multiple-append-rounded: var(--upload-multiple-append-pc-rounded);
+    --upload-multiple-append-border: var(--upload-multiple-append-pc-border);
+    --upload-multiple-append-min-h: var(--upload-multiple-append-pc-min-h);
+    --upload-multiple-append-gap-y: var(--upload-multiple-append-pc-gap-y);
+    --upload-multiple-append-text-size: var(--upload-multiple-append-pc-text-size);
+    --upload-multiple-append-icon-size: var(--upload-multiple-append-icon-pc-size);
+  }
+
+  .m-upload-multiple-item {
+    --upload-multiple-item-rounded: var(--upload-multiple-item-pc-rounded);
+    --upload-multiple-item-h: var(--upload-multiple-item-pc-h);
+    --upload-multiple-remove-size: var(--upload-multiple-remove-pc-size);
+    --upload-multiple-remove-rounded: var(--upload-multiple-remove-pc-rounded);
+    --upload-multiple-remove-icon-size: var(--upload-multiple-remove-icon-pc-size);
+    --upload-multiple-check-icon-size: var(--upload-multiple-check-icon-pc-size);
+    --upload-multiple-check-icon-p: var(--upload-multiple-check-icon-pc-p);
+    --upload-multiple-check-icon-rounded: var(--upload-multiple-check-icon-pc-rounded);
+    --upload-multiple-check-icon-border: var(--upload-multiple-check-icon-pc-border);
+    --upload-multiple-check-icon-mt: var(--upload-multiple-check-icon-pc-mt);
+  }
+
+  .m-upload-multiple-check {
+    margin-top: var(--upload-multiple-check-pc-mt);
+  }
+
+  .m-upload-multiple-list {
+    @apply grid-cols-4;
+  }
+
+  .m-upload-multiple-slot {
+    width: var(--upload-multiple-slot-pc-w);
+  }
+
+  .m-upload-multiple-append {
+    &.\-\-filled {
+      height: var(--upload-multiple-item-pc-h);
+      width: var(--upload-multiple-slot-pc-w);
+    }
+  }
+}
+
+@screen t {
+  .m-upload {
+    --upload-multiple-list-gap-x: var(--upload-multiple-list-tablet-gap-x);
+    --upload-multiple-list-gap-y: var(--upload-multiple-list-tablet-gap-y);
+    --upload-multiple-append-rounded: var(--upload-multiple-append-tablet-rounded);
+    --upload-multiple-append-border: var(--upload-multiple-append-tablet-border);
+    --upload-multiple-append-min-h: var(--upload-multiple-append-tablet-min-h);
+    --upload-multiple-append-gap-y: var(--upload-multiple-append-tablet-gap-y);
+    --upload-multiple-append-text-size: var(--upload-multiple-append-tablet-text-size);
+    --upload-multiple-append-icon-size: var(--upload-multiple-append-icon-tablet-size);
+  }
+
+  .m-upload-multiple-item {
+    --upload-multiple-item-rounded: var(--upload-multiple-item-tablet-rounded);
+    --upload-multiple-item-h: var(--upload-multiple-item-tablet-h);
+    --upload-multiple-remove-size: var(--upload-multiple-remove-tablet-size);
+    --upload-multiple-remove-rounded: var(--upload-multiple-remove-tablet-rounded);
+    --upload-multiple-remove-icon-size: var(--upload-multiple-remove-icon-tablet-size);
+    --upload-multiple-check-icon-size: var(--upload-multiple-check-icon-tablet-size);
+    --upload-multiple-check-icon-p: var(--upload-multiple-check-icon-tablet-p);
+    --upload-multiple-check-icon-rounded: var(--upload-multiple-check-icon-tablet-rounded);
+    --upload-multiple-check-icon-border: var(--upload-multiple-check-icon-tablet-border);
+    --upload-multiple-check-icon-mt: var(--upload-multiple-check-icon-tablet-mt);
+  }
+
+  .m-upload-multiple-check {
+    margin-top: var(--upload-multiple-check-tablet-mt);
+  }
+
+  .m-upload-multiple-list {
+    @apply grid-cols-3;
+  }
+
+  .m-upload-multiple-append {
+    &:not(.\-\-filled) {
+      @apply col-span-3;
+    }
+
+    &.\-\-filled {
+      height: var(--upload-multiple-item-tablet-h);
+    }
+  }
+}
+
+@screen m {
+  .m-upload {
+    --upload-multiple-list-gap-x: var(--upload-multiple-list-mobile-gap-x);
+    --upload-multiple-list-gap-y: var(--upload-multiple-list-mobile-gap-y);
+    --upload-multiple-append-rounded: var(--upload-multiple-append-mobile-rounded);
+    --upload-multiple-append-border: var(--upload-multiple-append-mobile-border);
+    --upload-multiple-append-min-h: var(--upload-multiple-append-mobile-min-h);
+    --upload-multiple-append-gap-y: var(--upload-multiple-append-mobile-gap-y);
+    --upload-multiple-append-text-size: var(--upload-multiple-append-mobile-text-size);
+    --upload-multiple-append-icon-size: var(--upload-multiple-append-icon-mobile-size);
+  }
+
+  .m-upload-multiple-item {
+    --upload-multiple-item-rounded: var(--upload-multiple-item-mobile-rounded);
+    --upload-multiple-item-h: var(--upload-multiple-item-mobile-h);
+    --upload-multiple-remove-size: var(--upload-multiple-remove-mobile-size);
+    --upload-multiple-remove-rounded: var(--upload-multiple-remove-mobile-rounded);
+    --upload-multiple-remove-icon-size: var(--upload-multiple-remove-icon-mobile-size);
+    --upload-multiple-check-icon-size: var(--upload-multiple-check-icon-mobile-size);
+    --upload-multiple-check-icon-p: var(--upload-multiple-check-icon-mobile-p);
+    --upload-multiple-check-icon-rounded: var(--upload-multiple-check-icon-mobile-rounded);
+    --upload-multiple-check-icon-border: var(--upload-multiple-check-icon-mobile-border);
+    --upload-multiple-check-icon-mt: var(--upload-multiple-check-icon-mobile-mt);
+  }
+
+  /* 手機的勾選框是疊在圖片左下角 */
+  .m-upload-multiple-check {
+    @apply absolute;
+
+    bottom: var(--upload-multiple-check-mobile-inset);
+    left: var(--upload-multiple-check-mobile-inset);
+  }
+
+  .m-upload-multiple-list {
+    @apply grid-cols-2;
+  }
+
+  .m-upload-multiple-append {
+    &:not(.\-\-filled) {
+      @apply col-span-2;
+    }
+
+    &.\-\-filled {
+      height: var(--upload-multiple-item-mobile-h);
+    }
+  }
+}

@@ -1,0 +1,88 @@
+/* mFooter 的版型,以及 @screen 的斷點對應。 */
+.m-footer {
+  @apply mx-auto;
+  @apply mt-[--footer-mt] max-w-[--footer-max-w] px-[--footer-px];
+}
+
+/* PC / 平板左右兩欄,手機改成上下堆疊 */
+.m-footer-container {
+  @apply overflow-hidden pt:flex;
+  @apply gap-x-[--footer-container-gap-x] rounded-t-[--footer-container-rounded-t];
+  @apply bg-[--footer-container-bg-color];
+  @apply px-[--footer-container-px] py-[--footer-container-py];
+}
+
+.m-footer-logo {
+  @apply flex flex-col t:shrink-0 p:grow;
+}
+
+.m-footer-links {
+  @apply inline-flex items-center p:shrink-0;
+  @apply mt-[--footer-links-mt] gap-x-[--footer-links-gap-x];
+}
+
+.m-footer-link {
+  @apply underline;
+  @apply text-[length:--footer-link-text-size] text-[--footer-link-color];
+}
+
+.m-footer-information {
+  @apply t:grow p:shrink-0;
+  @apply mt-[--footer-information-mt] space-y-[--footer-information-space-y];
+  @apply text-[length:--footer-information-text-size] text-[--footer-information-color];
+  @apply tracking-wider;
+}
+
+@screen p {
+  .m-footer {
+    --footer-mt: var(--footer-pc-mt);
+    --footer-px: var(--footer-pc-px);
+    --footer-max-w: var(--footer-pc-max-w);
+    --footer-container-rounded-t: var(--footer-container-pc-rounded-t);
+    --footer-container-py: var(--footer-container-pc-py);
+    --footer-container-px: var(--footer-container-pc-px);
+    --footer-container-gap-x: var(--footer-container-pc-gap-x);
+    --footer-links-gap-x: var(--footer-links-pc-gap-x);
+    --footer-links-mt: var(--footer-links-pc-mt);
+    --footer-link-text-size: var(--footer-link-pc-text-size);
+    --footer-information-text-size: var(--footer-information-pc-text-size);
+    --footer-information-space-y: var(--footer-information-pc-space-y);
+    --footer-information-mt: var(--footer-information-pc-mt);
+  }
+}
+
+@screen t {
+  .m-footer {
+    --footer-mt: var(--footer-tablet-mt);
+    --footer-px: var(--footer-tablet-px);
+    --footer-max-w: var(--footer-tablet-max-w);
+    --footer-container-rounded-t: var(--footer-container-tablet-rounded-t);
+    --footer-container-py: var(--footer-container-tablet-py);
+    --footer-container-px: var(--footer-container-tablet-px);
+    --footer-container-gap-x: var(--footer-container-tablet-gap-x);
+    --footer-links-gap-x: var(--footer-links-tablet-gap-x);
+    --footer-links-mt: var(--footer-links-tablet-mt);
+    --footer-link-text-size: var(--footer-link-tablet-text-size);
+    --footer-information-text-size: var(--footer-information-tablet-text-size);
+    --footer-information-space-y: var(--footer-information-tablet-space-y);
+    --footer-information-mt: var(--footer-information-tablet-mt);
+  }
+}
+
+@screen m {
+  .m-footer {
+    --footer-mt: var(--footer-mobile-mt);
+    --footer-px: var(--footer-mobile-px);
+    --footer-max-w: var(--footer-mobile-max-w);
+    --footer-container-rounded-t: var(--footer-container-mobile-rounded-t);
+    --footer-container-py: var(--footer-container-mobile-py);
+    --footer-container-px: var(--footer-container-mobile-px);
+    --footer-container-gap-x: var(--footer-container-mobile-gap-x);
+    --footer-links-gap-x: var(--footer-links-mobile-gap-x);
+    --footer-links-mt: var(--footer-links-mobile-mt);
+    --footer-link-text-size: var(--footer-link-mobile-text-size);
+    --footer-information-text-size: var(--footer-information-mobile-text-size);
+    --footer-information-space-y: var(--footer-information-mobile-space-y);
+    --footer-information-mt: var(--footer-information-mobile-mt);
+  }
+}

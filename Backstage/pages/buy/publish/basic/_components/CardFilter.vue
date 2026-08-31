@@ -91,7 +91,7 @@ onMounted(() => {
               isRequired: item.isRequired,
             }"
             :setClass="{
-              main: ['pt:flex pt:w-[100px] pt:shrink-0 pt:items-center', item.class],
+              main: ['text-[16px] pt:flex pt:w-[100px] pt:shrink-0 pt:items-center', item.class],
             }"
             v-if="item.label || $slots[`${item.id}_label`]"
           >

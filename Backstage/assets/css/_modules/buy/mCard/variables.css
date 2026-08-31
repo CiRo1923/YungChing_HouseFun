@@ -5,7 +5,8 @@
   --card-pb: 0;
   --card-pl: 0;
   --card-rounded: 0;
-  --card-bg-color: initial;
+  /* 沒帶顏色 modifier 時就是沒有背景色 —— 背景不該去繼承父層,所以是 transparent 不是 inherit */
+  --card-bg-color: transparent;
 
   /*
    * pc 是四邊 40、tablet / mobile 是 px 16 + py 32 —— 兩個層級併存,

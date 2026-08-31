@@ -16,6 +16,7 @@ const { apiData } = storeToRefs(buyPublish)
           required: '請輸入姓名',
         }"
         :setClass="{
+          type: 'text-[16px]',
           main: '--h-40 --px-12 --py-8',
           element: 'grow',
         }"

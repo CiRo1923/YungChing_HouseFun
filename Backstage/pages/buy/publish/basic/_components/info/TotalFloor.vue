@@ -22,6 +22,7 @@ const { apiData } = storeToRefs(buyPublish)
       required: '請輸入總樓高',
     }"
     :setClass="{
+      type: 'text-[16px]',
       main: '--h-40 --px-12 --py-8 t:w-[90px] p:w-[100px]',
       element: 'grow',
       rearAssist: 'text-[14px] text-[--gray-999]',

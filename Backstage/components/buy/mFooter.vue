@@ -1,4 +1,7 @@
 <script setup>
+import '@css/_modules/buy/mFooter/variables.css'
+import '@css/_modules/buy/mFooter/common.css'
+
 const houseFun = readonly([
   {
     label: '好房網首頁',
@@ -12,27 +15,27 @@ const houseFun = readonly([
 </script>
 
 <template>
-  <div class="m-fooetr mx-auto mt-[32px] px-[16px] p:max-w-[1232px]">
+  <div class="m-footer">
     <div
-      class="m-footer-container overflow-hidden rounded-t-[15px] bg-[--gray-f7] py-[40px] t:gap-x-[40px] tm:px-[16px] pt:flex p:px-[40px]"
+      class="m-footer-container"
     >
-      <div class="m-footer-logo flex flex-col t:shrink-0 p:grow">
+      <div class="m-footer-logo">
         <CommonImgSrc
           src="common/logo.svg"
           :setClass="{
             main: 'h-[50px] w-[126px] p:grow',
           }"
         />
-        <ul class="inline-flex items-center gap-x-[8px] tm:mt-[16px] p:shrink-0">
+        <ul class="m-footer-links">
           <li v-for="(item, index) in houseFun" :key="`${item.label}_${index}`">
-            <a :href="item.href" class="text-[14px] text-[--green-6a2d] underline">
+            <a :href="item.href" class="m-footer-link">
               <em>{{ item.label }}</em>
             </a>
           </li>
         </ul>
       </div>
       <div
-        class="m-footer-information space-y-[16px] text-[14px] tracking-wider text-[--gray-999] m:mt-[24px] t:grow p:shrink-0"
+        class="m-footer-information"
       >
         <ul>
           <li>
@@ -43,7 +46,7 @@ const houseFun = readonly([
           <li>
             <p>
               我們將使用追蹤技術來提供優質服務，當用戶使用網站服務即同意
-              <a href="javascript:;" class="text-[14px] text-[--green-6a2d] underline">
+              <a href="javascript:;" class="m-footer-link">
                 <em>隱私權政策</em>
               </a>
             </p>
@@ -57,7 +60,7 @@ const houseFun = readonly([
             <p>
               客服服務時段：週一到週五 9:00 ~ 12:00 / 13:30 ~
               18:00，如遇非服務時段或忙線，歡迎多加利用
-              <a href="javascript:;" class="text-[14px] text-[--green-6a2d] underline">
+              <a href="javascript:;" class="m-footer-link">
                 <em>客服信箱</em>
               </a>
               留言

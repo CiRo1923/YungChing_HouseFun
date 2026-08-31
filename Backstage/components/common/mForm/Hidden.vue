@@ -1,5 +1,6 @@
 <script setup>
-import '@css/_modules/buy/mForm.css'
+import '@css/_modules/common/mForm/variables.css'
+import '@css/_modules/common/mForm/common.css'
 
 import useValidateEvents from './.composables/useValidateEvents.js'
 
@@ -85,7 +86,7 @@ defineExpose({
     <ErrorMessage
       as="span"
       :name="`${props.name}_hidden`"
-      class="m-form-hidden-error block text-[14px]"
+      class="m-form-error"
       :class="setClass.error"
       v-slot="{ message }"
     >

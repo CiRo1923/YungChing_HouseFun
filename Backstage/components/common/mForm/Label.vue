@@ -1,4 +1,7 @@
 <script setup>
+import '@css/_modules/common/mLabel/variables.css'
+import '@css/_modules/common/mLabel/common.css'
+
 const props = defineProps({
   label: {
     type: String,
@@ -43,7 +46,7 @@ const setClass = computed(() => ({
 <template>
   <component
     :is="config.as"
-    class="m-label text-[16px]"
+    class="m-label"
     :for="config.for"
     :class="setClass.main"
     v-bind="dataRequired"
@@ -52,12 +55,3 @@ const setClass = computed(() => ({
   </component>
 </template>
 
-<style lang="postcss">
-.m-label {
-  &[data-required]:not([data-required='']) {
-    &::before {
-      @apply ml-[2px] text-[--orange-e646] content-[attr(data-required)];
-    }
-  }
-}
-</style>

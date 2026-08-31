@@ -1,0 +1,101 @@
+/* mTable 的共用版型,以及 @screen 的斷點對應。 */
+.m-table {
+  &.\-\-rounded {
+    .m-table-thead-th {
+      &:first-child {
+        @apply rounded-l-[--table-rounded-l];
+      }
+
+      &:last-child {
+        @apply rounded-r-[--table-rounded-r];
+      }
+    }
+  }
+
+  &.\-\-rounded-t {
+    .m-table-thead-th {
+      &:first-child {
+        @apply rounded-tl-[--table-rounded-tl];
+      }
+
+      &:last-child {
+        @apply rounded-tr-[--table-rounded-tr];
+      }
+    }
+  }
+
+  &.\-\-thead-gray-f7 {
+    .m-table-thead-th {
+      @apply bg-[--gray-f7];
+    }
+  }
+
+  &.\-\-thead-gray-f2 {
+    .m-table-thead-th {
+      @apply bg-[--gray-f2];
+    }
+  }
+}
+
+.m-table-container {
+  /*
+    捲軸貼著最後一欄會顯得太擠,內容往左讓出間距。
+    只在真的捲得動時才留 —— --scrolling 由 useTableCore 依 scrollHeight / clientHeight 掛上,
+    否則沒有捲軸的表格會平白內縮。
+  */
+  &.scrollbar.\-\-y.\-\-scrolling {
+    @apply pr-[--table-scroll-pr];
+  }
+}
+
+/* 表格一律撐滿容器,欄寬由各欄自己的 setClass 決定 */
+.m-table-content {
+  @apply w-full;
+}
+
+.m-table-thead {
+  @apply relative z-[1];
+}
+
+.m-table-thead-tr {
+  @apply text-center;
+}
+
+@screen p {
+  .m-table {
+    --table-rounded-l: var(--table-pc-rounded);
+    --table-rounded-r: var(--table-pc-rounded);
+    --table-rounded-tl: var(--table-pc-rounded);
+    --table-rounded-tr: var(--table-pc-rounded);
+  }
+
+  .m-table-container {
+    --table-scroll-pr: var(--table-scroll-pc-pr);
+  }
+}
+
+@screen t {
+  .m-table {
+    --table-rounded-l: var(--table-tablet-rounded);
+    --table-rounded-r: var(--table-tablet-rounded);
+    --table-rounded-tl: var(--table-tablet-rounded);
+    --table-rounded-tr: var(--table-tablet-rounded);
+  }
+
+  .m-table-container {
+    --table-scroll-pr: var(--table-scroll-tablet-pr);
+  }
+}
+
+@screen m {
+  .m-table {
+    --table-rounded-l: var(--table-mobile-rounded);
+    --table-rounded-r: var(--table-mobile-rounded);
+    --table-rounded-tl: var(--table-mobile-rounded);
+    --table-rounded-tr: var(--table-mobile-rounded);
+  }
+
+  .m-table-container {
+    --table-scroll-pr: var(--table-scroll-mobile-pr);
+  }
+}

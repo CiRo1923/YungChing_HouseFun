@@ -1,0 +1,84 @@
+/*
+ * autocomplete 變體的變數。
+ *
+ * 輸入框本身(邊框、底色、文字色、disabled / focus / error 狀態)全部走 mForm 的共用層 ——
+ * 這支只放 autocomplete 專屬的:右側搜尋圖示、錯誤訊息、以及 Teleport 出去的下拉選單。
+ */
+:root {
+  /* 右側的搜尋圖示 */
+  --form-autocomplete-icon-color: var(--gray-ccce);
+  --form-autocomplete-error-icon-color: var(--orange-e646);
+
+  --form-autocomplete-icon-size: 0;
+  --form-autocomplete-icon-pc-size: 20px;
+  --form-autocomplete-icon-tablet-size: 20px;
+  --form-autocomplete-icon-mobile-size: 20px;
+
+  --form-autocomplete-icon-p: 0;
+  --form-autocomplete-icon-pc-p: 2px;
+  --form-autocomplete-icon-tablet-p: 2px;
+  --form-autocomplete-icon-mobile-p: 2px;
+
+  /* 錯誤訊息 */
+  --form-autocomplete-error-color: var(--red-f00);
+
+  --form-autocomplete-error-mt: 0;
+  --form-autocomplete-error-pc-mt: 2px;
+  --form-autocomplete-error-tablet-mt: 2px;
+  --form-autocomplete-error-mobile-mt: 2px;
+
+  /* 下拉選單(Teleport 到 body) */
+  --form-autocomplete-dropdown-bg-color: var(--white);
+
+  --form-autocomplete-dropdown-mt: 0;
+  --form-autocomplete-dropdown-pc-mt: 3px;
+  --form-autocomplete-dropdown-tablet-mt: 3px;
+  --form-autocomplete-dropdown-mobile-mt: 3px;
+
+  /* box-shadow 整條當一個值 —— 走原生 CSS 屬性,不用 @apply shadow-[…] */
+  --form-autocomplete-dropdown-shadow: none;
+  --form-autocomplete-dropdown-pc-shadow: 0 4px 24px 0 var(--blue-0016-14), 0 2px 16px -8px var(--blue-0016-33);
+  --form-autocomplete-dropdown-tablet-shadow: 0 4px 24px 0 var(--blue-0016-14), 0 2px 16px -8px var(--blue-0016-33);
+  --form-autocomplete-dropdown-mobile-shadow: 0 4px 24px 0 var(--blue-0016-14), 0 2px 16px -8px var(--blue-0016-33);
+
+  /* 沒有結果時的提示 */
+  --form-autocomplete-dropdown-no-data-color: var(--gray-333);
+
+  --form-autocomplete-dropdown-no-data-p: 0;
+  --form-autocomplete-dropdown-no-data-pc-p: 8px;
+  --form-autocomplete-dropdown-no-data-tablet-p: 8px;
+  --form-autocomplete-dropdown-no-data-mobile-p: 8px;
+
+  /*
+   * 選項的字級固定在這裡 —— 下拉選單是組件內部的結構,不是使用端會想逐頁調的東西
+   * (mForm 的 setClass 也沒有對應的 key)。
+   */
+  --form-autocomplete-dropdown-text-size: inherit;
+  --form-autocomplete-dropdown-pc-text-size: 14px;
+  --form-autocomplete-dropdown-tablet-text-size: 14px;
+  --form-autocomplete-dropdown-mobile-text-size: 14px;
+
+  /* 選項之間的分隔線,用 ::after 畫,所以吃的是 h-[] */
+  --form-autocomplete-dropdown-item-border-color: var(--gray-e5);
+  --form-autocomplete-dropdown-item-border-opacity: 0.3;
+
+  --form-autocomplete-dropdown-item-border: 0;
+  --form-autocomplete-dropdown-item-pc-border: 1px;
+  --form-autocomplete-dropdown-item-tablet-border: 1px;
+  --form-autocomplete-dropdown-item-mobile-border: 1px;
+
+  /* 選項按鈕 */
+  --form-autocomplete-dropdown-button-color: var(--gray-333);
+  --form-autocomplete-dropdown-button-active-bg-color: var(--orange-feea);
+  --form-autocomplete-dropdown-button-disabled-color: var(--gray-33-4d);
+
+  --form-autocomplete-dropdown-button-px: 0;
+  --form-autocomplete-dropdown-button-pc-px: 8px;
+  --form-autocomplete-dropdown-button-tablet-px: 8px;
+  --form-autocomplete-dropdown-button-mobile-px: 8px;
+
+  --form-autocomplete-dropdown-label-py: 0;
+  --form-autocomplete-dropdown-label-pc-py: 8px;
+  --form-autocomplete-dropdown-label-tablet-py: 8px;
+  --form-autocomplete-dropdown-label-mobile-py: 8px;
+}

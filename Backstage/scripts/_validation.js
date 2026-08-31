@@ -72,8 +72,18 @@ defineRule('halfWidth', (value, object) => {
   return value && /[\u0100-\uffff]/g.test(exception) ? message : true
 })
 
-// 電話格式
+// 手機格式
 defineRule('phone', (value, message) => {
+  return value && !/^09\d{8}$/.test(value) ? message[0] : true
+})
+
+// 電話格式
+defineRule('tel', (value, message) => {
+  return !/^0\d{1,4}-?\d{5,8}(#\d+)?$/.test(value) ? message[0] : true
+})
+
+// 手機&手機格式
+defineRule('bothTelPhone', (value, message) => {
   return value && (!/^09\d{8}$/.test(value) || !/^0\d{1,4}-?\d{5,8}(#\d+)?$/.test(value))
     ? message[0]
     : true

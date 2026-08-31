@@ -16,6 +16,7 @@ const { apiSearchData, serachOptions } = storeToRefs(buyList)
       },
     }"
     :setClass="{
+      type: 'text-[16px]',
       main: '--h-40 --px-12 --py-8 p:w-[115px]',
       dropdown: 't:w-[300px] p:w-[400px]',
     }"

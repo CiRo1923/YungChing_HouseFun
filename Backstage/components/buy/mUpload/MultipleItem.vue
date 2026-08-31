@@ -1,4 +1,9 @@
 <script setup>
+import '@css/_modules/buy/mUpload/variables.css'
+import '@css/_modules/buy/mUpload/multipleVariables.css'
+import '@css/_modules/buy/mUpload/common.css'
+import '@css/_modules/buy/mUpload/multiple.css'
+
 const emit = defineEmits(['remove', 'check'])
 const props = defineProps({
   item: {
@@ -38,41 +43,41 @@ const onRemoveClick = () => {
 
 <template>
   <div
-    class="relative"
+    class="m-upload-multiple-item"
     :class="[
       {
-        'opacity-30': config.isPreview,
+        '--preview': config.isPreview,
       },
     ]"
     :style="style"
   >
     <div
-      class="relative overflow-hidden rounded-[5px] m:h-[114px] p:h-[152px]"
+      class="m-upload-multiple-figure"
       :class="{
-        'pointer-events-none': config.isDragging,
+        '--dragging': config.isDragging,
       }"
     >
-      <img :src="props.item.url" alt="" class="h-full w-full object-cover" draggable="false" />
+      <img :src="props.item.url" alt="" class="m-upload-multiple-image" draggable="false" />
 
       <button
         type="button"
-        class="absolute right-0 top-0 z-[1] flex h-[24px] w-[24px] items-center justify-center rounded-[5px] bg-[--gray-f2]"
+        class="m-upload-multiple-remove"
         :tabindex="config.isPreview ? -1 : undefined"
         @pointerdown.stop
         @click.stop="onRemoveClick"
       >
-        <CommonSvgIcon icon="icon_xmark" class="h-[10px] w-[10px] text-[--gray-666]" />
+        <CommonSvgIcon icon="icon_xmark" class="m-upload-multiple-remove-icon" />
       </button>
     </div>
 
     <label
-      class="flex items-center justify-center m:absolute m:bottom-[5px] m:left-[5px] pt:mt-[6px]"
+      class="m-upload-multiple-check"
       @pointerdown.stop
       @click.stop
     >
       <input
         type="checkbox"
-        class="m-upload-checkbox sr-only"
+        class="m-upload-checkbox"
         :checked="props.item.checked"
         :tabindex="config.isPreview ? -1 : undefined"
         @pointerdown.stop
@@ -80,7 +85,7 @@ const onRemoveClick = () => {
       />
       <CommonSvgIcon
         icon="icon_check_solid"
-        class="m-upload-checkbox-icon relative mt-[2px] block h-[18px] w-[18px] shrink-0 self-start rounded-[2px] border-[1px] bg-[--white] p-[1px] text-[--orange-e646] transition-colors duration-300"
+        class="m-upload-checkbox-icon m-upload-multiple-check-icon"
         :class="props.setClass.icon"
       />
     </label>

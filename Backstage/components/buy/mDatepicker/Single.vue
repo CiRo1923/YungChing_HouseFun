@@ -1,5 +1,6 @@
 <script setup>
-import '@css/_modules/buy/mDatepicker.css'
+import '@css/_modules/buy/mDatepicker/variables.css'
+import '@css/_modules/buy/mDatepicker/common.css'
 
 /* 單一日期選擇。自己實作,不依賴第三方套件。
 
@@ -275,7 +276,7 @@ onUnmounted(() => {
               @pointerdown="onCalendarButtonPointerdown($event)"
               ref="iconRef"
             >
-              <CommonSvgIcon icon="icon_calendar" class="h-full w-full" />
+              <CommonSvgIcon icon="icon_calendar" />
             </button>
           </div>
         </div>

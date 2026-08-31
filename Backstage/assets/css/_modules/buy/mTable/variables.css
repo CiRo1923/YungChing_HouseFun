@@ -1,0 +1,21 @@
+/* mTable 的共用變數 —— 只放「值」,斷點對應與狀態切換寫在 common.css。 */
+:root {
+  /*
+   * 圓角依 modifier 決定套哪幾個角(--rounded 是左右兩端、--rounded-t 是上緣兩角),
+   * 所以每個方向各一個變數 —— 值都取同一組斷點值,但名字要對得上實際套用的 utility。
+   */
+  --table-rounded-l: 0;
+  --table-rounded-r: 0;
+  --table-rounded-tl: 0;
+  --table-rounded-tr: 0;
+
+  --table-pc-rounded: 15px;
+  --table-tablet-rounded: 15px;
+  --table-mobile-rounded: 15px;
+
+  /* 捲軸與內容之間的間距(捲軸本身 4px,見 _common/basic.css 的 .scrollbar.--y) */
+  --table-scroll-pr: 0;
+  --table-scroll-pc-pr: 8px;
+  --table-scroll-tablet-pr: 8px;
+  --table-scroll-mobile-pr: 8px;
+}

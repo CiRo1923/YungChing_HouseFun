@@ -1,5 +1,8 @@
 <script setup>
-import '@css/_modules/buy/mForm.css'
+import '@css/_modules/common/mForm/variables.css'
+import '@css/_modules/common/mForm/radiosOvalVariables.css'
+import '@css/_modules/common/mForm/common.css'
+import '@css/_modules/common/mForm/radiosOval.css'
 
 import useValidateEvents from './.composables/useValidateEvents.js'
 
@@ -106,20 +109,20 @@ watch(
 </script>
 
 <template>
-  <div class="m-form --radios-oval overflow-hidden" :class="setClass.main">
+  <div class="m-form --radios-oval" :class="setClass.main">
     <ul
-      class="m-form-radios inline-flex overflow-hidden tm:flex-wrap tm:gap-x-[9px] tm:gap-y-[12px] p:rounded-[5px] p:bg-[--gray-f2]"
+      class="m-form-radios"
       :class="setClass.radios"
     >
       <li
-        class="m-form-container overflow-hidden tm:h-[50px] tm:rounded-[5px] tm:bg-[--gray-f2] p:h-[35px]"
+        class="m-form-container"
         :class="setClass.container"
         v-for="(item, index) in props.options"
         :key="`${item[config.schema.label]}_${index}`"
       >
         <!-- '--checked': item[config.schema.value] == selected 用 == 會有形態別問題 '1' (string) !== 1 (int) -->
         <label
-          class="m-form-element relative flex h-full w-full cursor-pointer items-center justify-center text-[--gray-666] transition-colors duration-300 tm:gap-x-[3px] tm:px-[10px] p:gap-x-[5px] p:px-[12px]"
+          class="m-form-element"
           :class="[
             {
               '--checked': item[config.schema.value] == selected,
@@ -132,17 +135,17 @@ watch(
             :name="props.name"
             v-model="selected"
             :value="item[config.schema.value]"
-            class="m-form-type sr-only"
+            class="m-form-type --visually-hidden"
             :class="setClass.type"
             @change="onChange(item)"
           />
           <!-- v-if="item[config.schema.value] == selected" 用 == 會有形態別問題 '1' (string) !== 1 (int) -->
           <CommonSvgIcon
             icon="icon_check_solid"
-            class="m-form-icon h-[16px] w-[16px] text-[--orange-e646]"
+            class="m-form-icon"
             v-if="item[config.schema.value] == selected"
           />
-          <em class="m-form-label text-[16px]">{{ item[config.schema.label] }}</em>
+          <em class="m-form-label">{{ item[config.schema.label] }}</em>
         </label>
       </li>
     </ul>
@@ -158,7 +161,7 @@ watch(
     <ErrorMessage
       as="span"
       :name="`${props.name}_radios`"
-      class="m-form-error block"
+      class="m-form-error"
       :class="setClass.error"
       v-slot="{ message }"
     >
@@ -167,46 +170,3 @@ watch(
   </div>
 </template>
 
-<style lang="postcss">
-.m-form {
-  &.\-\-radios-oval {
-    .m-form-element {
-      &:not(&.\-\-checked) {
-        @apply bg-transparent;
-      }
-
-      &.\-\-checked {
-        @apply bg-[--orange-feea];
-
-        .m-form-label {
-          @apply font-semibold;
-        }
-      }
-    }
-  }
-}
-
-@screen p {
-  .m-form {
-    &.\-\-radios-oval {
-      .m-form-element {
-        &:not(&.\-\-checked) {
-          @apply px-[25px];
-        }
-      }
-    }
-  }
-}
-
-@screen tm {
-  .m-form {
-    &.\-\-radios-oval {
-      .m-form-element {
-        &:not(&.\-\-checked) {
-          @apply pl-[19px] pr-[20px];
-        }
-      }
-    }
-  }
-}
-</style>

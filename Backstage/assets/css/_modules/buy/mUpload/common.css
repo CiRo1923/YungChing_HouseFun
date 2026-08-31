@@ -1,5 +1,41 @@
+/* mUpload 的共用版型。 */
+
 /* 錯誤訊息的顏色由「嵌入 mErrorMessage 的組件」決定 ——
    .m-error-message 自己不設 color,靠這裡繼承下去 */
 .m-upload-error {
-  @apply text-[--orange-e646];
+  @apply text-[--upload-error-color];
+}
+
+.m-upload-checkbox {
+  /* 真正的 input 藏起來但保留給輔助技術,視覺上是旁邊那個圖示在代表它 */
+  @apply sr-only;
+
+  &:not(:checked) {
+    & + .m-upload-checkbox-icon {
+      @apply border-[--upload-checkbox-icon-border-color];
+    }
+  }
+
+  &:checked {
+    & + .m-upload-checkbox-icon {
+      @apply border-transparent;
+
+      > use {
+        opacity: var(--upload-checkbox-icon-checked-opacity);
+      }
+    }
+  }
+}
+
+.m-upload-checkbox-icon {
+  > use {
+    opacity: var(--upload-checkbox-icon-opacity);
+
+    @apply transition-opacity duration-300;
+  }
+}
+
+.m-upload-drag-preview {
+  /* 拖曳中的預覽跟手,transition 走 tailwind 的 arbitrary property(空格用 _ 代替) */
+  @apply [transition:transform_0.22s_ease];
 }

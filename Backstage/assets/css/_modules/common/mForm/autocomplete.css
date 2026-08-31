@@ -1,0 +1,131 @@
+/*
+ * autocomplete 變體的版型,以及 @screen 的斷點對應。
+ *
+ * 輸入框本身走 mForm 的共用層(.m-form-element)—— 邊框、底色、文字色與
+ * disabled / focus / error 的狀態切換都在 common.css,這裡不重複一份。
+ */
+.m-form-element {
+  &.\-\-autocomplete {
+    &.\-\-error {
+      --form-autocomplete-icon-color: var(--form-autocomplete-error-icon-color);
+    }
+  }
+}
+
+.m-form-autocomplete-icon {
+  @apply pointer-events-none shrink-0 transition-colors duration-300;
+  @apply h-[--form-autocomplete-icon-size] w-[--form-autocomplete-icon-size] p-[--form-autocomplete-icon-p];
+  @apply text-[--form-autocomplete-icon-color];
+}
+
+.m-form-autocomplete-error {
+  @apply flex text-left;
+  @apply mt-[--form-autocomplete-error-mt] text-[--form-autocomplete-error-color];
+}
+
+/* Teleport to="body" —— DOM 上不在 .m-form 內,斷點對應要自己再掛一份(見下面 @screen) */
+.m-form-autocomplete-dropdown {
+  box-shadow: var(--form-autocomplete-dropdown-shadow);
+
+  @apply absolute z-[5] overflow-hidden;
+  @apply mt-[--form-autocomplete-dropdown-mt];
+}
+
+.m-form-autocomplete-dropdown-no-data {
+  @apply bg-[--form-autocomplete-dropdown-bg-color];
+  @apply p-[--form-autocomplete-dropdown-no-data-p];
+  @apply text-[length:--form-autocomplete-dropdown-text-size] text-[--form-autocomplete-dropdown-no-data-color];
+}
+
+.m-form-autocomplete-dropdown-container {
+  @apply max-h-full bg-[--form-autocomplete-dropdown-bg-color];
+}
+
+.m-form-autocomplete-dropdown-item {
+  &:not(:last-child) {
+    .m-form-autocomplete-dropdown-button {
+      &:after {
+        @apply block w-full content-default;
+        @apply h-[--form-autocomplete-dropdown-item-border] bg-[--form-autocomplete-dropdown-item-border-color];
+
+        opacity: var(--form-autocomplete-dropdown-item-border-opacity);
+      }
+    }
+  }
+}
+
+.m-form-autocomplete-dropdown-button {
+  @apply block w-full text-left transition-colors duration-300;
+  @apply px-[--form-autocomplete-dropdown-button-px];
+
+  &:not(:disabled) {
+    @apply text-[--form-autocomplete-dropdown-button-color];
+
+    &.\-\-active {
+      @apply bg-[--form-autocomplete-dropdown-button-active-bg-color];
+    }
+  }
+
+  &:disabled {
+    @apply text-[--form-autocomplete-dropdown-button-disabled-color];
+  }
+}
+
+.m-form-autocomplete-dropdown-label {
+  @apply relative block grow;
+  @apply py-[--form-autocomplete-dropdown-label-py] text-[length:--form-autocomplete-dropdown-text-size];
+}
+
+@screen p {
+  .m-form {
+    --form-autocomplete-icon-size: var(--form-autocomplete-icon-pc-size);
+    --form-autocomplete-icon-p: var(--form-autocomplete-icon-pc-p);
+    --form-autocomplete-error-mt: var(--form-autocomplete-error-pc-mt);
+  }
+
+  .m-form-autocomplete-dropdown {
+    --form-autocomplete-dropdown-mt: var(--form-autocomplete-dropdown-pc-mt);
+    --form-autocomplete-dropdown-shadow: var(--form-autocomplete-dropdown-pc-shadow);
+    --form-autocomplete-dropdown-text-size: var(--form-autocomplete-dropdown-pc-text-size);
+    --form-autocomplete-dropdown-no-data-p: var(--form-autocomplete-dropdown-no-data-pc-p);
+    --form-autocomplete-dropdown-item-border: var(--form-autocomplete-dropdown-item-pc-border);
+    --form-autocomplete-dropdown-button-px: var(--form-autocomplete-dropdown-button-pc-px);
+    --form-autocomplete-dropdown-label-py: var(--form-autocomplete-dropdown-label-pc-py);
+  }
+}
+
+@screen t {
+  .m-form {
+    --form-autocomplete-icon-size: var(--form-autocomplete-icon-tablet-size);
+    --form-autocomplete-icon-p: var(--form-autocomplete-icon-tablet-p);
+    --form-autocomplete-error-mt: var(--form-autocomplete-error-tablet-mt);
+  }
+
+  .m-form-autocomplete-dropdown {
+    --form-autocomplete-dropdown-mt: var(--form-autocomplete-dropdown-tablet-mt);
+    --form-autocomplete-dropdown-shadow: var(--form-autocomplete-dropdown-tablet-shadow);
+    --form-autocomplete-dropdown-text-size: var(--form-autocomplete-dropdown-tablet-text-size);
+    --form-autocomplete-dropdown-no-data-p: var(--form-autocomplete-dropdown-no-data-tablet-p);
+    --form-autocomplete-dropdown-item-border: var(--form-autocomplete-dropdown-item-tablet-border);
+    --form-autocomplete-dropdown-button-px: var(--form-autocomplete-dropdown-button-tablet-px);
+    --form-autocomplete-dropdown-label-py: var(--form-autocomplete-dropdown-label-tablet-py);
+  }
+}
+
+@screen m {
+  .m-form {
+    --form-autocomplete-icon-size: var(--form-autocomplete-icon-mobile-size);
+    --form-autocomplete-icon-p: var(--form-autocomplete-icon-mobile-p);
+    --form-autocomplete-error-mt: var(--form-autocomplete-error-mobile-mt);
+  }
+
+  .m-form-autocomplete-dropdown {
+    --form-autocomplete-dropdown-mt: var(--form-autocomplete-dropdown-mobile-mt);
+    --form-autocomplete-dropdown-shadow: var(--form-autocomplete-dropdown-mobile-shadow);
+    --form-autocomplete-dropdown-text-size: var(--form-autocomplete-dropdown-mobile-text-size);
+    --form-autocomplete-dropdown-no-data-p: var(--form-autocomplete-dropdown-no-data-mobile-p);
+    --form-autocomplete-dropdown-item-border: var(--form-autocomplete-dropdown-item-mobile-border);
+    --form-autocomplete-dropdown-button-px: var(--form-autocomplete-dropdown-button-mobile-px);
+    --form-autocomplete-dropdown-label-py: var(--form-autocomplete-dropdown-label-mobile-py);
+  }
+}

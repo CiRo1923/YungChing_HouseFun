@@ -100,6 +100,7 @@ watch(
             isDisabled: apiData.caseInfo.isCaseAttachedSqAutoCalculate,
           }"
           :setClass="{
+            type: 'text-[16px]',
             main: '--h-40 --px-12 --py-8',
             element: 'grow',
             rearAssist: 'text-[14px] text-[--gray-999]',
@@ -150,6 +151,7 @@ watch(
             comma: true,
           }"
           :setClass="{
+            type: 'text-[16px]',
             main: '--h-40 --px-12 --py-8 pt:grow',
             element: 'grow',
             rearAssist: 'text-[14px] text-[--gray-999]',

@@ -1,0 +1,17 @@
+/*
+ * mLabel 的變數 —— 對應 components/common/mForm/Label.vue。
+ *
+ * 資料夾名跟著 class(m-label)走。它與 mForm 的 .m-form-label 是**不同的元素**,
+ * 刻意不合併(見 skill css-conventions 的「撞名不要硬合併」)。
+ *
+ * ⚠️ 這裡沒有 --label-text-size —— 標籤到處複用,字級由使用端 setClass.main 傳。
+ * 建了變數 module 就會 @apply 它,一輸出就蓋掉使用端的 text-*,交給父系等於白做。
+ */
+:root {
+  --label-required-color: var(--orange-e646);
+
+  --label-required-ml: 0;
+  --label-required-pc-ml: 2px;
+  --label-required-tablet-ml: 2px;
+  --label-required-mobile-ml: 2px;
+}

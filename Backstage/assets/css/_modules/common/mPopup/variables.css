@@ -1,10 +1,18 @@
 :root {
-  --popup-width: auto;
-  --popup-mobile-width: 343px;
+  --popup-w: auto;
 
+  /* lint-breakpoint-exempt: 手機版寬度固定,桌機 / 平板的寬度由 --w-1200 ~ --w-300 modifier 決定 */
+  --popup-mobile-w: 343px;
+
+  --popup-container-rounded-t: 0;
   --popup-container-pc-rounded: 15px;
   --popup-container-tablet-rounded: 15px;
   --popup-container-mobile-rounded: 15px;
+
+  /* --bottomSheet 變體只圓上緣(目前保留未啟用),值同整體圓角 */
+  --popup-container-pc-rounded-t: 15px;
+  --popup-container-tablet-rounded-t: 15px;
+  --popup-container-mobile-rounded-t: 15px;
 
   --popup-container-pc-px: 72px;
   --popup-container-tablet-px: 32px;
@@ -46,9 +54,16 @@
   --popup-header-anchor-tablet-size: 30px;
   --popup-header-anchor-mobile-size: 30px;
 
-  --popup-tools-pc-m: 24px;
-  --popup-tools-tablet-m: 12px;
-  --popup-tools-mobile-m: 12px;
+  /* 工具列手機排到下方(推上外距)、桌機與平板排到側邊(推開左右),兩端各只有一個方向 */
+  --popup-tools-mt: 0;
+  --popup-tools-mx: 0;
+
+  /* lint-breakpoint-exempt: 桌機 / 平板的工具列在側邊,只推左右,手機沒有這個方向 */
+  --popup-tools-pc-mx: 24px;
+  --popup-tools-tablet-mx: 12px;
+
+  /* lint-breakpoint-exempt: 手機的工具列在下方,只推上方,桌機 / 平板沒有這個方向 */
+  --popup-tools-mobile-mt: 12px;
 
   --popup-body-pc-mt: 24px;
   --popup-body-tablet-mt: 24px;
@@ -75,37 +90,37 @@
     &.\-\-w-1200,
     &.p\:\-\-w-1200,
     &.pt\:\-\-w-1200 {
-      --popup-width: 1200px;
+      --popup-w: 1200px;
     }
 
     &.\-\-w-800,
     &.p\:\-\-w-800,
     &.pt\:\-\-w-800 {
-      --popup-width: 800px;
+      --popup-w: 800px;
     }
 
     &.\-\-w-720,
     &.p\:\-\-w-720,
     &.pt\:\-\-w-720 {
-      --popup-width: 720px;
+      --popup-w: 720px;
     }
 
     &.\-\-w-600,
     &.p\:\-\-w-600,
     &.pt\:\-\-w-600 {
-      --popup-width: 600px;
+      --popup-w: 600px;
     }
 
     &.\-\-w-450,
     &.p\:\-\-w-450,
     &.pt\:\-\-w-450 {
-      --popup-width: 450px;
+      --popup-w: 450px;
     }
 
     &.\-\-w-300,
     &.p\:\-\-w-300,
     &.pt\:\-\-w-300 {
-      --popup-width: 300px;
+      --popup-w: 300px;
     }
   }
 }
@@ -116,48 +131,42 @@
     &.pt\:\-\-w-1200,
     &.tm\:\-\-w-1200,
     &.t\:\-\-w-1200 {
-      --popup-width: 1200px;
+      --popup-w: 1200px;
     }
 
     &.\-\-w-800,
     &.pt\:\-\-w-800,
     &.tm\:\-\-w-800,
     &.t\:\-\-w-800 {
-      --popup-width: 800px;
+      --popup-w: 800px;
     }
 
     &.\-\-w-720,
     &.pt\:\-\-w-720,
     &.tm\:\-\-w-720,
     &.t\:\-\-w-720 {
-      --popup-width: 720px;
+      --popup-w: 720px;
     }
 
     &.\-\-w-600,
     &.pt\:\-\-w-600,
     &.tm\:\-\-w-600,
     &.t\:\-\-w-600 {
-      --popup-width: 600px;
+      --popup-w: 600px;
     }
 
     &.\-\-w-450,
     &.pt\:\-\-w-450,
     &.tm\:\-\-w-450,
     &.t\:\-\-w-450 {
-      --popup-width: 450px;
+      --popup-w: 450px;
     }
 
     &.\-\-w-300,
     &.pt\:\-\-w-300,
     &.tm\:\-\-w-300,
     &.t\:\-\-w-300 {
-      --popup-width: 300px;
+      --popup-w: 300px;
     }
-  }
-}
-
-@screen m {
-  .m-popup {
-    --popup-width: var(--popup-mobile-width);
   }
 }

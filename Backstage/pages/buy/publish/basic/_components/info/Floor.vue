@@ -93,6 +93,7 @@ const onFloorVaild = () => {
               isError,
             }"
             :setClass="{
+              type: 'text-[16px]',
               main: '--h-40 --px-12 --py-8 shrink-0',
             }"
           />
@@ -113,6 +114,7 @@ const onFloorVaild = () => {
               required: '請輸入樓層',
             }"
             :setClass="{
+              type: 'text-[16px]',
               main: '--h-40 --px-12 --py-8 p:grow',
               element: 'grow',
               rearAssist: 'text-[14px] text-[--gray-999]',
@@ -138,6 +140,7 @@ const onFloorVaild = () => {
               isError,
             }"
             :setClass="{
+              type: 'text-[16px]',
               main: '--h-40 --px-12 --py-8 shrink-0',
             }"
           />
@@ -158,6 +161,7 @@ const onFloorVaild = () => {
               required: '請輸入樓層',
             }"
             :setClass="{
+              type: 'text-[16px]',
               main: '--h-40 --px-12 --py-8 grow',
               element: 'grow',
               rearAssist: 'text-[14px] text-[--gray-999]',

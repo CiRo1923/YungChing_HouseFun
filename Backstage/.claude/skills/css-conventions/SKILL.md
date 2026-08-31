@@ -1,12 +1,12 @@
 ---
 name: css-conventions
-description: 動到任何 css、顏色、module 樣式前必須先讀。四條規則 —— 顏色一律定義在 color.css 且依規則命名與排序、components 的 template 不寫 tailwind class、module 拆資料夾與引入順序、module 變數的命名與斷點。含四層自動守門與檢查工具的用法。觸發時機 - 要加新顏色 / 改 assets/css/_common/color.css、要拆或改 assets/css/_modules/**、要動 components/**/*.vue 的 class 或 <style>、或使用者問到「顏色要放哪 / 色票命名 / 色系排序 / 為什麼跳 CSS 警告」。
+description: 動到任何 css、顏色、module 樣式前必須先讀。六條規則 —— 顏色一律定義在 color.css 且依規則命名與排序、components 的 template 不寫 tailwind class、module 拆資料夾與引入順序、module 變數的命名與斷點、.vue 的 import 順序、不要用被 theme 整組覆寫掉而不存在的 tailwind class(text-sm / 任何 shadow-* / md: 都產不出 CSS)。含四層自動守門與檢查工具的用法。觸發時機 - 要加新顏色 / 改 assets/css/_common/color.css、要拆或改 assets/css/_modules/**、要動 components/**/*.vue 的 class 或 <style>、要寫任何 tailwind class(先確認它在本專案存不存在)、或使用者問到「顏色要放哪 / 色票命名 / 色系排序 / 為什麼跳 CSS 警告 / 這個 class 為什麼沒效果」。
 ---
 
 # CSS 規範(摘要)
 
 **完整規則見 [.claude/rules/css-conventions.md](../../rules/css-conventions.md) —— 動手前一定要讀那份。**
-這裡只列四條規則的重點與工具指令,細節、踩過的坑、違規存量都在規則檔裡。
+這裡只列六條規則的重點與工具指令,細節、踩過的坑、違規存量都在規則檔裡。
 
 | 規則 | 一句話 | 工具會自動抓 |
 |---|---|---|
@@ -15,6 +15,7 @@ description: 動到任何 css、顏色、module 樣式前必須先讀。四條�
 | 3 | module 拆成 `_modules/<頻道>/<組件>/`,在 `<script setup>` 最上方按固定順序 JS import | ✅(引入方式與順序) |
 | 4 | module 變數用 `-w` / `-h` / `-p` / `-m` / `-border`,尺寸類拆 pc / tablet / mobile 三份 | ✅ |
 | 5 | `<script setup>` 的 import 順序:**css → `./.composables` → `@js` → 其他套件** | ✅ |
+| 6 | 不要用被 `theme` 整組覆寫掉而不存在的 class:`text-sm` / **任何** `shadow-*` / `font-sans` / `md:` / `transition-width`(單數)。`*-hexa` 在這個專案**仍合法** | ✅ |
 
 ## ⚠️ 判斷不出來就問 —— 不要猜
 
@@ -49,11 +50,11 @@ description: 動到任何 css、顏色、module 樣式前必須先讀。四條�
 | **`@screen` 別拆散** | 同一支檔案的 `@screen p` / `t` / `m` **各自只寫一組**,散在好幾處很容易改漏其中一組。 |
 | **粒度** | 建在「用到的最小單位」上(見下一節)。 |
 | **px 就開變數** | **帶 px 的值一律開變數拆三斷點**,`1px` 線寬、`2px` 內距也算 —— 「感覺是造型」不是豁免理由,判斷看單位。`duration-*` / `rounded-full` / `w-full` / `-1/2` 目前是存量,碰到時問使用者。 |
-| **不開變數的** | `z-index`(`z-[1]` 直接寫)、`0` / `auto` / `none`、以及 **`font-weight`** —— 字重不是父系帶入就是寫死(`@apply font-medium` / `font-normal`),值域小又固定。 |
+| **不開變數的** | **`z-index`**(`z-[3]` 直接寫,lint 會擋變數版)、`0` / `auto` / `none`、**`font-weight`**(不是父系帶入就是寫死,值域小又固定)、**`letter-spacing`**(`tracking-[0.06em]` 直接寫)。 |
 | **`100%` 用 `-full`** | 三個斷點沒差別時直接寫 tailwind 的 `w-full` / `h-full` / `max-w-full` / `min-w-full` / `min-h-full` —— 不要 `w-[100%]`,更不要繞變數。只有**真的分斷點不同**(pc `50%` / mobile `100%`)才開變數。 |
 | **中性變數** | 一支檔案有**多個**變數要分斷點 → 版型吃中性變數、`@screen` 各段集中對應;**只有一個** → 版型直接寫在 `@screen` 內吃 `-pc-` / `-tablet-` / `-mobile-`,不用多繞一層。 |
 | **字級寫法** | `text-[length:--x-text-size]`,**不要原生 `font-size: var(…)`**;`length:` 省略會被當成 color(靜默失效)。 |
-| **base** | `px-[--x]` / `py-` / `mx-` / `my-` 沒 base 會**整條讀不到**,base 給 `0`;**高度的 base 要給 `auto`**(給 0 會塌);顏色沒有時給 `initial`。 |
+| **base** | `px-[--x]` / `py-` / `mx-` / `my-` 沒 base 會**整條讀不到**,base 給 `0`;**高度的 base 要給 `auto`**(給 0 會塌);**顏色沒有時給 `inherit`**(不是 `initial` —— `color` 的 initial 是**黑色**,會讓所有沒帶顏色 modifier 的元素從繼承父層變成黑字)。 |
 | **狀態** | hover / focus / active 一律「覆寫基礎變數」,不要在 `:root` 寫 `--x-hover-color: var(--x-color)` 當 fallback —— 那在 `:root` 當下就解析完了,永遠是無效值。 |
 | **hover** | modifier 帶 `hover:` 前綴、包在 variables.css 的 `&:hover` 裡(見下節),**不要建 `--x-hover-bg-color` 專用變數**,也**不要在版型檔寫 `&:hover`**。 |
 | **撞名** | 同組 module 內不同元素撞 class 名時**不要硬合併**(`.m-label` vs `.m-form-label`),在 variables 檔頭註明原因。 |
@@ -182,6 +183,22 @@ import '…/mForm/checkbox.css'            // 變體樣式
 
 共通原因:**tailwind 推斷不出 arbitrary value 的型別時一律當成顏色**。
 
+✅ 但**字級與文字顏色可以放在同一個 `@apply`** —— `text-[length:--a] text-[--b]` 兩個都會出現。
+規範舊版說「只會保留一個、顏色要退回原生 `color:`」是**錯的**,已依實際產物更正。
+寫這類「tailwind 會靜默吃掉某宣告」的斷言前,先跑一次 `npx tailwindcss` 看產物再下結論。
+
+## ⚠️ 動 CSS 前先讀 tailwind.config.js
+
+本專案把 `screens` / `fontSize` / `boxShadow` 直接寫在 `theme`(**不是** `extend`),
+tailwind 的預設整組被換掉:
+
+- **沒有** `text-sm` / `text-base` / `text-lg` —— 字級一律 arbitrary value
+- **沒有** `sm` / `md` / `lg` / `xl` —— 斷點是 `m` / `t` / `p` / `tm` / `pt` / `pMin` / `pMax` / `mLandscape`,全是 raw media query
+- **沒有** `shadow-sm` / `shadow-md` —— 只有 `tailwind.extend.js` 定義的那幾個
+- plugin 另外給了 `text-hexa` / `bg-hexa` / `border-hexa` / `divide-hexa`,語法是 `bg-hexa-[--black,0.7]`
+
+細節見規範的「動手前先讀 tailwind.config.js」。
+
 `transition-property: transform` 也**不要**換成 `transition-transform` ——
 會連帶塞 `duration-150` 與 `cubic-bezier(.4,0,.2,1)`,timing-function 蓋不掉、手感會變,
 原本沒 duration 的元素還會憑空多出動畫。`transform: translate3d(0,0,0)` 同理維持原生。
@@ -214,7 +231,12 @@ module 的 `common.css` **無條件**套 `text-[--x-color]` / `bg-[--x-bg-color]
 
 字級變數只能出現在**固定位置**的組件。全案目前只有六支有:
 mTitle / mFooter / mNav / mLoading / mPopup + mChart 的 tooltip(它沒有 `setClass` key,
-使用端沒管道可傳)。複用型的 mForm / mTag / mAnchor **一個都沒有**,那是對的。
+使用端沒管道可傳)。複用型的 mTag / mAnchor **一個都沒有**,那是對的。
+
+**mForm 有一個特例**:輸入框的字級照規則交給使用端(63 個實例都帶 `type: 'text-[16px]'`),
+但 `.m-form-error` 的 `--form-error-text-size` 留在 module ——
+錯誤訊息全系列統一,而且它是 module 自己渲染的節點,使用端不見得碰得到。
+判準跟 mChart tooltip 同一條:**使用端有沒有管道傳**。
 
 ## 變數建在「用到的最小單位」上
 
@@ -279,7 +301,7 @@ padding / margin / border-radius 的 modifier 有層級(整體 → 軸向 → �
 ## 指令
 
 ```powershell
-npm run lint:css                              # 全專案掃描(四條規則)
+npm run lint:css                              # 全專案掃描(六條規則)
 node .tools/css/lint-css.mjs <檔案或目錄>      # 只檢查指定範圍
 npm run sort:color                            # 色票檔自動排序
 node .tools/css/sort-color-css.mjs            # 色票檔:只檢查排序 / 命名 / 頻道歸屬

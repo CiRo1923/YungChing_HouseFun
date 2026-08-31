@@ -1,0 +1,30 @@
+/*
+ * mAddress 的變數 —— 對應 components/buy/mAddress.vue。
+ * 縣市 / 鄉鎮 / 路段 / 門牌幾個欄位橫排,窄螢幕會換行。
+ */
+:root {
+  --address-gap-x: 0;
+  --address-pc-gap-x: 8px;
+  --address-tablet-gap-x: 8px;
+  --address-mobile-gap-x: 8px;
+
+  /* 換行後的列距 —— 手機換行機會多,間距放寬一點 */
+  --address-gap-y: 0;
+  --address-pc-gap-y: 8px;
+  --address-tablet-gap-y: 8px;
+  --address-mobile-gap-y: 12px;
+
+  /*
+   * 門牌的「之」分隔字。
+   *
+   * 字級留在 module 是刻意的 —— mAddress 雖然是複用型組件,
+   * 但這個字是 module 自己渲染的節點,setClass 沒有對應的 key,
+   * 使用端根本沒有管道可以傳(判準同 .m-form-error)。
+   */
+  --address-separator-color: var(--gray-666);
+
+  --address-separator-text-size: inherit;
+  --address-separator-pc-text-size: 16px;
+  --address-separator-tablet-text-size: 16px;
+  --address-separator-mobile-text-size: 16px;
+}

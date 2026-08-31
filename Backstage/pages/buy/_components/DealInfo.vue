@@ -53,7 +53,7 @@ onInit()
         <CommonMFormLabel
           label="成交日期"
           :setClass="{
-            main: 'pt:shrink-0 p:flex p:h-[40px] p:items-center',
+            main: 'text-[16px] pt:shrink-0 p:flex p:h-[40px] p:items-center',
           }"
         />
         <BuyMDatepickerSingle

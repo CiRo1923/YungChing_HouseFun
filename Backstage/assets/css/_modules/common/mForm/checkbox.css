@@ -1,0 +1,80 @@
+/* checkbox 變體的版型 —— 方框的配色;打勾圖示的顯示切換在 selection.css。 */
+.m-form-container {
+  /* checkbox 是行內元素,容器的行高要收掉才不會多出一條空隙 */
+  &.\-\-checkbox {
+    @apply leading-none;
+  }
+}
+
+.m-form-element {
+  &.\-\-checkbox {
+    @apply inline-flex items-center;
+    @apply text-[--form-checkbox-color];
+
+    /* 標籤文字可能折行,行高比預設鬆一點才不會擠在一起 */
+    @apply leading-[1.35];
+
+    @apply cursor-pointer;
+
+    &.\-\-disabled {
+      @apply cursor-not-allowed;
+    }
+
+    /* --align-top:標籤是多行時,方框要對齊第一行文字而不是整塊置中。
+       只動圖示的 self-start —— 容器維持 items-center,與拆 module 前一致。 */
+    &.\-\-align-top {
+      .m-form-icon {
+        @apply self-start;
+      }
+    }
+
+    /* 有標籤時方框要往下對齊文字的視覺中線 */
+    &.\-\-has-label {
+      .m-form-icon {
+        @apply mt-[--form-checkbox-icon-mt];
+      }
+    }
+
+    .m-form-icon {
+      @apply rounded-[--form-checkbox-icon-rounded];
+
+      /* 圖示是 svg,行高留著會讓它多佔一點高度 */
+      @apply leading-[0];
+    }
+
+    .m-form-type {
+      &:not(:disabled):not(:checked) {
+        & + .m-form-icon {
+          @apply border-[--form-checkbox-icon-border-color] bg-[--form-checkbox-icon-bg-color];
+        }
+      }
+
+      &:disabled {
+        & + .m-form-icon {
+          @apply border-[--form-checkbox-icon-disabled-border-color] bg-[--form-checkbox-icon-disabled-bg-color];
+        }
+      }
+    }
+  }
+}
+
+@screen p {
+  .m-form {
+    --form-checkbox-icon-rounded: var(--form-checkbox-icon-pc-rounded);
+    --form-checkbox-icon-mt: var(--form-checkbox-icon-pc-mt);
+  }
+}
+
+@screen t {
+  .m-form {
+    --form-checkbox-icon-rounded: var(--form-checkbox-icon-tablet-rounded);
+    --form-checkbox-icon-mt: var(--form-checkbox-icon-tablet-mt);
+  }
+}
+
+@screen m {
+  .m-form {
+    --form-checkbox-icon-rounded: var(--form-checkbox-icon-mobile-rounded);
+    --form-checkbox-icon-mt: var(--form-checkbox-icon-mobile-mt);
+  }
+}

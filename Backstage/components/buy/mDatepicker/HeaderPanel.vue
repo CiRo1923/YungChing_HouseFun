@@ -33,7 +33,7 @@ defineEmits(['prev', 'next', 'toggle'])
 
 <template>
   <ul class="m-datepicker-calendar-header">
-    <li class="shrink-0">
+    <li class="m-datepicker-calendar-header-side">
       <button
         type="button"
         class="m-datepicker-calendar-arrow"
@@ -45,7 +45,7 @@ defineEmits(['prev', 'next', 'toggle'])
     </li>
 
     <li class="m-datepicker-calendar-header-container">
-      <div class="flex items-center justify-center gap-x-[8px]">
+      <div class="m-datepicker-calendar-header-group">
         <button
           type="button"
           class="m-datepicker-calendar-label"
@@ -65,7 +65,7 @@ defineEmits(['prev', 'next', 'toggle'])
       </div>
     </li>
 
-    <li class="shrink-0">
+    <li class="m-datepicker-calendar-header-side">
       <button
         type="button"
         class="m-datepicker-calendar-arrow"

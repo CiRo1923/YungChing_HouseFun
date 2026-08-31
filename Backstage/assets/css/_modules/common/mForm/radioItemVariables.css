@@ -1,0 +1,27 @@
+/* radioItem 變體的變數 —— 整塊可點的選項卡,打勾圖示的行為在 selection 群組。 */
+:root {
+  --form-radio-item-icon-border-color: var(--gray-ccce);
+
+  --form-radio-item-checked-bg-color: var(--orange-feea);
+  --form-radio-item-error-border-color: var(--orange-e646);
+
+  --form-radio-item-disabled-bg-color: var(--gray-f2);
+  --form-radio-item-disabled-color: var(--gray-ccce);
+
+  /* 選項卡本身的外框 —— --checked / --disabled 會把顏色換成 transparent,寬度不變 */
+  --form-radio-item-rounded: 0;
+  --form-radio-item-pc-rounded: 15px;
+  --form-radio-item-tablet-rounded: 15px;
+  --form-radio-item-mobile-rounded: 15px;
+
+  --form-radio-item-border: 0;
+  --form-radio-item-pc-border: 1px;
+  --form-radio-item-tablet-border: 1px;
+  --form-radio-item-mobile-border: 1px;
+
+  /* items-baseline 時圖示要跟著第一行文字對齊,往下推一點 */
+  --form-radio-item-icon-baseline-mt: 0;
+  --form-radio-item-icon-pc-baseline-mt: 2px;
+  --form-radio-item-icon-tablet-baseline-mt: 2px;
+  --form-radio-item-icon-mobile-baseline-mt: 2px;
+}

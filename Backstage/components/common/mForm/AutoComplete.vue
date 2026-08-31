@@ -1,4 +1,9 @@
 <script setup>
+import '@css/_modules/common/mForm/variables.css'
+import '@css/_modules/common/mForm/autocompleteVariables.css'
+import '@css/_modules/common/mForm/common.css'
+import '@css/_modules/common/mForm/autocomplete.css'
+
 import useValidateEvents from './.composables/useValidateEvents.js'
 
 import { onDeepMerge } from '@js/_prototype.js'
@@ -493,8 +498,8 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="m-autocomplete" :class="setClass.main">
-    <div class="m-autocomplete-container overflow-hidden" :class="setClass.container">
+  <div class="m-form" :class="setClass.main">
+    <div class="m-form-container" :class="setClass.container">
       <Field
         :name="props.name"
         :rules="config.isDisabled ? '' : props.rules"
@@ -504,7 +509,7 @@ onUnmounted(() => {
       >
         <input type="hidden" v-bind="field" />
         <div
-          class="m-autocomplete-element relative flex items-center gap-x-[8px] rounded-[5px] border-[1px] border-[--autocomplete-border-color] bg-[--autocomplete-bg-color] px-[10px] transition-colors duration-300"
+          class="m-form-element --autocomplete"
           :class="[
             setClass.element,
             { '--focus': isFocus },
@@ -517,7 +522,8 @@ onUnmounted(() => {
             :name="`${props.name}_type`"
             type="text"
             v-model="inputLabel"
-            class="m-autocomplete-type min-w-0 grow"
+            class="m-form-type"
+            :class="setClass.type"
             autocomplete="off"
             :placeholder="config.placeholder"
             :disabled="config.isDisabled"
@@ -529,7 +535,7 @@ onUnmounted(() => {
           />
           <button
             type="button"
-            class="m-autocomplete-clear-button flex h-[18px] w-[18px] shrink-0 items-center p-[4px] text-[--gray-999] transition-opacitys duration-300"
+            class="m-form-clear-button"
             :class="{
               '--show': inputLabel,
             }"
@@ -537,18 +543,18 @@ onUnmounted(() => {
             @click="onClear"
             v-if="config.isExistClose && !config.isDisabled"
           >
-            <CommonSvgIcon icon="icon_xmark" class="m-autocomplete-clear-icon" />
+            <CommonSvgIcon icon="icon_xmark" class="m-form-clear-icon" />
           </button>
           <CommonSvgIcon
             icon="icon_search"
-            class="pointer-events-none h-[20px] w-[20px] shrink-0 p-[2px] text-[--autocomplete-icon-color] transition-colors duration-300"
+            class="m-form-autocomplete-icon"
           />
         </div>
       </Field>
     </div>
     <ErrorMessage
       as="span"
-      class="m-autocomplete-error"
+      class="m-form-autocomplete-error"
       :class="setClass.error"
       :name="props.name"
       v-slot="{ message }"
@@ -559,40 +565,40 @@ onUnmounted(() => {
   <Teleport to="body">
     <Transition name="autocomplete" @afterLeave="onCloseDropdown" appear>
       <div
-        class="m-autocomplete-dropdown absolute z-[5] mt-[3px] overflow-hidden"
+        class="m-form-autocomplete-dropdown"
         :class="setClass.dropdown"
         ref="dropdownRef"
         v-if="isActive && dropdownItems && !config.isDisabled"
       >
         <div
-          class="m-autocomplete-dropdown-no-data bg-[--white] p-[8px] text-[14px] text-[--gray-333]"
+          class="m-form-autocomplete-dropdown-no-data"
           v-if="dropdownItems.length === 0"
           ref="dropdownNoDataRef"
         >
           <p>{{ isWaiting ? config.waitMessage : config.noResult }}</p>
         </div>
         <ul
-          class="m-autocomplete-dropdown-container max-h-full bg-[--white]"
+          class="m-form-autocomplete-dropdown-container"
           :class="setClass.dropdownContainer"
           ref="dropdownContainerRef"
           v-else
         >
           <li
-            class="m-autocomplete-dropdown-item"
+            class="m-form-autocomplete-dropdown-item"
             v-for="(item, index) in dropdownItems"
             :key="`${item}_${index}`"
             ref="dropdownItemRef"
           >
             <button
               type="button"
-              class="m-autocomplete-dropdown-button block w-full px-[8px] text-left transition-colors duration-300"
+              class="m-form-autocomplete-dropdown-button"
               :class="{
                 '--active': index === selected.index,
               }"
               @mousedown="onDropdownItemMousedown"
               @click="onDropdownItemClick(item)"
             >
-              <em class="m-autocomplete-dropdown-label relative block grow py-[8px] text-[14px]">
+              <em class="m-form-autocomplete-dropdown-label">
                 <slot name="option" :item="item">
                   {{ item[config.schema.label] }}
                 </slot>
@@ -605,473 +611,3 @@ onUnmounted(() => {
   </Teleport>
 </template>
 
-<style lang="postcss">
-.m-autocomplete-element {
-  &.\-\-disabled {
-    --autocomplete-bg-color: var(--gray-f2);
-    /* 文字色只定義在 :not(--disabled) 裡，停用時整個變數是空的，
-       顏色會掉回繼承值。這裡補上 mForm 停用時用的同一個灰 */
-    --autocomplete-text-color: var(--gray-ccce);
-    --autocomplete-text-placeholder-color: var(--gray-ccce);
-
-    &,
-    .m-autocomplete-type {
-      @apply cursor-not-allowed;
-    }
-  }
-
-  &:not(.\-\-disabled) {
-    --autocomplete-text-color: var(--gray-666);
-    --autocomplete-text-placeholder-color: var(--gray-999);
-  }
-
-  &:not(.\-\-error) {
-    --autocomplete-icon-color: var(--gray-ccce);
-    --autocomplete-border-color: var(--gray-e5);
-  }
-
-  &.\-\-error {
-    --autocomplete-text-color: var(--orange-e646);
-    --autocomplete-icon-color: var(--orange-e646);
-    --autocomplete-border-color: var(--orange-e646);
-  }
-}
-
-.m-autocomplete-type {
-  @apply text-[--autocomplete-text-color];
-
-  &::placeholder {
-    @apply text-[--autocomplete-text-placeholder-color];
-  }
-}
-
-.m-autocomplete-clear-button {
-  &:not(.\-\-show) {
-    @apply pointer-events-none invisible opacity-0;
-  }
-
-  &.\-\-show {
-    @apply visible opacity-100;
-  }
-}
-
-.m-autocomplete-error {
-  @apply mt-[2px] flex text-left text-[--red-f00];
-}
-
-.m-autocomplete-dropdown {
-  box-shadow:
-    0 4px 24px 0 var(--blue-0016-14),
-    0 2px 16px -8px var(--blue-0016-33);
-}
-
-.m-autocomplete-dropdown-item {
-  &:not(:last-child) {
-    .m-autocomplete-dropdown-button {
-      &:after {
-        @apply block h-[1px] w-full bg-[--gray-e5] opacity-30 content-default;
-      }
-    }
-  }
-}
-
-.m-autocomplete-dropdown-button {
-  &:not(:disabled) {
-    @apply text-[--gray-333];
-
-    &.\-\-active {
-      @apply bg-[--orange-feea];
-    }
-  }
-
-  &:disabled {
-    @apply text-[--gray-33-4d];
-  }
-}
-
-@screen p {
-  .m-autocomplete {
-    &.\-\-px-12,
-    &.p\:\-\-px-12,
-    &.pt\:\-\-px-12 {
-      .m-autocomplete-element {
-        @apply px-[12px];
-      }
-    }
-
-    &.\-\-padding-y-16,
-    &.p\:\-\-padding-y-16,
-    &.pt\:\-\-padding-y-16 {
-      .m-autocomplete-element {
-        @apply py-[16px];
-      }
-    }
-
-    &.\-\-h-40,
-    &.p\:\-\-h-40,
-    &.pt\:\-\-h-40 {
-      .m-autocomplete-element {
-        @apply h-[40px];
-      }
-    }
-
-    &.\-\-text-18,
-    &.p\:\-\-text-18,
-    &.pt\:\-\-text-18 {
-      .m-autocomplete-type {
-        @apply text-[18px];
-      }
-    }
-
-    &.\-\-text-16,
-    &.p\:\-\-text-16,
-    &.pt\:\-\-text-16 {
-      .m-autocomplete-type {
-        @apply text-[16px];
-      }
-    }
-  }
-
-  .m-autocomplete-dropdown {
-    &.\-\-rounded-16,
-    &.p\:\-\-rounded-16,
-    &.pt\:\-\-rounded-16 {
-      @apply rounded-[16px];
-    }
-
-    &.\-\-padding-12,
-    &.p\:\-\-padding-12,
-    &.pt\:\-\-padding-12 {
-      .m-autocomplete-dropdown-no-data,
-      .m-autocomplete-dropdown-button {
-        @apply p-[12px];
-      }
-    }
-
-    &.\-\-padding-x-12,
-    &.p\:\-\-padding-x-12,
-    &.pt\:\-\-padding-x-12 {
-      .m-autocomplete-dropdown-no-data,
-      .m-autocomplete-dropdown-button {
-        @apply px-[12px];
-      }
-    }
-
-    &.\-\-padding-y-12,
-    &.p\:\-\-padding-y-12,
-    &.pt\:\-\-padding-y-12 {
-      .m-autocomplete-dropdown-no-data,
-      .m-autocomplete-dropdown-button {
-        @apply py-[12px];
-      }
-    }
-
-    &.\-\-padding-24,
-    &.p\:\-\-padding-24,
-    &.pt\:\-\-padding-24 {
-      .m-autocomplete-dropdown-no-data,
-      .m-autocomplete-dropdown-button {
-        @apply p-[24px];
-      }
-    }
-
-    &.\-\-padding-x-24,
-    &.p\:\-\-padding-x-24,
-    &.pt\:\-\-padding-x-24 {
-      .m-autocomplete-dropdown-no-data,
-      .m-autocomplete-dropdown-button {
-        @apply px-[24px];
-      }
-    }
-
-    &.\-\-padding-y-24,
-    &.p\:\-\-padding-y-24,
-    &.pt\:\-\-padding-y-24 {
-      .m-autocomplete-dropdown-no-data,
-      .m-autocomplete-dropdown-button {
-        @apply py-[24px];
-      }
-    }
-
-    &.\-\-text-18,
-    &.p\:\-\-text-18,
-    &.pt\:\-\-text-18 {
-      .m-autocomplete-dropdown-no-data,
-      .m-autocomplete-dropdown-button {
-        @apply text-[18px];
-      }
-    }
-
-    &.\-\-text-16,
-    &.p\:\-\-text-16,
-    &.pt\:\-\-text-16 {
-      .m-autocomplete-dropdown-no-data,
-      .m-autocomplete-dropdown-button {
-        @apply text-[16px];
-      }
-    }
-  }
-}
-
-@screen t {
-  .m-autocomplete {
-    &.\-\-px-12,
-    &.pt\:\-\-px-12,
-    &.tm\:\-\-px-12,
-    &.t\:\-\-px-12 {
-      .m-autocomplete-element {
-        @apply px-[12px];
-      }
-    }
-
-    &.\-\-padding-y-16,
-    &.pt\:\-\-padding-y-16,
-    &.tm\:\-\-padding-y-16,
-    &.t\:\-\-padding-y-16 {
-      .m-autocomplete-element {
-        @apply py-[16px];
-      }
-    }
-
-    &.\-\-h-40,
-    &.pt\:\-\-h-40,
-    &.tm\:\-\-h-40,
-    &.t\:\-\-h-40 {
-      .m-autocomplete-element {
-        @apply h-[40px];
-      }
-    }
-
-    &.\-\-text-18,
-    &.pt\:\-\-text-18,
-    &.tm\:\-\-text-18,
-    &.t\:\-\-text-18 {
-      .m-autocomplete-type {
-        @apply text-[18px];
-      }
-    }
-
-    &.\-\-text-16,
-    &.pt\:\-\-text-16,
-    &.tm\:\-\-text-16,
-    &.t\:\-\-text-16 {
-      .m-autocomplete-type {
-        @apply text-[16px];
-      }
-    }
-  }
-
-  .m-autocomplete-dropdown {
-    &.\-\-rounded-16,
-    &.pt\:\-\-rounded-16,
-    &.tm\:\-\-rounded-16,
-    &.t\:\-\-rounded-16 {
-      @apply rounded-[16px];
-    }
-
-    &.\-\-padding-12,
-    &.pt\:\-\-padding-12,
-    &.tm\:\-\-padding-12,
-    &.t\:\-\-padding-12 {
-      .m-autocomplete-dropdown-no-data,
-      .m-autocomplete-dropdown-button {
-        @apply p-[12px];
-      }
-    }
-
-    &.\-\-padding-x-12,
-    &.pt\:\-\-padding-x-12,
-    &.tm\:\-\-padding-x-12,
-    &.t\:\-\-padding-x-12 {
-      .m-autocomplete-dropdown-no-data,
-      .m-autocomplete-dropdown-button {
-        @apply px-[12px];
-      }
-    }
-
-    &.\-\-padding-y-12,
-    &.pt\:\-\-padding-y-12,
-    &.tm\:\-\-padding-y-12,
-    &.t\:\-\-padding-y-12 {
-      .m-autocomplete-dropdown-no-data,
-      .m-autocomplete-dropdown-button {
-        @apply py-[12px];
-      }
-    }
-
-    &.\-\-padding-24,
-    &.pt\:\-\-padding-24,
-    &.tm\:\-\-padding-24,
-    &.t\:\-\-padding-24 {
-      .m-autocomplete-dropdown-no-data,
-      .m-autocomplete-dropdown-button {
-        @apply p-[24px];
-      }
-    }
-
-    &.\-\-padding-x-24,
-    &.pt\:\-\-padding-x-24,
-    &.tm\:\-\-padding-x-24,
-    &.t\:\-\-padding-x-24 {
-      .m-autocomplete-dropdown-no-data,
-      .m-autocomplete-dropdown-button {
-        @apply px-[24px];
-      }
-    }
-
-    &.\-\-padding-y-24,
-    &.pt\:\-\-padding-y-24,
-    &.tm\:\-\-padding-y-24,
-    &.t\:\-\-padding-y-24 {
-      .m-autocomplete-dropdown-no-data,
-      .m-autocomplete-dropdown-button {
-        @apply py-[24px];
-      }
-    }
-
-    &.\-\-text-18,
-    &.pt\:\-\-text-18,
-    &.tm\:\-\-text-18,
-    &.t\:\-\-text-18 {
-      .m-autocomplete-dropdown-no-data,
-      .m-autocomplete-dropdown-button {
-        @apply text-[18px];
-      }
-    }
-
-    &.\-\-text-16,
-    &.pt\:\-\-text-16,
-    &.tm\:\-\-text-16,
-    &.t\:\-\-text-16 {
-      .m-autocomplete-dropdown-no-data,
-      .m-autocomplete-dropdown-button {
-        @apply text-[16px];
-      }
-    }
-  }
-}
-
-@screen m {
-  .m-autocomplete {
-    &.\-\-px-12,
-    &.tm\:\-\-px-12,
-    &.m\:\-\-px-12 {
-      .m-autocomplete-element {
-        @apply px-[12px];
-      }
-    }
-
-    &.\-\-padding-y-16,
-    &.tm\:\-\-padding-y-16,
-    &.m\:\-\-padding-y-16 {
-      .m-autocomplete-element {
-        @apply py-[16px];
-      }
-    }
-
-    &.\-\-h-40,
-    &.tm\:\-\-h-40,
-    &.m\:\-\-h-40 {
-      .m-autocomplete-element {
-        @apply h-[40px];
-      }
-    }
-
-    &.\-\-text-18,
-    &.tm\:\-\-text-18,
-    &.m\:\-\-text-18 {
-      .m-autocomplete-type {
-        @apply text-[18px];
-      }
-    }
-
-    &.\-\-text-16,
-    &.tm\:\-\-text-16,
-    &.m\:\-\-text-16 {
-      .m-autocomplete-type {
-        @apply text-[16px];
-      }
-    }
-  }
-
-  .m-autocomplete-dropdown {
-    &.\-\-rounded-16,
-    &.tm\:\-\-rounded-16,
-    &.m\:\-\-rounded-16 {
-      @apply rounded-[16px];
-    }
-
-    &.\-\-padding-12,
-    &.tm\:\-\-padding-12,
-    &.m\:\-\-padding-12 {
-      .m-autocomplete-dropdown-no-data,
-      .m-autocomplete-dropdown-button {
-        @apply p-[12px];
-      }
-    }
-
-    &.\-\-padding-x-12,
-    &.tm\:\-\-padding-x-12,
-    &.m\:\-\-padding-x-12 {
-      .m-autocomplete-dropdown-no-data,
-      .m-autocomplete-dropdown-button {
-        @apply px-[12px];
-      }
-    }
-
-    &.\-\-padding-y-12,
-    &.tm\:\-\-padding-y-12,
-    &.m\:\-\-padding-y-12 {
-      .m-autocomplete-dropdown-no-data,
-      .m-autocomplete-dropdown-button {
-        @apply py-[12px];
-      }
-    }
-
-    &.\-\-padding-24,
-    &.tm\:\-\-padding-24,
-    &.m\:\-\-padding-24 {
-      .m-autocomplete-dropdown-no-data,
-      .m-autocomplete-dropdown-button {
-        @apply p-[24px];
-      }
-    }
-
-    &.\-\-padding-x-24,
-    &.tm\:\-\-padding-x-24,
-    &.m\:\-\-padding-x-24 {
-      .m-autocomplete-dropdown-no-data,
-      .m-autocomplete-dropdown-button {
-        @apply px-[24px];
-      }
-    }
-
-    &.\-\-padding-y-24,
-    &.tm\:\-\-padding-y-24,
-    &.m\:\-\-padding-y-24 {
-      .m-autocomplete-dropdown-no-data,
-      .m-autocomplete-dropdown-button {
-        @apply py-[24px];
-      }
-    }
-
-    &.\-\-text-18,
-    &.tm\:\-\-text-18,
-    &.m\:\-\-text-18 {
-      .m-autocomplete-dropdown-no-data,
-      .m-autocomplete-dropdown-button {
-        @apply text-[18px];
-      }
-    }
-
-    &.\-\-text-16,
-    &.tm\:\-\-text-16,
-    &.m\:\-\-text-16 {
-      .m-autocomplete-dropdown-no-data,
-      .m-autocomplete-dropdown-button {
-        @apply text-[16px];
-      }
-    }
-  }
-}
-</style>

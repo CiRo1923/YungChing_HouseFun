@@ -142,7 +142,7 @@ onUnmounted(() => {
                   :class="[setClass.icon, { '--defaule-color': !setClass.icon }]"
                   v-if="icon"
                 />
-                <b class="font-medium" v-html="title" />
+                <b v-html="title" />
               </p>
             </slot>
 
@@ -152,7 +152,7 @@ onUnmounted(() => {
               @click="onExistClose"
               v-if="hasExistClose"
             >
-              <CommonSvgIcon icon="icon_xmark" class="h-full w-full" />
+              <CommonSvgIcon icon="icon_xmark" />
             </button>
 
             <div class="m-popup-tools" :class="setClass.headerTools" v-if="$slots.headerTools">

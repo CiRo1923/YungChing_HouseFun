@@ -1,0 +1,73 @@
+/* mFigure 的版型,以及 @screen 的斷點對應。 */
+.m-figure {
+  &.\-\-no-image {
+    @apply flex items-center justify-center bg-[--figure-no-image-bg-color];
+
+    img {
+      @apply h-auto w-[--figure-no-image-img-w] max-w-[--figure-no-image-img-max-w];
+    }
+  }
+
+  /*
+   * 圖片載入失敗:改顯示帶外框的佔位區。
+   * 底下兩層寫成後代選擇器,是因為它們的變數定義在 .m-figure 上 ——
+   * 拉到外層當獨立選擇器就繼承不到,寬高會整條失效。
+   */
+  &.\-\-error {
+    @apply flex items-center justify-center;
+    @apply rounded-[--figure-error-rounded] border-[--figure-error-border-color];
+
+    /* border-width 走原生 CSS —— production 會壓成 border shorthand,var() 讓整條失效 */
+    border-width: var(--figure-error-border);
+
+    .m-figure-error {
+      @apply flex items-center justify-center;
+    }
+
+    /* 失敗圖示:佔容器 30%(比例不分斷點),但不超過上限 */
+    .m-figure-error-icon {
+      @apply h-[30%] w-[30%];
+      @apply max-h-[--figure-error-icon-max-size] max-w-[--figure-error-icon-max-size];
+      @apply text-[--figure-error-icon-color];
+    }
+  }
+}
+
+@screen p {
+  .m-figure {
+    --figure-error-rounded: var(--figure-error-pc-rounded);
+    --figure-error-border: var(--figure-error-pc-border);
+    --figure-error-icon-max-size: var(--figure-error-icon-pc-max-size);
+
+    &.\-\-no-image {
+      --figure-no-image-img-w: var(--figure-no-image-img-pc-w);
+      --figure-no-image-img-max-w: var(--figure-no-image-img-pc-max-w);
+    }
+  }
+}
+
+@screen t {
+  .m-figure {
+    --figure-error-rounded: var(--figure-error-tablet-rounded);
+    --figure-error-border: var(--figure-error-tablet-border);
+    --figure-error-icon-max-size: var(--figure-error-icon-tablet-max-size);
+
+    &.\-\-no-image {
+      --figure-no-image-img-w: var(--figure-no-image-img-tablet-w);
+      --figure-no-image-img-max-w: var(--figure-no-image-img-tablet-max-w);
+    }
+  }
+}
+
+@screen m {
+  .m-figure {
+    --figure-error-rounded: var(--figure-error-mobile-rounded);
+    --figure-error-border: var(--figure-error-mobile-border);
+    --figure-error-icon-max-size: var(--figure-error-icon-mobile-max-size);
+
+    &.\-\-no-image {
+      --figure-no-image-img-w: var(--figure-no-image-img-mobile-w);
+      --figure-no-image-img-max-w: var(--figure-no-image-img-mobile-max-w);
+    }
+  }
+}

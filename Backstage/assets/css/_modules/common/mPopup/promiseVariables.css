@@ -1,0 +1,44 @@
+/*
+ * apiPromise 變體的變數 —— 由 containers 的 Promise.vue 使用。
+ * 它是「API 等待中」的全屏遮罩 + 訊息框,不吃 .m-popup 的尺寸 modifier。
+ */
+:root {
+  --popup-promise-overlay-bg-color: var(--black-40);
+
+  --popup-promise-message-bg-color: var(--white);
+  --popup-promise-message-color: var(--gray-999);
+
+  --popup-promise-message-rounded: 0;
+  --popup-promise-message-pc-rounded: 15px;
+  --popup-promise-message-tablet-rounded: 15px;
+  --popup-promise-message-mobile-rounded: 15px;
+
+  --popup-promise-message-text-size: inherit;
+  --popup-promise-message-pc-text-size: 14px;
+  --popup-promise-message-tablet-text-size: 14px;
+  --popup-promise-message-mobile-text-size: 14px;
+
+  /*
+   * 內距在 pc 是上下 30 / 左右 72,tablet 與 mobile 則是四邊都 32 ——
+   * 兩個層級併存,所以拆到四個方向,common 也用 pt / pr / pb / pl 分開取。
+   */
+  --popup-promise-message-pt: 0;
+  --popup-promise-message-pr: 0;
+  --popup-promise-message-pb: 0;
+  --popup-promise-message-pl: 0;
+
+  --popup-promise-message-pc-pt: 30px;
+  --popup-promise-message-pc-pr: 72px;
+  --popup-promise-message-pc-pb: 30px;
+  --popup-promise-message-pc-pl: 72px;
+
+  --popup-promise-message-tablet-pt: 32px;
+  --popup-promise-message-tablet-pr: 32px;
+  --popup-promise-message-tablet-pb: 32px;
+  --popup-promise-message-tablet-pl: 32px;
+
+  --popup-promise-message-mobile-pt: 32px;
+  --popup-promise-message-mobile-pr: 32px;
+  --popup-promise-message-mobile-pb: 32px;
+  --popup-promise-message-mobile-pl: 32px;
+}

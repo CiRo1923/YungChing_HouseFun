@@ -77,10 +77,10 @@ const FIX_HINTS = {
     '@stores / @components 等不參與排序檢查。',
   variable:
     '規則 4:命名改成 -w / -h / -p / -m / -border / -text-size,寬高相同的元素(icon 多半是正方形)用 -size 一個變數、不同才拆 -w / -h;' +
-    '帶 px 的值一律開變數(1px 線寬、2px 內距也算,「感覺是造型」不是豁免理由;明確不開的:z-index、0/auto/none、以及 font-weight(不是父系帶入就是寫死,直接 @apply font-medium / font-normal)。100% 三個斷點沒差別時直接用 tailwind 的 w-full / h-full / max-w-full / min-w-full / min-h-full,不要寫 w-[100%] 也不要繞變數,只有真的分斷點不同才開變數),值拆成 pc / tablet / mobile 三份,而且要成套(有 -pc-X 就必須有 -tablet-X / -mobile-X,漏一個那斷點會靜靜讀不到值);版型檔不可直接吃 --x-pc-y,要吃中性變數再由 @screen p / t / m 各段對應(但已包在 @screen p 裡面直接吃 -pc- 是合理的,只抓斷點對不上與沒包在斷點區塊裡;複合斷點 pt / tm 裡一律不能直接吃單一斷點的值),同一支檔案的 @screen p / t / m 各自只寫一組,例外寫 /* lint-breakpoint-exempt: 理由 */。這條多半是機械式改名,可以直接動手。' +
+    '帶 px 的值一律開變數(1px 線寬、2px 內距也算,「感覺是造型」不是豁免理由;明確不開的:z-index、leading(行高)、tracking(字距)、0/auto/none、以及 font-weight(不是父系帶入就是寫死,直接 @apply font-medium / font-normal)——這四個都有對應的檢查函式(checkZIndexVariable / checkLeadingVariable / checkTrackingVariable)。100% 三個斷點沒差別時直接用 tailwind 的 w-full / h-full / max-w-full / min-w-full / min-h-full,不要寫 w-[100%] 也不要繞變數,只有真的分斷點不同才開變數),值拆成 pc / tablet / mobile 三份,而且要成套(有 -pc-X 就必須有 -tablet-X / -mobile-X,漏一個那斷點會靜靜讀不到值);版型檔不可直接吃 --x-pc-y,要吃中性變數再由 @screen p / t / m 各段對應(但已包在 @screen p 裡面直接吃 -pc- 是合理的,只抓斷點對不上與沒包在斷點區塊裡;複合斷點 pt / tm 裡一律不能直接吃單一斷點的值),同一支檔案的 @screen p / t / m 各自只寫一組,例外寫 /* lint-breakpoint-exempt: 理由 */。這條多半是機械式改名,可以直接動手。' +
     '順便檢查同一支檔案的其他變數規則:前綴要跟著 class / 資料夾走(mForm/ → --form-*,' +
     '不要在變數名塞 m-);px-[--x] / py- / mx- / my- 的 base 要給 0(沒 base 整條讀不到),' +
-    '高度的 base 要給 auto(給 0 會塌),顏色沒有時給 initial;' +
+    '高度的 base 要給 auto(給 0 會塌),顏色的 base 不要用 initial —— 文字色給 inherit、背景 / 邊框色給 transparent(checkColorBase 會抓);' +
     'hover / focus 一律覆寫基礎變數,不要在 :root 用 var() 做 fallback。hover 的固定寫法(參考 mAnchor):modifier 帶 hover: 前綴、包在 variables.css 的 &:hover 內(hover:--bg-gray-333),不要建 --x-hover-bg-color 專用變數(直接覆寫 --x-bg-color 本身),版型檔也不要寫 &:hover(否則使用端沒帶 modifier 也會觸發)。' +
     'variables 檔只放「值」(:root 預設值、modifier 的具體值、指向色票的 var(--white));' +
     '「行為」放版型檔 —— 狀態切換(--checked { --x-bg: var(--x-checked-bg) })與' +
@@ -89,6 +89,17 @@ const FIX_HINTS = {
     '看到 --tag-px: 0 這種常值就是放錯地方(base 值屬於 variables 的 :root)。' +
     '另外空字串是無效 CSS 值、整條宣告會被丟棄,高度寫 auto、圓角寫 0、陰影寫 none。' +
     '判斷方式:這行是在給一個值,還是在切換成自己 module 的另一個變數?',
+  theme:
+    '規則 6:tailwind.config.js 的 theme 有四組是**整組覆寫**(寫在 theme 而非 theme.extend),' +
+    '內建的 key 因此完全不存在,寫了不報錯但產不出任何 CSS —— ' +
+    'screens 只有 m / t / p / tm / pt / pMin / pMax(所以 sm: md: lg: xl: 2xl: 都無效),' +
+    'fontSize 只有 vmp / vmt / vmm / vmmls(字級一律寫 text-[值] 或 text-[length:--變數]),' +
+    'boxShadow 一個 preset 都沒有(tailwind.extend.js 刻意不放陰影)—— ' +
+    '陰影一律走原生 box-shadow: var(--x-shadow) + module 自己的斷點變數,' +
+    'fontFamily 只有 font-default。' +
+    '另外 transition-property 定義的是複數(transition-widths / heights / sizes,不是單數)。' +
+    '注意 *-hexa 在這個專案還是合法用法(bg-hexa-[--black,0.7]),不要當成違規。' +
+    '這條是機械式替換,可以直接動手 —— 但要先確認原本想要的效果是什麼(那個 class 一直沒生效)。',
 }
 
 const RULE_TITLE = {
@@ -98,6 +109,7 @@ const RULE_TITLE = {
   module: '規則 3 違規 —— module css 的結構或引入方式不對',
   variable: '規則 4 違規 —— module 變數的命名或斷點不對',
   import: '規則 5 違規 —— .vue 的 import 順序不對',
+  theme: '規則 6 違規 —— 用到本專案不存在的 tailwind class',
 }
 
 const MAX_LISTED = 12
@@ -117,7 +129,7 @@ const onSortColorCss = (rel, absPath) => {
 const onLint = (rel) => {
   const lint = runNode(['.tools/css/lint-css.mjs', '--json', rel])
 
-  let parsed = null
+  let parsed
   try {
     parsed = JSON.parse(lint.out)
   } catch {

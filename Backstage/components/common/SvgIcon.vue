@@ -1,4 +1,6 @@
 <script setup>
+import '@css/_modules/common/mSvgIcon/common.css'
+
 const runtimeConfig = useRuntimeConfig()
 const spriteVersion = useState('svgSpriteVersion', () =>
   String(runtimeConfig.public.appHash || '').trim()
@@ -28,7 +30,7 @@ const spriteHref = computed(() => {
 </script>
 
 <template>
-  <svg class="fill-current">
+  <svg class="m-svg-icon">
     <use :href="spriteHref" :xlink:href="spriteHref" />
   </svg>
 </template>

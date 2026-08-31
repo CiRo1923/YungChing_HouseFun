@@ -1041,6 +1041,88 @@ export function checkTailwindPitfalls(relPath, text) {
 }
 
 /**
+ * 規則 6 —— 用到本專案「不存在」的 tailwind class。
+ *
+ * ⚠️ 這裡的「規則 6」與規則 4 章節內的 6-a / 6-b 編號無關,那是另一組代號。
+ *
+ * tailwind.config.js 的 `theme` 有四組是**整組覆寫**(寫在 `theme` 而非 `theme.extend`),
+ * 內建的那些 key 因此**完全消失**:
+ *
+ *   screens     → 只有 m / t / p / tm / pt / pMin / pMax / mLandscape / notsupport / firefox / IE
+ *   fontSize    → 只有 vmp / vmt / vmm / vmmls
+ *   boxShadow   → **一個都沒有** —— tailwind.extend.js 刻意不放陰影(值裡會帶色碼,
+ *                 而那支檔案不在掃描範圍內),陰影一律走原生 box-shadow + module 變數
+ *   fontFamily  → 只有 default
+ *
+ * 所以 `md:flex`、`text-sm`、`shadow-md`、`font-sans` 這些**產不出任何 CSS**
+ * ——tailwind 不會報錯,class 就靜靜地不生效,和拼錯字一樣難找。
+ * 實測方式:`npx tailwindcss -c tailwind.config.js --content <含這些 class 的檔案>`。
+ *
+ * ⚠️ **與 Official 的差異(兩邊是各自的複本,不要照抄)**:
+ *   1. Official 的 tailwind.extend.js 有三個 boxShadow preset,這邊一個都沒有。
+ *   2. `*-hexa` 在 Official 已淘汰、會被抓;**這邊還是合法用法**
+ *      (語法 `bg-hexa-[--black,0.7]`),所以這裡沒有那一段。
+ *
+ * ⚠️ 改了 tailwind.config.js 的 `theme` 就要回頭同步這裡 ——
+ *    把某組從 `theme` 移進 `theme.extend`(內建復活)時,對應那段要刪掉。
+ */
+const UNAVAILABLE_CLASSES = [
+  {
+    // theme.screens 整組覆寫 —— 內建斷點前綴全部不存在
+    re: /(?<![\w-])(sm|md|lg|xl|2xl):/g,
+    detail: (m) =>
+      `${m[1]}: 這個斷點前綴不存在(theme.screens 整組覆寫過)—— ` +
+      '本專案只有 m / t / p / tm / pt / pMin / pMax,整條 class 不會產生任何 CSS',
+  },
+  {
+    // theme.fontSize 整組覆寫 —— 只剩四個 vw 值
+    re: /(?<![\w-])text-(xs|sm|base|lg|xl|[2-9]xl)(?![\w-])/g,
+    detail: (m) =>
+      `${m[0]} 這個字級不存在(theme.fontSize 整組覆寫過)—— ` +
+      '本專案只有 text-vmp / vmt / vmm / vmmls,其餘一律寫 text-[值] 或 text-[length:--變數]',
+  },
+  {
+    // theme.boxShadow 整組覆寫,而 tailwind.extend.js 不放陰影 —— 一個 preset 都沒有。
+    // 所以任何 shadow-* 都不存在(不像 Official 只需抓內建那幾個 key),
+    // 只有 arbitrary value 的 shadow-[…] 例外(不吃 theme)—— 但那有規則 3 的 pitfall 在管。
+    // lookbehind 讓 drop-shadow-md / box-shadow: / --x-shadow 都不會誤中。
+    re: /(?<![\w-])shadow(?!-\[)(-[a-z0-9-]+)?(?![\w[])/g,
+    detail: (m) =>
+      `${m[0]} 不存在 —— 本專案沒有任何 shadow preset(tailwind.extend.js 刻意不放陰影),` +
+      '陰影一律走原生 box-shadow: var(--x-shadow) + module 自己的斷點變數',
+  },
+  {
+    // theme.fontFamily 整組覆寫 —— 只剩 default
+    re: /(?<![\w-])font-(sans|serif|mono)(?![\w-])/g,
+    detail: (m) => `${m[0]} 這個字族不存在(theme.fontFamily 整組覆寫過)—— 本專案只有 font-default`,
+  },
+  {
+    // transitionProperty 定義的是複數
+    re: /(?<![\w-])transition-(width|height|size)(?![\w-])/g,
+    detail: (m) => `${m[0]} 不存在 —— 專案定義的是複數:transition-${m[1]}s`,
+  },
+]
+
+export function checkTailwindTheme(relPath, text) {
+  const issues = []
+  const masked = maskComments(text)
+
+  for (const { re, detail } of UNAVAILABLE_CLASSES) {
+    for (const m of masked.matchAll(re)) {
+      issues.push({
+        rule: 'theme',
+        file: relPath,
+        line: lineOf(text, m.index),
+        detail: detail(m),
+        snippet: m[0],
+      })
+    }
+  }
+
+  return issues
+}
+
+/**
  * letter-spacing(tracking)不開變數。
  *
  * 字距是組件的字體造型設定,全站一個值走到底,沒有「各頁面各自指定」或
@@ -1070,6 +1152,120 @@ export function checkTrackingVariable(relPath, text) {
   // 使用端:原生 letter-spacing: var(…)
   for (const m of masked.matchAll(/letter-spacing\s*:\s*var\([^)]*\)/g)) {
     add(m.index, `${m[0]} 取用了字距變數 ${hint}`, m[0])
+  }
+
+  return issues
+}
+
+/**
+ * 顏色變數的 base 不可以是 `initial`。
+ *
+ * `initial` 能運作,但靠的是繞路:custom property 的值寫成 CSS-wide keyword 時,
+ * 它的計算值是 guaranteed-invalid,於是 `color: var(--x-color)` 變成
+ * IACVT(invalid at computed-value time)—— 繼承屬性(color)表現為 inherit、
+ * 非繼承屬性(background-color)表現為 initial(transparent)。
+ * 結果剛好符合直覺,但**意圖完全讀不出來**,而且下一個人會以為
+ * 「initial 就是 color 的初始值(黑色)」而不敢動它。
+ *
+ * 所以一律寫出真正想要的值,分兩種:
+ *   文字色(`-color`)          → `inherit`     沒指定就跟父層走
+ *   背景 / 邊框色(`-bg-color` / `-border-color` / `-outline-color`)
+ *                             → `transparent` 沒指定就是沒有顏色,不該繼承父層的背景
+ *
+ * 2026-08-31 決定並清完存量(Official 5 處、Backstage 1 處)。
+ */
+const TRANSPARENT_BASE = /-(?:bg|background|border|outline|divide|fill|stroke)-color$/
+
+export function checkColorBase(relPath, text) {
+  const issues = []
+  const masked = maskComments(text)
+  const issuesFor = (name) =>
+    TRANSPARENT_BASE.test(name)
+      ? `${name} 是背景 / 邊框色 —— base 寫 transparent(沒指定就是沒有顏色,不要繼承父層)`
+      : `${name} 是文字色 —— base 寫 inherit(沒指定就跟父層走)`
+
+  for (const m of masked.matchAll(/(--[a-z0-9-]*color)\s*:\s*initial\s*[;}]/g)) {
+    issues.push({
+      rule: 'variable',
+      file: relPath,
+      line: lineOf(text, m.index),
+      detail: `顏色變數的 base 不要用 initial —— ${issuesFor(m[1])}`,
+      snippet: m[0].trim(),
+    })
+  }
+
+  return issues
+}
+
+/**
+ * line-height(leading)不開變數。
+ *
+ * 理由同 tracking:行高是組件的字體造型設定,跟著字級走,
+ * 沒有「各頁面各自指定」的需求;而且值多半是無單位比例(`1.5` / `1`),
+ * 本來就不隨斷點改變 —— 拆三份只會得到三個一樣的數字。
+ * 直接寫 `@apply leading-[1.5]` 就好。
+ *
+ * 抓三種寫法:變數定義、tailwind 取用、原生屬性取用。
+ */
+export function checkLeadingVariable(relPath, text) {
+  const issues = []
+  const masked = maskComments(text)
+  const add = (index, detail, snippet) =>
+    issues.push({ rule: 'variable', file: relPath, line: lineOf(text, index), detail, snippet })
+
+  const hint = '—— leading 不開變數,直接寫 @apply leading-[值]'
+
+  // 定義端:--x-leading / --x-line-height / --x-pc-leading
+  for (const m of masked.matchAll(/(--[a-z0-9-]*(?:leading|line-height))\s*:/g)) {
+    add(m.index, `${m[1]} 是行高變數 ${hint}`, m[0])
+  }
+
+  // 使用端:leading-[--x] / leading-[var(--x)]
+  for (const m of masked.matchAll(/(?<![\w-])leading-\[[^\]]*--[^\]]*\]/g)) {
+    add(m.index, `${m[0]} 取用了行高變數 ${hint}`, m[0])
+  }
+
+  // 使用端:原生 line-height: var(…)
+  for (const m of masked.matchAll(/line-height\s*:\s*var\([^)]*\)/g)) {
+    add(m.index, `${m[0]} 取用了行高變數 ${hint}`, m[0])
+  }
+
+  return issues
+}
+
+/**
+ * z-index 不開變數。
+ *
+ * 疊層順序是「整站共用的一套秩序」——「遮罩要蓋在下拉選單上面」這種關係一旦決定就
+ * 不會變,也不隨斷點或使用端改變。開成變數只是把一個常數多轉一手,還要憑空拆出
+ * 三個一模一樣的斷點值;更糟的是它會讓「這一層到底排第幾」變得要跨檔案追,
+ * 而疊層問題最需要的正是「一眼看到數字」。
+ *
+ * 直接寫 `@apply z-[3]`,要調整時整站 grep `z-[` 就看得到全部層級。
+ *
+ * 抓三種寫法:變數定義、tailwind 取用、原生屬性取用。
+ */
+export function checkZIndexVariable(relPath, text) {
+  const issues = []
+  const masked = maskComments(text)
+  const add = (index, detail, snippet) =>
+    issues.push({ rule: 'variable', file: relPath, line: lineOf(text, index), detail, snippet })
+
+  const hint = '—— z-index 不開變數,直接寫 @apply z-[數字]'
+
+  // 定義端:--x-z / --x-z-index / --x-pc-z / --z-index
+  for (const m of masked.matchAll(/(--(?:[a-z0-9-]*-)?z(?:-index)?)\s*:/g)) {
+    add(m.index, `${m[1]} 是 z-index 變數 ${hint}`, m[0])
+  }
+
+  // 使用端:z-[--x] / z-[var(--x)]
+  for (const m of masked.matchAll(/(?<![\w-])z-\[[^\]]*--[^\]]*\]/g)) {
+    add(m.index, `${m[0]} 取用了 z-index 變數 ${hint}`, m[0])
+  }
+
+  // 使用端:原生 z-index: var(…)
+  for (const m of masked.matchAll(/z-index\s*:\s*var\([^)]*\)/g)) {
+    add(m.index, `${m[0]} 取用了 z-index 變數 ${hint}`, m[0])
   }
 
   return issues
@@ -1405,8 +1601,16 @@ export function lintFile(projectRoot, absPath, definedVars) {
   // tailwind 推斷不出型別的三個屬性 —— 在哪裡寫都是錯的,所以不限目錄
   if (rel.endsWith('.vue') || rel.endsWith('.css')) {
     issues.push(...checkTailwindPitfalls(rel, text))
+    // 顏色變數的 base 要寫 inherit / transparent,不要用 initial 繞路
+    issues.push(...checkColorBase(rel, text))
     // tracking 不開變數 —— 在哪裡寫都是錯的,所以同樣不限目錄
     issues.push(...checkTrackingVariable(rel, text))
+    // leading 同理:行高跟著字級走,值又多半是無單位比例
+    issues.push(...checkLeadingVariable(rel, text))
+    // z-index 同理:疊層是整站一套秩序,寫成常數才看得出誰蓋誰
+    issues.push(...checkZIndexVariable(rel, text))
+    // 規則 6:被 theme 整組覆寫掉而不存在的 class
+    issues.push(...checkTailwindTheme(rel, text))
   }
 
   if (rel.endsWith('.vue')) {

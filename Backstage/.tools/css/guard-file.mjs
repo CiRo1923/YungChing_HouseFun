@@ -44,6 +44,7 @@ const RULE_TITLE = {
   module: '規則 3 module css 的引入方式或順序',
   variable: '規則 4 module 變數的命名或斷點',
   import: '規則 5 .vue 的 import 順序',
+  theme: '規則 6 用到不存在的 tailwind class',
 }
 
 const RULE_HINT = {
@@ -53,6 +54,7 @@ const RULE_HINT = {
   module: '<script setup> 最上方 JS import;變數建在用到的最小單位上',
   variable: '-w / -h / -p,尺寸分 pc / tablet / mobile 三份',
   import: 'css → ./.composables → @js → 其他套件',
+  theme: 'text-sm / shadow-md / font-sans / md: 產不出任何 CSS',
 }
 
 /**

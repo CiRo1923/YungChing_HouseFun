@@ -1,0 +1,37 @@
+/*
+ * mHeader 的變數 —— 對應 components/buy/mHeader.vue。
+ * 全站共用的頂部列,固定位置組件,尺寸與字級都由 module 自己決定。
+ */
+:root {
+  --header-h: auto;
+  --header-pc-h: 60px;
+  --header-tablet-h: 50px;
+  --header-mobile-h: 50px;
+
+  --header-px: 0;
+  --header-pc-px: 50px;
+  --header-tablet-px: 15px;
+  --header-mobile-px: 15px;
+
+  /* 超寬螢幕時內容收邊置中,平板以下滿版 */
+  --header-max-w: none;
+  --header-pc-max-w: 1920px;
+  --header-tablet-max-w: none;
+  --header-mobile-max-w: none;
+
+  /*
+   * logo 右邊的「管理後台」字樣 —— 只有 PC 顯示(template 的 v-if),
+   * 所以間距與字級只有 pc 有值,另外兩份是為了讓斷點成套。
+   */
+  --header-label-color: var(--white);
+
+  --header-label-ml: 0;
+  --header-label-pc-ml: 10px;
+  --header-label-tablet-ml: 0;
+  --header-label-mobile-ml: 0;
+
+  --header-label-text-size: inherit;
+  --header-label-pc-text-size: 24px;
+  --header-label-tablet-text-size: inherit;
+  --header-label-mobile-text-size: inherit;
+}

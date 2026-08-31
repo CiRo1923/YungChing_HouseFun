@@ -1,0 +1,27 @@
+/* mLabel 的版型,以及 @screen 的斷點對應。 */
+.m-label {
+  /* data-required 有值時才在標籤後面補那個字(通常是 *) */
+  &[data-required]:not([data-required='']) {
+    &::before {
+      @apply ml-[--label-required-ml] text-[--label-required-color] content-[attr(data-required)];
+    }
+  }
+}
+
+@screen p {
+  .m-label {
+    --label-required-ml: var(--label-required-pc-ml);
+  }
+}
+
+@screen t {
+  .m-label {
+    --label-required-ml: var(--label-required-tablet-ml);
+  }
+}
+
+@screen m {
+  .m-label {
+    --label-required-ml: var(--label-required-mobile-ml);
+  }
+}

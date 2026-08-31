@@ -1,0 +1,40 @@
+/* mContainer 的變數 —— 只放「值」,modifier 的斷點對應寫在 common.css。 */
+:root {
+  --container-px: 0;
+  --container-pc-px: 16px;
+  --container-tablet-px: 16px;
+  --container-mobile-px: 16px;
+
+  /* 內容區的最大寬度 —— 只有 PC 需要收邊,平板以下滿版 */
+  --container-max-w: none;
+  --container-pc-max-w: 1232px;
+  --container-tablet-max-w: none;
+  --container-mobile-max-w: none;
+
+  --container-pt: 0;
+  --container-pc-pt: 40px;
+  --container-tablet-pt: 32px;
+  --container-mobile-pt: 32px;
+
+  --container-body-mt: 0;
+  --container-body-pc-mt: 32px;
+  --container-body-tablet-mt: 32px;
+  --container-body-mobile-mt: 32px;
+
+  --container-tools-mb: 0;
+  --container-tools-pc-mb: 32px;
+  --container-tools-tablet-mb: 32px;
+  --container-tools-mobile-mb: 32px;
+
+  /*
+   * 頁面主標題。
+   * 字級留在 module 是因為 mContainer 是「固定位置」的版型組件 ——
+   * 全站每個頁面的主標題都長一樣,不是各處要自訂的東西。
+   */
+  --container-title-color: var(--gray-333);
+
+  --container-title-text-size: inherit;
+  --container-title-pc-text-size: 30px;
+  --container-title-tablet-text-size: 24px;
+  --container-title-mobile-text-size: 24px;
+}

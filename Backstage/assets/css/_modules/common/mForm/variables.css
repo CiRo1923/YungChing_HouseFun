@@ -1,0 +1,254 @@
+/*
+ * mForm 的共用變數 —— 全系列(Input / CheckBox / Radio / Search / Dropdown …)都吃得到。
+ * 只放「值」::root 預設值、modifier 的具體值、指向色票的 var()。
+ * 斷點對應與狀態切換屬於「行為」,寫在 common.css。
+ */
+:root {
+  --form-clear-button-pc-p: 4px;
+  --form-clear-button-tablet-p: 4px;
+  --form-clear-button-mobile-p: 4px;
+
+  --form-clear-button-pc-size: 18px;
+  --form-clear-button-tablet-size: 18px;
+  --form-clear-button-mobile-size: 18px;
+
+  --form-element-border-color: var(--gray-e5);
+  --form-element-focus-border-color: var(--green-6a2d);
+  --form-element-disbaled-border-color: var(--gray-e5);
+  --form-element-error-border-color: var(--orange-e646);
+
+  --form-element-color: var(--gray-666);
+  --form-element-focus-color: var(--gray-666);
+  --form-element-disbaled-color: var(--gray-666);
+  --form-element-error-color: var(--orange-e646);
+
+  --form-clear-button-color: var(--gray-999);
+
+  /* 停用與 placeholder 的灰,原本寫死在 common.css 的狀態區塊裡 */
+  --form-element-placeholder-color: var(--gray-999);
+  --form-element-disabled-bg-color: var(--gray-f2);
+  --form-element-disabled-text-color: var(--gray-ccce);
+  --form-element-error-assist-color: var(--orange-e646);
+
+  /* 輸入框本身的外框 */
+  --form-element-bg-color: var(--white);
+
+  --form-element-gap-x: 0;
+  --form-element-pc-gap-x: 8px;
+  --form-element-tablet-gap-x: 8px;
+  --form-element-mobile-gap-x: 8px;
+
+  --form-element-rounded: 0;
+  --form-element-pc-rounded: 5px;
+  --form-element-tablet-rounded: 5px;
+  --form-element-mobile-rounded: 5px;
+
+  --form-element-border: 0;
+  --form-element-pc-border: 1px;
+  --form-element-tablet-border: 1px;
+  --form-element-mobile-border: 1px;
+
+  /*
+   * 輸入框的字級沒有變數 —— mForm 是到處複用的組件,字級由使用端 setClass.type 傳。
+   * 這裡若建了變數,common.css 會 @apply 它,一輸出就蓋掉使用端傳的 text-*。
+   *
+   * 錯誤訊息是這條規則的特例:.m-form-error 全系列統一,而且它是 module 自己
+   * 渲染的節點、使用端不見得碰得到,所以字級留在 module。
+   */
+  --form-error-color: var(--orange-e646);
+
+  --form-error-mt: 0;
+  --form-error-pc-mt: 4px;
+  --form-error-tablet-mt: 4px;
+  --form-error-mobile-mt: 4px;
+
+  --form-error-text-size: inherit;
+  --form-error-pc-text-size: 14px;
+  --form-error-tablet-text-size: 14px;
+  --form-error-mobile-text-size: 14px;
+
+  /*
+   * 內距與高度的 base。
+   *
+   * --p-16 是四邊、--px-* 只有左右、--py-* 只有上下 —— 三個層級併存,
+   * 所以拆到 pt / pr / pb / pl 四個方向,組合時才不會互相蓋掉
+   * (使用端常常同時帶 --px-12 --py-8)。
+   */
+  --form-element-pt: 0;
+  --form-element-pr: 0;
+  --form-element-pb: 0;
+  --form-element-pl: 0;
+  --form-element-min-h: 0;
+}
+
+/*
+ * modifier 的值 —— 直接寫在選擇器裡,不繞 :root。
+ * modifier 的名字本身就是值(--px-12 就是 12px),不隨斷點變;
+ * 之所以每個 @screen 都要重寫一次,是因為各斷點收的前綴不同
+ * (p 段收 --x / p:--x / pt:--x,t 段多收 tm: 與 t:,m 段收 tm: 與 m:)。
+ */
+@screen p {
+  .m-form {
+    &.\-\-p-16,
+    &.p\:\-\-p-16,
+    &.pt\:\-\-p-16 {
+      --form-element-pt: 16px;
+      --form-element-pr: 16px;
+      --form-element-pb: 16px;
+      --form-element-pl: 16px;
+    }
+
+    &.\-\-px-40,
+    &.p\:\-\-px-40,
+    &.pt\:\-\-px-40 {
+      --form-element-pr: 40px;
+      --form-element-pl: 40px;
+    }
+
+    &.\-\-px-12,
+    &.p\:\-\-px-12,
+    &.pt\:\-\-px-12 {
+      --form-element-pr: 12px;
+      --form-element-pl: 12px;
+    }
+
+    &.\-\-py-16,
+    &.p\:\-\-py-16,
+    &.pt\:\-\-py-16 {
+      --form-element-pt: 16px;
+      --form-element-pb: 16px;
+    }
+
+    &.\-\-py-8,
+    &.p\:\-\-py-8,
+    &.pt\:\-\-py-8 {
+      --form-element-pt: 8px;
+      --form-element-pb: 8px;
+    }
+
+    &.\-\-h-56,
+    &.p\:\-\-h-56,
+    &.pt\:\-\-h-56 {
+      --form-element-min-h: 56px;
+    }
+
+    &.\-\-h-40,
+    &.p\:\-\-h-40,
+    &.pt\:\-\-h-40 {
+      --form-element-min-h: 40px;
+    }
+  }
+}
+
+@screen t {
+  .m-form {
+    &.\-\-p-16,
+    &.pt\:\-\-p-16,
+    &.tm\:\-\-p-16,
+    &.t\:\-\-p-16 {
+      --form-element-pt: 16px;
+      --form-element-pr: 16px;
+      --form-element-pb: 16px;
+      --form-element-pl: 16px;
+    }
+
+    &.\-\-px-40,
+    &.pt\:\-\-px-40,
+    &.tm\:\-\-px-40,
+    &.t\:\-\-px-40 {
+      --form-element-pr: 40px;
+      --form-element-pl: 40px;
+    }
+
+    &.\-\-px-12,
+    &.pt\:\-\-px-12,
+    &.tm\:\-\-px-12,
+    &.t\:\-\-px-12 {
+      --form-element-pr: 12px;
+      --form-element-pl: 12px;
+    }
+
+    &.\-\-py-16,
+    &.pt\:\-\-py-16,
+    &.tm\:\-\-py-16,
+    &.t\:\-\-py-16 {
+      --form-element-pt: 16px;
+      --form-element-pb: 16px;
+    }
+
+    &.\-\-py-8,
+    &.pt\:\-\-py-8,
+    &.tm\:\-\-py-8,
+    &.t\:\-\-py-8 {
+      --form-element-pt: 8px;
+      --form-element-pb: 8px;
+    }
+
+    &.\-\-h-56,
+    &.pt\:\-\-h-56,
+    &.tm\:\-\-h-56,
+    &.t\:\-\-h-56 {
+      --form-element-min-h: 56px;
+    }
+
+    &.\-\-h-40,
+    &.pt\:\-\-h-40,
+    &.tm\:\-\-h-40,
+    &.t\:\-\-h-40 {
+      --form-element-min-h: 40px;
+    }
+  }
+}
+
+@screen m {
+  .m-form {
+    &.\-\-p-16,
+    &.tm\:\-\-p-16,
+    &.m\:\-\-p-16 {
+      --form-element-pt: 16px;
+      --form-element-pr: 16px;
+      --form-element-pb: 16px;
+      --form-element-pl: 16px;
+    }
+
+    &.\-\-px-40,
+    &.tm\:\-\-px-40,
+    &.m\:\-\-px-40 {
+      --form-element-pr: 40px;
+      --form-element-pl: 40px;
+    }
+
+    &.\-\-px-12,
+    &.tm\:\-\-px-12,
+    &.m\:\-\-px-12 {
+      --form-element-pr: 12px;
+      --form-element-pl: 12px;
+    }
+
+    &.\-\-py-16,
+    &.tm\:\-\-py-16,
+    &.m\:\-\-py-16 {
+      --form-element-pt: 16px;
+      --form-element-pb: 16px;
+    }
+
+    &.\-\-py-8,
+    &.tm\:\-\-py-8,
+    &.m\:\-\-py-8 {
+      --form-element-pt: 8px;
+      --form-element-pb: 8px;
+    }
+
+    &.\-\-h-56,
+    &.tm\:\-\-h-56,
+    &.m\:\-\-h-56 {
+      --form-element-min-h: 56px;
+    }
+
+    &.\-\-h-40,
+    &.tm\:\-\-h-40,
+    &.m\:\-\-h-40 {
+      --form-element-min-h: 40px;
+    }
+  }
+}
