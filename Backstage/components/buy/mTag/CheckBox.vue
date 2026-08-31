@@ -1,4 +1,9 @@
 <script setup>
+import '@css/_modules/buy/mTag/variables.css'
+import '@css/_modules/buy/mTag/checkboxVariables.css'
+import '@css/_modules/buy/mTag/common.css'
+import '@css/_modules/buy/mTag/checkbox.css'
+
 import { onDeepMerge } from '@js/_prototype.js'
 
 const emits = defineEmits(['update:modelValue', 'change'])
@@ -104,7 +109,7 @@ const onChange = () => {
 
 <template>
   <label
-    class="m-tag --checkbox relative"
+    class="m-tag --checkbox"
     :class="[{ '--checked': hasChecked }, { '--disabled': config.isDisabled }, setClass.main]"
   >
     <input
@@ -112,20 +117,13 @@ const onChange = () => {
       type="checkbox"
       v-model="model"
       :value="config.value"
-      class="m-tag-type sr-only"
+      class="m-tag-type"
       :disabled="config.isDisabled"
       @change="onChange"
     />
-    <span class="m-tag-assist relative h-[15px] w-[12px] shrink-0">
-      <CommonSvgIcon
-        icon="icon_check_solid"
-        class="m-tag-icon absolute right-0 top-0 h-full w-[15px] text-[--orange-e646] transition-opacitys duration-300"
-        :class="setClass.icon"
-      />
-      <small
-        class="m-tag-assist-label relative block text-right leading-[1] transition-opacitys duration-300"
-        v-if="config.assist !== null"
-      >
+    <span class="m-tag-assist">
+      <CommonSvgIcon icon="icon_check_solid" class="m-tag-icon" :class="setClass.icon" />
+      <small class="m-tag-assist-label" v-if="config.assist !== null">
         {{ config.assist }}
       </small>
     </span>
@@ -134,46 +132,3 @@ const onChange = () => {
     </slot>
   </label>
 </template>
-
-<style src="@css/_modules/buy/mTag.css" />
-<style lang="postcss">
-.m-tag {
-  &.\-\-checkbox {
-    &:not(.\-\-disabled) {
-      @apply cursor-pointer;
-
-      &.\-\-checked {
-        @apply bg-[--orange-feea];
-
-        .m-tag-icon {
-          @apply visible opacity-100;
-        }
-
-        .m-tag-assist-label {
-          @apply invisible opacity-0;
-        }
-
-        .m-tag-label {
-          @apply font-semibold;
-        }
-      }
-
-      &:not(.\-\-checked) {
-        @apply bg-[--gray-f2];
-
-        .m-tag-icon {
-          @apply invisible opacity-0;
-        }
-
-        .m-tag-assist-label {
-          @apply visible opacity-100;
-        }
-      }
-    }
-
-    &.\-\-disabled {
-      @apply cursor-not-allowed;
-    }
-  }
-}
-</style>

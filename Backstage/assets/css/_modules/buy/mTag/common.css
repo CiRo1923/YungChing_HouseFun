@@ -1,0 +1,39 @@
+.m-tag {
+  @apply relative inline-flex items-center gap-x-[--tag-gap-x] overflow-hidden rounded-full
+    h-[--tag-h] px-[--tag-px] py-[--tag-py]
+    bg-[--tag-bg-color] text-[--tag-color] transition-colors duration-300;
+}
+
+.m-tag-element {
+  @apply flex items-center gap-x-[--tag-element-gap-x] overflow-hidden;
+}
+
+@screen p {
+  .m-tag {
+    --tag-gap-x: var(--tag-pc-gap-x);
+  }
+
+  .m-tag-element {
+    --tag-element-gap-x: var(--tag-element-pc-gap-x);
+  }
+}
+
+@screen t {
+  .m-tag {
+    --tag-gap-x: var(--tag-tablet-gap-x);
+  }
+
+  .m-tag-element {
+    --tag-element-gap-x: var(--tag-element-tablet-gap-x);
+  }
+}
+
+@screen m {
+  .m-tag {
+    --tag-gap-x: var(--tag-mobile-gap-x);
+  }
+
+  .m-tag-element {
+    --tag-element-gap-x: var(--tag-element-mobile-gap-x);
+  }
+}

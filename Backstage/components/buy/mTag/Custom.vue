@@ -1,4 +1,9 @@
 <script setup>
+import '@css/_modules/buy/mTag/variables.css'
+import '@css/_modules/buy/mTag/customVariables.css'
+import '@css/_modules/buy/mTag/common.css'
+import '@css/_modules/buy/mTag/custom.css'
+
 const emits = defineEmits(['update:modelValue', 'blur', 'remove'])
 const props = defineProps({
   name: {
@@ -199,7 +204,7 @@ onBeforeUnmount(() => {
 
 <template>
   <label
-    class="m-tag --custom relative"
+    class="m-tag --custom"
     :class="[
       {
         '--disabled': config.isDisabled,
@@ -211,13 +216,13 @@ onBeforeUnmount(() => {
   >
     <CommonSvgIcon
       icon="icon_check_solid"
-      class="m-tag-icon h-full w-[15px] text-[--orange-e646] transition-opacitys duration-300"
+      class="m-tag-icon --checked"
       :class="setClass.icon"
       v-if="hasCheckValue"
     />
     <CommonSvgIcon
       icon="icon_plus_circle"
-      class="m-tag-icon h-full w-[15px] transition-opacitys duration-300"
+      class="m-tag-icon"
       :class="setClass.icon"
       v-if="!isFocus && !hasValue"
     />
@@ -226,7 +231,7 @@ onBeforeUnmount(() => {
         :name="props.name"
         v-model="model"
         type="text"
-        class="m-tag-type bg-transparent"
+        class="m-tag-type"
         :placeholder="config.placeholder"
         :style="{
           width: inputWidth,
@@ -249,7 +254,7 @@ onBeforeUnmount(() => {
         @click.stop="onClear"
         v-if="!config.isDisabled && isFocus"
       >
-        <CommonSvgIcon icon="icon_xmark" class="m-tag-clear-icon h-[10px] w-[10px]" />
+        <CommonSvgIcon icon="icon_xmark" class="m-tag-clear-icon" />
       </button>
     </div>
     <button
@@ -260,58 +265,13 @@ onBeforeUnmount(() => {
       @click.stop="onRemove"
       v-if="!config.isDisabled && hasCheckValue"
     >
-      <CommonSvgIcon icon="icon_xmark_circle" class="m-tag-remove-icon h-[15px] w-[15px]" />
+      <CommonSvgIcon icon="icon_xmark_circle" class="m-tag-remove-icon" />
     </button>
     <span
-      class="m-tag-mirror pointer-events-none invisible absolute whitespace-pre"
+      class="m-tag-mirror"
       ref="mirrorRef"
     >
       {{ mirrorText || ' ' }}
     </span>
   </label>
 </template>
-
-<style src="@css/_modules/buy/mTag.css" />
-<style lang="postcss">
-.m-tag {
-  &.\-\-custom {
-    @apply border-[1px] bg-transparent;
-
-    &:not(.\-\-value):not(.\-\-focus) {
-      @apply border-dashed border-[--gray-ccce];
-    }
-
-    &.\-\-value {
-      @apply border-transparent bg-[--orange-feea];
-    }
-
-    &.\-\-focus {
-      @apply border-solid border-[--green-6a2d] bg-transparent;
-    }
-  }
-}
-
-.m-tag-type {
-  &::placeholder {
-    @apply transition-colors duration-300;
-  }
-}
-
-@screen p {
-  .m-tag {
-    &.\-\-custom {
-      &:not(.\-\-value):not(.\-\-focus) {
-        &:hover {
-          @apply border-transparent bg-[--green-8b0d] text-[--white];
-
-          .m-tag-type {
-            &::placeholder {
-              @apply text-[--white];
-            }
-          }
-        }
-      }
-    }
-  }
-}
-</style>

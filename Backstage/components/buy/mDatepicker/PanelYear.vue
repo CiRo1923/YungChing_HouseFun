@@ -1,6 +1,5 @@
 <script setup>
 // 年份面板。headerMode: 'panel' 時點年份會展開這個。
-import { nextTick, onMounted, ref } from 'vue'
 
 const props = defineProps({
   years: {

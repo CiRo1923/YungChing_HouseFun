@@ -1,0 +1,77 @@
+.m-time {
+  @apply relative inline-flex items-center justify-center gap-x-[--time-gap-x] rounded-full
+    h-[--time-h] w-[--time-w] cursor-default
+    bg-[--time-bg-color] text-[--time-color] transition-colors duration-300;
+
+  /* as='label' 才點得下去(as='span' 只是顯示) */
+  &.\-\-cursor-pointer {
+    @apply cursor-pointer;
+  }
+
+  &:not(.\-\-disabled) {
+    &.\-\-checked {
+      --time-bg-color: var(--time-checked-bg-color);
+
+      .m-time-label {
+        @apply font-semibold;
+      }
+    }
+
+    &:not(.\-\-checked) {
+      --time-bg-color: var(--time-unchecked-bg-color);
+    }
+  }
+
+  &.\-\-disabled {
+    --time-color: var(--time-disabled-color);
+    --time-bg-color: var(--time-disabled-bg-color);
+
+    @apply cursor-not-allowed;
+  }
+}
+
+.m-time-type {
+  @apply sr-only;
+}
+
+.m-time-icon {
+  @apply h-[--time-icon-size] w-[--time-icon-size] p-[--time-icon-p];
+
+  /* 打勾用強調色;鎖頭 icon 沒有這個 modifier,維持繼承色 */
+  &.\-\-checked {
+    @apply text-[--time-icon-checked-color];
+  }
+}
+
+@screen p {
+  .m-time {
+    --time-gap-x: var(--time-pc-gap-x);
+  }
+
+  .m-time-icon {
+    --time-icon-size: var(--time-icon-pc-size);
+    --time-icon-p: var(--time-icon-pc-p);
+  }
+}
+
+@screen t {
+  .m-time {
+    --time-gap-x: var(--time-tablet-gap-x);
+  }
+
+  .m-time-icon {
+    --time-icon-size: var(--time-icon-tablet-size);
+    --time-icon-p: var(--time-icon-tablet-p);
+  }
+}
+
+@screen m {
+  .m-time {
+    --time-gap-x: var(--time-mobile-gap-x);
+  }
+
+  .m-time-icon {
+    --time-icon-size: var(--time-icon-mobile-size);
+    --time-icon-p: var(--time-icon-mobile-p);
+  }
+}

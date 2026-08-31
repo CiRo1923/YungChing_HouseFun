@@ -1,0 +1,52 @@
+:root {
+  --tag-custom-pc-border: 1px;
+  --tag-custom-tablet-border: 1px;
+  --tag-custom-mobile-border: 1px;
+
+  --tag-custom-icon-pc-w: 15px;
+  --tag-custom-icon-tablet-w: 15px;
+  --tag-custom-icon-mobile-w: 15px;
+
+  --tag-custom-clear-icon-pc-size: 10px;
+  --tag-custom-clear-icon-tablet-size: 10px;
+  --tag-custom-clear-icon-mobile-size: 10px;
+
+  --tag-custom-remove-icon-pc-size: 15px;
+  --tag-custom-remove-icon-tablet-size: 15px;
+  --tag-custom-remove-icon-mobile-size: 15px;
+
+  --tag-custom-border-color: transparent;
+
+  /* 三種狀態各自的框線色 / 底色 */
+  --tag-custom-idle-border-color: var(--gray-ccce);
+  --tag-custom-focus-border-color: var(--green-6a2d);
+  --tag-custom-value-border-color: transparent;
+  --tag-custom-value-bg-color: var(--orange-feea);
+  --tag-custom-focus-bg-color: transparent;
+
+  --tag-custom-checked-icon-color: var(--orange-e646);
+}
+
+@screen p {
+  .m-tag {
+    &.\-\-custom {
+      /* hover 只在桌機生效 —— 觸控裝置點完會把 hover 狀態黏住。
+         值直接覆寫基礎變數,不另外建 hover 專用變數(見 mAnchor 的寫法)。 */
+      &:not(.\-\-value):not(.\-\-focus) {
+        &:hover {
+          &.hover\:\-\-bg-green-8b0d {
+            --tag-bg-color: var(--green-8b0d);
+          }
+
+          &.hover\:\-\-text-white {
+            --tag-color: var(--white);
+          }
+
+          &.hover\:\-\-border-transparent {
+            --tag-custom-border-color: transparent;
+          }
+        }
+      }
+    }
+  }
+}

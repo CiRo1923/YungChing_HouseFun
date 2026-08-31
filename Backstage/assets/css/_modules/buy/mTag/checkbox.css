@@ -1,0 +1,90 @@
+.m-tag {
+  &.\-\-checkbox {
+    &:not(.\-\-disabled) {
+      @apply cursor-pointer;
+
+      /* 勾選:打勾 icon 蓋掉輔助符號 */
+      &.\-\-checked {
+        --tag-bg-color: var(--tag-checkbox-checked-bg-color);
+
+        .m-tag-icon {
+          @apply visible opacity-100;
+        }
+
+        .m-tag-assist-label {
+          @apply invisible opacity-0;
+        }
+
+        .m-tag-label {
+          @apply font-semibold;
+        }
+      }
+
+      &:not(.\-\-checked) {
+        --tag-bg-color: var(--tag-checkbox-unchecked-bg-color);
+
+        .m-tag-icon {
+          @apply invisible opacity-0;
+        }
+
+        .m-tag-assist-label {
+          @apply visible opacity-100;
+        }
+      }
+    }
+
+    /* 停用時不換底色(維持拆 module 前的行為) */
+    &.\-\-disabled {
+      @apply cursor-not-allowed;
+    }
+
+    /* 原生 checkbox 藏起來只留給輔助技術 —— 只有這個變體要藏,
+       --custom 的 .m-tag-type 是看得見的輸入框,所以不能寫在共用層 */
+    .m-tag-type {
+      @apply sr-only;
+    }
+
+    .m-tag-assist {
+      @apply relative h-[--tag-checkbox-assist-h] w-[--tag-checkbox-assist-w] shrink-0;
+    }
+
+    .m-tag-icon {
+      @apply absolute right-0 top-0 h-full w-[--tag-checkbox-icon-w]
+        text-[--tag-checkbox-icon-color] transition-opacitys duration-300;
+    }
+
+    .m-tag-assist-label {
+      @apply relative block text-right leading-[1] transition-opacitys duration-300;
+    }
+  }
+}
+
+@screen p {
+  .m-tag {
+    &.\-\-checkbox {
+      --tag-checkbox-assist-w: var(--tag-checkbox-assist-pc-w);
+      --tag-checkbox-assist-h: var(--tag-checkbox-assist-pc-h);
+      --tag-checkbox-icon-w: var(--tag-checkbox-icon-pc-w);
+    }
+  }
+}
+
+@screen t {
+  .m-tag {
+    &.\-\-checkbox {
+      --tag-checkbox-assist-w: var(--tag-checkbox-assist-tablet-w);
+      --tag-checkbox-assist-h: var(--tag-checkbox-assist-tablet-h);
+      --tag-checkbox-icon-w: var(--tag-checkbox-icon-tablet-w);
+    }
+  }
+}
+
+@screen m {
+  .m-tag {
+    &.\-\-checkbox {
+      --tag-checkbox-assist-w: var(--tag-checkbox-assist-mobile-w);
+      --tag-checkbox-assist-h: var(--tag-checkbox-assist-mobile-h);
+      --tag-checkbox-icon-w: var(--tag-checkbox-icon-mobile-w);
+    }
+  }
+}

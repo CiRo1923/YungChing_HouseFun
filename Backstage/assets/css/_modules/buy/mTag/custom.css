@@ -1,0 +1,106 @@
+.m-tag {
+  &.\-\-custom {
+    border-width: var(--tag-custom-border);
+
+    @apply border-[--tag-custom-border-color];
+
+    /* 空的:虛線框 */
+    &:not(.\-\-value):not(.\-\-focus) {
+      --tag-custom-border-color: var(--tag-custom-idle-border-color);
+
+      @apply border-dashed;
+    }
+
+    /* 已填:實底色、無框線 */
+    &.\-\-value {
+      --tag-bg-color: var(--tag-custom-value-bg-color);
+      --tag-custom-border-color: var(--tag-custom-value-border-color);
+    }
+
+    /* 編輯中:實線框、底色收回透明(要蓋掉 --value 的底色) */
+    &.\-\-focus {
+      --tag-bg-color: var(--tag-custom-focus-bg-color);
+      --tag-custom-border-color: var(--tag-custom-focus-border-color);
+
+      @apply border-solid;
+    }
+
+    .m-tag-icon {
+      @apply h-full w-[--tag-custom-icon-w] transition-opacitys duration-300;
+
+      /* 已確認的值才是打勾 icon(另一顆是加號,維持繼承色) */
+      &.\-\-checked {
+        @apply text-[--tag-custom-checked-icon-color];
+      }
+    }
+
+    .m-tag-type {
+      @apply bg-transparent;
+
+      &::placeholder {
+        @apply transition-colors duration-300;
+      }
+    }
+
+    .m-tag-clear-icon {
+      @apply h-[--tag-custom-clear-icon-size] w-[--tag-custom-clear-icon-size];
+    }
+
+    .m-tag-remove-icon {
+      @apply h-[--tag-custom-remove-icon-size] w-[--tag-custom-remove-icon-size];
+    }
+
+    .m-tag-mirror {
+      @apply pointer-events-none invisible absolute whitespace-pre;
+    }
+  }
+}
+
+@screen p {
+  .m-tag {
+    &.\-\-custom {
+      --tag-custom-border: var(--tag-custom-pc-border);
+      --tag-custom-icon-w: var(--tag-custom-icon-pc-w);
+      --tag-custom-clear-icon-size: var(--tag-custom-clear-icon-pc-size);
+      --tag-custom-remove-icon-size: var(--tag-custom-remove-icon-pc-size);
+
+      /* ⚠️ 這段是版型檔裡唯一的 `&:hover`,而且是刻意的。
+         ::placeholder 的顏色沒辦法只靠變數切換 —— 它的預設值是瀏覽器給的,
+         一旦寫成 text-[--x] 並給任何 base(inherit / initial)都會改掉未 hover 時的外觀。
+         所以只在「使用端帶了 hover:--text-white」時才輸出這一條。 */
+      &:not(.\-\-value):not(.\-\-focus) {
+        &:hover {
+          &.hover\:\-\-text-white {
+            .m-tag-type {
+              &::placeholder {
+                @apply text-[--white];
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+@screen t {
+  .m-tag {
+    &.\-\-custom {
+      --tag-custom-border: var(--tag-custom-tablet-border);
+      --tag-custom-icon-w: var(--tag-custom-icon-tablet-w);
+      --tag-custom-clear-icon-size: var(--tag-custom-clear-icon-tablet-size);
+      --tag-custom-remove-icon-size: var(--tag-custom-remove-icon-tablet-size);
+    }
+  }
+}
+
+@screen m {
+  .m-tag {
+    &.\-\-custom {
+      --tag-custom-border: var(--tag-custom-mobile-border);
+      --tag-custom-icon-w: var(--tag-custom-icon-mobile-w);
+      --tag-custom-clear-icon-size: var(--tag-custom-clear-icon-mobile-size);
+      --tag-custom-remove-icon-size: var(--tag-custom-remove-icon-mobile-size);
+    }
+  }
+}

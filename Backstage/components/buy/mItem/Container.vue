@@ -1,12 +1,12 @@
-<script>
-import { computed, ref } from 'vue'
-
-export default {
-  name: 'MItemContainer',
-}
-</script>
-
 <script setup>
+import '@css/_modules/buy/mItem/variables.css'
+import '@css/_modules/buy/mItem/common.css'
+
+// 自己遞迴呼叫自己(<m-item-container>),要有 name 才找得到
+defineOptions({
+  name: 'MItemContainer',
+})
+
 const props = defineProps({
   data: {
     type: Object,
@@ -92,14 +92,14 @@ defineExpose({
     ref="containerRef"
   >
     <li
-      class="m-item-container-list flex items-baseline"
+      class="m-item-container-list"
       :class="setClass.item"
       :data-label="labelData"
       v-for="(item, index) in props.data.items"
       :key="`m_item_${index}`"
     >
-      <p class="grow" v-html="item.item" v-if="!item.children" />
-      <div class="grow" v-else>
+      <p class="m-item-container-item" v-html="item.item" v-if="!item.children" />
+      <div class="m-item-container-item" v-else>
         <p v-html="item.item" />
         <m-item-container
           :data="item.children"
@@ -110,57 +110,3 @@ defineExpose({
     </li>
   </component>
 </template>
-
-<style lang="postcss">
-.m-item-container {
-  counter-reset: item;
-
-  &.\-\-disc {
-    > .m-item-container-list {
-      &:before {
-        content: '•';
-      }
-    }
-  }
-
-  /* 數字 1. 2. 3. ... */
-  &.\-\-decimal {
-    > .m-item-container-list {
-      &:before {
-        content: counter(item) '.';
-      }
-    }
-  }
-
-  /* 0 + 數字 01. 02. 03. ... */
-  &.\-\-decimal-leading-zero {
-    > .m-item-container-list {
-      &:before {
-        content: counter(item, decimal-leading-zero) '.';
-      }
-    }
-  }
-}
-
-.m-item-container-list {
-  counter-increment: item;
-
-  &:before {
-    @apply pointer-events-none shrink-0;
-  }
-
-  &[data-label] {
-    &:before {
-      &[data-label=''] {
-        @apply content-default;
-      }
-    }
-
-    &:not([data-label='']) {
-      &:before {
-        @apply mr-[5px] content-[attr(data-label)];
-      }
-    }
-  }
-}
-</style>

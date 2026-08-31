@@ -1,0 +1,19 @@
+:root {
+  /* 輔助符號(#)的位置盒 —— 寬高不同,拆兩個變數 */
+  --tag-checkbox-assist-pc-w: 12px;
+  --tag-checkbox-assist-tablet-w: 12px;
+  --tag-checkbox-assist-mobile-w: 12px;
+
+  --tag-checkbox-assist-pc-h: 15px;
+  --tag-checkbox-assist-tablet-h: 15px;
+  --tag-checkbox-assist-mobile-h: 15px;
+
+  /* 打勾 icon 疊在輔助符號上,高度撐滿所以只有寬 */
+  --tag-checkbox-icon-pc-w: 15px;
+  --tag-checkbox-icon-tablet-w: 15px;
+  --tag-checkbox-icon-mobile-w: 15px;
+
+  --tag-checkbox-icon-color: var(--orange-e646);
+  --tag-checkbox-checked-bg-color: var(--orange-feea);
+  --tag-checkbox-unchecked-bg-color: var(--gray-f2);
+}

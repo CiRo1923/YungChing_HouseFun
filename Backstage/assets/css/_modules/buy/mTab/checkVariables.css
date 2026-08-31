@@ -1,0 +1,33 @@
+:root {
+  --tab-check-anchor-pc-gap-x: 4px;
+  --tab-check-anchor-tablet-gap-x: 4px;
+  --tab-check-anchor-mobile-gap-x: 4px;
+
+  --tab-check-anchor-pc-px: 9px;
+  --tab-check-anchor-tablet-px: 9px;
+  --tab-check-anchor-mobile-px: 9px;
+
+  --tab-check-anchor-pc-py: 8px;
+  --tab-check-anchor-tablet-py: 8px;
+  --tab-check-anchor-mobile-py: 8px;
+
+  --tab-check-anchor-icon-pc-size: 16px;
+  --tab-check-anchor-icon-tablet-size: 16px;
+  --tab-check-anchor-icon-mobile-size: 16px;
+
+  --tab-check-body-pc-border-t: 4px;
+  --tab-check-body-tablet-border-t: 4px;
+  --tab-check-body-mobile-border-t: 4px;
+
+  --tab-check-body-content-pc-rounded-b: 15px;
+  --tab-check-body-content-tablet-rounded-b: 15px;
+  --tab-check-body-content-mobile-rounded-b: 15px;
+
+  --tab-check-body-border-t-color: var(--orange-e646);
+
+  --tab-check-anchor-color: var(--gray-666);
+  --tab-check-anchor-bg-color: var(--white);
+
+  --tab-check-anchor-active-color: var(--white);
+  --tab-check-anchor-active-bg-color: var(--orange-e646);
+}

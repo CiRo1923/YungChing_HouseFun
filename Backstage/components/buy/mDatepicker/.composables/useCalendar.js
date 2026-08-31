@@ -5,8 +5,6 @@
     config  computed<Object>  已經 merge 過的設定
     model   Ref<any>          呼叫端的 v-model 值(model 格式) */
 
-import { computed, ref, watch } from 'vue'
-
 import {
   onAddMonthsSafe,
   onDateOnlyMs,

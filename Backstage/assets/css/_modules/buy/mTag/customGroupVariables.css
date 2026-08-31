@@ -1,0 +1,6 @@
+:root {
+  /* 平板 / 手機不給水平間距(標籤自己換行時貼齊左緣),桌機才留 8px */
+  --tag-custom-group-pc-gap-x: 8px;
+  --tag-custom-group-tablet-gap-x: 0;
+  --tag-custom-group-mobile-gap-x: 0;
+}

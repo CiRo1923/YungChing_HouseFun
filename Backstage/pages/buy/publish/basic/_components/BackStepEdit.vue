@@ -8,7 +8,7 @@ const props = defineProps({
 </script>
 
 <template>
-  <BuyMAnchorTool :anchor="props.anchor">尚未刊登</BuyMAnchorTool>
+  <BuyMToolbar :anchor="props.anchor">尚未刊登</BuyMToolbar>
 </template>
 
 <style></style>

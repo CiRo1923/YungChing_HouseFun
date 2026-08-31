@@ -1,4 +1,6 @@
 <script setup>
+import '@css/_modules/buy/mErrorMessage/common.css'
+
 const props = defineProps({
   message: {
     type: String,
@@ -8,9 +10,7 @@ const props = defineProps({
 </script>
 
 <template>
-  <small class="m-error-message block text-[--orange-e646]">
+  <small class="m-error-message">
     {{ props.message }}
   </small>
 </template>
-
-<style></style>

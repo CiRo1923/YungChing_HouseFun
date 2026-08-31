@@ -1,4 +1,6 @@
 <script setup>
+import '@css/_modules/buy/mForm.css'
+
 import { useTextCore } from './.composables/useTextCore.js'
 
 const emits = defineEmits(['update:modelValue', 'input', 'keydown.enter', 'enter'])
@@ -93,7 +95,6 @@ const onFocus = (value) => {
   </div>
 </template>
 
-<style src="@css/_modules/buy/mForm.css"></style>
 <style lang="postcss">
 :root {
   --form-search-icon-pc-p: 2px;

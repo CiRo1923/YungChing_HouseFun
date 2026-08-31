@@ -1,8 +1,6 @@
 <script setup>
 import { onFormatDate, numberComma } from '@js/_prototype.js'
 
-import { computed } from 'vue'
-
 const props = defineProps({
   value: {
     type: [String, Number],

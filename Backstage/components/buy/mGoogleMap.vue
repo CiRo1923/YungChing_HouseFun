@@ -1,4 +1,6 @@
 <script setup>
+import '@css/_modules/buy/mGoogleMap/common.css'
+
 import { setOptions, importLibrary } from '@googlemaps/js-api-loader'
 
 const emits = defineEmits(['click'])
@@ -279,5 +281,5 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div ref="mapRef" class="m-google-map w-full" />
+  <div ref="mapRef" class="m-google-map" />
 </template>

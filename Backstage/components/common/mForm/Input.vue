@@ -1,8 +1,10 @@
 <script setup>
-import { numberComma, onToFixed, onUnicodLength, onUnicodSlice } from '@js/_prototype.js'
+import '@css/_modules/buy/mForm.css'
+
 import { useTextCore } from './.composables/useTextCore.js'
 import useValidateEvents from './.composables/useValidateEvents.js'
 
+import { numberComma, onToFixed, onUnicodLength, onUnicodSlice } from '@js/_prototype.js'
 import '@js/_validation.js'
 
 import { Field, ErrorMessage } from 'vee-validate'
@@ -392,5 +394,3 @@ watch(
     </ErrorMessage>
   </div>
 </template>
-
-<style src="@css/_modules/buy/mForm.css"></style>

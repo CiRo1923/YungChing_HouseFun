@@ -1,7 +1,8 @@
 <script setup>
-import { onDeepMerge } from '@js/_prototype.js'
+import '@css/_modules/buy/mItem/variables.css'
+import '@css/_modules/buy/mItem/common.css'
 
-import { computed, ref } from 'vue'
+import { onDeepMerge } from '@js/_prototype.js'
 
 const props = defineProps({
   data: {
@@ -50,9 +51,9 @@ defineExpose({
 
 <template>
   <div class="m-item" :class="setClass.main" ref="mainRef">
-    <div :class="setClass.header" v-if="config.header.label">
-      <p class="inline-flex">
-        <b class="grow font-medium" :class="setClass.label">
+    <div class="m-item-header" :class="setClass.header" v-if="config.header.label">
+      <p class="m-item-header-text">
+        <b class="m-item-header-label" :class="setClass.label">
           {{ config.header.label }}
         </b>
       </p>
@@ -65,5 +66,3 @@ defineExpose({
     />
   </div>
 </template>
-
-<style></style>

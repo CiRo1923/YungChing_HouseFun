@@ -118,8 +118,19 @@
   @apply transition-colors duration-300;
 }
 
+/* 錯誤訊息的顏色由「嵌入 mErrorMessage 的組件」決定 ——
+   .m-error-message 自己不設 color,靠這裡繼承下去 */
 .m-form-error {
+  /* ⚠️ 顏色走原生 color —— 同一個 @apply 裡放兩個 text-*(字級 + 顏色)時
+     tailwind 只會留下其中一個,加 length: / color: 型別提示也救不了,
+     而且不會報錯。字級與顏色要併存時,顏色寫原生屬性。 */
+  color: var(--orange-e646);
+
   @apply mt-[4px] text-[14px];
+}
+
+.m-form-hidden-error {
+  @apply text-[--orange-e646];
 }
 
 @screen p {

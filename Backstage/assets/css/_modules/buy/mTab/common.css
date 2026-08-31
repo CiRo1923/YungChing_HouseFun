@@ -1,0 +1,69 @@
+.m-tab-header {
+  @apply flex gap-x-[--tab-header-gap-x];
+}
+
+.m-tab-header-item {
+  @apply flex items-center;
+}
+
+.m-tab-anchor {
+  @apply flex w-full items-center justify-center gap-x-[--tab-anchor-gap-x]
+    min-h-[--tab-anchor-min-h] rounded-t-[--tab-anchor-rounded-t]
+    px-[--tab-anchor-px] py-[--tab-anchor-py] transition-colors duration-300;
+}
+
+.m-table-body-content {
+  /* border-width 走原生屬性 —— @apply border-x-[…] 在 production 會被壓成
+     border shorthand,值是 var() 時整條失效 */
+  border-left-width: var(--tab-body-content-border-x);
+  border-right-width: var(--tab-body-content-border-x);
+  border-top-width: var(--tab-body-content-border-y);
+  border-bottom-width: var(--tab-body-content-border-y);
+
+  @apply overflow-hidden border-transparent;
+}
+
+.m-tab-body-items {
+  @apply flex w-[200%] will-change-transform;
+
+  &.\-\-animating {
+    @apply transition-transform duration-300;
+
+    &.\-\-left {
+      @apply -translate-x-1/2;
+    }
+
+    &.\-\-right {
+      @apply translate-x-0;
+    }
+  }
+
+  &.\-\-right {
+    @apply -translate-x-1/2;
+  }
+}
+
+.m-tab-body-item {
+  @apply w-1/2 shrink-0;
+}
+
+@screen p {
+  .m-tab {
+    --tab-header-gap-x: var(--tab-header-pc-gap-x);
+    --tab-anchor-rounded-t: var(--tab-anchor-pc-rounded-t);
+  }
+}
+
+@screen t {
+  .m-tab {
+    --tab-header-gap-x: var(--tab-header-tablet-gap-x);
+    --tab-anchor-rounded-t: var(--tab-anchor-tablet-rounded-t);
+  }
+}
+
+@screen m {
+  .m-tab {
+    --tab-header-gap-x: var(--tab-header-mobile-gap-x);
+    --tab-anchor-rounded-t: var(--tab-anchor-mobile-rounded-t);
+  }
+}

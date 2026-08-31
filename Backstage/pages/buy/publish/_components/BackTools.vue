@@ -23,7 +23,7 @@ const config = computed(() => {
 </script>
 
 <template>
-  <BuyMAnchorTool :anchor="props.anchor">
+  <BuyMToolbar :anchor="props.anchor">
     <BuyMStepArrow
       :options="props.stepOptions"
       :config="{
@@ -35,7 +35,7 @@ const config = computed(() => {
         icon: 'text-[--orange-e646]',
       }"
     />
-  </BuyMAnchorTool>
+  </BuyMToolbar>
 </template>
 
 <style></style>

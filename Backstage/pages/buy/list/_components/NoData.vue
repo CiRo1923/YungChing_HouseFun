@@ -13,7 +13,7 @@
       <BuyMAnchor
         text="開始複製物件"
         :setClass="{
-          main: '--oval --h-45 --border-gray-e5 --px-30 text-[--gray-666]',
+          main: '--oval --h-45 --border-gray-e5 --px-30 --text-gray-666',
           text: 'text-[18px] tracking-wider',
         }"
       />

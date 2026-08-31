@@ -1,0 +1,99 @@
+.m-add-identical {
+  @apply space-y-[var(--add-identical-space-y)];
+}
+
+.m-add-identical-container {
+  @apply space-y-[var(--add-identical-space-y)];
+}
+
+.m-add-identical-item {
+  @apply relative overflow-hidden;
+}
+
+.m-add-identical-clear-anchor {
+  @apply absolute right-[--add-identical-clear-anchor-right] top-[--add-identical-clear-anchor-top]
+    block h-[--add-identical-clear-anchor-size] w-[--add-identical-clear-anchor-size]
+    p-[--add-identical-clear-anchor-p];
+}
+
+.m-add-identical-clear-icon {
+  @apply h-full w-full;
+}
+
+.m-add-identical-anchor {
+  @apply underline;
+}
+
+.m-add-identical-anchor-text {
+  @apply text-[length:--add-identical-anchor-text-size];
+}
+
+.m-add-identical-anchor-icon {
+  @apply h-[--add-identical-anchor-icon-size] w-[--add-identical-anchor-icon-size] text-[--gray-666];
+}
+
+@screen p {
+  .m-add-identical,
+  .m-add-identical-container {
+    --add-identical-space-y: var(--add-identical-pc-space-y);
+  }
+
+  .m-add-identical-clear-anchor {
+    --add-identical-clear-anchor-size: var(--add-identical-clear-anchor-pc-size);
+    --add-identical-clear-anchor-p: var(--add-identical-clear-anchor-pc-p);
+    --add-identical-clear-anchor-top: var(--add-identical-clear-anchor-pc-top);
+    --add-identical-clear-anchor-right: var(--add-identical-clear-anchor-pc-right);
+  }
+
+  .m-add-identical-anchor-text {
+    --add-identical-anchor-text-size: var(--add-identical-anchor-pc-text-size);
+  }
+
+  .m-add-identical-anchor-icon {
+    --add-identical-anchor-icon-size: var(--add-identical-anchor-icon-pc-size);
+  }
+}
+
+@screen t {
+  .m-add-identical,
+  .m-add-identical-container {
+    --add-identical-space-y: var(--add-identical-tablet-space-y);
+  }
+
+  .m-add-identical-clear-anchor {
+    --add-identical-clear-anchor-size: var(--add-identical-clear-anchor-tablet-size);
+    --add-identical-clear-anchor-p: var(--add-identical-clear-anchor-tablet-p);
+    --add-identical-clear-anchor-top: var(--add-identical-clear-anchor-tablet-top);
+    --add-identical-clear-anchor-right: var(--add-identical-clear-anchor-tablet-right);
+  }
+
+  .m-add-identical-anchor-text {
+    --add-identical-anchor-text-size: var(--add-identical-anchor-tablet-text-size);
+  }
+
+  .m-add-identical-anchor-icon {
+    --add-identical-anchor-icon-size: var(--add-identical-anchor-icon-tablet-size);
+  }
+}
+
+@screen m {
+  .m-add-identical,
+  .m-add-identical-container {
+    --add-identical-space-y: var(--add-identical-mobile-space-y);
+  }
+
+  .m-add-identical-clear-anchor {
+    --add-identical-clear-anchor-size: var(--add-identical-clear-anchor-mobile-size);
+    --add-identical-clear-anchor-p: var(--add-identical-clear-anchor-mobile-p);
+    --add-identical-clear-anchor-top: var(--add-identical-clear-anchor-mobile-top);
+    --add-identical-clear-anchor-right: var(--add-identical-clear-anchor-mobile-right);
+  }
+
+  .m-add-identical-anchor-text {
+    --add-identical-anchor-text-size: var(--add-identical-anchor-mobile-text-size);
+  }
+
+  .m-add-identical-anchor-icon {
+    --add-identical-anchor-icon-size: var(--add-identical-anchor-icon-mobile-size);
+  }
+}

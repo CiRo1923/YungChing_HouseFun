@@ -1,8 +1,11 @@
 <script setup>
+import '@css/_modules/buy/mUpload/common.css'
+
+import useValidateEvents from '../../common/mForm/.composables/useValidateEvents.js'
+
 import '@js/_validation.js'
 
 import { validate as validateValue, Field, ErrorMessage } from 'vee-validate'
-import useValidateEvents from '../../common/mForm/.composables/useValidateEvents.js'
 
 const emit = defineEmits(['uploaded'])
 

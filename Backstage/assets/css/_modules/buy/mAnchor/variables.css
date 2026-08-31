@@ -1,0 +1,271 @@
+:root {
+  /* padding 的 base 給 0 —— px-[--x] / py-[--x] 各自展開成兩條宣告,
+     變數未定義時兩條一起失效,畫面沒效果也不報錯。
+     給 0 等同「沒有 padding」,modifier 再覆蓋成實際值。 */
+  --anchor-px: 0;
+  --anchor-py: 0;
+
+  /* 高度的 base 不能給 0,否則沒帶 --h-XX 的按鈕會整個塌掉 */
+  --anchor-h: auto;
+
+  --anchor-pc-gap-x: 4px;
+  --anchor-tablet-gap-x: 4px;
+  --anchor-mobile-gap-x: 4px;
+
+  --anchor-pc-border: 1px;
+  --anchor-tablet-border: 1px;
+  --anchor-mobile-border: 1px;
+
+  /* 沒帶 --text-XX 時繼承父層字色 —— 拆 module 前的行為就是這樣,
+     全案有一半以上的使用端沒帶顏色 modifier,靠的就是繼承。
+     這裡不能用 initial,那是黑色而不是繼承。 */
+  --anchor-color: inherit;
+  --anchor-bg-color: transparent;
+  --anchor-border-color: transparent;
+
+  --anchor-disabled-color: var(--white);
+  --anchor-disabled-bg-color: var(--gray-e5);
+}
+
+.m-anchor {
+  &:not(:disabled) {
+    /* color */
+    &.\-\-text-white {
+      --anchor-color: var(--white);
+    }
+
+    &.\-\-text-gray-666 {
+      --anchor-color: var(--gray-666);
+    }
+
+    &.\-\-text-green-6a2d {
+      --anchor-color: var(--green-6a2d);
+    }
+
+    /* bg color */
+    &.\-\-bg-white {
+      --anchor-bg-color: var(--white);
+    }
+
+    &.\-\-bg-orange-e646 {
+      --anchor-bg-color: var(--orange-e646);
+    }
+
+    &.\-\-bg-green-6a2d {
+      --anchor-bg-color: var(--green-6a2d);
+    }
+
+    /* border color */
+    &.\-\-border-gray-e5 {
+      --anchor-border-color: var(--gray-e5);
+    }
+
+    /* 「有框線但透明」—— 與 --border-gray-e5 的按鈕併排時撐出一樣的盒子,
+       兩者切換才不會位移。list/_components/item/Setting.vue 在用。 */
+    &.\-\-border-transparent {
+      --anchor-border-color: transparent;
+    }
+  }
+}
+
+@screen p {
+  .m-anchor {
+    &.\-\-px-30,
+    &.p\:\-\-px-30,
+    &.pt\:\-\-px-30 {
+      --anchor-px: 30px;
+    }
+
+    &.\-\-px-20,
+    &.p\:\-\-px-20,
+    &.pt\:\-\-px-20 {
+      --anchor-px: 20px;
+    }
+
+    &.\-\-px-15,
+    &.p\:\-\-px-15,
+    &.pt\:\-\-px-15 {
+      --anchor-px: 15px;
+    }
+
+    &.\-\-px-8,
+    &.p\:\-\-px-8,
+    &.pt\:\-\-px-8 {
+      --anchor-px: 8px;
+    }
+
+    &.\-\-py-8,
+    &.p\:\-\-py-8,
+    &.pt\:\-\-py-8 {
+      --anchor-py: 8px;
+    }
+
+    &.\-\-py-5,
+    &.p\:\-\-py-5,
+    &.pt\:\-\-py-5 {
+      --anchor-py: 5px;
+    }
+
+    &.\-\-h-45,
+    &.p\:\-\-h-45,
+    &.pt\:\-\-h-45 {
+      --anchor-h: 45px;
+    }
+
+    &.\-\-h-40,
+    &.p\:\-\-h-40,
+    &.pt\:\-\-h-40 {
+      --anchor-h: 40px;
+    }
+
+    &.\-\-h-35,
+    &.p\:\-\-h-35,
+    &.pt\:\-\-h-35 {
+      --anchor-h: 35px;
+    }
+
+    &.\-\-h-30,
+    &.p\:\-\-h-30,
+    &.pt\:\-\-h-30 {
+      --anchor-h: 30px;
+    }
+  }
+}
+
+@screen t {
+  .m-anchor {
+    &.\-\-px-30,
+    &.pt\:\-\-px-30,
+    &.tm\:\-\-px-30,
+    &.t\:\-\-px-30 {
+      --anchor-px: 30px;
+    }
+
+    &.\-\-px-20,
+    &.pt\:\-\-px-20,
+    &.tm\:\-\-px-20,
+    &.t\:\-\-px-20 {
+      --anchor-px: 20px;
+    }
+
+    &.\-\-px-15,
+    &.pt\:\-\-px-15,
+    &.tm\:\-\-px-15,
+    &.t\:\-\-px-15 {
+      --anchor-px: 15px;
+    }
+
+    &.\-\-px-8,
+    &.pt\:\-\-px-8,
+    &.tm\:\-\-px-8,
+    &.t\:\-\-px-8 {
+      --anchor-px: 8px;
+    }
+
+    &.\-\-py-8,
+    &.pt\:\-\-py-8,
+    &.tm\:\-\-py-8,
+    &.t\:\-\-py-8 {
+      --anchor-py: 8px;
+    }
+
+    &.\-\-py-5,
+    &.pt\:\-\-py-5,
+    &.tm\:\-\-py-5,
+    &.t\:\-\-py-5 {
+      --anchor-py: 5px;
+    }
+
+    &.\-\-h-45,
+    &.pt\:\-\-h-45,
+    &.tm\:\-\-h-45,
+    &.t\:\-\-h-45 {
+      --anchor-h: 45px;
+    }
+
+    &.\-\-h-40,
+    &.pt\:\-\-h-40,
+    &.tm\:\-\-h-40,
+    &.t\:\-\-h-40 {
+      --anchor-h: 40px;
+    }
+
+    &.\-\-h-35,
+    &.pt\:\-\-h-35,
+    &.tm\:\-\-h-35,
+    &.t\:\-\-h-35 {
+      --anchor-h: 35px;
+    }
+
+    &.\-\-h-30,
+    &.pt\:\-\-h-30,
+    &.tm\:\-\-h-30,
+    &.t\:\-\-h-30 {
+      --anchor-h: 30px;
+    }
+  }
+}
+
+@screen m {
+  .m-anchor {
+    &.\-\-px-30,
+    &.tm\:\-\-px-30,
+    &.m\:\-\-px-30 {
+      --anchor-px: 30px;
+    }
+
+    &.\-\-px-20,
+    &.tm\:\-\-px-20,
+    &.m\:\-\-px-20 {
+      --anchor-px: 20px;
+    }
+
+    &.\-\-px-15,
+    &.tm\:\-\-px-15,
+    &.m\:\-\-px-15 {
+      --anchor-px: 15px;
+    }
+
+    &.\-\-px-8,
+    &.tm\:\-\-px-8,
+    &.m\:\-\-px-8 {
+      --anchor-px: 8px;
+    }
+
+    &.\-\-py-8,
+    &.tm\:\-\-py-8,
+    &.m\:\-\-py-8 {
+      --anchor-py: 8px;
+    }
+
+    &.\-\-py-5,
+    &.tm\:\-\-py-5,
+    &.m\:\-\-py-5 {
+      --anchor-py: 5px;
+    }
+
+    &.\-\-h-45,
+    &.tm\:\-\-h-45,
+    &.m\:\-\-h-45 {
+      --anchor-h: 45px;
+    }
+
+    &.\-\-h-40,
+    &.tm\:\-\-h-40,
+    &.m\:\-\-h-40 {
+      --anchor-h: 40px;
+    }
+
+    &.\-\-h-35,
+    &.tm\:\-\-h-35,
+    &.m\:\-\-h-35 {
+      --anchor-h: 35px;
+    }
+
+    &.\-\-h-30,
+    &.tm\:\-\-h-30,
+    &.m\:\-\-h-30 {
+      --anchor-h: 30px;
+    }
+  }
+}

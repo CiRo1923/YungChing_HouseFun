@@ -1,0 +1,88 @@
+:root {
+  --separator-gap-x: 0;
+
+  /* 分隔線是 :after,靠負的 right 推到兩個項目中間 —— 值固定是 gap 的一半 */
+  --separator-item-after-right: 0;
+
+  --separator-item-after-pc-w: 1px;
+  --separator-item-after-tablet-w: 1px;
+  --separator-item-after-mobile-w: 1px;
+}
+
+@screen p {
+  .m-separator {
+    &.\-\-gap-x-32,
+    &.p\:\-\-gap-x-32,
+    &.pt\:\-\-gap-x-32 {
+      --separator-gap-x: 32px;
+      --separator-item-after-right: -16px;
+    }
+
+    &.\-\-gap-x-16,
+    &.p\:\-\-gap-x-16,
+    &.pt\:\-\-gap-x-16 {
+      --separator-gap-x: 16px;
+      --separator-item-after-right: -8px;
+    }
+
+    &.\-\-gap-x-8,
+    &.p\:\-\-gap-x-8,
+    &.pt\:\-\-gap-x-8 {
+      --separator-gap-x: 8px;
+      --separator-item-after-right: -4px;
+    }
+  }
+}
+
+@screen t {
+  .m-separator {
+    &.\-\-gap-x-32,
+    &.pt\:\-\-gap-x-32,
+    &.tm\:\-\-gap-x-32,
+    &.t\:\-\-gap-x-32 {
+      --separator-gap-x: 32px;
+      --separator-item-after-right: -16px;
+    }
+
+    &.\-\-gap-x-16,
+    &.pt\:\-\-gap-x-16,
+    &.tm\:\-\-gap-x-16,
+    &.t\:\-\-gap-x-16 {
+      --separator-gap-x: 16px;
+      --separator-item-after-right: -8px;
+    }
+
+    &.\-\-gap-x-8,
+    &.pt\:\-\-gap-x-8,
+    &.tm\:\-\-gap-x-8,
+    &.t\:\-\-gap-x-8 {
+      --separator-gap-x: 8px;
+      --separator-item-after-right: -4px;
+    }
+  }
+}
+
+@screen m {
+  .m-separator {
+    &.\-\-gap-x-32,
+    &.tm\:\-\-gap-x-32,
+    &.m\:\-\-gap-x-32 {
+      --separator-gap-x: 32px;
+      --separator-item-after-right: -16px;
+    }
+
+    &.\-\-gap-x-16,
+    &.tm\:\-\-gap-x-16,
+    &.m\:\-\-gap-x-16 {
+      --separator-gap-x: 16px;
+      --separator-item-after-right: -8px;
+    }
+
+    &.\-\-gap-x-8,
+    &.tm\:\-\-gap-x-8,
+    &.m\:\-\-gap-x-8 {
+      --separator-gap-x: 8px;
+      --separator-item-after-right: -4px;
+    }
+  }
+}

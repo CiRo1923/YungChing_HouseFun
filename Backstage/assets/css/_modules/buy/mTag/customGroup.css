@@ -1,0 +1,21 @@
+.m-tag-custom-group {
+  @apply flex flex-wrap items-center gap-x-[--tag-custom-group-gap-x];
+}
+
+@screen p {
+  .m-tag-custom-group {
+    --tag-custom-group-gap-x: var(--tag-custom-group-pc-gap-x);
+  }
+}
+
+@screen t {
+  .m-tag-custom-group {
+    --tag-custom-group-gap-x: var(--tag-custom-group-tablet-gap-x);
+  }
+}
+
+@screen m {
+  .m-tag-custom-group {
+    --tag-custom-group-gap-x: var(--tag-custom-group-mobile-gap-x);
+  }
+}

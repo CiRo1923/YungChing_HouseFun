@@ -1,0 +1,70 @@
+.m-separator {
+  @apply gap-x-[--separator-gap-x];
+}
+
+.m-separator-item {
+  @apply relative;
+
+  &:not(:last-child) {
+    &:after {
+      @apply pointer-events-none absolute top-1/2 h-[55%] w-[--separator-item-after-w]
+        -translate-y-1/2 bg-[--gray-999] content-default;
+    }
+  }
+}
+
+/* `right` 只在 --horizontal 時給 —— 直排時分隔線不靠右,維持 auto(靜態位置) */
+@screen p {
+  .m-separator {
+    --separator-item-after-w: var(--separator-item-after-pc-w);
+
+    &.\-\-horizontal,
+    &.p\:\-\-horizontal,
+    &.pt\:\-\-horizontal {
+      @apply flex;
+
+      .m-separator-item {
+        &:after {
+          @apply right-[--separator-item-after-right];
+        }
+      }
+    }
+  }
+}
+
+@screen t {
+  .m-separator {
+    --separator-item-after-w: var(--separator-item-after-tablet-w);
+
+    &.\-\-horizontal,
+    &.pt\:\-\-horizontal,
+    &.tm\:\-\-horizontal,
+    &.t\:\-\-horizontal {
+      @apply flex;
+
+      .m-separator-item {
+        &:after {
+          @apply right-[--separator-item-after-right];
+        }
+      }
+    }
+  }
+}
+
+@screen m {
+  .m-separator {
+    --separator-item-after-w: var(--separator-item-after-mobile-w);
+
+    &.\-\-horizontal,
+    &.tm\:\-\-horizontal,
+    &.m\:\-\-horizontal {
+      @apply flex;
+
+      .m-separator-item {
+        &:after {
+          @apply right-[--separator-item-after-right];
+        }
+      }
+    }
+  }
+}

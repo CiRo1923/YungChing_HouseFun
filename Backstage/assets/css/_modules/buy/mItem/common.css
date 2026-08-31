@@ -1,0 +1,87 @@
+.m-item-header-text {
+  @apply inline-flex;
+}
+
+.m-item-header-label {
+  @apply grow font-medium;
+}
+
+.m-item-container {
+  counter-reset: item;
+
+  &.\-\-disc {
+    > .m-item-container-list {
+      &:before {
+        content: '•';
+      }
+    }
+  }
+
+  /* 數字 1. 2. 3. ... */
+  &.\-\-decimal {
+    > .m-item-container-list {
+      &:before {
+        content: counter(item) '.';
+      }
+    }
+  }
+
+  /* 0 + 數字 01. 02. 03. ... */
+  &.\-\-decimal-leading-zero {
+    > .m-item-container-list {
+      &:before {
+        content: counter(item, decimal-leading-zero) '.';
+      }
+    }
+  }
+}
+
+.m-item-container-list {
+  counter-increment: item;
+
+  @apply flex items-baseline;
+
+  &:before {
+    @apply pointer-events-none shrink-0;
+  }
+
+  &[data-label] {
+    /* ⚠️ 這段是搬過來的原樣 —— `:before` 後面再接屬性選擇器不合法,
+       瀏覽器會整條丟掉,等於從來沒生效過。修掉會讓空 data-label 多出一個空的
+       :before(內容是空字串,畫面上看不出差別),所以先原封不動保留,
+       要不要修由使用者決定。 */
+    &:before {
+      &[data-label=''] {
+        @apply content-default;
+      }
+    }
+
+    &:not([data-label='']) {
+      &:before {
+        @apply mr-[--item-list-label-mr] content-[attr(data-label)];
+      }
+    }
+  }
+}
+
+.m-item-container-item {
+  @apply grow;
+}
+
+@screen p {
+  .m-item-container-list {
+    --item-list-label-mr: var(--item-list-label-pc-mr);
+  }
+}
+
+@screen t {
+  .m-item-container-list {
+    --item-list-label-mr: var(--item-list-label-tablet-mr);
+  }
+}
+
+@screen m {
+  .m-item-container-list {
+    --item-list-label-mr: var(--item-list-label-mobile-mr);
+  }
+}

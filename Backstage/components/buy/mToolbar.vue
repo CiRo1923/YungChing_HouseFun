@@ -1,4 +1,7 @@
 <script setup>
+import '@css/_modules/buy/mToolbar/variables.css'
+import '@css/_modules/buy/mToolbar/common.css'
+
 const common = useCommonStore()
 const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
@@ -36,9 +39,8 @@ onUnmounted(() => {
 
 <template>
   <div class="m-toolbar">
-    <ul class="p:flex p:items-center p:gap-x-[16px]">
-      <!-- device 預設值先給 p 平板、手機 先用 css 隱藏；畫面不會跳閃 -->
-      <li class="tm:hidden p:shrink-0" v-if="isDeviceP">
+    <ul class="m-toolbar-container">
+      <li class="m-toolbar-back" v-if="isDeviceP">
         <BuyMAnchor
           :text="anchor.text"
           :to="anchor.to"
@@ -48,17 +50,15 @@ onUnmounted(() => {
           }"
           :setClass="{
             main: '--border-gray-e5 --bg-white --oval --h-30 --px-15 --text-gray-666',
-            text: 'font-semibold',
-            icon: 'text-[--gray-999] p:h-[16px] p:w-[16px]',
+            text: 'm-toolbar-anchor-text',
+            icon: 'm-toolbar-anchor-icon',
           }"
           @click="anchor.onClick"
         />
       </li>
-      <li class="flex h-[30px] flex-col justify-center rounded-full bg-[--white] px-[20px] p:grow">
+      <li class="m-toolbar-content">
         <slot />
       </li>
     </ul>
   </div>
 </template>
-
-<style></style>

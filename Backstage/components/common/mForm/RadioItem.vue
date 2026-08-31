@@ -1,10 +1,12 @@
 <script setup>
-import { onDeepMerge } from '@js/_prototype.js'
+import '@css/_modules/buy/mForm.css'
 
+import useValidateEvents from './.composables/useValidateEvents.js'
+
+import { onDeepMerge } from '@js/_prototype.js'
 import '@js/_validation.js'
 
 import { Field, ErrorMessage } from 'vee-validate'
-import useValidateEvents from './.composables/useValidateEvents.js'
 
 const emits = defineEmits(['update:modelValue', 'change'])
 const props = defineProps({
@@ -135,7 +137,6 @@ const onChange = () => {
   </div>
 </template>
 
-<style src="@css/_modules/buy/mForm.css"></style>
 <style lang="postcss">
 .m-form-element {
   &.\-\-radio-item {

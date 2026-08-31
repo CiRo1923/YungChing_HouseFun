@@ -1,0 +1,38 @@
+:root {
+  /* 手機不留 gap(頁籤各自 flex-1 填滿),平板 4px、桌機 8px */
+  --tab-default-oval-anchor-pc-gap-x: 8px;
+  --tab-default-oval-anchor-tablet-gap-x: 4px;
+  --tab-default-oval-anchor-mobile-gap-x: 0;
+
+  /* header 下緣留 1px 給 :after 的底線,不然會被下一層蓋住 */
+  --tab-default-oval-header-pc-pb: 1px;
+  --tab-default-oval-header-tablet-pb: 1px;
+  --tab-default-oval-header-mobile-pb: 1px;
+
+  --tab-default-oval-header-after-pc-h: 4px;
+  --tab-default-oval-header-after-tablet-h: 4px;
+  --tab-default-oval-header-after-mobile-h: 4px;
+
+  --tab-default-oval-icon-pc-size: 18px;
+  --tab-default-oval-icon-tablet-size: 18px;
+  --tab-default-oval-icon-mobile-size: 18px;
+
+  --tab-default-oval-anchor-color: var(--gray-666);
+  --tab-default-oval-anchor-bg-color: var(--gray-f7);
+  --tab-default-oval-icon-color: var(--gray-999);
+
+  --tab-default-oval-header-after-bg-color: transparent;
+  --tab-default-oval-anchor-active-color: inherit;
+  --tab-default-oval-anchor-active-bg-color: transparent;
+}
+
+.m-tab {
+  &.\-\-default-oval {
+    /* 一次換一整套配色的主題開關 —— 同時決定底線、active 頁籤的底色與字色 */
+    &.\-\-theme-orange-e646 {
+      --tab-default-oval-header-after-bg-color: var(--orange-e646);
+      --tab-default-oval-anchor-active-color: var(--white);
+      --tab-default-oval-anchor-active-bg-color: var(--orange-e646);
+    }
+  }
+}

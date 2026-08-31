@@ -644,6 +644,25 @@ modifier 名稱就是 **tailwind 的 utility 名前面加 `--`**,不要自己另
   | `font-size` | `@apply text-[length:--x-text-size]` | 不寫 `length:` 會變成 `color` |
   | `column-gap` | `@apply gap-x-[var(--x-gap,0px)]` ✓ | arbitrary value 內可帶 `var()` fallback |
 
+  ⚠️ **同一個 `@apply` 裡不能同時出現字級與文字顏色** —— 兩個都是 `text-*`,
+  tailwind 只會保留其中一個,而且**不報錯**。加型別提示(`text-[length:14px]`
+  搭 `text-[color:--orange-e646]`)也救不了,拆成兩行 `@apply` 一樣沒用。
+
+  ```css
+  /* ✗ 產物只剩 font-size,顏色整條消失 */
+  .m-form-error { @apply mt-[4px] text-[14px] text-[--orange-e646]; }
+
+  /* ✓ 顏色寫原生屬性,字級留在 @apply */
+  .m-form-error {
+    color: var(--orange-e646);
+
+    @apply mt-[4px] text-[14px];
+  }
+  ```
+
+  只有其中一個要設的時候維持 `@apply` 就好 —— 這條只約束「兩者併存」的情況。
+  查產物確認的指令見「拆完 module 的驗證」。
+
   另外 `transition-property: transform` **不要換成 tailwind 的 `transition-transform`** ——
   後者會連帶塞進 `transition-duration: 150ms` 與 `transition-timing-function: cubic-bezier(.4,0,.2,1)`。
   duration 若由 JS inline 控制還蓋得掉,timing-function 蓋不掉,**動畫手感會變**;
@@ -719,7 +738,12 @@ modifier 名稱就是 **tailwind 的 utility 名前面加 `--`**,不要自己另
   3. **版型檔不要寫 `&:hover`** —— 那會變成「module 自己決定 hover 行為」,
      使用端沒帶 modifier 時也會觸發。狀態切換由 variables 的 modifier 表達就夠了。
 - ⚠️ **顏色是組件的職責,使用端不得自訂**。modifier 只設 `--x-color`,
-  `common.css` **無條件**套用 `text-[--x-color]`;沒有顏色時用 `--x-color: initial`。
+  `common.css` **無條件**套用 `text-[--x-color]`;沒有顏色時用 **`--x-color: inherit`**。
+
+  ⚠️ **base 一定是 `inherit`,不是 `initial`** —— `color` 的 initial 值是**黑色**,不是「不設定」。
+  寫 `initial` 會讓所有沒帶顏色 modifier 的元素從「繼承父層」變成黑字,
+  而那通常是全案一大半的使用端(mAnchor 就有一半以上沒帶顏色 modifier)。
+  `inherit` 才是「module 沒指定就跟著父層走」,也才等同拆 module 前的行為。
 
   使用端在 `setClass.main`(或 `class`)寫 `text-[--gray-999]` 這種 tailwind 顏色**本身就是錯的** ——
   它會被 module 的宣告蓋掉,而且**本來就該被蓋掉**。正確做法是:
@@ -753,7 +777,7 @@ modifier 名稱就是 **tailwind 的 utility 名前面加 `--`**,不要自己另
   mSort 的捲軸留白寫死 `pr-[2px]`,當時都以為「這是造型不會變」而略過。
   真要調的時候(例如高解析度螢幕想加粗)就得回頭改版型檔,而不是只動一個值。
 
-  **明確不開變數的三個**:
+  **明確不開變數的四個**:
 
   - **`z-index`** —— 層級是版型結構的一部分,`z-[1]` / `z-[3]` 直接寫,
     抽成變數只會讓「誰疊在誰上面」更難看懂。
@@ -773,6 +797,10 @@ modifier 名稱就是 **tailwind 的 utility 名前面加 `--`**,不要自己另
     module 自己的狀態(`--active` 時變粗)直接 `@apply font-medium` / `font-normal`;
     要讓使用端決定就走 `setClass`。開成 `--x-font-weight` 變數只是多一層轉手,
     而字重的值域小又固定(400 / 500 / 700),不會有「各頁面各自指定」的需求。
+  - **`letter-spacing`(`tracking-*`)** —— 一律**直接寫在 `common.css` 的 `@apply`**,
+    不開變數、也不分斷點:`@apply tracking-[0.06em]`。
+    字距是組件的字體造型設定,全站一個值走到底,沒有「各頁面各自指定」或「各斷點不同」的需求;
+    值本身也不是 px(通常是 `em`),不受「帶 px 一律開變數」約束。
 
   `0` / `auto` / `none` 這種「歸零或不設定」也直接寫,那不是尺寸。
 

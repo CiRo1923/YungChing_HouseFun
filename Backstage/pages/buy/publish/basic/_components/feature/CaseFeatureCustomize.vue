@@ -14,7 +14,7 @@ const { apiData } = storeToRefs(buyPublish)
     }"
     :setClass="{
       tag: {
-        main: 'pt:--h-30 m:--h-35 --px-15 --py-5',
+        main: 'pt:--h-30 m:--h-35 --px-15 --py-5 p:text-[14px] tm:text-[16px] hover:--bg-green-8b0d hover:--text-white hover:--border-transparent',
       },
     }"
   />

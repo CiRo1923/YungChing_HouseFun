@@ -1,0 +1,61 @@
+.m-toolbar-content {
+  @apply flex h-[--toolbar-content-h] flex-col justify-center rounded-full bg-[--white] px-[--toolbar-content-px];
+}
+
+.m-toolbar-anchor-text {
+  @apply font-semibold;
+}
+
+.m-toolbar-anchor-icon {
+  @apply h-[--toolbar-anchor-icon-size] w-[--toolbar-anchor-icon-size] text-[--gray-999];
+}
+
+@screen p {
+  .m-toolbar-container {
+    /* lint-breakpoint-exempt: 只有桌機才橫排 —— 平板 / 手機沒有返回鈕
+       (.m-toolbar-back 在那兩個斷點是 hidden),整列只剩一個區塊,不需要 flex。
+       這裡若在 t / m 也給 flex,唯一的 li 會縮成內容寬而不是撐滿。 */
+    @apply flex items-center gap-x-[--toolbar-pc-gap-x];
+  }
+
+  .m-toolbar-back {
+    /* lint-breakpoint-exempt: 返回鈕只在桌機出現,見上 */
+    @apply shrink-0;
+  }
+
+  .m-toolbar-content {
+    /* lint-breakpoint-exempt: 只有桌機是 flex 排版,grow 才有意義 */
+    @apply grow;
+  }
+
+  .m-toolbar-content {
+    --toolbar-content-h: var(--toolbar-content-pc-h);
+    --toolbar-content-px: var(--toolbar-content-pc-px);
+  }
+
+  .m-toolbar-anchor-icon {
+    --toolbar-anchor-icon-size: var(--toolbar-anchor-icon-pc-size);
+  }
+}
+
+@screen t {
+  .m-toolbar-content {
+    --toolbar-content-h: var(--toolbar-content-tablet-h);
+    --toolbar-content-px: var(--toolbar-content-tablet-px);
+  }
+
+  .m-toolbar-anchor-icon {
+    --toolbar-anchor-icon-size: var(--toolbar-anchor-icon-tablet-size);
+  }
+}
+
+@screen m {
+  .m-toolbar-content {
+    --toolbar-content-h: var(--toolbar-content-mobile-h);
+    --toolbar-content-px: var(--toolbar-content-mobile-px);
+  }
+
+  .m-toolbar-anchor-icon {
+    --toolbar-anchor-icon-size: var(--toolbar-anchor-icon-mobile-size);
+  }
+}

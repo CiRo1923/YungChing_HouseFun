@@ -1,0 +1,32 @@
+:root {
+  /* 各區塊之間的垂直間距(space-y 展開成子元素的 margin-top) */
+  --add-identical-pc-space-y: 8px;
+  --add-identical-tablet-space-y: 8px;
+  --add-identical-mobile-space-y: 16px;
+
+  /* 右上角的刪除鈕 */
+  --add-identical-clear-anchor-pc-size: 22px;
+  --add-identical-clear-anchor-tablet-size: 22px;
+  --add-identical-clear-anchor-mobile-size: 22px;
+
+  --add-identical-clear-anchor-pc-p: 5px;
+  --add-identical-clear-anchor-tablet-p: 5px;
+  --add-identical-clear-anchor-mobile-p: 5px;
+
+  --add-identical-clear-anchor-pc-top: 5px;
+  --add-identical-clear-anchor-tablet-top: 5px;
+  --add-identical-clear-anchor-mobile-top: 5px;
+
+  --add-identical-clear-anchor-pc-right: 5px;
+  --add-identical-clear-anchor-tablet-right: 5px;
+  --add-identical-clear-anchor-mobile-right: 5px;
+
+  /* 新增鈕 */
+  --add-identical-anchor-pc-text-size: 14px;
+  --add-identical-anchor-tablet-text-size: 14px;
+  --add-identical-anchor-mobile-text-size: 16px;
+
+  --add-identical-anchor-icon-pc-size: 18px;
+  --add-identical-anchor-icon-tablet-size: 18px;
+  --add-identical-anchor-icon-mobile-size: 20px;
+}

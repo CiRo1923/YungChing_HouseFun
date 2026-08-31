@@ -1,4 +1,7 @@
 <script setup>
+import '@css/_modules/buy/mPagination/variables.css'
+import '@css/_modules/buy/mPagination/common.css'
+
 const emits = defineEmits(['click'])
 const props = defineProps({
   route: {
@@ -107,8 +110,8 @@ const onClick = (page) => {
 </script>
 
 <template>
-  <div class="m-pagination text-center" :class="setClass.main">
-    <ol class="inline-flex items-center gap-x-[--pagination-gap-x]">
+  <div class="m-pagination" :class="setClass.main">
+    <ol class="m-pagination-container">
       <li v-for="(page, index) in visiblePages" :key="`${page}_${index}`">
         <component
           :is="as"
@@ -121,7 +124,7 @@ const onClick = (page) => {
         </component>
         <button
           type="button"
-          class="m-pagination-anchor --curr bg-[--pagination-curr-bg-color] text-[--pagination-curr-color]"
+          class="m-pagination-anchor --curr"
           @click="onClick(page)"
           v-else
         >
@@ -131,26 +134,3 @@ const onClick = (page) => {
     </ol>
   </div>
 </template>
-
-<style lang="postcss">
-:root {
-  --pagination-gap-x: 5px;
-  --pagination-width: 30px;
-  --pagination-height: 30px;
-  --pagination-text: 16px;
-  --pagination-rounded: 3px;
-  --pagination-curr-bg-color: transparent;
-  --pagination-curr-color: var(--gray-666);
-}
-
-.m-pagination-anchor {
-  font-size: var(--pagination-text);
-
-  @apply flex h-[--pagination-height] w-[--pagination-width] items-center justify-center rounded-[--pagination-rounded] transition-colors duration-300;
-
-  &.\-\-curr {
-    --pagination-curr-bg-color: var(--green-8b0d);
-    --pagination-curr-color: var(--white);
-  }
-}
-</style>

@@ -1,4 +1,7 @@
 <script setup>
+import '@css/_modules/buy/mForm.css'
+import '@css/_modules/buy/mFormDropdown.css'
+
 import { onMergeDropdownConfig, useDropdownCore } from './.composables/useDropdownCore.js'
 import SelectDropdownOptions from './SelectDropdownOptions.vue'
 
@@ -368,8 +371,6 @@ onUnmounted(() => {
   </Teleport>
 </template>
 
-<style src="@css/_modules/buy/mForm.css"></style>
-<style src="@css/_modules/buy/mFormDropdown.css"></style>
 <style lang="postcss">
 @import '@css/_common/vueTransition.css';
 </style>

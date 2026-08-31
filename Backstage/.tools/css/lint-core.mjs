@@ -1041,6 +1041,41 @@ export function checkTailwindPitfalls(relPath, text) {
 }
 
 /**
+ * letter-spacing(tracking)不開變數。
+ *
+ * 字距是組件的字體造型設定,全站一個值走到底,沒有「各頁面各自指定」或
+ * 「各斷點不同」的需求 —— 直接寫在 common.css 的 `@apply tracking-[0.06em]` 就好。
+ * 開成變數只是多一層轉手,還要憑空拆出三個一模一樣的斷點值。
+ *
+ * 抓三種寫法:變數定義、tailwind 取用、原生屬性取用。
+ */
+export function checkTrackingVariable(relPath, text) {
+  const issues = []
+  const masked = maskComments(text)
+  const add = (index, detail, snippet) =>
+    issues.push({ rule: 'variable', file: relPath, line: lineOf(text, index), detail, snippet })
+
+  const hint = '—— tracking 不開變數,直接寫 @apply tracking-[值]'
+
+  // 定義端:--x-tracking / --x-pc-tracking / --x-letter-spacing
+  for (const m of masked.matchAll(/(--[a-z0-9-]*(?:tracking|letter-spacing))\s*:/g)) {
+    add(m.index, `${m[1]} 是字距變數 ${hint}`, m[0])
+  }
+
+  // 使用端:tracking-[--x] / tracking-[var(--x)]
+  for (const m of masked.matchAll(/(?<![\w-])tracking-\[[^\]]*--[^\]]*\]/g)) {
+    add(m.index, `${m[0]} 取用了字距變數 ${hint}`, m[0])
+  }
+
+  // 使用端:原生 letter-spacing: var(…)
+  for (const m of masked.matchAll(/letter-spacing\s*:\s*var\([^)]*\)/g)) {
+    add(m.index, `${m[0]} 取用了字距變數 ${hint}`, m[0])
+  }
+
+  return issues
+}
+
+/**
  * 4-c 變數名的屬性要跟實際套用的 utility 一致。
  *
  * 例如 `px-[--x-container-mx]` —— 變數叫 mx(margin)卻套在 px(padding)上,
@@ -1370,6 +1405,8 @@ export function lintFile(projectRoot, absPath, definedVars) {
   // tailwind 推斷不出型別的三個屬性 —— 在哪裡寫都是錯的,所以不限目錄
   if (rel.endsWith('.vue') || rel.endsWith('.css')) {
     issues.push(...checkTailwindPitfalls(rel, text))
+    // tracking 不開變數 —— 在哪裡寫都是錯的,所以同樣不限目錄
+    issues.push(...checkTrackingVariable(rel, text))
   }
 
   if (rel.endsWith('.vue')) {

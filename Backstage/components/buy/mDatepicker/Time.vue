@@ -1,4 +1,6 @@
 <script setup>
+import '@css/_modules/buy/mDatepicker.css'
+
 /* 單一時間選擇。與 Single(日期)是兩支獨立元件,共用 .composables 與同一份樣式。
 
   有哪幾欄可以選,由 config.format 決定:
@@ -10,16 +12,14 @@
 
   config 的鍵見 .composables/useConfig.js。 */
 
-import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
+import useValidateEvents from '../../common/mForm/.composables/useValidateEvents.js'
+import { onFormatTime, onParseTime, onParseTimeFormat } from './.composables/useTimeCore.js'
+import { onMergeTimeConfig } from './.composables/useConfig.js'
+import { usePosition } from './.composables/usePosition.js'
 
 import '@js/_validation.js'
 
 import { Field, ErrorMessage } from 'vee-validate'
-import useValidateEvents from '../../common/mForm/.composables/useValidateEvents.js'
-
-import { onFormatTime, onParseTime, onParseTimeFormat } from './.composables/useTimeCore.js'
-import { onMergeTimeConfig } from './.composables/useConfig.js'
-import { usePosition } from './.composables/usePosition.js'
 
 const common = useCommonStore()
 const { device } = storeToRefs(common)
@@ -333,5 +333,3 @@ onUnmounted(() => {
     </Transition>
   </Teleport>
 </template>
-
-<style src="@css/_modules/buy/mDatepicker.css"></style>

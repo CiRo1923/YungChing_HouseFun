@@ -1,0 +1,7 @@
+.m-add-identical {
+  &.\-\-card {
+    .m-add-identical-item {
+      @apply rounded-[--add-identical-card-item-rounded] p-[--add-identical-card-item-p];
+    }
+  }
+}

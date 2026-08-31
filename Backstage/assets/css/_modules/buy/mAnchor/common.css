@@ -1,0 +1,43 @@
+.m-anchor {
+  @apply relative inline-flex h-[--anchor-h] items-center justify-center gap-x-[--anchor-gap-x] px-[--anchor-px] py-[--anchor-py] tracking-[0.06em] transition-colors duration-300;
+
+  /* border-width 走原生屬性 —— @apply border-[…] 在 production 會被壓成 border
+     shorthand,值是 var() 時整條失效。
+     只在帶了 --border-XX 時才給寬度:沒帶的按鈕本來就不該多出 1px 的框線盒子。 */
+  &[class*='--border'] {
+    border-width: var(--anchor-border);
+  }
+
+  &:not(:disabled) {
+    @apply border-[--anchor-border-color] bg-[--anchor-bg-color] text-[--anchor-color];
+  }
+
+  &.\-\-oval {
+    @apply rounded-full;
+  }
+
+  &:disabled {
+    @apply cursor-not-allowed bg-[--anchor-disabled-bg-color] text-[--anchor-disabled-color];
+  }
+}
+
+@screen p {
+  .m-anchor {
+    --anchor-gap-x: var(--anchor-pc-gap-x);
+    --anchor-border: var(--anchor-pc-border);
+  }
+}
+
+@screen t {
+  .m-anchor {
+    --anchor-gap-x: var(--anchor-tablet-gap-x);
+    --anchor-border: var(--anchor-tablet-border);
+  }
+}
+
+@screen m {
+  .m-anchor {
+    --anchor-gap-x: var(--anchor-mobile-gap-x);
+    --anchor-border: var(--anchor-mobile-border);
+  }
+}

@@ -1,0 +1,5 @@
+/* 錯誤訊息的顏色由「嵌入 mErrorMessage 的組件」決定 ——
+   .m-error-message 自己不設 color,靠這裡繼承下去 */
+.m-upload-error {
+  @apply text-[--orange-e646];
+}

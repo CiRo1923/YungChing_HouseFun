@@ -1,4 +1,6 @@
 <script setup>
+import '@css/_modules/buy/mTable.css'
+
 import useTableCore from './.composables/useTableCore'
 
 const common = useCommonStore()
@@ -299,7 +301,6 @@ onUnmounted(() => {
   </div>
 </template>
 
-<style src="@css/_modules/buy/mTable.css"></style>
 <style lang="postcss">
 :root {
   --table-checkbox-responsiv-thtd-first-last-pc-px: 16px;

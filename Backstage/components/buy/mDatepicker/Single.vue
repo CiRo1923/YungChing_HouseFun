@@ -1,4 +1,6 @@
 <script setup>
+import '@css/_modules/buy/mDatepicker.css'
+
 /* 單一日期選擇。自己實作,不依賴第三方套件。
 
   這支只負責「輸入框 + 什麼時候展開」;日期怎麼算在 .composables,
@@ -6,17 +8,15 @@
 
   config 的鍵見 .composables/useConfig.js —— 那份是對外契約,不要改名。 */
 
-import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
-
-import '@js/_validation.js'
-
-import { Field, ErrorMessage } from 'vee-validate'
 import useValidateEvents from '../../common/mForm/.composables/useValidateEvents.js'
-
 import { onGetYMDByFormat, onPickFormat, onGetFormatSep } from './.composables/useDateCore.js'
 import { onMergeDateConfig } from './.composables/useConfig.js'
 import { useCalendar } from './.composables/useCalendar.js'
 import { usePosition } from './.composables/usePosition.js'
+
+import '@js/_validation.js'
+
+import { Field, ErrorMessage } from 'vee-validate'
 
 const common = useCommonStore()
 const { device } = storeToRefs(common)
@@ -316,5 +316,3 @@ onUnmounted(() => {
     </Transition>
   </Teleport>
 </template>
-
-<style src="@css/_modules/buy/mDatepicker.css"></style>

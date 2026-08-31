@@ -79,8 +79,9 @@ onUnmounted(() => {
       },
     }"
     :setClass="{
-      main: '--orange-e646 --anchor-height-40 p:--anchor-px-20 tm:--anchor-px-14',
+      main: '--theme-orange-e646 --anchor-h-40 p:--anchor-px-20 tm:--anchor-px-14',
       headerItem: 'm:flex-1',
+      anchor: 'text-[16px]',
       body: 'rounded-b-[15px] bg-[--white] py-[32px] tm:px-[16px] p:px-[40px]',
     }"
     @click="onClick"

@@ -1,12 +1,15 @@
 <script setup>
-import { onDeepClone, onEmptyData } from '@js/_prototype.js'
+import '@css/_modules/buy/mForm.css'
+import '@css/_modules/buy/mFormDropdown.css'
+
 import { onMergeDropdownConfig, useDropdownCore } from './.composables/useDropdownCore.js'
+import useValidateEvents from './.composables/useValidateEvents.js'
 import SelectDropdownOptions from './SelectDropdownOptions.vue'
 
+import { onDeepClone, onEmptyData } from '@js/_prototype.js'
 import '@js/_validation.js'
 
 import { Field, ErrorMessage } from 'vee-validate'
-import useValidateEvents from './.composables/useValidateEvents.js'
 
 const { onResize } = useCommonActions()
 
@@ -419,8 +422,6 @@ onUnmounted(() => {
   </Teleport>
 </template>
 
-<style src="@css/_modules/buy/mForm.css"></style>
-<style src="@css/_modules/buy/mFormDropdown.css"></style>
 <style lang="postcss">
 @import '@css/_common/vueTransition.css';
 </style>

@@ -1,4 +1,8 @@
 <script setup>
+import '@css/_modules/buy/mStep/arrowVariables.css'
+import '@css/_modules/buy/mStep/common.css'
+import '@css/_modules/buy/mStep/arrow.css'
+
 const props = defineProps({
   options: {
     type: Array,
@@ -33,9 +37,9 @@ const setClass = computed(() => {
 </script>
 
 <template>
-  <ul class="m-step --arrow flex items-center" :class="setClass.main">
+  <ul class="m-step --arrow" :class="setClass.main">
     <li
-      class="m-step-item flex items-center"
+      class="m-step-item"
       :class="[
         {
           '--enabled': index < config.active,
@@ -48,7 +52,7 @@ const setClass = computed(() => {
     >
       <CommonSvgIcon
         icon="chevron_right"
-        class="m-step-icon text-[--gray-e5]"
+        class="m-step-icon --pending"
         v-if="index > config.active"
       />
       <CommonSvgIcon
@@ -63,21 +67,3 @@ const setClass = computed(() => {
     </li>
   </ul>
 </template>
-
-<style lang="postcss">
-.m-step {
-  &.\-\-arrow {
-    .m-step-item {
-      &.\-\-active {
-        & ~ * {
-          @apply text-[--gray-ccce];
-        }
-      }
-    }
-
-    .m-step-icon {
-      @apply h-[18px] w-[18px] p-[1px];
-    }
-  }
-}
-</style>

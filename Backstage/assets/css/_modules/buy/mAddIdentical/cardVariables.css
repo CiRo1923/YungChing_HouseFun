@@ -1,0 +1,84 @@
+:root {
+  /* 卡片的四邊內距 —— `--p-XX` 與軸向 / 單邊 modifier 併存時要拆到最細那層,
+     目前只有整體 `--p-XX`,所以一個變數就夠 */
+  --add-identical-card-item-p: 0;
+  --add-identical-card-item-rounded: 0;
+}
+
+/* 卡片底色不由 module 列舉 —— 使用端直接用 setClass.item 傳 `bg-[--gray-f7]`,
+   所以 card.css 不能無條件輸出 background,那會把使用端傳的蓋掉。 */
+
+@screen p {
+  .m-add-identical {
+    &.\-\-card {
+      &.\-\-p-30,
+      &.p\:\-\-p-30,
+      &.pt\:\-\-p-30 {
+        --add-identical-card-item-p: 30px;
+      }
+
+      &.\-\-p-24,
+      &.p\:\-\-p-24,
+      &.pt\:\-\-p-24 {
+        --add-identical-card-item-p: 24px;
+      }
+
+      &.\-\-rounded-15,
+      &.p\:\-\-rounded-15,
+      &.pt\:\-\-rounded-15 {
+        --add-identical-card-item-rounded: 15px;
+      }
+    }
+  }
+}
+
+@screen t {
+  .m-add-identical {
+    &.\-\-card {
+      &.\-\-p-30,
+      &.pt\:\-\-p-30,
+      &.tm\:\-\-p-30,
+      &.t\:\-\-p-30 {
+        --add-identical-card-item-p: 30px;
+      }
+
+      &.\-\-p-24,
+      &.pt\:\-\-p-24,
+      &.tm\:\-\-p-24,
+      &.t\:\-\-p-24 {
+        --add-identical-card-item-p: 24px;
+      }
+
+      &.\-\-rounded-15,
+      &.pt\:\-\-rounded-15,
+      &.tm\:\-\-rounded-15,
+      &.t\:\-\-rounded-15 {
+        --add-identical-card-item-rounded: 15px;
+      }
+    }
+  }
+}
+
+@screen m {
+  .m-add-identical {
+    &.\-\-card {
+      &.\-\-p-30,
+      &.tm\:\-\-p-30,
+      &.m\:\-\-p-30 {
+        --add-identical-card-item-p: 30px;
+      }
+
+      &.\-\-p-24,
+      &.tm\:\-\-p-24,
+      &.m\:\-\-p-24 {
+        --add-identical-card-item-p: 24px;
+      }
+
+      &.\-\-rounded-15,
+      &.tm\:\-\-rounded-15,
+      &.m\:\-\-rounded-15 {
+        --add-identical-card-item-rounded: 15px;
+      }
+    }
+  }
+}

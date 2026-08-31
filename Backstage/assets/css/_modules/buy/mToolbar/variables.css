@@ -1,0 +1,17 @@
+:root {
+  --toolbar-pc-gap-x: 16px;
+  --toolbar-tablet-gap-x: 0;
+  --toolbar-mobile-gap-x: 0;
+
+  --toolbar-content-pc-h: 30px;
+  --toolbar-content-tablet-h: 30px;
+  --toolbar-content-mobile-h: 30px;
+
+  --toolbar-content-pc-px: 20px;
+  --toolbar-content-tablet-px: 20px;
+  --toolbar-content-mobile-px: 20px;
+
+  --toolbar-anchor-icon-pc-size: 16px;
+  --toolbar-anchor-icon-tablet-size: 16px;
+  --toolbar-anchor-icon-mobile-size: 16px;
+}

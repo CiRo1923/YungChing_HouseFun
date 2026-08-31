@@ -1,0 +1,25 @@
+:root {
+  --pagination-pc-gap-x: 5px;
+  --pagination-tablet-gap-x: 5px;
+  --pagination-mobile-gap-x: 5px;
+
+  /* 頁碼是正方形,寬高共用一個變數 */
+  --pagination-anchor-pc-size: 30px;
+  --pagination-anchor-tablet-size: 30px;
+  --pagination-anchor-mobile-size: 30px;
+
+  --pagination-anchor-pc-rounded: 3px;
+  --pagination-anchor-tablet-rounded: 3px;
+  --pagination-anchor-mobile-rounded: 3px;
+
+  --pagination-anchor-pc-text-size: 16px;
+  --pagination-anchor-tablet-text-size: 16px;
+  --pagination-anchor-mobile-text-size: 16px;
+
+  /* 非當頁的頁碼不指定顏色,跟著父層走(拆 module 前就是這個行為) */
+  --pagination-anchor-color: inherit;
+  --pagination-anchor-bg-color: transparent;
+
+  --pagination-anchor-curr-color: var(--white);
+  --pagination-anchor-curr-bg-color: var(--green-8b0d);
+}

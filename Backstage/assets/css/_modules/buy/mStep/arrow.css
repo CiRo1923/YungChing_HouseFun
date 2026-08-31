@@ -1,0 +1,54 @@
+.m-step {
+  &.\-\-arrow {
+    .m-step-item {
+      /* 目前這一步之後的全部變淡 */
+      &.\-\-active {
+        & ~ * {
+          @apply text-[--gray-ccce];
+        }
+      }
+    }
+
+    .m-step-icon {
+      @apply h-[--step-arrow-icon-size] w-[--step-arrow-icon-size] p-[--step-arrow-icon-p];
+
+      /* 還沒走到的那幾步用的箭頭 */
+      &.\-\-pending {
+        @apply text-[--gray-e5];
+      }
+    }
+  }
+}
+
+@screen p {
+  .m-step {
+    &.\-\-arrow {
+      .m-step-icon {
+        --step-arrow-icon-size: var(--step-arrow-icon-pc-size);
+        --step-arrow-icon-p: var(--step-arrow-icon-pc-p);
+      }
+    }
+  }
+}
+
+@screen t {
+  .m-step {
+    &.\-\-arrow {
+      .m-step-icon {
+        --step-arrow-icon-size: var(--step-arrow-icon-tablet-size);
+        --step-arrow-icon-p: var(--step-arrow-icon-tablet-p);
+      }
+    }
+  }
+}
+
+@screen m {
+  .m-step {
+    &.\-\-arrow {
+      .m-step-icon {
+        --step-arrow-icon-size: var(--step-arrow-icon-mobile-size);
+        --step-arrow-icon-p: var(--step-arrow-icon-mobile-p);
+      }
+    }
+  }
+}

@@ -1,0 +1,73 @@
+.m-tab {
+  &.\-\-check {
+    .m-tab-anchor {
+      @apply bg-[--tab-check-anchor-bg-color] text-[--tab-check-anchor-color];
+    }
+
+    .m-tab-anchor-text {
+      @apply font-semibold;
+    }
+
+    .m-tab-header-item {
+      &.\-\-active {
+        .m-tab-anchor {
+          --tab-check-anchor-color: var(--tab-check-anchor-active-color);
+          --tab-check-anchor-bg-color: var(--tab-check-anchor-active-bg-color);
+        }
+      }
+    }
+
+    .m-tab-body {
+      border-top-width: var(--tab-check-body-border-t);
+
+      @apply border-t-[--tab-check-body-border-t-color];
+    }
+
+    .m-table-body-content {
+      @apply rounded-b-[--tab-check-body-content-rounded-b] bg-[--white];
+    }
+  }
+}
+
+@screen p {
+  .m-tab {
+    &.\-\-check {
+      --tab-anchor-gap-x: var(--tab-check-anchor-pc-gap-x);
+      --tab-anchor-px: var(--tab-check-anchor-pc-px);
+      --tab-anchor-py: var(--tab-check-anchor-pc-py);
+      --tab-check-anchor-icon-size: var(--tab-check-anchor-icon-pc-size);
+      --tab-check-body-border-t: var(--tab-check-body-pc-border-t);
+      --tab-check-body-content-rounded-b: var(--tab-check-body-content-pc-rounded-b);
+    }
+  }
+}
+
+@screen t {
+  .m-tab {
+    &.\-\-check {
+      --tab-anchor-gap-x: var(--tab-check-anchor-tablet-gap-x);
+      --tab-anchor-px: var(--tab-check-anchor-tablet-px);
+      --tab-anchor-py: var(--tab-check-anchor-tablet-py);
+      --tab-check-anchor-icon-size: var(--tab-check-anchor-icon-tablet-size);
+      --tab-check-body-border-t: var(--tab-check-body-tablet-border-t);
+      --tab-check-body-content-rounded-b: var(--tab-check-body-content-tablet-rounded-b);
+    }
+  }
+}
+
+@screen m {
+  .m-tab {
+    &.\-\-check {
+      --tab-anchor-gap-x: var(--tab-check-anchor-mobile-gap-x);
+      --tab-anchor-px: var(--tab-check-anchor-mobile-px);
+      --tab-anchor-py: var(--tab-check-anchor-mobile-py);
+      --tab-check-anchor-icon-size: var(--tab-check-anchor-icon-mobile-size);
+      --tab-check-body-border-t: var(--tab-check-body-mobile-border-t);
+      --tab-check-body-content-rounded-b: var(--tab-check-body-content-mobile-rounded-b);
+    }
+  }
+}
+
+.m-tab-check-anchor-icon {
+  @apply h-[--tab-check-anchor-icon-size] w-[--tab-check-anchor-icon-size];
+}

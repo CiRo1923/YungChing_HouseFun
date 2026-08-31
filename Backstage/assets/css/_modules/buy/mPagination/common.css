@@ -1,0 +1,56 @@
+.m-pagination {
+  @apply text-center;
+}
+
+.m-pagination-container {
+  @apply inline-flex items-center gap-x-[--pagination-gap-x];
+}
+
+.m-pagination-anchor {
+  @apply flex h-[--pagination-anchor-size] w-[--pagination-anchor-size] items-center justify-center
+    rounded-[--pagination-anchor-rounded] text-[length:--pagination-anchor-text-size]
+    bg-[--pagination-anchor-bg-color] text-[--pagination-anchor-color]
+    transition-colors duration-300;
+
+  /* 當頁 —— 狀態切換(把基礎變數指向另一組變數),所以寫在版型檔不是 variables */
+  &.\-\-curr {
+    --pagination-anchor-color: var(--pagination-anchor-curr-color);
+    --pagination-anchor-bg-color: var(--pagination-anchor-curr-bg-color);
+  }
+}
+
+@screen p {
+  .m-pagination-container {
+    --pagination-gap-x: var(--pagination-pc-gap-x);
+  }
+
+  .m-pagination-anchor {
+    --pagination-anchor-size: var(--pagination-anchor-pc-size);
+    --pagination-anchor-rounded: var(--pagination-anchor-pc-rounded);
+    --pagination-anchor-text-size: var(--pagination-anchor-pc-text-size);
+  }
+}
+
+@screen t {
+  .m-pagination-container {
+    --pagination-gap-x: var(--pagination-tablet-gap-x);
+  }
+
+  .m-pagination-anchor {
+    --pagination-anchor-size: var(--pagination-anchor-tablet-size);
+    --pagination-anchor-rounded: var(--pagination-anchor-tablet-rounded);
+    --pagination-anchor-text-size: var(--pagination-anchor-tablet-text-size);
+  }
+}
+
+@screen m {
+  .m-pagination-container {
+    --pagination-gap-x: var(--pagination-mobile-gap-x);
+  }
+
+  .m-pagination-anchor {
+    --pagination-anchor-size: var(--pagination-anchor-mobile-size);
+    --pagination-anchor-rounded: var(--pagination-anchor-mobile-rounded);
+    --pagination-anchor-text-size: var(--pagination-anchor-mobile-text-size);
+  }
+}

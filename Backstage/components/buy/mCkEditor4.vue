@@ -1,4 +1,6 @@
 <script setup>
+import '@css/_plugin/ckeditor4.css'
+
 const emits = defineEmits(['update:modelValue'])
 const props = defineProps({
   modelValue: {
@@ -330,10 +332,3 @@ const setClass = computed(() => {
     </ClientOnly>
   </div>
 </template>
-
-<style src="@css/_plugin/ckeditor4.css" />
-<style lang="postcss">
-.m-ckeditor4-content {
-  @apply text-[16px];
-}
-</style>

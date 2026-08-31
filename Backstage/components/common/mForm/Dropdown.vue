@@ -1,10 +1,13 @@
 <script setup>
+import '@css/_modules/buy/mForm.css'
+import '@css/_modules/buy/mFormDropdown.css'
+
 import { onMergeDropdownConfig, useDropdownCore } from './.composables/useDropdownCore.js'
+import useValidateEvents from './.composables/useValidateEvents.js'
 
 import '@js/_validation.js'
 
 import { Field, ErrorMessage } from 'vee-validate'
-import useValidateEvents from './.composables/useValidateEvents.js'
 
 const emits = defineEmits(['update:modelValue'])
 const props = defineProps({
@@ -241,6 +244,4 @@ onUnmounted(() => {
   </Teleport>
 </template>
 
-<style src="@css/_modules/buy/mForm.css"></style>
-<style src="@css/_modules/buy/mFormDropdown.css"></style>
 <style lang="postcss"></style>

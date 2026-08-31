@@ -1,9 +1,9 @@
 <script setup>
+import useValidateEvents from './.composables/useValidateEvents.js'
+
 import { onDeepMerge } from '@js/_prototype.js'
 
-import { computed, getCurrentInstance, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { Field, ErrorMessage } from 'vee-validate'
-import useValidateEvents from './.composables/useValidateEvents.js'
 
 const emits = defineEmits(['change', 'input', 'update:modelValue'])
 const props = defineProps({

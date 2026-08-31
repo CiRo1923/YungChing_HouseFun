@@ -168,7 +168,7 @@ onInit()
       @change="onIsCaseParkingChange"
       v-if="casePurposeToken !== '7'"
     />
-    <BuyMAddIdentical
+    <BuyMAddIdenticalCard
       v-model="apiData.caseInfo.parkingInfos"
       :config="{
         keepDelItems: 1,
@@ -178,7 +178,8 @@ onInit()
         },
       }"
       :setClass="{
-        main: '--card --gray-f7 --rounded-15 p:--p-30 tm:--p-24',
+        main: '--rounded-15 p:--p-30 tm:--p-24',
+        item: 'bg-[--gray-f7]',
       }"
       v-slot="{ data, index }"
       v-if="apiData.caseInfo.isCaseParking"
@@ -263,7 +264,7 @@ onInit()
           </ul>
         </li>
       </ul>
-    </BuyMAddIdentical>
+    </BuyMAddIdenticalCard>
   </PageBuyPublishBasicRadiosOval>
 </template>
 

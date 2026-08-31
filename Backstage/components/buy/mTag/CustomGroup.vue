@@ -1,4 +1,7 @@
 <script setup>
+import '@css/_modules/buy/mTag/customGroupVariables.css'
+import '@css/_modules/buy/mTag/customGroup.css'
+
 const emits = defineEmits(['update:modelValue'])
 const props = defineProps({
   name: {
@@ -155,7 +158,7 @@ const onBlurItem = (index, value) => {
 </script>
 
 <template>
-  <ul class="m-tag-custom-group flex flex-wrap items-center p:gap-x-[8px]" :class="setClass.main">
+  <ul class="m-tag-custom-group" :class="setClass.main">
     <li v-for="(item, index) in items" :key="`${props.name}_${index}`">
       <BuyMTagCustom
         :name="`${props.name}[${index}]`"
@@ -169,5 +172,3 @@ const onBlurItem = (index, value) => {
     </li>
   </ul>
 </template>
-
-<style></style>

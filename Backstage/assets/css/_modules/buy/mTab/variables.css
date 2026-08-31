@@ -1,161 +1,146 @@
+:root {
+  --tab-header-pc-gap-x: 8px;
+  --tab-header-tablet-gap-x: 8px;
+  --tab-header-mobile-gap-x: 8px;
+
+  --tab-anchor-pc-rounded-t: 15px;
+  --tab-anchor-tablet-rounded-t: 15px;
+  --tab-anchor-mobile-rounded-t: 15px;
+
+  /* 高度的 base 不能給 0,否則沒帶 --anchor-h-XX 時會塌 */
+  --tab-anchor-min-h: auto;
+  --tab-anchor-px: 0;
+  --tab-anchor-py: 0;
+  --tab-anchor-gap-x: 0;
+
+  /* 內容區的留白刻意用透明 border 撐 —— 容器是 overflow-hidden,
+     用 padding 會被內容的圓角裁掉 */
+  --tab-body-content-border-x: 0;
+  --tab-body-content-border-y: 0;
+}
+
 @screen p {
   .m-tab {
-    &.\-\-anchor-height-40,
-    &.p\:\-\-anchor-height-40,
-    &.pt\:\-\-anchor-height-40 {
-      .m-tab-anchor {
-        @apply min-h-[40px];
-      }
+    &.\-\-anchor-h-40,
+    &.p\:\-\-anchor-h-40,
+    &.pt\:\-\-anchor-h-40 {
+      --tab-anchor-min-h: 40px;
     }
 
     &.\-\-anchor-px-20,
     &.p\:\-\-anchor-px-20,
     &.pt\:\-\-anchor-px-20 {
-      .m-tab-anchor {
-        @apply px-[20px];
-      }
+      --tab-anchor-px: 20px;
     }
 
     &.\-\-anchor-px-14,
     &.p\:\-\-anchor-px-14,
     &.pt\:\-\-anchor-px-14 {
-      .m-tab-anchor {
-        @apply px-[14px];
-      }
+      --tab-anchor-px: 14px;
     }
 
     &.\-\-body-px-40,
     &.p\:\-\-body-px-40,
     &.pt\:\-\-body-px-40 {
-      .m-table-body-content {
-        @apply border-x-[40px];
-      }
+      --tab-body-content-border-x: 40px;
     }
 
     &.\-\-body-px-16,
     &.p\:\-\-body-px-16,
     &.pt\:\-\-body-px-16 {
-      .m-table-body-content {
-        @apply border-x-[16px];
-      }
+      --tab-body-content-border-x: 16px;
     }
 
     &.\-\-body-py-32,
     &.p\:\-\-body-py-32,
     &.pt\:\-\-body-py-32 {
-      .m-table-body-content {
-        @apply border-y-[32px];
-      }
+      --tab-body-content-border-y: 32px;
     }
   }
 }
 
 @screen t {
   .m-tab {
-    &.\-\-anchor-height-40,
-    &.pt\:\-\-anchor-height-40,
-    &.tm\:\-\-anchor-height-40,
-    &.t\:\-\-anchor-height-40 {
-      .m-tab-anchor {
-        @apply min-h-[40px];
-      }
+    &.\-\-anchor-h-40,
+    &.pt\:\-\-anchor-h-40,
+    &.tm\:\-\-anchor-h-40,
+    &.t\:\-\-anchor-h-40 {
+      --tab-anchor-min-h: 40px;
     }
 
     &.\-\-anchor-px-20,
     &.pt\:\-\-anchor-px-20,
     &.tm\:\-\-anchor-px-20,
     &.t\:\-\-anchor-px-20 {
-      .m-tab-anchor {
-        @apply px-[20px];
-      }
+      --tab-anchor-px: 20px;
     }
 
     &.\-\-anchor-px-14,
     &.pt\:\-\-anchor-px-14,
     &.tm\:\-\-anchor-px-14,
     &.t\:\-\-anchor-px-14 {
-      .m-tab-anchor {
-        @apply px-[14px];
-      }
+      --tab-anchor-px: 14px;
     }
 
     &.\-\-body-px-40,
     &.pt\:\-\-body-px-40,
     &.tm\:\-\-body-px-40,
     &.t\:\-\-body-px-40 {
-      .m-table-body-content {
-        @apply border-x-[40px];
-      }
+      --tab-body-content-border-x: 40px;
     }
 
     &.\-\-body-px-16,
     &.pt\:\-\-body-px-16,
     &.tm\:\-\-body-px-16,
     &.t\:\-\-body-px-16 {
-      .m-table-body-content {
-        @apply border-x-[16px];
-      }
+      --tab-body-content-border-x: 16px;
     }
 
     &.\-\-body-py-32,
     &.pt\:\-\-body-py-32,
     &.tm\:\-\-body-py-32,
     &.t\:\-\-body-py-32 {
-      .m-table-body-content {
-        @apply border-y-[32px];
-      }
+      --tab-body-content-border-y: 32px;
     }
   }
 }
 
 @screen m {
   .m-tab {
-    &.\-\-anchor-height-40,
-    &.tm\:\-\-anchor-height-40,
-    &.m\:\-\-anchor-height-40 {
-      .m-tab-anchor {
-        @apply min-h-[40px];
-      }
+    &.\-\-anchor-h-40,
+    &.tm\:\-\-anchor-h-40,
+    &.m\:\-\-anchor-h-40 {
+      --tab-anchor-min-h: 40px;
     }
 
     &.\-\-anchor-px-20,
     &.tm\:\-\-anchor-px-20,
     &.m\:\-\-anchor-px-20 {
-      .m-tab-anchor {
-        @apply px-[20px];
-      }
+      --tab-anchor-px: 20px;
     }
 
     &.\-\-anchor-px-14,
     &.tm\:\-\-anchor-px-14,
     &.m\:\-\-anchor-px-14 {
-      .m-tab-anchor {
-        @apply px-[14px];
-      }
+      --tab-anchor-px: 14px;
     }
 
     &.\-\-body-px-40,
     &.tm\:\-\-body-px-40,
     &.m\:\-\-body-px-40 {
-      .m-table-body-content {
-        @apply border-x-[40px];
-      }
+      --tab-body-content-border-x: 40px;
     }
 
     &.\-\-body-px-16,
     &.tm\:\-\-body-px-16,
     &.m\:\-\-body-px-16 {
-      .m-table-body-content {
-        @apply border-x-[16px];
-      }
+      --tab-body-content-border-x: 16px;
     }
 
     &.\-\-body-py-32,
     &.tm\:\-\-body-py-32,
     &.m\:\-\-body-py-32 {
-      .m-table-body-content {
-        @apply border-y-[32px];
-      }
+      --tab-body-content-border-y: 32px;
     }
   }
 }

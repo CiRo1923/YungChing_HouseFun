@@ -1,4 +1,3 @@
-import { nextTick, onUnmounted, ref } from 'vue'
 import { onDeepMerge } from '@js/_prototype.js'
 
 export const defaultDropdownConfig = {

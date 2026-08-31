@@ -1,4 +1,9 @@
 <script setup>
+import '@css/_modules/buy/mTab/variables.css'
+import '@css/_modules/buy/mTab/checkVariables.css'
+import '@css/_modules/buy/mTab/common.css'
+import '@css/_modules/buy/mTab/check.css'
+
 const props = defineProps({
   options: {
     type: Array,
@@ -145,43 +150,41 @@ onMounted(() => {
 
 <template>
   <div class="m-tab --check" :class="setClass.main">
-    <ul class="m-tab-header flex gap-x-[8px]" :class="setClass.header">
+    <ul class="m-tab-header" :class="setClass.header">
       <li
-        class="m-tab-header-item flex items-center"
+        class="m-tab-header-item"
         :class="[{ '--active': index === activeIndex }, setClass.headerItem]"
         v-for="(item, index) in props.options"
         :key="`tab_header_${item.label}_${index}`"
       >
         <component
           :is="onHeaderAs(item)"
-          class="m-tab-anchor flex w-full items-center justify-center gap-x-[4px] rounded-t-[15px] px-[9px] py-[8px] text-[16px] transition-colors duration-300"
+          class="m-tab-anchor"
           :class="setClass.anchor"
           v-bind="onHeaderBind(item)"
           @click="onClick(item, index)"
         >
           <CommonSvgIcon
             icon="icon_check_solid"
-            class="h-[16px] w-[16px]"
+            class="m-tab-check-anchor-icon"
             v-if="index === activeIndex"
           />
           <slot name="header" :item="item" :index="index">
-            <b class="font-semibold">{{ item.label }}</b>
+            <b class="m-tab-anchor-text">{{ item.label }}</b>
           </slot>
         </component>
       </li>
     </ul>
-    <div class="m-tab-body border-t-[4px] border-t-[--orange-e646]" :class="setClass.body">
-      <div
-        class="m-table-body-content overflow-hidden rounded-b-[15px] border-transparent bg-[--white]"
-      >
+    <div class="m-tab-body" :class="setClass.body">
+      <div class="m-table-body-content">
         <ul
-          class="m-tab-body-items flex w-[200%] will-change-transform"
+          class="m-tab-body-items"
           :class="[animating, direction]"
           @transitionend="onTrackTransitionEnd"
         >
           <template v-for="(item, index) in props.options" :key="`tab_body_${item.label}_${index}`">
             <li
-              class="m-tab-body-item w-1/2 shrink-0"
+              class="m-tab-body-item"
               v-if="!item.href && (index === activeIndex || (isShowItem && index === prevIndex))"
             >
               <slot :name="`content_${index}`" :index="index" />
@@ -192,42 +195,3 @@ onMounted(() => {
     </div>
   </div>
 </template>
-
-<style src="@css/_modules/buy/mTab.css"></style>
-<style lang="postcss">
-.m-tab {
-  &.\-\-check {
-    .m-tab-header-item {
-      &:not(.\-\-active) {
-        .m-tab-anchor {
-          @apply bg-[--white] text-[--gray-666];
-        }
-      }
-
-      &.\-\-active {
-        .m-tab-anchor {
-          @apply bg-[--orange-e646] text-[--white];
-        }
-      }
-    }
-
-    .m-tab-body-items {
-      &.\-\-animating {
-        @apply transition-transform duration-300;
-
-        &.\-\-left {
-          @apply -translate-x-1/2;
-        }
-
-        &.\-\-right {
-          @apply translate-x-0;
-        }
-      }
-
-      &.\-\-right {
-        @apply -translate-x-1/2;
-      }
-    }
-  }
-}
-</style>

@@ -1,4 +1,3 @@
-import { computed, toValue } from 'vue'
 
 // 把 config.validateEvents(字串陣列)轉成 vee-validate <Field> 的 validateOn* props。
 //

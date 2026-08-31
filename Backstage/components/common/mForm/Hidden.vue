@@ -1,8 +1,11 @@
 <script setup>
+import '@css/_modules/buy/mForm.css'
+
+import useValidateEvents from './.composables/useValidateEvents.js'
+
 import '@js/_validation.js'
 
 import { Field, ErrorMessage } from 'vee-validate'
-import useValidateEvents from './.composables/useValidateEvents.js'
 
 const props = defineProps({
   name: {
@@ -91,5 +94,4 @@ defineExpose({
   </div>
 </template>
 
-<style src="@css/_modules/buy/mForm.css"></style>
 <style lang="postcss"></style>

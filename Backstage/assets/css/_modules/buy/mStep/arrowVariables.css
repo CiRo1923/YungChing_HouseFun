@@ -1,0 +1,9 @@
+:root {
+  --step-arrow-icon-pc-size: 18px;
+  --step-arrow-icon-tablet-size: 18px;
+  --step-arrow-icon-mobile-size: 18px;
+
+  --step-arrow-icon-pc-p: 1px;
+  --step-arrow-icon-tablet-p: 1px;
+  --step-arrow-icon-mobile-p: 1px;
+}

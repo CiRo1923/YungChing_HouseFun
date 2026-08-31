@@ -6,8 +6,6 @@
   ⚠️ 這支只負責畫面 —— 日期狀態全在 props.calendar(useCalendar 的實例)裡,
       由 Single 建立後傳進來,選了哪天用 emit 回報。 */
 
-import { computed, ref, watch } from 'vue'
-
 const props = defineProps({
   name: {
     type: String,

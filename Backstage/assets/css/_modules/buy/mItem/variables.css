@@ -1,0 +1,6 @@
+:root {
+  /* 項目符號(data-label)與內文之間的間距 */
+  --item-list-label-pc-mr: 5px;
+  --item-list-label-tablet-mr: 5px;
+  --item-list-label-mobile-mr: 5px;
+}

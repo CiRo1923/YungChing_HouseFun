@@ -1,0 +1,7 @@
+.m-step {
+  @apply flex items-center;
+}
+
+.m-step-item {
+  @apply flex items-center;
+}

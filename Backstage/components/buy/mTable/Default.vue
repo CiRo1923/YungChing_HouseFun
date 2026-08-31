@@ -1,4 +1,6 @@
 <script setup>
+import '@css/_modules/buy/mTable.css'
+
 import useTableCore from './.composables/useTableCore'
 
 const props = defineProps({
@@ -151,7 +153,6 @@ const {
   </div>
 </template>
 
-<style src="@css/_modules/buy/mTable.css"></style>
 <style lang="postcss">
 :root {
   --table-default-thtd-pc-px: 5px;

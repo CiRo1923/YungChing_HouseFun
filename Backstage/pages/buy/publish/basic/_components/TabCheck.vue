@@ -16,8 +16,9 @@ const options = readonly([
   <BuyMTabCheck
     :options="options"
     :setClass="{
-      main: '--anchor-height-40 --body-py-32 p:--body-px-40 p:--body-py-32 tm:--body-px-16',
+      main: '--anchor-h-40 --body-py-32 p:--body-px-40 p:--body-py-32 tm:--body-px-16',
       headerItem: 'tm:flex-1 p:min-w-[160px]',
+      anchor: 'text-[16px]',
     }"
   >
     <!-- 網址匯入 -->
