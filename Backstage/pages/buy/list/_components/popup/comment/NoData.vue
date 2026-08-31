@@ -1,5 +1,3 @@
-<script setup></script>
-
 <template>
   <div
     class="flex items-center justify-center gap-x-[10px] text-[--gray-333] t:h-[240px] p:h-[320px]"
@@ -8,5 +6,3 @@
     <p class="font-medium tm:text-[20px] p:text-[24px]">無留言內容</p>
   </div>
 </template>
-
-<style lang="postcss"></style>

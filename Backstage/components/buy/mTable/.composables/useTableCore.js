@@ -111,9 +111,7 @@ export default (props, options = {}) => {
   const onSyncContainerScroll = () => {
     const $container = containerRef.value
 
-    isContainerScroll.value = $container
-      ? $container.scrollHeight > $container.clientHeight
-      : false
+    isContainerScroll.value = $container ? $container.scrollHeight > $container.clientHeight : false
   }
 
   const onSyncFixedThead = () => {

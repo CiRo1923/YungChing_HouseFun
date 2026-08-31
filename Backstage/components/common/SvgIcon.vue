@@ -21,9 +21,7 @@ const spriteHref = computed(() => {
     ? rawSpritePath
     : `${buildAssetsDir}${rawSpritePath.replace(/^\/*/, '')}`
 
-  const version = spriteVersion.value
-    ? `?v=${encodeURIComponent(spriteVersion.value)}`
-    : ''
+  const version = spriteVersion.value ? `?v=${encodeURIComponent(spriteVersion.value)}` : ''
 
   return `${baseURL}${spritePath}${version}#${props.icon}`
 })
@@ -34,5 +32,3 @@ const spriteHref = computed(() => {
     <use :href="spriteHref" :xlink:href="spriteHref" />
   </svg>
 </template>
-
-<style lang="postcss"></style>

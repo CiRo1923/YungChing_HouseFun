@@ -68,5 +68,3 @@ const onIsCaseHasElevatorChnage = () => {
     </ul>
   </PageBuyPublishBasicRadiosOval>
 </template>
-
-<style></style>

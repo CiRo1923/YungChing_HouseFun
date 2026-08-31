@@ -7,10 +7,7 @@
 }
 
 .m-pagination-anchor {
-  @apply flex h-[--pagination-anchor-size] w-[--pagination-anchor-size] items-center justify-center
-    rounded-[--pagination-anchor-rounded] text-[length:--pagination-anchor-text-size]
-    bg-[--pagination-anchor-bg-color] text-[--pagination-anchor-color]
-    transition-colors duration-300;
+  @apply flex h-[--pagination-anchor-size] w-[--pagination-anchor-size] items-center justify-center rounded-[--pagination-anchor-rounded] bg-[--pagination-anchor-bg-color] text-[length:--pagination-anchor-text-size] text-[--pagination-anchor-color] transition-colors duration-300;
 
   /* 當頁 —— 狀態切換(把基礎變數指向另一組變數),所以寫在版型檔不是 variables */
   &.\-\-curr {

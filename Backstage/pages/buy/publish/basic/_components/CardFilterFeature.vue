@@ -91,5 +91,3 @@ onUnmounted(() => {
     </template>
   </PageBuyPublishBasicCardFilter>
 </template>
-
-<style></style>

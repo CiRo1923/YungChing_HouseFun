@@ -28,5 +28,3 @@ const { searchSelectCount } = useBuyListActions()
     </div>
   </BuyCommonCustomPopup>
 </template>
-
-<style lang="postcss"></style>

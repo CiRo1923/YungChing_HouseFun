@@ -26,5 +26,3 @@ await onWithLoadingAll([])
     </NuxtLink>
   </BuyMContainer>
 </template>
-
-<style></style>

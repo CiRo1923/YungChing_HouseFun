@@ -10,5 +10,3 @@ const { apiPromiseData } = storeToRefs(popup)
     </CommonMLoadingContainer>
   </CommonMPopupMain>
 </template>
-
-<style></style>

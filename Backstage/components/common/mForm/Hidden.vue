@@ -94,5 +94,3 @@ defineExpose({
     </ErrorMessage>
   </div>
 </template>
-
-<style lang="postcss"></style>

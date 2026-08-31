@@ -276,5 +276,3 @@ onMounted(() => {
   <PageBuyPublishBasicPopupFeature />
   <PageBuyPublishBasicPopupTitleDeed />
 </template>
-
-<style lang="postcss"></style>

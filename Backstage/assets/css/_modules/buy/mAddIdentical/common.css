@@ -11,9 +11,7 @@
 }
 
 .m-add-identical-clear-anchor {
-  @apply absolute right-[--add-identical-clear-anchor-right] top-[--add-identical-clear-anchor-top]
-    block h-[--add-identical-clear-anchor-size] w-[--add-identical-clear-anchor-size]
-    p-[--add-identical-clear-anchor-p];
+  @apply absolute right-[--add-identical-clear-anchor-right] top-[--add-identical-clear-anchor-top] block h-[--add-identical-clear-anchor-size] w-[--add-identical-clear-anchor-size] p-[--add-identical-clear-anchor-p];
 }
 
 .m-add-identical-clear-icon {

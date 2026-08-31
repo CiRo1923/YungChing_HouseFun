@@ -96,11 +96,7 @@ export default defineNuxtConfig({
   },
   vite: {
     optimizeDeps: {
-      include: [
-        '@vue/devtools-core',
-        '@vue/devtools-kit',
-        '@mayasabha/ckeditor4-vue3',
-      ],
+      include: ['@vue/devtools-core', '@vue/devtools-kit', '@mayasabha/ckeditor4-vue3'],
     },
     build: {
       rolldownOptions: {

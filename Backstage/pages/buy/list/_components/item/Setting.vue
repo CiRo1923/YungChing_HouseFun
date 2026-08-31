@@ -106,5 +106,3 @@ const items = computed(() => {
     </li>
   </ul>
 </template>
-
-<style lang="postcss"></style>

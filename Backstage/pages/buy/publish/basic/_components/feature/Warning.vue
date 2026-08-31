@@ -50,5 +50,3 @@ const onPopupFeature = async () => {
     />
   </div>
 </template>
-
-<style></style>

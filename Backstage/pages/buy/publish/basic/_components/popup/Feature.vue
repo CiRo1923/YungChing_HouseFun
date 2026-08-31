@@ -87,5 +87,3 @@ const example2 = readonly({
     </div>
   </BuyCommonCustomPopup>
 </template>
-
-<style></style>

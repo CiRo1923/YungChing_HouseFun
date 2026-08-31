@@ -51,5 +51,3 @@ const timeSpan = computed(() => template.value[selectedIndex.value]?.listTimeSpa
     </div>
   </BuyCommonCustomPopup>
 </template>
-
-<style lang="postcss"></style>

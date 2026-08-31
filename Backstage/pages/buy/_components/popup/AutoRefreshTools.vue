@@ -36,5 +36,3 @@ const items = computed(() => {
     </BuyMSeparator>
   </div>
 </template>
-
-<style lang="postcss"></style>

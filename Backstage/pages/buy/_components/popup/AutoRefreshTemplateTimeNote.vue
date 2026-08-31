@@ -33,5 +33,3 @@ const note = computed(() => {
     }"
   />
 </template>
-
-<style lang="postcss"></style>

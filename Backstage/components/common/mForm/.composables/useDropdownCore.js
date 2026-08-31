@@ -24,7 +24,10 @@ const onGetScrollParents = (el) => {
     const { overflowY, overflowX, overflow } = getComputedStyle(node)
     const isScrollable = /(auto|scroll|overlay)/.test(`${overflow}${overflowY}${overflowX}`)
 
-    if (isScrollable && (node.scrollHeight > node.clientHeight || node.scrollWidth > node.clientWidth)) {
+    if (
+      isScrollable &&
+      (node.scrollHeight > node.clientHeight || node.scrollWidth > node.clientWidth)
+    ) {
       parents.push(node)
     }
 

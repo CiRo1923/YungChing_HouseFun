@@ -76,5 +76,3 @@ const items = computed(() => {
     </ul>
   </BuyMCardDefault>
 </template>
-
-<style></style>

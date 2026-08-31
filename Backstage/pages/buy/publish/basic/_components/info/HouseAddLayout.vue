@@ -78,5 +78,3 @@ const layoutValue = computed(() => {
     </ul>
   </CommonMFormHidden>
 </template>
-
-<style></style>

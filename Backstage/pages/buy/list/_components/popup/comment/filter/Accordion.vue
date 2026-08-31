@@ -56,5 +56,3 @@ const onSearchClick = (onToggle) => {
     </template>
   </BuyMAccordionShowHide>
 </template>
-
-<style lang="postcss"></style>

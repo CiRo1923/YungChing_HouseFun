@@ -1,5 +1,3 @@
-<script setup></script>
-
 <template>
   <div class="flex flex-col">
     <div
@@ -20,5 +18,3 @@
     </div>
   </div>
 </template>
-
-<style lang="postcss"></style>

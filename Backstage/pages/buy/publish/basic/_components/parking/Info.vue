@@ -268,5 +268,3 @@ onInit()
     </BuyMAddIdenticalCard>
   </PageBuyPublishBasicRadiosOval>
 </template>
-
-<style></style>

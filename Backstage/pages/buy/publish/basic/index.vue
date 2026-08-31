@@ -59,5 +59,3 @@ onUseMeta({
     />
   </BuyMContainer>
 </template>
-
-<style lang="postcss"></style>

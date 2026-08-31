@@ -86,9 +86,7 @@ export const onFormatTime = (time, format) => {
 
   const { sep, parts } = onParseTimeFormat(format)
 
-  return parts
-    .map((part) => (part.editable ? onPad2(time[part.type] ?? 0) : part.value))
-    .join(sep)
+  return parts.map((part) => (part.editable ? onPad2(time[part.type] ?? 0) : part.value)).join(sep)
 }
 
 /* 產生某一欄的可選清單。step 由 config.step 給(預設 1),

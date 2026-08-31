@@ -107,9 +107,7 @@ for (const { rel, abs } of targets) {
   if (orderChanged) {
     if (write) {
       fs.writeFileSync(abs, sortedText.endsWith(eol) ? sortedText : sortedText + eol, 'utf8')
-      console.log(
-        `${GREEN}✔ 已依「紅澄黃綠藍紫金白灰黑 + 由淺至深」重新排序 ${rel}${RESET}`
-      )
+      console.log(`${GREEN}✔ 已依「紅澄黃綠藍紫金白灰黑 + 由淺至深」重新排序 ${rel}${RESET}`)
     } else {
       console.error(`${RED}⛔ ${rel} 排序不符規則${RESET}`)
       console.error(`${YELLOW}   執行 npm run sort:color 自動排序${RESET}`)
@@ -124,7 +122,9 @@ const shared = findSharedColors(projectRoot)
 
 if (shared.length) {
   console.error('')
-  console.error(`${RED}⛔ 有 ${shared.length} 個色值該收攏到 ${SHARED_COLOR_CSS_PATH}(不自動搬)${RESET}`)
+  console.error(
+    `${RED}⛔ 有 ${shared.length} 個色值該收攏到 ${SHARED_COLOR_CSS_PATH}(不自動搬)${RESET}`
+  )
 
   for (const { hex, kind, entries } of shared) {
     const where = entries.map((e) => `${e.name} @ ${e.rel}`).join('、')
@@ -140,9 +140,7 @@ if (shared.length) {
 }
 
 if (exitCode === 0) {
-  console.log(
-    `${GREEN}✔ 色票排序、命名與頻道歸屬皆符合規則(${targets.length} 個檔案)${RESET}`
-  )
+  console.log(`${GREEN}✔ 色票排序、命名與頻道歸屬皆符合規則(${targets.length} 個檔案)${RESET}`)
 }
 
 process.exit(exitCode)

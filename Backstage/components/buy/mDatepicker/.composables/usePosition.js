@@ -53,7 +53,9 @@ export const usePosition = (config, isPopup, refs) => {
     const isBottomOverflow = rawTop - scrollTop + contentHeight > viewHeight
     const isTopFits = topTop >= scrollTop
     const safeTop =
-      positionY !== 'popup' && positionY !== 'top' && isBottomOverflow && isTopFits ? topTop : rawTop
+      positionY !== 'popup' && positionY !== 'top' && isBottomOverflow && isTopFits
+        ? topTop
+        : rawTop
 
     refs.panel.value.style.left = `${onClamp(rawLeft, scrollLeft, scrollLeft + viewWidth - contentWidth)}px`
     refs.panel.value.style.top = `${safeTop}px`

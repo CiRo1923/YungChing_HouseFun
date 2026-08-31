@@ -356,11 +356,7 @@ onUnmounted(() => {
           @click="onButtonClick(item, index)"
         >
           <em class="m-sort-label">{{ item.label }}</em>
-          <CommonSvgIcon
-            icon="caret_large_down"
-            class="m-sort-icon"
-            v-if="item.sort"
-          />
+          <CommonSvgIcon icon="caret_large_down" class="m-sort-icon" v-if="item.sort" />
         </button>
       </li>
     </ul>
@@ -376,20 +372,13 @@ onUnmounted(() => {
       v-if="currentMode === 'dropdown'"
     >
       <em class="m-sort-select-label">{{ dropdownLabel }}</em>
-      <CommonSvgIcon
-        icon="caret_large_down"
-        class="m-sort-select-icon"
-      />
+      <CommonSvgIcon icon="caret_large_down" class="m-sort-select-icon" />
     </button>
   </div>
   <template v-if="currentMode === 'dropdown'">
     <Teleport to="body">
       <Transition name="dropdown" @afterLeave="onCloseDropdown" appear>
-        <div
-          class="m-sort-dropdown"
-          ref="dropdownRef"
-          v-if="isActive && sortOptions.length > 0"
-        >
+        <div class="m-sort-dropdown" ref="dropdownRef" v-if="isActive && sortOptions.length > 0">
           <ul class="m-sort-dropdown-list scrollbar --y">
             <li
               class="m-sort-dropdown-item"

@@ -267,10 +267,7 @@ onBeforeUnmount(() => {
     >
       <CommonSvgIcon icon="icon_xmark_circle" class="m-tag-remove-icon" />
     </button>
-    <span
-      class="m-tag-mirror"
-      ref="mirrorRef"
-    >
+    <span class="m-tag-mirror" ref="mirrorRef">
       {{ mirrorText || ' ' }}
     </span>
   </label>

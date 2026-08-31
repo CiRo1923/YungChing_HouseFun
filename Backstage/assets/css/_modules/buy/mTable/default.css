@@ -7,7 +7,7 @@
     }
 
     .m-table-thead-th {
-      @apply text-[length:--table-default-thead-th-text-size] py-[--table-default-thead-th-py] text-[--table-default-thead-th-color];
+      @apply py-[--table-default-thead-th-py] text-[length:--table-default-thead-th-text-size] text-[--table-default-thead-th-color];
     }
 
     .m-table-tbody-tr {
@@ -16,7 +16,7 @@
     }
 
     .m-table-tbody-td {
-      @apply text-[length:--table-default-tbody-td-text-size] py-[--table-default-tbody-td-py] text-[--table-default-tbody-td-color];
+      @apply py-[--table-default-tbody-td-py] text-[length:--table-default-tbody-td-text-size] text-[--table-default-tbody-td-color];
     }
   }
 }

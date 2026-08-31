@@ -9,11 +9,11 @@ description: Backstage 與 Official 共用元件(mForm / mPopup / ImgSrc / SvgIc
 
 以下元件在 **Backstage** 與 **Official** 兩個專案都有一份,**功能必須保持一致**:
 
-| 元件 | Backstage | Official |
-| --- | --- | --- |
-| mForm | `components/common/mForm/` | `components/common/mForm/` |
-| mPopup | `components/common/mPopup/` | `components/common/mPopup/` |
-| ImgSrc | `components/common/ImgSrc.vue` | `components/common/ImgSrc.vue` |
+| 元件    | Backstage                       | Official                        |
+| ------- | ------------------------------- | ------------------------------- |
+| mForm   | `components/common/mForm/`      | `components/common/mForm/`      |
+| mPopup  | `components/common/mPopup/`     | `components/common/mPopup/`     |
+| ImgSrc  | `components/common/ImgSrc.vue`  | `components/common/ImgSrc.vue`  |
 | SvgIcon | `components/common/SvgIcon.vue` | `components/common/SvgIcon.vue` |
 
 兩專案的路徑相同:
@@ -43,10 +43,10 @@ description: Backstage 與 Official 共用元件(mForm / mPopup / ImgSrc / SvgIc
 
 ### mForm 的 composable 分層不同
 
-| | Backstage | Official |
-| --- | --- | --- |
+|          | Backstage                                                                 | Official                                                                            |
+| -------- | ------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
 | 文字輸入 | `useTextCore.js` —— 較厚,回傳 `model` / `onInput` / `onEnter` / `onClear` | `useInputTextCore.js` —— 很薄,只回傳 `isFocus` / `config` / `setClass`,邏輯留在元件 |
-| 下拉 | `useDropdownCore.js` | `useDropdownCore.js`,多一個 `onDropdownActive` |
+| 下拉     | `useDropdownCore.js`                                                      | `useDropdownCore.js`,多一個 `onDropdownActive`                                      |
 
 `placeholder` / `hasClearButton` 在 Backstage 是定義在 `useTextCore` 的 `textConfigDefault`,不在元件檔裡 —— 用 grep 找元件檔的 config 會誤判成「缺這兩項」。
 

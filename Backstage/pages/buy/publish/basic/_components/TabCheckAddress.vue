@@ -139,5 +139,3 @@ const onClick = async (validate) => {
     />
   </Form>
 </template>
-
-<style></style>

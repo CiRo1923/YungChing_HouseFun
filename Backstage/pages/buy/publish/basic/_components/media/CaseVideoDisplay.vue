@@ -58,5 +58,3 @@ const videoPicture = computed(() => {
     </div>
   </PageBuyPublishBasicRadiosOval>
 </template>
-
-<style></style>

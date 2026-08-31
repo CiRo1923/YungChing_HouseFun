@@ -110,10 +110,7 @@ watch(
 
 <template>
   <div class="m-form --radios-oval" :class="setClass.main">
-    <ul
-      class="m-form-radios"
-      :class="setClass.radios"
-    >
+    <ul class="m-form-radios" :class="setClass.radios">
       <li
         class="m-form-container"
         :class="setClass.container"
@@ -169,4 +166,3 @@ watch(
     </ErrorMessage>
   </div>
 </template>
-

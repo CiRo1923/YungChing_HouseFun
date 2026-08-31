@@ -37,10 +37,10 @@ description: 動到錯誤頁、404 導向或分頁參數(pg)防呆前必須先�
 
 ## pg 參數的兩層防呆
 
-| 層 | 位置 | 擋什麼 |
-|---|---|---|
-| 路由 | `middleware/pageQuery.global.js` | 非數字、0、負數、小數、`01` 這種(`String(page) === String(pg)` 擋掉),一律 `replace` 成 `pg=1` |
-| API | `stores/buy/.composables/useListActions.js` 的 `onApiPOSTRealEstateSearch` | `queryPage >= 1 ? queryPage : 1`(`NaN >= 1` 為 false,所以 `abc` 也接得住) |
+| 層   | 位置                                                                       | 擋什麼                                                                                        |
+| ---- | -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| 路由 | `middleware/pageQuery.global.js`                                           | 非數字、0、負數、小數、`01` 這種(`String(page) === String(pg)` 擋掉),一律 `replace` 成 `pg=1` |
+| API  | `stores/buy/.composables/useListActions.js` 的 `onApiPOSTRealEstateSearch` | `queryPage >= 1 ? queryPage : 1`(`NaN >= 1` 為 false,所以 `abc` 也接得住)                     |
 
 兩層都只防**下界**。上界(`pg=999`)由後端負責:超過最大頁數時 API 回 404,前端在
 `status === 404` 分支處理:

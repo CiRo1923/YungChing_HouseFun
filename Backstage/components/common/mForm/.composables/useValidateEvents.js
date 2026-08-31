@@ -1,4 +1,3 @@
-
 // 把 config.validateEvents(字串陣列)轉成 vee-validate <Field> 的 validateOn* props。
 //
 // 各 mForm 元件的 config 都接受:

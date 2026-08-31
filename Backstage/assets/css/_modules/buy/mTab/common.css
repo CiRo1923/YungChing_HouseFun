@@ -7,9 +7,7 @@
 }
 
 .m-tab-anchor {
-  @apply flex w-full items-center justify-center gap-x-[--tab-anchor-gap-x]
-    min-h-[--tab-anchor-min-h] rounded-t-[--tab-anchor-rounded-t]
-    px-[--tab-anchor-px] py-[--tab-anchor-py] transition-colors duration-300;
+  @apply flex min-h-[--tab-anchor-min-h] w-full items-center justify-center gap-x-[--tab-anchor-gap-x] rounded-t-[--tab-anchor-rounded-t] px-[--tab-anchor-px] py-[--tab-anchor-py] transition-colors duration-300;
 }
 
 .m-table-body-content {

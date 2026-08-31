@@ -30,5 +30,3 @@ const config = computed(() => {
   <p v-html="`$${numberComma.add(props.value) || 0}`" v-else-if="config.type === 'currency'" />
   <p v-html="props.value" v-else />
 </template>
-
-<style></style>

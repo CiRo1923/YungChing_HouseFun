@@ -56,5 +56,3 @@ const total = computed(() => customData.value.data.reduce((sum, item) => sum + i
     </BuyMTableDefault>
   </BuyCommonCustomPopup>
 </template>
-
-<style lang="postcss"></style>

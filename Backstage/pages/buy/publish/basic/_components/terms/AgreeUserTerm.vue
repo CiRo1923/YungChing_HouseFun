@@ -26,5 +26,3 @@ const { apiData } = storeToRefs(buyPublish)
     </p>
   </CommonMFormCheckBox>
 </template>
-
-<style></style>

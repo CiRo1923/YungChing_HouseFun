@@ -39,5 +39,3 @@ const onHighQualityWordCount = (length) => {
     </template>
   </BuyMCkEditor4>
 </template>
-
-<style></style>

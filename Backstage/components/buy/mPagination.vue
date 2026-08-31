@@ -122,12 +122,7 @@ const onClick = (page) => {
         >
           {{ page }}
         </component>
-        <button
-          type="button"
-          class="m-pagination-anchor --curr"
-          @click="onClick(page)"
-          v-else
-        >
+        <button type="button" class="m-pagination-anchor --curr" @click="onClick(page)" v-else>
           {{ page }}
         </button>
       </li>

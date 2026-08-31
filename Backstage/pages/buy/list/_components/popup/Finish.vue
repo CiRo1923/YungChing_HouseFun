@@ -38,5 +38,3 @@ const hasFinishInfo = computed(() => true)
     />
   </BuyCommonCustomPopup>
 </template>
-
-<style lang="postcss"></style>

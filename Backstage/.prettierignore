@@ -3,3 +3,12 @@
 dist
 node_modules
 coverage
+
+# 第三方套件的原始發佈檔 —— 不是我們維護的程式碼,重排只會製造假 diff。
+# ckeditor.js 是 minified 的,prettier 會把 1400 行攤成 35000 行;
+# lang/ 底下還有 60+ 個語言檔。整包一起排除。
+public/scripts/plugins/
+public/assets/css/plugins/
+
+# swagger 由後端產生,格式跟著來源走
+.api.json/

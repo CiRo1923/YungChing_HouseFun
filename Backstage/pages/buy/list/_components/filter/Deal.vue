@@ -41,5 +41,3 @@ const onSearchClick = async () => {
     </template>
   </PageBuyListFilterCommonAccordion>
 </template>
-
-<style lang="postcss"></style>

@@ -65,5 +65,3 @@ const onClick = (id) => {
     </li>
   </ul>
 </template>
-
-<style lang="postcss"></style>

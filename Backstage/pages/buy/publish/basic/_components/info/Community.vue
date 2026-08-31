@@ -86,5 +86,3 @@ const onCommunityChange = (item) => {
     />
   </PageBuyPublishBasicRadiosOval>
 </template>
-
-<style></style>

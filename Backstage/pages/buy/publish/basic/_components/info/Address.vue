@@ -256,5 +256,3 @@ const onPopupAddressGoogleMap = async () => {
     <p class="line-clamp-1 min-w-0 text-[--gray-666] m:w-full">顯示至路段名：{{ onAddress() }}</p>
   </div>
 </template>
-
-<style></style>

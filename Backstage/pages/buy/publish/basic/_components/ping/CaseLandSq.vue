@@ -27,5 +27,3 @@ const { pingData } = storeToRefs(buyPublish)
     <template #rearAssist>{{ pingUnitLabel }}</template>
   </CommonMFormInput>
 </template>
-
-<style></style>

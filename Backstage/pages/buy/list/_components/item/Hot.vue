@@ -68,5 +68,3 @@ const items = computed(() => {
     </template>
   </ul>
 </template>
-
-<style lang="postcss"></style>

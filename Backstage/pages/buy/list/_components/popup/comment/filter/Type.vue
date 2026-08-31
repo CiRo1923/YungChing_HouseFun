@@ -22,5 +22,3 @@ const { apiCommentsData, commentsOptions } = storeToRefs(buyList)
     }"
   />
 </template>
-
-<style lang="postcss"></style>

@@ -70,11 +70,7 @@ const onRemoveClick = () => {
       </button>
     </div>
 
-    <label
-      class="m-upload-multiple-check"
-      @pointerdown.stop
-      @click.stop
-    >
+    <label class="m-upload-multiple-check" @pointerdown.stop @click.stop>
       <input
         type="checkbox"
         class="m-upload-checkbox"

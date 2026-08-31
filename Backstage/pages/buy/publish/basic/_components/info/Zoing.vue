@@ -99,5 +99,3 @@ const onCaseZoingChange = () => {
     />
   </PageBuyPublishBasicRadiosOval>
 </template>
-
-<style></style>

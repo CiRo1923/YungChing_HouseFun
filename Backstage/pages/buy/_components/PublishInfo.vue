@@ -65,5 +65,3 @@ onUnmounted(() => {
   </div>
   <!-- {{ props.data }} -->
 </template>
-
-<style lang="postcss"></style>

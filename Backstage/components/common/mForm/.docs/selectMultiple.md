@@ -75,11 +75,11 @@
 
 ## Props
 
-| 名稱 | 型別 | 預設 | 說明 |
-| --- | --- | --- | --- |
-| `items` | `Array` | `[]` | 多組 dropdown data，每組包含 options ref 與 model ref。 |
-| `config` | `Object` | `{}` | dropdown 設定。 |
-| `setClass` | `Object` | `{}` | 外部覆寫 class。 |
+| 名稱       | 型別     | 預設 | 說明                                                    |
+| ---------- | -------- | ---- | ------------------------------------------------------- |
+| `items`    | `Array`  | `[]` | 多組 dropdown data，每組包含 options ref 與 model ref。 |
+| `config`   | `Object` | `{}` | dropdown 設定。                                         |
+| `setClass` | `Object` | `{}` | 外部覆寫 class。                                        |
 
 ## items 結構
 

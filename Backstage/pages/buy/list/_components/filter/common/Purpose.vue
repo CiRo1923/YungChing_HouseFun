@@ -22,5 +22,3 @@ const { apiSearchData, serachOptions } = storeToRefs(buyList)
     }"
   />
 </template>
-
-<style lang="postcss"></style>

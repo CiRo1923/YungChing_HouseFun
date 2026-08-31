@@ -115,5 +115,3 @@ const onSure = async () => {
     </div>
   </BuyCommonCustomPopup>
 </template>
-
-<style lang="postcss"></style>

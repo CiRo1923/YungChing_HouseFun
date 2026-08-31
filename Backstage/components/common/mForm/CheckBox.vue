@@ -292,11 +292,7 @@ const onChange = async () => {
             :disabled="config.isDisabled"
             @change="onChange"
           />
-          <CommonSvgIcon
-            icon="icon_check_solid"
-            class="m-form-icon"
-            :class="setClass.icon"
-          />
+          <CommonSvgIcon icon="icon_check_solid" class="m-form-icon" :class="setClass.icon" />
           <slot>
             <em :class="setClass.label" v-if="config.label">
               {{ config.label }}
@@ -316,4 +312,3 @@ const onChange = async () => {
     </ErrorMessage>
   </div>
 </template>
-

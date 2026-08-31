@@ -245,5 +245,3 @@ onUnmounted(() => {
     </Transition>
   </Teleport>
 </template>
-
-<style lang="postcss"></style>

@@ -37,5 +37,3 @@ const onClick = (id) => {
     <slot name="sort" />
   </div>
 </template>
-
-<style lang="postcss"></style>

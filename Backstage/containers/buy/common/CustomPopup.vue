@@ -87,5 +87,3 @@ const onClose = (item) => {
     </template>
   </CommonMPopupMain>
 </template>
-
-<style></style>

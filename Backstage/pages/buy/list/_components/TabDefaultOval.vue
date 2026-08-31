@@ -89,5 +89,3 @@ onUnmounted(() => {
     <slot />
   </BuyMTabDefaultOval>
 </template>
-
-<style lang="postcss"></style>

@@ -4,8 +4,7 @@
       @apply relative pb-[--tab-default-oval-header-pb];
 
       &:after {
-        @apply pointer-events-none absolute bottom-0 w-full content-default
-          h-[--tab-default-oval-header-after-h] bg-[--tab-default-oval-header-after-bg-color];
+        @apply pointer-events-none absolute bottom-0 h-[--tab-default-oval-header-after-h] w-full bg-[--tab-default-oval-header-after-bg-color] content-default;
       }
     }
 
@@ -26,8 +25,7 @@
       }
 
       &.\-\-active {
-        @apply bg-[--tab-default-oval-anchor-active-bg-color]
-          text-[--tab-default-oval-anchor-active-color];
+        @apply bg-[--tab-default-oval-anchor-active-bg-color] text-[--tab-default-oval-anchor-active-color];
 
         .m-tab-anchor-text {
           @apply font-semibold;
@@ -36,8 +34,7 @@
     }
 
     .m-tab-icon {
-      @apply overflow-hidden transition-all duration-300
-        h-[--tab-default-oval-icon-size] w-[--tab-default-oval-icon-size];
+      @apply h-[--tab-default-oval-icon-size] w-[--tab-default-oval-icon-size] overflow-hidden transition-all duration-300;
     }
 
     .m-tab-body {

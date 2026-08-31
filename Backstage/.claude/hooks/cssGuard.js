@@ -77,7 +77,7 @@ const FIX_HINTS = {
     '@stores / @components 等不參與排序檢查。',
   variable:
     '規則 4:命名改成 -w / -h / -p / -m / -border / -text-size,寬高相同的元素(icon 多半是正方形)用 -size 一個變數、不同才拆 -w / -h;' +
-    '帶 px 的值一律開變數(1px 線寬、2px 內距也算,「感覺是造型」不是豁免理由;明確不開的:z-index、leading(行高)、tracking(字距)、0/auto/none、以及 font-weight(不是父系帶入就是寫死,直接 @apply font-medium / font-normal)——這四個都有對應的檢查函式(checkZIndexVariable / checkLeadingVariable / checkTrackingVariable)。100% 三個斷點沒差別時直接用 tailwind 的 w-full / h-full / max-w-full / min-w-full / min-h-full,不要寫 w-[100%] 也不要繞變數,只有真的分斷點不同才開變數),值拆成 pc / tablet / mobile 三份,而且要成套(有 -pc-X 就必須有 -tablet-X / -mobile-X,漏一個那斷點會靜靜讀不到值);版型檔不可直接吃 --x-pc-y,要吃中性變數再由 @screen p / t / m 各段對應(但已包在 @screen p 裡面直接吃 -pc- 是合理的,只抓斷點對不上與沒包在斷點區塊裡;複合斷點 pt / tm 裡一律不能直接吃單一斷點的值),同一支檔案的 @screen p / t / m 各自只寫一組,例外寫 /* lint-breakpoint-exempt: 理由 */。這條多半是機械式改名,可以直接動手。' +
+    '帶 px 的值一律開變數(1px 線寬、2px 內距也算,「感覺是造型」不是豁免理由;明確不開的:z-index、leading(行高)、tracking(字距)、0/auto/none、以及 font-weight(不是父系帶入就是寫死,直接 @apply font-medium / font-normal)——這四個都有對應的檢查函式(checkZIndexVariable / checkLeadingVariable / checkTrackingVariable)。100% 三個斷點沒差別時直接用 tailwind 的 w-full / h-full / max-w-full / min-w-full / min-h-full,不要寫 w-[100%] 也不要繞變數,只有真的分斷點不同才開變數),值拆成 pc / tablet / mobile 三份,而且要成套(有 -pc-X 就必須有 -tablet-X / -mobile-X,漏一個那斷點會靜靜讀不到值);版型檔不可直接吃 --x-pc-y,要吃中性變數再由 @screen p / t / m 各段對應(但已包在 @screen p 裡面直接吃 -pc- 是合理的,只抓斷點對不上與沒包在斷點區塊裡;複合斷點 pt / tm 裡一律不能直接吃單一斷點的值),同一支檔案的頂層 @screen p / t / m 各自只寫一組(checkScreenGrouping 會抓;巢狀寫法不受限,真要分開就標 /* lint-screen-group-exempt: 理由 */),例外寫 /* lint-breakpoint-exempt: 理由 */。這條多半是機械式改名,可以直接動手。' +
     '順便檢查同一支檔案的其他變數規則:前綴要跟著 class / 資料夾走(mForm/ → --form-*,' +
     '不要在變數名塞 m-);px-[--x] / py- / mx- / my- 的 base 要給 0(沒 base 整條讀不到),' +
     '高度的 base 要給 auto(給 0 會塌),顏色的 base 不要用 initial —— 文字色給 inherit、背景 / 邊框色給 transparent(checkColorBase 會抓);' +
@@ -145,7 +145,10 @@ const onLint = (rel) => {
 
     messages.push(
       `⛔ ${RULE_TITLE[rule]}(${rel},${list.length} 筆):\n` +
-        list.slice(0, MAX_LISTED).map((i) => `   L${i.line} ${i.detail}`).join('\n') +
+        list
+          .slice(0, MAX_LISTED)
+          .map((i) => `   L${i.line} ${i.detail}`)
+          .join('\n') +
         (list.length > MAX_LISTED ? `\n   …另有 ${list.length - MAX_LISTED} 筆` : '')
     )
   }

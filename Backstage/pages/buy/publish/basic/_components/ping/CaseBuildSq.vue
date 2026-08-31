@@ -58,5 +58,3 @@ const casePurposeToken = computed(() => apiData.value.caseInfo.casePurposeToken)
     </li>
   </ul>
 </template>
-
-<style></style>

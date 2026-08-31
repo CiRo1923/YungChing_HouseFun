@@ -51,5 +51,3 @@ const items = shallowReadonly([
     </ul>
   </BuyMCardDefault>
 </template>
-
-<style></style>

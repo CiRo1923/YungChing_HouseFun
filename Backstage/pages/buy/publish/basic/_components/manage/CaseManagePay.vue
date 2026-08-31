@@ -53,5 +53,3 @@ const { apiData } = storeToRefs(buyPublish)
     </li>
   </ul>
 </template>
-
-<style></style>

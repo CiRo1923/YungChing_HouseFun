@@ -57,5 +57,3 @@ const onUploaded = async (items, done) => {
     />
   </div>
 </template>
-
-<style></style>

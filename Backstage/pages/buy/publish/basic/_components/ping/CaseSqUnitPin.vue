@@ -17,5 +17,3 @@ const { onPingUnitChange } = useBuyPublishActions()
     @change="onPingUnitChange"
   />
 </template>
-
-<style></style>

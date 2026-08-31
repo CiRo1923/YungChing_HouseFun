@@ -132,5 +132,3 @@ onUnmounted(() => {
     />
   </template>
 </template>
-
-<style lang="postcss"></style>

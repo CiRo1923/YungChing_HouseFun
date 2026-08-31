@@ -89,5 +89,3 @@ const result = computed(() => datas.filter((item) => props.items.includes(item.i
     </li>
   </ul>
 </template>
-
-<style lang="postcss"></style>

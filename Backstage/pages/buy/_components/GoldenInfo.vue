@@ -66,5 +66,3 @@ const setClass = computed(() => {
     </ul>
   </CommonMFormHidden>
 </template>
-
-<style lang="postcss"></style>

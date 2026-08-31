@@ -79,5 +79,3 @@ onUnmounted(() => {
     </BuyMSeparator>
   </div>
 </template>
-
-<style lang="postcss"></style>

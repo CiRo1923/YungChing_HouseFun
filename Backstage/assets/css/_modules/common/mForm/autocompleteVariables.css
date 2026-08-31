@@ -37,9 +37,12 @@
 
   /* box-shadow 整條當一個值 —— 走原生 CSS 屬性,不用 @apply shadow-[…] */
   --form-autocomplete-dropdown-shadow: none;
-  --form-autocomplete-dropdown-pc-shadow: 0 4px 24px 0 var(--blue-0016-14), 0 2px 16px -8px var(--blue-0016-33);
-  --form-autocomplete-dropdown-tablet-shadow: 0 4px 24px 0 var(--blue-0016-14), 0 2px 16px -8px var(--blue-0016-33);
-  --form-autocomplete-dropdown-mobile-shadow: 0 4px 24px 0 var(--blue-0016-14), 0 2px 16px -8px var(--blue-0016-33);
+  --form-autocomplete-dropdown-pc-shadow:
+    0 4px 24px 0 var(--blue-0016-14), 0 2px 16px -8px var(--blue-0016-33);
+  --form-autocomplete-dropdown-tablet-shadow:
+    0 4px 24px 0 var(--blue-0016-14), 0 2px 16px -8px var(--blue-0016-33);
+  --form-autocomplete-dropdown-mobile-shadow:
+    0 4px 24px 0 var(--blue-0016-14), 0 2px 16px -8px var(--blue-0016-33);
 
   /* 沒有結果時的提示 */
   --form-autocomplete-dropdown-no-data-color: var(--gray-333);

@@ -70,5 +70,3 @@ const onClick = async () => {
     @click="onClick"
   />
 </template>
-
-<style lang="postcss"></style>

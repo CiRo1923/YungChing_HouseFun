@@ -44,12 +44,12 @@
 
 ## Props
 
-| 名稱 | 型別 | 預設 | 說明 |
-| --- | --- | --- | --- |
-| `modelValue` | `String` / `Number` / `Boolean` / `Object` | `null` | 目前選取值。 |
-| `options` | `Array` | `[]` | 下拉選項資料。 |
-| `config` | `Object` | `{}` | Select 與 dropdown 設定。 |
-| `setClass` | `Object` | `{}` | 外部覆寫 class。 |
+| 名稱         | 型別                                       | 預設   | 說明                      |
+| ------------ | ------------------------------------------ | ------ | ------------------------- |
+| `modelValue` | `String` / `Number` / `Boolean` / `Object` | `null` | 目前選取值。              |
+| `options`    | `Array`                                    | `[]`   | 下拉選項資料。            |
+| `config`     | `Object`                                   | `{}`   | Select 與 dropdown 設定。 |
+| `setClass`   | `Object`                                   | `{}`   | 外部覆寫 class。          |
 
 ## config 預設值
 

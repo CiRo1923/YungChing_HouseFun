@@ -210,5 +210,3 @@ const onChange = (item) => {
 <template>
   <PageBuyPublishBasicCardFilter :title="props.title" :items="visibleItems" @change="onChange" />
 </template>
-
-<style></style>

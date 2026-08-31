@@ -77,5 +77,3 @@ const setClass = computed(() => {
     <PageBuyAutoRefreshNote />
   </div>
 </template>
-
-<style lang="postcss"></style>

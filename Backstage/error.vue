@@ -49,5 +49,3 @@ const onBackClick = () => clearError({ redirect: '/buy/list/publish' })
     </div>
   </NuxtLayout>
 </template>
-
-<style></style>

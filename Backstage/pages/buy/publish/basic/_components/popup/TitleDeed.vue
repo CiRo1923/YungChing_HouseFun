@@ -1,5 +1,3 @@
-<script setup></script>
-
 <template>
   <BuyCommonCustomPopup
     id="popupTitleDeed"
@@ -15,5 +13,3 @@
     />
   </BuyCommonCustomPopup>
 </template>
-
-<style></style>

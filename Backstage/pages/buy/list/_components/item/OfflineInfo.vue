@@ -44,5 +44,3 @@ const onClick = () => {
     <!-- {{ offlineInfo }} -->
   </div>
 </template>
-
-<style lang="postcss"></style>

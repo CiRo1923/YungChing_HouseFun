@@ -57,5 +57,3 @@ const onChange = (item) => {
   </ul>
   <PageBuyPublishBasicNav :data="visibleComponents" />
 </template>
-
-<style></style>

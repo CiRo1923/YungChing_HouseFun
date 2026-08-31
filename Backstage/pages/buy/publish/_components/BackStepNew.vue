@@ -32,5 +32,3 @@ const stepOptions = readonly([
     }"
   />
 </template>
-
-<style></style>

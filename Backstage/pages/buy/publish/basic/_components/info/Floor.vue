@@ -174,5 +174,3 @@ const onFloorVaild = () => {
     </CommonMFormHidden>
   </PageBuyPublishBasicRadiosOval>
 </template>
-
-<style></style>

@@ -172,9 +172,7 @@ const allowedContent = computed(() => {
     ['TextColor', 'color'],
     ['BGColor', 'background-color'],
   ])
-  const styles = [...styleMap]
-    .filter(([item]) => items.includes(item))
-    .map(([, style]) => style)
+  const styles = [...styleMap].filter(([item]) => items.includes(item)).map(([, style]) => style)
 
   return styles.length
     ? `${config.value.allowedContent}; span{${styles.join(',')}}`

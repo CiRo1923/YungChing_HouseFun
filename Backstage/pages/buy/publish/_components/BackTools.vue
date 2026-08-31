@@ -37,5 +37,3 @@ const config = computed(() => {
     />
   </BuyMToolbar>
 </template>
-
-<style></style>

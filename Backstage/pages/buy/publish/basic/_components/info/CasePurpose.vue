@@ -167,5 +167,3 @@ const onChange = async (item) => {
     @change="onChange"
   />
 </template>
-
-<style></style>

@@ -32,5 +32,3 @@ const isSelectAll = computed({
     }"
   />
 </template>
-
-<style lang="postcss"></style>

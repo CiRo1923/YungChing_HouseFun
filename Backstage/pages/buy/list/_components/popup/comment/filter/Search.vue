@@ -23,5 +23,3 @@ const onEnter = () => {
     @keydown.enter="onEnter"
   />
 </template>
-
-<style lang="postcss"></style>

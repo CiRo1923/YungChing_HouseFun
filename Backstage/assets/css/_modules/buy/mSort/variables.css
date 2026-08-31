@@ -45,8 +45,10 @@
 
   /* box-shadow 整條當一個值(同 mFormDropdown)—— 走原生 CSS 屬性,不用 @apply shadow-[…] */
   --sort-dropdown-pc-shadow: 0 4px 24px 0 var(--blue-0016-14), 0 2px 16px -8px var(--blue-0016-33);
-  --sort-dropdown-tablet-shadow: 0 4px 24px 0 var(--blue-0016-14), 0 2px 16px -8px var(--blue-0016-33);
-  --sort-dropdown-mobile-shadow: 0 4px 24px 0 var(--blue-0016-14), 0 2px 16px -8px var(--blue-0016-33);
+  --sort-dropdown-tablet-shadow:
+    0 4px 24px 0 var(--blue-0016-14), 0 2px 16px -8px var(--blue-0016-33);
+  --sort-dropdown-mobile-shadow:
+    0 4px 24px 0 var(--blue-0016-14), 0 2px 16px -8px var(--blue-0016-33);
 
   --sort-dropdown-item-pc-px: 0;
   --sort-dropdown-item-tablet-px: 0;

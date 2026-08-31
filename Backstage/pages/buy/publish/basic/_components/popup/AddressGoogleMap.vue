@@ -32,5 +32,3 @@ const onClick = (data) => {
     </div>
   </BuyCommonCustomPopup>
 </template>
-
-<style></style>

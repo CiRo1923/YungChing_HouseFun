@@ -523,18 +523,14 @@ watch(
         @drop="(event) => onUploadDrop(event, handleChange, validate)"
       >
         <template v-if="hasImage">
-          <div
-            class="m-upload-single-preview"
-          >
+          <div class="m-upload-single-preview">
             <img
               :src="innerItem.previewUrl"
               alt=""
               class="m-upload-single-image"
               draggable="false"
             />
-            <div
-              class="m-upload-single-overlay"
-            >
+            <div class="m-upload-single-overlay">
               <CommonSvgIcon icon="icon_upload" class="m-upload-single-icon" />
               <span>點擊或拖曳重新上傳</span>
             </div>
@@ -548,10 +544,7 @@ watch(
           </button>
         </template>
 
-        <div
-          class="m-upload-single-empty"
-          v-else
-        >
+        <div class="m-upload-single-empty" v-else>
           <CommonSvgIcon icon="icon_upload" class="m-upload-single-icon" />
           <span class="m-upload-single-text">{{ config.placeholder }}</span>
         </div>
@@ -569,4 +562,3 @@ watch(
     <BuyMErrorMessageElem :message="message" />
   </ErrorMessage>
 </template>
-

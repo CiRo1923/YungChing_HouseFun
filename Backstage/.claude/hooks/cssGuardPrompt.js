@@ -217,7 +217,7 @@ const main = () => {
           '要在 module 補顏色 modifier(--text-gray-999)讓使用端改用,' +
           '不要把 module 的顏色宣告條件化來讓使用端自訂。\n\n' +
           'module 變數的規則:前綴跟著 class / 資料夾走(mForm/ → --form-*,不要塞 m-);' +
-          '命名用 -w / -h / -p / -m / -border / -text-size,寬高相同的元素(icon 多半是正方形)用 -size 一個變數、不同才拆 -w / -h;帶 px 的值一律開變數(1px / 2px 也算,例外是 z-index、0/auto/none、font-weight(不是父系帶入就是寫死);100% 直接用 w-full / h-full / max-w-full 等,不要繞變數),拆 pc / tablet / mobile 三份且要成套(有 -pc-X 就必須有 -tablet-X / -mobile-X);版型檔不可直接吃 --x-pc-y,要吃中性變數再由 @screen p / t / m 各段對應(已包在 @screen p 裡面直接吃 -pc- 是合理的),同一支檔案的 @screen p / t / m 各自只寫一組;' +
+          '命名用 -w / -h / -p / -m / -border / -text-size,寬高相同的元素(icon 多半是正方形)用 -size 一個變數、不同才拆 -w / -h;帶 px 的值一律開變數(1px / 2px 也算,例外是 z-index、0/auto/none、font-weight(不是父系帶入就是寫死);100% 直接用 w-full / h-full / max-w-full 等,不要繞變數),拆 pc / tablet / mobile 三份且要成套(有 -pc-X 就必須有 -tablet-X / -mobile-X);版型檔不可直接吃 --x-pc-y,要吃中性變數再由 @screen p / t / m 各段對應(已包在 @screen p 裡面直接吃 -pc- 是合理的),同一支檔案的頂層 @screen p / t / m 各自只寫一組(checkScreenGrouping 會抓;巢狀寫法不受限,真要分開就標 /* lint-screen-group-exempt: 理由 */);' +
           'px-[--x] / py- / mx- / my- 的 base 給 0(沒 base 整條讀不到),高度給 auto,顏色的 base 不要用 initial —— 文字色給 inherit(沒指定就跟父層)、背景 / 邊框色給 transparent(沒指定就是沒有顏色);' +
           'hover / focus 覆寫基礎變數而非在 :root 做 var() fallback,且 hover 用帶 hover: 前綴的 modifier 包在 variables.css 的 &:hover 內、不建 hover 專用變數、版型檔不寫 &:hover(參考 mAnchor);' +
           '同組 module 內不同元素撞 class 名時不要硬合併。\n' +

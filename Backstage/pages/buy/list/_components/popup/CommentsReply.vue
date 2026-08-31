@@ -29,5 +29,3 @@ const text = computed(() => (isReply.value ? '已回覆' : isNoReply.value ? '�
     </div>
   </BuyCommonCustomPopup>
 </template>
-
-<style lang="postcss"></style>

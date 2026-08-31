@@ -92,7 +92,9 @@ const onPropListMatcher = (propList) => {
 const onBlacklistedSelector = (blacklist, selector) => {
   if (typeof selector !== 'string') return false
 
-  return blacklist.some((item) => (typeof item === 'string' ? selector.includes(item) : item.test(selector)))
+  return blacklist.some((item) =>
+    typeof item === 'string' ? selector.includes(item) : item.test(selector)
+  )
 }
 
 const onExcluded = (exclude, filePath) => {

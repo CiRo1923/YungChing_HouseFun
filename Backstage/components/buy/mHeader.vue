@@ -19,9 +19,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div
-    class="m-header"
-  >
+  <div class="m-header">
     <div class="m-header-logo">
       <CommonImgSrc
         src="buy/logo_text.svg"
@@ -40,5 +38,3 @@ onUnmounted(() => {
     </div>
   </div>
 </template>
-
-<style lang="postcss"></style>

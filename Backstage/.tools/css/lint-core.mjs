@@ -1158,6 +1158,56 @@ export function checkTrackingVariable(relPath, text) {
 }
 
 /**
+ * 同一支檔案的頂層 `@screen X` 只能寫一組。
+ *
+ * 同一個斷點的設定散在檔案各處時,改的時候很容易漏掉其中一組 ——
+ * 而漏掉的那一組不會報錯,只會在某個斷點靜靜地少一段樣式。
+ *
+ * ⚠️ **只看頂層(行首沒有縮排)的 `@screen`。** 巢狀寫法
+ * (`.m-x { @screen p { … } }`)是另一種合法組織:每個選擇器自己收三段,
+ * 同一支檔案自然會出現多個 `@screen p`,那不是「散落」——
+ * 參考 Backstage 的 mCard/filter.css,整支都是這個寫法。
+ *
+ * 真的需要分開寫(例如變數對應與子元素版型差異大)就在該行或上一行標
+ * `/* lint-screen-group-exempt: 理由 *\/`,理由一定要寫。
+ */
+export function checkScreenGrouping(relPath, text) {
+  const issues = []
+  const lines = maskComments(text).split('\n')
+  const rawLines = text.split('\n')
+  const seen = new Map()
+
+  lines.forEach((line, i) => {
+    const m = /^@screen\s+([a-zA-Z]+)\s*\{/.exec(line)
+    if (!m) return
+
+    const exempt = /lint-screen-group-exempt\s*:/.test(
+      `${rawLines[i] ?? ''}\n${rawLines[i - 1] ?? ''}`
+    )
+    if (exempt) return
+
+    const bp = m[1]
+    if (!seen.has(bp)) {
+      seen.set(bp, i + 1)
+      return
+    }
+
+    issues.push({
+      rule: 'variable',
+      file: relPath,
+      line: i + 1,
+      detail:
+        `@screen ${bp} 在這支檔案出現第二次(第一次在 L${seen.get(bp)})—— ` +
+        '同一個斷點只寫一組,散在各處改的時候會漏;' +
+        '真要分開就標 /* lint-screen-group-exempt: 理由 */',
+      snippet: `@screen ${bp} {`,
+    })
+  })
+
+  return issues
+}
+
+/**
  * 顏色變數的 base 不可以是 `initial`。
  *
  * `initial` 能運作,但靠的是繞路:custom property 的值寫成 CSS-wide keyword 時,
@@ -1625,6 +1675,7 @@ export function lintFile(projectRoot, absPath, definedVars) {
     issues.push(...checkVariablesFile(rel, text))
     issues.push(...checkLayoutFileValues(rel, text))
     issues.push(...checkBreakpointCoverage(rel, text))
+    issues.push(...checkScreenGrouping(rel, text))
   }
 
   if (rel.startsWith('components/') && rel.endsWith('.vue')) {

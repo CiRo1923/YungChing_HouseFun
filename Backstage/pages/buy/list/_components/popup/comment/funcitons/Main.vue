@@ -18,5 +18,3 @@ const onClick = (id) => {
     <PageBuyListPopupCommentFuncitonsSelectCount />
   </div>
 </template>
-
-<style lang="postcss"></style>

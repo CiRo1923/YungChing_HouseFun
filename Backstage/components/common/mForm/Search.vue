@@ -89,12 +89,8 @@ const onFocus = (value) => {
         >
           <CommonSvgIcon icon="icon_xmark" class="m-form-clear-icon" />
         </button>
-        <CommonSvgIcon
-          icon="icon_search"
-          class="m-form-search-icon"
-        />
+        <CommonSvgIcon icon="icon_search" class="m-form-search-icon" />
       </div>
     </div>
   </div>
 </template>
-

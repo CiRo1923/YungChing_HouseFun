@@ -8,14 +8,14 @@ description: 動到任何 css、顏色、module 樣式前必須先讀。六條�
 **完整規則見 [.claude/rules/css-conventions.md](../../rules/css-conventions.md) —— 動手前一定要讀那份。**
 這裡只列六條規則的重點與工具指令,細節、踩過的坑、違規存量都在規則檔裡。
 
-| 規則 | 一句話 | 工具會自動抓 |
-|---|---|---|
-| 1 | 顏色一律定義在 `assets/css/_common/color.css`,依 hex 型態命名、依色系與亮度排序 | ✅(排序會**自動修正**) |
-| 2 | `components/` 的 `<template>` 不得使用 tailwind class,只能用 `m-xxx` 與 `--modifier` | ✅ |
-| 3 | module 拆成 `_modules/<頻道>/<組件>/`,在 `<script setup>` 最上方按固定順序 JS import | ✅(引入方式與順序) |
-| 4 | module 變數用 `-w` / `-h` / `-p` / `-m` / `-border`,尺寸類拆 pc / tablet / mobile 三份 | ✅ |
-| 5 | `<script setup>` 的 import 順序:**css → `./.composables` → `@js` → 其他套件** | ✅ |
-| 6 | 不要用被 `theme` 整組覆寫掉而不存在的 class:`text-sm` / **任何** `shadow-*` / `font-sans` / `md:` / `transition-width`(單數)。`*-hexa` 在這個專案**仍合法** | ✅ |
+| 規則 | 一句話                                                                                                                                                      | 工具會自動抓           |
+| ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| 1    | 顏色一律定義在 `assets/css/_common/color.css`,依 hex 型態命名、依色系與亮度排序                                                                             | ✅(排序會**自動修正**) |
+| 2    | `components/` 的 `<template>` 不得使用 tailwind class,只能用 `m-xxx` 與 `--modifier`                                                                        | ✅                     |
+| 3    | module 拆成 `_modules/<頻道>/<組件>/`,在 `<script setup>` 最上方按固定順序 JS import                                                                        | ✅(引入方式與順序)     |
+| 4    | module 變數用 `-w` / `-h` / `-p` / `-m` / `-border`,尺寸類拆 pc / tablet / mobile 三份                                                                      | ✅                     |
+| 5    | `<script setup>` 的 import 順序:**css → `./.composables` → `@js` → 其他套件**                                                                               | ✅                     |
+| 6    | 不要用被 `theme` 整組覆寫掉而不存在的 class:`text-sm` / **任何** `shadow-*` / `font-sans` / `md:` / `transition-width`(單數)。`*-hexa` 在這個專案**仍合法** | ✅                     |
 
 ## ⚠️ 判斷不出來就問 —— 不要猜
 
@@ -24,40 +24,40 @@ description: 動到任何 css、顏色、module 樣式前必須先讀。六條�
 
 一律問、不要自己決定:
 
-| 岔路 | 看程式碼判斷不出來的原因 |
-|---|---|
-| 屬性**要不要開 modifier** | 取決於將來各頁面會不會想各自指定 |
-| 字級歸 module 還是**父系 `setClass`** | 取決於是不是「固定位置」組件 |
-| 語意標籤**要不要給 class** | 取決於使用端想不想改它的字級 / 顏色 |
-| 某斷點沒設定是**例外還是漏寫** | 兩者長得一模一樣 |
-| 非 px 值(`duration-*` / `rounded-full`)**要不要變數化** | 規則只明確要求 px,這是灰色地帶 |
-| 死檔**要重寫還是刪** | 可能還沒接上,也可能是廢棄品 |
-| modifier 沒人用**要留還是刪** | 可能預留給還沒做的頁面 |
-| template 綁了 class **但沒有 CSS** | 刻意不做 vs 漏掉,兩種都實際遇過 |
+| 岔路                                                    | 看程式碼判斷不出來的原因            |
+| ------------------------------------------------------- | ----------------------------------- |
+| 屬性**要不要開 modifier**                               | 取決於將來各頁面會不會想各自指定    |
+| 字級歸 module 還是**父系 `setClass`**                   | 取決於是不是「固定位置」組件        |
+| 語意標籤**要不要給 class**                              | 取決於使用端想不想改它的字級 / 顏色 |
+| 某斷點沒設定是**例外還是漏寫**                          | 兩者長得一模一樣                    |
+| 非 px 值(`duration-*` / `rounded-full`)**要不要變數化** | 規則只明確要求 px,這是灰色地帶      |
+| 死檔**要重寫還是刪**                                    | 可能還沒接上,也可能是廢棄品         |
+| modifier 沒人用**要留還是刪**                           | 可能預留給還沒做的頁面              |
+| template 綁了 class **但沒有 CSS**                      | 刻意不做 vs 漏掉,兩種都實際遇過     |
 
 **問法**:直說「這個我判斷不出來」,列出選項與各自後果 ——
 不要假裝有把握然後埋一句「暫時這樣」。
 
 ## module 變數的規則(最常踩的一區)
 
-| 面向 | 規則 |
-|---|---|
-| **前綴** | 跟著 class / 資料夾走:`mForm/` → `--form-*`(變體再接變體名 `--form-select-*`)。**不要在變數名塞 `m-`**(`--m-autocomplete-…` ✗)。 |
-| **命名** | `-w` / `-h` / `-p` / `-m` / `-border` / `-text-size`,不要 `-width` / `-height` / `-padding` / `-text`。 |
-| **寬高** | **相同用 `-size`,不同才拆 `-w` / `-h`**。icon 多半是正方形 → `--x-icon-size` 一個就好。`-w` 的變數被套到 `h-[]` 上是命名錯誤(工具會抓),之後想單獨調高度會連寬度一起動到。 |
-| **斷點** | `:root` 裡的尺寸值(px / rem / % / vh / vw)一律拆 `pc` / `tablet` / `mobile` 三份,即使三個值一樣。顏色不用拆。 |
-| **斷點成套** | 有 `-pc-X` 就**必須**有 `-tablet-X` / `-mobile-X`(漏一個那斷點會靜靜讀不到值);版型檔**不可直接吃** `--x-pc-y`,要吃中性變數、由 `@screen` 各段對應。**但已經包在 `@screen p` 裡面的直接吃 `-pc-` 是合理的**,工具只抓「斷點對不上」與「沒包在斷點區塊裡」;複合斷點(`pt` / `tm`)裡一律不能直接吃單一斷點的值。例外寫 `/* lint-breakpoint-exempt: 理由 */`。 |
-| **`@screen` 別拆散** | 同一支檔案的 `@screen p` / `t` / `m` **各自只寫一組**,散在好幾處很容易改漏其中一組。 |
-| **粒度** | 建在「用到的最小單位」上(見下一節)。 |
-| **px 就開變數** | **帶 px 的值一律開變數拆三斷點**,`1px` 線寬、`2px` 內距也算 —— 「感覺是造型」不是豁免理由,判斷看單位。`duration-*` / `rounded-full` / `w-full` / `-1/2` 目前是存量,碰到時問使用者。 |
-| **不開變數的** | **`z-index`**(`z-[3]` 直接寫,lint 會擋變數版)、`0` / `auto` / `none`、**`font-weight`**(不是父系帶入就是寫死,值域小又固定)、**`letter-spacing`**(`tracking-[0.06em]` 直接寫)。 |
-| **`100%` 用 `-full`** | 三個斷點沒差別時直接寫 tailwind 的 `w-full` / `h-full` / `max-w-full` / `min-w-full` / `min-h-full` —— 不要 `w-[100%]`,更不要繞變數。只有**真的分斷點不同**(pc `50%` / mobile `100%`)才開變數。 |
-| **中性變數** | 一支檔案有**多個**變數要分斷點 → 版型吃中性變數、`@screen` 各段集中對應;**只有一個** → 版型直接寫在 `@screen` 內吃 `-pc-` / `-tablet-` / `-mobile-`,不用多繞一層。 |
-| **字級寫法** | `text-[length:--x-text-size]`,**不要原生 `font-size: var(…)`**;`length:` 省略會被當成 color(靜默失效)。 |
-| **base** | `px-[--x]` / `py-` / `mx-` / `my-` 沒 base 會**整條讀不到**,base 給 `0`;**高度的 base 要給 `auto`**(給 0 會塌);**顏色沒有時給 `inherit`**(不是 `initial` —— `color` 的 initial 是**黑色**,會讓所有沒帶顏色 modifier 的元素從繼承父層變成黑字)。 |
-| **狀態** | hover / focus / active 一律「覆寫基礎變數」,不要在 `:root` 寫 `--x-hover-color: var(--x-color)` 當 fallback —— 那在 `:root` 當下就解析完了,永遠是無效值。 |
-| **hover** | modifier 帶 `hover:` 前綴、包在 variables.css 的 `&:hover` 裡(見下節),**不要建 `--x-hover-bg-color` 專用變數**,也**不要在版型檔寫 `&:hover`**。 |
-| **撞名** | 同組 module 內不同元素撞 class 名時**不要硬合併**(`.m-label` vs `.m-form-label`),在 variables 檔頭註明原因。 |
+| 面向                  | 規則                                                                                                                                                                                                                                                                                                                                                     |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **前綴**              | 跟著 class / 資料夾走:`mForm/` → `--form-*`(變體再接變體名 `--form-select-*`)。**不要在變數名塞 `m-`**(`--m-autocomplete-…` ✗)。                                                                                                                                                                                                                         |
+| **命名**              | `-w` / `-h` / `-p` / `-m` / `-border` / `-text-size`,不要 `-width` / `-height` / `-padding` / `-text`。                                                                                                                                                                                                                                                  |
+| **寬高**              | **相同用 `-size`,不同才拆 `-w` / `-h`**。icon 多半是正方形 → `--x-icon-size` 一個就好。`-w` 的變數被套到 `h-[]` 上是命名錯誤(工具會抓),之後想單獨調高度會連寬度一起動到。                                                                                                                                                                                |
+| **斷點**              | `:root` 裡的尺寸值(px / rem / % / vh / vw)一律拆 `pc` / `tablet` / `mobile` 三份,即使三個值一樣。顏色不用拆。                                                                                                                                                                                                                                            |
+| **斷點成套**          | 有 `-pc-X` 就**必須**有 `-tablet-X` / `-mobile-X`(漏一個那斷點會靜靜讀不到值);版型檔**不可直接吃** `--x-pc-y`,要吃中性變數、由 `@screen` 各段對應。**但已經包在 `@screen p` 裡面的直接吃 `-pc-` 是合理的**,工具只抓「斷點對不上」與「沒包在斷點區塊裡」;複合斷點(`pt` / `tm`)裡一律不能直接吃單一斷點的值。例外寫 `/* lint-breakpoint-exempt: 理由 */`。 |
+| **`@screen` 別拆散**  | 同一支檔案的 `@screen p` / `t` / `m` **各自只寫一組**,散在好幾處很容易改漏其中一組。                                                                                                                                                                                                                                                                     |
+| **粒度**              | 建在「用到的最小單位」上(見下一節)。                                                                                                                                                                                                                                                                                                                     |
+| **px 就開變數**       | **帶 px 的值一律開變數拆三斷點**,`1px` 線寬、`2px` 內距也算 —— 「感覺是造型」不是豁免理由,判斷看單位。`duration-*` / `rounded-full` / `w-full` / `-1/2` 目前是存量,碰到時問使用者。                                                                                                                                                                      |
+| **不開變數的**        | **`z-index`**(`z-[3]` 直接寫,lint 會擋變數版)、`0` / `auto` / `none`、**`font-weight`**(不是父系帶入就是寫死,值域小又固定)、**`letter-spacing`**(`tracking-[0.06em]` 直接寫)。                                                                                                                                                                           |
+| **`100%` 用 `-full`** | 三個斷點沒差別時直接寫 tailwind 的 `w-full` / `h-full` / `max-w-full` / `min-w-full` / `min-h-full` —— 不要 `w-[100%]`,更不要繞變數。只有**真的分斷點不同**(pc `50%` / mobile `100%`)才開變數。                                                                                                                                                          |
+| **中性變數**          | 一支檔案有**多個**變數要分斷點 → 版型吃中性變數、`@screen` 各段集中對應;**只有一個** → 版型直接寫在 `@screen` 內吃 `-pc-` / `-tablet-` / `-mobile-`,不用多繞一層。                                                                                                                                                                                       |
+| **字級寫法**          | `text-[length:--x-text-size]`,**不要原生 `font-size: var(…)`**;`length:` 省略會被當成 color(靜默失效)。                                                                                                                                                                                                                                                  |
+| **base**              | `px-[--x]` / `py-` / `mx-` / `my-` 沒 base 會**整條讀不到**,base 給 `0`;**高度的 base 要給 `auto`**(給 0 會塌);**顏色沒有時給 `inherit`**(不是 `initial` —— `color` 的 initial 是**黑色**,會讓所有沒帶顏色 modifier 的元素從繼承父層變成黑字)。                                                                                                          |
+| **狀態**              | hover / focus / active 一律「覆寫基礎變數」,不要在 `:root` 寫 `--x-hover-color: var(--x-color)` 當 fallback —— 那在 `:root` 當下就解析完了,永遠是無效值。                                                                                                                                                                                                |
+| **hover**             | modifier 帶 `hover:` 前綴、包在 variables.css 的 `&:hover` 裡(見下節),**不要建 `--x-hover-bg-color` 專用變數**,也**不要在版型檔寫 `&:hover`**。                                                                                                                                                                                                          |
+| **撞名**              | 同組 module 內不同元素撞 class 名時**不要硬合併**(`.m-label` vs `.m-form-label`),在 variables 檔頭註明原因。                                                                                                                                                                                                                                             |
 
 ## 狀態一律 `--` 開頭,沒有 `is-*`
 
@@ -76,11 +76,11 @@ description: 動到任何 css、顏色、module 樣式前必須先讀。六條�
 
 判斷方式:**這行是在「給一個值」,還是在「切換成另一個變數」?**
 
-| variables 檔 | 版型檔(`common.css` / `<變體>.css`) |
-|---|---|
-| `:root` 預設值 `--x-px: 0;` | 版型宣告 `@apply h-[--x-size];` |
-| modifier 的具體值 `&.--px-5 { --x-px: 5px; }` | **狀態切換** `&.--checked { --x-bg: var(--x-checked-bg); }` |
-| 指向**色票**也算值 `&.--text-white { --x-color: var(--white); }` | **斷點對應** `@screen p { --x-size: var(--x-pc-size); }` |
+| variables 檔                                                     | 版型檔(`common.css` / `<變體>.css`)                         |
+| ---------------------------------------------------------------- | ----------------------------------------------------------- |
+| `:root` 預設值 `--x-px: 0;`                                      | 版型宣告 `@apply h-[--x-size];`                             |
+| modifier 的具體值 `&.--px-5 { --x-px: 5px; }`                    | **狀態切換** `&.--checked { --x-bg: var(--x-checked-bg); }` |
+| 指向**色票**也算值 `&.--text-white { --x-color: var(--white); }` | **斷點對應** `@screen p { --x-size: var(--x-pc-size); }`    |
 
 `var(--white)` 指向色票 = 給值 ✓ 留 variables;
 `var(--x-checked-bg-color)` 指向自己 module 的變數 = 切換 ✗ 要搬版型檔。
@@ -100,32 +100,32 @@ base 值屬於 variables 的 `:root`。值散在兩個檔案時,調預設值得�
 
 組件放在**某個 module 的子資料夾**底下時,它就是那個 module 的變體,三者都要收斂:
 
-| | ✗ | ✓ |
-|---|---|---|
-| 資料夾 | `_modules/buy/mSwitchItem/` | `_modules/buy/mItem/` |
-| 檔名 | `common.css` | `switchItem.css` / `switchItemVariables.css` |
-| class | `m-switch-item-header` | `m-item-switch-header` |
+|        | ✗                           | ✓                                            |
+| ------ | --------------------------- | -------------------------------------------- |
+| 資料夾 | `_modules/buy/mSwitchItem/` | `_modules/buy/mItem/`                        |
+| 檔名   | `common.css`                | `switchItem.css` / `switchItemVariables.css` |
+| class  | `m-switch-item-header`      | `m-item-switch-header`                       |
 
 只搬資料夾而 class 不動,「看到 class 就能找到檔案」就失效了。
 判斷:檔案在 `components/<頻道>/<母體>/` 底下 → 它是 `<母體>` 的變體。
 
 ## module 的四層:共用 → 群組 → 變體
 
-| 層 | 檔案 | 誰吃得到 |
-|---|---|---|
-| 共用 | `variables.css` / `common.css` | 該 module 全系列 |
+| 層       | 檔案                                 | 誰吃得到                                                        |
+| -------- | ------------------------------------ | --------------------------------------------------------------- |
+| 共用     | `variables.css` / `common.css`       | 該 module 全系列                                                |
 | **群組** | `<群組>Variables.css` / `<群組>.css` | **兩個以上變體共用**(mForm 的 `selection.*` = checkbox + radio) |
-| 變體 | `<變體>Variables.css` / `<變體>.css` | 只有那個變體 |
+| 變體     | `<變體>Variables.css` / `<變體>.css` | 只有那個變體                                                    |
 
 import 順序**變數全部先定義完,版型才取用**:
 
 ```js
-import '…/mForm/variables.css'           // 共用變數
-import '…/mForm/selectionVariables.css'  // 群組變數
-import '…/mForm/checkboxVariables.css'   // 變體變數
-import '…/mForm/common.css'              // 共用版型
-import '…/mForm/selection.css'           // 群組版型
-import '…/mForm/checkbox.css'            // 變體樣式
+import '…/mForm/variables.css' // 共用變數
+import '…/mForm/selectionVariables.css' // 群組變數
+import '…/mForm/checkboxVariables.css' // 變體變數
+import '…/mForm/common.css' // 共用版型
+import '…/mForm/selection.css' // 群組版型
+import '…/mForm/checkbox.css' // 變體樣式
 ```
 
 兩個以上變體共用的結構 → 進群組層,不要在各變體檔各寫一份,更不要留在 template。
@@ -137,15 +137,21 @@ import '…/mForm/checkbox.css'            // 變體樣式
 ```css
 /* variables.css —— hover 是獨立 modifier,包在 &:hover 裡 */
 .m-tooltip {
-  &.\-\-bg-gray-33bf { --tooltip-bg-color: var(--gray-33bf); }
+  &.\-\-bg-gray-33bf {
+    --tooltip-bg-color: var(--gray-33bf);
+  }
 
   &:hover {
-    &.hover\:\-\-bg-gray-333 { --tooltip-bg-color: var(--gray-333); }
+    &.hover\:\-\-bg-gray-333 {
+      --tooltip-bg-color: var(--gray-333);
+    }
   }
 }
 
 /* common.css —— 無條件取一次,不要再寫 &:hover */
-.m-tooltip { @apply bg-[--tooltip-bg-color]; }
+.m-tooltip {
+  @apply bg-[--tooltip-bg-color];
+}
 ```
 
 1. modifier 帶 **`hover:` 前綴**,由使用端顯式指定
@@ -160,11 +166,11 @@ import '…/mForm/checkbox.css'            // 變體樣式
 **但這個選擇有不對稱的後果**:`.m-x > strong` 是 **(0,1,1)**,
 使用端 `setClass` 傳的 utility 只有 **(0,1,0)** —— **module 永遠贏,使用端再也改不動**。
 
-| 情況 | 做法 |
-|---|---|
-| module 全權決定 | 後代選擇器 + 變數 ✓ |
+| 情況               | 做法                                                                          |
+| ------------------ | ----------------------------------------------------------------------------- |
+| module 全權決定    | 後代選擇器 + 變數 ✓                                                           |
 | **使用端要能決定** | 補 `setClass` key,`<strong :class="setClass.strong">`,module **不設**那個屬性 |
-| 預設值 + 可覆蓋 | 後代選擇器**做不到**,改用 modifier 由 module 提供選項 |
+| 預設值 + 可覆蓋    | 後代選擇器**做不到**,改用 modifier 由 module 提供選項                         |
 
 「使用端將來會不會想改」**看程式碼判斷不出來**,猜錯要回頭改 module 加 template。
 所以**拆到語意標籤就停下來問使用者**:這個 `<strong>` 的字級 / 顏色要不要能傳?
@@ -173,13 +179,13 @@ import '…/mForm/checkbox.css'            // 變體樣式
 
 ## ⚠️ 這幾個屬性不能用 tailwind 寫,而且都不會報錯
 
-| 屬性 | 寫法 | 用 tailwind 會怎樣 |
-|---|---|---|
-| `border-width` | 原生 `border-width: var(--x-border)` | production 壓成 `border` shorthand,`var()` 讓整條失效 |
-| `box-shadow` | 原生 `box-shadow: var(--x-shadow)` | `shadow-[--x]` 被當成 shadow **color**,`box-shadow` 根本不出現 |
-| `font-size` | `text-[length:--x-text-size]` | 少了 `length:` 會變成 `color: var(…)` |
-| `border-color` | `border-[--x-border-color]` ✓ | 沒問題,正常產出 |
-| `column-gap` | `gap-x-[var(--x-gap,0px)]` ✓ | 沒問題,`var()` fallback 可用 |
+| 屬性           | 寫法                                 | 用 tailwind 會怎樣                                             |
+| -------------- | ------------------------------------ | -------------------------------------------------------------- |
+| `border-width` | 原生 `border-width: var(--x-border)` | production 壓成 `border` shorthand,`var()` 讓整條失效          |
+| `box-shadow`   | 原生 `box-shadow: var(--x-shadow)`   | `shadow-[--x]` 被當成 shadow **color**,`box-shadow` 根本不出現 |
+| `font-size`    | `text-[length:--x-text-size]`        | 少了 `length:` 會變成 `color: var(…)`                          |
+| `border-color` | `border-[--x-border-color]` ✓        | 沒問題,正常產出                                                |
+| `column-gap`   | `gap-x-[var(--x-gap,0px)]` ✓         | 沒問題,`var()` fallback 可用                                   |
 
 共通原因:**tailwind 推斷不出 arbitrary value 的型別時一律當成顏色**。
 
@@ -215,10 +221,10 @@ module 的 `common.css` **無條件**套 `text-[--x-color]` / `bg-[--x-bg-color]
 
 ## 字級定在哪:看組件是不是「固定位置」
 
-| 組件性質 | 字級放哪 | 例子 |
-|---|---|---|
-| **固定位置、全站長一樣** | module 自己定,走 `:root` 變數(`--x-text-size`,分三斷點) | 麵包屑、分頁器、mNav、mFooter |
-| **到處複用、每處都不同** | **父系 `setClass` 傳 tailwind class**,module 不定 `text-*` | 按鈕、mForm 全系列、mTag |
+| 組件性質                 | 字級放哪                                                   | 例子                          |
+| ------------------------ | ---------------------------------------------------------- | ----------------------------- |
+| **固定位置、全站長一樣** | module 自己定,走 `:root` 變數(`--x-text-size`,分三斷點)    | 麵包屑、分頁器、mNav、mFooter |
+| **到處複用、每處都不同** | **父系 `setClass` 傳 tailwind class**,module 不定 `text-*` | 按鈕、mForm 全系列、mTag      |
 
 第二類沒有對應 `setClass` key 就**補一個**,並把原本的值**補回每一個使用端**(否則字級會變成繼承)。
 使用端根本沒管道可傳(後台編輯器存的 class)才留在 module。分不出來就問使用者。
@@ -244,14 +250,14 @@ padding / margin / border-radius 的 modifier 有層級(整體 → 軸向 → �
 **同一個組件只要用到一個以上的層級,變數就建在最細的那一層**,
 較粗的 modifier 同時設它涵蓋的每個細變數,`common.css` 用最細的 utility 分開取。
 
-| 用到的 modifier | 建立的變數 |
-|---|---|
-| 只有 `--p-*` | `--x-p` |
+| 用到的 modifier                            | 建立的變數                       |
+| ------------------------------------------ | -------------------------------- |
+| 只有 `--p-*`                               | `--x-p`                          |
 | `--p-*` + `--px-*` / `--py-*` / `--pb-*` … | `--x-pt` / `-pr` / `-pb` / `-pl` |
-| 只有 `--rounded-*` | `--x-rounded` |
-| `--rounded-*` + `--rounded-t/-b-*` | `--x-rounded-t` / `-rounded-b` |
-| `--rounded-*` + `--rounded-x/-y-*` | `--x-rounded-x` / `-rounded-y` |
-| 出現任何單角 `--rounded-tl/-tr/-bl/-br-*` | 四個角各一個 |
+| 只有 `--rounded-*`                         | `--x-rounded`                    |
+| `--rounded-*` + `--rounded-t/-b-*`         | `--x-rounded-t` / `-rounded-b`   |
+| `--rounded-*` + `--rounded-x/-y-*`         | `--x-rounded-x` / `-rounded-y`   |
+| 出現任何單角 `--rounded-tl/-tr/-bl/-br-*`  | 四個角各一個                     |
 
 不這樣做的話,覆寫關係會取決於 tailwind 的輸出順序而不是你寫的順序。
 另外**使用端若已經在用 tailwind 傳某個細粒度**(例如 `m:rounded-b-[20px]`),
@@ -269,9 +275,9 @@ padding / margin / border-radius 的 modifier 有層級(整體 → 軸向 → �
 
 **不沉默,也不打斷** —— 這兩件事要同時成立:
 
-| | 做法 |
-|---|---|
-| **每一輪都列** | 只要違規還在,清單每一輪都會出現。不去重、上一輪列過不算數、使用者上次說「先不用」也不算數。**要它安靜的唯一方式是把違規修掉。** |
+|                  | 做法                                                                                                                                                    |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **每一輪都列**   | 只要違規還在,清單每一輪都會出現。不去重、上一輪列過不算數、使用者上次說「先不用」也不算數。**要它安靜的唯一方式是把違規修掉。**                         |
 | **不主動彈問句** | **不要呼叫 AskUserQuestion 問「要不要現在修」** —— 同一份警告使用者存檔時已經在終端機 / 輸出面板看過了,那裡就寫著「要修就打『修正』」。主動權在他手上。 |
 
 使用者說「修正」「好」「幫我改」時**直接動手**,不用再問一次是哪個檔案 —— 清單就在上下文裡。

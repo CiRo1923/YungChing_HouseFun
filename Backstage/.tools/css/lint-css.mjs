@@ -16,18 +16,8 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import {
-  SHARED_COLOR_CSS_PATH,
-  isColorCssPath,
-  loadDefinedColorVars,
-} from './color-order.mjs'
-import {
-  SCAN_TARGETS,
-  checkSharedColors,
-  isScannable,
-  lintFile,
-  listFiles,
-} from './lint-core.mjs'
+import { SHARED_COLOR_CSS_PATH, isColorCssPath, loadDefinedColorVars } from './color-order.mjs'
+import { SCAN_TARGETS, checkSharedColors, isScannable, lintFile, listFiles } from './lint-core.mjs'
 
 import { BOLD, CYAN, DIM, GREEN, RED, RESET, YELLOW } from './colors.mjs'
 

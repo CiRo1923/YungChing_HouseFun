@@ -62,5 +62,3 @@ const onIsCasePriceIncludeParkingChange = () => {
     </li>
   </ul>
 </template>
-
-<style></style>

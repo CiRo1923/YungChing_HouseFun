@@ -102,5 +102,3 @@ const onClick = async () => {
     />
   </div>
 </template>
-
-<style lang="stylus"></style>

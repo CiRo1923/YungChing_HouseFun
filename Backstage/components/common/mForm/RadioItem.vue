@@ -119,11 +119,7 @@ const onChange = () => {
             :disabled="config.isDisabled"
             @change="onChange"
           />
-          <CommonSvgIcon
-            icon="icon_check_solid"
-            class="m-form-icon"
-            :class="setClass.icon"
-          />
+          <CommonSvgIcon icon="icon_check_solid" class="m-form-icon" :class="setClass.icon" />
           <div class="m-form-radio-item-label" :class="setClass.label">
             <slot />
           </div>
@@ -141,4 +137,3 @@ const onChange = () => {
     </ErrorMessage>
   </div>
 </template>
-

@@ -22,5 +22,3 @@ const { customData } = storeToRefs(popup)
     </div>
   </BuyCommonCustomPopup>
 </template>
-
-<style lang="postcss"></style>

@@ -31,5 +31,3 @@ const { apiData } = storeToRefs(buyPublish)
     <template #rearAssist>樓</template>
   </CommonMFormInput>
 </template>
-
-<style></style>

@@ -35,5 +35,3 @@ const options = readonly([
     </template>
   </BuyMTabCheck>
 </template>
-
-<style></style>

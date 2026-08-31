@@ -48,5 +48,3 @@ const onClick = (item) => {
     />
   </div>
 </template>
-
-<style lang="postcss"></style>

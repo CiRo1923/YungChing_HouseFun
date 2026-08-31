@@ -12,5 +12,3 @@ const items = readonly({
 <template>
   <PageBuyPublishBasicTabItem :data="items" />
 </template>
-
-<style></style>

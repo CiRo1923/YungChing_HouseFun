@@ -32,5 +32,3 @@ const setClass = computed(() => {
     <b class="font-medium">{{ props.label }}</b>
   </p>
 </template>
-
-<style lang="postcss"></style>

@@ -961,9 +961,7 @@ watch(
           @drop="(event) => onAppendButtonDrop(event, handleChange, validate)"
           v-if="hasAppendButton"
         >
-          <div
-            class="m-upload-multiple-append-body"
-          >
+          <div class="m-upload-multiple-append-body">
             <CommonSvgIcon
               class="m-upload-multiple-append-icon"
               :icon="hasImages ? 'icon_plus_circle' : 'icon_upload'"
@@ -986,4 +984,3 @@ watch(
     <BuyMErrorMessageElem :message="message" />
   </ErrorMessage>
 </template>
-

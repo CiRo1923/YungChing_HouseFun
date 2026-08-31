@@ -21,5 +21,3 @@ const note = shallowReadonly({
     }"
   />
 </template>
-
-<style lang="postcss"></style>

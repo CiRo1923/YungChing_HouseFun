@@ -63,5 +63,3 @@ const data = shallowReadonly({
     }"
   />
 </template>
-
-<style></style>

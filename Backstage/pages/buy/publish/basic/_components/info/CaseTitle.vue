@@ -45,5 +45,3 @@ const remainingWordCount = computed(() => {
     </template>
   </CommonMFormInput>
 </template>
-
-<style></style>

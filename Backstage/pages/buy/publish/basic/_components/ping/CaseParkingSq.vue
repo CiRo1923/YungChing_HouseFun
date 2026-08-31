@@ -35,5 +35,3 @@ const onParkingSqBlur = () => {
     <template #rearAssist>{{ pingUnitLabel }}</template>
   </CommonMFormInput>
 </template>
-
-<style></style>

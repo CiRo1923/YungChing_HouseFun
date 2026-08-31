@@ -44,5 +44,3 @@ onResetPojectData('renewal')
     </BuyMCardDefault>
   </div>
 </template>
-
-<style lang="postcss"></style>

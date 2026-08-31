@@ -97,5 +97,3 @@ onMounted(() => {
   <PageBuyListPopupCommentsReply />
   <PageBuyListPopupRemove />
 </template>
-
-<style></style>

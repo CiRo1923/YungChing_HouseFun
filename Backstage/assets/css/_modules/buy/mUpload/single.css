@@ -50,7 +50,7 @@
 }
 
 .m-upload-single-icon {
-  @apply shrink-0 h-[--upload-single-icon-size] w-[--upload-single-icon-size];
+  @apply h-[--upload-single-icon-size] w-[--upload-single-icon-size] shrink-0;
 }
 
 .m-upload-single-remove {

@@ -1,7 +1,5 @@
 .m-tag {
-  @apply relative inline-flex items-center gap-x-[--tag-gap-x] overflow-hidden rounded-full
-    h-[--tag-h] px-[--tag-px] py-[--tag-py]
-    bg-[--tag-bg-color] text-[--tag-color] transition-colors duration-300;
+  @apply relative inline-flex h-[--tag-h] items-center gap-x-[--tag-gap-x] overflow-hidden rounded-full bg-[--tag-bg-color] px-[--tag-px] py-[--tag-py] text-[--tag-color] transition-colors duration-300;
 }
 
 .m-tag-element {

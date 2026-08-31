@@ -41,5 +41,3 @@ const onParkingPriceBlur = () => {
     <template #rearAssist>萬</template>
   </CommonMFormInput>
 </template>
-
-<style></style>

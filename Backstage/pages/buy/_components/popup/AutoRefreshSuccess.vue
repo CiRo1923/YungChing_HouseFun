@@ -1,5 +1,3 @@
-<script setup></script>
-
 <template>
   <BuyCommonCustomPopup
     id="popupAutoRefreshSuccess"
@@ -20,5 +18,3 @@
     </div>
   </BuyCommonCustomPopup>
 </template>
-
-<style lang="postcss"></style>

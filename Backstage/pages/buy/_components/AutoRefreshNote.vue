@@ -27,5 +27,3 @@ const data = shallowReadonly({
     }"
   />
 </template>
-
-<style lang="postcss"></style>

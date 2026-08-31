@@ -9,10 +9,10 @@
 
 **不沉默,也不打斷。** 這兩件事要同時成立,缺一個都不對:
 
-| | 做法 | 為什麼 |
-|---|---|---|
-| **每一輪都列** | 只要違規還在,清單每一輪都會出現。**不去重** —— 上一輪列過不算數,使用者上次說「先不用」也不算數。 | 沉默會讓違規靜靜留著,讓人以為已經處理完了。**要它不再出現的唯一方式,是把違規修掉。** |
-| **不主動彈問句** | **不要呼叫 AskUserQuestion 問「要不要現在修」。** | 同一份警告使用者存檔時已經在終端機 / 輸出面板看過了,那裡就寫著「要修就打『修正』」。再彈一次只是重複打斷。 |
+|                  | 做法                                                                                             | 為什麼                                                                                                     |
+| ---------------- | ------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| **每一輪都列**   | 只要違規還在,清單每一輪都會出現。**不去重** —— 上一輪列過不算數,使用者上次說「先不用」也不算數。 | 沉默會讓違規靜靜留著,讓人以為已經處理完了。**要它不再出現的唯一方式,是把違規修掉。**                       |
+| **不主動彈問句** | **不要呼叫 AskUserQuestion 問「要不要現在修」。**                                                | 同一份警告使用者存檔時已經在終端機 / 輸出面板看過了,那裡就寫著「要修就打『修正』」。再彈一次只是重複打斷。 |
 
 使用者說「修正」「好」「幫我改」時**直接動手**,不用再問一次是哪個檔案 —— 清單就在上下文裡。
 他沒開口就不要修、也不要催,主動權在他手上。
@@ -38,13 +38,13 @@
 
 ## 四層守門
 
-| 機制 | 何時生效 | 行為 |
-|---|---|---|
-| [.vite/css-guard.mjs](../../.vite/css-guard.mjs) | 編輯器存檔,**需 `npm run dev` 執行中** | 色票檔自動排序、其他檔案印紅色警告到 dev 終端機 |
+| 機制                                                                            | 何時生效                                                         | 行為                                                                                                                                      |
+| ------------------------------------------------------------------------------- | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| [.vite/css-guard.mjs](../../.vite/css-guard.mjs)                                | 編輯器存檔,**需 `npm run dev` 執行中**                           | 色票檔自動排序、其他檔案印紅色警告到 dev 終端機                                                                                           |
 | [.vscode/settings.json](../../.vscode/settings.json) 的 `emeraldwalk.runonsave` | 編輯器存檔,**不需 dev server**(要裝擴充 `emeraldwalk.RunOnSave`) | 跑 [.tools/css/guard-file.mjs](../../.tools/css/guard-file.mjs):色票檔自動排序 + 逐筆列出違規,**有違規時自動彈出**「Run On Save」輸出面板 |
-| [.claude/hooks/cssGuard.js](../hooks/cssGuard.js) | **Claude 用 Write / Edit 寫檔**,隨時 | 自動排序 + 違規清單回報到對話(背景資訊,不主動彈問句) |
-| [.claude/hooks/cssGuardPrompt.js](../hooks/cssGuardPrompt.js) | **使用者送出訊息時**(補「自己存檔」的情境) | 掃追蹤清單 + 工作區有改動的 .vue / .css:色票檔自動排序 + 帶出違規清單 |
-| [.githooks/pre-commit](../../.githooks/pre-commit) | `git commit` 時,**不依賴 dev 或編輯器** | 色票檔自動排序並加入本次 commit;staged 檔案的違規印警告後照常 commit |
+| [.claude/hooks/cssGuard.js](../hooks/cssGuard.js)                               | **Claude 用 Write / Edit 寫檔**,隨時                             | 自動排序 + 違規清單回報到對話(背景資訊,不主動彈問句)                                                                                      |
+| [.claude/hooks/cssGuardPrompt.js](../hooks/cssGuardPrompt.js)                   | **使用者送出訊息時**(補「自己存檔」的情境)                       | 掃追蹤清單 + 工作區有改動的 .vue / .css:色票檔自動排序 + 帶出違規清單                                                                     |
+| [.githooks/pre-commit](../../.githooks/pre-commit)                              | `git commit` 時,**不依賴 dev 或編輯器**                          | 色票檔自動排序並加入本次 commit;staged 檔案的違規印警告後照常 commit                                                                      |
 
 **「存檔就看到警告,想修的時候一句話就修」是這樣拼起來的**:
 
@@ -94,6 +94,7 @@
 
   ⚠️ 這兩個 exit code 是那個設定的依據,**改 `guard-file.mjs` 時不要動它們** ——
   一律 exit 0 的話面板就永遠不會彈,一律 exit 1 則每次存檔都彈。
+
 - **dev server 那層用 `server.watcher` 而不是 `handleHotUpdate`** ——
   後者只對「已經進模組圖」的檔案觸發,存到當前頁面沒載入的組件時完全不會有反應。
 
@@ -105,11 +106,11 @@
 
 **存檔那一層整層失效** —— 它是唯一「你打字的當下就回報」的機制,沒有它:
 
-| 仍然有效 | 失效 |
-|---|---|
-| 對話那層(`cssGuardPrompt.js` 靠 `git status` 掃改動過的檔案,不依賴任何擴充) | 存檔時的即時警告與面板彈出 |
-| `git commit` 的 pre-commit | 存檔時的色票檔自動排序 |
-| dev server 那層(**前提是 `npm run dev` 有在跑**) | `pending.json` 接力棒 —— 「存了檔但內容沒變」或「改動已 commit」的情況對話那層會漏掉 |
+| 仍然有效                                                                    | 失效                                                                                 |
+| --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| 對話那層(`cssGuardPrompt.js` 靠 `git status` 掃改動過的檔案,不依賴任何擴充) | 存檔時的即時警告與面板彈出                                                           |
+| `git commit` 的 pre-commit                                                  | 存檔時的色票檔自動排序                                                               |
+| dev server 那層(**前提是 `npm run dev` 有在跑**)                            | `pending.json` 接力棒 —— 「存了檔但內容沒變」或「改動已 commit」的情況對話那層會漏掉 |
 
 所以 `npm install` 會跑 [.tools/check-vscode-extensions.mjs](../../.tools/check-vscode-extensions.mjs)
 檢查並印出黃色警告,說明用途、沒裝的後果與安裝指令;
@@ -143,19 +144,75 @@
 
 **一定要問,不要自己決定的**:
 
-| 岔路 | 為什麼看程式碼判斷不出來 |
-|---|---|
-| 這個屬性**要不要開 modifier** | 取決於「將來各頁面會不會想各自指定」,不是現在有幾種值 |
-| 字級歸 module 還是**父系 `setClass`** | 取決於這個組件是不是「固定位置」,那是設計意圖 |
-| 語意標籤(`strong` / `em`)**要不要給 class** | 取決於使用端將來想不想改它的字級 / 顏色 |
-| 某個斷點沒有設定,是**刻意例外還是漏寫** | 兩者長得一模一樣,只有原作者知道 |
-| 非 px 的值(`duration-*`、`rounded-full`、`w-full`)**要不要變數化** | 規則只明確要求 px;這些是灰色地帶 |
-| 這支 css **沒人 import,要重寫還是刪** | 可能是還沒接上,也可能是廢棄品 |
-| modifier **定義了卻沒人用**,要留還是刪 | 可能是預留給還沒做的頁面 |
-| template 綁了 class **但沒有對應 CSS** | 可能是刻意不做,也可能是漏掉(實際遇過兩種都有) |
+| 岔路                                                               | 為什麼看程式碼判斷不出來                              |
+| ------------------------------------------------------------------ | ----------------------------------------------------- |
+| 這個屬性**要不要開 modifier**                                      | 取決於「將來各頁面會不會想各自指定」,不是現在有幾種值 |
+| 字級歸 module 還是**父系 `setClass`**                              | 取決於這個組件是不是「固定位置」,那是設計意圖         |
+| 語意標籤(`strong` / `em`)**要不要給 class**                        | 取決於使用端將來想不想改它的字級 / 顏色               |
+| 某個斷點沒有設定,是**刻意例外還是漏寫**                            | 兩者長得一模一樣,只有原作者知道                       |
+| 非 px 的值(`duration-*`、`rounded-full`、`w-full`)**要不要變數化** | 規則只明確要求 px;這些是灰色地帶                      |
+| 這支 css **沒人 import,要重寫還是刪**                              | 可能是還沒接上,也可能是廢棄品                         |
+| modifier **定義了卻沒人用**,要留還是刪                             | 可能是預留給還沒做的頁面                              |
+| template 綁了 class **但沒有對應 CSS**                             | 可能是刻意不做,也可能是漏掉(實際遇過兩種都有)         |
 
 **問的方式**:直接說「這個我判斷不出來」,把兩三個選項與各自的後果列出來,
 不要假裝有把握然後埋一個註解說「暫時這樣」。
+
+### 「沒使用端的 modifier」刪之前先做三件事
+
+2026-08-31 在姊妹專案 Official 稽核時找出 9 個沒有使用端的 modifier,決定**刪 7 個、留 2 個** ——
+差別在「刪掉之後失去什麼」:
+
+| | 判斷 | 實例 |
+|---|---|---|
+| **可以刪** | 它只是一個**選項**,刪掉不影響任何現有畫面,也不會讓其他宣告變成死碼 | `--border-gray-db`(mTag)、`--text-orange-f74c`(mAnchor)、`--resize-x` / `-y`(mForm)、`--gap-x-30` / `-24` / `-10`(mSeparator) |
+| **先問再說** | 刪掉等於**移除一個功能**:會連帶讓一批變數變孤兒、讓版型檔的 `@apply` 讀不到值 | `--pagination-point` / `--pagination-bar`(mSwiper)—— 連帶 19 個變數與 bullet 的整段版型,實質是移除分頁點的兩種造型。**已決定保留,見那支檔案的註解** |
+
+**刪之前一定要查的三件事**(缺一件就可能刪錯):
+
+1. **有沒有動態拼接的 class** —— 樣板字面值拼出來的 modifier(`--` 接變數)grep 抓不到。
+   先全案搜 `'--'` 與 `--` 後面接變數的寫法,確認哪些組件會拼 class
+   (Official 只有 mTooltip 的 `--<align>-x` / `--<side>-y` 與 mPopup 的 `--<mode>`)。
+2. **組件本身有沒有對應的 props / 綁定** —— `--resize-x` 那組就是查了才發現
+   TextArea.vue **完全沒有 resize 相關程式碼**,不是「使用端還沒用」而是功能沒接上。
+3. **刪掉會不會讓別的東西變孤兒** —— 那些 modifier 設定的 `-pc-` / `-tablet-` / `-mobile-`
+   值變數、以及版型檔取用它們的 `@apply`,都要一起清掉,否則留下讀不到值的死宣告。
+
+**刪掉後在檔頭留紀錄**(照 [deleted-components.md](./deleted-components.md) 的慣例):
+刪了什麼、為什麼、要加回來時從 git 撈、格式照哪一組寫。
+mForm/textarea.css 與 mSeparator/variables.css 的檔頭就是這樣寫的。
+
+### 「沒有對應 CSS 的 class」先查這四種正當理由,再問
+
+這條岔路**大多數情況是刻意的**,不是漏掉 —— 2026-08-31 在姊妹專案 Official 全案稽核,
+找出 15 個沒有對應 CSS 的 `m-*` class,查完發現**一個都不用補**。
+所以遇到時先照下面判斷,只有四種都不符合才需要問。
+
+| 正當理由 | 怎麼認 | 稽核時的實例 |
+|---|---|---|
+| **1. 根本不是 class** | 字串長得像 class,其實是事件名 / 常數 | `new Event('m-swiper-update')` —— 自訂事件名 |
+| **2. `setClass` 的掛載點** | 同一個標籤上有 `:class="setClass.xxx"` | `.m-anchor-text` + `setClass.text`、`.m-popup-note` + `setClass.note` 等 7 個 |
+| **3. 樣式在父層,靠繼承或容器** | 字級 / 顏色定在父容器,子元素繼承;或間距由父層的 `gap` 負責 | `.m-loading-text` 的字級在 `.m-loading-container`;`.m-sort-item` 的間距在 `.m-sort-list` 的 `gap-x` |
+| **4. 純結構標記** | SVG 的 `<g>` 群組、只為包住一組元素的容器,樣式在子元素上 | `.m-chart-grid` / `.m-chart-radial` |
+
+**怎麼確認「本來就沒有」而不是「拆 module 時漏掉」** —— 兩條都要查:
+
+```powershell
+# 1. 歷史上有沒有存在過這個選擇器(注意前面的點,只會命中 CSS 不會命中 template)
+git log --all --oneline -S ".m-chart-grid"
+
+# 2. 該 class 首次出現時,template 那一行有沒有夾著 tailwind class
+git show <首次出現的 commit>:<檔案> | Select-String "m-chart-grid"
+```
+
+第 1 條 0 筆 **且** 第 2 條顯示當時就只有這個 class(沒有 tailwind 混在一起)——
+那就是**本來就沒有樣式**,不是拆的時候搬走 tailwind 卻忘了寫 CSS。
+
+> ⚠️ 第 1 條的搜尋字串**一定要帶點**(`.m-chart-grid`)。不帶點會連 template 的
+> `class="m-chart-grid"` 一起命中,每個 class 都有一堆 commit,查了等於沒查。
+
+這幾種都留著沒有壞處:class 在,將來要上樣式時選擇器已經就位;
+而 `setClass` 掛載點與「樣式在父層」兩種**本來就該沒有 CSS**,補了反而會蓋掉使用端。
 
 ---
 
@@ -169,12 +226,12 @@
 `screens` / `fontFamily` / `fontSize` / `boxShadow` 直接寫在 `theme`,**tailwind 的預設值整組被換掉**;
 只有 `content` / `width` / `dropShadow` / `transitionProperty` 在 `extend` 裡是「加上去」。
 
-| 被覆寫的 | 後果 |
-|---|---|
-| `fontSize` | **沒有 `text-sm` / `text-base` / `text-lg`**,只剩 `vmp` / `vmt` / `vmm` / `vmmls` 四個 vw 級距。字級一律寫 arbitrary value(`text-[16px]` / `text-[length:--x-text-size]`) |
-| `screens` | 沒有 `sm` / `md` / `lg` / `xl`,全部換成本專案的斷點(見下) |
-| `boxShadow` | **一個 preset 都沒有** —— `tailwind.extend.js` 刻意不放陰影(值裡必定帶色碼,而那支檔案在 lint 掃描範圍外)。所以 `shadow-sm` / `shadow-md` / `shadow-card` 全部無效,陰影一律走原生 `box-shadow: var(--x-shadow)` + module 自己的斷點變數 |
-| `fontFamily` | 沒有 `font-sans` / `font-serif` / `font-mono`,只有 `font-default` |
+| 被覆寫的     | 後果                                                                                                                                                                                                                                   |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `fontSize`   | **沒有 `text-sm` / `text-base` / `text-lg`**,只剩 `vmp` / `vmt` / `vmm` / `vmmls` 四個 vw 級距。字級一律寫 arbitrary value(`text-[16px]` / `text-[length:--x-text-size]`)                                                              |
+| `screens`    | 沒有 `sm` / `md` / `lg` / `xl`,全部換成本專案的斷點(見下)                                                                                                                                                                              |
+| `boxShadow`  | **一個 preset 都沒有** —— `tailwind.extend.js` 刻意不放陰影(值裡必定帶色碼,而那支檔案在 lint 掃描範圍外)。所以 `shadow-sm` / `shadow-md` / `shadow-card` 全部無效,陰影一律走原生 `box-shadow: var(--x-shadow)` + module 自己的斷點變數 |
+| `fontFamily` | 沒有 `font-sans` / `font-serif` / `font-mono`,只有 `font-default`                                                                                                                                                                      |
 
 **這一節由 [規則 6](#規則-6不要用本專案不存在的-tailwind-class) 守門** ——
 `checkTailwindTheme` 會把這些寫法抓出來,不必靠記憶。
@@ -184,16 +241,16 @@
 全部是 `raw` media query(不是單純的 min-width),所以**順序不遵守 tailwind 的行動優先直覺**,
 要靠 media query 本身判斷誰蓋誰。
 
-| 斷點 | 涵蓋 |
-|---|---|
-| `m` | 手機(含橫向的矮螢幕) |
-| `t` | 平板 |
-| `p` | `min-width: 1024px` |
-| `tm` | 平板 + 手機 |
-| `pt` | PC + 平板 |
-| `pMin` / `pMax` | PC 的窄 / 寬兩段 |
-| `mLandscape` | 手機橫向 |
-| `notsupport` / `firefox` / `IE` | 瀏覽器偵測用 |
+| 斷點                            | 涵蓋                 |
+| ------------------------------- | -------------------- |
+| `m`                             | 手機(含橫向的矮螢幕) |
+| `t`                             | 平板                 |
+| `p`                             | `min-width: 1024px`  |
+| `tm`                            | 平板 + 手機          |
+| `pt`                            | PC + 平板            |
+| `pMin` / `pMax`                 | PC 的窄 / 寬兩段     |
+| `mLandscape`                    | 手機橫向             |
+| `notsupport` / `firefox` / `IE` | 瀏覽器偵測用         |
 
 模組的三段 `@screen p` / `@screen t` / `@screen m` 就是對應 `p` / `t` / `m`;
 `pt` 與 `tm` 是複合斷點,**會同時落在兩段裡**,寫 modifier 時要一起收(見規則 4)。
@@ -229,15 +286,15 @@
 
 ### 違規寫法
 
-| 違規寫法 | 範例 |
-|---|---|
-| 寫死色碼 | `color: #333`、`shadow-[0_2px_8px_0_#0000001a]` |
-| 寫死 `rgb()` / `rgba()` / `hsl()` 字面值 | `background: rgba(0, 0, 0, 0.5)` |
-| `rgba(var(--x-rgb), …)` 舊寫法 | `rgba(var(--black-rgb), 0.1)` → 改用 `var(--black-1a)` |
-| 在色票檔以外定義顏色變數 | module 自己的 `:root { --popup-overlay-bg-color: #000000b3 }` |
-| tailwind 內建色票 | `text-red-500`、`bg-black`、`shadow-black` |
-| CSS 具名色 | `color: white`、`border: 1px solid black` |
-| **取用不存在的色票變數** | `var(--blue-08dc)` 但色票檔沒有這個變數 |
+| 違規寫法                                 | 範例                                                          |
+| ---------------------------------------- | ------------------------------------------------------------- |
+| 寫死色碼                                 | `color: #333`、`shadow-[0_2px_8px_0_#0000001a]`               |
+| 寫死 `rgb()` / `rgba()` / `hsl()` 字面值 | `background: rgba(0, 0, 0, 0.5)`                              |
+| `rgba(var(--x-rgb), …)` 舊寫法           | `rgba(var(--black-rgb), 0.1)` → 改用 `var(--black-1a)`        |
+| 在色票檔以外定義顏色變數                 | module 自己的 `:root { --popup-overlay-bg-color: #000000b3 }` |
+| tailwind 內建色票                        | `text-red-500`、`bg-black`、`shadow-black`                    |
+| CSS 具名色                               | `color: white`、`border: 1px solid black`                     |
+| **取用不存在的色票變數**                 | `var(--blue-08dc)` 但色票檔沒有這個變數                       |
 
 最後一條特別要小心:取不到值時**畫面上不會有顏色,也不會報錯**,只能靠 lint 抓。
 
@@ -250,10 +307,14 @@
 
 ```js
 // ✗ 色碼寫死在設定檔裡
-boxShadow: { card: '0 0 5px 0 #00000026' }
+boxShadow: {
+  card: '0 0 5px 0 #00000026'
+}
 
 // ✓ 走色票變數
-boxShadow: { card: '0 0 5px 0 var(--black-26)' }
+boxShadow: {
+  card: '0 0 5px 0 var(--black-26)'
+}
 ```
 
 `var()` 在這裡是安全的 —— 色票檔由 [nuxt.config.ts](../../nuxt.config.ts) 全域載入、定義在 `:root`,
@@ -276,11 +337,11 @@ tailwind 產出的 `--tw-shadow: 0 0 .3125rem 0 var(--black-26)` 執行時解析
 色票檔在其他顏色規則裡是豁免的(它本來就該有顏色),但這三種寫法在色票檔裡出現同樣是錯的,
 那裡正是它們的原生棲地:
 
-| 編號 | 抓什麼 | 改成 |
-|---|---|---|
-| 1-f2 | `rgba(var(--x-rgb), .5)` 的**使用端** | `var(--black-80)` |
-| 1-g | `hexToRgb(` 的**呼叫端** | 8 碼 hex |
-| 1-h | `--xxx-rgb:` 的**定義端** | 直接在色票檔定義 8 碼 hex |
+| 編號 | 抓什麼                                | 改成                      |
+| ---- | ------------------------------------- | ------------------------- |
+| 1-f2 | `rgba(var(--x-rgb), .5)` 的**使用端** | `var(--black-80)`         |
+| 1-g  | `hexToRgb(` 的**呼叫端**              | 8 碼 hex                  |
+| 1-h  | `--xxx-rgb:` 的**定義端**             | 直接在色票檔定義 8 碼 hex |
 
 ### `-rgb` 衍生變數
 
@@ -298,23 +359,23 @@ tailwind 產出的 `--tw-shadow: 0 0 .3125rem 0 var(--black-26)` 執行時解析
 
 格式為 **`--<色名>-<色碼縮寫>`**,色碼縮寫依 hex 型態決定:
 
-| 型態 | 取法 | 範例 |
-|---|---|---|
-| 6 碼、三組不同 | 第 **1、3、5** 碼 + 第 **6** 碼 | `#276ee1` → `--blue-26e1`、`#2f3338` → `--gray-2338` |
-| 6 碼、純灰(R=G=B) | 前 **2** 碼 | `#f7f7f7` → `--gray-f7` |
-| 3 碼 hex | 原樣照抄 | `#999` → `--gray-999` |
-| 純黑 / 純白 | 不加色碼 | `#fff` → `--white`、`#000` → `--black` |
+| 型態              | 取法                            | 範例                                                 |
+| ----------------- | ------------------------------- | ---------------------------------------------------- |
+| 6 碼、三組不同    | 第 **1、3、5** 碼 + 第 **6** 碼 | `#276ee1` → `--blue-26e1`、`#2f3338` → `--gray-2338` |
+| 6 碼、純灰(R=G=B) | 前 **2** 碼                     | `#f7f7f7` → `--gray-f7`                              |
+| 3 碼 hex          | 原樣照抄                        | `#999` → `--gray-999`                                |
+| 純黑 / 純白       | 不加色碼                        | `#fff` → `--white`、`#000` → `--black`               |
 
 **帶透明度**時,在上述縮寫後**用 `-` 隔開再接 alpha 兩碼**;
 純黑白因為沒有色碼縮寫,只留 alpha 兩碼、不加額外的分隔:
 
-| 色值 | 變數名 | |
-|---|---|---|
-| `#87b90d66` | `--green-8b0d-66` | 色碼 `8b0d` + alpha `66` |
-| `#e5e5e54d` | `--gray-e5-4d` | 純灰取前 2 碼 `e5` + alpha `4d` |
-| `#3333334d` | `--gray-33-4d` | 同上 |
-| `#0000001a` | `--black-1a` | 純黑沒有色碼縮寫,`1a` 就是 alpha |
-| `#ffffff4d` | `--white-4d` | 純白同理 |
+| 色值        | 變數名            |                                  |
+| ----------- | ----------------- | -------------------------------- |
+| `#87b90d66` | `--green-8b0d-66` | 色碼 `8b0d` + alpha `66`         |
+| `#e5e5e54d` | `--gray-e5-4d`    | 純灰取前 2 碼 `e5` + alpha `4d`  |
+| `#3333334d` | `--gray-33-4d`    | 同上                             |
+| `#0000001a` | `--black-1a`      | 純黑沒有色碼縮寫,`1a` 就是 alpha |
+| `#ffffff4d` | `--white-4d`      | 純白同理                         |
 
 **為什麼要那個連字號**:黏在一起會分不出哪幾碼是色碼、哪幾碼是透明度 ——
 `--gray-334d` 到底是「`#33334d` 這個顏色」還是「`#333333` 加 30% 透明」?
@@ -362,32 +423,32 @@ alpha 兩碼的換算為 `Math.round(透明度 × 255).toString(16)`,與
 ## 規則 3:module 拆成資料夾,共用與變體分開
 
 組件樣式以「一個組件一個資料夾」組織:
-**[assets/css/_modules/&lt;頻道&gt;/&lt;組件&gt;/](../../assets/css/_modules/)**
+**[assets/css/\_modules/&lt;頻道&gt;/&lt;組件&gt;/](../../assets/css/_modules/)**
 (`common/` 為跨頻道共用組件,`buy/` 等為頻道專屬)。
 
-| 檔案 | 放什麼 |
-|---|---|
-| `variables.css` | **共用變數**:`:root` 預設值,以及 modifier(`--px-XX` / `--h-XX`)對應的變數值,依 `@screen p` / `t` / `m` 分別定義。 |
-| `common.css` | **共用版型**:所有變體共通的結構,以及 **`@screen` 的斷點對應**。可調的尺寸與顏色走 `var()`。 |
-| `<變體>Variables.css` | 該變體專屬的變數(`borderBottomVariables.css`)。 |
-| `<變體>.css` | 該變體專屬的樣式與斷點對應,整段包在 `.m-xxx { &.\-\-<變體> { … } }` 內(`borderBottom.css`)。 |
-| `<群組>Variables.css` / `<群組>.css` | **兩個以上變體共用、但不是全部變體都要**的那一層(見下)。 |
+| 檔案                                 | 放什麼                                                                                                            |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| `variables.css`                      | **共用變數**:`:root` 預設值,以及 modifier(`--px-XX` / `--h-XX`)對應的變數值,依 `@screen p` / `t` / `m` 分別定義。 |
+| `common.css`                         | **共用版型**:所有變體共通的結構,以及 **`@screen` 的斷點對應**。可調的尺寸與顏色走 `var()`。                       |
+| `<變體>Variables.css`                | 該變體專屬的變數(`borderBottomVariables.css`)。                                                                   |
+| `<變體>.css`                         | 該變體專屬的樣式與斷點對應,整段包在 `.m-xxx { &.\-\-<變體> { … } }` 內(`borderBottom.css`)。                      |
+| `<群組>Variables.css` / `<群組>.css` | **兩個以上變體共用、但不是全部變體都要**的那一層(見下)。                                                          |
 
 ### variables 檔只放「值」,版型檔放「行為」
 
 這條是 variables 與版型檔的分界線,**由工具檢查**(`checkVariablesFile`):
 
-| 放 variables 檔 | 例 |
-|---|---|
-| `:root` 的預設值 | `--form-radios-oval-element-px: 0;` |
-| modifier 對應的**具體值** | `&.\-\-px-5 { --x-px: 5px; }` |
+| 放 variables 檔                         | 例                                                   |
+| --------------------------------------- | ---------------------------------------------------- |
+| `:root` 的預設值                        | `--form-radios-oval-element-px: 0;`                  |
+| modifier 對應的**具體值**               | `&.\-\-px-5 { --x-px: 5px; }`                        |
 | modifier 指向**色票變數**(也是在設定值) | `&.\-\-text-white { --anchor-color: var(--white); }` |
 
-| 放版型檔(`common.css` / `<變體>.css`) | 例 |
-|---|---|
-| 版型宣告 | `@apply h-[--x-size];`、`border-width: var(--x-border);` |
+| 放版型檔(`common.css` / `<變體>.css`)                        | 例                                                                                                                             |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| 版型宣告                                                     | `@apply h-[--x-size];`、`border-width: var(--x-border);`                                                                       |
 | **狀態切換** —— 把 module 自己的變數指向**自己的另一個變數** | `&.\-\-border { --x-border-color: var(--x-border-on-color); }`<br>`&.\-\-checked { --x-bg-color: var(--x-checked-bg-color); }` |
-| **斷點對應** | `@screen p { .m-x { --x-size: var(--x-pc-size); } }` |
+| **斷點對應**                                                 | `@screen p { .m-x { --x-size: var(--x-pc-size); } }`                                                                           |
 
 判斷方式很簡單:**這行是在「給一個值」,還是在「切換成另一個變數」?**
 前者是值,後者是行為。`var(--white)` 這種指向色票的算給值(色票是值的來源);
@@ -431,11 +492,11 @@ alpha 兩碼的換算為 `Math.round(透明度 × 255).toString(16)`,與
 這種就開一層**群組層**,檔名用群組名(`selection.css` / `selectionVariables.css`),
 夾在共用層與變體層之間:
 
-| 層 | 檔案 | 誰吃得到 |
-|---|---|---|
-| 共用 | `variables.css` / `common.css` | mForm 全系列 |
+| 層       | 檔案                                       | 誰吃得到             |
+| -------- | ------------------------------------------ | -------------------- |
+| 共用     | `variables.css` / `common.css`             | mForm 全系列         |
 | **群組** | `selectionVariables.css` / `selection.css` | **checkbox + radio** |
-| 變體 | `checkboxVariables.css` / `checkbox.css` | 只有 checkbox |
+| 變體     | `checkboxVariables.css` / `checkbox.css`   | 只有 checkbox        |
 
 **判斷**:兩個以上變體共用 → 群組層;只有一個變體用 → 變體層。
 共用的結構不要在各變體檔裡各寫一份,更不要留在 template。
@@ -448,11 +509,11 @@ alpha 兩碼的換算為 `Math.round(透明度 × 255).toString(16)`,與
 `components/buy/mItem/SwitchItem.vue` 這種「**放在某個 module 的子資料夾**」的組件,
 它是那個 module 的變體,module 資料夾與 class 都要跟著母體走:
 
-| | ✗ | ✓ |
-|---|---|---|
-| module 資料夾 | `_modules/buy/mSwitchItem/` | `_modules/buy/mItem/` |
-| 變體檔名 | `common.css` | `switchItem.css` / `switchItemVariables.css` |
-| class | `m-switch-item-header` | `m-item-switch-header` |
+|               | ✗                           | ✓                                            |
+| ------------- | --------------------------- | -------------------------------------------- |
+| module 資料夾 | `_modules/buy/mSwitchItem/` | `_modules/buy/mItem/`                        |
+| 變體檔名      | `common.css`                | `switchItem.css` / `switchItemVariables.css` |
+| class         | `m-switch-item-header`      | `m-item-switch-header`                       |
 
 **三者要一致**:看到 `m-item-switch-*` 就知道去 `_modules/buy/mItem/switchItem.css` 找。
 如果只搬資料夾而 class 維持 `m-switch-item`,「看到 class 就能找到檔案」這條就失效了。
@@ -469,24 +530,22 @@ alpha 兩碼的換算為 `Math.round(透明度 × 255).toString(16)`,與
 
 ```js
 <script setup>
-import '@css/_modules/common/mTab/variables.css'
-import '@css/_modules/common/mTab/borderBottomVariables.css'
-import '@css/_modules/common/mTab/common.css'
-import '@css/_modules/common/mTab/borderBottom.css'
-
-// …其餘 import
+  import '@css/_modules/common/mTab/variables.css' import
+  '@css/_modules/common/mTab/borderBottomVariables.css' import
+  '@css/_modules/common/mTab/common.css' import '@css/_modules/common/mTab/borderBottom.css' //
+  …其餘 import
 </script>
 ```
 
 有群組層時插在中間,**同樣是「變數全部先定義完,版型才取用」**:
 
 ```js
-import '@css/_modules/common/mForm/variables.css'           // 共用變數
-import '@css/_modules/common/mForm/selectionVariables.css'  // 群組變數
-import '@css/_modules/common/mForm/checkboxVariables.css'   // 變體變數
-import '@css/_modules/common/mForm/common.css'              // 共用版型
-import '@css/_modules/common/mForm/selection.css'           // 群組版型
-import '@css/_modules/common/mForm/checkbox.css'            // 變體樣式
+import '@css/_modules/common/mForm/variables.css' // 共用變數
+import '@css/_modules/common/mForm/selectionVariables.css' // 群組變數
+import '@css/_modules/common/mForm/checkboxVariables.css' // 變體變數
+import '@css/_modules/common/mForm/common.css' // 共用版型
+import '@css/_modules/common/mForm/selection.css' // 群組版型
+import '@css/_modules/common/mForm/checkbox.css' // 變體樣式
 ```
 
 > 不要用 `<style src="…">`,也不要用 `<style>` 裡的 `@import`。
@@ -508,9 +567,9 @@ import '@css/_modules/common/mForm/checkbox.css'            // 變體樣式
 
 modifier 名稱就是 **tailwind 的 utility 名前面加 `--`**,不要自己另外發明說法:
 
-| ✗ | ✓ | tailwind |
-|---|---|---|
-| `--has-border-b` | `--border-b` | `border-b` |
+| ✗                 | ✓              | tailwind     |
+| ----------------- | -------------- | ------------ |
+| `--has-border-b`  | `--border-b`   | `border-b`   |
 | `--is-rounded-20` | `--rounded-20` | `rounded-20` |
 
 這樣看到 modifier 就知道它會影響哪個屬性,也不必記兩套詞彙。
@@ -521,10 +580,10 @@ modifier 名稱就是 **tailwind 的 utility 名前面加 `--`**,不要自己另
 
 拆 module 時**最基礎的判斷**,決定每個屬性寫成哪一種形式:
 
-| 情況 | 形式 | 例子 |
-|---|---|---|
-| 整個專案**各處樣式不同**,使用端要能逐頁指定 | **開 modifier**,值由 `--<屬性>-<數值>` 決定 | `--px-24` / `--py-12` / `--h-46` |
-| 整個專案**只有一種狀態**,不需要逐頁指定 | **不開 modifier**,只分 `pc` / `tablet` / `mobile` 三個值 | `--anchor-pc-border` / `--anchor-tablet-border` |
+| 情況                                        | 形式                                                     | 例子                                            |
+| ------------------------------------------- | -------------------------------------------------------- | ----------------------------------------------- |
+| 整個專案**各處樣式不同**,使用端要能逐頁指定 | **開 modifier**,值由 `--<屬性>-<數值>` 決定              | `--px-24` / `--py-12` / `--h-46`                |
+| 整個專案**只有一種狀態**,不需要逐頁指定     | **不開 modifier**,只分 `pc` / `tablet` / `mobile` 三個值 | `--anchor-pc-border` / `--anchor-tablet-border` |
 
 > **分不出來就直接問使用者**,不要自己猜 —— 猜錯的兩種代價不對稱:
 > 該開沒開,之後要加值就得整組改寫並回頭動使用端;不該開卻開了,則留下一堆沒人用的死 modifier。
@@ -537,14 +596,14 @@ modifier 名稱就是 **tailwind 的 utility 名前面加 `--`**,不要自己另
 
 這一節是拆 module 時最常回頭查的東西,依主題分成六區:
 
-| 區 | 大概在講什麼 |
-|---|---|
-| [斷點與 DOM 結構](#斷點與-dom-結構) | `@screen` 放哪、Teleport 浮層的變數會斷掉 |
-| [template 與 class](#template-與-class) | 容器別漏 `flex`、語意標籤要不要給 class、子組件用什麼接 |
-| [變數的 base 與粒度](#變數的-base-與粒度) | 沒 base 整條讀不到、無效 `var()` 仍會參與 cascade、變數建在最小單位 |
-| [這些屬性不能用 tailwind 寫](#這些屬性不能用-tailwind-寫) | `border-width` / `box-shadow` / `font-size` / `transition` |
-| [誰決定這個屬性](#誰決定這個屬性) | 字級、顏色、hover 各自歸誰管 |
-| [值要不要開變數](#值要不要開變數) | 帶 px 一律開;`z-index` / `leading` / `tracking` / `100%` / `font-weight` 不開 |
+| 區                                                        | 大概在講什麼                                                                  |
+| --------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| [斷點與 DOM 結構](#斷點與-dom-結構)                       | `@screen` 放哪、Teleport 浮層的變數會斷掉                                     |
+| [template 與 class](#template-與-class)                   | 容器別漏 `flex`、語意標籤要不要給 class、子組件用什麼接                       |
+| [變數的 base 與粒度](#變數的-base-與粒度)                 | 沒 base 整條讀不到、無效 `var()` 仍會參與 cascade、變數建在最小單位           |
+| [這些屬性不能用 tailwind 寫](#這些屬性不能用-tailwind-寫) | `border-width` / `box-shadow` / `font-size` / `transition`                    |
+| [誰決定這個屬性](#誰決定這個屬性)                         | 字級、顏色、hover 各自歸誰管                                                  |
+| [值要不要開變數](#值要不要開變數)                         | 帶 px 一律開;`z-index` / `leading` / `tracking` / `100%` / `font-weight` 不開 |
 
 #### 斷點與 DOM 結構
 
@@ -581,11 +640,11 @@ modifier 名稱就是 **tailwind 的 utility 名前面加 `--`**,不要自己另
   使用端 `setClass` 傳的 `text-[20px]` 只有 **(0,1,0)**,**module 永遠贏**。
   也就是說,只要 module 在後代選擇器上設了某個屬性,使用端就再也改不動它。
 
-  | 情況 | 做法 |
-  |---|---|
-  | module 全權決定(全站一致) | 後代選擇器 + 變數,沒問題 |
-  | **使用端要能決定** | 補 `setClass` key,template 寫 `<strong :class="setClass.strong">`,module **不設**那個屬性 —— 仍然不需要固定 class |
-  | module 給預設值 + 使用端可覆蓋 | **後代選擇器做不到**,(0,1,1) 永遠贏。改用 modifier 由 module 提供選項 |
+  | 情況                           | 做法                                                                                                              |
+  | ------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+  | module 全權決定(全站一致)      | 後代選擇器 + 變數,沒問題                                                                                          |
+  | **使用端要能決定**             | 補 `setClass` key,template 寫 `<strong :class="setClass.strong">`,module **不設**那個屬性 —— 仍然不需要固定 class |
+  | module 給預設值 + 使用端可覆蓋 | **後代選擇器做不到**,(0,1,1) 永遠贏。改用 modifier 由 module 提供選項                                             |
 
   問題在於「使用端將來會不會想改這個屬性」**不是看程式碼就能判斷的**,猜錯的代價是
   之後要回頭改 module 加 template。所以**拆到語意標籤時就停下來問**:
@@ -593,6 +652,7 @@ modifier 名稱就是 **tailwind 的 utility 名前面加 `--`**,不要自己另
 
   不必問的只有三種明確情況:JS 要抓、同一層有多個同名標籤要分別上樣式、
   或那是 `<div>` / `<span>` 這種無語意容器(這些一律給 class)。
+
 - **注意子組件是用 `class` 還是 `setClass` 接**。使用端若是 components,
   直接寫 `<MTag class="text-[14px]">` 會踩規則 2;這種情況要**給子組件補 `setClass`**,
   而不是讓父組件硬塞 tailwind。
@@ -600,7 +660,12 @@ modifier 名稱就是 **tailwind 的 utility 名前面加 `--`**,不要自己另
   已對 `*, ::before, ::after` 輸出 `border: 0 solid`,產物裡看得到:
 
   ```css
-  *,:after,:before{box-sizing:border-box;border:0 solid #e5e7eb}
+  *,
+  :after,
+  :before {
+    box-sizing: border-box;
+    border: 0 solid #e5e7eb;
+  }
   ```
 
   寫了是多餘的。(參考專案是關掉內建 preflight、靠自家 `preflight.css` 設同一件事,
@@ -618,14 +683,20 @@ modifier 名稱就是 **tailwind 的 utility 名前面加 `--`**,不要自己另
   ```css
   /* ✗ mobile 給 0 或不定義變數 → 宣告仍在,算成 0，蓋掉使用端的 m:px-[32px] */
   /* ✓ 宣告本身只寫在有值的斷點 */
-  .m-form-filter { @apply rounded-[--form-filter-rounded] bg-[--form-filter-bg-color]; }
-  @screen pt { .m-form-filter { @apply p-[--form-filter-p]; } }
+  .m-form-filter {
+    @apply rounded-[--form-filter-rounded] bg-[--form-filter-bg-color];
+  }
+  @screen pt {
+    .m-form-filter {
+      @apply p-[--form-filter-p];
+    }
+  }
   ```
 
-  | 情況 | 做法 |
-  |---|---|
+  | 情況                                                    | 做法                                                          |
+  | ------------------------------------------------------- | ------------------------------------------------------------- |
   | 屬性**完全由 module 的 modifier 控制**,使用端不會另外傳 | `:root` 給 base(`--x-px: 0`),否則 modifier 沒帶到時整條讀不到 |
-  | **使用端也會傳同一個屬性**,而該斷點 module 原本就沒設定 | 把宣告**收進有值的斷點**,該斷點完全不寫這條 |
+  | **使用端也會傳同一個屬性**,而該斷點 module 原本就沒設定 | 把宣告**收進有值的斷點**,該斷點完全不寫這條                   |
 
 - ⚠️ **變數建在「用到的最小單位」上**(padding / margin / border-radius 都適用)。
 
@@ -633,31 +704,54 @@ modifier 名稱就是 **tailwind 的 utility 名前面加 `--`**,不要自己另
   **只要同一個組件用到一個以上的層級,變數就要建在最細的那一層**,
   較粗的 modifier 同時設它涵蓋的每一個細變數,`common.css` 也用最細的 utility 分開取。
 
-  | 組件用到的 modifier | 要建立的變數 |
-  |---|---|
-  | 只有 `--p-*` | `--x-p` 一個就好 |
-  | `--p-*` + `--px-*` / `--py-*` / `--pb-*` … | `--x-pt` / `--x-pr` / `--x-pb` / `--x-pl` |
-  | 只有 `--rounded-*` | `--x-rounded` 一個就好 |
-  | `--rounded-*` + `--rounded-t/-b-*` | `--x-rounded-t` / `--x-rounded-b` |
-  | `--rounded-*` + `--rounded-x/-y-*` | `--x-rounded-x` / `--x-rounded-y` |
-  | `--rounded-*` + 單角 `--rounded-tl/-tr/-bl/-br-*` | 四個角各一個變數 |
-  | `--rounded-t/-b/-x/-y-*` + 單角 | 四個角各一個變數 |
+  | 組件用到的 modifier                               | 要建立的變數                              |
+  | ------------------------------------------------- | ----------------------------------------- |
+  | 只有 `--p-*`                                      | `--x-p` 一個就好                          |
+  | `--p-*` + `--px-*` / `--py-*` / `--pb-*` …        | `--x-pt` / `--x-pr` / `--x-pb` / `--x-pl` |
+  | 只有 `--rounded-*`                                | `--x-rounded` 一個就好                    |
+  | `--rounded-*` + `--rounded-t/-b-*`                | `--x-rounded-t` / `--x-rounded-b`         |
+  | `--rounded-*` + `--rounded-x/-y-*`                | `--x-rounded-x` / `--x-rounded-y`         |
+  | `--rounded-*` + 單角 `--rounded-tl/-tr/-bl/-br-*` | 四個角各一個變數                          |
+  | `--rounded-t/-b/-x/-y-*` + 單角                   | 四個角各一個變數                          |
 
   margin 同理(`--m-*` + `--mx-*` … → `--x-mt` / `-mr` / `-mb` / `-ml`)。
 
   ```css
   /* variables.css —— 每個 modifier 只設它負責的那幾個細變數 */
-  &.\-\-p-24, …        { --content-pt: 24px; --content-pr: 24px; --content-pb: 24px; --content-pl: 24px; }
-  &.\-\-px-30, …       { --content-pr: 30px; --content-pl: 30px; }
-  &.\-\-py-20, …       { --content-pt: 20px; --content-pb: 20px; }
-  &.\-\-pb-20, …       { --content-pb: 20px; }
-  &.\-\-rounded-20, …  { --content-rounded-t: 20px; --content-rounded-b: 20px; }
-  &.\-\-rounded-b-20, …{ --content-rounded-b: 20px; }
+  &.\-\-p-24,
+  … {
+    --content-pt: 24px;
+    --content-pr: 24px;
+    --content-pb: 24px;
+    --content-pl: 24px;
+  }
+  &.\-\-px-30,
+  … {
+    --content-pr: 30px;
+    --content-pl: 30px;
+  }
+  &.\-\-py-20,
+  … {
+    --content-pt: 20px;
+    --content-pb: 20px;
+  }
+  &.\-\-pb-20,
+  … {
+    --content-pb: 20px;
+  }
+  &.\-\-rounded-20,
+  … {
+    --content-rounded-t: 20px;
+    --content-rounded-b: 20px;
+  }
+  &.\-\-rounded-b-20,
+  … {
+    --content-rounded-b: 20px;
+  }
 
   /* common.css —— 用最細的 utility 分開取,不要用 p- / px- / rounded- 的 shorthand */
   .m-content {
-    @apply rounded-b-[--content-rounded-b] rounded-t-[--content-rounded-t]
-           pb-[--content-pb] pl-[--content-pl] pr-[--content-pr] pt-[--content-pt];
+    @apply rounded-b-[--content-rounded-b] rounded-t-[--content-rounded-t] pb-[--content-pb] pl-[--content-pl] pr-[--content-pr] pt-[--content-pt];
   }
   ```
 
@@ -667,6 +761,7 @@ modifier 名稱就是 **tailwind 的 utility 名前面加 `--`**,不要自己另
   module 缺的那一層 —— **那種寫法會跟 module 的 shorthand 宣告在同一個優先權上打架**。
   使用端已經在傳某個細粒度的 tailwind 時,正確做法是**幫 module 補對應的 modifier**,
   而不是讓兩邊硬碰(mContent 的 `--rounded-b-20` 就是這樣補出來的)。
+
 - **高度的 base 不能給 0**。padding / rounded 給 0 等同「沒設定」是對的,
   但 `--x-h: 0` 會讓元素直接塌掉 —— 高度的 base 要給 `auto`。
 
@@ -683,18 +778,19 @@ modifier 名稱就是 **tailwind 的 utility 名前面加 `--`**,不要自己另
      ✓ `@apply text-[length:--sort-anchor-text-size];`
   2. **`length:` 不能省** —— `text-[--var]` 會被 tailwind 當成 **color**,
      產生 `color: var(…)` 而不是 `font-size`,**完全不會報錯**,畫面上就是字級沒生效。
+
 - **`box-shadow` 直接寫 CSS 屬性**(`box-shadow: var(--x-shadow)`),不要 `@apply shadow-[…]` ——
   和 `text-[--var]` 同一個病:tailwind 推斷不出型別就當成**陰影顏色**,產出
   `--tw-shadow-color: var(…); --tw-shadow: var(--tw-shadow-colored)`,
   **`box-shadow` 這條根本不會出現**,一樣不報錯。`shadow-[var(--x)]` 也一樣沒救。
 
-  | 屬性 | 寫法 | 為什麼 |
-  |---|---|---|
+  | 屬性           | 寫法                                 | 為什麼                                                     |
+  | -------------- | ------------------------------------ | ---------------------------------------------------------- |
   | `border-width` | 原生 `border-width: var(--x-border)` | production 壓成 `border` shorthand,值是 `var()` 時整條失效 |
-  | `box-shadow` | 原生 `box-shadow: var(--x-shadow)` | `shadow-[…]` 被當成 shadow **color** |
-  | `border-color` | `@apply border-[--x-border-color]` ✓ | 產出正確的 `border-color`,沒問題 |
-  | `font-size` | `@apply text-[length:--x-text-size]` | 不寫 `length:` 會變成 `color` |
-  | `column-gap` | `@apply gap-x-[var(--x-gap,0px)]` ✓ | arbitrary value 內可帶 `var()` fallback |
+  | `box-shadow`   | 原生 `box-shadow: var(--x-shadow)`   | `shadow-[…]` 被當成 shadow **color**                       |
+  | `border-color` | `@apply border-[--x-border-color]` ✓ | 產出正確的 `border-color`,沒問題                           |
+  | `font-size`    | `@apply text-[length:--x-text-size]` | 不寫 `length:` 會變成 `color`                              |
+  | `column-gap`   | `@apply gap-x-[var(--x-gap,0px)]` ✓  | arbitrary value 內可帶 `var()` fallback                    |
 
   ✅ **同一個 `@apply` 裡字級與文字顏色可以併存** —— 兩個都是 `text-*` 但不會互相蓋掉,
   只要字級帶 `length:` 提示讓 tailwind 分得出型別即可。
@@ -712,7 +808,11 @@ modifier 名稱就是 **tailwind 的 utility 名前面加 `--`**,不要自己另
   > 還把 `.m-form-error` 當成範例。實際跑 `npx tailwindcss` 產出來的是:
   >
   > ```css
-  > .m-form-error { margin-top: 4px; font-size: 14px; color: var(--orange-e646) }
+  > .m-form-error {
+  >   margin-top: 4px;
+  >   font-size: 14px;
+  >   color: var(--orange-e646);
+  > }
   > ```
   >
   > 字面值 + 變數、雙型別提示、變數 + 變數 —— 四種組合全部正確。
@@ -734,9 +834,9 @@ modifier 名稱就是 **tailwind 的 utility 名前面加 `--`**,不要自己另
 
 - ⚠️ **字級定在哪,看組件是不是「固定位置」**:
 
-  | 組件性質 | 字級放哪 | 例子 |
-  |---|---|---|
-  | **固定位置、全站長一樣**的組件 | module 自己定,走 `:root` 變數(`--x-text-size`,分三斷點) | 麵包屑、分頁器、mNav、mFooter |
+  | 組件性質                           | 字級放哪                                                     | 例子                              |
+  | ---------------------------------- | ------------------------------------------------------------ | --------------------------------- |
+  | **固定位置、全站長一樣**的組件     | module 自己定,走 `:root` 變數(`--x-text-size`,分三斷點)      | 麵包屑、分頁器、mNav、mFooter     |
   | **到處複用、每個位置都不同**的組件 | **由父系 `setClass` 傳 tailwind class**,module 不定 `text-*` | 按鈕(mAnchor)、mForm 全系列、mTag |
 
   第二類的組件**沒有對應的 `setClass` key 就補一個**,並且**把原本的值補回每一個使用端**,
@@ -756,6 +856,7 @@ modifier 名稱就是 **tailwind 的 utility 名前面加 `--`**,不要自己另
 
   另一個例外是使用端根本沒有管道可傳(後台編輯器存進 HTML 的 class),那就留在 module。
   **分不出來就問使用者。**
+
 - **狀態(hover / focus / active)一律用「覆寫基礎變數」**,不要在 `:root` 用
   `--x-hover-color: var(--x-color)` 做 fallback —— custom property 的 `var()` 在**定義它的元素**上
   就解析完再繼承,`:root` 當下 `--x-color` 還是 `initial`,後面再怎麼覆寫都救不回來,
@@ -797,14 +898,15 @@ modifier 名稱就是 **tailwind 的 utility 名前面加 `--`**,不要自己另
      `--x-bg-color` 本身。多一層變數只是把「誰決定顏色」變得更難追。
   3. **版型檔不要寫 `&:hover`** —— 那會變成「module 自己決定 hover 行為」,
      使用端沒帶 modifier 時也會觸發。狀態切換由 variables 的 modifier 表達就夠了。
+
 - ⚠️ **顏色是組件的職責,使用端不得自訂**。modifier 只設 `--x-color`,
   `common.css` **無條件**套用 `text-[--x-color]`;沒有顏色時用 **`--x-color: inherit`**。
 
   ⚠️ **base 一定寫出真正想要的值,不要用 `initial`**,而且分兩種:
 
-  | 變數 | base | 意思 |
-  |---|---|---|
-  | 文字色 `--x-color` | `inherit` | 沒指定就跟父層走(等同拆 module 前的行為) |
+  | 變數                                              | base          | 意思                                         |
+  | ------------------------------------------------- | ------------- | -------------------------------------------- |
+  | 文字色 `--x-color`                                | `inherit`     | 沒指定就跟父層走(等同拆 module 前的行為)     |
   | 背景 / 邊框色 `--x-bg-color` / `--x-border-color` | `transparent` | 沒指定就是**沒有顏色** —— 背景不該去繼承父層 |
 
   **為什麼不用 `initial`**(2026-08-31 更正過理由,原本寫的不精確):
@@ -840,13 +942,13 @@ modifier 名稱就是 **tailwind 的 utility 名前面加 `--`**,不要自己另
 
   判斷標準是**單位**,不是「感覺重不重要」:
 
-  | 直接寫 | 開變數(拆三斷點) |
-  |---|---|
-  | `w-1/2`、`w-full`(比例) | `w-[--x-w]`、`h-[--x-h]` |
-  | `z-[1]`、`z-[3]`(層級) | `px-[--x-px]`、`my-[--x-my]` |
-  | `duration-300`、`rounded-full` | `rounded-[--x-rounded]` |
-  | `left-1/2`、`-translate-x-1/2` | `gap-x-[--x-gap-x]` |
-  | `border-0`、`h-0`(歸零) | `text-[length:--x-text-size]` |
+  | 直接寫                         | 開變數(拆三斷點)              |
+  | ------------------------------ | ----------------------------- |
+  | `w-1/2`、`w-full`(比例)        | `w-[--x-w]`、`h-[--x-h]`      |
+  | `z-[1]`、`z-[3]`(層級)         | `px-[--x-px]`、`my-[--x-my]`  |
+  | `duration-300`、`rounded-full` | `rounded-[--x-rounded]`       |
+  | `left-1/2`、`-translate-x-1/2` | `gap-x-[--x-gap-x]`           |
+  | `border-0`、`h-0`(歸零)        | `text-[length:--x-text-size]` |
 
   **`1px` 的線寬、`2px` 的內距也算**——它們一樣是 px。實際踩過:
   mSwitchItem 的展開符號兩條線寫死 `h-[1px]` / `w-[1px]`、
@@ -858,15 +960,16 @@ modifier 名稱就是 **tailwind 的 utility 名前面加 `--`**,不要自己另
   - **`100%`** —— 三個斷點沒差別時直接用 tailwind 的 `-full`,
     不要寫成 `w-[100%]`,更不要繞一層變數:
 
-    | ✗ | ✓ |
-    |---|---|
-    | `--x-w: 100%` 再 `w-[--x-w]` | `w-full` |
-    | `w-[100%]` / `h-[100%]` | `w-full` / `h-full` |
+    | ✗                               | ✓                           |
+    | ------------------------------- | --------------------------- |
+    | `--x-w: 100%` 再 `w-[--x-w]`    | `w-full`                    |
+    | `w-[100%]` / `h-[100%]`         | `w-full` / `h-full`         |
     | `max-w-[100%]` / `min-w-[100%]` | `max-w-full` / `min-w-full` |
-    | `min-h-[100%]` | `min-h-full` |
+    | `min-h-[100%]`                  | `min-h-full`                |
 
     `100%` 語意是「撐滿容器」不是某個尺寸,拆三斷點只會得到三個一樣的值。
     **只有真的分斷點不同**(例如 pc 用 `50%`、mobile 用 `100%`)才開變數。
+
   - **`font-weight`** —— **不是父系帶入,就是寫死**,沒有中間地帶。
     module 自己的狀態(`--active` 時變粗)直接 `@apply font-medium` / `font-normal`;
     要讓使用端決定就走 `setClass`。開成 `--x-font-weight` 變數只是多一層轉手,
@@ -890,12 +993,12 @@ modifier 名稱就是 **tailwind 的 utility 名前面加 `--`**,不要自己另
 
     要盤點全站層級就 `grep -rn "z-\[" assets/css/`,現況如下(全部是字面值):
 
-    | 層級 | 用在哪 |
-    |---|---|
-    | `z-[5]` | mLoading 全螢幕遮罩、mSort / AutoComplete 的下拉 |
+    | 層級    | 用在哪                                                 |
+    | ------- | ------------------------------------------------------ |
+    | `z-[5]` | mLoading 全螢幕遮罩、mSort / AutoComplete 的下拉       |
     | `z-[3]` | mPopup 遮罩、mDatepicker 浮層、mForm dropdown 的展開態 |
-    | `z-[2]` | mUpload 的多檔進度條、mPopup 的 promise 內層 |
-    | `z-[1]` | 各組件內部把某個子元素抬到同層之上 |
+    | `z-[2]` | mUpload 的多檔進度條、mPopup 的 promise 內層           |
+    | `z-[1]` | 各組件內部把某個子元素抬到同層之上                     |
 
   `0` / `auto` / `none` 這種「歸零或不設定」也直接寫,那不是尺寸。
 
@@ -922,10 +1025,10 @@ modifier 名稱就是 **tailwind 的 utility 名前面加 `--`**,不要自己另
 
 變數名的前綴要和 **class 前綴 / 資料夾**對得上,看到變數就知道它屬於哪支 module:
 
-| ✗ | ✓ |
-|---|---|
+| ✗                                    | ✓                                       |
+| ------------------------------------ | --------------------------------------- |
 | `--m-autocomplete-dropdown-label-px` | `--form-autocomplete-dropdown-label-px` |
-| `--m-tab-select-h` | `--tab-select-h` |
+| `--m-tab-select-h`                   | `--tab-select-h`                        |
 
 `mForm/` 底下一律 `--form-*`(變體再接變體名:`--form-autocomplete-*` / `--form-select-*`),
 `mTab/` 底下一律 `--tab-*`。**不要在變數名裡塞 `m-` 前綴** —— 那是 class 的慣例,不是變數的。
@@ -939,12 +1042,12 @@ modifier 名稱就是 **tailwind 的 utility 名前面加 `--`**,不要自己另
 
 ### 命名慣例
 
-| 不要寫 | 要寫 |
-|---|---|
-| `-width` | `-w` |
-| `-height` | `-h` |
-| `-padding` | `-p` |
-| `-margin` | `-m` |
+| 不要寫          | 要寫      |
+| --------------- | --------- |
+| `-width`        | `-w`      |
+| `-height`       | `-h`      |
+| `-padding`      | `-p`      |
+| `-margin`       | `-m`      |
 | `-border-width` | `-border` |
 
 字級一律 `-text-size`(不是 `-text`)。
@@ -956,7 +1059,9 @@ icon、圓點、方形按鈕這類**寬高一致**的元素,只建一個 `-size`
 ```css
 /* ✓ 20 × 20 的 icon */
 --pagination-arrow-icon-pc-size: 20px;
-.m-pagination-arrow-icon { @apply h-[--pagination-arrow-icon-size] w-[--pagination-arrow-icon-size]; }
+.m-pagination-arrow-icon {
+  @apply h-[--pagination-arrow-icon-size] w-[--pagination-arrow-icon-size];
+}
 
 /* ✓ 寬高不同才拆兩個 */
 --tag-checkbox-pc-assist-w: 12px;
@@ -968,6 +1073,7 @@ icon、圓點、方形按鈕這類**寬高一致**的元素,只建一個 `-size`
 之後有人要單獨調高度時,會發現改 `-w` 會把寬度也一起改掉。
 
 同一個值被兩個軸共用時,判斷「它們是不是永遠相等」:
+
 - **永遠相等**(正方形 icon、圓點)→ 一個 `-size`
 - **剛好目前相等**(展開符號的橫線長 = 直線高)→ 也用 `-size`,因為那是同一個「臂長」概念
 - **各自獨立會變**(容器的寬與高)→ 拆 `-w` / `-h`
@@ -978,10 +1084,12 @@ icon、圓點、方形按鈕這類**寬高一致**的元素,只建一個 `-size`
 `pc` / `tablet` / `mobile` 三份**,即使目前三個值一模一樣:
 
 ```css
-/* ✗ */  --pagination-p: 4px;
-/* ✓ */  --pagination-pc-p: 4px;
-         --pagination-tablet-p: 4px;
-         --pagination-mobile-p: 4px;
+/* ✗ */
+--pagination-p: 4px;
+/* ✓ */
+--pagination-pc-p: 4px;
+--pagination-tablet-p: 4px;
+--pagination-mobile-p: 4px;
 ```
 
 之後要單獨調某個斷點時直接改值就好,不必回頭拆結構。**顏色不用分斷點。**
@@ -999,23 +1107,33 @@ icon、圓點、方形按鈕這類**寬高一致**的元素,只建一個 `-size`
 上一條只抓「完全沒分斷點的單值」,**分了三份卻漏掉其中一個**沒人會發現,
 而那個斷點會靜靜地讀不到值,**畫面不報錯**。
 
-| | 規則 | 例 |
-|---|---|---|
-| **6-a** | 版型檔不可直接吃帶斷點的變數 | ✗ `@apply gap-x-[--x-pc-gap-x]`(綁死 pc,t / m 永遠吃不到) |
-| **6-b** | `:root` 有 `-pc-X` 就必須有 `-tablet-X` 與 `-mobile-X` | ✗ 只寫了 `--x-pc-gap-x` 與 `--x-tablet-gap-x` |
+|         | 規則                                                   | 例                                                        |
+| ------- | ------------------------------------------------------ | --------------------------------------------------------- |
+| **6-a** | 版型檔不可直接吃帶斷點的變數                           | ✗ `@apply gap-x-[--x-pc-gap-x]`(綁死 pc,t / m 永遠吃不到) |
+| **6-b** | `:root` 有 `-pc-X` 就必須有 `-tablet-X` 與 `-mobile-X` | ✗ 只寫了 `--x-pc-gap-x` 與 `--x-tablet-gap-x`             |
 
 **6-a 只抓「斷點對不上」的**:已經包在 `@screen p` 裡面的宣告直接吃 `-pc-` 的值
 **是合理寫法,不算違規** —— 那本來就只有 pc 會套用到。工具會看它在哪個區塊裡:
 
 ```css
 /* ✓ 在 p 區塊內吃 pc 的值 —— 直接、正確 */
-@screen p { .m-x { @apply max-w-[--x-pc-max-w]; } }
+@screen p {
+  .m-x {
+    @apply max-w-[--x-pc-max-w];
+  }
+}
 
 /* ✗ 沒包在任何 @screen p / t / m 裡 —— 平板手機也會吃到 pc 的值 */
-.m-x { border-width: var(--x-pc-border); }
+.m-x {
+  border-width: var(--x-pc-border);
+}
 
 /* ✗ 斷點對不上 —— pt 同時涵蓋 p 與 t，平板也會吃到 pc 的值 */
-@screen pt { .m-x { @apply p-[--x-pc-p]; } }
+@screen pt {
+  .m-x {
+    @apply p-[--x-pc-p];
+  }
+}
 ```
 
 > 複合斷點(`pt` / `tm`)裡一律不能直接吃單一斷點的變數,理由同上。
@@ -1023,27 +1141,68 @@ icon、圓點、方形按鈕這類**寬高一致**的元素,只建一個 `-size`
 **同一支檔案的 `@screen p` / `t` / `m` 各自只寫一組**,不要拆散成好幾處 ——
 同一個斷點的設定散在檔案各處,改的時候很容易漏掉其中一組。
 
+這條由 `checkScreenGrouping` 檢查(2026-08-31 加),但**只看頂層的 `@screen`**:
+
+| 寫法                                                   | 算不算違規                                         |
+| ------------------------------------------------------ | -------------------------------------------------- |
+| 頂層出現兩個 `@screen m`                               | ⛔ 違規 —— 合併成一組                              |
+| 巢狀(`.m-x { @screen p { … } }`)在多個選擇器內各寫一次 | ✅ 合法 —— 那是另一種組織方式,每個選擇器自己收三段 |
+
+真的需要分開(變數對應與子元素版型差異大)就在該行或上一行標
+`/* lint-screen-group-exempt: 理由 */`,**理由一定要寫**。
+
+> 導入當天兩邊各有一筆存量,都用**合併**解決而不是標豁免:
+> mHeader 的第二段 `@screen m` 併回第一段(選擇器不重疊、`@screen pt` 的相對順序不變),
+> Backstage 的 mTable/checkboxResponsiv 同理。合併前確認過兩件事:
+> **選擇器有沒有重疊**(有就要注意宣告順序)、**與複合斷點(`pt` / `tm`)的先後有沒有被改動**。
+
 ```css
 /* ✓ 版型吃中性變數，@screen p / t / m 各段負責對應 */
-.m-x { @apply gap-x-[--x-gap-x]; }
+.m-x {
+  @apply gap-x-[--x-gap-x];
+}
 
-@screen p { .m-x { --x-gap-x: var(--x-pc-gap-x); } }
-@screen t { .m-x { --x-gap-x: var(--x-tablet-gap-x); } }
-@screen m { .m-x { --x-gap-x: var(--x-mobile-gap-x); } }
+@screen p {
+  .m-x {
+    --x-gap-x: var(--x-pc-gap-x);
+  }
+}
+@screen t {
+  .m-x {
+    --x-gap-x: var(--x-tablet-gap-x);
+  }
+}
+@screen m {
+  .m-x {
+    --x-gap-x: var(--x-mobile-gap-x);
+  }
+}
 ```
 
 ### 中性變數要不要開,看「這支檔案有幾個變數要分斷點」
 
-| 情況 | 寫法 |
-|---|---|
-| **多個**變數要分斷點 | 版型吃**中性變數**,`@screen p` / `t` / `m` 各開一段集中對應(上面的例子) |
-| **只有一個** | 不必多繞一層 —— 版型直接寫在 `@screen` 內吃 `-pc-` / `-tablet-` / `-mobile-` |
+| 情況                 | 寫法                                                                         |
+| -------------------- | ---------------------------------------------------------------------------- |
+| **多個**變數要分斷點 | 版型吃**中性變數**,`@screen p` / `t` / `m` 各開一段集中對應(上面的例子)      |
+| **只有一個**         | 不必多繞一層 —— 版型直接寫在 `@screen` 內吃 `-pc-` / `-tablet-` / `-mobile-` |
 
 ```css
 /* ✓ 整支檔案只有一個變數要分斷點時，直接吃就好 */
-@screen p { .m-x { @apply max-w-[--x-pc-max-w]; } }
-@screen t { .m-x { @apply max-w-[--x-tablet-max-w]; } }
-@screen m { .m-x { @apply max-w-[--x-mobile-max-w]; } }
+@screen p {
+  .m-x {
+    @apply max-w-[--x-pc-max-w];
+  }
+}
+@screen t {
+  .m-x {
+    @apply max-w-[--x-tablet-max-w];
+  }
+}
+@screen m {
+  .m-x {
+    @apply max-w-[--x-mobile-max-w];
+  }
+}
 ```
 
 多個變數時之所以要中性變數,是因為版型會散在檔案各處 ——
@@ -1068,12 +1227,12 @@ template 常常只有 `p:min-w-[265px]` 這種只寫桌機的 class,直接搬進
 
 `<script setup>` 的 import 由「離這支組件最近」排到「最遠」:
 
-| 順序 | 類別 | 例 |
-|---|---|---|
-| 1 | **css** | `import '@css/_modules/common/mForm/variables.css'` |
-| 2 | **`./.composables`** | `import useValidateEvents from './.composables/useValidateEvents.js'` |
-| 3 | **`@js`** | `import { onDeepMerge } from '@js/_prototype.js'` |
-| 4 | **其他套件** | `import { Field } from 'vee-validate'` |
+| 順序 | 類別                 | 例                                                                    |
+| ---- | -------------------- | --------------------------------------------------------------------- |
+| 1    | **css**              | `import '@css/_modules/common/mForm/variables.css'`                   |
+| 2    | **`./.composables`** | `import useValidateEvents from './.composables/useValidateEvents.js'` |
+| 3    | **`@js`**            | `import { onDeepMerge } from '@js/_prototype.js'`                     |
+| 4    | **其他套件**         | `import { Field } from 'vee-validate'`                                |
 
 ```js
 <script setup>
@@ -1106,12 +1265,12 @@ import { Field, ErrorMessage } from 'vee-validate'
 這條是「[動手前先讀 tailwind.config.js](#動手前先讀-tailwindconfigjs)」那一節的**守門版** ——
 `theme` 底下整組覆寫的那幾組,內建 key 全部消失:
 
-| theme 的組 | 本專案剩下什麼 | 因此不存在的 |
-|---|---|---|
-| `screens` | `m` / `t` / `p` / `tm` / `pt` / `pMin` / `pMax` / `mLandscape` / `notsupport` / `firefox` / `IE` | **`sm:` `md:` `lg:` `xl:` `2xl:`** |
-| `fontSize` | `vmp` / `vmt` / `vmm` / `vmmls` | **`text-xs` ~ `text-9xl`、`text-base`** |
-| `boxShadow` | **一個都沒有** | **所有 `shadow-*`**(`shadow-[…]` 的 arbitrary value 除外) |
-| `fontFamily` | `default` | **`font-sans` `font-serif` `font-mono`** |
+| theme 的組   | 本專案剩下什麼                                                                                   | 因此不存在的                                              |
+| ------------ | ------------------------------------------------------------------------------------------------ | --------------------------------------------------------- |
+| `screens`    | `m` / `t` / `p` / `tm` / `pt` / `pMin` / `pMax` / `mLandscape` / `notsupport` / `firefox` / `IE` | **`sm:` `md:` `lg:` `xl:` `2xl:`**                        |
+| `fontSize`   | `vmp` / `vmt` / `vmm` / `vmmls`                                                                  | **`text-xs` ~ `text-9xl`、`text-base`**                   |
+| `boxShadow`  | **一個都沒有**                                                                                   | **所有 `shadow-*`**(`shadow-[…]` 的 arbitrary value 除外) |
+| `fontFamily` | `default`                                                                                        | **`font-sans` `font-serif` `font-mono`**                  |
 
 **寫了不會報錯,class 就靜靜地不生效** —— 和拼錯字一個症狀,但更難發現。
 實測方式(不要靠推論,`theme` 的值是 import 進來的,改過就會變):
@@ -1142,10 +1301,10 @@ Official 那邊已經全面改用 8 碼 hex 色票、會抓 —— **兩邊在�
 
 判斷一個檔案會不會被檢查,看 [lint-core.mjs](../../.tools/css/lint-core.mjs) 的兩份清單:
 
-| 清單 | 內容 | 檢查什麼 |
-|---|---|---|
-| `SCAN_TARGETS` + `SCAN_EXT` | `components` / `containers` / `pages` / `layouts` / `assets/css` / `error.vue` 底下的 `.vue` `.css` | 全部規則 |
-| `SCAN_CONFIG_FILES` | `tailwind.extend.js` / `tailwind.config.js` | **只有顏色**(其餘規則講的是 CSS 結構,對 js 不成立) |
+| 清單                        | 內容                                                                                                | 檢查什麼                                           |
+| --------------------------- | --------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| `SCAN_TARGETS` + `SCAN_EXT` | `components` / `containers` / `pages` / `layouts` / `assets/css` / `error.vue` 底下的 `.vue` `.css` | 全部規則                                           |
+| `SCAN_CONFIG_FILES`         | `tailwind.extend.js` / `tailwind.config.js`                                                         | **只有顏色**(其餘規則講的是 CSS 結構,對 js 不成立) |
 
 **兩份都不符的檔案是「讀都沒讀」,不是「讀了沒問題」。** 這個差別看得出來 ——
 指名檢查一支範圍外的檔案,它會回報通過,但括號裡的檔案數是 0:
@@ -1198,15 +1357,15 @@ $all -match 'm-tab-select-element'
 > 少了它會找不到任何檔案而誤判成「樣式沒進去」。
 > ⚠️ px 會被 px-to-rem 轉成 rem(`8px` → `.5rem`),**搜產物時不要用 px 找**。
 
-| 檔案 | 職責 |
-|---|---|
-| [.tools/css/color-order.mjs](../../.tools/css/color-order.mjs) | 色票檔的解析、命名驗證、亮度排序、頻道歸屬比對 |
-| [.tools/css/lint-core.mjs](../../.tools/css/lint-core.mjs) | 五條規則的判斷邏輯(只判斷,不輸出也不改檔) |
-| [.tools/css/lint-css.mjs](../../.tools/css/lint-css.mjs) | 檢查用 CLI |
-| [.tools/css/sort-color-css.mjs](../../.tools/css/sort-color-css.mjs) | 排序用 CLI |
-| [.tools/css/guard-file.mjs](../../.tools/css/guard-file.mjs) | 存檔用的單檔入口(排序 + 檢查),給 Run on Save 呼叫 |
-| [.tools/css/colors.mjs](../../.tools/css/colors.mjs) | CLI 顏色開關(非 TTY 自動關色) |
-| [.tools/install-git-hooks.mjs](../../.tools/install-git-hooks.mjs) | 設定 `core.hooksPath`(postinstall 自動跑) |
+| 檔案                                                                           | 職責                                                         |
+| ------------------------------------------------------------------------------ | ------------------------------------------------------------ |
+| [.tools/css/color-order.mjs](../../.tools/css/color-order.mjs)                 | 色票檔的解析、命名驗證、亮度排序、頻道歸屬比對               |
+| [.tools/css/lint-core.mjs](../../.tools/css/lint-core.mjs)                     | 五條規則的判斷邏輯(只判斷,不輸出也不改檔)                    |
+| [.tools/css/lint-css.mjs](../../.tools/css/lint-css.mjs)                       | 檢查用 CLI                                                   |
+| [.tools/css/sort-color-css.mjs](../../.tools/css/sort-color-css.mjs)           | 排序用 CLI                                                   |
+| [.tools/css/guard-file.mjs](../../.tools/css/guard-file.mjs)                   | 存檔用的單檔入口(排序 + 檢查),給 Run on Save 呼叫            |
+| [.tools/css/colors.mjs](../../.tools/css/colors.mjs)                           | CLI 顏色開關(非 TTY 自動關色)                                |
+| [.tools/install-git-hooks.mjs](../../.tools/install-git-hooks.mjs)             | 設定 `core.hooksPath`(postinstall 自動跑)                    |
 | [.tools/check-vscode-extensions.mjs](../../.tools/check-vscode-extensions.mjs) | 檢查 RunOnSave 擴充有沒有裝(postinstall 自動跑,只警告不阻擋) |
 
 拆 module 前也要看規則 3 的「動工前一定要查的三件事」:
@@ -1244,13 +1403,13 @@ module 一樣分頻道目錄(`_modules/<頻道>/<組件>/`),目前只有 `buy` �
 
 2026-08-28 的掃描:250 個檔案,**785 筆**。規則 1 是清乾淨的,其餘是既有程式碼:
 
-| 規則 | 筆數 / 檔案 | 主要分布 |
-|---|---|---|
-| 1 顏色 | **0** | 導入時一併清完(見下方) |
-| 2 tailwind class | 553 / 48 | mUpload、mForm/AutoComplete、mLoading 等尚未拆的組件 |
-| 3 module 結構 | 51 / 34 | 組件自己留 `<style>` 區塊 |
-| 4 module 變數 | 167 / 6 | 見下方說明 |
-| 5 import 順序 | 14 / 13 | `./.composables` 排在 `vee-validate` / `@js` 之後 |
+| 規則             | 筆數 / 檔案 | 主要分布                                             |
+| ---------------- | ----------- | ---------------------------------------------------- |
+| 1 顏色           | **0**       | 導入時一併清完(見下方)                               |
+| 2 tailwind class | 553 / 48    | mUpload、mForm/AutoComplete、mLoading 等尚未拆的組件 |
+| 3 module 結構    | 51 / 34     | 組件自己留 `<style>` 區塊                            |
+| 4 module 變數    | 167 / 6     | 見下方說明                                           |
+| 5 import 順序    | 14 / 13     | `./.composables` 排在 `vee-validate` / `@js` 之後    |
 
 規則 4 那 167 筆裡有 **113 筆是 `checkLayoutFileValues`**(「版型檔的變數宣告右邊一定是 `var(…)`」),
 集中在四支**還沒拆成資料夾的單檔 module**:`buy/mFormDropdown.css` 61、`buy/mDatepicker.css` 42、
@@ -1268,15 +1427,15 @@ module 一樣分頻道目錄(`_modules/<頻道>/<組件>/`),目前只有 `buy` �
 
 本專案 `components/` 才拆了三支,更完整的範例要看參考專案:
 
-| 情境 | 看哪一支 |
-|---|---|
-| **有變體的完整拆法** | [buy/mCard/](../../assets/css/_modules/buy/mCard/) — `variables` / `common` + `filter*`,`--default` 無專屬樣式只當標記 |
-| **Teleport 浮層的斷點** | [buy/mSort/](../../assets/css/_modules/buy/mSort/) — dropdown `Teleport to="body"`,DOM 上不在組件內,`@screen` 各段要自己再掛一份 |
-| **變數建在最小單位** | 同 mCard — pc 是 `p-40`、tablet / mobile 是 `px-16 py-32`,兩個層級併存所以拆成 `-pt` / `-pr` / `-pb` / `-pl` |
-| **box-shadow 的寫法** | 同 mSort 與 [buy/mFormDropdown.css](../../assets/css/_modules/buy/mFormDropdown.css) — 走原生 CSS 屬性 + `--x-*-shadow` 三斷點變數 |
-| **最標準的一支**(共用 + 變體兩層) | 參考專案的 [common/mTab/](../../../Official/assets/css/_modules/common/mTab/) |
-| **群組層**(兩個以上變體共用) | 參考專案的 [common/mForm/](../../../Official/assets/css/_modules/common/mForm/) 的 `selection.*` |
-| **hover 的固定寫法** | 參考專案的 [common/mAnchor/variables.css](../../../Official/assets/css/_modules/common/mAnchor/variables.css) |
+| 情境                              | 看哪一支                                                                                                                           |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| **有變體的完整拆法**              | [buy/mCard/](../../assets/css/_modules/buy/mCard/) — `variables` / `common` + `filter*`,`--default` 無專屬樣式只當標記             |
+| **Teleport 浮層的斷點**           | [buy/mSort/](../../assets/css/_modules/buy/mSort/) — dropdown `Teleport to="body"`,DOM 上不在組件內,`@screen` 各段要自己再掛一份   |
+| **變數建在最小單位**              | 同 mCard — pc 是 `p-40`、tablet / mobile 是 `px-16 py-32`,兩個層級併存所以拆成 `-pt` / `-pr` / `-pb` / `-pl`                       |
+| **box-shadow 的寫法**             | 同 mSort 與 [buy/mFormDropdown.css](../../assets/css/_modules/buy/mFormDropdown.css) — 走原生 CSS 屬性 + `--x-*-shadow` 三斷點變數 |
+| **最標準的一支**(共用 + 變體兩層) | 參考專案的 [common/mTab/](../../../Official/assets/css/_modules/common/mTab/)                                                      |
+| **群組層**(兩個以上變體共用)      | 參考專案的 [common/mForm/](../../../Official/assets/css/_modules/common/mForm/) 的 `selection.*`                                   |
+| **hover 的固定寫法**              | 參考專案的 [common/mAnchor/variables.css](../../../Official/assets/css/_modules/common/mAnchor/variables.css)                      |
 
 > 少數確實無法符合規範的地方,一律用 `/* lint-breakpoint-exempt: 理由 */` 就地標註,
 > 不集中列在這裡 —— 清單會過期,註解不會。目前有標的是 mCard 的 filter 變體
@@ -1305,10 +1464,10 @@ module 一樣分頻道目錄(`_modules/<頻道>/<組件>/`),目前只有 `buy` �
 都是參考專案的逐字複本,**最近一次對照 2026-08-28**。兩邊不會自動同步,而且發散得比想像中快 ——
 2026-08-27 複製過來,隔天就對照了兩次:
 
-| 那次收了什麼 | |
-|---|---|
-| 第一次 | `checkColorMechanism`、`checkStateClassNaming`、`checkImportOrder`(規則 5)、`checkVariablesFile`、`checkVariableUsage`、`checkBreakpointCoverage`、死變數偵測、`guard-file.mjs`;色票 alpha 命名從 `--gray-334d` 改成 `--gray-33-4d` |
-| 第二次 | 「每輪都列、不主動彈問句」的流程改寫、`reported.json` 去重移除、`pending.json` 語意改成「還沒修好的檔案」 |
+| 那次收了什麼 |                                                                                                                                                                                                                                     |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 第一次       | `checkColorMechanism`、`checkStateClassNaming`、`checkImportOrder`(規則 5)、`checkVariablesFile`、`checkVariableUsage`、`checkBreakpointCoverage`、死變數偵測、`guard-file.mjs`;色票 alpha 命名從 `--gray-334d` 改成 `--gray-33-4d` |
+| 第二次       | 「每輪都列、不主動彈問句」的流程改寫、`reported.json` 去重移除、`pending.json` 語意改成「還沒修好的檔案」                                                                                                                           |
 
 **所以動 CSS 工具或規則前,先跑一次 diff 對照**,不要假設兩邊一致:
 
@@ -1321,9 +1480,9 @@ diff --strip-trailing-cr ../Official/.claude/rules/css-conventions.md .claude/ru
 
 #### 目前的差異
 
-| 面向 | 本專案 |
-|---|---|
-| 色票 | 只有單一 `color.css`;參考專案有頻道色票(`color<Channel>.css`)與跨頻道收攏檢查 |
-| 存量 | 尚有 672 筆;參考專案已歸零 |
-| module | 路徑分層一致,但本專案只拆了 `common/mPopup/`、`buy/mCard/`、`buy/mSort/` |
+| 面向        | 本專案                                                                                                  |
+| ----------- | ------------------------------------------------------------------------------------------------------- |
+| 色票        | 只有單一 `color.css`;參考專案有頻道色票(`color<Channel>.css`)與跨頻道收攏檢查                           |
+| 存量        | 尚有 672 筆;參考專案已歸零                                                                              |
+| module      | 路徑分層一致,但本專案只拆了 `common/mPopup/`、`buy/mCard/`、`buy/mSort/`                                |
 | `.githooks` | 本專案那支保留「依第一層目錄分派」的判斷(還在共用 repo 裡);參考專案抽出去的獨立 repo 版本已拿掉分派迴圈 |

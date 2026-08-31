@@ -137,5 +137,3 @@ const visibleItems = computed(() => {
     </template>
   </PageBuyPublishBasicCardFilter>
 </template>
-
-<style></style>

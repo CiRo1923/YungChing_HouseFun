@@ -155,5 +155,3 @@ const onActionClick = (item) => {
   </div>
   <PageBuyListPopupCommentNoData v-else />
 </template>
-
-<style lang="postcss"></style>

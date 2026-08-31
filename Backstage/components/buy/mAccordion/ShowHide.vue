@@ -105,5 +105,3 @@ onUnmounted(() => {
     </footer>
   </div>
 </template>
-
-<style lang="postcss"></style>

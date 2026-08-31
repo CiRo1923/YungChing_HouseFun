@@ -56,5 +56,3 @@ const visibleItems = computed(() => {
 <template>
   <PageBuyPublishBasicCardFilter :title="props.title" :items="visibleItems" />
 </template>
-
-<style></style>

@@ -545,10 +545,7 @@ onUnmounted(() => {
           >
             <CommonSvgIcon icon="icon_xmark" class="m-form-clear-icon" />
           </button>
-          <CommonSvgIcon
-            icon="icon_search"
-            class="m-form-autocomplete-icon"
-          />
+          <CommonSvgIcon icon="icon_search" class="m-form-autocomplete-icon" />
         </div>
       </Field>
     </div>
@@ -610,4 +607,3 @@ onUnmounted(() => {
     </Transition>
   </Teleport>
 </template>
-

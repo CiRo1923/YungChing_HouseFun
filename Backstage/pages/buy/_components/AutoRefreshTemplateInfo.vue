@@ -75,5 +75,3 @@ const onItemClick = async (item, index) => {
     </ul>
   </div>
 </template>
-
-<style lang="postcss"></style>

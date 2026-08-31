@@ -131,5 +131,3 @@ const items = shallowReadonly([
     </ul>
   </div>
 </template>
-
-<style lang="postcss"></style>

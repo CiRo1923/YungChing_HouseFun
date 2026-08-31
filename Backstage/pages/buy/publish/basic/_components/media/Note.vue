@@ -21,5 +21,3 @@ const note = readonly({
     }"
   />
 </template>
-
-<style></style>

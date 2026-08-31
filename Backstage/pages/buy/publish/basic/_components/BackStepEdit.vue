@@ -10,5 +10,3 @@ const props = defineProps({
 <template>
   <BuyMToolbar :anchor="props.anchor">尚未刊登</BuyMToolbar>
 </template>
-
-<style></style>

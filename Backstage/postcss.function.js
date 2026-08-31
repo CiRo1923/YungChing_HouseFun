@@ -13,5 +13,5 @@ module.exports = {
         ${parseInt(abbrTransform(result[2]), 16)},
         ${parseInt(abbrTransform(result[3]), 16)}`
       : null
-  }
+  },
 }

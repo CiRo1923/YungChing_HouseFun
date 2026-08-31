@@ -7,8 +7,7 @@
 
   &:not(:last-child) {
     &:after {
-      @apply pointer-events-none absolute top-1/2 h-[55%] w-[--separator-item-after-w]
-        -translate-y-1/2 bg-[--gray-999] content-default;
+      @apply pointer-events-none absolute top-1/2 h-[55%] w-[--separator-item-after-w] -translate-y-1/2 bg-[--gray-999] content-default;
     }
   }
 }

@@ -10,10 +10,10 @@ PC 版的留言管理與瀏覽數燈箱也有同樣問題(捲軸貼著表格最�
 
 ## 分層原則(不可違反)
 
-| 檔案 | 負責 |
-|---|---|
+| 檔案                                           | 負責                                                                                        |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------- |
 | `assets/css/_common/basic.css` 的 `.scrollbar` | **只管捲軸外觀** —— 顏色、圓角、寬度(`--y` 4px / `--x` 4px),以及 `--x` / `--y` 決定捲動方向 |
-| 各元件自己的 CSS 模組 | **間距屬於版面,歸元件自己管**。不得為了某個元件的間距去動 `basic.css` |
+| 各元件自己的 CSS 模組                          | **間距屬於版面,歸元件自己管**。不得為了某個元件的間距去動 `basic.css`                       |
 
 曾經試過在 `basic.css` 加一個 `--scroll` 修飾符讓各處選用,**已否決** ——
 間距是元件的版面問題,不該進通用的捲軸樣式。同理也不要為此新造 class 名稱,
@@ -79,10 +79,10 @@ container 的內容寬度,動 container 的 px 會把底線一起拉寬。改用
 
 ## 全專案只有這些地方會真的捲動
 
-| 位置 | 容器 | 狀態 |
-|---|---|---|
-| `pages/buy/list/_components/popup/comment/Datas.vue` | `container: 'p:max-h-[365px]'`(留言管理) | 已由 mTable 規則覆蓋 |
-| `pages/buy/list/_components/popup/View.vue` | `container: 'p:max-h-[365px]'`(瀏覽數) | 已由 mTable 規則覆蓋 |
+| 位置                                                     | 容器                                                         | 狀態                                                                                                 |
+| -------------------------------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| `pages/buy/list/_components/popup/comment/Datas.vue`     | `container: 'p:max-h-[365px]'`(留言管理)                     | 已由 mTable 規則覆蓋                                                                                 |
+| `pages/buy/list/_components/popup/View.vue`              | `container: 'p:max-h-[365px]'`(瀏覽數)                       | 已由 mTable 規則覆蓋                                                                                 |
 | `pages/buy/publish/basic/_components/terms/Items.vue:61` | `container: 'scrollbar --y m:max-h-[220px] pt:max-h-[90px]'` | **尚未處理** —— 那是 mAccordion 的 container,不歸 mTable 管,要比照辦理得寫在 mAccordion 自己的樣式裡 |
 
 其他既有寫法可參考:

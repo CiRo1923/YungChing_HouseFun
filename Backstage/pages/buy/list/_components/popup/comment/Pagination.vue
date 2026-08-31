@@ -32,5 +32,3 @@ const onClick = async (page) => {
     v-if="hasData"
   />
 </template>
-
-<style lang="postcss"></style>

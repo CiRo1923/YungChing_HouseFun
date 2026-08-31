@@ -27,14 +27,14 @@
 
 ## Props
 
-| 名稱 | 型別 | 預設 | 說明 |
-| --- | --- | --- | --- |
-| `name` | `String` | `null` | vee-validate 欄位名稱。 |
-| `modelValue` | `String` / `Number` / `Boolean` / `Object` | `null` | 目前欄位值。 |
-| `modelModifiers` | `Object` | `{}` | 支援 `number` modifier，空字串會轉成 `null`。 |
-| `config` | `Object` | `{}` | dropdown 設定。 |
-| `rules` | `Object` | `null` | vee-validate rules。 |
-| `setClass` | `Object` | `{}` | 外部覆寫 class。 |
+| 名稱             | 型別                                       | 預設   | 說明                                          |
+| ---------------- | ------------------------------------------ | ------ | --------------------------------------------- |
+| `name`           | `String`                                   | `null` | vee-validate 欄位名稱。                       |
+| `modelValue`     | `String` / `Number` / `Boolean` / `Object` | `null` | 目前欄位值。                                  |
+| `modelModifiers` | `Object`                                   | `{}`   | 支援 `number` modifier，空字串會轉成 `null`。 |
+| `config`         | `Object`                                   | `{}`   | dropdown 設定。                               |
+| `rules`          | `Object`                                   | `null` | vee-validate rules。                          |
+| `setClass`       | `Object`                                   | `{}`   | 外部覆寫 class。                              |
 
 ## config 預設值
 
@@ -112,11 +112,7 @@ dropdown container 下方區塊。
 ## 使用範例
 
 ```vue
-<BuyMFormDropdown
-  name="customDropdown"
-  v-model="dropdownValue"
-  :config="{ placeholder: '請選擇' }"
->
+<BuyMFormDropdown name="customDropdown" v-model="dropdownValue" :config="{ placeholder: '請選擇' }">
   <template #suffix>
     <span>單位</span>
   </template>

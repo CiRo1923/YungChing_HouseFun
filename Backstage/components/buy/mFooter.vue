@@ -16,9 +16,7 @@ const houseFun = readonly([
 
 <template>
   <div class="m-footer">
-    <div
-      class="m-footer-container"
-    >
+    <div class="m-footer-container">
       <div class="m-footer-logo">
         <CommonImgSrc
           src="common/logo.svg"
@@ -34,9 +32,7 @@ const houseFun = readonly([
           </li>
         </ul>
       </div>
-      <div
-        class="m-footer-information"
-      >
+      <div class="m-footer-information">
         <ul>
           <li>
             <p>
@@ -71,5 +67,3 @@ const houseFun = readonly([
     </div>
   </div>
 </template>
-
-<style></style>

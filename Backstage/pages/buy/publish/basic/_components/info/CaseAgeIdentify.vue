@@ -189,5 +189,3 @@ const onIsCasePreSale = () => {
     </ul>
   </PageBuyPublishBasicRadiosOval>
 </template>
-
-<style></style>

@@ -87,5 +87,3 @@ const onNormalizeVideoUrl = () => {
     </li>
   </ul>
 </template>
-
-<style></style>

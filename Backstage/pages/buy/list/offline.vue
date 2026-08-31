@@ -118,5 +118,3 @@ onMounted(() => {
   <PageBuyListPopupComment />
   <PageBuyListPopupCommentsReply />
 </template>
-
-<style></style>

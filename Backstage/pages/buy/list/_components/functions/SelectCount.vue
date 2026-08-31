@@ -7,5 +7,3 @@ const { searchSelectCount } = useBuyListActions()
     已選 <span class="text-[--orange-e646]">{{ searchSelectCount }}</span> 筆
   </p>
 </template>
-
-<style lang="postcss"></style>

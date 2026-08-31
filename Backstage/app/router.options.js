@@ -3,8 +3,8 @@
 
 export default {
   routes: (routes) => {
-    const homeRoute = routes.find((r) =>
-      typeof r.path === 'string' && r.path.toLowerCase() === '/home'
+    const homeRoute = routes.find(
+      (r) => typeof r.path === 'string' && r.path.toLowerCase() === '/home'
     )
 
     if (homeRoute) {

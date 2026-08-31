@@ -9,9 +9,9 @@ description: 新增 / 改名 pages 目錄下的檔案或目錄前必須先讀。
 
 Nuxt 的檔案路由直接拿檔名當 path segment,**不做任何大小寫轉換**:
 
-| 檔案 | 產生的 path |
-|---|---|
-| `pages/buy/list/verify.vue` | `/buy/list/verify` |
+| 檔案                            | 產生的 path                             |
+| ------------------------------- | --------------------------------------- |
+| `pages/buy/list/verify.vue`     | `/buy/list/verify`                      |
 | `pages/buy/list/VerifyCode.vue` | `/buy/list/VerifyCode` ← 大寫會留在 URL |
 
 大寫 URL 的問題:
@@ -21,11 +21,11 @@ Nuxt 的檔案路由直接拿檔名當 path segment,**不做任何大小寫轉�
 
 ### 命名規則
 
-| 位置 | 命名 | 例 |
-|---|---|---|
-| `pages/` 下的**路由檔** | 全小寫,多字用連字號 | `index.vue`、`basic.vue`、`[id].vue` |
-| `pages/**/_components/` 下的**元件** | PascalCase | `AutoRefreshAddTime.vue` |
-| `components/`、`containers/` 下的元件 | 依既有慣例 | `buy/mPopup/Main.vue` |
+| 位置                                  | 命名                | 例                                   |
+| ------------------------------------- | ------------------- | ------------------------------------ |
+| `pages/` 下的**路由檔**               | 全小寫,多字用連字號 | `index.vue`、`basic.vue`、`[id].vue` |
+| `pages/**/_components/` 下的**元件**  | PascalCase          | `AutoRefreshAddTime.vue`             |
+| `components/`、`containers/` 下的元件 | 依既有慣例          | `buy/mPopup/Main.vue`                |
 
 **改名 pages 檔案前先 grep 路由 name** —— 路由 name 由路徑轉成(`/buy/list/VerifyCode`
 → `buy-list-VerifyCode`),`router.push({ name: ... })` 的地方會一起壞掉。

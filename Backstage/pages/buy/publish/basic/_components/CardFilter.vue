@@ -105,5 +105,3 @@ onMounted(() => {
     </ul>
   </BuyMCardFilter>
 </template>
-
-<style></style>

@@ -106,5 +106,3 @@ watch(
     </li>
   </ul>
 </template>
-
-<style></style>

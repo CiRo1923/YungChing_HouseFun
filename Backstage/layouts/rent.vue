@@ -1,5 +1,3 @@
-<script setup></script>
-
 <template>
   <div class="l-wrap">
     <main class="l-body">
@@ -8,5 +6,3 @@
     </main>
   </div>
 </template>
-
-<style></style>

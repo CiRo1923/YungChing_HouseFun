@@ -152,13 +152,7 @@ const onInput = async (e) => {
     config.value
   const regex = {
     chinese: /[\u4e00-\u9fa5０-９Ａ-Ｚａ-ｚ～！＠＃＄％︿＆＊（）＿｜｛｝［］＜＞？／＊＼＋－]/g,
-    number: allowNegative
-      ? integer
-        ? /[^0-9-]/g
-        : /[^0-9.-]/g
-      : integer
-        ? /[^0-9]/g
-        : /[^0-9.]/g,
+    number: allowNegative ? (integer ? /[^0-9-]/g : /[^0-9.-]/g) : integer ? /[^0-9]/g : /[^0-9.]/g,
   }
 
   const isRemoveChinese =
@@ -329,11 +323,7 @@ watch(
             { '--error': errorMessage || config.isError },
           ]"
         >
-          <div
-            v-if="$slots.frontAssist"
-            class="m-form-assist"
-            :class="setClass.frontAssist"
-          >
+          <div v-if="$slots.frontAssist" class="m-form-assist" :class="setClass.frontAssist">
             <slot name="frontAssist" />
           </div>
           <input

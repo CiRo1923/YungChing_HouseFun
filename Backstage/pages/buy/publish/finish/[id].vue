@@ -89,5 +89,3 @@ onMounted(() => {
   <PageBuyPopupAutoRefreshTemplateRenewal />
   <PageBuyPopupAutoRefreshTemplateEditTime />
 </template>
-
-<style></style>

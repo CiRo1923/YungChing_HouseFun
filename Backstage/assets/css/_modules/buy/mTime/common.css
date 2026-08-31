@@ -1,7 +1,5 @@
 .m-time {
-  @apply relative inline-flex items-center justify-center gap-x-[--time-gap-x] rounded-full
-    h-[--time-h] w-[--time-w] cursor-default
-    bg-[--time-bg-color] text-[--time-color] transition-colors duration-300;
+  @apply relative inline-flex h-[--time-h] w-[--time-w] cursor-default items-center justify-center gap-x-[--time-gap-x] rounded-full bg-[--time-bg-color] text-[--time-color] transition-colors duration-300;
 
   /* as='label' 才點得下去(as='span' 只是顯示) */
   &.\-\-cursor-pointer {

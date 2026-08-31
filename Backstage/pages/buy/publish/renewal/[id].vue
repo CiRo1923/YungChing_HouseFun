@@ -138,5 +138,3 @@ onMounted(() => {
     </Form>
   </BuyMContainer>
 </template>
-
-<style></style>

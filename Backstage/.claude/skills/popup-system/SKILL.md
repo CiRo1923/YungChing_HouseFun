@@ -13,15 +13,15 @@ description: 修改 popup(alert / confirm / custom / apiPromise)的顯示狀態�
 
 ## 檔案分工
 
-| 檔案 | 負責 |
-|---|---|
-| `stores/popup.js` | 狀態:`alertData` / `confirmData` / `customData` / `apiPromiseData`(各含 `id`)、`alertCheck` / `confirmCheck` / `customCheck`(Promise 的 resolver)、`buttons` 與 `setClass`(alert / confirm 的預設按鈕與外觀) |
-| `stores/.composables/usePopupActions.js` | 開啟 / 關閉 / 結算。**是唯一能碰 `xxxCheck` 的地方** |
-| `components/common/mPopup/Main.vue` | 顯示狀態機與兩層 Transition。每個 popup 實例比對 `props.id === keyID` |
-| `containers/buy/common/*.vue` | 各型別的外框(AlertSystem / ConfirmSystem / CustomPopup / ApiPromiseSystem) |
-| `assets/css/_modules/common/mPopup/variables.css` | 尺寸 / 色彩變數與 `--w-1200` ~ `--w-300` 寬度修飾符。改樣式優先動這裡 |
-| `assets/css/_modules/common/mPopup/common.css` | `.m-popup*` 的版面規則(由 `Main.vue` import) |
-| `assets/css/_common/vueTransition.css` | `popup-overlay-*` / `popup-zoom-*`。**不得出現 `.m-xxx` 選擇器** |
+| 檔案                                              | 負責                                                                                                                                                                                                         |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `stores/popup.js`                                 | 狀態:`alertData` / `confirmData` / `customData` / `apiPromiseData`(各含 `id`)、`alertCheck` / `confirmCheck` / `customCheck`(Promise 的 resolver)、`buttons` 與 `setClass`(alert / confirm 的預設按鈕與外觀) |
+| `stores/.composables/usePopupActions.js`          | 開啟 / 關閉 / 結算。**是唯一能碰 `xxxCheck` 的地方**                                                                                                                                                         |
+| `components/common/mPopup/Main.vue`               | 顯示狀態機與兩層 Transition。每個 popup 實例比對 `props.id === keyID`                                                                                                                                        |
+| `containers/buy/common/*.vue`                     | 各型別的外框(AlertSystem / ConfirmSystem / CustomPopup / ApiPromiseSystem)                                                                                                                                   |
+| `assets/css/_modules/common/mPopup/variables.css` | 尺寸 / 色彩變數與 `--w-1200` ~ `--w-300` 寬度修飾符。改樣式優先動這裡                                                                                                                                        |
+| `assets/css/_modules/common/mPopup/common.css`    | `.m-popup*` 的版面規則(由 `Main.vue` import)                                                                                                                                                                 |
+| `assets/css/_common/vueTransition.css`            | `popup-overlay-*` / `popup-zoom-*`。**不得出現 `.m-xxx` 選擇器**                                                                                                                                             |
 
 **與 Official 的差異**:本專案**沒有 bottomSheet 模式**,PC / 平板 / 手機一律 zoom ——
 `Main.vue` 的 `--zoom` class 與 `<Transition name="popup-zoom">` 都是寫死的,
@@ -34,19 +34,23 @@ description: 修改 popup(alert / confirm / custom / apiPromise)的顯示狀態�
 `Main.vue` 有兩個 flag,對應兩層 Transition:
 
 ```js
-const isShowOverlay = ref(false)  // 外層 .m-popup(遮罩)
-const isShowPopup = ref(false)    // 內層 .m-popup-container(內容)
+const isShowOverlay = ref(false) // 外層 .m-popup(遮罩)
+const isShowPopup = ref(false) // 內層 .m-popup-container(內容)
 
-watch(isOpen, async (open) => {
-  if (!open) {
-    isShowPopup.value = false   // container 先退場,遮罩等它的 @afterLeave
-    return
-  }
+watch(
+  isOpen,
+  async (open) => {
+    if (!open) {
+      isShowPopup.value = false // container 先退場,遮罩等它的 @afterLeave
+      return
+    }
 
-  isShowOverlay.value = true
-  await nextTick()              // 等遮罩掛上,內層 Transition 才存在
-  if (isOpen.value) isShowPopup.value = true
-}, { immediate: true })
+    isShowOverlay.value = true
+    await nextTick() // 等遮罩掛上,內層 Transition 才存在
+    if (isOpen.value) isShowPopup.value = true
+  },
+  { immediate: true }
+)
 
 // 只在「確實已關閉」時才收遮罩
 const onAfterLeave = () => {
@@ -67,7 +71,9 @@ const onAfterLeave = () => {
 
 ```js
 // ✗ 已移除的實作
-const onOverlayEnter = () => { if (isOpen.value) isShowPopup.value = true }
+const onOverlayEnter = () => {
+  if (isOpen.value) isShowPopup.value = true
+}
 // 外層 v-if="isOpen || isShowOverlay"
 ```
 
@@ -91,8 +97,8 @@ const onOverlayEnter = () => { if (isOpen.value) isShowPopup.value = true }
 const onSettle = (checkRef, isSure = false, item = null) => {
   const resolve = checkRef.value
 
-  checkRef.value = null      // 先清空
-  resolve?.(isSure, item)    // 再呼叫,且 null 安全
+  checkRef.value = null // 先清空
+  resolve?.(isSure, item) // 再呼叫,且 null 安全
 }
 ```
 
@@ -109,10 +115,10 @@ const onSettle = (checkRef, isSure = false, item = null) => {
 
 ## 三個 bug(症狀 → 根因)
 
-| 症狀 | 根因 | 防線 |
-|---|---|---|
-| popup **再也打不開**,只剩半透明遮罩,console 無錯誤 | 不變式 1:`isShowPopup` 依賴 `@enter`,錯過一次就死鎖 | `watch(isOpen)` 無條件設定 |
-| `await onCustom(...)` **之後的程式碼永不執行**(流程卡住) | 不變式 2:close 只清空 resolver、不呼叫 | `onSettle` 統一結算 |
+| 症狀                                                             | 根因                                                                                                                                 | 防線                                |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------- |
+| popup **再也打不開**,只剩半透明遮罩,console 無錯誤               | 不變式 1:`isShowPopup` 依賴 `@enter`,錯過一次就死鎖                                                                                  | `watch(isOpen)` 無條件設定          |
+| `await onCustom(...)` **之後的程式碼永不執行**(流程卡住)         | 不變式 2:close 只清空 resolver、不呼叫                                                                                               | `onSettle` 統一結算                 |
 | `alertCheck.value is not a function`,之後**所有** popup 都打不開 | 元件直接呼叫已是 `null` 的 resolver,拋錯中斷了後面的 `onAlertClose()`,`alertData.id` 卡住 → `keyID` 永遠是 `alertSystem`(優先序最高) | `onSettle` 用 `?.`,元件不再直接呼叫 |
 
 **除錯對照**:症狀是「只剩遮罩」→ 看不變式 1;「流程不往下走」→ 看不變式 2;
@@ -139,11 +145,19 @@ console 有 `is not a function` → 第三條。
 
 ```css
 .popup-overlay-enter-active,
-.popup-overlay-leave-active { transition: opacity 0.15s ease; }
-.popup-overlay-leave-active { transition-delay: 0.1s; }   /* 等 container 收完 */
+.popup-overlay-leave-active {
+  transition: opacity 0.15s ease;
+}
+.popup-overlay-leave-active {
+  transition-delay: 0.1s;
+} /* 等 container 收完 */
 
-.popup-zoom-enter-active { animation: popup-bomb 0.1s 0.075s both; }  /* delay 讓遮罩先浮現 */
-.popup-zoom-leave-active { animation: popup-bomb 0.1s reverse both; }
+.popup-zoom-enter-active {
+  animation: popup-bomb 0.1s 0.075s both;
+} /* delay 讓遮罩先浮現 */
+.popup-zoom-leave-active {
+  animation: popup-bomb 0.1s reverse both;
+}
 ```
 
 **`vueTransition.css` 內不得出現 `.m-xxx` 選擇器**(只有註解可提及元件名)。需要綁元件 class

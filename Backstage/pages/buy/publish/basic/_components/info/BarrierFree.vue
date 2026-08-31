@@ -64,5 +64,3 @@ const isOther = computed(() => {
     </li>
   </ul>
 </template>
-
-<style></style>

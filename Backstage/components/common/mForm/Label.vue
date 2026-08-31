@@ -54,4 +54,3 @@ const setClass = computed(() => ({
     <slot>{{ props.label }}</slot>
   </component>
 </template>
-

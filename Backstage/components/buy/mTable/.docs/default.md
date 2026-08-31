@@ -4,14 +4,14 @@
 
 ## Props
 
-| 名稱 | 型別 | 預設值 | 說明 |
-| --- | --- | --- | --- |
-| `thead` | `Array` | `null` | 表頭欄位設定。 |
-| `tbody` | `Array` | `null` | 表格內容資料。可傳入陣列、空陣列或 `null`。 |
-| `tfoot` | `Array` | `null` | 表尾資料。沒有資料時不顯示。 |
-| `table` | `Object` | `null` | 完整表格資料。傳入後優先使用 `table.thead`、`table.tbody`、`table.tfoot`。 |
-| `config` | `Object` | `{}` | 組件設定，會與預設設定合併。 |
-| `setClass` | `Object` | `{}` | class 設定，會與預設 class 合併。 |
+| 名稱       | 型別     | 預設值 | 說明                                                                       |
+| ---------- | -------- | ------ | -------------------------------------------------------------------------- |
+| `thead`    | `Array`  | `null` | 表頭欄位設定。                                                             |
+| `tbody`    | `Array`  | `null` | 表格內容資料。可傳入陣列、空陣列或 `null`。                                |
+| `tfoot`    | `Array`  | `null` | 表尾資料。沒有資料時不顯示。                                               |
+| `table`    | `Object` | `null` | 完整表格資料。傳入後優先使用 `table.thead`、`table.tbody`、`table.tfoot`。 |
+| `config`   | `Object` | `{}`   | 組件設定，會與預設設定合併。                                               |
+| `setClass` | `Object` | `{}`   | class 設定，會與預設 class 合併。                                          |
 
 ## Data
 
@@ -61,19 +61,19 @@ const thead = [
 ]
 ```
 
-| 名稱 | 說明 |
-| --- | --- |
-| `id` | 欄位 key，同時也是 tbody slot name。 |
-| `label` | 表頭文字，使用 `v-html` 輸出。 |
-| `type` | 預設欄位輸出格式。可傳 `date`、`comma`、`currency`。 |
-| `format` | `type: 'date'` 時使用的日期格式，預設 `YYYY-MM-DD`。 |
-| `colspan.thead` | 表頭 `th` 的 `colspan`。 |
-| `colspan.tbody` | 內容 `td` 的 `colspan`。 |
-| `rowspan.thead` | 表頭 `th` 的 `rowspan`。 |
-| `rowspan.tbody` | 內容 `td` 的 `rowspan`。 |
-| `class.thead` | 表頭 `th` 額外 class。 |
-| `class.tbody` | 內容 `td` 額外 class。 |
-| `class.tfoot` | 表尾 `td` 額外 class。 |
+| 名稱            | 說明                                                 |
+| --------------- | ---------------------------------------------------- |
+| `id`            | 欄位 key，同時也是 tbody slot name。                 |
+| `label`         | 表頭文字，使用 `v-html` 輸出。                       |
+| `type`          | 預設欄位輸出格式。可傳 `date`、`comma`、`currency`。 |
+| `format`        | `type: 'date'` 時使用的日期格式，預設 `YYYY-MM-DD`。 |
+| `colspan.thead` | 表頭 `th` 的 `colspan`。                             |
+| `colspan.tbody` | 內容 `td` 的 `colspan`。                             |
+| `rowspan.thead` | 表頭 `th` 的 `rowspan`。                             |
+| `rowspan.tbody` | 內容 `td` 的 `rowspan`。                             |
+| `class.thead`   | 表頭 `th` 額外 class。                               |
+| `class.tbody`   | 內容 `td` 額外 class。                               |
+| `class.tfoot`   | 表尾 `td` 額外 class。                               |
 
 ## Tbody
 
@@ -99,19 +99,19 @@ value = tbody[rowIndex][thead.id]
 
 `components/buy/mTable/TBodyValue.vue` 接收：
 
-| 名稱 | 型別 | 說明 |
-| --- | --- | --- |
-| `value` | `String \| Number` | 欄位值。 |
-| `config` | `Object` | 欄位設定，通常傳入當前 `thead` item。 |
+| 名稱     | 型別               | 說明                                  |
+| -------- | ------------------ | ------------------------------------- |
+| `value`  | `String \| Number` | 欄位值。                              |
+| `config` | `Object`           | 欄位設定，通常傳入當前 `thead` item。 |
 
 格式化規則：
 
-| `config.type` | 輸出 |
-| --- | --- |
-| `date` | `onFormatDate(value, config.format || 'YYYY-MM-DD')` |
-| `comma` | `onNumberComma(value) || 0` |
-| `currency` | `$${onNumberComma(value) || 0}` |
-| 其他 | 原值 |
+| `config.type` | 輸出                               |
+| ------------- | ---------------------------------- |
+| `date`        | `onFormatDate(value, config.format |     | 'YYYY-MM-DD')` |
+| `comma`       | `onNumberComma(value)              |     | 0`             |
+| `currency`    | `$${onNumberComma(value)           |     | 0}`            |
+| 其他          | 原值                               |
 
 ## Tfoot
 
@@ -131,11 +131,11 @@ const config = {
 }
 ```
 
-| 名稱 | 說明 |
-| --- | --- |
-| `isTheadFixed` | 是否啟用固定表頭。啟用後會依 `.m-table-container` 的捲動位置移動同一個 `thead`。 |
-| `noData.icon` | 無資料時傳給 `CommonSvgIcon` 的 icon。沒有值時不顯示 icon。 |
-| `noData.message` | 無資料文字，使用 `v-html` 輸出。 |
+| 名稱             | 說明                                                                             |
+| ---------------- | -------------------------------------------------------------------------------- |
+| `isTheadFixed`   | 是否啟用固定表頭。啟用後會依 `.m-table-container` 的捲動位置移動同一個 `thead`。 |
+| `noData.icon`    | 無資料時傳給 `CommonSvgIcon` 的 icon。沒有值時不顯示 icon。                      |
+| `noData.message` | 無資料文字，使用 `v-html` 輸出。                                                 |
 
 ## Set Class
 
@@ -173,12 +173,12 @@ slot name 使用 `thead.id`。
 </BuyMTableDefault>
 ```
 
-| 名稱 | 說明 |
-| --- | --- |
-| `item` | tbody 當前列的完整資料。 |
-| `value` | `item[thead.id]` 的欄位值。 |
-| `index` | tbody 當前列 index。 |
-| `column` | 當前 thead 欄位設定。 |
+| 名稱     | 說明                        |
+| -------- | --------------------------- |
+| `item`   | tbody 當前列的完整資料。    |
+| `value`  | `item[thead.id]` 的欄位值。 |
+| `index`  | tbody 當前列 index。        |
+| `column` | 當前 thead 欄位設定。       |
 
 ### Tfoot 欄位
 

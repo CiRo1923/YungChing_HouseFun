@@ -29,5 +29,3 @@ const { isLoading } = storeToRefs(common)
     <BuyCommonApiPromiseSystem />
   </div>
 </template>
-
-<style></style>

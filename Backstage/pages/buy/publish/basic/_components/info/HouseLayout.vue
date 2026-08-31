@@ -128,5 +128,3 @@ const onIsCaseOpenConceptChange = () => {
     </ul>
   </CommonMFormHidden>
 </template>
-
-<style></style>

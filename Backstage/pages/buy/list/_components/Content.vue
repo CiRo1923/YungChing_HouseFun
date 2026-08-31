@@ -427,5 +427,3 @@ const onCommentClick = async (objectData) => {
     <PageBuyListNoData v-else />
   </BuyMCardDefault>
 </template>
-
-<style lang="postcss"></style>

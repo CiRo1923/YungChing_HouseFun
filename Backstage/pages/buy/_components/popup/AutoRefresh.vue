@@ -74,5 +74,3 @@ const publishInfo = computed(() => {
     </div>
   </BuyCommonCustomPopup>
 </template>
-
-<style lang="postcss"></style>
