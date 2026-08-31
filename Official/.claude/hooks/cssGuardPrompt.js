@@ -268,6 +268,7 @@ const main = () => {
           'text-[length:--x];border-color 與 gap-x-[var(--x,0px)] 則沒問題。' +
           'transition-property: transform 不要換成 transition-transform(會連帶塞 duration-150 與 ' +
           'cubic-bezier,timing-function 蓋不掉、手感會變),transform: translate3d(0,0,0) 同理維持原生。\n\n' +
+          '⛔ **嚴禁在規則本體與 .tools/css/ 的註解裡寫死專案名稱** —— 不論本專案、姊妹專案還是參考專案的名字都不行。這份規範與工具是各自的複本、移植時整份複製,寫死對方的名字複製過去就變成錯的敘述(「與 A 的差異」抄到 A 專案會變成「與自己的差異」)。兩邊真的有差異時,只描述**本專案的事實**與**移植時要重新確認什麼**,不要提對方是誰 —— 例如「本專案的 tailwind.extend.js 有三個 boxShadow preset,所以只抓內建的 key;若對方的 extend 不放陰影,要改成抓任何 shadow-*」。專案名只能出現在規範最後的「本專案現況」一章,以及專門講跨專案同步的 skill。\n\n' +
           '**再說一次**:不要主動彈 AskUserQuestion 問「要不要修」—— 等使用者開口。\n' +
           '他說「修正」時就直接動手,不用再確認一次;修的時候要說清楚哪些是這次改出來的、' +
           '哪些是碰到的舊檔案既有存量,不要讓他誤以為都是新問題。\n' +

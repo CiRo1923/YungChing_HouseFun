@@ -15,7 +15,7 @@ description: 動到任何 css、顏色、module 樣式前必須先讀。六條�
 | 3    | module 拆成 `_modules/<頻道>/<組件>/`,在 `<script setup>` 最上方按固定順序 JS import                                                                        | ✅(引入方式與順序)     |
 | 4    | module 變數用 `-w` / `-h` / `-p` / `-m` / `-border`,尺寸類拆 pc / tablet / mobile 三份                                                                      | ✅                     |
 | 5    | `<script setup>` 的 import 順序:**css → `./.composables` → `@js` → 其他套件**                                                                               | ✅                     |
-| 6    | 不要用被 `theme` 整組覆寫掉而不存在的 class:`text-sm` / **任何** `shadow-*` / `font-sans` / `md:` / `transition-width`(單數)。`*-hexa` 在這個專案**仍合法** | ✅                     |
+| 6    | 不要用被 `theme` 整組覆寫掉而不存在的 class:`text-sm` / **任何** `shadow-*` / `font-sans` / `md:` / `transition-width`(單數)。`*-hexa` **已淘汰**(改用 8 碼 hex 色票) | ✅                     |
 
 ## ⚠️ 判斷不出來就問 —— 不要猜
 

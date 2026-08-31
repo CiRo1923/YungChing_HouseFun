@@ -3,6 +3,29 @@
 本規則為本專案專用,每次對話都必須遵守。
 摘要與觸發時機見 skill [css-conventions](../skills/css-conventions/SKILL.md)。
 
+### ⛔ 嚴禁在規則本體寫死專案名稱
+
+**規則本體與 `.tools/css/` 的程式碼註解裡,不可以出現任何專案名稱** ——
+不論是本專案的、姊妹專案的、還是參考專案的。
+
+| ✗ | ✓ |
+|---|---|
+| 「與 XXX 的差異:YYY 有三個 preset」 | 「移植時要重新對照那邊的 config —— **本專案**不放陰影」 |
+| 「2026-08-31 清完存量(A 專案 5 處、B 專案 1 處)」 | 「2026-08-31 清完**本專案**的存量(1 處)」 |
+| 「在姊妹專案 XXX 稽核時找出 9 個」 | 「全案稽核時找出 9 個」 |
+| 「XXX 那邊還在用,不要抄過去」 | (直接刪掉 —— 差異寫在**自己這邊該怎麼做**就夠了) |
+
+**為什麼**:這份規範與工具是**各自的複本**,移植時整份複製 ——
+一旦寫死對方的專案名,複製過去就變成錯的敘述(「與 A 的差異」抄到 A 專案
+會變成「與自己的差異」),而且會讓人以為要去翻另一個 repo 才看得懂這條規則。
+
+**兩邊真的有差異時怎麼寫**:只描述**本專案的事實**與**移植時要重新確認什麼**,
+不要提對方是誰。例如陰影那條 —— 寫「本專案的 `tailwind.extend.js` 完全不放陰影,
+所以抓任何 `shadow-*`;若對方的 extend 有 preset,只能抓內建的 key」。
+
+> 專案名稱只能出現在兩個地方:最後的「[本專案現況](#本專案現況)」一章
+> (那章本來就是專案特有的),以及專門講跨專案同步的 skill(如 shared-components-sync)。
+
 **違規一律只警告不阻擋** —— 擋下來只會逼人繞過(加 `--no-verify`),反而讓守門機制形同虛設。
 
 ### ⚠️ 每一輪都要列出違規 —— 但不要主動問「要不要修」
@@ -160,7 +183,7 @@
 
 ### 「沒使用端的 modifier」刪之前先做三件事
 
-2026-08-31 在姊妹專案 Official 稽核時找出 9 個沒有使用端的 modifier,決定**刪 7 個、留 2 個** ——
+2026-08-31 全案稽核時找出 9 個沒有使用端的 modifier,決定**刪 7 個、留 2 個** ——
 差別在「刪掉之後失去什麼」:
 
 | | 判斷 | 實例 |
@@ -172,7 +195,7 @@
 
 1. **有沒有動態拼接的 class** —— 樣板字面值拼出來的 modifier(`--` 接變數)grep 抓不到。
    先全案搜 `'--'` 與 `--` 後面接變數的寫法,確認哪些組件會拼 class
-   (Official 只有 mTooltip 的 `--<align>-x` / `--<side>-y` 與 mPopup 的 `--<mode>`)。
+   (實際稽核時只找到兩處:mTooltip 的 `--<align>-x` / `--<side>-y` 與 mPopup 的 `--<mode>`)。
 2. **組件本身有沒有對應的 props / 綁定** —— `--resize-x` 那組就是查了才發現
    TextArea.vue **完全沒有 resize 相關程式碼**,不是「使用端還沒用」而是功能沒接上。
 3. **刪掉會不會讓別的東西變孤兒** —— 那些 modifier 設定的 `-pc-` / `-tablet-` / `-mobile-`
@@ -184,7 +207,7 @@ mForm/textarea.css 與 mSeparator/variables.css 的檔頭就是這樣寫的。
 
 ### 「沒有對應 CSS 的 class」先查這四種正當理由,再問
 
-這條岔路**大多數情況是刻意的**,不是漏掉 —— 2026-08-31 在姊妹專案 Official 全案稽核,
+這條岔路**大多數情況是刻意的**,不是漏掉 —— 2026-08-31 全案稽核,
 找出 15 個沒有對應 CSS 的 `m-*` class,查完發現**一個都不用補**。
 所以遇到時先照下面判斷,只有四種都不符合才需要問。
 
@@ -259,6 +282,16 @@ git show <首次出現的 commit>:<檔案> | Select-String "m-chart-grid"
 
 `text-hexa` / `bg-hexa` / `border-hexa` / `divide-hexa` 走 `onColorWithAlpha`,
 語法是 `bg-hexa-[--black,0.7]`(色票變數 + alpha),不是 tailwind 原生的 `/70`。
+
+⚠️ **這四個已淘汰**(2026-08-31)—— plugin 還留著但不要再用,規則 6 會抓。
+改法:算出 alpha 兩碼(`Math.round(透明度 × 255).toString(16)`)、在色票檔建 8 碼 hex 變數,
+使用端改成 `bg-[--色名-色碼-alpha]`。淘汰當天全案只有 2 處(`bg-hexa-[--black,0.7]`),
+補了 `--black-b3: #000000b3` 就收掉了。
+
+> 為什麼不留著:`bg-hexa-[--black,0.7]` 產出的是
+> `color-mix(in srgb, var(--black) 70%, transparent)` —— 與 `#000000b3` 等值,
+> 但 `color-mix()` 要 Chrome 111+ / Safari 16.2+,8 碼 hex 的支援範圍寬得多。
+> 而且色值散在使用端、色票檔看不到它,違反規則 1 的用意。
 
 ### `content` 的掃描範圍
 
@@ -917,7 +950,7 @@ modifier 名稱就是 **tailwind 的 utility 名前面加 `--`**,不要自己另
 
   > 所以原本那句「`color` 的 initial 是黑色,寫 initial 會讓元素全變黑」**是錯的** ——
   > 那只在直接寫 `color: initial` 時成立,透過 `var()` 不成立。
-  > 實務也對得上:Official 的 mAnchor 長期用 `initial`、50 個檔案在用它,從來沒有變黑。
+  > 實務也對得上:mAnchor 長期用 `initial`、50 個檔案在用它,從來沒有變黑。
 
   真正的問題是**意圖讀不出來**:下一個人會以為 initial 就是「黑色」而不敢動它,
   或反過來以為 `-bg-color: initial` 會繼承父層背景。寫 `inherit` / `transparent` 就沒有這層猜測。
@@ -1162,7 +1195,7 @@ icon、圓點、方形按鈕這類**寬高一致**的元素,只建一個 `-size`
 
 > 導入當天兩邊各有一筆存量,都用**合併**解決而不是標豁免:
 > mHeader 的第二段 `@screen m` 併回第一段(選擇器不重疊、`@screen pt` 的相對順序不變),
-> Backstage 的 mTable/checkboxResponsiv 同理。合併前確認過兩件事:
+> 另一支變體檔的重複 `@screen m` 同理。合併前確認過兩件事:
 > **選擇器有沒有重疊**(有就要注意宣告順序)、**與複合斷點(`pt` / `tm`)的先後有沒有被改動**。
 
 ```css
@@ -1293,8 +1326,8 @@ npx tailwindcss -c tailwind.config.js -i in.css --content probe.html -o out.css
 另外 `transition-width` / `-height` / `-size`(單數)也會被抓 ——
 `theme.extend.transitionProperty` 定義的是**複數**:`widths` / `heights` / `sizes`。
 
-⚠️ **`*-hexa` 在這個專案是合法用法**(`bg-hexa-[--black,0.7]`),所以規則 6 不抓它。
-Official 那邊已經全面改用 8 碼 hex 色票、會抓 —— **兩邊在這點上不同,對照時不要照抄**。
+⚠️ **`*-hexa` 已淘汰**(2026-08-31 起兩個專案一致)—— plugin 還留著但不要再用,規則 6 會抓。
+改法見「[動手前先讀 tailwind.config.js](#動手前先讀-tailwindconfigjs)」那章。
 
 這條由 [lint-core.mjs](../../.tools/css/lint-core.mjs) 的 `checkTailwindTheme` 檢查,
 `.vue` 與 `.css` 都掃(寫在哪裡都是錯的)。

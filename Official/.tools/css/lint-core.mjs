@@ -1077,11 +1077,9 @@ export function checkTailwindPitfalls(relPath, text) {
  *   `*-hexa`      → 2026-08-28 起全面改用 8 碼 hex 色票,plugin 還留著但不要再用
  *   `transition-` 單數 → 專案定義的是複數(widths / heights / sizes),寫單數不存在
  *
- * ⚠️ **與 Backstage 的差異(兩邊是各自的複本,不要照抄)**:
- *   1. 這邊的 tailwind.extend.js 有三個 boxShadow preset,Backstage 一個都沒有 ——
- *      所以那邊抓「任何 shadow-*」,這邊只抓內建那幾個 key。
- *   2. `*-hexa` 這邊已淘汰、會被抓;**Backstage 還是合法用法**
- *      (語法 `bg-hexa-[--black,0.7]`),那邊沒有這一段。
+ * ⚠️ **移植到別的專案時,這份清單要重新對照那邊的 config**,不能照抄 ——
+ *    最容易錯的是陰影:本專案的 tailwind.extend.js 有三個 boxShadow preset,
+ *    所以只抓內建那幾個 key;若對方的 extend 完全不放陰影,就要改成抓「任何 shadow-*」。
  *
  * ⚠️ 改了 tailwind.config.js 的 `theme` 就要回頭同步這裡 ——
  *    把某組從 `theme` 移進 `theme.extend`(內建復活)時,對應那段要刪掉。
@@ -1115,7 +1113,7 @@ const UNAVAILABLE_CLASSES = [
     detail: (m) => `${m[0]} 這個字族不存在(theme.fontFamily 整組覆寫過)—— 本專案只有 font-default`,
   },
   {
-    // plugin 還在,但已淘汰。實際寫法是 bg-hexa-[#000,0.5],所以 hexa 後面允許接 -[
+    // plugin 還在,但已淘汰。實際寫法是 bg-hexa-[--black,0.7],所以 hexa 後面允許接 -[
     re: /(?<![\w-])(text|bg|border|divide)-hexa(?![\w])/g,
     detail: (m) =>
       `${m[0]} 已淘汰(2026-08-28 全面改用 8 碼 hex 色票)—— ` +
@@ -1249,7 +1247,7 @@ export function checkScreenGrouping(relPath, text) {
  *   背景 / 邊框色(`-bg-color` / `-border-color` / `-outline-color`)
  *                             → `transparent` 沒指定就是沒有顏色,不該繼承父層的背景
  *
- * 2026-08-31 決定並清完存量(Official 5 處、Backstage 1 處)。
+ * 2026-08-31 決定並清完本專案的存量(5 處)。
  */
 const TRANSPARENT_BASE = /-(?:bg|background|border|outline|divide|fill|stroke)-color$/
 

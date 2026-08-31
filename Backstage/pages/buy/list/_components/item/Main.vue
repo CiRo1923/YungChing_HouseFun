@@ -143,12 +143,12 @@ onUnmounted(() => {
             黃金曝光
           </span>
           <span
-            class="absolute bottom-0 left-0 flex h-[22px] items-center rounded-r-full px-[12px] text-[14px] leading-[1] tracking-wider text-[--white] bg-hexa-[--black,0.7]"
+            class="absolute bottom-0 left-0 flex h-[22px] items-center rounded-r-full px-[12px] text-[14px] leading-[1] tracking-wider text-[--white] bg-[--black-b3]"
           >
             {{ props.data.isCaseExchange ? '可換' : '不可換' }}
           </span>
           <span
-            class="absolute bottom-0 right-0 flex h-[22px] items-center rounded-l-full px-[12px] text-[14px] leading-[1] tracking-wider text-[--white] bg-hexa-[--black,0.7]"
+            class="absolute bottom-0 right-0 flex h-[22px] items-center rounded-l-full px-[12px] text-[14px] leading-[1] tracking-wider text-[--white] bg-[--black-b3]"
           >
             {{ props.data.hfID }}
           </span>

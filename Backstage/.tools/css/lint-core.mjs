@@ -1057,7 +1057,7 @@ export function checkTailwindPitfalls(relPath, text) {
 }
 
 /**
- * 規則 6 —— 用到本專案「不存在」的 tailwind class。
+ * 規則 6 —— 用到本專案「不存在」或「已淘汰」的 tailwind class。
  *
  * ⚠️ 這裡的「規則 6」與規則 4 章節內的 6-a / 6-b 編號無關,那是另一組代號。
  *
@@ -1074,10 +1074,13 @@ export function checkTailwindPitfalls(relPath, text) {
  * ——tailwind 不會報錯,class 就靜靜地不生效,和拼錯字一樣難找。
  * 實測方式:`npx tailwindcss -c tailwind.config.js --content <含這些 class 的檔案>`。
  *
- * ⚠️ **與 Official 的差異(兩邊是各自的複本,不要照抄)**:
- *   1. Official 的 tailwind.extend.js 有三個 boxShadow preset,這邊一個都沒有。
- *   2. `*-hexa` 在 Official 已淘汰、會被抓;**這邊還是合法用法**
- *      (語法 `bg-hexa-[--black,0.7]`),所以這裡沒有那一段。
+ * 另外兩類:
+ *   `*-hexa`      → 2026-08-31 起全面改用 8 碼 hex 色票,plugin 還留著但不要再用
+ *   `transition-` 單數 → 專案定義的是複數(widths / heights / sizes),寫單數不存在
+ *
+ * ⚠️ **移植到別的專案時,這份清單要重新對照那邊的 config**,不能照抄 ——
+ *    最容易錯的是陰影:本專案的 tailwind.extend.js 完全不放陰影,所以抓「任何 shadow-*」;
+ *    若對方的 extend 有 preset,就只能抓內建那幾個 key,否則會把合法的 preset 報成違規。
  *
  * ⚠️ 改了 tailwind.config.js 的 `theme` 就要回頭同步這裡 ——
  *    把某組從 `theme` 移進 `theme.extend`(內建復活)時,對應那段要刪掉。
@@ -1099,7 +1102,7 @@ const UNAVAILABLE_CLASSES = [
   },
   {
     // theme.boxShadow 整組覆寫,而 tailwind.extend.js 不放陰影 —— 一個 preset 都沒有。
-    // 所以任何 shadow-* 都不存在(不像 Official 只需抓內建那幾個 key),
+    // 所以任何 shadow-* 都不存在(有 preset 的專案只需抓內建那幾個 key),
     // 只有 arbitrary value 的 shadow-[…] 例外(不吃 theme)—— 但那有規則 3 的 pitfall 在管。
     // lookbehind 讓 drop-shadow-md / box-shadow: / --x-shadow 都不會誤中。
     re: /(?<![\w-])shadow(?!-\[)(-[a-z0-9-]+)?(?![\w[])/g,
@@ -1111,6 +1114,13 @@ const UNAVAILABLE_CLASSES = [
     // theme.fontFamily 整組覆寫 —— 只剩 default
     re: /(?<![\w-])font-(sans|serif|mono)(?![\w-])/g,
     detail: (m) => `${m[0]} 這個字族不存在(theme.fontFamily 整組覆寫過)—— 本專案只有 font-default`,
+  },
+  {
+    // plugin 還在,但已淘汰。實際寫法是 bg-hexa-[--black,0.7],所以 hexa 後面允許接 -[
+    re: /(?<![\w-])(text|bg|border|divide)-hexa(?![\w])/g,
+    detail: (m) =>
+      `${m[0]} 已淘汰(2026-08-31 起改用 8 碼 hex 色票)—— ` +
+      `在色票檔建立 8 碼 hex 變數,改寫 ${m[1]}-[--色名-色碼-alpha]`,
   },
   {
     // transitionProperty 定義的是複數
@@ -1240,7 +1250,7 @@ export function checkScreenGrouping(relPath, text) {
  *   背景 / 邊框色(`-bg-color` / `-border-color` / `-outline-color`)
  *                             → `transparent` 沒指定就是沒有顏色,不該繼承父層的背景
  *
- * 2026-08-31 決定並清完存量(Official 5 處、Backstage 1 處)。
+ * 2026-08-31 決定並清完本專案的存量(1 處)。
  */
 const TRANSPARENT_BASE = /-(?:bg|background|border|outline|divide|fill|stroke)-color$/
 

@@ -32,7 +32,13 @@ const runNode = (args) => {
   }
 }
 
-/** 各規則對應的修正方式,寫進給 Claude 的指示裡,讓它提得出具體方案 */
+/**
+ * 各規則對應的修正方式,寫進給 Claude 的指示裡,讓它提得出具體方案。
+ *
+ * ⛔ 寫這些文字(以及規範、.tools/css/ 的註解)時**不可以出現任何專案名稱** ——
+ *    規則本體是各自的複本、移植時整份複製,寫死對方的名字複製過去就變成錯的敘述。
+ *    有差異時只描述「本專案的事實」與「移植時要重新確認什麼」。
+ */
 const FIX_HINTS = {
   color:
     '規則 1:先到 assets/css/_common/color.css(跨頻道共用)或 color<Channel>.css(單一頻道)' +
@@ -97,8 +103,8 @@ const FIX_HINTS = {
     'boxShadow 一個 preset 都沒有(tailwind.extend.js 刻意不放陰影)—— ' +
     '陰影一律走原生 box-shadow: var(--x-shadow) + module 自己的斷點變數,' +
     'fontFamily 只有 font-default。' +
-    '另外 transition-property 定義的是複數(transition-widths / heights / sizes,不是單數)。' +
-    '注意 *-hexa 在這個專案還是合法用法(bg-hexa-[--black,0.7]),不要當成違規。' +
+    '另外 *-hexa 已淘汰(2026-08-31 起改用 8 碼 hex 色票),transition-property 定義的是複數' +
+    '(transition-widths / heights / sizes,不是單數)。' +
     '這條是機械式替換,可以直接動手 —— 但要先確認原本想要的效果是什麼(那個 class 一直沒生效)。',
 }
 
