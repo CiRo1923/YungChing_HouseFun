@@ -1,0 +1,142 @@
+/* checkboxResponsive 變體的版型,以及 @screen 的斷點對應。 */
+.m-table {
+  &.\-\-checkbox-responsive {
+    .m-table-tbody-tr {
+      border-bottom: var(--table-checkbox-responsive-tbody-tr-border-b) solid
+        var(--table-checkbox-responsive-tbody-tr-border-color);
+
+      /* 整列可點選,所以勾選狀態的底色要有過渡 */
+      @apply cursor-pointer transition-colors duration-300;
+
+      &:not(.\-\-checked) {
+        @apply bg-[--table-checkbox-responsive-tbody-tr-background-color];
+      }
+
+      &.\-\-checked {
+        @apply bg-[--table-checkbox-responsive-tbody-tr-checked-background-color];
+      }
+
+      /* 該列的 checkbox 被停用時,整列都不能點 */
+      &.\-\-disabled {
+        @apply cursor-not-allowed;
+      }
+    }
+
+    .m-table-tbody-td {
+      @apply text-[--table-checkbox-responsive-tbody-td-color];
+    }
+
+    /* 表頭在這個變體裡不加粗 —— 它的視覺重點是勾選欄而不是欄名 */
+    .m-table-thead-th {
+      @apply font-normal;
+    }
+  }
+}
+
+@screen p {
+  .m-table {
+    &.\-\-checkbox-responsive {
+      --table-checkbox-responsive-thtd-first-last-pl: var(
+        --table-checkbox-responsive-thtd-first-last-pc-px
+      );
+      --table-checkbox-responsive-thtd-first-last-pr: var(
+        --table-checkbox-responsive-thtd-first-last-pc-px
+      );
+      --table-checkbox-responsive-thtd-pl: var(--table-checkbox-responsive-thtd-pc-px);
+      --table-checkbox-responsive-thtd-pr: var(--table-checkbox-responsive-thtd-pc-px);
+      --table-checkbox-responsive-thead-th-py: var(--table-checkbox-responsive-thead-th-pc-py);
+      --table-checkbox-responsive-thead-th-text-size: var(
+        --table-checkbox-responsive-thead-th-pc-text-size
+      );
+
+      --table-checkbox-responsive-tbody-tr-border-b: var(
+        --table-checkbox-responsive-tbody-tr-pc-border-b
+      );
+      --table-checkbox-responsive-tbody-td-py: var(--table-checkbox-responsive-tbody-td-pc-py);
+    }
+  }
+}
+
+@screen pt {
+  .m-table {
+    &.\-\-checkbox-responsive {
+      .m-table-thead-th,
+      .m-table-tbody-td {
+        &:not(:first-child) {
+          @apply pl-[--table-checkbox-responsive-thtd-pl];
+        }
+
+        &:first-child {
+          @apply w-[calc(var(--table-checkbox-responsive-thtd-pl)_+_var(--table-checkbox-responsive-thtd-first-last-pl)_+_18px)] pl-[--table-checkbox-responsive-thtd-first-last-pl];
+        }
+
+        &:not(:last-child) {
+          @apply pr-[--table-checkbox-responsive-thtd-pr];
+        }
+
+        &:last-child {
+          @apply pr-[--table-checkbox-responsive-thtd-first-last-pr];
+        }
+      }
+
+      .m-table-thead-th {
+        @apply py-[--table-checkbox-responsive-thead-th-py] text-[length:--table-checkbox-responsive-thead-th-text-size] text-[--table-checkbox-responsive-thead-th-color];
+      }
+
+      .m-table-tbody-td {
+        @apply py-[--table-checkbox-responsive-tbody-td-py];
+      }
+    }
+  }
+}
+
+@screen t {
+  .m-table {
+    &.\-\-checkbox-responsive {
+      --table-checkbox-responsive-thtd-first-last-pl: var(
+        --table-checkbox-responsive-thtd-first-last-tablet-px
+      );
+      --table-checkbox-responsive-thtd-first-last-pr: var(
+        --table-checkbox-responsive-thtd-first-last-tablet-px
+      );
+      --table-checkbox-responsive-thtd-pl: var(--table-checkbox-responsive-thtd-tablet-px);
+      --table-checkbox-responsive-thtd-pr: var(--table-checkbox-responsive-thtd-tablet-px);
+      --table-checkbox-responsive-thead-th-py: var(--table-checkbox-responsive-thead-th-tablet-py);
+      --table-checkbox-responsive-thead-th-text-size: var(
+        --table-checkbox-responsive-thead-th-tablet-text-size
+      );
+
+      --table-checkbox-responsive-tbody-tr-border-b: var(
+        --table-checkbox-responsive-tbody-tr-tablet-border-b
+      );
+      --table-checkbox-responsive-tbody-td-py: var(--table-checkbox-responsive-tbody-td-tablet-py);
+    }
+  }
+}
+
+@screen m {
+  .m-table {
+    --table-checkbox-responsive-tbody-tr-border-b: var(
+      --table-checkbox-responsive-tbody-tr-mobile-border-b
+    );
+
+    &.\-\-checkbox-responsive {
+      .m-table-tbody,
+      .m-table-tbody-tr,
+      .m-table-tbody-td {
+        @apply block;
+      }
+
+      .m-table-tbody-tr {
+        @apply px-[--table-checkbox-responsive-tbody-tr-mobile-px] py-[--table-checkbox-responsive-tbody-tr-mobile-py];
+      }
+
+      /* 手機版把勾選欄的 checkbox 與序號排成一列;pt 維持預設的堆疊,所以只寫 m 段 */
+      /* lint-breakpoint-exempt: 只有手機把勾選欄橫排,PC / 平板沒有這個佈局 */
+      .m-table-tbody-checkbox {
+        @apply flex items-center;
+        @apply gap-x-[--table-checkbox-responsive-tbody-checkbox-mobile-gap-x];
+      }
+    }
+  }
+}

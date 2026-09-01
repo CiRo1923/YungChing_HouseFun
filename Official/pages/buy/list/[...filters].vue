@@ -167,7 +167,7 @@ onUnmounted(() => {
   </div> -->
 
   <div class="bg-[--white] pt:pt-[12px]">
-    <PageBuyListTabOvalResponsiv />
+    <PageBuyListTabOvalResponsive />
     <PageBuyListSearchFunction
       @apiSearch="onApiSearch"
       @routerPush="onRoutePush"

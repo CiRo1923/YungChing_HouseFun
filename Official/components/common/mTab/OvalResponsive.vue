@@ -1,8 +1,8 @@
 <script setup>
 import '@css/_modules/common/mTab/variables.css'
-import '@css/_modules/common/mTab/ovalResponsivVariables.css'
+import '@css/_modules/common/mTab/ovalResponsiveVariables.css'
 import '@css/_modules/common/mTab/common.css'
-import '@css/_modules/common/mTab/ovalResponsiv.css'
+import '@css/_modules/common/mTab/ovalResponsive.css'
 
 import { onMergeTabConfig, useTabCore } from './.composables/useTabCore.js'
 
@@ -74,7 +74,7 @@ const onTransitionEnd = async (e) => {
 </script>
 
 <template>
-  <div class="m-tab --oval-responsiv" :class="setClass.main">
+  <div class="m-tab --oval-responsive" :class="setClass.main">
     <div class="m-tab-header" :class="setClass.header">
       <ul class="m-tab-header-items" :class="setClass.headerItems">
         <li

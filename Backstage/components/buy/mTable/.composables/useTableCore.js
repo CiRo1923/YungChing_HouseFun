@@ -26,12 +26,12 @@ const defaultSetClass = {
 }
 
 /**
- * m-table 共用核心邏輯（Default / CheckboxResponsiv 共用）
+ * m-table 共用核心邏輯（Default / CheckboxResponsive 共用）
  *
  * @param {Object} props - 元件 props（thead / tbody / tfoot / table / config / setClass）
  * @param {Object} [options]
  * @param {import('vue').Ref<boolean>|(() => boolean)|boolean} [options.canFixThead=true]
- *   是否允許 thead 固定。CheckboxResponsiv 在手機版會傳入 false，使 isTheadFixedActive 永遠關閉。
+ *   是否允許 thead 固定。CheckboxResponsive 在手機版會傳入 false，使 isTheadFixedActive 永遠關閉。
  */
 export default (props, options = {}) => {
   const { canFixThead = true } = options
@@ -86,7 +86,7 @@ export default (props, options = {}) => {
   // 沒有捲軸卻留間距,表格會平白內縮。
   const isContainerScroll = ref(false)
 
-  // 是否真的要啟用固定 thead：需開啟 config 且當前裝置允許（CheckboxResponsiv 手機版會關閉）
+  // 是否真的要啟用固定 thead：需開啟 config 且當前裝置允許（CheckboxResponsive 手機版會關閉）
   const isTheadFixedEnabled = computed(() => {
     return config.value.isTheadFixed && toValue(canFixThead)
   })

@@ -98,7 +98,7 @@ const onActionClick = (item) => {
       @click:reply="onFunctionsClick('reply')"
       @click:noReply="onFunctionsClick('noReply')"
     />
-    <BuyMTableCheckboxResponsiv
+    <BuyMTableCheckboxResponsive
       :thead="thead"
       :tbody="commentsDatas"
       :config="{
@@ -151,7 +151,7 @@ const onActionClick = (item) => {
           @click="onActionClick(item)"
         />
       </template>
-    </BuyMTableCheckboxResponsiv>
+    </BuyMTableCheckboxResponsive>
   </div>
   <PageBuyListPopupCommentNoData v-else />
 </template>

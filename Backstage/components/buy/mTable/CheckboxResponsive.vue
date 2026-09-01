@@ -1,8 +1,8 @@
 <script setup>
 import '@css/_modules/buy/mTable/variables.css'
-import '@css/_modules/buy/mTable/checkboxResponsivVariables.css'
+import '@css/_modules/buy/mTable/checkboxResponsiveVariables.css'
 import '@css/_modules/buy/mTable/common.css'
-import '@css/_modules/buy/mTable/checkboxResponsiv.css'
+import '@css/_modules/buy/mTable/checkboxResponsive.css'
 
 import useTableCore from './.composables/useTableCore'
 
@@ -42,7 +42,7 @@ const props = defineProps({
 
 const isDeviceM = computed(() => device.value === 'm')
 
-// CheckboxResponsiv 只在「非手機版」才固定 thead（手機版 thead 會被移除），
+// CheckboxResponsive 只在「非手機版」才固定 thead（手機版 thead 會被移除），
 // 因此把 canFixThead 綁定為 !isDeviceM，讓 isTheadFixedActive 在手機版永遠關閉。
 const {
   slots,
@@ -127,7 +127,7 @@ onUnmounted(() => {
 
 <template>
   <div
-    class="m-table --checkbox-responsiv"
+    class="m-table --checkbox-responsive"
     :class="[setClass.main, { '--thead-fixed': config.isTheadFixed }]"
   >
     <div

@@ -48,7 +48,7 @@ const active = computed(() => {
 </script>
 
 <template>
-  <CommonMTabOvalResponsiv
+  <CommonMTabOvalResponsive
     :items="items"
     :config="{
       active: active,

@@ -56,7 +56,7 @@ container 的內容寬度,動 container 的 px 會把底線一起拉寬。改用
 ```
 
 值 `--table-scroll-px: 8px` 在同檔 `:root`(單一值,沒有分裝置)。
-`mTable.css` 由 `components/buy/mTable/{CheckboxResponsiv,Default}.vue` 各自 `<style src>` 引入。
+`mTable.css` 由 `components/buy/mTable/{CheckboxResponsive,Default}.vue` 各自 `<style src>` 引入。
 
 **`--scrolling` 是必要的,不能拿掉**:`m-table-container scrollbar --y` 是寫死在兩個表格元件裡的,
 若只用 `.scrollbar.--y` 當條件,**全站每個表格都會吃到這 8px 右內距** —— 包含根本不會捲動的表格,

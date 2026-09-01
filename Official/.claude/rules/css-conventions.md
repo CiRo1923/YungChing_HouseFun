@@ -1041,8 +1041,8 @@ block 元素換過去通常沒事,但**`inline` 元素或 flex item 要實機確
   不是尺寸,也沒有「各頁面各自指定」或「各斷點不同」的需求。
 
   ⚠️ **`calc()` 裡的抵銷值仍然要開變數。** 那是尺寸,不因為包在算式裡就豁免 ——
-  實際踩過:mTab/ovalResponsiv 的 `mt-[calc(calc(var(--x-border-h)_-_1px)_*_-1)]`,
-  那個 `1px` 是「底線露出的厚度」,已改成 `--tab-oval-responsiv-body-*-border-visible`。
+  實際踩過:mTab/ovalResponsive 的 `mt-[calc(calc(var(--x-border-h)_-_1px)_*_-1)]`,
+  那個 `1px` 是「底線露出的厚度」,已改成 `--tab-oval-responsive-body-*-border-visible`。
   順帶一個容易漏的點:**那條宣告在 `@screen pt` 內,所以不能吃 `-pc-`**(規則 4 的 6-a),
   要吃中性變數再由 `@screen p` / `t` 兩段各自對應。
 
@@ -1430,7 +1430,7 @@ node .tools/css/lint-css.mjs tailwind.extend.js
 
 | preset | 色碼 | 使用端 |
 |---|---|---|
-| `black-y2-b4` | `#00000033` | `containers/common/Header.vue`、`_modules/common/mTab/ovalResponsiv.css` |
+| `black-y2-b4` | `#00000033` | `containers/common/Header.vue`、`_modules/common/mTab/ovalResponsive.css` |
 | `dropdown` | `#0000001a` ×2 | `_modules/buy/mSort/common.css` |
 | `card` | `#00000026` | `pages/buy/_components/common/Card.vue` |
 
@@ -1529,7 +1529,7 @@ module 也多一層頻道目錄(`_modules/<頻道>/<組件>/`)。
 > 少數確實無法符合規範的地方,一律用 `/* lint-breakpoint-exempt: 理由 */` 就地標註,
 > 不集中列在這裡 —— 清單會過期,註解不會。目前有標的是
 > mNav(漢堡按鈕與側邊選單只有手機版)、mPopup(工具列手機用 `mt`、桌機用 `mx`)、
-> mTab/ovalResponsiv(mobile 是膠囊形按鈕組,另一套設計)。
+> mTab/ovalResponsive(mobile 是膠囊形按鈕組,另一套設計)。
 
 ### 參考實作
 
