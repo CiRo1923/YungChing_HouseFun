@@ -708,6 +708,25 @@ export default () => {
     onApiPromise('close')
 
     if (status === 200) {
+      /*
+       * 封面圖沿用列表帶進來的那張。
+       *
+       * ⚠️ RefreshCurrentPlansForCase 的回應沒有 picURLCover,而自動刷新流程
+       * 後續的每個燈箱(設定 / 選範本 / 確認)都是拿 autoRefresh.info 當物件
+       * 資料 —— 不補的話那些燈箱的封面圖全是空的。
+       *
+       * 補在這裡而不是燈箱內:上面那支 API 會整個覆寫 autoRefresh.info,
+       * 只能等它寫完再補。而且一定要在 status === 200 之後 —— API 失敗時
+       * info 還是上一個物件的殘值,補上去會變成張冠李戴。
+       *
+       * 列表的網址已經過 onReplaceImageSize 換掉 {0} / {1} 尺寸佔位符,
+       * 直接沿用即可。這支也會被「從子燈箱返回」呼叫,那時 objectData 就是
+       * info 自己,沒有 picURLCover 也不會把已經補好的值蓋掉。
+       */
+      if (objectData?.picURLCover && autoRefresh.value.info) {
+        autoRefresh.value.info.picURLCover = objectData.picURLCover
+      }
+
       await onCustom({
         id: 'popupAutoRefresh',
         title: '自動刷新設定',
@@ -773,6 +792,15 @@ export default () => {
     const { isSure: isRenewal, item } = await onCustom({
       id: 'popupAutoRefreshRenewal',
       title: '請選擇額度',
+      /*
+       * 這個燈箱本來就渲染 PageBuyPublishInfo,只是一直沒收到資料 ——
+       * data 沒傳時 publishInfo 是 null,v-if 讓整塊靜靜消失,所以不會破版,
+       * 也就一直沒被發現。
+       *
+       * 這裡讀 autoRefresh.info 是安全的:流程上一步的「增加刷新次數」燈箱
+       * 已經在用同一份 info,而 onResetPojectData 只清 save.apiData,不碰 info。
+       */
+      data: autoRefresh.value.info,
       icon: 'icon_quota',
       btns: [
         {
@@ -806,7 +834,7 @@ export default () => {
   const onAutoRefreshTemplatePopup = async (objectData) => {
     onApiPromise('open')
 
-    const { status, data } = await onApiGETRefreshTemplateAvailableTemplates(objectData.hfID)
+    const { status } = await onApiGETRefreshTemplateAvailableTemplates(objectData.hfID)
 
     onApiPromise('close')
 
@@ -815,7 +843,16 @@ export default () => {
         id: 'popupAutoRefreshTemplate',
         title: '請選擇範本',
         icon: 'icon_copy',
-        data,
+        /*
+         * ⚠️ 這裡要傳物件資料,不是上面那支 API 的回應。
+         *
+         * 燈箱頂端的 PageBuyPublishInfo 從 customData.data 取 caseTitle /
+         * caseAddr / picURLCover 等欄位;傳範本清單進來的話,那幾個欄位一個都
+         * 對不到,照片與標題就整塊空白。
+         * 範本清單本身不必經由這裡 —— onApiGETRefreshTemplateAvailableTemplates
+         * 已經寫進 autoRefresh.templateSave.list,燈箱是從 store 讀的。
+         */
+        data: objectData,
         btns: [
           {
             id: 'cancel',
@@ -888,6 +925,8 @@ export default () => {
     const { isSure: isRenewal, item } = await onCustom({
       id: 'popupAutoRefreshTemplateRenewal',
       title: '請選擇額度',
+      /* 同 onAutoRefreshRenewalPopup —— 範本流程的上一步也是拿這份 info */
+      data: autoRefresh.value.info,
       icon: 'icon_quota',
       btns: [
         {
