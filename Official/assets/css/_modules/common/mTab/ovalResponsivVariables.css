@@ -3,6 +3,11 @@
   --tab-oval-responsiv-icon-tablet-p: 2px;
   --tab-oval-responsiv-icon-mobile-p: 2px;
 
+  /* 選中的頁籤浮起來的陰影 —— 走自己的變數,不放 tailwind preset。
+     取用它的宣告只寫在 @screen pt 內,所以 mobile(膠囊形按鈕組)本來就吃不到。 */
+  /* lint-same-value: pc 與 tablet 同一個陰影,已與設計確認不分斷點 */
+  --tab-oval-responsiv-anchor-active-shadow: 0 2px 4px var(--black-33);
+
   --tab-oval-responsiv-icon-pc-size: 22px;
   --tab-oval-responsiv-icon-tablet-size: 22px;
   --tab-oval-responsiv-icon-mobile-size: 22px;

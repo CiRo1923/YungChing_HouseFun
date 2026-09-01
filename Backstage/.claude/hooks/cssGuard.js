@@ -115,7 +115,7 @@ const RULE_TITLE = {
   module: '規則 3 違規 —— module css 的結構或引入方式不對',
   variable: '規則 4 違規 —— module 變數的命名或斷點不對',
   import: '規則 5 違規 —— .vue 的 import 順序不對',
-  theme: '規則 6 違規 —— 用到本專案不存在的 tailwind class',
+  theme: '規則 6 違規 —— 用到本專案不存在或已淘汰的 tailwind class',
 }
 
 const MAX_LISTED = 12
@@ -130,6 +130,23 @@ const onSortColorCss = (rel, absPath) => {
   if (before === after) return null
 
   return `🔧 ${rel} 排序不符規則,已自動依「紅澄黃綠藍紫金白灰黑 + 由淺至深」重新排序。`
+}
+
+/**
+ * 空的規則區塊 —— 直接刪掉,連同後面的空行。
+ *
+ * 與色票排序同一層級的「自動修正」:空區塊在產物裡沒有任何輸出,
+ * 留著只會讓下一個人以為樣式被誤刪。帶註解的不算空,不會被動到。
+ */
+const onCleanEmptyRules = (rel, absPath) => {
+  const before = fs.readFileSync(absPath, 'utf8')
+  const after = runNode(['.tools/css/clean-empty-rules.mjs', rel])
+  if (!after.ok) return null
+  if (fs.readFileSync(absPath, 'utf8') === before) return null
+
+  return rel.endsWith('.vue')
+    ? `🔧 ${rel} 有空的 <style> 區塊,已自動移除。`
+    : `🔧 ${rel} 有空的規則區塊(產物不會有輸出),已自動移除。`
 }
 
 const onLint = (rel) => {
@@ -183,8 +200,9 @@ process.stdin
       if (!fs.existsSync(absPath)) return
 
       const sorted = onSortColorCss(rel, absPath)
+      const cleaned = onCleanEmptyRules(rel, absPath)
       const { messages: lintMessages, issues } = onLint(rel)
-      const messages = [sorted, ...lintMessages].filter(Boolean)
+      const messages = [sorted, cleaned, ...lintMessages].filter(Boolean)
 
       if (!messages.length) return
 

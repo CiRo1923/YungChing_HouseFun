@@ -39,6 +39,10 @@
   --sort-dropdown-tablet-my: 10px;
   --sort-dropdown-mobile-my: 10px;
 
+  /* 陰影走 module 自己的變數 —— 不放進 tailwind preset(那裡的值帶色碼、又無法分斷點) */
+  /* lint-same-value: 三端同一個陰影,已與設計確認不分斷點 */
+  --sort-dropdown-shadow: -2px -2px 10px 0 var(--black-1a), 3px 4px 10px 0 var(--black-1a);
+
   --sort-dropdown-pc-rounded: 10px;
   --sort-dropdown-tablet-rounded: 10px;
   --sort-dropdown-mobile-rounded: 10px;

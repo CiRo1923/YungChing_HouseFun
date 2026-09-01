@@ -64,7 +64,7 @@ onUnmounted(() => {
       },
     }"
     :setClass="{
-      type: 'text-[16px]',
+      type: 'line-clamp-1 text-[16px]',
       main: '--h-40 --px-12 --py-8 p:w-[140px]',
       dropdown: 'p:w-[665px]',
     }"
@@ -124,7 +124,7 @@ onUnmounted(() => {
         },
       }"
       :setClass="{
-        type: 'text-[16px]',
+        type: 'line-clamp-1 text-[16px]',
         main: '--h-40 --px-12 --py-8',
       }"
       v-for="(item, index) in items"

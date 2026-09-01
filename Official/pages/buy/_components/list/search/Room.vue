@@ -110,7 +110,7 @@ onUnmounted(() => {
     }"
     :setClass="{
       main: '--rounded p:--py-10 p:--px-12 m:--h-40 pt:--h-45 tm:--py-8 tm:--px-8 w-full',
-      type: 'tm:text-[14px] p:text-[16px]',
+      type: 'line-clamp-1 tm:text-[14px] p:text-[16px]',
       dropdown: 'pt:--rounded --py-20 pt:--px-20 m:--px-30 m:w-full',
       dropdownContainer: 'p:w-[220px]',
     }"

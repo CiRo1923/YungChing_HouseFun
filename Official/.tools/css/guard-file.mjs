@@ -24,7 +24,7 @@ import {
   sortDecls,
 } from './color-order.mjs'
 import { RESET, YELLOW } from './colors.mjs'
-import { checkSharedColors, lintFile } from './lint-core.mjs'
+import { checkSharedColors, lintFile, onRemoveEmptyRules } from './lint-core.mjs'
 
 const projectRoot = path.resolve(fileURLToPath(import.meta.url), '../../..')
 const CACHE_DIR = path.join(projectRoot, 'node_modules/.cache/cssGuard')
@@ -90,6 +90,28 @@ const onSortColorCss = () => {
 
   fs.writeFileSync(abs, sorted, 'utf8')
   lines.push(`🔧 ${rel} 排序不符規則,已自動依「紅澄黃綠藍紫金白灰黑 + 由淺至深」重新排序。`)
+  lines.push('')
+}
+
+/**
+ * 空的規則區塊(`.foo {}` / `@screen m {}`)—— 直接刪掉,連同後面的空行。
+ *
+ * 和色票排序一樣是「自動修正」:它沒有任何判斷空間(空區塊在產物裡不會有輸出),
+ * 留著只會讓人以為樣式被誤刪了。帶註解的區塊不算空,不會被動到。
+ */
+const onCleanEmptyRules = () => {
+  const isVue = rel.endsWith('.vue')
+
+  const original = fs.readFileSync(abs, 'utf8')
+  const cleaned = onRemoveEmptyRules(original, { isVue })
+  if (!cleaned) return
+
+  fs.writeFileSync(abs, cleaned, 'utf8')
+  lines.push(
+    isVue
+      ? `🔧 ${rel} 有空的 <style> 區塊,已自動移除。`
+      : `🔧 ${rel} 有空的規則區塊(產物不會有輸出),已自動移除。`
+  )
   lines.push('')
 }
 
@@ -161,6 +183,7 @@ const onLint = () => {
 
 try {
   if (isColorCssPath(rel)) onSortColorCss()
+  onCleanEmptyRules()
   onLint()
 } catch (err) {
   console.error(`[css-guard] 檢查失敗:${err.message}`)

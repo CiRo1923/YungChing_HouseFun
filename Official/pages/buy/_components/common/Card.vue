@@ -33,7 +33,7 @@ const setClass = computed(() => {
 <template>
   <div class="detail-card group" :class="setClass.main">
     <div
-      class="detail-card-container relative flex flex-col-reverse overflow-hidden bg-[--white] shadow-card"
+      class="detail-card-container relative flex flex-col-reverse overflow-hidden bg-[--white] shadow-[0_0_5px_0_var(--black-26)]"
       :class="setClass.container"
     >
       <CommonMAnchor

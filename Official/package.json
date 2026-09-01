@@ -17,6 +17,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "lint:css": "node ./.tools/css/lint-css.mjs",
+    "diff:css": "node ./.tools/css/diff-output.mjs",
     "sort:color": "node ./.tools/css/sort-color-css.mjs --write",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

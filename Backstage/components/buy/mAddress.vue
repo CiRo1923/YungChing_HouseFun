@@ -317,7 +317,7 @@ onMounted(() => {
         isDisabled: config.city.isDisabled,
       }"
       :setClass="{
-        type: 'text-[16px]',
+        type: 'line-clamp-1 text-[16px]',
         main: ['--h-40 --px-12 --py-8 m:w-full', setClass.city],
       }"
       @change="onCityChange()"
@@ -334,7 +334,7 @@ onMounted(() => {
         isDisabled: config.area.isDisabled || !modelCity,
       }"
       :setClass="{
-        type: 'text-[16px]',
+        type: 'line-clamp-1 text-[16px]',
         main: ['--h-40 --px-12 --py-8 m:w-full', setClass.area],
       }"
       @change="onAreaChange()"

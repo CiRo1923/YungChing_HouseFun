@@ -31,7 +31,7 @@
     }
 
     .m-form-type {
-      @apply line-clamp-1 h-auto w-full grow cursor-pointer leading-[1];
+      @apply h-auto w-full grow cursor-pointer leading-[1];
     }
 
     .m-form-icon {

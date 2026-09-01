@@ -43,7 +43,9 @@
 }
 
 .m-sort-dropdown {
-  @apply absolute z-[3] my-[--sort-dropdown-my] overflow-hidden rounded-[--sort-dropdown-rounded] bg-[--sort-dropdown-bg-color] shadow-dropdown;
+  box-shadow: var(--sort-dropdown-shadow);
+
+  @apply absolute z-[3] my-[--sort-dropdown-my] overflow-hidden rounded-[--sort-dropdown-rounded] bg-[--sort-dropdown-bg-color];
 
   &.\-\-scrollbar {
     @apply pr-[--sort-dropdown-scrollbar-pr];

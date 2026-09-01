@@ -100,7 +100,8 @@ const FIX_HINTS = {
     '內建的 key 因此完全不存在,寫了不報錯但產不出任何 CSS —— ' +
     'screens 只有 m / t / p / tm / pt / pMin / pMax(所以 sm: md: lg: xl: 2xl: 都無效),' +
     'fontSize 只有 vmp / vmt / vmm / vmmls(字級一律寫 text-[值] 或 text-[length:--變數]),' +
-    'boxShadow 只有 tailwind.extend.js 的三個 preset(或走原生 box-shadow: var(--x-shadow)),' +
+    'boxShadow 一個 preset 都沒有(tailwind.extend.js 刻意不放陰影)—— ' +
+    '陰影一律走原生 box-shadow: var(--x-shadow) + module 自己的斷點變數,' +
     'fontFamily 只有 font-default。' +
     '另外 *-hexa 已淘汰(改用 8 碼 hex 色票),transition-property 定義的是複數' +
     '(transition-widths / heights / sizes,不是單數)。' +
@@ -129,6 +130,23 @@ const onSortColorCss = (rel, absPath) => {
   if (before === after) return null
 
   return `🔧 ${rel} 排序不符規則,已自動依「紅澄黃綠藍紫金白灰黑 + 由淺至深」重新排序。`
+}
+
+/**
+ * 空的規則區塊 —— 直接刪掉,連同後面的空行。
+ *
+ * 與色票排序同一層級的「自動修正」:空區塊在產物裡沒有任何輸出,
+ * 留著只會讓下一個人以為樣式被誤刪。帶註解的不算空,不會被動到。
+ */
+const onCleanEmptyRules = (rel, absPath) => {
+  const before = fs.readFileSync(absPath, 'utf8')
+  const after = runNode(['.tools/css/clean-empty-rules.mjs', rel])
+  if (!after.ok) return null
+  if (fs.readFileSync(absPath, 'utf8') === before) return null
+
+  return rel.endsWith('.vue')
+    ? `🔧 ${rel} 有空的 <style> 區塊,已自動移除。`
+    : `🔧 ${rel} 有空的規則區塊(產物不會有輸出),已自動移除。`
 }
 
 const onLint = (rel) => {
@@ -182,8 +200,9 @@ process.stdin
       if (!fs.existsSync(absPath)) return
 
       const sorted = onSortColorCss(rel, absPath)
+      const cleaned = onCleanEmptyRules(rel, absPath)
       const { messages: lintMessages, issues } = onLint(rel)
-      const messages = [sorted, ...lintMessages].filter(Boolean)
+      const messages = [sorted, cleaned, ...lintMessages].filter(Boolean)
 
       if (!messages.length) return
 

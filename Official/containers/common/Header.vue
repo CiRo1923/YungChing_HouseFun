@@ -26,7 +26,7 @@ const onLogout = () => {
 </script>
 
 <template>
-  <header class="l-header relative z-[1] shadow-black-y2-b4">
+  <header class="l-header relative z-[1] shadow-[0_2px_4px_var(--black-33)]">
     <h1 v-if="h1" class="sr-only">{{ h1 }}</h1>
     <CommonMHeader>
       <template #nav>

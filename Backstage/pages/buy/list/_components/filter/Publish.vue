@@ -31,7 +31,7 @@ const onSearchClick = async () => {
           },
         }"
         :setClass="{
-          type: 'text-[16px]',
+          type: 'line-clamp-1 text-[16px]',
           main: '--h-40 --px-12 --py-8 p:w-[150px]',
           dropdown: 't:w-[300px] p:w-[400px]',
         }"
@@ -48,7 +48,7 @@ const onSearchClick = async () => {
           },
         }"
         :setClass="{
-          type: 'text-[16px]',
+          type: 'line-clamp-1 text-[16px]',
           main: '--h-40 --px-12 --py-8 p:w-[150px]',
           dropdown: 't:w-[300px] p:w-[400px]',
         }"

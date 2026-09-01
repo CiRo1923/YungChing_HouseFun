@@ -133,7 +133,7 @@ onUnmounted(() => {
   >
     <div class="min-w-0 grow">
       <p class="flex items-center gap-x-[8px]">
-        <span class="truncate text-[16px] leading-[1]">{{ broker.name }}</span>
+        <span class="line-clamp-1 text-[16px] leading-[1]">{{ broker.name }}</span>
         <BuyMTagDefault
           label="社區達人"
           :setClass="{
@@ -142,8 +142,8 @@ onUnmounted(() => {
           }"
         />
       </p>
-      <p class="truncate text-[12px]">{{ broker.brand }}</p>
-      <p class="truncate text-[12px]">{{ broker.store }}</p>
+      <p class="line-clamp-1 text-[12px]">{{ broker.brand }}</p>
+      <p class="line-clamp-1 text-[12px]">{{ broker.store }}</p>
     </div>
     <ul class="fixed-bar-tools flex shrink-0 items-center">
       <!-- 用 slot 自行組裝而非 text / config.icon:斷行由 <br> 明確指定,

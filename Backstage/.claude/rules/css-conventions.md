@@ -812,10 +812,28 @@ modifier 名稱就是 **tailwind 的 utility 名前面加 `--`**,不要自己另
   2. **`length:` 不能省** —— `text-[--var]` 會被 tailwind 當成 **color**,
      產生 `color: var(…)` 而不是 `font-size`,**完全不會報錯**,畫面上就是字級沒生效。
 
-- **`box-shadow` 直接寫 CSS 屬性**(`box-shadow: var(--x-shadow)`),不要 `@apply shadow-[…]` ——
-  和 `text-[--var]` 同一個病:tailwind 推斷不出型別就當成**陰影顏色**,產出
-  `--tw-shadow-color: var(…); --tw-shadow: var(--tw-shadow-colored)`,
-  **`box-shadow` 這條根本不會出現**,一樣不報錯。`shadow-[var(--x)]` 也一樣沒救。
+- **`box-shadow` 一律走 module 自己的獨立變數**,寫成原生屬性
+  `box-shadow: var(--x-shadow)` —— **不要放進 tailwind 的 `boxShadow` preset**。
+
+  preset 的問題有兩層:值裡必定帶色碼(規則 1)、而且**無法分斷點** ——
+  要調某一端的陰影就得跨到設定檔改,還會同時影響所有使用端。
+  module 自己的 `--x-*-shadow` 變數兩個問題都沒有。
+  (`containers` / `pages` 沒有 module 可放,見下面的 arbitrary value。)
+
+  **哪種 `shadow-[…]` 會出事,界線很明確**(2026-09-01 實測 `npx tailwindcss` 的產物):
+
+  | 寫法 | 產出 | |
+  |---|---|---|
+  | `shadow-[--x-shadow]` | `--tw-shadow-color: var(…)` —— 被當成**陰影顏色**,`box-shadow` 不出現 | ✗ |
+  | `shadow-[var(--x-shadow)]` | 同上,一樣沒救 | ✗ |
+  | `shadow-[0_2px_4px_var(--black-33)]` | `--tw-shadow: 0 2px 4px var(…)` + `box-shadow: …` | ✓ |
+
+  差別在**值裡有沒有 `_` 分隔的多個部分** —— 有就是完整的陰影值,tailwind 認得出型別。
+  所以 `containers` / `pages` 這些沒有 module 的地方,寫帶完整值的 arbitrary value
+  是合法的(色值仍取色票變數);`checkTailwindPitfalls` 只抓單一 token 的那兩種。
+
+  > 這條的敘述在 2026-09-01 更正過 —— 原本寫「`shadow-[…]` 一律被當成陰影顏色」,
+  > 那只在單一 token 時成立。照舊敘述會把合法的完整值寫法也當成違規(實際誤報過兩筆)。
 
   | 屬性           | 寫法                                 | 為什麼                                                     |
   | -------------- | ------------------------------------ | ---------------------------------------------------------- |
@@ -862,6 +880,47 @@ modifier 名稱就是 **tailwind 的 utility 名前面加 `--`**,不要自己另
   原本沒有 duration 的元素則會憑空多出 150ms 動畫。要換之前先確認 duration 由誰決定。
   `transform: translate3d(0,0,0)` 這種 GPU 提示同理,維持原生寫法就好
   (`transform-gpu` 展開成一整串 `--tw-translate-*` 鏈,反而更繞)。
+
+#### 空的規則區塊一律清掉(存檔時自動移除)
+
+`.foo {}` / `@screen m {}` 這種**大括號內完全空白**的區塊,在產物裡不會有任何輸出,
+留著只有壞處:
+
+- 讀的人以為「這裡本來有樣式、是不是被誤刪了」
+- 拆 module 時常常先開好骨架再填,填不完的就變成殘骸
+- `@screen m {}` 更糟 —— 看起來像「手機刻意不設定」,其實只是空殼
+
+**`.vue` 的空 `<style>` 區塊同樣要清掉** —— 樣式搬進 module 後,那個殼常常留在檔案末尾;
+它不產生任何輸出,卻會讓人以為「這支還有自己的樣式」。含 `lang="postcss"` / `scoped` 等屬性都一樣。
+
+**帶註解的不算空**(`.foo { /* 之後補手機版 */ }`)—— 那是有意留的位置,
+而且註解通常寫著為什麼,不會被動到。
+
+這條有**自動修正**:存檔時(Run on Save 那層與 Claude 寫檔的 hook)會直接把空區塊
+連同後面的空行刪掉,`checkEmptyRule` 只負責在其他情境(全案掃描、commit)報出來。
+判斷邏輯共用 `EMPTY_RULE_RE`,檢查與自動修正不會分岔。
+
+#### 截斷文字一律用 `line-clamp-*`,而且由父系傳入
+
+兩條規則:
+
+1. **不要用 `truncate`,一律 `line-clamp-1`** —— 統一成一種寫法,
+   多行截斷(`line-clamp-2` / `-3`)也走同一組 utility,不必在兩套機制之間切換。
+2. **`line-clamp-*` 由父系 `setClass` 傳入**,module 不要自己定 ——
+   理由同字級:要截幾行是**使用位置**的決定(列表要一行、詳情頁可能要兩行),
+   module 寫死就等於替所有使用端決定了。
+
+⚠️ **這兩種寫法不等值,替換時要看 DOM 結構**:
+
+| | `truncate` | `line-clamp-1` |
+|---|---|---|
+| | `overflow: hidden` | `overflow: hidden` |
+| | `text-overflow: ellipsis` | **`display: -webkit-box`** |
+| | `white-space: nowrap` | `-webkit-box-orient: vertical` + `-webkit-line-clamp: 1` |
+
+**`display` 會被改成 `-webkit-box`、而且失去 `white-space: nowrap`**。
+block 元素換過去通常沒事,但**`inline` 元素或 flex item 要實機確認** ——
+那是版面會不會位移的地方(替換當天就有一處 `<span>` 在 flex 容器裡,只能靠實際畫面確認)。
 
 #### 誰決定這個屬性
 
@@ -1127,6 +1186,31 @@ icon、圓點、方形按鈕這類**寬高一致**的元素,只建一個 `-size`
 
 之後要單獨調某個斷點時直接改值就好,不必回頭拆結構。**顏色不用分斷點。**
 
+#### ⛔ 三個斷點同值時可以不拆 —— 但**一定要先問設計者**
+
+拆三份的用意是「之後要調某個斷點時不用回頭改結構」。但有一批屬性三端本來就同一個值,
+拆三份只是讓同一個數字重複三次、改的時候還要記得三個都改。所以規則是**二選一**:
+
+| | 寫法 |
+|---|---|
+| 要分斷點 | 拆 `-pc-` / `-tablet-` / `-mobile-` 三份,版型吃中性變數 |
+| 三端同值 | **只寫一個變數**,並標 `/* lint-same-value: 理由 */`(該行或上一行) |
+
+**⛔ 決定之前一定要先問設計者「這個屬性要不要分斷點」—— 不可以自己判斷。**
+
+這不是工程問題,是設計問題。看程式碼永遠看不出「設計上將來會不會想讓手機的陰影淺一點」,
+而猜錯的代價不對稱:
+
+- 猜「不用分」→ 之後要加斷點,得把一個變數拆成三個、補斷點對應、回頭確認每個使用端
+- 猜「要分」→ 留下三個一模一樣的值,改的時候容易只改到其中一個
+
+**最常被問到的是 `box-shadow` 與 `border-width` 這類造型屬性** ——
+它們看起來「應該不會分斷點」,但那正是最容易猜錯的地方。
+
+> ⚠️ 工具只抓得到**單一數值**的尺寸(`SIZE_VALUE_RE` 是 `/^-?\d*\.?\d+(px|rem|em|%|vh|vw)$/`),
+> 所以 `box-shadow: 0 2px 4px var(--black-33)` 這種**複合值一律漏抓**。
+> 也就是說:陰影要不要分斷點,工具不會提醒你 —— **只能靠先問設計者**。
+
 **不受這條約束的**:顏色、`0` / `0px` / `auto` / `none` / `transparent` / `inherit` / `initial`、
 已經有對應斷點版本的 base 值,以及**非 px 單位**的比例 / 層級 / 時間
 (`w-1/2`、`z-[1]`、`duration-300`、`rounded-full`)。
@@ -1354,6 +1438,38 @@ npx tailwindcss -c tailwind.config.js -i in.css --content probe.html -o out.css
 > prettier 那邊另外用 `.prettierignore` 的 `*.md` 排除文件(中文表格重排會製造假 diff),
 > 兩者是不同機制、各自設定。
 
+
+### 重構樣式後要比對產物 —— 這是唯一看得出跑版的方法
+
+module 的重構(變數化、合併 `@screen`、調整巢狀結構、刪 modifier)在原始碼上是大改動,
+但**產物往往一個位元組都沒變**。反過來,看起來無害的一行也可能讓某個斷點整條宣告失效 ——
+lint 通過、build 成功、畫面卻壞了。**只有比對產物看得出來**。
+
+```powershell
+npm run build
+npm run diff:css -- --collect ../new.css     # 收集現在的產物
+
+git checkout <基準 commit> -- .              # 取出重構前的原始碼
+npm run build
+npm run diff:css -- --collect ../old.css
+
+git checkout HEAD -- .                       # 還原(⚠️ 見下)
+npm run diff:css -- ../old.css ../new.css    # 比對
+```
+
+比對的是「每個 (media query, selector) 底下有哪些宣告」,忽略空白與順序,只看實質內容。
+輸出分三類,每一類都要對得上預期:
+
+| 類別 | 預期 |
+|---|---|
+| **消失** | 只該有刻意刪除的 modifier |
+| **新增** | 只該有新變數的定義與斷點對應,**不該有意外的樣式宣告** |
+| **宣告有變** | 「寫死值 → 變數」要核對變數值與原本一致 —— ⚠️ **px 會被轉成 rem**(`2px` → `.125rem`),不要以為是差異 |
+
+> ⚠️ **`git checkout HEAD -- .` 只還原 HEAD 裡有的檔案** ——
+> 基準 commit 有、而 HEAD 已經刪掉的檔案會留在工作區(而且是 staged 的新增)。
+> 還原後**一定要看 `git status`**:多出來的檔案要自己刪掉。
+> 實際踩過:一次比對把 276 支早已刪除的第三方語言檔帶了回來,差點一起 commit 進去。
 
 ### ⚠️ 掃描範圍以內、以外分別是什麼
 

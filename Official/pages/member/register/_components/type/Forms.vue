@@ -277,6 +277,7 @@ const onWorkBrandChange = () => {
               }"
               :setClass="{
                 main: '--rounded --h-55 --px-12',
+                type: 'line-clamp-1',
                 dropdownLabel: 'text-[14px]',
               }"
               @change="onCityChange"
@@ -296,6 +297,7 @@ const onWorkBrandChange = () => {
               }"
               :setClass="{
                 main: '--rounded --h-55 --px-12',
+                type: 'line-clamp-1',
                 dropdownLabel: 'text-[14px]',
               }"
             />
@@ -337,6 +339,7 @@ const onWorkBrandChange = () => {
               }"
               :setClass="{
                 main: '--rounded --h-55 --px-12',
+                type: 'line-clamp-1',
                 dropdownLabel: 'text-[14px]',
               }"
               @change="onWorkCityChange"
@@ -356,6 +359,7 @@ const onWorkBrandChange = () => {
               }"
               :setClass="{
                 main: '--rounded --h-55 --px-12',
+                type: 'line-clamp-1',
                 dropdownLabel: 'text-[14px]',
               }"
               @change="onWorkAreaChange"

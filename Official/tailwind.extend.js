@@ -11,13 +11,11 @@ export default {
       'sans-serif',
     ],
   },
-  // 顏色走色票變數(assets/css/_common/color.css)—— 這裡的值最後會變成產物裡的
-  // box-shadow 宣告,所以規則 1「顏色一律定義在色票檔」對它一樣成立。
-  boxShadow: {
-    'black-y2-b4': '0 2px 4px var(--black-33)',
-    dropdown: '-2px -2px 10px 0 var(--black-1a), 3px 4px 10px 0 var(--black-1a)',
-    card: '0 0 5px 0 var(--black-26)',
-  },
+  // 這裡不要放陰影 —— 值裡會帶色碼,而這支檔案雖然在 lint 的設定檔白名單裡,
+  // preset 本身仍是「藏在 js 裡的樣式」:改一個陰影要跨到設定檔、還無法分斷點。
+  // 陰影一律走原生 box-shadow + module 自己的 --x-*-shadow 變數(參考 mSort / mTab),
+  // 色值取色票變數;module 以外(containers / pages)寫 shadow-[0_2px_4px_var(--black-33)]
+  // 這種帶完整值的 arbitrary value —— 實測產出正確的 box-shadow,不會被當成陰影顏色。
   letterSpacing: {
     default: '0.05rem',
   },

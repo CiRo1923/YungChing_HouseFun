@@ -133,7 +133,7 @@ const setClass = computed(() => {
         schema: config.select.schema,
       }"
       :rules="props.selectRules"
-      :setClass="{ type: 'text-[16px]', ...setClass.select }"
+      :setClass="{ type: 'line-clamp-1 text-[16px]', ...setClass.select }"
     />
     <CommonMFormInput
       v-if="isOtherSelect(modelSelect)"

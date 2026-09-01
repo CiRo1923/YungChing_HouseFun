@@ -21,7 +21,7 @@ const { apiData } = storeToRefs(buyPublish)
       },
     }"
     :setClass="{
-      type: 'text-[16px]',
+      type: 'line-clamp-1 text-[16px]',
       main: '--h-40 --px-12 --py-8',
     }"
   />

@@ -880,7 +880,7 @@ export function checkModuleVariables(relPath, text) {
       continue
     }
 
-    // 4-b 尺寸類要分斷點
+    // 4-b 尺寸類要分斷點 —— 除非明確標註「三個斷點同值」
     if (name.includes('-pc-') || name.includes('-tablet-') || name.includes('-mobile-')) continue
     if (STRUCTURAL_VALUES.has(value)) continue
     if (!SIZE_VALUE_RE.test(value)) continue
@@ -891,9 +891,15 @@ export function checkModuleVariables(relPath, text) {
     )
     if (hasBreakpointSibling) continue
 
+    // 標了 lint-same-value 就放行 —— 見該常數的說明,理由一定要寫
+    if (SAME_VALUE_RE.test(lineTextOf(text, line))) continue
+
     add(
       line,
-      `${name}: ${value} 是尺寸類單值,要拆成 pc / tablet / mobile 三份(即使三個值一樣)`,
+      `${name}: ${value} 是尺寸類單值 —— 要嘛拆成 pc / tablet / mobile 三份,` +
+        `要嘛標 /* lint-same-value: 理由 */ 表示三個斷點同值。` +
+        `⚠️ 決定之前**先問設計者這個屬性要不要分斷點**(box-shadow / border 這類最常被問), ` +
+        `不要自己假設 —— 猜「不用分」之後要加就得改結構並回頭動每個使用端。`,
       name
     )
   }
@@ -1030,8 +1036,17 @@ export function checkTailwindPitfalls(relPath, text) {
     )
   }
 
-  // box-shadow —— shadow-[…] 一律被當成陰影「顏色」,shadow-[var(--x)] 也一樣沒救
-  for (const m of masked.matchAll(/(?<![\w-])shadow-\[([^\]]*--[^\]]*)\]/g)) {
+  // box-shadow —— 值只有「一個 token」時 tailwind 推斷不出型別,當成陰影**顏色**:
+  //   shadow-[--x-shadow]      → --tw-shadow-color: var(--x-shadow)   ✗ box-shadow 不出現
+  //   shadow-[var(--x-shadow)] → 同上,一樣沒救                        ✗
+  //
+  // 但**帶完整陰影值**的 arbitrary value 是合法的(2026-09-01 實測 npx tailwindcss 的產物):
+  //   shadow-[0_2px_4px_var(--black-33)] → --tw-shadow: 0 2px 4px var(…) + box-shadow  ✓
+  //
+  // 界線就是「值裡有沒有 _ 分隔的多個部分」—— 有就是完整的陰影值,放行。
+  // module 內仍建議走原生 box-shadow + 自己的斷點變數(才能分 pc / tablet / mobile);
+  // containers / pages 沒有 module 可放,就用這種帶完整值的寫法,色值仍取色票變數。
+  for (const m of masked.matchAll(/(?<![\w-])shadow-\[([^\]_]*--[^\]_]*)\]/g)) {
     add(
       m.index,
       `shadow-[${m[1].slice(0, 30)}] 會被當成 shadow color,box-shadow 不會出現 —— ` +
@@ -1066,7 +1081,8 @@ export function checkTailwindPitfalls(relPath, text) {
  *
  *   screens     → 只有 m / t / p / tm / pt / pMin / pMax / mLandscape / notsupport / firefox / IE
  *   fontSize    → 只有 vmp / vmt / vmm / vmmls
- *   boxShadow   → 只有 tailwind.extend.js 的三個 preset
+ *   boxShadow   → **一個都沒有** —— tailwind.extend.js 刻意不放陰影(值裡會帶色碼,
+ *                 而那支檔案不在掃描範圍內),陰影一律走原生 box-shadow + module 變數
  *   fontFamily  → 只有 default
  *
  * 所以 `md:flex`、`text-sm`、`shadow-md`、`font-sans` 這些**產不出任何 CSS**
@@ -1078,8 +1094,8 @@ export function checkTailwindPitfalls(relPath, text) {
  *   `transition-` 單數 → 專案定義的是複數(widths / heights / sizes),寫單數不存在
  *
  * ⚠️ **移植到別的專案時,這份清單要重新對照那邊的 config**,不能照抄 ——
- *    最容易錯的是陰影:本專案的 tailwind.extend.js 有三個 boxShadow preset,
- *    所以只抓內建那幾個 key;若對方的 extend 完全不放陰影,就要改成抓「任何 shadow-*」。
+ *    最容易錯的是陰影:本專案的 tailwind.extend.js 完全不放陰影,所以抓「任何 shadow-*」;
+ *    若對方的 extend 有 preset,就只能抓內建那幾個 key,否則會把合法的 preset 報成違規。
  *
  * ⚠️ 改了 tailwind.config.js 的 `theme` 就要回頭同步這裡 ——
  *    把某組從 `theme` 移進 `theme.extend`(內建復活)時,對應那段要刪掉。
@@ -1100,12 +1116,14 @@ const UNAVAILABLE_CLASSES = [
       '本專案只有 text-vmp / vmt / vmm / vmmls,其餘一律寫 text-[值] 或 text-[length:--變數]',
   },
   {
-    // theme.boxShadow 整組覆寫 —— 只剩 tailwind.extend.js 的三個 preset
-    re: /(?<![\w-])shadow(-(?:sm|md|lg|xl|2xl|inner|none))?(?![\w[-])/g,
+    // theme.boxShadow 整組覆寫,而 tailwind.extend.js 不放陰影 —— 一個 preset 都沒有。
+    // 所以任何 shadow-* 都不存在(有 preset 的專案只需抓內建那幾個 key),
+    // 只有 arbitrary value 的 shadow-[…] 例外(不吃 theme)—— 但那有規則 3 的 pitfall 在管。
+    // lookbehind 讓 drop-shadow-md / box-shadow: / --x-shadow 都不會誤中。
+    re: /(?<![\w-])shadow(?!-\[)(-[a-z0-9-]+)?(?![\w[])/g,
     detail: (m) =>
-      `${m[0]} 這個陰影不存在(theme.boxShadow 整組覆寫過)—— ` +
-      '本專案只有 shadow-black-y2-b4 / shadow-dropdown / shadow-card,' +
-      '或走原生 box-shadow: var(--x-shadow)',
+      `${m[0]} 不存在 —— 本專案沒有任何 shadow preset(tailwind.extend.js 刻意不放陰影),` +
+      '陰影一律走原生 box-shadow: var(--x-shadow) + module 自己的斷點變數',
   },
   {
     // theme.fontFamily 整組覆寫 —— 只剩 default
@@ -1192,7 +1210,7 @@ export function checkTrackingVariable(relPath, text) {
  * 得逐一檢查每個選擇器有沒有 `@screen p`,漏掉哪一個不會有任何提示。
  * 集中成一組 `@screen p { .m-x { … } .m-y { … } }` 才能一眼看完該斷點的全部設定。
  *
- * 真的需要分開寫就在該行或上一行標
+ * 真的需要分開寫(例如變數對應與子元素版型差異大)就在該行或上一行標
  * `/* lint-screen-group-exempt: 理由 *\/`,理由一定要寫。
  */
 export function checkScreenGrouping(relPath, text) {
@@ -1267,6 +1285,141 @@ export function checkColorBase(relPath, text) {
       detail: `顏色變數的 base 不要用 initial —— ${issuesFor(m[1])}`,
       snippet: m[0].trim(),
     })
+  }
+
+  return issues
+}
+
+/**
+ * 空的規則區塊(`.foo {}` / `@screen m {}`)—— 一律清掉。
+ *
+ * 空區塊在產物裡不會有任何輸出,留著只有壞處:
+ *   - 讀的人以為「這裡本來有樣式、是不是被誤刪了」
+ *   - 拆 module 時常常先開好骨架再填,填不完的就變成殘骸
+ *   - `@screen m {}` 這種更糟 —— 看起來像「手機刻意不設定」,其實只是空殼
+ *
+ * ⚠️ **只抓大括號內完全空白的**。帶註解的(`.foo { /* 之後補 *\/ }`)不算 ——
+ *    那是有意留的位置,而且註解通常寫著為什麼。
+ *
+ * 這條有**自動修正**:存檔時(guard-file / cssGuard)會直接把空區塊連同
+ * 後面的空行一起刪掉,不必手動處理。
+ */
+export function checkEmptyRule(relPath, text) {
+  const issues = []
+
+  // .vue 的空 <style> 區塊 —— 連 SFC 的殼都不必留
+  if (relPath.endsWith('.vue')) {
+    for (const m of text.matchAll(EMPTY_STYLE_BLOCK_RE)) {
+      issues.push({
+        rule: 'module',
+        file: relPath,
+        line: lineOf(text, m.index),
+        detail:
+          '空的 <style> 區塊 —— 沒有樣式就不要留這個殼(存檔時會自動移除)。' +
+          '樣式本身要拆進 assets/css/_modules/,見規則 3',
+        snippet: m[0].replace(/\s+/g, ''),
+      })
+    }
+    return issues
+  }
+
+  if (!relPath.endsWith('.css')) return []
+
+  for (const m of text.matchAll(EMPTY_RULE_RE)) {
+    issues.push({
+      rule: 'module',
+      file: relPath,
+      line: lineOf(text, m.index),
+      detail: `${m[2].trim()} { } 是空的規則區塊 —— 產物不會有任何輸出,清掉(存檔時會自動移除)`,
+      snippet: `${m[2].trim()} { }`,
+    })
+  }
+  return issues
+}
+
+/**
+ * `.vue` 裡內容全空白的 `<style>` 區塊 —— 含 `lang="postcss"` / `scoped` 之類的屬性。
+ *
+ * 樣式搬進 module 後,那個殼常常留在檔案末尾;它不會產生任何輸出,
+ * 但會讓人以為「這支還有自己的樣式」。
+ */
+export const EMPTY_STYLE_BLOCK_RE = /<style[^>]*>\s*<\/style>/g
+
+/**
+ * 空規則的樣式 —— 檢查與自動移除共用同一份,兩邊的判斷才不會分岔。
+ *
+ * `[^{}\n]` 讓選擇器不跨行也不含大括號;`\{\s*\}` 只吃「完全空白」的內容,
+ * 所以帶註解的區塊不會被誤判成空的。
+ */
+export const EMPTY_RULE_RE = /^([ \t]*)([^{}\n][^{}\n]*?)\s*\{\s*\}/gm
+
+/**
+ * 移除檔案裡所有空的規則區塊(連同後面的空行),回傳新內容。
+ * 沒有可移除的就回傳 null —— 呼叫端據此判斷要不要寫檔。
+ */
+export function onRemoveEmptyRules(text, { isVue = false } = {}) {
+  const nl = text.includes('\r\n') ? '\r\n' : '\n'
+
+  // .vue:只處理空的 <style> 區塊(裡面的 CSS 規則由 module 那邊管)
+  if (isVue) {
+    const next = text
+      .replace(/(\r?\n)*[ \t]*<style[^>]*>\s*<\/style>[ \t]*(\r?\n)*/g, nl)
+      .replace(/(\r?\n){3,}/g, nl + nl)
+      .replace(/(\r?\n)+$/, nl)
+
+    return next === text ? null : next
+  }
+
+  const next = text
+    .replace(/^[ \t]*[^{}\n][^{}\n]*?\s*\{\s*\}[ \t]*(\r?\n)+/gm, '')
+    .replace(/(\r?\n){3,}/g, nl + nl)
+
+  return next === text ? null : next
+}
+
+/**
+ * 文字截斷:一律用 `line-clamp-*`,而且**不寫在 module 裡**。
+ *
+ * 兩件事:
+ *   1. `truncate` 一律換成 `line-clamp-1` —— 統一成一組 utility,
+ *      多行截斷(`line-clamp-2` / `-3`)才不必在兩套機制之間切換。
+ *   2. `line-clamp-*` 由父系 `setClass` 傳入,module 不要自己定 ——
+ *      理由同字級:要截幾行是**使用位置**的決定(列表要一行、詳情頁可能兩行),
+ *      module 寫死就替所有使用端決定了。
+ *
+ * ⚠️ 兩種寫法**不等值**,替換時要看 DOM 結構:
+ *      truncate      → overflow:hidden + text-overflow:ellipsis + white-space:nowrap
+ *      line-clamp-1  → overflow:hidden + display:-webkit-box + -webkit-line-clamp:1
+ *    `display` 會變成 `-webkit-box`、而且失去 `white-space:nowrap` ——
+ *    block 元素通常沒事,但 inline 元素或 flex item 要實機確認版面沒有位移。
+ *
+ * 只抓 module(版型檔與 variables),使用端(pages / containers)本來就該寫。
+ */
+export function checkLineClamp(relPath, text) {
+  if (!relPath.startsWith('assets/css/_modules/')) return []
+
+  const issues = []
+  const masked = maskComments(text)
+  const add = (index, detail, snippet) =>
+    issues.push({ rule: 'variable', file: relPath, line: lineOf(text, index), detail, snippet })
+
+  for (const m of masked.matchAll(/(?<![\w-])truncate(?![\w-])/g)) {
+    add(
+      m.index,
+      'truncate 一律改用 line-clamp-1 —— 而且截斷幾行由父系 setClass 傳,module 不要定。' +
+        '⚠️ 兩者不等值:display 會變成 -webkit-box、也沒有 white-space:nowrap,' +
+        'inline 元素或 flex item 要實機確認',
+      m[0]
+    )
+  }
+
+  for (const m of masked.matchAll(/(?<![\w-])line-clamp-[a-z0-9-]+/g)) {
+    add(
+      m.index,
+      `${m[0]} 不要寫在 module —— 要截斷幾行是使用位置的決定,` +
+        '由父系 setClass 傳入(module 寫死就替所有使用端決定了)',
+      m[0]
+    )
   }
 
   return issues
@@ -1430,6 +1583,30 @@ const SCREEN_OF = { p: 'pc', t: 'tablet', m: 'mobile' }
 
 /** 標了這個註解就跳過 —— 例外一定要在註解裡寫清楚理由 */
 const EXEMPT_RE = /lint-breakpoint-exempt/
+
+/**
+ * 「三個斷點同值,刻意不拆」的標註。
+ *
+ * 規則 4-b 原本要求尺寸類一律拆成 pc / tablet / mobile 三份、即使三個值一樣 ——
+ * 那是為了「之後要單獨調某個斷點時不必回頭拆結構」。但實務上有一批屬性
+ * (box-shadow、border-width 這類造型)三端本來就同一個值,拆三份只是
+ * 讓同一個數字重複三次,改的時候還要記得三個都改。
+ *
+ * 所以改成二選一:**拆三份,或標註同值**。標註的形式是
+ * `/* lint-same-value: 理由 *\/`,寫在該行或上一行。
+ *
+ * ⚠️ **標之前要先問設計者這個屬性到不到分斷點** —— 這不是工程判斷。
+ *    猜「不用分」的代價:之後要加斷點就得把一個變數拆成三個、
+ *    改斷點對應、還要回頭確認每個使用端。
+ */
+const SAME_VALUE_RE = /lint-same-value/
+
+/** 取某一行的原文(含註解)—— 判斷豁免標註用 */
+const lineTextOf = (text, line) =>
+  text
+    .split(/\r?\n/)
+    .slice(Math.max(0, line - 2), line)
+    .join('\n')
 
 /** 斷點對應本身:  --中性變數: var(--帶斷點的變數); */
 const BREAKPOINT_MAP_RE = /^\s*--[a-z0-9-]+:\s*var\(--[a-z0-9-]+\)\s*;?\s*$/
@@ -1680,13 +1857,17 @@ export function lintFile(projectRoot, absPath, definedVars) {
     issues.push(...checkTailwindPitfalls(rel, text))
     // 顏色變數的 base 要寫 inherit / transparent,不要用 initial 繞路
     issues.push(...checkColorBase(rel, text))
+    // 文字截斷:一律 line-clamp-*,而且不寫在 module 裡
+    issues.push(...checkLineClamp(rel, text))
+    // 空的規則區塊 —— 產物不會有輸出,存檔時會自動移除
+    issues.push(...checkEmptyRule(rel, text))
     // tracking 不開變數 —— 在哪裡寫都是錯的,所以同樣不限目錄
     issues.push(...checkTrackingVariable(rel, text))
     // leading 同理:行高跟著字級走,值又多半是無單位比例
     issues.push(...checkLeadingVariable(rel, text))
     // z-index 同理:疊層是整站一套秩序,寫成常數才看得出誰蓋誰
     issues.push(...checkZIndexVariable(rel, text))
-    // 規則 6:被 theme 整組覆寫掉而不存在的 class、以及已淘汰的 *-hexa
+    // 規則 6:被 theme 整組覆寫掉而不存在的 class
     issues.push(...checkTailwindTheme(rel, text))
   }
 

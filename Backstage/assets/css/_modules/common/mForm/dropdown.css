@@ -37,8 +37,13 @@
       }
     }
 
+    /*
+     * ⚠️ 選中的文字過長會把輸入框撐開,要截成一行 ——
+     * 但 line-clamp 屬於使用位置的決定,由使用端傳 setClass.type="line-clamp-1"。
+     * 拆 module 之前這條寫在這裡,搬走時記得每個下拉的使用端都要帶。
+     */
     .m-form-type {
-      @apply line-clamp-1 w-full leading-[1.33];
+      @apply w-full leading-[1.33];
     }
 
     .m-form-icon {
