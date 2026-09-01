@@ -60,7 +60,17 @@ onInit()
           name="dealDatepicker"
           v-model="apiDealData.dateDeal"
           :config="{
-            defaultIsToday: true,
+            /*
+             * ⚠️ 成交日期一定要使用者自己選,不給預設。
+             *
+             * defaultIsToday 開著時,Field 綁的 datePickerModel 會在 model 還是
+             * null 的情況下回傳「今天」的字串 —— 畫面看得到日期、required 也判定
+             * 有值,但真正送出的 apiDealData.dateDeal 仍是 null,後端就回 400。
+             * 關掉之後 get() 回空字串,required 才擋得住。
+             */
+            defaultIsToday: false,
+            /* 日曆開啟時落在哪個月,以及可選的上限,都跟著伺服器時間走 */
+            today: serverTime.value,
             maxDate: serverTime.value,
           }"
           :rules="{
