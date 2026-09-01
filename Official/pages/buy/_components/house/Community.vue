@@ -28,14 +28,14 @@ onUnmounted(() => {
         <div class="mt-[5px] m:space-y-[5px] t:space-y-[10px] p:space-y-[15px]">
           <PageBuyHouseCommunityInfo />
           <PageBuyHouseCommunityPrice />
-          <PageBuyHouseCommunityActioinButton v-if="isDeviceP" />
+          <PageBuyHouseCommunityActionButton v-if="isDeviceP" />
         </div>
       </article>
       <div
         class="t:w-full tm:mt-[20px] tm:space-y-[20px] tm:border-t-[1px] tm:border-t-[--gray-e5] tm:pt-[20px] p:flex-1 p:border-l-[1px] p:border-l-[--gray-e5] p:pl-[30px]"
       >
         <PageBuyHouseCommunityChart />
-        <PageBuyHouseCommunityActioinButton v-if="!isDeviceP" />
+        <PageBuyHouseCommunityActionButton v-if="!isDeviceP" />
       </div>
     </div>
   </PageBuyHouseContent>

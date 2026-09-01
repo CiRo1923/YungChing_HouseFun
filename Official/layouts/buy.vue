@@ -132,13 +132,13 @@ watch(
   <div id="box">
     <CommonAlertSystem />
     <CommonConfirmSystem />
-    <CommonLoginSyetem :container="popupLoginContainerRef">
+    <CommonLoginSystem :container="popupLoginContainerRef">
       <!-- 預留之後有不一樣的 login -->
       <LoginContainer ref="popupLoginContainerRef" />
       <template #note>
         <LoginNote />
       </template>
-    </CommonLoginSyetem>
+    </CommonLoginSystem>
     <CommonApiPromiseSystem />
   </div>
 </template>
