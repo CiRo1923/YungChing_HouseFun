@@ -20,9 +20,16 @@
       @apply cursor-not-allowed;
     }
 
-    /* --align-top:標籤是多行時,方框要對齊第一行文字而不是整塊置中。
-       只動圖示的 self-start —— 容器維持 items-center,與拆 module 前一致。 */
+    /*
+     * --align-top:標籤是多行時,方框要對齊第一行文字而不是整塊置中。
+     *
+     * ⚠️ 容器是 items-baseline 不是 items-start —— 拆 module 前的 template 寫的是
+     * `config.align === 'top' && config.label ? 'items-baseline' : 'items-center'`,
+     * 基線對齊才會讓方框跟文字的視覺中線對上。
+     */
     &.\-\-align-top {
+      @apply items-baseline;
+
       .m-form-icon {
         @apply self-start;
       }
