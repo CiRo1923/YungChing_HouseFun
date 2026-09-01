@@ -309,6 +309,8 @@ padding / margin / border-radius 的 modifier 有層級(整體 → 軸向 → �
 
 ```powershell
 npm run lint:css                              # 全專案掃描(六條規則)
+npm run test:css                              # 規則自我驗證(改過 lint-core 後要跑)
+npm run diff:css                              # 產物比對(重構樣式後確認沒跑版)
 node .tools/css/lint-css.mjs <檔案或目錄>      # 只檢查指定範圍
 npm run sort:color                            # 色票檔自動排序
 node .tools/css/sort-color-css.mjs            # 色票檔:只檢查排序 / 命名 / 頻道歸屬
