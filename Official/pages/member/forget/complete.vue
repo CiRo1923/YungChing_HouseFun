@@ -1,12 +1,31 @@
 <script setup>
+import { FORGETCOMPLETE } from '@js/_storage.js'
+import { deCrypto } from '@js/.crypto/index.js'
+
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
 
 definePageMeta({
   layout: 'member',
   channel: 'member',
   requiresAuth: false,
-  // TODO: 未完成重設就直接進來要退回第一步(比照 upgrade/complete 的 middleware),
-  // 等 API 確定用什麼 token(cookie 名稱與效期)再補。
+  middleware: [
+    () => {
+      const raw = useCookie(FORGETCOMPLETE).value
+
+      // 這支 cookie 只有 confirm 成功時寫得出來,所以有值就代表「剛完成重設」。
+      // 效期短(store 的 completeExpiresMinutes),過了就自然失效、事後貼網址進不去。
+      if (!raw || !deCrypto(raw)) {
+        return navigateTo(
+          {
+            name: 'member-forget',
+          },
+          {
+            replace: true,
+          }
+        )
+      }
+    },
+  ],
 })
 
 await onWithLoadingAll([])

@@ -24,6 +24,18 @@ export const useMemberForgetStore = defineStore('memberForget', () => {
       confirmPassword: null,
     },
   })
+
+  // 驗證碼的發送管道。swagger 寫成 integer 0 / 1 是轉譯錯誤,實際要帶字串。
+  // 目前一律 sms;未來可能改發 LINE,所以留成表而不是寫死在呼叫端。
+  const verificationChannels = readonly({
+    sms: 'sms',
+    line: 'line',
+  })
+
+  // 完成頁的進入憑證效期(分鐘)。比照 upgrade 的完成頁:短效,
+  // 讓使用者重整還看得到,過了就自然失效、事後貼網址進不去。
+  const completeExpiresMinutes = 5
+
   const verify = ref({
     countdownData: {
       expires: null,
@@ -38,6 +50,8 @@ export const useMemberForgetStore = defineStore('memberForget', () => {
 
   return {
     apiDefault,
+    verificationChannels,
+    completeExpiresMinutes,
     verify,
     resetPassword,
   }

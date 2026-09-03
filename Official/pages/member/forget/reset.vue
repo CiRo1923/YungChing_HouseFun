@@ -1,13 +1,39 @@
 <script setup>
+import { FORGETRESET } from '@js/_storage.js'
+import { deCrypto } from '@js/.crypto/index.js'
+
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
+const memberForget = useMemberForgetStore()
+const { verify } = storeToRefs(memberForget)
+const { onGetCookie, onApiAuthPasswordResetConfirm, reset } = useMemberForgetActions()
+const { onApiPromise } = usePopupActions()
 const router = useRouter()
 
 definePageMeta({
   layout: 'member',
   channel: 'member',
   requiresAuth: false,
-  // TODO: 未經手機驗證直接進來要退回第一步(比照 upgrade/phone 的 middleware),
-  // 等 API 確定用什麼 token(cookie 名稱與效期)再補。
+  middleware: [
+    () => {
+      const raw = useCookie(FORGETRESET).value
+
+      // 沒有 resetToken(未經手機驗證進來、或已過 expireAt 被瀏覽器清掉)→
+      // confirm 打不了,退回第一步重跑。
+      //
+      // middleware 只判斷「有沒有有效值」,用 useCookie + deCrypto 兩行就夠,
+      // 不必為此初始化整個 store(server 端 store 也沒有值)。
+      if (!raw || !deCrypto(raw)) {
+        return navigateTo(
+          {
+            name: 'member-forget',
+          },
+          {
+            replace: true,
+          }
+        )
+      }
+    },
+  ],
 })
 
 await onWithLoadingAll([])
@@ -19,12 +45,35 @@ onUseMeta({
   url: useRequestURL(),
 })
 
-// TODO: 待「重設密碼」API 就緒後接上(成功才換頁)。
-const onSumit = () => {
+// 驗證碼與新密碼一起送出(這條流程只有 confirm 會驗證碼)。
+// 驗證碼錯誤時 action 會導回步驟 1,所以這裡只處理成功的去向。
+const onSumit = async () => {
+  onApiPromise('open')
+
+  const { status } = await onApiAuthPasswordResetConfirm()
+
+  onApiPromise('close')
+
+  if (status !== 200) return
+
   router.push({
     name: 'member-forget-complete',
   })
 }
+
+// 手機號碼、驗證碼與 resetToken 都在步驟 1 寫進 cookie;本頁 URL 不帶,
+// 重整後靠 cookie 還原,confirm 才有東西可送。走到這裡代表 middleware 已放行。
+const onInit = () => {
+  reset.onResetPassword()
+
+  const { mobilePhone, verificationCode, resetToken } = onGetCookie(FORGETRESET) ?? {}
+
+  verify.value.apiData.mobilePhone = mobilePhone ?? null
+  verify.value.apiData.verificationCode = verificationCode ?? null
+  verify.value.apiData.resetToken = resetToken ?? null
+}
+
+onInit()
 </script>
 
 <template>

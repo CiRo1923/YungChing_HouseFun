@@ -14,9 +14,10 @@
 | `pages/member/forget/reset.vue` | 步驟 2 重設密碼,`/member/forget/reset` |
 | `pages/member/forget/complete.vue` | 步驟 3 設定完成,`/member/forget/complete` |
 | `pages/member/forget/_components/` | Header / Steps / Note + index、reset、complete 三個 Content |
-| `stores/member/forget.js` | 欄位已照 swagger 補齊(`verify` / `resetPassword` 兩段) |
-| `stores/member/.composables/useForgetActions.js` | 只有 `reset`,兩支 API 還沒接(缺兩個值,見下) |
-| `scripts/_api/member/forget.js` | 兩支 C 端 API 已就位 |
+| `stores/member/forget.js` | 欄位照 swagger,`verify` / `resetPassword` 兩段 |
+| `stores/member/.composables/useForgetActions.js` | 兩支 API、cookie 工具、驗證碼錯誤的出口都接好了 |
+| `scripts/_api/member/forget.js` | 兩支 C 端 API |
+| `scripts/_storage.js` | 新增 `FORGETRESET`(效期跟 `expireAt`)、`FORGETCOMPLETE`(短效,完成頁憑證) |
 
 ## API(`.apiJson/swagger.json`)
 
@@ -33,6 +34,18 @@ C 端只有兩支;`app/password-reset/*` 那三支是舊版 App 用的,**不要�
 發送限制與註冊驗證共用 60 秒冷卻 + 手機每日 / IP 每小時上限;
 400 會帶 `failedAttempts` / `remainingAttempts` / `unlockAt`,結構同 upgrade。
 
+**`verificationChannel` 帶字串** —— swagger 寫成 integer 0 / 1 是轉譯錯誤。
+目前一律 `'sms'`,未來可能發 LINE,值集中在 store 的 `verificationChannels`。
+
+### 兩個暫時的做法,拿到後端答案就改
+
+1. **重送倒數吃 `expireAt`** —— 規格寫 60 秒冷卻,但 200 只回 token 的到期時間,
+   沒有 `resendAvailableAt` 那種「可重送時間」欄位(upgrade 那條流程有)。
+   **要問後端補不補這個欄位**;補了就把 `verify.countdownData.expires` 改吃它。
+2. **驗證碼錯誤靠「有沒有帶 `failedAttempts` / `remainingAttempts`」判斷** ——
+   400 有 `code` 欄位但 swagger 沒列舉值。實際看到 code 之後改成比對 code 會更準
+   (現在的判斷若失準,會變成密碼格式錯誤也把人踢回步驟 1)。
+
 錯誤呈現一律走 mForm 內建那套(`--error` 紅框 + `m-form-error`),
 **設計稿的錯誤樣式是錯的,不要照抄**,比照 member 其他單元即可。
 
@@ -44,7 +57,6 @@ C 端只有兩支;`app/password-reset/*` 那三支是舊版 App 用的,**不要�
 | 2 | 缺兩個 icon:設計稿的「手機裝置」與「鎖」 | `_svg/` 沒有,暫用 `icon_phone`(其實是聽筒)與 `icon_certification`,已標 TODO。第三步的實心圓 + 白勾是用 `icon_check_solid` 包圓底做出來的 | 使用者會補 svg 進 `_svg/` |
 | 3 | ~~停用狀態的淡橘按鈕色票~~ | **已定案:不補。** 設計稿那個淡橘是錯的,按鈕一律用現有的 `--bg-orange-f74c`,按下去才驗證(等同 upgrade 既有做法) | — |
 | 4 | 完成頁插圖 | 暫時沿用註冊完成頁的 `member/register/complete/icon_complete.svg` | 使用者會再提供 |
-| 5 | 接 API | api 與 store 已就位,**actions 還沒接** —— 缺 `verificationChannel`(0 / 1 哪個是簡訊,swagger 沒寫)與「60 秒重送冷卻的倒數要吃什麼」(200 只回 token 的 `expireAt`,語意不是可重送時間)。頁面的表單 model 也還是頁面內的 `ref`,`resetToken` 要走哪支 cookie(比照 `EMAILVERIFYTOKEN`)未定 | 使用者去確認 channel 值;冷卻時間要問後端有沒有欄位 |
-| 5b | 步驟 2、3 的 middleware | 未經上一步直接進來要退回步驟 1,等 `resetToken` 的 cookie 與效期定案 | 跟著第 5 項一起做 |
+| 5 | ~~接 API~~ | **已接完**,三頁都走 store,middleware 也補了(步驟 2 看 `FORGETRESET`、步驟 3 看 `FORGETCOMPLETE`,沒有就退回步驟 1)。剩下上面那兩個暫時做法要問後端 | 待後端回覆重送冷卻欄位與 400 的 code |
 | 6 | 設計稿內部不一致 | p57 是重設密碼頁,但按鈕寫「下一步」又沒有 ⓘ 提示行,和 p50 / p55 的「確定修改」+「請設定新密碼」對不上 —— 目前照 p50 / p55 做 | 使用者會再確認 |
 | 7 | 忘記密碼的入口 | `containers/login/Note.vue` 只有「立即註冊」與「MAIL 會員升級」,沒有連到 `/member/forget` 的入口 | 使用者會再確認要放哪 |

@@ -1,5 +1,11 @@
 <script setup>
+import { FORGETRESET } from '@js/_storage.js'
+
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
+const memberForget = useMemberForgetStore()
+const { verify } = storeToRefs(memberForget)
+const { onGetCookie, onApiAuthPasswordResetRequest, onSaveVerify, reset } = useMemberForgetActions()
+const { onApiPromise } = usePopupActions()
 const router = useRouter()
 
 definePageMeta({
@@ -17,16 +23,40 @@ onUseMeta({
   url: useRequestURL(),
 })
 
-// TODO: 待忘記密碼「發送驗證碼」API 就緒後接上
-// (呼叫發送 API → 取得 expires → 傳入 VerifyCountdown 的 config.expires 觸發倒數)。
-const onSendCode = () => {}
+// 發送(或重送)驗證碼。管道目前一律 sms —— swagger 把它寫成 integer 0 / 1 是轉譯錯誤,
+// 實際要帶字串;未來可能改發 LINE,值集中在 store 的 verificationChannels。
+const onSendCode = async () => {
+  onApiPromise('open')
 
-// TODO: 待「驗證手機 + 驗證碼」API 就緒後接上(成功才換頁,並把 token 交給下一步)。
+  await onApiAuthPasswordResetRequest(memberForget.verificationChannels.sms)
+
+  onApiPromise('close')
+}
+
+// 驗證碼要到步驟 2 的 confirm 才驗得到 → 這裡沒有 API 可打,格式與「已發過碼」由
+// Content 檢查完才會走到這裡。換頁前把驗證碼補寫進 cookie(步驟 2 重整時 store 會清空)。
 const onSumit = () => {
+  onSaveVerify()
+
   router.push({
     name: 'member-forget-reset',
   })
 }
+
+// resetToken 由發送驗證碼寫進 cookie;本頁 URL 不帶這些值,重整後靠 cookie 還原,
+// 倒數與「下一步」才知道這一輪已經發過碼。未發過或已過期(瀏覽器自動清掉)時為 null。
+const onInit = () => {
+  reset.onVerify()
+
+  const { mobilePhone, verificationCode, resetToken, expireAt } = onGetCookie(FORGETRESET) ?? {}
+
+  verify.value.apiData.mobilePhone = mobilePhone ?? null
+  verify.value.apiData.verificationCode = verificationCode ?? null
+  verify.value.apiData.resetToken = resetToken ?? null
+  verify.value.countdownData.expires = expireAt ?? null
+}
+
+onInit()
 </script>
 
 <template>

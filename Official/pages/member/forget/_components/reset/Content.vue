@@ -1,14 +1,11 @@
 <script setup>
 import { Form } from 'vee-validate'
 
-const emits = defineEmits(['submit'])
+const memberForget = useMemberForgetStore()
+const { resetPassword } = storeToRefs(memberForget)
 
-// TODO: API 未定,先用頁面內的 model 撐畫面;
-// 之後改由 stores/member/forget 的 apiData 接管(欄位名跟著 API 走)。
-const apiData = ref({
-  password: null,
-  passwordConfirm: null,
-})
+const emits = defineEmits(['submit'])
+const apiData = computed(() => resetPassword.value.apiData)
 
 // 6~12 位數字或英文,大小寫有別(設計稿的 placeholder 文案)
 const PASSWORD_RE = /^[0-9a-zA-Z]{6,12}$/
@@ -26,8 +23,8 @@ const onSumit = async (validate) => {
   <Form as="div" class="space-y-[15px]" v-slot="{ validate }">
     <PageMemberForgetNote message="請設定新密碼" />
     <CommonMFormPassword
-      name="password"
-      v-model="apiData.password"
+      name="newPassword"
+      v-model="apiData.newPassword"
       :config="{
         placeholder: '6~12位數字或英文，大小寫有別',
         validateEvents: ['blur', 'change'],
@@ -35,7 +32,7 @@ const onSumit = async (validate) => {
       :rules="{
         required: '請輸入密碼',
         custom: {
-          valid: PASSWORD_RE.test(apiData.password ?? ''),
+          valid: PASSWORD_RE.test(apiData.newPassword ?? ''),
           errorMessage: '密碼格式錯誤',
         },
       }"
@@ -44,8 +41,8 @@ const onSumit = async (validate) => {
       }"
     />
     <CommonMFormPassword
-      name="passwordConfirm"
-      v-model="apiData.passwordConfirm"
+      name="confirmPassword"
+      v-model="apiData.confirmPassword"
       :config="{
         placeholder: '再次輸入密碼',
         validateEvents: ['blur', 'change'],
@@ -53,7 +50,7 @@ const onSumit = async (validate) => {
       :rules="{
         required: '請再次輸入密碼',
         custom: {
-          valid: !!apiData.passwordConfirm && apiData.passwordConfirm === apiData.password,
+          valid: !!apiData.confirmPassword && apiData.confirmPassword === apiData.newPassword,
           errorMessage: '密碼格式錯誤',
         },
       }"

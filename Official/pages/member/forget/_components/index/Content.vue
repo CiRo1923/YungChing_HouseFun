@@ -1,32 +1,37 @@
 <script setup>
 import { Form } from 'vee-validate'
 
+const project = useProjectStore()
+const { serverTime } = storeToRefs(project)
+const memberForget = useMemberForgetStore()
+const { verify } = storeToRefs(memberForget)
+
 const emits = defineEmits(['sendCode', 'submit'])
-
-// TODO: API 未定,先用頁面內的 model 撐畫面;
-// 之後改由 stores/member/forget 的 apiData 接管(欄位名跟著 API 走)。
-const apiData = ref({
-  mobilePhone: null,
-  verificationCode: null,
-})
-
+const apiData = computed(() => verify.value.apiData)
 const isPhoneValid = computed(() => /^09\d{8}$/.test(apiData.value.mobilePhone ?? ''))
 
 const onSendCode = () => {
   emits('sendCode')
 }
 
-const onSumit = async (validate) => {
+// 驗證碼是 confirm(步驟 2)才驗的,這裡只能確認格式與「有沒有發過碼」——
+// 沒有 resetToken 就代表沒發過,讓錯誤落在驗證碼欄位上,而不是放人進下一步空等。
+const onSumit = async (validate, setFieldError) => {
   const { valid } = await validate()
 
   if (!valid) return
+
+  if (!apiData.value.resetToken) {
+    setFieldError('verificationCode', '請先發送驗證碼')
+    return
+  }
 
   emits('submit')
 }
 </script>
 
 <template>
-  <Form as="div" class="space-y-[15px]" v-slot="{ validate }">
+  <Form as="div" class="space-y-[15px]" v-slot="{ validate, setFieldError }">
     <PageMemberForgetNote message="忘記密碼每天只能使用2次" />
     <CommonMFormInput
       name="mobilePhone"
@@ -54,6 +59,8 @@ const onSumit = async (validate) => {
         length: 6,
         placeholder: '請輸入6位數驗證碼',
         validateEvents: ['blur', 'change'],
+        serverTime: serverTime?.full,
+        expires: verify.countdownData.expires,
         message: {
           timeout: '{timeout}s後重發',
           reSend: '發送驗證碼',
@@ -78,7 +85,7 @@ const onSumit = async (validate) => {
         main: '--oval --bg-orange-f74c --h-55 --text-white --px-20 --text-center w-full',
         text: 'text-[16px]',
       }"
-      @click="onSumit(validate)"
+      @click="onSumit(validate, setFieldError)"
     />
   </Form>
 </template>
