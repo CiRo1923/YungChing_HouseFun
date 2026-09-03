@@ -17,7 +17,9 @@ import { spawn } from 'node:child_process'
 
 // 兩邊都不要的項目:AI 工具設定與內部文件,對發布與備份都沒有意義。
 // .acceptance 是驗收測試報告(含規格比對與缺陷清單),屬對內資料,不隨原始碼出去。
-const TOOLING_NAMES = ['.claude', '.agents', 'docs', '.acceptance']
+// .apiJson 是後端的 swagger 規格,只給開發時查 API 用 —— 同樣屬對內資料,
+// 而且它在專案根目錄、不經任何建置,漏掉就會原樣被同步與打包出去。
+const TOOLING_NAMES = ['.claude', '.agents', 'docs', '.acceptance', '.apiJson']
 
 // 同步時額外排除:建置產物、依賴,以及先前產生的壓縮檔
 const SYNC_EXCLUDE_NAMES = new Set([

@@ -1,0 +1,3328 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Housefun.Member.Auth.Api",
+    "version": "1.0"
+  },
+  "paths": {
+    "/": {
+      "get": {
+        "tags": ["Housefun.Member.Auth.Api"],
+        "summary": "檢查 Member Auth API 是否可回應",
+        "description": "用途：確認 Member Auth API 服務目前可正常處理基本請求。",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StringBoolean<>f__AnonymousType0"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/member/auth/register/verification-code": {
+      "post": {
+        "tags": ["MemberAuth"],
+        "summary": "建立會員註冊手機驗證碼；第一版測試環境會回傳 developmentVerificationCode 供測試使用。",
+        "description": "用途：執行 Member Auth 的 Create Registration Verification Code 作業。HTTP 方法：POST；路由：/api/{version}/member/auth/register/verification-code。",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API 參數：version。",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "請依照 schema 傳入此 API 需要的資料。",
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberRegistrationVerificationCodeRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberRegistrationVerificationCodeRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberRegistrationVerificationCodeRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberRegistrationVerificationCodeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberRegistrationVerificationCodeResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberRegistrationVerificationCodeResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberRegistrationVerificationCodeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/member/auth/register": {
+      "post": {
+        "tags": ["MemberAuth"],
+        "summary": "完成會員註冊；第一版支援一般會員與屋主/房東，手機同時作為登入帳號。",
+        "description": "用途：執行 Member Auth 的 Register 作業。HTTP 方法：POST；路由：/api/{version}/member/auth/register。",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API 參數：version。",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "請依照 schema 傳入此 API 需要的資料。",
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberRegistrationRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberRegistrationRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberRegistrationRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberRegistrationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberRegistrationResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberRegistrationResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberRegistrationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/member/auth/password-reset/request": {
+      "post": {
+        "tags": ["MemberAuth"],
+        "summary": "建立 C 端忘記密碼驗證流程。",
+        "description": "依會員手機號碼建立一次性密碼重設 token，驗證碼由指定管道發送。\r\n本版已接簡訊 provider；LINE provider 尚未提供時會回傳 400，不建立驗證流程。\r\n發送限制與會員註冊驗證共用 60 秒冷卻、手機每日及 IP 每小時上限。\r\n規格來源：C203-1 規格書第 13 頁；OTP 細節依文件引用的註冊／登入規格。",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API 參數：version。",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "請依照 schema 傳入此 API 需要的資料。",
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthPasswordResetRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthPasswordResetRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthPasswordResetRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthPasswordResetRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthPasswordResetRequestResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthPasswordResetRequestResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthPasswordResetRequestResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/member/auth/password-reset/confirm": {
+      "post": {
+        "tags": ["MemberAuth"],
+        "summary": "驗證 C 端忘記密碼驗證碼並設定新密碼。",
+        "description": "驗證一次性密碼重設 token 與驗證碼；成功後更新密碼並撤銷該會員的 Member Auth 登入 Session。\r\n規格來源：C203-1 規格書第 13 頁；OTP 細節依文件引用的註冊／登入規格。",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API 參數：version。",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "請依照 schema 傳入此 API 需要的資料。",
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthPasswordResetConfirmRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthPasswordResetConfirmRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthPasswordResetConfirmRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthPasswordResetConfirmRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthPasswordResetConfirmResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthPasswordResetConfirmResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthPasswordResetConfirmResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/member/auth/app/register/begin": {
+      "post": {
+        "tags": ["MemberAuth"],
+        "summary": "舊版 App 註冊第一步；建立 pending registration 與手機驗證碼。",
+        "description": "用途：執行 Member Auth 的 Begin App Register 作業。HTTP 方法：POST；路由：/api/{version}/member/auth/app/register/begin。",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API 參數：version。",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "請依照 schema 傳入此 API 需要的資料。",
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthAppRegisterBeginRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthAppRegisterBeginRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthAppRegisterBeginRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthAppRegisterBeginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthAppRegisterBeginResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthAppRegisterBeginResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthAppRegisterBeginResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/member/auth/app/register/confirm": {
+      "post": {
+        "tags": ["MemberAuth"],
+        "summary": "舊版 App 註冊第二步；驗證手機認證碼並完成註冊，成功後回正式 SSO token。",
+        "description": "用途：執行 Member Auth 的 Confirm App Register 作業。HTTP 方法：POST；路由：/api/{version}/member/auth/app/register/confirm。",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API 參數：version。",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "請依照 schema 傳入此 API 需要的資料。",
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthAppRegisterConfirmRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthAppRegisterConfirmRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthAppRegisterConfirmRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthAppRegisterConfirmRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthAppRegisterConfirmResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthAppRegisterConfirmResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthAppRegisterConfirmResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/member/auth/app/password-reset/begin": {
+      "post": {
+        "tags": ["MemberAuth"],
+        "summary": "舊版 App 忘記密碼第一步；建立密碼重設 token 與手機驗證碼。",
+        "description": "用途：執行 Member Auth 的 Begin App Password Reset 作業。HTTP 方法：POST；路由：/api/{version}/member/auth/app/password-reset/begin。",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API 參數：version。",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "請依照 schema 傳入此 API 需要的資料。",
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthAppPasswordResetBeginRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthAppPasswordResetBeginRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthAppPasswordResetBeginRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthAppPasswordResetBeginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthAppPasswordResetBeginResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthAppPasswordResetBeginResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthAppPasswordResetBeginResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/member/auth/app/password-reset/verify": {
+      "post": {
+        "tags": ["MemberAuth"],
+        "summary": "舊版 App 忘記密碼第二步；驗證認證碼並換發已驗證的 reset token。",
+        "description": "用途：執行 Member Auth 的 Verify App Password Reset 作業。HTTP 方法：POST；路由：/api/{version}/member/auth/app/password-reset/verify。",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API 參數：version。",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "請依照 schema 傳入此 API 需要的資料。",
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthAppPasswordResetVerifyRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthAppPasswordResetVerifyRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthAppPasswordResetVerifyRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthAppPasswordResetVerifyRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthAppPasswordResetVerifyResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthAppPasswordResetVerifyResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthAppPasswordResetVerifyResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/member/auth/app/password-reset/confirm": {
+      "post": {
+        "tags": ["MemberAuth"],
+        "summary": "舊版 App 忘記密碼第三步；用已驗證的 reset token 設定新密碼。",
+        "description": "用途：執行 Member Auth 的 Confirm App Password Reset 作業。HTTP 方法：POST；路由：/api/{version}/member/auth/app/password-reset/confirm。",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API 參數：version。",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "請依照 schema 傳入此 API 需要的資料。",
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthAppPasswordResetConfirmRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthAppPasswordResetConfirmRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthAppPasswordResetConfirmRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthAppPasswordResetConfirmRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthAppPasswordResetConfirmResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthAppPasswordResetConfirmResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthAppPasswordResetConfirmResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/member/auth/token": {
+      "post": {
+        "tags": ["MemberAuth"],
+        "summary": "建立會員 SSO 長 token；實際帳密驗證與 token 發行將由 Application use case 承接。",
+        "description": "用途：執行 Member Auth 的 Issue Token 作業。HTTP 方法：POST；路由：/api/{version}/member/auth/token。",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API 參數：version。",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "請依照 schema 傳入此 API 需要的資料。",
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthTokenRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthTokenRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthTokenRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthTokenRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthTokenResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthTokenResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthTokenResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/member/auth/handoff": {
+      "get": {
+        "tags": ["MemberAuth"],
+        "summary": "使用記得我 Cookie 建立頻道 handoff，成功後導回 returnUrl 並附加 30 秒有效的 encryptedToken。",
+        "description": "用途：執行 Member Auth 的 Handoff 作業。HTTP 方法：GET；路由：/api/{version}/member/auth/handoff。",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API 參數：version。",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "channel",
+            "in": "query",
+            "description": "API 參數：channel。",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "returnUrl",
+            "in": "query",
+            "description": "API 參數：returnUrl。",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Found"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/member/auth/handoff/token": {
+      "get": {
+        "tags": ["MemberAuth"],
+        "summary": "使用記得我 Cookie 建立頻道 handoff token，成功時只回 JSON，不進行導頁。",
+        "description": "用途：執行 Member Auth 的 Handoff Token 作業。HTTP 方法：GET；路由：/api/{version}/member/auth/handoff/token。",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API 參數：version。",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "channel",
+            "in": "query",
+            "description": "API 參數：channel。",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthHandoffResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthHandoffResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthHandoffResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/member/auth/introspect": {
+      "post": {
+        "tags": ["MemberAuth"],
+        "summary": "驗證 SSO 長 token 是否有效，供各頻道換發自己的短登入狀態。",
+        "description": "用途：執行 Member Auth 的 Introspect 作業。HTTP 方法：POST；路由：/api/{version}/member/auth/introspect。",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API 參數：version。",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "請依照 schema 傳入此 API 需要的資料。",
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthIntrospectRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthIntrospectRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthIntrospectRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthIntrospectRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthIntrospectResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthIntrospectResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthIntrospectResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/member/auth/revoke": {
+      "post": {
+        "tags": ["MemberAuth"],
+        "summary": "撤銷指定 SSO 長 token，供登出或風控封鎖時使用。",
+        "description": "用途：執行 Member Auth 的 Revoke 作業。HTTP 方法：POST；路由：/api/{version}/member/auth/revoke。",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API 參數：version。",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "請依照 schema 傳入此 API 需要的資料。",
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthRevokeRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthRevokeRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthRevokeRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthRevokeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthRevokeResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthRevokeResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthRevokeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/member/auth/session/status": {
+      "post": {
+        "tags": ["MemberAuth"],
+        "summary": "驗證全域登入 session 是否有效，供各 BFF 驗證自身短 token 時同步檢查。",
+        "description": "用途：執行 Member Auth 的 Session Status 作業。HTTP 方法：POST；路由：/api/{version}/member/auth/session/status。",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API 參數：version。",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "請依照 schema 傳入此 API 需要的資料。",
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthSessionStatusRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthSessionStatusRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthSessionStatusRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthSessionStatusRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthSessionStatusResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthSessionStatusResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthSessionStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/member/auth/logout": {
+      "post": {
+        "tags": ["MemberAuth"],
+        "summary": "全頻道登出；撤銷 Member Auth 全域 session，讓各 BFF 既有短 token 不再通過驗證。",
+        "description": "用途：執行 Member Auth 的 Logout 作業。HTTP 方法：POST；路由：/api/{version}/member/auth/logout。",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API 參數：version。",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "請依照 schema 傳入此 API 需要的資料。",
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthLogoutRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthLogoutRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthLogoutRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthLogoutRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthLogoutResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthLogoutResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthLogoutResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/member/auth/rotate": {
+      "post": {
+        "tags": ["MemberAuth"],
+        "summary": "輪替 SSO 長 token，降低長效 token 外洩後的風險。",
+        "description": "用途：執行 Member Auth 的 Rotate 作業。HTTP 方法：POST；路由：/api/{version}/member/auth/rotate。",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API 參數：version。",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "請依照 schema 傳入此 API 需要的資料。",
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthRotateRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthRotateRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthRotateRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAuthRotateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthRotateResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthRotateResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAuthRotateResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/member/auth/email-upgrade/email/verification-code": {
+      "post": {
+        "tags": ["MemberAuthEmailUpgrade"],
+        "summary": "寄送 Email 會員升級驗證碼",
+        "description": "以 HFMemberAccount.LoginAccount 比對輸入的 Email 登入帳號，並檢查會員是否存在且尚未綁定手機；只有符合條件才寄送驗證信。 Email 不存在、已綁定手機或帳號不可使用時，一律回覆「帳號不存在」。同一 LoginAccount 每 24 小時最多寄送 10 次，達上限後回傳 unlockAt。 規格來源：C201-2 規格書第 4、8、9 頁；依確認需求，以 Email 驗證碼取代原 Email＋密碼驗證。",
+        "operationId": "SendEmailVerificationCode",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API 版本路徑參數",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "請依照 schema 傳入此 API 需要的資料。",
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberEmailUpgradeSendCodeRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberEmailUpgradeSendCodeRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberEmailUpgradeSendCodeRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberEmailUpgradeSendCodeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberEmailUpgradeSendCodeResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberEmailUpgradeSendCodeResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberEmailUpgradeSendCodeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/member/auth/email-upgrade/email/verification-code/verify": {
+      "post": {
+        "tags": ["MemberAuthEmailUpgrade"],
+        "summary": "驗證 Email 會員升級驗證碼",
+        "description": "驗證 Email 驗證碼，成功後簽發僅供升級流程使用的短效 upgradeToken，不建立正式登入狀態。驗證碼錯誤時回傳 failedAttempts 與 remainingAttempts；錯誤達 5 次後驗證碼失效。 規格來源：C201-2 規格書第 4、8、9 頁；依確認需求，以 Email 驗證碼取代原 Email＋密碼驗證。",
+        "operationId": "VerifyEmailVerificationCode",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API 版本路徑參數",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "請依照 schema 傳入此 API 需要的資料。",
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberEmailUpgradeVerifyCodeRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberEmailUpgradeVerifyCodeRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberEmailUpgradeVerifyCodeRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberEmailUpgradeVerifyCodeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberEmailUpgradeVerifyCodeResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberEmailUpgradeVerifyCodeResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberEmailUpgradeVerifyCodeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/member/auth/email-upgrade/status": {
+      "get": {
+        "tags": ["MemberAuthEmailUpgrade"],
+        "summary": "查詢 Email 會員升級狀態",
+        "description": "以 upgradeToken 查詢升級狀態、升級期限、是否可以稍後處理，以及可預帶的未驗證手機。 規格來源：C201-2 規格書第 2、3、18、19、20 頁。",
+        "operationId": "GetUpgradeStatus",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API 版本路徑參數",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Upgrade-Token",
+            "in": "header",
+            "description": "Email 驗證成功後取得的短效升級權杖",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberEmailUpgradeStatusResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberEmailUpgradeStatusResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberEmailUpgradeStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/member/auth/email-upgrade/mobile/check": {
+      "post": {
+        "tags": ["MemberAuthEmailUpgrade"],
+        "summary": "檢查升級手機號碼是否可使用",
+        "description": "檢查台灣手機號碼格式及 LoginAccount 綁定狀態，只依 LoginAccount 判斷是否由其他會員使用；MobilePhone 聯絡欄位不參與綁定或整併判斷。 只回傳可用或其他會員已使用，不揭露其他會員資料。 規格來源：C201-2 規格書第 4、5、6、19 頁。",
+        "operationId": "CheckMobile",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API 版本路徑參數",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Upgrade-Token",
+            "in": "header",
+            "description": "Email 驗證成功後取得的短效升級權杖",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "請依照 schema 傳入此 API 需要的資料。",
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberEmailUpgradeMobileRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberEmailUpgradeMobileRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberEmailUpgradeMobileRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberEmailUpgradeMobileRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberEmailUpgradeMobileCheckResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberEmailUpgradeMobileCheckResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberEmailUpgradeMobileCheckResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/member/auth/email-upgrade/mobile/verification-code": {
+      "post": {
+        "tags": ["MemberAuthEmailUpgrade"],
+        "summary": "建立升級手機驗證碼",
+        "description": "建立欲綁定或欲整併帳號的 6 碼手機驗證碼，套用 1 分鐘有效、60 秒重寄冷卻、每日 10 次及每 IP 每小時 20 次限制。 UAT 前的開發模式不呼叫簡訊服務，改由 developmentVerificationCode 回傳驗證碼；UAT 起關閉開發模式後才寄送簡訊，且不回傳該欄位。 規格來源：C201-2 規格書第 4、5、6、10、18、19 頁。",
+        "operationId": "SendMobileVerificationCode",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API 版本路徑參數",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Upgrade-Token",
+            "in": "header",
+            "description": "Email 驗證成功後取得的短效升級權杖",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "請依照 schema 傳入此 API 需要的資料。",
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberEmailUpgradeMobileRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberEmailUpgradeMobileRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberEmailUpgradeMobileRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberEmailUpgradeMobileRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberEmailUpgradeMobileCodeResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberEmailUpgradeMobileCodeResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberEmailUpgradeMobileCodeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/member/auth/email-upgrade/mobile/verification-code/verify": {
+      "post": {
+        "tags": ["MemberAuthEmailUpgrade"],
+        "summary": "驗證升級手機驗證碼",
+        "description": "驗證手機驗證碼；成功後立即使驗證碼失效，並簽發一次性 mobileVerificationToken 供綁定或整併使用。 同一驗證碼錯誤 5 次即失效。規格來源：C201-2 規格書第 6、10、16、17、19 頁。",
+        "operationId": "VerifyMobileVerificationCode",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API 版本路徑參數",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Upgrade-Token",
+            "in": "header",
+            "description": "Email 驗證成功後取得的短效升級權杖",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "請依照 schema 傳入此 API 需要的資料。",
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberEmailUpgradeVerifyMobileCodeRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberEmailUpgradeVerifyMobileCodeRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberEmailUpgradeVerifyMobileCodeRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberEmailUpgradeVerifyMobileCodeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberEmailUpgradeVerifyMobileCodeResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberEmailUpgradeVerifyMobileCodeResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberEmailUpgradeVerifyMobileCodeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/member/auth/email-upgrade/bind": {
+      "post": {
+        "tags": ["MemberAuthEmailUpgrade"],
+        "summary": "綁定手機並完成 Email 會員升級",
+        "description": "使用已驗證的手機完成綁定，保留原 Email 與密碼、更新升級狀態及寫入升級紀錄，完成後建立正式登入狀態。 規格來源：C201-2 規格書第 5、11、19、20 頁。",
+        "operationId": "BindMobile",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API 版本路徑參數",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Upgrade-Token",
+            "in": "header",
+            "description": "Email 驗證成功後取得的短效升級權杖",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "請依照 schema 傳入此 API 需要的資料。",
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberEmailUpgradeCompleteRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberEmailUpgradeCompleteRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberEmailUpgradeCompleteRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberEmailUpgradeCompleteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberEmailUpgradeCompleteResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberEmailUpgradeCompleteResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberEmailUpgradeCompleteResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/member/auth/email-upgrade/merge": {
+      "post": {
+        "tags": ["MemberAuthEmailUpgrade"],
+        "summary": "整併 Email 會員與既有手機會員",
+        "description": "以手機會員為存續帳號，將 Email 會員資料整併後標記為不可登入；保留有效點數並依規格保留最近 10 筆訂單。 規格來源：C201-2 規格書第 5、6、12、19、20 頁。",
+        "operationId": "MergeAccount",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API 版本路徑參數",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Upgrade-Token",
+            "in": "header",
+            "description": "Email 驗證成功後取得的短效升級權杖",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "請依照 schema 傳入此 API 需要的資料。",
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberEmailUpgradeCompleteRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberEmailUpgradeCompleteRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberEmailUpgradeCompleteRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberEmailUpgradeCompleteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberEmailUpgradeCompleteResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberEmailUpgradeCompleteResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberEmailUpgradeCompleteResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/member/auth/email-upgrade/defer": {
+      "post": {
+        "tags": ["MemberAuthEmailUpgrade"],
+        "summary": "暫緩 Email 會員升級",
+        "description": "升級期間內記錄一次「稍後再說」；超過升級期限後不得暫緩。 規格來源：C201-2 規格書第 2、3、18、19、20 頁。",
+        "operationId": "DeferUpgrade",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API 版本路徑參數",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Upgrade-Token",
+            "in": "header",
+            "description": "Email 驗證成功後取得的短效升級權杖",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberEmailUpgradeDeferResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberEmailUpgradeDeferResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberEmailUpgradeDeferResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "MemberAuthAppPasswordResetBeginRequest": {
+        "type": "object",
+        "properties": {
+          "account": {
+            "type": "string",
+            "description": "手機號碼或帳號；目前以手機號碼建立驗證流程。",
+            "nullable": true
+          },
+          "channel": {
+            "type": "string",
+            "description": "發起流程的頻道，例如 app。",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "舊版 App 忘記密碼開始請求。"
+      },
+      "MemberAuthAppPasswordResetBeginResponse": {
+        "type": "object",
+        "properties": {
+          "memberToken": {
+            "type": "string",
+            "description": "密碼重設 token；App BFF 可映射為舊版 MemberToken。",
+            "nullable": true
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "到期時間。",
+            "format": "date-time"
+          },
+          "developmentVerificationCode": {
+            "type": "string",
+            "description": "測試環境用驗證碼；正式串簡訊後不應回傳。",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "description": "操作結果訊息。",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "舊版 App 忘記密碼開始結果。"
+      },
+      "MemberAuthAppPasswordResetConfirmRequest": {
+        "type": "object",
+        "properties": {
+          "memberToken": {
+            "type": "string",
+            "description": "密碼重設 token。",
+            "nullable": true
+          },
+          "newPassword": {
+            "type": "string",
+            "description": "新密碼。",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "舊版 App 忘記密碼確認請求。"
+      },
+      "MemberAuthAppPasswordResetConfirmResponse": {
+        "type": "object",
+        "properties": {
+          "changed": {
+            "type": "boolean",
+            "description": "是否已完成密碼重設。"
+          },
+          "message": {
+            "type": "string",
+            "description": "操作結果訊息。",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "舊版 App 忘記密碼確認結果。"
+      },
+      "MemberAuthAppPasswordResetVerifyRequest": {
+        "type": "object",
+        "properties": {
+          "memberToken": {
+            "type": "string",
+            "description": "密碼重設 token。",
+            "nullable": true
+          },
+          "authCode": {
+            "type": "string",
+            "description": "手機驗證碼。",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "舊版 App 忘記密碼驗證碼確認請求；成功後換發 verified reset token。"
+      },
+      "MemberAuthAppPasswordResetVerifyResponse": {
+        "type": "object",
+        "properties": {
+          "memberToken": {
+            "type": "string",
+            "description": "已通過驗證的密碼重設 token；App BFF 可映射為舊版 MemberToken。",
+            "nullable": true
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "到期時間。",
+            "format": "date-time"
+          },
+          "message": {
+            "type": "string",
+            "description": "操作結果訊息。",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "舊版 App 忘記密碼驗證碼確認結果。"
+      },
+      "MemberAuthAppRegisterBeginRequest": {
+        "type": "object",
+        "properties": {
+          "account": {
+            "type": "string",
+            "description": "舊版 App 傳入的帳號；目前視為台灣手機號碼。",
+            "nullable": true
+          },
+          "password": {
+            "type": "string",
+            "description": "註冊密碼。",
+            "nullable": true
+          },
+          "channel": {
+            "type": "string",
+            "description": "發起註冊的頻道，例如 app。",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "舊版 App 註冊開始請求；由 Member Auth 保管 pending 註冊狀態，App BFF 僅負責轉接。"
+      },
+      "MemberAuthAppRegisterBeginResponse": {
+        "type": "object",
+        "properties": {
+          "memberToken": {
+            "type": "string",
+            "description": "Pending 註冊 token；App BFF 可映射為舊版 MemberToken。",
+            "nullable": true
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "到期時間。",
+            "format": "date-time"
+          },
+          "developmentVerificationCode": {
+            "type": "string",
+            "description": "測試環境用驗證碼；正式串簡訊後不應回傳。",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "description": "操作結果訊息。",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "舊版 App 註冊開始結果。"
+      },
+      "MemberAuthAppRegisterConfirmRequest": {
+        "type": "object",
+        "properties": {
+          "memberToken": {
+            "type": "string",
+            "description": "註冊開始時取得的 pending token。",
+            "nullable": true
+          },
+          "authCode": {
+            "type": "string",
+            "description": "手機驗證碼。",
+            "nullable": true
+          },
+          "channel": {
+            "type": "string",
+            "description": "發起確認的頻道，例如 app。",
+            "nullable": true
+          },
+          "deviceId": {
+            "type": "string",
+            "description": "裝置識別碼；無裝置概念可不傳。",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "舊版 App 註冊確認請求。"
+      },
+      "MemberAuthAppRegisterConfirmResponse": {
+        "type": "object",
+        "properties": {
+          "memberToken": {
+            "type": "string",
+            "description": "正式 SSO 長 token。",
+            "nullable": true
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "token 到期時間。",
+            "format": "date-time"
+          },
+          "identity": {
+            "$ref": "#/components/schemas/MemberAuthIdentity"
+          },
+          "message": {
+            "type": "string",
+            "description": "操作結果訊息。",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "舊版 App 註冊確認結果。"
+      },
+      "MemberAuthErrorResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "錯誤代碼。",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "description": "錯誤訊息。",
+            "nullable": true
+          },
+          "details": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "欄位層級錯誤明細。",
+            "nullable": true
+          },
+          "failedAttempts": {
+            "type": "integer",
+            "description": "驗證碼已錯誤的次數；僅驗證碼錯誤時回傳。",
+            "format": "int32",
+            "nullable": true
+          },
+          "remainingAttempts": {
+            "type": "integer",
+            "description": "驗證碼尚可嘗試的次數；僅驗證碼錯誤時回傳。",
+            "format": "int32",
+            "nullable": true
+          },
+          "unlockAt": {
+            "type": "string",
+            "description": "限制解除時間；Email 每 24 小時寄送上限達標時回傳。",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Member Auth API 錯誤回應。"
+      },
+      "MemberAuthHandoffResponse": {
+        "type": "object",
+        "properties": {
+          "encryptedToken": {
+            "type": "string",
+            "description": "供頻道 BFF token exchange 使用的加密長 token envelope。",
+            "nullable": true
+          },
+          "redirectUrl": {
+            "type": "string",
+            "description": "已附加 encryptedToken query string 的安全導回 URL。",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "以記得我 Cookie 建立頻道 handoff 的結果。"
+      },
+      "MemberAuthIdentity": {
+        "type": "object",
+        "properties": {
+          "memberId": {
+            "type": "string",
+            "description": "會員登入帳號。",
+            "nullable": true
+          },
+          "memberType": {
+            "type": "string",
+            "description": "會員類型，例如 general、agent、backendAdmin。",
+            "nullable": true
+          },
+          "displayName": {
+            "type": "string",
+            "description": "會員顯示名稱。",
+            "nullable": true
+          },
+          "stateCode": {
+            "type": "string",
+            "description": "會員狀態代碼。",
+            "nullable": true
+          },
+          "claims": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "可供頻道短 token 使用的基本 claims。",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "SSO 驗證後提供給各頻道建立自身短登入狀態的會員身份資訊。"
+      },
+      "MemberAuthIntrospectRequest": {
+        "type": "object",
+        "properties": {
+          "longToken": {
+            "type": "string",
+            "description": "要驗證的 SSO 長 token。",
+            "nullable": true
+          },
+          "channel": {
+            "type": "string",
+            "description": "發起驗證的頻道。",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "驗證 SSO 長 token 是否仍有效的請求。"
+      },
+      "MemberAuthIntrospectResponse": {
+        "type": "object",
+        "properties": {
+          "active": {
+            "type": "boolean",
+            "description": "token 是否有效且未過期、未撤銷。"
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "token 到期時間；無效 token 不回傳。",
+            "format": "date-time",
+            "nullable": true
+          },
+          "identity": {
+            "$ref": "#/components/schemas/MemberAuthIdentity"
+          },
+          "sessionId": {
+            "type": "string",
+            "description": "Member Auth 全域登入 session id；各 BFF 需保存於自身短 token session 內。",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "SSO 長 token 驗證結果。"
+      },
+      "MemberAuthLogoutRequest": {
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": "string",
+            "description": "Member Auth 全域登入 session id。",
+            "nullable": true
+          },
+          "channel": {
+            "type": "string",
+            "description": "發起登出的頻道。",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string",
+            "description": "登出原因，例如 user-logout、risk-control。",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "全頻道登出請求；由任一 BFF 以全域 session id 觸發。"
+      },
+      "MemberAuthLogoutResponse": {
+        "type": "object",
+        "properties": {
+          "loggedOut": {
+            "type": "boolean",
+            "description": "是否已撤銷全域登入 session。"
+          }
+        },
+        "additionalProperties": false,
+        "description": "全頻道登出結果。"
+      },
+      "MemberAuthPasswordResetConfirmRequest": {
+        "required": [
+          "confirmPassword",
+          "mobilePhone",
+          "newPassword",
+          "resetToken",
+          "verificationCode"
+        ],
+        "type": "object",
+        "properties": {
+          "mobilePhone": {
+            "type": "string",
+            "description": "會員手機號碼。"
+          },
+          "verificationCode": {
+            "type": "string",
+            "description": "手機驗證碼。"
+          },
+          "resetToken": {
+            "type": "string",
+            "description": "建立流程時取得的一次性密碼重設 token。"
+          },
+          "newPassword": {
+            "type": "string",
+            "description": "新密碼。"
+          },
+          "confirmPassword": {
+            "type": "string",
+            "description": "新密碼確認值。"
+          }
+        },
+        "additionalProperties": false,
+        "description": "驗證 C 端忘記密碼驗證碼並設定新密碼的請求。"
+      },
+      "MemberAuthPasswordResetConfirmResponse": {
+        "required": ["message", "requireRelogin", "success"],
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "是否完成密碼重設。"
+          },
+          "requireRelogin": {
+            "type": "boolean",
+            "description": "是否要求使用者重新登入。"
+          },
+          "message": {
+            "type": "string",
+            "description": "操作結果訊息。"
+          }
+        },
+        "additionalProperties": false,
+        "description": "C 端忘記密碼完成結果。"
+      },
+      "MemberAuthPasswordResetRequest": {
+        "required": ["mobilePhone", "verificationChannel"],
+        "type": "object",
+        "properties": {
+          "mobilePhone": {
+            "type": "string",
+            "description": "會員手機號碼。"
+          },
+          "verificationChannel": {
+            "$ref": "#/components/schemas/MemberAuthPasswordResetVerificationChannel"
+          }
+        },
+        "additionalProperties": false,
+        "description": "建立 C 端忘記密碼驗證流程的請求。"
+      },
+      "MemberAuthPasswordResetRequestResponse": {
+        "required": ["expireAt", "message", "resetToken", "success"],
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "是否成功建立驗證流程。"
+          },
+          "resetToken": {
+            "type": "string",
+            "description": "一次性密碼重設 token。"
+          },
+          "expireAt": {
+            "type": "string",
+            "description": "token 到期時間。",
+            "format": "date-time"
+          },
+          "message": {
+            "type": "string",
+            "description": "操作結果訊息。"
+          }
+        },
+        "additionalProperties": false,
+        "description": "建立 C 端忘記密碼驗證流程的結果。"
+      },
+      "MemberAuthPasswordResetVerificationChannel": {
+        "enum": [0, 1],
+        "type": "integer",
+        "description": "忘記密碼驗證碼的傳送管道。",
+        "format": "int32"
+      },
+      "MemberAuthRevokeRequest": {
+        "type": "object",
+        "properties": {
+          "longToken": {
+            "type": "string",
+            "description": "要撤銷的 SSO 長 token。",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string",
+            "description": "撤銷原因，例如 logout、risk-control。",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "撤銷 SSO 長 token 的請求。"
+      },
+      "MemberAuthRevokeResponse": {
+        "type": "object",
+        "properties": {
+          "revoked": {
+            "type": "boolean",
+            "description": "是否成功撤銷。"
+          }
+        },
+        "additionalProperties": false,
+        "description": "SSO 長 token 撤銷結果。"
+      },
+      "MemberAuthRotateRequest": {
+        "type": "object",
+        "properties": {
+          "longToken": {
+            "type": "string",
+            "description": "要輪替的既有 SSO 長 token。",
+            "nullable": true
+          },
+          "channel": {
+            "type": "string",
+            "description": "發起輪替的頻道。",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "輪替 SSO 長 token 的請求。"
+      },
+      "MemberAuthRotateResponse": {
+        "type": "object",
+        "properties": {
+          "longToken": {
+            "type": "string",
+            "description": "新的 SSO 長 token。",
+            "nullable": true
+          },
+          "tokenType": {
+            "type": "string",
+            "description": "token 類型，預設為 Bearer。",
+            "nullable": true
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "新 token 到期時間。",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false,
+        "description": "SSO 長 token 輪替成功後的新 token。"
+      },
+      "MemberAuthSessionStatusRequest": {
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": "string",
+            "description": "Member Auth 全域登入 session id。",
+            "nullable": true
+          },
+          "channel": {
+            "type": "string",
+            "description": "發起驗證的頻道。",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "驗證 Member Auth 全域登入 session 是否仍有效的請求。"
+      },
+      "MemberAuthSessionStatusResponse": {
+        "type": "object",
+        "properties": {
+          "active": {
+            "type": "boolean",
+            "description": "session 是否有效且未過期、未撤銷。"
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "session 到期時間；無效 session 不回傳。",
+            "format": "date-time",
+            "nullable": true
+          },
+          "identity": {
+            "$ref": "#/components/schemas/MemberAuthIdentity"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Member Auth 全域登入 session 驗證結果。"
+      },
+      "MemberAuthTokenRequest": {
+        "type": "object",
+        "properties": {
+          "account": {
+            "type": "string",
+            "description": "會員登入帳號，可為登入帳號、會員代碼、手機或 Email。",
+            "nullable": true
+          },
+          "password": {
+            "type": "string",
+            "description": "會員登入密碼。",
+            "nullable": true
+          },
+          "channel": {
+            "type": "string",
+            "description": "發起登入的頻道，例如 web、app、buy-web。",
+            "nullable": true
+          },
+          "deviceId": {
+            "type": "string",
+            "description": "裝置識別碼；無裝置概念的頻道可不傳。",
+            "nullable": true
+          },
+          "rememberMe": {
+            "type": "boolean",
+            "description": "是否啟用記得我；啟用時 Member Auth 會建立較長效的全域登入狀態。"
+          }
+        },
+        "additionalProperties": false,
+        "description": "會員帳密登入並取得 SSO 長 token 的請求。"
+      },
+      "MemberAuthTokenResponse": {
+        "type": "object",
+        "properties": {
+          "longToken": {
+            "type": "string",
+            "description": "SSO 長 token；各頻道可用它向 Member Auth 驗證登入狀態。",
+            "nullable": true
+          },
+          "tokenType": {
+            "type": "string",
+            "description": "token 類型，預設為 Bearer。",
+            "nullable": true
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "長 token 到期時間。",
+            "format": "date-time"
+          },
+          "identity": {
+            "$ref": "#/components/schemas/MemberAuthIdentity"
+          }
+        },
+        "additionalProperties": false,
+        "description": "會員登入成功後回傳的 SSO 長 token 與會員身份資訊。"
+      },
+      "MemberEmailUpgradeCompleteRequest": {
+        "required": ["channel", "mobilePhone", "mobileVerificationToken"],
+        "type": "object",
+        "properties": {
+          "mobilePhone": {
+            "pattern": "^09\\d{8}$",
+            "type": "string",
+            "description": "已完成 OTP 驗證的手機號碼"
+          },
+          "mobileVerificationToken": {
+            "maxLength": 2147483647,
+            "minLength": 32,
+            "type": "string",
+            "description": "手機 OTP 驗證成功後取得的一次性權杖"
+          },
+          "channel": {
+            "type": "string",
+            "description": "完成升級後建立登入狀態的頻道"
+          },
+          "rememberMe": {
+            "type": "boolean",
+            "description": "是否建立記得我 Cookie"
+          }
+        },
+        "additionalProperties": false,
+        "description": "完成手機綁定或帳號整併請求；規格書第 5、6、11、12、19、20 頁。"
+      },
+      "MemberEmailUpgradeCompleteResponse": {
+        "required": [
+          "displayName",
+          "expiresAt",
+          "longToken",
+          "maskedMobile",
+          "memberId",
+          "memberType",
+          "tokenType"
+        ],
+        "type": "object",
+        "properties": {
+          "completed": {
+            "type": "boolean",
+            "description": "是否完成升級"
+          },
+          "mergePerformed": {
+            "type": "boolean",
+            "description": "是否執行帳號整併"
+          },
+          "maskedMobile": {
+            "type": "string",
+            "description": "遮罩後的手機號碼"
+          },
+          "longToken": {
+            "type": "string",
+            "description": "Member Auth SSO 長 token"
+          },
+          "tokenType": {
+            "type": "string",
+            "description": "Token 類型"
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "SSO 長 token 到期時間",
+            "format": "date-time"
+          },
+          "memberId": {
+            "type": "string",
+            "description": "升級完成後的會員識別"
+          },
+          "memberType": {
+            "type": "string",
+            "description": "會員類型"
+          },
+          "displayName": {
+            "type": "string",
+            "description": "會員顯示名稱"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Email 會員升級或整併完成結果；規格書第 5、6、11、12、19、20 頁。"
+      },
+      "MemberEmailUpgradeDeferResponse": {
+        "type": "object",
+        "properties": {
+          "canDefer": {
+            "type": "boolean",
+            "description": "是否仍可再次暫緩"
+          },
+          "upgradeDeadline": {
+            "type": "string",
+            "description": "強制完成升級的期限",
+            "format": "date-time",
+            "nullable": true
+          },
+          "remindCount": {
+            "maximum": 2147483647,
+            "minimum": 0,
+            "type": "integer",
+            "description": "累計暫緩次數",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false,
+        "description": "暫緩升級結果；規格書第 2、3、18、19、20 頁。"
+      },
+      "MemberEmailUpgradeMobileAvailability": {
+        "enum": [0, 1, 2],
+        "type": "integer",
+        "description": "手機號碼與會員帳號的關聯狀態；數值對應為：0 = available（手機號碼尚未綁定會員，可直接綁定目前會員）；1 = currentMember（手機號碼已綁定目前會員）；2 = otherMember（手機號碼已綁定其他會員，需進入帳號整併流程）。\r\n\r\n",
+        "format": "int32"
+      },
+      "MemberEmailUpgradeMobileCheckResponse": {
+        "required": ["availability"],
+        "type": "object",
+        "properties": {
+          "availability": {
+            "$ref": "#/components/schemas/MemberEmailUpgradeMobileAvailability"
+          },
+          "requiresMerge": {
+            "type": "boolean",
+            "description": "是否必須進入帳號整併流程"
+          }
+        },
+        "additionalProperties": false,
+        "description": "升級手機可用性檢查結果；規格書第 4、5、6、19 頁。"
+      },
+      "MemberEmailUpgradeMobileCodeResponse": {
+        "required": ["expiresAt", "message", "resendAvailableAt", "verificationToken"],
+        "type": "object",
+        "properties": {
+          "verificationToken": {
+            "type": "string",
+            "description": "後續驗證手機 OTP 使用的權杖"
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "OTP 到期時間",
+            "format": "date-time"
+          },
+          "resendAvailableAt": {
+            "type": "string",
+            "description": "可重新寄送 OTP 的時間",
+            "format": "date-time"
+          },
+          "message": {
+            "type": "string",
+            "description": "顯示訊息"
+          },
+          "developmentVerificationCode": {
+            "pattern": "^\\d{6}$",
+            "type": "string",
+            "description": "UAT 前開發測試使用的驗證碼；UAT 與正式環境不得回傳",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "升級手機驗證碼建立結果；規格書第 6、10、18、19 頁。"
+      },
+      "MemberEmailUpgradeMobileRequest": {
+        "required": ["mobilePhone"],
+        "type": "object",
+        "properties": {
+          "mobilePhone": {
+            "pattern": "^09\\d{8}$",
+            "type": "string",
+            "description": "欲綁定或欲驗證帳號所有權的台灣手機號碼"
+          }
+        },
+        "additionalProperties": false,
+        "description": "升級手機驗證請求；規格書第 4、5、6、10、18、19 頁。"
+      },
+      "MemberEmailUpgradeSendCodeRequest": {
+        "required": ["email"],
+        "type": "object",
+        "properties": {
+          "email": {
+            "maxLength": 320,
+            "minLength": 0,
+            "type": "string",
+            "description": "舊會員 Email"
+          }
+        },
+        "additionalProperties": false,
+        "description": "寄送 Email 升級驗證碼請求；規格書第 4、8、9 頁。"
+      },
+      "MemberEmailUpgradeSendCodeResponse": {
+        "required": ["challengeToken", "expiresAt", "message", "resendAvailableAt"],
+        "type": "object",
+        "properties": {
+          "challengeToken": {
+            "type": "string",
+            "description": "後續驗證 Email 驗證碼使用的挑戰權杖"
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "驗證碼到期時間",
+            "format": "date-time"
+          },
+          "resendAvailableAt": {
+            "type": "string",
+            "description": "可重新寄送驗證碼的時間",
+            "format": "date-time"
+          },
+          "message": {
+            "type": "string",
+            "description": "顯示訊息"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Email 升級驗證碼寄送結果；規格書第 4、8、9 頁。"
+      },
+      "MemberEmailUpgradeStatus": {
+        "enum": [0, 1, 2],
+        "type": "integer",
+        "description": "Email 會員升級狀態",
+        "format": "int32"
+      },
+      "MemberEmailUpgradeStatusResponse": {
+        "required": ["upgradeStatus"],
+        "type": "object",
+        "properties": {
+          "upgradeStatus": {
+            "$ref": "#/components/schemas/MemberEmailUpgradeStatus"
+          },
+          "canDefer": {
+            "type": "boolean",
+            "description": "是否仍可選擇稍後升級"
+          },
+          "upgradeDeadline": {
+            "type": "string",
+            "description": "強制完成升級的期限",
+            "format": "date-time",
+            "nullable": true
+          },
+          "remindCount": {
+            "maximum": 2147483647,
+            "minimum": 0,
+            "type": "integer",
+            "description": "已選擇稍後升級的次數",
+            "format": "int32"
+          },
+          "prefilledMobilePhone": {
+            "type": "string",
+            "description": "會員既有但尚未驗證、可供升級頁預帶的手機號碼",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Email 會員升級狀態；規格書第 2、3、18、19、20 頁。"
+      },
+      "MemberEmailUpgradeVerifyCodeRequest": {
+        "required": ["challengeToken", "verificationCode"],
+        "type": "object",
+        "properties": {
+          "challengeToken": {
+            "maxLength": 2147483647,
+            "minLength": 32,
+            "type": "string",
+            "description": "寄送驗證碼時取得的挑戰權杖"
+          },
+          "verificationCode": {
+            "pattern": "^\\d{6}$",
+            "type": "string",
+            "description": "6 碼 Email 驗證碼"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Email 升級驗證碼確認請求；規格書第 4、8、9 頁。"
+      },
+      "MemberEmailUpgradeVerifyCodeResponse": {
+        "required": ["expiresAt", "upgradeStatus", "upgradeToken"],
+        "type": "object",
+        "properties": {
+          "upgradeToken": {
+            "type": "string",
+            "description": "僅供後續升級 API 使用的短效權杖"
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "升級權杖到期時間",
+            "format": "date-time"
+          },
+          "upgradeStatus": {
+            "$ref": "#/components/schemas/MemberEmailUpgradeStatus"
+          },
+          "canDefer": {
+            "type": "boolean",
+            "description": "是否仍可選擇稍後升級"
+          },
+          "upgradeDeadline": {
+            "type": "string",
+            "description": "強制完成升級的期限",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Email 驗證成功後的升級授權；規格書第 4、8、9 頁。"
+      },
+      "MemberEmailUpgradeVerifyMobileCodeRequest": {
+        "required": ["mobilePhone", "verificationCode", "verificationToken"],
+        "type": "object",
+        "properties": {
+          "mobilePhone": {
+            "pattern": "^09\\d{8}$",
+            "type": "string",
+            "description": "已接收 OTP 的手機號碼"
+          },
+          "verificationToken": {
+            "maxLength": 2147483647,
+            "minLength": 32,
+            "type": "string",
+            "description": "建立手機 OTP 時取得的權杖"
+          },
+          "verificationCode": {
+            "pattern": "^\\d{6}$",
+            "type": "string",
+            "description": "6 碼手機驗證碼"
+          }
+        },
+        "additionalProperties": false,
+        "description": "驗證升級手機 OTP 請求；規格書第 6、10、16、17、19 頁。"
+      },
+      "MemberEmailUpgradeVerifyMobileCodeResponse": {
+        "required": ["availability", "expiresAt", "mobileVerificationToken"],
+        "type": "object",
+        "properties": {
+          "mobileVerificationToken": {
+            "type": "string",
+            "description": "供綁定或整併使用的一次性手機驗證權杖"
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "手機驗證權杖到期時間",
+            "format": "date-time"
+          },
+          "availability": {
+            "$ref": "#/components/schemas/MemberEmailUpgradeMobileAvailability"
+          }
+        },
+        "additionalProperties": false,
+        "description": "手機 OTP 驗證結果；規格書第 6、10、16、17、19 頁。"
+      },
+      "MemberRegistrationRequest": {
+        "type": "object",
+        "properties": {
+          "memberType": {
+            "type": "string",
+            "description": "會員類型；支援 general、landlord 與 agent。",
+            "nullable": true
+          },
+          "mobilePhone": {
+            "type": "string",
+            "description": "台灣手機號碼，需為 09 開頭共 10 碼；手機同時是登入帳號。",
+            "nullable": true
+          },
+          "password": {
+            "type": "string",
+            "description": "註冊密碼。",
+            "nullable": true
+          },
+          "confirmPassword": {
+            "type": "string",
+            "description": "再次確認密碼。",
+            "nullable": true
+          },
+          "verificationToken": {
+            "type": "string",
+            "description": "手機驗證流程 token。",
+            "nullable": true
+          },
+          "verificationCode": {
+            "type": "string",
+            "description": "手機驗證碼。",
+            "nullable": true
+          },
+          "agreeTerms": {
+            "type": "boolean",
+            "description": "是否同意會員條款。"
+          },
+          "channel": {
+            "type": "string",
+            "description": "發起註冊的頻道，例如 web、app、buy-web。",
+            "nullable": true
+          },
+          "lastName": {
+            "type": "string",
+            "description": "姓；屋主/房東與經紀人必填。",
+            "nullable": true
+          },
+          "firstName": {
+            "type": "string",
+            "description": "名；屋主/房東與經紀人必填。",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "description": "Email；非必填，提供時會檢查是否重複。",
+            "nullable": true
+          },
+          "identityNumber": {
+            "type": "string",
+            "description": "身份證字號；屋主/房東必填。",
+            "nullable": true
+          },
+          "cityId": {
+            "type": "integer",
+            "description": "聯絡縣市 ID；屋主/房東必填。",
+            "format": "int32",
+            "nullable": true
+          },
+          "districtId": {
+            "type": "integer",
+            "description": "聯絡區域 ID；屋主/房東必填。",
+            "format": "int32",
+            "nullable": true
+          },
+          "roadId": {
+            "type": "integer",
+            "description": "聯絡路段 ID；屋主/房東必填。",
+            "format": "int32",
+            "nullable": true
+          },
+          "address": {
+            "type": "string",
+            "description": "巷弄號樓地址；屋主/房東必填。",
+            "nullable": true
+          },
+          "fullAddress": {
+            "type": "string",
+            "description": "完整地址；屋主/房東選填。",
+            "nullable": true
+          },
+          "workCityId": {
+            "type": "integer",
+            "description": "工作縣市 ID；經紀人必填，僅供前端選擇品牌與分店。",
+            "format": "int32",
+            "nullable": true
+          },
+          "workDistrictId": {
+            "type": "integer",
+            "description": "工作區域 ID；經紀人必填，僅供前端選擇品牌與分店。",
+            "format": "int32",
+            "nullable": true
+          },
+          "brandId": {
+            "type": "integer",
+            "description": "服務品牌 ID；經紀人必填，0 表示其他品牌。",
+            "format": "int32",
+            "nullable": true
+          },
+          "brandOtherName": {
+            "type": "string",
+            "description": "其他品牌名稱；BrandId 為 0 時必填，寫入 HFMemberProfile.BrandOtherName。",
+            "nullable": true
+          },
+          "storeId": {
+            "type": "integer",
+            "description": "服務分店 ID；對應 RFBranchStore.StoreID，經紀人必填，0 表示其他分店。",
+            "format": "int32",
+            "nullable": true
+          },
+          "storeOtherName": {
+            "type": "string",
+            "description": "其他分店名稱；StoreId 為 0 時必填，寫入 HFMemberProfile.StoreOtherName。",
+            "nullable": true
+          },
+          "companyName": {
+            "type": "string",
+            "description": "經紀業名稱；寫入 HFMemberProfile.CompanyName，經紀人必填。",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "會員註冊請求。"
+      },
+      "MemberRegistrationResponse": {
+        "type": "object",
+        "properties": {
+          "registered": {
+            "type": "boolean",
+            "description": "是否已完成註冊。"
+          },
+          "memberId": {
+            "type": "string",
+            "description": "會員登入帳號。",
+            "nullable": true
+          },
+          "memberType": {
+            "type": "string",
+            "description": "會員類型。",
+            "nullable": true
+          },
+          "displayName": {
+            "type": "string",
+            "description": "會員顯示名稱。",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "description": "操作結果訊息。",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "會員註冊成功結果。"
+      },
+      "MemberRegistrationVerificationCodeRequest": {
+        "type": "object",
+        "properties": {
+          "mobilePhone": {
+            "type": "string",
+            "description": "要註冊的台灣手機號碼，需為 09 開頭共 10 碼。",
+            "nullable": true
+          },
+          "channel": {
+            "type": "string",
+            "description": "發起註冊的頻道，例如 web、app、buy-web。",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "建立會員註冊手機驗證碼的請求。"
+      },
+      "MemberRegistrationVerificationCodeResponse": {
+        "type": "object",
+        "properties": {
+          "verificationToken": {
+            "type": "string",
+            "description": "手機驗證流程 token；完成註冊時需一併送回。",
+            "nullable": true
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "驗證碼到期時間。",
+            "format": "date-time"
+          },
+          "resendAvailableAt": {
+            "type": "string",
+            "description": "可重新發送驗證碼的時間；前端可用於顯示 60 秒倒數。",
+            "format": "date-time"
+          },
+          "developmentVerificationCode": {
+            "type": "string",
+            "description": "第一版測試環境用驗證碼；正式串接簡訊服務後不應回傳此欄位。",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "description": "操作結果訊息。",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "會員註冊手機驗證碼建立結果。"
+      },
+      "ProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "detail": {
+            "type": "string",
+            "nullable": true
+          },
+          "instance": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": {}
+      },
+      "StringBoolean<>f__AnonymousType0": {
+        "type": "object",
+        "properties": {
+          "api": {
+            "type": "string",
+            "nullable": true
+          },
+          "ok": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Housefun.Member.Auth.Api"
+    },
+    {
+      "name": "MemberAuth"
+    },
+    {
+      "name": "MemberAuthEmailUpgrade",
+      "description": "Email 會員升級的 Member Auth API controller。"
+    }
+  ]
+}
