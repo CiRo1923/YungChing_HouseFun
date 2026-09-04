@@ -45,6 +45,11 @@ const onClick = (item) => {
         },
       }"
       @click="onClick"
+      :setClass="{
+        anchor: 'text-[14px]',
+        selectAnchor: 'text-[14px]',
+        dropdownAnchor: 'text-[14px]',
+      }"
     />
   </div>
 </template>

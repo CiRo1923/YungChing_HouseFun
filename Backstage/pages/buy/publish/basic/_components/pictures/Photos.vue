@@ -85,6 +85,8 @@ const onUploaded = async (items, done) => {
       :setClass="{
         main: 'm:mt-[24px] pt:mt-[16px]',
         item: 'case-pictures',
+        appendBody: 'text-[16px]',
+        appendText: 'text-[16px]',
       }"
       @uploaded="onUploaded"
     />

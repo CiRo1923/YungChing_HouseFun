@@ -55,6 +55,7 @@ const onCommunityChange = (item) => {
       v-model="apiData.caseInfo.isCaseCommunity"
       :options="radioOptions"
       :setClass="{
+        label: 'text-[16px]',
         radios: 'm:w-full',
         container: 'm:flex-1',
       }"
@@ -80,6 +81,7 @@ const onCommunityChange = (item) => {
       :setClass="{
         type: 'text-[16px]',
         main: '--h-40 --px-12 --py-8 m:w-full',
+        dropdownLabel: 'text-[14px]',
       }"
       @input="onCommunities"
       @change="onCommunityChange"

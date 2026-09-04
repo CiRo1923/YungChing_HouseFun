@@ -18,8 +18,6 @@
   --table-checkbox-responsive-thead-th-pc-py: 8px;
   --table-checkbox-responsive-thead-th-tablet-py: 5px;
   /* lint-breakpoint-exempt: 手機改成一列一卡的排版,這些表格欄位的間距用不到 */
-  --table-checkbox-responsive-thead-th-pc-text-size: 16px;
-  --table-checkbox-responsive-thead-th-tablet-text-size: 14px;
 
   --table-checkbox-responsive-tbody-tr-pc-border-b: 1px;
   --table-checkbox-responsive-tbody-tr-tablet-border-b: 1px;

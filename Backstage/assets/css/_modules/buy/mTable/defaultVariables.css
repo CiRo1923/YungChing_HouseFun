@@ -12,17 +12,9 @@
   --table-default-thead-th-tablet-py: 5px;
   --table-default-thead-th-mobile-py: 5px;
 
-  --table-default-thead-th-pc-text-size: 16px;
-  --table-default-thead-th-tablet-text-size: 14px;
-  --table-default-thead-th-mobile-text-size: 14px;
-
   --table-default-tbody-td-pc-py: 15px;
   --table-default-tbody-td-tablet-py: 10px;
   --table-default-tbody-td-mobile-py: 10px;
-
-  --table-default-tbody-td-pc-text-size: 16px;
-  --table-default-tbody-td-tablet-text-size: 14px;
-  --table-default-tbody-td-mobile-text-size: 14px;
 
   --table-default-thead-th-color: var(--gray-666);
   --table-default-tbody-td-color: var(--gray-666);

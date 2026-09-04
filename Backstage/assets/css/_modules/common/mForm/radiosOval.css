@@ -38,9 +38,6 @@
       @apply text-[--form-radios-oval-icon-color];
     }
 
-    .m-form-label {
-      @apply text-[length:--form-radios-oval-text-size];
-    }
   }
 }
 
@@ -55,7 +52,6 @@
       --form-radios-oval-pr: var(--form-radios-oval-pc-pr);
       --form-radios-oval-checked-px: var(--form-radios-oval-checked-pc-px);
       --form-radios-oval-icon-size: var(--form-radios-oval-icon-pc-size);
-      --form-radios-oval-text-size: var(--form-radios-oval-pc-text-size);
     }
   }
 }
@@ -73,7 +69,6 @@
       --form-radios-oval-pr: var(--form-radios-oval-tablet-pr);
       --form-radios-oval-checked-px: var(--form-radios-oval-checked-tablet-px);
       --form-radios-oval-icon-size: var(--form-radios-oval-icon-tablet-size);
-      --form-radios-oval-text-size: var(--form-radios-oval-tablet-text-size);
     }
   }
 }
@@ -91,7 +86,6 @@
       --form-radios-oval-pr: var(--form-radios-oval-mobile-pr);
       --form-radios-oval-checked-px: var(--form-radios-oval-checked-mobile-px);
       --form-radios-oval-icon-size: var(--form-radios-oval-icon-mobile-size);
-      --form-radios-oval-text-size: var(--form-radios-oval-mobile-text-size);
     }
   }
 }

@@ -61,6 +61,7 @@
 
   --footer-link-color: var(--green-6a2d);
 
+  /* lint-text-size-exempt: 頁尾是固定位置且全站唯一,字級由 module 決定 */
   --footer-link-text-size: inherit;
   --footer-link-pc-text-size: 14px;
   --footer-link-tablet-text-size: 14px;
@@ -69,6 +70,7 @@
   /* 右側公司資訊 */
   --footer-information-color: var(--gray-999);
 
+  /* lint-text-size-exempt: 同上,頁尾固定位置 */
   --footer-information-text-size: inherit;
   --footer-information-pc-text-size: 14px;
   --footer-information-tablet-text-size: 14px;

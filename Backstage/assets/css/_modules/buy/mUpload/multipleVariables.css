@@ -113,10 +113,6 @@
   --upload-multiple-append-tablet-gap-y: 10px;
   --upload-multiple-append-mobile-gap-y: 10px;
 
-  --upload-multiple-append-text-size: inherit;
-  --upload-multiple-append-pc-text-size: 16px;
-  --upload-multiple-append-tablet-text-size: 16px;
-  --upload-multiple-append-mobile-text-size: 16px;
 
   --upload-multiple-append-icon-size: 0;
   --upload-multiple-append-icon-pc-size: 24px;

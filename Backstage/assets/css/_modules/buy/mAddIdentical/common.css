@@ -22,10 +22,6 @@
   @apply underline;
 }
 
-.m-add-identical-anchor-text {
-  @apply text-[length:--add-identical-anchor-text-size];
-}
-
 .m-add-identical-anchor-icon {
   @apply h-[--add-identical-anchor-icon-size] w-[--add-identical-anchor-icon-size] text-[--gray-666];
 }
@@ -41,10 +37,6 @@
     --add-identical-clear-anchor-p: var(--add-identical-clear-anchor-pc-p);
     --add-identical-clear-anchor-top: var(--add-identical-clear-anchor-pc-top);
     --add-identical-clear-anchor-right: var(--add-identical-clear-anchor-pc-right);
-  }
-
-  .m-add-identical-anchor-text {
-    --add-identical-anchor-text-size: var(--add-identical-anchor-pc-text-size);
   }
 
   .m-add-identical-anchor-icon {
@@ -65,10 +57,6 @@
     --add-identical-clear-anchor-right: var(--add-identical-clear-anchor-tablet-right);
   }
 
-  .m-add-identical-anchor-text {
-    --add-identical-anchor-text-size: var(--add-identical-anchor-tablet-text-size);
-  }
-
   .m-add-identical-anchor-icon {
     --add-identical-anchor-icon-size: var(--add-identical-anchor-icon-tablet-size);
   }
@@ -85,10 +73,6 @@
     --add-identical-clear-anchor-p: var(--add-identical-clear-anchor-mobile-p);
     --add-identical-clear-anchor-top: var(--add-identical-clear-anchor-mobile-top);
     --add-identical-clear-anchor-right: var(--add-identical-clear-anchor-mobile-right);
-  }
-
-  .m-add-identical-anchor-text {
-    --add-identical-anchor-text-size: var(--add-identical-anchor-mobile-text-size);
   }
 
   .m-add-identical-anchor-icon {

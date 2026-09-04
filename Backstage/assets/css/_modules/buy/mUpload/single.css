@@ -46,7 +46,7 @@
 .m-upload-single-overlay {
   @apply relative z-[1] flex flex-col items-center justify-center;
   @apply gap-y-[--upload-single-overlay-gap-y];
-  @apply text-[length:--upload-single-overlay-text-size] text-[--upload-single-overlay-color];
+  @apply text-[--upload-single-overlay-color];
 }
 
 .m-upload-single-icon {
@@ -78,17 +78,12 @@
   }
 }
 
-.m-upload-single-text {
-  @apply text-[length:--upload-single-overlay-text-size];
-}
-
 @screen p {
   .m-upload-single {
     --upload-single-dropzone-min-h: var(--upload-single-dropzone-pc-min-h);
     --upload-single-box-rounded: var(--upload-single-box-pc-rounded);
     --upload-single-box-h: var(--upload-single-box-pc-h);
     --upload-single-overlay-gap-y: var(--upload-single-overlay-pc-gap-y);
-    --upload-single-overlay-text-size: var(--upload-single-overlay-pc-text-size);
     --upload-single-icon-size: var(--upload-single-icon-pc-size);
     --upload-single-remove-size: var(--upload-single-remove-pc-size);
     --upload-single-remove-rounded: var(--upload-single-remove-pc-rounded);
@@ -109,7 +104,6 @@
     --upload-single-box-rounded: var(--upload-single-box-tablet-rounded);
     --upload-single-box-h: var(--upload-single-box-tablet-h);
     --upload-single-overlay-gap-y: var(--upload-single-overlay-tablet-gap-y);
-    --upload-single-overlay-text-size: var(--upload-single-overlay-tablet-text-size);
     --upload-single-icon-size: var(--upload-single-icon-tablet-size);
     --upload-single-remove-size: var(--upload-single-remove-tablet-size);
     --upload-single-remove-rounded: var(--upload-single-remove-tablet-rounded);
@@ -124,7 +118,6 @@
     --upload-single-box-rounded: var(--upload-single-box-mobile-rounded);
     --upload-single-box-h: var(--upload-single-box-mobile-h);
     --upload-single-overlay-gap-y: var(--upload-single-overlay-mobile-gap-y);
-    --upload-single-overlay-text-size: var(--upload-single-overlay-mobile-text-size);
     --upload-single-icon-size: var(--upload-single-icon-mobile-size);
     --upload-single-remove-size: var(--upload-single-remove-mobile-size);
     --upload-single-remove-rounded: var(--upload-single-remove-mobile-rounded);

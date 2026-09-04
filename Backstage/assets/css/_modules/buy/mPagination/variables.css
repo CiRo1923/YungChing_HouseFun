@@ -12,6 +12,7 @@
   --pagination-anchor-tablet-rounded: 3px;
   --pagination-anchor-mobile-rounded: 3px;
 
+  /* lint-text-size-exempt: 分頁器是固定位置,全站長一樣 */
   --pagination-anchor-pc-text-size: 16px;
   --pagination-anchor-tablet-text-size: 16px;
   --pagination-anchor-mobile-text-size: 16px;

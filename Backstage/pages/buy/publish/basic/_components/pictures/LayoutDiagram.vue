@@ -52,6 +52,8 @@ const onUploaded = async (items, done) => {
       }"
       :setClass="{
         main: 'm:mt-[24px] pt:mt-[16px]',
+        overlay: 'text-[16px]',
+        text: 'text-[16px]',
       }"
       @uploaded="onUploaded"
     />

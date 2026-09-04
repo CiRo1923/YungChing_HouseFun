@@ -72,6 +72,8 @@ const setClass = computed(() => {
       container: '',
       element: '',
       type: '',
+      // 字級由使用端決定 —— mForm 是複用型元件,module 不定 text-*
+      label: '',
       error: '',
     },
     ...props.setClass,
@@ -142,7 +144,7 @@ watch(
             class="m-form-icon"
             v-if="item[config.schema.value] == selected"
           />
-          <em class="m-form-label">{{ item[config.schema.label] }}</em>
+          <em class="m-form-label" :class="setClass.label">{{ item[config.schema.label] }}</em>
         </label>
       </li>
     </ul>

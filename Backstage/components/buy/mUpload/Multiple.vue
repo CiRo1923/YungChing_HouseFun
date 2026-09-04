@@ -86,6 +86,9 @@ const setClass = computed(() => ({
   main: '',
   item: '',
   error: '',
+  // 字級由使用端決定 —— 這支是複用型元件,module 不定 text-*
+  appendBody: '',
+  appendText: '',
   ...props.setClass,
 }))
 
@@ -961,12 +964,12 @@ watch(
           @drop="(event) => onAppendButtonDrop(event, handleChange, validate)"
           v-if="hasAppendButton"
         >
-          <div class="m-upload-multiple-append-body">
+          <div class="m-upload-multiple-append-body" :class="setClass.appendBody">
             <CommonSvgIcon
               class="m-upload-multiple-append-icon"
               :icon="hasImages ? 'icon_plus_circle' : 'icon_upload'"
             />
-            <span class="m-upload-multiple-append-text">
+            <span class="m-upload-multiple-append-text" :class="setClass.appendText">
               {{ hasImages ? placeholder.hasImages : placeholder.default }}
             </span>
           </div>

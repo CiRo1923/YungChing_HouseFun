@@ -162,6 +162,7 @@ onInit()
       v-model="apiData.caseInfo.isCaseParking"
       :options="radioOptions"
       :setClass="{
+        label: 'text-[16px]',
         radios: 'm:w-full',
         container: 'm:flex-1',
       }"
@@ -180,6 +181,7 @@ onInit()
       :setClass="{
         main: '--rounded-15 p:--p-30 tm:--p-24',
         item: 'bg-[--gray-f7]',
+        anchorText: 'm:text-[16px] pt:text-[14px]',
       }"
       v-slot="{ data, index }"
       v-if="apiData.caseInfo.isCaseParking"

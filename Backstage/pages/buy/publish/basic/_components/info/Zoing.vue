@@ -22,6 +22,7 @@ const onCaseZoingChange = () => {
         },
       }"
       :setClass="{
+        label: 'text-[16px]',
         radios: 'm:w-full',
         container: 'm:flex-1',
       }"

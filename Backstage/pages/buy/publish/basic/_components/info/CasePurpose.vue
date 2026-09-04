@@ -165,5 +165,8 @@ const onChange = async (item) => {
       required: '請選擇現況',
     }"
     @change="onChange"
+    :setClass="{
+      label: 'text-[16px]',
+    }"
   />
 </template>

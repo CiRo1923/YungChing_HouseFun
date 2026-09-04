@@ -3,10 +3,6 @@
   --sort-list-tablet-gap-x: 16px;
   --sort-list-mobile-gap-x: 16px;
 
-  --sort-anchor-pc-text-size: 14px;
-  --sort-anchor-tablet-text-size: 14px;
-  --sort-anchor-mobile-text-size: 14px;
-
   --sort-anchor-pc-gap-x: 5px;
   --sort-anchor-tablet-gap-x: 5px;
   --sort-anchor-mobile-gap-x: 5px;
@@ -18,10 +14,6 @@
   --sort-icon-pc-size: 14px;
   --sort-icon-tablet-size: 14px;
   --sort-icon-mobile-size: 14px;
-
-  --sort-select-anchor-pc-text-size: 14px;
-  --sort-select-anchor-tablet-text-size: 14px;
-  --sort-select-anchor-mobile-text-size: 14px;
 
   --sort-select-anchor-pc-gap-x: 3px;
   --sort-select-anchor-tablet-gap-x: 3px;
@@ -61,10 +53,6 @@
   --sort-dropdown-anchor-pc-py: 8px;
   --sort-dropdown-anchor-tablet-py: 8px;
   --sort-dropdown-anchor-mobile-py: 8px;
-
-  --sort-dropdown-anchor-pc-text-size: 14px;
-  --sort-dropdown-anchor-tablet-text-size: 14px;
-  --sort-dropdown-anchor-mobile-text-size: 14px;
 
   /* ::after 模擬的分隔線,吃的是 h-[] —— 叫 -border 才讀得出語意 */
   --sort-dropdown-anchor-pc-border-b: 1px;

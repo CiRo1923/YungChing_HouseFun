@@ -33,6 +33,7 @@
    */
   --container-title-color: var(--gray-333);
 
+  /* lint-text-size-exempt: 區塊標題是固定位置,全站長一樣,由 module 全權決定 */
   --container-title-text-size: inherit;
   --container-title-pc-text-size: 30px;
   --container-title-tablet-text-size: 24px;

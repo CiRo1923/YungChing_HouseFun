@@ -1500,6 +1500,85 @@ export function checkZIndexVariable(relPath, text) {
 }
 
 /**
+ * 字級變數只有「固定位置」的元件才能建。
+ *
+ * 到處複用的元件(按鈕、表單、標籤)每個位置的字級都不一樣,規範要求交給父系
+ * `setClass` 傳 tailwind class。**這件事最容易做半套** —— 知道字級交給父系,
+ * 卻還是順手建了 `--x-text-size`;只要建了,module 就會在某處 `@apply` 它,
+ * 而一輸出就蓋掉使用端傳的 `text-*`,等於「交給父系」白做。
+ * **沒有變數,才真的沒有輸出。**
+ *
+ * 反過來,固定位置的元件(header / footer / 分頁器 / 麵包屑)全站長一樣,
+ * 字級本來就該由 module 決定;使用端根本沒有管道可傳的情況(元件自己疊出來的
+ * 圖層、後台編輯器存進 HTML 的 class)同理。
+ *
+ * 「這支是不是固定位置」是設計意圖,工具看不出來 —— 所以一律報,
+ * 由人在該行或上一行標 `/* lint-text-size-exempt: 理由 *\/` 表示已經確認過。
+ * 這樣新元件建字級變數時會被擋下來問,既有的合法用法則在原地留下判斷依據。
+ *
+ * **只看 variables 檔** —— 變數存不存在是那裡決定的,版型檔裡的
+ * `--x-text-size: var(--x-pc-text-size)` 只是斷點對應,跟著定義走。這樣一支 module
+ * 只需要在 `:root` 標一次豁免,而不是每個 `@screen` 段各標一次。
+ * (版型檔若直接寫死 `--x-text-size: 14px`,那由 checkLayoutFileValues 那條抓。)
+ */
+const TEXT_SIZE_EXEMPT_RE = /lint-text-size-exempt/
+
+// 字級變數的兩種命名:斷點在中間(--x-pc-text-size)與在後面(--x-text-pc-size)。
+// 後者不符規則 4 的命名慣例,但實務上存在 —— 只抓前者的話它會整組躲過這條檢查。
+const TEXT_SIZE_RE = /(--[a-z0-9-]*-text(?:-(?:pc|tablet|mobile))?-size)\s*:/g
+
+export function checkTextSizeVariable(relPath, text) {
+  if (!isVariablesFile(relPath)) return []
+
+  const issues = []
+  const masked = maskComments(text)
+  // 豁免註解要從原文讀 —— masked 已經把註解換成空白了。
+  // 反過來,「masked 該行是空白但原文不是」正好等於「這行整行都是註解」。
+  const rawLines = text.split(/\r?\n/)
+  const maskedLines = masked.split(/\r?\n/)
+  const isCommentLine = (i) =>
+    (rawLines[i] || '').trim() !== '' && (maskedLines[i] || '').trim() === ''
+
+  /** 標在該行,或緊貼在上方的連續註解區塊裡(多行 /* … *\/ 也算) */
+  const hasMark = (idx) => {
+    if (TEXT_SIZE_EXEMPT_RE.test(rawLines[idx] || '')) return true
+    for (let i = idx - 1; i >= 0 && isCommentLine(i); i--) {
+      if (TEXT_SIZE_EXEMPT_RE.test(rawLines[i])) return true
+    }
+    return false
+  }
+
+  // 字級變數依規則 4 必定拆 pc / tablet / mobile 三份,所以豁免要涵蓋整組 ——
+  // 只標在 pc 那行就夠,不必為同一個判斷貼三次。
+  // 斷點可能寫在中間(--x-pc-text-size)或後面(--x-text-pc-size)—— 兩種都收斂成同一個基底
+  const baseOf = (name) => name.replace(/-(?:pc|tablet|mobile)(-|$)/, '$1')
+  const hits = [...masked.matchAll(TEXT_SIZE_RE)].map((m) => ({
+    name: m[1],
+    line: lineOf(text, m.index),
+    snippet: m[0],
+  }))
+  const exemptBases = new Set(
+    hits.filter((h) => hasMark(h.line - 1)).map((h) => baseOf(h.name)),
+  )
+
+  for (const hit of hits) {
+    if (exemptBases.has(baseOf(hit.name))) continue
+    issues.push({
+      rule: 'variable',
+      file: relPath,
+      line: hit.line,
+      detail:
+        `${hit.name} 是字級變數 —— 到處複用的元件不要建,` +
+        `建了就會 @apply 出去、蓋掉使用端傳的 text-*,字級交給父系 setClass 傳。` +
+        `固定位置的元件才可以,在 pc 那行或上方註解標 /* lint-text-size-exempt: 理由 */(整組三個斷點一起放行)。`,
+      snippet: hit.snippet,
+    })
+  }
+
+  return issues
+}
+
+/**
  * 4-c 變數名的屬性要跟實際套用的 utility 一致。
  *
  * 例如 `px-[--x-container-mx]` —— 變數叫 mx(margin)卻套在 px(padding)上,
@@ -1867,6 +1946,8 @@ export function lintFile(projectRoot, absPath, definedVars) {
     issues.push(...checkLeadingVariable(rel, text))
     // z-index 同理:疊層是整站一套秩序,寫成常數才看得出誰蓋誰
     issues.push(...checkZIndexVariable(rel, text))
+    // 字級變數只有固定位置的元件能建 —— 複用型元件建了就會蓋掉使用端傳的 text-*
+    issues.push(...checkTextSizeVariable(rel, text))
     // 規則 6:被 theme 整組覆寫掉而不存在的 class
     issues.push(...checkTailwindTheme(rel, text))
   }

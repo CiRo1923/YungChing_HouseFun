@@ -30,6 +30,7 @@
   --header-label-tablet-ml: 0;
   --header-label-mobile-ml: 0;
 
+  /* lint-text-size-exempt: 頁首是固定位置,全站長一樣 */
   --header-label-text-size: inherit;
   --header-label-pc-text-size: 24px;
   --header-label-tablet-text-size: inherit;

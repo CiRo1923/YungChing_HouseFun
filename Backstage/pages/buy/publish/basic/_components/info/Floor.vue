@@ -59,6 +59,7 @@ const onFloorVaild = () => {
       v-model="apiData.caseInfo.isSingleFloor"
       :options="radioOptions"
       :setClass="{
+        label: 'text-[16px]',
         radios: 'm:w-full',
         container: 'm:flex-1',
       }"

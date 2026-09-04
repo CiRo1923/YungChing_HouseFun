@@ -13,14 +13,13 @@
  */
 .m-address-separator {
   @apply flex items-center;
-  @apply text-[length:--address-separator-text-size] text-[--address-separator-color];
+  @apply text-[--address-separator-color];
 }
 
 @screen p {
   .m-address {
     --address-gap-x: var(--address-pc-gap-x);
     --address-gap-y: var(--address-pc-gap-y);
-    --address-separator-text-size: var(--address-separator-pc-text-size);
   }
 }
 
@@ -28,7 +27,6 @@
   .m-address {
     --address-gap-x: var(--address-tablet-gap-x);
     --address-gap-y: var(--address-tablet-gap-y);
-    --address-separator-text-size: var(--address-separator-tablet-text-size);
   }
 }
 
@@ -36,6 +34,5 @@
   .m-address {
     --address-gap-x: var(--address-mobile-gap-x);
     --address-gap-y: var(--address-mobile-gap-y);
-    --address-separator-text-size: var(--address-separator-mobile-text-size);
   }
 }

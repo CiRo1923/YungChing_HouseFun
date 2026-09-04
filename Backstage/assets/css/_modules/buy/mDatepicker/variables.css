@@ -67,17 +67,20 @@
   --datepicker-calendar-cell-tablet-size: 35px;
   --datepicker-calendar-cell-mobile-size: 35px;
   --datepicker-calendar-cell-p: 0;
+  /* lint-text-size-exempt: 日曆是元件自己排版的浮層,使用端沒有管道可傳 */
   --datepicker-calendar-header-text-size: 0;
   --datepicker-calendar-header-text-pc-size: 14px;
   --datepicker-calendar-header-text-tablet-size: 14px;
   --datepicker-calendar-header-text-mobile-size: 14px;
   --datepicker-calendar-header-color: var(--gray-333);
+  /* lint-text-size-exempt: 同上,日曆浮層 */
   --datepicker-calendar-week-text-size: 0;
   --datepicker-calendar-week-text-pc-size: 14px;
   --datepicker-calendar-week-text-tablet-size: 14px;
   --datepicker-calendar-week-text-mobile-size: 14px;
   --datepicker-calendar-week-bg-color: transparent;
   --datepicker-calendar-week-color: var(--gray-666);
+  /* lint-text-size-exempt: 同上,日曆浮層 */
   --datepicker-calendar-date-text-size: 0;
   --datepicker-calendar-date-text-pc-size: 14px;
   --datepicker-calendar-date-text-tablet-size: 14px;

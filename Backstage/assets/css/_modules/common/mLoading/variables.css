@@ -4,6 +4,7 @@
   --loading-container-color: var(--gray-999);
   --loading-container-bg-color: inherit;
 
+  /* lint-text-size-exempt: 讀取提示是元件自己疊出來的圖層,使用端沒有管道可傳 */
   --loading-container-text-size: inherit;
   --loading-container-pc-text-size: 14px;
   --loading-container-tablet-text-size: 14px;

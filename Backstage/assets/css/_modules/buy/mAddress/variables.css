@@ -22,9 +22,4 @@
    * 使用端根本沒有管道可以傳(判準同 .m-form-error)。
    */
   --address-separator-color: var(--gray-666);
-
-  --address-separator-text-size: inherit;
-  --address-separator-pc-text-size: 16px;
-  --address-separator-tablet-text-size: 16px;
-  --address-separator-mobile-text-size: 16px;
 }

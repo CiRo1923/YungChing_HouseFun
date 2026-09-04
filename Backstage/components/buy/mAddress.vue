@@ -273,6 +273,8 @@ const setClass = computed(() => {
     main: '',
     city: '',
     area: '',
+    // 字級由使用端決定 —— 這支是複用型元件,module 不定 text-*
+    separator: '',
     ...props.setClass,
   }
 })
@@ -354,6 +356,7 @@ onMounted(() => {
       :setClass="{
         type: 'text-[16px]',
         main: ['--h-40 --px-12 --py-8 m:w-full', setClass.road],
+        dropdownLabel: 'text-[14px]',
       }"
       v-if="props.road !== undefined"
     />
@@ -427,7 +430,7 @@ onMounted(() => {
       <template #rearAssist>號</template>
     </CommonMFormInput>
     <template v-if="props.ofNumber !== undefined">
-      <span class="m-address-separator">之</span>
+      <span class="m-address-separator" :class="setClass.separator">之</span>
       <CommonMFormInput
         :name="`${props.name}_address_of_number`"
         v-model="modelOfNumber"
@@ -472,7 +475,7 @@ onMounted(() => {
       <template #rearAssist>樓</template>
     </CommonMFormInput>
     <template v-if="props.ofFloor !== undefined">
-      <span class="m-address-separator">之</span>
+      <span class="m-address-separator" :class="setClass.separator">之</span>
       <CommonMFormInput
         :name="`${props.name}_address_of_floor`"
         v-model="modelOfFloor"

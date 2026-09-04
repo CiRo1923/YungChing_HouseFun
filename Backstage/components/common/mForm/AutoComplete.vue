@@ -110,6 +110,8 @@ const setClass = computed(() => {
       error: '',
       dropdown: '',
       dropdownContainer: '',
+      // 字級由使用端決定 —— mForm 是複用型元件,module 不定 text-*
+      dropdownLabel: '',
     },
     ...props.setClass,
   }
@@ -595,7 +597,7 @@ onUnmounted(() => {
               @mousedown="onDropdownItemMousedown"
               @click="onDropdownItemClick(item)"
             >
-              <em class="m-form-autocomplete-dropdown-label">
+              <em class="m-form-autocomplete-dropdown-label" :class="setClass.dropdownLabel">
                 <slot name="option" :item="item">
                   {{ item[config.schema.label] }}
                 </slot>

@@ -34,7 +34,7 @@
 .m-form-autocomplete-dropdown-no-data {
   @apply bg-[--form-autocomplete-dropdown-bg-color];
   @apply p-[--form-autocomplete-dropdown-no-data-p];
-  @apply text-[length:--form-autocomplete-dropdown-text-size] text-[--form-autocomplete-dropdown-no-data-color];
+  @apply text-[--form-autocomplete-dropdown-no-data-color];
 }
 
 .m-form-autocomplete-dropdown-container {
@@ -73,7 +73,7 @@
 
 .m-form-autocomplete-dropdown-label {
   @apply relative block grow;
-  @apply py-[--form-autocomplete-dropdown-label-py] text-[length:--form-autocomplete-dropdown-text-size];
+  @apply py-[--form-autocomplete-dropdown-label-py];
 }
 
 @screen p {
@@ -86,7 +86,6 @@
   .m-form-autocomplete-dropdown {
     --form-autocomplete-dropdown-mt: var(--form-autocomplete-dropdown-pc-mt);
     --form-autocomplete-dropdown-shadow: var(--form-autocomplete-dropdown-pc-shadow);
-    --form-autocomplete-dropdown-text-size: var(--form-autocomplete-dropdown-pc-text-size);
     --form-autocomplete-dropdown-no-data-p: var(--form-autocomplete-dropdown-no-data-pc-p);
     --form-autocomplete-dropdown-item-border: var(--form-autocomplete-dropdown-item-pc-border);
     --form-autocomplete-dropdown-button-px: var(--form-autocomplete-dropdown-button-pc-px);
@@ -104,7 +103,6 @@
   .m-form-autocomplete-dropdown {
     --form-autocomplete-dropdown-mt: var(--form-autocomplete-dropdown-tablet-mt);
     --form-autocomplete-dropdown-shadow: var(--form-autocomplete-dropdown-tablet-shadow);
-    --form-autocomplete-dropdown-text-size: var(--form-autocomplete-dropdown-tablet-text-size);
     --form-autocomplete-dropdown-no-data-p: var(--form-autocomplete-dropdown-no-data-tablet-p);
     --form-autocomplete-dropdown-item-border: var(--form-autocomplete-dropdown-item-tablet-border);
     --form-autocomplete-dropdown-button-px: var(--form-autocomplete-dropdown-button-tablet-px);
@@ -122,7 +120,6 @@
   .m-form-autocomplete-dropdown {
     --form-autocomplete-dropdown-mt: var(--form-autocomplete-dropdown-mobile-mt);
     --form-autocomplete-dropdown-shadow: var(--form-autocomplete-dropdown-mobile-shadow);
-    --form-autocomplete-dropdown-text-size: var(--form-autocomplete-dropdown-mobile-text-size);
     --form-autocomplete-dropdown-no-data-p: var(--form-autocomplete-dropdown-no-data-mobile-p);
     --form-autocomplete-dropdown-item-border: var(--form-autocomplete-dropdown-item-mobile-border);
     --form-autocomplete-dropdown-button-px: var(--form-autocomplete-dropdown-button-mobile-px);

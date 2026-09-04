@@ -104,6 +104,7 @@ onInit()
         v-model="apiDealData.isDealShow"
         :options="dealShow"
         :setClass="{
+          label: 'text-[16px]',
           radios: 'm:w-full',
           container: 'm:flex-1',
         }"

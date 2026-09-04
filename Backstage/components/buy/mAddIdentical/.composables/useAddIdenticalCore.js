@@ -19,6 +19,8 @@ export const addIdenticalSetClassDefault = {
   container: '',
   item: '',
   anchor: '',
+  // 字級由使用端決定 —— 這支是複用型元件,module 不定 text-*
+  anchorText: '',
 }
 
 export const useAddIdenticalCore = ({

@@ -56,10 +56,6 @@
    * 選項的字級固定在這裡 —— 下拉選單是組件內部的結構,不是使用端會想逐頁調的東西
    * (mForm 的 setClass 也沒有對應的 key)。
    */
-  --form-autocomplete-dropdown-text-size: inherit;
-  --form-autocomplete-dropdown-pc-text-size: 14px;
-  --form-autocomplete-dropdown-tablet-text-size: 14px;
-  --form-autocomplete-dropdown-mobile-text-size: 14px;
 
   /* 選項之間的分隔線,用 ::after 畫,所以吃的是 h-[] */
   --form-autocomplete-dropdown-item-border-color: var(--gray-e5);

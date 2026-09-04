@@ -101,7 +101,7 @@
 .m-upload-multiple-append-body {
   @apply flex grow flex-col items-center justify-center;
   @apply gap-y-[--upload-multiple-append-gap-y];
-  @apply text-[length:--upload-multiple-append-text-size] text-[--upload-multiple-append-color];
+  @apply text-[--upload-multiple-append-color];
 }
 
 .m-upload-multiple-append-icon {
@@ -111,7 +111,7 @@
 }
 
 .m-upload-multiple-append-text {
-  @apply grow text-[length:--upload-multiple-append-text-size];
+  @apply grow;
 }
 
 /* ===== 斷點對應 ===== */
@@ -124,7 +124,6 @@
     --upload-multiple-append-border: var(--upload-multiple-append-pc-border);
     --upload-multiple-append-min-h: var(--upload-multiple-append-pc-min-h);
     --upload-multiple-append-gap-y: var(--upload-multiple-append-pc-gap-y);
-    --upload-multiple-append-text-size: var(--upload-multiple-append-pc-text-size);
     --upload-multiple-append-icon-size: var(--upload-multiple-append-icon-pc-size);
   }
 
@@ -169,7 +168,6 @@
     --upload-multiple-append-border: var(--upload-multiple-append-tablet-border);
     --upload-multiple-append-min-h: var(--upload-multiple-append-tablet-min-h);
     --upload-multiple-append-gap-y: var(--upload-multiple-append-tablet-gap-y);
-    --upload-multiple-append-text-size: var(--upload-multiple-append-tablet-text-size);
     --upload-multiple-append-icon-size: var(--upload-multiple-append-icon-tablet-size);
   }
 
@@ -213,7 +211,6 @@
     --upload-multiple-append-border: var(--upload-multiple-append-mobile-border);
     --upload-multiple-append-min-h: var(--upload-multiple-append-mobile-min-h);
     --upload-multiple-append-gap-y: var(--upload-multiple-append-mobile-gap-y);
-    --upload-multiple-append-text-size: var(--upload-multiple-append-mobile-text-size);
     --upload-multiple-append-icon-size: var(--upload-multiple-append-icon-mobile-size);
   }
 

@@ -45,9 +45,6 @@
       --table-checkbox-responsive-thtd-pl: var(--table-checkbox-responsive-thtd-pc-px);
       --table-checkbox-responsive-thtd-pr: var(--table-checkbox-responsive-thtd-pc-px);
       --table-checkbox-responsive-thead-th-py: var(--table-checkbox-responsive-thead-th-pc-py);
-      --table-checkbox-responsive-thead-th-text-size: var(
-        --table-checkbox-responsive-thead-th-pc-text-size
-      );
 
       --table-checkbox-responsive-tbody-tr-border-b: var(
         --table-checkbox-responsive-tbody-tr-pc-border-b
@@ -80,7 +77,7 @@
       }
 
       .m-table-thead-th {
-        @apply py-[--table-checkbox-responsive-thead-th-py] text-[length:--table-checkbox-responsive-thead-th-text-size] text-[--table-checkbox-responsive-thead-th-color];
+        @apply py-[--table-checkbox-responsive-thead-th-py] text-[--table-checkbox-responsive-thead-th-color];
       }
 
       .m-table-tbody-td {
@@ -102,9 +99,6 @@
       --table-checkbox-responsive-thtd-pl: var(--table-checkbox-responsive-thtd-tablet-px);
       --table-checkbox-responsive-thtd-pr: var(--table-checkbox-responsive-thtd-tablet-px);
       --table-checkbox-responsive-thead-th-py: var(--table-checkbox-responsive-thead-th-tablet-py);
-      --table-checkbox-responsive-thead-th-text-size: var(
-        --table-checkbox-responsive-thead-th-tablet-text-size
-      );
 
       --table-checkbox-responsive-tbody-tr-border-b: var(
         --table-checkbox-responsive-tbody-tr-tablet-border-b

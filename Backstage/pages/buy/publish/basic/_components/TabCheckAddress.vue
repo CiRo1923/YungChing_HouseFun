@@ -109,6 +109,7 @@ const onClick = async (validate) => {
           },
         }"
         :setClass="{
+          separator: 'text-[16px]',
           main: 'grow',
           city: 'pt:w-[182px]',
           area: 'pt:w-[182px]',

@@ -177,6 +177,7 @@ const onPopupAddressGoogleMap = async () => {
         },
       }"
       :setClass="{
+        separator: 'text-[16px]',
         city: 't:w-[180px] p:w-[260px]',
         area: 't:w-[180px] p:w-[260px]',
         road: 't:w-[220px] p:w-[294px]',
@@ -227,6 +228,7 @@ const onPopupAddressGoogleMap = async () => {
         },
       }"
       :setClass="{
+        separator: 'text-[16px]',
         city: 't:w-[180px] p:w-[260px]',
         area: 't:w-[180px] p:w-[260px]',
         road: 't:w-[220px] p:w-[294px]',

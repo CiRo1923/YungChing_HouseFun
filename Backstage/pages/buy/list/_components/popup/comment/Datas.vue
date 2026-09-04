@@ -111,6 +111,7 @@ const onActionClick = (item) => {
         main: '--rounded-t --thead-gray-f2',
         container: 'p:max-h-[365px]',
         tbodyTr: 'm:space-y-[8px]',
+        theadTh: 'p:text-[16px] t:text-[14px]',
       }"
     >
       <template #checkbox_m="{ tbody, index }">

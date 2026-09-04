@@ -61,6 +61,9 @@ const validateOn = useValidateEvents(() => config.value.validateEvents)
 const setClass = computed(() => ({
   main: '',
   error: '',
+  // 字級由使用端決定 —— 這支是複用型元件,module 不定 text-*
+  overlay: '',
+  text: '',
   ...props.setClass,
 }))
 
@@ -530,7 +533,7 @@ watch(
               class="m-upload-single-image"
               draggable="false"
             />
-            <div class="m-upload-single-overlay">
+            <div class="m-upload-single-overlay" :class="setClass.overlay">
               <CommonSvgIcon icon="icon_upload" class="m-upload-single-icon" />
               <span>點擊或拖曳重新上傳</span>
             </div>
@@ -546,7 +549,7 @@ watch(
 
         <div class="m-upload-single-empty" v-else>
           <CommonSvgIcon icon="icon_upload" class="m-upload-single-icon" />
-          <span class="m-upload-single-text">{{ config.placeholder }}</span>
+          <span class="m-upload-single-text" :class="setClass.text">{{ config.placeholder }}</span>
         </div>
       </div>
     </div>
