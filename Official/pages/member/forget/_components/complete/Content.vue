@@ -1,10 +1,6 @@
-<script setup>
-// 設計稿的插圖與註冊完成頁同一張(吉祥物 + 橘色打勾),沿用既有檔案不另外進圖。
-</script>
-
 <template>
   <CommonImgSrc
-    src="member/register/complete/icon_complete.svg"
+    src="member/forget/complete/complete.svg"
     alt=""
     :setClass="{
       main: 'mx-auto h-[170px] w-[160px]',

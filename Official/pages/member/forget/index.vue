@@ -1,10 +1,7 @@
 <script setup>
-import { FORGETRESET } from '@js/_storage.js'
-
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
 const memberForget = useMemberForgetStore()
-const { verify } = storeToRefs(memberForget)
-const { onGetCookie, onApiAuthPasswordResetRequest, onSaveVerify, reset } = useMemberForgetActions()
+const { onApiAuthPasswordResetRequest, onSaveVerify, reset } = useMemberForgetActions()
 const { onApiPromise } = usePopupActions()
 const router = useRouter()
 
@@ -43,17 +40,13 @@ const onSumit = () => {
   })
 }
 
-// resetToken 由發送驗證碼寫進 cookie;本頁 URL 不帶這些值,重整後靠 cookie 還原,
-// 倒數與「下一步」才知道這一輪已經發過碼。未發過或已過期(瀏覽器自動清掉)時為 null。
+// 輸入頁不把自己的輸入值填回去 —— 發碼時寫的 cookie 是給步驟 2 用的。
+//
+// 還原號碼會有實際的坑:resetToken 綁定當初那支號碼,若把號碼填回輸入框、
+// 使用者改填另一支,按「下一步」就會用舊 token 配新號碼送出,confirm 必然失敗。
+// 所以這一頁重整後一律重新開始:重填號碼、重新發碼(60 秒冷卻由後端擋)。
 const onInit = () => {
   reset.onVerify()
-
-  const { mobilePhone, verificationCode, resetToken, expireAt } = onGetCookie(FORGETRESET) ?? {}
-
-  verify.value.apiData.mobilePhone = mobilePhone ?? null
-  verify.value.apiData.verificationCode = verificationCode ?? null
-  verify.value.apiData.resetToken = resetToken ?? null
-  verify.value.countdownData.expires = expireAt ?? null
 }
 
 onInit()

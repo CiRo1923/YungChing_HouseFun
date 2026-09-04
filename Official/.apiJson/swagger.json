@@ -238,7 +238,7 @@
       "post": {
         "tags": ["MemberAuth"],
         "summary": "建立 C 端忘記密碼驗證流程。",
-        "description": "依會員手機號碼建立一次性密碼重設 token，驗證碼由指定管道發送。\r\n本版已接簡訊 provider；LINE provider 尚未提供時會回傳 400，不建立驗證流程。\r\n發送限制與會員註冊驗證共用 60 秒冷卻、手機每日及 IP 每小時上限。\r\n規格來源：C203-1 規格書第 13 頁；OTP 細節依文件引用的註冊／登入規格。",
+        "description": "依會員手機號碼建立一次性密碼重設 token，驗證碼由指定管道發送。\r\nDevelop 模式開啟時不寄送簡訊，改由 response 回傳 developmentVerificationCode。\r\n本版已接簡訊 provider；LINE provider 尚未提供時會回傳 400，不建立驗證流程。\r\n發送限制與會員註冊驗證共用 60 秒冷卻、手機每日及 IP 每小時上限。\r\n規格來源：C203-1 規格書第 13 頁；OTP 細節依文件引用的註冊／登入規格。",
         "parameters": [
           {
             "name": "version",
@@ -2541,6 +2541,11 @@
             "type": "string",
             "description": "token 到期時間。",
             "format": "date-time"
+          },
+          "developmentVerificationCode": {
+            "type": "string",
+            "description": "開發環境測試用驗證碼；關閉 develop 模式時不回傳。",
+            "nullable": true
           },
           "message": {
             "type": "string",

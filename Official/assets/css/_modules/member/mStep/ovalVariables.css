@@ -1,0 +1,14 @@
+/* mStep 的 oval 變體變數 —— 膠囊形的外框(底色 + 內距)。
+   步驟本身的值(icon / 箭頭 / 間距 / 顏色)在 variables.css。 */
+
+:root {
+  --step-oval-pc-px: 15px;
+  --step-oval-tablet-px: 15px;
+  --step-oval-mobile-px: 15px;
+
+  --step-oval-pc-py: 10px;
+  --step-oval-tablet-py: 10px;
+  --step-oval-mobile-py: 10px;
+
+  --step-oval-bg-color: var(--gray-f7);
+}

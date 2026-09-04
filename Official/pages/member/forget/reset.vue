@@ -16,13 +16,19 @@ definePageMeta({
   middleware: [
     () => {
       const raw = useCookie(FORGETRESET).value
+      const data = raw ? deCrypto(raw) : null
 
       // 沒有 resetToken(未經手機驗證進來、或已過 expireAt 被瀏覽器清掉)→
       // confirm 打不了,退回第一步重跑。
       //
-      // middleware 只判斷「有沒有有效值」,用 useCookie + deCrypto 兩行就夠,
+      // ⚠️ verificationCode 也要檢查:它是離開步驟 1 前才補寫進同一支 cookie 的
+      // (見 onSaveVerify)。「發完碼就重整」的情況下 cookie 已經有 resetToken 但
+      // verificationCode 還是 null —— 那時手打本頁網址進得來,卻只會送出必然失敗的
+      // confirm。缺值就退回,不要讓人卡在死路上。
+      //
+      // middleware 只判斷「有沒有有效值」,用 useCookie + deCrypto 就夠,
       // 不必為此初始化整個 store(server 端 store 也沒有值)。
-      if (!raw || !deCrypto(raw)) {
+      if (!data?.resetToken || !data?.verificationCode) {
         return navigateTo(
           {
             name: 'member-forget',

@@ -30,6 +30,21 @@ const setClass = computed(() => {
     ...props.setClass,
   }
 })
+
+const steps = readonly([
+  {
+    icon: 'icon_phone',
+    text: '手機驗證',
+  },
+  {
+    icon: 'icon_lock',
+    text: '重設密碼',
+  },
+  {
+    icon: 'icon_check_circle',
+    text: '設定完成',
+  },
+])
 </script>
 
 <template>
@@ -39,6 +54,15 @@ const setClass = computed(() => {
         <strong class="font-medium">{{ props.title }}</strong>
       </component>
     </header>
-    <PageMemberForgetSteps :step="config.step" :class="setClass.steps" />
+    <MemberMStepOval
+      :items="steps"
+      :config="{
+        step: config.step,
+      }"
+      :setClass="{
+        label: 'tm:text-[14px] p:text-[16px]',
+      }"
+      :class="setClass.steps"
+    />
   </div>
 </template>

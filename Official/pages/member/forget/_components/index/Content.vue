@@ -8,9 +8,14 @@ const { verify } = storeToRefs(memberForget)
 
 const emits = defineEmits(['sendCode', 'submit'])
 const apiData = computed(() => verify.value.apiData)
-const isPhoneValid = computed(() => /^09\d{8}$/.test(apiData.value.mobilePhone ?? ''))
 
-const onSendCode = () => {
+// 按鈕不停用,按下去才驗 —— 與其他單元一致,錯誤由 mForm 的 rules 顯示在欄位上。
+// 這裡只驗手機欄位:驗證碼要等發碼之後才填,連它一起驗會冒出「請輸入驗證碼」。
+const onSendCode = async (validateField) => {
+  const { valid } = await validateField('mobilePhone')
+
+  if (!valid) return
+
   emits('sendCode')
 }
 
@@ -31,8 +36,7 @@ const onSumit = async (validate, setFieldError) => {
 </script>
 
 <template>
-  <Form as="div" class="space-y-[15px]" v-slot="{ validate, setFieldError }">
-    <PageMemberForgetNote message="忘記密碼每天只能使用2次" />
+  <Form as="div" class="space-y-[15px]" v-slot="{ validate, validateField, setFieldError }">
     <CommonMFormInput
       name="mobilePhone"
       v-model="apiData.mobilePhone"
@@ -65,9 +69,6 @@ const onSumit = async (validate, setFieldError) => {
           timeout: '{timeout}s後重發',
           reSend: '發送驗證碼',
         },
-        isDisabled: {
-          button: !isPhoneValid,
-        },
       }"
       :rules="{
         required: '請輸入驗證碼',
@@ -77,7 +78,7 @@ const onSumit = async (validate, setFieldError) => {
         main: '--rounded --h-55 --px-12',
         button: '--h-35 --px-15',
       }"
-      @submit="onSendCode"
+      @submit="onSendCode(validateField)"
     />
     <CommonMAnchor
       text="下一步"

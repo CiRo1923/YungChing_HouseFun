@@ -7,9 +7,6 @@ const { resetPassword } = storeToRefs(memberForget)
 const emits = defineEmits(['submit'])
 const apiData = computed(() => resetPassword.value.apiData)
 
-// 6~12 位數字或英文,大小寫有別(設計稿的 placeholder 文案)
-const PASSWORD_RE = /^[0-9a-zA-Z]{6,12}$/
-
 const onSumit = async (validate) => {
   const { valid } = await validate()
 
@@ -26,14 +23,17 @@ const onSumit = async (validate) => {
       name="newPassword"
       v-model="apiData.newPassword"
       :config="{
-        placeholder: '6~12位數字或英文，大小寫有別',
+        minlength: 6,
+        maxlength: 12,
+        placeholder: '6 ~ 12 位數字或英文，大小寫有別',
         validateEvents: ['blur', 'change'],
       }"
       :rules="{
-        required: '請輸入密碼',
+        required: '請設定密碼',
         custom: {
-          valid: PASSWORD_RE.test(apiData.newPassword ?? ''),
-          errorMessage: '密碼格式錯誤',
+          // 6~12 位數字或英文（大小寫有別）
+          valid: /^[A-Za-z0-9]{6,12}$/.test(apiData.newPassword),
+          errorMessage: '請輸入 { minlength } ~ { maxlength } 位數字或英文，大小寫有別',
         },
       }"
       :setClass="{
@@ -48,10 +48,10 @@ const onSumit = async (validate) => {
         validateEvents: ['blur', 'change'],
       }"
       :rules="{
-        required: '請再次輸入密碼',
+        required: '再次輸入密碼',
         custom: {
-          valid: !!apiData.confirmPassword && apiData.confirmPassword === apiData.newPassword,
-          errorMessage: '密碼格式錯誤',
+          valid: apiData.newPassword === apiData.confirmPassword,
+          errorMessage: '密碼與再次輸入密碼不同',
         },
       }"
       :setClass="{
@@ -59,7 +59,7 @@ const onSumit = async (validate) => {
       }"
     />
     <CommonMAnchor
-      text="確定修改"
+      text="下一步"
       :setClass="{
         main: '--oval --bg-orange-f74c --h-55 --text-white --px-20 --text-center w-full',
         text: 'text-[16px]',

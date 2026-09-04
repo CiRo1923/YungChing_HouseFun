@@ -25,11 +25,16 @@ export default () => {
     verify.value.apiResult = null
 
     if (status === 200) {
-      const { resetToken, expireAt } = data
+      const { resetToken, expireAt, developmentVerificationCode } = data
       const expires = new Date(expireAt)
       const isValidExpires = !Number.isNaN(expires.getTime())
 
       verify.value.apiData.resetToken = resetToken
+
+      // 後端只在 develop 模式回 developmentVerificationCode(正式環境不回、也不寄簡訊)→
+      // 直接接,不必自己判斷環境。沒有值時補 null,與 apiDefault 的型別一致
+      // (undefined 會讓 v-model 綁的輸入框變成非受控)。與 upgrade / 註冊那兩條流程同一套寫法。
+      verify.value.apiData.verificationCode = developmentVerificationCode ?? null
 
       // 重送倒數的到期時間。重送成功會拿到新的值 → 倒數元件 watch 到就覆蓋重算。
       //
@@ -44,17 +49,29 @@ export default () => {
       //
       // expireAt 也一起寫進值裡:cookie 的 expires 讀不回來,而倒數元件需要這個
       // 絕對到期時間才能在 SSR(首屏)就算出剩餘秒數。
-      // verificationCode 此刻還沒輸入(碼是發出去之後才填),留給 onSaveVerify 補寫。
+      //
+      // verificationCode 寫的是「此刻 store 裡的值」—— 正式環境是 null(碼要使用者
+      // 自己輸入,離開步驟 1 前由 onSaveVerify 補寫);develop 模式則是後端回的測試碼,
+      // 一起寫進去,發完碼就重整也能接著走。
       onSetCookie(
         FORGETRESET,
-        { mobilePhone, resetToken, expireAt, verificationCode: null },
+        {
+          mobilePhone,
+          resetToken,
+          expireAt,
+          verificationCode: verify.value.apiData.verificationCode,
+        },
         isValidExpires ? { expires } : {}
       )
     } else if (status === 400 || status === 404 || status === 429) {
-      // 後端有給明確原因的可預期錯誤(號碼不存在 / 太頻繁 / 已達每日上限)→ 只顯示 message。
+      // 後端有給明確原因的可預期錯誤 → 只顯示 message,不套用通用錯誤彈窗。
       //
-      // 429 不寫進 apiResult:這條流程沒有「整頁換成超限」的版面(設計稿是把它畫成
-      // 欄位錯誤),寫進去只會讓輸入表單被取代掉,使用者連改號碼都沒得改。
+      // 發送限制(60 秒冷卻、手機每日與 IP 每小時上限)也走這裡 —— swagger 這兩支
+      // 只列 200 / 400,超限是回 400 帶 message,沒有獨立的 429。429 一起收在這個
+      // 分支是保險:真的收到就當可預期錯誤顯示,不掉進通用錯誤彈窗。
+      //
+      // 不寫進 apiResult:那是給「整頁換成超限呈現」用的,這條流程沒有那個版面,
+      // 寫進去只會讓輸入表單被取代掉,使用者連改號碼都沒得改。
       const { message } = data
 
       onAlert({

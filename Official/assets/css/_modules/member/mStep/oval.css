@@ -1,0 +1,35 @@
+/* mStep 的 oval 變體 —— 整排步驟包在一個膠囊形底框裡,水平置中。
+   步驟之間的距離由箭頭的 ml 決定(見 common.css),所以這裡不設 gap。 */
+
+.m-step {
+  &.\-\-oval {
+    @apply mx-auto w-fit rounded-full bg-[--step-oval-bg-color] px-[--step-oval-px] py-[--step-oval-py];
+  }
+}
+
+@screen p {
+  .m-step {
+    &.\-\-oval {
+      --step-oval-px: var(--step-oval-pc-px);
+      --step-oval-py: var(--step-oval-pc-py);
+    }
+  }
+}
+
+@screen t {
+  .m-step {
+    &.\-\-oval {
+      --step-oval-px: var(--step-oval-tablet-px);
+      --step-oval-py: var(--step-oval-tablet-py);
+    }
+  }
+}
+
+@screen m {
+  .m-step {
+    &.\-\-oval {
+      --step-oval-px: var(--step-oval-mobile-px);
+      --step-oval-py: var(--step-oval-mobile-py);
+    }
+  }
+}

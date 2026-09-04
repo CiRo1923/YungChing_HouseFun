@@ -1,0 +1,37 @@
+/* mStep(components/member/mStep/)的共用變數 —— 流程步驟指示器。
+   資料夾名跟著 class 前綴 .m-step 走;變體(Oval)的專屬值在 ovalVariables.css。 */
+
+:root {
+  /* 單一步驟內的間距 —— 箭頭、圖示、文字三者橫向並排 */
+  --step-item-pc-gap-x: 20px;
+  --step-item-tablet-gap-x: 20px;
+  --step-item-mobile-gap-x: 10px;
+
+  /* 未完成 / 已完成的顏色 —— 由 --done modifier 切換,icon 吃 currentColor 一起變 */
+  --step-color: var(--gray-ccce);
+  --step-done-color: var(--green-8b0d);
+
+  /* icon 是正方形,寬高共用一個 -size */
+  --step-icon-pc-size: 22px;
+  --step-icon-tablet-size: 22px;
+  --step-icon-mobile-size: 22px;
+
+  /* 圖形在框內留白 —— box-sizing 是 border-box,所以 22px 含這層 padding */
+  --step-icon-pc-p: 2px;
+  --step-icon-tablet-p: 2px;
+  --step-icon-mobile-p: 2px;
+
+  /* 步驟之間的箭頭 —— 圖是 9 × 15 的直立箭頭,不是正方形,所以拆 -w / -h */
+  --step-divider-pc-w: 9px;
+  --step-divider-tablet-w: 9px;
+  --step-divider-mobile-w: 9px;
+
+  --step-divider-pc-h: 15px;
+  --step-divider-tablet-h: 15px;
+  --step-divider-mobile-h: 15px;
+
+  /* 箭頭與前一個步驟的距離 —— 步驟之間的間距由這個外距決定,ul 本身不設 gap */
+  --step-divider-pc-ml: 20px;
+  --step-divider-tablet-ml: 20px;
+  --step-divider-mobile-ml: 10px;
+}

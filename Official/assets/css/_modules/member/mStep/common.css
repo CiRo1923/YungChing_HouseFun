@@ -1,0 +1,79 @@
+/* mStep 的共用版型 —— 所有變體共通的步驟結構。
+   外框的造型(膠囊、底色、內距)屬於變體,在 oval.css。 */
+
+.m-step {
+  @apply flex items-center;
+}
+
+.m-step-item {
+  @apply flex items-center gap-x-[--step-item-gap-x] text-[--step-color];
+
+  /* 已完成的步驟改用強調色 —— icon 吃 currentColor,一起變 */
+  &.\-\-done {
+    --step-color: var(--step-done-color);
+  }
+
+  /*
+   * 步驟之間的箭頭 —— 畫在「第二步之後」每一步的 ::before,所以不必為它多放節點。
+   * 它排在流程內(圖示前面),與前一個步驟的距離由自己的 ml 決定,
+   * 所以 ul 不必設 gap,三個斷點也都得維持橫排。
+   *
+   * 顏色寫在 svg 裡(#c3c8ce)而不是走色票 —— 這裡是 background,套 bg-[…] 也會被
+   * 圖片整片蓋掉。要換色就換圖,不要在這裡加背景色。
+   */
+  &:not(:first-child) {
+    &::before {
+      background-image: url('@imgs/member/common/step_oval_arrow.svg');
+
+      @apply ml-[--step-divider-ml] block h-[--step-divider-h] w-[--step-divider-w] bg-cover bg-center bg-no-repeat content-default;
+    }
+  }
+}
+
+/* 顏色不設在這裡 —— svg 吃 currentColor,跟著 .m-step-item 的 --step-color 走,
+   所以「未完成灰、已完成綠」由 --done 一處切換就夠。 */
+.m-step-icon {
+  @apply h-[--step-icon-size] w-[--step-icon-size] shrink-0 p-[--step-icon-p];
+}
+
+/* 字級不定在這裡 —— 這支是可複用元件,大小由使用端 setClass.label 傳。
+   字重不是父系帶入就是寫死,依規範直接 @apply。
+
+   ⚠️ whitespace-nowrap 是必要的:每個步驟都是 flex item,寬度不足時
+   文字會被壓縮成兩行(「手機驗 / 證」)。不換行才會維持一排。 */
+.m-step-label {
+  @apply whitespace-nowrap font-medium;
+}
+
+@screen p {
+  .m-step {
+    --step-item-gap-x: var(--step-item-pc-gap-x);
+    --step-icon-size: var(--step-icon-pc-size);
+    --step-icon-p: var(--step-icon-pc-p);
+    --step-divider-w: var(--step-divider-pc-w);
+    --step-divider-h: var(--step-divider-pc-h);
+    --step-divider-ml: var(--step-divider-pc-ml);
+  }
+}
+
+@screen t {
+  .m-step {
+    --step-item-gap-x: var(--step-item-tablet-gap-x);
+    --step-icon-size: var(--step-icon-tablet-size);
+    --step-icon-p: var(--step-icon-tablet-p);
+    --step-divider-w: var(--step-divider-tablet-w);
+    --step-divider-h: var(--step-divider-tablet-h);
+    --step-divider-ml: var(--step-divider-tablet-ml);
+  }
+}
+
+@screen m {
+  .m-step {
+    --step-item-gap-x: var(--step-item-mobile-gap-x);
+    --step-icon-size: var(--step-icon-mobile-size);
+    --step-icon-p: var(--step-icon-mobile-p);
+    --step-divider-w: var(--step-divider-mobile-w);
+    --step-divider-h: var(--step-divider-mobile-h);
+    --step-divider-ml: var(--step-divider-mobile-ml);
+  }
+}
