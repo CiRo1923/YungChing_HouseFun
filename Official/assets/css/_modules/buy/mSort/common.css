@@ -3,7 +3,7 @@
 }
 
 .m-sort-anchor {
-  @apply flex items-center gap-x-[--sort-anchor-gap-x] text-[length:--sort-anchor-text-size] transition-colors duration-300;
+  @apply flex items-center gap-x-[--sort-anchor-gap-x] transition-colors duration-300;
 
   &:hover {
     @apply text-[--sort-anchor-hover-color];
@@ -29,7 +29,7 @@
 }
 
 .m-sort-select-anchor {
-  @apply flex items-center gap-x-[--sort-select-anchor-gap-x] text-[length:--sort-select-anchor-text-size] text-[--sort-anchor-color];
+  @apply flex items-center gap-x-[--sort-select-anchor-gap-x] text-[--sort-anchor-color];
 
   &.\-\-active {
     .m-sort-select-icon {
@@ -80,7 +80,7 @@
 }
 
 .m-sort-dropdown-anchor {
-  @apply relative flex w-full items-center gap-x-[--sort-dropdown-anchor-gap-x] px-[--sort-dropdown-anchor-px] py-[--sort-dropdown-anchor-py] text-left text-[length:--sort-dropdown-anchor-text-size] transition-colors duration-300;
+  @apply relative flex w-full items-center gap-x-[--sort-dropdown-anchor-gap-x] px-[--sort-dropdown-anchor-px] py-[--sort-dropdown-anchor-py] text-left transition-colors duration-300;
 
   &:hover {
     @apply bg-[--sort-dropdown-anchor-hover-bg-color] text-[--sort-dropdown-anchor-hover-color];
@@ -102,11 +102,9 @@
 @screen p {
   .m-sort {
     --sort-list-gap-x: var(--sort-list-pc-gap-x);
-    --sort-anchor-text-size: var(--sort-anchor-pc-text-size);
     --sort-anchor-gap-x: var(--sort-anchor-pc-gap-x);
     --sort-icon-p: var(--sort-icon-pc-p);
     --sort-icon-size: var(--sort-icon-pc-size);
-    --sort-select-anchor-text-size: var(--sort-select-anchor-pc-text-size);
     --sort-select-anchor-gap-x: var(--sort-select-anchor-pc-gap-x);
     --sort-select-icon-p: var(--sort-select-icon-pc-p);
     --sort-select-icon-size: var(--sort-select-icon-pc-size);
@@ -121,7 +119,6 @@
     --sort-dropdown-item-px: var(--sort-dropdown-item-pc-px);
     --sort-dropdown-anchor-px: var(--sort-dropdown-anchor-pc-px);
     --sort-dropdown-anchor-py: var(--sort-dropdown-anchor-pc-py);
-    --sort-dropdown-anchor-text-size: var(--sort-dropdown-anchor-pc-text-size);
     --sort-dropdown-anchor-border-b: var(--sort-dropdown-anchor-pc-border-b);
     --sort-dropdown-anchor-gap-x: var(--sort-dropdown-anchor-pc-gap-x);
     --sort-dropdown-anchor-icon-p: var(--sort-dropdown-anchor-icon-pc-p);
@@ -132,11 +129,9 @@
 @screen t {
   .m-sort {
     --sort-list-gap-x: var(--sort-list-tablet-gap-x);
-    --sort-anchor-text-size: var(--sort-anchor-tablet-text-size);
     --sort-anchor-gap-x: var(--sort-anchor-tablet-gap-x);
     --sort-icon-p: var(--sort-icon-tablet-p);
     --sort-icon-size: var(--sort-icon-tablet-size);
-    --sort-select-anchor-text-size: var(--sort-select-anchor-tablet-text-size);
     --sort-select-anchor-gap-x: var(--sort-select-anchor-tablet-gap-x);
     --sort-select-icon-p: var(--sort-select-icon-tablet-p);
     --sort-select-icon-size: var(--sort-select-icon-tablet-size);
@@ -151,7 +146,6 @@
     --sort-dropdown-item-px: var(--sort-dropdown-item-tablet-px);
     --sort-dropdown-anchor-px: var(--sort-dropdown-anchor-tablet-px);
     --sort-dropdown-anchor-py: var(--sort-dropdown-anchor-tablet-py);
-    --sort-dropdown-anchor-text-size: var(--sort-dropdown-anchor-tablet-text-size);
     --sort-dropdown-anchor-border-b: var(--sort-dropdown-anchor-tablet-border-b);
     --sort-dropdown-anchor-gap-x: var(--sort-dropdown-anchor-tablet-gap-x);
     --sort-dropdown-anchor-icon-p: var(--sort-dropdown-anchor-icon-tablet-p);
@@ -162,11 +156,9 @@
 @screen m {
   .m-sort {
     --sort-list-gap-x: var(--sort-list-mobile-gap-x);
-    --sort-anchor-text-size: var(--sort-anchor-mobile-text-size);
     --sort-anchor-gap-x: var(--sort-anchor-mobile-gap-x);
     --sort-icon-p: var(--sort-icon-mobile-p);
     --sort-icon-size: var(--sort-icon-mobile-size);
-    --sort-select-anchor-text-size: var(--sort-select-anchor-mobile-text-size);
     --sort-select-anchor-gap-x: var(--sort-select-anchor-mobile-gap-x);
     --sort-select-icon-p: var(--sort-select-icon-mobile-p);
     --sort-select-icon-size: var(--sort-select-icon-mobile-size);
@@ -181,7 +173,6 @@
     --sort-dropdown-item-px: var(--sort-dropdown-item-mobile-px);
     --sort-dropdown-anchor-px: var(--sort-dropdown-anchor-mobile-px);
     --sort-dropdown-anchor-py: var(--sort-dropdown-anchor-mobile-py);
-    --sort-dropdown-anchor-text-size: var(--sort-dropdown-anchor-mobile-text-size);
     --sort-dropdown-anchor-border-b: var(--sort-dropdown-anchor-mobile-border-b);
     --sort-dropdown-anchor-gap-x: var(--sort-dropdown-anchor-mobile-gap-x);
     --sort-dropdown-anchor-icon-p: var(--sort-dropdown-anchor-icon-mobile-p);

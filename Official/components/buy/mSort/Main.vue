@@ -58,6 +58,10 @@ const dropdownLabel = computed(() => {
 const setClass = computed(() => {
   return {
     main: '',
+    // 字級由使用端決定 —— 這支是複用型元件,module 不定 text-*
+    anchor: '',
+    selectAnchor: '',
+    dropdownAnchor: '',
     ...props.setClass,
   }
 })
@@ -379,11 +383,14 @@ onUnmounted(() => {
         <button
           type="button"
           class="m-sort-anchor"
-          :class="{
-            '--active': activeIndex === index,
-            '--asc': activeIndex === index && activeSortType === 'asc',
-            '--desc': activeIndex === index && activeSortType === 'desc',
-          }"
+          :class="[
+            setClass.anchor,
+            {
+              '--active': activeIndex === index,
+              '--asc': activeIndex === index && activeSortType === 'asc',
+              '--desc': activeIndex === index && activeSortType === 'desc',
+            },
+          ]"
           @click="onButtonClick(item, index)"
         >
           <em class="m-sort-label">{{ item.label }}</em>
@@ -396,9 +403,12 @@ onUnmounted(() => {
     <button
       type="button"
       class="m-sort-select-anchor"
-      :class="{
-        '--active': isActive,
-      }"
+      :class="[
+        setClass.selectAnchor,
+        {
+          '--active': isActive,
+        },
+      ]"
       ref="selectAnchorRef"
       @click="onToggleDropdown"
       v-if="mode === 'dropdown'"
@@ -433,9 +443,12 @@ onUnmounted(() => {
                 <button
                   type="button"
                   class="m-sort-dropdown-anchor"
-                  :class="{
-                    '--active': activeIndex === index,
-                  }"
+                  :class="[
+                    setClass.dropdownAnchor,
+                    {
+                      '--active': activeIndex === index,
+                    },
+                  ]"
                   @click="onDropdownItemClick(item, index)"
                 >
                   <CommonSvgIcon

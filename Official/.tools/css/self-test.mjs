@@ -228,6 +228,56 @@ const CASES = [
     keyword: 'z-index',
   },
 
+  // ---------- 字級變數 ----------
+  {
+    name: '字級變數沒有標豁免',
+    file: `${M}/variables.css`,
+    code: `:root {
+  --probe-pc-text-size: 14px;
+  --probe-tablet-text-size: 14px;
+  --probe-mobile-text-size: 14px;
+}
+`,
+    expectMin: 3,
+    keyword: '字級變數',
+  },
+  {
+    // 標在 pc 那行上方就整組放行 —— tablet / mobile 不必各標一次
+    name: '字級變數標了豁免(整組放行)',
+    file: `${M}/variables.css`,
+    code: `:root {
+  /* lint-text-size-exempt: 固定位置的元件 */
+  --probe-pc-text-size: 14px;
+  --probe-tablet-text-size: 14px;
+  --probe-mobile-text-size: 14px;
+}
+`,
+    expect: 0,
+  },
+  {
+    // 版型檔的斷點對應不算「建變數」—— 變數存不存在由 variables 檔決定
+    name: '版型檔的字級斷點對應不報',
+    file: `${M}/common.css`,
+    code: `@screen p {
+  .m-probe {
+    --probe-text-size: var(--probe-pc-text-size);
+  }
+}
+`,
+    expect: 0,
+  },
+
+  {
+    // 斷點寫在 text 後面(不符命名慣例但實務上存在)—— 只抓 -pc-text-size 的話會整組漏掉
+    name: '字級變數斷點寫在後面也要抓',
+    file: `${M}/variables.css`,
+    code: `:root {
+  --probe-text-pc-size: 14px;
+}
+`,
+    expectMin: 1,
+    keyword: '字級變數',
+  },
   // ---------- 顏色 base ----------
   {
     name: '顏色 base 用 initial',

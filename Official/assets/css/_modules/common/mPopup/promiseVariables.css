@@ -12,6 +12,7 @@
   --popup-promise-message-bg-color: var(--white);
   --popup-promise-message-color: var(--gray-999);
 
+  /* lint-text-size-exempt: 訊息文字由元件產生(Promise 版沒有 slot),使用端沒有管道可傳 */
   --popup-promise-message-pc-text-size: 14px;
   --popup-promise-message-tablet-text-size: 14px;
   --popup-promise-message-mobile-text-size: 14px;

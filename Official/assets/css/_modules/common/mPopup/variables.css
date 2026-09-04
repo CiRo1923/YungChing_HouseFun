@@ -18,6 +18,7 @@
   --popup-header-tablet-border: 2px;
   --popup-header-mobile-border: 2px;
 
+  /* lint-text-size-exempt: 彈窗標題由元件自己排版,全站長一樣 */
   --popup-header-pc-text-size: 24px;
   --popup-header-tablet-text-size: 20px;
   --popup-header-mobile-text-size: 20px;

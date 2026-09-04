@@ -7,6 +7,7 @@
 // 跨電腦共用 → 腳本放在專案內並進版控,settings.json 只負責呼叫。
 // package.json 是 "type": "module",所以這裡用 ESM 語法。
 
+import { execFileSync } from 'node:child_process'
 import fs from 'node:fs'
 
 // 規則 1:Actions 只放執行事件,常數宣告要回到 stores/*.js
@@ -60,6 +61,42 @@ const onCheckSharedComponent = (filePath) => {
   return `[shared-components-sync] ${matched.name} 是 Backstage / Official 共用元件。這次若動到「功能」(config / props / emits / 行為),要同步到另一個專案;純樣式調整則不用。規則見 .claude/skills/shared-components-sync/SKILL.md。`
 }
 
+// 規則 4:新檔案就是「新結構」—— 沿用既有的板,不要自己發明
+//
+// 對應規則:.claude/rules/no-invention.md
+//
+// 判斷方式是「git 還不認識這個檔案」。改既有檔案不會觸發,只有真的多開一支才會 ——
+// 這正是最容易自己發明結構的時刻(順手拆一個元件、多開一層資料夾)。
+// 使用者明確要求開的檔案也會被提醒,那沒關係:確認過就忽略一行字。
+const onCheckNewFile = (filePath) => {
+  const path = filePath.replaceAll('\\', '/')
+
+  if (!/\.(vue|js|mjs|css)$/.test(path)) return null
+  // 規則講的是產品程式碼的結構,工具與設定不在此限
+  if (/(^|\/)(\.claude|\.tools|\.vite|node_modules)\//.test(path)) return null
+
+  let isTracked = true
+
+  try {
+    execFileSync('git', ['ls-files', '--error-unmatch', filePath], { stdio: 'ignore' })
+  } catch (error) {
+    // exit 1 才是「git 不認識這個檔案」。其他失敗(128 = 不是 repo、
+    // ENOENT = 找不到 git)代表**無法判斷**,那就當既有檔案處理 ——
+    // 提醒錯了比漏提醒更糟:每次寫檔都跳一次,很快就會被當雜訊忽略。
+    isTracked = error.status !== 1
+  }
+
+  if (isTracked) return null
+
+  const fileName = path.split('/').pop()
+
+  return (
+    `[no-invention] 「${fileName}」是新檔案 —— 也就是新結構。` +
+    `動手前先 grep 既有的同類頁面 / 元件怎麼做,找到就照抄那個板(連文案與 config 欄位名都照抄);` +
+    `找不到或有兩種以上做法就**停下來問**,不要自己選。規則見 .claude/rules/no-invention.md。`
+  )
+}
+
 let input = ''
 
 process.stdin
@@ -75,6 +112,7 @@ process.stdin
         onCheckActionsReadonly(filePath),
         onCheckPageFileName(filePath),
         onCheckSharedComponent(filePath),
+        onCheckNewFile(filePath),
       ].filter(Boolean)
 
       if (!messages.length) return

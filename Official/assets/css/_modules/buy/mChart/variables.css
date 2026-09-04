@@ -16,6 +16,7 @@
   --chart-tip-tablet-rounded: 6px;
   --chart-tip-mobile-rounded: 6px;
 
+  /* lint-text-size-exempt: tooltip 是元件自己疊出來的圖層,setClass 沒有對應的 key,使用端根本沒有管道可傳 */
   --chart-tip-pc-text-size: 12px;
   --chart-tip-tablet-text-size: 12px;
   --chart-tip-mobile-text-size: 12px;

@@ -27,7 +27,8 @@
   --form-error-tablet-mt: 4px;
   --form-error-mobile-mt: 4px;
 
-  /* ⚠️ 字級變數的特例 —— mForm 是複用型組件,規則上「字級由使用端 setClass 傳、module 連
+  /* lint-text-size-exempt: 錯誤訊息全站長一樣,不隨使用位置變化,由 module 統一決定。
+     ⚠️ 這是字級變數的特例 —— mForm 是複用型組件,規則上「字級由使用端 setClass 傳、module 連
      -text-size 變數都不要建」。錯誤訊息是刻意的例外:它全站長一樣,不隨使用位置變化,
      由 module 統一決定。setClass.error 仍然存在,但不該用來調字級。 */
   --form-error-pc-text-size: 14px;

@@ -7,6 +7,7 @@
   --title-tablet-gap-x: 5px;
   --title-mobile-gap-x: 5px;
 
+  /* lint-text-size-exempt: 區塊標題是固定位置,全站長一樣,由 module 全權決定 */
   --title-pc-text-size: 24px;
   --title-tablet-text-size: 18px;
   --title-mobile-text-size: 18px;

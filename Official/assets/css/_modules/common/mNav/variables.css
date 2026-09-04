@@ -20,6 +20,7 @@
   --nav-menu-mobile-gap-x: 0;
 
   /* 連結 */
+  /* lint-text-size-exempt: 導覽是固定位置,全站長一樣 */
   --nav-anchor-pc-text-size: 18px;
   --nav-anchor-tablet-text-size: 18px;
   --nav-anchor-mobile-text-size: 18px;

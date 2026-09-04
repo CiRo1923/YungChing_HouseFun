@@ -126,6 +126,9 @@ const onClick = (item) => {
     }"
     :setClass="{
       main: 'ml-auto',
+      anchor: 'text-[14px]',
+      selectAnchor: 'text-[14px]',
+      dropdownAnchor: 'text-[14px]',
     }"
     @click="onClick"
   />

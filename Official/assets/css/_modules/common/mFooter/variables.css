@@ -33,6 +33,7 @@
   /* 左半:公司資訊 */
   --footer-information-color: var(--gray-666);
 
+  /* lint-text-size-exempt: 頁尾是固定位置且全站唯一,字級由 module 決定 */
   --footer-information-pc-text-size: 12px;
   --footer-information-tablet-text-size: 12px;
   --footer-information-mobile-text-size: 12px;
@@ -56,6 +57,7 @@
   /* 右半:關注好房網(mobile 不顯示) */
   --footer-links-color: var(--gray-999);
 
+  /* lint-text-size-exempt: 同上,頁尾固定位置 */
   --footer-links-pc-text-size: 12px;
   --footer-links-tablet-text-size: 12px;
   --footer-links-mobile-text-size: 12px;
@@ -66,6 +68,7 @@
 
   --footer-links-title-color: var(--green-6a2d);
 
+  /* lint-text-size-exempt: 同上,頁尾固定位置 */
   --footer-links-title-pc-text-size: 16px;
   --footer-links-title-tablet-text-size: 16px;
   --footer-links-title-mobile-text-size: 16px;

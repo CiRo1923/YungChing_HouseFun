@@ -892,10 +892,13 @@ block 元素換過去通常沒事,但**`inline` 元素或 flex item 要實機確
   只要建了,module 就會在某處 `@apply` 它,而**一輸出就蓋掉使用端傳的 `text-*`**,
   等於「交給父系」白做。**沒有變數,才真的沒有輸出。**
 
-  字級變數只能出現在**固定位置**的組件裡。目前全案有 `-text-size` 變數的只有六支,
-  全都屬於這類:mTitle / mFooter / mNav / mLoading / mPopup,以及 mChart 的 tooltip
-  (它是組件自己疊出來的圖層,`setClass` 沒有對應的 key,使用端根本沒有管道可傳)。
-  複用型的 mTag / mAnchor **一個字級變數都沒有**,那是對的。
+  字級變數只能出現在**固定位置**的組件裡 —— 頁首、頁尾、導覽、區塊標題這種全站長一樣的,
+  以及組件自己疊出來的圖層(讀取提示、圖表 tooltip:`setClass` 沒有對應的 key,
+  使用端根本沒有管道可傳)。複用型的按鈕與標籤 **一個字級變數都沒有**,那是對的。
+
+  > 哪幾支合法**不列在這裡** —— 清單會過期,註解不會。
+  > 判斷依據就寫在該支 variables 檔的 `lint-text-size-exempt` 理由裡,
+  > 要看全貌就跑 `npm run lint:css`(沒標的會被列出來)或 grep 那個標記詞。
 
   **例外:`.m-form-error`(2026-08-31 決定)。** mForm 整體是複用型,但錯誤訊息的字級
   **全站長一樣、不隨使用位置變化**,所以由 module 統一決定,建了
@@ -906,6 +909,20 @@ block 元素換過去通常沒事,但**`inline` 元素或 flex item 要實機確
 
   另一個例外是使用端根本沒有管道可傳(後台編輯器存進 HTML 的 class),那就留在 module。
   **分不出來就問使用者。**
+
+  **這條由 `checkTextSizeVariable` 檢查 —— 但工具只能問,不能答。**
+  「這支是不是固定位置」是設計意圖,程式碼上看不出來,所以規則反過來寫:
+  **variables 檔裡的 `-text-size` 一律報**,確認過是固定位置的才在該行或上方註解標
+  `/* lint-text-size-exempt: 理由 */`。這樣新元件順手建字級變數時會被擋下來問,
+  既有的合法用法則在原地留下判斷依據 —— 不必回頭查文件,也不會因為文件過期而失效。
+
+  兩個實作細節:
+
+  - **只看 variables 檔**。變數存不存在是那裡決定的;版型檔的
+    `--x-text-size: var(--x-pc-text-size)` 只是斷點對應,跟著定義走。
+    (版型檔若直接寫死 `--x-text-size: 14px`,那由 `checkLayoutFileValues` 抓。)
+  - **一組三個斷點共用一個豁免**。字級依規則 4 必定拆 pc / tablet / mobile,
+    標在 pc 那行就整組放行,不必為同一個判斷貼三次。
 - **狀態(hover / focus / active)一律用「覆寫基礎變數」**,不要在 `:root` 用
   `--x-hover-color: var(--x-color)` 做 fallback —— custom property 的 `var()` 在**定義它的元素**上
   就解析完再繼承,`:root` 當下 `--x-color` 還是 `initial`,後面再怎麼覆寫都救不回來,
