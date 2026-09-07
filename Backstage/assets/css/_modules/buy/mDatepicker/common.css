@@ -356,6 +356,8 @@
     --datepicker-rounded: var(--datepicker-pc-rounded);
     --datepicker-type-size: var(--datepicker-type-pc-size);
     --datepicker-icon-size: var(--datepicker-icon-pc-size);
+    --datepicker-datetime-gap-x: var(--datepicker-datetime-pc-gap-x);
+    --datepicker-range-gap-x: var(--datepicker-range-pc-gap-x);
   }
   .m-datepicker-calendar {
     --datepicker-calendar-my: var(--datepicker-calendar-pc-my);
@@ -373,8 +375,6 @@
     --datepicker-calendar-date-rounded: var(--datepicker-calendar-date-pc-rounded);
     --datepicker-calendar-range-start-rounded: var(--datepicker-calendar-range-start-pc-rounded);
     --datepicker-calendar-range-end-rounded: var(--datepicker-calendar-range-end-pc-rounded);
-    --datepicker-range-gap-x: var(--datepicker-range-pc-gap-x);
-    --datepicker-datetime-gap-x: var(--datepicker-datetime-pc-gap-x);
     --datepicker-panel-h: var(--datepicker-panel-pc-h);
     --datepicker-panel-gap: var(--datepicker-panel-pc-gap);
     --datepicker-panel-ctrl-h: var(--datepicker-panel-ctrl-pc-h);
@@ -408,6 +408,8 @@
     --datepicker-rounded: var(--datepicker-tablet-rounded);
     --datepicker-type-size: var(--datepicker-type-tablet-size);
     --datepicker-icon-size: var(--datepicker-icon-tablet-size);
+    --datepicker-datetime-gap-x: var(--datepicker-datetime-tablet-gap-x);
+    --datepicker-range-gap-x: var(--datepicker-range-tablet-gap-x);
   }
   .m-datepicker-calendar {
     --datepicker-calendar-my: var(--datepicker-calendar-tablet-my);
@@ -427,8 +429,6 @@
       --datepicker-calendar-range-start-tablet-rounded
     );
     --datepicker-calendar-range-end-rounded: var(--datepicker-calendar-range-end-tablet-rounded);
-    --datepicker-range-gap-x: var(--datepicker-range-tablet-gap-x);
-    --datepicker-datetime-gap-x: var(--datepicker-datetime-tablet-gap-x);
     --datepicker-panel-h: var(--datepicker-panel-tablet-h);
     --datepicker-panel-gap: var(--datepicker-panel-tablet-gap);
     --datepicker-panel-ctrl-h: var(--datepicker-panel-ctrl-tablet-h);
@@ -463,6 +463,8 @@
     --datepicker-rounded: var(--datepicker-mobile-rounded);
     --datepicker-type-size: var(--datepicker-type-mobile-size);
     --datepicker-icon-size: var(--datepicker-icon-mobile-size);
+    --datepicker-datetime-gap-x: var(--datepicker-datetime-mobile-gap-x);
+    --datepicker-range-gap-x: var(--datepicker-range-mobile-gap-x);
   }
   .m-datepicker-calendar {
     --datepicker-calendar-my: var(--datepicker-calendar-mobile-my);
@@ -482,8 +484,6 @@
       --datepicker-calendar-range-start-mobile-rounded
     );
     --datepicker-calendar-range-end-rounded: var(--datepicker-calendar-range-end-mobile-rounded);
-    --datepicker-range-gap-x: var(--datepicker-range-mobile-gap-x);
-    --datepicker-datetime-gap-x: var(--datepicker-datetime-mobile-gap-x);
     --datepicker-panel-h: var(--datepicker-panel-mobile-h);
     --datepicker-panel-gap: var(--datepicker-panel-mobile-gap);
     --datepicker-panel-ctrl-h: var(--datepicker-panel-ctrl-mobile-h);

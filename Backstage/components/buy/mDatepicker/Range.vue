@@ -32,10 +32,6 @@ import '@js/_validation.js'
 
 import { Field, ErrorMessage } from 'vee-validate'
 
-const common = useCommonStore()
-const { device } = storeToRefs(common)
-const { onResize } = useCommonActions()
-
 const emits = defineEmits(['update:modelValue', 'selected', 'focusin', 'focusout'])
 
 const props = defineProps({
@@ -65,20 +61,11 @@ const props = defineProps({
 const config = computed(() => onMergeDateConfig(props.config))
 const validateOn = useValidateEvents(() => config.value.validateEvents)
 
-const containerRef = ref(null)
-const iconRef = ref(null)
-const panelRef = ref(null)
-
-const isFocus = ref(false)
-const isActive = ref(false)
 // 現在在選哪一端
 const activeField = ref('start')
 /* 選取中的起訖(Date | null)。傳給 useCalendar 畫底色,兩端都有值才寫回 v-model ——
   中途的半套狀態不該讓呼叫端看到。 */
 const draft = ref({ start: null, end: null })
-
-const isDeviceM = computed(() => device.value === 'm')
-const isPopup = computed(() => isDeviceM.value && config.value.mobileSupport)
 
 const modelStart = computed(() => props.modelValue?.[0] ?? null)
 const modelEnd = computed(() => props.modelValue?.[1] ?? null)
@@ -137,11 +124,17 @@ const activeModel = computed(() =>
 
 const calendar = useCalendar(config, activeModel, { range: draft })
 
-const { onOpen, onClickOutside, onResizeDone } = usePosition(config, isPopup, {
-  container: containerRef,
-  icon: iconRef,
-  panel: panelRef,
-})
+const {
+  containerRef,
+  iconRef,
+  panelRef,
+  isPopup,
+  isActive,
+  isFocus,
+  onToggle,
+  onOpen,
+  onClickTimeField,
+} = usePosition(config)
 
 // 畫面上顯示的值。model 與畫面格式可以不同,所以中間要轉一手
 const onDisplay = (value) => {
@@ -165,11 +158,6 @@ const setClass = computed(() => ({
   error: '',
   ...props.setClass,
 }))
-
-const onToggle = (value) => {
-  isActive.value = value !== undefined ? value : !isActive.value
-  isFocus.value = isActive.value
-}
 
 /* 點欄位就從那一端開始選。
   ⚠️ 這裡不清任何值 —— 清了 draft 卻沒清 model 的話,欄位還顯示舊日期、
@@ -248,13 +236,6 @@ const onSelectYMD = ({ y, m, d }) => {
   if (ymd) onSelect(ymd.date)
 }
 
-const onDocumentClick = (e) => onClickOutside(e, () => onToggle(false))
-
-const onWindowResize = () => {
-  onResize()
-  onResizeDone(onOpen)()
-}
-
 // 外部改了 v-model → 同步回選取中的狀態(deep:陣列內容變動也要收到)
 watch(
   () => props.modelValue,
@@ -271,19 +252,8 @@ watch(
   { immediate: true, deep: true }
 )
 
-onResize()
-
 onMounted(() => {
   calendar.onSyncFromModel()
-  document.addEventListener('click', onDocumentClick, true)
-  window.addEventListener('resize', onWindowResize)
-})
-
-/* ⚠️ 移除的必須是「同一個」函式參照 —— 傳匿名箭頭函式的話 removeEventListener
-    對不上,每掛載一次就多留一個 listener。 */
-onUnmounted(() => {
-  document.removeEventListener('click', onDocumentClick, true)
-  window.removeEventListener('resize', onWindowResize)
 })
 </script>
 
@@ -292,7 +262,10 @@ onUnmounted(() => {
     <div class="m-datepicker-container" ref="containerRef">
       <div class="m-datepicker-range-group" :class="setClass.group">
         <!-- 起:日期 +(format 帶時間段時)時間 -->
-        <div class="m-datepicker-datetime-group">
+        <!-- @pointerdown.capture 綁在這一層而不是 Time 元件上 —— Time 是 fragment
+           元件(div + Teleport 兩個根),Vue 的 attrs fallthrough 對多根元素失效,
+           綁在它身上不會有落點;判斷本身在 usePosition,那裡有完整說明 -->
+        <div class="m-datepicker-datetime-group" @pointerdown.capture="onClickTimeField">
           <Field
             :name="`${props.name}Start`"
             :rules="props.rules"
@@ -358,7 +331,7 @@ onUnmounted(() => {
         </span>
 
         <!-- 訖:日期 +(format 帶時間段時)時間 -->
-        <div class="m-datepicker-datetime-group">
+        <div class="m-datepicker-datetime-group" @pointerdown.capture="onClickTimeField">
           <Field
             :name="`${props.name}End`"
             :rules="props.rules"

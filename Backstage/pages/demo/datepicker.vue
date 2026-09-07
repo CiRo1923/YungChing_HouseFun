@@ -2,7 +2,8 @@
 // ⚠ 暫時的 mDatepicker 驗證頁,驗完請整個 pages/demo 目錄移除。
 // 路由:/demo/datepicker
 definePageMeta({
-  layout: 'buy',
+  // 驗證頁不要 layout 的頁首頁尾 —— 只看元件本身
+  layout: false,
 })
 
 /* 每一條 format 對應「選到哪一層」——
@@ -155,7 +156,7 @@ const hasLimit = ref(false)
             />
             <output class="text-[14px]">
               v-model:
-              <b class="font-medium">{{ item.value ?? 'null' }}</b>
+              <b class="font-medium">{{ JSON.stringify(item.value) }}</b>
             </output>
           </div>
         </li>
@@ -195,7 +196,7 @@ const hasLimit = ref(false)
             />
             <output class="text-[14px]">
               v-model:
-              <b class="font-medium">{{ item.value?.length ? item.value.join(' ~ ') : '[]' }}</b>
+              <b class="font-medium">{{ JSON.stringify(item.value) }}</b>
             </output>
           </div>
         </li>

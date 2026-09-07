@@ -22,10 +22,6 @@ import '@js/_validation.js'
 
 import { Field, ErrorMessage } from 'vee-validate'
 
-const common = useCommonStore()
-const { device } = storeToRefs(common)
-const { onResize } = useCommonActions()
-
 const emits = defineEmits([
   'update:modelValue',
   'selected',
@@ -60,16 +56,6 @@ const props = defineProps({
 
 const config = computed(() => onMergeTimeConfig(props.config))
 const validateOn = useValidateEvents(() => config.value.validateEvents)
-
-const containerRef = ref(null)
-const iconRef = ref(null)
-const panelRef = ref(null)
-
-const isFocus = ref(false)
-const isActive = ref(false)
-const isDeviceM = computed(() => device.value === 'm')
-
-const isPopup = computed(() => isDeviceM.value && config.value.mobileSupport)
 
 const model = computed({
   get: () => props.modelValue,
@@ -127,16 +113,8 @@ const setClass = computed(() => ({
   ...props.setClass,
 }))
 
-const { onOpen, onClickOutside, onResizeDone } = usePosition(config, isPopup, {
-  container: containerRef,
-  icon: iconRef,
-  panel: panelRef,
-})
-
-const onToggle = (value) => {
-  isActive.value = value !== undefined ? value : !isActive.value
-  isFocus.value = isActive.value
-}
+const { containerRef, iconRef, panelRef, isPopup, isActive, isFocus, onToggle, onOpen } =
+  usePosition(config)
 
 const onInputPointerdown = (e) => {
   if (config.value.altInput) return
@@ -222,26 +200,10 @@ const onFocusout = (e) => {
   emits('focusout', e)
 }
 
-const onDocumentClick = (e) => onClickOutside(e, () => onToggle(false))
-
-const onWindowResize = () => {
-  onResize()
-  onResizeDone(onOpen)()
-}
-
 watch(() => props.modelValue, onSyncFromModel, { immediate: true })
-
-onResize()
 
 onMounted(() => {
   onSyncFromModel()
-  document.addEventListener('click', onDocumentClick, true)
-  window.addEventListener('resize', onWindowResize)
-})
-
-onUnmounted(() => {
-  document.removeEventListener('click', onDocumentClick, true)
-  window.removeEventListener('resize', onWindowResize)
 })
 </script>
 

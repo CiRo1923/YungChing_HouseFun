@@ -25,10 +25,6 @@ import '@js/_validation.js'
 
 import { Field, ErrorMessage } from 'vee-validate'
 
-const common = useCommonStore()
-const { device } = storeToRefs(common)
-const { onResize } = useCommonActions()
-
 const emits = defineEmits([
   'update:modelValue',
   'selected',
@@ -64,16 +60,6 @@ const props = defineProps({
 const config = computed(() => onMergeDateConfig(props.config))
 const validateOn = useValidateEvents(() => config.value.validateEvents)
 
-const containerRef = ref(null)
-const iconRef = ref(null)
-const panelRef = ref(null)
-
-const isFocus = ref(false)
-const isActive = ref(false)
-const isDeviceM = computed(() => device.value === 'm')
-
-// 手機且開啟 mobileSupport → 置中的 popup;關掉則交給原生 <input type="date">
-const isPopup = computed(() => isDeviceM.value && config.value.mobileSupport)
 const inputType = computed(() => (isDeviceM.value && !config.value.mobileSupport ? 'date' : 'tel'))
 
 /* format 帶時間段時,時間是**獨立的一個欄位**(Time.vue)並排在日期旁邊 ——
@@ -123,11 +109,18 @@ const timeModel = computed({
 // 日曆只吃日期那半 —— 時間交給 Time.vue,useCalendar 不碰
 const calendar = useCalendar(config, dateModel)
 
-const { onOpen, onClickOutside, onResizeDone } = usePosition(config, isPopup, {
-  container: containerRef,
-  icon: iconRef,
-  panel: panelRef,
-})
+const {
+  containerRef,
+  iconRef,
+  panelRef,
+  isDeviceM,
+  isPopup,
+  isActive,
+  isFocus,
+  onToggle,
+  onOpen,
+  onClickTimeField,
+} = usePosition(config)
 
 const onGetInputValue = (value) => {
   if (value?.target) return value.target.value
@@ -172,11 +165,6 @@ const setClass = computed(() => ({
   },
   ...props.setClass,
 }))
-
-const onToggle = (value) => {
-  isActive.value = value !== undefined ? value : !isActive.value
-  isFocus.value = isActive.value
-}
 
 /* altInput = false 時輸入框不給打字,點它就是展開日曆,
   所以要 preventDefault 擋掉 focus,不然手機會跳出鍵盤。 */
@@ -261,35 +249,20 @@ const onSelect = (dateStr) => onCommit(calendar.onSelectDate(dateStr))
 
 const onSelectYMD = ({ y, m, d }) => onCommit(calendar.onSelectYMD(y, m, d))
 
-const onDocumentClick = (e) => onClickOutside(e, () => onToggle(false))
-
-const onWindowResize = () => {
-  onResize()
-  onResizeDone(onOpen)()
-}
-
 watch(() => props.modelValue, calendar.onSyncFromModel, { immediate: true })
-
-onResize()
 
 onMounted(() => {
   calendar.onSyncFromModel()
-  document.addEventListener('click', onDocumentClick, true)
-  window.addEventListener('resize', onWindowResize)
-})
-
-/* ⚠️ 這裡一定要移除的是「同一個」函式參照 —— 原本傳的是匿名箭頭函式,
-    removeEventListener 根本對不上,每掛載一次就多留一個 listener。 */
-onUnmounted(() => {
-  document.removeEventListener('click', onDocumentClick, true)
-  window.removeEventListener('resize', onWindowResize)
 })
 </script>
 
 <template>
   <div class="m-datepicker --single" :class="setClass.main">
     <!-- 日期與時間並排。沒有時間段時 group 裡只有日期那一個,版型不受影響 -->
-    <div class="m-datepicker-datetime-group">
+    <!-- @pointerdown.capture 綁在這一層而不是 Time 元件上 —— Time 是 fragment
+           元件(div + Teleport 兩個根),Vue 的 attrs fallthrough 對多根元素失效,
+           綁在它身上不會有落點;判斷本身在 usePosition,那裡有完整說明 -->
+    <div class="m-datepicker-datetime-group" @pointerdown.capture="onClickTimeField">
       <Field
         :name="props.name"
         :rules="props.rules"

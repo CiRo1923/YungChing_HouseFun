@@ -3,12 +3,47 @@
   面板是 Teleport 到 body 的 absolute 元素,所以座標要自己算 ——
   好處是不會被祖先的 overflow-hidden 裁掉。
 
-  用法:const { onOpen, onClickOutside } = usePosition(config, isPopup, refs)
-    refs.container  觸發用的外框(定位基準)
-    refs.icon       右側的按鈕(判斷點擊是否在自己身上)
-    refs.panel      被定位的面板 */
+  面板「開著沒有」也在這裡 —— 三支元件的 onToggle 一模一樣,而且
+  「點外面關掉」「resize 重算位置」都要動它,放在呼叫端只會各寫一份。
 
-export const usePosition = (config, isPopup, refs) => {
+  用法:const { containerRef, iconRef, panelRef, isPopup, isActive, isFocus, onToggle, onOpen }
+        = usePosition(config)
+
+  三個 ref 由這支建立、由呼叫端綁到 template 上:
+    containerRef  觸發用的外框(定位基準)
+    iconRef       右側的按鈕(判斷點擊是否在自己身上)
+    panelRef      被定位的面板
+
+  isPopup(手機且開啟 mobileSupport → 置中的 popup)也在這裡算 ——
+  它只影響「要不要算座標」與遮罩的樣式,呼叫端只是轉手給 template。
+
+  document 的 click 與 window 的 resize 監聽由這支自己掛上與移除,
+  呼叫端不必再處理(移除時對不上參照是很常見的漏洞)。 */
+
+export const usePosition = (config) => {
+  const { device } = storeToRefs(useCommonStore())
+  const { onResize } = useCommonActions()
+
+  const containerRef = ref(null)
+  const iconRef = ref(null)
+  const panelRef = ref(null)
+
+  const refs = { container: containerRef, icon: iconRef, panel: panelRef }
+
+  const isDeviceM = computed(() => device.value === 'm')
+
+  // 手機且開啟 mobileSupport → 置中的 popup;關掉則交給原生的 input
+  const isPopup = computed(() => isDeviceM.value && config.value.mobileSupport)
+
+  // 面板開著沒有;isFocus 跟著它走(輸入框的外框要顯示 focus 樣式)
+  const isActive = ref(false)
+  const isFocus = ref(false)
+
+  const onToggle = (value) => {
+    isActive.value = value !== undefined ? value : !isActive.value
+    isFocus.value = isActive.value
+  }
+
   const onClamp = (value, min, max) => Math.min(Math.max(value, min), max)
 
   const onOpen = () => {
@@ -65,7 +100,7 @@ export const usePosition = (config, isPopup, refs) => {
 
   /* 點在自己(外框 / 按鈕 / 面板)身上都不算外面。
     altInput 時輸入框本身要能點來打字,所以不把 icon 列入判斷。 */
-  const onClickOutside = (e, onClose) => {
+  const onClickOutside = (e) => {
     if (isPopup.value) return
 
     const $container = refs.container.value
@@ -77,7 +112,26 @@ export const usePosition = (config, isPopup, refs) => {
     if (!$panel) return
     if ($panel.contains(e.target)) return
 
-    onClose()
+    onToggle(false)
+  }
+
+  /* 點到並排的時間欄位時,把日期的浮層收掉 —— 否則兩個浮層會同時開著。
+    format 帶時間段時,時間是獨立的一個欄位(Time.vue)並排在日期旁邊,
+    日期選擇器(Single / Range)接在自己的 datetime-group 上呼叫這支。
+
+    ⚠️ 上面那支 onClickOutside 幫不上忙:它看到 container.contains(target)
+        就當成「點在自己身上」而直接 return,而時間欄位就在同一個 container 裡。
+        也不能改那支的判斷 —— 時間元件自己也用它,一改就會變成點自己關自己。
+
+    ⚠️ 呼叫端要用**捕獲階段**(@pointerdown.capture):時間元件內部的 pointerdown
+        有 stopPropagation,冒泡階段收不到。
+
+    ⚠️ 選擇器不要寫成 CSS 檔案裡那種 `.\-\-time` —— 那個轉義是給 PostCSS 用的,
+        querySelector 認得 `--` 開頭的 class,直接寫就好。 */
+  const onClickTimeField = (e) => {
+    if (!e.target?.closest?.('.m-datepicker.--time')) return
+
+    onToggle(false)
   }
 
   // resize 期間連續觸發,只在停下來 200ms 後重算一次位置
@@ -90,5 +144,37 @@ export const usePosition = (config, isPopup, refs) => {
     }
   }
 
-  return { onOpen, onClickOutside, onResizeDone }
+  const onWindowResize = () => {
+    onResize()
+    onResizeDone(onOpen)()
+  }
+
+  // 進來就先量一次,斷點相關的判斷才有值
+  onResize()
+
+  /* ⚠️ 移除時必須是「同一個」函式參照 —— 呼叫端各自包一層匿名箭頭的話
+      removeEventListener 對不上,每掛載一次就多留一個 listener。
+      掛在這裡就不會有那個機會。 */
+  onMounted(() => {
+    document.addEventListener('click', onClickOutside, true)
+    window.addEventListener('resize', onWindowResize)
+  })
+
+  onUnmounted(() => {
+    document.removeEventListener('click', onClickOutside, true)
+    window.removeEventListener('resize', onWindowResize)
+  })
+
+  return {
+    containerRef,
+    iconRef,
+    panelRef,
+    isDeviceM,
+    isPopup,
+    isActive,
+    isFocus,
+    onToggle,
+    onOpen,
+    onClickTimeField,
+  }
 }
