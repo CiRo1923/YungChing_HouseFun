@@ -11,7 +11,14 @@ const formRef = ref(null)
 const isDeviceM = computed(() => device.value === 'm')
 
 const onSubmit = async () => {
-  const validate = async () => await formRef.value?.form?.validate?.()
+  const validate = async () => {
+    /* 送出時把所有欄位標成 touched —— mForm 的「碰過才即時驗」要靠它,
+      少了這行,使用者補填時紅字不會即時消失(得等下一次送出)。
+      詳見 components/common/mForm/.composables/useValidateEvents.js */
+    formRef.value?.form?.setTouched?.(true)
+
+    return await formRef.value?.form?.validate?.()
+  }
   const { valid } = await validate()
 
   if (valid) {

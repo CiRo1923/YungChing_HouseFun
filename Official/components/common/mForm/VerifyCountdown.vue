@@ -51,9 +51,10 @@ const config = computed(() => {
     {
       placeholder: null,
       length: null,
-      // 驗證時機:本元件不自己驗證,原樣轉給底層的 Input(真正掛 Field 的地方)。
-      // null = 沿用全域,詳見 .composables/useValidateEvents.js
-      validateEvents: null,
+      /* 驗證時機:本元件不自己驗證,原樣轉給底層的 Input(真正掛 Field 的地方)。
+        ⚠️ 這裡的預設要跟著子元件走 —— 傳 null 會蓋掉子元件的預設,
+           讓「碰過才即時驗」退回「值一動就驗」。詳見 .composables/useValidateEvents.js */
+      validateEvents: ['blur', 'change', 'touchedModelUpdate'],
       serverTime: +new Date(),
       expires: null,
       storageName: null,

@@ -36,18 +36,27 @@ const config = computed(() => {
     length: null,
     minlength: null,
     maxlength: null,
-    // 這個欄位要在哪些時機自動驗證。null(不傳)= 沿用 vee-validate 的全域預設,
-    // 等同 ['blur', 'change', 'modelUpdate']。
-    //
-    // ⚠️ 傳陣列是「完整指定」,沒列到的一律不驗 —— 不是在預設值上疊加。
-    //    所以 [] 代表只有 submit 時的主動 validate() 會驗,自動驗證全關。
-    //    例:清空值不想立刻跳紅字 → ['blur', 'change'](把 modelUpdate 拿掉)
-    validateEvents: null,
+    /* 這個欄位要在哪些時機自動驗證。
+
+      ⚠️ 這支渲染的是 <input type="hidden"> —— 使用者碰不到它,**永遠不會 blur / change**,
+          所以那兩個時機在這裡等於沒有:實際生效的只有 touchedModelUpdate,
+          而它要靠送出時的 setTouched(true) 才會開。
+
+      這正是它需要的行為 —— Hidden 幾乎都綁「一組欄位的合格旗標」(多欄位的 computed),
+      填到一半或程式自己連動清值時不該跳紅字,送出後才即時反映。
+
+      ⚠️ 傳陣列是「完整指定」,沒列到的一律不驗 —— 不是在預設值上疊加。
+         詳見 .composables/useValidateEvents.js */
+    validateEvents: ['blur', 'change', 'touchedModelUpdate'],
     ...props.config,
   }
 })
 
-const validateOn = useValidateEvents(() => config.value.validateEvents)
+// Field 註冊的名稱帶 _hidden 後綴,查 touched 要用同一個名字
+const validateOn = useValidateEvents(
+  () => config.value.validateEvents,
+  () => `${props.name}_hidden`
+)
 
 const setClass = computed(() => {
   return {

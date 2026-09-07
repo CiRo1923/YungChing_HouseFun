@@ -27,7 +27,12 @@ const onReSend = () => {
   emits('reSend')
 }
 
-const onSumit = async (validate, setFieldError) => {
+const onSumit = async (validate, setFieldError, setTouched) => {
+  /* 送出時把所有欄位標成 touched —— mForm 的「碰過才即時驗」要靠它,
+    少了這行,使用者補填時紅字不會即時消失(得等下一次送出)。
+    詳見 components/common/mForm/.composables/useValidateEvents.js */
+  setTouched(true)
+
   const { verificationCode } = apiData.value
   const { name, config } = continuousRef.value
   const length = config.length
@@ -52,7 +57,11 @@ const onSumit = async (validate, setFieldError) => {
 </script>
 
 <template>
-  <Form as="div" class="space-y-[15px] text-center" v-slot="{ validate, setFieldError }">
+  <Form
+    as="div"
+    class="space-y-[15px] text-center"
+    v-slot="{ validate, setFieldError, setTouched }"
+  >
     <PageMemberUpgradeExpired
       message="驗證碼已失效 (超過 1 分鐘有效時間並錯誤達 5 次)<br />請重新發送。"
       v-if="isExpiredExceeded"
@@ -87,7 +96,7 @@ const onSumit = async (validate, setFieldError) => {
         main: '--oval --bg-orange-f74c --h-55 --text-white --px-20 --text-center w-full',
         text: 'text-[16px]',
       }"
-      @click="onSumit(validate, setFieldError)"
+      @click="onSumit(validate, setFieldError, setTouched)"
     />
   </Form>
 </template>
