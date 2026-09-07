@@ -44,6 +44,13 @@ const SYNC_EXCLUDE_NAMES = new Set([
   'dist',
 ])
 
+/* 同步時要排除的「特定路徑」—— 上面那幾組是比對名稱,對 `pages/demo` 這種
+  「只有在這個位置才要排除」的不夠精確(比對名稱會誤傷任何同名目錄)。
+
+  pages/demo  暫時的元件驗證頁(見那幾支檔案的檔頭),對協作方沒有意義。
+              ⚠️ 只排除同步 —— 備份仍要收,而且本地 dev 照樣開得起來。 */
+const SYNC_EXCLUDE_PATHS = ['pages/demo']
+
 // 壓縮時只拿掉工具設定與文件,其餘一律收進壓縮檔
 const ARCHIVE_EXCLUDE_NAMES = new Set(TOOLING_NAMES)
 
@@ -65,6 +72,15 @@ const stagingDir = path.join(os.tmpdir(), `sync-to-public-${projectName}-${proce
 
 function isExcluded(name, excludeNames) {
   return excludeNames.has(name) || EXCLUDE_EXTENSIONS.has(path.extname(name).toLowerCase())
+}
+
+// 專案根起算的相對路徑比對。分隔符統一成 `/`,清單才不必寫兩種寫法
+function isExcludedPath(src) {
+  const relative = path.relative(projectDir, src).split(path.sep).join('/')
+
+  return SYNC_EXCLUDE_PATHS.some(
+    (target) => relative === target || relative.startsWith(`${target}/`)
+  )
 }
 
 // 把 Dev 換成 Public。取「最後一個」相符的段:路徑前綴若剛好也有同名資料夾,
@@ -242,7 +258,7 @@ async function rewritePackageJson(dir) {
 async function copyFiltered(source, destination) {
   await cp(source, destination, {
     recursive: true,
-    filter: (src) => !isExcluded(path.basename(src), SYNC_EXCLUDE_NAMES),
+    filter: (src) => !isExcluded(path.basename(src), SYNC_EXCLUDE_NAMES) && !isExcludedPath(src),
   })
 }
 
@@ -318,23 +334,34 @@ function formatTimestamp() {
   ].join('')
 }
 
+/* 「環境還沒就緒」一律警告後跳過,**不要**回非零。
+
+  這支是接在 build / deploy 後面跑的(`… && npm run sync:public`),回非零會讓
+  整個 build 被判定成失敗 —— 而 build 其實成功了,只是這台機器還沒把發布用的
+  repo clone 下來。CI 或別的腳本串起來時那個差別很致命。
+
+  ⚠️ 這只涵蓋「還沒準備好」。真正做到一半才出錯(壓縮失敗、複製失敗、push 失敗)
+      仍然要回非零 —— 那時目標端可能已經被清空,不能靜靜當作沒事。 */
+function skip(...lines) {
+  console.warn(`[sync-to-public] 跳過同步 —— ${lines[0]}`)
+
+  for (const line of lines.slice(1)) console.warn(`  ${line}`)
+}
+
 async function main() {
   const targetDir = resolveTargetDir()
 
   if (!targetDir) {
-    console.error(`[sync-to-public] 中止:路徑中找不到 \`${DEV_SEGMENT}\` 這一段,無法推出目標位置。`)
-    console.error(`  目前位置:${projectDir}`)
-    process.exitCode = 1
+    skip(`路徑中找不到 \`${DEV_SEGMENT}\` 這一段,無法推出目標位置。`, `目前位置:${projectDir}`)
+
     return
   }
 
   const targetStats = await stat(targetDir).catch(() => null)
 
   if (!targetStats?.isDirectory()) {
-    console.error(`[sync-to-public] 中止:目標目錄不存在。`)
-    console.error(`  ${targetDir}`)
-    console.error(`  請先 clone 發布用的 repo 到 ${PUBLIC_SEGMENT} 側。`)
-    process.exitCode = 1
+    skip('目標目錄不存在。', targetDir, `請先 clone 發布用的 repo 到 ${PUBLIC_SEGMENT} 側。`)
+
     return
   }
 
@@ -344,9 +371,8 @@ async function main() {
   ])
 
   if (!targetBranch) {
-    console.error(`[sync-to-public] 中止:目標端不是 git repo。`)
-    console.error(`  ${targetDir}`)
-    process.exitCode = 1
+    skip('目標端不是 git repo。', targetDir)
+
     return
   }
 

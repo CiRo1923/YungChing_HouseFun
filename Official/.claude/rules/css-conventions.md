@@ -1432,27 +1432,28 @@ npm run diff:css -- ../old.css ../new.css    # 比對
 
 [lint-core.mjs](../../.tools/css/lint-core.mjs) 的 `SCAN_TARGETS` 只涵蓋
 `components` / `containers` / `pages` / `layouts` / `assets/css` / `app.vue` / `error.vue`,
-`SCAN_EXT` 只有 `.vue` 與 `.css`。**根目錄的設定檔兩個條件都不符**,
-而五層守門共用同一份判斷邏輯 —— 所以那些檔案是**五層都讀不到**,不是讀了以後判定沒問題。
+`SCAN_EXT` 只有 `.vue` 與 `.css`;根目錄的設定檔靠 `SCAN_CONFIG_FILES` 白名單納入
+(目前是 `tailwind.extend.js` 與 `tailwind.config.js`,**只檢查顏色**)。
+**兩份清單都不符的檔案是五層都讀不到**,不是讀了以後判定沒問題。
 
-親自確認:
+差別看得出來 —— 指名一支範圍外的檔案,它會回報通過,但括號裡的檔案數是 0:
 
 ```powershell
 node .tools/css/lint-css.mjs tailwind.extend.js
-# ✔ CSS 規範檢查通過(掃描 0 個檔案)   ← 括號裡是 0,檔案根本沒被打開
+# ✔ CSS 規範檢查通過(掃描 1 個檔案)   ← 在白名單裡,真的讀了
+
+node .tools/css/lint-css.mjs postcss.function.js
+# ✔ CSS 規範檢查通過(掃描 0 個檔案)   ← 是 0,檔案根本沒被打開
 ```
 
-**這代表「存量 0 筆」只涵蓋掃得到的範圍。** 本專案目前就有三個藏在盲區的色碼,
-都在 [tailwind.extend.js](../../tailwind.extend.js) 的 `boxShadow`:
+**目前仍在盲區的**:`postcss.function.js`、`tailwind.function.js`、`config.js`,
+以及任何其他根目錄 `.js`。`theme` 底下任何吃顏色的 key
+(`colors` / `borderColor` / `boxShadow` / `dropShadow`)只要落在那些檔案裡就抓不到。
 
-| preset | 色碼 | 使用端 |
-|---|---|---|
-| `black-y2-b4` | `#00000033` | `containers/common/Header.vue`、`_modules/common/mTab/ovalResponsive.css` |
-| `dropdown` | `#0000001a` ×2 | `_modules/buy/mSort/common.css` |
-| `card` | `#00000026` | `pages/buy/_components/common/Card.vue` |
-
-`tailwind.config.js` / `tailwind.function.js` / `postcss.function.js` / `config.js` 同理 ——
-`theme` 底下任何吃顏色的 key(`colors` / `borderColor` / `boxShadow` / `dropShadow`)都在盲區。
+> 這個盲區曾經藏過東西:`tailwind.extend.js` 的三個 `boxShadow` preset
+> (`black-y2-b4` / `dropdown` / `card`)各有寫死色碼,躲到 2026-08-28 才被發現。
+> **三個 preset 都已移除**,該檔現在只剩 `fontFamily` / `letterSpacing` / `lineHeight`,
+> 而它本身也進了白名單。
 
 **修法不是擴大掃描範圍**(把 `.js` 拉進來會開始誤報一堆字串),而是切斷需求:
 **陰影不要放進 tailwind preset** —— 值裡必定帶顏色,而 preset 又掃不到。
@@ -1528,10 +1529,11 @@ module 也多一層頻道目錄(`_modules/<頻道>/<組件>/`)。
 
 ### 違規存量
 
-**2026-08-28 起為 0 筆** —— `npm run lint:css` 掃描 289 個檔案全數通過。
+**2026-08-28 起為 0 筆** —— 最近一次確認 2026-09-07,`npm run lint:css` 掃描 304 個檔案全數通過。
 
-> ⚠️ 這個 0 只涵蓋**掃得到的範圍**。`tailwind.extend.js` 的三個 `boxShadow` preset
-> 仍藏著寫死色碼,那支檔案在掃描範圍外(見「檢查工具」章),lint 永遠不會報它們。
+> ⚠️ 這個 0 只涵蓋**掃得到的範圍**。掃不到的是 `postcss.function.js` 這類根目錄 `.js`
+> (見「檢查工具」章的盲區那節);當初藏在 `tailwind.extend.js` 的三個 `boxShadow`
+> preset 已經移除,該檔本身也進了白名單。
 
 導入當天(2026-08-27)是 414 筆 / 258 個檔案,分兩批清完:
 
