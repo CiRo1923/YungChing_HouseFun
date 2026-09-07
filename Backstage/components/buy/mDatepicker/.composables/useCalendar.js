@@ -10,16 +10,22 @@ import {
   onDateOnlyMs,
   onFormatYMD,
   onGetClientToday,
+  onGetDatePrecision,
   onGetYMD,
   onGetYMDByFormat,
   onPad2,
   onParseDate,
   onPickFormat,
   onSafeDateFromYMD,
+  onSplitDateTimeFormat,
 } from './useDateCore.js'
 import { monthLabels, weekLabels } from './useConfig.js'
 
-export const useCalendar = (config, model) => {
+/* options.range  Ref<{ start, end } | null> —— 區間選擇的起訖(Date 或任何 onParseDate 吃得下的值)。
+    只有 Range 那支會傳;單選不傳,range 相關的 class 就一律不出現。 */
+export const useCalendar = (config, model, options = {}) => {
+  const rangeRef = options.range ?? ref(null)
+
   // 已選中的日期(datePicker 格式,給畫面比對用)
   const currDate = ref(null)
   // 已選中的日期(model 格式,給呼叫端)
@@ -31,9 +37,23 @@ export const useCalendar = (config, model) => {
 
   const onFormat = (type = 'datePicker') => onPickFormat(config.value.format, type)
 
-  const onFormatBy = (y, m, d, type = 'datePicker') => onFormatYMD(y, m, d, onFormat(type))
+  /* ⚠️ 一定要先把 format 的時間段切掉再組字 —— onFormatYMD 只認得 YYYY / MM / DD,
+      直接餵 'YYYY-MM-DD hh:mm' 給它,時間那半會原封不動留在輸出裡
+      (得到 '2026-09-04 hh:mm')。
+
+      這支**只負責日期**。時間是獨立的一個欄位(Time.vue),值由呼叫端把兩半接起來。 */
+  const onFormatBy = (y, m, d, type = 'datePicker') => {
+    const { date: dateFormat } = onSplitDateTimeFormat(onFormat(type))
+
+    return onFormatYMD(y, m, d, dateFormat)
+  }
 
   const onGetYMDByConfig = (value, type = 'model') => onGetYMDByFormat(value, onFormat(type))
+
+  /* 選到哪一層,由畫面用的 format 決定 —— 'year' | 'month' | 'day'。
+    看 datePicker 而不是 model:畫面能不能點到日,是畫面格式的事
+    (model 存 YYYYMMDD、畫面顯示 YYYY-MM 這種組合仍然合理)。 */
+  const precision = computed(() => onGetDatePrecision(onFormat('datePicker')))
 
   /* ---- 今天 ---- */
 
@@ -204,7 +224,57 @@ export const useCalendar = (config, model) => {
     return list
   })
 
-  const onBindClass = (item) => {
+  /* 區間比對的粒度跟著精度走 —— 只選年的時候要比「年」,只到月的時候比「年月」。
+    用可比大小的整數鍵(2026 / 202609 / 20260904),而不是毫秒:
+    只到月的精度下,3 月 1 日與 3 月 31 日都該算同一格。 */
+  const onRangeKeyOf = (value) => {
+    const ymd = onGetYMD(value)
+    if (!ymd) return null
+
+    if (precision.value === 'year') return ymd.y
+    if (precision.value === 'month') return ymd.y * 100 + ymd.m
+
+    return ymd.y * 10000 + ymd.m * 100 + ymd.d
+  }
+
+  /* 區間的 class。起訖各自一個(要能單獨設圓角),中間一律 --in-range。
+    只選了起、還沒選訖時,那一格同時是頭也是尾 —— 兩邊都給,圓角才會是完整的一顆。 */
+  const onRangeClassOf = (key) => {
+    const range = rangeRef.value
+    if (!range || key == null) return []
+
+    const startKey = onRangeKeyOf(range.start)
+    if (startKey == null) return []
+
+    const endKey = onRangeKeyOf(range.end)
+
+    if (endKey == null) return key === startKey ? ['--range-start', '--range-end'] : []
+
+    const list = []
+
+    if (key === startKey) list.push('--range-start')
+    if (key === endKey) list.push('--range-end')
+    if (key > startKey && key < endKey) list.push('--in-range')
+
+    return list
+  }
+
+  const onRangeClass = (dateStr) => onRangeClassOf(onRangeKeyOf(dateStr))
+
+  /* 年清單與月清單的區間 class —— 精度停在那一層時才標,
+    否則(例如 format 到日、只是借年清單換年)區間標在年份上會很怪。 */
+  const onRangeClassByYear = (year) =>
+    precision.value === 'year' ? onRangeClassOf(Number(year)) : []
+
+  const onRangeClassByMonth = (monthIndex) =>
+    precision.value === 'month'
+      ? onRangeClassOf(Number(currYear.value) * 100 + Number(monthIndex) + 1)
+      : []
+
+  /* ⚠️ 狀態那幾個維持「互斥、只回一個」的優先鏈 —— 原本就是這個行為,
+      改成全部並存會讓「今天且被選中」的格子同時吃到 --curr 與 --today,
+      畫面會變。區間的 class 是**附加**上去的,不影響那條鏈。 */
+  const onBindStateClass = (item) => {
     if (item.date === currDate.value) return '--curr'
     if (onDateDisabled(item.date)) return '--disabled'
     if (item.type === 'last') return '--last'
@@ -213,6 +283,9 @@ export const useCalendar = (config, model) => {
 
     return null
   }
+
+  // 回陣列 —— 狀態一個 + 區間 0~2 個。Vue 的 :class 吃陣列,呼叫端不必改寫法
+  const onBindClass = (item) => [onBindStateClass(item), ...onRangeClass(item.date)].filter(Boolean)
 
   /* ---- 換年 / 換月 ---- */
 
@@ -321,6 +394,28 @@ export const useCalendar = (config, model) => {
     return formatDate.value
   }
 
+  /* 寫入一個「年月日」並回傳 model 格式的值 —— precision 為 year / month 時,
+    沒寫進 format 的那幾段補 1,onFormatYMD 也不會輸出它們。
+    與 onSelectDate 分開:那支是「點日曆格子」,這支是「點年 / 月清單」。 */
+  const onSelectYMD = (y, m = 1, d = 1) => {
+    const date = onSafeDateFromYMD(y, m, d)
+    if (!date) return null
+
+    currYear.value = y
+    currMonth.value = m - 1
+    currDateValue.value = date
+    currDate.value = onFormatBy(y, m, d, 'datePicker')
+    formatDate.value = onFormatBy(y, m, d, 'model')
+
+    return formatDate.value
+  }
+
+  // 點年清單。precision 為 year 時這就是最終值;更細的精度只是換年瀏覽(走 onChangeYear)
+  const onSelectYear = (year) => onSelectYMD(year)
+
+  // 點月清單(0-11)。precision 為 month 時這是最終值
+  const onSelectMonth = (monthIndex) => onSelectYMD(currYear.value, monthIndex + 1)
+
   /* maxDate / minDate 是外部餵的(常常晚一步才回來),
     變更時若目前停的日期已經超過 maxDate,把日曆拉回 maxDate。 */
   watch(
@@ -367,5 +462,12 @@ export const useCalendar = (config, model) => {
     onSetMonth,
     onSyncFromModel,
     onSelectDate,
+    precision,
+    onSelectYMD,
+    onSelectYear,
+    onSelectMonth,
+    onRangeClassByYear,
+    onRangeClassByMonth,
+    range: rangeRef,
   }
 }

@@ -107,6 +107,40 @@
   --datepicker-calendar-next-color: var(--gray-ccce);
   --datepicker-calendar-next-border: 0;
   --datepicker-calendar-next-border-color: transparent;
+
+  /*
+   * 區間選擇(Range 變體)—— 起訖兩端與中間各自的配色。顏色不分斷點。
+   * 中間只設背景,文字色沿用格子的基礎色(--datepicker-calendar-date-color)。
+   */
+  --datepicker-calendar-range-bg-color: var(--orange-e646);
+  --datepicker-calendar-range-color: var(--white);
+  --datepicker-calendar-in-range-bg-color: var(--orange-feea);
+
+  /*
+   * 區間最頭 / 最尾的圓角 —— 兩端各自一組,要方角就把值改成 0。
+   * 9999px 等同 tailwind 的 rounded-full:格子非正方時會是膠囊而不是橢圓。
+   */
+  --datepicker-calendar-range-start-rounded: 0;
+  --datepicker-calendar-range-start-pc-rounded: 9999px;
+  --datepicker-calendar-range-start-tablet-rounded: 9999px;
+  --datepicker-calendar-range-start-mobile-rounded: 9999px;
+
+  --datepicker-calendar-range-end-rounded: 0;
+  --datepicker-calendar-range-end-pc-rounded: 9999px;
+  --datepicker-calendar-range-end-tablet-rounded: 9999px;
+  --datepicker-calendar-range-end-mobile-rounded: 9999px;
+
+  /* 日期欄位與時間欄位之間(format 帶時間段時) */
+  --datepicker-datetime-gap-x: 0;
+  --datepicker-datetime-pc-gap-x: 8px;
+  --datepicker-datetime-tablet-gap-x: 8px;
+  --datepicker-datetime-mobile-gap-x: 8px;
+
+  /* Range 變體:起訖兩組之間(input ~ input) */
+  --datepicker-range-gap-x: 0;
+  --datepicker-range-pc-gap-x: 8px;
+  --datepicker-range-tablet-gap-x: 8px;
+  --datepicker-range-mobile-gap-x: 8px;
   --datepicker-calendar-disabled-bg-color: transparent;
   --datepicker-calendar-disabled-color: var(--gray-e5);
   --datepicker-calendar-disabled-border: 0;

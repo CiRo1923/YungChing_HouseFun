@@ -10,8 +10,14 @@ const props = defineProps({
     type: [Number, String],
     default: null,
   },
+  rangeClassOf: {
+    type: Function,
+    default: () => [],
+  },
 })
 
+/* 區間選擇時,這一格要標哪些 class(--range-start / --in-range / --range-end)。
+  由 useCalendar 算好傳進來 —— 這支只負責畫,不知道區間是什麼。 */
 defineEmits(['select'])
 </script>
 
@@ -21,7 +27,10 @@ defineEmits(['select'])
       <button
         type="button"
         class="m-datepicker-panel-ctrl"
-        :class="{ '--curr': Number(item.key) === Number(props.current) }"
+        :class="[
+          props.rangeClassOf(item.key),
+          { '--curr': Number(item.key) === Number(props.current) },
+        ]"
         @click="$emit('select', item.key)"
       >
         {{ item.value }}

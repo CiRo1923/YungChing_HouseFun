@@ -150,6 +150,39 @@ export const onPickFormat = (format, type = 'datePicker') => {
   return String(format || DEFAULT_FORMAT).trim()
 }
 
+/* format 同時決定「選到哪一層」與「有沒有時間」—— 與時間端同一套想法:
+    寫在 format 裡的段落才選得到,沒寫的就不出現。
+
+      YYYY                 只選年
+      YYYY-MM              年 / 月
+      YYYY-MM-DD           年 / 月 / 日
+      YYYY-MM-DD hh        年月日 + 時
+      YYYY-MM-DD hh:mm     年月日 + 時分
+      YYYY-MM-DD hh:mm:00  年月日 + 時分(秒補 00)
+
+  日期與時間以空白分隔,時間那半原封不動交給 useTimeCore 處理
+  (它自己會依 hh / mm / ss 與數字字面決定欄位),這裡不重複解析。 */
+export const onSplitDateTimeFormat = (format) => {
+  const raw = String(format || DEFAULT_FORMAT).trim()
+  const [date, ...rest] = raw.split(/\s+/)
+
+  return { date: date || DEFAULT_FORMAT, time: rest.join(' ') }
+}
+
+/* 日期的精度 —— 'year' | 'month' | 'day'。
+  有 D 就到日、只有 M 就到月、都沒有就只有年。 */
+export const onGetDatePrecision = (format) => {
+  const { date } = onSplitDateTimeFormat(format)
+
+  if (/D/.test(date)) return 'day'
+  if (/M/.test(date)) return 'month'
+
+  return 'year'
+}
+
+// format 裡有沒有時間段(決定要不要掛時間滾輪)
+export const onHasTimeFormat = (format) => !!onSplitDateTimeFormat(format).time
+
 // 依 format 組出日期字串;分隔符統一換成 format 自己用的那個
 export const onFormatYMD = (y, m, d, format) => {
   const sep = onGetFormatSep(format)
@@ -162,27 +195,34 @@ export const onFormatYMD = (y, m, d, format) => {
 }
 
 /* 依 format 反解:先把兩邊的非文數字都去掉,再用 format 裡 Y/M/D 的**位置**去切值。
-  這樣 20260819 與 2026-08-19 都吃得下,不必為每種分隔符寫一條正則。 */
+  這樣 20260819 與 2026-08-19 都吃得下,不必為每種分隔符寫一條正則。
+
+  ⚠️ format 只到年或只到月時(YYYY / YYYY-MM),缺的那幾段補 1 ——
+      Date 需要完整的年月日才建得起來,少一段會得到 Invalid Date。
+      補 1 而不是補「今天」:同一個值不該因為今天是幾號而解析出不同結果。 */
 export const onParseByFormat = (value, format) => {
   if (value instanceof Date || typeof value === 'number') return onParseDate(value)
   if (value == null || value === '') return null
 
-  const formatValue = String(format).replace(/\W/g, '')
+  // 時間那半交給 useTimeCore,這裡只看日期段
+  const { date: dateFormat } = onSplitDateTimeFormat(onPickFormat(format))
+  const formatValue = String(dateFormat).replace(/\W/g, '')
   const dateValue = String(value).replace(/\W/g, '')
   if (dateValue.length < formatValue.length) return null
 
-  const onGetPart = (regex) => {
+  const onGetPart = (regex, fallback) => {
     const matched = new RegExp(regex).exec(formatValue)
-    if (!matched) return ''
+    if (!matched) return fallback
 
-    return dateValue.substring(matched.index, matched.index + matched[0].length)
+    const parsed = parseInt(
+      dateValue.substring(matched.index, matched.index + matched[0].length),
+      10
+    )
+
+    return Number.isNaN(parsed) ? fallback : parsed
   }
 
-  return onSafeDateFromYMD(
-    parseInt(onGetPart(/Y+/), 10),
-    parseInt(onGetPart(/M+/), 10),
-    parseInt(onGetPart(/D+/), 10)
-  )
+  return onSafeDateFromYMD(onGetPart(/Y+/, NaN), onGetPart(/M+/, 1), onGetPart(/D+/, 1))
 }
 
 export const onGetYMDByFormat = (value, format) => {

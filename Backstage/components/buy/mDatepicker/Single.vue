@@ -10,7 +10,13 @@ import '@css/_modules/buy/mDatepicker/common.css'
   config 的鍵見 .composables/useConfig.js —— 那份是對外契約,不要改名。 */
 
 import useValidateEvents from '../../common/mForm/.composables/useValidateEvents.js'
-import { onGetYMDByFormat, onPickFormat, onGetFormatSep } from './.composables/useDateCore.js'
+import {
+  onGetYMDByFormat,
+  onPickFormat,
+  onGetFormatSep,
+  onHasTimeFormat,
+  onSplitDateTimeFormat,
+} from './.composables/useDateCore.js'
 import { onMergeDateConfig } from './.composables/useConfig.js'
 import { useCalendar } from './.composables/useCalendar.js'
 import { usePosition } from './.composables/usePosition.js'
@@ -70,12 +76,52 @@ const isDeviceM = computed(() => device.value === 'm')
 const isPopup = computed(() => isDeviceM.value && config.value.mobileSupport)
 const inputType = computed(() => (isDeviceM.value && !config.value.mobileSupport ? 'date' : 'tel'))
 
+/* format 帶時間段時,時間是**獨立的一個欄位**(Time.vue)並排在日期旁邊 ——
+  不是把時間滾輪塞進日曆浮層。有哪幾欄仍然由 format 決定,轉手給那支元件判斷。 */
+const hasTime = computed(() => onHasTimeFormat(onPickFormat(config.value.format, 'datePicker')))
+
+const timeFormat = computed(
+  () => onSplitDateTimeFormat(onPickFormat(config.value.format, 'datePicker')).time
+)
+
+/* model 是「日期 時間」兩半用一個空白接起來的字串。
+  兩個欄位各自只認自己那半,寫回時再把另一半接上 —— 這樣時間欄位不必知道日期怎麼格式化,
+  反之亦然。 */
+const modelParts = computed(() => {
+  const [date, time] = String(props.modelValue ?? '')
+    .trim()
+    .split(/\s+/)
+
+  return { date: date || '', time: time || '' }
+})
+
 const model = computed({
   get: () => props.modelValue,
   set: (value) => emits('update:modelValue', value),
 })
 
-const calendar = useCalendar(config, model)
+// 日期那半 —— 寫回時保留現有的時間
+const dateModel = computed({
+  get: () => modelParts.value.date,
+  set: (value) => {
+    const { time } = modelParts.value
+
+    emits('update:modelValue', hasTime.value && time ? `${value} ${time}` : value)
+  },
+})
+
+// 時間那半 —— 寫回時保留現有的日期
+const timeModel = computed({
+  get: () => modelParts.value.time,
+  set: (value) => {
+    const { date } = modelParts.value
+
+    emits('update:modelValue', date ? `${date} ${value}` : value)
+  },
+})
+
+// 日曆只吃日期那半 —— 時間交給 Time.vue,useCalendar 不碰
+const calendar = useCalendar(config, dateModel)
 
 const { onOpen, onClickOutside, onResizeDone } = usePosition(config, isPopup, {
   container: containerRef,
@@ -95,23 +141,25 @@ const onGetInputValue = (value) => {
   (config.format 給 { model, datePicker } 時),所以中間要轉一手。 */
 const datePickerModel = computed({
   get() {
-    const ymd = calendar.onGetYMDByConfig(model.value, 'model')
+    const ymd = calendar.onGetYMDByConfig(dateModel.value, 'model')
     if (ymd) return calendar.onFormatBy(ymd.y, ymd.m, ymd.d, 'datePicker')
 
-    if (model.value == null) return config.value.defaultIsToday ? calendar.today.value : ''
+    if (!dateModel.value) return config.value.defaultIsToday ? calendar.today.value : ''
 
-    return onGetInputValue(model.value)
+    return onGetInputValue(dateModel.value)
   },
   set(newValue) {
     const value = onGetInputValue(newValue)
     const ymd = onGetYMDByFormat(value, onPickFormat(config.value.format, 'datePicker'))
 
-    model.value = ymd ? calendar.onFormatBy(ymd.y, ymd.m, ymd.d, 'model') : value
+    dateModel.value = ymd ? calendar.onFormatBy(ymd.y, ymd.m, ymd.d, 'model') : value
   },
 })
 
 const setClass = computed(() => ({
   main: '',
+  // format 帶時間段時,傳給並排的那個時間欄位
+  time: '',
   input: {
     main: '',
     elem: '',
@@ -197,15 +245,21 @@ const onFocusout = (e) => {
   emits('focusout', e)
 }
 
-const onSelect = (dateStr) => {
-  const value = calendar.onSelectDate(dateStr)
+/* 選定的統一出口:收合 → 回報值 → 下一輪再發 selected。
+  ⚠️ 走 dateModel 而不是直接 emit —— 它的 setter 會把現有的時間接回去,
+      直接 emit 會把時間那半整個蓋掉。 */
+const onCommit = (value) => {
   if (!value) return
 
   onToggle(false)
-  emits('update:modelValue', value)
+  dateModel.value = value
 
   nextTick(() => emits('selected'))
 }
+
+const onSelect = (dateStr) => onCommit(calendar.onSelectDate(dateStr))
+
+const onSelectYMD = ({ y, m, d }) => onCommit(calendar.onSelectYMD(y, m, d))
 
 const onDocumentClick = (e) => onClickOutside(e, () => onToggle(false))
 
@@ -234,54 +288,75 @@ onUnmounted(() => {
 
 <template>
   <div class="m-datepicker --single" :class="setClass.main">
-    <Field
-      :name="props.name"
-      :rules="props.rules"
-      v-model="datePickerModel"
-      v-bind="validateOn"
-      v-slot="{ field, errorMessage }"
-    >
-      <div class="m-datepicker-container" ref="containerRef">
-        <div
-          class="m-datepicker-element"
-          :class="[
-            setClass.label,
-            { '--required': model },
-            { '--focus': isFocus },
-            { '--error': errorMessage },
-          ]"
-        >
-          <input
-            class="m-datepicker-type"
-            :type="inputType"
-            v-bind="field"
-            :minlength="config.length"
-            :maxlength="config.length"
-            :placeholder="config.placeholder"
-            :readonly="!config.altInput"
-            :value="datePickerModel"
-            autocomplete="off"
-            @pointerdown="onInputPointerdown($event)"
-            @keydown="onKeydownDateMask($event)"
-            @focusin="onFocusin($event)"
-            @click="onInputClick()"
-            @focusout="onFocusout($event)"
-            @input="emits('input', $event)"
-            @keydown.enter="emits('keydown.enter')"
-          />
-          <div class="m-datepicker-ctrl">
-            <button
-              type="button"
-              class="m-datepicker-icon"
-              @pointerdown="onCalendarButtonPointerdown($event)"
-              ref="iconRef"
-            >
-              <CommonSvgIcon icon="icon_calendar" />
-            </button>
+    <!-- 日期與時間並排。沒有時間段時 group 裡只有日期那一個,版型不受影響 -->
+    <div class="m-datepicker-datetime-group">
+      <Field
+        :name="props.name"
+        :rules="props.rules"
+        v-model="datePickerModel"
+        v-bind="validateOn"
+        v-slot="{ field, errorMessage }"
+      >
+        <div class="m-datepicker-container" ref="containerRef">
+          <div
+            class="m-datepicker-element"
+            :class="[
+              setClass.label,
+              { '--required': model },
+              { '--focus': isFocus },
+              { '--error': errorMessage },
+            ]"
+          >
+            <input
+              class="m-datepicker-type"
+              :type="inputType"
+              v-bind="field"
+              :minlength="config.length"
+              :maxlength="config.length"
+              :placeholder="config.placeholder"
+              :readonly="!config.altInput"
+              :value="datePickerModel"
+              autocomplete="off"
+              @pointerdown="onInputPointerdown($event)"
+              @keydown="onKeydownDateMask($event)"
+              @focusin="onFocusin($event)"
+              @click="onInputClick()"
+              @focusout="onFocusout($event)"
+              @input="emits('input', $event)"
+              @keydown.enter="emits('keydown.enter')"
+            />
+            <div class="m-datepicker-ctrl">
+              <button
+                type="button"
+                class="m-datepicker-icon"
+                @pointerdown="onCalendarButtonPointerdown($event)"
+                ref="iconRef"
+              >
+                <CommonSvgIcon icon="icon_calendar" />
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    </Field>
+      </Field>
+
+      <!-- format 帶時間段時才出現。有哪幾欄由那支元件依 format 自己判斷 -->
+      <BuyMDatepickerTime
+        :name="`${props.name}Time`"
+        v-model="timeModel"
+        :config="{
+          format: timeFormat,
+          step: config.step,
+          minTime: config.minTime,
+          maxTime: config.maxTime,
+          mobileSupport: config.mobileSupport,
+          position: config.position,
+        }"
+        :setClass="{
+          main: setClass.time,
+        }"
+        v-if="hasTime"
+      />
+    </div>
 
     <ErrorMessage
       as="span"
@@ -310,6 +385,7 @@ onUnmounted(() => {
             :config="config"
             :calendar="calendar"
             @select="onSelect"
+            @selectYMD="onSelectYMD"
             v-if="isActive"
           />
         </Transition>

@@ -59,6 +59,13 @@ export const defaultDateConfig = {
   today: null, // 指定「今天」(通常餵 server 時間)
   maxDate: '',
   minDate: '',
+  /* 以下三個只在 format 帶時間段時才用得到(YYYY-MM-DD hh:mm 這種)——
+    語意與 defaultTimeConfig 的同名鍵完全一致,轉手傳給同一個時間面板。 */
+  step: { hour: 1, minute: 1, second: 1 },
+  minTime: '',
+  maxTime: '',
+  // Range 變體兩個欄位之間的符號
+  rangeSeparator: '~',
   length: null,
   placeholder: null,
   // 驗證時機。null = 沿用全域(等同 ['blur', 'change', 'modelUpdate']);
@@ -77,8 +84,7 @@ export const defaultTimeConfig = {
   defaultIsNow: false, // 對齊日期的 defaultIsToday
   minTime: '',
   maxTime: '',
-  // ⚠️ _svg 裡目前沒有時鐘圖示,先沿用日曆的;要換就自己加一支 svg 再傳這個
-  icon: 'icon_calendar',
+  icon: 'icon_time',
   length: null,
   placeholder: null,
   // 驗證時機。null = 沿用全域(等同 ['blur', 'change', 'modelUpdate']);
@@ -91,11 +97,22 @@ export const defaultTimeConfig = {
 export const onMergeDateConfig = (config = {}) => {
   const merged = { ...defaultDateConfig, ...config }
 
-  return { ...merged, format: onNormalizeFormat(merged.format) }
+  return {
+    ...merged,
+    format: onNormalizeFormat(merged.format),
+    // step 與時間那支一樣要逐欄合併,呼叫端只給 { minute: 15 } 時另兩欄才不會掉
+    step: { ...defaultDateConfig.step, ...(config.step || {}) },
+  }
 }
 
 export const onMergeTimeConfig = (config = {}) => {
   const merged = { ...defaultTimeConfig, ...config }
 
-  return { ...merged, step: { ...defaultTimeConfig.step, ...(config.step || {}) } }
+  return {
+    ...merged,
+    step: { ...defaultTimeConfig.step, ...(config.step || {}) },
+    /* placeholder 沒給就用 format 本身當提示(hh:mm:ss / hh:mm / hh …)。
+      不寫死成 hh:mm:ss —— format 只到分的時候,提示三段會對不上實際能填的欄位。 */
+    placeholder: merged.placeholder ?? merged.format,
+  }
 }

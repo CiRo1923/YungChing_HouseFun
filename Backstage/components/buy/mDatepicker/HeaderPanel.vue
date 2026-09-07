@@ -3,7 +3,11 @@
   (vue-datepicker-next 的操作方式)。面板本身由 Calendar 決定要不要顯示,
   這裡只負責回報「使用者想切到哪一層」。
 
-  ⚠️ 面板開著的時候左右箭頭要停用 —— 那時畫面上不是日曆,換月沒有意義。 */
+  ⚠️ 箭頭要不要停用**完全由 prevDisabled / nextDisabled 決定**,這裡不自己判斷 ——
+      箭頭換的是月還是年、面板開著算不算有意義,都要看 format 的精度,
+      而精度只有 Calendar 知道(只到月時月清單一直開著,箭頭換的是年,不該停用)。
+
+  ⚠️ monthLabel 空字串時不渲染月按鈕 —— 只到月的精度沒有「月」可以再往下切。 */
 const props = defineProps({
   year: {
     type: [Number, String],
@@ -37,7 +41,7 @@ defineEmits(['prev', 'next', 'toggle'])
       <button
         type="button"
         class="m-datepicker-calendar-arrow"
-        :disabled="props.prevDisabled || props.mode !== 'date'"
+        :disabled="props.prevDisabled"
         @click="$emit('prev')"
       >
         <CommonSvgIcon icon="chevron_left" class="m-datepicker-calendar-arrow-icon" />
@@ -59,6 +63,7 @@ defineEmits(['prev', 'next', 'toggle'])
           class="m-datepicker-calendar-label"
           :class="{ '--active': props.mode === 'month' }"
           @click="$emit('toggle', 'month')"
+          v-if="props.monthLabel"
         >
           {{ props.monthLabel }}
         </button>
@@ -69,7 +74,7 @@ defineEmits(['prev', 'next', 'toggle'])
       <button
         type="button"
         class="m-datepicker-calendar-arrow"
-        :disabled="props.nextDisabled || props.mode !== 'date'"
+        :disabled="props.nextDisabled"
         @click="$emit('next')"
       >
         <CommonSvgIcon icon="chevron_right" class="m-datepicker-calendar-arrow-icon" />

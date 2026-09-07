@@ -283,7 +283,7 @@ onUnmounted(() => {
             @keydown.enter="emits('keydown.enter')"
           />
           <div class="m-datepicker-ctrl">
-            <!-- ⚠️ _svg 裡沒有時鐘圖示,所以預設沿用日曆的;要換就傳 config.icon -->
+            <!-- 圖示可換 —— 預設是 icon_time,要別的就傳 config.icon -->
             <button
               type="button"
               class="m-datepicker-icon"
