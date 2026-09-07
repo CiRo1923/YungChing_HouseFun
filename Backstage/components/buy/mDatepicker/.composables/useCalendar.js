@@ -80,21 +80,31 @@ export const useCalendar = (config, model, options = {}) => {
 
   /* ---- min / max ---- */
 
-  const onDateDisabled = (dateStr) => {
-    const dateMs = onDateOnlyMs(dateStr)
-    if (dateMs == null) return false
+  // 沒設定時回 null(= 那一端不限制),空字串也算沒設定
+  const onLimitMs = (key) =>
+    config.value[key] !== '' && config.value[key] != null ? onDateOnlyMs(config.value[key]) : null
 
-    const maxMs =
-      config.value.maxDate !== '' && config.value.maxDate != null
-        ? onDateOnlyMs(config.value.maxDate)
-        : null
-    const minMs =
-      config.value.minDate !== '' && config.value.minDate != null
-        ? onDateOnlyMs(config.value.minDate)
-        : null
+  /* 一段日期區間與 min / max 完全沒有交集 → 這段整個不能選。
 
-    return !!((maxMs != null && dateMs > maxMs) || (minMs != null && dateMs < minMs))
+    ⚠️ 判斷的是「有沒有交集」,不是「兩個端點各自合不合格」——
+        min 是 3 月、max 是 10 月時,年初早於 min、年末晚於 max,
+        **兩端都不合格但中間 8 個月都選得到**。拿兩個端點各自 disabled 再 `&&`
+        會把整年停掉,那是實際踩過的 bug(月清單同理:min / max 落在同一個月內時,
+        月初與月末都不合格,但中間那幾天是可選的)。 */
+  const onRangeDisabled = (startDate, endDate) => {
+    const startMs = onDateOnlyMs(startDate)
+    const endMs = onDateOnlyMs(endDate)
+    if (startMs == null || endMs == null) return false
+
+    const maxMs = onLimitMs('maxDate')
+    const minMs = onLimitMs('minDate')
+
+    // 整段都晚於 max,或整段都早於 min
+    return !!((maxMs != null && startMs > maxMs) || (minMs != null && endMs < minMs))
   }
+
+  // 單一天就是「起訖同一天」的區間
+  const onDateDisabled = (dateStr) => onRangeDisabled(dateStr, dateStr)
 
   /* ---- 年 / 月清單 ---- */
 
@@ -128,13 +138,14 @@ export const useCalendar = (config, model, options = {}) => {
     return labels.map((value, index) => ({ key: index, value }))
   })
 
-  /* 整年(整月)都落在 min / max 之外才停用 —— 只要有一天在範圍內就要能點進去,
-    不然 maxDate 是 9/7 的時候整個 9 月會被停掉。 */
+  /* 整年 / 整月與 min / max 沒有交集才停用 —— 只要有一天在範圍內就要能點進去
+    (maxDate 是 9/7 時 9 月要選得到;min 3 月、max 10 月時 2026 年要選得到)。
+    判斷細節見 onRangeDisabled 的註解。 */
   const onYearDisabled = (year) => {
     const y = Number(year)
     if (!Number.isFinite(y)) return false
 
-    return onDateDisabled(onSafeDateFromYMD(y, 1, 1)) && onDateDisabled(onSafeDateFromYMD(y, 12, 31))
+    return onRangeDisabled(onSafeDateFromYMD(y, 1, 1), onSafeDateFromYMD(y, 12, 31))
   }
 
   // monthIndex 是 0-11,對齊 Date 的 getMonth()
@@ -146,9 +157,7 @@ export const useCalendar = (config, model, options = {}) => {
     // 這個月的最後一天 —— 下個月的第 0 天
     const lastDay = new Date(y, m, 0).getDate()
 
-    return (
-      onDateDisabled(onSafeDateFromYMD(y, m, 1)) && onDateDisabled(onSafeDateFromYMD(y, m, lastDay))
-    )
+    return onRangeDisabled(onSafeDateFromYMD(y, m, 1), onSafeDateFromYMD(y, m, lastDay))
   }
 
   /* ---- 星期列 ---- */

@@ -15,6 +15,11 @@ const onOffsetDate = (days) => {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
 }
 
+/* 同一年、不同月份的 min / max —— 專門驗年 / 月面板的「有沒有交集」判斷。
+  不寫死年份:寫死的話明年就變成整年都超出範圍,這個案例會失去意義。 */
+const sameYearMin = `${today.getFullYear()}-03-01`
+const sameYearMax = `${today.getFullYear()}-10-31`
+
 /* 每一條 format 對應「選到哪一層」——
   規則與時間端一致:寫成 token 的段落可選,寫成數字字面(00)的只輸出不可選。 */
 const singles = ref([
@@ -75,6 +80,14 @@ const ranges = ref([
     note: 'maxDate 固定是今天(直接餵 Date 物件,元件會自己截掉時分秒),不受上面的 min / max 開關影響。12 個月照樣列出來,本月之後的是 disabled 點不到(整月都超出上限才停用,所以本月自己仍可選)。起訖共用同一個上限。',
     value: [],
     maxDate: today,
+  },
+  {
+    format: 'YYYY-MM',
+    label: '區間(年月)—— min / max 同年不同月',
+    note: '驗年 / 月面板的「有沒有交集」判斷:3 月到 10 月可選、1、2、11、12 月停用,而點開年份面板時**今年必須是可選的** —— 它不該因為年初與年末都超出範圍就被整年停掉(那是實際踩過的 bug)。',
+    value: [],
+    minDate: sameYearMin,
+    maxDate: sameYearMax,
   },
   {
     format: 'YYYY-MM-DD hh:mm',
@@ -192,7 +205,7 @@ const hasLimit = ref(false)
                 defaultIsToday: false,
                 headerMode: 'panel',
                 placeholder: onDateFormatOf(item.format),
-                minDate: hasLimit ? minDate : '',
+                minDate: item.minDate || (hasLimit ? minDate : ''),
                 maxDate: item.maxDate || (hasLimit ? maxDate : ''),
               }"
               :setClass="{
