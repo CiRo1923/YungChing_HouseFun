@@ -14,7 +14,7 @@
     iconRef       右側的按鈕(判斷點擊是否在自己身上)
     panelRef      被定位的面板
 
-  isPopup(手機且開啟 mobileSupport → 置中的 popup)也在這裡算 ——
+  isPopup(置中的 popup —— 成立條件見下面那段註解)也在這裡算 ——
   它只影響「要不要算座標」與遮罩的樣式,呼叫端只是轉手給 template。
 
   document 的 click 與 window 的 resize 監聽由這支自己掛上與移除,
@@ -32,8 +32,16 @@ export const usePosition = (config) => {
 
   const isDeviceM = computed(() => device.value === 'm')
 
-  // 手機且開啟 mobileSupport → 置中的 popup;關掉則交給原生的 input
-  const isPopup = computed(() => isDeviceM.value && config.value.mobileSupport)
+  /* 置中的 popup 有兩種成立方式,兩邊都要收:
+      config.position === 'popup'  呼叫端明確要求(不分裝置)
+      手機 + mobileSupport         自動切換;關掉則交給原生的 input
+
+    ⚠️ 兩個條件都留著,這支才能在不同專案的複本之間保持一份 ——
+        有的專案只用 position、有的只用裝置判斷,少一個就會少一種行為。
+        沒有那個 config 鍵的專案讀到 undefined,那一半自然不成立。 */
+  const isPopup = computed(
+    () => config.value.position === 'popup' || (isDeviceM.value && !!config.value.mobileSupport)
+  )
 
   // 面板開著沒有;isFocus 跟著它走(輸入框的外框要顯示 focus 樣式)
   const isActive = ref(false)
@@ -47,14 +55,28 @@ export const usePosition = (config) => {
   const onClamp = (value, min, max) => Math.min(Math.max(value, min), max)
 
   const onOpen = () => {
-    // popup 模式靠 CSS 置中,不需要算座標
-    if (isPopup.value) return true
+    /* popup 模式靠 CSS 置中,不需要算座標 —— 但先把先前算過的 inline 座標清掉。
+
+      ⚠️ 不清會歪掉:`--popup` 是 `fixed inset-0`,而 inline style 的優先權更高。
+          面板開著時跨斷點 resize(isPopup 由 false 翻成 true)就會留著舊的 left / top,
+          inset 的 left 被蓋掉、right 卻還是 0,面板被拉成一條並偏到一邊。 */
+    if (isPopup.value) {
+      if (refs.panel.value) {
+        refs.panel.value.style.left = ''
+        refs.panel.value.style.top = ''
+      }
+
+      return true
+    }
+
     if (!refs.panel.value || !refs.container.value) return false
 
+    /* 走到這裡的 position 只會是 'auto' 或上下左右組合('left' / 'left-top')——
+      'popup' 已經在上面就 return 了,所以這底下不必再判斷它。 */
     const { position } = config.value
-    const isKeyword = position === 'auto' || position === 'popup'
-    const positionX = isKeyword ? position : position.split('-')[0]
-    const positionY = isKeyword ? position : position.split('-')[1]
+    const isAuto = position === 'auto'
+    const positionX = isAuto ? position : position.split('-')[0]
+    const positionY = isAuto ? position : position.split('-')[1]
 
     const rect = refs.container.value.getBoundingClientRect()
     const viewHeight = Math.max(document.documentElement.clientHeight, window.innerHeight)
@@ -68,29 +90,19 @@ export const usePosition = (config) => {
     const bottomTop = containerTop + refs.container.value.scrollHeight
     const topTop = containerTop - contentHeight
 
-    const rawTop =
-      positionY === 'popup'
-        ? scrollTop + viewHeight / 2 - contentHeight / 2
-        : positionY === 'top'
-          ? topTop
-          : bottomTop
+    const rawTop = positionY === 'top' ? topTop : bottomTop
 
     const rawLeft =
-      positionX === 'popup'
-        ? scrollLeft + viewWidth / 2 - contentWidth / 2
-        : positionX === 'left'
-          ? scrollLeft + rect.left
-          : positionX === 'right'
-            ? scrollLeft + rect.right - contentWidth
-            : scrollLeft + rect.left + rect.width / 2 - contentWidth / 2
+      positionX === 'left'
+        ? scrollLeft + rect.left
+        : positionX === 'right'
+          ? scrollLeft + rect.right - contentWidth
+          : scrollLeft + rect.left + rect.width / 2 - contentWidth / 2
 
     // 下方放不下就翻到上方;上方也放不下就維持原本設定的位置
     const isBottomOverflow = rawTop - scrollTop + contentHeight > viewHeight
     const isTopFits = topTop >= scrollTop
-    const safeTop =
-      positionY !== 'popup' && positionY !== 'top' && isBottomOverflow && isTopFits
-        ? topTop
-        : rawTop
+    const safeTop = positionY !== 'top' && isBottomOverflow && isTopFits ? topTop : rawTop
 
     refs.panel.value.style.left = `${onClamp(rawLeft, scrollLeft, scrollLeft + viewWidth - contentWidth)}px`
     refs.panel.value.style.top = `${safeTop}px`

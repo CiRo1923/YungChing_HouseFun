@@ -1548,7 +1548,7 @@ node .tools/css/lint-css.mjs postcss.function.js
 > 這個盲區曾經藏過東西:`tailwind.extend.js` 的 `boxShadow.dropdown` 與 `dropShadow.text`
 > 各有寫死色碼,躲到 2026-08-28 才被發現(兩個 preset 都已移除,該檔現在只剩 `fontFamily`)。
 > 陰影改走原生 `box-shadow` + module 的 `--x-pc-shadow` 三斷點變數,
-> 參考 [mFormDropdown](../../assets/css/_modules/buy/mFormDropdown.css) 與
+> 參考 [common/mForm/dropdownVariables.css](../../assets/css/_modules/common/mForm/dropdownVariables.css) 與
 > [mSort](../../assets/css/_modules/buy/mSort/variables.css) ——
 > 那是比留在 preset 更好的寫法(值能分斷點),但**不是**因為 preset 抓不到,
 > preset 現在也在檢查範圍內了。
@@ -1624,40 +1624,37 @@ module 一樣分頻道目錄(`_modules/<頻道>/<組件>/`),目前只有 `buy` �
 > diff --strip-trailing-cr ../Official/.githooks/pre-commit .githooks/pre-commit
 > ```
 
-### 違規存量
+### 違規存量:**已歸零**
 
-2026-08-28 的掃描:250 個檔案,**785 筆**。規則 1 是清乾淨的,其餘是既有程式碼:
+2026-09-07 的全案掃描:**326 個檔案、0 筆**。
 
-| 規則             | 筆數 / 檔案 | 主要分布                                             |
-| ---------------- | ----------- | ---------------------------------------------------- |
-| 1 顏色           | **0**       | 導入時一併清完(見下方)                               |
-| 2 tailwind class | 553 / 48    | mUpload、mForm/AutoComplete、mLoading 等尚未拆的組件 |
-| 3 module 結構    | 51 / 34     | 組件自己留 `<style>` 區塊                            |
-| 4 module 變數    | 167 / 6     | 見下方說明                                           |
-| 5 import 順序    | 14 / 13     | `./.composables` 排在 `vee-validate` / `@js` 之後    |
+✅ **所以看到紅字就是剛動的那幾行有問題** —— 不必再分辨「這是不是既有存量」,
+直接當成這次改壞的來看。
 
-規則 4 那 167 筆裡有 **113 筆是 `checkLayoutFileValues`**(「版型檔的變數宣告右邊一定是 `var(…)`」),
-集中在四支**還沒拆成資料夾的單檔 module**:`buy/mFormDropdown.css` 61、`buy/mDatepicker.css` 42、
-`buy/mForm.css` 6、`buy/mTable.css` 4。
+```powershell
+npm run lint:css        # 應該永遠是「✔ CSS 規範檢查通過」
+```
 
-那條規則要求「值」與「版型」分家,而單檔 module 的 `:root` 與版型本來就寫在同一支 ——
-**所以這 113 筆是「還沒拆」的衍生結果,不是四散各處的獨立問題,拆完資料夾會一起消失**,
-不需要也不該單獨去修。剩下的 54 筆才是命名與斷點本身的問題。
+⚠️ **這一節的價值在於「歸零」這個狀態,不在數字** ——
+真的又出現存量(例如整批移植進來的舊程式碼)時,要嘛當次清掉,
+要嘛把上面那句 ✅ 改回「不一定是這次改壞的」並寫明還剩哪些。
+**不要讓它停在「說歸零、其實沒有」的狀態**,那比一開始就承認有存量更糟。
 
-⚠️ **存量還沒清完,所以跳出來的警告不一定是這次改壞的** —— 回報時要分清楚。
-存量歸零的專案(例如參考專案)規則檔會寫「看到紅字就是剛動的那幾行有問題」,
-**那句話在這裡還不成立,不要照抄**。
+> 導入期的存量長什麼樣子留在 git 歷史裡 ——
+> 2026-08-28 曾有 785 筆(規則 2 佔 553 筆、規則 4 的 113 筆是「單檔 module 還沒拆成資料夾」
+> 的衍生結果)。要看當時的分布就翻這一節的歷史版本,不必留在這裡佔篇幅。
 
 ### 參考實作
 
-本專案 `components/` 才拆了三支,更完整的範例要看參考專案:
+本專案 `components/` 有 49 支 import module css、`_modules/` 底下 27 支全部是資料夾。
+下面按情境列出最有代表性的幾支;群組層與 hover 那兩種本專案沒有現成的,借參考專案的看:
 
 | 情境                              | 看哪一支                                                                                                                           |
 | --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
 | **有變體的完整拆法**              | [buy/mCard/](../../assets/css/_modules/buy/mCard/) — `variables` / `common` + `filter*`,`--default` 無專屬樣式只當標記             |
 | **Teleport 浮層的斷點**           | [buy/mSort/](../../assets/css/_modules/buy/mSort/) — dropdown `Teleport to="body"`,DOM 上不在組件內,`@screen` 各段要自己再掛一份   |
 | **變數建在最小單位**              | 同 mCard — pc 是 `p-40`、tablet / mobile 是 `px-16 py-32`,兩個層級併存所以拆成 `-pt` / `-pr` / `-pb` / `-pl`                       |
-| **box-shadow 的寫法**             | 同 mSort 與 [buy/mFormDropdown.css](../../assets/css/_modules/buy/mFormDropdown.css) — 走原生 CSS 屬性 + `--x-*-shadow` 三斷點變數 |
+| **box-shadow 的寫法**             | 同 mSort 與 [common/mForm/dropdown.css](../../assets/css/_modules/common/mForm/dropdown.css) — 走原生 CSS 屬性 + `--x-*-shadow` 三斷點變數 |
 | **最標準的一支**(共用 + 變體兩層) | 參考專案的 [common/mTab/](../../../Official/assets/css/_modules/common/mTab/)                                                      |
 | **群組層**(兩個以上變體共用)      | 參考專案的 [common/mForm/](../../../Official/assets/css/_modules/common/mForm/) 的 `selection.*`                                   |
 | **hover 的固定寫法**              | 參考專案的 [common/mAnchor/variables.css](../../../Official/assets/css/_modules/common/mAnchor/variables.css)                      |
@@ -1708,6 +1705,6 @@ diff --strip-trailing-cr ../Official/.claude/rules/css-conventions.md .claude/ru
 | 面向        | 本專案                                                                                                  |
 | ----------- | ------------------------------------------------------------------------------------------------------- |
 | 色票        | 只有單一 `color.css`;參考專案有頻道色票(`color<Channel>.css`)與跨頻道收攏檢查                           |
-| 存量        | 尚有 672 筆;參考專案已歸零                                                                              |
-| module      | 路徑分層一致,但本專案只拆了 `common/mPopup/`、`buy/mCard/`、`buy/mSort/`                                |
+| 存量        | 兩邊都已歸零(本專案 2026-09-07 確認)                                                                    |
+| module      | 兩邊都全部拆成資料夾 —— 本專案 27 支,**沒有單檔 module 殘留**                                           |
 | `.githooks` | 本專案那支保留「依第一層目錄分派」的判斷(還在共用 repo 裡);參考專案抽出去的獨立 repo 版本已拿掉分派迴圈 |

@@ -35,7 +35,7 @@ description: Backstage 與 Official 共用元件(mForm / mPopup / ImgSrc / SvgIc
 3. 若對方的實作結構不同(見下方「已知結構差異」),**不要整包覆蓋** —— 在對方現有架構上補等效功能
 4. 兩邊各自跑 `npm run build` 驗證
 
-> `npm run build` 的 exit code 1 是正常的 —— 來自最後的 `sync:public`(找不到發布 repo)。判斷成功看有沒有印出 `✨ Build complete!`。
+> `npm run build` 最後會接 `sync:public`。找不到發布 repo 時它**印警告後跳過、回 exit 0**(2026-09-07 改;在那之前是 exit 1,舊的紀錄說「exit code 1 是正常的」已不成立)。所以現在 **exit code 非零就是真的有問題**,不要放過。
 
 ## 已知結構差異(同步時要繞開的坑)
 
