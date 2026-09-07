@@ -20,7 +20,7 @@
 | `scripts/_api/member/forget.js` | 兩支 C 端 API |
 | `scripts/_storage.js` | 新增 `FORGETRESET`(效期跟 `expireAt`)、`FORGETCOMPLETE`(短效,完成頁憑證) |
 
-## API(`.apiJson/swagger.json`)
+## API(`.api.json/swagger.json`)
 
 C 端只有兩支;`app/password-reset/*` 那三支是舊版 App 用的,**不要接**。
 

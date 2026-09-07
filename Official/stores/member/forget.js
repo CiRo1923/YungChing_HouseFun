@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 
 // 忘記密碼流程(手機驗證 → 重設密碼 → 設定完成)。
 //
-// 欄位跟著 swagger 的兩支 C 端 API 走(.apiJson/swagger.json):
+// 欄位跟著 swagger 的兩支 C 端 API 走(.api.json/swagger.json):
 //   password-reset/request  mobilePhone + verificationChannel → resetToken / expireAt
 //   password-reset/confirm  mobilePhone + verificationCode + resetToken
 //                           + newPassword + confirmPassword  → success / requireRelogin
