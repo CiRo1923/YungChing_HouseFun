@@ -81,7 +81,12 @@ const onDraft = async () => {
   }
 }
 
-const onSave = async (validate) => {
+/* setTouched 是 Form 的 slot 給的 —— 送出時把所有欄位標成 touched,
+  mForm 的「碰過才即時驗」要靠它:少了它,使用者補填時紅字不會即時消失
+  (得等下一次送出)。詳見 components/common/mForm/.composables/useValidateEvents.js */
+const onSave = async (validate, setTouched) => {
+  setTouched(true)
+
   const { valid, errors } = await validate()
 
   if (valid) {
@@ -100,7 +105,9 @@ const onSave = async (validate) => {
   }
 }
 
-const onRenewal = async (validate) => {
+const onRenewal = async (validate, setTouched) => {
+  setTouched(true)
+
   const { valid, errors } = await validate()
   const onToFinish = () => {
     router.push({
@@ -262,13 +269,13 @@ onMounted(() => {
         }"
       /> -->
     </template>
-    <Form as="div" class="relative tm:mt-[24px] p:mt-[32px]" v-slot="{ validate }">
+    <Form as="div" class="relative tm:mt-[24px] p:mt-[32px]" v-slot="{ validate, setTouched }">
       <!-- <pre>{{ apiData }}</pre> -->
       <PageBuyPublishBasicDataComponents @change:casePurpose="onPurposeChange" />
       <PageBuyPublishBasicSubmitButtons
         @click:draft="onDraft"
-        @click:save="() => onSave(validate)"
-        @click:renewal="() => onRenewal(validate)"
+        @click:save="() => onSave(validate, setTouched)"
+        @click:renewal="() => onRenewal(validate, setTouched)"
       />
     </Form>
   </BuyMContainer>

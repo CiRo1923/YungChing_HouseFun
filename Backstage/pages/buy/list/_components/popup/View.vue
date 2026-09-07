@@ -41,8 +41,8 @@ const total = computed(() => customData.value.data.reduce((sum, item) => sum + i
       }"
       :setClass="{
         main: '--rounded --thead-gray-f7',
-        theadTh: 'p:text-[16px] tm:text-[14px]',
-        tbodyTd: 'p:text-[16px] tm:text-[14px]',
+        theadTh: 'tm:text-[14px] p:text-[16px]',
+        tbodyTd: 'tm:text-[14px] p:text-[16px]',
         container: 'p:max-h-[365px]',
         theadLabel: 'font-normal',
         tbodyTd: 'text-center',

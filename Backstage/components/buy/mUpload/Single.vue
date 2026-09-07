@@ -51,12 +51,18 @@ const config = computed(() => ({
   draggableUpload: true,
   accept: 'image/*',
   isDisabled: false,
-  // 驗證時機。null = 沿用全域(等同 ['blur', 'change', 'modelUpdate']);
-  // 傳陣列為「完整指定」,詳見 common/mForm/.composables/useValidateEvents.js
-  validateEvents: null,
+  // 驗證時機。blur / change 一律驗;值一動就驗只在「碰過之後」才生效
+  // (touchedModelUpdate 的用意見 common/mForm/.composables/useValidateEvents.js)。
+  // 傳陣列為「完整指定」,沒列到的一律關閉。
+  validateEvents: ['blur', 'change', 'touchedModelUpdate'],
   ...props.config,
 }))
-const validateOn = useValidateEvents(() => config.value.validateEvents)
+/* ⚠️ `name` 宣告在下面,這裡靠 getter 延後求值 —— 它只在 render 讀 validateOn 時才執行,
+    那時 name 已經建立好了。改成直接傳 `name` 會撞到 TDZ。 */
+const validateOn = useValidateEvents(
+  () => config.value.validateEvents,
+  () => name.value
+)
 
 const setClass = computed(() => ({
   main: '',

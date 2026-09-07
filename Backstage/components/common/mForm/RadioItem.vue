@@ -50,10 +50,11 @@ const model = computed({
 const config = computed(() => {
   return onDeepMerge(
     {
-      // 驗證時機。勾選類控制項刻意不吃 blur —— 用鍵盤 Tab 經過卻還沒選就跳紅字,
-      // 那是誤報。change 已涵蓋「使用者動了它」,submit 的主動 validate() 一律會驗、
-      // 不受此設定影響。詳見 .composables/useValidateEvents.js
-      validateEvents: ['change'],
+      /* 驗證時機。勾選類控制項兩件事都刻意不做 —— 不吃 blur(Tab 經過還沒選就跳紅字
+        是誤報;但 handleBlur 仍會標記 touched)、也不吃 change(change 就是
+        「使用者剛選了它」,那時跳紅字等於一選就罵人)。
+        只留 touchedModelUpdate,詳見 .composables/useValidateEvents.js */
+      validateEvents: ['touchedModelUpdate'],
       label: null,
       value: null,
       align: 'center',
@@ -63,7 +64,10 @@ const config = computed(() => {
     props.config
   )
 })
-const validateOn = useValidateEvents(() => config.value.validateEvents)
+const validateOn = useValidateEvents(
+  () => config.value.validateEvents,
+  () => props.name
+)
 
 const setClass = computed(() => {
   return {

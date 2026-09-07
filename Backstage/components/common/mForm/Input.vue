@@ -52,9 +52,10 @@ const { config, setClass, onEnter } = useTextCore({
   emits,
   model,
   config: {
-    // 驗證時機。null = 沿用全域(等同 ['blur', 'change', 'modelUpdate']);
-    // 傳陣列為「完整指定」,詳見 .composables/useValidateEvents.js
-    validateEvents: null,
+    // 驗證時機。blur / change 一律驗;值一動就驗只在「碰過之後」才生效
+    // (touchedModelUpdate 的用意見 .composables/useValidateEvents.js)。
+    // 傳陣列為「完整指定」,沒列到的一律關閉。
+    validateEvents: ['blur', 'change', 'touchedModelUpdate'],
     length: null,
     minlength: null,
     maxlength: null,
@@ -80,7 +81,10 @@ const { config, setClass, onEnter } = useTextCore({
     error: '',
   },
 })
-const validateOn = useValidateEvents(() => config.value.validateEvents)
+const validateOn = useValidateEvents(
+  () => config.value.validateEvents,
+  () => props.name
+)
 
 const isNumeric = computed(() => /^(decimal|numeric)$/.test(config.value.inputMode))
 

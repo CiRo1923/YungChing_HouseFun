@@ -67,9 +67,10 @@ export const defaultDateConfig = {
   rangeSeparator: '~',
   length: null,
   placeholder: null,
-  // 驗證時機。null = 沿用全域(等同 ['blur', 'change', 'modelUpdate']);
-  // 傳陣列為「完整指定」,詳見 components/common/mForm/.composables/useValidateEvents.js
-  validateEvents: null,
+  // 驗證時機。blur / change 一律驗;值一動就驗只在「碰過之後」才生效
+  // (touchedModelUpdate 的用意見 components/common/mForm/.composables/useValidateEvents.js)。
+  // 傳陣列為「完整指定」,沒列到的一律關閉。
+  validateEvents: ['blur', 'change', 'touchedModelUpdate'],
 }
 
 export const defaultTimeConfig = {
@@ -86,9 +87,10 @@ export const defaultTimeConfig = {
   icon: 'icon_time',
   length: null,
   placeholder: null,
-  // 驗證時機。null = 沿用全域(等同 ['blur', 'change', 'modelUpdate']);
-  // 傳陣列為「完整指定」,詳見 components/common/mForm/.composables/useValidateEvents.js
-  validateEvents: null,
+  // 驗證時機。blur / change 一律驗;值一動就驗只在「碰過之後」才生效
+  // (touchedModelUpdate 的用意見 components/common/mForm/.composables/useValidateEvents.js)。
+  // 傳陣列為「完整指定」,沒列到的一律關閉。
+  validateEvents: ['blur', 'change', 'touchedModelUpdate'],
 }
 
 /* ⚠️ format 要在合併「之後」再正規化一次 —— 呼叫端只給 { model: 'YYYYMMDD' } 時,

@@ -58,7 +58,10 @@ const props = defineProps({
 })
 
 const config = computed(() => onMergeDateConfig(props.config))
-const validateOn = useValidateEvents(() => config.value.validateEvents)
+const validateOn = useValidateEvents(
+  () => config.value.validateEvents,
+  () => props.name
+)
 
 const inputType = computed(() => (isDeviceM.value && !config.value.mobileSupport ? 'date' : 'tel'))
 

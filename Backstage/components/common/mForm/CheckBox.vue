@@ -92,10 +92,17 @@ const model = computed({
 const config = computed(() => {
   return onDeepMerge(
     {
-      // 驗證時機。勾選類控制項刻意不吃 blur —— 用鍵盤 Tab 經過卻還沒選就跳紅字,
-      // 那是誤報。change 已涵蓋「使用者動了它」,submit 的主動 validate() 一律會驗、
-      // 不受此設定影響。詳見 .composables/useValidateEvents.js
-      validateEvents: ['change'],
+      /* 驗證時機。勾選類控制項兩件事都刻意不做:
+
+        不吃 blur    用鍵盤 Tab 經過卻還沒選就跳紅字,那是誤報。
+                     ⚠️ 不驗證不代表不記錄 —— vee-validate 的 handleBlur 仍會標記
+                        touched,所以下面那個時機照樣運作。
+        不吃 change  change 就是「使用者剛選了它」,那時跳紅字等於一切就罵人 ——
+                     radio 由 false 切成 true 讓一組欄位顯示出來時最明顯。
+
+        只留 touchedModelUpdate:碰過(或送出過)之後才即時驗,
+        所以送出後補選會讓紅字立刻消失。詳見 .composables/useValidateEvents.js */
+      validateEvents: ['touchedModelUpdate'],
       mode: 'group', // 'boolean' | 'group' | 'value'
       sort: null, // null | 'desc' (大到小) | 'asc' (小到大)，只有 group 用
       label: null,
@@ -109,7 +116,10 @@ const config = computed(() => {
     props.config
   )
 })
-const validateOn = useValidateEvents(() => config.value.validateEvents)
+const validateOn = useValidateEvents(
+  () => config.value.validateEvents,
+  () => props.name
+)
 
 const joinSep = computed(() => {
   const { mode, isJoin } = config.value

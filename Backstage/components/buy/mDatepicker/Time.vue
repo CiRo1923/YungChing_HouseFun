@@ -55,7 +55,10 @@ const props = defineProps({
 })
 
 const config = computed(() => onMergeTimeConfig(props.config))
-const validateOn = useValidateEvents(() => config.value.validateEvents)
+const validateOn = useValidateEvents(
+  () => config.value.validateEvents,
+  () => props.name
+)
 
 const model = computed({
   get: () => props.modelValue,

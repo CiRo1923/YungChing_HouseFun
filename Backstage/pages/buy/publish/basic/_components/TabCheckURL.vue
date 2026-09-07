@@ -17,7 +17,12 @@ const items = readonly({
   ],
 })
 
-const onClick = async (validate) => {
+const onClick = async (validate, setTouched) => {
+  /* 送出時把所有欄位標成 touched —— mForm 的「碰過才即時驗」要靠它,
+    少了這行,使用者補填時紅字不會即時消失(得等下一次送出)。
+    詳見 components/common/mForm/.composables/useValidateEvents.js */
+  setTouched(true)
+
   const { valid } = await validate()
 
   if (valid) {
@@ -27,7 +32,7 @@ const onClick = async (validate) => {
 </script>
 
 <template>
-  <Form as="div" v-slot="{ validate }">
+  <Form as="div" v-slot="{ validate, setTouched }">
     <div class="p:flex p:gap-x-[16px]">
       <CommonMFormLabel
         label="網址匯入"
@@ -64,7 +69,7 @@ const onClick = async (validate) => {
           main: '--oval --h-40 --px-20 --py-5 --bg-green-6a2d --text-white shrink-0',
           text: 'font-semibold',
         }"
-        @click="onClick(validate)"
+        @click="onClick(validate, setTouched)"
       />
     </div>
     <PageBuyPublishBasicTabItem

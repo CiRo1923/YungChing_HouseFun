@@ -59,7 +59,12 @@ const props = defineProps({
 })
 
 const config = computed(() => onMergeDateConfig(props.config))
-const validateOn = useValidateEvents(() => config.value.validateEvents)
+/* 起訖兩個 Field 共用同一組驗證時機,所以兩個名字都要查 ——
+  任一端被碰過就算(起訖是一組,分開判斷會變成「填了起、改訖時還不驗」)。 */
+const validateOn = useValidateEvents(
+  () => config.value.validateEvents,
+  () => [`${props.name}Start`, `${props.name}End`]
+)
 
 // 現在在選哪一端
 const activeField = ref('start')
