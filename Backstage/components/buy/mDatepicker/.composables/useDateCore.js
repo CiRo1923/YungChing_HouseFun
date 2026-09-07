@@ -4,6 +4,8 @@
       iOS Safari 更是直接給 Invalid Date。內部解析固定用本地時間中午 12:00,
       日期比較時再轉成 00:00:00。 */
 
+import { onParseTimeFormat } from './useTimeCore.js'
+
 const DEFAULT_FORMAT = 'YYYY-MM-DD'
 
 export const onPad2 = (n) => String(n).padStart(2, '0')
@@ -163,10 +165,20 @@ export const onPickFormat = (format, type = 'datePicker') => {
   日期與時間以空白分隔,時間那半原封不動交給 useTimeCore 處理
   (它自己會依 hh / mm / ss 與數字字面決定欄位),這裡不重複解析。 */
 export const onSplitDateTimeFormat = (format) => {
-  const raw = String(format || DEFAULT_FORMAT).trim()
-  const [date, ...rest] = raw.split(/\s+/)
+  const segments = String(format || DEFAULT_FORMAT)
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
 
-  return { date: date || DEFAULT_FORMAT, time: rest.join(' ') }
+  /* ⚠️ 用「特徵」找段落,不要靠位置(segments[0] 是日期、[1] 是時間)——
+      只給時間段的 format 會被誤判成日期,順序反過來寫也會錯。
+
+      日期段認大寫 Y / M / D,時間段認小寫 hh / mm / ss 或帶冒號的字面值,
+      所以 'YYYY-MM-DD' 的 MM 不會被當成分鐘。 */
+  const date = segments.find((segment) => /[YMD]/.test(segment)) ?? ''
+  const time = segments.find((segment) => /hh|HH|mm|ss/.test(segment) || /:/.test(segment)) ?? ''
+
+  return { date: date || DEFAULT_FORMAT, time }
 }
 
 /* 日期的精度 —— 'year' | 'month' | 'day'。
@@ -180,8 +192,17 @@ export const onGetDatePrecision = (format) => {
   return 'year'
 }
 
-// format 裡有沒有時間段(決定要不要掛時間滾輪)
-export const onHasTimeFormat = (format) => !!onSplitDateTimeFormat(format).time
+/* format 有沒有「可以選」的時間欄位 —— 決定要不要並排那個時間輸入框。
+  ⚠️ 不是看有沒有時間段:'YYYY-MM-DD 00:00:00' 有時間段,但三欄都是數字字面值,
+      意思是「不給選時間,可是值要帶滿 00:00:00」—— 那時不該長出時間欄。
+      判斷交給 useTimeCore,它本來就負責「哪幾欄可選」。 */
+export const onHasTimeFormat = (format) => {
+  const time = onSplitDateTimeFormat(format).time
+
+  if (!time) return false
+
+  return onParseTimeFormat(time).parts.some((part) => part.editable)
+}
 
 // 依 format 組出日期字串;分隔符統一換成 format 自己用的那個
 export const onFormatYMD = (y, m, d, format) => {

@@ -6,6 +6,15 @@ definePageMeta({
   layout: false,
 })
 
+// min / max 給一個以今天為中心的範圍,方便看區間與 disabled 的界線
+const today = new Date()
+const onOffsetDate = (days) => {
+  const date = new Date(today.getFullYear(), today.getMonth(), today.getDate() + days)
+  const pad = (n) => String(n).padStart(2, '0')
+
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
+}
+
 /* 每一條 format 對應「選到哪一層」——
   規則與時間端一致:寫成 token 的段落可選,寫成數字字面(00)的只輸出不可選。 */
 const singles = ref([
@@ -61,6 +70,13 @@ const ranges = ref([
     value: [],
   },
   {
+    format: 'YYYY-MM',
+    label: '區間(年月)—— 最大鎖今天',
+    note: 'maxDate 固定是今天(直接餵 Date 物件,元件會自己截掉時分秒),不受上面的 min / max 開關影響。12 個月照樣列出來,本月之後的是 disabled 點不到(整月都超出上限才停用,所以本月自己仍可選)。起訖共用同一個上限。',
+    value: [],
+    maxDate: today,
+  },
+  {
     format: 'YYYY-MM-DD hh:mm',
     label: '區間 ＋ 時分(四個框)',
     note: '起訖各自再多一個時間欄位 —— [起日期][起時間] ~ [訖日期][訖時間]。日期由共用的日曆選,時間各自獨立。',
@@ -71,15 +87,6 @@ const ranges = ref([
 /* --range 的圓角是變數控制的。這裡直接覆寫那組變數示範「方角」的樣子 ——
   正式使用時是改 module 的 variables.css,不是在頁面上覆寫。 */
 const isSquareRange = ref(false)
-
-// min / max 給一個以今天為中心的範圍,方便看區間與 disabled 的界線
-const today = new Date()
-const onOffsetDate = (days) => {
-  const date = new Date(today.getFullYear(), today.getMonth(), today.getDate() + days)
-  const pad = (n) => String(n).padStart(2, '0')
-
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
-}
 
 /* 日期欄位的 placeholder 只放日期那半 —— 整串 format 塞進去會被日曆圖示擠掉、
   文字截斷成「YYYY-MM-D」。時間那半的提示由時間欄位自己顯示(它的 placeholder
@@ -168,8 +175,8 @@ const hasLimit = ref(false)
       <ul class="space-y-[20px]">
         <li
           class="space-y-[6px] rounded-[10px] border-[1px] border-[--gray-e5] p-[16px]"
-          v-for="item in ranges"
-          :key="item.format"
+          v-for="(item, index) in ranges"
+          :key="item.label"
         >
           <div class="flex flex-wrap items-baseline gap-x-[10px]">
             <strong class="text-[16px] font-medium">{{ item.label }}</strong>
@@ -178,7 +185,7 @@ const hasLimit = ref(false)
           <p class="text-[14px] text-[--gray-666]">{{ item.note }}</p>
           <div class="flex flex-wrap items-center gap-x-[16px] gap-y-[8px]">
             <BuyMDatepickerRange
-              :name="`range_${item.format.replace(/\W/g, '_')}`"
+              :name="`range_${index}_${item.format.replace(/\W/g, '_')}`"
               v-model="item.value"
               :config="{
                 format: item.format,
@@ -186,7 +193,7 @@ const hasLimit = ref(false)
                 headerMode: 'panel',
                 placeholder: onDateFormatOf(item.format),
                 minDate: hasLimit ? minDate : '',
-                maxDate: hasLimit ? maxDate : '',
+                maxDate: item.maxDate || (hasLimit ? maxDate : ''),
               }"
               :setClass="{
                 main: onWidthOf(item.format, true),

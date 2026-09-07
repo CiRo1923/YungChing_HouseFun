@@ -54,7 +54,6 @@ export const defaultDateConfig = {
   format: 'YYYY-MM-DD', // 字串,或 { model, datePicker } 分開指定
   headerMode: 'string', // 'string' 純文字 | 'panel' 點年月展開面板
   weeks: weekLabels,
-  showOverDate: true, // 是否顯示超出 min/max 的日期
   defaultIsToday: true,
   today: null, // 指定「今天」(通常餵 server 時間)
   maxDate: '',

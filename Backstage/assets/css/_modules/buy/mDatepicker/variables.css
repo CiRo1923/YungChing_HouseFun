@@ -159,6 +159,7 @@
   --datepicker-panel-ctrl-pc-h: 35px;
   --datepicker-panel-ctrl-tablet-h: 35px;
   --datepicker-panel-ctrl-mobile-h: 35px;
+  --datepicker-panel-disabled-color: var(--gray-e5);
   --datepicker-panel-rounded: 0;
   --datepicker-panel-pc-rounded: 5px;
   --datepicker-panel-tablet-rounded: 5px;

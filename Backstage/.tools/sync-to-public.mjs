@@ -9,20 +9,32 @@
 //   同步 —— 只送原始碼,建置產物與依賴由目標端自己產生;
 //   壓縮 —— 是整包備份,node_modules 與建置產物都要收進去,能直接還原成可跑的專案。
 
-import { cp, mkdir, readdir, rm, stat } from 'node:fs/promises'
+import { cp, mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import { createInterface } from 'node:readline/promises'
 import { spawn } from 'node:child_process'
 
-// 兩邊都不要的項目:AI 工具設定與內部文件,對發布與備份都沒有意義。
+// 兩邊都不要的項目:AI 工具設定與對內資料,對發布與備份都沒有意義。
 // .acceptance 是驗收測試報告(含規格比對與缺陷清單),屬對內資料,不隨原始碼出去。
-// .api.json 是後端給的 API 契約(swagger),留在開發側供查欄位與產文件用,同樣不對外。
-const TOOLING_NAMES = ['.claude', '.agents', 'docs', '.acceptance', '.api.json']
+// .api.json 是後端的 swagger 規格,只給開發時查 API 用 —— 同樣屬對內資料,
+// 而且它在專案根目錄、不經任何建置,漏掉就會原樣被同步與打包出去。
+// ⚠️ docs/ 不在這裡 —— 元件的文件與範例頁對協作方有用,照樣送出去。
+const TOOLING_NAMES = ['.claude', '.agents', '.acceptance', '.api.json']
+
+/* 只排除同步、壓縮檔仍要收的項目 —— 那份是自己的備份,要能還原成完整可跑的專案。
+
+  sync-to-public.mjs  這支腳本自己。它做的是「把開發側複製到別處」,那是開發側才有意義的
+                      動作;對方拿到也只會在找不到 `Dev` 段時中止,留著只是讓人以為那邊也該跑。
+  .githooks           pre-commit 的 css 檢查,是我們這邊的規範。
+                      對方少了它 commit 不會跑檢查;postinstall 的 hooks:install 找不到
+                      pre-commit 只會印一行警告就略過,不會失敗。 */
+const SYNC_ONLY_NAMES = ['sync-to-public.mjs', '.githooks']
 
 // 同步時額外排除:建置產物、依賴,以及先前產生的壓縮檔
 const SYNC_EXCLUDE_NAMES = new Set([
   ...TOOLING_NAMES,
+  ...SYNC_ONLY_NAMES,
   '.nuxt',
   '.output',
   '.nitro',
@@ -175,6 +187,57 @@ async function commitAndPush(targetDir, branch, message) {
   return `已提交並推送到 origin/${branch}`
 }
 
+/* 目標端要拿掉的 script —— 同步機制本身。
+  依賴清單不動:改寫的是「差異」而不是另外維護一份對外的 package.json,
+  否則每加一個套件都要記得改兩邊。 */
+const SYNC_ONLY_SCRIPTS = ['sync:public']
+
+// 把某個 script 從別的 script 的串接裡拆掉(`X && npm run 它` / `npm run 它 && X`)
+function stripChainedRun(command, name) {
+  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+  return command
+    .replace(new RegExp(`\\s*&&\\s*npm run ${escaped}(?![\\w:-])`, 'g'), '')
+    .replace(new RegExp(`^npm run ${escaped}(?![\\w:-])\\s*&&\\s*`), '')
+    .trim()
+}
+
+/* 改寫 staging 的 package.json,而不是目標端的 —— 目標端在下一步會被整包覆蓋,
+  改那邊等於白做。回傳做了哪些調整,給最後的訊息用。 */
+async function rewritePackageJson(dir) {
+  const file = path.join(dir, 'package.json')
+  const raw = await readFile(file, 'utf8').catch(() => null)
+
+  if (raw == null) return []
+
+  const pkg = JSON.parse(raw)
+  const scripts = pkg.scripts
+
+  if (!scripts) return []
+
+  const changes = []
+
+  for (const name of SYNC_ONLY_SCRIPTS) {
+    if (name in scripts) {
+      delete scripts[name]
+      changes.push(`移除 ${name}`)
+    }
+
+    for (const [key, command] of Object.entries(scripts)) {
+      const stripped = stripChainedRun(command, name)
+
+      if (stripped === command) continue
+
+      scripts[key] = stripped
+      changes.push(`${key} 拆掉 ${name}`)
+    }
+  }
+
+  if (changes.length) await writeFile(file, `${JSON.stringify(pkg, null, 2)}\n`)
+
+  return changes
+}
+
 // 依排除規則複製整棵目錄。cp 的 filter 是逐項呼叫,回傳 false 該項連同子孫都不複製。
 async function copyFiltered(source, destination) {
   await cp(source, destination, {
@@ -306,6 +369,8 @@ async function main() {
   await mkdir(path.dirname(stagingDir), { recursive: true })
   await copyFiltered(projectDir, stagingDir)
 
+  const packageChanges = await rewritePackageJson(stagingDir)
+
   const cleared = await clearTarget(targetDir)
 
   await cp(stagingDir, targetDir, { recursive: true, force: true })
@@ -317,6 +382,10 @@ async function main() {
   console.log(`  壓縮檔:${path.relative(projectDir, zipPath)}(${(size / 1024 ** 2).toFixed(1)} MB)`)
   console.log(`  已同步:${targetDir}`)
   console.log(`  同步前清除項目:${cleared.length}(保留 ${[...TARGET_KEEP_NAMES].join(' / ')})`)
+
+  if (packageChanges.length) {
+    console.log(`  目標端 package.json:${packageChanges.join('、')}`)
+  }
 
   if (oldArchives.length) {
     console.log(`  已刪除舊壓縮檔:${oldArchives.join(', ')}`)

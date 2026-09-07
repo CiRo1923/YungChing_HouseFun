@@ -98,16 +98,21 @@ export const useCalendar = (config, model, options = {}) => {
 
   /* ---- 年 / 月清單 ---- */
 
+  /* 年 / 月清單一律列出完整範圍,超出 min / max 的由 onYearDisabled / onMonthDisabled
+    標成不能點 —— 與日曆格子的行為一致(那邊也是照樣顯示、只給 --disabled)。
+
+    ⚠️ 不要改回「不列出」:清單少了幾格看起來像資料壞了,而且使用者無法從畫面上
+        知道那些月份是被上限擋掉的。 */
   const yearOptions = computed(() => {
-    const maxDate = config.value.today || config.value.maxDate
-    const maxYear =
-      maxDate && !config.value.showOverDate
-        ? (onGetYMDByConfig(maxDate)?.y ?? new Date().getFullYear())
-        : new Date().getFullYear()
-    const minYear =
-      config.value.minDate && !config.value.showOverDate
-        ? onGetYMDByConfig(config.value.minDate)?.y || 1911
-        : 1911
+    /* 上限取「今年」與 maxDate 的年較晚的那個 —— maxDate 落在未來時要選得到,
+      落在過去時今年仍然要列出來(只是點不到)。 */
+    const currentYear = onGetYMD(todayDate.value)?.y ?? new Date().getFullYear()
+    const maxDateYear = config.value.maxDate
+      ? (onGetYMDByConfig(config.value.maxDate)?.y ?? currentYear)
+      : currentYear
+
+    const maxYear = Math.max(currentYear, maxDateYear)
+    const minYear = 1911
 
     const years = []
     for (let i = maxYear + config.value.maximumYear; i >= minYear; i -= 1) {
@@ -117,22 +122,34 @@ export const useCalendar = (config, model, options = {}) => {
     return years
   })
 
-  // 停在 maxDate 那一年時,超過 maxDate 的月份不列出來
   const monthOptions = computed(() => {
-    const maxDateValue =
-      typeof config.value.maxDate === 'object' ? +config.value.maxDate : config.value.maxDate
-
-    const curr = onGetYMD(currDateValue.value)
-    const max = onGetYMD(maxDateValue)
     const labels = monthLabels[config.value.lang] || monthLabels.ch
 
-    const maxMonth =
-      config.value.maxDate && curr && max && curr.y === max.y && !config.value.showOverDate
-        ? max.date.getMonth() + 1
-        : labels.length
-
-    return labels.slice(0, maxMonth).map((value, index) => ({ key: index, value }))
+    return labels.map((value, index) => ({ key: index, value }))
   })
+
+  /* 整年(整月)都落在 min / max 之外才停用 —— 只要有一天在範圍內就要能點進去,
+    不然 maxDate 是 9/7 的時候整個 9 月會被停掉。 */
+  const onYearDisabled = (year) => {
+    const y = Number(year)
+    if (!Number.isFinite(y)) return false
+
+    return onDateDisabled(onSafeDateFromYMD(y, 1, 1)) && onDateDisabled(onSafeDateFromYMD(y, 12, 31))
+  }
+
+  // monthIndex 是 0-11,對齊 Date 的 getMonth()
+  const onMonthDisabled = (monthIndex) => {
+    const y = Number(currYear.value)
+    const m = Number(monthIndex) + 1
+    if (!Number.isFinite(y) || !Number.isFinite(m)) return false
+
+    // 這個月的最後一天 —— 下個月的第 0 天
+    const lastDay = new Date(y, m, 0).getDate()
+
+    return (
+      onDateDisabled(onSafeDateFromYMD(y, m, 1)) && onDateDisabled(onSafeDateFromYMD(y, m, lastDay))
+    )
+  }
 
   /* ---- 星期列 ---- */
 
@@ -455,6 +472,8 @@ export const useCalendar = (config, model, options = {}) => {
     onFormatBy,
     onGetYMDByConfig,
     onDateDisabled,
+    onYearDisabled,
+    onMonthDisabled,
     onBindClass,
     onChangeMonth,
     onChangeMonthDisabled,

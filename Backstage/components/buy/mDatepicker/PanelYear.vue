@@ -14,6 +14,11 @@ const props = defineProps({
     type: Function,
     default: () => [],
   },
+  // 這一格超出 min / max 沒有?整年都在範圍外才會是 true(由 useCalendar 判斷)
+  disabledOf: {
+    type: Function,
+    default: () => false,
+  },
 })
 
 /* 區間選擇時,這一格要標哪些 class(--range-start / --in-range / --range-end)。
@@ -45,7 +50,9 @@ onMounted(() => {
         :class="[
           props.rangeClassOf(item.value),
           { '--curr': Number(item.value) === Number(props.current) },
+          { '--disabled': props.disabledOf(item.value) },
         ]"
+        :disabled="props.disabledOf(item.value)"
         @click="$emit('select', item.value)"
       >
         {{ item.value }}

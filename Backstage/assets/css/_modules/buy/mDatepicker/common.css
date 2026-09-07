@@ -272,7 +272,7 @@
   @apply rounded-[--datepicker-panel-rounded] text-[--datepicker-panel-color];
   @apply transition-colors duration-300;
 
-  &:hover {
+  &:hover:not(.\-\-disabled) {
     @apply bg-[--datepicker-panel-hover-bg-color];
   }
 
@@ -312,6 +312,11 @@
     border-bottom-left-radius: var(--datepicker-calendar-range-start-rounded);
     border-top-right-radius: var(--datepicker-calendar-range-end-rounded);
     border-bottom-right-radius: var(--datepicker-calendar-range-end-rounded);
+  }
+
+  /* 超出 min / max 的年 / 月 —— 照樣列出來,只是點不到。放最後才蓋得過上面那幾種底色 */
+  &.\-\-disabled {
+    @apply cursor-not-allowed text-[--datepicker-panel-disabled-color];
   }
 }
 

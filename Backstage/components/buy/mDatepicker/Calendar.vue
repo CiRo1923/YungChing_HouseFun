@@ -81,9 +81,12 @@ const onNext = () => {
   props.calendar.onChangeMonth(1)
 }
 
-/* 換年的界限用 yearOptions 的頭尾判斷 —— 那份清單已經套用過 minDate / maxDate
-  與 showOverDate,與 onChangeMonthDisabled 同一個依據。清單是由大到小排的。 */
-const onYearDisabled = (step) => {
+/* 換年的界限用 yearOptions 的頭尾判斷 —— 與 onChangeMonthDisabled 同一個依據。
+  清單是由大到小排的。
+
+  ⚠️ 這支是「箭頭能不能按」,與 calendar.onYearDisabled(某一年能不能點)不同 ——
+      清單裡超出 min / max 的年份仍然列得出來、只是 disabled,所以翻到那裡是允許的。 */
+const onYearArrowDisabled = (step) => {
   const years = props.calendar.yearOptions.value
   if (!years.length) return true
 
@@ -96,7 +99,7 @@ const onArrowDisabled = (step) => {
   const precision = props.calendar.precision.value
 
   if (precision === 'year') return true
-  if (precision === 'month') return onYearDisabled(step)
+  if (precision === 'month') return onYearArrowDisabled(step)
   // 日曆精度:面板開著時換月沒有意義
   if (mode.value !== 'date') return true
 
@@ -171,6 +174,7 @@ watch(baseMode, (value) => {
       :years="props.calendar.yearOptions.value"
       :current="props.calendar.currYear.value"
       :rangeClassOf="props.calendar.onRangeClassByYear"
+      :disabledOf="props.calendar.onYearDisabled"
       @select="onSelectYear"
       v-if="mode === 'year'"
     />
@@ -178,6 +182,7 @@ watch(baseMode, (value) => {
       :months="props.calendar.monthOptions.value"
       :current="props.calendar.currMonth.value"
       :rangeClassOf="props.calendar.onRangeClassByMonth"
+      :disabledOf="props.calendar.onMonthDisabled"
       @select="onSelectMonth"
       v-else-if="mode === 'month'"
     />

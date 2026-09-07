@@ -14,6 +14,11 @@ const props = defineProps({
     type: Function,
     default: () => [],
   },
+  // 這一格超出 min / max 沒有?整月都在範圍外才會是 true(由 useCalendar 判斷)
+  disabledOf: {
+    type: Function,
+    default: () => false,
+  },
 })
 
 /* 區間選擇時,這一格要標哪些 class(--range-start / --in-range / --range-end)。
@@ -30,7 +35,9 @@ defineEmits(['select'])
         :class="[
           props.rangeClassOf(item.key),
           { '--curr': Number(item.key) === Number(props.current) },
+          { '--disabled': props.disabledOf(item.key) },
         ]"
+        :disabled="props.disabledOf(item.key)"
         @click="$emit('select', item.key)"
       >
         {{ item.value }}
