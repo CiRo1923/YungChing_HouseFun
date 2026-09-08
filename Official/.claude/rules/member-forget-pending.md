@@ -39,16 +39,17 @@ C 端只有兩支;`app/password-reset/*` 那三支是舊版 App 用的,**不要�
 
 ### 待後端確認
 
-1. **`verificationChannel` 到底傳什麼** —— 目前傳字串 `'sms'`(值集中在 store 的
-   `verificationChannels`),當初判斷 swagger 寫成 integer 是轉譯錯誤。
-   **2026-09-04 對照更新後的 swagger,那個欄位仍然是 `integer` 的 enum `[0, 1]`。**
-   若規格才是對的,現在送出去會 400 —— 要跟後端確認,不要自己改值。
-2. **重送倒數吃 `expireAt`** —— 規格寫 60 秒冷卻,但 200 只回 token 的到期時間。
+1. **重送倒數吃 `expireAt`** —— 規格寫 60 秒冷卻,但 200 只回 token 的到期時間。
    `resendAvailableAt`(可重送時間)確實存在於 swagger,但**只在會員升級與註冊的回應**,
    忘記密碼這支沒有。要問後端補不補;補了就把 `verify.countdownData.expires` 改吃它。
-3. **`developmentVerificationCode`(2026-09-04 新增)** —— develop 模式開啟時
-   200 會回傳測試用驗證碼,不寄簡訊。目前程式沒有用它。要不要在開發環境自動帶入,
-   是新行為,等指示。
+
+> **`verificationChannel` 已確認**(2026-09-08 的 swagger)——
+> 字串 enum `sms` / `line`,說明明寫「JSON 不接受數字 0／1」,
+> 與程式現在送的值一致。早一版誤寫成 integer `[0, 1]`,不要照那版改回去。
+>
+> **`developmentVerificationCode` 也已接上** —— `MemberPasswordReset:UseDevelopmentVerificationCode=true`
+> 時後端不寄簡訊、改由 200 回傳測試碼,程式直接帶入驗證碼欄位(正式環境不回這個欄位,
+> 不必自己判斷環境),與 upgrade / 註冊同一套寫法。
 
 > **驗證碼錯誤的判斷已經有依據了**(原本列為暫時做法)——
 > swagger 現在明寫 `failedAttempts` / `remainingAttempts`「僅驗證碼錯誤時回傳」,

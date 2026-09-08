@@ -20,8 +20,8 @@ onUseMeta({
   url: useRequestURL(),
 })
 
-// 發送(或重送)驗證碼。管道目前一律 sms —— swagger 把它寫成 integer 0 / 1 是轉譯錯誤,
-// 實際要帶字串;未來可能改發 LINE,值集中在 store 的 verificationChannels。
+// 發送(或重送)驗證碼。管道目前一律 sms —— 規格是字串 enum(`sms` / `line`),
+// 明寫不接受數字 0 / 1;未來可能改發 LINE,值集中在 store 的 verificationChannels。
 const onSendCode = async () => {
   onApiPromise('open')
 

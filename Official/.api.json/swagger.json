@@ -7,7 +7,9 @@
   "paths": {
     "/": {
       "get": {
-        "tags": ["Housefun.Member.Auth.Api"],
+        "tags": [
+          "Housefun.Member.Auth.Api"
+        ],
         "summary": "檢查 Member Auth API 是否可回應",
         "description": "用途：確認 Member Auth API 服務目前可正常處理基本請求。",
         "responses": {
@@ -26,7 +28,9 @@
     },
     "/api/{version}/member/auth/register/verification-code": {
       "post": {
-        "tags": ["MemberAuth"],
+        "tags": [
+          "MemberAuth"
+        ],
         "summary": "建立會員註冊手機驗證碼；第一版測試環境會回傳 developmentVerificationCode 供測試使用。",
         "description": "用途：執行 Member Auth 的 Create Registration Verification Code 作業。HTTP 方法：POST；路由：/api/{version}/member/auth/register/verification-code。",
         "parameters": [
@@ -131,7 +135,9 @@
     },
     "/api/{version}/member/auth/register": {
       "post": {
-        "tags": ["MemberAuth"],
+        "tags": [
+          "MemberAuth"
+        ],
         "summary": "完成會員註冊；第一版支援一般會員與屋主/房東，手機同時作為登入帳號。",
         "description": "用途：執行 Member Auth 的 Register 作業。HTTP 方法：POST；路由：/api/{version}/member/auth/register。",
         "parameters": [
@@ -236,9 +242,11 @@
     },
     "/api/{version}/member/auth/password-reset/request": {
       "post": {
-        "tags": ["MemberAuth"],
+        "tags": [
+          "MemberAuth"
+        ],
         "summary": "建立 C 端忘記密碼驗證流程。",
-        "description": "依會員手機號碼建立一次性密碼重設 token，驗證碼由指定管道發送。\r\nDevelop 模式開啟時不寄送簡訊，改由 response 回傳 developmentVerificationCode。\r\n本版已接簡訊 provider；LINE provider 尚未提供時會回傳 400，不建立驗證流程。\r\n發送限制與會員註冊驗證共用 60 秒冷卻、手機每日及 IP 每小時上限。\r\n規格來源：C203-1 規格書第 13 頁；OTP 細節依文件引用的註冊／登入規格。",
+        "description": "依會員手機號碼建立一次性密碼重設 token，驗證碼由指定管道發送。\r\nverificationChannel 的 JSON 值只接受 sms 或 line，不接受數字 0／1。\r\nMemberPasswordReset:UseDevelopmentVerificationCode=true 時不寄送簡訊，改由 response 回傳 developmentVerificationCode；\r\n關閉或未設定時會呼叫簡訊 provider，並省略 developmentVerificationCode。\r\n本版已接簡訊 provider；LINE provider 尚未提供時會回傳 400，不建立驗證流程。\r\n發送限制與會員註冊驗證共用 60 秒冷卻、手機每日及 IP 每小時上限。\r\n規格來源：C203-1 規格書第 13 頁；OTP 細節依文件引用的註冊／登入規格。",
         "parameters": [
           {
             "name": "version",
@@ -321,7 +329,9 @@
     },
     "/api/{version}/member/auth/password-reset/confirm": {
       "post": {
-        "tags": ["MemberAuth"],
+        "tags": [
+          "MemberAuth"
+        ],
         "summary": "驗證 C 端忘記密碼驗證碼並設定新密碼。",
         "description": "驗證一次性密碼重設 token 與驗證碼；成功後更新密碼並撤銷該會員的 Member Auth 登入 Session。\r\n規格來源：C203-1 規格書第 13 頁；OTP 細節依文件引用的註冊／登入規格。",
         "parameters": [
@@ -406,7 +416,9 @@
     },
     "/api/{version}/member/auth/app/register/begin": {
       "post": {
-        "tags": ["MemberAuth"],
+        "tags": [
+          "MemberAuth"
+        ],
         "summary": "舊版 App 註冊第一步；建立 pending registration 與手機驗證碼。",
         "description": "用途：執行 Member Auth 的 Begin App Register 作業。HTTP 方法：POST；路由：/api/{version}/member/auth/app/register/begin。",
         "parameters": [
@@ -511,7 +523,9 @@
     },
     "/api/{version}/member/auth/app/register/confirm": {
       "post": {
-        "tags": ["MemberAuth"],
+        "tags": [
+          "MemberAuth"
+        ],
         "summary": "舊版 App 註冊第二步；驗證手機認證碼並完成註冊，成功後回正式 SSO token。",
         "description": "用途：執行 Member Auth 的 Confirm App Register 作業。HTTP 方法：POST；路由：/api/{version}/member/auth/app/register/confirm。",
         "parameters": [
@@ -616,7 +630,9 @@
     },
     "/api/{version}/member/auth/app/password-reset/begin": {
       "post": {
-        "tags": ["MemberAuth"],
+        "tags": [
+          "MemberAuth"
+        ],
         "summary": "舊版 App 忘記密碼第一步；建立密碼重設 token 與手機驗證碼。",
         "description": "用途：執行 Member Auth 的 Begin App Password Reset 作業。HTTP 方法：POST；路由：/api/{version}/member/auth/app/password-reset/begin。",
         "parameters": [
@@ -701,7 +717,9 @@
     },
     "/api/{version}/member/auth/app/password-reset/verify": {
       "post": {
-        "tags": ["MemberAuth"],
+        "tags": [
+          "MemberAuth"
+        ],
         "summary": "舊版 App 忘記密碼第二步；驗證認證碼並換發已驗證的 reset token。",
         "description": "用途：執行 Member Auth 的 Verify App Password Reset 作業。HTTP 方法：POST；路由：/api/{version}/member/auth/app/password-reset/verify。",
         "parameters": [
@@ -786,7 +804,9 @@
     },
     "/api/{version}/member/auth/app/password-reset/confirm": {
       "post": {
-        "tags": ["MemberAuth"],
+        "tags": [
+          "MemberAuth"
+        ],
         "summary": "舊版 App 忘記密碼第三步；用已驗證的 reset token 設定新密碼。",
         "description": "用途：執行 Member Auth 的 Confirm App Password Reset 作業。HTTP 方法：POST；路由：/api/{version}/member/auth/app/password-reset/confirm。",
         "parameters": [
@@ -871,7 +891,9 @@
     },
     "/api/{version}/member/auth/token": {
       "post": {
-        "tags": ["MemberAuth"],
+        "tags": [
+          "MemberAuth"
+        ],
         "summary": "建立會員 SSO 長 token；實際帳密驗證與 token 發行將由 Application use case 承接。",
         "description": "用途：執行 Member Auth 的 Issue Token 作業。HTTP 方法：POST；路由：/api/{version}/member/auth/token。",
         "parameters": [
@@ -956,7 +978,9 @@
     },
     "/api/{version}/member/auth/handoff": {
       "get": {
-        "tags": ["MemberAuth"],
+        "tags": [
+          "MemberAuth"
+        ],
         "summary": "使用記得我 Cookie 建立頻道 handoff，成功後導回 returnUrl 並附加 30 秒有效的 encryptedToken。",
         "description": "用途：執行 Member Auth 的 Handoff 作業。HTTP 方法：GET；路由：/api/{version}/member/auth/handoff。",
         "parameters": [
@@ -1035,7 +1059,9 @@
     },
     "/api/{version}/member/auth/handoff/token": {
       "get": {
-        "tags": ["MemberAuth"],
+        "tags": [
+          "MemberAuth"
+        ],
         "summary": "使用記得我 Cookie 建立頻道 handoff token，成功時只回 JSON，不進行導頁。",
         "description": "用途：執行 Member Auth 的 Handoff Token 作業。HTTP 方法：GET；路由：/api/{version}/member/auth/handoff/token。",
         "parameters": [
@@ -1123,7 +1149,9 @@
     },
     "/api/{version}/member/auth/introspect": {
       "post": {
-        "tags": ["MemberAuth"],
+        "tags": [
+          "MemberAuth"
+        ],
         "summary": "驗證 SSO 長 token 是否有效，供各頻道換發自己的短登入狀態。",
         "description": "用途：執行 Member Auth 的 Introspect 作業。HTTP 方法：POST；路由：/api/{version}/member/auth/introspect。",
         "parameters": [
@@ -1188,7 +1216,9 @@
     },
     "/api/{version}/member/auth/revoke": {
       "post": {
-        "tags": ["MemberAuth"],
+        "tags": [
+          "MemberAuth"
+        ],
         "summary": "撤銷指定 SSO 長 token，供登出或風控封鎖時使用。",
         "description": "用途：執行 Member Auth 的 Revoke 作業。HTTP 方法：POST；路由：/api/{version}/member/auth/revoke。",
         "parameters": [
@@ -1253,7 +1283,9 @@
     },
     "/api/{version}/member/auth/session/status": {
       "post": {
-        "tags": ["MemberAuth"],
+        "tags": [
+          "MemberAuth"
+        ],
         "summary": "驗證全域登入 session 是否有效，供各 BFF 驗證自身短 token 時同步檢查。",
         "description": "用途：執行 Member Auth 的 Session Status 作業。HTTP 方法：POST；路由：/api/{version}/member/auth/session/status。",
         "parameters": [
@@ -1318,7 +1350,9 @@
     },
     "/api/{version}/member/auth/logout": {
       "post": {
-        "tags": ["MemberAuth"],
+        "tags": [
+          "MemberAuth"
+        ],
         "summary": "全頻道登出；撤銷 Member Auth 全域 session，讓各 BFF 既有短 token 不再通過驗證。",
         "description": "用途：執行 Member Auth 的 Logout 作業。HTTP 方法：POST；路由：/api/{version}/member/auth/logout。",
         "parameters": [
@@ -1383,7 +1417,9 @@
     },
     "/api/{version}/member/auth/rotate": {
       "post": {
-        "tags": ["MemberAuth"],
+        "tags": [
+          "MemberAuth"
+        ],
         "summary": "輪替 SSO 長 token，降低長效 token 外洩後的風險。",
         "description": "用途：執行 Member Auth 的 Rotate 作業。HTTP 方法：POST；路由：/api/{version}/member/auth/rotate。",
         "parameters": [
@@ -1468,7 +1504,9 @@
     },
     "/api/{version}/member/auth/email-upgrade/email/verification-code": {
       "post": {
-        "tags": ["MemberAuthEmailUpgrade"],
+        "tags": [
+          "MemberAuthEmailUpgrade"
+        ],
         "summary": "寄送 Email 會員升級驗證碼",
         "description": "以 HFMemberAccount.LoginAccount 比對輸入的 Email 登入帳號，並檢查會員是否存在且尚未綁定手機；只有符合條件才寄送驗證信。 Email 不存在、已綁定手機或帳號不可使用時，一律回覆「帳號不存在」。同一 LoginAccount 每 24 小時最多寄送 10 次，達上限後回傳 unlockAt。 規格來源：C201-2 規格書第 4、8、9 頁；依確認需求，以 Email 驗證碼取代原 Email＋密碼驗證。",
         "operationId": "SendEmailVerificationCode",
@@ -1534,7 +1572,9 @@
     },
     "/api/{version}/member/auth/email-upgrade/email/verification-code/verify": {
       "post": {
-        "tags": ["MemberAuthEmailUpgrade"],
+        "tags": [
+          "MemberAuthEmailUpgrade"
+        ],
         "summary": "驗證 Email 會員升級驗證碼",
         "description": "驗證 Email 驗證碼，成功後簽發僅供升級流程使用的短效 upgradeToken，不建立正式登入狀態。驗證碼錯誤時回傳 failedAttempts 與 remainingAttempts；錯誤達 5 次後驗證碼失效。 規格來源：C201-2 規格書第 4、8、9 頁；依確認需求，以 Email 驗證碼取代原 Email＋密碼驗證。",
         "operationId": "VerifyEmailVerificationCode",
@@ -1600,7 +1640,9 @@
     },
     "/api/{version}/member/auth/email-upgrade/status": {
       "get": {
-        "tags": ["MemberAuthEmailUpgrade"],
+        "tags": [
+          "MemberAuthEmailUpgrade"
+        ],
         "summary": "查詢 Email 會員升級狀態",
         "description": "以 upgradeToken 查詢升級狀態、升級期限、是否可以稍後處理，以及可預帶的未驗證手機。 規格來源：C201-2 規格書第 2、3、18、19、20 頁。",
         "operationId": "GetUpgradeStatus",
@@ -1649,7 +1691,9 @@
     },
     "/api/{version}/member/auth/email-upgrade/mobile/check": {
       "post": {
-        "tags": ["MemberAuthEmailUpgrade"],
+        "tags": [
+          "MemberAuthEmailUpgrade"
+        ],
         "summary": "檢查升級手機號碼是否可使用",
         "description": "檢查台灣手機號碼格式及 LoginAccount 綁定狀態，只依 LoginAccount 判斷是否由其他會員使用；MobilePhone 聯絡欄位不參與綁定或整併判斷。 只回傳可用或其他會員已使用，不揭露其他會員資料。 規格來源：C201-2 規格書第 4、5、6、19 頁。",
         "operationId": "CheckMobile",
@@ -1723,7 +1767,9 @@
     },
     "/api/{version}/member/auth/email-upgrade/mobile/verification-code": {
       "post": {
-        "tags": ["MemberAuthEmailUpgrade"],
+        "tags": [
+          "MemberAuthEmailUpgrade"
+        ],
         "summary": "建立升級手機驗證碼",
         "description": "建立欲綁定或欲整併帳號的 6 碼手機驗證碼，套用 1 分鐘有效、60 秒重寄冷卻、每日 10 次及每 IP 每小時 20 次限制。 UAT 前的開發模式不呼叫簡訊服務，改由 developmentVerificationCode 回傳驗證碼；UAT 起關閉開發模式後才寄送簡訊，且不回傳該欄位。 規格來源：C201-2 規格書第 4、5、6、10、18、19 頁。",
         "operationId": "SendMobileVerificationCode",
@@ -1797,7 +1843,9 @@
     },
     "/api/{version}/member/auth/email-upgrade/mobile/verification-code/verify": {
       "post": {
-        "tags": ["MemberAuthEmailUpgrade"],
+        "tags": [
+          "MemberAuthEmailUpgrade"
+        ],
         "summary": "驗證升級手機驗證碼",
         "description": "驗證手機驗證碼；成功後立即使驗證碼失效，並簽發一次性 mobileVerificationToken 供綁定或整併使用。 同一驗證碼錯誤 5 次即失效。規格來源：C201-2 規格書第 6、10、16、17、19 頁。",
         "operationId": "VerifyMobileVerificationCode",
@@ -1871,7 +1919,9 @@
     },
     "/api/{version}/member/auth/email-upgrade/bind": {
       "post": {
-        "tags": ["MemberAuthEmailUpgrade"],
+        "tags": [
+          "MemberAuthEmailUpgrade"
+        ],
         "summary": "綁定手機並完成 Email 會員升級",
         "description": "使用已驗證的手機完成綁定，保留原 Email 與密碼、更新升級狀態及寫入升級紀錄，完成後建立正式登入狀態。 規格來源：C201-2 規格書第 5、11、19、20 頁。",
         "operationId": "BindMobile",
@@ -1945,7 +1995,9 @@
     },
     "/api/{version}/member/auth/email-upgrade/merge": {
       "post": {
-        "tags": ["MemberAuthEmailUpgrade"],
+        "tags": [
+          "MemberAuthEmailUpgrade"
+        ],
         "summary": "整併 Email 會員與既有手機會員",
         "description": "以手機會員為存續帳號，將 Email 會員資料整併後標記為不可登入；保留有效點數並依規格保留最近 10 筆訂單。 規格來源：C201-2 規格書第 5、6、12、19、20 頁。",
         "operationId": "MergeAccount",
@@ -2019,7 +2071,9 @@
     },
     "/api/{version}/member/auth/email-upgrade/defer": {
       "post": {
-        "tags": ["MemberAuthEmailUpgrade"],
+        "tags": [
+          "MemberAuthEmailUpgrade"
+        ],
         "summary": "暫緩 Email 會員升級",
         "description": "升級期間內記錄一次「稍後再說」；超過升級期限後不得暫緩。 規格來源：C201-2 規格書第 2、3、18、19、20 頁。",
         "operationId": "DeferUpgrade",
@@ -2491,7 +2545,11 @@
         "description": "驗證 C 端忘記密碼驗證碼並設定新密碼的請求。"
       },
       "MemberAuthPasswordResetConfirmResponse": {
-        "required": ["message", "requireRelogin", "success"],
+        "required": [
+          "message",
+          "requireRelogin",
+          "success"
+        ],
         "type": "object",
         "properties": {
           "success": {
@@ -2511,7 +2569,10 @@
         "description": "C 端忘記密碼完成結果。"
       },
       "MemberAuthPasswordResetRequest": {
-        "required": ["mobilePhone", "verificationChannel"],
+        "required": [
+          "mobilePhone",
+          "verificationChannel"
+        ],
         "type": "object",
         "properties": {
           "mobilePhone": {
@@ -2519,14 +2580,24 @@
             "description": "會員手機號碼。"
           },
           "verificationChannel": {
-            "$ref": "#/components/schemas/MemberAuthPasswordResetVerificationChannel"
+            "enum": [
+              "sms",
+              "line"
+            ],
+            "type": "string",
+            "description": "驗證碼傳送管道；sms 為簡訊，line 為 LINE。JSON 不接受數字 0／1。"
           }
         },
         "additionalProperties": false,
         "description": "建立 C 端忘記密碼驗證流程的請求。"
       },
       "MemberAuthPasswordResetRequestResponse": {
-        "required": ["expireAt", "message", "resetToken", "success"],
+        "required": [
+          "expireAt",
+          "message",
+          "resetToken",
+          "success"
+        ],
         "type": "object",
         "properties": {
           "success": {
@@ -2544,7 +2615,7 @@
           },
           "developmentVerificationCode": {
             "type": "string",
-            "description": "開發環境測試用驗證碼；關閉 develop 模式時不回傳。",
+            "description": "開發環境測試用 6 位驗證碼；僅 MemberPasswordReset:UseDevelopmentVerificationCode=true 時回傳。",
             "nullable": true
           },
           "message": {
@@ -2554,12 +2625,6 @@
         },
         "additionalProperties": false,
         "description": "建立 C 端忘記密碼驗證流程的結果。"
-      },
-      "MemberAuthPasswordResetVerificationChannel": {
-        "enum": [0, 1],
-        "type": "integer",
-        "description": "忘記密碼驗證碼的傳送管道。",
-        "format": "int32"
       },
       "MemberAuthRevokeRequest": {
         "type": "object",
@@ -2722,7 +2787,11 @@
         "description": "會員登入成功後回傳的 SSO 長 token 與會員身份資訊。"
       },
       "MemberEmailUpgradeCompleteRequest": {
-        "required": ["channel", "mobilePhone", "mobileVerificationToken"],
+        "required": [
+          "channel",
+          "mobilePhone",
+          "mobileVerificationToken"
+        ],
         "type": "object",
         "properties": {
           "mobilePhone": {
@@ -2826,13 +2895,19 @@
         "description": "暫緩升級結果；規格書第 2、3、18、19、20 頁。"
       },
       "MemberEmailUpgradeMobileAvailability": {
-        "enum": [0, 1, 2],
+        "enum": [
+          0,
+          1,
+          2
+        ],
         "type": "integer",
         "description": "手機號碼與會員帳號的關聯狀態；數值對應為：0 = available（手機號碼尚未綁定會員，可直接綁定目前會員）；1 = currentMember（手機號碼已綁定目前會員）；2 = otherMember（手機號碼已綁定其他會員，需進入帳號整併流程）。\r\n\r\n",
         "format": "int32"
       },
       "MemberEmailUpgradeMobileCheckResponse": {
-        "required": ["availability"],
+        "required": [
+          "availability"
+        ],
         "type": "object",
         "properties": {
           "availability": {
@@ -2847,7 +2922,12 @@
         "description": "升級手機可用性檢查結果；規格書第 4、5、6、19 頁。"
       },
       "MemberEmailUpgradeMobileCodeResponse": {
-        "required": ["expiresAt", "message", "resendAvailableAt", "verificationToken"],
+        "required": [
+          "expiresAt",
+          "message",
+          "resendAvailableAt",
+          "verificationToken"
+        ],
         "type": "object",
         "properties": {
           "verificationToken": {
@@ -2879,7 +2959,9 @@
         "description": "升級手機驗證碼建立結果；規格書第 6、10、18、19 頁。"
       },
       "MemberEmailUpgradeMobileRequest": {
-        "required": ["mobilePhone"],
+        "required": [
+          "mobilePhone"
+        ],
         "type": "object",
         "properties": {
           "mobilePhone": {
@@ -2892,7 +2974,9 @@
         "description": "升級手機驗證請求；規格書第 4、5、6、10、18、19 頁。"
       },
       "MemberEmailUpgradeSendCodeRequest": {
-        "required": ["email"],
+        "required": [
+          "email"
+        ],
         "type": "object",
         "properties": {
           "email": {
@@ -2906,7 +2990,12 @@
         "description": "寄送 Email 升級驗證碼請求；規格書第 4、8、9 頁。"
       },
       "MemberEmailUpgradeSendCodeResponse": {
-        "required": ["challengeToken", "expiresAt", "message", "resendAvailableAt"],
+        "required": [
+          "challengeToken",
+          "expiresAt",
+          "message",
+          "resendAvailableAt"
+        ],
         "type": "object",
         "properties": {
           "challengeToken": {
@@ -2932,13 +3021,19 @@
         "description": "Email 升級驗證碼寄送結果；規格書第 4、8、9 頁。"
       },
       "MemberEmailUpgradeStatus": {
-        "enum": [0, 1, 2],
+        "enum": [
+          0,
+          1,
+          2
+        ],
         "type": "integer",
         "description": "Email 會員升級狀態",
         "format": "int32"
       },
       "MemberEmailUpgradeStatusResponse": {
-        "required": ["upgradeStatus"],
+        "required": [
+          "upgradeStatus"
+        ],
         "type": "object",
         "properties": {
           "upgradeStatus": {
@@ -2971,7 +3066,10 @@
         "description": "Email 會員升級狀態；規格書第 2、3、18、19、20 頁。"
       },
       "MemberEmailUpgradeVerifyCodeRequest": {
-        "required": ["challengeToken", "verificationCode"],
+        "required": [
+          "challengeToken",
+          "verificationCode"
+        ],
         "type": "object",
         "properties": {
           "challengeToken": {
@@ -2990,7 +3088,11 @@
         "description": "Email 升級驗證碼確認請求；規格書第 4、8、9 頁。"
       },
       "MemberEmailUpgradeVerifyCodeResponse": {
-        "required": ["expiresAt", "upgradeStatus", "upgradeToken"],
+        "required": [
+          "expiresAt",
+          "upgradeStatus",
+          "upgradeToken"
+        ],
         "type": "object",
         "properties": {
           "upgradeToken": {
@@ -3020,7 +3122,11 @@
         "description": "Email 驗證成功後的升級授權；規格書第 4、8、9 頁。"
       },
       "MemberEmailUpgradeVerifyMobileCodeRequest": {
-        "required": ["mobilePhone", "verificationCode", "verificationToken"],
+        "required": [
+          "mobilePhone",
+          "verificationCode",
+          "verificationToken"
+        ],
         "type": "object",
         "properties": {
           "mobilePhone": {
@@ -3044,7 +3150,11 @@
         "description": "驗證升級手機 OTP 請求；規格書第 6、10、16、17、19 頁。"
       },
       "MemberEmailUpgradeVerifyMobileCodeResponse": {
-        "required": ["availability", "expiresAt", "mobileVerificationToken"],
+        "required": [
+          "availability",
+          "expiresAt",
+          "mobileVerificationToken"
+        ],
         "type": "object",
         "properties": {
           "mobileVerificationToken": {
@@ -3301,7 +3411,7 @@
             "nullable": true
           }
         },
-        "additionalProperties": {}
+        "additionalProperties": { }
       },
       "StringBoolean<>f__AnonymousType0": {
         "type": "object",

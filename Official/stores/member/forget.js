@@ -25,7 +25,8 @@ export const useMemberForgetStore = defineStore('memberForget', () => {
     },
   })
 
-  // 驗證碼的發送管道。swagger 寫成 integer 0 / 1 是轉譯錯誤,實際要帶字串。
+  // 驗證碼的發送管道。規格是字串 enum(`sms` / `line`),明寫不接受數字 0 / 1
+  // (2026-09-08 的 swagger 已更正,早一版誤寫成 integer)。
   // 目前一律 sms;未來可能改發 LINE,所以留成表而不是寫死在呼叫端。
   const verificationChannels = readonly({
     sms: 'sms',
