@@ -1,4 +1,4 @@
-export const useMemberRegisterStore = defineStore('memberRegister', () => {
+export const useMemberAuthRegisterStore = defineStore('memberAuthRegister', () => {
   const apiDefault = readonly({
     type: {
       memberType: null,

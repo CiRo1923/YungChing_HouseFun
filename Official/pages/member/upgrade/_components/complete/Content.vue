@@ -1,7 +1,7 @@
 <script setup>
 import { UPGRADECOMPLETE } from '@js/_storage.js'
 
-const { onGetCookie } = useMemberUpgradeActions()
+const { onGetCookie } = useMemberAuthUpgradeActions()
 
 // 剛完成綁定的號碼,遮罩由後端給(bind / merge 回傳的 maskedMobile),前端不再自己遮。
 // 走到這裡代表 middleware 已放行 → cookie 一定有效。值不會變動,setup 取一次即可。

@@ -1,5 +1,9 @@
 /* mLoading 的共用變數 —— 只放「值」,斷點對應與狀態切換寫在 common.css。 */
 :root {
+  --loading-overlay-pc-blur: 2px;
+  --loading-overlay-tablet-blur: 2px;
+  --loading-overlay-mobile-blur: 2px;
+
   --loading-overlay-bg-color: var(--black-33);
   --loading-container-color: var(--gray-999);
   --loading-container-bg-color: inherit;

@@ -1,5 +1,5 @@
 <script setup>
-const memberProjct = useMemberProjectStore()
+const memberProjct = useMemberAuthProjectStore()
 const { login } = storeToRefs(memberProjct)
 
 // TODO: 待 member 驗證碼「發送 / 重送」API 就緒後接上
@@ -56,6 +56,7 @@ const onSubmit = () => {}
         :setClass="{
           main: '--rounded --h-55 --px-12',
           button: '--h-35 --px-15',
+          buttonText: 'text-[14px]',
         }"
         @submit="onSubmit"
       />

@@ -9,15 +9,16 @@ const {
   onApiGETBranchSelectOptions,
   onApiGETBranchStoreSelectOptions,
 } = useManageActions()
-const { onApiAuthRegisterVerificationCode, onApiAuthRegister, reset } = useMemberRegisterActions()
-const memberRegister = useMemberRegisterStore()
+const { onApiAuthRegisterVerificationCode, onApiAuthRegister, reset } =
+  useMemberAuthRegisterActions()
+const memberRegister = useMemberAuthRegisterStore()
 const { type } = storeToRefs(memberRegister)
 const route = useRoute()
 const router = useRouter()
 
 definePageMeta({
-  layout: 'member',
-  channel: 'member',
+  layout: 'member-auth',
+  channel: 'memberAuth',
   requiresAuth: false,
 })
 
@@ -88,7 +89,7 @@ onInit()
 
 <template>
   <CommonMContainer
-    class="p:--max-w-400 tm:pt-[20px] p:pt-[55px]"
+    class="p:--max-w-400"
     :config="{
       as: 'section',
     }"

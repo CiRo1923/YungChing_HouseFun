@@ -290,6 +290,9 @@ const TW_PREFIX = [
   'aspect-',
   'font-',
   'leading-',
+  // 規範對 line-clamp 有明文規定(截斷一律用它、而且由父系 setClass 傳入),
+  // 所以一定要抓得到。'scrollbar' 這種專案全域 class 不帶連字號,不會誤中。
+  'line-clamp-',
   'tracking-',
   'align-',
   'whitespace-',
@@ -572,6 +575,23 @@ export function checkTailwindInComponents(relPath, text) {
   const issues = []
   const seen = new Set()
 
+  const addFrom = (offset, chunks, source) => {
+    for (const chunk of chunks) {
+      for (const cls of chunk.split(/\s+/)) {
+        if (!cls || !isTailwindUtility(cls)) continue
+        if (seen.has(cls)) continue
+        seen.add(cls)
+        issues.push({
+          rule: 'tailwind',
+          file: relPath,
+          line: lineOf(text, tpl.offset + offset),
+          detail: `${source}使用 tailwind class ${cls}`,
+          snippet: cls,
+        })
+      }
+    }
+  }
+
   // class="..." 與 :class="'...'" / :class="{ '...': cond }" 內的字面 class 字串
   const attrRe = /(?::|v-bind:)?class\s*=\s*"([^"]*)"|(?::|v-bind:)?class\s*=\s*'([^']*)'/g
 
@@ -582,20 +602,25 @@ export function checkTailwindInComponents(relPath, text) {
     // 動態綁定只取引號包住的字面 class,其餘(變數、三元運算)無法靜態判讀
     const candidates = isDynamic ? [...raw.matchAll(/['"]([^'"]+)['"]/g)].map((x) => x[1]) : [raw]
 
-    for (const chunk of candidates) {
-      for (const cls of chunk.split(/\s+/)) {
-        if (!cls || !isTailwindUtility(cls)) continue
-        if (seen.has(cls)) continue
-        seen.add(cls)
-        issues.push({
-          rule: 'tailwind',
-          file: relPath,
-          line: lineOf(text, tpl.offset + m.index),
-          detail: `template 使用 tailwind class ${cls}`,
-          snippet: cls,
-        })
-      }
-    }
+    addFrom(m.index, candidates, 'template ')
+  }
+
+  // :setClass="{ main: '…', icon: '…' }" —— 傳給子組件的樣式同樣不得寫 tailwind。
+  //
+  // 為什麼要另外抓:它不是 class 屬性,上面那條 regex 完全掃不到,
+  // 於是「組件不寫 tailwind」這條規則只要改用 setClass 就能整個繞過去
+  // (實際存量:兩個專案合計 30 行,含 rounded-[15px] / py-[30px] 這種寫死尺寸)。
+  const setClassRe = /(?::|v-bind:)?set-?class\s*=\s*(?:"([^"]*)"|'([^']*)')/gi
+
+  for (const m of body.matchAll(setClassRe)) {
+    const raw = m[1] ?? m[2] ?? ''
+
+    // 物件字面值裡的字串就是要檢查的 class;變數與三元運算無法靜態判讀,略過
+    addFrom(
+      m.index,
+      [...raw.matchAll(/['"]([^'"]+)['"]/g)].map((x) => x[1]),
+      'setClass '
+    )
   }
 
   return issues

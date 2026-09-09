@@ -4,7 +4,7 @@ import { onMaskPhone } from '@js/_projectPrototype.js'
 import { deCrypto } from '@js/.crypto/index.js'
 
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
-const memberUpgrade = useMemberUpgradeStore()
+const memberUpgrade = useMemberAuthUpgradeStore()
 const { phone, phoneVerify } = storeToRefs(memberUpgrade)
 const {
   onGetCookie,
@@ -12,13 +12,13 @@ const {
   onApiAuthEmailUpgradeMobileVerificationCodeVerify,
   onApiAuthEmailUpgradeBind,
   onApiAuthEmailUpgradeMerge,
-} = useMemberUpgradeActions()
+} = useMemberAuthUpgradeActions()
 const { onApiPromise } = usePopupActions()
 const router = useRouter()
 
 definePageMeta({
-  layout: 'member',
-  channel: 'member',
+  layout: 'member-auth',
+  channel: 'memberAuth',
   requiresAuth: false,
   middleware: [
     () => {
@@ -28,7 +28,7 @@ definePageMeta({
       // verificationToken 只活在 store(沒有寫 cookie),重整後必然是空的 →
       // 本頁的驗證與重送都缺這個值,畫面只會停在「驗證碼已失效」。
       // 與其讓使用者卡在死畫面,不如退回上一頁重新輸入號碼、重新發送。
-      const { phoneVerify } = useMemberUpgradeStore()
+      const { phoneVerify } = useMemberAuthUpgradeStore()
 
       // 沒有 upgradeToken(未經上一頁進來、或已過 expiresAt 被瀏覽器清掉)→
       // 後續 mobile API 都缺 header X-Upgrade-Token,打不了,退回上一頁重跑。
@@ -143,7 +143,7 @@ onInit()
 
 <template>
   <CommonMContainer
-    class="p:--max-w-400 space-y-[30px] tm:pt-[20px] p:pt-[55px]"
+    class="p:--max-w-400 space-y-[30px]"
     :config="{
       as: 'section',
     }"

@@ -15,9 +15,9 @@ export default () => {
   const project = useProjectStore()
   const { serverTime } = storeToRefs(project)
   const { onApiGetCommonServerTime } = useProjectActions()
-  const memberProjct = useMemberProjectStore()
+  const memberProjct = useMemberAuthProjectStore()
   const { authToken, userData } = storeToRefs(memberProjct)
-  const { onApiAuthToken, onSetAuthTokenCookie, onReset } = useMemberProjectActions()
+  const { onApiAuthToken, onSetAuthTokenCookie, onReset } = useMemberAuthProjectActions()
   const buyProject = useBuyProjectStore()
   const { channel, access, message, countdownData, apiVerifyCodeData, cottonCandyCheckbox } =
     storeToRefs(buyProject)

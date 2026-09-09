@@ -1,13 +1,13 @@
 <script setup>
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
-const memberForget = useMemberForgetStore()
-const { onApiAuthPasswordResetRequest, onSaveVerify, reset } = useMemberForgetActions()
+const memberForget = useMemberAuthForgetStore()
+const { onApiAuthPasswordResetRequest, onSaveVerify, reset } = useMemberAuthForgetActions()
 const { onApiPromise } = usePopupActions()
 const router = useRouter()
 
 definePageMeta({
-  layout: 'member',
-  channel: 'member',
+  layout: 'member-auth',
+  channel: 'memberAuth',
   requiresAuth: false,
 })
 
@@ -20,8 +20,8 @@ onUseMeta({
   url: useRequestURL(),
 })
 
-// 發送(或重送)驗證碼。管道目前一律 sms —— 規格是字串 enum(`sms` / `line`),
-// 明寫不接受數字 0 / 1;未來可能改發 LINE,值集中在 store 的 verificationChannels。
+// 發送(或重送)驗證碼。管道目前一律 sms;
+// 未來可能改發 LINE,值集中在 store 的 verificationChannels。
 const onSendCode = async () => {
   onApiPromise('open')
 
@@ -54,7 +54,7 @@ onInit()
 
 <template>
   <CommonMContainer
-    class="p:--max-w-400 space-y-[30px] tm:pt-[20px] p:pt-[55px]"
+    class="p:--max-w-400 space-y-[30px]"
     :config="{
       as: 'section',
     }"

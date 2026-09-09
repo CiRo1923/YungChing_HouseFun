@@ -3,6 +3,11 @@
 
 .m-separator {
   @apply gap-x-[--separator-gap-x];
+
+  /* 換行由使用端決定(--horizontal 時才有意義),不分斷點 */
+  &.\-\-wrap {
+    @apply flex-wrap;
+  }
 }
 
 .m-separator-item {

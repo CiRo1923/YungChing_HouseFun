@@ -1,5 +1,5 @@
 <script setup>
-const memberProjct = useMemberProjectStore()
+const memberProjct = useMemberAuthProjectStore()
 const { userData } = storeToRefs(memberProjct)
 const { onPopupLogin } = useBuyProjectActions()
 const props = defineProps({

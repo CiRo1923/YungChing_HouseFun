@@ -1,7 +1,7 @@
 <script setup>
 import { Form } from 'vee-validate'
 
-const memberForget = useMemberForgetStore()
+const memberForget = useMemberAuthForgetStore()
 const { resetPassword } = storeToRefs(memberForget)
 
 const emits = defineEmits(['submit'])

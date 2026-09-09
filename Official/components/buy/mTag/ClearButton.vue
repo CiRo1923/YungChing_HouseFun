@@ -52,7 +52,7 @@ const onClick = () => {
       }"
       :setClass="{
         main: 'm-tag-xmark-button',
-        icon: 'h-[14px] w-[14px]',
+        icon: 'm-tag-xmark-button-icon',
       }"
       @click="onClick"
     />

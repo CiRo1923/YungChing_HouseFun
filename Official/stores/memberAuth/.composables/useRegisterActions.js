@@ -1,7 +1,7 @@
-import { apiAuthRegisterVerificationCode, apiAuthRegister } from '@js/_api/member/register.js'
+import { apiAuthRegisterVerificationCode, apiAuthRegister } from '@js/_api/memberAuth/register.js'
 
 export default () => {
-  const memberRegister = useMemberRegisterStore()
+  const memberRegister = useMemberAuthRegisterStore()
   const { type } = storeToRefs(memberRegister)
   const { onApiError } = usePopupActions()
 

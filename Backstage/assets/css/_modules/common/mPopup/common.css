@@ -2,7 +2,7 @@
   @apply fixed inset-0 z-[3] flex m:px-[16px];
 
   &:before {
-    @apply absolute inset-0 bg-[--popup-overlay-bg-color] content-default;
+    @apply absolute inset-0 bg-[--popup-overlay-bg-color] backdrop-blur-[--popup-overlay-blur] content-default;
   }
 
   &.\-\-zoom {
@@ -89,6 +89,7 @@
 
 @screen p {
   .m-popup {
+    --popup-overlay-blur: var(--popup-overlay-pc-blur);
     --popup-container-rounded: var(--popup-container-pc-rounded);
     --popup-container-rounded-t: var(--popup-container-pc-rounded-t);
     --popup-px: var(--popup-container-pc-px);
@@ -110,6 +111,7 @@
 
 @screen t {
   .m-popup {
+    --popup-overlay-blur: var(--popup-overlay-tablet-blur);
     --popup-container-rounded: var(--popup-container-tablet-rounded);
     --popup-container-rounded-t: var(--popup-container-tablet-rounded-t);
     --popup-px: var(--popup-container-tablet-px);
@@ -131,6 +133,7 @@
 
 @screen m {
   .m-popup {
+    --popup-overlay-blur: var(--popup-overlay-mobile-blur);
     --popup-container-rounded: var(--popup-container-mobile-rounded);
     --popup-container-rounded-t: var(--popup-container-mobile-rounded-t);
     --popup-px: var(--popup-container-mobile-px);

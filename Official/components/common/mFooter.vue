@@ -153,7 +153,7 @@ onUnmounted(() => {
             isHiddenItem: false,
           }"
           :setClass="{
-            main: '--horizontal --gap-x-16 flex-wrap',
+            main: '--horizontal --gap-x-16 --wrap',
           }"
           v-slot="{ item }"
         >

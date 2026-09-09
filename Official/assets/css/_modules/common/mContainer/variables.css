@@ -11,6 +11,12 @@
 
 @screen p {
   .m-container {
+    &.\-\-max-w-1430,
+    &.p\:\-\-max-w-1430,
+    &.pt\:\-\-max-w-1430 {
+      --container-max-w: 1430px;
+    }
+
     &.\-\-max-w-1220,
     &.p\:\-\-max-w-1220,
     &.pt\:\-\-max-w-1220 {
@@ -39,6 +45,13 @@
 
 @screen t {
   .m-container {
+    &.\-\-max-w-1430,
+    &.pt\:\-\-max-w-1430,
+    &.tm\:\-\-max-w-1430,
+    &.t\:\-\-max-w-1430 {
+      --container-max-w: 1430px;
+    }
+
     &.\-\-max-w-1220,
     &.pt\:\-\-max-w-1220,
     &.tm\:\-\-max-w-1220,
@@ -71,6 +84,12 @@
 
 @screen m {
   .m-container {
+    &.\-\-max-w-1430,
+    &.tm\:\-\-max-w-1430,
+    &.m\:\-\-max-w-1430 {
+      --container-max-w: 1430px;
+    }
+
     &.\-\-max-w-1220,
     &.tm\:\-\-max-w-1220,
     &.m\:\-\-max-w-1220 {

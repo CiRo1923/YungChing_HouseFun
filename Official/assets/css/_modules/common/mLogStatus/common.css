@@ -7,6 +7,19 @@
   @apply relative leading-[0];
 }
 
+.m-log-status-anchor {
+  @apply gap-x-[--log-status-anchor-gap-x];
+}
+
+/* 行高不分斷點、也不開變數(規則:leading 跟著字級走,值是無單位比例) */
+.m-log-status-text {
+  @apply text-[length:--log-status-text-text-size] leading-[1.64];
+}
+
+.m-log-status-icon {
+  @apply h-[--log-status-icon-size] w-[--log-status-icon-size] p-[--log-status-icon-p];
+}
+
 @screen p {
   .m-log-status {
     @apply flex items-center gap-x-[--log-status-gap-x];
@@ -15,6 +28,19 @@
     --log-status-divider-h: var(--log-status-divider-pc-h);
     --log-status-divider-w: var(--log-status-divider-pc-w);
     --log-status-divider-right: var(--log-status-divider-pc-right);
+  }
+
+  .m-log-status-anchor {
+    --log-status-anchor-gap-x: var(--log-status-anchor-pc-gap-x);
+  }
+
+  .m-log-status-text {
+    --log-status-text-text-size: var(--log-status-text-pc-text-size);
+  }
+
+  .m-log-status-icon {
+    --log-status-icon-size: var(--log-status-icon-pc-size);
+    --log-status-icon-p: var(--log-status-icon-pc-p);
   }
 
   .m-log-status-item {
@@ -36,6 +62,19 @@
     --log-status-divider-right: var(--log-status-divider-tablet-right);
   }
 
+  .m-log-status-anchor {
+    --log-status-anchor-gap-x: var(--log-status-anchor-tablet-gap-x);
+  }
+
+  .m-log-status-text {
+    --log-status-text-text-size: var(--log-status-text-tablet-text-size);
+  }
+
+  .m-log-status-icon {
+    --log-status-icon-size: var(--log-status-icon-tablet-size);
+    --log-status-icon-p: var(--log-status-icon-tablet-p);
+  }
+
   .m-log-status-item {
     &:not(:last-child) {
       &:after {
@@ -53,5 +92,21 @@
     @apply border-t-[--log-status-border-color];
 
     --log-status-border-t: var(--log-status-mobile-border-t);
+  }
+
+  .m-log-status-anchor {
+    --log-status-anchor-gap-x: var(--log-status-anchor-mobile-gap-x);
+
+    /* mobile 是直向清單,連結撐滿整列 */
+    @apply w-full;
+  }
+
+  .m-log-status-text {
+    --log-status-text-text-size: var(--log-status-text-mobile-text-size);
+  }
+
+  .m-log-status-icon {
+    --log-status-icon-size: var(--log-status-icon-mobile-size);
+    --log-status-icon-p: var(--log-status-icon-mobile-p);
   }
 }

@@ -24,7 +24,12 @@ onMounted(() => {
 </script>
 
 <template>
-  <div>
-    <CommonMContainer class="p:--max-w-1220"> 1 </CommonMContainer>
-  </div>
+  <CommonMContainer class="p:--max-w-1430 p:--px-10 p:flex p:items-start p:gap-x-[25px]">
+    <PageMemberCenterNavs />
+    <CommonMContent
+      class="p:--hasBgColor pt:--rounded-20 p:--py-25 t:--py-20 p:--px-40 m:--pb-20 tm:--px-16 grow t:mx-[10px]"
+    >
+      <PageMemberCenterHeader title="實登訂閱管理" />
+    </CommonMContent>
+  </CommonMContainer>
 </template>

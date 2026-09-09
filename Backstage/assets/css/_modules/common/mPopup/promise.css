@@ -3,7 +3,7 @@
   @apply absolute inset-0 z-[2] flex items-center justify-center;
 
   &::before {
-    @apply absolute inset-0 z-0 bg-[--popup-promise-overlay-bg-color] content-default;
+    @apply absolute inset-0 z-0 bg-[--popup-promise-overlay-bg-color] backdrop-blur-[--popup-promise-overlay-blur] content-default;
   }
 }
 
@@ -15,6 +15,10 @@
 }
 
 @screen p {
+  .m-popup-promise {
+    --popup-promise-overlay-blur: var(--popup-promise-overlay-pc-blur);
+  }
+
   .m-popup-promise-message {
     --popup-promise-message-rounded: var(--popup-promise-message-pc-rounded);
     --popup-promise-message-text-size: var(--popup-promise-message-pc-text-size);
@@ -26,6 +30,10 @@
 }
 
 @screen t {
+  .m-popup-promise {
+    --popup-promise-overlay-blur: var(--popup-promise-overlay-tablet-blur);
+  }
+
   .m-popup-promise-message {
     --popup-promise-message-rounded: var(--popup-promise-message-tablet-rounded);
     --popup-promise-message-text-size: var(--popup-promise-message-tablet-text-size);
@@ -37,6 +45,10 @@
 }
 
 @screen m {
+  .m-popup-promise {
+    --popup-promise-overlay-blur: var(--popup-promise-overlay-mobile-blur);
+  }
+
   .m-popup-promise-message {
     --popup-promise-message-rounded: var(--popup-promise-message-mobile-rounded);
     --popup-promise-message-text-size: var(--popup-promise-message-mobile-text-size);

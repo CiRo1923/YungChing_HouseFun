@@ -1,5 +1,5 @@
 <script setup>
-const memberUpgrade = useMemberUpgradeStore()
+const memberUpgrade = useMemberAuthUpgradeStore()
 const { phone } = storeToRefs(memberUpgrade)
 
 const emits = defineEmits(['enter'])

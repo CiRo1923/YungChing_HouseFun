@@ -20,6 +20,17 @@
   --footer-tablet-max-w: none;
   --footer-mobile-max-w: none;
 
+  /* logo 圖 —— 寬高不同,拆 -w / -h */
+  --footer-logo-image-w: auto;
+  --footer-logo-image-pc-w: 126px;
+  --footer-logo-image-tablet-w: 126px;
+  --footer-logo-image-mobile-w: 126px;
+
+  --footer-logo-image-h: auto;
+  --footer-logo-image-pc-h: 50px;
+  --footer-logo-image-tablet-h: 50px;
+  --footer-logo-image-mobile-h: 50px;
+
   /* 內層灰底區塊 */
   --footer-container-bg-color: var(--gray-f7);
 

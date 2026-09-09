@@ -1,6 +1,6 @@
 // 忘記密碼流程(手機驗證 → 重設密碼 → 設定完成)。
 //
-// 欄位跟著 swagger 的兩支 C 端 API 走(.api.json/swagger.json):
+// 欄位對應 C 端的兩支 API:
 //   password-reset/request  mobilePhone + verificationChannel → resetToken / expireAt
 //   password-reset/confirm  mobilePhone + verificationCode + resetToken
 //                           + newPassword + confirmPassword  → success / requireRelogin
@@ -10,7 +10,7 @@
 //
 // 段落名為 verify(步驟 1)/ resetPassword(步驟 2)——
 // 後者不叫 reset 是因為 Actions 那邊的清空工具已經佔用 `reset` 這個名字。
-export const useMemberForgetStore = defineStore('memberForget', () => {
+export const useMemberAuthForgetStore = defineStore('memberAuthForget', () => {
   const apiDefault = readonly({
     verify: {
       mobilePhone: null,
@@ -23,8 +23,7 @@ export const useMemberForgetStore = defineStore('memberForget', () => {
     },
   })
 
-  // 驗證碼的發送管道。規格是字串 enum(`sms` / `line`),明寫不接受數字 0 / 1
-  // (2026-09-08 的 swagger 已更正,早一版誤寫成 integer)。
+  // 驗證碼的發送管道,值為字串 `sms` / `line`。
   // 目前一律 sms;未來可能改發 LINE,所以留成表而不是寫死在呼叫端。
   const verificationChannels = readonly({
     sms: 'sms',

@@ -3,7 +3,11 @@
  * 它是「API 等待中」的全屏遮罩 + 訊息框,不吃 .m-popup 的尺寸 modifier。
  */
 :root {
-  --popup-promise-overlay-bg-color: var(--black-40);
+  --popup-promise-overlay-pc-blur: 2px;
+  --popup-promise-overlay-tablet-blur: 2px;
+  --popup-promise-overlay-mobile-blur: 2px;
+
+  --popup-promise-overlay-bg-color: var(--black-33);
 
   --popup-promise-message-bg-color: var(--white);
   --popup-promise-message-color: var(--gray-999);

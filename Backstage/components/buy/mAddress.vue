@@ -274,6 +274,13 @@ const setClass = computed(() => {
     city: '',
     area: '',
     // 字級由使用端決定 —— 這支是複用型元件,module 不定 text-*
+    // fieldType 套用到每個欄位的輸入框,dropdownLabel / rearAssist 各只有一種用法,
+    // 值都一樣,所以不逐欄位開 key。
+    fieldType: '',
+    // 只有 city / area 兩個下拉會用(選項名稱可能很長),與 fieldType 疊加
+    selectType: '',
+    dropdownLabel: '',
+    rearAssist: '',
     separator: '',
     ...props.setClass,
   }
@@ -319,8 +326,8 @@ onMounted(() => {
         isDisabled: config.city.isDisabled,
       }"
       :setClass="{
-        type: 'line-clamp-1 text-[16px]',
-        main: ['--h-40 --px-12 --py-8 m:w-full', setClass.city],
+        type: [setClass.fieldType, setClass.selectType],
+        main: ['m-address-select --h-40 --px-12 --py-8', setClass.city],
       }"
       @change="onCityChange()"
       v-if="props.city !== undefined"
@@ -336,8 +343,8 @@ onMounted(() => {
         isDisabled: config.area.isDisabled || !modelCity,
       }"
       :setClass="{
-        type: 'line-clamp-1 text-[16px]',
-        main: ['--h-40 --px-12 --py-8 m:w-full', setClass.area],
+        type: [setClass.fieldType, setClass.selectType],
+        main: ['m-address-select --h-40 --px-12 --py-8', setClass.area],
       }"
       @change="onAreaChange()"
       v-if="props.area !== undefined"
@@ -354,9 +361,9 @@ onMounted(() => {
         noMatchClearLabel: true,
       }"
       :setClass="{
-        type: 'text-[16px]',
-        main: ['--h-40 --px-12 --py-8 m:w-full', setClass.road],
-        dropdownLabel: 'text-[14px]',
+        type: setClass.fieldType,
+        main: ['m-address-select --h-40 --px-12 --py-8', setClass.road],
+        dropdownLabel: setClass.dropdownLabel,
       }"
       v-if="props.road !== undefined"
     />
@@ -375,9 +382,9 @@ onMounted(() => {
         isDisabled: config.lane.isDisabled,
       }"
       :setClass="{
-        type: 'text-[16px]',
+        type: setClass.fieldType,
         main: ['--h-40 --px-12 --py-8', setClass.lane],
-        rearAssist: 'text-[14px] text-[--gray-999]',
+        rearAssist: ['m-address-rear-assist', setClass.rearAssist],
       }"
       v-if="props.lane !== undefined"
     >
@@ -398,9 +405,9 @@ onMounted(() => {
         isDisabled: config.alley.isDisabled,
       }"
       :setClass="{
-        type: 'text-[16px]',
+        type: setClass.fieldType,
         main: ['--h-40 --px-12 --py-8', setClass.alley],
-        rearAssist: 'text-[14px] text-[--gray-999]',
+        rearAssist: ['m-address-rear-assist', setClass.rearAssist],
       }"
       v-if="props.alley !== undefined"
     >
@@ -421,9 +428,9 @@ onMounted(() => {
         isDisabled: config.number.isDisabled,
       }"
       :setClass="{
-        type: 'text-[16px]',
+        type: setClass.fieldType,
         main: ['--h-40 --px-12 --py-8', setClass.number],
-        rearAssist: 'text-[14px] text-[--gray-999]',
+        rearAssist: ['m-address-rear-assist', setClass.rearAssist],
       }"
       v-if="props.number !== undefined"
     >
@@ -445,9 +452,9 @@ onMounted(() => {
           isDisabled: config.ofNumber.isDisabled,
         }"
         :setClass="{
-          type: 'text-[16px]',
+          type: setClass.fieldType,
           main: ['--h-40 --px-12 --py-8', setClass.ofNumber],
-          rearAssist: 'text-[14px] text-[--gray-999]',
+          rearAssist: ['m-address-rear-assist', setClass.rearAssist],
         }"
       />
     </template>
@@ -466,9 +473,9 @@ onMounted(() => {
         isDisabled: config.floor.isDisabled,
       }"
       :setClass="{
-        type: 'text-[16px]',
+        type: setClass.fieldType,
         main: ['--h-40 --px-12 --py-8', setClass.floor],
-        rearAssist: 'text-[14px] text-[--gray-999]',
+        rearAssist: ['m-address-rear-assist', setClass.rearAssist],
       }"
       v-if="props.floor !== undefined"
     >
@@ -490,9 +497,9 @@ onMounted(() => {
           isDisabled: config.ofFloor.isDisabled,
         }"
         :setClass="{
-          type: 'text-[16px]',
+          type: setClass.fieldType,
           main: ['--h-40 --px-12 --py-8', setClass.ofFloor],
-          rearAssist: 'text-[14px] text-[--gray-999]',
+          rearAssist: ['m-address-rear-assist', setClass.rearAssist],
         }"
       />
     </template>

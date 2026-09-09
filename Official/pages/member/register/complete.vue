@@ -2,8 +2,8 @@
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
 
 definePageMeta({
-  layout: 'member',
-  channel: 'member',
+  layout: 'member-auth',
+  channel: 'memberAuth',
   requiresAuth: false,
 })
 
@@ -19,7 +19,7 @@ onUseMeta({
 
 <template>
   <CommonMContainer
-    class="p:--max-w-400 space-y-[40px] tm:pt-[20px] p:pt-[55px]"
+    class="p:--max-w-400 space-y-[40px]"
     :config="{
       as: 'section',
     }"

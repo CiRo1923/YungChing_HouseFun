@@ -24,13 +24,13 @@ onUnmounted(() => {
       <CommonImgSrc
         src="buy/logo_text.svg"
         :setClass="{
-          main: 'tm:h-[20px] tm:w-[57px] p:h-[25px] p:w-[77px]',
+          main: 'm-header-logo-text',
         }"
       />
       <CommonImgSrc
         src="buy/logo_icon.svg"
         :setClass="{
-          main: 'p:ml-[4px] p:h-[25px] p:w-[87px]',
+          main: 'm-header-logo-icon',
         }"
         v-if="isDeviceP"
       />

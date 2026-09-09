@@ -8,6 +8,9 @@
   --address-tablet-gap-x: 8px;
   --address-mobile-gap-x: 8px;
 
+  /* 門牌數字後面的「號 / 樓」字樣 —— 顏色是組件的職責,不交給使用端 */
+  --address-rear-assist-color: var(--gray-999);
+
   /* 換行後的列距 —— 手機換行機會多,間距放寬一點 */
   --address-gap-y: 0;
   --address-pc-gap-y: 8px;

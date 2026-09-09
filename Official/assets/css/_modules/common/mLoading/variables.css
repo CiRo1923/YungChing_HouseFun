@@ -13,6 +13,35 @@
   --loading-tablet-text-size: 14px;
   --loading-mobile-text-size: 14px;
 
+  /* 卡片外觀 —— 只有帶 --card 的 container 才輸出(直接放在別的容器裡時是裸的),
+     所以 base 一律是「沒有」。 */
+  --loading-container-bg-color: transparent;
+
+  --loading-container-rounded: 0;
+  --loading-container-pc-rounded: 15px;
+  --loading-container-tablet-rounded: 15px;
+  --loading-container-mobile-rounded: 15px;
+
+  --loading-container-pt: 0;
+  --loading-container-pr: 0;
+  --loading-container-pb: 0;
+  --loading-container-pl: 0;
+
+  --loading-container-pc-pt: 30px;
+  --loading-container-pc-pr: 72px;
+  --loading-container-pc-pb: 30px;
+  --loading-container-pc-pl: 72px;
+
+  --loading-container-tablet-pt: 32px;
+  --loading-container-tablet-pr: 32px;
+  --loading-container-tablet-pb: 32px;
+  --loading-container-tablet-pl: 32px;
+
+  --loading-container-mobile-pt: 32px;
+  --loading-container-mobile-pr: 32px;
+  --loading-container-mobile-pb: 32px;
+  --loading-container-mobile-pl: 32px;
+
   /* 全螢幕遮罩(--fixed) */
   --loading-overlay-bg-color: var(--black-33);
 

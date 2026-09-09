@@ -21,7 +21,7 @@ const houseFun = readonly([
         <CommonImgSrc
           src="common/logo.svg"
           :setClass="{
-            main: 'h-[50px] w-[126px] p:grow',
+            main: 'm-footer-logo-image',
           }"
         />
         <ul class="m-footer-links">

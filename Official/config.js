@@ -12,10 +12,16 @@ export default {
   svg: '_svg',
   proxy: {
     '/memberAuth/api': {
-      target: process.env.NUXT_PUBLIC_MEMBER_API_PATH,
+      target: process.env.NUXT_PUBLIC_MEMBER_AUTH_API_PATH,
       changeOrigin: true,
       secure: false,
       rewrite: (path) => path.replace(/^\/memberAuth/, ''),
+    },
+    '/member/api': {
+      target: process.env.NUXT_PUBLIC_MEMBER_API_PATH,
+      changeOrigin: true,
+      secure: false,
+      rewrite: (path) => path.replace(/^\/member/, ''),
     },
     '/buy/api': {
       target: process.env.NUXT_PUBLIC_BUY_API_PATH,

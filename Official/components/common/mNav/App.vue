@@ -40,9 +40,9 @@ onUnmounted(() => {
           },
         }"
         :setClass="{
-          main: '--px-20 --py-15 gap-x-[10px]',
-          text: 'text-[18px]',
-          icon: 'h-[24px] w-[24px] text-[--green-8b0d]',
+          main: 'm-nav-app-anchor --px-20 --py-15',
+          text: 'm-nav-app-text',
+          icon: 'm-nav-app-icon',
         }"
       />
     </li>

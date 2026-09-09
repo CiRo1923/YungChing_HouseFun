@@ -1,5 +1,3 @@
-import { defineStore } from 'pinia'
-
 export const usePopupStore = defineStore('popup', () => {
   let alertCheck = ref(null)
   let confirmCheck = ref(null)

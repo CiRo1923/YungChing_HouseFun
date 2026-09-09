@@ -1,7 +1,7 @@
 <script setup>
 import { Form } from 'vee-validate'
 
-const memberUpgrade = useMemberUpgradeStore()
+const memberUpgrade = useMemberAuthUpgradeStore()
 const { phoneVerify } = storeToRefs(memberUpgrade)
 
 const emits = defineEmits(['reSend', 'submit'])

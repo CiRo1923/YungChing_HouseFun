@@ -1,15 +1,24 @@
 <script setup>
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
-const { onApiAuthToken } = useMemberProjectActions()
+const { onApiAuthToken, onReset: onMemberAuthReset } = useMemberAuthProjectActions()
+const { onApiAuthTokenExchange, onApiAuthMe, onClearCookies, onReset } = useMemberProjectActions()
 const { onApiPromise } = usePopupActions()
+const router = useRouter()
 
 definePageMeta({
-  layout: 'member',
-  channel: 'member',
+  layout: 'member-auth',
+  channel: 'memberAuth',
   requiresAuth: false,
 })
 
 const loginContainerRef = ref(null)
+
+// 進到登入頁一律先把登入狀態清乾淨 —— store 與 cookie 都要,與登出同一組動作
+// (見 stores/member/.composables/useProjectActions.js 的 onApiAuthLogout)。
+// 帶著舊的 authToken / accessData 重新登入,換 token 那一步會吃到過期的憑證。
+onMemberAuthReset()
+onReset()
+onClearCookies()
 
 await onWithLoadingAll([])
 
@@ -23,7 +32,12 @@ onUseMeta({
 // 帳密登入 → 成功即建立登入狀態(authToken + AUTHTOKEN cookie 由 store action 寫好)。
 // channel 是「發起登入的頻道」,比照既有登入流程的 `${頻道}-web`。
 //
-// TODO: 登入成功後的去向待確認(member 頻道目前沒有登入後的落腳頁)。
+// 登入拿到的是 SSO 長 token,會員中心的 API 不吃它 → 用它換這個服務自己的 bearer token,
+// 再取會員資料,然後進通知總覽。與 buy 頻道同一套順序(見 stores/buy 的 onPopupLogin):
+// exchange 吃的就是 member/auth/token 回的 longToken。
+//
+// 三支一路包在同一個 loading 裡,中間不閃。換 token 沒過就留在原頁 ——
+// 會員中心的每一支 API 都要帶那個 bearer token,沒有它進去也取不到資料。
 const onAuthToken = async () => {
   const { valid } = (await loginContainerRef.value?.form?.validate?.()) ?? {}
 
@@ -35,9 +49,23 @@ const onAuthToken = async () => {
     channel: 'member-web',
   })
 
+  if (status !== 200) {
+    onApiPromise('close')
+    return
+  }
+
+  const { status: exchangeStatus } = await onApiAuthTokenExchange()
+  const { status: meStatus } = exchangeStatus === 200 ? await onApiAuthMe() : {}
+
   onApiPromise('close')
 
-  if (status !== 200) return
+  // me 沒過也留在原頁。導過去的話 layouts/member.vue 的 onInit 會因為 userData
+  // 還是空的而再打一次 me,同一個錯誤就跳兩次窗。
+  if (meStatus !== 200) return
+
+  router.push({
+    name: 'member-center-notice-price',
+  })
 }
 
 // 驗證碼登入。
@@ -66,7 +94,7 @@ const onLogin = async () => {
 
 <template>
   <CommonMContainer
-    class="p:--max-w-400 space-y-[30px] tm:pt-[20px] p:pt-[55px]"
+    class="p:--max-w-400 space-y-[30px]"
     :config="{
       as: 'section',
     }"

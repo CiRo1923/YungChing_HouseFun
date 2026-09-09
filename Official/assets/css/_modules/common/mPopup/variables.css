@@ -52,7 +52,13 @@
   --popup-footer-tablet-mt: 30px;
   --popup-footer-mobile-mt: 30px;
 
-  --popup-overlay-bg-color: var(--black-b3);
+  /* 遮罩與全域 loading(mLoading 的 --fixed)一致 —— 兩者會在「動作結束就導頁」時
+     短暫交疊,深淺或模糊不同就會露出是兩層。改這裡要連 mLoading 一起改。 */
+  --popup-overlay-pc-blur: 2px;
+  --popup-overlay-tablet-blur: 2px;
+  --popup-overlay-mobile-blur: 2px;
+
+  --popup-overlay-bg-color: var(--black-33);
   --popup-container-bg-color: var(--white);
   --popup-header-border-color: var(--green-8b0d);
   --popup-header-icon-color: var(--gray-666);

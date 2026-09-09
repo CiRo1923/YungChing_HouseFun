@@ -16,6 +16,14 @@
 .m-loading-container {
   /* text-[--var] 會被 tailwind 當成 color,字級一定要加 length: 型別提示 */
   @apply relative text-[length:--loading-text-size] text-[--loading-color];
+
+  /* 浮在遮罩上的卡片。裸用(直接塞進別的容器)時不帶這個 modifier */
+  &.\-\-card {
+    @apply rounded-[--loading-container-rounded] bg-[--loading-container-bg-color];
+    @apply pb-[--loading-container-pb] pl-[--loading-container-pl] pr-[--loading-container-pr] pt-[--loading-container-pt];
+
+    --loading-container-bg-color: var(--white);
+  }
 }
 
 @screen p {
@@ -23,6 +31,16 @@
   .m-loading-container {
     --loading-text-size: var(--loading-pc-text-size);
     --loading-overlay-blur: var(--loading-overlay-pc-blur);
+  }
+
+  .m-loading-container {
+    &.\-\-card {
+      --loading-container-rounded: var(--loading-container-pc-rounded);
+      --loading-container-pt: var(--loading-container-pc-pt);
+      --loading-container-pr: var(--loading-container-pc-pr);
+      --loading-container-pb: var(--loading-container-pc-pb);
+      --loading-container-pl: var(--loading-container-pc-pl);
+    }
   }
 }
 
@@ -32,6 +50,16 @@
     --loading-text-size: var(--loading-tablet-text-size);
     --loading-overlay-blur: var(--loading-overlay-tablet-blur);
   }
+
+  .m-loading-container {
+    &.\-\-card {
+      --loading-container-rounded: var(--loading-container-tablet-rounded);
+      --loading-container-pt: var(--loading-container-tablet-pt);
+      --loading-container-pr: var(--loading-container-tablet-pr);
+      --loading-container-pb: var(--loading-container-tablet-pb);
+      --loading-container-pl: var(--loading-container-tablet-pl);
+    }
+  }
 }
 
 @screen m {
@@ -39,5 +67,15 @@
   .m-loading-container {
     --loading-text-size: var(--loading-mobile-text-size);
     --loading-overlay-blur: var(--loading-overlay-mobile-blur);
+  }
+
+  .m-loading-container {
+    &.\-\-card {
+      --loading-container-rounded: var(--loading-container-mobile-rounded);
+      --loading-container-pt: var(--loading-container-mobile-pt);
+      --loading-container-pr: var(--loading-container-mobile-pr);
+      --loading-container-pb: var(--loading-container-mobile-pb);
+      --loading-container-pl: var(--loading-container-mobile-pl);
+    }
   }
 }

@@ -5,8 +5,8 @@ import { deCrypto } from '@js/.crypto/index.js'
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
 
 definePageMeta({
-  layout: 'member',
-  channel: 'member',
+  layout: 'member-auth',
+  channel: 'memberAuth',
   requiresAuth: false,
   middleware: [
     () => {
@@ -40,7 +40,7 @@ onUseMeta({
 
 <template>
   <CommonMContainer
-    class="p:--max-w-400 space-y-[30px] tm:pt-[20px] p:pt-[55px]"
+    class="p:--max-w-400 space-y-[30px]"
     :config="{
       as: 'section',
     }"

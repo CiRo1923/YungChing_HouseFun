@@ -3,7 +3,7 @@ import { Form } from 'vee-validate'
 
 const project = useProjectStore()
 const { serverTime } = storeToRefs(project)
-const memberForget = useMemberForgetStore()
+const memberForget = useMemberAuthForgetStore()
 const { verify } = storeToRefs(memberForget)
 
 const emits = defineEmits(['sendCode', 'submit'])
@@ -86,6 +86,7 @@ const onSumit = async (validate, setFieldError, setTouched) => {
       :setClass="{
         main: '--rounded --h-55 --px-12',
         button: '--h-35 --px-15',
+        buttonText: 'text-[14px]',
       }"
       @submit="onSendCode(validateField)"
     />

@@ -14,6 +14,24 @@
 
   --log-status-border-color: var(--gray-e5);
 
+  /* 連結本體 —— icon 與文字之間的間距(mobile 不顯示 icon,所以是 0) */
+  --log-status-anchor-pc-gap-x: 3px;
+  --log-status-anchor-tablet-gap-x: 3px;
+  --log-status-anchor-mobile-gap-x: 0;
+
+  /* lint-text-size-exempt: header 的登入狀態是固定位置的元件,字級全站長一樣 */
+  --log-status-text-pc-text-size: 14px;
+  --log-status-text-tablet-text-size: 14px;
+  --log-status-text-mobile-text-size: 18px;
+
+  --log-status-icon-pc-size: 18px;
+  --log-status-icon-tablet-size: 18px;
+  --log-status-icon-mobile-size: 18px;
+
+  --log-status-icon-pc-p: 1px;
+  --log-status-icon-tablet-p: 1px;
+  --log-status-icon-mobile-p: 1px;
+
   /* 項目之間的分隔線(只有橫向排列時才畫) */
   --log-status-divider-bg-color: var(--gray-999);
 

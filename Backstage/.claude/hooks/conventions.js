@@ -8,6 +8,7 @@
 // package.json 是 "type": "module",所以這裡用 ESM 語法。
 
 import { execFileSync } from 'node:child_process'
+import fs from 'node:fs'
 
 // 規則 1:pages/ 下的路由檔名一律全小寫(_components 內是元件,PascalCase 才對)
 const onCheckPageFileName = (filePath) => {
@@ -78,6 +79,85 @@ const onCheckNewFile = (filePath) => {
   )
 }
 
+// 以下兩條都要看檔案內容。讀不到就跳過(hook 只是提醒),並排除工具與依賴目錄。
+const CONTENT_EXTENSIONS = /\.(vue|js|mjs|ts|css|md)$/
+const CONTENT_SKIP_DIRS = /(^|\/)(node_modules|\.output|\.nuxt|dist)\//
+
+const onReadContent = (filePath) => {
+  const path = filePath.replaceAll('\\', '/')
+
+  if (!CONTENT_EXTENSIONS.test(path) || CONTENT_SKIP_DIRS.test(path)) return null
+
+  try {
+    return fs.readFileSync(filePath, 'utf8')
+  } catch {
+    return null
+  }
+}
+
+// 規則 4:這是與客戶共同開發的專案 —— 註解與文件只記錄「邏輯」,
+// 不記錄「誰弄錯了什麼」。
+//
+// 對方讀得到這個 repo,而「規格上一版寫錯、設計稿是錯的、某天更正」這類敘述,
+// 對讀程式的人沒有任何幫助(要知道的是現在的行為與為什麼這樣做),
+// 卻會變成翻舊帳的紀錄。判斷方式:把那句話唸給客戶聽,會不會尷尬。
+//
+// 需要記「還沒定案 / 待確認」是可以的 —— 那是待辦,寫成「要問後端能不能提供 X」,
+// 而不是「後端漏了 X」。
+const BLAME_WORDS = [
+  '誤寫',
+  '寫錯',
+  '標錯',
+  '轉譯錯誤',
+  '是錯的',
+  '是錯誤的',
+  '設計稿錯',
+  '規格錯',
+  '早一版',
+  '舊版規格',
+  '後端漏',
+  '沒寫清楚',
+]
+
+const onCheckClientBlame = (content) => {
+  if (!content) return null
+
+  const hits = BLAME_WORDS.filter((word) => content.includes(word))
+
+  if (!hits.length) return null
+
+  return (
+    `[client-tone] 這個 repo 與客戶共同開發 —— 註解與文件只記錄邏輯,不記錄「哪一版寫錯、誰弄錯」。` +
+    `這次寫入含有:${hits.join('、')}。` +
+    `改成描述「現在的行為與為什麼」;若是待確認事項,寫成「要問後端能不能提供 X」而不是「後端漏了 X」。`
+  )
+}
+
+// 規則 5:盡可能不要用 emoji —— 註解、文件、訊息都一樣。
+//
+// 它在等寬字型下寬度不一致(對齊會歪)、終端機與 diff 常顯示成豆腐或問號,
+// 而且傳達不了任何程式資訊:該強調就把話寫清楚。
+// 需要視覺分級時用文字前綴(「注意:」「必讀:」)。
+const EMOJI_RE = /[\p{Extended_Pictographic}\u2713\u2714\u2717\u2718]/gu
+
+const onCheckEmoji = (content) => {
+  if (!content) return null
+
+  // 去掉 U+FE0F(變體選擇子):它不會單獨出現,跟在符號後面才變成彩色 emoji,
+  // 留著會讓訊息多印一個看不見的字元。
+  const hits = [
+    ...new Set((content.match(EMOJI_RE) ?? []).map((char) => char.replace(/\uFE0F/g, ''))),
+  ]
+
+  if (!hits.length) return null
+
+  return (
+    `[no-emoji] 盡可能不要用 emoji 符號。這次寫入含有:${hits.join(' ')}。` +
+    `請刪掉,需要強調就用文字(「注意:」「必讀:」)—— emoji 在等寬字型下寬度不一致,` +
+    `終端機與 diff 也常顯示不出來。`
+  )
+}
+
 let input = ''
 
 process.stdin
@@ -89,10 +169,13 @@ process.stdin
 
       if (!filePath) return
 
+      const content = onReadContent(filePath)
       const messages = [
         onCheckPageFileName(filePath),
         onCheckSharedComponent(filePath),
         onCheckNewFile(filePath),
+        onCheckClientBlame(content),
+        onCheckEmoji(content),
       ].filter(Boolean)
 
       if (!messages.length) return

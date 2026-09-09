@@ -7,9 +7,33 @@
   @apply border-t-[--nav-app-border-color];
 }
 
+.m-nav-app-anchor {
+  @apply gap-x-[--nav-app-anchor-gap-x];
+}
+
+.m-nav-app-text {
+  @apply text-[length:--nav-app-text-text-size];
+}
+
+.m-nav-app-icon {
+  @apply h-[--nav-app-icon-size] w-[--nav-app-icon-size] text-[--nav-app-icon-color];
+}
+
 @screen p {
   .m-nav-app {
     --nav-app-border-t: var(--nav-app-pc-border-t);
+  }
+
+  .m-nav-app-anchor {
+    --nav-app-anchor-gap-x: var(--nav-app-anchor-pc-gap-x);
+  }
+
+  .m-nav-app-text {
+    --nav-app-text-text-size: var(--nav-app-text-pc-text-size);
+  }
+
+  .m-nav-app-icon {
+    --nav-app-icon-size: var(--nav-app-icon-pc-size);
   }
 }
 
@@ -17,10 +41,34 @@
   .m-nav-app {
     --nav-app-border-t: var(--nav-app-tablet-border-t);
   }
+
+  .m-nav-app-anchor {
+    --nav-app-anchor-gap-x: var(--nav-app-anchor-tablet-gap-x);
+  }
+
+  .m-nav-app-text {
+    --nav-app-text-text-size: var(--nav-app-text-tablet-text-size);
+  }
+
+  .m-nav-app-icon {
+    --nav-app-icon-size: var(--nav-app-icon-tablet-size);
+  }
 }
 
 @screen m {
   .m-nav-app {
     --nav-app-border-t: var(--nav-app-mobile-border-t);
+  }
+
+  .m-nav-app-anchor {
+    --nav-app-anchor-gap-x: var(--nav-app-anchor-mobile-gap-x);
+  }
+
+  .m-nav-app-text {
+    --nav-app-text-text-size: var(--nav-app-text-mobile-text-size);
+  }
+
+  .m-nav-app-icon {
+    --nav-app-icon-size: var(--nav-app-icon-mobile-size);
   }
 }

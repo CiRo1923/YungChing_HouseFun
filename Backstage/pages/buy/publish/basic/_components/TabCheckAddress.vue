@@ -115,6 +115,10 @@ const onClick = async (validate, setTouched) => {
         }"
         :setClass="{
           separator: 'text-[16px]',
+          fieldType: 'text-[16px]',
+          selectType: 'line-clamp-1',
+          dropdownLabel: 'text-[14px]',
+          rearAssist: 'text-[14px]',
           main: 'grow',
           city: 'pt:w-[182px]',
           area: 'pt:w-[182px]',

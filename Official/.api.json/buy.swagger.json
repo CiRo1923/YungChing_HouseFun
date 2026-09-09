@@ -1,0 +1,3494 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Housefun.Bff.Buy.Web",
+    "version": "1.0"
+  },
+  "paths": {
+    "/api/{version}/buy/list": {
+      "get": {
+        "tags": [
+          "Buy"
+        ],
+        "summary": "Buy list (search + tabs + sorting + paging)",
+        "description": "用途：執行 Buy 的 List 作業。HTTP 方法：GET；路由：/api/{version}/buy/list。",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API version segment (e.g., v1)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "region",
+            "in": "query",
+            "description": "Region code token (e.g., 6303,6304_region)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "mrt",
+            "in": "query",
+            "description": "MRT token (e.g., 1,5_mrt)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "purpose",
+            "in": "query",
+            "description": "Purpose token (e.g., 1_purpose)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "price",
+            "in": "query",
+            "description": "Price range token (e.g., 3000-5000_price or -3000_price or 5000-_price)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "room",
+            "in": "query",
+            "description": "Room range token (e.g., 2-3_room, 3-_room)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "addRoom",
+            "in": "query",
+            "description": "Include addon room/living counts when isAddition=true",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "Case type token (e.g., 2,3_Type)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "buildpin",
+            "in": "query",
+            "description": "Build pin range token (e.g., 20-30_buildpin)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "usepin",
+            "in": "query",
+            "description": "Main+Balcony pin range token (e.g., 20-30_usepin)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "landpin",
+            "in": "query",
+            "description": "Land pin range token (e.g., 20-30_landpin)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "npark",
+            "in": "query",
+            "description": "No parking flag (true means no parking)",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "parking",
+            "in": "query",
+            "description": "Parking mode token (e.g., 1_parking)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "age",
+            "in": "query",
+            "description": "Build age range token (e.g., 20-30_age)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "floor",
+            "in": "query",
+            "description": "Floor range token (e.g., 6-10_floor)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "uniprice",
+            "in": "query",
+            "description": "Unit price range token (e.g., 40-50_uniprice)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dt",
+            "in": "query",
+            "description": "Direction token (e.g., 1_dt)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ft",
+            "in": "query",
+            "description": "Environment/POI filters (repeatable), e.g., NMarket_ft, NTransit_ft",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "tag",
+            "in": "query",
+            "description": "Feature tags (repeatable)",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "kw",
+            "in": "query",
+            "description": "Keyword",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pg",
+            "in": "query",
+            "description": "Page number",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Page size",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "od",
+            "in": "query",
+            "description": "Order by",
+            "schema": {
+              "$ref": "#/components/schemas/BuyOrderBy"
+            }
+          },
+          {
+            "name": "view",
+            "in": "query",
+            "description": "View mode (list/card/map)",
+            "schema": {
+              "$ref": "#/components/schemas/BuyViewMode"
+            }
+          },
+          {
+            "name": "tab",
+            "in": "query",
+            "description": "Tab filter",
+            "schema": {
+              "$ref": "#/components/schemas/BuyTab"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyListResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyListResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/buy/list/focus": {
+      "get": {
+        "tags": [
+          "Buy"
+        ],
+        "summary": "Buy list focus items",
+        "description": "Golden exposure items for the list page focus block. Filters only by purpose and region or MRT station context; response items reuse the normal buy list item DTO.",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API version segment (e.g., v1)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "purpose",
+            "in": "query",
+            "description": "Purpose token (e.g., 1_purpose)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "region",
+            "in": "query",
+            "description": "Region code token (e.g., 6303,6304_region)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "mrt",
+            "in": "query",
+            "description": "MRT token (e.g., 1,5_mrt)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BuyListItem"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BuyListItem"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BuyListItem"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/buy/house/{hfid}": {
+      "get": {
+        "tags": [
+          "Buy"
+        ],
+        "summary": "Buy house detail",
+        "description": "用途：執行 Buy 的 House Detail 作業。HTTP 方法：GET；路由：/api/{version}/buy/house/{hfid}。",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API version segment (e.g., v1)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "hfid",
+            "in": "path",
+            "description": "House ID (HFID)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyHouseDetailResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyHouseDetailResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyHouseDetailResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/buy/house/{hfid}/poi": {
+      "get": {
+        "tags": [
+          "Buy"
+        ],
+        "summary": "Buy house life map POI items",
+        "description": "Detail page life-map POI items. Uses the existing POI cache mechanism and reuses PoiItem DTO.",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API version segment (e.g., v1)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "hfid",
+            "in": "path",
+            "description": "House ID (HFID)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PoiBlock"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PoiBlock"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PoiBlock"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/buy/suggest": {
+      "get": {
+        "tags": [
+          "Buy"
+        ],
+        "summary": "Keyword suggest (community/road/mrt/school/keyword)",
+        "description": "用途：執行 Buy 的 Suggest 作業。HTTP 方法：GET；路由：/api/{version}/buy/suggest。",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API version segment (e.g., v1)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "kw",
+            "in": "query",
+            "description": "Keyword; omit or leave empty to request hot communities",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "region",
+            "in": "query",
+            "description": "Optional region context for ranking",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "mrt",
+            "in": "query",
+            "description": "Optional MRT station context for ranking",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "API 參數：limit。",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuySuggestResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuySuggestResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuySuggestResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/region": {
+      "get": {
+        "tags": [
+          "Buy"
+        ],
+        "summary": "Get region city and area reference data",
+        "description": "用途：執行 Buy 的 Region 作業。HTTP 方法：GET；路由：/api/{version}/region。",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API version segment (e.g., v1)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegionResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegionResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/mrt": {
+      "get": {
+        "tags": [
+          "Buy"
+        ],
+        "summary": "Get MRT operators, lines, and stations",
+        "description": "用途：執行 Buy 的 Mrt 作業。HTTP 方法：GET；路由：/api/{version}/mrt。",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API version segment (e.g., v1)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MrtResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MrtResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MrtResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/dirface": {
+      "get": {
+        "tags": [
+          "Buy"
+        ],
+        "summary": "Get direction face reference data",
+        "description": "用途：執行 Buy 的 Dir Face 作業。HTTP 方法：GET；路由：/api/{version}/dirface。",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API version segment (e.g., v1)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DirFaceResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DirFaceResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DirFaceResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/buy/subscriptions/search-conditions": {
+      "post": {
+        "tags": [
+          "Buy"
+        ],
+        "summary": "Subscribe a search condition (max 10 per user)",
+        "description": "用途：執行 Buy 的 Subscribe Search Conditions 作業。HTTP 方法：POST；路由：/api/{version}/buy/subscriptions/search-conditions。",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API version segment (e.g., v1)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "請依照 schema 傳入此 API 需要的資料。",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubscribeSearchConditionRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubscribeSearchConditionRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubscribeSearchConditionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscribeSearchConditionResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscribeSearchConditionResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscribeSearchConditionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/buy/subscriptions/price-drop": {
+      "post": {
+        "tags": [
+          "Buy"
+        ],
+        "summary": "Subscribe price-drop for a house",
+        "description": "用途：執行 Buy 的 Subscribe Price Drop 作業。HTTP 方法：POST；路由：/api/{version}/buy/subscriptions/price-drop。",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API version segment (e.g., v1)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "請依照 schema 傳入此 API 需要的資料。",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubscribePriceDropRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubscribePriceDropRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubscribePriceDropRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscribePriceDropResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscribePriceDropResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscribePriceDropResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/buy/messages": {
+      "post": {
+        "tags": [
+          "Buy"
+        ],
+        "summary": "建立買屋留言",
+        "description": "建立買屋留言。若同一瀏覽器中的手機尚未於 1 小時內完成驗證， 系統會先建立待驗證留言並回傳驗證資訊；驗證完成後才會正式寫入留言。 若已驗證，則直接寫入留言並回傳棉花糖推薦物件列表。",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API version segment (e.g., v1)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "請依照 schema 傳入此 API 需要的資料。",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMessageRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMessageRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMessageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateMessageResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateMessageResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateMessageResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/buy/messages/verify-code": {
+      "post": {
+        "tags": [
+          "Buy"
+        ],
+        "summary": "驗證買屋留言手機驗證碼",
+        "description": "驗證待留言的手機驗證碼。驗證成功後會將原本暫存的留言正式寫入， 並回傳與一般留言完成相同的回應格式。",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API version segment (e.g., v1)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "請依照 schema 傳入此 API 需要的資料。",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyMessageCodeRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyMessageCodeRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyMessageCodeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateMessageResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateMessageResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateMessageResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/buy/messages/resend-code": {
+      "post": {
+        "tags": [
+          "Buy"
+        ],
+        "summary": "重新發送買屋留言手機驗證碼",
+        "description": "重新發送待留言的手機驗證碼。驗證碼建立 1 分鐘後才可重新發送， 第一版簡訊為 mock，會回傳開發測試用驗證碼。",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API version segment (e.g., v1)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "請依照 schema 傳入此 API 需要的資料。",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResendMessageCodeRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResendMessageCodeRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResendMessageCodeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageVerificationResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageVerificationResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageVerificationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/buy/auth/token/exchange": {
+      "post": {
+        "tags": [
+          "BuyAuth"
+        ],
+        "summary": "以 Member Auth 加密 token 交換 Buy BFF 專用 bearer token。",
+        "description": "用途：執行 Buy Auth 的 Exchange Token 作業。HTTP 方法：POST；路由：/api/{version}/buy/auth/token/exchange。",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API 參數：version。",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "encryptedToken",
+            "in": "query",
+            "description": "API 參數：encryptedToken。",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "請依照 schema 傳入此 API 需要的資料。",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BuyAuthTokenExchangeRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BuyAuthTokenExchangeRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/BuyAuthTokenExchangeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyAuthTokenExchangeResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyAuthTokenExchangeResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyAuthTokenExchangeResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyAuthErrorResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyAuthErrorResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyAuthErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/buy/auth/me": {
+      "get": {
+        "tags": [
+          "BuyAuth"
+        ],
+        "summary": "以 Buy BFF bearer token 取得買屋頻道會員資料。",
+        "description": "用途：執行 Buy Auth 的 Me 作業。HTTP 方法：GET；路由：/api/{version}/buy/auth/me。",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API 參數：version。",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyAuthMemberResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyAuthMemberResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyAuthMemberResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyAuthErrorResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyAuthErrorResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyAuthErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyAuthErrorResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyAuthErrorResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyAuthErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/buy/auth/logout": {
+      "post": {
+        "tags": [
+          "BuyAuth"
+        ],
+        "summary": "撤銷 Buy BFF bearer token，清除買屋頻道登入狀態。",
+        "description": "用途：執行 Buy Auth 的 Logout 作業。HTTP 方法：POST；路由：/api/{version}/buy/auth/logout。",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API 參數：version。",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyAuthLogoutResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyAuthLogoutResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyAuthLogoutResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyAuthErrorResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyAuthErrorResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyAuthErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "tags": [
+          "Housefun.Bff.Buy.Web"
+        ],
+        "summary": "檢查 Buy Web BFF 是否可回應",
+        "description": "用途：確認 Buy Web BFF 服務目前可正常處理基本請求。",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StringBoolean<>f__AnonymousType5"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/buy/mail/test": {
+      "post": {
+        "tags": [
+          "MailTest"
+        ],
+        "summary": "發送一封測試信，供部署後驗證 Amazon SES 設定。",
+        "description": "用途：執行 Mail Test 的 Send 作業。HTTP 方法：POST；路由：/api/{version}/buy/mail/test。",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API 參數：version。",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Mail-Test-Key",
+            "in": "header",
+            "description": "API 參數：X-Mail-Test-Key。",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "請依照 schema 傳入此 API 需要的資料。",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendTestMailRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendTestMailRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendTestMailRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SendTestMailResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SendTestMailResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SendTestMailResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ActualPriceBlock": {
+        "required": [
+          "items"
+        ],
+        "type": "object",
+        "properties": {
+          "totalCount": {
+            "maximum": 2147483647,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "currentYearCount": {
+            "maximum": 2147483647,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ActualPriceItem"
+            }
+          },
+          "moreLink": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ActualPriceItem": {
+        "required": [
+          "date",
+          "id",
+          "yearMonth"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "recordCount": {
+            "maximum": 2147483647,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "yearMonth": {
+            "type": "string"
+          },
+          "dealKind": {
+            "type": "string",
+            "nullable": true
+          },
+          "address": {
+            "type": "string",
+            "nullable": true
+          },
+          "buildingName": {
+            "type": "string",
+            "nullable": true
+          },
+          "caseType": {
+            "type": "string",
+            "nullable": true
+          },
+          "caseTypeID": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "price": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "priceNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "parkingPrice": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "unitPrice": {
+            "type": "number",
+            "format": "double"
+          },
+          "unitPriceNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "areaPin": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "areaPinNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "landPin": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "floor": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "floorText": {
+            "type": "string",
+            "nullable": true
+          },
+          "totalFloor": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "buildingAge": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "layoutText": {
+            "type": "string",
+            "nullable": true
+          },
+          "room": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "livingRoom": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "bathRoom": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "similarity": {
+            "maximum": 99,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AddonInfo": {
+        "type": "object",
+        "properties": {
+          "room": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "living": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "bath": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "balcony": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AiDecorStyle": {
+        "required": [
+          "images",
+          "style"
+        ],
+        "type": "object",
+        "properties": {
+          "style": {
+            "type": "string"
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uri"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "BreadcrumbItem": {
+        "required": [
+          "text"
+        ],
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "BrokerCard": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "store": {
+            "type": "string",
+            "nullable": true
+          },
+          "brand": {
+            "type": "string",
+            "nullable": true
+          },
+          "imageUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "storeUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "agency": {
+            "type": "string",
+            "nullable": true
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true
+          },
+          "extension": {
+            "type": "string",
+            "nullable": true
+          },
+          "badges": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "BuyAuthErrorResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "BuyAuthLogoutResponse": {
+        "type": "object",
+        "properties": {
+          "revoked": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "BuyAuthMemberResponse": {
+        "type": "object",
+        "properties": {
+          "mid": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "memberCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "loginAccount": {
+            "type": "string",
+            "nullable": true
+          },
+          "firstName": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastName": {
+            "type": "string",
+            "nullable": true
+          },
+          "displayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "mobilePhone": {
+            "type": "string",
+            "nullable": true
+          },
+          "lineUid": {
+            "type": "string",
+            "nullable": true
+          },
+          "memberTypeCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "stateCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "registerSourceCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "emailVerifiedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "mobileVerifiedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastLoginAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastLoginIp": {
+            "type": "string",
+            "nullable": true
+          },
+          "registeredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "identityNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "contactCityCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "contactDistrictCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "contactRoadCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "contactAddress": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "BuyAuthTokenExchangeRequest": {
+        "type": "object",
+        "properties": {
+          "encryptedToken": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "BuyAuthTokenExchangeResponse": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "tokenType": {
+            "type": "string",
+            "nullable": true
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "BuyHouseDetailResponse": {
+        "required": [
+          "badges",
+          "basic",
+          "hfid",
+          "media",
+          "pricing",
+          "seo"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "hfid": {
+            "type": "string"
+          },
+          "caseNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "breadcrumb": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BreadcrumbItem"
+            },
+            "nullable": true
+          },
+          "basic": {
+            "$ref": "#/components/schemas/HouseBasic"
+          },
+          "pricing": {
+            "$ref": "#/components/schemas/HousePricing"
+          },
+          "media": {
+            "$ref": "#/components/schemas/HouseMedia"
+          },
+          "badges": {
+            "$ref": "#/components/schemas/MediaBadges"
+          },
+          "highlights": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HouseHighlightItem"
+            },
+            "nullable": true
+          },
+          "poi": {
+            "$ref": "#/components/schemas/PoiBlock"
+          },
+          "features": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "floor": {
+            "$ref": "#/components/schemas/FloorInfo"
+          },
+          "parking": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ParkingItem"
+            },
+            "nullable": true
+          },
+          "pin": {
+            "$ref": "#/components/schemas/PinInfo"
+          },
+          "community": {
+            "$ref": "#/components/schemas/CommunityBlock"
+          },
+          "actualPrice": {
+            "$ref": "#/components/schemas/ActualPriceBlock"
+          },
+          "broker": {
+            "$ref": "#/components/schemas/BrokerCard"
+          },
+          "recommend": {
+            "$ref": "#/components/schemas/RecommendBlock"
+          },
+          "seo": {
+            "$ref": "#/components/schemas/SeoMeta"
+          }
+        },
+        "additionalProperties": false
+      },
+      "BuyListItem": {
+        "required": [
+          "address",
+          "badges",
+          "hfid",
+          "media",
+          "pin",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "hfid": {
+            "type": "string"
+          },
+          "caseNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "maxLength": 25,
+            "minLength": 0,
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "county": {
+            "type": "string",
+            "nullable": true
+          },
+          "district": {
+            "type": "string",
+            "nullable": true
+          },
+          "community": {
+            "$ref": "#/components/schemas/CommunityBrief"
+          },
+          "purpose": {
+            "type": "string",
+            "nullable": true
+          },
+          "purposeID": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "caseType": {
+            "type": "string",
+            "nullable": true
+          },
+          "caseTypeID": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "price": {
+            "type": "number",
+            "format": "double"
+          },
+          "isPriceIncludeParking": {
+            "type": "boolean"
+          },
+          "lastPrice": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "priceDrop": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "unitPrice": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "isBelowActualPrice": {
+            "type": "boolean"
+          },
+          "pin": {
+            "$ref": "#/components/schemas/PinInfo"
+          },
+          "layout": {
+            "$ref": "#/components/schemas/LayoutInfo"
+          },
+          "features": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "floor": {
+            "$ref": "#/components/schemas/FloorInfo"
+          },
+          "buildAge": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "hasParking": {
+            "type": "boolean"
+          },
+          "parkPrice": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "parking": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ParkingItem"
+            },
+            "nullable": true
+          },
+          "badges": {
+            "$ref": "#/components/schemas/MediaBadges"
+          },
+          "media": {
+            "$ref": "#/components/schemas/ListMedia"
+          },
+          "actualPrice": {
+            "$ref": "#/components/schemas/ActualPriceBlock"
+          },
+          "broker": {
+            "$ref": "#/components/schemas/BrokerCard"
+          },
+          "lastUpdateTime": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "latestMessageTime": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "BuyListResponse": {
+        "required": [
+          "items",
+          "paging",
+          "tabs"
+        ],
+        "type": "object",
+        "properties": {
+          "query": {
+            "$ref": "#/components/schemas/Query"
+          },
+          "paging": {
+            "$ref": "#/components/schemas/Paging"
+          },
+          "tabs": {
+            "$ref": "#/components/schemas/BuyTabsCount"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BuyListItem"
+            }
+          },
+          "seo": {
+            "$ref": "#/components/schemas/SeoMeta"
+          }
+        },
+        "additionalProperties": false
+      },
+      "BuyOrderBy": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "BuySuggestResponse": {
+        "required": [
+          "items"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SuggestItem"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "BuyTab": {
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "BuyTabsCount": {
+        "type": "object",
+        "properties": {
+          "all": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "vr": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "priceDrop": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "new": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "BuyViewMode": {
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "CommunityActualPriceSummary": {
+        "type": "object",
+        "properties": {
+          "totalCount": {
+            "maximum": 2147483647,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "currentYearCount": {
+            "maximum": 2147483647,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "link": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CommunityBlock": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "address": {
+            "type": "string",
+            "nullable": true
+          },
+          "imageUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "buildType": {
+            "type": "string",
+            "nullable": true
+          },
+          "buildingAge": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "areaMin": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "areaMax": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "detailUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "priceTableUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "actualPriceUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "cta": {
+            "type": "string",
+            "nullable": true
+          },
+          "stats": {
+            "$ref": "#/components/schemas/Stats"
+          },
+          "market": {
+            "$ref": "#/components/schemas/Market"
+          },
+          "onSale": {
+            "$ref": "#/components/schemas/CommunityOnSaleSummary"
+          },
+          "actualPrice": {
+            "$ref": "#/components/schemas/CommunityActualPriceSummary"
+          },
+          "priceTrend": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CommunityPriceTrendItem"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CommunityBrief": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CommunityOnSaleSummary": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "maximum": 2147483647,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "minPrice": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "maxPrice": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CommunityPriceTrendItem": {
+        "required": [
+          "date",
+          "monthLabel",
+          "yearMonth"
+        ],
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "yearMonth": {
+            "type": "string"
+          },
+          "monthLabel": {
+            "type": "string"
+          },
+          "unitPrice": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CottonCandyBlock": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BuyListItem"
+            },
+            "nullable": true
+          },
+          "fallback": {
+            "$ref": "#/components/schemas/Fallback"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateMessageRequest": {
+        "required": [
+          "houseId",
+          "name",
+          "phone"
+        ],
+        "type": "object",
+        "properties": {
+          "houseId": {
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 5,
+            "minLength": 0,
+            "type": "string"
+          },
+          "phone": {
+            "maxLength": 20,
+            "minLength": 0,
+            "type": "string"
+          },
+          "message": {
+            "maxLength": 30,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "browserId": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "source": {
+            "$ref": "#/components/schemas/CreateMessageRequestSource"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateMessageRequestSource": {
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "CreateMessageResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "messageId": {
+            "type": "string",
+            "nullable": true
+          },
+          "requiresVerification": {
+            "type": "boolean"
+          },
+          "verificationToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "developmentVerificationCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "verificationExpiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "canResendAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "isMember": {
+            "type": "boolean"
+          },
+          "memberId": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "$ref": "#/components/schemas/CreateMessageResponseReason"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "cottonCandy": {
+            "$ref": "#/components/schemas/CottonCandyBlock"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateMessageResponseReason": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "DirFaceItem": {
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "DirFaceResponse": {
+        "required": [
+          "items"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DirFaceItem"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "Fallback": {
+        "type": "object",
+        "properties": {
+          "showQrCode": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "FloorInfo": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "to": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "up": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "HouseBasic": {
+        "required": [
+          "address",
+          "purpose",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "caseUsageToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "caseZoingCity": {
+            "type": "string",
+            "nullable": true
+          },
+          "caseAmenitieSq": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "caseStructureToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "caseFaceToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "caseElevatorCount": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "isCaseHasElevator": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "caseBarrierfreeToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "caseManageTypeToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "maxLength": 25,
+            "minLength": 0,
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "county": {
+            "type": "string",
+            "nullable": true
+          },
+          "district": {
+            "type": "string",
+            "nullable": true
+          },
+          "purpose": {
+            "type": "string"
+          },
+          "purposeID": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "caseType": {
+            "type": "string",
+            "nullable": true
+          },
+          "caseTypeID": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "buildAge": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "floorText": {
+            "type": "string",
+            "nullable": true
+          },
+          "layoutText": {
+            "type": "string",
+            "nullable": true
+          },
+          "layout": {
+            "$ref": "#/components/schemas/LayoutInfo"
+          }
+        },
+        "additionalProperties": false
+      },
+      "HouseHighlightItem": {
+        "required": [
+          "context",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "context": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "HouseMedia": {
+        "required": [
+          "images"
+        ],
+        "type": "object",
+        "properties": {
+          "images": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          "floorPlan": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          },
+          "streetViewUrl": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          },
+          "vrUrl": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          },
+          "aiTourMp4": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          },
+          "videoTourUrl": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          },
+          "aiDecor": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AiDecorStyle"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "HousePricing": {
+        "type": "object",
+        "properties": {
+          "caseManageFee": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "caseManageFeePeriodToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "mortgageMonth": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "price": {
+            "type": "number",
+            "format": "double"
+          },
+          "lastPrice": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "priceDrop": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "unitPrice": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "parkPrice": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "unitPriceNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "isPriceIncludeParking": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "LayoutInfo": {
+        "type": "object",
+        "properties": {
+          "room": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "living": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "bath": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "hasAddon": {
+            "type": "boolean"
+          },
+          "addon": {
+            "$ref": "#/components/schemas/AddonInfo"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ListMedia": {
+        "required": [
+          "images"
+        ],
+        "type": "object",
+        "properties": {
+          "images": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          "floorPlan": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Market": {
+        "type": "object",
+        "properties": {
+          "averageUnitPrice": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "minUnitPrice": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "maxUnitPrice": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "MediaBadges": {
+        "type": "object",
+        "properties": {
+          "gold": {
+            "type": "boolean"
+          },
+          "new": {
+            "type": "boolean"
+          },
+          "vr": {
+            "type": "boolean"
+          },
+          "aiTour": {
+            "type": "boolean"
+          },
+          "aiDecor": {
+            "type": "boolean"
+          },
+          "videoTour": {
+            "type": "boolean"
+          },
+          "floorPlan": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "MessageVerificationResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "verificationToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "developmentVerificationCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "verificationExpiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "canResendAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "reason": {
+            "$ref": "#/components/schemas/MessageVerificationResponseReason"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "MessageVerificationResponseReason": {
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "MrtLineItem": {
+        "required": [
+          "code",
+          "id",
+          "name",
+          "stations"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "stations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MrtStationItem"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "MrtOperatorItem": {
+        "required": [
+          "code",
+          "id",
+          "lines",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MrtLineItem"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "MrtResponse": {
+        "required": [
+          "items"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MrtOperatorItem"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "MrtStationItem": {
+        "required": [
+          "code",
+          "id",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "countyName": {
+            "type": "string",
+            "nullable": true
+          },
+          "districtName": {
+            "type": "string",
+            "nullable": true
+          },
+          "latitude": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Paging": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ParkingItem": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "type": "string",
+            "nullable": true
+          },
+          "amount": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "reg": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "expense": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "isParkingExpenseInclude": {
+            "type": "boolean"
+          },
+          "payPeriod": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PinInfo": {
+        "type": "object",
+        "properties": {
+          "platform": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "build": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "main": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "balcony": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "terrace": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "stairwell": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "mezzanine": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "basement": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "other": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "totalAttached": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "amenities": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "parking": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "amenitiesRatio": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "land": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PoiBlock": {
+        "required": [
+          "dining",
+          "living",
+          "medical",
+          "parking",
+          "parks",
+          "schools",
+          "shopping",
+          "traffic"
+        ],
+        "type": "object",
+        "properties": {
+          "traffic": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PoiItem"
+            }
+          },
+          "schools": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PoiItem"
+            }
+          },
+          "medical": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PoiItem"
+            }
+          },
+          "parks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PoiItem"
+            }
+          },
+          "parking": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PoiItem"
+            }
+          },
+          "living": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PoiItem"
+            }
+          },
+          "shopping": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PoiItem"
+            }
+          },
+          "dining": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PoiItem"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "PoiItem": {
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "distanceMeter": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "walkMin": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "latitude": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Query": {
+        "type": "object",
+        "properties": {
+          "canonicalPath": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RecommendBlock": {
+        "required": [
+          "agentPick",
+          "hotForYou"
+        ],
+        "type": "object",
+        "properties": {
+          "agentPick": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BuyListItem"
+            }
+          },
+          "hotForYou": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BuyListItem"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "RegionAreaItem": {
+        "required": [
+          "id",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "latitude": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "zipCode": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RegionCityItem": {
+        "required": [
+          "areas",
+          "id",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "areas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RegionAreaItem"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "RegionResponse": {
+        "required": [
+          "items"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RegionCityItem"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "ResendMessageCodeRequest": {
+        "required": [
+          "verificationToken"
+        ],
+        "type": "object",
+        "properties": {
+          "verificationToken": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SendTestMailRequest": {
+        "type": "object",
+        "properties": {
+          "to": {
+            "type": "string",
+            "nullable": true
+          },
+          "subject": {
+            "type": "string",
+            "nullable": true
+          },
+          "textBody": {
+            "type": "string",
+            "nullable": true
+          },
+          "htmlBody": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SendTestMailResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "messageId": {
+            "type": "string",
+            "nullable": true
+          },
+          "to": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SeoMeta": {
+        "required": [
+          "canonical",
+          "description",
+          "h1",
+          "jsonLd",
+          "ogDescription",
+          "ogImage",
+          "ogTitle",
+          "robots",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "canonical": {
+            "type": "string"
+          },
+          "noindex": {
+            "type": "boolean"
+          },
+          "h1": {
+            "type": "string"
+          },
+          "ogTitle": {
+            "type": "string"
+          },
+          "ogDescription": {
+            "type": "string"
+          },
+          "ogImage": {
+            "type": "string",
+            "format": "uri"
+          },
+          "robots": {
+            "type": "string"
+          },
+          "jsonLd": { }
+        },
+        "additionalProperties": false
+      },
+      "Stats": {
+        "type": "object",
+        "properties": {
+          "households": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "floors": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "StringBoolean<>f__AnonymousType5": {
+        "type": "object",
+        "properties": {
+          "bff": {
+            "type": "string",
+            "nullable": true
+          },
+          "ok": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SubscribePriceDropRequest": {
+        "required": [
+          "houseId"
+        ],
+        "type": "object",
+        "properties": {
+          "houseId": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SubscribePriceDropResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "subscriptionId": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "$ref": "#/components/schemas/SubscribePriceDropResponseReason"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SubscribePriceDropResponseReason": {
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "SubscribeSearchConditionRequest": {
+        "required": [
+          "conditionPath"
+        ],
+        "type": "object",
+        "properties": {
+          "conditionPath": {
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/components/schemas/SubscribeSearchConditionRequestSource"
+          },
+          "lineBind": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SubscribeSearchConditionRequestSource": {
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "SubscribeSearchConditionResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "subscriptionId": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "$ref": "#/components/schemas/SubscribeSearchConditionResponseReason"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SubscribeSearchConditionResponseReason": {
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "SuggestItem": {
+        "required": [
+          "query",
+          "text",
+          "type",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "location": {
+            "$ref": "#/components/schemas/SuggestLocation"
+          },
+          "query": {
+            "$ref": "#/components/schemas/SuggestQuery"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SuggestLocation": {
+        "type": "object",
+        "properties": {
+          "countyId": {
+            "type": "string",
+            "nullable": true
+          },
+          "countyName": {
+            "type": "string",
+            "nullable": true
+          },
+          "districtId": {
+            "type": "string",
+            "nullable": true
+          },
+          "districtName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SuggestQuery": {
+        "type": "object",
+        "properties": {
+          "kw": {
+            "type": "string",
+            "nullable": true
+          },
+          "region": {
+            "type": "string",
+            "nullable": true
+          },
+          "mrt": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "VerifyMessageCodeRequest": {
+        "required": [
+          "verificationCode",
+          "verificationToken"
+        ],
+        "type": "object",
+        "properties": {
+          "verificationToken": {
+            "type": "string"
+          },
+          "verificationCode": {
+            "maxLength": 6,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Buy"
+    },
+    {
+      "name": "BuyAuth",
+      "description": "Buy BFF 會員認證端點。"
+    },
+    {
+      "name": "Housefun.Bff.Buy.Web"
+    },
+    {
+      "name": "MailTest",
+      "description": "Buy BFF 郵件測試端點。"
+    }
+  ]
+}

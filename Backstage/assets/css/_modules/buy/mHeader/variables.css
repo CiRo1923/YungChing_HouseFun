@@ -23,6 +23,33 @@
    * logo 右邊的「管理後台」字樣 —— 只有 PC 顯示(template 的 v-if),
    * 所以間距與字級只有 pc 有值,另外兩份是為了讓斷點成套。
    */
+  /* logo —— 文字版全斷點都在;icon 版只有 PC 顯示(template 的 v-if),
+     另外兩份是為了讓斷點成套。寬高不同,所以拆 -w / -h。 */
+  --header-logo-text-w: auto;
+  --header-logo-text-pc-w: 77px;
+  --header-logo-text-tablet-w: 57px;
+  --header-logo-text-mobile-w: 57px;
+
+  --header-logo-text-h: auto;
+  --header-logo-text-pc-h: 25px;
+  --header-logo-text-tablet-h: 20px;
+  --header-logo-text-mobile-h: 20px;
+
+  --header-logo-icon-w: auto;
+  --header-logo-icon-pc-w: 87px;
+  --header-logo-icon-tablet-w: auto;
+  --header-logo-icon-mobile-w: auto;
+
+  --header-logo-icon-h: auto;
+  --header-logo-icon-pc-h: 25px;
+  --header-logo-icon-tablet-h: auto;
+  --header-logo-icon-mobile-h: auto;
+
+  --header-logo-icon-ml: 0;
+  --header-logo-icon-pc-ml: 4px;
+  --header-logo-icon-tablet-ml: 0;
+  --header-logo-icon-mobile-ml: 0;
+
   --header-label-color: var(--white);
 
   --header-label-ml: 0;

@@ -1,5 +1,5 @@
 <script setup>
-const memberProjct = useMemberProjectStore()
+const memberProjct = useMemberAuthProjectStore()
 const { login } = storeToRefs(memberProjct)
 </script>
 

@@ -5,7 +5,7 @@ const project = useProjectStore()
 const { serverTime } = storeToRefs(project)
 const manage = useManageStore()
 const { options } = storeToRefs(manage)
-const memberRegister = useMemberRegisterStore()
+const memberRegister = useMemberAuthRegisterStore()
 const { type } = storeToRefs(memberRegister)
 
 const emits = defineEmits(['verifySubmit', 'cityChange', 'workAreaChange', 'workBrandChange'])
@@ -173,6 +173,7 @@ const onWorkBrandChange = () => {
             :setClass="{
               main: '--rounded --h-55 --px-12',
               button: '--h-35 --px-15',
+              buttonText: 'text-[14px]',
             }"
             @submit="onVerifySubmit"
             v-if="form.name === 'verifyCode'"

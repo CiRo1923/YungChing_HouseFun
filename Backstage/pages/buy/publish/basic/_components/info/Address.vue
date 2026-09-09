@@ -178,6 +178,10 @@ const onPopupAddressGoogleMap = async () => {
       }"
       :setClass="{
         separator: 'text-[16px]',
+        fieldType: 'text-[16px]',
+        selectType: 'line-clamp-1',
+        dropdownLabel: 'text-[14px]',
+        rearAssist: 'text-[14px]',
         city: 't:w-[180px] p:w-[260px]',
         area: 't:w-[180px] p:w-[260px]',
         road: 't:w-[220px] p:w-[294px]',

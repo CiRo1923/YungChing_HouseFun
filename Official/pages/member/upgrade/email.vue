@@ -2,16 +2,16 @@
 import { EMAILEXCEEDED } from '@js/_storage.js'
 
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
-const memberUpgrade = useMemberUpgradeStore()
+const { onApiPromise } = usePopupActions()
+const memberUpgrade = useMemberAuthUpgradeStore()
 const { email } = storeToRefs(memberUpgrade)
 const { onGetCookie, onClearCookie, onApiAuthEmailUpgradeVerificationCode, reset } =
-  useMemberUpgradeActions()
-const { onApiPromise } = usePopupActions()
+  useMemberAuthUpgradeActions()
 const router = useRouter()
 
 definePageMeta({
-  layout: 'member',
-  channel: 'member',
+  layout: 'member-auth',
+  channel: 'memberAuth',
   requiresAuth: false,
 })
 
@@ -73,7 +73,7 @@ onInit()
 
 <template>
   <CommonMContainer
-    class="p:--max-w-400 space-y-[30px] tm:pt-[20px] p:pt-[55px]"
+    class="p:--max-w-400 space-y-[30px]"
     :config="{
       as: 'section',
     }"

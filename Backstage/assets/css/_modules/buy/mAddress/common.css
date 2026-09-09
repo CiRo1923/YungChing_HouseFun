@@ -16,6 +16,10 @@
   @apply text-[--address-separator-color];
 }
 
+.m-address-rear-assist {
+  @apply text-[--address-rear-assist-color];
+}
+
 @screen p {
   .m-address {
     --address-gap-x: var(--address-pc-gap-x);
@@ -34,5 +38,10 @@
   .m-address {
     --address-gap-x: var(--address-mobile-gap-x);
     --address-gap-y: var(--address-mobile-gap-y);
+  }
+
+  /* 手機時縣市 / 鄉鎮 / 路段各自佔滿一列 */
+  .m-address-select {
+    @apply w-full;
   }
 }

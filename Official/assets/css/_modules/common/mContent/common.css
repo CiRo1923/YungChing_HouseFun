@@ -5,5 +5,39 @@
   /* 內距四個方向、圓角上下各取各的變數 —— 不要用 p- / px- / py- / rounded- 的 shorthand,
      那會讓覆寫關係取決於 tailwind 的輸出順序。
      圓角建在 t / b 這層是因為使用端會單獨指定下方(--rounded-b-20)。 */
-  @apply rounded-b-[--content-rounded-b] rounded-t-[--content-rounded-t] bg-[--content-bg-color] pb-[--content-pb] pl-[--content-pl] pr-[--content-pr] pt-[--content-pt];
+  @apply rounded-b-[--content-rounded-b] rounded-t-[--content-rounded-t] pb-[--content-pb] pl-[--content-pl] pr-[--content-pr] pt-[--content-pt];
+}
+
+/* 底色由使用端決定要不要有,而且可以只在某個斷點有 —— 所以宣告本身收進三段 @screen,
+   沒帶 modifier 的斷點根本不會出現 background-color 這條(不是設成 transparent),
+   使用端若自己傳底色才不會被蓋掉。 */
+@screen p {
+  .m-content {
+    &.\-\-hasBgColor,
+    &.p\:\-\-hasBgColor,
+    &.pt\:\-\-hasBgColor {
+      @apply bg-[--content-bg-color];
+    }
+  }
+}
+
+@screen t {
+  .m-content {
+    &.\-\-hasBgColor,
+    &.pt\:\-\-hasBgColor,
+    &.tm\:\-\-hasBgColor,
+    &.t\:\-\-hasBgColor {
+      @apply bg-[--content-bg-color];
+    }
+  }
+}
+
+@screen m {
+  .m-content {
+    &.\-\-hasBgColor,
+    &.tm\:\-\-hasBgColor,
+    &.m\:\-\-hasBgColor {
+      @apply bg-[--content-bg-color];
+    }
+  }
 }

@@ -93,6 +93,7 @@ const onSure = async () => {
         :setClass="{
           main: '--rounded --h-55 --px-12',
           button: '--h-35 --px-15',
+          buttonText: 'text-[14px]',
         }"
         @submit="onSubmit"
       />

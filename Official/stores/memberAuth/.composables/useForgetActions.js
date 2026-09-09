@@ -1,4 +1,4 @@
-import { apiAuthPasswordResetRequest, apiAuthPasswordResetConfirm } from '@js/_api/member/forget.js'
+import { apiAuthPasswordResetRequest, apiAuthPasswordResetConfirm } from '@js/_api/memberAuth/forget.js'
 import { enCrypto, deCrypto } from '@js/.crypto/index.js'
 import { FORGETRESET, FORGETCOMPLETE } from '@js/_storage.js'
 
@@ -7,7 +7,7 @@ import { FORGETRESET, FORGETCOMPLETE } from '@js/_storage.js'
 // 這條流程只有兩支 API,而驗證碼是 confirm 才驗的 —— 步驟 1 的「下一步」沒有東西可打,
 // 只檢查格式並確認已經發過碼。驗證碼錯誤要到步驟 2 送出才會知道,那時導回步驟 1。
 export default () => {
-  const memberForget = useMemberForgetStore()
+  const memberForget = useMemberAuthForgetStore()
   const { verify, resetPassword } = storeToRefs(memberForget)
   const { onApiError, onAlert } = usePopupActions()
   // 在 setup 期間先取好:action 是在事件處理器、且多半在 await 之後才執行,
@@ -38,9 +38,9 @@ export default () => {
 
       // 重送倒數的到期時間。重送成功會拿到新的值 → 倒數元件 watch 到就覆蓋重算。
       //
-      // ⚠️ 這裡吃的是 expireAt(token 到期),不是「可重送時間」——
-      // 規格寫 60 秒冷卻,但 200 沒有對應的欄位(upgrade 那條流程回的是 resendAvailableAt)。
-      // 後端補了欄位就改吃那個,見 .claude/rules/member-forget-pending.md。
+      // 這裡吃的是 expireAt(token 到期),不是「可重送時間」——
+      // 60 秒冷卻沒有對應的回傳欄位(upgrade 那條流程回的是 resendAvailableAt)。
+      // 有了那個欄位就改吃它,見 .claude/rules/member-forget-pending.md。
       verify.value.countdownData.expires = expireAt
 
       // 步驟 2 的 URL 不帶這些值,重整 / 換頁要靠 cookie 還原。
@@ -66,9 +66,8 @@ export default () => {
     } else if (status === 400 || status === 404 || status === 429) {
       // 後端有給明確原因的可預期錯誤 → 只顯示 message,不套用通用錯誤彈窗。
       //
-      // 發送限制(60 秒冷卻、手機每日與 IP 每小時上限)也走這裡 —— swagger 這兩支
-      // 只列 200 / 400,超限是回 400 帶 message,沒有獨立的 429。429 一起收在這個
-      // 分支是保險:真的收到就當可預期錯誤顯示,不掉進通用錯誤彈窗。
+      // 發送限制(60 秒冷卻、手機每日與 IP 每小時上限)也走這裡:超限回 400 帶 message。
+      // 429 一起收在這個分支是保險 —— 真的收到就當可預期錯誤顯示,不掉進通用錯誤彈窗。
       //
       // 不寫進 apiResult:那是給「整頁換成超限呈現」用的,這條流程沒有那個版面,
       // 寫進去只會讓輸入表單被取代掉,使用者連改號碼都沒得改。
@@ -117,11 +116,10 @@ export default () => {
         },
       })
 
-      // 驗證碼類的錯誤(帶 failedAttempts / remainingAttempts)在這一頁沒有欄位可以改 →
-      // 導回步驟 1 重新輸入。密碼格式錯誤則留在本頁,使用者當場就能改。
+      // 驗證碼類的錯誤在這一頁沒有欄位可以改 → 導回步驟 1 重新輸入;
+      // 密碼格式錯誤則留在本頁,使用者當場就能改。
       //
-      // ⚠️ 用「有沒有帶次數」判斷是暫時的:swagger 的 400 有 code 欄位但沒列舉值,
-      // 實際看到 code 之後改成比對 code 會更準。
+      // 判斷依據是有沒有帶嘗試次數:failedAttempts / remainingAttempts 只在驗證碼錯誤時回傳。
       if (data?.failedAttempts != null || data?.remainingAttempts != null) {
         onBackToVerify()
       }

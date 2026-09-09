@@ -20,9 +20,9 @@
 | `scripts/_api/member/forget.js` | 兩支 C 端 API |
 | `scripts/_storage.js` | 新增 `FORGETRESET`(效期跟 `expireAt`)、`FORGETCOMPLETE`(短效,完成頁憑證) |
 
-## API(`.api.json/swagger.json`)
+## API
 
-C 端只有兩支;`app/password-reset/*` 那三支是舊版 App 用的,**不要接**。
+C 端只有兩支;`app/password-reset/*` 那三支是舊版 App 專用,**這裡不接**。
 
 | API | 送出 | 回傳 |
 |---|---|---|
@@ -33,31 +33,23 @@ C 端只有兩支;`app/password-reset/*` 那三支是舊版 App 用的,**不要�
 **已定案:維持三頁,confirm 回驗證碼錯誤時導回步驟 1 並帶出錯誤訊息。**
 
 發送限制與註冊驗證共用 60 秒冷卻 + 手機每日 / IP 每小時上限;
-**超限也是回 400 帶 `message`** —— 兩支的回應只列 200 / 400,沒有 429。
-400 的結構是共用的 `MemberAuthErrorResponse`:
-`code` / `message` / `details` / `failedAttempts` / `remainingAttempts` / `unlockAt`。
+**超限回 400 帶 `message`**,沒有獨立的 429。
+400 的欄位為 `code` / `message` / `details` / `failedAttempts` / `remainingAttempts` / `unlockAt`,
+其中 `failedAttempts` / `remainingAttempts` 只在驗證碼錯誤時回傳 ——
+程式就是以此判斷「該不該把人導回步驟 1」。
 
-### 待後端確認
+`verificationChannel` 傳字串 `sms` / `line`,值集中在 store 的 `verificationChannels`。
 
-1. **重送倒數吃 `expireAt`** —— 規格寫 60 秒冷卻,但 200 只回 token 的到期時間。
-   `resendAvailableAt`(可重送時間)確實存在於 swagger,但**只在會員升級與註冊的回應**,
-   忘記密碼這支沒有。要問後端補不補;補了就把 `verify.countdownData.expires` 改吃它。
+`developmentVerificationCode`:開發設定開啟時後端不寄簡訊、改由 200 回傳測試碼,
+程式直接帶入驗證碼欄位(正式環境不回這個欄位,不必自己判斷環境),與 upgrade / 註冊同一套寫法。
 
-> **`verificationChannel` 已確認**(2026-09-08 的 swagger)——
-> 字串 enum `sms` / `line`,說明明寫「JSON 不接受數字 0／1」,
-> 與程式現在送的值一致。早一版誤寫成 integer `[0, 1]`,不要照那版改回去。
->
-> **`developmentVerificationCode` 也已接上** —— `MemberPasswordReset:UseDevelopmentVerificationCode=true`
-> 時後端不寄簡訊、改由 200 回傳測試碼,程式直接帶入驗證碼欄位(正式環境不回這個欄位,
-> 不必自己判斷環境),與 upgrade / 註冊同一套寫法。
+### 待確認
 
-> **驗證碼錯誤的判斷已經有依據了**(原本列為暫時做法)——
-> swagger 現在明寫 `failedAttempts` / `remainingAttempts`「僅驗證碼錯誤時回傳」,
-> 所以「有沒有帶次數」就是正確的判準,不必等 `code` 的列舉值。
-> (`unlockAt` 的說明是「Email 每 24 小時寄送上限達標時回傳」,手機這條流程未必會帶,程式沒用到它。)
+1. **重送倒數目前吃 `expireAt`** —— 60 秒冷卻沒有對應的回傳欄位,而 `expireAt` 是 token 的到期時間。
+   升級與註冊那兩條流程回的是 `resendAvailableAt`,這支沒有。
+   要問後端能不能一併提供;有了就把 `verify.countdownData.expires` 改吃它。
 
-錯誤呈現一律走 mForm 內建那套(`--error` 紅框 + `m-form-error`),
-**設計稿的錯誤樣式是錯的,不要照抄**,比照 member 其他單元即可。
+錯誤呈現一律走 mForm 內建那套(`--error` 紅框 + `m-form-error`),比照 member 其他單元。
 
 ## 等使用者處理的項目
 

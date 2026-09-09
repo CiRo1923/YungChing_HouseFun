@@ -4,7 +4,7 @@ import { onMaskEmail } from '@js/_projectPrototype.js'
 import { deCrypto } from '@js/.crypto/index.js'
 
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
-const memberUpgrade = useMemberUpgradeStore()
+const memberUpgrade = useMemberAuthUpgradeStore()
 const { email, emailVerify } = storeToRefs(memberUpgrade)
 const {
   onGetCookie,
@@ -12,13 +12,13 @@ const {
   onApiAuthEmailUpgradeVerificationCodeVerify,
   onPopupCustomer,
   reset,
-} = useMemberUpgradeActions()
+} = useMemberAuthUpgradeActions()
 const { onApiPromise } = usePopupActions()
 const router = useRouter()
 
 definePageMeta({
-  layout: 'member',
-  channel: 'member',
+  layout: 'member-auth',
+  channel: 'memberAuth',
   requiresAuth: false,
   middleware: [
     () => {
@@ -128,7 +128,7 @@ onInit()
 
 <template>
   <CommonMContainer
-    class="p:--max-w-400 space-y-[30px] tm:pt-[20px] p:pt-[55px]"
+    class="p:--max-w-400 space-y-[30px]"
     :config="{
       as: 'section',
     }"

@@ -6,5 +6,20 @@
   --nav-app-tablet-border-t: 1px;
   --nav-app-mobile-border-t: 1px;
 
+  /* 連結本體 —— icon 與文字之間的間距 */
+  --nav-app-anchor-pc-gap-x: 10px;
+  --nav-app-anchor-tablet-gap-x: 10px;
+  --nav-app-anchor-mobile-gap-x: 10px;
+
+  /* lint-text-size-exempt: 側邊選單是固定位置的元件,字級全站長一樣 */
+  --nav-app-text-pc-text-size: 18px;
+  --nav-app-text-tablet-text-size: 18px;
+  --nav-app-text-mobile-text-size: 18px;
+
+  --nav-app-icon-pc-size: 24px;
+  --nav-app-icon-tablet-size: 24px;
+  --nav-app-icon-mobile-size: 24px;
+
   --nav-app-border-color: var(--gray-e5);
+  --nav-app-icon-color: var(--green-8b0d);
 }

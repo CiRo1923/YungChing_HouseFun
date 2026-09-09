@@ -94,6 +94,20 @@ const CASES = [
     keyword: 'tailwind',
   },
   {
+    name: '規則 2 setClass 傳 tailwind',
+    file: `${C}/A.vue`,
+    code: `<template>\n  <MChild :setClass="{ main: 'rounded-[15px] py-[30px]' }" />\n</template>\n`,
+    expectMin: 1,
+    keyword: 'tailwind',
+  },
+  {
+    name: '規則 2 setClass 傳 line-clamp(規範要求由父系傳入)',
+    file: `${C}/A.vue`,
+    code: `<template>\n  <MChild :setClass="{ label: 'line-clamp-2' }" />\n</template>\n`,
+    expectMin: 1,
+    keyword: 'tailwind',
+  },
+  {
     name: '規則 2 狀態用 is- 裸前綴',
     file: `${C}/A.vue`,
     code: `<template>\n  <div class="m-probe" :class="{ 'is-active': x }">y</div>\n</template>\n`,
@@ -380,6 +394,18 @@ const CASES = [
   },
 
   // ================= 合法寫法:一筆都不該報 =================
+  {
+    name: '✓ setClass 只傳 modifier 與組件 class',
+    file: `${C}/A.vue`,
+    code: `<template>\n  <MChild :setClass="{ main: 'm-probe p:--px-15 hover:--text-white' }" />\n</template>\n`,
+    expect: 0,
+  },
+  {
+    name: '✓ setClass 傳變數(靜態判讀不到,不該猜)',
+    file: `${C}/A.vue`,
+    code: `<template>\n  <MChild :setClass="setClass" />\n</template>\n`,
+    expect: 0,
+  },
   {
     name: '✓ 完整值的 shadow arbitrary value',
     file: `${M}/common.css`,

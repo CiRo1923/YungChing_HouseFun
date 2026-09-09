@@ -244,6 +244,9 @@ export default createConfigForNuxt(
         defineNuxtPlugin: 'readonly',
         defineNuxtRouteMiddleware: 'readonly',
         definePageMeta: 'readonly',
+        // @pinia/nuxt 自己就會 auto-import 它(見 .nuxt/imports.d.ts),
+        // stores 底下不必寫 `import { defineStore } from 'pinia'`
+        defineStore: 'readonly',
         inject: 'readonly',
         navigateTo: 'readonly',
         nextTick: 'readonly',

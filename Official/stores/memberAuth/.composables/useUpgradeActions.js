@@ -6,7 +6,7 @@ import {
   apiAuthEmailUpgradeMobileVerificationCodeVerify,
   apiAuthEmailUpgradeBind,
   apiAuthEmailUpgradeMerge,
-} from '@js/_api/member/upgrade.js'
+} from '@js/_api/memberAuth/upgrade.js'
 import { enCrypto, deCrypto } from '@js/.crypto/index.js'
 import {
   EMAILVALUE,
@@ -19,7 +19,7 @@ import {
 } from '@js/_storage.js'
 
 export default () => {
-  const memberUpgrade = useMemberUpgradeStore()
+  const memberUpgrade = useMemberAuthUpgradeStore()
   const { email, emailVerify, phone, phoneVerify, bind, merge } = storeToRefs(memberUpgrade)
   const { onApiError, onAlert, onCustom } = usePopupActions()
   // 在 setup 期間先取好:action 是在事件處理器、且多半在 await 之後才執行,

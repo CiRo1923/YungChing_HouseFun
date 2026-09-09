@@ -1,4 +1,4 @@
-import { version, fetchApi } from '@js/_api/member/.config.js'
+import { version, fetchApi } from '@js/_api/memberAuth/.config.js'
 
 // 發送 email 驗證碼
 // req  { email }

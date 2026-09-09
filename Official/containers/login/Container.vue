@@ -1,7 +1,7 @@
 <script setup>
 import { Form } from 'vee-validate'
 
-const { onReset } = useMemberProjectActions()
+const { onReset } = useMemberAuthProjectActions()
 const items = readonly([
   {
     id: 'password',

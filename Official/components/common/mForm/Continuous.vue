@@ -179,7 +179,7 @@ defineExpose({
     :rules="props.rules"
     :setClass="{
       main: setClass.main,
-      container: ['flex items-center justify-center', setClass.container],
+      container: ['--flex --items-center --justify-center', setClass.container],
     }"
     @keydown="onKeydown"
     @paste="onPaste"
@@ -202,7 +202,7 @@ defineExpose({
       }"
       :setClass="{
         main: '--h-50 --px-12 --rounded',
-        type: 'text-center',
+        type: '--text-center',
       }"
       @input="onInput(index, $event)"
       @focusin="onFocusIn(index)"

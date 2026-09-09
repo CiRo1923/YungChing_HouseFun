@@ -1,5 +1,3 @@
-import { defineStore } from 'pinia'
-
 export const useBuyListStore = defineStore('buyList', () => {
   const apiSearchDataDefault = readonly({
     is7DayExpirerFilterer: false,

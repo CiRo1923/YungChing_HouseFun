@@ -179,11 +179,14 @@ export default () => {
       })
     }
   }
+  // SSR 期間存下的錯誤在 client 補跳一次。重播完一定要清掉 ——
+  // apiError 留著的話,每一支頁面的 onMounted 都會再跳同一個錯誤窗。
   const onApiErrorServerToClient = () => {
     if (apiError.value) {
       const { config, status, data } = apiError.value
 
       onApiError(config, status, data)
+      onApiErrorClear()
     }
   }
   const onApiErrorClear = () => {

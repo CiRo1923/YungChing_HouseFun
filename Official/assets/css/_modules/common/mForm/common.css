@@ -50,8 +50,27 @@
   }
 }
 
+.m-form-hidden-container {
+  &.\-\-flex {
+    @apply flex;
+  }
+
+  &.\-\-items-center {
+    @apply items-center;
+  }
+
+  &.\-\-justify-center {
+    @apply justify-center;
+  }
+}
+
 .m-form-type {
   @apply bg-transparent;
+
+  /* 文字置中由使用端決定(驗證碼那種一格一字的輸入框要),不分斷點 */
+  &.\-\-text-center {
+    @apply text-center;
+  }
 
   &:not([type='checkbox']):not([type='radio']) {
     @apply flex h-full min-w-0 grow items-center text-[--form-element-color];

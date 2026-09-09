@@ -107,6 +107,16 @@
       --anchor-bg-color: var(--green-ffe9);
     }
   }
+
+  &.\-\-active {
+    &.active\:\-\-text-white {
+      --anchor-color: var(--white);
+    }
+
+    &.active\:\-\-bg-green-8b0d {
+      --anchor-bg-color: var(--green-8b0d);
+    }
+  }
 }
 
 @screen p {
@@ -139,6 +149,12 @@
     &.p\:\-\-py-15,
     &.pt\:\-\-py-15 {
       --anchor-py: 15px;
+    }
+
+    &.\-\-py-12,
+    &.p\:\-\-py-12,
+    &.pt\:\-\-py-12 {
+      --anchor-py: 12px;
     }
 
     &.\-\-py-8,
@@ -244,6 +260,13 @@
     &.tm\:\-\-py-15,
     &.t\:\-\-py-15 {
       --anchor-py: 15px;
+    }
+
+    &.\-\-py-12,
+    &.pt\:\-\-py-12,
+    &.tm\:\-\-py-12,
+    &.t\:\-\-py-12 {
+      --anchor-py: 12px;
     }
 
     &.\-\-py-8,
@@ -355,6 +378,12 @@
     &.tm\:\-\-py-15,
     &.m\:\-\-py-15 {
       --anchor-py: 15px;
+    }
+
+    &.\-\-py-12,
+    &.tm\:\-\-py-12,
+    &.m\:\-\-py-12 {
+      --anchor-py: 12px;
     }
 
     &.\-\-py-8,

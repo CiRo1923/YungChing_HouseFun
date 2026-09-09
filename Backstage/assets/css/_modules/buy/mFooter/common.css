@@ -16,6 +16,11 @@
   @apply flex flex-col t:shrink-0 p:grow;
 }
 
+/* p:grow —— PC 時撐滿剩餘空間,平板手機維持內容寬 */
+.m-footer-logo-image {
+  @apply h-[--footer-logo-image-h] w-[--footer-logo-image-w] p:grow;
+}
+
 .m-footer-links {
   @apply inline-flex items-center p:shrink-0;
   @apply mt-[--footer-links-mt] gap-x-[--footer-links-gap-x];
@@ -49,6 +54,11 @@
     --footer-information-space-y: var(--footer-information-pc-space-y);
     --footer-information-mt: var(--footer-information-pc-mt);
   }
+
+  .m-footer-logo-image {
+    --footer-logo-image-w: var(--footer-logo-image-pc-w);
+    --footer-logo-image-h: var(--footer-logo-image-pc-h);
+  }
 }
 
 @screen t {
@@ -67,6 +77,11 @@
     --footer-information-space-y: var(--footer-information-tablet-space-y);
     --footer-information-mt: var(--footer-information-tablet-mt);
   }
+
+  .m-footer-logo-image {
+    --footer-logo-image-w: var(--footer-logo-image-tablet-w);
+    --footer-logo-image-h: var(--footer-logo-image-tablet-h);
+  }
 }
 
 @screen m {
@@ -84,5 +99,10 @@
     --footer-information-text-size: var(--footer-information-mobile-text-size);
     --footer-information-space-y: var(--footer-information-mobile-space-y);
     --footer-information-mt: var(--footer-information-mobile-mt);
+  }
+
+  .m-footer-logo-image {
+    --footer-logo-image-w: var(--footer-logo-image-mobile-w);
+    --footer-logo-image-h: var(--footer-logo-image-mobile-h);
   }
 }

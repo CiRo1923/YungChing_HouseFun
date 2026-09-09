@@ -3,6 +3,10 @@
   --tag-clear-button-tablet-gap-x: 5px;
   --tag-clear-button-mobile-gap-x: 5px;
 
+  --tag-xmark-button-icon-pc-size: 14px;
+  --tag-xmark-button-icon-tablet-size: 14px;
+  --tag-xmark-button-icon-mobile-size: 14px;
+
   --tag-clear-button-color: var(--gray-999);
 }
 

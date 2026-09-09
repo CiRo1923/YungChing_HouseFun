@@ -1,0 +1,36 @@
+import { onFetchApi } from '@js/_api/.export.js'
+
+// baseURL 用函式延遲解析:onFetchApi 每次請求時才 resolveValue()。
+// 避免在模組頂層呼叫 useRuntimeConfig()(context 外呼叫的反樣式;動態 import 時會警告),
+// 改成每次請求在 request context 內取值,SSR / client 行為不變。
+export const version = 'v1'
+
+// Member Auth(登入 / 註冊 / 升級 / 忘記密碼)。
+// 會員中心那些 API 在另一個服務,見 scripts/_api/member/.config.js。
+export const fetchApi = onFetchApi({
+  baseURL: () =>
+    import.meta.dev && import.meta.client
+      ? '/memberAuth/'
+      : useRuntimeConfig().public.NUXT_PUBLIC_MEMBER_AUTH_API_PATH,
+  credentials: 'include',
+})
+
+export const fetchManageApi = onFetchApi({
+  baseURL: () =>
+    import.meta.dev && import.meta.client
+      ? '/manage/'
+      : useRuntimeConfig().public.NUXT_PUBLIC_MANAGE_API_PATH,
+})
+
+// 每次請求在 header 帶上 memberProjct 的 accessToken(Bearer)。
+// fetchApi.interceptors.request.use((fetchConfig) => {
+//   const buyProject = useBuyProjectStore()
+//   const { accessData } = storeToRefs(buyProject)
+//   const accessToken = accessData.value?.accessToken
+
+//   if (accessToken) {
+//     fetchConfig.headers.Authorization = `Bearer ${accessToken}`
+//   }
+
+//   return fetchConfig
+// })

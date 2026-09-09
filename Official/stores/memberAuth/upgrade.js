@@ -1,4 +1,4 @@
-export const useMemberUpgradeStore = defineStore('memberUpgrade', () => {
+export const useMemberAuthUpgradeStore = defineStore('memberAuthUpgrade', () => {
   const apiDefault = readonly({
     email: {
       email: null,

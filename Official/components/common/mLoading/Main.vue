@@ -21,7 +21,7 @@ const config = computed(() => {
   <div class="m-loading" :class="{ '--fixed': config.isFixed }">
     <CommonMLoadingContainer
       :setClass="{
-        container: 'rounded-[15px] bg-[--white] py-[30px] tm:p-[32px] p:px-[72px]',
+        container: '--card',
       }"
     >
       <slot />

@@ -6,7 +6,7 @@
     @apply fixed inset-0 z-[5];
 
     &:before {
-      @apply pointer-events-none absolute inset-0 bg-[--loading-overlay-bg-color] backdrop-blur-[2px] content-default;
+      @apply pointer-events-none absolute inset-0 bg-[--loading-overlay-bg-color] backdrop-blur-[--loading-overlay-blur] content-default;
     }
   }
 }
@@ -25,6 +25,10 @@
 }
 
 @screen p {
+  .m-loading {
+    --loading-overlay-blur: var(--loading-overlay-pc-blur);
+  }
+
   .m-loading-container {
     --loading-container-text-size: var(--loading-container-pc-text-size);
 
@@ -39,6 +43,10 @@
 }
 
 @screen t {
+  .m-loading {
+    --loading-overlay-blur: var(--loading-overlay-tablet-blur);
+  }
+
   .m-loading-container {
     --loading-container-text-size: var(--loading-container-tablet-text-size);
 
@@ -53,6 +61,10 @@
 }
 
 @screen m {
+  .m-loading {
+    --loading-overlay-blur: var(--loading-overlay-mobile-blur);
+  }
+
   .m-loading-container {
     --loading-container-text-size: var(--loading-container-mobile-text-size);
 

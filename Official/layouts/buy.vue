@@ -8,7 +8,7 @@ const colorHref = getChannelColorHref('buy')
 const common = useCommonStore()
 const { isLoading } = storeToRefs(common)
 const { onGetAuthTokenCookie, onApiAuthHandoffToken, onRestoreAuthToken } =
-  useMemberProjectActions()
+  useMemberAuthProjectActions()
 const buyProject = useBuyProjectStore()
 const { access } = storeToRefs(buyProject)
 const {
@@ -111,7 +111,9 @@ watch(
 
 <template>
   <div class="l-wrap">
-    <CommonHeader @login="onPopupLogin" @logout="onApiAuthLogout" />
+    <CommonHeader>
+      <CommonMLogStatus @login="onPopupLogin" @logout="onApiAuthLogout" />
+    </CommonHeader>
     <main class="l-body relative z-0">
       <slot />
     </main>

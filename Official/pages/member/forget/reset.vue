@@ -3,15 +3,15 @@ import { FORGETRESET } from '@js/_storage.js'
 import { deCrypto } from '@js/.crypto/index.js'
 
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
-const memberForget = useMemberForgetStore()
+const memberForget = useMemberAuthForgetStore()
 const { verify } = storeToRefs(memberForget)
-const { onGetCookie, onApiAuthPasswordResetConfirm, reset } = useMemberForgetActions()
+const { onGetCookie, onApiAuthPasswordResetConfirm, reset } = useMemberAuthForgetActions()
 const { onApiPromise } = usePopupActions()
 const router = useRouter()
 
 definePageMeta({
-  layout: 'member',
-  channel: 'member',
+  layout: 'member-auth',
+  channel: 'memberAuth',
   requiresAuth: false,
   middleware: [
     () => {
@@ -21,7 +21,7 @@ definePageMeta({
       // 沒有 resetToken(未經手機驗證進來、或已過 expireAt 被瀏覽器清掉)→
       // confirm 打不了,退回第一步重跑。
       //
-      // ⚠️ verificationCode 也要檢查:它是離開步驟 1 前才補寫進同一支 cookie 的
+      // verificationCode 也要檢查:它是離開步驟 1 前才補寫進同一支 cookie 的
       // (見 onSaveVerify)。「發完碼就重整」的情況下 cookie 已經有 resetToken 但
       // verificationCode 還是 null —— 那時手打本頁網址進得來,卻只會送出必然失敗的
       // confirm。缺值就退回,不要讓人卡在死路上。
@@ -84,7 +84,7 @@ onInit()
 
 <template>
   <CommonMContainer
-    class="p:--max-w-400 space-y-[30px] tm:pt-[20px] p:pt-[55px]"
+    class="p:--max-w-400 space-y-[30px]"
     :config="{
       as: 'section',
     }"

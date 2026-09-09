@@ -1,5 +1,5 @@
 <script setup>
-const memberRegister = useMemberRegisterStore()
+const memberRegister = useMemberAuthRegisterStore()
 </script>
 
 <template>

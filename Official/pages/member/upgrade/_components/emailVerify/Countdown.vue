@@ -5,7 +5,7 @@ const emits = defineEmits(['click', 'done'])
 
 const project = useProjectStore()
 const { serverTime } = storeToRefs(project)
-const memberUpgrade = useMemberUpgradeStore()
+const memberUpgrade = useMemberAuthUpgradeStore()
 const { emailVerify } = storeToRefs(memberUpgrade)
 const nuxtApp = useNuxtApp()
 

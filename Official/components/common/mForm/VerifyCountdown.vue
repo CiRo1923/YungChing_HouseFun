@@ -85,6 +85,7 @@ const setClass = computed(() => {
   return {
     main: '',
     button: '',
+    buttonText: '',
     ...props.setClass,
   }
 })
@@ -177,7 +178,7 @@ defineExpose({
             { '--bg-green-8b0d': isTimeout },
             '--oval --text-white',
           ],
-          text: 'text-[14px]',
+          text: setClass.buttonText,
         }"
         @click="isTimeout ? onSubmit() : null"
       />
