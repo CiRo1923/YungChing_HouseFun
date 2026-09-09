@@ -1,5 +1,3 @@
-import { defineStore } from 'pinia'
-
 export const useMemberUpgradeStore = defineStore('memberUpgrade', () => {
   const apiDefault = readonly({
     email: {

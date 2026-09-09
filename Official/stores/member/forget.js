@@ -1,5 +1,3 @@
-import { defineStore } from 'pinia'
-
 // 忘記密碼流程(手機驗證 → 重設密碼 → 設定完成)。
 //
 // 欄位跟著 swagger 的兩支 C 端 API 走(.api.json/swagger.json):

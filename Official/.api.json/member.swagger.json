@@ -1,0 +1,2900 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Housefun.Bff.Member.Web",
+    "version": "1.0"
+  },
+  "paths": {
+    "/": {
+      "get": {
+        "tags": [
+          "Housefun.Bff.Member.Web"
+        ],
+        "summary": "檢查 Member Web BFF 是否可回應",
+        "description": "用途：確認 Member Web BFF 服務目前可正常處理基本請求。架構補充：此健康檢查非規格書原始 API；會員中心服務範圍參考 C203-1 規格書第 2 頁。",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StringBoolean<>f__AnonymousType0"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/member/menu": {
+      "get": {
+        "tags": [
+          "Member"
+        ],
+        "summary": "Get member center menu and badge counts",
+        "description": "取得會員中心功能選單、未讀提示與租屋／買屋刊登外部連結。 規格來源：C203-1 規格書第 2、3、4 頁。",
+        "operationId": "Member_Menu",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API version segment (e.g., v1)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Member-Id",
+            "in": "header",
+            "description": "Current member account id; notification endpoints require it to match the verified Member BFF bearer identity and reject slash, backslash, or control characters",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberMenuResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberMenuResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberMenuResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/member/notifications/summary": {
+      "get": {
+        "tags": [
+          "Member"
+        ],
+        "summary": "Get notification tab counts and retention rules",
+        "description": "取得通知總覽五類頁籤、未讀數、30 天可見期限、3 秒自動已讀門檻及可用通道。 規格來源：C203-1 規格書第 4、5、7、9 頁；C203-2 規格書第 2、3、4、9、11、12 頁。",
+        "operationId": "Member_NotificationSummary",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API version segment (e.g., v1)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Member-Id",
+            "in": "header",
+            "description": "Current member account id; notification endpoints require it to match the verified Member BFF bearer identity and reject slash, backslash, or control characters",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationSummaryResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationSummaryResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationSummaryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/member/notifications": {
+      "get": {
+        "tags": [
+          "Member"
+        ],
+        "summary": "List member notifications by category",
+        "description": "依通知類別分頁列出最近 30 天的站內通知卡片、已讀狀態、物件／社區摘要與操作連結。 規格來源：C203-1 規格書第 4、5、6、7、8、9、10 頁；C203-2 規格書第 9、11、12 頁。",
+        "operationId": "Member_NotificationList",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API version segment (e.g., v1)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Member-Id",
+            "in": "header",
+            "description": "Current member account id; notification endpoints require it to match the verified Member BFF bearer identity and reject slash, backslash, or control characters",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "description": "API 參數：category。",
+            "schema": {
+              "$ref": "#/components/schemas/NotificationCategory"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "API 參數：page。",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "API 參數：pageSize。",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationListResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationListResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationListResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Member"
+        ],
+        "summary": "Delete selected notifications",
+        "description": "刪除會員選取的站內通知；前端須先顯示確認提示，刪除後不可復原。 規格來源：C203-1 規格書第 6、8、9、10 頁。",
+        "operationId": "Member_DeleteNotifications",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API version segment (e.g., v1)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Member-Id",
+            "in": "header",
+            "description": "Current member account id; notification endpoints require it to match the verified Member BFF bearer identity and reject slash, backslash, or control characters",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "請依照 schema 傳入此 API 需要的資料。",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotificationBatchDeleteRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotificationBatchDeleteRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotificationBatchDeleteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchOperationResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchOperationResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchOperationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/member/notifications/read": {
+      "post": {
+        "tags": [
+          "Member"
+        ],
+        "summary": "Mark selected notifications as read",
+        "description": "markAllVisible=true 時標記最近三十日全部可見通知，不受 category 限制；false 時 ids 不可為空。 規格來源：C203-1 規格書第 5、6、7 頁；C203-2 規格書第 12 頁。",
+        "operationId": "Member_MarkNotificationsRead",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API version segment (e.g., v1)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Member-Id",
+            "in": "header",
+            "description": "Current member account id; notification endpoints require it to match the verified Member BFF bearer identity and reject slash, backslash, or control characters",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "請依照 schema 傳入此 API 需要的資料。",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchReadRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchReadRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchReadRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchOperationResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchOperationResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchOperationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/member/profile": {
+      "get": {
+        "tags": [
+          "Member"
+        ],
+        "summary": "Get member account profile",
+        "description": "取得會員帳號、姓氏、名字與 E-mail；手機帳號不可由會員中心修改。 規格來源：C203-1 規格書第 11 頁。",
+        "operationId": "Member_Profile",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API version segment (e.g., v1)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Member-Id",
+            "in": "header",
+            "description": "Current member account id; notification endpoints require it to match the verified Member BFF bearer identity and reject slash, backslash, or control characters",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberProfileResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberProfileResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberProfileResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Member"
+        ],
+        "summary": "Update editable member profile fields",
+        "description": "更新會員姓氏、名字與 E-mail，並套用必填及 E-mail 格式驗證；手機帳號維持唯讀。 規格來源：C203-1 規格書第 11 頁。",
+        "operationId": "Member_UpdateProfile",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API version segment (e.g., v1)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Member-Id",
+            "in": "header",
+            "description": "Current member account id; notification endpoints require it to match the verified Member BFF bearer identity and reject slash, backslash, or control characters",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "請依照 schema 傳入此 API 需要的資料。",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMemberProfileRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMemberProfileRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMemberProfileRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberProfileResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberProfileResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberProfileResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/member/password/change": {
+      "post": {
+        "tags": [
+          "Member"
+        ],
+        "summary": "Change member password",
+        "description": "驗證既有密碼、新密碼與再次輸入後更新密碼，完成後要求會員重新登入。 規格來源：C203-1 規格書第 12、13 頁。",
+        "operationId": "Member_ChangePassword",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API version segment (e.g., v1)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Member-Id",
+            "in": "header",
+            "description": "Current member account id; notification endpoints require it to match the verified Member BFF bearer identity and reject slash, backslash, or control characters",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "請依照 schema 傳入此 API 需要的資料。",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PasswordOperationResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PasswordOperationResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PasswordOperationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/member/messages": {
+      "get": {
+        "tags": [
+          "Member"
+        ],
+        "summary": "List member lead messages",
+        "description": "依留言時間新到舊列出會員的物件留言紀錄與物件、經紀人、價格資訊。 規格來源：C203-1 規格書第 14、15 頁。",
+        "operationId": "Member_MessageList",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API version segment (e.g., v1)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Member-Id",
+            "in": "header",
+            "description": "Current member account id; notification endpoints require it to match the verified Member BFF bearer identity and reject slash, backslash, or control characters",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "API 參數：page。",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "API 參數：pageSize。",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageRecordListResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageRecordListResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageRecordListResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Member"
+        ],
+        "summary": "Delete selected member lead messages",
+        "description": "批次刪除會員選取的留言紀錄；留言紀錄原則上持續保留，僅於會員主動刪除時移除。 規格來源：C203-1 規格書第 14、15 頁；留言資料非通知 inbox，另參考 C203-2 規格書第 3 頁。",
+        "operationId": "Member_DeleteMessages",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API version segment (e.g., v1)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Member-Id",
+            "in": "header",
+            "description": "Current member account id; notification endpoints require it to match the verified Member BFF bearer identity and reject slash, backslash, or control characters",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "請依照 schema 傳入此 API 需要的資料。",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchDeleteRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchDeleteRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchDeleteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchOperationResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchOperationResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchOperationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/member/subscriptions/search": {
+      "get": {
+        "tags": [
+          "Member"
+        ],
+        "summary": "List saved search subscriptions",
+        "description": "依建立時間新到舊列出買屋搜尋訂閱條件、標籤與新增配對物件數。 規格來源：C203-1 規格書第 15、16 頁；通知觸發規則另參考 C203-2 規格書第 4、7 頁。",
+        "operationId": "Member_SearchSubscriptionList",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API version segment (e.g., v1)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Member-Id",
+            "in": "header",
+            "description": "Current member account id; notification endpoints require it to match the verified Member BFF bearer identity and reject slash, backslash, or control characters",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "API 參數：page。",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "API 參數：pageSize。",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchSubscriptionListResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchSubscriptionListResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchSubscriptionListResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Member"
+        ],
+        "summary": "Delete selected search subscriptions",
+        "description": "批次刪除會員選取的買屋搜尋訂閱條件，刪除後不可復原。 規格來源：C203-1 規格書第 15、16 頁。",
+        "operationId": "Member_DeleteSearchSubscriptions",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API version segment (e.g., v1)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Member-Id",
+            "in": "header",
+            "description": "Current member account id; notification endpoints require it to match the verified Member BFF bearer identity and reject slash, backslash, or control characters",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "請依照 schema 傳入此 API 需要的資料。",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchDeleteRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchDeleteRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchDeleteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchOperationResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchOperationResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchOperationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/member/subscriptions/realprice": {
+      "get": {
+        "tags": [
+          "Member"
+        ],
+        "summary": "List saved real-price subscriptions",
+        "description": "依建立時間新到舊列出實登搜尋訂閱條件、標籤與最近一筆行情資訊。 規格來源：C203-1 規格書第 16、17 頁；通知觸發規則另參考 C203-2 規格書第 4、7 頁。",
+        "operationId": "Member_RealPriceSubscriptionList",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API version segment (e.g., v1)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Member-Id",
+            "in": "header",
+            "description": "Current member account id; notification endpoints require it to match the verified Member BFF bearer identity and reject slash, backslash, or control characters",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "API 參數：page。",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "API 參數：pageSize。",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/RealPriceSubscriptionListResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RealPriceSubscriptionListResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RealPriceSubscriptionListResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Member"
+        ],
+        "summary": "Delete selected real-price subscriptions",
+        "description": "批次刪除會員選取的實登搜尋訂閱條件，刪除後不可復原。 規格來源：C203-1 規格書第 16、17 頁。",
+        "operationId": "Member_DeleteRealPriceSubscriptions",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API version segment (e.g., v1)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Member-Id",
+            "in": "header",
+            "description": "Current member account id; notification endpoints require it to match the verified Member BFF bearer identity and reject slash, backslash, or control characters",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "請依照 schema 傳入此 API 需要的資料。",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchDeleteRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchDeleteRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchDeleteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchOperationResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchOperationResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchOperationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/member/subscriptions/buy-objects": {
+      "get": {
+        "tags": [
+          "Member"
+        ],
+        "summary": "List favorite houses and price-drop subscriptions",
+        "description": "依訂閱時間新到舊列出買屋物件訂閱、降價資訊、經紀人資料及可用操作。 規格來源：C203-1 規格書第 17、18 頁；降價通知規則另參考 C203-2 規格書第 3、7 頁。",
+        "operationId": "Member_BuyObjectSubscriptionList",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API version segment (e.g., v1)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Member-Id",
+            "in": "header",
+            "description": "Current member account id; notification endpoints require it to match the verified Member BFF bearer identity and reject slash, backslash, or control characters",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "API 參數：page。",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "API 參數：pageSize。",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyObjectSubscriptionListResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyObjectSubscriptionListResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyObjectSubscriptionListResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Member"
+        ],
+        "summary": "Delete selected favorite houses",
+        "description": "批次刪除會員選取的買屋物件訂閱，刪除後不可復原。 規格來源：C203-1 規格書第 17、18 頁。",
+        "operationId": "Member_DeleteBuyObjectSubscriptions",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API version segment (e.g., v1)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Member-Id",
+            "in": "header",
+            "description": "Current member account id; notification endpoints require it to match the verified Member BFF bearer identity and reject slash, backslash, or control characters",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "請依照 schema 傳入此 API 需要的資料。",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchDeleteRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchDeleteRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchDeleteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchOperationResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchOperationResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchOperationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/member/subscriptions/communities": {
+      "get": {
+        "tags": [
+          "Member"
+        ],
+        "summary": "List favorite community subscriptions",
+        "description": "依訂閱時間新到舊列出社區訂閱、待售物件、最新成交單價及可用操作。 規格來源：C203-1 規格書第 18、19 頁；社區通知規則另參考 C203-2 規格書第 4、7 頁。",
+        "operationId": "Member_CommunitySubscriptionList",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API version segment (e.g., v1)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Member-Id",
+            "in": "header",
+            "description": "Current member account id; notification endpoints require it to match the verified Member BFF bearer identity and reject slash, backslash, or control characters",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "API 參數：page。",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "API 參數：pageSize。",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommunitySubscriptionListResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommunitySubscriptionListResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommunitySubscriptionListResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Member"
+        ],
+        "summary": "Delete selected community subscriptions",
+        "description": "批次刪除會員選取的社區訂閱，刪除後不可復原。 規格來源：C203-1 規格書第 18、19 頁。",
+        "operationId": "Member_DeleteCommunitySubscriptions",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API version segment (e.g., v1)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Member-Id",
+            "in": "header",
+            "description": "Current member account id; notification endpoints require it to match the verified Member BFF bearer identity and reject slash, backslash, or control characters",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "請依照 schema 傳入此 API 需要的資料。",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchDeleteRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchDeleteRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchDeleteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchOperationResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchOperationResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchOperationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/member/compare/buy-objects": {
+      "get": {
+        "tags": [
+          "Member"
+        ],
+        "summary": "Get buy-object comparison list",
+        "description": "取得 1 至 4 筆物件比較資料與價格、坪數、屋齡等優勢標籤。 規格來源：C203-1 規格書第 19、20、21 頁。",
+        "operationId": "Member_BuyObjectCompare",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API version segment (e.g., v1)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Member-Id",
+            "in": "header",
+            "description": "Current member account id; notification endpoints require it to match the verified Member BFF bearer identity and reject slash, backslash, or control characters",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyObjectCompareResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyObjectCompareResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyObjectCompareResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/member/compare/buy-objects/items": {
+      "post": {
+        "tags": [
+          "Member"
+        ],
+        "summary": "Add houses into compare list",
+        "description": "將會員選取的物件加入物件比一比清單，清單上限為 4 筆。 規格來源：C203-1 規格書第 17、18、19、20、21 頁。",
+        "operationId": "Member_AddBuyObjectCompareItems",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API version segment (e.g., v1)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Member-Id",
+            "in": "header",
+            "description": "Current member account id; notification endpoints require it to match the verified Member BFF bearer identity and reject slash, backslash, or control characters",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "請依照 schema 傳入此 API 需要的資料。",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchAddCompareRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchAddCompareRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchAddCompareRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchOperationResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchOperationResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchOperationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/member/compare/buy-objects/{houseId}": {
+      "delete": {
+        "tags": [
+          "Member"
+        ],
+        "summary": "Remove a house from compare list",
+        "description": "從物件比一比清單移除指定物件。 規格來源：C203-1 規格書第 19、20、21 頁。",
+        "operationId": "Member_RemoveBuyObjectCompareItem",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API version segment (e.g., v1)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Member-Id",
+            "in": "header",
+            "description": "Current member account id; notification endpoints require it to match the verified Member BFF bearer identity and reject slash, backslash, or control characters",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "houseId",
+            "in": "path",
+            "description": "API 參數：houseId。",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchOperationResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchOperationResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchOperationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/member/compare/communities": {
+      "get": {
+        "tags": [
+          "Member"
+        ],
+        "summary": "Get community comparison list",
+        "description": "取得 1 至 4 筆社區比較資料與單價、坪數、屋齡、車位比例等優勢標籤。 規格來源：C203-1 規格書第 21、22、23 頁。",
+        "operationId": "Member_CommunityCompare",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API version segment (e.g., v1)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Member-Id",
+            "in": "header",
+            "description": "Current member account id; notification endpoints require it to match the verified Member BFF bearer identity and reject slash, backslash, or control characters",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommunityCompareResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommunityCompareResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommunityCompareResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/member/compare/communities/items": {
+      "post": {
+        "tags": [
+          "Member"
+        ],
+        "summary": "Add communities into compare list",
+        "description": "將會員選取的社區加入社區比一比清單，清單上限為 4 筆。 規格來源：C203-1 規格書第 18、19、21、22、23 頁。",
+        "operationId": "Member_AddCommunityCompareItems",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API version segment (e.g., v1)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Member-Id",
+            "in": "header",
+            "description": "Current member account id; notification endpoints require it to match the verified Member BFF bearer identity and reject slash, backslash, or control characters",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "請依照 schema 傳入此 API 需要的資料。",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchAddCompareRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchAddCompareRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchAddCompareRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchOperationResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchOperationResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchOperationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/member/compare/communities/{communityId}": {
+      "delete": {
+        "tags": [
+          "Member"
+        ],
+        "summary": "Remove a community from compare list",
+        "description": "從社區比一比清單移除指定社區。 規格來源：C203-1 規格書第 21、22、23 頁。",
+        "operationId": "Member_RemoveCommunityCompareItem",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API version segment (e.g., v1)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Member-Id",
+            "in": "header",
+            "description": "Current member account id; notification endpoints require it to match the verified Member BFF bearer identity and reject slash, backslash, or control characters",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "communityId",
+            "in": "path",
+            "description": "API 參數：communityId。",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchOperationResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchOperationResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchOperationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/auth/token/exchange": {
+      "post": {
+        "tags": [
+          "MemberAuth"
+        ],
+        "summary": "交換 Member BFF bearer token",
+        "description": "前端將 Member Auth handoff 取得的 AES-GCM 加密 token 傳給 Member BFF。Member BFF 解密後檢查 issuedAt 是否仍在交換時限內，再以 member-web channel 呼叫 Member Auth introspect；成功後簽發 Member BFF 專用 opaque bearer token，並保存對應的 Member Auth sessionId。 架構補充：此 token exchange 為 member-auth／member-bff 邊界 API；會員中心登入情境與帳號資料需求 參考 C203-1 規格書第 2、11、13 頁。",
+        "operationId": "MemberAuth_ExchangeToken",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API version segment (e.g., v1)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "encryptedToken",
+            "in": "query",
+            "description": "Member Auth 回傳的加密 token；解密後包含 longToken 與 issuedAt。",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberBffAuthTokenExchangeResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberBffAuthTokenExchangeResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberBffAuthTokenExchangeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/auth/me": {
+      "get": {
+        "tags": [
+          "MemberAuth"
+        ],
+        "summary": "取得 Member BFF 會員資料",
+        "description": "驗證 Member BFF 本地 opaque bearer token，並向 Member Auth 確認其全域 session 仍有效且身份一致， 成功後回傳會員中心需要的 HFMemberAccount 與 HFMemberProfile 資料。 規格來源：C203-1 規格書第 11 頁；token 與全域 session 驗證為 member-bff 架構補充。",
+        "operationId": "MemberAuth_Me",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API version segment (e.g., v1)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberBffAuthMemberResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberBffAuthMemberResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberBffAuthMemberResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{version}/auth/logout": {
+      "post": {
+        "tags": [
+          "MemberAuth"
+        ],
+        "summary": "登出 Member BFF 會員",
+        "description": "以 Member BFF bearer token 找出對應 Member Auth sessionId，先撤銷 Member Auth 全域 session， 再刪除 Member BFF server-side token session。成功後同一全域 session 派生的頻道 token均不得繼續使用。 架構補充：此登出與 session 撤銷為 member-auth／member-bff 邊界 API；會員中心重新登入情境 參考 C203-1 規格書第 13 頁。",
+        "operationId": "MemberAuth_Logout",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "description": "API version segment (e.g., v1)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberBffAuthLogoutResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberBffAuthLogoutResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberBffAuthLogoutResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ActionLink": {
+        "required": [
+          "key",
+          "target",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "BatchAddCompareRequest": {
+        "required": [
+          "ids"
+        ],
+        "type": "object",
+        "properties": {
+          "ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "BatchDeleteRequest": {
+        "required": [
+          "ids"
+        ],
+        "type": "object",
+        "properties": {
+          "ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "BatchOperationResponse": {
+        "required": [
+          "message"
+        ],
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "affectedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "BatchReadRequest": {
+        "required": [
+          "ids"
+        ],
+        "type": "object",
+        "properties": {
+          "ids": {
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "markAllVisible=false 時至少需要一筆；true 時可為空陣列。"
+          },
+          "markAllVisible": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "BrokerContactCard": {
+        "required": [
+          "mobilePhone",
+          "name",
+          "shopName"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "mobilePhone": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "BrokerProfile": {
+        "type": "object",
+        "properties": {
+          "empNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "shopId": {
+            "type": "string",
+            "nullable": true
+          },
+          "shopName": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "BuyObjectCompareItem": {
+        "required": [
+          "house",
+          "id",
+          "tags"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "house": {
+            "$ref": "#/components/schemas/HouseCard"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CompareTag"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "BuyObjectCompareResponse": {
+        "required": [
+          "items"
+        ],
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BuyObjectCompareItem"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "BuyObjectSubscriptionItem": {
+        "required": [
+          "actions",
+          "broker",
+          "house",
+          "id",
+          "subscribedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "house": {
+            "$ref": "#/components/schemas/HouseCard"
+          },
+          "broker": {
+            "$ref": "#/components/schemas/BrokerContactCard"
+          },
+          "subscribedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "priceDropAmount": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "canCompare": {
+            "type": "boolean"
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ActionLink"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "BuyObjectSubscriptionListResponse": {
+        "required": [
+          "items",
+          "paging"
+        ],
+        "type": "object",
+        "properties": {
+          "compareLimit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "paging": {
+            "$ref": "#/components/schemas/Paging"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BuyObjectSubscriptionItem"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "ChangePasswordRequest": {
+        "required": [
+          "confirmPassword",
+          "currentPassword",
+          "newPassword"
+        ],
+        "type": "object",
+        "properties": {
+          "currentPassword": {
+            "type": "string"
+          },
+          "newPassword": {
+            "type": "string"
+          },
+          "confirmPassword": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CommunityCard": {
+        "required": [
+          "id",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string",
+            "nullable": true
+          },
+          "district": {
+            "type": "string",
+            "nullable": true
+          },
+          "imageUrl": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CommunityCompareItem": {
+        "required": [
+          "id",
+          "stats"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "community": {
+            "$ref": "#/components/schemas/CommunityCard"
+          },
+          "stats": {
+            "$ref": "#/components/schemas/CommunityCompareStats"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CommunityCompareResponse": {
+        "required": [
+          "items"
+        ],
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CommunityCompareItem"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "CommunityCompareStats": {
+        "type": "object",
+        "properties": {
+          "unitPrice": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "buildingPing": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "floorText": {
+            "type": "string",
+            "nullable": true
+          },
+          "householdCount": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "buildingType": {
+            "type": "string",
+            "nullable": true
+          },
+          "buildAge": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "parkingText": {
+            "type": "string",
+            "nullable": true
+          },
+          "builderCompany": {
+            "type": "string",
+            "nullable": true
+          },
+          "constructorCompany": {
+            "type": "string",
+            "nullable": true
+          },
+          "onsaleCount": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CommunitySubscriptionItem": {
+        "required": [
+          "actions",
+          "id",
+          "subscribedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "community": {
+            "$ref": "#/components/schemas/CommunityCard"
+          },
+          "subscribedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "latestListingCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "latestMarketCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "canCompare": {
+            "type": "boolean"
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ActionLink"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "CommunitySubscriptionListResponse": {
+        "required": [
+          "items",
+          "paging"
+        ],
+        "type": "object",
+        "properties": {
+          "compareLimit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "paging": {
+            "$ref": "#/components/schemas/Paging"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CommunitySubscriptionItem"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "CompareTag": {
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "ExternalMenuLink": {
+        "required": [
+          "key",
+          "title",
+          "url"
+        ],
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "HouseCard": {
+        "required": [
+          "address",
+          "id",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "communityName": {
+            "type": "string",
+            "nullable": true
+          },
+          "totalPrice": {
+            "type": "number",
+            "format": "double"
+          },
+          "lastPrice": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "unitPrice": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "buildPing": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "roomText": {
+            "type": "string",
+            "nullable": true
+          },
+          "floorText": {
+            "type": "string",
+            "nullable": true
+          },
+          "imageUrl": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "MemberBffAuthLogoutResponse": {
+        "type": "object",
+        "properties": {
+          "revoked": {
+            "type": "boolean",
+            "description": "是否已撤銷 Member BFF token session。"
+          }
+        },
+        "additionalProperties": false
+      },
+      "MemberBffAuthMemberResponse": {
+        "required": [
+          "displayName",
+          "memberId",
+          "memberType",
+          "registeredAt",
+          "stateCode"
+        ],
+        "type": "object",
+        "properties": {
+          "mid": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "memberId": {
+            "type": "string"
+          },
+          "memberType": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastName": {
+            "type": "string",
+            "nullable": true
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "mobilePhone": {
+            "type": "string",
+            "nullable": true
+          },
+          "stateCode": {
+            "type": "string"
+          },
+          "registeredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false,
+        "description": "會員中心頻道 /auth/me 回傳的會員資料。"
+      },
+      "MemberBffAuthTokenExchangeResponse": {
+        "required": [
+          "accessToken",
+          "expiresAt",
+          "tokenType"
+        ],
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Member BFF 專用 opaque bearer token。"
+          },
+          "tokenType": {
+            "$ref": "#/components/schemas/MemberBffAuthTokenExchangeResponseTokenType"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Member BFF bearer token 交換結果。"
+      },
+      "MemberBffAuthTokenExchangeResponseTokenType": {
+        "enum": [
+          0
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "MemberMenuResponse": {
+        "required": [
+          "externalLinks",
+          "items",
+          "memberId"
+        ],
+        "type": "object",
+        "properties": {
+          "memberId": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MenuItem"
+            }
+          },
+          "externalLinks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExternalMenuLink"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "MemberProfileResponse": {
+        "required": [
+          "displayName",
+          "firstName",
+          "lastName",
+          "memberId",
+          "memberType",
+          "mobilePhone",
+          "stateCode"
+        ],
+        "type": "object",
+        "properties": {
+          "mid": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "memberId": {
+            "type": "string"
+          },
+          "memberType": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "mobilePhone": {
+            "type": "string"
+          },
+          "mobilePhoneEditable": {
+            "type": "boolean"
+          },
+          "stateCode": {
+            "type": "string"
+          },
+          "registeredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "broker": {
+            "$ref": "#/components/schemas/BrokerProfile"
+          }
+        },
+        "additionalProperties": false
+      },
+      "MenuItem": {
+        "required": [
+          "key",
+          "path",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "badgeCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "MessageRecordItem": {
+        "required": [
+          "actions",
+          "broker",
+          "house",
+          "id",
+          "messageSentAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "house": {
+            "$ref": "#/components/schemas/HouseCard"
+          },
+          "community": {
+            "$ref": "#/components/schemas/CommunityCard"
+          },
+          "broker": {
+            "$ref": "#/components/schemas/BrokerContactCard"
+          },
+          "messageSentAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "priceDropAmount": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ActionLink"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "MessageRecordListResponse": {
+        "required": [
+          "items",
+          "paging"
+        ],
+        "type": "object",
+        "properties": {
+          "paging": {
+            "$ref": "#/components/schemas/Paging"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MessageRecordItem"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "NotificationBatchDeleteRequest": {
+        "required": [
+          "ids"
+        ],
+        "type": "object",
+        "properties": {
+          "ids": {
+            "maxItems": 100,
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        },
+        "additionalProperties": false,
+        "description": "通知中心專用批次刪除請求；每筆 ID 均為 Notification UUID。"
+      },
+      "NotificationCategory": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "NotificationChannel": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "NotificationChannelCapability": {
+        "required": [
+          "channel"
+        ],
+        "type": "object",
+        "properties": {
+          "channel": {
+            "$ref": "#/components/schemas/NotificationChannel"
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "NotificationItem": {
+        "required": [
+          "actions",
+          "category",
+          "id",
+          "sentAt",
+          "tags",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "isRead": {
+            "type": "boolean"
+          },
+          "category": {
+            "$ref": "#/components/schemas/NotificationCategory"
+          },
+          "title": {
+            "type": "string"
+          },
+          "subtitle": {
+            "type": "string",
+            "nullable": true
+          },
+          "sentAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "priceDropAmount": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "house": {
+            "$ref": "#/components/schemas/HouseCard"
+          },
+          "community": {
+            "$ref": "#/components/schemas/CommunityCard"
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ActionLink"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "NotificationListResponse": {
+        "required": [
+          "category",
+          "items",
+          "paging"
+        ],
+        "type": "object",
+        "properties": {
+          "category": {
+            "$ref": "#/components/schemas/NotificationCategory"
+          },
+          "paging": {
+            "$ref": "#/components/schemas/Paging"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NotificationItem"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "NotificationSummaryResponse": {
+        "required": [
+          "channels",
+          "tabs"
+        ],
+        "type": "object",
+        "properties": {
+          "unreadCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "keepDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "autoReadSeconds": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tabs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NotificationTab"
+            }
+          },
+          "channels": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NotificationChannelCapability"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "NotificationTab": {
+        "required": [
+          "category",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "category": {
+            "$ref": "#/components/schemas/NotificationCategory"
+          },
+          "title": {
+            "type": "string"
+          },
+          "unreadCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Paging": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "PasswordOperationResponse": {
+        "required": [
+          "message"
+        ],
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "requireRelogin": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RealPriceSubscriptionItem": {
+        "required": [
+          "conditionTags",
+          "id",
+          "regionName"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "regionName": {
+            "type": "string"
+          },
+          "keyword": {
+            "type": "string",
+            "nullable": true
+          },
+          "latestTradeDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "latestUnitPrice": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "conditionTags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "RealPriceSubscriptionListResponse": {
+        "required": [
+          "items",
+          "paging"
+        ],
+        "type": "object",
+        "properties": {
+          "paging": {
+            "$ref": "#/components/schemas/Paging"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RealPriceSubscriptionItem"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "SearchSubscriptionItem": {
+        "required": [
+          "actions",
+          "conditionPath",
+          "conditionTags",
+          "createdAt",
+          "id"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "conditionPath": {
+            "type": "string"
+          },
+          "conditionTags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "matchedHouseCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ActionLink"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "SearchSubscriptionListResponse": {
+        "required": [
+          "items",
+          "paging"
+        ],
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "paging": {
+            "$ref": "#/components/schemas/Paging"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SearchSubscriptionItem"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "StringBoolean<>f__AnonymousType0": {
+        "type": "object",
+        "properties": {
+          "bff": {
+            "type": "string",
+            "nullable": true
+          },
+          "ok": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateMemberProfileRequest": {
+        "required": [
+          "firstName",
+          "lastName"
+        ],
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Housefun.Bff.Member.Web"
+    },
+    {
+      "name": "Member"
+    },
+    {
+      "name": "MemberAuth"
+    }
+  ]
+}

@@ -1,5 +1,3 @@
-import { defineStore } from 'pinia'
-
 export const useBuyPopupStore = defineStore('buyPopup', () => {
   const buttons = readonly({
     alert: [

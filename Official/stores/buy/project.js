@@ -1,5 +1,3 @@
-import { defineStore } from 'pinia'
-
 export const useBuyProjectStore = defineStore('buyProject', () => {
   const runtimeConfig = useRuntimeConfig()
   const isDevMode = runtimeConfig.public.NUXT_PUBLIC_APP_MODE === 'dev'

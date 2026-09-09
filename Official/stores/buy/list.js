@@ -1,5 +1,3 @@
-import { defineStore } from 'pinia'
-
 export const useBuyListStore = defineStore('buyList', () => {
   const basicRouteName = 'buy-list-filters'
   const focus = ref(null)
