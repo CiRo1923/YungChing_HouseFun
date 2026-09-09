@@ -19,8 +19,9 @@ import { spawn } from 'node:child_process'
 // .acceptance 是驗收測試報告(含規格比對與缺陷清單),屬對內資料,不隨原始碼出去。
 // .api.json 是後端的 swagger 規格,只給開發時查 API 用 —— 同樣屬對內資料,
 // 而且它在專案根目錄、不經任何建置,漏掉就會原樣被同步與打包出去。
+// .specifications 是客戶的規格書(.docx),同理:對內資料,不隨原始碼出去。
 // ⚠️ docs/ 不在這裡 —— 元件的文件與範例頁對協作方有用,照樣送出去。
-const TOOLING_NAMES = ['.claude', '.agents', '.acceptance', '.api.json']
+const TOOLING_NAMES = ['.claude', '.agents', '.acceptance', '.api.json', '.specifications']
 
 /* 只排除同步、壓縮檔仍要收的項目 —— 那份是自己的備份,要能還原成完整可跑的專案。
 
