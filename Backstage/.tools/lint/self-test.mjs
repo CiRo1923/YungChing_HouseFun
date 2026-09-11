@@ -61,6 +61,7 @@ import {
   onWrapMountedCalls,
 } from './lint-core.mjs'
 import { aliasListOf, importGroupOf, tailwindThemeOf } from './rules-code.mjs'
+import { IS_SOURCE_PROJECT, unusedConfigNames } from './rules-global.mjs'
 import {
   ACTIONS_DIR_NAME,
   API_DIR,
@@ -74,6 +75,7 @@ import {
   PROJECT_NAMES,
   PROJECT_NAME_SCOPE,
   SHARED_API_FILE,
+  SOURCE_PROJECT_NAME,
   SRC_DIR,
   STANDALONE_STORES,
   STORE_DIR,
@@ -2325,6 +2327,63 @@ const onCheckViewDepth = () => {
   )
 }
 
+/**
+ * 專案設定檔只改值、不新增項目 —— 那條規則的判準驗證。
+ *
+ * 這條只對設定檔那一個路徑生效,所以不能像別條那樣造一支探測檔
+ * (造出來就是覆寫真正的設定)。改成直接餵判準函式一段假的設定內容,
+ * 三種形狀各驗一次:有人讀的、沒人讀的、只有設定檔自己用的中介值。
+ *
+ * 最後再對真正的設定檔跑一次,確認這個專案目前沒有多出來的項目。
+ */
+const onCheckConfigItem = () => {
+  const text = [
+    'export const USED_BY_RULE = 1',
+    'export const NOBODY_READS = 2',
+    'export const MIDDLE_VALUE = 3',
+    'export const BUILT_FROM_MIDDLE = MIDDLE_VALUE + 1',
+  ].join('\n')
+
+  /* MIDDLE_VALUE 沒有被規則讀,只有設定檔自己用它組出 BUILT_FROM_MIDDLE ——
+     那種中介值不該被抓,所以 sources 裡只有另外兩項。 */
+  const sourceText = ['const x = USED_BY_RULE', 'const y = BUILT_FROM_MIDDLE']
+  const found = unusedConfigNames(text, sourceText).map((i) => i.name)
+  const expect = ['NOBODY_READS']
+
+  report(
+    found.length === expect.length && expect.every((n, i) => found[i] === n),
+    'configItem 只抓沒有任何人讀的項目',
+    found.length === expect.length && expect.every((n, i) => found[i] === n)
+      ? []
+      : [`預期 ${JSON.stringify(expect)},實際 ${JSON.stringify(found)}`]
+  )
+
+  const configText = fs.readFileSync(path.join(root, '.tools/lint/project-config.mjs'), 'utf8')
+  const sources = fs
+    .readdirSync(path.join(root, '.tools/lint'))
+    .filter((name) => name.endsWith('.mjs') && name !== 'project-config.mjs')
+    .map((name) => fs.readFileSync(path.join(root, '.tools/lint', name), 'utf8'))
+
+  const extras = unusedConfigNames(configText, sources).map((i) => i.name)
+
+  report(!extras.length, '本專案的設定檔沒有多出沒人讀的項目', extras.length ? [extras.join('、')] : [])
+
+  /* 來源的判定 —— 設定裡的來源名稱與這個專案自己的名稱對得上就是來源。
+     兩邊都從設定取,不寫死任何一個名字:寫死的話,換一個專案這則不是永遠通過
+     就是永遠失敗,而它要驗的「兩者比對得起來」根本沒被驗到。 */
+  const nameMatches = PROJECT_NAMES.some((name) =>
+    new RegExp(name.trim().split(/\s+/).join('[\\s_-]?'), 'i').test(SOURCE_PROJECT_NAME)
+  )
+
+  report(
+    IS_SOURCE_PROJECT === nameMatches,
+    '來源的判定與「專案名稱對不對得上」一致',
+    IS_SOURCE_PROJECT === nameMatches
+      ? []
+      : [`名稱比對是 ${nameMatches},規則判定是 ${IS_SOURCE_PROJECT}`]
+  )
+}
+
 const MAJORITY_CASES = [
   { name: '命名大宗:全部帶色相時是 name', style: { hued: 10, semantic: 0 }, majority: 'name' },
   { name: '命名大宗:全部語意名時是 value', style: { hued: 0, semantic: 10 }, majority: 'value' },
@@ -2926,6 +2985,7 @@ try {
   }
 
   onCheckViewDepth()
+  onCheckConfigItem()
 
   for (const c of MAJORITY_CASES) {
     const actual = majorityHueSource(c.style)
