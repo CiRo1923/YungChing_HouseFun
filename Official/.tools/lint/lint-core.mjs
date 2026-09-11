@@ -11,17 +11,24 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import {
+  COLOR_NAME_SEPARATOR,
+  HUE_LIST_TEXT,
   SHARED_COLOR_CSS_PATH,
+  baseNameOf,
+  bodyOf,
   buildColorCss,
   expectedSuffix,
   findSharedColors,
-  hexOfValue,
+  hexOf,
   hueOf,
   isColorCssPath,
-  isDerivedColorVar,
+  isRgbVar,
+  isSorted,
+  isSuffixNamingChecked,
+  namingStyleOf,
   parseColorCss,
   sortDecls,
-  suffixOf,
+  varIndexOf,
 } from './color-order.mjs'
 /* 其他類別的規範各自成一支,判斷不寫在這裡 —— 這一支只放 CSS 規範與引擎。
   換一個專案時要改的只有 project-config.mjs,這五支一行都不用動。 */
@@ -35,7 +42,7 @@ import { STORE_CHECKS, STORE_RULE_HINT, STORE_RULE_TITLE } from './rules-store.m
   判斷與修正寫在各自的規則模組裡,這裡只轉出去,不要在這一支再實作一份。 */
 export { onSortComposables } from './rules-code.mjs'
 export { onWrapMountedCalls } from './rules-page.mjs'
-import { SCAN_TARGETS, listFiles } from './shared.mjs'
+import { SCAN_TARGETS, issueOf, listFiles } from './shared.mjs'
 
 /* 五組外部規範,依序跑。它們收的是 ctx 物件(見 lintFile 結尾的說明),
   與這一支的 CSS 規則簽名不同,所以分開收集、在 lintFile 裡各自呼叫。 */
@@ -473,7 +480,15 @@ function maskLineComments(text) {
 
 // --- 規則 1:顏色 -----------------------------------------------------------
 
-export function checkColors(relPath, rawText, definedVars) {
+export function checkColors(relPath, rawText, definedColors) {
+  /* 色票清單以「色值」為鍵(同一個色可能有多個變數名),這條規則問的是
+     「這個變數名有沒有被定義過」,所以先轉成以名字為鍵的索引。
+
+     轉換走 color-order 的 varIndexOf,不自己再讀一次色票檔 ——
+     「哪些檔案算色票檔」那個判斷只能有一份,各自讀檔的話,
+     改了其中一處,兩邊看到的色票就不一樣了。 */
+  const definedVars = varIndexOf(definedColors ?? new Map())
+
   // 註解裡的色碼是設計說明不是樣式,先遮掉再檢查
   const text = maskComments(rawText)
   const issues = []
@@ -1433,24 +1448,40 @@ export const EMPTY_RULE_RE = /^([ \t]*)([^{}\n][^{}\n]*?)\s*\{\s*\}/gm
  * 移除檔案裡所有空的規則區塊(連同後面的空行),回傳新內容。
  * 沒有可移除的就回傳 null —— 呼叫端據此判斷要不要寫檔。
  */
-export function onRemoveEmptyRules(text, { isVue = false } = {}) {
-  const nl = text.includes('\r\n') ? '\r\n' : '\n'
+const EMPTY_BLOCK = /^[ \t]*[^\s{}/][^{}]*\{[ \t\r\n]*\}[ \t]*(?=\r?\n|$)\r?\n?/gm
 
-  // .vue:只處理空的 <style> 區塊(裡面的 CSS 規則由 module 那邊管)
-  if (isVue) {
-    const next = text
-      .replace(/(\r?\n)*[ \t]*<style[^>]*>\s*<\/style>[ \t]*(\r?\n)*/g, nl)
-      .replace(/(\r?\n){3,}/g, nl + nl)
-      .replace(/(\r?\n)+$/, nl)
+const stripEmptyBlocks = (css) => {
+  let out = css
+  let prev
 
-    return next === text ? null : next
+  do {
+    prev = out
+    out = out.replace(EMPTY_BLOCK, '')
+  } while (out !== prev) // 巢狀空區塊要反覆清到收斂
+
+  return out
+}
+
+export const onRemoveEmptyRules = (text, { rel = '' } = {}) => {
+  const isVue = /\.vue$/i.test(rel)
+
+  // 不是 CSS 也不是 .vue 就完全不碰(見上面第 3 道防線)
+  if (!isVue && !/\.css$/i.test(rel)) return null
+
+  if (!isVue) {
+    const out = stripEmptyBlocks(text)
+    return out === text ? null : out
   }
 
-  const next = text
-    .replace(/^[ \t]*[^{}\n][^{}\n]*?\s*\{\s*\}[ \t]*(\r?\n)+/gm, '')
-    .replace(/(\r?\n){3,}/g, nl + nl)
+  // .vue:逐個 <style> 區塊處理,標籤與其他區塊原封不動
+  let out = text.replace(
+    /(<style\b[^>]*>)([\s\S]*?)(<\/style>)/gi,
+    (_m, open, css, close) => `${open}${stripEmptyBlocks(css)}${close}`
+  )
 
-  return next === text ? null : next
+  out = out.replace(/<style[^>]*>\s*<\/style>\r?\n?/gi, '')
+
+  return out === text ? null : out
 }
 
 /**
@@ -1899,67 +1930,163 @@ export function checkColorFile(projectRoot, rel) {
   const abs = path.join(projectRoot, rel)
   if (!fs.existsSync(abs)) return []
 
+  const text = fs.readFileSync(abs, 'utf8')
+
+  const parsed = parseColorCss(text)
+  if (!parsed) return [issueOf(rel, 1, 'colorFile', '解析不出 :root 區塊,排序與命名檢查已跳過')]
+
   const issues = []
-  const add = (detail, snippet) =>
-    issues.push({ rule: 'colorFile', file: rel, line: 1, detail, snippet })
 
-  const original = fs.readFileSync(abs, 'utf8')
-  const parsed = parseColorCss(original)
+  /*
+   * 同一份色票只能用一種命名方式,不能混。
+   *
+   * 兩種方式的分類來源不同:帶色相的名字是人做過的判斷(`#c09648` 寫 gold 就歸金),
+   * 語意名只能從色值算(色相環上那是橘)。混在一起的話,同一份檔案裡有一半的色
+   * 依人的判斷分類、另一半依色值分類,排出來的順序沒有一致的依據 ——
+   * 讀的人看到金和橘夾雜,不知道該照哪一種去放新的顏色。
+   *
+   * 這一條要自己報:專案設定成 value 時,帶色相的那一批完全不會被其他檢查碰到,
+   * 混用就成了看不見的狀態。
+   */
+  const { hued, semantic } = namingStyleOf(parsed.decls)
 
-  if (!parsed) {
-    add(`${rel} 結構無法解析(需要單層 :root { … })`, ':root')
-    return issues
+  if (hued > 0 && semantic > 0) {
+    const majority = hued >= semantic ? '帶色相的名字' : '語意名'
+    issues.push(
+      issueOf(
+        rel,
+        1,
+        'colorFile',
+        `這份色票混了兩種命名方式(帶色相的名字 ${hued} 個、語意名 ${semantic} 個)——一份色票只能用一種,大宗是${majority},另一批要跟著改`
+      )
+    )
   }
 
   for (const d of parsed.decls) {
-    const hue = hueOf(d.name)
-    if (!hue) {
-      add(`${d.name} 的色系前綴不在允許清單內(紅澄黃綠藍紫金白灰黑)`, d.name)
+    /*
+     * 色相從色值算的專案不檢查命名 —— 那些專案的變數叫 --title-color 這類語意名,
+     * 名字本來就不帶色相。拿「色相 + 取碼」的規則去對,會是每一個變數各報一次,
+     * 而那一百多筆訊息說的是同一件事:這條規則不適用於這個專案。
+     *
+     * 排序仍然照跑(色相從色值算得出來),所以「彩虹順序、每類由淺到深」不受影響。
+     */
+    if (!isSuffixNamingChecked) continue
+
+    const hue = hueOf(d.name, d.value)
+
+    if (hue === null) {
+      issues.push(
+        issueOf(
+          rel,
+          d.line,
+          'colorFile',
+          `${d.name} 認不出色相前綴 —— 命名為「色相 + 取碼」,色相限 ${HUE_LIST_TEXT}`
+        )
+      )
       continue
     }
-    if (isDerivedColorVar(d.name)) continue
 
-    const hex = hexOfValue(d.value)
-    if (!hex) continue
+    // --white / --black 是語意名,沒有取碼後綴
+    const body = bodyOf(d.name)
+    if (body === hue) continue
 
-    const expect = expectedSuffix(hex)
-    if (expect === null) continue
-    if (suffixOf(d.name) !== expect) {
-      const should = expect === '' ? `--${hue}` : `--${hue}-${expect}`
-      add(`${d.name}: ${hex} 依命名規則應為 ${should}`, d.name)
+    /* 純黑與純白帶透明度時,只接 alpha 兩碼(#0000001a → --black-1a)。
+
+       其他顏色的名字是「取碼 + 分隔符 + alpha」,要那個分隔符才分得出
+       哪幾碼是色碼、哪幾碼是透明度。純黑白本來就沒有取碼,不會混淆,
+       所以那一段連同分隔符一起省略 —— 算出來的建議值會多一段 00,
+       在這裡先放行。 */
+    const alphaOnly = /^(?:0{6}|f{6})([0-9a-f]{2})$/i.exec(hexOf(d.value) ?? '')
+    if (alphaOnly && body === `${hue}${COLOR_NAME_SEPARATOR}${alphaOnly[1].toLowerCase()}`) continue
+
+    const suffix = body.slice(hue.length + COLOR_NAME_SEPARATOR.length)
+    const expected = expectedSuffix(d.value)
+    if (!expected || suffix === expected) continue
+
+    const shown = hexOf(d.value) ? `#${hexOf(d.value)}` : d.value
+
+    /*
+     * 取碼不一致分兩種,嚴重程度差很多:
+     *
+     * 長度相同 —— 多半是為了避開同色系撞碼而微調取碼位置,規範允許,
+     *   所以只給建議值,不斷定是錯的。
+     * 長度不同 —— 形狀跟命名規則對不上(例如規則算出四碼,實際是語意名或
+     *   多了分隔符)。這種不是微調,要講出來。
+     *
+     * 兩種分開判斷是必要的:合成一條「長度相同才報」的話,整個形狀對不上的專案
+     * 會一筆都不報,看起來像是全部通過 —— 專案的色票命名慣例與設定不同時,
+     * 正確的做法是調整 COLOR_SUFFIX_PICK,而不是讓檢查安靜地失效。
+     */
+    if (suffix.length === expected.length) {
+      issues.push(
+        issueOf(
+          rel,
+          d.line,
+          'colorFile',
+          `${d.name} 的取碼建議為 --${hue}${COLOR_NAME_SEPARATOR}${expected}(${shown});若為避開同色系撞碼而微調則可忽略`
+        )
+      )
+      continue
     }
+
+    issues.push(
+      issueOf(
+        rel,
+        d.line,
+        'colorFile',
+        `${d.name} 的取碼形狀與命名規則對不上(${shown} 應為 --${hue}${COLOR_NAME_SEPARATOR}${expected});專案的取碼慣例不同時改 project-config.mjs 的 COLOR_SUFFIX_PICK`
+      )
+    )
   }
 
-  // `--white-rgb: hexToRgb(#fff)` 這類衍生變數:要有本體、色值要一致、還要真的有人在用
+  /* 衍生變數(`--white-rgb: hexToRgb(#fff)`)跟著本體走,要多確認三件事。
+
+     這類變數在本專案已經淘汰(新的透明色一律用 8 碼 hex),但既有的還在,
+     而它們壞掉的方式都不會報錯:本體被刪了就讀不到值、色值抄錯了畫面上看不出來、
+     沒有使用端就是佔著位置的死變數。 */
   const byName = new Map(parsed.decls.map((d) => [d.name, d]))
 
-  for (const d of parsed.decls.filter((x) => isDerivedColorVar(x.name))) {
-    const baseName = d.name.replace(/-rgb$/, '')
+  for (const d of parsed.decls.filter((x) => isRgbVar(x.name))) {
+    const baseName = baseNameOf(d.name)
     const base = byName.get(baseName)
 
     if (!base) {
-      add(`${d.name} 找不到本體 ${baseName} —— 衍生變數要跟著本體走,先建本體或刪掉這個`, d.name)
+      issues.push(
+        issueOf(
+          rel,
+          d.line,
+          'colorFile',
+          `${d.name} 找不到本體 ${baseName} —— 衍生變數要跟著本體走,先建本體或刪掉這個`
+        )
+      )
     } else {
-      const a = hexOfValue(d.value)
-      const b = hexOfValue(base.value)
+      const a = hexOf(d.value)
+      const b = hexOf(base.value)
+
       if (a && b && a.toLowerCase() !== b.toLowerCase()) {
-        add(`${d.name}(${a})與本體 ${baseName}(${b})色值不一致`, d.name)
+        issues.push(
+          issueOf(rel, d.line, 'colorFile', `${d.name}(${a})與本體 ${baseName}(${b})色值不一致`)
+        )
       }
     }
 
     if (!countUsages(projectRoot, d.name)) {
-      add(
-        `${d.name} 沒有任何使用端 —— 是死變數,建議刪掉` +
-          '(新的透明色請直接用 8 碼 hex,不要走 hexToRgb)',
-        d.name
+      issues.push(
+        issueOf(
+          rel,
+          d.line,
+          'colorFile',
+          `${d.name} 沒有任何使用端 —— 是死變數,建議刪掉` +
+            '(新的透明色請直接用 8 碼 hex,不要走 hexToRgb)'
+        )
       )
     }
   }
 
-  const eol = original.includes('\r\n') ? '\r\n' : '\n'
-  const sortedText = buildColorCss(parsed, sortDecls(parsed.decls)).split('\n').join(eol)
-  if (sortedText.trimEnd() !== original.split(/\r?\n/).join(eol).trimEnd()) {
-    add('排序不符規則(紅澄黃綠藍紫金白灰黑 + 由淺至深)—— 執行 npm run sort:color 自動修正', rel)
+  if (!isSorted(text)) {
+    issues.push(
+      issueOf(rel, 1, 'colorFile', '排序不符規則(彩虹 + 每類由淺到深)—— 存檔或 npm run sort:color 會自動修正')
+    )
   }
 
   return issues
@@ -2077,4 +2204,4 @@ export function lintFile(projectRoot, absPath, definedVars) {
   return issues.sort((a, b) => (a.line ?? 0) - (b.line ?? 0))
 }
 
-export { isDerivedColorVar }
+export { isRgbVar }

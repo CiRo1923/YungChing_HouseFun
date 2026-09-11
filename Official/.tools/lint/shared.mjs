@@ -63,7 +63,7 @@ export {
  *   detail  人看得懂的一句話,要寫清楚「怎麼改」
  *   level   'error' 一律要改 | 'warn' 建議,不擋
  *
- * ⚠️ level 預設 error —— 規則沒指定就是要擋的。要放行的那條自己用 warnOf,
+ * level 預設 error —— 規則沒指定就是要擋的。要放行的那條自己用 warnOf,
  *    這樣「忘了標」的結果是嚴格而不是靜默放過。
  */
 export const issueOf = (rel, line, rule, detail, level = 'error') => ({
@@ -193,8 +193,8 @@ export const PENDING_CACHE_FILE = 'node_modules/.cache/cssGuard/pending.json'
   而修它沒有意義(下次建置就覆蓋掉了)。漏掉一個名字的代價不是報錯,
   是掃描數字與違規筆數都被灌水,讓人看不出原始碼到底有幾筆。
 
-  ⚠️ 這份名單跟著**建置工具**走,不同框架的產物目錄名不一樣
-  (`dist` / `build` / `.output` / `.nuxt` 都有專案在用)。
+  注意:這份名單跟著建置工具走,不同框架的產物目錄名不一樣
+  (dist / build / .output / .nuxt 都有專案在用)。
   移植到別的專案時要確認那邊的產物目錄有沒有在名單裡。 */
 const SKIP_DIR = /(^|\/)(node_modules|\.git|dist|build|public|\.output|\.nuxt)(\/|$)/
 
@@ -226,6 +226,10 @@ export const isProjectDocs = (rel) => rel === PROJECT_DOCS_DIR || rel.startsWith
  */
 const frontMatterOf = (text) => {
   const m = /^---\r?\n([\s\S]*?)\r?\n---/.exec(text)
+  if (!m) return {}
+
+  const fields = {}
+
   for (const line of m[1].split(/\r?\n/)) {
     const kv = /^(\w[\w-]*)\s*:\s*(.*)$/.exec(line)
     if (kv) fields[kv[1]] = kv[2].trim().replace(/^['"]|['"]$/g, '')
@@ -280,6 +284,8 @@ export const listConventionSkills = (root) => {
     .filter((e) => e.isDirectory())
     .map((e) => {
       const file = path.join(dir, e.name, 'SKILL.md')
+      const fields = fs.existsSync(file) ? frontMatterOf(fs.readFileSync(file, 'utf8')) : {}
+
       return { name: e.name, summary: fields.summary || '' }
     })
     .filter((s) => fs.existsSync(path.join(dir, s.name, 'SKILL.md')))

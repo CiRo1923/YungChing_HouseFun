@@ -29,7 +29,7 @@ const ACTIONS_DIR = `${STORE_DIR}/${ACTIONS_DIR_NAME}`
  * 基礎建設(彈窗、登入、靜態資料這類)不一樣,寫在規則裡的話,
  * 換一個專案就會把它自己的基礎建設全部報成違規。
  *
- * ⚠️ 加進那份清單之前先想清楚「它為什麼不屬於任何一個頁面」——
+ * 加進那份清單之前先想清楚「它為什麼不屬於任何一個頁面」——
  *    想不出理由就是該歸到某個頁面底下,不要放進去。
  */
 const ALLOWED_STANDALONE = new Set(STANDALONE_STORES)
@@ -275,7 +275,7 @@ const checkActionsNaming = ({ rel }) => {
 // 要求它們也有一層,補出來的會是沒有人讀的空層 —— 那正是
 // 「沒有頁面要用就不要加狀態」在擋的事情。判斷方式是頁面裡有沒有呼叫 action。
 //
-// ⚠️ **這條是提醒,不是結論。** 規則看得到「這一頁打了 api、store 沒有同名的層」,
+// **這條是提醒,不是結論。** 規則看得到「這一頁打了 api、store 沒有同名的層」,
 //    看不出那份資料實際上該放哪裡 —— 兩頁共用同一份資料、或那一頁的資料
 //    本來就屬於別的層,都是合理的。收到提醒之後由人判斷,
 //    確定不需要那一層就用註解豁免,並寫下理由。
@@ -699,9 +699,9 @@ const checkResetDefault = ({ rel, text }) => {
 // pinia 的 store 實例是 reactive 物件,值一旦「取出來」就跟 store 斷了連結:
 //
 //   const member = useMemberStore()
-//   const { info } = member          ← ❌ 解構,拿到的是當下的值
-//   const info = member.info         ← ❌ 賦值,同樣是當下的值
-//   const { info } = storeToRefs(member)   ← ✅ 拿到 ref,跟著 store 變
+//   const { info } = member          ← 錯誤：解構,拿到的是當下的值
+//   const info = member.info         ← 錯誤：賦值,同樣是當下的值
+//   const { info } = storeToRefs(member)   ← 正確：拿到 ref,跟著 store 變
 //
 // 斷掉之後畫面不會報錯,只是**不再更新** —— api 回來了、別的頁面改了值,
 // 這裡還是舊的。而且通常要等到「為什麼這裡沒跟著變」才被發現,

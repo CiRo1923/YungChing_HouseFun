@@ -51,7 +51,15 @@ import { PENDING_FILE, PROJECT_ROOT as projectRoot } from './paths.mjs'
  */
 const timeOf = () => new Date().toTimeString().slice(0, 8)
 
-const target = process.argv.slice(2).find((a) => !a.startsWith('--'))
+const args = process.argv.slice(2)
+const target = args.find((a) => !a.startsWith('--'))
+
+/* --write:只做自動修正,不排宣告順序也不報違規。commit 那一層用這個。
+
+   宣告順序與並行載入的包裝會改動程式碼的結構,在 commit 當下做的話,
+   人會提交到自己沒看過的內容 —— 那比順序不對嚴重。
+   排序與清空區塊則是純格式,沒有判斷空間,commit 時修掉是安全的。 */
+const writeOnly = args.includes('--write')
 if (!target) process.exit(0)
 
 const abs = path.resolve(projectRoot, target)
@@ -92,7 +100,7 @@ const onCleanEmptyRules = () => {
   const isVue = rel.endsWith('.vue')
 
   const original = fs.readFileSync(abs, 'utf8')
-  const cleaned = onRemoveEmptyRules(original, { isVue })
+  const cleaned = onRemoveEmptyRules(original, { rel })
   if (!cleaned) return
 
   fs.writeFileSync(abs, cleaned, 'utf8')
@@ -201,9 +209,12 @@ const onLint = () => {
 try {
   if (isColorCssPath(rel)) onSortColorCss()
   onCleanEmptyRules()
-  onSortDeclarations()
-  onWrapMounted()
-  onLint()
+
+  if (!writeOnly) {
+    onSortDeclarations()
+    onWrapMounted()
+    onLint()
+  }
 } catch (err) {
   console.error(`[css-guard] 檢查失敗:${err.message}`)
   process.exit(0) // 工具自己壞掉不要吵

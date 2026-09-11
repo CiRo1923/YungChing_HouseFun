@@ -15,16 +15,15 @@ import path from 'node:path'
 import {
   SHARED_COLOR_CSS_PATH,
   buildColorCss,
-  expectedSuffix,
-  hexOfValue,
-  hueOf,
-  isDerivedColorVar,
-  listColorCssFiles,
   findSharedColors,
+  listColorCssFiles,
   parseColorCss,
   sortDecls,
-  suffixOf,
 } from './color-order.mjs'
+
+/* 命名是否符合規則,由引擎那一份判斷 —— 這支只負責排序與輸出。
+   排序工具自己再寫一份判斷的話,兩邊遲早會對不上,而且不會有人發現。 */
+import { checkColorFile } from './lint-core.mjs'
 
 import { CYAN, DIM, GREEN, RED, RESET, YELLOW } from './colors.mjs'
 
@@ -68,28 +67,15 @@ for (const { rel, abs } of targets) {
 
   const decls = parsed.decls
 
-  // 命名檢查
-  const namingIssues = []
-  for (const d of decls) {
-    const hue = hueOf(d.name)
-    if (!hue) {
-      namingIssues.push(`${d.name} 的色系前綴不在允許清單內(紅澄黃綠藍紫金白灰黑)`)
-      continue
-    }
-    // --white-rgb 這類衍生變數跟著本體命名,不套色碼縮寫規則
-    if (isDerivedColorVar(d.name)) continue
+  /* 命名檢查走引擎的那一份,這裡不再實作一次。
 
-    const hex = hexOfValue(d.value)
-    if (!hex) continue // 計算值交由人工判斷
+     兩邊各判斷一次的話,改了一邊另一邊還在用舊規則 —— 而那不會報錯,
+     只會變成「排序工具說不符、檢查工具說通過」,看的人不知道該信哪一個。
 
-    const expect = expectedSuffix(hex)
-    const actual = suffixOf(d.name)
-    if (expect === null) continue
-    if (actual !== expect) {
-      const should = expect === '' ? `--${hue}` : `--${hue}-${expect}`
-      namingIssues.push(`${d.name}: ${hex} 依命名規則應為 ${should}`)
-    }
-  }
+     排序不符那一筆在這裡濾掉:它下面幾行就會自動修好,再報一次是多餘的。 */
+  const namingIssues = checkColorFile(projectRoot, rel)
+    .filter((i) => !i.detail.startsWith('排序不符'))
+    .map((i) => i.detail)
 
   // 排序
   const sortedText = buildColorCss(parsed, sortDecls(decls)).split('\n').join(eol)
@@ -100,7 +86,10 @@ for (const { rel, abs } of targets) {
     console.error(`${RED}⛔ ${rel} 命名不符規則(${namingIssues.length} 筆,不自動修正)${RESET}`)
     for (const msg of namingIssues) console.error(`   ${RED}✗${RESET} ${msg}`)
     console.error(
-      `${DIM}   命名規則:6 碼取第 1、3、5 + 第 6 碼;純灰取前 2 碼;純黑白不加色碼;帶 alpha 再接 alpha 兩碼。${RESET}`
+      /* 取碼規則不在這裡重寫一份 —— 它定義在 project-config.mjs 的 COLOR_SUFFIX_PICK,
+         抄過來就會有改了設定忘了改這句話的一天,而那時訊息說的是錯的。
+         每一筆違規的訊息本身已經寫出建議的名字了。 */
+      `${DIM}   命名規則見 .claude/skills/color-naming/SKILL.md;取碼設定在 .tools/lint/project-config.mjs。${RESET}`
     )
     exitCode = 1
   }

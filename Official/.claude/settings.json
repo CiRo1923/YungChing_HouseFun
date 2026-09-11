@@ -46,8 +46,8 @@
             "type": "command",
             "command": "node .claude/hooks/move-permissions-to-local.js 2>/dev/null || true",
             "timeout": 30,
-            "async": true,
-            "statusMessage": "把 permissions 搬回 settings.local.json…"
+            "statusMessage": "把 permissions 搬回 settings.local.json…",
+            "async": true
           }
         ]
       }

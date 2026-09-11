@@ -36,12 +36,12 @@ description: 本專案的 import 路徑規範。當需要在原始碼新增或�
 ## 範例
 
 ```js
-// ❌ 不要
+// 不要
 import Foo from '../../components/Foo.vue'
 import { useUser } from '../../stores/user'
 import util from '../../scripts/util'
 
-// ✅ 改成
+// 改成
 import Foo from '@components/Foo.vue'
 import { useUser } from '@stores/user'
 import util from '@js/util'
@@ -50,7 +50,7 @@ import util from '@js/util'
 同層維持相對即可:
 
 ```js
-// ✅ OK(同資料夾)
+// 正確：OK(同資料夾)
 import Child from './Child.vue'
 ```
 

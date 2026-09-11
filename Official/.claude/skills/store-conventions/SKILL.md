@@ -25,7 +25,7 @@ description: 本專案的 store 與 actions 撰寫規範(store 目錄的 *.js �
 規則 `storeDeclare`(擋)。
 
 ```js
-// ✅ <store 目錄>/<頁面資料夾名>.js —— 只有宣告
+// 正確：<store 目錄>/<頁面資料夾名>.js —— 只有宣告
 export const useExchangeStore = defineStore('exchange', () => {
   const index = ref({ data: null })
   const detail = ref({
@@ -77,12 +77,12 @@ export const useExchangeStore = defineStore('exchange', () => {
 舉例:某個頁面群底下有一個分類資料夾,裡面放著三支各自獨立的頁面。
 
 ```js
-// ✅ 三支頁面各自一層,分類資料夾不出現在 store 裡
+// 正確：三支頁面各自一層,分類資料夾不出現在 store 裡
 const 頁面A = ref({ … })
 const 頁面B = ref({ … })
 const 頁面C = ref({ … })
 
-// ❌ 為了對應資料夾名多包一層
+// 錯誤：為了對應資料夾名多包一層
 const 分類 = ref({
   頁面A: { … },
   頁面B: { … },
@@ -172,10 +172,10 @@ detail.value.delivery.apiData = { ...apiDefault.detail.delivery }
 ```js
 const member = useMemberStore()
 
-const { info } = storeToRefs(member)   // ✅ 拿到 ref,跟著 store 變
+const { info } = storeToRefs(member)   // 正確：拿到 ref,跟著 store 變
 
-const { info } = useMemberStore()      // ❌ 解構,拿到當下的值
-const info = member.info               // ❌ 賦值,同樣是當下的值
+const { info } = useMemberStore()      // 錯誤：解構,拿到當下的值
+const info = member.info               // 錯誤：賦值,同樣是當下的值
 ```
 
 pinia 的 store 實例是 reactive 物件,值一旦「取出來」就跟 store 斷了連結。

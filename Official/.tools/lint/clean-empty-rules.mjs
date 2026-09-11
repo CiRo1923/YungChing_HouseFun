@@ -29,7 +29,7 @@ if (rel.startsWith('..') || !/\.(css|vue)$/.test(rel) || !fs.existsSync(abs)) pr
 
 try {
   const original = fs.readFileSync(abs, 'utf8')
-  const cleaned = onRemoveEmptyRules(original, { isVue: rel.endsWith('.vue') })
+  const cleaned = onRemoveEmptyRules(original, { rel })
   if (cleaned) {
     fs.writeFileSync(abs, cleaned, 'utf8')
     console.log(rel)
