@@ -320,9 +320,17 @@ const checkColorFile = ({ rel, text }) => {
     )
   }
 
+  /*
+   * 排序自己一個代號,不跟命名那幾條混在一起。
+   *
+   * 兩者性質相反:排序**存檔就自動修好了**,人什麼都不用做;
+   * 命名與值那幾條要人動手改,而且改名會牽動每一個使用端。
+   * 混在同一個代號底下的話,看到一串 colorFile 分不出哪幾筆該處理 ——
+   * 而「都不用管」與「要改十個檔案」被當成同一件事,結果是兩種都被略過。
+   */
   if (!isSorted(text)) {
     issues.push(
-      issueOf(rel, 1, 'colorFile', '排序不符規則(彩虹 + 每類由淺到深)—— 存檔或 npm run sort:color 會自動修正')
+      issueOf(rel, 1, 'colorSort', '排序不符規則(彩虹 + 每類由淺到深)—— 存檔或 npm run sort:color 會自動修正')
     )
   }
 
@@ -1384,7 +1392,8 @@ export const RULE_TITLE = {
      安靜地跳過的話,那條規則從此不抓任何東西,而畫面上顯示的是通過。 */
   ruleCrashed: '規則執行失敗,這支檔案沒有被那條規則檢查',
   color: '顏色未使用色票變數',
-  colorFile: '色票檔的命名 / 排序 / 分組歸屬',
+  colorFile: '色票檔的命名 / 值 / 分組歸屬',
+  colorSort: '色票檔的排列順序',
   tailwind: 'components 的 template 使用 tailwind class',
   theme: '用到本專案不存在的 tailwind class',
   themeNaming: 'tailwind theme 自己定義的值用了尺寸縮寫',
@@ -1402,7 +1411,8 @@ export const RULE_TITLE = {
 export const RULE_HINT = {
   ruleCrashed: '多半是搬了函式卻沒搬它的 import —— 跑 npx eslint .tools/ 會指出是哪一個名字',
   color: `色票定義在 ${COLOR_CSS_DIR}/${COLOR_CSS_PREFIX}*.css,使用端寫 var(--色名-色碼)`,
-  colorFile: `跨分組共用的色值收進 ${SHARED_COLOR_CSS_PATH};排序會自動修正,命名要人工改(牽動使用端)`,
+  colorFile: `跨分組共用的色值收進 ${SHARED_COLOR_CSS_PATH};命名要人工改,改名會牽動每一個使用端`,
+  colorSort: '存檔或 npm run sort:color 就會排好,不必自己動手',
   tailwind: `樣式搬進 ${CSS_MODULES_DIR}/,template 只留組件 class 與 --modifier`,
   theme: `theme 的 ${THEME_GROUPS.map((g) => g.key).join(' / ')} 是整組覆寫,內建 key 全部不存在`,
   themeNaming: '整組覆寫後重新定義的值不要再用 sm / md / lg —— 改用說得出用途的名字或實際數值',
