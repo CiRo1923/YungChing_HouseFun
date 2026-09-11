@@ -2,6 +2,16 @@
 
 本規則每次對話都必須遵守。摘要與觸發時機見 skill [css-conventions](../skills/css-conventions/SKILL.md)。
 
+其中兩個題目**規範不在這份文件裡**,各自有一支 skill 是唯一來源:
+
+| 題目 | 規範在哪 |
+|---|---|
+| 色票變數的命名與色票檔的排序 | skill [color-naming](../skills/color-naming/SKILL.md) |
+| 變數該寫在 variables 檔還是版型檔 | skill [css-module-variables](../skills/css-module-variables/SKILL.md) |
+
+這份文件在那兩處只補這個專案特有的部分,不重抄規則本體 ——
+同一條規則存在兩份時,改了一邊沒改另一邊,就沒人知道該信哪一邊。
+
 > **規則本體(到「檢查工具」為止)不綁任何專案** —— 要移植到別的專案時整份複製,
 > 只需要調整最後的「[本專案現況](#本專案現況)」一章,以及路徑前綴
 > (有些專案的原始碼在 `src/` 底下,`assets/css/…` 就要寫成 `src/assets/css/…`)。
@@ -28,7 +38,6 @@
 
 > 專案名稱只能出現在兩個地方:最後的「[本專案現況](#本專案現況)」一章
 > (那章本來就是專案特有的),以及專門講跨專案同步的 skill(如 shared-components-sync)。
-
 
 **違規一律只警告不阻擋** —— 擋下來只會逼人繞過(加 `--no-verify`),反而讓守門機制形同虛設。
 
@@ -397,51 +406,21 @@ tailwind 產出的 `--tw-shadow: 0 0 .3125rem 0 var(--black-26)` 執行時解析
 2026-08-27 已把 `--white-rgb`、`--black-rgb` 刪除,`mSwiper` 的三行 shadow 改用 `--black-1a`
 (`rgba(#000, 0.1)` 與 `#0000001a` 等值,畫面無變化)。
 
-### 命名規則
+### 命名與排序:規範在 skill [color-naming](../skills/color-naming/SKILL.md)
 
-格式為 **`--<色名>-<色碼縮寫>`**,色碼縮寫依 hex 型態決定:
+變數要取什麼名字、色票檔怎麼排,**完整規範寫在那支 skill,不在這裡重抄一份** ——
+抄兩份就會有對不上的一天,而對不上的時候,沒人知道該信哪一邊。
 
-| 型態 | 取法 | 範例 |
-|---|---|---|
-| 6 碼、三組不同 | 第 **1、3、5** 碼 + 第 **6** 碼 | `#276ee1` → `--blue-26e1`、`#2f3338` → `--gray-2338` |
-| 6 碼、純灰(R=G=B) | 前 **2** 碼 | `#f7f7f7` → `--gray-f7` |
-| 3 碼 hex | 原樣照抄 | `#999` → `--gray-999` |
-| 純黑 / 純白 | 不加色碼 | `#fff` → `--white`、`#000` → `--black` |
+那支 skill 涵蓋:色相前綴的十個分類、依 hex 型態的取碼規則(6 碼 / 純灰 / 3 碼 /
+純黑白)、帶透明度時 alpha 兩碼前面那個連字號、alpha 的換算對照、
+彩虹分組與組內由淺到深的排序,以及註解在排序時怎麼處理。
 
-**帶透明度**時,在上述縮寫後**用 `-` 隔開再接 alpha 兩碼**;
-純黑白因為沒有色碼縮寫,只留 alpha 兩碼、不加額外的分隔:
+這一節只補兩件這個專案特有的事:
 
-| 色值 | 變數名 | |
-|---|---|---|
-| `#87b90d66` | `--green-8b0d-66` | 色碼 `8b0d` + alpha `66` |
-| `#e5e5e54d` | `--gray-e5-4d` | 純灰取前 2 碼 `e5` + alpha `4d` |
-| `#3333334d` | `--gray-33-4d` | 同上 |
-| `#0000001a` | `--black-1a` | 純黑沒有色碼縮寫,`1a` 就是 alpha |
-| `#ffffff4d` | `--white-4d` | 純白同理 |
-
-**為什麼要那個連字號**:黏在一起會分不出哪幾碼是色碼、哪幾碼是透明度 ——
-`--gray-334d` 到底是「`#33334d` 這個顏色」還是「`#333333` 加 30% 透明」?
-加了 `-` 就沒有歧義。純黑白本來就不帶色碼縮寫,不會混淆,所以維持原樣。
-
-alpha 兩碼的換算為 `Math.round(透明度 × 255).toString(16)`,與
-[tailwind.function.js](../../tailwind.function.js) 的 `onColorWithAlpha` 一致。
-常用對照:`0.04→0a`、`0.08→14`、`0.1→1a`、`0.12→1f`、`0.2→33`、`0.3→4d`、`0.4→66`、`0.5→80`、`0.7→b3`。
-
-命名不符規則**只警告不自動改**(改名會牽動使用端)。
-`--white-rgb` 這類 `-rgb` 衍生變數跟著本體命名,不套色碼縮寫規則。
-
-### 排序規則
-
-`:root` 內的變數依 **紅 → 澄 → 黃 → 綠 → 藍 → 紫 → 金 → 白 → 灰 → 黑** 分組,
-組內 **由淺至深**(WCAG 相對亮度高者在前);同一色的不同透明度則**透明度低(較淺)者在前**。
-色系之間空一行。
-
-**存檔時排序不對會自動修正**,不需要人工調整。
-
-註解不會被排序吃掉:
-
-- `/* 紅色 */`、`/* blue */` 這種**色系標頭**會固定放回該色系組的最前面。
-- 其他說明性註解(例如 `/* CommonMHeader(全頻道共用 header)用色 */`)**跟著它下方的變數一起移動**。
+- **命名不符規則只警告,不自動改** —— 改名會牽動每一個使用端。
+  排序則相反,存檔時不對會自動修好,不必人工調整。
+- **`-rgb` 衍生變數跟著本體命名**,不套取碼規則(`--white` 的衍生就是 `--white-rgb`)。
+  這類變數本身已經淘汰,新的透明色一律用 8 碼 hex。
 
 ---
 
@@ -476,56 +455,19 @@ alpha 兩碼的換算為 `Math.round(透明度 × 255).toString(16)`,與
 | `<變體>.css` | 該變體專屬的樣式與斷點對應,整段包在 `.m-xxx { &.\-\-<變體> { … } }` 內(`borderBottom.css`)。 |
 | `<群組>Variables.css` / `<群組>.css` | **兩個以上變體共用、但不是全部變體都要**的那一層(見下)。 |
 
-### variables 檔只放「值」,版型檔放「行為」
+### 值與行為的分界線:規範在 skill [css-module-variables](../skills/css-module-variables/SKILL.md)
 
-這條是 variables 與版型檔的分界線,**由工具檢查**(`checkVariablesFile`):
+哪一行該寫在 variables 檔、哪一行該留在版型檔,**完整規範寫在那支 skill,
+不在這裡重抄一份** —— 抄兩份就會有對不上的一天,而對不上的時候,沒人知道該信哪一邊。
 
-| 放 variables 檔 | 例 |
-|---|---|
-| `:root` 的預設值 | `--form-radios-oval-element-px: 0;` |
-| modifier 對應的**具體值** | `&.\-\-px-5 { --x-px: 5px; }` |
-| modifier 指向**色票變數**(也是在設定值) | `&.\-\-text-white { --anchor-color: var(--white); }` |
+那支 skill 涵蓋:值與行為的判準(這行是在「給一個值」還是「切換成另一個變數」)、
+兩個方向的檢查(`checkVariablesFile` 與 `checkLayoutFileValues`)、
+級距覆寫的斷點前綴要列哪幾種、為什麼分開放不受 import 順序影響,
+以及級距 class 由使用端怎麼傳進來。
 
-| 放版型檔(`common.css` / `<變體>.css`) | 例 |
-|---|---|
-| 版型宣告 | `@apply h-[--x-size];`、`border-width: var(--x-border);` |
-| **狀態切換** —— 把 module 自己的變數指向**自己的另一個變數** | `&.\-\-border { --x-border-color: var(--x-border-on-color); }`<br>`&.\-\-checked { --x-bg-color: var(--x-checked-bg-color); }` |
-| **斷點對應** | `@screen p { .m-x { --x-size: var(--x-pc-size); } }` |
-
-判斷方式很簡單:**這行是在「給一個值」,還是在「切換成另一個變數」?**
-前者是值,後者是行為。`var(--white)` 這種指向色票的算給值(色票是值的來源);
-`var(--x-checked-bg-color)` 這種指向自己 module 的變數則是切換。
-
-### ⚠️ 反過來也成立:版型檔不准出現「直接給值」
-
-`common.css` / `<變體>.css` 裡的變數宣告**只能是斷點對應或狀態切換**
-(`--x-size: var(--x-pc-size)`),**不可以直接寫死一個值**:
-
-```css
-/* ✗ common.css —— 這些 base 值屬於 variables.css 的 :root */
-.m-tag {
-  --tag-px: 0;
-  --tag-h: '';
-  --tag-border-color: transparent;
-}
-
-/* ✓ variables.css */
-:root {
-  --tag-px: 0;
-  --tag-h: auto;
-  --tag-border-color: transparent;
-}
-```
-
-**為什麼**:值散在兩個檔案時,要調一個預設值得先猜它在哪裡。
-規則很好記 —— **`variables.css` 與 `*Variables.css` 以外的檔案,
-變數宣告右邊一定是 `var(…)`**,看到常值就是放錯地方了。
-
-這條由 `checkLayoutFileValues` 檢查(`checkVariablesFile` 的反向)。
-
-> ⚠️ 順帶一提,`--tag-h: ''` 這種**空字串是無效的 CSS 值**,
-> 整條宣告會被丟棄。行為上剛好等同「沒設定」所以看不出問題,
-> 但意圖完全讀不出來 —— 高度要寫 `auto`、圓角寫 `0`、陰影寫 `none`。
+這一節只補這個專案特有的一件事:**檔案分三層**(共用 `variables.css` / `common.css`、
+群組層、變體層),所以 skill 講的「Variables 檔」在這裡有三種可能的落點,
+要照下面「群組共用層」那一節判斷它屬於哪一層。
 
 ### 群組共用層(兩個以上變體共用時)
 
@@ -1366,7 +1308,6 @@ import { Field, ErrorMessage } from 'vee-validate'
 
 > prettier 那邊另外用 `.prettierignore` 的 `*.md` 排除文件(中文表格重排會製造假 diff),
 > 兩者是不同機制、各自設定。
-
 
 ### 改過檢查邏輯後要跑規則自我驗證
 
