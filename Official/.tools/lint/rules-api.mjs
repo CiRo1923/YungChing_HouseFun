@@ -208,11 +208,29 @@ const API_EXPORT_RE =
  * 少認 template literal 那種的話,每一支用它的 api 都會被誤報成命名不對,
  * 而建議名還會長出 `$id` 這種東西。
  */
+/**
+ * 去掉端點裡的 `api` 字樣 —— 函式名本來就以 api 開頭,端點再帶一次是重複的。
+ *
+ *   apiAD    →  AD       (整支叫 apiGetADSearch,不是 apiGetApiADSearch)
+ *   api      →  (整段拿掉)
+ *   apiary   →  apiary   (那是一個完整的字,不是前綴)
+ *
+ * 只在 `api` 後面接大寫字母或數字時才當成前綴 —— 後面接小寫的話,
+ * 那是某個字的開頭(apiary、apis),剝掉會把端點切成看不懂的東西。
+ */
+const stripApiWord = (segment) => {
+  if (segment.toLowerCase() === 'api') return ''
+
+  const m = /^api(?=[A-Z0-9])(.*)$/.exec(segment)
+  return m ? m[1] : segment
+}
+
 const segmentsOf = (endpoint) =>
   endpoint
     .split('?')[0]
     .split('/')
     .map((s) => s.replace(/\$\{\s*([^}]*)\s*\}/g, '$1').replace(/[{}]/g, ''))
+    .map(stripApiWord)
     .filter(Boolean)
 
 /** 期望的函式名(全小寫,只用來比對) */

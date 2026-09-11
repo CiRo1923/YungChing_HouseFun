@@ -1377,6 +1377,34 @@ const RULE_CASES = [
     keyword: 'method 寫在前面',
   },
   {
+    /* 端點本身帶 api 字樣時,那一段不計入名字 —— 函式名已經以 api 開頭,
+       再帶一次會組出 apiGetApiADSearch 這種名字。 */
+    name: 'apiNaming 端點的 api 前綴不計入名字',
+    file: `${A}/${PROBE_PAGE_ALPHA}.js`,
+    code:
+      `import { fetchApi } from './.config.js'\n\n` +
+      `export const apiGetADSearch = (data) => fetchApi.get('apiAD/Search', data)\n`,
+    expect: 0,
+  },
+  {
+    name: 'apiNaming 端點整段就是 api 時那一段拿掉',
+    file: `${A}/${PROBE_PAGE_ALPHA}.js`,
+    code:
+      `import { fetchApi } from './.config.js'\n\n` +
+      `export const apiGetMemberInfo = (data) => fetchApi.get('api/member/info', data)\n`,
+    expect: 0,
+  },
+  {
+    /* api 後面接小寫時那是一個完整的字(apiary),剝掉會把端點切成看不懂的東西。
+       只有後面接大寫或數字才算前綴。 */
+    name: 'apiNaming api 開頭的完整單字不可以被剝掉',
+    file: `${A}/${PROBE_PAGE_ALPHA}.js`,
+    code:
+      `import { fetchApi } from './.config.js'\n\n` +
+      `export const apiGetApiaryList = (data) => fetchApi.get('apiary/list', data)\n`,
+    expect: 0,
+  },
+  {
     name: 'apiNaming 沒有寫出 method',
     file: `${A}/selfTestAlpha.js`,
     code: `import { fetchApi } from '@js/_api/.config.js'\n\nexport const apiActivityList = (data) => fetchApi.get('activity/list', data)\n`,

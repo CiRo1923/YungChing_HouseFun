@@ -12,8 +12,10 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { isColorNamingConfigFit, isHueSourceFit } from './color-order.mjs'
+import { hasBreakpointVars, hasResponsiveStyles } from './lint-core.mjs'
 import {
   API_DIR,
+  BREAKPOINTS,
   BUILD_CONFIG_FILES,
   COLOR_CSS_DIR,
   COMPONENTS_DIR,
@@ -117,6 +119,32 @@ const REQUIREMENTS = [
     check: (root) => (hasDir(root, VIEWS_DIR) ? VIEWS_DIR : null),
     need: `要有頁面目錄(目前設定為 ${VIEWS_DIR})`,
     why: 'api 檔名、store 檔名與分層都是拿頁面目錄的第一層資料夾來對照。目錄不存在時,那些對照沒有比對基準,頁面規則也掃不到檔案。',
+  },
+  {
+    label: '響應式的斷點',
+    rules: ['variable'],
+
+    /*
+     * 設成空陣列是刻意的(不做響應式的專案),不是缺東西 —— 所以專案確實
+     * 沒有響應式寫法時就不提醒。有 `@screen` 或寬度 media query 卻設成空的話,
+     * 那是設定漏填,要講出來:那兩條規則從此不檢查任何東西。
+     */
+    check: (root) => BREAKPOINTS.length > 0 || !hasResponsiveStyles(root),
+    need: '設定裡要填 BREAKPOINTS(尺寸值要分成哪幾個斷點)',
+    why: 'CSS 模組裡有響應式寫法(@screen 或寬度 media query),但斷點設定是空的 —— 「斷點要成套」與「尺寸值要分斷點」兩條會整條略過,那些該分斷點卻沒分的變數不會被報出來。',
+  },
+  {
+    label: '斷點設定與專案實際的用法',
+    rules: ['variable'],
+
+    /*
+     * 設定填了斷點,但整個 CSS 模組裡一個斷點變數都沒有 —— 那多半是
+     * 換專案時忘了改這一項。不講的話,每一個尺寸變數都會被要求拆成三份,
+     * 而那個專案根本不做響應式,補出來的值永遠相同。
+     */
+    check: (root) => !BREAKPOINTS.length || hasBreakpointVars(root),
+    need: `專案要實際用到設定的斷點(目前設定為 ${BREAKPOINTS.join(' / ') || '(空)'}),不用的話把 BREAKPOINTS 設成空陣列`,
+    why: '設定填了斷點,但 CSS 模組裡找不到任何一個帶斷點的變數。這種情況下每一個尺寸值都會被要求拆成三份,等於要補上一大批永遠相同的值 —— 不做響應式的專案應該把 BREAKPOINTS 設成空陣列。',
   },
   {
     label: '並行載入的包裝函式',
