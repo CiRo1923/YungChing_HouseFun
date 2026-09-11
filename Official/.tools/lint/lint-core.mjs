@@ -62,6 +62,7 @@ import {
   TAILWIND_THEME_OVERRIDES,
   isInSrc,
   isProjectDocs,
+  hasExemptMark,
   issueOf,
   lineNoOf,
   toRel,
@@ -812,7 +813,6 @@ const checkTShirtSizing = ({ rel, text: raw }) => {
 //
 // 這條檢查的是**設定檔本身**,不是使用端 —— 所以它只在掃到那支設定檔時跑。
 
-const THEME_NAMING_EXEMPT_RE = /lint-theme-naming-exempt/
 
 /**
  * 這一份內容裡,theme 各類直接定義了哪些值。
@@ -869,7 +869,7 @@ const checkThemeNaming = ({ rel, text, root }) => {
   /* 專案沒有樣式設定檔時整條跳過 —— 那種專案沒有 theme 可言。
      前提缺了會由 preflight 說出來,不會安靜地顯示通過。 */
   if (!styleConfigPathOf(root)) return []
-  if (THEME_NAMING_EXEMPT_RE.test(text)) return []
+  if (hasExemptMark(text, 'theme-naming')) return []
 
   const issues = []
 
@@ -917,7 +917,6 @@ const BREAKPOINT_ALT = BREAKPOINTS.join('|')
 
 const BREAKPOINT_VAR_RE = new RegExp(`(--[\\w-]*?)-(${BREAKPOINT_ALT})-([\\w-]+)\\s*:`, 'g')
 
-const EXEMPT_RE = /lint-breakpoint-exempt/
 
 /**
  * 專案裡到底有沒有在用斷點變數 —— 拿來檢查 BREAKPOINTS 設定是不是填錯了。
@@ -982,7 +981,7 @@ const checkBreakpointSet = ({ rel, text: raw }) => {
   if (!BREAKPOINTS.length) return []
 
   // 豁免標記寫在註解裡,所以要先判斷,再把註解遮掉
-  if (!rel.startsWith(MODULES_PREFIX) || EXEMPT_RE.test(raw)) return []
+  if (!rel.startsWith(MODULES_PREFIX) || hasExemptMark(raw, 'breakpoint')) return []
 
   const text = maskCssComments(raw)
   const groups = new Map()
@@ -1037,7 +1036,7 @@ const checkBreakpointNeeded = ({ rel, text: raw }) => {
   if (!rel.startsWith(MODULES_PREFIX) || !/variables\.css$/i.test(rel)) return []
 
   // 豁免標記寫在註解裡,所以要先判斷,再把註解遮掉
-  if (EXEMPT_RE.test(raw)) return []
+  if (hasExemptMark(raw, 'breakpoint')) return []
 
   const text = maskCssComments(raw)
   const root = text.match(/:root\s*\{([\s\S]*?)\n\}/)

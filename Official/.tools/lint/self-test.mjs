@@ -65,6 +65,7 @@ import { IS_SOURCE_PROJECT, unusedConfigNames } from './rules-global.mjs'
 import {
   ACTIONS_DIR_NAME,
   API_DIR,
+  BREAKPOINTS,
   BUILD_CONFIG_FILES,
   COLOR_CSS_DIR,
   COLOR_CSS_PREFIX,
@@ -84,7 +85,7 @@ import {
   VIEWS_DIR,
 } from './project-config.mjs'
 import { detectViewResourceDepth, listConventionRules, listConventionSkills } from './shared.mjs'
-import { BOLD, GREEN, RED, RESET } from './colors.mjs'
+import { BOLD, GREEN, RED, RESET, YELLOW } from './colors.mjs'
 
 const root = path.resolve(fileURLToPath(import.meta.url), '../../..')
 
@@ -125,8 +126,56 @@ const A = `${API_DIR}/${PROBE}`
 /** store 規則的探測檔 —— 同樣放子資料夾,避免與正式的 store 撞名覆蓋 */
 const T = `${STORE_DIR}/${PROBE}`
 
-/** 頁面規則的探測檔 */
-const P = `${VIEWS_DIR}/${PROBE}`
+/**
+ * 探測頁面資料夾共同的開頭 —— 清除時靠它認出「這幾個是驗證自己建的」。
+ *
+ * 上一次執行中途失敗時,那些資料夾會留在頁面目錄底下。下一次執行看到它們已經
+ * 存在就不會再建,也就不會記進清除清單 —— 於是永遠留在那裡,還會被規則
+ * 當成真的頁面資料夾。清除時一律掃過去刪,殘留才不會累積。
+ */
+const PROBE_PAGE_PREFIX = 'selfTest'
+
+/**
+ * 第一層是分類層的專案(VIEW_RESOURCE_DEPTH 為 2),探測資源要放在這個分類底下。
+ *
+ * 名字用與探測頁面同一個開頭 —— 清除時掃頁面目錄第一層就會把它整個刪掉,
+ * 不必為它多寫一條清除規則(多寫一條就會有忘了改的一天,而殘留不會報錯)。
+ */
+const PROBE_VIEW_GROUP = `${PROBE_PAGE_PREFIX}Group`
+
+/**
+ * 探測用頁面資源資料夾的路徑。
+ *
+ * 「資源」是 api 檔名與 store 檔名要對得上的那一層。有的專案資源直接放第一層,
+ * 有的第一層是分類層、資源在它底下 —— 哪一種由設定的 VIEW_RESOURCE_DEPTH 決定。
+ *
+ * 固定建在第一層的話,分類層的專案會把探測資源當成分類:每一則案例都多一筆
+ * 「檔名對不上資料夾」,把要驗的那一筆擠掉,於是一整批案例在那種專案必定失敗 ——
+ * 而失敗的原因與規則本身無關,是探測檔建錯了地方。
+ */
+const viewResourceDir = (resource) =>
+  VIEW_RESOURCE_DEPTH >= 2
+    ? `${VIEWS_DIR}/${PROBE_VIEW_GROUP}/${resource}`
+    : `${VIEWS_DIR}/${resource}`
+
+/** 頁面規則的探測檔 —— 資源在第幾層由設定決定 */
+const P = viewResourceDir(PROBE)
+
+/**
+ * 探針用的一組斷點變數,每個斷點各一份。
+ *
+ * 斷點叫什麼、有幾個都從設定取(BREAKPOINTS)—— 寫死 pc / tablet / mobile 的話,
+ * 換一個命名的專案,這幾則驗到的是別人的斷點名;不做響應式的專案更是
+ * 每一則都必定失敗,而失敗的原因與規則本身無關。
+ *
+ * 值由大到小遞減,像真的響應式寫法;`skipLast` 是刻意少寫最後一個斷點,
+ * 用來驗「斷點要成套」那一條抓不抓得到缺的那一份。
+ */
+const breakpointVars = (suffix, { skipLast = false } = {}) => {
+  const list = skipLast ? BREAKPOINTS.slice(0, -1) : BREAKPOINTS
+
+  return list.map((bp, i) => `  --probe-${bp}-${suffix}: ${40 - i * 4}px;`).join('\n')
+}
 
 /**
  * 規範系統自身的探測檔。
@@ -195,15 +244,9 @@ const apiAliasImportOf = (fileName) => {
    所以執行前會自己把需要的前提建起來,而且**只建不存在的**,
    結束時也只刪自己建的那幾個 —— 專案原本就有的完全不碰。 */
 
-/** 探測用的頁面資料夾。名字取得夠特別,誤留下來一眼看得出是什麼 */
-/**
- * 探測頁面資料夾共同的開頭 —— 清除時靠它認出「這幾個是驗證自己建的」。
- *
- * 上一次執行中途失敗時,那些資料夾會留在頁面目錄底下。下一次執行看到它們已經
- * 存在就不會再建,也就不會記進清除清單 —— 於是永遠留在那裡,還會被規則
- * 當成真的頁面資料夾。清除時一律掃過去刪,殘留才不會累積。
- */
-const PROBE_PAGE_PREFIX = 'selfTest'
+/* 探測用的頁面資料夾。名字取得夠特別,誤留下來一眼看得出是什麼。
+   共同開頭(PROBE_PAGE_PREFIX)與資源路徑的算法定義在上面的探測檔路徑那一段 ——
+   頁面探測檔的位置要用到它們。 */
 
 const PROBE_PAGE_ALPHA = `${PROBE_PAGE_PREFIX}Alpha`
 const PROBE_PAGE_PLURAL = `${PROBE_PAGE_PREFIX}Pets`
@@ -376,9 +419,9 @@ const onCreateIfMissing = (rel, content = null) => {
 
 /** 規則要比對的對象 —— 頁面資料夾、色票、建置設定 */
 const onPrepare = () => {
-  onCreateIfMissing(`${VIEWS_DIR}/${PROBE_PAGE_ALPHA}`)
-  onCreateIfMissing(`${VIEWS_DIR}/${PROBE_PAGE_PLURAL}`)
-  onCreateIfMissing(`${VIEWS_DIR}/${PROBE_PAGE_FLAT}`)
+  onCreateIfMissing(viewResourceDir(PROBE_PAGE_ALPHA))
+  onCreateIfMissing(viewResourceDir(PROBE_PAGE_PLURAL))
+  onCreateIfMissing(viewResourceDir(PROBE_PAGE_FLAT))
 
   /* store 的分層規則比對的是「有向後端要資料的頁面」,所以探測用的頁面群裡
      要有一支會呼叫 action 的頁面檔,否則那條規則沒有東西可以比對。
@@ -388,18 +431,18 @@ const onPrepare = () => {
   const probePage = `<script setup>\nonApiSelfTestProbe()\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`
 
   onCreateIfMissing(
-    `${VIEWS_DIR}/${PROBE_PAGE_ALPHA}/${PROBE_PAGE_SUB_FOLDER}/${PROBE_PAGE_FILE}`,
+    `${viewResourceDir(PROBE_PAGE_ALPHA)}/${PROBE_PAGE_SUB_FOLDER}/${PROBE_PAGE_FILE}`,
     probePage
   )
 
   /* 第二個頁面群裡放兩支同名的頁面,分別在兩個分類資料夾底下 ——
      撞名時分類資料夾要補回來當一層,不撞的維持扁平,兩種都要驗得到。 */
   onCreateIfMissing(
-    `${VIEWS_DIR}/${PROBE_PAGE_PLURAL}/${PROBE_CLASH_FOLDER_A}/${PROBE_PAGE_FILE}`,
+    `${viewResourceDir(PROBE_PAGE_PLURAL)}/${PROBE_CLASH_FOLDER_A}/${PROBE_PAGE_FILE}`,
     probePage
   )
   onCreateIfMissing(
-    `${VIEWS_DIR}/${PROBE_PAGE_PLURAL}/${PROBE_CLASH_FOLDER_B}/${PROBE_PAGE_FILE}`,
+    `${viewResourceDir(PROBE_PAGE_PLURAL)}/${PROBE_CLASH_FOLDER_B}/${PROBE_PAGE_FILE}`,
     probePage
   )
 
@@ -713,8 +756,9 @@ const CSS_CASES = [
     /* 豁免標記本身寫在註解裡 —— 先遮蔽再找的話,標記也被抹掉,
        規則會從「不報」變成「開始報」,方向完全相反。 */
     name: '註解:斷點豁免標記仍然讀得到',
+    needs: 'breakpoints',
     file: `${M}/variables.css`,
-    code: `/* lint-breakpoint-exempt: 三個斷點的值相同 */\n:root {\n  --probe-pc-px: 10px;\n}\n`,
+    code: `/* lint-breakpoint-exempt: 每個斷點的值相同 */\n:root {\n  --probe-${BREAKPOINTS[0]}-px: 10px;\n}\n`,
     expect: 0,
   },
 
@@ -836,22 +880,27 @@ const CSS_CASES = [
     expect: 0,
   },
   {
+    /* 斷點名從設定取,不寫死 —— 每個專案的斷點叫什麼、有幾個都不一樣,
+       寫死的話換一個命名的專案,這幾則驗到的是別人的斷點名。 */
     name: 'variable 斷點缺一份',
+    needs: 'breakpoints',
     file: `${M}/bp1.css`,
-    code: `:root {\n  --probe-pc-px: 24px;\n  --probe-tablet-px: 15px;\n}`,
+    code: `:root {\n${breakpointVars('px', { skipLast: true })}\n}`,
     expect: 1,
-    keyword: '--probe-mobile-px',
+    keyword: `--probe-${BREAKPOINTS.at(-1)}-px`,
   },
   {
     name: 'variable 斷點成套不誤報',
+    needs: 'breakpoints',
     file: `${M}/bp2.css`,
-    code: `:root {\n  --probe-pc-px: 24px;\n  --probe-tablet-px: 15px;\n  --probe-mobile-px: 10px;\n}`,
+    code: `:root {\n${breakpointVars('px')}\n}`,
     expect: 0,
   },
   {
     name: 'variable 標了例外註解就放行',
+    needs: 'breakpoints',
     file: `${M}/bp3.css`,
-    code: `/* lint-breakpoint-exempt: 只有桌機版有這個區塊 */\n:root {\n  --probe-pc-px: 24px;\n}`,
+    code: `/* lint-breakpoint-exempt: 只有桌機版有這個區塊 */\n:root {\n  --probe-${BREAKPOINTS[0]}-px: 24px;\n}`,
     expect: 0,
   },
 
@@ -881,6 +930,7 @@ const CSS_CASES = [
   // ---------- 規則 variable:該分斷點卻沒分 ----------
   {
     name: 'variable 尺寸值沒分斷點',
+    needs: 'breakpoints',
     file: `${M}/needVariables.css`,
     code: `:root {\n  --probe-h: 40px;\n}`,
     expect: 1,
@@ -894,8 +944,9 @@ const CSS_CASES = [
   },
   {
     name: 'variable 已分斷點不誤報',
+    needs: 'breakpoints',
     file: `${M}/need3Variables.css`,
-    code: `:root {\n  --probe-pc-h: 40px;\n  --probe-tablet-h: 36px;\n  --probe-mobile-h: 32px;\n}`,
+    code: `:root {\n${breakpointVars('h')}\n}`,
     expect: 0,
   },
   {
@@ -1204,6 +1255,23 @@ const RULE_CASES = [
     expect: 0,
   },
   {
+    /* 同一個狀態記號寫進註解就是裝飾 —— 印出來的那一份幫讀者分辨狀態,
+       註解裡的只剩「這裡很重要」的語氣。分辨的方式是看它在不在字串裡。 */
+    name: 'plainText 狀態記號寫在註解裡照樣抓',
+    file: `${D}/probe-status-comment.mjs`,
+    code: `// ⚠️ 這裡要小心\nconst probe = 1\n`,
+    expect: 1,
+    keyword: '⚠',
+  },
+  {
+    /* 帶理由的訊息常常夾在同一行的字串裡 —— 那仍然是要印出來的東西 */
+    name: 'plainText 字串裡的狀態記號放行,同一行的註解照樣抓',
+    file: `${D}/probe-status-mixed.mjs`,
+    code: `console.log('✔ 通過')\n// ✗ 這一行是註解\n`,
+    expect: 1,
+    keyword: '✗',
+  },
+  {
     // 對照表的箭頭是資訊本身,換成文字反而讓整欄對不齊
     name: 'plainText 對照表的箭頭不算裝飾',
     file: `${D}/probe-table.md`,
@@ -1215,6 +1283,16 @@ const RULE_CASES = [
     file: `${D}/probe-plain.md`,
     code: `# 說明\n\n注意:這裡必須同時滿足三個條件,否則會刪到程式碼。\n`,
     expect: 0,
+  },
+  {
+    /* 豁免只認註解裡的那一份 —— 程式碼裡的字面值也算的話,定義比對式的那一行
+       會讓規則檔永遠豁免自己,那條規則對它完全失效,而且不會有任何徵兆。
+       這一則的探針同時有兩種:程式碼裡的不算,所以註解裡的符號照樣要被抓。 */
+    name: 'plainText 豁免寫在程式碼裡不算',
+    file: `${D}/probe-fake-exempt.mjs`,
+    code: `const EXEMPT_RE = /lint-plain-text-exempt/\n// ✅ 這一行是註解\n`,
+    expect: 1,
+    keyword: '✅',
   },
   {
     name: 'plainText 標了豁免註解就整份放行',
@@ -1792,7 +1870,10 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
     /* 標了豁免才只驗得到 import 路徑那一條 —— 這段程式碼 import 的是 api,
        同時也會觸發「頁面直接 import api」。兩條規則混在一則案例裡的話,
        其中一條的行為改了,另一條的案例也會跟著失敗,看不出是誰壞了。 */
+    /* 只計 importAlias —— 資源在第二層的專案,探針的相對路徑會多跳一層,
+       深到會被「跨專案引用」那條一起抓。那是另一條規則的判定,不該讓這則跟著失敗。 */
     name: 'importAlias 相對路徑跳出資料夾',
+    rule: 'importAlias',
     file: `${P}/Detail.vue`,
     code: `<script setup>\n/* lint-page-api-exempt: 這則在驗 import 路徑的寫法 */\nimport { onDo } from '${apiImportPathOf(P, 'home.js')}'\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
     expect: 1,
@@ -2834,6 +2915,9 @@ let failed = 0
    可以加,那種永遠會被漏掉。 */
 let total = 0
 
+/** 因為專案的設定而驗不到的案例 —— 結束時要講出來,不能安靜地少驗 */
+const skipped = []
+
 const report = (ok, name, extra = []) => {
   total += 1
 
@@ -2855,6 +2939,14 @@ try {
   definedVars = loadDefinedColorVars(root)
 
   for (const c of CASES) {
+    /* 專案沒有斷點(BREAKPOINTS 是空陣列)時,兩條斷點規則整條略過 ——
+       那幾則案例的探針就驗不到東西,留著只會變成必定失敗的雜訊。
+       跳過的則數最後會印出來,不會安靜地少驗。 */
+    if (c.needs === 'breakpoints' && !BREAKPOINTS.length) {
+      skipped.push(c.name)
+      continue
+    }
+
     const abs = path.join(root, c.file)
     // 有些案例放在模組子資料夾(moduleScope 要靠資料夾名推 class 前綴)
     fs.mkdirSync(path.dirname(abs), { recursive: true })
@@ -3086,6 +3178,16 @@ try {
 }
 
 console.log('')
+
+/* 跳過的一定要講出來 —— 少驗幾則與全部通過在畫面上長得一樣,
+   不講的話,設定改成不做響應式的專案會以為斷點規則還在保護它。 */
+if (skipped.length) {
+  console.log(`${YELLOW}${skipped.length} 則因為這個專案的設定而沒有驗:${RESET}`)
+  console.log(`  ${skipped.join('、')}`)
+  console.log('  斷點相關的那幾則需要 BREAKPOINTS 有值;這個專案設成空陣列,兩條斷點規則本來就整條略過。')
+  console.log('')
+}
+
 console.log(
   failed
     ? `${RED}${BOLD}${failed} 個案例未通過 —— 規則可能已失效,修好再繼續。${RESET}`
