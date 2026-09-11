@@ -17,7 +17,6 @@ import {
   isInSrc,
   issueOf,
   lineNoOf,
-  warnOf,
 } from './shared.mjs'
 
 const ACTIONS_DIR = `${STORE_DIR}/${ACTIONS_DIR_NAME}`
@@ -176,18 +175,20 @@ const checkPageActionNaming = ({ rel, text }) => {
 // 直接 import api 的話,拿到的資料就停在那一支檔案裡 —— 沒有進 store,
 // 換頁回來要重打、別的地方要用只能再打一次。
 //
-// **同一個判斷,兩種對象,兩種輕重:**
+// **同一個判斷,兩種對象,例外的出口不同:**
 //
-//   元件(componentApiImport,擋)
+//   元件(componentApiImport)
 //     元件是被放進畫面裡的零件,同一支可能出現在很多頁、也可能同一頁出現很多次。
 //     它自己去要資料的話,出現幾次就打幾次,而且每一份資料各自活在各自的元件裡。
 //     元件要什麼資料由使用它的頁面決定並傳進來,或是頁面寫進 store 之後元件去讀。
+//     **沒有例外** —— 元件自己去要資料在任何情況下都會有上面那些問題。
 //
-//   頁面(pageApiImport,建議級不擋)
-//     一次性的請求(送出後就不再用的表單、只給這一頁的下拉選項)直接打是可以的,
-//     進 store 反而多繞一圈。但那要想過再決定,不是順手 import。
+//   頁面(pageApiImport)
+//     一次性的請求(送出後就不再用的表單)直接打是可以的,進 store 反而多繞一圈。
+//     但那要想過再決定,不是順手 import ——「真的是一次性」與「偷懶沒寫 actions」
+//     寫出來一模一樣,所以一律擋下,確定是前者的在檔頭標 lint-page-api-exempt。
 //
-// 兩者的判斷完全相同,只有代號與輕重不同 —— 判斷寫成兩份的話,
+// 兩者的判斷完全相同,只有代號與能不能豁免不同 —— 判斷寫成兩份的話,
 // 修好一邊的誤報,另一邊還在報。
 
 /** 所有 import 寫法:具名匯入、整包匯入、動態 import */
@@ -215,9 +216,22 @@ const resolveImport = (root, fromFile, spec) => {
   return path.resolve(hit.root, spec.slice(hit.alias.length).replace(/^\//, ''))
 }
 
+/**
+ * 頁面直接 import api 的豁免。
+ *
+ * 一次性的請求(送出表單、按一個鈕就結束的動作)不需要把結果放進 store,
+ * 直接打是合理的。那種情況在檔頭標這個記號並寫明理由,整支檔案就跳過這條。
+ *
+ * 「有沒有對應的 actions」不拿來當判準 —— 新功能還沒寫 actions 的時候,
+ * 那種判斷會放行,而那正是最該擋下來的時候。由人判斷、理由留在程式碼裡,
+ * 下一個人看到才知道那不是漏寫。
+ */
+const PAGE_API_EXEMPT_RE = /lint-page-api-exempt/
+
 const checkPageApiImport = ({ rel, text, root }) => {
   if (!isInSrc(rel) || !rel.endsWith('.vue')) return []
 
+  const isPageExempt = PAGE_API_EXEMPT_RE.test(text)
   const apiRoot = path.resolve(root, API_DIR)
   const isComponent = isComponentFile(rel)
   const issues = []
@@ -232,20 +246,28 @@ const checkPageApiImport = ({ rel, text, root }) => {
 
     const line = lineNoOf(text, m.index)
 
+    if (isComponent) {
+      issues.push(
+        issueOf(
+          rel,
+          line,
+          'componentApiImport',
+          `元件不能直接 import api —— 元件可能出現在很多頁、同一頁也可能出現很多次,自己去要資料就是出現幾次打幾次;要什麼資料由使用它的頁面傳進來,或頁面寫進 store 之後這裡讀 store`
+        )
+      )
+      continue
+    }
+
+    // 元件那一種不受豁免影響 —— 元件一律不能自己去要資料,沒有正當的例外
+    if (isPageExempt) continue
+
     issues.push(
-      isComponent
-        ? issueOf(
-            rel,
-            line,
-            'componentApiImport',
-            `元件不能直接 import api —— 元件可能出現在很多頁、同一頁也可能出現很多次,自己去要資料就是出現幾次打幾次;要什麼資料由使用它的頁面傳進來,或頁面寫進 store 之後這裡讀 store`
-          )
-        : warnOf(
-            rel,
-            line,
-            'pageApiImport',
-            `頁面直接 import 了 api —— 正常路徑是 api → ${ACTIONS_DIR}/use*Actions.js(寫進 store)→ 頁面讀 store;一次性的請求才直接打,那要想過再決定`
-          )
+      issueOf(
+        rel,
+        line,
+        'pageApiImport',
+        `頁面直接 import 了 api —— 正常路徑是 api → ${ACTIONS_DIR}/use*Actions.js(寫進 store)→ 頁面讀 store,資料才不會跳頁回來就整份消失;真的是一次性的請求(送出表單那種,結果不顯示在畫面上)就在檔頭標 /* lint-page-api-exempt: 理由 */`
+      )
     )
   }
 

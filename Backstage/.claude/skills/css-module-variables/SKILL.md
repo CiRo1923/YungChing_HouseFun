@@ -1,7 +1,7 @@
 ---
 name: css-module-variables
 summary: css 模組變數
-description: 本專案的 CSS 模組變數分層規範。當需要在 CSS 模組目錄新增或調整樣式、加入 --px-XX / --py-XX / --h-XX / --rounded-XX 這類可由父層覆寫的尺寸級距,或審查既有模組 css 時使用。規則:凡是「給一個值」的變數宣告(:root 預設、級距覆寫的數字、指向色票變數)一律定義在 ***Variables.css,只有一個值的也一樣;模組 css 只放樣式與「切換成另一個變數」的宣告(斷點對應、狀態切換),右邊一定是 var();作用域依實際共用範圍決定,只有這個模組用的放該模組的 Variables 檔、跨模組共用的放共用 variables.css。
+description: 本專案的 CSS 模組變數分層規範。當需要在 CSS 模組目錄新增或調整樣式、加入 --px-XX / --py-XX / --h-XX / --rounded-XX 這類可由父層覆寫的尺寸級距,或審查既有模組 css 時使用。規則:同一屬性有兩個以上級距值的覆寫 class 一律定義在 ***Variables.css(單一值可留在模組 css);作用域依實際共用範圍決定,只有這個模組用的放該模組的 Variables 檔、跨模組共用的放共用 variables.css。
 ---
 
 # CSS 模組變數分層:值進 Variables、樣式留模組
@@ -14,16 +14,10 @@ CSS 模組目錄(位置定義在 `.tools/lint/project-config.mjs` 的 `CSS_MODUL
 | `***Variables.css` | `:root` 的**原始值** + **級距覆寫 class**(同一屬性有多個可選值者) |
 | `***.css`(模組樣式) | **樣式規則**(顏色、圓角、排版)+ **斷點變數對應**(`--x: var(--x-pc)`) |
 
-判準是**「這一行是在給一個值,還是在切換成另一個變數」**:
+判準是**「這個屬性有幾個可選值」**:
 
-- **在給值** —— `:root` 的預設、級距覆寫的具體數字、指向色票變數 → 一律寫在 `***Variables.css`。
-  **只有一個值的也一樣**,不因為「這個屬性只有一種寫法」就留在模組 css。
-- **在切換** —— 把模組自己的變數指向自己的另一個變數(斷點對應
-  `--x-px: var(--x-pc-px)`、狀態切換 `&.\-\-checked { --x-bg-color: var(--x-checked-bg-color) }`)
-  → 寫在模組 css。
-
-規則很好記:**`***Variables.css` 以外的檔案,變數宣告右邊一定是 `var(…)`** ——
-看到常值就是放錯地方了。值散在兩個檔案時,要調一個預設值得先猜它在哪一支。
+- **兩個以上** → 是一組級距,覆寫 class 必須寫在 `***Variables.css`。
+- **只有一個固定值** → 直接寫在模組 css 即可,不需要抽出來。
 
 ## 一、作用域:依實際共用範圍決定
 
@@ -126,7 +120,7 @@ CSS 模組目錄(位置定義在 `.tools/lint/project-config.mjs` 的 `CSS_MODUL
 
 ## 五、新增級距的檢查清單
 
-1. 這一行是在給值還是在切換變數?**給值就進 Variables 檔**,只有一個值的也一樣。
+1. 這個屬性目前有幾個值?**兩個以上**才需要進 Variables 檔。
 2. 只有這個模組會用嗎?是 → `***Variables.css`;跨模組 → 共用變數檔
    (位置定義在 `.tools/lint/project-config.mjs` 的 `SHARED_MODULE_VARIABLES`)。
 3. 三個 `@screen` 都補齊了嗎?各自的前綴變體都列了嗎?
@@ -134,33 +128,23 @@ CSS 模組目錄(位置定義在 `.tools/lint/project-config.mjs` 的 `CSS_MODUL
 
 ## 六、自動檢查
 
-這條由兩個互為反向的檢查把關,判斷邏輯在 `.tools/lint/lint-core.mjs`:
-
-| 檢查 | 抓什麼 |
-| --- | --- |
-| `checkVariablesFile` | Variables 檔裡出現了版型宣告或狀態切換 —— 那些屬於模組 css |
-| `checkLayoutFileValues` | 模組 css 裡的變數宣告右邊是常值 —— 那個值屬於 Variables 檔 |
-
+規則 `moduleVar`,判斷邏輯在 `.tools/lint/lint-core.mjs`,
 四個時機跑的是同一份判斷:
 
 - **存檔時** —— 編輯器與開發伺服器會即時檢查,違規逐筆印在終端機。只提醒,不影響存檔。
-- **AI 寫檔時** —— `.claude/hooks/enforce-conventions.js` 比對寫入前後的內容,
+- **AI 寫檔時** —— `.claude/hooks/enforce-conventions.cjs` 比對寫入前後的內容,
   只擋「這次新增」的違規;既有存量不影響。
 - **對話時** —— 存檔時沒修掉的違規會列進對話,直到修好為止。
 - **commit 時** —— pre-commit 檢查這次提交的檔案。
 
 本機覆核:`node .tools/lint/lint.mjs <檔案或目錄>`。
 
-判定方式:`***Variables.css` 與 `variables.css` 以外的檔案裡,變數宣告右邊只能是 `var(…)`。
-出現常值(`--x-px: 24px`、`--x-h: auto`、`--x-border-color: transparent`)就要搬到
-對應的 Variables 檔。反過來,Variables 檔裡出現 `@apply`、原生版型屬性,
-或把自己的變數指向自己另一個變數的狀態切換,也是放錯層。
+判定方式:非 Variables 檔裡,同一屬性出現**兩個以上不同值**的覆寫 class
+(例如同時有 `--px-24` 與 `--px-15`)就要搬到對應的 `***Variables.css`。
 
-> 空字串是無效的 CSS 值,整條宣告會被丟棄 —— `--x-h: ''` 的行為剛好等同「沒設定」,
-> 所以看不出問題,但意圖完全讀不出來。高度要寫 `auto`、圓角寫 `0`、陰影寫 `none`。
+不算違規的情況:`***Variables.css` 與 `variables.css` 本身、單一值的覆寫 class、
+以及值不是數字的狀態 modifier(`--range-start` 這種是狀態不是尺寸級距)。
 
 ## 相關
 
 - [[color-naming]]:顏色變數的集中定義與命名規範,分層邏輯相同(共用 / 專屬)。
-- 這個專案的 CSS 規範另有斷點三份、變數建在最小單位、字級歸屬等條目,
-  寫在 `.claude/rules/css-conventions.md`。

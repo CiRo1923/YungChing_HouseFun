@@ -60,7 +60,7 @@ import Child from './Child.vue'
 四個時機跑的是同一份判斷:
 
 - **存檔時** —— 編輯器與開發伺服器會即時檢查,違規逐筆印在終端機。只提醒,不影響存檔。
-- **AI 寫檔時** —— `.claude/hooks/enforce-conventions.js` 比對寫入前後的內容,
+- **AI 寫檔時** —— `.claude/hooks/enforce-conventions.cjs` 比對寫入前後的內容,
   只擋「這次新增」的違規;既有存量不影響。
 - **對話時** —— 存檔時沒修掉的違規會列進對話,直到修好為止。
 - **commit 時** —— pre-commit 檢查這次提交的檔案。
@@ -68,56 +68,3 @@ import Child from './Child.vue'
 本機覆核:`node .tools/lint/lint.mjs <檔案或目錄>`。
 
 訊息會直接寫出該改成哪一個 alias。
-
----
-
-## Nuxt 內建的 `~/` 與 `@/` 怎麼辦
-
-Nuxt 本身提供 `~/`、`~~/`、`@/` 指向專案根。**有自訂 alias 可用時就用自訂的** ——
-`@imgs/buy/house.svg` 比 `@/assets/imgs/buy/house.svg` 精確,
-而且圖片目錄搬家時前者不用改。
-
-自訂 alias 沒有涵蓋到的目錄才用 Nuxt 內建的。
-
-## 判定規則
-
-- 相對路徑 import(以 `.` 開頭)解析後若**落在某個 alias 目錄下**,改用該 alias
-- 有多個 alias 命中時,選**最深層**(路徑最長)那個 ——
-  一個檔案同時落在 `@/` 與 `@imgs` 底下時要用 `@imgs`,因為它比較精確
-- 只針對含 `..`(離開當前資料夾)的相對路徑;同層 `./Foo` 不必改
-
-## 範例
-
-```js
-// 不要
-import Foo from '../../components/common/Foo.vue'
-import { useCommonStore } from '../../stores/common.js'
-import icon from '@/assets/imgs/buy/house/home.svg'
-
-// 改成
-import Foo from '@components/common/Foo.vue'
-import { useCommonStore } from '@stores/common.js'
-import icon from '@imgs/buy/house/home.svg'
-```
-
-同層維持相對即可:
-
-```js
-// 同資料夾,不必改
-import useValidateEvents from './.composables/useValidateEvents.js'
-```
-
-## 目前沒有自動檢查
-
-這條規則**還沒有對應的檢查工具** —— 靠寫的時候自己遵守,以及 code review。
-
-判斷方式很簡單:**看到 `..` 就想一下有沒有對應的 alias**。
-
-要找出違規的地方,搜尋 `from '../` 就看得到全部
-(同層的 `./` 不算,那本來就允許)。
-
-## 相關
-
-- CSS 模組的 import 順序另有規範,見 `.claude/rules/css-conventions.md` 的
-  「規則 5:.vue 的 import 順序」—— 那條管的是**先後次序**,
-  這一份管的是**路徑怎麼寫**,兩者不衝突。
