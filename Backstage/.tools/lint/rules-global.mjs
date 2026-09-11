@@ -8,7 +8,7 @@
 import {
   ABSOLUTE_PATH_SCOPE,
   WRITING_STYLE_SCOPE,
-  PROJECT_NAME_PATTERNS,
+  PROJECT_NAMES,
   PROJECT_NAME_SCOPE,
   issueOf,
   lineNoOf,
@@ -28,10 +28,28 @@ import {
 // ⚠️ 這裡與訊息中都**不要寫出任何實際路徑當範例** —— 那本身就是寫死路徑,
 //    而且會讓人以為只有那種形狀才算違規。
 //
-// 要抓哪幾種寫法定義在 project-config.mjs 的 PROJECT_NAME_PATTERNS ——
-// 專案名稱是每個專案各不相同的東西,寫在規則裡的話,換一個專案之後
+// 專案叫什麼定義在 project-config.mjs 的 PROJECT_NAMES ——
+// 名稱是每個專案各不相同的東西,寫在規則裡的話,換一個專案之後
 // 這條會去抓一個與它無關的字,而它自己的名稱反而不會被抓。
-const PROJECT_NAME_RE = PROJECT_NAME_PATTERNS
+
+/**
+ * 從專案名稱組出比對式。
+ *
+ * 設定填的是名稱本身(`Royal Canin`),不是正規表示式 —— 換專案的人要填的是
+ * 「這個專案叫什麼」,不該連帶要會寫比對式。
+ *
+ * 組出來的比對式涵蓋名稱的各種寫法:名稱裡的空白對應到實際寫法中的
+ * 空白、底線、連字號,或是完全連在一起(`royalcanin`、`royal-canin`、
+ * `Royal_Canin` 都算),大小寫一律不分。
+ *
+ * 名稱以外的字元會被跳脫 —— 名字裡有 `.` 或 `+` 的專案才不會變成萬用字元。
+ */
+const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+const patternOf = (name) =>
+  new RegExp(name.trim().split(/\s+/).map(escapeRe).join('[\\s_-]?'), 'i')
+
+const PROJECT_NAME_RE = PROJECT_NAMES.map(patternOf)
 
 /**
  * 這條規則**只管規範系統自身** —— 檢查工具、skills、hooks,

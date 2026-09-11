@@ -46,7 +46,7 @@ import {
 } from './rules-code.mjs'
 
 // 存檔時的自動排序 —— 判斷與修正都在 rules-code.mjs,這裡只轉出去
-export { onSortComposables } from './rules-code.mjs'
+export { onSortComposables, onSortImports } from './rules-code.mjs'
 
 // 存檔時把進入頁面要拿的資料包成一起發出 —— 判斷與修正都在 rules-page.mjs
 export { onWrapMountedCalls } from './rules-page.mjs'

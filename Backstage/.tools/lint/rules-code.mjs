@@ -8,6 +8,8 @@ import fs from 'node:fs'
 import path from 'node:path'
 import {
   BUILD_CONFIG_FILES,
+  COMPONENTS_DIR,
+  IMPORT_ORDER_GROUPS,
   PROJECT_CONFIG_FILES,
   STYLE_CONFIG_FILES,
   isInActionsDir,
@@ -770,17 +772,153 @@ export const onSortComposables = (text, rel) => {
   return `${before}${rebuilt}${after}`
 }
 
-export const CODE_CHECKS = [checkImportAlias, checkDeprecated]
+// --- 規則 importOrder:元件的 import 怎麼寫 ----------------------------------
+//
+// **只管共用元件目錄底下的 .vue。** 頁面不在範圍內 —— 頁面載入的東西
+// 依它要做的事而定,沒有固定的形狀;元件是被重複放進畫面的零件,
+// 每一支長得一樣才好接手。
+//
+// 管兩件事,而兩件事的處理方式不同:
+//
+//   一、樣式一定要 import —— 報違規
+//      元件的樣式寫在 CSS 模組裡,由元件自己載入。少了那一行,
+//      這支元件在別的頁面被用到時樣式不會跟著來 —— 而它在原本那一頁看起來
+//      是正常的(因為同一頁的別支元件已經把樣式載進來了)。
+//      那種問題要換一頁才發現,而且看起來像是「這一頁壞了」。
+//      這一條只能報:工具看不出這支元件的樣式該放在哪一支 CSS 模組,
+//      自動補一行等於替開發者決定檔案要叫什麼。
+//
+//   二、import 依分組排列 —— 存檔時直接排好,不報違規
+//      一支檔案開頭那十幾行,每個人寫的順序都不一樣的話,
+//      要找「這支有沒有載入某個東西」得整段看完。
+//      順序是機械式的規則,讓人照著訊息一行一行搬只是浪費時間,
+//      而且搬的過程比工具更容易出錯。自動排序的行為在 onSortImports。
+//
+// 分組與順序定義在 project-config.mjs 的 IMPORT_ORDER_GROUPS ——
+// 各專案的 alias 與資料夾命名不同,寫死在這裡的話,換一個命名的專案
+// 會把每一支元件都報成順序錯。
+//
+// **只管組與組之間的先後,不管同一組裡面怎麼排。** 組內另有規則
+// (樣式那一組的變數檔要排在版型檔之前,那是 moduleOrder 在管)——
+// 兩條都去管組內順序的話,同一行會被指出兩種不同的修法。
+
+/**
+ * 這一行 import 屬於哪一組;都不符合就回組數(也就是排在最後的「其他」)。
+ *
+ * 對外提供是為了讓規則的自我驗證能確認「造出來的探針真的落在預期那一組」——
+ * 分組來自設定,驗證自己算一次的話就成了第二份判準,兩邊會有對不上的一天。
+ */
+export const importGroupOf = (spec) => {
+  const hit = IMPORT_ORDER_GROUPS.findIndex((g) => new RegExp(g.match).test(spec))
+  return hit === -1 ? IMPORT_ORDER_GROUPS.length : hit
+}
+
+/** import 的路徑與行號 —— 具名、整包、純副作用(只寫路徑)三種都要認 */
+const IMPORT_SPEC_RE = /^import\s+(?:[^'"\n]*?from\s*)?['"]([^'"]+)['"]/gm
+
+/** 樣式是第一組 —— 「一定要有」檢查的就是這一組有沒有出現 */
+const STYLE_GROUP = 0
+
+const checkImportOrder = ({ rel, text }) => {
+  if (!rel.startsWith(`${COMPONENTS_DIR}/`) || !rel.endsWith('.vue')) return []
+
+  const hasStyle = [...text.matchAll(IMPORT_SPEC_RE)].some(
+    (m) => importGroupOf(m[1]) === STYLE_GROUP
+  )
+  if (hasStyle) return []
+
+  return [
+    issueOf(
+      rel,
+      1,
+      'importOrder',
+      `這支元件沒有載入樣式 —— 元件的樣式寫在 CSS 模組裡、由元件自己 import;少了那一行,這支元件被放進別的頁面時樣式不會跟著來,而在原本那一頁看起來是正常的`
+    ),
+  ]
+}
+
+/** 單行寫完的 import —— 路徑與 import 在同一行才認得出來 */
+const IMPORT_LINE_RE = /^import\s+(?:[^'"]*?from\s*)?['"]([^'"]+)['"]/
+
+/**
+ * 把元件的 import 依分組排好,回傳整份新的檔案內容。
+ *
+ * 沒有需要調整時回傳 null —— 呼叫端據此決定要不要寫檔。
+ *
+ * 這個函式會直接改動程式碼。安全前提有三個,少一個就可能改壞:
+ *      1. 只在「連續好幾行都是 import」的區塊內重排,跨過任何一行別的東西就停
+ *      2. 每一行帶著自己上方緊鄰的註解一起搬
+ *      3. 排序是穩定的 —— 同一組的兩行維持原本的先後,組內順序另有規則在管
+ *
+ * 分好幾行寫的 import(路徑不在 import 那一行上)認不出來,
+ * 那種區塊整塊不動 —— 排錯一行的代價遠高於少排一次。
+ */
+export const onSortImports = (text, rel) => {
+  if (!rel.startsWith(`${COMPONENTS_DIR}/`) || !rel.endsWith('.vue')) return null
+
+  const lines = text.split('\n')
+  const nextLines = [...lines]
+  let changed = false
+
+  /** 一個區塊排好之後寫回去;區塊之間互不影響 */
+  const flush = (items, from, to) => {
+    if (items.length < 2) return
+
+    const sorted = [...items].sort((a, b) => a.group - b.group || items.indexOf(a) - items.indexOf(b))
+    if (sorted.every((item, i) => item === items[i])) return
+
+    const rebuilt = sorted.flatMap((item) => lines.slice(item.start, item.end + 1))
+
+    // 行數不可以變 —— 變了代表解析有落差,寧可不動
+    if (rebuilt.length !== to - from + 1) return
+
+    nextLines.splice(from, rebuilt.length, ...rebuilt)
+    changed = true
+  }
+
+  let items = []
+  let pending = []
+  let from = -1
+
+  lines.forEach((line, i) => {
+    if (COMMENT_LINE_RE.test(line)) {
+      pending.push(i)
+      return
+    }
+
+    const hit = IMPORT_LINE_RE.exec(line)
+    if (hit) {
+      const start = pending.length ? pending[0] : i
+      if (from === -1) from = start
+      items.push({ group: importGroupOf(hit[1]), start, end: i })
+      pending = []
+      return
+    }
+
+    if (items.length) flush(items, from, items[items.length - 1].end)
+    items = []
+    pending = []
+    from = -1
+  })
+
+  if (items.length) flush(items, from, items[items.length - 1].end)
+
+  return changed ? nextLines.join('\n') : null
+}
+
+export const CODE_CHECKS = [checkImportAlias, checkDeprecated, checkImportOrder]
 
 /* composableOrder 沒有出現在這兩張表裡 —— 它不報違規,存檔時直接把順序排好。
    自動修正的行為在 onSortComposables。 */
 
 export const CODE_RULE_TITLE = {
+  importOrder: '元件沒有載入樣式',
   importAlias: 'import 沒有使用 alias',
   deprecated: '已淘汰的寫法',
 }
 
 export const CODE_RULE_HINT = {
+  importOrder: '元件的樣式寫在 CSS 模組裡,由元件自己 import(分組順序存檔時自動排好)',
   importAlias: '離開自己資料夾的相對路徑改用 @ alias',
   deprecated: 'apiParams / inject(route) 已淘汰;actions 不留 console.log、不 bare 透傳',
 }
