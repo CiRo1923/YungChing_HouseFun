@@ -150,7 +150,38 @@ export const PROJECT_NAME_PATTERNS = [
 ]
 
 /**
- * 被 tailwind 設定「整組覆寫」掉、實際上不存在的 class。
+ * 色票檔的檔名前綴。
+ *
+ * 共用色票是 `<前綴>.css`,各分組是 `<前綴><分組名>.css`
+ * (前綴 `color` 就是 `color.css` 與 `colorMember.css`)。
+ *
+ * ⚠️ 這個字決定「哪些檔案算色票檔」。改錯或與專案實際命名對不上時,
+ *    掃不到任何色票檔 —— 顏色檢查、排序、撞色比對會全部安靜地不再有結果,
+ *    而且看起來像是全部通過。專案把共用色票叫 `theme.css` 的話,
+ *    這裡就要跟著改成 `theme`。
+ */
+export const COLOR_CSS_PREFIX = 'color'
+
+/**
+ * 建置工具的樣式設定檔 —— 由前往後找,用第一個存在的那一支。
+ *
+ * 規則要知道這個專案的 theme 實際定義了哪些值。那份資料只有設定檔知道,
+ * 所以直接讀它,不在這裡另外抄一份 —— 抄了就要人工同步,
+ * 而忘了同步不會報錯,只會讓規則提醒實際上存在的 class、
+ * 或放行實際上已經消失的 class。
+ *
+ * 一支都找不到時,「用到不存在的 class」那條規則會被略過(不誤報)。
+ * 工具啟動時會把「因為缺什麼而沒有作用」列出來,不會安靜地失效。
+ */
+export const STYLE_CONFIG_FILES = [
+  'tailwind.config.js',
+  'tailwind.config.ts',
+  'tailwind.config.mjs',
+  'tailwind.config.cjs',
+]
+
+/**
+ * 被 tailwind 設定「整組覆寫」掉、實際上不存在的內建 class。
  *
  * tailwind 的 theme 設定分兩種寫法:寫在 `extend` 底下是「補充」,
  * 內建的值都還在;直接寫在 `theme` 底下是「整組覆寫」——
@@ -158,16 +189,19 @@ export const PROJECT_NAME_PATTERNS = [
  * 但產不出任何 CSS,樣式就是沒有效果,而且很難查。
  *
  * 每一項的意思:
- *   dead       被覆寫掉、已經不存在的內建值 —— 用到就提醒
- *   available  覆寫之後實際可用的值 —— 寫進提示訊息,讓看到的人知道該改用什麼
+ *   label   訊息裡怎麼稱呼這一類
+ *   prefix  這一類的 class 長什麼樣(斷點沒有前綴,寫法是 `斷點:class`)
+ *   dead    tailwind **內建**的值 —— 這一類被整組覆寫時,用到就提醒
  *
- * **這份設定要跟著專案的 tailwind 設定走。** 沒有整組覆寫的類別,
- * `dead` 留空陣列就好(那一類不會有任何提醒)。
- * 專案改了 tailwind 的 theme 設定時,這裡要跟著更新 ——
- * 沒更新的話,規則會提醒實際上存在的 class,或漏掉實際上已消失的 class。
+ * **`dead` 列的是 tailwind 自己的預設值,與專案無關**,所以換專案不必改;
+ * 升級 tailwind 大版本、預設值有增減時才要跟著調。
  *
- * 目前的情形:screens、fontSize、boxShadow 三類是整組覆寫;
- * fontFamily 沒有覆寫,所以 font-sans / font-serif / font-mono 正常可用,不列入。
+ * **「這個專案實際可以用哪些值」不寫在這裡** —— 那是直接讀 tailwind 設定檔
+ * 算出來的(見 STYLE_CONFIG_FILES)。兩邊各寫一份的話,改了設定忘了改這裡,
+ * 規則就會開始講錯話,而且不會有任何徵兆。
+ *
+ * 專案沒有整組覆寫的類別,規則自然不會提醒 —— 工具讀得到 theme 底下
+ * 有沒有那一類,不必在這裡宣告。
  */
 export const TAILWIND_THEME_OVERRIDES = {
   /** 斷點前綴,寫法是 `斷點:class` */
@@ -338,6 +372,21 @@ export const ABSOLUTE_PATH_SCOPE = IS_SRC_PROJECT_ROOT
   : [SRC_PREFIX, ...TOOLING_PREFIXES]
 
 /**
+ * 「文字怎麼寫」那幾條規則的適用範圍(路徑前綴)。
+ *
+ * 涵蓋原始碼與規範系統自身 —— 這兩處的文字客戶都會看到:
+ * 畫面上的文案、交接時對方讀的註解、交付出去的規範說明。
+ *
+ * **專案自己的文件不在範圍內。** 那一層有自己的檢查工具
+ * (連結有效、側欄一致、排版慣例那些),文字怎麼寫由它負責。
+ * 兩套工具掃同一層的話,判準會各自演化 —— 同一份文件被兩邊報不同的東西,
+ * 而修好一邊另一邊還在報。
+ */
+export const WRITING_STYLE_SCOPE = IS_SRC_PROJECT_ROOT
+  ? ['']
+  : [SRC_PREFIX, ...TOOLING_PREFIXES]
+
+/**
  * 建置設定檔的候選檔名 —— 由前往後找,用第一個存在的那一支。
  *
  * 「離開自己資料夾要用 alias」那條規則需要知道專案有哪些 alias,
@@ -367,22 +416,4 @@ export const BUILD_CONFIG_FILES = [
  * 那些值定義在專案設定檔。找不到這支檔案時,帶變數的那幾條 alias 會被跳過,
  * 其餘照常運作。
  */
-/**
- * 建置工具的樣式設定檔 —— 由前往後找,用第一個存在的那一支。
- *
- * 規則要知道這個專案的 theme 實際定義了哪些值。那份資料只有設定檔知道,
- * 所以直接讀它,不在這裡另外抄一份 —— 抄了就要人工同步,
- * 而忘了同步不會報錯,只會讓規則提醒實際上存在的 class、
- * 或放行實際上已經消失的 class。
- *
- * 一支都找不到時,「用到不存在的 class」那條規則會被略過(不誤報)。
- * 工具啟動時會把「因為缺什麼而沒有作用」列出來,不會安靜地失效。
- */
-export const STYLE_CONFIG_FILES = [
-  'tailwind.config.js',
-  'tailwind.config.ts',
-  'tailwind.config.mjs',
-  'tailwind.config.cjs',
-]
-
 export const PROJECT_CONFIG_FILES = ['config.js', 'config.mjs', 'config.ts']

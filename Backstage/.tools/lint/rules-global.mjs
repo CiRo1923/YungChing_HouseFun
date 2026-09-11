@@ -7,6 +7,7 @@
 
 import {
   ABSOLUTE_PATH_SCOPE,
+  WRITING_STYLE_SCOPE,
   PROJECT_NAME_PATTERNS,
   PROJECT_NAME_SCOPE,
   issueOf,
@@ -151,15 +152,182 @@ const checkAbsolutePath = ({ rel, text }) => {
   return issues
 }
 
-export const GLOBAL_CHECKS = [checkProjectName, checkAbsolutePath]
+// --- 規則 plainText:不用 emoji 與裝飾符號 -----------------------------------
+//
+// 寫給人讀的文字裡不放 emoji,也不放拿來裝飾的符號。客戶會看到這些文字,
+// 那是正式的工作文件,不是聊天訊息。
+//
+// 要強調就把理由寫出來,那比一個圖示有用 —— 圖示只說「這裡很重要」,
+// 理由才說得出「為什麼重要、不照做會怎樣」。
+//
+// 兩種情況不算裝飾,所以不抓:
+//
+//   一、工具在終端機印出來的狀態(通過與違規各一個記號)。那不是文件,
+//       是程式跑起來當下的回饋;一排訊息裡要能一眼分出哪幾筆有問題。
+//
+//   二、對照表裡表示「變成」的箭頭。那是資訊本身,不是裝飾 ——
+//       換成文字反而讓整欄對不齊、更難讀。
+//
+// 兩者都列在 KEPT_MARKS,其餘的圖形符號一律抓。
+
+/**
+ * 不算裝飾、可以留下來的符號。
+ *
+ * 前四個是終端機的狀態記號,後三個是對照表的箭頭。
+ * 要再放行別的符號時加在這裡,不要改下面的偵測範圍 ——
+ * 改範圍會連帶放行一整批沒想過的字元。
+ */
+const KEPT_MARKS = new Set(['✔', '✓', '✗', '⛔', '→', '←', '↔'])
+
+/**
+ * 變體選擇子 —— 跟在符號後面讓它顯示成彩色圖示的那個字元。
+ *
+ * 它本身不顯示任何東西,所以不獨立算一個符號。
+ * 寫成常數而不是直接比對字面值:那個字元在編輯器裡看不見,
+ * 寫成字面值的話,下一個人會以為那裡是空字串。
+ */
+const VARIATION_SELECTOR = '️'
+
+/**
+ * 圖形符號與 emoji 的字元範圍。
+ *
+ * 涵蓋各類圖示、雜項符號、裝飾記號與箭頭,以及讓符號變成彩色的變體選擇子
+ * (那個字元本身不顯示,跟在符號後面,漏掉的話清完會留下看不見的殘渣)。
+ */
+const DECORATIVE_RE =
+  /[\u{1F000}-\u{1FAFF}\u{2190}-\u{21FF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{2028}\u{2029}]/gu
+
+const PLAIN_TEXT_EXEMPT_RE = /lint-plain-text-exempt/
+
+const checkPlainText = ({ rel, text }) => {
+  if (!WRITING_STYLE_SCOPE.some((prefix) => rel.startsWith(prefix))) return []
+  if (PLAIN_TEXT_EXEMPT_RE.test(text)) return []
+
+  const issues = []
+  const seen = new Set()
+
+  for (const m of text.matchAll(DECORATIVE_RE)) {
+    const mark = m[0]
+
+    if (KEPT_MARKS.has(mark)) continue
+
+    /* 變體選擇子一律不獨立報。那個字元本身不顯示,它跟在前一個符號後面
+       讓那個符號變成彩色 —— 該不該報已經由前一個符號自己決定了。
+       獨立報的話,同一個圖示會報兩筆,而第二筆指著一個看不見的字元。 */
+    if (mark === VARIATION_SELECTOR) continue
+
+    // 同一個符號只報一次 —— 一份文件裡同一個圖示常常出現幾十次
+    if (seen.has(mark)) continue
+    seen.add(mark)
+
+    issues.push(
+      issueOf(
+        rel,
+        lineNoOf(text, m.index),
+        'plainText',
+        `用了裝飾符號「${mark}」 —— 這些文字客戶會看到,要強調就把理由寫出來;` +
+          `終端機的狀態記號與對照表的箭頭不在此限`
+      )
+    )
+  }
+
+  return issues
+}
+
+// --- 規則 selfContained:讀者不必離開現在這一段 -------------------------------
+//
+// 「同上」「同 1」「參考第三節」這類寫法不行 —— 它們把資訊留在別的地方,
+// 強迫讀者跳走。
+//
+// 讀的人多半是帶著一個具體問題來的,從搜尋結果或某一節的中間開始看,
+// 沒有「上一段」可以參照。被送去另一個地方之後,還要自己找回原本在看什麼 ——
+// 跳兩次就放棄了。
+//
+// 同一件事出現在很多地方時,挑一個地方寫完整,其餘各自寫一段短的。
+// 內容重複完全沒問題,重複遠比指涉好:同一句話在三個地方各寫一次,
+// 讀者三次都讀得懂;寫成「同上」則是三個地方都讀不懂。
+//
+// **指向別的檔案不算**(「完整清單見某某文件」)。那是有用的補充,
+// 前提是這一段自己要講的已經講完了。這條抓的是「指向同一份文件裡的別處」。
+
+/**
+ * 把讀者送回同一份文件別處的寫法。
+ *
+ * 兩類:
+ *   一、直接說「跟前面一樣」(同上、同前述、如前所述)
+ *   二、指名文件內部的位置(參考第三節、見上一段、同第 1 點)
+ *
+ * 中文句子裡詞與詞之間沒有空格,所以不能要求這些詞前面一定是標點 ——
+ * 「這段的規則同上」的「同上」前面就是一個中文字,加了條件會整批漏抓。
+ * 有誤報風險的詞(「同理」會出現在「同理心」)改用後置排除處理。
+ */
+const CROSS_REFERENCE_RE = new RegExp(
+  [
+    '同上(?:所述)?',
+    '同前(?:述|面|一[點條節])?',
+    '[如承]上所述',
+    '如前所述',
+    '承上',
+    // 「同理」後面接字就不是指涉(同理心、同理可證的「可證」另計)
+    '同理(?![心念解])',
+    /* 「同 2」這種省略量詞的寫法也要抓 —— 量詞寫成可選。
+       但前面不能接「相」「不」「雷」:「相同 2 個條件」「不同 3 種寫法」
+       是正常句子,那個「同」屬於前面那個詞,不是「跟第 2 點一樣」的意思。 */
+    '(?<![相不雷])同第?\\s*\\d+\\s*[點條項節]?',
+    '參[考照](?:上|前|第)\\s*[\\d一二三四五六七八九十]*\\s*[點條項節章單元段]',
+    '[見詳](?:上|前)\\s*[一]?\\s*[點條項節章段]',
+  ].join('|'),
+  'g'
+)
+
+const SELF_CONTAINED_EXEMPT_RE = /lint-self-contained-exempt/
+
+const checkSelfContained = ({ rel, text }) => {
+  if (!WRITING_STYLE_SCOPE.some((prefix) => rel.startsWith(prefix))) return []
+  if (SELF_CONTAINED_EXEMPT_RE.test(text)) return []
+
+  const issues = []
+  const seen = new Set()
+
+  for (const m of text.matchAll(CROSS_REFERENCE_RE)) {
+    const phrase = m[0]
+
+    // 同一種寫法只報一次 —— 一份文件裡同一個詞常常出現好幾十次
+    if (seen.has(phrase)) continue
+    seen.add(phrase)
+
+    issues.push(
+      issueOf(
+        rel,
+        lineNoOf(text, m.index),
+        'selfContained',
+        `寫了「${phrase}」 —— 讀的人多半從中間開始看,沒有「上一段」可以參照;` +
+          `把那段要講的在這裡再寫一次,內容重複沒關係,重複遠比讓讀者跳頁好`
+      )
+    )
+  }
+
+  return issues
+}
+
+export const GLOBAL_CHECKS = [
+  checkProjectName,
+  checkAbsolutePath,
+  checkPlainText,
+  checkSelfContained,
+]
 
 export const GLOBAL_RULE_TITLE = {
   projectName: '寫死專案名稱',
   absolutePath: '寫了某一台機器上才有的路徑',
+  plainText: '用了 emoji 或裝飾符號',
+  selfContained: '把讀者送去別處的寫法(同上 / 參考第幾節)',
 }
 
 export const GLOBAL_RULE_HINT = {
   projectName: '專案名稱不寫進程式碼與文件 —— 網域 / 路徑 / 識別字走環境變數或設定檔',
   absolutePath:
     '路徑一律相對專案根目錄 —— 磁碟機代號、家目錄、file://、往上跳三層以上都只在特定電腦上成立',
+  plainText: '要強調就把理由寫出來 —— 終端機的狀態記號與對照表的箭頭不在此限',
+  selfContained: '把那段要講的在這裡再寫一次 —— 內容重複沒關係,重複遠比讓讀者跳頁好',
 }
