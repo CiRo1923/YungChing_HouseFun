@@ -2,9 +2,9 @@
 // 檢查 / 自動修正色票檔(assets/css/_common/color*.css)的變數排序與命名,
 // 並找出「該搬到共用 color.css」的頻道色。
 //
-//   node .tools/css/sort-color-css.mjs           # 檢查,不改檔(不符規則時 exit 1)
-//   node .tools/css/sort-color-css.mjs --write   # 直接依規則重新排序寫回
-//   node .tools/css/sort-color-css.mjs <file>    # 只處理指定的色票檔
+//   node .tools/lint/sort-color-css.mjs           # 檢查,不改檔(不符規則時 exit 1)
+//   node .tools/lint/sort-color-css.mjs --write   # 直接依規則重新排序寫回
+//   node .tools/lint/sort-color-css.mjs <file>    # 只處理指定的色票檔
 //
 // 只調整順序與空行,不會改動任何變數名或色值。
 // 命名不符規則、頻道色重複這兩類以警告列出,不自動修 —— 改名與搬家都會牽動使用端。
@@ -12,7 +12,6 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 import {
   SHARED_COLOR_CSS_PATH,
   buildColorCss,
@@ -29,7 +28,9 @@ import {
 
 import { CYAN, DIM, GREEN, RED, RESET, YELLOW } from './colors.mjs'
 
-const projectRoot = path.resolve(fileURLToPath(import.meta.url), '../../..')
+/* 專案根一律 import,不要自己算 —— 各支用 import.meta.url 往上數層數時,
+  層數寫錯就會指到別的地方,而那種錯誤只表現成「檔案讀不到」,看不出是路徑算錯。 */
+import { PROJECT_ROOT as projectRoot } from './paths.mjs'
 const args = process.argv.slice(2)
 const write = args.includes('--write')
 const fileArgs = args.filter((a) => !a.startsWith('--'))

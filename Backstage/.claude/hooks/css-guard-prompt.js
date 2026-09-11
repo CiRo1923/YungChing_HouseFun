@@ -19,19 +19,19 @@
 import { execFileSync } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 
-const PROJECT_ROOT = path.resolve(fileURLToPath(import.meta.url), '../../..')
-const CACHE_DIR = path.join(PROJECT_ROOT, 'node_modules/.cache/cssGuard')
+/* 專案根與快取路徑一律 import,不要自己算 ——
+  存檔那層(.tools/lint/guard-file.mjs)寫進去的就是同一份常數,
+  兩邊各自拼路徑的話對不上就等於接力棒斷了,而且**兩邊都不會報錯**,
+  只是對話裡再也不會出現違規清單。
 
-/**
- * 存檔那層(.tools/css/guard-file.mjs)留下的追蹤清單。
- *
- * **不是讀走就清空** —— 檔案一旦被存過而且有違規,就一直留在這裡,
- * 每一輪對話都重新檢查一次;直到它通過了才移除。
- * 這樣「有違規就每次問」才成立:不修掉就會一直被問。
- */
-const PENDING_FILE = path.join(CACHE_DIR, 'pending.json')
+  這裡用相對路徑而不是 @ alias:hook 是 node 直接執行的腳本,
+  不經過建置流程,alias 在這裡不會被解析。
+
+  PENDING_FILE 是存檔那層留下的追蹤清單。**不是讀走就清空** ——
+  檔案一旦被存過而且有違規,就一直留在裡面,每一輪對話都重新檢查一次;
+  直到它通過了才移除。這樣「有違規就每次問」才成立:不修掉就會一直被問。 */
+import { PENDING_FILE, PROJECT_ROOT } from '../../.tools/lint/paths.mjs'
 
 const MAX_LISTED = 10
 
@@ -82,7 +82,7 @@ const onSortColorFiles = (files) => {
   for (const rel of files.filter(isColorCss)) {
     const abs = path.join(PROJECT_ROOT, rel)
     const before = fs.readFileSync(abs, 'utf8')
-    run(process.execPath, ['.tools/css/sort-color-css.mjs', '--write', rel])
+    run(process.execPath, ['.tools/lint/sort-color-css.mjs', '--write', rel])
     if (fs.readFileSync(abs, 'utf8') !== before) sorted.push(rel)
   }
 
@@ -90,7 +90,7 @@ const onSortColorFiles = (files) => {
 }
 
 const onLint = (files) => {
-  const lint = run(process.execPath, ['.tools/css/lint-css.mjs', '--json', ...files])
+  const lint = run(process.execPath, ['.tools/lint/lint.mjs', '--json', ...files])
   try {
     return JSON.parse(lint.out)?.issues ?? []
   } catch {
@@ -275,7 +275,7 @@ const main = () => {
           '(標 /* lint-same-value: 理由 */),但那是設計決定不是工程判斷。' +
           'box-shadow / border-width 這類造型屬性最常被問到,' +
           '而工具只抓得到單一數值的尺寸、複合值(陰影)一律漏抓,所以更要先問。\n\n' +
-          '⛔ **嚴禁在規則本體與 .tools/css/ 的註解裡寫死專案名稱** —— 不論本專案、姊妹專案還是參考專案的名字都不行。這份規範與工具是各自的複本、移植時整份複製,寫死對方的名字複製過去就變成錯的敘述(「與 A 的差異」抄到 A 專案會變成「與自己的差異」)。兩邊真的有差異時,只描述**本專案的事實**與**移植時要重新確認什麼**,不要提對方是誰 —— 例如「本專案的 tailwind.extend.js 有三個 boxShadow preset,所以只抓內建的 key;若對方的 extend 不放陰影,要改成抓任何 shadow-*」。專案名只能出現在規範最後的「本專案現況」一章,以及專門講跨專案同步的 skill。\n\n' +
+          '⛔ **嚴禁在規則本體與 .tools/lint/ 的註解裡寫死專案名稱** —— 不論本專案、姊妹專案還是參考專案的名字都不行。這份規範與工具是各自的複本、移植時整份複製,寫死對方的名字複製過去就變成錯的敘述(「與 A 的差異」抄到 A 專案會變成「與自己的差異」)。兩邊真的有差異時,只描述**本專案的事實**與**移植時要重新確認什麼**,不要提對方是誰 —— 例如「本專案的 tailwind.extend.js 有三個 boxShadow preset,所以只抓內建的 key;若對方的 extend 不放陰影,要改成抓任何 shadow-*」。專案名只能出現在規範最後的「本專案現況」一章,以及專門講跨專案同步的 skill。\n\n' +
           '**再說一次**:不要主動彈 AskUserQuestion 問「要不要修」—— 等使用者開口。\n' +
           '他說「修正」時就直接動手,不用再確認一次;修的時候要說清楚哪些是這次改出來的、' +
           '哪些是碰到的舊檔案既有存量,不要讓他誤以為都是新問題。\n' +

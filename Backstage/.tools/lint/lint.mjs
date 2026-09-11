@@ -7,21 +7,22 @@
 //   規則 5 —— .vue 的 import 順序(css → ./.composables → @js → 其他套件)
 //   規則 6 —— 不要用被 theme 整組覆寫掉而不存在的 tailwind class
 //
-//   node .tools/css/lint-css.mjs                 # 全專案掃描
-//   node .tools/css/lint-css.mjs <file> [file..] # 只檢查指定檔案 / 目錄
-//   node .tools/css/lint-css.mjs --json          # 以 JSON 輸出,供程式解析
+//   node .tools/lint/lint.mjs                 # 全專案掃描
+//   node .tools/lint/lint.mjs <file> [file..] # 只檢查指定檔案 / 目錄
+//   node .tools/lint/lint.mjs --json          # 以 JSON 輸出,供程式解析
 //
 // 一律只回報、不改動任何檔案。有違規時 exit 1。
 
 import fs from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 import { SHARED_COLOR_CSS_PATH, isColorCssPath, loadDefinedColorVars } from './color-order.mjs'
 import { SCAN_TARGETS, checkSharedColors, isScannable, lintFile, listFiles } from './lint-core.mjs'
 
 import { BOLD, CYAN, DIM, GREEN, RED, RESET, YELLOW } from './colors.mjs'
 
-const projectRoot = path.resolve(fileURLToPath(import.meta.url), '../../..')
+/* 專案根一律 import,不要自己算 —— 各支用 import.meta.url 往上數層數時,
+  層數寫錯就會指到別的地方,而那種錯誤只表現成「檔案讀不到」,看不出是路徑算錯。 */
+import { PROJECT_ROOT as projectRoot } from './paths.mjs'
 
 const args = process.argv.slice(2)
 const jsonOut = args.includes('--json')

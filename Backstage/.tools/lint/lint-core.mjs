@@ -5,8 +5,8 @@
 //   規則 4 —— module 變數的命名與斷點
 //
 // 這支只負責「判斷」,不做輸出也不改檔案。
-// CLI 在 lint-css.mjs;dev server 的即時檢查在 .vite/css-guard.mjs;
-// Claude 寫檔後的檢查在 .claude/hooks/cssGuard.js。
+// CLI 在 lint.mjs;dev server 的即時檢查在 .vite/css-guard.mjs;
+// Claude 寫檔後的檢查在 .claude/hooks/css-guard.js。
 
 import fs from 'node:fs'
 import path from 'node:path'
@@ -1326,7 +1326,7 @@ export function checkColorBase(relPath, text) {
  * ⚠️ **只抓大括號內完全空白的**。帶註解的(`.foo { /* 之後補 *\/ }`)不算 ——
  *    那是有意留的位置,而且註解通常寫著為什麼。
  *
- * 這條有**自動修正**:存檔時(guard-file / cssGuard)會直接把空區塊連同
+ * 這條有**自動修正**:存檔時(guard-file / css-guard)會直接把空區塊連同
  * 後面的空行一起刪掉,不必手動處理。
  */
 export function checkEmptyRule(relPath, text) {

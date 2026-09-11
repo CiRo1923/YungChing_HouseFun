@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // 移除 CSS 檔裡「空的規則區塊」—— 給 hook 與存檔守門呼叫。
 //
-//   node .tools/css/clean-empty-rules.mjs <檔案>
+//   node .tools/lint/clean-empty-rules.mjs <檔案>
 //
 // 空區塊(`.foo {}` / `@screen m {}`)在產物裡不會有任何輸出,留著只有壞處:
 // 讀的人以為樣式被誤刪、或把 `@screen m {}` 讀成「手機刻意不設定」。
@@ -13,10 +13,11 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 import { onRemoveEmptyRules } from './lint-core.mjs'
 
-const projectRoot = path.resolve(fileURLToPath(import.meta.url), '../../..')
+/* 專案根一律 import,不要自己算 —— 各支用 import.meta.url 往上數層數時,
+  層數寫錯就會指到別的地方,而那種錯誤只表現成「檔案讀不到」,看不出是路徑算錯。 */
+import { PROJECT_ROOT as projectRoot } from './paths.mjs'
 const target = process.argv[2]
 
 if (!target) process.exit(0)

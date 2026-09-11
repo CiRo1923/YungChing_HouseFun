@@ -79,7 +79,7 @@ config.value.position === 'popup' || (isDeviceM.value && !!config.value.mobileSu
 5. 兩邊各自驗證:
 
 ```powershell
-npm run lint:css        # 或 node .tools/css/lint-css.mjs <範圍>
+npm run lint:css        # 或 node .tools/lint/lint.mjs <範圍>
 npx eslint <範圍>
 npm run build
 ```

@@ -3,7 +3,7 @@
 //   1. 存檔色票檔 assets/css/_common/color*.css → 依規則自動重新排序(只動順序,不動色值)
 //   2. 存檔任何 .vue / .css                     → 檢查四條規範,終端機印紅色警告
 //
-// 規範見 .claude/rules/css-conventions.md,判斷邏輯在 .tools/css/。
+// 規範見 .claude/rules/css-conventions.md,判斷邏輯在 .tools/lint/。
 // 只在 dev(apply: 'serve')生效,build 不跑,也不會擋掉任何東西。
 
 import { createHash } from 'node:crypto'
@@ -15,8 +15,8 @@ import {
   loadDefinedColorVars,
   parseColorCss,
   sortDecls,
-} from '../.tools/css/color-order.mjs'
-import { checkSharedColors, lintFile } from '../.tools/css/lint-core.mjs'
+} from '../.tools/lint/color-order.mjs'
+import { checkSharedColors, lintFile } from '../.tools/lint/lint-core.mjs'
 
 const RED = '\x1b[31m'
 const YELLOW = '\x1b[33m'
