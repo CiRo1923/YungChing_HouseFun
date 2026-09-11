@@ -1,7 +1,7 @@
 ---
 name: page-conventions
 summary: 頁面
-description: 本專案的頁面撰寫規範(頁面目錄底下的 .vue 與其元件)。當在頁面新增 api 呼叫、包裝 action、放置 api 回來的資料、調整 onMounted 的初次載入,或審查既有頁面寫法時使用。規則:api 資料一律放 store,頁面不要自己 ref 一份;元件一律不能直接 import api(擋),頁面則是建議級不擋;onMounted 裡的請求一律用並行載入的包裝函式一起發出,單支也包,存檔時自動包好;包裝 function 命名為 on + endpoint(去掉 Api 與 method 那一段,postForm 連 Form 一起去掉);只有這一頁要用的邏輯寫在這一頁,第二個頁面也要用時才搬進 use*Actions;掛在 api 回傳物件上的自訂欄位一律加 _ 前綴。
+description: 本專案的頁面撰寫規範(頁面目錄底下的 .vue 與其元件)。當在頁面新增 api 呼叫、包裝 action、放置 api 回來的資料、調整 onMounted 的初次載入,或審查既有頁面寫法時使用。規則:api 資料一律放 store,頁面不要自己 ref 一份;元件一律不能直接 import api(沒有例外),頁面也擋但可在檔頭標 lint-page-api-exempt 放行一次性的請求;onMounted 裡的請求一律用並行載入的包裝函式一起發出,單支也包,存檔時自動包好;包裝 function 命名為 on + endpoint(去掉 Api 與 method 那一段,postForm 連 Form 一起去掉);只有這一頁要用的邏輯寫在這一頁,第二個頁面也要用時才搬進 use*Actions;掛在 api 回傳物件上的自訂欄位一律加 _ 前綴。
 ---
 
 # 頁面撰寫規範
@@ -9,7 +9,7 @@ description: 本專案的頁面撰寫規範(頁面目錄底下的 .vue 與其元
 判斷邏輯在 `.tools/lint/rules-page.mjs`,四個時機跑的是同一份判斷:
 
 - **存檔時** —— 編輯器與開發伺服器會即時檢查,違規逐筆印在終端機。只提醒,不影響存檔。
-- **AI 寫檔時** —— `.claude/hooks/enforce-conventions.js` 比對寫入前後的內容,
+- **AI 寫檔時** —— `.claude/hooks/enforce-conventions.cjs` 比對寫入前後的內容,
   只擋「這次新增」的違規;既有存量不影響。
 - **對話時** —— 存檔時沒修掉的違規會列進對話,直到修好為止。
 - **commit 時** —— pre-commit 檢查這次提交的檔案。
@@ -49,20 +49,33 @@ const { detail } = storeToRefs(usePetsStore())
 直接 import api 的話,拿到的資料就停在那一支檔案裡 —— 沒有進 store,
 換頁回來要重打,別的地方要用只能再打一次,也就是第 1 條想擋的那個結果。
 
-**同一件事,元件與頁面的輕重不同:**
+**兩種對象都擋,差別在有沒有例外的出口:**
 
-| 對象 | 規則 | 輕重 |
+| 對象 | 規則 | 有沒有例外 |
 | --- | --- | --- |
-| **元件** | `componentApiImport` | **擋** |
-| **頁面** | `pageApiImport` | 建議,不擋 |
+| **元件** | `componentApiImport` | 沒有例外 |
+| **頁面** | `pageApiImport` | 檔頭標 `lint-page-api-exempt` 可放行 |
 
 **元件一律不能自己去要資料。** 元件是被放進畫面裡的零件,同一支可能出現在很多頁、
 也可能同一頁出現很多次 —— 它自己打 api 的話,出現幾次就打幾次,
 而且每一份資料各自活在各自的元件裡,彼此不同步。
 元件要什麼資料,**由使用它的頁面決定並傳進來**,或是頁面寫進 store 之後元件去讀。
+這一種沒有例外,標了豁免記號也一樣擋。
 
-**頁面則是建議。** 一次性的請求(送出後就不再用的表單、只給這一頁的下拉選項)
-直接打是可以的,進 store 反而多繞一圈。但那要想過再決定,不是順手 import。
+**頁面有一種正當情況:一次性的請求。** 送出後就不再用的表單那種,
+結果不顯示在畫面上,進 store 反而多繞一圈。那種情況在檔頭標記號並寫明理由:
+
+```js
+/* lint-page-api-exempt: 送出問卷,結果不顯示在畫面上,不需要進 store */
+import { apiPostQuestionnaire } from '@api/question.js'
+```
+
+**為什麼要標而不是讓工具自己判斷。** 「真的是一次性請求」與「偷懶沒寫 actions」
+寫出來一模一樣,工具分不出來。讓工具去查「這支 api 有沒有對應的 actions」也不行:
+新功能還沒寫 actions 的時候會放行,而那正是最該擋下來的時候。
+由人判斷、理由留在程式碼裡,下一個人看到才知道那不是漏寫。
+
+記號作用於整支檔案 —— 與其他豁免記號一樣的範圍。
 
 哪些目錄算元件,定義在 `.tools/lint/project-config.mjs` 的 `COMPONENT_DIRS`
 (那幾個目錄底下**所有層級**都算)與 `COMPONENT_FOLDERS`

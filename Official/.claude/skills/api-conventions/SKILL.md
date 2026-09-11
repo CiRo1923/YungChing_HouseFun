@@ -9,7 +9,7 @@ description: 本專案的 API 撰寫規範(api 目錄底下的 *.js)。當新增
 判斷邏輯在 `.tools/lint/rules-api.mjs`,四個時機跑的是同一份判斷:
 
 - **存檔時** —— 編輯器與開發伺服器會即時檢查,違規逐筆印在終端機。只提醒,不影響存檔。
-- **AI 寫檔時** —— `.claude/hooks/enforce-conventions.js` 比對寫入前後的內容,
+- **AI 寫檔時** —— `.claude/hooks/enforce-conventions.cjs` 比對寫入前後的內容,
   只擋「這次新增」的違規;既有存量不影響。
 - **對話時** —— 存檔時沒修掉的違規會列進對話,直到修好為止。
 - **commit 時** —— pre-commit 檢查這次提交的檔案。
