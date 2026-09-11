@@ -30,9 +30,9 @@
   --popup-header-tablet-border: 2px;
   --popup-header-mobile-border: 2px;
 
-  --popup-header-pc-text: 24px;
-  --popup-header-tablet-text: 24px;
-  --popup-header-mobile-text: 24px;
+  --popup-header-pc-text-size: 24px;
+  --popup-header-tablet-text-size: 24px;
+  --popup-header-mobile-text-size: 24px;
 
   --popup-header-pc-gap-x: 10px;
   --popup-header-tablet-gap-x: 10px;

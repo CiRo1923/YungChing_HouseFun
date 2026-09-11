@@ -1,5 +1,7 @@
 <script setup>
+import '@css/_modules/common/mPopup/variables.css'
 import '@css/_modules/common/mPopup/promiseVariables.css'
+import '@css/_modules/common/mPopup/common.css'
 import '@css/_modules/common/mPopup/promise.css'
 
 const popup = usePopupStore()
