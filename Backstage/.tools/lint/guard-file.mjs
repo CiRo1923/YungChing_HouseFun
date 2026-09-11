@@ -23,17 +23,21 @@ import {
   sortDecls,
 } from './color-order.mjs'
 import { RESET, YELLOW } from './colors.mjs'
-import { checkSharedColors, lintFile, onRemoveEmptyRules } from './lint-core.mjs'
+/* 規則標題與修正提示也從這裡拿,不要各層自己寫一份 —— 加了新規則只改其中一層的話,
+  其他層會顯示原始代號而不是看得懂的標題,而那不會報錯,只是訊息變得難懂。 */
+import {
+  RULE_HINT,
+  RULE_TITLE,
+  checkSharedColors,
+  lintFile,
+  onRemoveEmptyRules,
+} from './lint-core.mjs'
 
 /* 專案根與快取路徑一律 import,不要自己算 ——
   對話那層(.claude/hooks/css-guard-prompt.js)讀的是同一份常數,
   兩邊各自拼路徑的話對不上就等於接力棒斷了,而且**兩邊都不會報錯**。 */
 import { PENDING_FILE, PROJECT_ROOT as projectRoot } from './paths.mjs'
 
-/* 規則標題與修正提示一律 import,不要各層自己寫一份 ——
-  加了新規則只改其中一層的話,其他層會顯示原始代號而不是看得懂的標題,
-  而那不會報錯,只是訊息變得難懂,通常沒有人會回報。 */
-import { RULE_HINT, RULE_TITLE } from './lint-core.mjs'
 
 
 
