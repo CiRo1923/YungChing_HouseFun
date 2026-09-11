@@ -17,8 +17,10 @@ import {
   CONVENTION_SKILLS_DIR,
   PROJECT_DOCS_DIR,
   SCANNABLE_RE,
+  SKIP_DIRS,
   SRC_PREFIX,
   TOOLING_PREFIXES,
+  VIEW_RESOURCE_DEPTH,
   VIEWS_DIR,
 } from './project-config.mjs'
 
@@ -46,12 +48,14 @@ export {
   SCAN_TARGETS,
   SHARED_API_FILE,
   SHARED_MODULE_VARIABLES,
+  SKIP_DIRS,
   STYLE_CONFIG_FILES,
   SRC_DIR,
   STANDALONE_APIS,
   STANDALONE_STORES,
   STORE_DIR,
   TAILWIND_THEME_OVERRIDES,
+  VIEW_RESOURCE_DEPTH,
   VIEWS_DIR,
 } from './project-config.mjs'
 
@@ -117,12 +121,55 @@ export const listViewFolders = (root) => {
   const abs = path.join(root, ...VIEWS_DIR.split('/'))
   if (!fs.existsSync(abs)) return null
 
-  return new Set(
-    fs
-      .readdirSync(abs, { withFileTypes: true })
-      .filter((e) => e.isDirectory())
-      .map((e) => e.name)
+  /**
+   * 走到指定深度,收集那一層的資料夾名。
+   *
+   * 深度來自設定(VIEW_RESOURCE_DEPTH)—— 有的專案資源直接放第一層,
+   * 有的第一層是分類層、資源在第二層。固定看第一層的話,分類層那種專案的
+   * 每一支 api 與 store 都會被報「對不上資料夾」,因為它們的檔名寫的是資源名。
+   *
+   * 底線開頭的資料夾不算資源 —— 那是放元件的地方,不是功能單位。
+   */
+  const foldersAt = (dir, depth) => {
+    const entries = fs
+      .readdirSync(dir, { withFileTypes: true })
+      .filter((e) => e.isDirectory() && !e.name.startsWith('_'))
+
+    if (depth <= 1) return entries.map((e) => e.name)
+
+    return entries.flatMap((e) => foldersAt(path.join(dir, e.name), depth - 1))
+  }
+
+  return new Set(foldersAt(abs, VIEW_RESOURCE_DEPTH))
+}
+
+/**
+ * 頁面目錄的第一層,是分類層還是資源層。
+ *
+ * 判準是「第一層的資料夾底下有沒有直接放 .vue」:
+ *   有  → 那一層就是資源(一個功能單位一個資料夾,裡面放它的頁面)
+ *   沒有 → 那一層只是分類,資源在更底下
+ *
+ * 回傳建議的深度;判斷不出來(目錄不存在、第一層沒有資料夾)時回 null。
+ *
+ * 這是給前提檢查用的 —— VIEW_RESOURCE_DEPTH 設錯的話,每一支 api 與 store
+ * 都會被報「對不上資料夾」,那一整片訊息說的其實是同一件事:這一項設錯了。
+ */
+export const detectViewResourceDepth = (root) => {
+  const abs = path.join(root, ...VIEWS_DIR.split('/'))
+  if (!fs.existsSync(abs)) return null
+
+  const firstLevel = fs
+    .readdirSync(abs, { withFileTypes: true })
+    .filter((e) => e.isDirectory() && !e.name.startsWith('_'))
+
+  if (!firstLevel.length) return null
+
+  const hasOwnPages = firstLevel.filter((e) =>
+    fs.readdirSync(path.join(abs, e.name)).some((name) => name.endsWith('.vue'))
   )
+
+  return hasOwnPages.length ? 1 : 2
 }
 
 /** 單複數 / 大小寫對不上是最常見的情況,把接近的名字指出來比只說「找不到」有用 */
@@ -187,7 +234,15 @@ export const isInActionsDir = (rel) => rel.includes(`/${ACTIONS_DIR_NAME}/`)
  */
 export const PENDING_CACHE_FILE = 'node_modules/.cache/cssGuard/pending.json'
 
-const SKIP_DIR = /(^|\/)(node_modules|\.git|dist|build|public)(\/|$)/
+/**
+ * 走訪時要跳過的目錄。
+ *
+ * 清單在 project-config.mjs —— 各專案的建置產物叫什麼不一樣(Nuxt 是 .output,
+ * Next 是 .next),寫死在這裡的話,漏掉的那一種會被當成原始碼整包掃進來。
+ */
+const SKIP_DIR = new RegExp(
+  `(^|/)(${SKIP_DIRS.map((d) => d.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})(/|$)`
+)
 
 /**
  * 專案自己的文件目錄底下的檔案 —— 每一條規則都不檢查。

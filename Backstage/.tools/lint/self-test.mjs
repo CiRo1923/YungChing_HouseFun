@@ -43,7 +43,14 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { hueOf, isSorted, loadDefinedColorVars, majorityHueSource } from './color-order.mjs'
+import {
+  COLOR_NAME_SEPARATOR,
+  expectedSuffix,
+  hueOf,
+  isSorted,
+  loadDefinedColorVars,
+  majorityHueSource,
+} from './color-order.mjs'
 import {
   checkSharedColors,
   lintFile,
@@ -63,12 +70,15 @@ import {
   CSS_MODULES_DIR,
   PROJECT_DOCS_DIR,
   PROJECT_NAME_SCOPE,
+  SHARED_API_FILE,
   SRC_DIR,
+  STANDALONE_STORES,
   STORE_DIR,
   TAILWIND_THEME_OVERRIDES,
+  VIEW_RESOURCE_DEPTH,
   VIEWS_DIR,
 } from './project-config.mjs'
-import { listConventionRules, listConventionSkills } from './shared.mjs'
+import { detectViewResourceDepth, listConventionRules, listConventionSkills } from './shared.mjs'
 import { BOLD, GREEN, RED, RESET } from './colors.mjs'
 
 const root = path.resolve(fileURLToPath(import.meta.url), '../../..')
@@ -181,8 +191,17 @@ const apiAliasImportOf = (fileName) => {
    結束時也只刪自己建的那幾個 —— 專案原本就有的完全不碰。 */
 
 /** 探測用的頁面資料夾。名字取得夠特別,誤留下來一眼看得出是什麼 */
-const PROBE_PAGE_ALPHA = 'selfTestAlpha'
-const PROBE_PAGE_PLURAL = 'selfTestPets'
+/**
+ * 探測頁面資料夾共同的開頭 —— 清除時靠它認出「這幾個是驗證自己建的」。
+ *
+ * 上一次執行中途失敗時,那些資料夾會留在頁面目錄底下。下一次執行看到它們已經
+ * 存在就不會再建,也就不會記進清除清單 —— 於是永遠留在那裡,還會被規則
+ * 當成真的頁面資料夾。清除時一律掃過去刪,殘留才不會累積。
+ */
+const PROBE_PAGE_PREFIX = 'selfTest'
+
+const PROBE_PAGE_ALPHA = `${PROBE_PAGE_PREFIX}Alpha`
+const PROBE_PAGE_PLURAL = `${PROBE_PAGE_PREFIX}Pets`
 
 /**
  * 探測用頁面的分類資料夾與頁面檔 —— store 的分層規則拿它比對。
@@ -207,7 +226,7 @@ const PROBE_CLASH_FOLDER_B = 'beta'
    測「store 只放宣告」「store 命名」這類規則時要用它 ——
    用有頁面檔的那個頁面群,每個案例都會多被分層規則抓一筆,
    那筆跟案例要驗的事情無關,只會讓預期數字對不上。 */
-const PROBE_PAGE_FLAT = 'selfTestBeta'
+const PROBE_PAGE_FLAT = `${PROBE_PAGE_PREFIX}Beta`
 
 /**
  * 探測用的分組色票檔名。
@@ -215,7 +234,23 @@ const PROBE_PAGE_FLAT = 'selfTestBeta'
  * 前綴從設定算出來,不寫死 —— 每個專案的色票檔叫什麼不一樣,
  * 寫死的話換一個專案這幾則驗證永遠不會命中,看起來像規則壞了。
  */
-const PROBE_COLOR_FILE = `${COLOR_CSS_PREFIX}SelfTest.css`
+/**
+ * 探測色票檔共同的開頭 —— 清除時靠它認出「這幾支是驗證自己建的」。
+ *
+ * 新增一支探測色票時沿用這個開頭,結束時就會被一起清掉,不必回頭補清除的清單。
+ */
+const PROBE_COLOR_PREFIX = `${COLOR_CSS_PREFIX}SelfTest`
+
+const PROBE_COLOR_FILE = `${PROBE_COLOR_PREFIX}.css`
+
+/**
+ * 驗色票檔自身規則(命名、混用、值的形狀)時用的另一支探測色票。
+ *
+ * **不能與上面那支共用** —— 案例會實際把 code 寫進檔案,共用的話後面的案例
+ * 會覆寫前面的內容,而「色票裡已經有這個色值」那類案例靠的正是那份內容。
+ * 覆寫之後那則會失敗,但失敗的原因看起來像是規則壞了。
+ */
+const PROBE_COLOR_NAMING_FILE = `${PROBE_COLOR_PREFIX}Naming.css`
 
 /**
  * 探測用的樣式設定檔 —— 擺在專案根,因為那條規則只看專案根的設定檔。
@@ -228,9 +263,43 @@ const BUILD_STYLE_CONFIG = `${PROBE}.config.js`
 /** 探測用的 theme 值來源檔 —— 值常常另外拆一支檔案再 import 進設定 */
 const THEME_SOURCE_FILE = `${PROBE}.theme.js`
 
+/** `common` → `Common` —— 從設定值組出 store 名稱時要用 */
+const pascalOf = (name) => name.charAt(0).toUpperCase() + name.slice(1)
+
 /** 探測用的色值與變數名 —— 用不太可能撞到的值,避免與專案既有色票重複 */
 const PROBE_COLOR_VAR = '--gray-4d2c'
 const PROBE_COLOR_HEX = '#4d2c1e'
+
+/**
+ * 帶透明度的探測色,以及它在**目前設定下**應該叫什麼。
+ *
+ * 名字用 expectedSuffix 算,不寫死 —— 透明度那兩碼怎麼接是設定
+ * (COLOR_SUFFIX_PICK.alphaSeparator),直接相接的專案得到 `--gray-e566`,
+ * 用分隔符的專案得到 `--gray-e5-66`。寫死一種的話,案例在另一種慣例的專案
+ * 會過不了,而那不是規則壞了,是案例綁死了設定。
+ */
+const PROBE_ALPHA_HEX = '#e5e5e566'
+const PROBE_ALPHA_HUE = 'gray'
+const PROBE_ALPHA_SUFFIX = expectedSuffix(PROBE_ALPHA_HEX)
+const PROBE_ALPHA_VAR = `--${PROBE_ALPHA_HUE}${COLOR_NAME_SEPARATOR}${PROBE_ALPHA_SUFFIX}`
+
+/**
+ * 同樣長度、但每一碼都不同的取碼 —— 驗「取碼位置不同只給建議」那條路徑。
+ *
+ * **只位移後綴,色相名原樣留著** —— 色相名裡也有 hex 字元(gray 的 a),
+ * 連它一起換的話會變成認不出的色相,那則案例就跑到別條規則去了。
+ *
+ * 分隔符也不動,長度才會與正確的名字一致 ——
+ * 長度一旦不同就會走到「形狀對不上」那條路徑,那是別則案例在驗的事。
+ */
+const HEX_DIGITS = '0123456789abcdef'
+
+const PROBE_ALPHA_SHIFTED =
+  `--${PROBE_ALPHA_HUE}${COLOR_NAME_SEPARATOR}` +
+  PROBE_ALPHA_SUFFIX.replace(
+    /[0-9a-f]/g,
+    (c) => HEX_DIGITS[(HEX_DIGITS.indexOf(c) + 1) % HEX_DIGITS.length]
+  )
 
 /** 這次執行自己建立的東西,結束時只刪這些 */
 const created = []
@@ -400,14 +469,14 @@ const CSS_CASES = [
   },
   {
     name: 'colorFile 值寫成 var() 要報違規',
-    file: `${COLOR_CSS_DIR}/${PROBE_COLOR_FILE}`,
+    file: `${COLOR_CSS_DIR}/${PROBE_COLOR_NAMING_FILE}`,
     code: `:root {\n  /* black */\n  --black-x: var(--black);\n}\n`,
     expect: 1,
     keyword: '不是單純的色碼',
   },
   {
     name: 'colorFile 純色碼不誤報',
-    file: `${COLOR_CSS_DIR}/${PROBE_COLOR_FILE}`,
+    file: `${COLOR_CSS_DIR}/${PROBE_COLOR_NAMING_FILE}`,
     code: `:root {\n  /* black */\n  --black: #000;\n  --black-b3: #000000b3;\n}\n`,
     expect: 0,
   },
@@ -444,11 +513,12 @@ const CSS_CASES = [
 
   // ---------- 規則 colorFile ----------
   {
-    /* 取碼規則來自設定(COLOR_SUFFIX_PICK)。這幾則案例跟著設定走 ——
-       專案改了取碼慣例,案例期望的名字也要跟著改,不然驗證會在專案設定正確時失敗。 */
+    /* 名字從設定算出來,不寫死 —— 取碼規則(COLOR_SUFFIX_PICK)每個專案不一樣,
+       透明度那兩碼有的直接接、有的用分隔符隔開。寫死一種的話,
+       案例搬到另一種慣例的專案就過不了,看起來像規則壞了,其實是案例綁死了設定。 */
     name: 'colorFile 取碼符合命名規則不報',
-    file: `${COLOR_CSS_DIR}/${PROBE_COLOR_FILE}`,
-    code: `:root {\n  /* gray */\n  --gray-e566: #e5e5e566;\n}\n`,
+    file: `${COLOR_CSS_DIR}/${PROBE_COLOR_NAMING_FILE}`,
+    code: `:root {\n  /* gray */\n  ${PROBE_ALPHA_VAR}: ${PROBE_ALPHA_HEX};\n}\n`,
     expect: 0,
   },
   {
@@ -456,8 +526,8 @@ const CSS_CASES = [
        例如透明度那兩碼用分隔符隔開。這種一定要報:
        不報的話,整個專案的那一類命名從此不被檢查,而畫面上看起來是全部通過。 */
     name: 'colorFile 取碼形狀對不上要報並指向設定',
-    file: `${COLOR_CSS_DIR}/${PROBE_COLOR_FILE}`,
-    code: `:root {\n  /* gray */\n  --gray-e5-66: #e5e5e566;\n}\n`,
+    file: `${COLOR_CSS_DIR}/${PROBE_COLOR_NAMING_FILE}`,
+    code: `:root {\n  /* gray */\n  ${PROBE_ALPHA_VAR}x: ${PROBE_ALPHA_HEX};\n}\n`,
     expect: 1,
     keyword: 'COLOR_SUFFIX_PICK',
   },
@@ -465,14 +535,14 @@ const CSS_CASES = [
     /* 長度相同、取碼位置不同 —— 規範允許為了避開同色系撞碼而微調,
        所以給建議值,不斷定是錯的。與上面那則的差別就在長度。 */
     name: 'colorFile 取碼位置不同只給建議',
-    file: `${COLOR_CSS_DIR}/${PROBE_COLOR_FILE}`,
-    code: `:root {\n  /* gray */\n  --gray-abcd: #e5e5e566;\n}\n`,
+    file: `${COLOR_CSS_DIR}/${PROBE_COLOR_NAMING_FILE}`,
+    code: `:root {\n  /* gray */\n  ${PROBE_ALPHA_SHIFTED}: ${PROBE_ALPHA_HEX};\n}\n`,
     expect: 1,
     keyword: '建議',
   },
   {
     name: 'colorFile 語意名沒有取碼後綴,不報',
-    file: `${COLOR_CSS_DIR}/${PROBE_COLOR_FILE}`,
+    file: `${COLOR_CSS_DIR}/${PROBE_COLOR_NAMING_FILE}`,
     code: `:root {\n  /* white */\n  --white: #fff;\n}\n`,
     expect: 0,
   },
@@ -481,7 +551,7 @@ const CSS_CASES = [
        帶色相的名字是人做過的判斷,語意名只能從色值算 ——
        混在一起排出來的順序就沒有一致的依據。 */
     name: 'colorFile 混用兩種命名方式要報',
-    file: `${COLOR_CSS_DIR}/${PROBE_COLOR_FILE}`,
+    file: `${COLOR_CSS_DIR}/${PROBE_COLOR_NAMING_FILE}`,
     code: `:root {\n  /* gray */\n  --gray-9e: #9e9e9e;\n  --btn-hover: #c20016;\n}\n`,
     expect: 3,
     keyword: '混了兩種命名方式',
@@ -1263,8 +1333,11 @@ const RULE_CASES = [
     expect: 0,
   },
   {
-    name: 'apiScope 共用的 project.js 不誤報',
-    file: `${A}/project.js`,
+    /* 檔名用設定值,不寫死 —— 「對不上資料夾的 api 放哪一支」是設定
+       (SHARED_API_FILE),每個專案叫的名字不一樣。寫死的話,案例在別的專案
+       會變成「一支對不上資料夾的 api」而被報違規,看起來像規則壞了。 */
+    name: 'apiScope 共用的那一支不誤報',
+    file: `${A}/${SHARED_API_FILE}.js`,
     code: `import { fetchApi } from '@js/_api/.config.js'\n\nexport const apiGetX = (data) => fetchApi.get('x', data)\n`,
     expect: 0,
   },
@@ -1286,16 +1359,18 @@ const RULE_CASES = [
        `Stores/` 的話，清理不會涵蓋到，會在專案裡留下一個看起來像真的目錄。 */
     name: 'storeDir 資料夾名大小寫或單複數不一致',
     // 檔名取例外清單裡的，才不會同時觸發「檔名要對得上頁面資料夾」那條
-    file: `${T}/Stores/common.js`,
-    code: `export const useCommonStore = null\n`,
+    file: `${T}/Stores/${PROBE_PAGE_ALPHA}.js`,
+    code: `/* lint-store-layer-exempt: 這則在驗資料夾名,不驗分層 */
+export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
     expect: 1,
     keyword: 'stores/',
   },
   {
     // 正確的資料夾名不該被自己的規則報
     name: 'storeDir 正確的資料夾名不誤報',
-    file: `${T}/common.js`,
-    code: `export const useCommonStore = null\n`,
+    file: `${T}/${PROBE_PAGE_ALPHA}.js`,
+    code: `/* lint-store-layer-exempt: 這則在驗資料夾名,不驗分層 */
+export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
     expect: 0,
   },
 
@@ -1310,14 +1385,14 @@ const RULE_CASES = [
   {
     // 用 ALLOWED_STANDALONE 內的檔名，才不會同時觸發 storeLayer（那條另有案例）
     name: 'storeDeclare computed 不誤報',
-    file: `${T}/common.js`,
-    code: `import { defineStore } from 'pinia'\n\nexport const useCommonStore = defineStore('common', () => {\n  const list = ref([])\n  const total = computed(() => list.value.length)\n  const info = readonly({ a: 1 })\n\n  return { list, total, info }\n})\n`,
+    file: `${T}/${PROBE_PAGE_ALPHA}.js`,
+    code: `/* lint-store-layer-exempt: 這則在驗 computed 算不算行為,不驗分層 */\nimport { defineStore } from 'pinia'\n\nexport const use${pascalOf(PROBE_PAGE_ALPHA)}Store = defineStore('${PROBE_PAGE_ALPHA}', () => {\n  const list = ref([])\n  const total = computed(() => list.value.length)\n  const info = readonly({ a: 1 })\n\n  return { list, total, info }\n})\n`,
     expect: 0,
   },
   {
     name: 'storeDeclare 物件屬性寫成 function',
-    file: `${T}/json.js`,
-    code: `import { defineStore } from 'pinia'\n\nexport const useJsonStore = defineStore('json', () => {\n  const config = ref({\n    onDone: () => {},\n  })\n\n  return { config }\n})\n`,
+    file: `${T}/${PROBE_PAGE_ALPHA}.js`,
+    code: `/* lint-store-layer-exempt: 這則在驗物件屬性寫成 function,不驗分層 */\nimport { defineStore } from 'pinia'\n\nexport const use${pascalOf(PROBE_PAGE_ALPHA)}Store = defineStore('${PROBE_PAGE_ALPHA}', () => {\n  const config = ref({\n    onDone: () => {},\n  })\n\n  return { config }\n})\n`,
     expect: 1,
     keyword: '物件屬性 onDone',
   },
@@ -1342,12 +1417,19 @@ const RULE_CASES = [
     expect: 1,
     keyword: 'selfTestPets/',
   },
-  {
-    name: 'storeScope 例外清單內的不誤報',
-    file: `${T}/popup.js`,
-    code: `import { defineStore } from 'pinia'\n\nexport const usePopupStore = defineStore('popup', () => {\n  const list = ref(null)\n\n  return { list }\n})\n`,
-    expect: 0,
-  },
+  /* 這一則驗的正是「例外清單」這個機制,所以要用清單裡的值,不能寫死某個名字 ——
+     清單(STANDALONE_STORES)每個專案不一樣。清單是空的時候整則跳過:
+     沒有例外可驗的專案,硬塞一個名字進去只會變成「一支對不上資料夾的 store」。 */
+  ...(STANDALONE_STORES.length
+    ? [
+        {
+          name: 'storeScope 例外清單內的不誤報',
+          file: `${T}/${STANDALONE_STORES[0]}.js`,
+          code: `import { defineStore } from 'pinia'\n\nexport const use${pascalOf(STANDALONE_STORES[0])}Store = defineStore('${STANDALONE_STORES[0]}', () => {\n  const list = ref(null)\n\n  return { list }\n})\n`,
+          expect: 0,
+        },
+      ]
+    : []),
   {
     name: 'storeActions 檔名不是 use*Actions',
     file: `${T}/.composables/homeActions.js`,
@@ -1747,30 +1829,37 @@ const RULE_CASES = [
   // ---------- 規則 storeApiDefault / storeResetDefault ----------
   {
     name: 'storeApiDefault 有 apiData 卻沒有 apiDefault',
-    file: `${T}/common.js`,
-    code: `import { defineStore } from 'pinia'\n\nexport const useCommonStore = defineStore('common', () => {\n  const detail = ref({ apiData: null })\n\n  return { detail }\n})\n`,
+    file: `${T}/${PROBE_PAGE_ALPHA}.js`,
+    code: `import { defineStore } from 'pinia'\n\nexport const use${pascalOf(PROBE_PAGE_ALPHA)}Store = defineStore('${PROBE_PAGE_ALPHA}', () => {\n  const detail = ref({ apiData: null })\n\n  return { detail }\n})\n`,
     expect: 1,
     keyword: '沒有 apiDefault',
   },
   {
     name: 'storeApiDefault 有 apiDefault 不誤報',
-    file: `${T}/json.js`,
-    code: `import { defineStore } from 'pinia'\n\nexport const useJsonStore = defineStore('json', () => {\n  const apiDefault = readonly({ detail: { Id: null } })\n  const detail = ref({ apiData: null })\n\n  return { apiDefault, detail }\n})\n`,
+    file: `${T}/${PROBE_PAGE_ALPHA}.js`,
+    code: `import { defineStore } from 'pinia'\n\nexport const use${pascalOf(PROBE_PAGE_ALPHA)}Store = defineStore('${PROBE_PAGE_ALPHA}', () => {\n  const apiDefault = readonly({ detail: { Id: null } })\n  const detail = ref({ apiData: null })\n\n  return { apiDefault, detail }\n})\n`,
     expect: 0,
   },
   {
     /* apiDefault 是「還原用的原始值」，沒包 readonly 的話任何一次寫入都會改掉它，
       之後每次 reset 都還原成被改過的值 —— 而且完全沒有徵兆 */
+    /* 檔名用探測資料夾的名字,不要寫死專案設定裡的 store 名 ——
+       那份名單(STANDALONE_STORES)每個專案不一樣,寫死的話案例搬到別的專案
+       會多報一筆「檔名對不上資料夾」,看起來像規則壞了,其實是案例綁死了設定。
+       探測資料夾是 self-test 自己在頁面目錄底下建的,任何專案都對得上。 */
     name: 'storeApiDefault 沒包 readonly 要被抓',
-    file: `${T}/lineLiff.js`,
-    code: `import { defineStore } from 'pinia'\n\nexport const useLineLiffStore = defineStore('lineLiff', () => {\n  const apiDefault = { detail: { Id: null } }\n  const detail = ref({ apiData: null })\n\n  return { apiDefault, detail }\n})\n`,
+    file: `${T}/${PROBE_PAGE_ALPHA}.js`,
+    code: `import { defineStore } from 'pinia'\n\nexport const useSelfTestAlphaStore = defineStore('selfTestAlpha', () => {\n  const apiDefault = { detail: { Id: null } }\n  const detail = ref({ apiData: null })\n\n  return { apiDefault, detail }\n})\n`,
     expect: 1,
     keyword: 'readonly',
   },
   {
+    /* 只讀不送的 store:有 data 沒有 apiData,所以不需要 apiDefault。
+       層本身要有 —— 探測資料夾裡有一支會打 api 的頁面,少了那一層會被
+       storeLayer 抓到,那樣這一則就同時牽扯到兩條規則了。 */
     name: 'storeApiDefault 沒有 apiData 的 store 不受限制',
-    file: `${T}/popup.js`,
-    code: `import { defineStore } from 'pinia'\n\nexport const usePopupStore = defineStore('popup', () => {\n  const isOpen = ref(false)\n\n  return { isOpen }\n})\n`,
+    file: `${T}/${PROBE_PAGE_ALPHA}.js`,
+    code: `import { defineStore } from 'pinia'\n\nexport const useSelfTestAlphaStore = defineStore('selfTestAlpha', () => {\n  const detail = ref({ data: null })\n\n  return { detail }\n})\n`,
     expect: 0,
   },
   {
@@ -2084,6 +2173,25 @@ const HUE_SOURCE_CASES = [
  * 剛好各半時算 value:那表示已經有一半的變數名看不出顏色,
  * 用 name 會讓那一半每一個都被報「認不出色相前綴」。
  */
+/**
+ * 頁面資源在第幾層 —— 依專案實際的擺法偵測出來,用來抓 VIEW_RESOURCE_DEPTH 設錯。
+ *
+ * 這一則驗的是「偵測認不認得出本專案的擺法」。設定與偵測結果不一致時,
+ * 前提檢查會講出來 —— 沒有這道驗證的話,偵測壞掉不會有人發現,
+ * 而換專案時那一整片「對不上資料夾」就沒有東西指出真正的原因。
+ */
+const onCheckViewDepth = () => {
+  const detected = detectViewResourceDepth(root)
+
+  report(
+    detected === VIEW_RESOURCE_DEPTH,
+    '頁面資源的層級偵測得出來,而且與設定一致',
+    detected === VIEW_RESOURCE_DEPTH
+      ? []
+      : [`設定是 ${VIEW_RESOURCE_DEPTH},偵測結果是 ${detected}`]
+  )
+}
+
 const MAJORITY_CASES = [
   { name: '命名大宗:全部帶色相時是 name', style: { hued: 10, semantic: 0 }, majority: 'name' },
   { name: '命名大宗:全部語意名時是 value', style: { hued: 0, semantic: 10 }, majority: 'value' },
@@ -2433,12 +2541,32 @@ const cleanup = () => {
     fs.rmSync(path.join(root, dir), { recursive: true, force: true })
   }
 
-  /* 專案根的探測檔沒有資料夾可以整個刪掉,所以掃過去把名字帶 PROBE 的清乾淨。
+  /* 有三處的探測檔沒有自己的資料夾可以整個刪掉,要掃過去認名字清乾淨。
      逐一列出檔名的話,以後新增一支就要記得回來補一行 —— 忘了補不會報錯,
-     只會在專案根留下一支看起來像設定檔的垃圾。 */
-  for (const name of fs.readdirSync(root)) {
-    if (!name.includes(PROBE)) continue
-    fs.rmSync(path.join(root, name), { recursive: true, force: true })
+     只會留下一支看起來像真的設定檔、色票或頁面資料夾的垃圾。
+
+     色票目錄與頁面目錄一定要掃:案例會實際寫檔,而上一次中途失敗留下的東西
+     不在 created 清單裡(那份只記這次 onPrepare 建的)。留著的話,
+     下一次執行會把它們當成真的色票與頁面讀進去,驗證結果就開始受殘留影響。 */
+  const sweeps = [
+    { dir: root, match: (name) => name.includes(PROBE) },
+    {
+      dir: path.join(root, ...COLOR_CSS_DIR.split('/')),
+      match: (name) => name.startsWith(PROBE_COLOR_PREFIX),
+    },
+    {
+      dir: path.join(root, ...VIEWS_DIR.split('/')),
+      match: (name) => name.startsWith(PROBE_PAGE_PREFIX),
+    },
+  ]
+
+  for (const { dir, match } of sweeps) {
+    if (!fs.existsSync(dir)) continue
+
+    for (const name of fs.readdirSync(dir)) {
+      if (!match(name)) continue
+      fs.rmSync(path.join(dir, name), { recursive: true, force: true })
+    }
   }
 
   while (created.length) {
@@ -2596,6 +2724,8 @@ try {
 
     report(!problems.length, c.name, problems)
   }
+
+  onCheckViewDepth()
 
   for (const c of MAJORITY_CASES) {
     const actual = majorityHueSource(c.style)

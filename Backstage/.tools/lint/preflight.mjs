@@ -13,6 +13,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { isColorNamingConfigFit, isHueSourceFit } from './color-order.mjs'
 import { hasBreakpointVars, hasResponsiveStyles } from './lint-core.mjs'
+import { detectViewResourceDepth } from './shared.mjs'
 import {
   API_DIR,
   BREAKPOINTS,
@@ -23,6 +24,7 @@ import {
   PARALLEL_AWAIT_HELPER,
   STORE_DIR,
   STYLE_CONFIG_FILES,
+  VIEW_RESOURCE_DEPTH,
   VIEWS_DIR,
 } from './project-config.mjs'
 
@@ -119,6 +121,22 @@ const REQUIREMENTS = [
     check: (root) => (hasDir(root, VIEWS_DIR) ? VIEWS_DIR : null),
     need: `要有頁面目錄(目前設定為 ${VIEWS_DIR})`,
     why: 'api 檔名、store 檔名與分層都是拿頁面目錄的第一層資料夾來對照。目錄不存在時,那些對照沒有比對基準,頁面規則也掃不到檔案。',
+  },
+  {
+    label: '頁面資源的層級',
+    rules: ['apiScope', 'storeScope', 'storeLayer'],
+
+    /*
+     * 判斷方式是看第一層的資料夾底下有沒有直接放頁面:有就是資源層(深度 1),
+     * 沒有就是分類層(深度 2)。設錯的話,每一支 api 與 store 都會被報
+     * 「對不上資料夾」—— 那一整片訊息說的其實是同一件事。
+     */
+    check: (root) => {
+      const detected = detectViewResourceDepth(root)
+      return detected === null || detected === VIEW_RESOURCE_DEPTH
+    },
+    need: `設定裡的 VIEW_RESOURCE_DEPTH 要符合頁面目錄的擺法(目前設定為 ${VIEW_RESOURCE_DEPTH})`,
+    why: '頁面目錄的實際擺法與設定的層級不同。api 檔名與 store 檔名都是拿那一層的資料夾名來對照,層級錯了就每一支都對不上 —— 那不是命名寫錯,是這一項設錯了。第一層直接放頁面的專案填 1,第一層只放分類、資源在第二層的填 2。',
   },
   {
     label: '響應式的斷點',

@@ -1,109 +1,95 @@
 #!/bin/sh
-# 規範檢查的最後一道關卡 —— 不依賴 dev server,也不依賴編輯器擴充。
+# 規範檢查的最後一道關卡 —— 不依賴開發伺服器,也不依賴編輯器擴充。
 #
-#   1. 可自動修正的格式 → 就地修好並重新 git add(純順序與空白的調整,不動邏輯)
-#   2. 本次 staged 的檔案 → 跑規範檢查(css / api / store / code / page 各類都在內),印提醒
-#   3. 本次 staged 的 .js / .mjs / .vue → 跑 ESLint,印警告
+#   1. 色票檔排序不對 → 自動排序並重新 git add(無害的純順序調整)
+#   2. 本次 staged 的檔案 → 跑規範檢查(css / api / store / page 四類都在內),印提醒
 #
-# 只警告不阻擋 commit(與 .claude/hooks/css-guard.js、.vite/css-guard.mjs 一致)——
+# 只警告不阻擋 commit(與開發伺服器外掛、存檔守門一致)——
 # 存量還沒清完,擋下來只會逼人加 --no-verify,反而讓守門機制形同虛設。
 #
-# ⚠️ 兩種擺法都要能動,所以先判斷「repo 根是不是就是專案根」:
+# 此 hook 由 .githooks/ 進版控,經 core.hooksPath 生效(npm run hooks:install,
+# postinstall 會自動跑)。
 #
-#   a. 開發機:repo 根在專案的上一層,底下並排放著多個專案
-#      → staged 路徑長 `<專案目錄名>/assets/…`,依第一層目錄分派
-#   b. 正式站:專案自己就是一個 repo(git 位置與 a 不同)
-#      → staged 路徑長 `assets/…`,直接處理、不分派
-#
-# 注意:core.hooksPath 是 repo 層級設定、**只能指向一個目錄** ——
-#    a 的情況下誰最後跑 `npm run hooks:install` 就指誰。所以這支與並排專案的同名檔案
-#    **內容要保持一致**(各自一份複本),誰生效結果都一樣。
-#    改這個檔案時記得對照並排的那一份:diff --strip-trailing-cr ../*/.githooks/pre-commit .githooks/pre-commit
-#
-# 此 hook 由 .githooks/ 進版控,經 core.hooksPath 生效(npm run hooks:install,postinstall 會跑)。
-
+# **一個 repo 可能裝了不只一個專案。** git hook 一律在 repo 根執行,
+# 而規範工具在各專案自己的目錄底下 —— 直接跑 node .tools/lint/... 會找不到檔案,
+# 整支 hook 掛掉(而且看起來像是工具壞了)。所以下面依 staged 路徑
+# 逐一往上找出各自的專案根,再進到那裡執行。
 
 YELLOW='\033[33m'
 GREEN='\033[32m'
 RESET='\033[0m'
 
-# 本次 staged 的檔案(路徑一律相對 repo 根)
-#
-# ⚠️ 規範檢查那組的副檔名要與 .tools/lint/project-config.mjs 的 SCANNABLE_EXTENSIONS 一致。
+# 副檔名要與 .tools/lint/project-config.mjs 的 SCANNABLE_EXTENSIONS 一致。
 #    shell 沒辦法 import 那份設定,只能人工同步 —— 那邊改了這裡要跟著改。
 #    少列一種,那種檔案 commit 時就完全不會被檢查,而且不會有任何徵兆:
 #    api、store、actions 都是 .js,漏掉等於整區沒有守門。
-#
-# ESLint 看 .js / .mjs / .vue —— .vue 兩組都要,職責不同
-STAGED_ALL=$(git diff --cached --name-only --diff-filter=ACM)
-STAGED=$(echo "$STAGED_ALL" | grep -E '\.(vue|css|m?js|cjs|md)$')
-STAGED_JS=$(echo "$STAGED_ALL" | grep -E '\.(js|mjs|vue)$')
+STAGED=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(vue|css|m?js|cjs|md)$')
+[ -z "$STAGED" ] && exit 0
 
-[ -z "$STAGED" ] && [ -z "$STAGED_JS" ] && exit 0
+# 這個檔案屬於哪一個專案 —— 從它所在的資料夾往上找,
+# 第一個裝了規範工具的目錄就是它的專案根。找不到就回空字串(那個檔案跳過)。
+project_root_of() {
+  dir=$(dirname "$1")
 
-# repo 根就有這套工具 → 專案自己是一個 repo,不必分派
-if [ -f ".tools/lint/lint.mjs" ]; then
-  PROJECTS="."
-else
-  PROJECTS=$(printf '%s\n%s\n' "$STAGED" "$STAGED_JS" | grep -v '^$' | cut -d/ -f1 | sort -u)
-fi
+  while [ -n "$dir" ] && [ "$dir" != "." ] && [ "$dir" != "/" ]; do
+    if [ -f "$dir/.tools/lint/lint.mjs" ]; then
+      printf '%s\n' "$dir"
+      return
+    fi
+    dir=$(dirname "$dir")
+  done
 
-for PROJECT in $PROJECTS; do
-  # 這個專案本次 staged 的檔案,轉成相對專案目錄的路徑
-  if [ "$PROJECT" = "." ]; then
-    REL="$STAGED"
-    REL_JS="$STAGED_JS"
+  # repo 根自己就是專案根的情況(一個 repo 一個專案)
+  [ -f ".tools/lint/lint.mjs" ] && printf '%s\n' "."
+}
+
+# 專案根底下的相對路徑 —— 工具要的是相對它自己的路徑
+relative_to() {
+  if [ "$2" = "." ]; then
+    printf '%s\n' "$1"
   else
-    REL=$(echo "$STAGED" | grep -E "^$PROJECT/" | sed "s|^$PROJECT/||")
-    REL_JS=$(echo "$STAGED_JS" | grep -E "^$PROJECT/" | sed "s|^$PROJECT/||")
+    printf '%s\n' "${1#"$2"/}"
   fi
+}
 
-  # --- 1. 自動修正(色票排序、空的樣式區塊、宣告順序)------------------------
+ROOTS=$(for f in $STAGED; do project_root_of "$f"; done | sort -u)
+[ -z "$ROOTS" ] && exit 0
+
+for root in $ROOTS; do
+  FILES=$(for f in $STAGED; do
+    [ "$(project_root_of "$f")" = "$root" ] && relative_to "$f" "$root"
+  done)
+
+  [ -z "$FILES" ] && continue
+
+  # --- 1. 自動修正(色票排序、空的樣式區塊)----------------------------------
   #
-  # 哪些檔案該修、要修什麼由 guard-file.mjs 自己判斷,這裡不重複寫一份判斷 ——
+  # 哪些檔案該修由 guard-file.mjs 自己判斷,這裡不重複寫一份判斷 ——
   # 兩邊各判斷一次的話,規則改了只改一邊,行為就開始不一致。
 
-  if [ -f "$PROJECT/.tools/lint/guard-file.mjs" ] && [ -n "$REL" ]; then
-    for f in $REL; do
-      [ -f "$PROJECT/$f" ] || continue
+  for rel in $FILES; do
+    abs="$root/$rel"
+    [ "$root" = "." ] && abs="$rel"
+    [ -f "$abs" ] || continue
 
-      BEFORE=$(git hash-object "$PROJECT/$f")
-      (cd "$PROJECT" && node .tools/lint/guard-file.mjs --write "$f" >/dev/null 2>&1)
-      AFTER=$(git hash-object "$PROJECT/$f")
+    BEFORE=$(git hash-object "$abs")
+    (cd "$root" && node .tools/lint/guard-file.mjs --write "$rel" >/dev/null 2>&1)
+    AFTER=$(git hash-object "$abs")
 
-      if [ "$BEFORE" != "$AFTER" ]; then
-        git add "$PROJECT/$f"
-        printf "${GREEN}%s 已自動修正格式並加入本次 commit。${RESET}\n" "$PROJECT/$f"
-      fi
-    done
-  fi
-
-  # --- 2. 規範檢查(只看 staged 的檔案)-------------------------------------
-
-  if [ -f "$PROJECT/.tools/lint/lint.mjs" ] && [ -n "$REL" ]; then
-    # shellcheck disable=SC2086
-    if ! (cd "$PROJECT" && node .tools/lint/lint.mjs $REL); then
-      printf "\n${YELLOW}以上為本次 commit 檔案的規範提醒,commit 照常完成。${RESET}\n"
-      printf "${YELLOW}  規範見 %s/.claude/rules/ 與 %s/.claude/skills/${RESET}\n" "$PROJECT" "$PROJECT"
-      printf "${YELLOW}  要協助修正的話,到 Claude Code 對話框打「修正」或「好」就會處理${RESET}\n"
-      printf "${YELLOW}  (它已經知道是哪個檔案、哪幾行)。不想修就不用理它 —— 主動權在你手上。${RESET}\n\n"
+    if [ "$BEFORE" != "$AFTER" ]; then
+      git add "$abs"
+      printf "${GREEN}已自動修正格式並加入本次 commit:%s${RESET}\n" "$abs"
     fi
-  fi
+  done
 
-  # --- 3. ESLint(只看 staged 的檔案)---------------------------------------
-  #
-  # 自製規則裡 require-ref-value-access 最有價值:storeToRefs 解構後漏 .value 會靜默
-  # 取到 undefined,不噴錯也不警告,通常要到畫面空白才發現。
-  #
-  # 用 --no-install 是刻意的 —— 沒裝依賴時安靜跳過,不要在 commit 當下才去抓套件。
+  # --- 2. 規範檢查(只看 staged 的檔案)--------------------------------------
 
-  if [ -f "$PROJECT/eslint.config.mjs" ] && [ -n "$REL_JS" ]; then
-    # shellcheck disable=SC2086
-    if ! (cd "$PROJECT" && npx --no-install eslint $REL_JS); then
-      printf "\n${YELLOW}以上為本次 commit 檔案的 ESLint 問題,commit 照常繼續。${RESET}\n"
-      printf "${YELLOW}  多數可自動修正:cd %s && npm run lint:fix${RESET}\n" "$PROJECT"
-      printf "${YELLOW}  要協助處理的話,到 Claude Code 對話框說一聲就好。${RESET}\n\n"
-    fi
+  # shellcheck disable=SC2086
+  if ! (cd "$root" && node .tools/lint/lint.mjs $FILES); then
+    printf "\n${YELLOW}以上是本次 commit 檔案的規範提醒,commit 照常完成。${RESET}\n"
+    printf "${YELLOW}  需要協助時,在 Claude Code 對話框輸入「修正」或「好」,Claude Code 會接手處理${RESET}\n"
+    printf "${YELLOW}     (它已經知道是哪個檔案、哪幾行)。${RESET}\n"
+    printf "${YELLOW}     此訊息僅為提醒,不會影響 commit;為了讓寫法保持一致,建議找時間調整。${RESET}\n\n"
   fi
 done
 
