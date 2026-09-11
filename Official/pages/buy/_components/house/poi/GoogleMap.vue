@@ -1,6 +1,6 @@
 <script setup>
 import { importLibrary, setOptions } from '@googlemaps/js-api-loader'
-import homeIcon from '@/assets/imgs/buy/house/poi/home.svg'
+import homeIcon from '@imgs/buy/house/poi/home.svg'
 
 const buyHouse = useBuyHouseStore()
 const { basic } = storeToRefs(buyHouse)

@@ -10,8 +10,12 @@ const active = computed(() => {
 
 <template>
   <CommonMTabBorderBottom
+    name="noticeTabs"
     :items="memberCenter.noticeTabs"
     :config="{
+      mode: {
+        tm: 'select',
+      },
       active: active,
       containerMode: false,
     }"

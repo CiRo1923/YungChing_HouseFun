@@ -263,6 +263,15 @@ watch(
   }
 )
 
+/* 在 setup 就算一次 —— label 與 selectedIndex 是從 model + options 推導出來的,
+  但它們是 ref、靠上面兩個 watch 與下面的 onMounted 手動同步。那三個點
+  **沒有一個會在 SSR 期間跑到**(watch 沒有 immediate、onMounted 只在 client),
+  所以 server render 出來的 label 是 null:有初始值的欄位會先閃一次空白,
+  hydrate 之後才補上文字。
+
+  注意:這裡呼叫的是純資料計算(不碰 DOM),在 server 端執行是安全的。 */
+onSetSelectedIndex()
+
 onMounted(() => {
   onSetSelectedIndex()
   document.addEventListener('click', onOutSide, true)
