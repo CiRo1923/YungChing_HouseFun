@@ -50,6 +50,7 @@ import {
   HUE_LIST_TEXT,
   hueOf,
   isSorted,
+  isSuffixNamingChecked,
   loadDefinedColorVars,
   majorityHueSource,
   parseColorBlocks,
@@ -305,6 +306,14 @@ const PROBE_COLOR_FILE = `${PROBE_COLOR_PREFIX}.css`
  * 覆寫之後那則會失敗,但失敗的原因看起來像是規則壞了。
  */
 const PROBE_COLOR_NAMING_FILE = `${PROBE_COLOR_PREFIX}Naming.css`
+
+/**
+ * 驗排序那一條時用的探測色票 —— 同樣要自己一支。
+ *
+ * 這支的內容是刻意沒排好的,與別的案例期待的內容相反;共用一支的話,
+ * 兩邊會互相覆寫,而失敗的原因看起來像是規則壞了。
+ */
+const PROBE_COLOR_SORT_FILE = `${PROBE_COLOR_PREFIX}Sort.css`
 
 /**
  * 探測用的樣式設定檔 —— 擺在專案根,因為那條規則只看專案根的設定檔。
@@ -613,7 +622,21 @@ const CSS_CASES = [
     keyword: '不是單純的色碼',
   },
   {
+    /* 排序走自己的代號 —— 它存檔就自動修好了,與「要人動手改」的命名、值那幾條
+       性質相反。混在同一個代號底下的話,看到一串違規分不出哪幾筆該處理。 */
+    name: 'colorSort 排序不符走自己的代號',
+    rule: 'colorSort',
+    file: `${COLOR_CSS_DIR}/${PROBE_COLOR_SORT_FILE}`,
+    code: `:root {\n  --black: #000000;\n  --white: #ffffff;\n}\n`,
+    expect: 1,
+    keyword: '排序不符規則',
+  },
+  {
+    /* 只計 colorFile —— 排序走自己的代號(colorSort),而探針的順序符不符合
+       會隨 COLOR_HUE_SOURCE 而異(語意命名時色相從色值算,算不出 hex 的排最後)。
+       不指定的話,這則在語意命名的專案會被排序那一筆撞到。 */
     name: 'colorFile 值寫成 var() 要報違規',
+    rule: 'colorFile',
     file: `${COLOR_CSS_DIR}/${PROBE_COLOR_NAMING_FILE}`,
     code: `:root {\n  /* black */\n  --black-x: var(--black);\n}\n`,
     expect: 1,
@@ -673,6 +696,7 @@ const CSS_CASES = [
        例如透明度那兩碼用分隔符隔開。這種一定要報:
        不報的話,整個專案的那一類命名從此不被檢查,而畫面上看起來是全部通過。 */
     name: 'colorFile 取碼形狀對不上要報並指向設定',
+    needs: 'suffixNaming',
     file: `${COLOR_CSS_DIR}/${PROBE_COLOR_NAMING_FILE}`,
     code: `:root {\n  /* gray */\n  ${PROBE_ALPHA_VAR}x: ${PROBE_ALPHA_HEX};\n}\n`,
     expect: 1,
@@ -682,6 +706,7 @@ const CSS_CASES = [
     /* 長度相同、取碼位置不同 —— 規範允許為了避開同色系撞碼而微調,
        所以給建議值,不斷定是錯的。與上面那則的差別就在長度。 */
     name: 'colorFile 取碼位置不同只給建議',
+    needs: 'suffixNaming',
     file: `${COLOR_CSS_DIR}/${PROBE_COLOR_NAMING_FILE}`,
     code: `:root {\n  /* gray */\n  ${PROBE_ALPHA_SHIFTED}: ${PROBE_ALPHA_HEX};\n}\n`,
     expect: 1,
@@ -698,9 +723,13 @@ const CSS_CASES = [
        帶色相的名字是人做過的判斷,語意名只能從色值算 ——
        混在一起排出來的順序就沒有一致的依據。 */
     name: 'colorFile 混用兩種命名方式要報',
+    rule: 'colorFile',
     file: `${COLOR_CSS_DIR}/${PROBE_COLOR_NAMING_FILE}`,
     code: `:root {\n  /* gray */\n  --gray-9e: #9e9e9e;\n  --btn-hover: #c20016;\n}\n`,
-    expect: 3,
+    /* 混用那一筆一定有;取碼命名那條只在「名字帶色相」的專案跑,
+       語意名的那個變數在那種專案會多被報一次「認不出色相」。
+       期待值跟著設定算,不寫死其中一種專案的數字。 */
+    expect: isSuffixNamingChecked ? 2 : 1,
     keyword: '混了兩種命名方式',
   },
   {
@@ -714,6 +743,7 @@ const CSS_CASES = [
        色相清單是設定,每個專案不一樣;挑一個字寫死的話,配色不含那一色的專案
        會比對不到,而規則本身是對的。 */
     name: 'colorFile 認不出色相時列出可用的色相',
+    needs: 'suffixNaming',
     file: `${COLOR_CSS_DIR}/${PROBE_COLOR_FILE}`,
     code: `:root {\n  /* other */\n  --brand-e566: #e5e5e566;\n}\n`,
     expect: 1,
@@ -3045,6 +3075,29 @@ let total = 0
 /** 因為專案的設定而驗不到的案例 —— 結束時要講出來,不能安靜地少驗 */
 const skipped = []
 
+/**
+ * 案例寫 `needs` 時要成立的前提 —— 不成立就跳過那一則。
+ *
+ * 每一項都取規則那邊算好的那一份,不在這裡重寫判斷:
+ *
+ *   breakpoints   專案有分斷點(沒有的話兩條斷點規則整條略過)
+ *   suffixNaming  色票用「色相 + 取碼」命名(語意命名的專案取碼那幾條整類跳過)
+ *
+ * 這兩種都是「規則這次本來就不作用」,案例驗不到東西是正常的;
+ * 留著會變成必定失敗的雜訊,而看的人會以為規則壞了。
+ */
+const NEEDS_MET = {
+  breakpoints: BREAKPOINTS.length > 0,
+  suffixNaming: isSuffixNamingChecked,
+}
+
+/** 前提不成立時要講的那一句 —— 只列名字的話,看的人分不出是設定造成的還是規則壞了 */
+const SKIP_REASON = {
+  breakpoints: '這個專案的 BREAKPOINTS 是空陣列(不做響應式),兩條斷點規則本來就整條略過。',
+  suffixNaming:
+    '這個專案的色票用語意命名(COLOR_HUE_SOURCE 設成 value),取碼那幾條規則本來就整類跳過。',
+}
+
 const report = (ok, name, extra = []) => {
   total += 1
 
@@ -3066,11 +3119,14 @@ try {
   definedVars = loadDefinedColorVars(root)
 
   for (const c of CASES) {
-    /* 專案沒有斷點(BREAKPOINTS 是空陣列)時,兩條斷點規則整條略過 ——
-       那幾則案例的探針就驗不到東西,留著只會變成必定失敗的雜訊。
-       跳過的則數最後會印出來,不會安靜地少驗。 */
-    if (c.needs === 'breakpoints' && !BREAKPOINTS.length) {
-      skipped.push(c.name)
+    /* 這個專案的設定讓某一條規則整條略過時,驗它的案例也要跟著跳過 ——
+       探針驗不到東西,留著只會變成必定失敗的雜訊,而失敗的原因與規則無關。
+       跳過的則數最後會印出來,不會安靜地少驗。
+
+       判準一律取規則那邊已經有的那一份,不在這裡重寫一次:
+       兩邊各判斷一次的話,規則改了條件而驗證沒跟上,那幾則就會開始亂報。 */
+    if (c.needs && !NEEDS_MET[c.needs]) {
+      skipped.push({ name: c.name, need: c.needs })
       continue
     }
 
@@ -3312,8 +3368,17 @@ console.log('')
    不講的話,設定改成不做響應式的專案會以為斷點規則還在保護它。 */
 if (skipped.length) {
   console.log(`${YELLOW}${skipped.length} 則因為這個專案的設定而沒有驗:${RESET}`)
-  console.log(`  ${skipped.join('、')}`)
-  console.log('  斷點相關的那幾則需要 BREAKPOINTS 有值;這個專案設成空陣列,兩條斷點規則本來就整條略過。')
+
+  /* 依前提分組列出,並各自講出「為什麼這次不作用」——
+     只列名字的話,看的人不知道那是設定造成的還是規則壞了。 */
+  for (const [need, reason] of Object.entries(SKIP_REASON)) {
+    const names = skipped.filter((s) => s.need === need)
+    if (!names.length) continue
+
+    console.log(`  ${names.map((s) => s.name).join('、')}`)
+    console.log(`    ${reason}`)
+  }
+
   console.log('')
 }
 
