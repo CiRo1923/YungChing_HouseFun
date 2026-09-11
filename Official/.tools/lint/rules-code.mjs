@@ -9,6 +9,7 @@ import path from 'node:path'
 import {
   BUILD_CONFIG_FILES,
   PROJECT_CONFIG_FILES,
+  STYLE_CONFIG_FILES,
   isInActionsDir,
   isInSrc,
   VIEWS_DIR,
@@ -148,6 +149,197 @@ const buildAliasMap = (root) => {
   if (list.length) aliasCache = { root, list }
 
   return list
+}
+
+// --- 讀 tailwind 的 theme 設定 ----------------------------------------------
+//
+// 規則要知道兩件事:這個專案的 theme 整組覆寫了哪幾類、各類實際定義了哪些值。
+// 那份資料只有設定檔知道,所以直接讀它 —— 在別處抄一份就要人工同步,
+// 而忘了同步不會報錯,只會讓規則開始講錯話。
+//
+// 設定檔是 ESM,同步讀取解析不了,所以用括號配對取出區塊、再取第一層的 key。
+// 只需要「有哪些名字」,不需要值,所以不必真的求值。
+
+/** 樣式設定檔在哪(給「缺前提就說出來」的檢查用) */
+export const styleConfigPathOf = (root) => firstExisting(root, STYLE_CONFIG_FILES)
+
+/**
+ * 從 `{` 開始配對到對應的 `}`,回傳中間的內容。
+ *
+ * 字串與樣板字面值裡的括號要跳過 —— 這個專案的斷點設定裡就有
+ * `'\\0screen\\, screen\\9'` 這種內容,不跳過的話配對會從中間斷掉。
+ */
+const braceBodyOf = (text, start) => {
+  let depth = 0
+  let quote = null
+
+  for (let i = start; i < text.length; i += 1) {
+    const ch = text[i]
+
+    if (quote) {
+      if (ch === '\\') i += 1
+      else if (ch === quote) quote = null
+      continue
+    }
+
+    if (ch === "'" || ch === '"' || ch === '`') {
+      quote = ch
+      continue
+    }
+
+    if (ch === '{') depth += 1
+    else if (ch === '}') {
+      depth -= 1
+      if (depth === 0) return text.slice(start + 1, i)
+    }
+  }
+
+  return ''
+}
+
+/** 取某個名字後面那個物件的內容;`名字: {` 與 `名字= {` 都認得 */
+export const objectBodyAfter = (text, name) => {
+  const m = new RegExp(`\\b${name}\\s*[:=]\\s*\\{`).exec(text)
+  if (!m) return null
+
+  return braceBodyOf(text, m.index + m[0].length - 1)
+}
+
+/**
+ * 一段物件內容裡第一層的 key。
+ *
+ * 巢狀物件、陣列、字串裡的內容都要跳過 —— `screens` 底下每個斷點自己
+ * 又是一個物件,不跳過的話 `raw` `min` `max` 會被當成斷點名。
+ */
+export const topLevelKeysOf = (body) => {
+  const keys = []
+  let depth = 0
+  let quote = null
+  let token = ''
+
+  for (let i = 0; i < body.length; i += 1) {
+    const ch = body[i]
+
+    if (quote) {
+      if (ch === '\\') i += 1
+      else if (ch === quote) quote = null
+      continue
+    }
+
+    if (ch === "'" || ch === '"' || ch === '`') {
+      // 引號包起來的 key(例如 'default-light')也要收
+      if (depth === 0) token = ''
+      quote = ch
+
+      if (depth === 0) {
+        const end = body.indexOf(ch, i + 1)
+        if (end !== -1 && /^\s*:/.test(body.slice(end + 1))) keys.push(body.slice(i + 1, end))
+      }
+      continue
+    }
+
+    if (ch === '{' || ch === '[' || ch === '(') depth += 1
+    else if (ch === '}' || ch === ']' || ch === ')') depth -= 1
+    else if (depth === 0) {
+      if (ch === ':') {
+        const name = token.trim()
+        if (/^[\w-]+$/.test(name)) keys.push(name)
+        token = ''
+      } else if (ch === ',') {
+        /* 逗號收尾代表這是簡寫(`boxShadow,` —— 值從別的檔案 import 進來)。
+           名字本身就是 key,所以照樣收;值在哪裡由呼叫端自己追。 */
+        const name = token.trim()
+        if (/^[\w-]+$/.test(name)) keys.push(name)
+        token = ''
+      } else {
+        token += ch
+      }
+    }
+  }
+
+  return keys
+}
+
+let themeCache = null
+
+/**
+ * 這個專案的 tailwind theme 整組覆寫了哪幾類、各類有哪些值。
+ *
+ * 回傳 `{ 類別名: [值, …] }`。只看 `theme` 直接底下的 ——
+ * 寫在 `extend` 底下的是「補充」,內建值都還在,不算整組覆寫。
+ *
+ * 值寫成簡寫(`boxShadow,`,從另一支檔案 import 進來)時會追到那支檔案,
+ * 找 `export const boxShadow = { … }` 取它的 key。
+ *
+ * 讀不到設定檔就回空物件 —— 依賴它的規則會自己跳過,不誤報。
+ */
+export const tailwindThemeOf = (root) => {
+  if (themeCache?.root === root) return themeCache.theme
+
+  const file = styleConfigPathOf(root)
+  const theme = {}
+
+  if (!file) return theme
+
+  try {
+    const text = fs.readFileSync(file, 'utf8')
+    const themeBody = objectBodyAfter(text, 'theme')
+
+    if (themeBody === null) return theme
+
+    // extend 底下是補充,不是整組覆寫 —— 整段挖掉再看剩下的
+    const extendBody = objectBodyAfter(themeBody, 'extend')
+    const overrideBody = extendBody === null ? themeBody : themeBody.replace(extendBody, '')
+
+    for (const group of topLevelKeysOf(overrideBody)) {
+      if (group === 'extend') continue
+
+      const body = objectBodyAfter(overrideBody, group)
+
+      if (body !== null) {
+        theme[group] = topLevelKeysOf(body)
+        continue
+      }
+
+      /* 簡寫:值從別的檔案 import 進來。找那支檔案裡的 `export const 名字 = {…}`。
+         追不到就記成空陣列 —— 那一類確實被覆寫了(規則要照樣提醒內建值消失),
+         只是列不出可用的值。 */
+      theme[group] = importedObjectKeysOf(root, file, text, group)
+    }
+  } catch {
+    // 讀不到就讓依賴它的規則自己跳過,不要因此讓整支工具失效
+  }
+
+  themeCache = { root, theme }
+
+  return theme
+}
+
+/** 追 import 來源檔案裡的 `export const 名字 = { … }`,取第一層 key */
+const importedObjectKeysOf = (root, configFile, configText, name) => {
+  const m = new RegExp(
+    `import\\s*\\{[^}]*\\b${name}\\b[^}]*\\}\\s*from\\s*['"]([^'"]+)['"]`
+  ).exec(configText)
+
+  if (!m) return []
+
+  const spec = m[1]
+  if (!spec.startsWith('.')) return [] // 套件裡的,不是這個專案定義的
+
+  const target = path.resolve(path.dirname(configFile), spec)
+
+  for (const candidate of [target, `${target}.js`, `${target}.mjs`, `${target}.ts`]) {
+    if (!fs.existsSync(candidate) || !fs.statSync(candidate).isFile()) continue
+
+    try {
+      const body = objectBodyAfter(fs.readFileSync(candidate, 'utf8'), name)
+      if (body !== null) return topLevelKeysOf(body)
+    } catch {
+      // 讀不到就當作列不出可用的值
+    }
+  }
+
+  return []
 }
 
 const IMPORT_RE =

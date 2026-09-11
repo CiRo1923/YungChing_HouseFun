@@ -363,4 +363,22 @@ export const BUILD_CONFIG_FILES = [
  * 那些值定義在專案設定檔。找不到這支檔案時,帶變數的那幾條 alias 會被跳過,
  * 其餘照常運作。
  */
+/**
+ * 建置工具的樣式設定檔 —— 由前往後找,用第一個存在的那一支。
+ *
+ * 規則要知道這個專案的 theme 實際定義了哪些值。那份資料只有設定檔知道,
+ * 所以直接讀它,不在這裡另外抄一份 —— 抄了就要人工同步,
+ * 而忘了同步不會報錯,只會讓規則提醒實際上存在的 class、
+ * 或放行實際上已經消失的 class。
+ *
+ * 一支都找不到時,「用到不存在的 class」那條規則會被略過(不誤報)。
+ * 工具啟動時會把「因為缺什麼而沒有作用」列出來,不會安靜地失效。
+ */
+export const STYLE_CONFIG_FILES = [
+  'tailwind.config.js',
+  'tailwind.config.ts',
+  'tailwind.config.mjs',
+  'tailwind.config.cjs',
+]
+
 export const PROJECT_CONFIG_FILES = ['config.js', 'config.mjs', 'config.ts']

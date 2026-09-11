@@ -19,6 +19,7 @@ import {
   CSS_MODULES_DIR,
   PARALLEL_AWAIT_HELPER,
   STORE_DIR,
+  STYLE_CONFIG_FILES,
   VIEWS_DIR,
 } from './project-config.mjs'
 
@@ -42,6 +43,13 @@ const REQUIREMENTS = [
     check: (root) => firstExistingFile(root, BUILD_CONFIG_FILES),
     need: `專案根目錄要有這幾支其中一支:${BUILD_CONFIG_FILES.join(' / ')}`,
     why: 'alias 有哪些只有建置設定知道。讀不到就無法判斷相對路徑該改成哪一個 alias,這條會整條略過。',
+  },
+  {
+    label: '樣式設定檔',
+    rules: ['theme', 'themeNaming'],
+    check: (root) => firstExistingFile(root, STYLE_CONFIG_FILES),
+    need: `專案根目錄要有這幾支其中一支:${STYLE_CONFIG_FILES.join(' / ')}`,
+    why: 'theme 覆寫了哪幾類、各類定義了哪些值,只有樣式設定檔知道。讀不到的話,「用到已消失的 class」與「重新定義的值不要用尺寸縮寫」兩條都會整條略過。',
   },
   {
     label: '色票目錄',
