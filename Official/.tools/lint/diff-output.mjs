@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // 比對兩份「產物 CSS」的語意差異 —— 重構樣式後用它確認畫面沒有跑版。
 //
-//   node .tools/css/diff-output.mjs --collect <輸出檔>   # 把 .output 的 CSS 收成一份
-//   node .tools/css/diff-output.mjs <舊> <新>            # 比對兩份
+//   node .tools/lint/diff-output.mjs --collect <輸出檔>   # 把 .output 的 CSS 收成一份
+//   node .tools/lint/diff-output.mjs <舊> <新>            # 比對兩份
 //
 // 比對的是「每個 (media query, selector) 底下有哪些宣告」——
 // 忽略空白、宣告順序、規則出現順序,只看樣式的實質內容。
@@ -14,11 +14,11 @@
 //
 // 完整流程(⚠️ 第 2 步有個會咬人的坑,見下):
 //
-//   1. npm run build && node .tools/css/diff-output.mjs --collect /tmp/new.css
+//   1. npm run build && node .tools/lint/diff-output.mjs --collect /tmp/new.css
 //   2. git checkout <基準 commit> -- .        # 取出重構前的原始碼
-//      npm run build && node .tools/css/diff-output.mjs --collect /tmp/old.css
+//      npm run build && node .tools/lint/diff-output.mjs --collect /tmp/old.css
 //   3. git checkout HEAD -- .                 # 還原
-//   4. node .tools/css/diff-output.mjs /tmp/old.css /tmp/new.css
+//   4. node .tools/lint/diff-output.mjs /tmp/old.css /tmp/new.css
 //
 // ⚠️ 第 3 步的 `git checkout HEAD -- .` **只會還原 HEAD 裡有的檔案** ——
 //    基準 commit 有、而 HEAD 已經刪掉的檔案會留在工作區(而且是 staged 的新增)。
@@ -180,7 +180,7 @@ const args = process.argv.slice(2)
 
 if (args[0] === '--collect') {
   if (!args[1]) {
-    console.error('✗ 用法:node .tools/css/diff-output.mjs --collect <輸出檔>')
+    console.error('✗ 用法:node .tools/lint/diff-output.mjs --collect <輸出檔>')
     process.exit(1)
   }
   onCollect(args[1])
@@ -189,8 +189,8 @@ if (args[0] === '--collect') {
 } else {
   console.error(
     '用法:\n' +
-      '  node .tools/css/diff-output.mjs --collect <輸出檔>   # 收集 .output 的 CSS\n' +
-      '  node .tools/css/diff-output.mjs <舊> <新>            # 比對兩份'
+      '  node .tools/lint/diff-output.mjs --collect <輸出檔>   # 收集 .output 的 CSS\n' +
+      '  node .tools/lint/diff-output.mjs <舊> <新>            # 比對兩份'
   )
   process.exit(1)
 }

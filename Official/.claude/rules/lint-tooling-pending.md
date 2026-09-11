@@ -1,7 +1,7 @@
 # 規範檢查工具 —— stores / api / pages 三支還沒做
 
 2026-09-09 決定把自動檢查從「只有 CSS」擴充到四個面向:**stores / api / css / pages**。
-`css` 那支已經完整([css-conventions.md](./css-conventions.md)、`.tools/css/`),
+`css` 那支已經完整([css-conventions.md](./css-conventions.md)、`.tools/lint/`),
 另外三支**還沒開始,因為規則還沒定**。
 
 > ⚠️ 這份放在版控裡,是因為規則可能從**另一台電腦**給進來 ——
@@ -10,7 +10,7 @@
 
 ## 現在卡在哪
 
-**規則由使用者提供,不可以自己發明**(見 [no-invention.md](./no-invention.md))。
+**規則由使用者提供,不可以自己發明**(見 [no-assumption.md](./no-assumption.md))。
 既有文件只涵蓋一部分,不足以直接轉成檢查:
 
 | 面向 | 現有文件 | 已經寫死、可直接轉成檢查的部分 |
@@ -33,7 +33,7 @@
 
 ## 要落地成什麼形狀
 
-照 `.tools/css/` 的板,每個面向一組:
+照 `.tools/lint/` 的板,每個面向一組:
 
 ```
 .tools/<area>/lint-core.mjs     判斷邏輯(只判斷,不輸出也不改檔)
@@ -42,7 +42,7 @@
 ```
 
 - `package.json` 加 `lint:<area>` 與 `test:<area>`
-- 掛進 `.githooks/pre-commit` 與兩支 hook(`cssGuard.js` / `cssGuardPrompt.js`)的分派 ——
+- 掛進 `.githooks/pre-commit` 與兩支 hook(`css-guard.js` / `css-guard-prompt.js`)的分派 ——
   或改成依副檔名 / 路徑分派到各面向
 - `colors.mjs` 共用(非 TTY 自動關色)
 

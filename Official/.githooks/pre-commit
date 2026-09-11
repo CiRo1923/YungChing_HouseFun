@@ -5,20 +5,20 @@
 #   2. 本次 staged 的 .vue / .css → 跑 CSS 規範檢查,印紅色警告
 #   3. 本次 staged 的 .js / .mjs / .vue → 跑 ESLint,印警告
 #
-# 只警告不阻擋 commit(與 .claude/hooks/cssGuard.js、.vite/css-guard.mjs 一致)——
+# 只警告不阻擋 commit(與 .claude/hooks/css-guard.js、.vite/css-guard.mjs 一致)——
 # 存量還沒清完,擋下來只會逼人加 --no-verify,反而讓守門機制形同虛設。
 #
 # ⚠️ 兩種擺法都要能動,所以先判斷「repo 根是不是就是專案根」:
 #
-#   a. 開發機:repo 根是 Dev/HouseFun,底下放 Official/ 與 Backstage/
-#      → staged 路徑長 `Backstage/assets/…`,依第一層目錄分派
-#   b. 正式站:專案自己就是一個 repo(兩邊的 git 位置不同)
+#   a. 開發機:repo 根在專案的上一層,底下並排放著多個專案
+#      → staged 路徑長 `<專案目錄名>/assets/…`,依第一層目錄分派
+#   b. 正式站:專案自己就是一個 repo(git 位置與 a 不同)
 #      → staged 路徑長 `assets/…`,直接處理、不分派
 #
-# ⚠️ core.hooksPath 是 repo 層級設定、**只能指向一個目錄** ——
-#    a 的情況下誰最後跑 `npm run hooks:install` 就指誰。所以這支與 Backstage 的那支
-#    **內容要保持一致**(兩邊各自一份複本),誰生效結果都一樣。
-#    改這個檔案時記得對照:diff --strip-trailing-cr ../Backstage/.githooks/pre-commit .githooks/pre-commit
+# 注意:core.hooksPath 是 repo 層級設定、**只能指向一個目錄** ——
+#    a 的情況下誰最後跑 `npm run hooks:install` 就指誰。所以這支與並排專案的同名檔案
+#    **內容要保持一致**(各自一份複本),誰生效結果都一樣。
+#    改這個檔案時記得對照並排的那一份:diff --strip-trailing-cr ../*/.githooks/pre-commit .githooks/pre-commit
 #
 # 此 hook 由 .githooks/ 進版控,經 core.hooksPath 生效(npm run hooks:install,postinstall 會跑)。
 
@@ -36,7 +36,7 @@ STAGED_JS=$(echo "$STAGED_ALL" | grep -E '\.(js|mjs|vue)$')
 [ -z "$STAGED" ] && [ -z "$STAGED_JS" ] && exit 0
 
 # repo 根就有這套工具 → 專案自己是一個 repo,不必分派
-if [ -f ".tools/css/lint-css.mjs" ]; then
+if [ -f ".tools/lint/lint.mjs" ]; then
   PROJECTS="."
 else
   PROJECTS=$(printf '%s\n%s\n' "$STAGED" "$STAGED_JS" | grep -v '^$' | cut -d/ -f1 | sort -u)
@@ -54,10 +54,10 @@ for PROJECT in $PROJECTS; do
 
   # --- 1. 色票檔自動排序 ----------------------------------------------------
 
-  if [ -f "$PROJECT/.tools/css/sort-color-css.mjs" ] && [ -n "$REL" ]; then
+  if [ -f "$PROJECT/.tools/lint/sort-color-css.mjs" ] && [ -n "$REL" ]; then
     for f in $(echo "$REL" | grep -E '^assets/css/_common/color[A-Za-z]*\.css$'); do
       BEFORE=$(git hash-object "$PROJECT/$f")
-      (cd "$PROJECT" && node .tools/css/sort-color-css.mjs --write "$f" >/dev/null 2>&1)
+      (cd "$PROJECT" && node .tools/lint/sort-color-css.mjs --write "$f" >/dev/null 2>&1)
       AFTER=$(git hash-object "$PROJECT/$f")
 
       if [ "$BEFORE" != "$AFTER" ]; then
@@ -69,9 +69,9 @@ for PROJECT in $PROJECTS; do
 
   # --- 2. CSS 規範檢查(只看 staged 的檔案)---------------------------------
 
-  if [ -f "$PROJECT/.tools/css/lint-css.mjs" ] && [ -n "$REL" ]; then
+  if [ -f "$PROJECT/.tools/lint/lint.mjs" ] && [ -n "$REL" ]; then
     # shellcheck disable=SC2086
-    if ! (cd "$PROJECT" && node .tools/css/lint-css.mjs $REL); then
+    if ! (cd "$PROJECT" && node .tools/lint/lint.mjs $REL); then
       printf "\n${YELLOW}⚠ 以上為本次 commit 檔案的 CSS 規範違規,commit 照常繼續。${RESET}\n"
       printf "${YELLOW}  規範見 %s/.claude/rules/css-conventions.md${RESET}\n" "$PROJECT"
       printf "${YELLOW}  👉 要協助修正的話,到 Claude Code 對話框打「修正」或「好」就會處理${RESET}\n"

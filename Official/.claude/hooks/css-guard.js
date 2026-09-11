@@ -11,9 +11,16 @@
 import { execFileSync } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 
-const PROJECT_ROOT = path.resolve(fileURLToPath(import.meta.url), '../../..')
+/* 專案根一律 import,不要自己算 —— 各支用 import.meta.url 往上數層數時,
+  層數寫錯就會指到別的地方,而那種錯誤只表現成「檔案讀不到」,看不出是路徑算錯。
+
+  這裡用相對路徑而不是 @ alias:hook 是 node 直接執行的腳本,
+  不經過建置流程,alias 在這裡不會被解析。 */
+import { PROJECT_ROOT } from '../../.tools/lint/paths.mjs'
+/* 規則標題一律 import,不要各層自己寫一份 —— 加了新規則只改其中一層的話,
+  其他層會顯示原始代號而不是看得懂的標題,而那不會報錯,只是訊息變得難懂。 */
+import { RULE_TITLE } from '../../.tools/lint/lint-core.mjs'
 
 const isColorCss = (rel) => /^assets\/css\/_common\/color[A-Za-z]*\.css$/.test(rel)
 
@@ -35,7 +42,7 @@ const runNode = (args) => {
 /**
  * 各規則對應的修正方式,寫進給 Claude 的指示裡,讓它提得出具體方案。
  *
- * ⛔ 寫這些文字(以及規範、.tools/css/ 的註解)時**不可以出現任何專案名稱** ——
+ * ⛔ 寫這些文字(以及規範、.tools/lint/ 的註解)時**不可以出現任何專案名稱** ——
  *    規則本體是各自的複本、移植時整份複製,寫死對方的名字複製過去就變成錯的敘述。
  *    有差異時只描述「本專案的事實」與「移植時要重新確認什麼」。
  */
@@ -108,15 +115,6 @@ const FIX_HINTS = {
     '這條是機械式替換,可以直接動手 —— 但要先確認原本想要的效果是什麼(那個 class 一直沒生效)。',
 }
 
-const RULE_TITLE = {
-  color: '規則 1 違規 —— 顏色沒有定義在色票檔',
-  colorFile: '規則 1 違規 —— 色票檔的命名 / 排序 / 頻道歸屬',
-  tailwind: '規則 2 違規 —— template 使用 tailwind class',
-  module: '規則 3 違規 —— module css 的結構或引入方式不對',
-  variable: '規則 4 違規 —— module 變數的命名或斷點不對',
-  import: '規則 5 違規 —— .vue 的 import 順序不對',
-  theme: '規則 6 違規 —— 用到本專案不存在或已淘汰的 tailwind class',
-}
 
 const MAX_LISTED = 12
 
@@ -124,7 +122,7 @@ const onSortColorCss = (rel, absPath) => {
   if (!isColorCss(rel)) return null
 
   const before = fs.readFileSync(absPath, 'utf8')
-  runNode(['.tools/css/sort-color-css.mjs', '--write', rel])
+  runNode(['.tools/lint/sort-color-css.mjs', '--write', rel])
   const after = fs.readFileSync(absPath, 'utf8')
 
   if (before === after) return null
@@ -140,7 +138,7 @@ const onSortColorCss = (rel, absPath) => {
  */
 const onCleanEmptyRules = (rel, absPath) => {
   const before = fs.readFileSync(absPath, 'utf8')
-  const after = runNode(['.tools/css/clean-empty-rules.mjs', rel])
+  const after = runNode(['.tools/lint/clean-empty-rules.mjs', rel])
   if (!after.ok) return null
   if (fs.readFileSync(absPath, 'utf8') === before) return null
 
@@ -150,7 +148,7 @@ const onCleanEmptyRules = (rel, absPath) => {
 }
 
 const onLint = (rel) => {
-  const lint = runNode(['.tools/css/lint-css.mjs', '--json', rel])
+  const lint = runNode(['.tools/lint/lint.mjs', '--json', rel])
 
   let parsed
   try {

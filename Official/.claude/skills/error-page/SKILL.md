@@ -10,9 +10,8 @@ description: 動到錯誤頁或 404 導向前必須先讀。說明 error.vue 為
 **Nuxt 的錯誤頁必須放在 srcDir 根目錄** —— 本專案 `pages/`、`components/`、`layouts/` 都在根,
 所以 srcDir 就是根,錯誤頁是 `./error.vue`。
 
-原本它放在 `pages/error.vue`,只有一行 `HouseFun Error`。那樣會被當成一般頁面編譯成
-`/error` 路由,**`showError` 從來不會用到它** —— 全專案也沒有任何地方導向 `/error`,它是個孤兒。
-(姊妹專案 Backstage 有一模一樣的問題,兩邊同時修掉。)
+放在 `pages/error.vue` 是不會生效的 —— 那樣會被當成一般頁面編譯成 `/error` 路由,
+**`showError` 從來不會用到它**,而且全專案也沒有任何地方導向 `/error`,它會是個孤兒。
 
 **怎麼確認錯誤頁真的生效**:build 後看 `.output`。
 

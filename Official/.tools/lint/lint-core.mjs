@@ -5,8 +5,8 @@
 //   規則 4 —— module 變數的命名與斷點
 //
 // 這支只負責「判斷」,不做輸出也不改檔案。
-// CLI 在 lint-css.mjs;dev server 的即時檢查在 .vite/css-guard.mjs;
-// Claude 寫檔後的檢查在 .claude/hooks/cssGuard.js。
+// CLI 在 lint.mjs;dev server 的即時檢查在 .vite/css-guard.mjs;
+// Claude 寫檔後的檢查在 .claude/hooks/css-guard.js。
 
 import fs from 'node:fs'
 import path from 'node:path'
@@ -23,6 +23,61 @@ import {
   sortDecls,
   suffixOf,
 } from './color-order.mjs'
+/* 其他類別的規範各自成一支,判斷不寫在這裡 —— 這一支只放 CSS 規範與引擎。
+  換一個專案時要改的只有 project-config.mjs,這五支一行都不用動。 */
+import { API_CHECKS, API_RULE_HINT, API_RULE_TITLE } from './rules-api.mjs'
+import { CODE_CHECKS, CODE_RULE_HINT, CODE_RULE_TITLE } from './rules-code.mjs'
+import { GLOBAL_CHECKS, GLOBAL_RULE_HINT, GLOBAL_RULE_TITLE } from './rules-global.mjs'
+import { PAGE_CHECKS, PAGE_RULE_HINT, PAGE_RULE_TITLE } from './rules-page.mjs'
+import { STORE_CHECKS, STORE_RULE_HINT, STORE_RULE_TITLE } from './rules-store.mjs'
+
+/* 五組外部規範,依序跑。它們收的是 ctx 物件(見 lintFile 結尾的說明),
+  與這一支的 CSS 規則簽名不同,所以分開收集、在 lintFile 裡各自呼叫。 */
+const EXTERNAL_CHECKS = [
+  ...GLOBAL_CHECKS,
+  ...API_CHECKS,
+  ...STORE_CHECKS,
+  ...CODE_CHECKS,
+  ...PAGE_CHECKS,
+]
+
+/* 規則代號對應的標題與修正提示,**五層守門共用同一份**
+  (存檔、開發伺服器、AI 寫檔、對話提醒、commit)。
+
+  注意:這份只能有一份。散在各層各寫一次的話,加了新規則只改其中一層,
+      其他層就會顯示原始代號而不是看得懂的標題 —— 而那不會報錯,
+      只是訊息變得難懂,通常沒有人會回報。
+
+  CSS 那七條寫在這裡(判斷也在這一支),其餘由各自的規則模組提供。 */
+export const RULE_TITLE = {
+  color: '規則 1 顏色未定義在色票檔',
+  colorFile: '規則 1 色票檔的命名 / 排序 / 頻道歸屬',
+  tailwind: '規則 2 template 使用 tailwind class',
+  module: '規則 3 module css 的引入方式或順序',
+  variable: '規則 4 module 變數的命名或斷點',
+  import: '規則 5 .vue 的 import 順序',
+  theme: '規則 6 用到不存在或已淘汰的 tailwind class',
+  ...GLOBAL_RULE_TITLE,
+  ...API_RULE_TITLE,
+  ...STORE_RULE_TITLE,
+  ...CODE_RULE_TITLE,
+  ...PAGE_RULE_TITLE,
+}
+
+export const RULE_HINT = {
+  color: '改用 var(--色名-色碼)',
+  colorFile: '跨頻道共用的搬到 color.css;命名要人工改',
+  tailwind: '樣式移到 assets/css/_modules/',
+  module: '<script setup> 最上方 JS import;變數建在用到的最小單位上',
+  variable: '-w / -h / -p,尺寸分 pc / tablet / mobile 三份',
+  import: 'css → ./.composables → @js → 其他套件',
+  theme: 'text-sm / shadow-md / font-sans / md: 產不出任何 CSS',
+  ...GLOBAL_RULE_HINT,
+  ...API_RULE_HINT,
+  ...STORE_RULE_HINT,
+  ...CODE_RULE_HINT,
+  ...PAGE_RULE_HINT,
+}
 
 /** 全專案掃描時要看的目錄 / 檔案 */
 export const SCAN_TARGETS = [
@@ -1326,7 +1381,7 @@ export function checkColorBase(relPath, text) {
  * ⚠️ **只抓大括號內完全空白的**。帶註解的(`.foo { /* 之後補 *\/ }`)不算 ——
  *    那是有意留的位置,而且註解通常寫著為什麼。
  *
- * 這條有**自動修正**:存檔時(guard-file / cssGuard)會直接把空區塊連同
+ * 這條有**自動修正**:存檔時(guard-file / css-guard)會直接把空區塊連同
  * 後面的空行一起刪掉,不必手動處理。
  */
 export function checkEmptyRule(relPath, text) {
@@ -1995,7 +2050,25 @@ export function lintFile(projectRoot, absPath, definedVars) {
     issues.push(...checkStateClassNaming(rel, text))
   }
 
-  return issues
+  /* 上面那些是 CSS 規範,判斷寫在這一支;下面五組是其他類別的規範,
+    判斷各自寫在 rules-*.mjs。兩邊的函式簽名不同 ——
+    CSS 那些收 (rel, text),五組收一個 ctx 物件,所以這裡組出 ctx 再轉交。
+
+    注意:單條規則丟例外時只跳過那一條,不要讓整個檢查停擺 ——
+        一條規則壞掉就什麼都檢查不到的話,災情比那條規則失效大得多。 */
+  const ctx = { root: projectRoot, rel, text, isVue: rel.endsWith('.vue'), definedVars }
+
+  issues.push(
+    ...EXTERNAL_CHECKS.flatMap((check) => {
+      try {
+        return check(ctx)
+      } catch {
+        return []
+      }
+    })
+  )
+
+  return issues.sort((a, b) => (a.line ?? 0) - (b.line ?? 0))
 }
 
 export { isDerivedColorVar }

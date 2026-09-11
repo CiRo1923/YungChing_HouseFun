@@ -37,7 +37,7 @@
       {
         // 存檔 .vue / .css → 色票檔自動排序 + 五條規範全部檢查,逐筆印出。
         "match": "\\.(vue|css)$",
-        "cmd": "node \"${workspaceFolder}/.tools/css/guard-file.mjs\" \"${file}\""
+        "cmd": "node \"${workspaceFolder}/.tools/lint/guard-file.mjs\" \"${file}\""
 
         // ⚠️ 刻意不設 autoShowOutputPanel —— 存檔時把焦點搶去輸出面板太干擾,
         //    正在打字的游標會跑掉。訊息留在「Run On Save」面板,要看的時候自己切過去。

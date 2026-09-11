@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/movePermissionsToLocal.js 2>/dev/null || true",
+            "command": "node .claude/hooks/move-permissions-to-local.js 2>/dev/null || true",
             "timeout": 30,
             "statusMessage": "把 permissions 搬回 settings.local.json…"
           }
@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/cssGuardPrompt.js 2>/dev/null || true",
+            "command": "node .claude/hooks/css-guard-prompt.js 2>/dev/null || true",
             "timeout": 30,
             "statusMessage": "檢查存檔後的 CSS 規範…"
           }
@@ -30,11 +30,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/conventions.js 2>/dev/null || true"
+            "command": "node .claude/hooks/enforce-conventions.js 2>/dev/null || true"
           },
           {
             "type": "command",
-            "command": "node .claude/hooks/cssGuard.js 2>/dev/null || true",
+            "command": "node .claude/hooks/css-guard.js 2>/dev/null || true",
             "statusMessage": "檢查 CSS 規範…"
           }
         ]
@@ -44,7 +44,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/movePermissionsToLocal.js 2>/dev/null || true",
+            "command": "node .claude/hooks/move-permissions-to-local.js 2>/dev/null || true",
             "timeout": 30,
             "async": true,
             "statusMessage": "把 permissions 搬回 settings.local.json…"

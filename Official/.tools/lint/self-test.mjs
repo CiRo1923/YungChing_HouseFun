@@ -17,12 +17,13 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 import { loadDefinedColorVars } from './color-order.mjs'
 import { lintFile } from './lint-core.mjs'
 import { BOLD, DIM, GREEN, RED, RESET, YELLOW } from './colors.mjs'
 
-const projectRoot = path.resolve(fileURLToPath(import.meta.url), '../../..')
+/* 專案根一律 import,不要自己算 —— 各支用 import.meta.url 往上數層數時,
+  層數寫錯就會指到別的地方,而那種錯誤只表現成「檔案讀不到」,看不出是路徑算錯。 */
+import { PROJECT_ROOT as projectRoot } from './paths.mjs'
 const definedVars = loadDefinedColorVars(projectRoot)
 
 /** 探測檔放這裡 —— 名字取得夠特別,誤留下來也一眼看得出是什麼 */
@@ -517,6 +518,6 @@ console.error('')
 for (const f of fails) console.error(`  ${RED}✗${RESET} ${f}\n`)
 console.error(
   `${YELLOW}這代表「規則本身」壞了,不是程式碼有問題 —— ` +
-    `改過 .tools/css/lint-core.mjs 之後最容易發生。${RESET}`
+    `改過 .tools/lint/lint-core.mjs 之後最容易發生。${RESET}`
 )
 process.exit(1)

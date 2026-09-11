@@ -4,11 +4,11 @@
 //
 // hooksPath 的相對路徑是相對 **repo 根**,不是相對專案 —— 所以兩種擺法算出來的值不同:
 //
-//   a. 開發機:repo 根是 Dev/HouseFun,底下放 Official/ 與 Backstage/ → `Backstage/.githooks`
-//   b. 正式站:專案自己就是一個 repo(兩邊的 git 位置不同)         → `.githooks`
+//   a. 開發機:repo 根在專案的上一層,底下並排放著多個專案 → `<專案目錄名>/.githooks`
+//   b. 正式站:專案自己就是一個 repo(git 位置與 a 不同)   → `.githooks`
 //
-// ⚠️ a 的情況下 core.hooksPath 是 repo 層級設定、**只能指向一個目錄** ——
-//    兩個專案都跑這支的話,**誰最後跑誰生效**。所以兩邊的 .githooks/pre-commit
+// 注意:a 的情況下 core.hooksPath 是 repo 層級設定、**只能指向一個目錄** ——
+//    並排的專案都跑這支的話,**誰最後跑誰生效**。所以各專案的 .githooks/pre-commit
 //    內容要保持一致(各自一份複本),誰生效結果都一樣;被改掉時這裡會印訊息說明。
 //
 // 不是 git repo、或 git 不可用時安靜跳過 —— 裝不上 hook 不該讓 npm install 失敗。
@@ -16,9 +16,10 @@
 import { execFileSync } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 
-const projectRoot = path.resolve(fileURLToPath(import.meta.url), '../..')
+/* 專案根一律 import,不要自己算 —— 各支用 import.meta.url 往上數層數時,
+  層數寫錯就會指到別的地方,而那種錯誤只表現成「檔案讀不到」,看不出是路徑算錯。 */
+import { PROJECT_ROOT as projectRoot } from './lint/paths.mjs'
 
 const onGit = (args) =>
   execFileSync('git', args, {

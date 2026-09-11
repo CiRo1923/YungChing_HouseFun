@@ -16,8 +16,8 @@ description: Backstage 與 Official 共用元件(mForm / mPopup / ImgSrc / SvgIc
 | ImgSrc | `components/common/ImgSrc.vue` | `components/common/ImgSrc.vue` |
 | SvgIcon | `components/common/SvgIcon.vue` | `components/common/SvgIcon.vue` |
 
-兩專案的路徑相同:
-`d:\CiRo\Project\YungChing\Dev\HouseFun\{Backstage,Official}\`
+兩個專案在同一個 repo 根底下並排,各自的內部路徑結構相同 ——
+所以上面那張表的兩欄看起來一樣,差別只在最外層是哪一個專案目錄。
 
 ## 核心原則
 

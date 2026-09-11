@@ -8,7 +8,7 @@
 
 ### ⛔ 嚴禁在規則本體寫死專案名稱
 
-**規則本體與 `.tools/css/` 的程式碼註解裡,不可以出現任何專案名稱** ——
+**規則本體與 `.tools/lint/` 的程式碼註解裡,不可以出現任何專案名稱** ——
 不論是本專案的、姊妹專案的、還是參考專案的。
 
 | ✗ | ✓ |
@@ -59,8 +59,8 @@
 **這條不適用於「判斷不出來」的情況** —— 那是「該怎麼做」不是「要不要修」,
 見下面的「判斷不出來就問」,遇到岔路一律要問,那條沒有放寬。
 
-違規清單由 [.claude/hooks/cssGuard.js](../hooks/cssGuard.js)(Claude 寫檔時)與
-[.claude/hooks/cssGuardPrompt.js](../hooks/cssGuardPrompt.js)(使用者送出訊息時)帶進對話,
+違規清單由 [.claude/hooks/css-guard.js](../hooks/css-guard.js)(Claude 寫檔時)與
+[.claude/hooks/css-guard-prompt.js](../hooks/css-guard-prompt.js)(使用者送出訊息時)帶進對話,
 但**不要依賴 hook 有沒有帶** —— 自己跑 `npm run lint:css` 或 commit 時看到的警告,一樣照這條處理。
 
 ## 四層守門
@@ -68,9 +68,9 @@
 | 機制 | 何時生效 | 行為 |
 |---|---|---|
 | [.vite/css-guard.mjs](../../.vite/css-guard.mjs) | 編輯器存檔,**需 `npm run dev` 執行中** | 色票檔自動排序、其他檔案印紅色警告到 dev 終端機 |
-| [.vscode/settings.json](../../.vscode/settings.json) 的 `emeraldwalk.runonsave` | 編輯器存檔,**不需 dev server**(要裝擴充 `emeraldwalk.RunOnSave`) | 跑 [.tools/css/guard-file.mjs](../../.tools/css/guard-file.mjs):色票檔自動排序 + 逐筆列出違規,**有違規時自動彈出**「Run On Save」輸出面板 |
-| [.claude/hooks/cssGuard.js](../hooks/cssGuard.js) | **Claude 用 Write / Edit 寫檔**,隨時 | 自動排序 + **自動移除空的規則區塊** + 違規清單回報到對話(背景資訊,不主動彈問句) |
-| [.claude/hooks/cssGuardPrompt.js](../hooks/cssGuardPrompt.js) | **使用者送出訊息時**(補「自己存檔」的情境) | 掃追蹤清單 + 工作區有改動的 .vue / .css:色票檔自動排序 + 帶出違規清單 |
+| [.vscode/settings.json](../../.vscode/settings.json) 的 `emeraldwalk.runonsave` | 編輯器存檔,**不需 dev server**(要裝擴充 `emeraldwalk.RunOnSave`) | 跑 [.tools/lint/guard-file.mjs](../../.tools/lint/guard-file.mjs):色票檔自動排序 + 逐筆列出違規,**有違規時自動彈出**「Run On Save」輸出面板 |
+| [.claude/hooks/css-guard.js](../hooks/css-guard.js) | **Claude 用 Write / Edit 寫檔**,隨時 | 自動排序 + **自動移除空的規則區塊** + 違規清單回報到對話(背景資訊,不主動彈問句) |
+| [.claude/hooks/css-guard-prompt.js](../hooks/css-guard-prompt.js) | **使用者送出訊息時**(補「自己存檔」的情境) | 掃追蹤清單 + 工作區有改動的 .vue / .css:色票檔自動排序 + 帶出違規清單 |
 | [.githooks/pre-commit](../../.githooks/pre-commit) | `git commit` 時,**不依賴 dev 或編輯器** | 色票檔自動排序並加入本次 commit;staged 檔案的違規印警告後照常 commit |
 
 **「存檔就看到警告,想修的時候一句話就修」是這樣拼起來的**:
@@ -79,14 +79,14 @@
    面板上就寫著「要修就到 Claude Code 打『修正』」。
 2. **終端機與輸出面板都是單向的**,沒辦法在那裡接你的回答 ——
    而 Claude Code 也沒有「檔案變更就喚醒對話」的 hook,對話只能由你這邊起頭。
-3. 所以存檔那層([guard-file.mjs](../../.tools/css/guard-file.mjs))會把「剛存了哪些檔」
-   寫進 `node_modules/.cache/cssGuard/pending.json` 當接力棒,
-   `cssGuardPrompt.js` 在你**下一次送出訊息**時讀出來,把違規清單帶進對話 ——
+3. 所以存檔那層([guard-file.mjs](../../.tools/lint/guard-file.mjs))會把「剛存了哪些檔」
+   寫進 `node_modules/.cache/css-guard/pending.json` 當接力棒,
+   `css-guard-prompt.js` 在你**下一次送出訊息**時讀出來,把違規清單帶進對話 ——
    Claude 記著但不打斷你,等你說「修正」再動手。
 
 **`pending.json` 是「還沒修好的檔案」清單,不是「還沒回報過的」** ——
 所以它**不是讀走就清空**,而是每一輪重新 lint、**只把已經通過的檔案移除**
-([`onDropClean`](../hooks/cssGuardPrompt.js#L131))。違規還在就一直留在清單裡,每一輪照樣列出。
+([`onDropClean`](../hooks/css-guard-prompt.js#L131))。違規還在就一直留在清單裡,每一輪照樣列出。
 
 早期還有一份 `reported.json` 負責去重(同一筆回報過就安靜),**已經移除** ——
 它會讓違規在第二輪之後靜靜消失,看起來像處理完了,正是這套機制要避免的事。
@@ -106,13 +106,13 @@
 
 沒有時間戳就分不出「這是剛剛那次存檔的結果」還是「上一次留著沒被捲掉的舊訊息」。
 
-> 對話那兩層(`cssGuard.js` / `cssGuardPrompt.js`)**不適用這條** ——
+> 對話那兩層(`css-guard.js` / `css-guard-prompt.js`)**不適用這條** ——
 > 它們是「有事才說」,通過時保持安靜才不會洗版;訊息本來就跟著對話輪次走,不會有殘留問題。
 
 存檔那層有兩個容易踩到的細節,都已處理:
 
 - **VSCode 的輸出面板不吃 ANSI 色碼** —— 硬印會變成一堆 `esc[31m`。
-  [.tools/css/colors.mjs](../../.tools/css/colors.mjs) 在非 TTY(被程式接走的 stdout)時自動關色,
+  [.tools/lint/colors.mjs](../../.tools/lint/colors.mjs) 在非 TTY(被程式接走的 stdout)時自動關色,
   dev 終端機照樣有顏色。也支援 `NO_COLOR` 與 `--no-color`。
 - **違規時面板會自動彈出** —— RunOnSave 設了 `"autoShowOutputPanel": "error"`,
   而 `guard-file.mjs` **違規回 exit 1、通過回 exit 0**,所以正好是「只有出事才打擾你」:
@@ -124,8 +124,8 @@
 - **dev server 那層用 `server.watcher` 而不是 `handleHotUpdate`** ——
   後者只對「已經進模組圖」的檔案觸發,存到當前頁面沒載入的組件時完全不會有反應。
 
-各層共用 [.tools/css/lint-core.mjs](../../.tools/css/lint-core.mjs) 與
-[.tools/css/color-order.mjs](../../.tools/css/color-order.mjs),判斷標準只有一套。
+各層共用 [.tools/lint/lint-core.mjs](../../.tools/lint/lint-core.mjs) 與
+[.tools/lint/color-order.mjs](../../.tools/lint/color-order.mjs),判斷標準只有一套。
 **除了色票檔的排序,任何工具都不會改動色值或程式碼。**
 
 ### 沒裝 RunOnSave 擴充會怎樣
@@ -134,7 +134,7 @@
 
 | 仍然有效 | 失效 |
 |---|---|
-| 對話那層(`cssGuardPrompt.js` 靠 `git status` 掃改動過的檔案,不依賴任何擴充) | 存檔時的即時警告與面板彈出 |
+| 對話那層(`css-guard-prompt.js` 靠 `git status` 掃改動過的檔案,不依賴任何擴充) | 存檔時的即時警告與面板彈出 |
 | `git commit` 的 pre-commit | 存檔時的色票檔自動排序 |
 | dev server 那層(**前提是 `npm run dev` 有在跑**) | `pending.json` 接力棒 —— 「存了檔但內容沒變」或「改動已 commit」的情況對話那層會漏掉 |
 
@@ -151,7 +151,7 @@
 >
 > ⚠️ `core.hooksPath` 是 **repo 層級**的設定、只能指向一個目錄。
 > 一個 repo 裡放了多個專案時,pre-commit 要能**依 staged 路徑的第一層目錄分派**到各專案的
-> `.tools/css/`,沒有這套工具的專案自動略過 —— 否則誰後跑 `hooks:install` 就蓋掉誰。
+> `.tools/lint/`,沒有這套工具的專案自動略過 —— 否則誰後跑 `hooks:install` 就蓋掉誰。
 > 每個專案一個 repo 時不需要這層,hook 直接處理根目錄即可。
 
 ---
@@ -1079,7 +1079,7 @@ block 元素換過去通常沒事,但**`inline` 元素或 flex item 要實機確
 
 ## 規則 4:module 變數的命名與斷點
 
-這條**由工具自動檢查**([lint-core.mjs](../../.tools/css/lint-core.mjs) 的 `checkModuleVariables`),
+這條**由工具自動檢查**([lint-core.mjs](../../.tools/lint/lint-core.mjs) 的 `checkModuleVariables`),
 不必靠記憶。
 
 ### 變數的前綴跟著 module 走
@@ -1308,7 +1308,7 @@ import { Field, ErrorMessage } from 'vee-validate'
 `@stores` / `@components` / `@imgs` 這些沒列在上面的**不參與排序檢查**,
 但習慣上排在 `@js` 之後、第三方套件之前。
 
-這條由工具檢查([lint-core.mjs](../../.tools/css/lint-core.mjs) 的 `checkImportOrder`)。
+這條由工具檢查([lint-core.mjs](../../.tools/lint/lint-core.mjs) 的 `checkImportOrder`)。
 
 ---
 
@@ -1342,7 +1342,7 @@ import { Field, ErrorMessage } from 'vee-validate'
 `tracking-wider` / `leading-*` 都是合法的(規範也要求字距用 `tracking-wider`)。
 `dropShadow` / `width` / `content` / `transitionProperty` 在 `extend` 底下,內建也都還在。
 
-這條由 [lint-core.mjs](../../.tools/css/lint-core.mjs) 的 `checkTailwindTheme` 檢查,
+這條由 [lint-core.mjs](../../.tools/lint/lint-core.mjs) 的 `checkTailwindTheme` 檢查,
 `.vue` 與 `.css` 都掃(寫在哪裡都是錯的)。
 
 > ⚠️ **改了 `theme` 就要回頭同步 `UNAVAILABLE_CLASSES`** ——
@@ -1385,7 +1385,7 @@ npm run test:css
 走的是 `lintFile` 的完整路徑,所以連「**哪個路徑跑哪些檢查**」的分派邏輯也一起驗到 ——
 例如文件路徑不檢查、`pages` 不跑 module 那組。
 
-**什麼時候要跑**:動過 `.tools/css/lint-core.mjs` 的任何判斷邏輯之後。
+**什麼時候要跑**:動過 `.tools/lint/lint-core.mjs` 的任何判斷邏輯之後。
 加新規則時順手補一個案例(違規 + 合法各一),那條規則才算真的立起來。
 
 > ⚠️ 探測檔會**實際寫進專案目錄**(檢查依路徑前綴決定要不要跑,不能寫在別處),
@@ -1430,7 +1430,7 @@ npm run diff:css -- ../old.css ../new.css    # 比對
 
 ### ⚠️ 掃描範圍以外的檔案 —— 寫死色碼一層都抓不到
 
-[lint-core.mjs](../../.tools/css/lint-core.mjs) 的 `SCAN_TARGETS` 只涵蓋
+[lint-core.mjs](../../.tools/lint/lint-core.mjs) 的 `SCAN_TARGETS` 只涵蓋
 `components` / `containers` / `pages` / `layouts` / `assets/css` / `app.vue` / `error.vue`,
 `SCAN_EXT` 只有 `.vue` 與 `.css`;根目錄的設定檔靠 `SCAN_CONFIG_FILES` 白名單納入
 (目前是 `tailwind.extend.js` 與 `tailwind.config.js`,**只檢查顏色**)。
@@ -1439,10 +1439,10 @@ npm run diff:css -- ../old.css ../new.css    # 比對
 差別看得出來 —— 指名一支範圍外的檔案,它會回報通過,但括號裡的檔案數是 0:
 
 ```powershell
-node .tools/css/lint-css.mjs tailwind.extend.js
+node .tools/lint/lint.mjs tailwind.extend.js
 # ✔ CSS 規範檢查通過(掃描 1 個檔案)   ← 在白名單裡,真的讀了
 
-node .tools/css/lint-css.mjs postcss.function.js
+node .tools/lint/lint.mjs postcss.function.js
 # ✔ CSS 規範檢查通過(掃描 0 個檔案)   ← 是 0,檔案根本沒被打開
 ```
 
@@ -1467,18 +1467,18 @@ node .tools/css/lint-css.mjs postcss.function.js
 
 ```powershell
 npm run lint:css                              # 全專案掃描(四條規則)
-node .tools/css/lint-css.mjs <檔案或目錄>      # 只檢查指定範圍
-node .tools/css/lint-css.mjs --json           # JSON 輸出,供程式解析
+node .tools/lint/lint.mjs <檔案或目錄>      # 只檢查指定範圍
+node .tools/lint/lint.mjs --json           # JSON 輸出,供程式解析
 
-node .tools/css/sort-color-css.mjs            # 色票檔:檢查排序 / 命名 / 頻道歸屬
+node .tools/lint/sort-color-css.mjs            # 色票檔:檢查排序 / 命名 / 頻道歸屬
 npm run sort:color                            # 色票檔:自動排序
 ```
 
 ### 拆完 module 的驗證
 
 ```powershell
-node .tools/css/lint-css.mjs components/<頻道>/<組件>.vue        # 應該完全通過
-node .tools/css/lint-css.mjs assets/css/_modules/<頻道>/<組件>/  # 應該完全通過
+node .tools/lint/lint.mjs components/<頻道>/<組件>.vue        # 應該完全通過
+node .tools/lint/lint.mjs assets/css/_modules/<頻道>/<組件>/  # 應該完全通過
 npm run build                                                    # 必跑
 ```
 
@@ -1496,12 +1496,12 @@ $all -match 'm-tab-select-element'
 
 | 檔案 | 職責 |
 |---|---|
-| [.tools/css/color-order.mjs](../../.tools/css/color-order.mjs) | 色票檔的解析、命名驗證、亮度排序、頻道歸屬比對 |
-| [.tools/css/lint-core.mjs](../../.tools/css/lint-core.mjs) | 五條規則的判斷邏輯(只判斷,不輸出也不改檔) |
-| [.tools/css/lint-css.mjs](../../.tools/css/lint-css.mjs) | 檢查用 CLI |
-| [.tools/css/sort-color-css.mjs](../../.tools/css/sort-color-css.mjs) | 排序用 CLI |
-| [.tools/css/guard-file.mjs](../../.tools/css/guard-file.mjs) | 存檔用的單檔入口(排序 + 檢查),給 Run on Save 呼叫 |
-| [.tools/css/colors.mjs](../../.tools/css/colors.mjs) | CLI 顏色開關(非 TTY 自動關色) |
+| [.tools/lint/color-order.mjs](../../.tools/lint/color-order.mjs) | 色票檔的解析、命名驗證、亮度排序、頻道歸屬比對 |
+| [.tools/lint/lint-core.mjs](../../.tools/lint/lint-core.mjs) | 五條規則的判斷邏輯(只判斷,不輸出也不改檔) |
+| [.tools/lint/lint.mjs](../../.tools/lint/lint.mjs) | 檢查用 CLI |
+| [.tools/lint/sort-color-css.mjs](../../.tools/lint/sort-color-css.mjs) | 排序用 CLI |
+| [.tools/lint/guard-file.mjs](../../.tools/lint/guard-file.mjs) | 存檔用的單檔入口(排序 + 檢查),給 Run on Save 呼叫 |
+| [.tools/lint/colors.mjs](../../.tools/lint/colors.mjs) | CLI 顏色開關(非 TTY 自動關色) |
 | [.tools/install-git-hooks.mjs](../../.tools/install-git-hooks.mjs) | 設定 `core.hooksPath`(postinstall 自動跑) |
 | [.tools/check-vscode-extensions.mjs](../../.tools/check-vscode-extensions.mjs) | 檢查 RunOnSave 擴充有沒有裝(postinstall 自動跑,只警告不阻擋) |
 
@@ -1587,7 +1587,7 @@ module 也多一層頻道目錄(`_modules/<頻道>/<組件>/`)。
 
 ### 與參考專案的關係
 
-這套規則與工具移植自參考專案(`.claude/rules/css-conventions.md` + `.tools/css/`),
+這套規則與工具移植自參考專案(`.claude/rules/css-conventions.md` + `.tools/lint/`),
 **最近一次對照為 2026-08-28**(對方 commit `32bd943`)。兩邊是各自的複本,不會自動同步:
 
 #### 2026-08-28 那次對照收了什麼
@@ -1619,8 +1619,8 @@ modifier 下輸出」與「顏色 modifier 不適合用變數覆寫模式」—�
 | 結構 | `_modules/<頻道>/<組件>/` 多一層路徑、**群組共用層**(mForm 的 `selection.*`)、變數建在「用到的最小單位」、寬高相同用 `-size` |
 | 命名 | modifier 對齊 tailwind utility、狀態一律 `--` 開頭(`checkStateClassNaming`)、variables 檔只放值(`checkVariablesFile`)、名實相符(`checkVariableUsage`) |
 | 規則 5 | `<script setup>` 的 import 順序(`checkImportOrder`)—— 對方沒有這條 |
-| 守門 | 第四層「使用者送出訊息時」(`cssGuardPrompt.js` + `guard-file.mjs` 的接力機制)、dev server 那層的去抖與 hash 比對、`colors.mjs` 的非 TTY 自動關色 |
+| 守門 | 第四層「使用者送出訊息時」(`css-guard-prompt.js` + `guard-file.mjs` 的接力機制)、dev server 那層的去抖與 hash 比對、`colors.mjs` 的非 TTY 自動關色 |
 | 流程 | 「**違規每一輪都要列出,但不主動彈問句**」以及「判斷不出來就問」的岔路清單 |
 
 > 那邊之後若更新規則或工具,要**人工回頭對照**,不要假設兩邊一致。
-> 對照時的三個目錄:`.claude/`(rules + skills + hooks)、`.tools/css/`、`.vite/`。
+> 對照時的三個目錄:`.claude/`(rules + skills + hooks)、`.tools/lint/`、`.vite/`。
