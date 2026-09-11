@@ -9,7 +9,7 @@ import '@css/_modules/buy/mDatepicker/common.css'
 
   config 的鍵見 .composables/useConfig.js —— 那份是對外契約,不要改名。 */
 
-import useValidateEvents from '../../common/mForm/.composables/useValidateEvents.js'
+import useValidateEvents from '@components/common/mForm/.composables/useValidateEvents.js'
 import {
   onGetYMDByFormat,
   onPickFormat,

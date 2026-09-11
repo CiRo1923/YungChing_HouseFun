@@ -86,11 +86,11 @@ export const useCalendar = (config, model, options = {}) => {
 
   /* 一段日期區間與 min / max 完全沒有交集 → 這段整個不能選。
 
-    ⚠️ 判斷的是「有沒有交集」,不是「兩個端點各自合不合格」——
+    注意:判斷的是「有沒有交集」,不是「兩個端點各自合不合格」——
         min 是 3 月、max 是 10 月時,年初早於 min、年末晚於 max,
         **兩端都不合格但中間 8 個月都選得到**。拿兩個端點各自 disabled 再 `&&`
-        會把整年停掉,那是實際踩過的 bug(月清單同理:min / max 落在同一個月內時,
-        月初與月末都不合格,但中間那幾天是可選的)。 */
+        會把整年停掉。月清單也是一樣的道理:min 與 max 落在同一個月內時,
+        月初與月末都不合格,但中間那幾天是可選的。 */
   const onRangeDisabled = (startDate, endDate) => {
     const startMs = onDateOnlyMs(startDate)
     const endMs = onDateOnlyMs(endDate)

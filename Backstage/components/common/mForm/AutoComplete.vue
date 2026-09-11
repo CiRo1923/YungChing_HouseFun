@@ -488,6 +488,15 @@ watch(
   { deep: true }
 )
 
+/* 在 setup 就算一次 —— label 是從 model + options 推導出來的,但它是 ref、
+  靠上面兩個 watch 與下面的 onMounted 手動同步。那三個點**沒有一個會在 SSR 期間跑到**
+  (watch 沒有 immediate、onMounted 只在 client),所以 server render 出來的 label
+  是 null:有初始值的欄位會先閃一次空白,hydrate 之後才補上文字。
+
+  注意:這裡只補顯示用的 label。onInit(內部是 onFilter)是算下拉清單的內容,
+      而下拉在 SSR 不會展開,留在 onMounted 就好。 */
+onGetInputLabel()
+
 onMounted(() => {
   onGetInputLabel()
   onInit()

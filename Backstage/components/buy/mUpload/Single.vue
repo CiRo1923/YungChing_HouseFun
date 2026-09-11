@@ -4,7 +4,7 @@ import '@css/_modules/buy/mUpload/singleVariables.css'
 import '@css/_modules/buy/mUpload/common.css'
 import '@css/_modules/buy/mUpload/single.css'
 
-import useValidateEvents from '../../common/mForm/.composables/useValidateEvents.js'
+import useValidateEvents from '@components/common/mForm/.composables/useValidateEvents.js'
 
 import '@js/_validation.js'
 

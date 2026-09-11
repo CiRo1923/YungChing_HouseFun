@@ -13,7 +13,7 @@ import '@css/_modules/buy/mDatepicker/common.css'
 
   config 的鍵見 .composables/useConfig.js。 */
 
-import useValidateEvents from '../../common/mForm/.composables/useValidateEvents.js'
+import useValidateEvents from '@components/common/mForm/.composables/useValidateEvents.js'
 import { onFormatTime, onParseTime, onParseTimeFormat } from './.composables/useTimeCore.js'
 import { onMergeTimeConfig } from './.composables/useConfig.js'
 import { usePosition } from './.composables/usePosition.js'
