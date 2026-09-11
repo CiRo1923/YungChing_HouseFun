@@ -1,6 +1,8 @@
 ---
 name: no-duplicate-rules
 scope: project
+priority: 2
+summary: 動規範系統之前先整個檢查一遍，確認沒有另一處在講同一件事；找到相近的就擴充那一份，改完要說出檢查結果（改動再小也不跳過）
 ---
 
 # 規範自己也不能有兩份

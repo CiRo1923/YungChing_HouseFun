@@ -174,8 +174,21 @@ const checkApiSource = ({ rel, text }) => {
 //    PetPhoto)需要語意判斷,工具推不出來。這裡只驗「段落有沒有對上、method
 //    有沒有寫在前面」,拆法交給人。
 
+/**
+ * 一支 api 的定義:匯出的名字、用的 method、endpoint。
+ *
+ * 名字與請求之間允許換行 —— 路徑長一點的時候,會被格式化成兩行:
+ *
+ *   export const apiGetVoucherForceBookDetailID = (data) =>
+ *     fetchApi.get('voucher/forcebook/detail/{id}', data)
+ *
+ * ⚠️ 中間不得跨過另一個 `export` —— 沒有這道限制的話,
+ *    「一支不打 api 的匯出」後面接著「一支打 api 的匯出」時,
+ *    比對會從前面那支開始,一路吃到後面那支的請求,
+ *    把前面那支誤判成打了後面那支的 endpoint。
+ */
 const API_EXPORT_RE =
-  /export\s+const\s+(\w+)\s*=[^\n]*?fetchApi\.(\w+)\s*\(\s*['"`]([^'"`]+)['"`]/g
+  /export\s+const\s+(\w+)\s*=(?:(?!\bexport\b)[\s\S])*?fetchApi\.(\w+)\s*\(\s*['"`]([^'"`]+)['"`]/g
 
 /**
  * endpoint 各段(去掉 query 與路徑參數的包裝),用來組期望的名字。

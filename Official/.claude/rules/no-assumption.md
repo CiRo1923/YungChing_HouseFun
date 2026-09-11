@@ -1,6 +1,8 @@
 ---
 name: no-assumption
 scope: project
+priority: 1
+summary: 不揣測邏輯、不自行建立邏輯 / 檔案 / 狀態；判斷不出來就直接問開發者，問的時候寫出確切位置、選項與代價、你建議的方向
 ---
 
 # 無法判斷就一律問

@@ -79,19 +79,12 @@ export const RULE_HINT = {
   ...PAGE_RULE_HINT,
 }
 
-/** 全專案掃描時要看的目錄 / 檔案 */
-export const SCAN_TARGETS = [
-  'components',
-  'containers',
-  'pages',
-  'layouts',
-  'assets/css',
-  'app.vue',
-  'error.vue',
-  ...['tailwind.extend.js', 'tailwind.config.js'],
-]
+/* 掃描範圍一律走 shared.mjs,這裡只是轉出去給各層用。
 
-export const SCAN_EXT = new Set(['.vue', '.css'])
+  注意:不要在這裡另外定義一份。掃描範圍與規則的適用範圍要由同一份設定長出來,
+      兩邊不一致的話,規則會宣告自己管某個目錄、但掃描根本不走訪它 ——
+      那個目錄就等於沒有被檢查過,而且不會有任何徵兆。 */
+export { PENDING_CACHE_FILE, SCAN_TARGETS, isScannable, isWarn, listFiles, toRel } from './shared.mjs'
 
 /**
  * 副檔名不是 .vue / .css,但**會產生 CSS** 的設定檔 —— 只檢查顏色。
@@ -100,13 +93,10 @@ export const SCAN_EXT = new Set(['.vue', '.css'])
  * 所以「顏色一律走色票」對它一樣成立;寫死在這裡的色碼一樣是規則 1 違規,
  * 只是它躲在 .js 裡,不掃就永遠看不到。
  *
- * ⚠️ 不要把 .js 整個放進 SCAN_EXT —— 一般 js 裡的 hex(雜湊、id、二進位遮罩)
- *    會全部變成誤報。只有這份白名單裡的設定檔要看。
+ * 注意:一般 js 裡的 hex(雜湊、id、二進位遮罩)會全部變成誤報,
+ *    所以顏色那條只對這份白名單裡的設定檔生效,不是對所有 .js。
  */
 export const SCAN_CONFIG_FILES = new Set(['tailwind.extend.js', 'tailwind.config.js'])
-
-export const isScannable = (abs) =>
-  SCAN_EXT.has(path.extname(abs)) || SCAN_CONFIG_FILES.has(path.basename(abs))
 
 /**
  * 文件用的路徑 —— 一律**不檢查**(2026-08-31 加)。
@@ -463,17 +453,6 @@ function maskLineComments(text) {
   return text.replace(/\/\/[^\n]*/g, (m) => ' '.repeat(m.length))
 }
 
-export function listFiles(projectRoot, target) {
-  const abs = path.join(projectRoot, target)
-  if (!fs.existsSync(abs)) return []
-  if (fs.statSync(abs).isFile()) return isScannable(abs) ? [abs] : []
-  const out = []
-  for (const entry of fs.readdirSync(abs, { withFileTypes: true })) {
-    if (entry.name.startsWith('.') && entry.isDirectory()) continue
-    out.push(...listFiles(projectRoot, path.join(target, entry.name)))
-  }
-  return out
-}
 
 // --- 規則 1:顏色 -----------------------------------------------------------
 
@@ -2007,7 +1986,17 @@ export function lintFile(projectRoot, absPath, definedVars) {
   // 對 js 不成立。先遮掉 // 註解,免得說明文字裡的色碼被當成違規。
   const text = SCAN_CONFIG_FILES.has(path.basename(absPath)) ? maskLineComments(raw) : raw
 
-  const issues = [...checkColors(rel, text, definedVars), ...checkColorMechanism(rel, text)]
+  /* 顏色規則只對「會變成樣式」的檔案生效:.vue / .css,加上那幾支會產出 CSS 的設定檔。
+
+    注意:不要對所有副檔名都跑。掃描範圍現在含 .js / .mjs / .md ——
+        那些檔案裡的色碼是雜湊、id、遮罩,或是規範文件在舉例,
+        全部當成違規的話一次會多出三百多筆,真正該看的那幾筆就被淹掉了。 */
+  const isStyleFile =
+    /\.(vue|css)$/i.test(rel) || SCAN_CONFIG_FILES.has(path.basename(absPath))
+
+  const issues = isStyleFile
+    ? [...checkColors(rel, text, definedVars), ...checkColorMechanism(rel, text)]
+    : []
 
   // tailwind 推斷不出型別的三個屬性 —— 在哪裡寫都是錯的,所以不限目錄
   if (rel.endsWith('.vue') || rel.endsWith('.css')) {

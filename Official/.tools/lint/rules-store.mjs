@@ -245,43 +245,76 @@ const checkActionsNaming = ({ rel }) => {
 
 // --- 規則 storeLayer:store 的結構跟著頁面分層 -------------------------------
 //
-// 一個頁面一層,層名就是頁面名。每一層基本上會有兩種東西:
+// **一個頁面一層,層名就是頁面名(首字小寫)。** 每一層基本上會有兩種東西:
 //   data     api 回來的資料
 //   apiData  要送給 api 的資料(預設值集中在 apiDefault,見 storeApiDefault)
 //
 // 分層跟著頁面走,才能「看到頁面就知道資料在 store 的哪裡」。
+// 反過來也成立:看到 store 裡某一層,知道它是給哪一頁用的,改的時候知道會影響誰。
 //
-// ⚠️ **這條是提醒,不是結論。** 規則看得到「頁面群底下有子資料夾」,
-//    看不出那個資料夾是哪一種:
+// **分類資料夾只在需要分辨時才佔一層。** 頁面群底下常常再分資料夾,
+// 把性質相近的頁面擺在一起,那是檔案的分類,不是一份狀態 ——
+// 多包的那一層沒有東西住在裡面,只是把路徑加長,每個使用端都要多寫一段。
+// 所以層名預設取頁面檔名,不含資料夾。
 //
-//      只是分類(底下的頁面各自獨立)  → store 直接用頁面名,分類不佔一層。
-//                                      多包的那一層沒有東西住在裡面,
-//                                      只是把路徑加長,每個使用端都要多寫一段。
-//      底下的頁面有共用狀態           → 那一層要建,共用的放那裡、各頁面的放底下。
-//      純靜態頁、只放元件的資料夾     → 本來就沒有狀態。
+// 但同一個頁面群裡常有好幾支同名的頁面(每個分類底下各一支 Index 與 Detail)。
+// 那時扁平的層名會撞在一起,而**撞在一起就等於兩頁共用同一份狀態** ——
+// 一頁改了另一頁跟著變,而且看不出來是誰改的。
+// 所以撞名的那幾支才把分類資料夾補回來當一層:
 //
-//    分辨這三種要看頁面實際共用什麼,規則推不出來 —— 所以收到提醒之後由人判斷,
+//   <頁面群>/Single.vue             →  const single = ref({ … })          ← 沒撞,扁平
+//   <頁面群>/<分類A>/Detail.vue     →  const <分類A> = ref({ detail: … }) ← 撞了,資料夾佔一層
+//   <頁面群>/<分類B>/Detail.vue     →  const <分類B> = ref({ detail: … })
+//
+// 角括號是要換掉的部分 —— 每個專案的資料夾叫什麼由專案自己決定,
+// 這條規則管的是「撞名的才多包一層」。
+//
+// 名字只在需要分辨的時候才變長,沒撞的維持最短。
+//
+// **只看有打 api 的頁面。** 純版型頁、靜態說明頁本來就沒有狀態,
+// 要求它們也有一層,補出來的會是沒有人讀的空層 —— 那正是
+// 「沒有頁面要用就不要加狀態」在擋的事情。判斷方式是頁面裡有沒有呼叫 action。
+//
+// ⚠️ **這條是提醒,不是結論。** 規則看得到「這一頁打了 api、store 沒有同名的層」,
+//    看不出那份資料實際上該放哪裡 —— 兩頁共用同一份資料、或那一頁的資料
+//    本來就屬於別的層,都是合理的。收到提醒之後由人判斷,
 //    確定不需要那一層就用註解豁免,並寫下理由。
 
-/** 子資料夾樹 —— 底線與點開頭的是元件 / 工具目錄,不算頁面 */
-const listPageSubFolders = (root, folder) => {
+/** 頁面檔(遞迴);底線與點開頭的資料夾是元件 / 工具目錄,裡面不是頁面 */
+const listPageFiles = (root, folder) => {
   const abs = path.join(root, ...VIEWS_DIR.split('/'), folder)
   if (!fs.existsSync(abs)) return []
 
-  return fs
-    .readdirSync(abs, { withFileTypes: true })
-    .filter((e) => e.isDirectory() && !/^[._]/.test(e.name))
-    .map((e) => e.name)
+  return fs.readdirSync(abs, { withFileTypes: true }).flatMap((e) => {
+    if (e.isDirectory()) return /^[._]/.test(e.name) ? [] : listPageFiles(root, `${folder}/${e.name}`)
+    return e.name.endsWith('.vue') ? [{ file: `${folder}/${e.name}`, abs: path.join(abs, e.name) }] : []
+  })
 }
 
 /**
- * 某一層底下還有沒有下一層。
+ * 頁面名 → 層名。`Index.vue` → `index`、`PetFair.vue` → `petFair`。
  *
- * 只往下看一層 —— 再深的巢狀目前沒有出現過,真的出現時再展開,
- * 現在先把「規則看得懂 detail/delivery」這件事做對。
+ * 只把首字轉小寫,其餘保持原樣 —— 駝峰的字要怎麼拆是語意問題,
+ * 工具全轉小寫的話 `PetFair` 會變成 `petfair`,與人寫出來的名字對不上。
  */
-const listPageGrandChildren = (root, folder, sub) =>
-  listPageSubFolders(root, `${folder}/${sub}`)
+const layerNameOf = (pageFile) => {
+  const base = path.basename(pageFile, '.vue')
+  return base.charAt(0).toLowerCase() + base.slice(1)
+}
+
+/**
+ * 頁面檔在頁面群底下的分類資料夾 —— 直接放在頁面群第一層的回空字串。
+ *
+ * 巢狀再深時取最靠近頁面檔的那一層。撞名要分辨的是「這一支 Detail 是哪一類的」,
+ * 最靠近的那一層就是答案;把整串路徑接起來只會讓名字變長,分辨力沒有增加。
+ */
+const pageFolderOf = (pageFile) => {
+  const segments = pageFile.split('/').slice(1, -1) // 去掉頁面群與檔名
+  return segments.length ? segments[segments.length - 1] : ''
+}
+
+/** 這一頁有沒有向後端要資料 —— 呼叫 action 就算 */
+const PAGE_CALLS_ACTION_RE = /\bon(?:Api|Json)\w*\s*\(/
 
 /**
  * 取出 `const <name> = ref({ … })` 大括號裡的內容。
@@ -290,9 +323,9 @@ const listPageGrandChildren = (root, folder, sub) =>
  * 巢狀物件用 regex 解析很容易出錯,而這裡只需要知道 key 在不在。
  */
 const layerBodyOf = (text, name) => {
-  const m = new RegExp(
-    `const\\s+${name}\\s*=\\s*(?:ref|reactive|readonly|shallowRef)\\s*\\(`
-  ).exec(text)
+  const m = new RegExp(`const\\s+${name}\\s*=\\s*(?:ref|reactive|readonly|shallowRef)\\s*\\(`).exec(
+    text
+  )
   if (!m) return null
 
   const start = text.indexOf('{', m.index + m[0].length - 1)
@@ -310,9 +343,6 @@ const checkStoreLayer = ({ rel, text, root }) => {
   const folders = listViewFolders(root)
   if (!folders?.has(name)) return [] // 對不上頁面資料夾的由 storeScope 處理
 
-  const subFolders = listPageSubFolders(root, name)
-  if (!subFolders.length) return []
-
   // store 第一層的宣告名稱
   const declared = new Set(
     [...text.matchAll(/^\s*const\s+(\w+)\s*=\s*(?:ref|reactive|readonly|shallowRef)\s*\(/gm)].map(
@@ -320,48 +350,68 @@ const checkStoreLayer = ({ rel, text, root }) => {
     )
   )
 
-  const issues = []
-  const missing = subFolders.filter((sub) => !declared.has(sub))
+  // 有向後端要資料的頁面 —— 沒有要資料的頁面本來就不需要狀態
+  const pages = []
 
-  if (missing.length) {
-    issues.push(
-      issueOf(
-        rel,
-        1,
-        'storeLayer',
-        `${VIEWS_DIR}/${name}/ 底下有子資料夾 ${missing.join(' / ')},store 沒有對應的層 —— ` +
-          `底下的頁面有共用狀態的話建一層(const ${missing[0]} = ref({ … }),共用的放那裡、各頁面的放底下);` +
-          `只是分類、各頁面各自獨立的話維持頁面名那幾層,標 /* lint-store-layer-exempt: 理由 */`
-      )
-    )
+  for (const page of listPageFiles(root, name)) {
+    let pageText = ''
+    try {
+      pageText = fs.readFileSync(page.abs, 'utf8')
+    } catch {
+      continue // 讀不到就當作沒看到,不要讓檔案權限問題變成違規
+    }
+    if (!PAGE_CALLS_ACTION_RE.test(pageText)) continue
+
+    pages.push({
+      file: page.file,
+      layer: layerNameOf(page.file),
+      folder: pageFolderOf(page.file),
+    })
   }
 
-  // 已經宣告的那幾層,再往下看一層 —— detail/delivery 要對應 detail 裡的 delivery
-  for (const sub of subFolders) {
-    if (!declared.has(sub)) continue // 這一層自己都還沒有,先補上面那筆就好
+  // 同一個層名有兩支以上頁面 —— 那幾支要靠分類資料夾分辨
+  const countByLayer = new Map()
+  for (const p of pages) countByLayer.set(p.layer, (countByLayer.get(p.layer) ?? 0) + 1)
 
-    const grandChildren = listPageGrandChildren(root, name, sub)
-    if (!grandChildren.length) continue
+  const missing = []
 
-    const body = layerBodyOf(text, sub)
-    if (body === null) continue
+  for (const p of pages) {
+    const isClashing = countByLayer.get(p.layer) > 1 && p.folder
 
-    const missingKeys = grandChildren.filter((key) => !new RegExp(`\\b${key}\\s*:`).test(body))
-    if (!missingKeys.length) continue
+    if (!isClashing) {
+      if (!declared.has(p.layer)) missing.push({ expect: p.layer, file: p.file })
+      continue
+    }
 
-    issues.push(
-      issueOf(
-        rel,
-        lineNoOf(text, text.search(new RegExp(`const\\s+${sub}\\s*=`))),
-        'storeLayer',
-        `${VIEWS_DIR}/${name}/${sub}/ 底下有子資料夾 ${missingKeys.join(' / ')},${sub} 裡沒有對應的層 —— ` +
-          `有共用狀態的話對應成 ${sub}.${missingKeys[0]}(每一層基本上有 data 與 apiData);` +
-          `只是分類的話標 /* lint-store-layer-exempt: 理由 */`
-      )
-    )
+    // 撞名:要有分類資料夾那一層,而且那一層底下要有這一頁的 key
+    if (!declared.has(p.folder)) {
+      missing.push({ expect: `${p.folder}.${p.layer}`, file: p.file })
+      continue
+    }
+
+    const body = layerBodyOf(text, p.folder)
+    if (body !== null && !new RegExp(`\\b${p.layer}\\s*:`).test(body)) {
+      missing.push({ expect: `${p.folder}.${p.layer}`, file: p.file })
+    }
   }
 
-  return issues
+  if (!missing.length) return []
+
+  /* 一支 store 只報一筆,把缺的層一次列完 —— 一頁一筆的話,
+     一支 store 可能一口氣出現十幾筆同一件事,把其他規則的訊息擠掉。 */
+  const list = missing.map((m) => `${m.expect}(${VIEWS_DIR}/${m.file})`).join('、')
+
+  return [
+    issueOf(
+      rel,
+      1,
+      'storeLayer',
+      `這幾頁有向後端要資料,store 沒有對應的層:${list} —— ` +
+        `一個頁面一層、層名就是頁面名首字小寫;` +
+        `同一群裡有好幾支同名頁面時,那幾支用分類資料夾多包一層分辨 —— 上面每一筆前面就是該有的層名;` +
+        `那份資料其實屬於別的層、或兩頁確實共用同一份的話,標 /* lint-store-layer-exempt: 理由 */`
+    ),
+  ]
 }
 
 // --- 規則 storeActionNaming:呼叫 api 的 action 命名 --------------------------
@@ -373,13 +423,38 @@ const checkStoreLayer = ({ rel, text, root }) => {
 //
 // 一個 action 打多支 api 時(例如取完清單再取明細)只檢查 onApi 前綴,
 // 因為沒辦法斷定該用哪一支的名字 —— 那是人要決定的。
+//
+// **同一支 api 被同一支 actions 檔裡的兩個 action 用到時,名字要帶上層名。**
+//
+//   onApiGetVoucherListIndex   → index 那一層
+//   onApiGetVoucherListDetail  → detail 那一層
+//
+// 為什麼要拆成兩個 action 而不是共用一個:兩頁要的東西不一樣。
+// 清單頁要的是整份列表,內頁要的是其中一筆加上明細欄位 —— 共用一個 action
+// 就得在裡面加「誰在呼叫」的判斷,或是兩頁共用同一份狀態,
+// 一頁換頁回來另一頁的畫面就跟著變,而且看不出來是誰改的。
+//
+// api 本身維持一份、名字不變(`api` + method + endpoint);
+// 分開的是「拿到之後放進哪一層」,那屬於 action。
+//
+// 後綴只在需要分辨時才加 —— 一支 api 只有一個 action 在用的話,
+// 名字維持最短的 `on` + api 名。
 
 const ACTION_FN_RE = /const\s+(\w+)\s*=\s*(?:async\s*)?\([^)]*\)\s*=>\s*\{/g
+
+/** 這個 action 把結果寫進 store 的哪幾層 —— storeToRefs 取出來的變數才有 .value */
+const LAYER_WRITE_RE = /\b(\w+)\.value\b/g
+
+const upperFirst = (s) => s.charAt(0).toUpperCase() + s.slice(1)
 
 const checkActionApiNaming = ({ rel, text }) => {
   if (!isActionsFile(rel)) return []
 
   const issues = []
+
+  /* 先收齊這支檔案裡所有打 api 的 action,再一起判斷 ——
+     「這支 api 有沒有第二個 action 在用」要看過整份檔案才知道。 */
+  const actions = []
 
   for (const m of text.matchAll(ACTION_FN_RE)) {
     const name = m[1]
@@ -393,30 +468,73 @@ const checkActionApiNaming = ({ rel, text }) => {
     const called = [...new Set([...body.matchAll(/\b(api[A-Z]\w*)\s*\(/g)].map((x) => x[1]))]
     if (!called.length) continue
 
-    if (!/^onApi[A-Z]/.test(name)) {
+    actions.push({
+      name,
+      called,
+      index: m.index,
+      layers: [...new Set([...body.matchAll(LAYER_WRITE_RE)].map((x) => x[1]))],
+    })
+  }
+
+  // 同一支 api 被幾個 action 用到 —— 只算「只打這一支」的,多支的本來就不比對完整名稱
+  const countByApi = new Map()
+  for (const a of actions) {
+    if (a.called.length !== 1) continue
+    countByApi.set(a.called[0], (countByApi.get(a.called[0]) ?? 0) + 1)
+  }
+
+  for (const a of actions) {
+    const line = lineNoOf(text, a.index)
+    const [api] = a.called
+
+    if (!/^onApi[A-Z]/.test(a.name)) {
       issues.push(
         issueOf(
           rel,
-          lineNoOf(text, m.index),
+          line,
           'storeActionNaming',
-          `${name} 有呼叫 api,要命名為 onApi… —— 建議 ${`on${called[0].charAt(0).toUpperCase()}${called[0].slice(1)}`}`
+          `${a.name} 有呼叫 api,要命名為 onApi… —— 建議 on${upperFirst(api)}`
         )
       )
       continue
     }
 
     // 只呼叫一支 api 時才比對完整名稱；多支時無法斷定該用哪一支
-    if (called.length > 1) continue
+    if (a.called.length > 1) continue
 
-    const expected = `on${called[0].charAt(0).toUpperCase()}${called[0].slice(1)}`
-    if (name === expected) continue
+    const base = `on${upperFirst(api)}`
+
+    /* 這支 api 只有一個 action 在用 —— 名字維持最短,不必帶層名。
+       帶了也不算錯(層名後綴無法與 endpoint 的最後一段區分),所以只比對基本形。 */
+    if (countByApi.get(api) === 1) {
+      if (a.name === base) continue
+
+      issues.push(
+        issueOf(
+          rel,
+          line,
+          'storeActionNaming',
+          `${a.name} 呼叫的是 ${api},名稱要對得上 —— 建議 ${base}(api 函式名前面加 on)`
+        )
+      )
+      continue
+    }
+
+    // 兩個以上的 action 用同一支 api —— 各自要帶上自己寫進哪一層
+    const expected = a.layers.map((layer) => `${base}${upperFirst(layer)}`)
+    if (expected.includes(a.name)) continue
+
+    const hint = expected.length
+      ? `建議 ${expected.join(' 或 ')}`
+      : `這支沒有寫進任何一層,先確認它該把資料放哪裡`
 
     issues.push(
       issueOf(
         rel,
-        lineNoOf(text, m.index),
+        line,
         'storeActionNaming',
-        `${name} 呼叫的是 ${called[0]},名稱要對得上 —— 建議 ${expected}(api 函式名前面加 on)`
+        `${a.name} 與另一個 action 都呼叫 ${api},名字要帶上各自寫進哪一層才分得開 —— ${hint};` +
+          `兩邊本來就該是各自的狀態,不要共用同一層`
       )
     )
   }

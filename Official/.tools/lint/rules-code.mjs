@@ -410,10 +410,14 @@ const parseComposableDecls = (rel, text) => {
     if (COMMENT_LINE_RE.test(line)) return
 
     /* 一行能歸到哪一組、在組內排第幾 —— 認不出來就不是可排序的宣告,
-       那一行會變成屏障(下面 groupByBarrier 判斷)。 */
-    let rank = null
-    let role = null
-    let label = ''
+       那一行會變成屏障(下面 groupByBarrier 判斷)。
+
+       三個變數刻意不給初值:下面每一條分支都會把三個都填滿,
+       填不滿的那條直接 return。給了初值反而讓「漏填一條分支」變成
+       安靜地用預設值排序,而不是當場壞掉。 */
+    let rank
+    let role
+    let label
 
     const store = STORE_RE.exec(line)
     const actions = ACTIONS_RE.exec(line)

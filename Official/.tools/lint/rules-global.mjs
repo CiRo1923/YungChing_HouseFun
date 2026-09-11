@@ -5,7 +5,13 @@
 // 這裡放的是「跟樣式無關、但每一種檔案都要守」的規則。
 // CSS 專屬的規則在 lint-core.mjs,兩邊都吐同一種 issue 物件,由 lintFile 合併。
 
-import { CONVENTION_SCOPE, PROJECT_NAME_PATTERNS, issueOf, lineNoOf } from './shared.mjs'
+import {
+  ABSOLUTE_PATH_SCOPE,
+  PROJECT_NAME_PATTERNS,
+  PROJECT_NAME_SCOPE,
+  issueOf,
+  lineNoOf,
+} from './shared.mjs'
 
 // --- 規則 projectName:不得寫死專案名稱、不得跨專案引用 -----------------------
 //
@@ -27,21 +33,21 @@ import { CONVENTION_SCOPE, PROJECT_NAME_PATTERNS, issueOf, lineNoOf } from './sh
 const PROJECT_NAME_RE = PROJECT_NAME_PATTERNS
 
 /**
- * 這條規則的適用範圍。
+ * 這條規則**只管規範系統自身** —— 檢查工具、skills、hooks,
+ * 以及規範自己的說明文件。那些會整批複製到下一個專案。
  *
- * 除了原始碼,規範本身也要守 —— skills、hooks、檢查工具、docs 都會跟著
- * 複製到下一個專案,裡面寫死專案名稱或某台機器的路徑,搬過去就是錯的敘述。
+ * 原始碼不在範圍內。頁面標題、頁尾品牌名、條款裡的品牌名稱是內容本身,
+ * 不是被寫死的設定 —— 那些檔案不會複製到別的專案,寫出品牌名是正確的。
+ * 一併納入的話,清單會被大量正當文案淹沒,真正該擋的那幾筆反而看不到。
  *
- * 例外是 `docs/` 底下用來記錄實際服務位置的清單(網址對照表那類):
- * 那裡的網址是資料本身,不是被寫死的設定。這種檔案在檔頭標
- * `lint-project-name-exempt` 就會跳過整份。
+ * 範圍之內仍有例外:用來記錄實際服務位置的清單(網址對照表那類),
+ * 裡面的網址是資料本身。這種檔案在檔頭標 `lint-project-name-exempt`
+ * 並寫明理由,就會跳過整份。
  */
-const SCOPE_PREFIXES = CONVENTION_SCOPE
-
 const PROJECT_NAME_EXEMPT_RE = /lint-project-name-exempt/
 
 const checkProjectName = ({ rel, text }) => {
-  if (!SCOPE_PREFIXES.some((prefix) => rel.startsWith(prefix))) return []
+  if (!PROJECT_NAME_SCOPE.some((prefix) => rel.startsWith(prefix))) return []
   if (PROJECT_NAME_EXEMPT_RE.test(text)) return []
 
   const issues = []
@@ -101,10 +107,17 @@ const ABSOLUTE_PATH_RE =
 const CROSS_PROJECT_IMPORT_RE =
   /(?:import|require)\b[^'"\n]*['"]((?:\.\.\/){3,}[^'"\n]*)['"]/g
 
+/**
+ * 這條規則**涵蓋原始碼與規範系統自身**,範圍比「不寫死專案名稱」那條大。
+ *
+ * 理由是兩者性質不同:品牌名稱寫在頁面裡是內容,絕對路徑不是 ——
+ * 它是只在某一台開發機上成立的位置,別人 clone 下來直接壞掉,build 也不會過。
+ * 寫在原始碼裡同樣是錯的,所以不限縮。
+ */
 const ABSOLUTE_PATH_EXEMPT_RE = /lint-absolute-path-exempt/
 
 const checkAbsolutePath = ({ rel, text }) => {
-  if (!SCOPE_PREFIXES.some((prefix) => rel.startsWith(prefix))) return []
+  if (!ABSOLUTE_PATH_SCOPE.some((prefix) => rel.startsWith(prefix))) return []
   if (ABSOLUTE_PATH_EXEMPT_RE.test(text)) return []
 
   const issues = []

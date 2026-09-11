@@ -13,6 +13,9 @@ import {
   ACTIONS_DIR_NAME,
   COMPONENT_DIRS,
   COMPONENT_FOLDERS,
+  CONVENTION_RULES_DIR,
+  CONVENTION_SKILLS_DIR,
+  PROJECT_DOCS_DIR,
   SCANNABLE_RE,
   SRC_PREFIX,
   TOOLING_PREFIXES,
@@ -20,6 +23,7 @@ import {
 } from './project-config.mjs'
 
 export {
+  ABSOLUTE_PATH_SCOPE,
   ACTIONS_DIR_NAME,
   API_DIR,
   BUILD_CONFIG_FILES,
@@ -27,11 +31,14 @@ export {
   COMPONENTS_DIR,
   COMPONENT_DIRS,
   COMPONENT_FOLDERS,
-  CONVENTION_SCOPE,
+  CONVENTION_RULES_DIR,
+  CONVENTION_SKILLS_DIR,
   CSS_MODULES_DIR,
   PARALLEL_AWAIT_HELPER,
   PROJECT_CONFIG_FILES,
+  PROJECT_DOCS_DIR,
   PROJECT_NAME_PATTERNS,
+  PROJECT_NAME_SCOPE,
   SCANNABLE_EXTENSIONS,
   SCANNABLE_RE,
   SCAN_TARGETS,
@@ -132,9 +139,10 @@ export const findNearFolder = (folders, name) => {
 export const isInSrc = (rel) =>
   SRC_PREFIX
     ? rel.startsWith(SRC_PREFIX)
-    : /* 原始碼就放在專案根時,反過來認:不在規範系統那幾個目錄底下的就是原始碼。
-         前綴是空的,正面比對永遠不成立,一整批規則會靜靜地不再檢查任何東西。 */
-      !TOOLING_PREFIXES.some((prefix) => rel.startsWith(prefix))
+    : /* 原始碼就放在專案根時,反過來認:不在規範系統、也不在專案文件那幾個目錄
+         底下的,就是原始碼。前綴是空的,正面比對永遠不成立,
+         一整批規則會靜靜地不再檢查任何東西。 */
+      !TOOLING_PREFIXES.some((prefix) => rel.startsWith(prefix)) && !isProjectDocs(rel)
 
 /**
  * 這個 .vue 是元件還是頁面。
@@ -179,6 +187,92 @@ export const PENDING_CACHE_FILE = 'node_modules/.cache/cssGuard/pending.json'
 
 const SKIP_DIR = /(^|\/)(node_modules|\.git|dist|build|public)(\/|$)/
 
+/**
+ * 專案自己的文件目錄底下的檔案 —— 每一條規則都不檢查。
+ *
+ * 那一層放的是寫給這個專案的內容(規格、對照表、會議紀錄那類),
+ * 提到專案名稱、貼一段實際路徑、引用一段不合規範的範例程式碼都是正常的。
+ * 拿規則去檢查只會產生整片誤報,而誤報多到一個程度,整份清單就被當成雜訊略過。
+ *
+ * 判斷只寫在這裡一份,全專案掃描與單檔檢查都呼叫它 ——
+ * 兩處各寫一次的話,會出現「整批掃描跳過、但存檔時照樣報」這種說不通的落差。
+ */
+export const isProjectDocs = (rel) => rel === PROJECT_DOCS_DIR || rel.startsWith(`${PROJECT_DOCS_DIR}/`)
+
+/**
+ * 取出 markdown 檔頭 `---` 之間的欄位。
+ *
+ * 只認 `key: value` 這種一行一組的寫法,不解析巢狀結構 ——
+ * 規範檔的檔頭只放幾個單層欄位,用完整的 YAML 解析器是多餘的相依。
+ */
+const frontMatterOf = (text) => {
+  const m = /^---\r?\n([\s\S]*?)\r?\n---/.exec(text)
+  if (!m) return {}
+
+  const fields = {}
+
+  for (const line of m[1].split(/\r?\n/)) {
+    const kv = /^(\w[\w-]*)\s*:\s*(.*)$/.exec(line)
+    if (kv) fields[kv[1]] = kv[2].trim().replace(/^['"]|['"]$/g, '')
+  }
+
+  return fields
+}
+
+/**
+ * 跨規則的共同前提有哪幾份 —— 依 `priority` 由小到大排序。
+ *
+ * 每一份自己在檔頭宣告 `priority`(順位)與 `summary`(一句話說明),
+ * 所以新增一份規則檔就會自動出現在提醒裡,不必再去別處補一行。
+ * 清單另外維護一份的話,新增的規則不會報錯,只是從此沒有人看得到它。
+ *
+ * 沒有宣告 `priority` 的排在最後,`summary` 缺了就退回用標題。
+ */
+export const listConventionRules = (root) => {
+  const dir = path.join(root, ...CONVENTION_RULES_DIR.split('/'))
+  if (!fs.existsSync(dir)) return []
+
+  return fs
+    .readdirSync(dir)
+    .filter((name) => name.endsWith('.md'))
+    .map((name) => {
+      const text = fs.readFileSync(path.join(dir, name), 'utf8')
+      const fields = frontMatterOf(text)
+      const title = /^#\s+(.+)$/m.exec(text)?.[1]?.trim() ?? name
+
+      return {
+        file: `${CONVENTION_RULES_DIR}/${name}`,
+        title,
+        summary: fields.summary || title,
+        priority: Number(fields.priority) || Number.MAX_SAFE_INTEGER,
+      }
+    })
+    .sort((a, b) => a.priority - b.priority || a.file.localeCompare(b.file))
+}
+
+/**
+ * 各類程式的寫法規範有哪幾份 —— 一個資料夾一份。
+ *
+ * 名稱取資料夾名,一句話說明取檔頭 `summary`(沒有就用資料夾名)。
+ * 跟共同前提那份一樣,清單從目錄長出來,新增一份就自動出現。
+ */
+export const listConventionSkills = (root) => {
+  const dir = path.join(root, ...CONVENTION_SKILLS_DIR.split('/'))
+  if (!fs.existsSync(dir)) return []
+
+  return fs
+    .readdirSync(dir, { withFileTypes: true })
+    .filter((e) => e.isDirectory())
+    .map((e) => {
+      const file = path.join(dir, e.name, 'SKILL.md')
+      const fields = fs.existsSync(file) ? frontMatterOf(fs.readFileSync(file, 'utf8')) : {}
+
+      return { name: e.name, summary: fields.summary || '' }
+    })
+    .filter((s) => fs.existsSync(path.join(dir, s.name, 'SKILL.md')))
+    .sort((a, b) => a.name.localeCompare(b.name))
+}
+
 // 副檔名範圍定義在 project-config.mjs,五層守門共用同一份
 export const isScannable = (abs) => SCANNABLE_RE.test(abs)
 
@@ -191,7 +285,7 @@ export const listFiles = (root, target) => {
   return fs.readdirSync(abs, { withFileTypes: true }).flatMap((entry) => {
     const next = path.join(abs, entry.name)
     const rel = toRel(root, next)
-    if (SKIP_DIR.test(rel)) return []
+    if (SKIP_DIR.test(rel) || isProjectDocs(rel)) return []
     return entry.isDirectory() ? listFiles(root, rel) : isScannable(next) ? [next] : []
   })
 }

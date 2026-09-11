@@ -200,7 +200,7 @@
 3. **刪掉會不會讓別的東西變孤兒** —— 那些 modifier 設定的 `-pc-` / `-tablet-` / `-mobile-`
    值變數、以及版型檔取用它們的 `@apply`,都要一起清掉,否則留下讀不到值的死宣告。
 
-**刪掉後在檔頭留紀錄**(照 [deleted-components.md](./deleted-components.md) 的慣例):
+**刪掉後在檔頭留紀錄**(照 [deleted-components.md](../docs/deleted-components.md) 的慣例):
 刪了什麼、為什麼、要加回來時從 git 撈、格式照哪一組寫。
 mForm/textarea.css 與 mSeparator/variables.css 的檔頭就是這樣寫的。
 
@@ -1540,7 +1540,7 @@ module 也多一層頻道目錄(`_modules/<頻道>/<組件>/`)。
 | 批次 | 內容 |
 |---|---|
 | 08-27 | common 組件全數拆進 `_modules/common/`;色票檔的排序、命名、頻道歸屬、`-rgb` 衍生變數 |
-| 08-28 | buy 組件全數拆進 `_modules/buy/`;刪掉 5 支沒有使用端的組件(見 [deleted-components.md](./deleted-components.md));`bg-hexa` 全面改 8 碼 hex 色票;alpha 命名加連字號;module 變數的斷點、命名、base 值 |
+| 08-28 | buy 組件全數拆進 `_modules/buy/`;刪掉 5 支沒有使用端的組件(見 [deleted-components.md](../docs/deleted-components.md));`bg-hexa` 全面改 8 碼 hex 色票;alpha 命名加連字號;module 變數的斷點、命名、base 值 |
 
 **所以現在跳出來的警告都是「這次改出來的」,不是存量。**
 既有程式碼已經沒有可以推給前人的違規了 —— 看到紅字就是剛動的那幾行有問題。

@@ -4,7 +4,7 @@
 // 有的 store 在 src/stores,有的在根目錄。把這些位置集中在這一支,
 // 換一個專案時只改這裡,規則本身完全不用動。
 //
-// 注意:規則檔案裡不要再寫死目錄路徑,一律 import 這裡的常數。
+// ⚠️ 規則檔案裡不要再寫死目錄路徑,一律 import 這裡的常數。
 //    散在各處的話,換專案時漏改一支,那條規則就靜靜失效 —— 不會報錯,
 //    只是從此不再檢查任何東西。
 
@@ -30,7 +30,8 @@ export const COMPONENTS_DIR = 'components'
  * 元件與頁面的規範不同(元件完全不能自己去要資料,頁面則是不建議),
  * 所以要分得出來。
  *
- * 本專案的版型目錄是 `layouts`(複數),與元件、容器並列。
+ * 目前列的三種都是「被放進畫面裡、自己不是網址」:共用元件、
+ * 彈窗與廣告這類系統元件、版型。
  */
 export const COMPONENT_DIRS = ['components', 'containers', 'layouts']
 
@@ -40,10 +41,10 @@ export const COMPONENT_DIRS = ['components', 'containers', 'layouts']
  * 頁面目錄底下同時放著兩種東西:對應網址的頁面,以及只給那一頁用的元件。
  * 這份清單是用來指出後者的。
  *
- * 本專案把「只給那一頁用的元件」放在各頁面目錄底下的 `_components/` ——
- * 那個底線前綴同時也是路由要排除它的依據(見 routing-conventions)。
+ * **目前留空** —— 頁面目錄底下的元件套用頁面的規範(那條是建議級,不擋)。
+ * 要讓它們也一律擋的話,把資料夾名加進來。
  *
- * 注意:判斷只看資料夾名,不看檔名 —— 檔名看不出用途,
+ * ⚠️ 判斷只看資料夾名,不看檔名 —— 檔名看不出用途,
  *    同一個名字在不同專案可能是頁面也可能是元件。
  */
 export const COMPONENT_FOLDERS = ['_components']
@@ -58,19 +59,15 @@ export const CSS_MODULES_DIR = 'assets/css/_modules'
  * 只有某一個模組會用到的,放那個模組自己的 ***Variables.css;
  * 兩個以上模組都要用的,才收進這一支。
  *
- * 本專案的模組多一層頻道目錄(`common/` 是跨頻道共用),所以路徑帶那一層。
+ * 換一個專案時,共用變數檔的位置可能不一樣 —— 改這裡就好,
+ * 規則的提示訊息會跟著指向正確的檔案。
  */
 export const SHARED_MODULE_VARIABLES = 'common/mForm/variables.css'
 
 /** 色票檔所在目錄 */
 export const COLOR_CSS_DIR = 'assets/css/_common'
 
-/**
- * 原始碼根目錄。
- *
- * 本專案的頁面、元件、狀態都直接放在專案根(沒有 src 這一層),
- * 所以這裡是空字串 —— 下面的 IS_SRC_PROJECT_ROOT 會據此改用排除法判斷。
- */
+/** 原始碼根目錄 */
 export const SRC_DIR = ''
 
 /**
@@ -79,7 +76,7 @@ export const SRC_DIR = ''
  * store 的檔名一般要對得上頁面目錄的第一層資料夾(有 `member` 頁面就有
  * `member` store)。這份清單是例外:它們是跨頁面的基礎建設,不屬於任何單一頁面。
  *
- * 注意:加進來之前先想清楚「它為什麼不屬於任何一個頁面」——
+ * ⚠️ 加進來之前先想清楚「它為什麼不屬於任何一個頁面」——
  *    多半是彈窗、登入、靜態資料這類跨頁面的東西。
  *    想不出理由就是該歸到某個頁面底下,不要放這裡。
  *
@@ -99,24 +96,17 @@ export const STANDALONE_STORES = [
  * 不對應任何頁面資料夾的 api 檔名。
  *
  * api 的檔名一般要對得上頁面目錄的第一層資料夾,對不上的一律放共用的那一支
- * (檔名見下方 SHARED_API_FILE)。
+ * (檔名見下方 SHARED_API_FILE)。這份清單是暫時的例外。
  *
- * 注意:本專案的 api 依**後端服務**分目錄,每個服務有自己的 baseURL 與攔截器 ——
- *    所以「對不上頁面」在這裡不是待處理的例外,而是架構本身。
- *    新增服務時要跟著加進這份清單。
+ * ⚠️ 不要往這裡加東西。對不上資料夾的 api 一律放共用那一支;
+ *    清單裡留著的是還沒決定歸屬的檔案,處理完就清空。
  */
 export const STANDALONE_APIS = [
   'manage', // 管理服務
   'memberAuth', // 會員驗證服務
 ]
 
-/**
- * 對不上任何頁面資料夾的 api 一律放這支(不含副檔名)。
- *
- * 注意:本專案目前沒有這支檔案 —— api 是依後端服務分目錄的,
- *    每一支都對應一個服務,不存在「其餘都丟這裡」的那一支。
- *    真的出現歸屬不明的 api 時再建立它,並把這裡的名稱對上。
- */
+/** 對不上任何頁面資料夾的 api 一律放這支(不含副檔名) */
 export const SHARED_API_FILE = 'project'
 
 /**
@@ -139,23 +129,22 @@ export const PARALLEL_AWAIT_HELPER = {
 }
 
 /**
- * 本專案自己的名稱 —— 這幾種寫法出現在規範檔案裡就是違規。
+ * 本專案自己的名稱 —— 這幾種寫法出現在程式碼或文件裡就是違規。
  *
- * 名稱寫進去之後,那份檔案就只能待在這個專案:規則與工具複製到別的專案要逐行改,
+ * 名稱寫進去之後,那份檔案就只能待在這個專案:共用元件複製到別的專案要逐行改,
  * 搬過去忘了改就變成錯的敘述(規範文件、提示訊息尤其容易),
  * 而且從內容看不出哪幾句是「本專案限定」。
+ * 網域、路徑、識別字一律走環境變數或設定檔。
  *
- * 注意:**只填本專案自己的名稱。**
+ * ⚠️ **只填本專案自己的名稱。**
  *    不要把別的專案名稱列進來 —— 那等於把別人的專案名寫死在這裡,
  *    正好是這條規則要防的事;而且這份設定會跟著專案複製出去。
- *
- * 注意:前面卡「不是英文字母」是必要的 —— 少了它,`inhouse`(in-house,自製)
- *    這種正常的英文字會被當成專案名,而專案裡本來就有那個字。
  *
  * 換專案時把這裡換成新專案的名稱。留著舊名稱的話,這條規則會去抓一個
  * 與新專案無關的字,而新專案自己的名稱反而不會被抓。
  */
 export const PROJECT_NAME_PATTERNS = [
+  // 前面卡「不是英文字母」是必要的 —— 少了它,in-house(自製)這種正常的英文字會被當成專案名
   /(?<![a-z])house[\s_-]?fun/i, // 本專案(套件設定的 name、資料夾名)
   /(?<![a-z])yung[\s_-]?ching/i, // 上層目錄名
 ]
@@ -177,12 +166,8 @@ export const PROJECT_NAME_PATTERNS = [
  * 專案改了 tailwind 的 theme 設定時,這裡要跟著更新 ——
  * 沒更新的話,規則會提醒實際上存在的 class,或漏掉實際上已消失的 class。
  *
- * 本專案的情形:screens、fontFamily、fontSize、boxShadow 四類都是整組覆寫。
- * letterSpacing 與 lineHeight 在設定裡是註解掉的,所以內建保留 ——
- * tracking-wider 與 leading-* 都正常可用,不列入。
- *
- * 驗證方式:對一份含那些 class 的檔案跑一次 tailwind 產物,看有沒有輸出。
- * 光看設定檔會判斷錯 —— 這幾個值就是實測產物確認的。
+ * 目前的情形:screens、fontSize、boxShadow 三類是整組覆寫;
+ * fontFamily 沒有覆寫,所以 font-sans / font-serif / font-mono 正常可用,不列入。
  */
 export const TAILWIND_THEME_OVERRIDES = {
   /** 斷點前綴,寫法是 `斷點:class` */
@@ -239,7 +224,7 @@ export const TAILWIND_THEME_OVERRIDES = {
  * 會被檢查的副檔名 —— 五層守門(編輯器存檔、開發伺服器、AI 寫檔、對話提醒、commit)
  * 用的是同一份範圍。
  *
- * 注意:少列一種,那種檔案就完全不會被檢查,而且不會有任何徵兆。
+ * ⚠️ 少列一種,那種檔案就完全不會被檢查,而且不會有任何徵兆。
  *    api、store、actions 都是 .js;規範文件、skills 與說明文件都是 .md ——
  *    漏掉哪一種,那一整區就沒有守門。
  *
@@ -247,7 +232,7 @@ export const TAILWIND_THEME_OVERRIDES = {
  * 那些檔案會整批複製到下一個專案,寫死名稱或某台機器的路徑,搬過去就是錯的敘述。
  * 其餘規則(css、api、store、頁面)都有自己的副檔名或路徑條件,不會誤判 .md。
  *
- * 注意:有兩個地方沒辦法 import 這份設定,改動時要一起改:
+ * ⚠️ 有兩個地方沒辦法 import 這份設定,改動時要一起改:
  *      .githooks/pre-commit          commit 時篩選檔案的 grep
  *      .vscode/settings.json         編輯器存檔時觸發的 match
  *    兩處都寫了註解指向這裡。
@@ -257,18 +242,51 @@ export const SCANNABLE_EXTENSIONS = ['vue', 'css', 'js', 'mjs', 'cjs', 'md']
 export const SCANNABLE_RE = new RegExp(`\\.(${SCANNABLE_EXTENSIONS.join('|')})$`, 'i')
 
 /**
- * 規範系統自己所在的目錄 —— 檢查工具、給 AI 讀的規範、開發伺服器外掛、
- * 說明文件、commit 前的檢查。
+ * 專案自己的文件目錄 —— **每一條規則都不檢查這裡**。
  *
- * 這些目錄裡的檔案也要守「不寫專案名稱」與「不寫絕對路徑」兩條規則,
- * 但不是原始碼 —— api、store、頁面那幾類規則不適用於它們。
+ * 這一層放的是寫給這個專案的文件:規格、對照表、會議紀錄那類。
+ * 它們是內容本身,不是程式碼也不是規範 —— 提到專案名稱、貼一段實際路徑、
+ * 引用一段不合規範的範例程式碼都是正常的,拿規則去檢查只會產生整片誤報,
+ * 而誤報多到一個程度,整份清單就會被當成雜訊略過。
  *
- * 本專案的開發伺服器外掛放在 `.vite/`(不是 `plugins/`)。
+ * 位置與名稱在每個專案都一樣(專案根底下的 `docs`),所以不列為
+ * 「換專案要改的設定」—— 直接固定在這裡。
+ *
+ * 規範系統自己的說明文件不放這裡,放在 `.claude/docs/`,照樣受規則檢查:
+ * 那些會整批複製到下一個專案,寫死名稱或路徑搬過去就是錯的敘述。
  */
-const TOOLING_DIRS = ['.claude', '.tools', '.vite', 'docs', '.githooks']
+export const PROJECT_DOCS_DIR = 'docs'
 
 /**
- * 原始碼放在專案根目錄時,SRC_DIR 會是空字串或 `.`(本專案就是這種擺法:
+ * 規範系統自己所在的目錄 —— 檢查工具、給 AI 讀的規範(含它的說明文件)、
+ * 開發伺服器外掛、commit 前的檢查。
+ *
+ * 這些目錄裡的檔案不是原始碼,api、store、頁面那幾類規則不適用於它們;
+ * 但它們會整批複製到下一個專案,所以「不寫專案名稱」這條只管這裡。
+ *
+ * ⚠️ 全專案掃描的範圍與規則的適用範圍都由這份清單長出來,不要分開維護 ——
+ *    兩邊不一致的話,規則會宣告自己管某個目錄,但預設掃描根本不走訪它,
+ *    那個目錄就等於沒有被檢查過。
+ */
+const TOOLING_DIRS = ['.claude', '.tools', '.vite', '.githooks']
+
+/** 給 AI 助理讀的設定目錄 —— 底下放跨規則的共同前提、各類寫法規範、各個 hook */
+const AI_CONFIG_DIR = '.claude'
+
+/**
+ * 跨規則的共同前提(判斷不出來就問、規範不能有兩份、治根、文字怎麼寫)。
+ *
+ * 這裡只定義位置。**有哪幾份、各自講什麼、優先順序是幾** 一律從檔案自己的
+ * frontmatter 讀出來,不在任何地方另外列一份清單 —— 列了就會有跟目錄對不上的
+ * 一天,而對不上的時候不會報錯,只是新增的那份規則從此沒有人看得到。
+ */
+export const CONVENTION_RULES_DIR = `${AI_CONFIG_DIR}/rules`
+
+/** 各類程式的寫法規範,一個資料夾一份,裡面是 SKILL.md */
+export const CONVENTION_SKILLS_DIR = `${AI_CONFIG_DIR}/skills`
+
+/**
+ * 原始碼放在專案根目錄時,SRC_DIR 會是空字串或 `.`(Nuxt 那種擺法:
  * pages、stores、components 都直接放在專案根,沒有 src 這一層)。
  *
  * 那時「這個檔案是不是原始碼」不能靠前綴比對 —— 前綴是空的,比對永遠不成立,
@@ -292,14 +310,32 @@ export const TOOLING_PREFIXES = TOOLING_DIRS.map((dir) => `${dir}/`)
 export const SCAN_TARGETS = IS_SRC_PROJECT_ROOT ? ['.'] : [SRC_DIR, ...TOOLING_DIRS]
 
 /**
- * 「不寫專案名稱」與「不寫絕對路徑」兩條規則的適用範圍(路徑前綴)。
+ * 規則 `projectName`(不寫死專案名稱)的適用範圍(路徑前綴)。
  *
- * 這兩條涵蓋原始碼與規範系統自身 —— 那些檔案都會整批複製到下一個專案,
- * 裡面寫死名稱或某台機器的路徑,搬過去就是錯的敘述。
+ * **只管規範系統自身** —— 檢查工具、skills、hooks、規範自己的說明文件。
+ * 那些檔案會整批複製到下一個專案,裡面寫死名稱的話,搬過去就是錯的敘述,
+ * 而且從內容看不出哪幾句是「本專案限定」。
+ *
+ * 原始碼不在範圍內。頁面標題、頁尾品牌名、會員條款裡的品牌名稱是內容本身,
+ * 不是被寫死的設定 —— 那些檔案不會複製到別的專案,寫出品牌名是正確的。
+ * 把原始碼也納入的話,整份清單會被大量正當文案淹沒,真正該擋的那幾筆反而看不到。
+ *
+ * 原始碼放在專案根的擺法(Nuxt 那種)也走同一份前綴,兩種擺法行為一致。
+ */
+export const PROJECT_NAME_SCOPE = TOOLING_PREFIXES
+
+/**
+ * 規則 `absolutePath`(不寫某一台機器上的路徑)的適用範圍(路徑前綴)。
+ *
+ * **涵蓋原始碼與規範系統自身。** 絕對路徑跟品牌名稱不一樣:它不是內容,
+ * 是只在某一台開發機上成立的位置 —— 別人 clone 下來直接壞掉,build 也不會過。
+ * 寫在原始碼裡同樣是錯的,所以範圍不限縮。
  *
  * 原始碼就放在專案根時,範圍是整個專案(空字串前綴對任何路徑都成立)。
  */
-export const CONVENTION_SCOPE = IS_SRC_PROJECT_ROOT ? [''] : [SRC_PREFIX, ...TOOLING_PREFIXES]
+export const ABSOLUTE_PATH_SCOPE = IS_SRC_PROJECT_ROOT
+  ? ['']
+  : [SRC_PREFIX, ...TOOLING_PREFIXES]
 
 /**
  * 建置設定檔的候選檔名 —— 由前往後找,用第一個存在的那一支。
@@ -312,9 +348,7 @@ export const CONVENTION_SCOPE = IS_SRC_PROJECT_ROOT ? [''] : [SRC_PREFIX, ...TOO
  * 讀的是設定裡 `'@名稱': '對應路徑'` 這種形狀,不管它放在 resolve.alias
  * 還是 alias 底下都認得,所以同一份解析可以共用給不同建置工具。
  *
- * 本專案是 Nuxt,alias 寫在 `nuxt.config.ts` 的 `alias` 底下。
- *
- * 注意:一支都找不到時,那條規則會被略過(不會報錯,也不會誤報)。
+ * ⚠️ 一支都找不到時,那條規則會被略過(不會報錯,也不會誤報)。
  *    工具啟動時會把「因為缺什麼而沒有作用」列出來,不會安靜地失效。
  */
 export const BUILD_CONFIG_FILES = [
@@ -329,8 +363,8 @@ export const BUILD_CONFIG_FILES = [
 /**
  * 專案設定檔的候選檔名 —— 由前往後找,用第一個存在的那一支。
  *
- * 建置設定裡的 alias 路徑有時帶變數(本專案的 `@css` / `@js` / `@imgs`
- * 就是這種寫法),那些值定義在專案設定檔。
- * 找不到這支檔案時,帶變數的那幾條 alias 會被跳過,其餘照常運作。
+ * 建置設定裡的 alias 路徑有時帶變數(例如 `src/${CONFIG.fonts}`),
+ * 那些值定義在專案設定檔。找不到這支檔案時,帶變數的那幾條 alias 會被跳過,
+ * 其餘照常運作。
  */
 export const PROJECT_CONFIG_FILES = ['config.js', 'config.mjs', 'config.ts']
