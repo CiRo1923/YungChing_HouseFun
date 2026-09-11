@@ -23,20 +23,76 @@ import {
   sortDecls,
   suffixOf,
 } from './color-order.mjs'
+/* 其他類別的規範各自成一支,判斷不寫在這裡 —— 這一支只放 CSS 規範與引擎。
+  換一個專案時要改的只有 project-config.mjs,這五支一行都不用動。 */
+import { API_CHECKS, API_RULE_HINT, API_RULE_TITLE } from './rules-api.mjs'
+import { CODE_CHECKS, CODE_RULE_HINT, CODE_RULE_TITLE } from './rules-code.mjs'
+import { GLOBAL_CHECKS, GLOBAL_RULE_HINT, GLOBAL_RULE_TITLE } from './rules-global.mjs'
+import { PAGE_CHECKS, PAGE_RULE_HINT, PAGE_RULE_TITLE } from './rules-page.mjs'
+import { STORE_CHECKS, STORE_RULE_HINT, STORE_RULE_TITLE } from './rules-store.mjs'
+import { SCAN_TARGETS, listFiles } from './shared.mjs'
 
-/** 全專案掃描時要看的目錄 / 檔案 */
-export const SCAN_TARGETS = [
-  'components',
-  'containers',
-  'pages',
-  'layouts',
-  'assets/css',
-  'app.vue',
-  'error.vue',
-  ...['tailwind.extend.js', 'tailwind.config.js'],
+/* 五組外部規範,依序跑。它們收的是 ctx 物件(見 lintFile 結尾的說明),
+  與這一支的 CSS 規則簽名不同,所以分開收集、在 lintFile 裡各自呼叫。 */
+const EXTERNAL_CHECKS = [
+  ...GLOBAL_CHECKS,
+  ...API_CHECKS,
+  ...STORE_CHECKS,
+  ...CODE_CHECKS,
+  ...PAGE_CHECKS,
 ]
 
-export const SCAN_EXT = new Set(['.vue', '.css'])
+/* 規則代號對應的標題與修正提示,**五層守門共用同一份**
+  (存檔、開發伺服器、AI 寫檔、對話提醒、commit)。
+
+  注意:這份只能有一份。散在各層各寫一次的話,加了新規則只改其中一層,
+      其他層就會顯示原始代號而不是看得懂的標題 —— 而那不會報錯,
+      只是訊息變得難懂,通常沒有人會回報。
+
+  CSS 那七條寫在這裡(判斷也在這一支),其餘由各自的規則模組提供。 */
+export const RULE_TITLE = {
+  color: '規則 1 顏色未定義在色票檔',
+  colorFile: '規則 1 色票檔的命名 / 排序 / 頻道歸屬',
+  tailwind: '規則 2 template 使用 tailwind class',
+  module: '規則 3 module css 的引入方式或順序',
+  variable: '規則 4 module 變數的命名或斷點',
+  import: '規則 5 .vue 的 import 順序',
+  theme: '規則 6 用到不存在或已淘汰的 tailwind class',
+  ...GLOBAL_RULE_TITLE,
+  ...API_RULE_TITLE,
+  ...STORE_RULE_TITLE,
+  ...CODE_RULE_TITLE,
+  ...PAGE_RULE_TITLE,
+}
+
+export const RULE_HINT = {
+  color: '改用 var(--色名-色碼)',
+  colorFile: '跨頻道共用的搬到 color.css;命名要人工改',
+  tailwind: '樣式移到 assets/css/_modules/',
+  module: '<script setup> 最上方 JS import;變數建在用到的最小單位上',
+  variable: '-w / -h / -p,尺寸分 pc / tablet / mobile 三份',
+  import: 'css → ./.composables → @js → 其他套件',
+  theme: 'text-sm / shadow-md / font-sans / md: 產不出任何 CSS',
+  ...GLOBAL_RULE_HINT,
+  ...API_RULE_HINT,
+  ...STORE_RULE_HINT,
+  ...CODE_RULE_HINT,
+  ...PAGE_RULE_HINT,
+}
+
+/* 掃描範圍一律走 shared.mjs,這裡轉出去給各層用。
+
+  注意:不要在這裡另外定義一份。掃描範圍與規則的適用範圍要由同一份設定長出來,
+      兩邊不一致的話,規則會宣告自己管某個目錄、但掃描根本不走訪它 ——
+      那個目錄就等於沒有被檢查過,而且不會有任何徵兆。 */
+export {
+  PENDING_CACHE_FILE,
+  SCAN_TARGETS,
+  isScannable,
+  isWarn,
+  listFiles,
+  toRel,
+} from './shared.mjs'
 
 /**
  * 副檔名不是 .vue / .css,但**會產生 CSS** 的設定檔 —— 只檢查顏色。
@@ -45,13 +101,10 @@ export const SCAN_EXT = new Set(['.vue', '.css'])
  * 所以「顏色一律走色票」對它一樣成立;寫死在這裡的色碼一樣是規則 1 違規,
  * 只是它躲在 .js 裡,不掃就永遠看不到。
  *
- * ⚠️ 不要把 .js 整個放進 SCAN_EXT —— 一般 js 裡的 hex(雜湊、id、二進位遮罩)
- *    會全部變成誤報。只有這份白名單裡的設定檔要看。
+ * 注意:一般 js 裡的 hex(雜湊、id、二進位遮罩)會全部變成誤報,
+ *    所以顏色那條只對這份白名單裡的設定檔生效,不是對所有 .js。
  */
 export const SCAN_CONFIG_FILES = new Set(['tailwind.extend.js', 'tailwind.config.js'])
-
-export const isScannable = (abs) =>
-  SCAN_EXT.has(path.extname(abs)) || SCAN_CONFIG_FILES.has(path.basename(abs))
 
 /**
  * 文件用的路徑 —— 一律**不檢查**(2026-08-31 加)。
@@ -408,17 +461,6 @@ function maskLineComments(text) {
   return text.replace(/\/\/[^\n]*/g, (m) => ' '.repeat(m.length))
 }
 
-export function listFiles(projectRoot, target) {
-  const abs = path.join(projectRoot, target)
-  if (!fs.existsSync(abs)) return []
-  if (fs.statSync(abs).isFile()) return isScannable(abs) ? [abs] : []
-  const out = []
-  for (const entry of fs.readdirSync(abs, { withFileTypes: true })) {
-    if (entry.name.startsWith('.') && entry.isDirectory()) continue
-    out.push(...listFiles(projectRoot, path.join(target, entry.name)))
-  }
-  return out
-}
 
 // --- 規則 1:顏色 -----------------------------------------------------------
 
@@ -1952,7 +1994,16 @@ export function lintFile(projectRoot, absPath, definedVars) {
   // 對 js 不成立。先遮掉 // 註解,免得說明文字裡的色碼被當成違規。
   const text = SCAN_CONFIG_FILES.has(path.basename(absPath)) ? maskLineComments(raw) : raw
 
-  const issues = [...checkColors(rel, text, definedVars), ...checkColorMechanism(rel, text)]
+  /* 顏色規則只對「會變成樣式」的檔案生效:.vue / .css,加上那幾支會產出 CSS 的設定檔。
+
+    注意:不要對所有副檔名都跑。掃描範圍含 .js / .mjs / .md ——
+        那些檔案裡的色碼是雜湊、id、遮罩,或是規範文件在舉例,
+        全部當成違規的話會多出好幾百筆,真正該看的那幾筆就被淹掉了。 */
+  const isStyleFile = /\.(vue|css)$/i.test(rel) || SCAN_CONFIG_FILES.has(path.basename(absPath))
+
+  const issues = isStyleFile
+    ? [...checkColors(rel, text, definedVars), ...checkColorMechanism(rel, text)]
+    : []
 
   // tailwind 推斷不出型別的三個屬性 —— 在哪裡寫都是錯的,所以不限目錄
   if (rel.endsWith('.vue') || rel.endsWith('.css')) {
@@ -1995,7 +2046,25 @@ export function lintFile(projectRoot, absPath, definedVars) {
     issues.push(...checkStateClassNaming(rel, text))
   }
 
-  return issues
+  /* 上面那些是 CSS 規範,判斷寫在這一支;下面五組是其他類別的規範,
+    判斷各自寫在 rules-*.mjs。兩邊的函式簽名不同 ——
+    CSS 那些收 (rel, text),五組收一個 ctx 物件,所以這裡組出 ctx 再轉交。
+
+    注意:單條規則丟例外時只跳過那一條,不要讓整個檢查停擺 ——
+        一條規則壞掉就什麼都檢查不到的話,災情比那條規則失效大得多。 */
+  const ctx = { root: projectRoot, rel, text, isVue: rel.endsWith('.vue'), definedVars }
+
+  issues.push(
+    ...EXTERNAL_CHECKS.flatMap((check) => {
+      try {
+        return check(ctx)
+      } catch {
+        return []
+      }
+    })
+  )
+
+  return issues.sort((a, b) => (a.line ?? 0) - (b.line ?? 0))
 }
 
 export { isDerivedColorVar }

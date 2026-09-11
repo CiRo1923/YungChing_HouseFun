@@ -32,6 +32,9 @@ import path from 'node:path'
   檔案一旦被存過而且有違規,就一直留在裡面,每一輪對話都重新檢查一次;
   直到它通過了才移除。這樣「有違規就每次問」才成立:不修掉就會一直被問。 */
 import { PENDING_FILE, PROJECT_ROOT } from '../../.tools/lint/paths.mjs'
+/* 規則標題一律 import,不要各層自己寫一份 —— 加了新規則只改其中一層的話,
+  其他層會顯示原始代號而不是看得懂的標題,而那不會報錯,只是訊息變得難懂。 */
+import { RULE_TITLE } from '../../.tools/lint/lint-core.mjs'
 
 const MAX_LISTED = 10
 
@@ -98,15 +101,6 @@ const onLint = (files) => {
   }
 }
 
-const RULE_TITLE = {
-  color: '規則 1 —— 顏色沒有定義在色票檔',
-  colorFile: '規則 1 —— 色票檔的命名 / 排序 / 頻道歸屬',
-  tailwind: '規則 2 —— components 的 template 使用 tailwind class',
-  module: '規則 3 —— module css 的結構或引入方式不對',
-  variable: '規則 4 —— module 變數的命名或斷點不對',
-  import: '規則 5 —— .vue 的 import 順序不對',
-  theme: '規則 6 —— 用到本專案不存在的 tailwind class(產不出任何 CSS)',
-}
 
 /**
  * 讀存檔那層留下的追蹤清單(**不清空**)。

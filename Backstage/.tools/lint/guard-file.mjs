@@ -30,25 +30,12 @@ import { checkSharedColors, lintFile, onRemoveEmptyRules } from './lint-core.mjs
   兩邊各自拼路徑的話對不上就等於接力棒斷了,而且**兩邊都不會報錯**。 */
 import { PENDING_FILE, PROJECT_ROOT as projectRoot } from './paths.mjs'
 
-const RULE_TITLE = {
-  color: '規則 1 顏色未定義在色票檔',
-  colorFile: '規則 1 色票檔的命名 / 排序 / 頻道歸屬',
-  tailwind: '規則 2 template 使用 tailwind class',
-  module: '規則 3 module css 的引入方式或順序',
-  variable: '規則 4 module 變數的命名或斷點',
-  import: '規則 5 .vue 的 import 順序',
-  theme: '規則 6 用到不存在或已淘汰的 tailwind class',
-}
+/* 規則標題與修正提示一律 import,不要各層自己寫一份 ——
+  加了新規則只改其中一層的話,其他層會顯示原始代號而不是看得懂的標題,
+  而那不會報錯,只是訊息變得難懂,通常沒有人會回報。 */
+import { RULE_HINT, RULE_TITLE } from './lint-core.mjs'
 
-const RULE_HINT = {
-  color: '改用 var(--色名-色碼)',
-  colorFile: '跨頻道共用的搬到 color.css;命名要人工改',
-  tailwind: '樣式移到 assets/css/_modules/',
-  module: '<script setup> 最上方 JS import;變數建在用到的最小單位上',
-  variable: '-w / -h / -p,尺寸分 pc / tablet / mobile 三份',
-  import: 'css → ./.composables → @js → 其他套件',
-  theme: 'text-sm / shadow-md / font-sans / md: 產不出任何 CSS',
-}
+
 
 /**
  * 存檔時間,格式 HH:MM:SS。

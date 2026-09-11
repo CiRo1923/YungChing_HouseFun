@@ -8,8 +8,8 @@ description: 修改 popup(alert / confirm / custom / apiPromise)的顯示狀態�
 全站只有一個 popup 顯示層。**同一時間只會有一個 popup 可見**,由 `keyID` 的優先序決定:
 `alertData.id || confirmData.id || customData.id || apiPromiseData.id`。
 
-> 本專案已與姊妹專案 Official(`D:\CiRo\Project\YungChing\Dev\HouseFun\Official`)對齊:
-> 兩條不變式都已套用,popup 元件搬到共用層,store 與 composable 不再分 buy 專屬版本。
+> 本專案已與並排的另一個專案對齊:兩條不變式都已套用,
+> popup 元件搬到共用層,store 與 composable 不再分頻道專屬版本。
 
 ## 檔案分工
 

@@ -1,8 +1,8 @@
 // build / deploy 成功後,把專案原始碼同步到 Public 側的發布 repo,並留一份 zip 備份。
 //
 // 路徑不寫死:從目前專案往上找路徑中的 `Dev` 段,換成 `Public`,其餘結構原樣保留。
-//   D:/任意路徑/YungChing/Dev/HouseFun/Official
-//   → D:/任意路徑/YungChing/Public/HouseFun/Official
+//   <任意前綴>/Dev/<中間層>/<專案目錄>
+//   → <任意前綴>/Public/<中間層>/<專案目錄>
 // 每台電腦的前綴不同也能對得上。
 //
 // 同步與壓縮的排除規則不同,刻意分成兩套:

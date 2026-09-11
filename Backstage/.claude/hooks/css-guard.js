@@ -18,6 +18,9 @@ import path from 'node:path'
   這裡用相對路徑而不是 @ alias:hook 是 node 直接執行的腳本,
   不經過建置流程,alias 在這裡不會被解析。 */
 import { PROJECT_ROOT } from '../../.tools/lint/paths.mjs'
+/* 規則標題一律 import,不要各層自己寫一份 —— 加了新規則只改其中一層的話,
+  其他層會顯示原始代號而不是看得懂的標題,而那不會報錯,只是訊息變得難懂。 */
+import { RULE_TITLE } from '../../.tools/lint/lint-core.mjs'
 
 const isColorCss = (rel) => /^assets\/css\/_common\/color[A-Za-z]*\.css$/.test(rel)
 
@@ -112,15 +115,6 @@ const FIX_HINTS = {
     '這條是機械式替換,可以直接動手 —— 但要先確認原本想要的效果是什麼(那個 class 一直沒生效)。',
 }
 
-const RULE_TITLE = {
-  color: '規則 1 違規 —— 顏色沒有定義在色票檔',
-  colorFile: '規則 1 違規 —— 色票檔的命名 / 排序 / 頻道歸屬',
-  tailwind: '規則 2 違規 —— template 使用 tailwind class',
-  module: '規則 3 違規 —— module css 的結構或引入方式不對',
-  variable: '規則 4 違規 —— module 變數的命名或斷點不對',
-  import: '規則 5 違規 —— .vue 的 import 順序不對',
-  theme: '規則 6 違規 —— 用到本專案不存在或已淘汰的 tailwind class',
-}
 
 const MAX_LISTED = 12
 

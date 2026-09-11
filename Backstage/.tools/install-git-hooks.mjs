@@ -4,8 +4,8 @@
 //
 // hooksPath 的相對路徑是相對 **repo 根**,不是相對專案 —— 所以兩種擺法算出來的值不同:
 //
-//   a. 開發機:repo 根是 Dev/HouseFun,底下放 Official/ 與 Backstage/ → `Backstage/.githooks`
-//   b. 正式站:專案自己就是一個 repo(兩邊的 git 位置不同)         → `.githooks`
+//   a. 開發機:repo 根在專案的上一層,底下並排放著多個專案 → `<專案目錄名>/.githooks`
+//   b. 正式站:專案自己就是一個 repo(git 位置與 a 不同)   → `.githooks`
 //
 // ⚠️ a 的情況下 core.hooksPath 是 repo 層級設定、**只能指向一個目錄** ——
 //    兩個專案都跑這支的話,**誰最後跑誰生效**。所以兩邊的 .githooks/pre-commit

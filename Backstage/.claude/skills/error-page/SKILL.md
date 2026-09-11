@@ -10,9 +10,9 @@ description: 動到錯誤頁、404 導向或分頁參數(pg)防呆前必須先�
 **Nuxt 的錯誤頁必須放在 srcDir 根目錄** —— 本專案 `pages/`、`components/`、`layouts/` 都在根,
 所以 srcDir 就是根,錯誤頁是 `./error.vue`。
 
-原本它放在 `pages/error.vue`,只有一行 `HouseFun Error`。那樣會被當成一般頁面編譯成
+放在 `pages/error.vue` 是不會生效的 —— 那樣會被當成一般頁面編譯成
 `/error` 路由,**`showError` 從來不會用到它** —— 全專案也沒有任何地方導向 `/error`,它是個孤兒。
-驗收條目 C-17 記錄的「HouseFun Error 系統錯誤頁」講的就是那個畫面。
+驗收條目 C-17 記錄的「系統錯誤頁」講的就是那個畫面。
 
 **怎麼確認錯誤頁真的生效**:build 後看 `.output`。
 
