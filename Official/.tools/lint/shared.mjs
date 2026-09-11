@@ -115,6 +115,29 @@ export const bodyRangeOf = (text, start) => {
 export const toRel = (root, abs) => path.relative(root, abs).split(path.sep).join('/')
 
 /**
+ * 把配對到的區段換成等長空白。
+ *
+ * 換成空白而不是刪掉,行號與欄位都不會跑掉 —— 違規要指到正確的那一行,
+ * 刪掉之後行號就對不上原始檔案了。
+ */
+const maskBy = (text, re) => text.replace(re, (m) => m.replace(/[^\n]/g, ' '))
+
+/**
+ * 遮蔽 CSS 註解。
+ *
+ * 兩種用途:一是註解掉的程式碼是死的,拿規範去檢查它沒有意義,而且會讓人
+ * 以為某一行有問題,打開檔案才發現那一段根本沒有作用;二是找大括號的配對時,
+ * 註解裡的括號不能算數(`/* { *​/` 會讓整份的巢狀層數從此錯開)。
+ *
+ * 需要讀註解的檢查不要用這個(豁免標記、色票的色相分類標籤、
+ * 文字寫法那幾條檢查的正是註解本身)。
+ */
+export const maskCssComments = (text) => maskBy(text, /\/\*[\s\S]*?\*\//g)
+
+/** 遮蔽 template 的 HTML 註解 */
+export const maskHtmlComments = (text) => maskBy(text, /<!--[\s\S]*?-->/g)
+
+/**
  * 這份檔案有沒有標某一條規則的豁免。
  *
  * 標記的形狀是 `lint-<規則>-exempt: 理由`,而且**一定要寫在註解裡**
