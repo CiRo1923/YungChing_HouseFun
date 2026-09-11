@@ -1,13 +1,25 @@
 {
   "hooks": {
-    "Stop": [
+    "PreToolUse": [
       {
+        "matcher": "Write|Edit",
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/move-permissions-to-local.cjs 2>/dev/null || true",
-            "timeout": 30,
-            "statusMessage": "把 permissions 搬回 settings.local.json…"
+            "command": "node .claude/hooks/enforce-conventions.cjs",
+            "statusMessage": "檢查規範(判斷委派給 .tools/lint 引擎)..."
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/move-permissions-to-local.cjs",
+            "async": true
           }
         ]
       }
@@ -17,41 +29,25 @@
         "hooks": [
           {
             "type": "command",
+            "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"UserPromptSubmit\",\"additionalContext\":\"請一律使用繁體中文（zh-TW）回覆：所有資訊、動作說明、結果與提問都必須使用繁體中文。\"}}'",
+            "statusMessage": "套用繁體中文回覆規則..."
+          },
+          {
+            "type": "command",
             "command": "node .claude/hooks/css-guard-prompt.cjs 2>/dev/null || true",
             "timeout": 30,
-            "statusMessage": "檢查存檔後的 CSS 規範…"
+            "statusMessage": "檢查存檔後的 CSS 規範..."
           }
         ]
       }
     ],
-    "PostToolUse": [
+    "Stop": [
       {
-        "matcher": "Write|Edit",
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/enforce-conventions.cjs 2>/dev/null || true"
-          },
-          {
-            "type": "command",
-            "command": "node .claude/hooks/css-guard.js 2>/dev/null || true",
-            "statusMessage": "檢查 CSS 規範…"
-          },
-          {
-            "type": "command",
-            "command": "node .claude/hooks/sync-conventions.cjs 2>/dev/null || true"
-          }
-        ]
-      },
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node .claude/hooks/move-permissions-to-local.cjs 2>/dev/null || true",
-            "timeout": 30,
-            "statusMessage": "把 permissions 搬回 settings.local.json…",
-            "async": true
+            "command": "node .claude/hooks/move-permissions-to-local.cjs",
+            "statusMessage": "歸位 settings 權限痕跡..."
           }
         ]
       }

@@ -13,6 +13,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { isColorNamingConfigFit, isHueSourceFit } from './color-order.mjs'
 import { hasBreakpointVars, hasResponsiveStyles } from './lint-core.mjs'
+import { IS_SOURCE_PROJECT } from './rules-global.mjs'
 import { detectViewResourceDepth } from './shared.mjs'
 import {
   API_DIR,
@@ -192,9 +193,22 @@ export const preflight = (root) =>
     why,
   }))
 
-/** 缺前提時印出說明;齊備就什麼都不印(通過的情況不需要噪音) */
+/**
+ * 缺前提時印出說明;齊備就什麼都不印(通過的情況不需要噪音)。
+ *
+ * 例外是「這個專案是規範工具的來源」—— 那會讓設定檔多出項目時只提醒、不擋,
+ * 是與其他專案不同的行為,所以一定要講出來。判定是不是來源的邏輯只有一份
+ * (在規則那邊),這裡直接用它的結果,不自己再算一次。
+ */
 export const onReportPreflight = (root, { print = console.error } = {}) => {
   const missing = preflight(root)
+
+  if (IS_SOURCE_PROJECT) {
+    print('')
+    print(`這個專案是規範工具的來源(名稱對得上 SOURCE_PROJECT_NAME)——`)
+    print('  設定檔多出沒有人讀的項目時只提醒,不擋;其他專案則是一律擋。')
+  }
+
   if (!missing.length) return missing
 
   print('')

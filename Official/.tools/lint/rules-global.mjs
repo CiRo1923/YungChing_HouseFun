@@ -5,13 +5,21 @@
 // 這裡放的是「跟樣式無關、但每一種檔案都要守」的規則。
 // CSS 專屬的規則在 lint-core.mjs,兩邊都吐同一種 issue 物件,由 lintFile 合併。
 
+import fs from 'node:fs'
+import path from 'node:path'
+
 import {
   ABSOLUTE_PATH_SCOPE,
   WRITING_STYLE_SCOPE,
   PROJECT_NAMES,
   PROJECT_NAME_SCOPE,
+  SOURCE_PROJECT_NAME,
+  TOOLING_PREFIXES,
   issueOf,
   lineNoOf,
+  listFiles,
+  toRel,
+  warnOf,
 } from './shared.mjs'
 
 // --- 規則 projectName:不得寫死專案名稱、不得跨專案引用 -----------------------
@@ -332,11 +340,122 @@ const checkSelfContained = ({ rel, text }) => {
   return issues
 }
 
+// --- 規則 configItem:專案設定檔只改值,不新增項目 ----------------------------
+//
+// 專案設定檔是規則與專案之間的介面:一邊是規則(換專案完全不動),
+// 另一邊是這個專案的資料夾怎麼擺。**介面的形狀由規則那一側決定** ——
+// 規則讀什麼,設定檔才有什麼。
+//
+// 每個專案只做一件事:把既有的項目改成自己的值。自己多加一項的話,
+// 沒有任何規則會讀它 —— 不是「設定沒生效」的錯誤訊息,是完全的安靜,
+// 而下一個人看到它會以為某條規則吃這個值。這條抓的就是那種項目。
+//
+// 反方向(刪掉或改名)不必抓:規則 import 的名稱不存在時,
+// 那條規則會直接壞掉,本來就看得見。
+//
+// **判準是「有沒有人用」,不是「來源長什麼樣」。** 規範工具與使用它的專案
+// 之後會分開放,那時這條照樣成立 —— 它問的是這個專案裡有沒有程式讀它。
+//
+// 來源那一邊不擋,只提醒:規則與設定在那裡是一起長出來的,
+// 先加設定、再改規則去讀它,中間必然有一段「還沒有人用」的狀態。
+// 那是正常的工作過程,擋下來只會讓人繞過檢查。
+
+/** 設定檔在規範工具自己的目錄裡,那個位置不隨專案而不同 */
+const CONFIG_FILE = '.tools/lint/project-config.mjs'
+
+const CONFIG_EXPORT_RE = /^export const ([A-Za-z_$][\w$]*)/gm
+
+/**
+ * 會讀設定的程式碼 —— 規範系統自己那幾個目錄底下,扣掉說明文件。
+ *
+ * 文件不算讀者:文件提到某個設定的名字是在說明它,不是在用它。
+ * 把文件算進來的話,一個沒有任何規則讀、只有文件寫過的設定會被判成有人用。
+ */
+const toolingSourcesOf = (root) =>
+  TOOLING_PREFIXES.flatMap((prefix) => listFiles(root, prefix.replace(/\/$/, '')))
+    .map((abs) => toRel(root, abs))
+    .filter((rel) => rel !== CONFIG_FILE && !rel.endsWith('.md'))
+    .map((rel) => {
+      try {
+        return fs.readFileSync(path.resolve(root, rel), 'utf8')
+      } catch {
+        return ''
+      }
+    })
+
+/**
+ * 設定檔裡沒有任何人讀的項目 —— 回傳 `{ name, index }`。
+ *
+ * 判準抽成純函式是為了讓規則的自我驗證能直接測它:這條規則只對設定檔
+ * 那一個路徑生效,驗證沒辦法像別條那樣造一支探測檔 ——
+ * 造出來的話就是覆寫真正的設定檔。
+ */
+export const unusedConfigNames = (text, sources) =>
+  [...text.matchAll(CONFIG_EXPORT_RE)].flatMap((m) => {
+    const name = m[1]
+    const nameRe = new RegExp(`\\b${name}\\b`)
+
+    if (sources.some((src) => nameRe.test(src))) return []
+
+    /* 設定檔自己用到也算 —— 有些項目是用來組出別的項目的中介值,
+       它們不會被規則直接讀,但拿掉之後別的項目就算不出來。
+       宣告本身就是一次出現,所以要兩次以上才算「自己也有用到」。 */
+    if (text.split(nameRe).length > 2) return []
+
+    return [{ name, index: m.index }]
+  })
+
+/**
+ * 這個專案是不是規範工具的來源。
+ *
+ * 拿設定裡的來源名稱與這個專案自己的名稱比對 —— 對得上就是來源。
+ * 每個專案安裝時本來就要把專案名稱換成自己的(不換的話,「不寫死專案名稱」
+ * 那條會去抓一個與它無關的字),換掉之後兩者自然對不上,就不再是來源。
+ *
+ * 比對走的是專案名稱那一套寫法,空白、底線、連字號、大小寫的差異都算同一個名字 ——
+ * 兩處各寫一種比對方式的話,同一個名字會有一邊算相符、另一邊算不相符。
+ *
+ * 對外提供是為了讓前提檢查印出「這次被判定為來源」—— 那個判斷只有這一份,
+ * 另一處自己再算一次的話,兩邊會有對不上的一天,而工具講的話就開始與行為不符。
+ */
+export const IS_SOURCE_PROJECT =
+  !!SOURCE_PROJECT_NAME && PROJECT_NAMES.some((name) => patternOf(name).test(SOURCE_PROJECT_NAME))
+
+const checkConfigItem = ({ root, rel, text }) => {
+  if (rel !== CONFIG_FILE) return []
+
+  return unusedConfigNames(text, toolingSourcesOf(root)).map(({ name, index }) => {
+    const line = lineNoOf(text, index)
+
+    /* 來源那一邊只提醒:規則與設定是一起長的,先加設定、再改規則去讀它,
+       中間必然有一段「還沒有人用」的狀態。 */
+    if (IS_SOURCE_PROJECT) {
+      return warnOf(
+        rel,
+        line,
+        'configItem',
+        `${name} 目前沒有任何規則讀它 —— 這個專案是規範工具的來源,所以只是提醒;` +
+          `規則那一側還沒改完的話這是正常的,確定不會用到就把它拿掉`
+      )
+    }
+
+    return issueOf(
+      rel,
+      line,
+      'configItem',
+      `${name} 沒有任何規則讀它 —— 設定項有哪些由規範工具的來源決定,` +
+        `專案只把既有項目改成自己的值;多出來的一項不會有任何作用,` +
+        `而下一個人會以為某條規則吃這個值`
+    )
+  })
+}
+
 export const GLOBAL_CHECKS = [
   checkProjectName,
   checkAbsolutePath,
   checkPlainText,
   checkSelfContained,
+  checkConfigItem,
 ]
 
 export const GLOBAL_RULE_TITLE = {
@@ -344,6 +463,7 @@ export const GLOBAL_RULE_TITLE = {
   absolutePath: '寫了某一台機器上才有的路徑',
   plainText: '用了 emoji 或裝飾符號',
   selfContained: '把讀者送去別處的寫法(同上 / 參考第幾節)',
+  configItem: '專案設定檔多了沒有規則讀的項目',
 }
 
 export const GLOBAL_RULE_HINT = {
@@ -352,4 +472,6 @@ export const GLOBAL_RULE_HINT = {
     '路徑一律相對專案根目錄 —— 磁碟機代號、家目錄、file://、往上跳三層以上都只在特定電腦上成立',
   plainText: '要強調就把理由寫出來 —— 終端機的狀態記號與對照表的箭頭不在此限',
   selfContained: '把那段要講的在這裡再寫一次 —— 內容重複沒關係,重複遠比讓讀者跳頁好',
+  configItem:
+    '專案設定檔只把既有項目改成自己的值 —— 需要新的一項代表規則本身要改,回到規範工具的來源去加',
 }
