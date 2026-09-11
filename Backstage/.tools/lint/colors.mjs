@@ -1,20 +1,18 @@
-// CLI 輸出的顏色。
+// 終端機色碼。
 //
-// **不是終端機就不要上色** —— VSCode 的輸出面板(Run on Save)、被程式接走的 stdout
-// 都不支援 ANSI,硬印會變成一堆 `esc[31m` 的亂碼。
-// 另外尊重慣例:NO_COLOR 環境變數與 --no-color 參數。
+// 非 TTY(編輯器輸出面板、CI log、被其他程式接管道)一律關色 ——
+// 否則面板會印出一堆 [31m 之類的 ESC 亂碼。
 
-const isTTY = Boolean(process.stderr.isTTY && process.stdout.isTTY)
-const wanted = !process.env.NO_COLOR && !process.argv.includes('--no-color')
+// FORCE_COLOR=1 是給「輸出會被父行程轉印到終端機」的情境用的 ——
+// dev server 外掛以子行程跑守門,子行程看不到 TTY,不強制的話永遠是黑白的。
+// 編輯器的 Run on Save 面板不吃 ANSI,那邊就不要帶這個環境變數。
+const on =
+  process.env.FORCE_COLOR === '1' || (Boolean(process.stdout.isTTY) && !process.env.NO_COLOR)
 
-export const useColor = isTTY && wanted
-
-const code = (value) => (useColor ? value : '')
-
-export const RED = code('\x1b[31m')
-export const YELLOW = code('\x1b[33m')
-export const GREEN = code('\x1b[32m')
-export const CYAN = code('\x1b[36m')
-export const DIM = code('\x1b[2m')
-export const BOLD = code('\x1b[1m')
-export const RESET = code('\x1b[0m')
+export const RED = on ? '\x1b[31m' : ''
+export const GREEN = on ? '\x1b[32m' : ''
+export const YELLOW = on ? '\x1b[33m' : ''
+export const CYAN = on ? '\x1b[36m' : ''
+export const DIM = on ? '\x1b[2m' : ''
+export const BOLD = on ? '\x1b[1m' : ''
+export const RESET = on ? '\x1b[0m' : ''

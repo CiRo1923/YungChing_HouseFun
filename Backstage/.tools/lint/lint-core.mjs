@@ -30,6 +30,11 @@ import { CODE_CHECKS, CODE_RULE_HINT, CODE_RULE_TITLE } from './rules-code.mjs'
 import { GLOBAL_CHECKS, GLOBAL_RULE_HINT, GLOBAL_RULE_TITLE } from './rules-global.mjs'
 import { PAGE_CHECKS, PAGE_RULE_HINT, PAGE_RULE_TITLE } from './rules-page.mjs'
 import { STORE_CHECKS, STORE_RULE_HINT, STORE_RULE_TITLE } from './rules-store.mjs'
+
+/* 兩支存檔時的自動修正,由存檔那層(.tools/lint/guard-file.mjs)呼叫 ——
+  判斷與修正寫在各自的規則模組裡,這裡只轉出去,不要在這一支再實作一份。 */
+export { onSortComposables } from './rules-code.mjs'
+export { onWrapMountedCalls } from './rules-page.mjs'
 import { SCAN_TARGETS, listFiles } from './shared.mjs'
 
 /* 五組外部規範,依序跑。它們收的是 ctx 物件(見 lintFile 結尾的說明),

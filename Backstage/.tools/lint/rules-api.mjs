@@ -187,8 +187,19 @@ const checkApiSource = ({ rel, text }) => {
  *    比對會從前面那支開始,一路吃到後面那支的請求,
  *    把前面那支誤判成打了後面那支的 endpoint。
  */
+/**
+ * 一支 api 的匯出:名稱、method、endpoint。
+ *
+ * 名稱用 `[\w$]+` 而不是 `\w+` —— `$` 在 JS 識別字裡是合法字元,
+ * 有人用它代替 endpoint 裡的底線(`questionnaire/q3_1` 寫成 `…Q3$1`)。
+ * 只認 `\w` 的話,名稱會在 `$` 那裡斷掉,接著比對不到等號,
+ * **整支 api 會被跳過** —— 不是報錯,是從此不檢查,而且看起來像通過。
+ *
+ * 中間允許換行(路徑長的時候會被格式化成兩行),但不得跨過另一個 export ——
+ * 少了那道條件,前一支不打 api 的匯出會一路吃到後面的請求,造成誤判。
+ */
 const API_EXPORT_RE =
-  /export\s+const\s+(\w+)\s*=(?:(?!\bexport\b)[\s\S])*?fetchApi\.(\w+)\s*\(\s*['"`]([^'"`]+)['"`]/g
+  /export\s+const\s+([\w$]+)\s*=(?:(?!\bexport\b)[\s\S])*?fetchApi\.(\w+)\s*\(\s*['"`]([^'"`]+)['"`]/g
 
 /**
  * endpoint 各段(去掉 query 與路徑參數的包裝),用來組期望的名字。
