@@ -21,11 +21,10 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import {
-  buildColorCss,
   addColorDecls,
   isColorCssPath,
   loadDefinedColorVars,
-  parseColorCss,
+  sortColorCss,
   sortDecls,
 } from './color-order.mjs'
 import {
@@ -80,12 +79,15 @@ const target = argv.find((a) => !a.startsWith('--'))
  */
 const onSortOneColorFile = (file) => {
   const original = fs.readFileSync(file, 'utf8')
-  const parsed = parseColorCss(original)
-  if (!parsed) return false
 
-  let sorted = buildColorCss(parsed, sortDecls(parsed.decls))
-  if (parsed.eol === '\r\n') sorted = sorted.split('\n').join('\r\n')
-  if (!sorted.endsWith(parsed.eol)) sorted += parsed.eol
+  /* 排序以「一組」為單位:一支色票可能只有一組(:root),也可能有深淺兩組主題。
+     每一組各自排好,組與組之間、以及區塊外的內容都不動。 */
+  let sorted = sortColorCss(original)
+  if (!sorted) return false
+
+  const eol = original.includes('\r\n') ? '\r\n' : '\n'
+  if (eol === '\r\n') sorted = sorted.split('\n').join('\r\n')
+  if (!sorted.endsWith(eol)) sorted += eol
   if (sorted.trimEnd() === original.trimEnd()) return false
 
   fs.writeFileSync(file, sorted, 'utf8')

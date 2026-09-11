@@ -13,7 +13,7 @@ import path from 'node:path'
 import {
   baseNameOf,
   bodyOf,
-  buildColorCss,
+  allColorDecls,
   COLOR_CSS_PREFIX,
   COLOR_NAME_SEPARATOR,
   channelOfColorCss,
@@ -30,9 +30,9 @@ import {
   varIndexOf,
   withAlpha,
   loadDefinedColorVars,
-  parseColorCss,
+  parseColorBlocks,
   SHARED_COLOR_CSS_PATH,
-  sortDecls,
+  writeColorBlock,
 } from './color-order.mjs'
 import { API_CHECKS, API_RULE_HINT, API_RULE_TITLE } from './rules-api.mjs'
 import {
@@ -61,6 +61,8 @@ import {
   SHARED_MODULE_VARIABLES,
   TAILWIND_THEME_OVERRIDES,
   isInSrc,
+  maskCssComments,
+  maskHtmlComments,
   isProjectDocs,
   hasExemptMark,
   issueOf,
@@ -87,27 +89,8 @@ export {
 } from './shared.mjs'
 
 
-/**
- * 把配對到的區段換成等長空白。
- *
- * 換成空白而不是刪掉,行號與欄位都不會跑掉 —— 違規要指到正確的那一行,
- * 刪掉之後行號就對不上原始檔案了。
- */
-const maskBy = (text, re) => text.replace(re, (m) => m.replace(/[^\n]/g, ' '))
-
-/**
- * 遮蔽 CSS 註解。
- *
- * 註解掉的程式碼是死的 —— 它不會產生任何樣式,拿規範去檢查它沒有意義,
- * 而且會讓人以為某一行有問題,打開檔案才發現那一段根本沒有作用。
- *
- * 需要讀註解的檢查不要用這個(豁免標記、色票的色相分類標籤、
- * 文字寫法那幾條檢查的正是註解本身)。
- */
-const maskCssComments = (text) => maskBy(text, /\/\*[\s\S]*?\*\//g)
-
-/** 遮蔽 template 的 HTML 註解 */
-const maskHtmlComments = (text) => maskBy(text, /<!--[\s\S]*?-->/g)
+/* 註解遮蔽(maskCssComments / maskHtmlComments)定義在 shared.mjs ——
+   色票的解析也要用它找區塊邊界,各寫一份的話,兩邊對註解的認定會開始不一樣。 */
 
 /** .vue 的 <style> 區塊範圍(不含標籤);非 .vue 回傳整份 */
 const styleRanges = (text, isVue) => {
@@ -202,8 +185,13 @@ const PURE_HEX_RE = /^#(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/
 const checkColorFile = ({ rel, text }) => {
   if (!isColorCssPath(rel)) return []
 
-  const parsed = parseColorCss(text)
-  if (!parsed) return [issueOf(rel, 1, 'colorFile', '解析不出 :root 區塊,排序與命名檢查已跳過')]
+  /* 一支色票可能有好幾組(深淺主題寫成巢狀的兩層就是兩組)。
+     命名與值的檢查逐筆看,所以把每一組的宣告攤平就好;
+     要以組為單位的事(排序、撞色)各自走 parseColorBlocks。 */
+  const decls = allColorDecls(text)
+  if (!decls.length) {
+    return [issueOf(rel, 1, 'colorFile', '這支色票裡找不到任何變數,排序與命名檢查已跳過')]
+  }
 
   const issues = []
 
@@ -218,7 +206,7 @@ const checkColorFile = ({ rel, text }) => {
    * 這一條要自己報:專案設定成 value 時,帶色相的那一批完全不會被其他檢查碰到,
    * 混用就成了看不見的狀態。
    */
-  const { hued, semantic } = namingStyleOf(parsed.decls)
+  const { hued, semantic } = namingStyleOf(decls)
 
   if (hued > 0 && semantic > 0) {
     const majority = hued >= semantic ? '帶色相的名字' : '語意名'
@@ -238,7 +226,7 @@ const checkColorFile = ({ rel, text }) => {
    * 不自動轉 —— 要先知道每一個衍生變數被用在哪幾種透明度,才能決定要建幾個
    * 8 碼變數、各自叫什麼。那是判斷題,報出來讓人決定。
    */
-  for (const d of parsed.decls) {
+  for (const d of decls) {
     if (isRgbVar(d.name) || /hexToRgb\s*\(/.test(d.value)) {
       issues.push(
         issueOf(rel, d.line, 'colorFile', `${d.name} 是已廢除的 rgb 衍生變數 —— ${LEGACY_RGB_HINT}`)
@@ -265,7 +253,7 @@ const checkColorFile = ({ rel, text }) => {
     }
   }
 
-  for (const d of parsed.decls) {
+  for (const d of decls) {
     /*
      * 色相從色值算的專案不檢查命名 —— 那些專案的變數叫 --title-color 這類語意名,
      * 名字本來就不帶色相。拿「色相 + 取碼」的規則去對,會是每一個變數各報一次,
@@ -1199,15 +1187,20 @@ const COLOR_VALUE_RGBA_RE = /^rgba\(\s*(#[0-9a-fA-F]{3,8}|var\(\s*--[\w-]+\s*\))
  * 色票檔:把 rgba() 的值換成 8 碼,名字跟著重算。
  *
  * `hexToRgb()` 的那幾筆完全不動 —— 它們要走另一條路(先問人)。
+ *
+ * **有兩組以上主題的色票整支不動。** 那種檔案裡同一個名字在每一組各有一份、
+ * 值不同,改名要連帶決定每一組的新名字與新值,而深淺主題的顏色是設計決定 ——
+ * 工具算得出其中一組,算不出另一組該配什麼。這種檔案由 colorFile 那條報出來由人改。
  */
 const fixColorFileRgba = (text, index) => {
-  const parsed = parseColorCss(text)
-  if (!parsed) return null
+  const blocks = parseColorBlocks(text)
+  if (blocks.length !== 1) return null
 
+  const [block] = blocks
   const renamed = []
   const decls = []
 
-  for (const d of parsed.decls) {
+  for (const d of block.items) {
     const m = d.value.trim().match(COLOR_VALUE_RGBA_RE)
     if (!m || /hexToRgb\s*\(/.test(d.value)) {
       decls.push(d)
@@ -1238,9 +1231,9 @@ const fixColorFileRgba = (text, index) => {
     decls.push({ ...d, name, value: eight })
   }
 
-  if (!renamed.length && decls.every((d, i) => d.value === parsed.decls[i].value)) return null
+  if (!renamed.length && decls.every((d, i) => d.value === block.items[i].value)) return null
 
-  return { text: buildColorCss(parsed, sortDecls(decls)), added: [], renamed }
+  return { text: writeColorBlock(text, block, decls), added: [], renamed }
 }
 
 export const onFixLegacyRgba = (text, rel, { definedVars } = {}) => {

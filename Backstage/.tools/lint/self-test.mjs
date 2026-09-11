@@ -45,11 +45,15 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import {
   COLOR_NAME_SEPARATOR,
+  addColorDecls,
   expectedSuffix,
+  HUE_LIST_TEXT,
   hueOf,
   isSorted,
   loadDefinedColorVars,
   majorityHueSource,
+  parseColorBlocks,
+  sortColorCss,
 } from './color-order.mjs'
 import {
   checkSharedColors,
@@ -72,6 +76,7 @@ import {
   COMPONENTS_DIR,
   CSS_MODULES_DIR,
   IMPORT_ORDER_GROUPS,
+  PARALLEL_AWAIT_HELPER,
   PROJECT_DOCS_DIR,
   PROJECT_NAMES,
   PROJECT_NAME_SCOPE,
@@ -704,11 +709,14 @@ const CSS_CASES = [
     expect: 0,
   },
   {
+    /* 期待的是「訊息把可用的色相列出來」,所以比對整份清單,不挑其中一個字 ——
+       色相清單是設定,每個專案不一樣;挑一個字寫死的話,配色不含那一色的專案
+       會比對不到,而規則本身是對的。 */
     name: 'colorFile 認不出色相時列出可用的色相',
     file: `${COLOR_CSS_DIR}/${PROBE_COLOR_FILE}`,
     code: `:root {\n  /* other */\n  --brand-e566: #e5e5e566;\n}\n`,
     expect: 1,
-    keyword: 'red',
+    keyword: HUE_LIST_TEXT,
   },
 
   // ---------- 被註解掉的內容一律不算違規 ----------
@@ -1500,11 +1508,13 @@ const RULE_CASES = [
     keyword: 'selfTestPets/',
   },
   {
+    /* 共用那一支叫什麼從設定取 —— 每個專案的檔名不一樣,寫死的話,
+       換一個專案這則會去比對一個它沒有的檔名,而規則本身是對的。 */
     name: 'apiScope 檔名完全沒有對應資料夾',
     file: `${A}/nowhere.js`,
     code: `import { fetchApi } from '@js/_api/.config.js'\n\nexport const apiGetX = (data) => fetchApi.get('x', data)\n`,
     expect: 1,
-    keyword: '搬進 project.js',
+    keyword: `搬進 ${SHARED_API_FILE}.js`,
   },
   {
     name: 'apiScope 檔名對得上資料夾不誤報',
@@ -1542,8 +1552,10 @@ const RULE_CASES = [
     file: `${T}/Stores/${PROBE_PAGE_ALPHA}.js`,
     code: `/* lint-store-layer-exempt: 這則在驗資料夾名,不驗分層 */
 export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
+    /* 正確的資料夾名是設定裡 store 目錄的最後一層 —— 那個字每個專案不一樣,
+       寫死的話,把 store 放在別的名字底下的專案會比對到一個它沒有的字。 */
     expect: 1,
-    keyword: 'stores/',
+    keyword: `${STORE_DIR.split('/').pop()}/`,
   },
   {
     // 正確的資料夾名不該被自己的規則報
@@ -2214,8 +2226,10 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
     name: 'pageAwaitAll onMounted 的請求沒有一起發出',
     file: `${P}/Await1.vue`,
     code: `<script setup>\nconst { onApiGetSelfTestAlpha } = useSelfTestAlphaActions()\n\nonMounted(async () => {\n  await onApiGetSelfTestAlpha()\n})\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
+    /* 包裝函式叫什麼從設定取 —— 專案沒有那支共用函式時這條會整條略過,
+       名字不一樣的專案也比對不到,兩種情況都與規則本身無關。 */
     expect: 1,
-    keyword: 'awaitAllPromise',
+    keyword: PARALLEL_AWAIT_HELPER.name,
   },
   {
     name: 'pageAwaitAll 已經包好的不誤報',
@@ -2653,6 +2667,90 @@ const WRAP_MOUNTED_CASES = [
  *   code     排序前的內容
  *   expect   排序後 import 那幾行的順序;null 代表「應該完全不動」
  */
+/**
+ * 一支色票有好幾組的情況 —— 深淺主題寫成巢狀的兩層就是兩組。
+ *
+ * 這幾則驗的是「每一組都算數」:只認第一組的話,第二組不會被排序、
+ * 不會被檢查,而畫面上顯示的是通過 —— 那種失效沒有任何徵兆。
+ *
+ * 探針直接餵給解析函式,不寫成檔案案例:這幾件事問的是解析與重建本身,
+ * 與「哪一支檔案算色票」無關,寫成檔案還要遷就色票檔的命名才掃得到。
+ */
+const onCheckThemeBlocks = () => {
+  const light = '&.\\-\\-light'
+  const dark = '&.\\-\\-dark'
+
+  const text = [
+    '.theme {',
+    `  ${light} {`,
+    '    --probe-a: #f1f1f1;',
+    '    /* 這一行是人寫的說明 */',
+    '    --probe-b: #000000;',
+    '  }',
+    '',
+    `  ${dark} {`,
+    '    --probe-b: #111111;',
+    '    --probe-a: #333333;',
+    '  }',
+    '}',
+    '',
+  ].join('\n')
+
+  const blocks = parseColorBlocks(text)
+
+  report(
+    blocks.length === 2,
+    '色票:巢狀的兩組主題都解析得到',
+    blocks.length === 2 ? [] : [`預期 2 組,實際 ${blocks.length} 組`]
+  )
+
+  const commented = blocks[0]?.items.find((i) => i.comments.length)
+
+  report(
+    commented?.name === '--probe-b',
+    '色票:人寫的註解跟著它下方那一行宣告',
+    commented?.name === '--probe-b' ? [] : [`預期跟著 --probe-b,實際 ${commented?.name ?? '沒有'}`]
+  )
+
+  /* 排序後兩組都要由淺到深,而且那句說明還在。
+     說明若消失就是把人寫的東西刪掉了 —— 排序是自動改檔,不會有人收到通知。 */
+  const sorted = sortColorCss(text) ?? text
+  const sortedBlocks = parseColorBlocks(sorted)
+
+  /* 驗的是排序後每一組的內容,不是字串長什麼樣 ——
+     比對字串的話,選擇器換個寫法這一則就會失敗,而排序本身根本沒問題。 */
+  const bothSorted =
+    sortedBlocks.length === 2 &&
+    sortedBlocks.every((block) => block.items.map((i) => i.name).join() === '--probe-a,--probe-b')
+
+  report(
+    bothSorted,
+    '色票:兩組主題各自排序',
+    bothSorted ? [] : [sortedBlocks.map((b) => b.items.map((i) => i.name).join(' ')).join(' | ')]
+  )
+
+  report(
+    sorted.includes('這一行是人寫的說明'),
+    '色票:排序不會刪掉人寫的註解',
+    sorted.includes('這一行是人寫的說明') ? [] : ['那句說明在排序後不見了']
+  )
+
+  /* 兩組主題時不自動加變數 —— 新變數在淺色與深色該是不同的值,那是設計決定。
+     猜一個填進去的話,畫面會錯得很安靜:看起來有值,只是顏色不對。 */
+  const added = addColorDecls(text, [{ name: '--probe-c', value: '#0000004d' }])
+
+  report(added === null, '色票:兩組主題時不自動加變數', added === null ? [] : [added])
+
+  const single = ':root {\n  --probe-a: #f1f1f1;\n}\n'
+  const singleAdded = addColorDecls(single, [{ name: '--probe-c', value: '#0000004d' }])
+
+  report(
+    singleAdded?.includes('--probe-c'),
+    '色票:單組主題照樣自動加變數',
+    singleAdded?.includes('--probe-c') ? [] : ['單組主題應該要加進去']
+  )
+}
+
 const SORT_IMPORT_CASES = [
   {
     name: '亂掉的分組會排回去',
@@ -3078,6 +3176,7 @@ try {
 
   onCheckViewDepth()
   onCheckConfigItem()
+  onCheckThemeBlocks()
 
   for (const c of MAJORITY_CASES) {
     const actual = majorityHueSource(c.style)

@@ -19,6 +19,10 @@ import {
   COLOR_SUFFIX_PICK,
 } from './project-config.mjs'
 
+/* 註解遮蔽與行號換算走 shared.mjs 的那一份 —— 找大括號配對時,
+   註解裡的括號不能算數,而那個判斷已經有實作了,不要再寫第二份。 */
+import { lineNoOf, maskCssComments } from './shared.mjs'
+
 export { COLOR_CSS_DIR, COLOR_CSS_PREFIX, COLOR_NAME_SEPARATOR }
 
 const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
@@ -213,8 +217,8 @@ export const projectNamingStyle = (root) => {
     const rel = `${COLOR_CSS_DIR}/${name}`
     if (!isColorCssPath(rel)) continue
 
-    const parsed = parseColorCss(fs.readFileSync(path.join(dir, name), 'utf8'))
-    const { hued, semantic } = namingStyleOf(parsed?.decls ?? [])
+    const decls = allColorDecls(fs.readFileSync(path.join(dir, name), 'utf8'))
+    const { hued, semantic } = namingStyleOf(decls)
 
     total.hued += hued
     total.semantic += semantic
@@ -382,40 +386,113 @@ export const expectedSuffix = (value) => {
   return core ? `${core}${alphaSeparator}${alpha}` : alpha
 }
 
+/** 一行色票宣告:`--name: value;` */
+const DECL_LINE_RE = /^\s*(--[\w-]+)\s*:\s*([^;]*?)\s*;?\s*$/
+
+/** 整行都是註解的那種寫法 */
+const COMMENT_LINE_RE = /^\s*\/\*.*\*\/\s*$/
+
 /**
- * 解析色票檔。
+ * 色票檔裡每一個「直接寫了 `--變數`」的區塊。
  *
- * 回傳 { head, tail, decls, eol };head 是 `:root {` 之前(含)的內容,
- * tail 是 `}` 之後。decls 內保留原始行號,回報違規時要用。
- * 解析不出來回傳 null。
+ * 一支色票可能只有一組(`:root { … }`),也可能有好幾組 —— 深淺主題寫成
+ * 巢狀的兩層就是兩組(`.theme { &.--light { … } &.--dark { … } }`)。
+ * **每一組各自是一份色票**:同一個名字在兩組各有一份、值不同,那是主題的正常寫法,
+ * 不是重複定義。所以排序、撞色、命名檢查都要以組為單位,不能跨組比。
+ *
+ * 只認第一個 `:root` 的話,第二組完全不會被檢查 —— 不報錯、不誤報,
+ * 只是那一整組的命名與撞色從此沒有人看,而畫面上顯示的是通過。
+ *
+ * 每一筆回傳:
+ *   selector     這一組的選擇器(巢狀時是最內層那一段)
+ *   indent       這一組宣告的縮排
+ *   start / end  區塊內容在原文中的位置(不含大括號)
+ *   items        [{ name, value, line, comments }];comments 是緊貼在它上方的註解行
+ *
+ * 括號沒有成對時回傳空陣列 —— 那種檔案解析不可靠,寧可不動它。
  */
-export const parseColorCss = (text) => {
-  const m = text.match(/(:root\s*\{)([\s\S]*?)(\n?\})/)
-  if (!m) return null
+export const parseColorBlocks = (text) => {
+  const masked = maskCssComments(text) // 註解裡的括號不算數
+  const opened = []
+  const closed = []
+  let cursor = 0
 
-  const bodyStart = m.index + m[1].length
-  const before = text.slice(0, bodyStart)
-  const baseLine = before.split('\n').length
+  for (let i = 0; i < masked.length; i += 1) {
+    if (masked[i] === '{') {
+      opened.push({
+        selector: text.slice(cursor, i).trim().split('\n').pop().trim(),
+        start: i + 1,
+      })
+      cursor = i + 1
+      continue
+    }
 
-  const decls = []
-  m[2].split('\n').forEach((raw, i) => {
-    const line = raw.trim()
-    if (!line.startsWith('--')) return
+    if (masked[i] !== '}') continue
 
-    const [name, ...rest] = line.replace(/;\s*$/, '').split(':')
-    decls.push({
-      name: name.trim(),
-      value: rest.join(':').trim(),
-      line: baseLine + i,
-    })
-  })
-
-  return {
-    head: before,
-    tail: text.slice(m.index + m[0].length),
-    decls,
-    eol: text.includes('\r\n') ? '\r\n' : '\n',
+    const open = opened.pop()
+    if (!open) return [] // 多了一個右括號:解析不可靠
+    closed.push({ ...open, end: i })
+    cursor = i + 1
   }
+
+  if (opened.length) return [] // 有沒閉合的括號
+
+  return closed
+    .map((block) => ({ ...block, ...itemsOf(text, masked, block) }))
+    .filter((block) => block.items.length)
+    .sort((a, b) => a.start - b.start)
+}
+
+/**
+ * 整份色票裡的所有宣告 —— 每一組都算,攤平成一串。
+ *
+ * 給「統計」與「收集已定義的顏色」用:那兩件事要看的是整支檔案有哪些顏色,
+ * 不分組。要以組為單位的檢查(排序、撞色、同名)一律走 parseColorBlocks,
+ * 別用這個 —— 攤平之後就分不出「同一個名字在兩組各一份」是主題還是重複定義。
+ */
+export const allColorDecls = (text) => parseColorBlocks(text).flatMap((block) => block.items)
+
+/**
+ * 一個區塊裡「直接寫在這一層」的宣告(不含更內層的)。
+ *
+ * 逐行追蹤巢狀深度:深度不是 0 的行屬於子區塊,那是子區塊自己的事。
+ * 註解行先存著,遇到宣告就跟著它 —— 那段文字在講下面那個變數,
+ * 排序時要一起搬,留在原地就指向了別的顏色。
+ */
+const itemsOf = (text, masked, { start, end }) => {
+  const items = []
+  let pending = []
+  let indent = null
+  let depth = 0
+  let offset = start
+
+  for (const raw of text.slice(start, end).split('\n')) {
+    const maskedLine = masked.slice(offset, offset + raw.length)
+
+    if (depth === 0) {
+      const decl = raw.match(DECL_LINE_RE)
+
+      if (decl) {
+        if (indent === null) indent = raw.match(/^\s*/)[0]
+        items.push({
+          name: decl[1],
+          value: decl[2],
+          line: lineNoOf(text, offset),
+          comments: pending,
+        })
+        pending = []
+      } else if (COMMENT_LINE_RE.test(raw)) {
+        pending.push(raw.trim())
+      } else if (raw.trim()) {
+        pending = [] // 夾在中間的其他東西:前面那段註解不屬於後面的宣告
+      }
+    }
+
+    depth += (maskedLine.match(/\{/g)?.length ?? 0) - (maskedLine.match(/\}/g)?.length ?? 0)
+    offset += raw.length + 1
+  }
+
+  return { items, indent: indent ?? '  ' }
 }
 
 /**
@@ -457,61 +534,112 @@ export const sortDecls = (decls) => {
   return sorted.flatMap((d) => [d, ...(followers.get(d.name) ?? [])])
 }
 
-/** 依排序結果重建檔案內容;同色相之間插入 /* 色相 *​/ 註解 */
-export const buildColorCss = (parsed, decls) => {
+/** 色相分類標籤 —— 排序時由工具重新產生的那種註解 */
+const isHueLabel = (comment) => {
+  const body = comment.replace(/^\/\*\s*|\s*\*\/$/g, '').trim()
+  return body === 'other' || HUE_ORDER.includes(body)
+}
+
+/**
+ * 一組色票排好之後的內容(不含大括號)。
+ *
+ * 同色相之間插入分類標籤與空行。**人寫的註解跟著它下方那一行宣告一起搬** ——
+ * 那段文字在講下面那個變數,留在原地就指向了別的顏色;整段丟掉更不行,
+ * 排序是自動改檔,刪掉的說明不會有人收到通知。
+ *
+ * 工具自己產生的分類標籤(內容只有色相名的那種)不算人寫的,重建時重新產生 ——
+ * 留著的話,每排序一次就多疊一層舊標籤。
+ */
+const buildBlockBody = (items, indent) => {
   const lines = []
   let currentHue
 
-  for (const d of decls) {
-    const hue = hueOf(d.name, d.value)
+  for (const item of items) {
+    const hue = hueOf(item.name, item.value)
     const label = hue === null ? 'other' : HUE_LABEL[hue]
 
     if (label !== currentHue) {
       if (lines.length) lines.push('')
-      lines.push(`  /* ${label} */`)
+      lines.push(`${indent}/* ${label} */`)
       currentHue = label
     }
 
-    lines.push(`  ${d.name}: ${d.value};`)
+    for (const comment of item.comments ?? []) {
+      if (!isHueLabel(comment)) lines.push(`${indent}${comment}`)
+    }
+
+    lines.push(`${indent}${item.name}: ${item.value};`)
   }
 
-  return `${parsed.head}\n${lines.join('\n')}\n}${parsed.tail}`
+  return lines.join('\n')
+}
+
+/**
+ * 把一組色票的內容換成給定的那幾筆(會先排序),回傳整份新的文字。
+ *
+ * 只動這一組的大括號之內,區塊外的內容(選擇器、巢狀的外層、檔頭註解)原樣不動。
+ * 排序、加變數、改色值都走這一份 —— 各自拼一次字串的話,縮排與換行的處理
+ * 會開始有出入,而那種差異每次存檔都會製造一筆假的改動。
+ */
+export const writeColorBlock = (text, block, items) => {
+  const body = buildBlockBody(sortDecls(items), block.indent)
+
+  /* 右大括號維持它原本的縮排 —— 從原文取,不從宣告的縮排推算:
+     推算要假設每一層縮排幾個空白,而那是每個專案自己的排版慣例。 */
+  const closeIndent = text.slice(text.lastIndexOf('\n', block.end) + 1, block.end).match(/^\s*/)[0]
+
+  return `${text.slice(0, block.start)}\n${body}\n${closeIndent}${text.slice(block.end)}`
+}
+
+/**
+ * 把整份色票的每一組各自排好,回傳新的內容;已經排好就回傳 null。
+ *
+ * 由後往前換,前面那幾組的位置才不會因為後面長度變了而位移。
+ */
+export const sortColorCss = (text) => {
+  const blocks = parseColorBlocks(text)
+  if (!blocks.length) return null
+
+  let next = text
+  for (const block of [...blocks].reverse()) next = writeColorBlock(next, block, block.items)
+
+  return toLf(next) === toLf(text) ? null : next
 }
 
 /**
  * 把幾個變數加進色票內容,並重新排序。
  *
- * 名稱已經存在的直接略過 —— 同一個名字定義兩次,改了一處另一處不會跟著變,
+ * 名稱已經存在的直接略過 —— 同一組裡同一個名字定義兩次,改了一處另一處不會跟著變,
  * 兩個地方的顏色就會慢慢分岔。
  *
- * 沒有東西要加、或解析不出 :root 結構時回傳 null(那支檔案完全不動)。
+ * **有兩組以上主題的色票不加。** 那種檔案裡同一個名字在每一組各有一份、值不同
+ * (淺色與深色本來就該不一樣),工具無從得知新變數在各組該是什麼顏色 ——
+ * 那是設計決定。猜一個值填進去的話,畫面會錯得很安靜:看起來有值,只是顏色不對。
+ * 這種情況由使用端那一筆違規提醒人自己補,回傳 null 代表這支檔案完全不動。
+ *
+ * 沒有東西要加、或解析不出任何一組時同樣回傳 null。
  */
 export const addColorDecls = (text, decls) => {
-  const parsed = parseColorCss(text)
-  if (!parsed) return null
+  const blocks = parseColorBlocks(text)
+  if (blocks.length !== 1) return null
 
-  const existing = new Set(parsed.decls.map((d) => d.name))
+  const [block] = blocks
+  const existing = new Set(block.items.map((d) => d.name))
   const fresh = decls.filter((d) => !existing.has(d.name))
   if (!fresh.length) return null
 
-  return buildColorCss(parsed, sortDecls([...parsed.decls, ...fresh]))
+  return writeColorBlock(text, block, [...block.items, ...fresh])
 }
 
 /**
- * 檔案內容是否已符合排序 —— 用來判斷要不要寫檔。
+ * 換行正規化 —— 重建一律吐 \n,而檔案可能是 \r\n。
  *
- * 比對前要把換行正規化:buildColorCss 一律吐 \n,而檔案可能是 \r\n。
- *    不正規化的話,CRLF 檔案排序完仍會被判定為「未排序」,每次存檔都重報一次。
+ * 不正規化的話,CRLF 檔案排序完仍會被判定為「未排序」,每次存檔都重報一次。
  */
 const toLf = (text) => text.replace(/\r\n/g, '\n')
 
-export const isSorted = (text) => {
-  const parsed = parseColorCss(text)
-  if (!parsed) return true
-
-  const built = buildColorCss(parsed, sortDecls(parsed.decls))
-  return toLf(built).trimEnd() === toLf(text).trimEnd()
-}
+/** 檔案內容是否已符合排序 —— 用來判斷要不要寫檔 */
+export const isSorted = (text) => sortColorCss(text) === null
 
 /**
  * 色票命名的設定,與專案實際的命名對不對得上。
@@ -548,9 +676,9 @@ export const colorNamingFit = (root) => {
     const rel = `${COLOR_CSS_DIR}/${name}`
     if (!isColorCssPath(rel)) continue
 
-    const parsed = parseColorCss(fs.readFileSync(path.join(dir, name), 'utf8'))
+    const decls = allColorDecls(fs.readFileSync(path.join(dir, name), 'utf8'))
 
-    for (const d of parsed?.decls ?? []) {
+    for (const d of decls) {
       if (isRgbVar(d.name)) continue
 
       const hue = hueOf(d.name, d.value)
@@ -605,9 +733,9 @@ export const loadDefinedColorVars = (root) => {
     const rel = `${COLOR_CSS_DIR}/${name}`
     if (!isColorCssPath(rel)) continue
 
-    const parsed = parseColorCss(fs.readFileSync(path.join(dir, name), 'utf8'))
+    const decls = allColorDecls(fs.readFileSync(path.join(dir, name), 'utf8'))
 
-    for (const d of parsed?.decls ?? []) {
+    for (const d of decls) {
       const hex = hexOf(d.value)
       if (!hex) continue
 
