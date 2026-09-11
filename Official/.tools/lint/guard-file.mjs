@@ -36,6 +36,7 @@ import {
   onFixLegacyRgba,
   onRemoveEmptyRules,
   onSortComposables,
+  onSortImports,
   onWrapMountedCalls,
 } from './lint-core.mjs'
 import { RESET, YELLOW } from './colors.mjs'
@@ -247,6 +248,25 @@ const onSortDeclarations = () => {
 }
 
 /**
+ * 元件的 import 分組順序 —— 存檔時直接排好,不報違規。
+ *
+ * 順序是機械式的規則,讓人照著訊息一行一行搬只是浪費時間,
+ * 而且搬的過程比工具更容易出錯。
+ *
+ * 「元件沒有載入樣式」那一條不在這裡 —— 工具看不出這支元件的樣式
+ * 該放在哪一支 CSS 模組,自動補一行等於替開發者決定檔案要叫什麼,
+ * 所以那一條照樣報違規由人處理。
+ */
+const onSortComponentImports = () => {
+  const original = fs.readFileSync(abs, 'utf8')
+  const sorted = onSortImports(original, rel)
+  if (!sorted) return
+
+  fs.writeFileSync(abs, sorted, 'utf8')
+  lines.push(`${rel} 元件的 import 順序已自動排好。`, '')
+}
+
+/**
  * 進入頁面要拿的資料 —— 存檔時包成一起發出。
  *
  * 一支一支等的話,使用者等的是每一支的時間加總;一起發出等的是最慢的那一支。
@@ -349,6 +369,7 @@ try {
      commit 那一刻改動檔案,人會提交到自己沒看過的內容。 */
   if (!writeOnly) {
     onSortDeclarations()
+    onSortComponentImports()
     onWrapMounted()
   }
 

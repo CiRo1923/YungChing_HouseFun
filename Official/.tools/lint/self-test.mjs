@@ -57,9 +57,10 @@ import {
   onRemoveEmptyRules,
   onFixLegacyRgba,
   onSortComposables,
+  onSortImports,
   onWrapMountedCalls,
 } from './lint-core.mjs'
-import { aliasListOf } from './rules-code.mjs'
+import { aliasListOf, importGroupOf, tailwindThemeOf } from './rules-code.mjs'
 import {
   ACTIONS_DIR_NAME,
   API_DIR,
@@ -68,7 +69,9 @@ import {
   COLOR_CSS_PREFIX,
   COMPONENTS_DIR,
   CSS_MODULES_DIR,
+  IMPORT_ORDER_GROUPS,
   PROJECT_DOCS_DIR,
+  PROJECT_NAMES,
   PROJECT_NAME_SCOPE,
   SHARED_API_FILE,
   SRC_DIR,
@@ -263,6 +266,57 @@ const BUILD_STYLE_CONFIG = `${PROBE}.config.js`
 /** 探測用的 theme 值來源檔 —— 值常常另外拆一支檔案再 import 進設定 */
 const THEME_SOURCE_FILE = `${PROBE}.theme.js`
 
+/**
+ * 依每一組的比對式,造一個一定會落在那一組的 import 路徑。
+ *
+ * 比對式的形狀只處理三種常見寫法:開頭(`^…`)、結尾(`…$`)、包含。
+ * 造出來之後一定要用規則自己的分組函式確認 —— 造錯了就退回不驗那一則,
+ * 而不是拿一個分錯組的探針去跑(那樣驗到的會是另一條路徑,結果卻看似通過)。
+ */
+const sampleSpecOf = (match) => {
+  const body = match.replace(/\\/g, '')
+
+  if (body.startsWith('^')) return `${body.slice(1)}probeSample.js`
+  if (body.endsWith('$')) return `probeSample${body.slice(0, -1)}`
+
+  return `probeSample/${body}probeSample.js`
+}
+
+/**
+ * 一份「照設定的順序排好」的 import 清單,每一組各一行,最後補一行「其他」。
+ *
+ * 造不出正確分組的那一組會被略過 —— 寧可少驗一組,也不要用分錯組的探針。
+ */
+const orderedImportsOf = () => {
+  const lines = []
+
+  IMPORT_ORDER_GROUPS.forEach((group, index) => {
+    const spec = sampleSpecOf(group.match)
+    if (importGroupOf(spec) !== index) return
+
+    lines.push(`import '${spec}'`)
+  })
+
+  // 「其他」那一組:不符合任何一條比對式的路徑
+  const other = 'vue'
+  if (importGroupOf(other) === IMPORT_ORDER_GROUPS.length) {
+    lines.push(`import { computed } from '${other}'`)
+  }
+
+  return lines
+}
+
+/**
+ * 探針裡要寫的「專案名稱」—— 從設定取,不寫死。
+ *
+ * 那條規則抓的是 PROJECT_NAMES 裡的名字,每個專案不一樣。探針寫死一個名字的話,
+ * 案例搬到別的專案就抓不到任何東西,看起來像規則失效,其實是探針寫錯了名字。
+ *
+ * 空白去掉,模擬「連在一起寫」那種最常見的形狀(網域、資料夾名都是這樣寫的)。
+ * 規則組出來的比對式涵蓋空白、底線、連字號與連寫,所以這一種一定命中。
+ */
+const PROBE_PROJECT_SLUG = (PROJECT_NAMES[0] ?? '').replace(/\s+/g, '')
+
 /** `common` → `Common` —— 從設定值組出 store 名稱時要用 */
 const pascalOf = (name) => name.charAt(0).toUpperCase() + name.slice(1)
 
@@ -381,6 +435,44 @@ const onPrepare = () => {
  * 那一類沒有列出任何消失的值時(專案沒有整組覆寫那一類),
  * 改成驗「不報」—— 用一個一定不存在的名字,確認規則不會誤報。
  */
+/**
+ * 驗「這個專案實際有的 class 不會被誤報成已消失」。
+ *
+ * 值從 tailwind 設定讀出來,不寫死 —— 每個專案 theme 定義的值都不一樣,
+ * 寫死一個值的話,沒有那個值的專案會被報「用到已消失的 class」,
+ * 看起來像規則壞了,其實是探針用了別的專案才有的名字。
+ *
+ * 挑的是「有列在覆寫清單裡、而且實際上定義了值」的那一類 ——
+ * 這兩個條件都成立才驗得到「規則分得出存在與消失」。
+ * 一類都找不到時退化成一段沒有 tailwind class 的樣式,確認規則不會無中生有。
+ */
+const aliveThemeCaseOf = (file) => {
+  const theme = tailwindThemeOf(root)
+
+  for (const [key, group] of Object.entries(TAILWIND_THEME_OVERRIDES)) {
+    // 斷點的寫法是 `斷點:class`,與其他類別的前綴形式不同,這裡只取有前綴的
+    if (!group.prefix) continue
+
+    const alive = (theme?.[key] ?? []).find((v) => !group.dead.includes(v))
+    if (!alive) continue
+
+    return {
+      name: `theme ${key} 實際定義的值不誤報`,
+      rule: 'theme',
+      file,
+      code: `.m-probe {\n  @apply ${group.prefix}${alive};\n}`,
+      expect: 0,
+    }
+  }
+
+  return {
+    name: 'theme 沒有可用的值時不會無中生有',
+    file,
+    code: `.m-probe {\n  color: var(--black);\n}`,
+    expect: 0,
+  }
+}
+
 const themeCaseOf = (key, file, codeOf) => {
   const group = TAILWIND_THEME_OVERRIDES[key]
   const [dead] = group?.dead ?? []
@@ -388,6 +480,7 @@ const themeCaseOf = (key, file, codeOf) => {
   if (!dead) {
     return {
       name: `theme ${key} 沒有整組覆寫時不誤報`,
+      rule: 'theme',
       file,
       code: codeOf(group?.prefix ? `${group.prefix}self-test-none` : 'selfTestNone:'),
       expect: 0,
@@ -398,6 +491,7 @@ const themeCaseOf = (key, file, codeOf) => {
 
   return {
     name: `theme 已被覆寫掉的${group.label}`,
+    rule: 'theme',
     file,
     code: codeOf(cls),
     expect: 1,
@@ -498,13 +592,15 @@ const CSS_CASES = [
   },
   {
     // 同時違反兩條:硬寫色碼(color)與 components 不得用 utility(tailwind)
+    rule: 'color',
     name: 'color .vue 的 template arbitrary value',
     file: `${C}/Probe.vue`,
     code: `<template>\n  <div class="text-[#333]"></div>\n</template>\n`,
-    expect: 2,
+    expect: 1,
     keyword: 'arbitrary',
   },
   {
+    rule: 'color',
     name: 'color .vue 的 script 不擋(送外部平台的色值)',
     file: `${C}/Probe2.vue`,
     code: `<script setup>\nconst flex = { color: '#ffffff' }\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
@@ -584,6 +680,7 @@ const CSS_CASES = [
     expect: 0,
   },
   {
+    rule: 'color',
     name: '註解:硬寫色碼在 .vue 的 style 註解裡不算違規',
     file: `${C}/Comment1.vue`,
     code: `<template>\n  <div class="m-probe"></div>\n</template>\n\n<style>\n.m-probe {\n  /* color: #123456; */\n}\n</style>\n`,
@@ -621,6 +718,7 @@ const CSS_CASES = [
 
   // ---------- 規則 tailwind ----------
   {
+    rule: 'tailwind',
     name: 'tailwind template 靜態 class',
     file: `${C}/Tw1.vue`,
     code: `<template>\n  <div class="m-probe flex items-center"></div>\n</template>\n`,
@@ -628,12 +726,14 @@ const CSS_CASES = [
     keyword: 'tailwind class',
   },
   {
+    rule: 'tailwind',
     name: 'tailwind 組件 class 與 --modifier 不誤報',
     file: `${C}/Tw2.vue`,
     code: `<template>\n  <div class="m-probe --px-15 p:--px-24 jFormValid"></div>\n</template>\n`,
     expect: 0,
   },
   {
+    rule: 'tailwind',
     name: 'tailwind variant 前綴要剝掉再判定',
     file: `${C}/Tw3.vue`,
     code: `<template>\n  <div class="p:flex hover:bg-[--white]"></div>\n</template>\n`,
@@ -641,6 +741,7 @@ const CSS_CASES = [
     keyword: 'tailwind class',
   },
   {
+    rule: 'tailwind',
     name: 'tailwind 動態綁定只取引號內的字面 class',
     file: `${C}/Tw4.vue`,
     code: `<template>\n  <div :class="[setClass.main, { 'shrink-0': isFixed }]"></div>\n</template>\n`,
@@ -648,12 +749,14 @@ const CSS_CASES = [
     keyword: 'shrink-0',
   },
   {
+    rule: 'tailwind',
     name: 'tailwind 被註解掉的 template 不算違規',
     file: `${C}/Tw5.vue`,
     code: `<template>\n  <!-- <div class="flex"></div> -->\n  <div class="m-probe"></div>\n</template>\n`,
     expect: 0,
   },
   {
+    rule: 'tailwind',
     name: 'tailwind 同一個 class 只報一次',
     file: `${C}/Tw6.vue`,
     code: `<template>\n  <div class="flex">\n    <span class="flex"></span>\n  </div>\n</template>\n`,
@@ -666,6 +769,7 @@ const CSS_CASES = [
     expect: 0,
   },
   {
+    rule: 'tailwind',
     name: 'tailwind <style> 內的 class 不算 template',
     file: `${C}/Tw7.vue`,
     code: `<template>\n  <div class="m-probe"></div>\n</template>\n\n<style>\n.m-probe {\n  @apply flex items-center;\n}\n</style>\n`,
@@ -685,12 +789,7 @@ const CSS_CASES = [
   ),
   themeCaseOf('fontSize', `${M}/theme2.css`, (cls) => `.m-probe {\n  @apply ${cls};\n}`),
   themeCaseOf('boxShadow', `${M}/theme3.css`, (cls) => `.m-probe {\n  @apply ${cls};\n}`),
-  {
-    name: 'theme 本專案存在的寫法不誤報',
-    file: `${M}/theme4.css`,
-    code: `.m-probe {\n  @apply shadow text-vmm;\n}\n\n@screen p {\n  .m-probe {\n    @apply font-sans;\n  }\n}`,
-    expect: 0,
-  },
+  aliveThemeCaseOf(`${M}/theme4.css`),
   {
     name: 'theme 色票變數名內含 sm/md 不誤報',
     file: `${M}/theme5.css`,
@@ -698,6 +797,7 @@ const CSS_CASES = [
     expect: 0,
   },
   {
+    rule: 'theme',
     name: 'theme .vue 的 script 不掃',
     file: `${C}/Theme6.vue`,
     code: `<script setup>\nconst size = 'text-sm'\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
@@ -958,14 +1058,14 @@ const RULE_CASES = [
   {
     name: 'projectName .js 寫死專案名稱',
     file: `${D}/probe-name.js`,
-    code: `export const API = 'https://royalcanin-api.example.com'\n`,
+    code: `export const API = 'https://${PROBE_PROJECT_SLUG}-api.example.com'\n`,
     expect: 1,
     keyword: '寫死了專案名稱',
   },
   {
     name: 'projectName .cjs 寫死專案名稱（hook 也是規範系統的一部分）',
     file: `${D}/probe-name.cjs`,
-    code: `const base = '/RoyalCanin/assets/'\n`,
+    code: `const base = '/${PROBE_PROJECT_SLUG}/assets/'\n`,
     expect: 1,
     keyword: '寫死了專案名稱',
   },
@@ -1003,7 +1103,7 @@ const RULE_CASES = [
   {
     name: '.md 寫死專案名稱要被抓',
     file: `${D}/probe-name.md`,
-    code: `# 說明\n\n這份文件是 RoyalCanin 專案專用的。\n`,
+    code: `# 說明\n\n這份文件是 ${PROBE_PROJECT_SLUG} 專案專用的。\n`,
     expect: 1,
     keyword: '寫死了專案名稱',
   },
@@ -1652,6 +1752,37 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
     keyword: `${PROBE_CLASH_FOLDER_B}.${PROBE_PAGE_LAYER}`,
   },
 
+  // ---------- 規則 importOrder ----------
+  //
+  // 分組與順序來自設定(IMPORT_ORDER_GROUPS),所以探針的路徑也從設定算 ——
+  // 寫死某個 alias 的話,換一個命名的專案這幾則會驗不到東西。
+  {
+    name: 'importOrder 依分組排列不誤報',
+    file: `${C}/Order1.vue`,
+    code: `<script setup>\n${orderedImportsOf().join('\n')}\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
+    expect: 0,
+  },
+  {
+    /* 順序不符不報違規,存檔時直接排好(驗證在 SORT_IMPORT_CASES)——
+       這則確認「順序亂掉」本身不會被報成違規,只剩樣式那一條。 */
+    name: 'importOrder 順序不符不報違規',
+    rule: 'importOrder',
+    file: `${C}/Order2.vue`,
+    code: (() => {
+      const lines = orderedImportsOf()
+      return `<script setup>\n${[...lines.slice(1), lines[0]].join('\n')}\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`
+    })(),
+    expect: 0,
+  },
+  {
+    name: 'importOrder 元件沒有載入樣式要報',
+    rule: 'importOrder',
+    file: `${C}/Order3.vue`,
+    code: `<script setup>\nimport { computed } from 'vue'\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
+    expect: 1,
+    keyword: '沒有載入樣式',
+  },
+
   // ---------- 規則 importAlias / deprecated / composableOrder ----------
   {
     /* 路徑與預期的 alias 都從專案設定算出來 —— 每個專案的 api 目錄位置與
@@ -1988,6 +2119,7 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
   {
     /* 同一個判斷，元件擋、頁面只給建議。
       元件可能出現在很多頁、同一頁也可能出現很多次，自己去要資料就是出現幾次打幾次。 */
+    rule: 'componentApiImport',
     name: 'componentApiImport 元件直接 import api 要擋',
     file: `${COMPONENTS_DIR}/${PROBE}/Direct.vue`,
     code: `<script setup>\nimport { apiGetMemberInfo } from '${API_ALIAS_IMPORT}'\n\nconst onLoad = () => apiGetMemberInfo()\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
@@ -2036,6 +2168,7 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
   {
     /* 元件沒有豁免 —— 它自己去要資料在任何情況下都會「出現幾次打幾次」,
        標了記號也一樣擋。豁免只放行頁面那一種。 */
+    rule: 'componentApiImport',
     name: 'componentApiImport 元件標了豁免照樣擋',
     file: `${C}/DirectExempt.vue`,
     code: `<script setup>\n/* lint-page-api-exempt: 標了也沒用 */\nimport { apiGetMemberInfo } from '${apiAliasImportOf('member.js') ?? apiImportPathOf(C, 'member.js')}'\n\nconst onLoad = () => apiGetMemberInfo()\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
@@ -2371,6 +2504,66 @@ const WRAP_MOUNTED_CASES = [
 ]
 
 /**
+ * 元件 import 分組順序的自動排序驗證。
+ *
+ * 這個功能會**直接改動程式碼**,所以除了「排對順序」之外,
+ * 更要驗「不該動的絕對不能動」:不是元件的檔案不碰、認不出來的寫法整塊不動。
+ *
+ *   rel      檔案路徑(只有共用元件目錄底下的 .vue 會被排)
+ *   code     排序前的內容
+ *   expect   排序後 import 那幾行的順序;null 代表「應該完全不動」
+ */
+const SORT_IMPORT_CASES = [
+  {
+    name: '亂掉的分組會排回去',
+    rel: `${C}/SortOrder.vue`,
+    code: (() => {
+      const lines = orderedImportsOf()
+      return `<script setup>\n${[...lines.slice(1), lines[0]].join('\n')}\n</script>\n`
+    })(),
+    expect: orderedImportsOf(),
+  },
+  {
+    name: '已經是正確順序就不動',
+    rel: `${C}/SortOrder.vue`,
+    code: `<script setup>\n${orderedImportsOf().join('\n')}\n</script>\n`,
+    expect: null,
+  },
+  {
+    /* 頁面載入的東西依它要做的事而定,沒有固定的形狀 ——
+       這條規則只管共用元件目錄底下的 .vue。 */
+    name: '頁面不在範圍內',
+    rel: `${VIEWS_DIR}/selfTestAlpha/Index.vue`,
+    code: (() => {
+      const lines = orderedImportsOf()
+      return `<script setup>\n${[...lines.slice(1), lines[0]].join('\n')}\n</script>\n`
+    })(),
+    expect: null,
+  },
+  {
+    /* 中間夾了別的程式碼就停 —— 那一行之後的 import 不一定能往上搬,
+       例如它要用到上面算出來的東西。 */
+    name: '中間夾了別的程式碼就不跨過去',
+    rel: `${C}/SortOrder.vue`,
+    code: (() => {
+      const lines = orderedImportsOf()
+      return `<script setup>\n${lines.at(-1)}\nconst probe = 1\n${lines[0]}\n</script>\n`
+    })(),
+    expect: null,
+  },
+  {
+    /* 註解多半在講下面那一行是什麼,留在原地就指向了別的 import */
+    name: '註解跟著下方那一行一起搬',
+    rel: `${C}/SortOrder.vue`,
+    code: (() => {
+      const lines = orderedImportsOf()
+      return `<script setup>\n// 說明\n${lines.at(-1)}\n${lines[0]}\n</script>\n`
+    })(),
+    expect: [orderedImportsOf()[0], '// 說明', orderedImportsOf().at(-1)],
+  },
+]
+
+/**
  * 宣告順序的自動排序驗證。
  *
  * 這個功能會**直接改動程式碼**,所以除了「排對順序」之外,
@@ -2611,9 +2804,16 @@ try {
     const all = lintFile(root, abs, definedVars)
 
     /* expect 算的是「要擋的」那些 —— 建議級不列入,否則每加一條 warn 規則,
-      不相干的案例都會因為多出一筆而失敗。要驗 warn 的案例寫 expectWarn。 */
-    const issues = all.filter((i) => i.level !== 'warn')
-    const warns = all.filter((i) => i.level === 'warn')
+      不相干的案例都會因為多出一筆而失敗。要驗 warn 的案例寫 expectWarn。
+
+      案例可以寫 `rule` 指定只計那一條。探針常常同時觸發別條規則
+      (一段元件的程式碼會被元件類、樣式類好幾條看到),不指定的話,
+      新增任何一條規則都會讓一批不相干的案例失敗 —— 而失敗的原因
+      看起來像是那幾條規則壞了,實際上只是探針多命中了一條。 */
+    const ofRule = (list) => (c.rule ? list.filter((i) => i.rule === c.rule) : list)
+
+    const issues = ofRule(all.filter((i) => i.level !== 'warn'))
+    const warns = ofRule(all.filter((i) => i.level === 'warn'))
 
     const countOk = issues.length === c.expect
     const warnOk = c.expectWarn === undefined || warns.length === c.expectWarn
@@ -2769,6 +2969,43 @@ try {
     }
 
     report(!problems.length, `composableSort ${c.name}`, problems)
+  }
+
+  for (const c of SORT_IMPORT_CASES) {
+    const result = onSortImports(c.code, c.rel)
+    const problems = []
+
+    if (c.expect === null) {
+      if (result !== null) problems.push(`預期完全不動,實際被改成:${result.trim()}`)
+    } else if (result === null) {
+      problems.push('預期會排序,實際沒有變動')
+    } else {
+      const got = result
+        .split('\n')
+        .map((l) => l.trim())
+        .filter((l) => l && l !== '<script setup>' && l !== '</script>')
+
+      if (!c.expect.every((line, i) => got[i] === line)) {
+        problems.push(`順序不符 —— 預期 ${JSON.stringify(c.expect)},實際 ${JSON.stringify(got)}`)
+      }
+
+      /* 內容一行都不能少 —— 排序只換位置,不該讓任何一行消失或多出來 */
+      const linesOf = (t) =>
+        t
+          .split('\n')
+          .map((l) => l.trim())
+          .filter(Boolean)
+          .sort()
+
+      const before = linesOf(c.code)
+      const after = linesOf(result)
+
+      if (before.length !== after.length || !before.every((l, i) => l === after[i])) {
+        problems.push('排序前後的內容對不上 —— 有行被刪掉或多出來')
+      }
+    }
+
+    report(!problems.length, `importSort ${c.name}`, problems)
   }
 
   for (const c of EMPTY_RULE_CASES) {
