@@ -243,23 +243,25 @@ const checkActionsNaming = ({ rel }) => {
 }
 
 
-// --- 規則 storeLayer:store 的結構跟著頁面資料夾分層 -------------------------
+// --- 規則 storeLayer:store 的結構跟著頁面分層 -------------------------------
 //
-// views/<資料夾>/<子資料夾>/… 每一層都對應 store 裡的一層,**巢狀也要跟著**:
-//
-//   views/exchange/index/            →  const index = ref({ … })
-//   views/exchange/detail/delivery/  →  const detail = ref({ delivery: { … } })
-//   views/exchange/detail/health/    →                    ↑ 同一支 detail 底下
-//
-// 每一層基本上會有兩種東西:
+// 一個頁面一層,層名就是頁面名。每一層基本上會有兩種東西:
 //   data     api 回來的資料
 //   apiData  要送給 api 的資料(預設值集中在 apiDefault,見 storeApiDefault)
 //
-// 分層跟著頁面走,才能「看到頁面路徑就知道資料在 store 的哪裡」。
-// 平鋪的話,detail 底下三種明細的狀態散在 store 第一層,看不出它們是同一頁的東西。
+// 分層跟著頁面走,才能「看到頁面就知道資料在 store 的哪裡」。
 //
-// ⚠️ 不是每個子資料夾都需要狀態(純靜態頁、只放元件的資料夾就不用),
-//    所以這條可以用註解豁免,但要寫理由。
+// ⚠️ **這條是提醒,不是結論。** 規則看得到「頁面群底下有子資料夾」,
+//    看不出那個資料夾是哪一種:
+//
+//      只是分類(底下的頁面各自獨立)  → store 直接用頁面名,分類不佔一層。
+//                                      多包的那一層沒有東西住在裡面,
+//                                      只是把路徑加長,每個使用端都要多寫一段。
+//      底下的頁面有共用狀態           → 那一層要建,共用的放那裡、各頁面的放底下。
+//      純靜態頁、只放元件的資料夾     → 本來就沒有狀態。
+//
+//    分辨這三種要看頁面實際共用什麼,規則推不出來 —— 所以收到提醒之後由人判斷,
+//    確定不需要那一層就用註解豁免,並寫下理由。
 
 /** 子資料夾樹 —— 底線與點開頭的是元件 / 工具目錄,不算頁面 */
 const listPageSubFolders = (root, folder) => {
@@ -327,9 +329,9 @@ const checkStoreLayer = ({ rel, text, root }) => {
         rel,
         1,
         'storeLayer',
-        `缺少對應頁面資料夾的分層:${missing.join(' / ')} —— ` +
-          `${VIEWS_DIR}/${name}/ 底下有這些子資料夾,store 要有同名的一層(const ${missing[0]} = ref({ … }));` +
-          `確實不需要狀態的話標 /* lint-store-layer-exempt: 理由 */`
+        `${VIEWS_DIR}/${name}/ 底下有子資料夾 ${missing.join(' / ')},store 沒有對應的層 —— ` +
+          `底下的頁面有共用狀態的話建一層(const ${missing[0]} = ref({ … }),共用的放那裡、各頁面的放底下);` +
+          `只是分類、各頁面各自獨立的話維持頁面名那幾層,標 /* lint-store-layer-exempt: 理由 */`
       )
     )
   }
@@ -352,9 +354,9 @@ const checkStoreLayer = ({ rel, text, root }) => {
         rel,
         lineNoOf(text, text.search(new RegExp(`const\\s+${sub}\\s*=`))),
         'storeLayer',
-        `${sub} 底下缺少分層:${missingKeys.join(' / ')} —— ` +
-          `${VIEWS_DIR}/${name}/${sub}/ 底下有這些子資料夾,要對應成 ${sub}.${missingKeys[0]}` +
-          `(每一層基本上有 data 與 apiData);確實不需要狀態的話標 /* lint-store-layer-exempt: 理由 */`
+        `${VIEWS_DIR}/${name}/${sub}/ 底下有子資料夾 ${missingKeys.join(' / ')},${sub} 裡沒有對應的層 —— ` +
+          `有共用狀態的話對應成 ${sub}.${missingKeys[0]}(每一層基本上有 data 與 apiData);` +
+          `只是分類的話標 /* lint-store-layer-exempt: 理由 */`
       )
     )
   }
@@ -665,6 +667,6 @@ export const STORE_RULE_HINT = {
   storeActionReturn: '打了 api 的 action 一律 return { config, status, data }',
   storeApiDefault: '送出參數的預設值集中成 const apiDefault = readonly({ … })',
   storeResetDefault: 'reset 用 { ...store.apiDefault.xxx },不要手寫',
-  storeLayer: `store 的分層跟著 ${VIEWS_DIR} 的子資料夾走`,
+  storeLayer: `一個頁面一層;子資料夾只是分類時不佔一層,標豁免並寫理由`,
   storeToRefs: '取值一律 const { … } = storeToRefs(store) —— 直接解構或賦值會斷掉響應',
 }
