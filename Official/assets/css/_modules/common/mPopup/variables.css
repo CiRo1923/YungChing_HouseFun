@@ -41,12 +41,15 @@
 
   /* 工具列:手機是上下排(用 mt)、桌機平板是左右排(用 mx),兩組刻意不成套 */
   --popup-tools-pc-mx: 24px; /* lint-breakpoint-exempt: 手機改用 mt */
-  --popup-tools-tablet-mx: 12px; /* lint-breakpoint-exempt: 同上 */
+  --popup-tools-tablet-mx: 12px; /* lint-breakpoint-exempt: 手機改用 mt */
   --popup-tools-mobile-mt: 12px; /* lint-breakpoint-exempt: 桌機平板改用 mx */
 
   --popup-body-pc-mt: 30px;
   --popup-body-tablet-mt: 30px;
   --popup-body-mobile-mt: 30px;
+  --popup-body-pc-px: 8px;
+  --popup-body-tablet-px: 8px;
+  --popup-body-mobile-px: 8px;
 
   --popup-footer-pc-mt: 30px;
   --popup-footer-tablet-mt: 30px;
