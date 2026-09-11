@@ -8,8 +8,25 @@
 //    散在各處的話,換專案時漏改一支,那條規則就靜靜失效 —— 不會報錯,
 //    只是從此不再檢查任何東西。
 
-/** 頁面。api 檔名、store 檔名、store 分層都對照這個目錄的第一層資料夾 */
+/** 頁面。api 檔名、store 檔名、store 分層都對照這個目錄底下的資源資料夾 */
 export const VIEWS_DIR = 'pages'
+
+/**
+ * 頁面目錄底下,資源資料夾在第幾層。
+ *
+ * 「資源」指的是一個功能單位(會員、點數、廣告),api 檔名與 store 檔名都要對得上它。
+ *
+ *   1  資源直接放在第一層:`src/views/member/Index.vue` → 資源是 `member`
+ *   2  第一層是分類層,資源在它底下:`src/views/Common/ad/Index.vue` → 資源是 `ad`
+ *
+ * 分類層(第一層只放分類、資源在第二層)的專案要填 2。填 1 的話,
+ *    每一支 api 與 store 都會被報「對不上資料夾」—— 因為它們對照的是
+ *    分類層的名字,而檔名寫的是資源名。那不是命名錯,是這一項設錯了。
+ *
+ * 底線開頭的資料夾(`_components`、`_pages` 那種)不算資源 ——
+ * 那些是放元件的地方,不是功能單位。
+ */
+export const VIEW_RESOURCE_DEPTH = 1
 
 /** 狀態宣告 */
 export const STORE_DIR = 'stores'
@@ -67,6 +84,19 @@ export const SHARED_MODULE_VARIABLES = 'common/mForm/variables.css'
 /** 色票檔所在目錄 */
 export const COLOR_CSS_DIR = 'assets/css/_common'
 
+/**
+ * 尺寸值要分成哪幾個斷點 —— 每一個尺寸變數都要為這幾個斷點各寫一份。
+ *
+ * 名字的形狀是 `--模組-<斷點>-屬性`,例如 `--popup-pc-w`、`--popup-mobile-w`。
+ * 三個斷點的值相同也要拆:之後只調其中一個時,改的人不必先把整組拆開。
+ *
+ * **不做響應式的專案(後台那類)把這裡設成空陣列**,兩條斷點規則就整條略過。
+ *    留著預設值的話,每一個尺寸變數都會被要求拆成三份,
+ *    等於要補上幾百個永遠相同的值 —— 那些值沒有任何作用,只是讓檔案變長。
+ *    工具啟動時會把「因為設成空陣列而沒有作用」列出來,不會安靜地跳過。
+ */
+export const BREAKPOINTS = ['pc', 'tablet', 'mobile']
+
 /** 原始碼根目錄 */
 export const SRC_DIR = ''
 
@@ -104,6 +134,7 @@ export const STANDALONE_APIS = [
 
 /** 對不上任何頁面資料夾的 api 一律放這支(不含副檔名) */
 export const SHARED_API_FILE = 'project'
+
 
 /**
  * 頁面初次載入時,同時發出的多個請求要用哪一支函式包起來。

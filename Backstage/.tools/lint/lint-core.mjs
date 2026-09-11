@@ -54,6 +54,7 @@ import { GLOBAL_CHECKS, GLOBAL_RULE_HINT, GLOBAL_RULE_TITLE } from './rules-glob
 import { PAGE_CHECKS, PAGE_RULE_HINT, PAGE_RULE_TITLE } from './rules-page.mjs'
 import { STORE_CHECKS, STORE_RULE_HINT, STORE_RULE_TITLE } from './rules-store.mjs'
 import {
+  BREAKPOINTS,
   COLOR_CSS_DIR,
   COMPONENTS_DIR,
   CSS_MODULES_DIR,
@@ -906,11 +907,80 @@ const checkThemeNaming = ({ rel, text, root }) => {
  * 只看同一支檔案 —— 跨檔補齊的情況存在,但那本來就該寫在一起,
  * 分散在兩支檔案時要調某個斷點得逐一確認有沒有漏。
  */
-const BREAKPOINT_VAR_RE = /(--[\w-]*?)-(pc|tablet|mobile)-([\w-]+)\s*:/g
+/**
+ * 斷點清單來自設定 —— 每個專案的斷點不一樣,後台那類根本不做響應式。
+ *
+ * 設成空陣列時這兩條斷點規則整條略過。寫死的話,不做響應式的專案會被要求
+ * 把每一個尺寸值都拆成三份,補出幾百個永遠相同的值。
+ */
+const BREAKPOINT_ALT = BREAKPOINTS.join('|')
+
+const BREAKPOINT_VAR_RE = new RegExp(`(--[\\w-]*?)-(${BREAKPOINT_ALT})-([\\w-]+)\\s*:`, 'g')
 
 const EXEMPT_RE = /lint-breakpoint-exempt/
 
+/**
+ * 專案裡到底有沒有在用斷點變數 —— 拿來檢查 BREAKPOINTS 設定是不是填錯了。
+ *
+ * 「是不是後台」工具看不出來,那是業務上的說法;看得出來的是
+ * 「CSS 模組裡有沒有 `--x-pc-w` 這種名字」,這是事實。
+ *
+ * 只偵測得了一個方向:設定填了斷點、專案卻一個都沒用到。
+ * 反方向(設定留空、專案其實有分斷點)偵測不出來 —— 設定留空時
+ * 連斷點叫什麼都不知道,無從比對。不過那個方向不會被忽略:
+ * 那些檔案本來就會被「尺寸值要分斷點」報一整片,一眼就看得到。
+ */
+/** CSS 模組底下有沒有任何一支檔案符合條件 */
+const someModuleCss = (root, test) => {
+  const dir = path.join(root, ...CSS_MODULES_DIR.split('/'))
+  if (!fs.existsSync(dir)) return false
+
+  const walk = (current) => {
+    for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
+      const full = path.join(current, entry.name)
+
+      if (entry.isDirectory()) {
+        if (walk(full)) return true
+        continue
+      }
+      if (!entry.name.endsWith('.css')) continue
+      if (test(fs.readFileSync(full, 'utf8'))) return true
+    }
+
+    return false
+  }
+
+  return walk(dir)
+}
+
+export const hasBreakpointVars = (root) => {
+  if (!BREAKPOINTS.length) return false
+
+  return someModuleCss(root, (text) => {
+    BREAKPOINT_VAR_RE.lastIndex = 0
+    return BREAKPOINT_VAR_RE.test(text)
+  })
+}
+
+/**
+ * 專案有沒有寫響應式樣式。
+ *
+ * 看的是 `@screen 斷點` 與寬度相關的 `@media` —— 那兩種是響應式的直接證據,
+ * 而且與斷點**叫什麼名字無關**,所以斷點設定留空時照樣判斷得出來。
+ *
+ * 這正是反方向的偵測:設定留空、專案其實有做響應式時,靠變數名比對不出來
+ * (留空時連斷點叫什麼都不知道),但這裡看得到。
+ *
+ * 列印與配色偏好那類 `@media` 不算 —— 它們與螢幕寬度無關,
+ * 不做響應式的專案照樣會用到。
+ */
+const RESPONSIVE_RE = /@screen\s+[\w-]|@media[^{]*\b(?:min|max)-width\b/
+
+export const hasResponsiveStyles = (root) => someModuleCss(root, (text) => RESPONSIVE_RE.test(text))
+
 const checkBreakpointSet = ({ rel, text: raw }) => {
+  if (!BREAKPOINTS.length) return []
+
   // 豁免標記寫在註解裡,所以要先判斷,再把註解遮掉
   if (!rel.startsWith(MODULES_PREFIX) || EXEMPT_RE.test(raw)) return []
 
@@ -926,7 +996,7 @@ const checkBreakpointSet = ({ rel, text: raw }) => {
   const issues = []
 
   for (const [key, { found, line }] of groups) {
-    const missing = ['pc', 'tablet', 'mobile'].filter((b) => !found.has(b))
+    const missing = BREAKPOINTS.filter((b) => !found.has(b))
     if (!missing.length) continue
 
     const [prefix, suffix] = key.split('|')
@@ -982,7 +1052,7 @@ const checkBreakpointNeeded = ({ rel, text: raw }) => {
 
     const [, name, value] = m
 
-    if (/-(pc|tablet|mobile)-/.test(name)) return // 已經分了
+    if (new RegExp(`-(${BREAKPOINT_ALT})-`).test(name)) return // 已經分了
     if (value.includes('var(')) return // 指向別的變數
     if (NEUTRAL_VALUE.has(value.trim())) return
     if (!SIZE_VALUE_RE.test(value.trim())) return

@@ -1,7 +1,7 @@
 ---
 name: store-conventions
 summary: store / actions
-description: 本專案的 store 與 actions 撰寫規範(store 目錄的 *.js 與 .composables/use*Actions.js)。當新增或修改 store、搬移狀態歸屬、取用 store 的值、新增呼叫 api 的 action,或審查既有 store 寫法時使用。規則:store 只放宣告(變數與 computed),function 一律進 .composables/use*Actions.js;檔名與分層跟著頁面目錄的資料夾走,每層基本有 data 與 apiData;送出參數的預設值集中成 const apiDefault = readonly({ … });取值一律走 storeToRefs,直接解構或賦值會斷掉響應;action 命名為 onApi + api 函式名,一律 return { config, status, data };action 基本只覆寫 apiData 與 data,只有一頁要用的邏輯寫在頁面、多頁共用的自訂欄位(_ 開頭)才寫進 action。
+description: 本專案的 store 與 actions 撰寫規範(store 目錄的 *.js 與 .composables/use*Actions.js)。當新增或修改 store、搬移狀態歸屬、取用 store 的值、新增呼叫 api 的 action,或審查既有 store 寫法時使用。規則:store 只放宣告(變數與 computed),function 一律進 .composables/use*Actions.js;檔名與分層跟著頁面目錄的資料夾走,層裡面有 data 還是 apiData 看這一頁與後端的往來而定;送出參數的預設值集中成 const apiDefault = readonly({ … });取值一律走 storeToRefs,直接解構或賦值會斷掉響應;action 命名為 onApi + api 函式名,一律 return { config, status, data };action 基本只覆寫 apiData 與 data,只有一頁要用的邏輯寫在頁面、多頁共用的自訂欄位(_ 開頭)才寫進 action。
 ---
 
 # store / actions 撰寫規範
@@ -55,12 +55,19 @@ export const useExchangeStore = defineStore('exchange', () => {
 <頁面群>/<分類>/<頁面>.vue   →  const <頁面> = ref({ … })   ← 分類資料夾不佔一層
 ```
 
-角括號是要換掉的部分。每一層基本上會有兩種東西:
+角括號是要換掉的部分。層裡面放什麼,看這一頁與後端有哪些往來:
 
-| key | 是什麼 |
+| key | 什麼時候要有 |
 | --- | --- |
-| `data` | api 回來的資料 |
-| `apiData` | 要送給 api 的資料 |
+| `data` | 這一頁有向後端要資料時,放 api 回來的結果 |
+| `apiData` | 這一頁有送參數給後端時,放要送出的資料 |
+
+**不是每一層都要有這兩個。** 只讀不送的頁面沒有 `apiData`,
+送出後不顯示結果的頁面沒有 `data` —— 依這一頁實際的往來決定,
+沒有的那個不必補一個空的出來。
+
+工具檢查的也是這件事:它只看「有向後端要資料的頁面,store 裡有沒有對應的層」,
+層裡面放什麼不管;`apiDefault` 則是「有 `apiData` 時才要求」。
 
 分層跟著頁面走,才能「看到頁面就知道資料在 store 的哪裡」。
 反過來也成立:看到 store 裡某一層,知道它是給哪一頁用的,改的時候知道會影響誰。
