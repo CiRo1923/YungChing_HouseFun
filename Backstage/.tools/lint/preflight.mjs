@@ -11,6 +11,7 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
+import { isColorNamingConfigFit, isHueSourceFit } from './color-order.mjs'
 import {
   API_DIR,
   BUILD_CONFIG_FILES,
@@ -57,6 +58,37 @@ const REQUIREMENTS = [
     check: (root) => (hasDir(root, COLOR_CSS_DIR) ? COLOR_CSS_DIR : null),
     need: `要有色票目錄(目前設定為 ${COLOR_CSS_DIR})`,
     why: '色票變數的定義來源在那裡。目錄不存在時,等於一個色票變數都沒定義,顏色檢查與色票排序都不會有結果。',
+  },
+  {
+    label: '色相判斷來源的設定',
+    rules: ['colorFile'],
+
+    /*
+     * 大宗是「超過一半的那一種」。設定與大宗不符時,那一大批變數會走錯路徑,
+     * 而兩個方向壞掉的樣子不一樣:
+     *
+     *   設定 name、多數是語意名   那一批每一個都被報「認不出色相前綴」,
+     *                             而且排序會把它們全部歸成未知色重排一次
+     *   設定 value、多數帶色相     人給的語意分類(把橘定義為金)被色值算的結果蓋掉
+     */
+    check: isHueSourceFit,
+    need: '設定裡的 COLOR_HUE_SOURCE 要符合專案實際的色票命名(名字帶色相用 name,語意名用 value)',
+    why: '色票檔裡超過一半的變數,命名方式與設定選的來源不同。設定是 name 而實際是語意名的話,那一批會每一個都被報「認不出色相前綴」,排序還會把它們重排成一大群未知色;設定是 value 而實際帶色相的話,名字裡人給的語意分類會被色值算出來的結果蓋掉。',
+  },
+  {
+    label: '色票命名的設定',
+    rules: ['colorFile'],
+
+    /*
+     * 判準是「整組一個都對不上」,不是「多數對不上」。
+     *
+     * 設定與專案對不上時,結果一定是整組落空 —— 那幾項設定影響的是該組的每一個變數。
+     * 只有部分對不上的話,那是個別變數命名不符規範,逐筆報在檢查結果裡,
+     * 不該在這裡再講一次。
+     */
+    check: isColorNamingConfigFit,
+    need: '設定裡的 COLOR_HUES、COLOR_NAME_SEPARATOR 與 COLOR_SUFFIX_PICK 要符合專案實際的色票命名',
+    why: '色票檔裡有一整類變數的命名形狀對不上目前的設定 —— 可能是全部(色相清單或分隔符不同),也可能是帶透明度的那一類(透明度兩碼怎麼接不同)。那一類的取碼檢查會完全沒有結果,而畫面上看起來是全部通過。改設定就會恢復。',
   },
   {
     label: 'CSS 模組目錄',

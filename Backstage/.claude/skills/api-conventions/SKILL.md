@@ -23,7 +23,7 @@ description: 本專案的 API 撰寫規範(api 目錄底下的 *.js)。當新增
 ## 1. 請求一律走共用實例
 
 ```js
-// ✅ <api 目錄>/member.js
+// 正確：<api 目錄>/member.js
 import fetchApi from './.config.js'
 
 export const apiGetMemberInfo = (data) => fetchApi.get('member/info', data)

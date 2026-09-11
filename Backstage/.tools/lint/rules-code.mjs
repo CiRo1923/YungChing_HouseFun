@@ -54,7 +54,7 @@ const isCommentLine = (line) => /^\s*(?:\/\/|\/\*|\*)/.test(line.trim() ? line :
  *
  * 路徑裡可能帶 ${CONFIG.xxx},那些值在專案設定檔裡,取出來替換掉。
  *
- * ⚠️ 冒號到路徑之間允許有逗號 —— path.resolve(process.cwd(), '…') 這種寫法
+ * 冒號到路徑之間允許有逗號 —— path.resolve(process.cwd(), '…') 這種寫法
  *    中間就隔著一個逗號,不允許的話這幾條 alias 全部讀不到,
  *    規則會改而建議比較淺的那一個(例如該用 @js 卻建議 @)。
  */
@@ -453,7 +453,7 @@ const checkDeprecated = ({ rel, text }) => {
 // 這條**不報違規,存檔時直接排好**。順序是機械式的規則,
 // 讓人照著訊息一行一行搬只是浪費時間,而且搬的過程比工具更容易出錯。
 //
-// ⚠️ 兩個宣告之間若夾了別的語句(storeToRefs / computed / ref …),那是「屏障」——
+// 兩個宣告之間若夾了別的語句(storeToRefs / computed / ref …),那是「屏障」——
 //    屏障前後各自為獨立區塊,**不跨屏障搬移**。那些語句往往相依於前面的宣告,
 //    跨過去會造成 TDZ(用到還沒初始化的變數),程式直接壞掉。
 
@@ -696,7 +696,7 @@ const groupByBarrier = (lines, decls) => {
  *
  * 沒有需要調整時回傳 null —— 呼叫端據此決定要不要寫檔。
  *
- * ⚠️ 這個函式會直接改動程式碼。安全前提有三個,少一個就可能改壞:
+ * 這個函式會直接改動程式碼。安全前提有三個,少一個就可能改壞:
  *      1. 只在同一個屏障區塊內重排,組與組之間不動
  *      2. 每一筆帶著自己上方緊鄰的註解一起搬
  *      3. 排序是穩定的 —— 順位相同的兩筆維持原本的先後
@@ -710,11 +710,15 @@ export const onSortComposables = (text, rel) => {
   const { lines, decls, match } = parsed
   const groups = groupByBarrier(lines, decls)
 
-  // 每一組各自排序,排完把行內容依新順序填回原本那幾行的位置
+  /* 每一組各自排序,並讓組內的宣告連續 —— 中間的空行拿掉。
+     一組就是「順序有意義的一整串」,中間空一行會讓人以為那是兩段不同的東西,
+     而排序完之後那個空行還會停在原地,夾在不相干的兩筆之間。
+
+     由後往前處理:前面的組先不動,行號才不會因為後面刪了空行而位移。 */
   const nextLines = [...lines]
   let changed = false
 
-  for (const group of groups) {
+  for (const group of [...groups].reverse()) {
     if (group.length < 2) continue
 
     const sorted = [...group].sort((a, b) => {
@@ -723,24 +727,36 @@ export const onSortComposables = (text, rel) => {
       return ar - br || as - bs || group.indexOf(a) - group.indexOf(b)
     })
 
-    if (sorted.every((d, i) => d === group[i])) continue
+    /* 組內兩筆之間夾的東西:全部是空行就拿掉,有註解就整段留著。
+       那種註解多半在講後面一整段,刪掉就是資料遺失 —— 而這個函式
+       不報違規、直接改檔,刪錯了不會有人收到訊息。 */
+    const gaps = []
+    for (let k = 1; k < group.length; k += 1) {
+      const between = lines.slice(group[k - 1].end + 1, group[k].start)
+      gaps.push(between.every((l) => /^\s*$/.test(l)) ? [] : between)
+    }
 
-    // 這一組佔用的行(由上而下),把排序後的內容依序放回去
-    const slots = group.flatMap((d) => {
-      const range = []
-      for (let ln = d.start; ln <= d.end; ln += 1) range.push(ln)
-      return range
+    const hasBlankGap = gaps.some((g, i) => g.length === 0 && group[i].end + 1 < group[i + 1].start)
+    const isSorted = sorted.every((d, i) => d === group[i])
+
+    if (isSorted && !hasBlankGap) continue
+
+    /* 重建整組:排序後的宣告依序接起來,中間只保留「夾著註解」的那幾段。
+       註解段落跟著它原本的位置(第幾個間隔),不跟著被搬動的宣告走 ——
+       那段文字講的是「這個位置之後」的事,搬走會讓它指向錯的東西。 */
+    const rebuilt = []
+    sorted.forEach((d, i) => {
+      rebuilt.push(...lines.slice(d.start, d.end + 1))
+      if (i < gaps.length) rebuilt.push(...gaps[i])
     })
 
-    const content = sorted.flatMap((d) => lines.slice(d.start, d.end + 1))
+    const from = group[0].start
+    const to = group[group.length - 1].end
 
-    // 行數必須完全相同 —— 不同就代表解析有落差,寧可不動
-    if (slots.length !== content.length) continue
+    // 內容行數不可以變多 —— 變多代表解析有落差,寧可不動
+    if (rebuilt.length > to - from + 1) continue
 
-    slots.forEach((ln, i) => {
-      nextLines[ln] = content[i]
-    })
-
+    nextLines.splice(from, to - from + 1, ...rebuilt)
     changed = true
   }
 

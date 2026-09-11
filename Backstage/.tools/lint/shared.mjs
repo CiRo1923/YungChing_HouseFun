@@ -63,7 +63,7 @@ export {
  *   detail  人看得懂的一句話,要寫清楚「怎麼改」
  *   level   'error' 一律要改 | 'warn' 建議,不擋
  *
- * ⚠️ level 預設 error —— 規則沒指定就是要擋的。要放行的那條自己用 warnOf,
+ * level 預設 error —— 規則沒指定就是要擋的。要放行的那條自己用 warnOf,
  *    這樣「忘了標」的結果是嚴格而不是靜默放過。
  */
 export const issueOf = (rel, line, rule, detail, level = 'error') => ({
@@ -187,7 +187,16 @@ export const isInActionsDir = (rel) => rel.includes(`/${ACTIONS_DIR_NAME}/`)
  */
 export const PENDING_CACHE_FILE = 'node_modules/.cache/cssGuard/pending.json'
 
-const SKIP_DIR = /(^|\/)(node_modules|\.git|dist|build|public)(\/|$)/
+/* 建置產物與依賴目錄 —— 走訪時整個跳過。
+
+  裡面的檔案是打包器產生的,規範對它們不成立:打包後的程式碼幾乎每一條都會違規,
+  而修它沒有意義(下次建置就覆蓋掉了)。漏掉一個名字的代價不是報錯,
+  是掃描數字與違規筆數都被灌水,讓人看不出原始碼到底有幾筆。
+
+  注意:這份名單跟著建置工具走,不同框架的產物目錄名不一樣
+  (dist / build / .output / .nuxt 都有專案在用)。
+  移植到別的專案時要確認那邊的產物目錄有沒有在名單裡。 */
+const SKIP_DIR = /(^|\/)(node_modules|\.git|dist|build|public|\.output|\.nuxt)(\/|$)/
 
 /**
  * 專案自己的文件目錄底下的檔案 —— 每一條規則都不檢查。

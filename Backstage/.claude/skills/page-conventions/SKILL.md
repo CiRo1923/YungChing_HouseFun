@@ -28,10 +28,10 @@ description: 本專案的頁面撰寫規範(頁面目錄底下的 .vue 與其元
 規則 `pageApiData`(擋)。
 
 ```js
-// ❌ 頁面自建
+// 錯誤：頁面自建
 const apiData = ref({ Description: null })
 
-// ✅ 讀 store
+// 正確：讀 store
 const { detail } = storeToRefs(usePetsStore())
 ```
 
@@ -77,13 +77,13 @@ const { detail } = storeToRefs(usePetsStore())
 使用者等的是每一支的時間加總;包在一起則是同時發出,等的是最慢的那一支。
 
 ```js
-// ❌ 一支一支等
+// 錯誤：一支一支等
 onMounted(async () => {
   await onApiGetActivityList()
   await onJsonEventsIndex()
 })
 
-// ✅ 一起發出
+// 正確：一起發出
 onMounted(async () => {
   await awaitAllPromise([onApiGetActivityList(), onJsonEventsIndex()])
 })

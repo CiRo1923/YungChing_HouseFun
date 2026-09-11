@@ -25,7 +25,7 @@ import {
  * (STANDALONE_APIS 與 SHARED_API_FILE)—— 每個專案的檔名不一樣,
  * 寫在規則裡的話,換一個專案就會把它自己的 api 報成違規。
  *
- * ⚠️ 不要再往那份清單加東西。對不上資料夾的 api 一律放共用的那一支;
+ * 不要再往那份清單加東西。對不上資料夾的 api 一律放共用的那一支;
  *    清單裡留著的是還沒決定歸屬的檔案(見 docs/待辦事項.md)。
  */
 const ALLOWED_STANDALONE = new Set(STANDALONE_APIS)
@@ -170,7 +170,7 @@ const checkApiSource = ({ rel, text }) => {
 //
 // 路徑參數 {id} 一律寫成大寫 **ID**(不是 Id)—— 這一段是大小寫敏感的。
 //
-// ⚠️ 比對是**大小寫不敏感**的:endpoint 全小寫的複合字要怎麼拆(petphoto →
+// 比對是**大小寫不敏感**的:endpoint 全小寫的複合字要怎麼拆(petphoto →
 //    PetPhoto)需要語意判斷,工具推不出來。這裡只驗「段落有沒有對上、method
 //    有沒有寫在前面」,拆法交給人。
 
@@ -182,7 +182,7 @@ const checkApiSource = ({ rel, text }) => {
  *   export const apiGetVoucherForceBookDetailID = (data) =>
  *     fetchApi.get('voucher/forcebook/detail/{id}', data)
  *
- * ⚠️ 中間不得跨過另一個 `export` —— 沒有這道限制的話,
+ * 中間不得跨過另一個 `export` —— 沒有這道限制的話,
  *    「一支不打 api 的匯出」後面接著「一支打 api 的匯出」時,
  *    比對會從前面那支開始,一路吃到後面那支的請求,
  *    把前面那支誤判成打了後面那支的 endpoint。
@@ -294,7 +294,7 @@ const RETURN_FIELDS = ['config', 'status', 'data']
 /**
  * export const apiX = (...) => ({ … })  ← 自己組物件回傳的那種
  *
- * ⚠️ 一定要認 `=> (` 的括號:沒有它的話 `=> fetchApi.get(\`item/${id}\`)`
+ * 一定要認 `=> (` 的括號:沒有它的話 `=> fetchApi.get(\`item/${id}\`)`
  *    裡的 ${id} 會被當成物件字面值,每一支帶路徑參數的 api 都會被誤報。
  */
 const API_OBJECT_RETURN_RE = /export\s+const\s+(\w+)\s*=\s*(?:async\s*)?\([^)]*\)\s*=>\s*\(\s*\{/g
