@@ -14,9 +14,11 @@ import {
   findNearFolder,
   isInActionsDir,
   isInSrc,
+  hasExemptMark,
   issueOf,
   lineNoOf,
   listViewFolders,
+  viewResourceDirOf,
 } from './shared.mjs'
 
 /** 行為放在 store 目錄底下的這個子資料夾 */
@@ -283,15 +285,29 @@ const checkActionsNaming = ({ rel }) => {
 //    本來就屬於別的層,都是合理的。收到提醒之後由人判斷,
 //    確定不需要那一層就用註解豁免,並寫下理由。
 
-/** 頁面檔(遞迴);底線與點開頭的資料夾是元件 / 工具目錄,裡面不是頁面 */
-const listPageFiles = (root, folder) => {
-  const abs = path.join(root, ...VIEWS_DIR.split('/'), folder)
-  if (!fs.existsSync(abs)) return []
+/**
+ * 一個資源底下的頁面檔(遞迴);底線與點開頭的資料夾是元件 / 工具目錄,裡面不是頁面。
+ *
+ * 資源資料夾在哪由 viewResourceDirOf 回答,不在這裡把資源名接在頁面目錄後面 ——
+ * 第一層是分類層的專案,那樣拼出來的路徑不存在,這條規則就會永遠找不到頁面,
+ * 看起來像是每一支 store 都沒問題。
+ */
+const listPageFiles = (root, resource) => {
+  const base = viewResourceDirOf(root, resource)
+  if (!base) return []
 
-  return fs.readdirSync(abs, { withFileTypes: true }).flatMap((e) => {
-    if (e.isDirectory()) return /^[._]/.test(e.name) ? [] : listPageFiles(root, `${folder}/${e.name}`)
-    return e.name.endsWith('.vue') ? [{ file: `${folder}/${e.name}`, abs: path.join(abs, e.name) }] : []
-  })
+  const walk = (abs, prefix) =>
+    fs.readdirSync(abs, { withFileTypes: true }).flatMap((e) => {
+      if (e.isDirectory()) {
+        return /^[._]/.test(e.name) ? [] : walk(path.join(abs, e.name), `${prefix}/${e.name}`)
+      }
+
+      return e.name.endsWith('.vue')
+        ? [{ file: `${prefix}/${e.name}`, abs: path.join(abs, e.name) }]
+        : []
+    })
+
+  return walk(base, resource)
 }
 
 /**
@@ -335,11 +351,10 @@ const layerBodyOf = (text, name) => {
   return start === -1 ? '' : bodyRangeOf(text, start)
 }
 
-const LAYER_EXEMPT_RE = /lint-store-layer-exempt/
 
 const checkStoreLayer = ({ rel, text, root }) => {
   if (!isStoreFile(rel)) return []
-  if (LAYER_EXEMPT_RE.test(text)) return []
+  if (hasExemptMark(text, 'store-layer')) return []
 
   const name = path.basename(rel, '.js')
 

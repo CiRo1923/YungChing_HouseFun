@@ -115,36 +115,84 @@ export const bodyRangeOf = (text, start) => {
 export const toRel = (root, abs) => path.relative(root, abs).split(path.sep).join('/')
 
 /**
- * 頁面資料夾的第一層名稱。
+ * 這份檔案有沒有標某一條規則的豁免。
+ *
+ * 標記的形狀是 `lint-<規則>-exempt: 理由`,而且**一定要寫在註解裡**
+ * (`/* … *​/`、`// …`、`<!-- … -->`)。整份檔案跳過那一條檢查。
+ *
+ * **只認註解裡的那一份,是因為程式碼本身也會寫出這串字。**
+ * 定義比對式的那一行(`const XXX_EXEMPT_RE = /lint-xxx-exempt/`)就含有它 ——
+ * 只看「整份文字有沒有出現」的話,定義規則的那支檔案永遠豁免自己,
+ * 於是那條規則對它完全失效,而且不會有任何徵兆。
+ *
+ * 判斷方式是看標記前面有沒有註解起頭。跨行註解中間、又不是以 `*` 起頭的那種行
+ * 會被判成不在註解裡 —— 那個方向是「照常檢查」,看到的人自己判斷得出來;
+ * 反過來誤放行才危險,漏掉的違規不會有人發現。
+ *
+ * 判準收在這裡一份 —— 每條規則各寫一次的話,改了一處忘了另一處,
+ * 那幾條的豁免行為就開始不一樣,而不一樣的那天不會有人通知你。
+ */
+export const hasExemptMark = (text, name) => {
+  const markRe = new RegExp(`lint-${name}-exempt`)
+
+  return text.split('\n').some((line) => {
+    const at = line.search(markRe)
+    if (at === -1) return false
+
+    const before = line.slice(0, at)
+
+    return /\/\/|\/\*|<!--/.test(before) || /^\s*\*/.test(before)
+  })
+}
+
+/**
+ * 頁面資源資料夾 —— 每一筆是 `{ name, abs }`(資源名與它的絕對路徑)。
+ *
+ * 「資源」是一個功能單位(會員、點數、廣告),api 檔名與 store 檔名都要對得上它。
+ * 資源在第幾層由設定的 VIEW_RESOURCE_DEPTH 決定:有的專案資源直接放第一層,
+ * 有的第一層是分類層、資源在它底下。
+ *
+ * **名稱與路徑一起回傳,是為了讓走訪深度的邏輯只有這一份。** 規則要嘛問
+ * 「有哪些資源」,要嘛問「某個資源的檔案放在哪」—— 後者自己拼路徑的話,
+ * 分類層的專案會拼出一個不存在的目錄,那條規則就整條靜默失效
+ * (不會報錯,只是永遠找不到檔案,看起來像全部通過)。
  *
  * 動態讀取而不是寫死清單 —— 寫死的話新增資料夾時規則不會跟著更新,
- * 而且不會有人發現。找不到目錄時回傳 null,由呼叫端跳過檢查(不亂猜)。
+ * 而且不會有人發現。找不到頁面目錄時回傳 null,由呼叫端跳過檢查(不亂猜)。
+ *
+ * 底線開頭的資料夾不算資源 —— 那是放元件的地方,不是功能單位。
  */
-export const listViewFolders = (root) => {
+export const listViewResources = (root) => {
   const abs = path.join(root, ...VIEWS_DIR.split('/'))
   if (!fs.existsSync(abs)) return null
 
-  /**
-   * 走到指定深度,收集那一層的資料夾名。
-   *
-   * 深度來自設定(VIEW_RESOURCE_DEPTH)—— 有的專案資源直接放第一層,
-   * 有的第一層是分類層、資源在第二層。固定看第一層的話,分類層那種專案的
-   * 每一支 api 與 store 都會被報「對不上資料夾」,因為它們的檔名寫的是資源名。
-   *
-   * 底線開頭的資料夾不算資源 —— 那是放元件的地方,不是功能單位。
-   */
   const foldersAt = (dir, depth) => {
     const entries = fs
       .readdirSync(dir, { withFileTypes: true })
       .filter((e) => e.isDirectory() && !e.name.startsWith('_'))
 
-    if (depth <= 1) return entries.map((e) => e.name)
+    if (depth <= 1) return entries.map((e) => ({ name: e.name, abs: path.join(dir, e.name) }))
 
     return entries.flatMap((e) => foldersAt(path.join(dir, e.name), depth - 1))
   }
 
-  return new Set(foldersAt(abs, VIEW_RESOURCE_DEPTH))
+  return foldersAt(abs, VIEW_RESOURCE_DEPTH)
 }
+
+/** 有哪些頁面資源(只要名字);找不到頁面目錄時回 null */
+export const listViewFolders = (root) => {
+  const resources = listViewResources(root)
+  return resources && new Set(resources.map((r) => r.name))
+}
+
+/**
+ * 某一個資源資料夾的絕對路徑;沒有這個資源就回 null。
+ *
+ * 規則要讀「某個資源底下有哪些頁面」時走這裡,不要自己把資源名接在頁面目錄後面 ——
+ * 第一層是分類層的專案,那樣拼出來的路徑不存在。
+ */
+export const viewResourceDirOf = (root, name) =>
+  listViewResources(root)?.find((r) => r.name === name)?.abs ?? null
 
 /**
  * 頁面目錄的第一層,是分類層還是資源層。

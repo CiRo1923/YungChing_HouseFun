@@ -1,3 +1,6 @@
+// lint-self-contained-exempt: 這支檔案定義「不要把讀者送去別處」那條規則,
+// 比對式必須把「同上」「同理」那幾個詞本身寫出來,規則才抓得到它們。
+//
 // 全站規範 —— 不限於 CSS,可檢查的每一種檔案都適用。
 // 副檔名範圍由 project-config.mjs 的 SCANNABLE_EXTENSIONS 決定,這裡不另外列一份 ——
 // 列了就會有跟它對不上的一天,而對不上的那種檔案會靜靜地不再被檢查。
@@ -15,6 +18,7 @@ import {
   PROJECT_NAME_SCOPE,
   SOURCE_PROJECT_NAME,
   TOOLING_PREFIXES,
+  hasExemptMark,
   issueOf,
   lineNoOf,
   listFiles,
@@ -33,8 +37,8 @@ import {
 // 那條路徑只在某台開發機上成立:每個人的專案擺法不同,作業系統也不一定一樣
 // (磁碟機代號 vs 家目錄),別人 clone 下來直接壞掉,build 也不會過。
 //
-// ⚠️ 這裡與訊息中都**不要寫出任何實際路徑當範例** —— 那本身就是寫死路徑,
-//    而且會讓人以為只有那種形狀才算違規。
+// 這裡與訊息中都**不要寫出任何實際路徑當範例** —— 那本身就是寫死路徑,
+// 而且會讓人以為只有那種形狀才算違規。
 //
 // 專案叫什麼定義在 project-config.mjs 的 PROJECT_NAMES ——
 // 名稱是每個專案各不相同的東西,寫在規則裡的話,換一個專案之後
@@ -71,11 +75,10 @@ const PROJECT_NAME_RE = PROJECT_NAMES.map(patternOf)
  * 裡面的網址是資料本身。這種檔案在檔頭標 `lint-project-name-exempt`
  * 並寫明理由,就會跳過整份。
  */
-const PROJECT_NAME_EXEMPT_RE = /lint-project-name-exempt/
 
 const checkProjectName = ({ rel, text }) => {
   if (!PROJECT_NAME_SCOPE.some((prefix) => rel.startsWith(prefix))) return []
-  if (PROJECT_NAME_EXEMPT_RE.test(text)) return []
+  if (hasExemptMark(text, 'project-name')) return []
 
   const issues = []
   const seen = new Set()
@@ -113,14 +116,16 @@ const checkProjectName = ({ rel, text }) => {
 //
 // 一律改寫成「相對專案根目錄的路徑」,例如 src/… 或 .tools/…。
 //
-// ⚠️ 這條會抓到「為了定義規則而必須寫出路徑形狀」的檔案(規則本身、測試案例)。
-//    那種檔案在檔頭標 lint-absolute-path-exempt 跳過整份,不要為了通過而改寫規則。
+// 這條會抓到「為了定義規則而必須寫出路徑形狀」的檔案(規則本身、測試案例)。
+// 那種檔案在檔頭標 lint-absolute-path-exempt 跳過整份,不要為了通過而改寫規則。
+// 標記一定要寫在註解裡 —— 程式碼裡的字面值不算,否則定義比對式的那一行
+// 會讓規則檔永遠豁免自己(見 shared.mjs 的 hasExemptMark)。
 
 /**
- * ⚠️ 家目錄那幾種前面一定要卡「不是文字字元」——
- *    專案裡本來就有 views/home/ 這種資料夾,少了這道條件,
- *    `views/home/Index.vue` 會被當成家目錄路徑,整批頁面都被誤報。
- *    真正的絕對路徑前面是行首、引號或空白,不會接在字母後面。
+ * 家目錄那幾種前面一定要卡「不是文字字元」——
+ * 專案裡本來就有 views/home/ 這種資料夾,少了這道條件,
+ * `views/home/Index.vue` 會被當成家目錄路徑,整批頁面都被誤報。
+ * 真正的絕對路徑前面是行首、引號或空白,不會接在字母後面。
  */
 const ABSOLUTE_PATH_RE =
   /(?<![\w.-])(?:[A-Za-z]:[\\/]|file:\/\/|\/(?:Users|home|Volumes|mnt)\/)[\w.\-\\/]*/g
@@ -141,11 +146,10 @@ const CROSS_PROJECT_IMPORT_RE =
  * 它是只在某一台開發機上成立的位置,別人 clone 下來直接壞掉,build 也不會過。
  * 寫在原始碼裡同樣是錯的,所以不限縮。
  */
-const ABSOLUTE_PATH_EXEMPT_RE = /lint-absolute-path-exempt/
 
 const checkAbsolutePath = ({ rel, text }) => {
   if (!ABSOLUTE_PATH_SCOPE.some((prefix) => rel.startsWith(prefix))) return []
-  if (ABSOLUTE_PATH_EXEMPT_RE.test(text)) return []
+  if (hasExemptMark(text, 'absolute-path')) return []
 
   const issues = []
   const seen = new Set()
@@ -188,32 +192,67 @@ const checkAbsolutePath = ({ rel, text }) => {
 //
 // 兩種情況不算裝飾,所以不抓:
 //
-//   一、工具在終端機印出來的狀態(通過與違規各一個記號)。那不是文件,
-//       是程式跑起來當下的回饋;一排訊息裡要能一眼分出哪幾筆有問題。
+//   一、工具在終端機印出來的狀態(通過、違規、擋下、提醒各一個記號)。
+//       那不是文件,是程式跑起來當下的回饋;一排訊息裡要能一眼分出哪幾筆有問題。
+//       **只有印出來的那一份合法** —— 同一個記號寫進註解或文件就是裝飾,
+//       照樣抓。分辨的方式是看它在不在字串裡(見 isInsideString)。
 //
 //   二、對照表裡表示「變成」的箭頭。那是資訊本身,不是裝飾 ——
-//       換成文字反而讓整欄對不齊、更難讀。
+//       換成文字反而讓整欄對不齊、更難讀,所以不分場合都放行。
 //
-// 兩者都列在 KEPT_MARKS,其餘的圖形符號一律抓。
+// 兩者分別列在 TERMINAL_MARKS 與 ARROW_MARKS,其餘的圖形符號一律抓。
 
 /**
- * 不算裝飾、可以留下來的符號。
+ * 終端機的狀態記號:通過、違規、擋下、提醒。
  *
- * 前五個是終端機的狀態記號:通過、違規、擋下、建議。
- * 那不是文件,是程式跑起來當下的回饋 ——
- * 一排訊息裡要能一眼分出哪幾筆通過、哪幾筆有問題、哪幾筆只是建議。
+ * **只有工具印出來的那一份合法,寫在註解或文件裡就是裝飾。**
+ * 印出來的那一份不是文件,是程式跑起來當下的回饋 ——
+ * 一排訊息裡要能一眼分出哪幾筆通過、哪幾筆有問題、哪幾筆只是提醒。
+ * 同一個字元寫進註解就沒有那個作用了,只剩下「這裡很重要」的語氣,
+ * 而語氣說不出「為什麼重要、不照做會怎樣」。
  *
- * 後三個是對照表裡表示「變成」的箭頭,那是資訊本身,不是裝飾。
- *
- * **取捨:同一個字元寫在註解裡就變成裝飾,規則分不出來。**
- * 判斷「它在字串字面值裡還是在註解裡」要解析整份程式碼,而解析錯的代價
- * 是誤報或漏報,比放行幾個符號嚴重。所以這幾個一律放行,
- * 註解裡不要用它們 —— 那一條靠人與 code review 守。
+ * 分辨的方式是看它在不在字串裡(見 isInsideString)——
+ * 工具要印出來的訊息一定是字串,註解與文件裡的則不是。
  *
  * 要再放行別的符號時加在這裡,不要改下面的偵測範圍 ——
  * 改範圍會連帶放行一整批沒想過的字元。
  */
-const KEPT_MARKS = new Set(['✔', '✓', '✗', '⛔', '⚠', '→', '←', '↔'])
+const TERMINAL_MARKS = new Set(['✔', '✓', '✗', '⛔', '⚠'])
+
+/**
+ * 對照表裡表示「變成」的箭頭(`舊名稱 → 新名稱`)。
+ *
+ * 這是資訊本身,不是裝飾 —— 換成文字反而讓整欄對不齊、更難讀,
+ * 所以不分場合一律放行。
+ */
+const ARROW_MARKS = new Set(['→', '←', '↔'])
+
+/**
+ * 這個位置在不在字串裡。
+ *
+ * 用來分辨「工具要印出來的訊息」與「寫給人讀的註解」——
+ * 前者一定包在引號裡,後者不是。
+ *
+ * 只看同一行:跨行的模板字串會被判成不在字串裡,那個方向是「多報一筆」,
+ * 看到的人自己判斷得出來;反過來放行才危險 —— 漏掉的裝飾符號不會有人發現。
+ *
+ * 跳脫過的引號(`\'`)不算開頭或結尾,否則一句 `don\'t` 會把後面整行
+ * 都算成字串外,那一行的符號就全部漏掉。
+ */
+const isInsideString = (line, index) => {
+  const quotes = { "'": 0, '"': 0, '`': 0 }
+
+  for (let i = 0; i < index; i += 1) {
+    const char = line[i]
+    if (char === '\\') {
+      i += 1
+      continue
+    }
+    if (char in quotes) quotes[char] += 1
+  }
+
+  return Object.values(quotes).some((count) => count % 2 === 1)
+}
 
 /**
  * 圖形符號與 emoji 的字元範圍 —— 各類圖示、雜項符號、裝飾記號與箭頭。
@@ -227,19 +266,30 @@ const KEPT_MARKS = new Set(['✔', '✓', '✗', '⛔', '⚠', '→', '←', '�
  */
 const DECORATIVE_RE = /[\u{1F000}-\u{1FAFF}\u{2190}-\u{21FF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}]/gu
 
-const PLAIN_TEXT_EXEMPT_RE = /lint-plain-text-exempt/
 
 const checkPlainText = ({ rel, text }) => {
   if (!WRITING_STYLE_SCOPE.some((prefix) => rel.startsWith(prefix))) return []
-  if (PLAIN_TEXT_EXEMPT_RE.test(text)) return []
+  if (hasExemptMark(text, 'plain-text')) return []
 
   const issues = []
   const seen = new Set()
 
+  const lines = text.split('\n')
+
   for (const m of text.matchAll(DECORATIVE_RE)) {
     const mark = m[0]
 
-    if (KEPT_MARKS.has(mark)) continue
+    if (ARROW_MARKS.has(mark)) continue
+
+    const line = lineNoOf(text, m.index)
+
+    /* 狀態記號只有工具印出來的那一份合法 —— 判斷它在不在字串裡。
+       行內位置要從整份文字的位置換算回來:比對是對整份做的,
+       而判斷字串只看同一行。 */
+    if (TERMINAL_MARKS.has(mark)) {
+      const lineStart = text.lastIndexOf('\n', m.index - 1) + 1
+      if (isInsideString(lines[line - 1], m.index - lineStart)) continue
+    }
 
     // 同一個符號只報一次 —— 一份文件裡同一個圖示常常出現幾十次
     if (seen.has(mark)) continue
@@ -248,10 +298,10 @@ const checkPlainText = ({ rel, text }) => {
     issues.push(
       issueOf(
         rel,
-        lineNoOf(text, m.index),
+        line,
         'plainText',
         `用了裝飾符號「${mark}」 —— 這些文字客戶會看到,要強調就把理由寫出來;` +
-          `終端機的狀態記號與對照表的箭頭不在此限`
+          `工具印出來的狀態記號(寫在字串裡的那些)與對照表的箭頭不在此限`
       )
     )
   }
@@ -310,11 +360,10 @@ const CROSS_REFERENCE_RE = new RegExp(
   'g'
 )
 
-const SELF_CONTAINED_EXEMPT_RE = /lint-self-contained-exempt/
 
 const checkSelfContained = ({ rel, text }) => {
   if (!WRITING_STYLE_SCOPE.some((prefix) => rel.startsWith(prefix))) return []
-  if (SELF_CONTAINED_EXEMPT_RE.test(text)) return []
+  if (hasExemptMark(text, 'self-contained')) return []
 
   const issues = []
   const seen = new Set()

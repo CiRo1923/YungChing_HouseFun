@@ -15,6 +15,7 @@ import {
   bodyRangeOf,
   isComponentFile,
   isInSrc,
+  hasExemptMark,
   issueOf,
   lineNoOf,
 } from './shared.mjs'
@@ -226,12 +227,11 @@ const resolveImport = (root, fromFile, spec) => {
  * 那種判斷會放行,而那正是最該擋下來的時候。由人判斷、理由留在程式碼裡,
  * 下一個人看到才知道那不是漏寫。
  */
-const PAGE_API_EXEMPT_RE = /lint-page-api-exempt/
 
 const checkPageApiImport = ({ rel, text, root }) => {
   if (!isInSrc(rel) || !rel.endsWith('.vue')) return []
 
-  const isPageExempt = PAGE_API_EXEMPT_RE.test(text)
+  const isPageExempt = hasExemptMark(text, 'page-api')
   const apiRoot = path.resolve(root, API_DIR)
   const isComponent = isComponentFile(rel)
   const issues = []
