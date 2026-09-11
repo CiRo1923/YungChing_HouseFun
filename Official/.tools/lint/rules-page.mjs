@@ -138,7 +138,7 @@ const checkPageActionNaming = ({ rel, text }) => {
   for (const w of wrappers) byShort.set(w.short, [...(byShort.get(w.short) ?? []), w])
 
   const keepShort = new Set()
-  for (const [short, group] of byShort) {
+  for (const group of byShort.values()) {
     if (group.length < 2) continue
 
     const reader = group.find((w) => /^onApiGet/.test(w.called))

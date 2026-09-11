@@ -25,7 +25,6 @@ import {
   isColorCssPath,
   loadDefinedColorVars,
   sortColorCss,
-  sortDecls,
 } from './color-order.mjs'
 import {
   RULE_HINT,
