@@ -550,7 +550,7 @@ const isHueLabel = (comment) => {
  * 工具自己產生的分類標籤(內容只有色相名的那種)不算人寫的,重建時重新產生 ——
  * 留著的話,每排序一次就多疊一層舊標籤。
  */
-const buildBlockBody = (items, indent) => {
+const buildBlockBody = (items, indent, withLabels) => {
   const lines = []
   let currentHue
 
@@ -558,7 +558,7 @@ const buildBlockBody = (items, indent) => {
     const hue = hueOf(item.name, item.value)
     const label = hue === null ? 'other' : HUE_LABEL[hue]
 
-    if (label !== currentHue) {
+    if (withLabels && label !== currentHue) {
       if (lines.length) lines.push('')
       lines.push(`${indent}/* ${label} */`)
       currentHue = label
@@ -575,6 +575,19 @@ const buildBlockBody = (items, indent) => {
 }
 
 /**
+ * 這一組原本有沒有色相分類標籤。
+ *
+ * **排序只換順序,不改檔案的風格。** 原本就有標籤的色票,排完仍然有;
+ * 原本沒有的,不會因為排了一次就多出十幾行英文標頭 ——
+ * 那是自動改檔,而且改的是「要不要這種註解」這種專案自己的決定。
+ *
+ * 用現況判斷而不是設定:多一個設定就要每個專案回答一次「你要不要標頭」,
+ * 而答案早就寫在他們的色票檔裡了。
+ */
+const hasHueLabels = (items) =>
+  items.some((item) => (item.comments ?? []).some(isHueLabel))
+
+/**
  * 把一組色票的內容換成給定的那幾筆(會先排序),回傳整份新的文字。
  *
  * 只動這一組的大括號之內,區塊外的內容(選擇器、巢狀的外層、檔頭註解)原樣不動。
@@ -582,7 +595,9 @@ const buildBlockBody = (items, indent) => {
  * 會開始有出入,而那種差異每次存檔都會製造一筆假的改動。
  */
 export const writeColorBlock = (text, block, items) => {
-  const body = buildBlockBody(sortDecls(items), block.indent)
+  /* 標籤跟著這一組原本的樣子 —— 用 block.items(檔案裡現在的內容)判斷,
+     不是用傳進來的 items:加變數時那幾筆是新的,身上沒有註解可看。 */
+  const body = buildBlockBody(sortDecls(items), block.indent, hasHueLabels(block.items))
 
   /* 右大括號維持它原本的縮排 —— 從原文取,不從宣告的縮排推算:
      推算要假設每一層縮排幾個空白,而那是每個專案自己的排版慣例。 */

@@ -42,7 +42,7 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import {
   COLOR_NAME_SEPARATOR,
   addColorDecls,
@@ -60,6 +60,7 @@ import {
   checkSharedColors,
   lintFile,
   lintText,
+  PROJECT_RULE_PREFIX,
   onRemoveEmptyRules,
   onFixLegacyRgba,
   onSortComposables,
@@ -2370,8 +2371,24 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
 
 ]
 
-/** 整份案例 —— 兩份合起來就是這支腳本實際要跑的 */
-const CASES = [...CSS_CASES, ...RULE_CASES]
+/**
+ * 這個專案自己的規則,連同它的驗證案例。
+ *
+ * 規則與案例放在同一支檔案(`.tools/lint/rules-project.mjs` 的 `PROJECT_CASES`)——
+ * 分成兩支的話,改了規則忘了改案例不會有人發現,而那正是「規則靜靜失效」的來源。
+ *
+ * 沒有那支檔案就是空的,一切照舊。
+ */
+const projectRulesFile = path.join(root, '.tools', 'lint', 'rules-project.mjs')
+
+const projectRules = fs.existsSync(projectRulesFile)
+  ? await import(pathToFileURL(projectRulesFile))
+  : {}
+
+const PROJECT_CASES = projectRules.PROJECT_CASES ?? []
+
+/** 整份案例 —— 三份合起來就是這支腳本實際要跑的 */
+const CASES = [...CSS_CASES, ...RULE_CASES, ...PROJECT_CASES]
 
 /**
  * 色票排序的行為驗證(不需要探測檔)。
@@ -2716,6 +2733,39 @@ const WRAP_MOUNTED_CASES = [
  *
  * 探針餵一段會讓規則拋錯的輸入:`text` 給 null,任何一條規則一碰它就爆。
  */
+/**
+ * 這個專案自己的規則,每一條都要有案例。
+ *
+ * 「每條規則都要有案例」是這套工具最有效的一道 —— 規則改壞了、漏了 import、
+ * 判準寫反了,都是靠案例當場失敗才被發現的。專案自己加的規則如果不受這道約束,
+ * 它就成了整套裡唯一沒有人驗的部分,而那種規則壞掉時畫面上顯示的是通過。
+ *
+ * 沒有專案規則檔時這一則什麼都不做。
+ */
+const onCheckProjectRules = () => {
+  const codes = Object.keys(projectRules.PROJECT_RULE_TITLE ?? {})
+  if (!codes.length) return
+
+  const wrongPrefix = codes.filter((code) => !code.startsWith(PROJECT_RULE_PREFIX))
+
+  report(
+    !wrongPrefix.length,
+    `專案自己的規則代號以 ${PROJECT_RULE_PREFIX} 開頭`,
+    wrongPrefix.length ? [`沒有前綴:${wrongPrefix.join('、')}`] : []
+  )
+
+  const tested = new Set(PROJECT_CASES.map((c) => c.rule).filter(Boolean))
+  const untested = codes.filter((code) => !tested.has(code))
+
+  report(
+    !untested.length,
+    '專案自己的規則每一條都有驗證案例',
+    untested.length
+      ? [`這幾條沒有案例:${untested.join('、')}(案例寫在 rules-project.mjs 的 PROJECT_CASES,用 rule 指定是哪一條)`]
+      : []
+  )
+}
+
 const onCheckRuleCrash = () => {
   let issues = []
 
@@ -2792,6 +2842,20 @@ const onCheckThemeBlocks = () => {
     sorted.includes('這一行是人寫的說明'),
     '色票:排序不會刪掉人寫的註解',
     sorted.includes('這一行是人寫的說明') ? [] : ['那句說明在排序後不見了']
+  )
+
+  /* 色相分類標籤跟著檔案原本的樣子:排序只換順序,不改風格。
+     原本沒有標籤的色票排一次就多出十幾行英文標頭的話,那是自動改檔,
+     而且改的是「要不要這種註解」這種專案自己的決定。 */
+  const plain = ':root {\n  --probe-b: #000000;\n  --probe-a: #ffffff;\n}\n'
+  const plainSorted = sortColorCss(plain) ?? plain
+  const gotLabels = /\/\*\s*(?:white|black|other)\s*\*\//.test(plainSorted)
+  const reordered = plainSorted.indexOf('--probe-a') < plainSorted.indexOf('--probe-b')
+
+  report(
+    !gotLabels && reordered,
+    '色票:原本沒有色相標籤的檔案,排序後也不會多出標籤',
+    gotLabels ? ['排序替它加上了色相標籤'] : ['排序沒有生效']
   )
 
   /* 兩組主題時不自動加變數 —— 新變數在淺色與深色該是不同的值,那是設計決定。
@@ -3263,6 +3327,7 @@ try {
   onCheckConfigItem()
   onCheckThemeBlocks()
   onCheckRuleCrash()
+  onCheckProjectRules()
 
   for (const c of MAJORITY_CASES) {
     const actual = majorityHueSource(c.style)
