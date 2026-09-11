@@ -30,6 +30,7 @@ import { CODE_CHECKS, CODE_RULE_HINT, CODE_RULE_TITLE } from './rules-code.mjs'
 import { GLOBAL_CHECKS, GLOBAL_RULE_HINT, GLOBAL_RULE_TITLE } from './rules-global.mjs'
 import { PAGE_CHECKS, PAGE_RULE_HINT, PAGE_RULE_TITLE } from './rules-page.mjs'
 import { STORE_CHECKS, STORE_RULE_HINT, STORE_RULE_TITLE } from './rules-store.mjs'
+import { SCAN_TARGETS, listFiles } from './shared.mjs'
 
 /* 五組外部規範,依序跑。它們收的是 ctx 物件(見 lintFile 結尾的說明),
   與這一支的 CSS 規則簽名不同,所以分開收集、在 lintFile 裡各自呼叫。 */
@@ -79,12 +80,23 @@ export const RULE_HINT = {
   ...PAGE_RULE_HINT,
 }
 
-/* 掃描範圍一律走 shared.mjs,這裡只是轉出去給各層用。
+/* 掃描範圍一律走 shared.mjs,這裡轉出去給各層用。
 
   注意:不要在這裡另外定義一份。掃描範圍與規則的適用範圍要由同一份設定長出來,
       兩邊不一致的話,規則會宣告自己管某個目錄、但掃描根本不走訪它 ——
-      那個目錄就等於沒有被檢查過,而且不會有任何徵兆。 */
-export { PENDING_CACHE_FILE, SCAN_TARGETS, isScannable, isWarn, listFiles, toRel } from './shared.mjs'
+      那個目錄就等於沒有被檢查過,而且不會有任何徵兆。
+
+  注意:import 與 export 兩行都要有。`export { X } from` 是純轉送,
+      **不會把名字帶進這個模組的作用域** —— 少了 import 那行,
+      這支檔案自己用到 SCAN_TARGETS / listFiles 的地方會在執行時才炸。 */
+export {
+  PENDING_CACHE_FILE,
+  SCAN_TARGETS,
+  isScannable,
+  isWarn,
+  listFiles,
+  toRel,
+} from './shared.mjs'
 
 /**
  * 副檔名不是 .vue / .css,但**會產生 CSS** 的設定檔 —— 只檢查顏色。
