@@ -354,7 +354,11 @@ const checkStoreLayer = ({ rel, text, root }) => {
   const pages = []
 
   for (const page of listPageFiles(root, name)) {
-    let pageText = ''
+    /* 刻意不給初值:讀失敗的那一條路直接 continue,下面用得到它時一定已經讀成功。
+       給了初值反而讓「讀失敗」變成拿空字串繼續判斷,而空字串看起來就像
+       「這一頁沒有打 api」—— 那一頁會被靜靜地跳過。 */
+    let pageText
+
     try {
       pageText = fs.readFileSync(page.abs, 'utf8')
     } catch {
