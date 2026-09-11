@@ -451,6 +451,18 @@ const LAYER_WRITE_RE = /\b(\w+)\.value\b/g
 
 const upperFirst = (s) => s.charAt(0).toUpperCase() + s.slice(1)
 
+/**
+ * 兩個 action 名稱算不算同一個 —— 比對時忽略底線。
+ *
+ * endpoint 裡出現底線時(`questionnaire/q3_1`),api 那層照著寫成
+ * `apiPostQuestionnaireQ3_1`,名字與網址一眼對得起來;
+ * 但 action 是程式裡到處被呼叫的識別字,底線夾在數字中間讀起來卡,
+ * 所以那一層寫成 `onApiPostQuestionnaireQ31`。
+ *
+ * 兩層只差這一個符號,不該因此被判成「名稱對不上」。
+ */
+const isSameActionName = (a, b) => a.replace(/_/g, '') === b.replace(/_/g, '')
+
 const checkActionApiNaming = ({ rel, text }) => {
   if (!isActionsFile(rel)) return []
 
@@ -511,7 +523,7 @@ const checkActionApiNaming = ({ rel, text }) => {
     /* 這支 api 只有一個 action 在用 —— 名字維持最短,不必帶層名。
        帶了也不算錯(層名後綴無法與 endpoint 的最後一段區分),所以只比對基本形。 */
     if (countByApi.get(api) === 1) {
-      if (a.name === base) continue
+      if (isSameActionName(a.name, base)) continue
 
       issues.push(
         issueOf(
@@ -526,7 +538,7 @@ const checkActionApiNaming = ({ rel, text }) => {
 
     // 兩個以上的 action 用同一支 api —— 各自要帶上自己寫進哪一層
     const expected = a.layers.map((layer) => `${base}${upperFirst(layer)}`)
-    if (expected.includes(a.name)) continue
+    if (expected.some((name) => isSameActionName(a.name, name))) continue
 
     const hint = expected.length
       ? `建議 ${expected.join(' 或 ')}`

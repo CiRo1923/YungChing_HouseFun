@@ -29,8 +29,11 @@ import {
   RULE_HINT,
   RULE_TITLE,
   checkSharedColors,
+  isScannable,
   lintFile,
   onRemoveEmptyRules,
+  onSortComposables,
+  onWrapMountedCalls,
 } from './lint-core.mjs'
 /* 專案根與快取路徑一律 import,不要自己算 ——
   對話那層(.claude/hooks/css-guard-prompt.js)讀的是同一份常數,
@@ -55,7 +58,10 @@ const abs = path.resolve(projectRoot, target)
 const rel = path.relative(projectRoot, abs).split(path.sep).join('/')
 
 if (rel.startsWith('..')) process.exit(0)
-if (!/\.(vue|css)$/.test(rel)) process.exit(0)
+/* 範圍與其他四層一致 —— 走引擎的 isScannable(讀 SCANNABLE_EXTENSIONS)。
+  自己寫一份副檔名判斷的話,規則涵蓋 .js / .mjs / .md 之後這一層還停在
+  只看 .vue / .css,那些檔案存檔時就完全沒有守門,而且不會有任何徵兆。 */
+if (!isScannable(abs)) process.exit(0)
 if (!fs.existsSync(abs)) process.exit(0)
 
 const lines = []
@@ -96,6 +102,34 @@ const onCleanEmptyRules = () => {
       : `🔧 ${rel} 有空的規則區塊(產物不會有輸出),已自動移除。`
   )
   lines.push('')
+}
+
+/**
+ * 進入頁面要拿的資料,包成一起發出。
+ *
+ * 一支一支 await 的話,第二支要等第一支回來才開始,使用者等的是每一支的時間加總;
+ * 包在一起則是同時發出,等的是最慢的那一支。
+ *
+ * 有三種情況不會動:後面那支拿前面的結果當參數、那一行接收了回傳值、
+ * 中間夾了別的語句 —— 那些都代表有順序安排,合併會打散它。
+ */
+const onWrapMounted = () => {
+  const original = fs.readFileSync(abs, 'utf8')
+  const wrapped = onWrapMountedCalls(original, rel)
+  if (!wrapped) return
+
+  fs.writeFileSync(abs, wrapped, 'utf8')
+  lines.push(`[自動修正] ${rel} 進入頁面要拿的資料已自動包成一起發出。`, '')
+}
+
+/** store / actions 的宣告順序,依規範排好(純粹換位置,不改任何行為) */
+const onSortDeclarations = () => {
+  const original = fs.readFileSync(abs, 'utf8')
+  const sorted = onSortComposables(original, rel)
+  if (!sorted) return
+
+  fs.writeFileSync(abs, sorted, 'utf8')
+  lines.push(`[自動修正] ${rel} store / actions 的宣告順序已自動排好。`, '')
 }
 
 const readJson = (file, fallback) => {
@@ -167,6 +201,8 @@ const onLint = () => {
 try {
   if (isColorCssPath(rel)) onSortColorCss()
   onCleanEmptyRules()
+  onSortDeclarations()
+  onWrapMounted()
   onLint()
 } catch (err) {
   console.error(`[css-guard] 檢查失敗:${err.message}`)

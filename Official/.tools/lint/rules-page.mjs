@@ -62,6 +62,20 @@ const checkPageApiData = ({ rel, text }) => {
 // 頁面那層把 Api 與 method 拿掉,是因為在頁面裡它就是個一般的事件處理函式
 // (通常還會接 callback、開關 loading),method 是底層的事;但 endpoint 留著,
 // 才看得出它背後打的是哪一支 api。
+//
+// **例外:去掉 method 之後會撞名的,就保留 method 那一段。**
+//
+//   讀一筆  apiGetMemberPetID  → onApiGetMemberPetID    → onMemberPetID
+//   刪一筆  apiDeleteMemberPetID → onApiDeleteMemberPetID → onDeleteMemberPetID
+//
+// 刪除那支保留了 Delete —— 去掉的話會與上面那支同名。
+//
+// 同一個 endpoint 有兩個 method 時(讀一筆、刪一筆),method 正是區分它們的
+// 唯一資訊。兩支都去掉的話,同一支檔案裡會出現兩個同名的函式,
+// 那不只是命名不好看,是程式直接壞掉。
+//
+// 撞名時「少去掉一段」而不是「加後綴」:這樣它與 action 那層只差一個 Api,
+// 而 method 擺在前面也與 api 檔的命名順序一致。
 
 /**
  * HTTP method 那一段 —— 頁面那層要去掉它。
@@ -82,10 +96,11 @@ const checkPageActionNaming = ({ rel, text }) => {
   // 元件也會包裝 action,不限頁面目錄
   if (!isInSrc(rel) || !rel.endsWith('.vue')) return []
 
-  const issues = []
+  /* 先收齊這支檔案裡所有包裝 action 的函式,再一起判斷 ——
+     「去掉 method 之後會不會與別支撞名」要看過整份檔案才知道。 */
+  const wrappers = []
 
   for (const m of text.matchAll(PAGE_FN_RE)) {
-    const name = m[1]
     const body = bodyRangeOf(text, m.index + m[0].length - 1)
 
     const called = [
@@ -99,16 +114,55 @@ const checkPageActionNaming = ({ rel, text }) => {
     if (!called.length) continue
     if (called.length > 1) continue // 打多支時無法斷定該用哪一支的名字
 
-    // onApiGetMemberVoucherID → GetMemberVoucherID → MemberVoucherID → onMemberVoucherID
-    const expected = `on${called[0].replace(/^onApi/, '').replace(METHOD_SEGMENT_RE, '')}`
-    if (name === expected) continue
+    const withoutApi = called[0].replace(/^onApi/, '')
+
+    wrappers.push({
+      name: m[1],
+      called: called[0],
+      index: m.index,
+      // onApiGetMemberVoucherID → GetMemberVoucherID → MemberVoucherID → onMemberVoucherID
+      short: `on${withoutApi.replace(METHOD_SEGMENT_RE, '')}`,
+      // 撞名時用的完整形:只去掉 Api,method 留著
+      full: `on${withoutApi}`,
+    })
+  }
+
+  /* 去掉 method 之後撞在一起的那幾支,改用保留 method 的名字。
+     不這樣做的話,規則會建議一個「照著改就會出現兩個同名函式」的名字。
+
+     撞名的那一組裡,**讀取那支維持短名**,其餘才帶 method ——
+     讀一筆是這個 endpoint 的預設操作,寫入與刪除是對它做的事。
+     全部都帶的話,最常用的那支名字反而變長了。
+     整組都沒有讀取時(例如新增與刪除撞在一起),就每一支都帶。 */
+  const byShort = new Map()
+  for (const w of wrappers) byShort.set(w.short, [...(byShort.get(w.short) ?? []), w])
+
+  const keepShort = new Set()
+  for (const [short, group] of byShort) {
+    if (group.length < 2) continue
+
+    const reader = group.find((w) => /^onApiGet/.test(w.called))
+    if (reader) keepShort.add(reader)
+  }
+
+  const issues = []
+
+  for (const w of wrappers) {
+    const isClashing = byShort.get(w.short).length > 1 && !keepShort.has(w)
+    const expected = isClashing ? w.full : w.short
+
+    if (w.name === expected) continue
+
+    const why = isClashing
+      ? '只去掉 Api —— 這一頁有兩支 api 只差在 method,去掉 method 會撞名'
+      : '去掉 Api 與 method 那一段'
 
     issues.push(
       issueOf(
         rel,
-        lineNoOf(text, m.index),
+        lineNoOf(text, w.index),
         'pageActionNaming',
-        `${name} 呼叫的是 ${called[0]},名稱要對得上 —— 建議 ${expected}(去掉 Api 與 method 那一段)`
+        `${w.name} 呼叫的是 ${w.called},名稱要對得上 —— 建議 ${expected}(${why})`
       )
     )
   }

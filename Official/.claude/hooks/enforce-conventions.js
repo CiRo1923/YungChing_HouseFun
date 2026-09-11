@@ -370,6 +370,34 @@ const onCheckAbsolutePath = (content) => {
   )
 }
 
+/* 規則 11:同步規範複本之前,把來源目錄的每一支檔案都重新讀一次
+
+  .claude/rules/、.claude/skills/、.tools/lint/ 這幾處是另一個專案的複本。
+  同步時**不要自己列一份「要比對哪幾支」的清單** —— 那份清單會過期,
+  而漏掉的那一支不會有任何徵兆,只會讓人以為「那邊還沒做」。
+
+  做法是用來源目錄的實際內容跑一遍,而不是憑記憶列檔名。
+
+  三件事要一起注意:
+
+    每一輪都重新讀      不要引用上一輪 diff 的結果 —— 對方可能在那之後才改
+    差異大不等於要同步  引擎的 CSS 規則各專案不同是刻意的,新增的模組才是要搬的
+    先讀再回報          說「那邊還沒做某件事」之前,確認這一輪真的讀過那支檔案
+
+  這條在寫入規範目錄時提醒,因為同步一定會寫到這裡。 */
+const SYNC_SCOPE = /(^|\/)(\.claude\/(rules|skills)|\.tools\/lint)\//
+
+const onCheckSyncScope = (filePath) => {
+  if (!SYNC_SCOPE.test(filePath.replaceAll('\\', '/'))) return null
+
+  return (
+    '[sync] 這支檔案在規範複本的範圍內。如果這次是在同步另一個專案的版本,' +
+    '先列出來源目錄的實際內容、逐支比對,不要只看記得的那幾支 —— ' +
+    '漏掉一支不會報錯,只會讓人以為那邊還沒做。' +
+    '每一輪都重新讀對方的檔案,不要引用上一輪比對的結果。'
+  )
+}
+
 let input = ''
 
 process.stdin
@@ -393,6 +421,7 @@ process.stdin
         onCheckReference(content, filePath),
         onCheckAbsolutePath(content),
         onCheckProjectName(content, filePath),
+        onCheckSyncScope(filePath),
       ].filter(Boolean)
 
       if (!messages.length) return
