@@ -10,6 +10,7 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import {
   baseNameOf,
   bodyOf,
@@ -1315,6 +1316,53 @@ export const onRemoveEmptyRules = (text, { rel = '' } = {}) => {
 
 // --- 對外入口 ---------------------------------------------------------------
 
+/**
+ * 這個專案自己的規則 —— 有些規範只有這個專案需要,不適合放進每個專案都拿到的那一套。
+ *
+ * 放在 `.tools/lint/rules-project.mjs`,**有就讀、沒有就跳過**。
+ * 那支檔案要匯出三樣東西,形狀與別的規則檔一樣:
+ *
+ *   PROJECT_CHECKS      檢查函式,每一支收 ctx、回傳違規陣列
+ *   PROJECT_RULE_TITLE  代號 → 標題
+ *   PROJECT_RULE_HINT   代號 → 怎麼修
+ *   PROJECT_CASES       驗證案例(self-test 會讀,形狀與它裡面的案例相同)
+ *
+ * **代號一律以 `project:` 開頭。** 不加前綴的話,專案自己的規則有一天會與
+ * 來源的規則撞名 —— 那時同一個代號底下有兩種判準,而看訊息的人分不出是哪一種。
+ * 前綴也讓人一眼看出「這條只有這個專案有」,搬到別的專案時不必猜。
+ *
+ * **來源整套覆蓋時不會動到這支檔案**(它不在來源裡),所以專案自己的規則不會被蓋掉。
+ * 反過來,這支檔案裡的東西也不該複製回來源 —— 那是這個專案的需求,
+ * 每個專案都拿到的話,不需要的那幾個會被迫標例外。
+ */
+const loadProjectRules = async () => {
+  const file = path.join(root, '.tools', 'lint', 'rules-project.mjs')
+  if (!fs.existsSync(file)) return { checks: [], title: {}, hint: {} }
+
+  const mod = await import(pathToFileURL(file))
+  const checks = mod.PROJECT_CHECKS ?? []
+  const title = mod.PROJECT_RULE_TITLE ?? {}
+  const hint = mod.PROJECT_RULE_HINT ?? {}
+
+  /* 代號沒有前綴時**講出來並跳過那一條** —— 靜靜地收下的話,
+     它會與來源的規則混在同一份清單裡,撞名時沒有人看得出來。 */
+  const bad = Object.keys(title).filter((code) => !code.startsWith(PROJECT_RULE_PREFIX))
+  if (bad.length) {
+    console.error(
+      `[lint] .tools/lint/rules-project.mjs 的代號要以 ${PROJECT_RULE_PREFIX} 開頭:${bad.join('、')}`
+    )
+  }
+
+  return { checks, title, hint }
+}
+
+/** 專案自己的規則代號一律用這個開頭 —— 與來源的規則分得開 */
+export const PROJECT_RULE_PREFIX = 'project:'
+
+const root = path.resolve(fileURLToPath(import.meta.url), '../../..')
+
+const PROJECT_RULES = await loadProjectRules()
+
 const CHECKS = [
   checkLiteralColor,
   checkColorFile,
@@ -1338,6 +1386,8 @@ const CHECKS = [
   ...CODE_CHECKS,
   // 頁面規範 —— 判斷寫在 rules-page.mjs
   ...PAGE_CHECKS,
+  // 這個專案自己的規則(有的話)—— 見下方 loadProjectRules
+  ...PROJECT_RULES.checks,
 ]
 
 /**
@@ -1406,6 +1456,8 @@ export const RULE_TITLE = {
   ...STORE_RULE_TITLE,
   ...CODE_RULE_TITLE,
   ...PAGE_RULE_TITLE,
+  // 這個專案自己的規則(有的話)
+  ...PROJECT_RULES.title,
 }
 
 export const RULE_HINT = {
@@ -1425,4 +1477,5 @@ export const RULE_HINT = {
   ...STORE_RULE_HINT,
   ...CODE_RULE_HINT,
   ...PAGE_RULE_HINT,
+  ...PROJECT_RULES.hint,
 }
