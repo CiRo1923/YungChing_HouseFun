@@ -16,7 +16,6 @@ import {
   allColorDecls,
   COLOR_CSS_PREFIX,
   COLOR_NAME_SEPARATOR,
-  channelOfColorCss,
   expectedSuffix,
   hexOf,
   hueOf,
@@ -1352,8 +1351,25 @@ export const lintText = (root, rel, text, definedVars) => {
   return CHECKS.flatMap((check) => {
     try {
       return check(ctx)
-    } catch {
-      return [] // 單條規則壞掉不要讓整個檢查停擺
+    } catch (err) {
+      /*
+       * 單條規則壞掉不讓整個檢查停擺,但**一定要講出來**。
+       *
+       * 安靜地回傳空陣列的話,那條規則從此不再抓任何東西,而畫面上顯示的是通過 ——
+       * 最常見的成因是搬了函式卻沒搬它的 import(執行到那一行才爆),
+       * 那種錯誤放著沒有人會發現。
+       *
+       * 報成違規而不是印在旁邊:違規會跟著五層守門一起出現在存檔、commit、
+       * 對話提醒裡,印在旁邊的訊息只有當下跑指令的人看得到。
+       */
+      return [
+        issueOf(
+          rel,
+          1,
+          'ruleCrashed',
+          `規則 ${check.name || '(匿名)'} 這次執行失敗,它沒有檢查這支檔案 —— ${err.message}`
+        ),
+      ]
     }
   }).sort((a, b) => a.line - b.line)
 }
@@ -1364,6 +1380,9 @@ export const lintFile = (root, abs, definedVars) =>
 
 /** 規則代號 → 標題與修正提示,五層共用 */
 export const RULE_TITLE = {
+  /* 規則自己壞掉 —— 不是程式碼違規,但要跟違規一起被看到:
+     安靜地跳過的話,那條規則從此不抓任何東西,而畫面上顯示的是通過。 */
+  ruleCrashed: '規則執行失敗,這支檔案沒有被那條規則檢查',
   color: '顏色未使用色票變數',
   colorFile: '色票檔的命名 / 排序 / 分組歸屬',
   tailwind: 'components 的 template 使用 tailwind class',
@@ -1381,6 +1400,7 @@ export const RULE_TITLE = {
 }
 
 export const RULE_HINT = {
+  ruleCrashed: '多半是搬了函式卻沒搬它的 import —— 跑 npx eslint .tools/ 會指出是哪一個名字',
   color: `色票定義在 ${COLOR_CSS_DIR}/${COLOR_CSS_PREFIX}*.css,使用端寫 var(--色名-色碼)`,
   colorFile: `跨分組共用的色值收進 ${SHARED_COLOR_CSS_PATH};排序會自動修正,命名要人工改(牽動使用端)`,
   tailwind: `樣式搬進 ${CSS_MODULES_DIR}/,template 只留組件 class 與 --modifier`,

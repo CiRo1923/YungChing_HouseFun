@@ -58,6 +58,7 @@ import {
 import {
   checkSharedColors,
   lintFile,
+  lintText,
   onRemoveEmptyRules,
   onFixLegacyRgba,
   onSortComposables,
@@ -2676,6 +2677,34 @@ const WRAP_MOUNTED_CASES = [
  * 探針直接餵給解析函式,不寫成檔案案例:這幾件事問的是解析與重建本身,
  * 與「哪一支檔案算色票」無關,寫成檔案還要遷就色票檔的命名才掃得到。
  */
+/**
+ * 規則自己壞掉時,要講出來而不是安靜跳過。
+ *
+ * 最常見的成因是搬了函式卻沒搬它的 import —— 那種錯誤在載入時不會報,
+ * 要執行到那一行才爆。爆了如果被接住並回傳空陣列,那條規則從此不抓任何東西,
+ * 而畫面上顯示的是通過:一顆看不見的未爆彈,通常要幾個月後才被發現。
+ *
+ * 探針餵一段會讓規則拋錯的輸入:`text` 給 null,任何一條規則一碰它就爆。
+ */
+const onCheckRuleCrash = () => {
+  let issues = []
+
+  try {
+    issues = lintText(root, `${M}/probeCrash.css`, null)
+  } catch (err) {
+    report(false, '規則壞掉時要報出來,不能安靜跳過', [`整個檢查停擺了:${err.message}`])
+    return
+  }
+
+  const crashed = issues.filter((i) => i.rule === 'ruleCrashed')
+
+  report(
+    crashed.length > 0,
+    '規則壞掉時要報出來,不能安靜跳過',
+    crashed.length ? [] : ['規則拋錯了,但檢查結果是空的 —— 那會顯示成通過']
+  )
+}
+
 const onCheckThemeBlocks = () => {
   const light = '&.\\-\\-light'
   const dark = '&.\\-\\-dark'
@@ -3177,6 +3206,7 @@ try {
   onCheckViewDepth()
   onCheckConfigItem()
   onCheckThemeBlocks()
+  onCheckRuleCrash()
 
   for (const c of MAJORITY_CASES) {
     const actual = majorityHueSource(c.style)
