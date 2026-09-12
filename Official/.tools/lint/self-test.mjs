@@ -92,7 +92,12 @@ import {
   VIEW_RESOURCE_DEPTH,
   VIEWS_DIR,
 } from './project-config.mjs'
-import { detectViewResourceDepth, listConventionRules, listConventionSkills } from './shared.mjs'
+import {
+  detectViewResourceDepth,
+  listConventionRules,
+  listConventionSkills,
+  listViewFolders,
+} from './shared.mjs'
 import { BOLD, GREEN, RED, RESET, YELLOW } from './colors.mjs'
 
 const root = path.resolve(fileURLToPath(import.meta.url), '../../..')
@@ -1568,7 +1573,7 @@ const RULE_CASES = [
     file: `${A}/selfTestAlpha.js`,
     code: `import { onFetchApi } from '@js/_api/.export.js'\n\nconst api = onFetchApi({ baseURL: '/api/' })\n`,
     expect: 1,
-    keyword: '實例只建在',
+    keyword: 'onFetchApi',
   },
 
   // ---------- 規則 storeDir ----------
@@ -2742,6 +2747,61 @@ const WRAP_MOUNTED_CASES = [
  *
  * 沒有專案規則檔時這一則什麼都不做。
  */
+/**
+ * api 目錄再分一層時,資源是哪一個名字。
+ *
+ * 有的專案的 api 依「服務」分層,每一層有自己的連線設定(.config.js)——
+ * 那一層才是資源,底下的檔案是它的功能分檔。沒有 .config.js 的資料夾只是分類,
+ * 資源仍然是檔名。
+ *
+ * 分不出這兩種的話,分層專案的每一支 api 都會被報「對不上資料夾」,
+ * 而它們其實都對得上 —— 一整批誤報會讓人乾脆忽略整條規則。
+ *
+ * 這一則實際建出兩種形狀再刪掉,不用寫死任何專案的目錄名。
+ */
+const onCheckApiLayers = () => {
+  const folders = [...(listViewFolders(root) ?? [])]
+  if (!folders.length) return
+
+  const resource = folders[0] // 拿這個專案真的有的頁面資源來造探針
+  const apiAbs = path.join(root, ...API_DIR.split('/'))
+  const svc = path.join(apiAbs, resource)
+  const group = path.join(apiAbs, `${PROBE}Group`)
+
+  const code = `import { fetchApi } from '@js/_api/.config.js'\n\nexport const apiGetX = (data) => fetchApi.get('x', data)\n`
+  const scopeOf = (rel) => lintText(root, rel, code).filter((i) => i.rule === 'apiScope')
+
+  try {
+    fs.mkdirSync(svc, { recursive: true })
+    fs.mkdirSync(group, { recursive: true })
+    fs.writeFileSync(path.join(svc, '.config.js'), 'export const fetchApi = {}\n', 'utf8')
+
+    const asService = scopeOf(`${API_DIR}/${resource}/list.js`)
+    report(
+      !asService.length,
+      'apiScope 服務分層:那一層有自己的 .config.js 時,資源是那一層',
+      asService.map((i) => i.detail)
+    )
+
+    const asGroup = scopeOf(`${API_DIR}/${PROBE}Group/${resource}.js`)
+    report(
+      !asGroup.length,
+      'apiScope 單純分類:那一層沒有 .config.js 時,資源仍是檔名',
+      asGroup.map((i) => i.detail)
+    )
+
+    const bad = scopeOf(`${API_DIR}/${PROBE}Group/${PROBE}Nowhere.js`)
+    report(
+      bad.length === 1,
+      'apiScope 分類層底下檔名對不上,照樣要報',
+      bad.length ? [] : ['對不上的檔名沒有被報出來']
+    )
+  } finally {
+    fs.rmSync(svc, { recursive: true, force: true })
+    fs.rmSync(group, { recursive: true, force: true })
+  }
+}
+
 const onCheckProjectRules = () => {
   const codes = Object.keys(projectRules.PROJECT_RULE_TITLE ?? {})
   if (!codes.length) return
@@ -3328,6 +3388,7 @@ try {
   onCheckThemeBlocks()
   onCheckRuleCrash()
   onCheckProjectRules()
+  onCheckApiLayers()
 
   for (const c of MAJORITY_CASES) {
     const actual = majorityHueSource(c.style)
