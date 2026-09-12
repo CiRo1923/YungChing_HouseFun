@@ -1,16 +1,16 @@
 {
-  "checksum.mjs": "55ef419257c63e2f",
+  "checksum.mjs": "da27abdcc5052c9a",
   "color-order.mjs": "ae880ee17cbd63c0",
   "colors.mjs": "569d6edb931b66c2",
   "guard-file.mjs": "611007c0230cc091",
   "lint-core.mjs": "3ef7f572c61742ae",
   "lint.mjs": "df1c710b6e08416e",
-  "preflight.mjs": "cde39c1f512d8e3b",
+  "preflight.mjs": "5e3bd1283e805fe7",
   "rules-api.mjs": "b832ef344c1c936b",
   "rules-code.mjs": "930dda4680cca689",
   "rules-global.mjs": "371c62093a9e9038",
   "rules-page.mjs": "b6c2ca808159e5ab",
   "rules-store.mjs": "62e75169d7290480",
-  "self-test.mjs": "46c89fec16be3d7d",
+  "self-test.mjs": "9050b4677d2e1805",
   "shared.mjs": "4b3bc207d8e09e24"
 }
