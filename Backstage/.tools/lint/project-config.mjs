@@ -527,7 +527,7 @@ export const PROJECT_DOCS_DIR = 'docs'
  *    兩邊不一致的話,規則會宣告自己管某個目錄,但預設掃描根本不走訪它,
  *    那個目錄就等於沒有被檢查過。
  */
-const TOOLING_DIRS = ['.claude', '.tools', 'plugins', '.githooks']
+const TOOLING_DIRS = ['.claude', '.tools', 'plugins', '.githooks', '.vite']
 
 /** 給 AI 助理讀的設定目錄 —— 底下放跨規則的共同前提、各類寫法規範、各個 hook */
 const AI_CONFIG_DIR = '.claude'
