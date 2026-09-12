@@ -11,6 +11,7 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
+import { CHECKSUM_FILE, recordedFingerprints } from './checksum.mjs'
 import { isColorNamingConfigFit, isHueSourceFit } from './color-order.mjs'
 import { hasBreakpointVars, hasResponsiveStyles } from './lint-core.mjs'
 import { IS_SOURCE_PROJECT } from './rules-global.mjs'
@@ -43,6 +44,15 @@ const firstExistingFile = (root, names) => names.find((n) => fs.existsSync(path.
  * 兩句都要能單獨讀懂,看的人不必再翻別的檔案才知道該補什麼。
  */
 const REQUIREMENTS = [
+  {
+    /* 來源那邊本來就不比對指紋(規則在那裡長,每改一行都報一次等於不能工作),
+       所以不算缺前提 —— 那件事由下方的身分說明講出來,不在這裡報。 */
+    label: '共用規則的指紋清單',
+    rules: ['ruleTampered'],
+    check: () => (IS_SOURCE_PROJECT || recordedFingerprints() ? CHECKSUM_FILE : null),
+    need: `要有 ${CHECKSUM_FILE} —— 那份清單由規範工具的來源跑 npm run rules:seal 產生,跟著規則一起複製過來`,
+    why: '沒有清單就沒有東西可以比對,這條會整條略過。在這個專案改了共用規則的話,不會有人發現,而改動會在下一次整套更新時被蓋掉。',
+  },
   {
     label: '建置設定檔',
     rules: ['importAlias'],
@@ -207,6 +217,8 @@ export const onReportPreflight = (root, { print = console.error } = {}) => {
     print('')
     print(`這個專案是規範工具的來源(名稱對得上 SOURCE_PROJECT_NAME)——`)
     print('  設定檔多出沒有人讀的項目時只提醒,不擋;其他專案則是一律擋。')
+    print('  共用規則的指紋不比對(規則在這裡長,每改一行都報一次等於不能工作);')
+    print('  改完規則要跑 npm run rules:seal 重新封存,新的清單才跟著規則複製出去。')
   }
 
   if (!missing.length) return missing

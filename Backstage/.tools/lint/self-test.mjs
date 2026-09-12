@@ -69,7 +69,7 @@ import {
 } from './lint-core.mjs'
 import { aliasListOf, importGroupOf, tailwindThemeOf } from './rules-code.mjs'
 import { IS_SOURCE_PROJECT, unusedConfigNames } from './rules-global.mjs'
-import { currentFingerprints, fingerprintDiff } from './checksum.mjs'
+import { currentFingerprints, fingerprintDiff, isSkipped } from './checksum.mjs'
 import {
   ACTIONS_DIR_NAME,
   API_DIR,
@@ -2884,8 +2884,19 @@ const onCheckRuleFingerprints = () => {
     const problems = []
 
     if (!covered.includes('checksum.mjs')) problems.push('少了 checksum.mjs 自己 —— 改掉它就能繞過比對')
-    for (const own of ['project-config.mjs', 'rules-project.mjs']) {
-      if (covered.includes(own)) problems.push(`${own} 不該列入 —— 那是每個專案自己的東西`)
+
+    /* 判準取 checksum 那邊的那一份,不在這裡重寫 —— 兩份會有一天對不上,
+       而驗證顯示通過的同時,實際的排除範圍已經變了。 */
+    for (const name of covered) {
+      if (isSkipped(name)) problems.push(`${name} 不該列入 —— 那是這個專案自己的東西`)
+    }
+
+    for (const own of ['project-config.mjs', 'rules-project.mjs', 'diff-output-project.mjs']) {
+      if (!isSkipped(own)) problems.push(`${own} 應該排除 —— 設定與 -project.mjs 結尾的都是專案自己的`)
+    }
+
+    for (const shared of ['rules-global.mjs', 'lint-core.mjs', 'checksum.mjs']) {
+      if (isSkipped(shared)) problems.push(`${shared} 不該被排除 —— 那是每個專案拿到的同一套`)
     }
 
     report(!problems.length, '共用規則的指紋涵蓋範圍正確', problems)
@@ -3377,8 +3388,15 @@ try {
       案例可以寫 `rule` 指定只計那一條。探針常常同時觸發別條規則
       (一段元件的程式碼會被元件類、樣式類好幾條看到),不指定的話,
       新增任何一條規則都會讓一批不相干的案例失敗 —— 而失敗的原因
-      看起來像是那幾條規則壞了,實際上只是探針多命中了一條。 */
-    const ofRule = (list) => (c.rule ? list.filter((i) => i.rule === c.rule) : list)
+      看起來像是那幾條規則壞了,實際上只是探針多命中了一條。
+
+      沒寫 `rule` 的案例一律不計專案自己的規則(代號以 project: 開頭)。
+      那幾條是各專案自己加的,這裡的案例寫的時候不可能預期到 ——
+      一個專案加兩條規則,就會有一批既有案例開始失敗,而訊息看起來像規則壞了,
+      實際上是探針多命中了那個專案的新規則。專案自己的規則由 PROJECT_CASES 驗,
+      那裡每一則都用 `rule` 指定是哪一條,所以不受這個排除影響。 */
+    const ofRule = (list) =>
+      c.rule ? list.filter((i) => i.rule === c.rule) : list.filter((i) => !i.rule.startsWith(PROJECT_RULE_PREFIX))
 
     const issues = ofRule(all.filter((i) => i.level !== 'warn'))
     const warns = ofRule(all.filter((i) => i.level === 'warn'))

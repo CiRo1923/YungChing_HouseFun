@@ -24,16 +24,34 @@ const dir = path.join(root, '.tools', 'lint')
 export const CHECKSUM_FILE = '.tools/lint/.rules-checksum.json'
 
 /**
- * 不列入指紋的檔案 —— 只有這兩支,其餘(含這支自己)全部列入。
+ * 設定檔 —— 不列入指紋,每個專案的值本來就不一樣。
+ */
+const CONFIG = 'project-config.mjs'
+
+/**
+ * 專案自己的東西:檔名以 `-project.mjs` 結尾的一律不列入指紋。
  *
- *   project-config.mjs  設定,每個專案的值本來就不一樣
- *   rules-project.mjs   專案自己的規則,本來就只有這個專案有
+ * 每個專案除了規則本身之外,還會有只有它要的東西 —— 自己的規則
+ * (`rules-project.mjs`)、自己的小工具。那些不在來源裡,列入指紋的話
+ * 會被報成「是多出來的」,而那個專案其實一點問題也沒有。
  *
- * **產生指紋的這一支自己也要列入。** 排除它的話,改掉它就能讓比對永遠通過 ——
- * 那等於留一道只有知道的人才找得到的後門,而保護在那之後看起來仍然正常。
+ * 用檔名判斷而不是設定清單:清單交給專案自己填的話,把共用規則填進去
+ * 就繞過了整道保護,而從設定看不出那是繞過還是正當的一項。
+ * 改名想繞過也不行 —— 原本那支會被報成「被刪掉了」。
+ *
+ * **產生指紋的這一支自己要列入。** 排除它的話,改掉它就能讓比對永遠通過,
+ * 那是一道只有知道的人才找得到的後門,而保護在那之後看起來仍然正常。
  * 列入它不會有循環問題:封存寫的是 json,這支 .mjs 的內容不會因此改變。
  */
-const SKIP = new Set(['project-config.mjs', 'rules-project.mjs'])
+const PROJECT_OWN_SUFFIX = '-project.mjs'
+
+/**
+ * 這支檔案該不該列入指紋。
+ *
+ * 對外提供是為了讓自我驗證直接驗這個判斷 —— 那邊自己再寫一次的話,
+ * 兩份會有一天對不上,而驗證顯示通過的同時,實際的排除範圍已經變了。
+ */
+export const isSkipped = (name) => name === CONFIG || name.endsWith(PROJECT_OWN_SUFFIX)
 
 /**
  * 一支檔案的指紋。
@@ -53,7 +71,7 @@ export const currentFingerprints = () =>
   Object.fromEntries(
     fs
       .readdirSync(dir)
-      .filter((name) => name.endsWith('.mjs') && !SKIP.has(name))
+      .filter((name) => name.endsWith('.mjs') && !isSkipped(name))
       .sort()
       .map((name) => [name, fingerprintOf(path.join(dir, name))])
   )
@@ -93,7 +111,12 @@ if (process.argv.includes('--write')) {
 } else if (process.argv[1]?.endsWith('checksum.mjs')) {
   const diff = fingerprintDiff()
 
-  if (!diff.length) {
+  /* 沒有清單與比對通過是兩件事,訊息要分得開 —— 都說「一致」的話,
+     還沒封存過的專案會以為保護已經生效,而它其實一支都沒比對。 */
+  if (!recordedFingerprints()) {
+    console.log(`還沒有指紋清單(${CHECKSUM_FILE}),這次沒有比對任何一支規則檔。`)
+    console.log('清單由規範工具的來源跑 npm run rules:seal 產生,跟著規則一起複製過來。')
+  } else if (!diff.length) {
     console.log('共用規則檔與指紋清單一致')
   } else {
     console.error('以下共用規則檔與指紋清單對不上:')
