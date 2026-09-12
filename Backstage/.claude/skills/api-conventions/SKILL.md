@@ -1,7 +1,7 @@
 ---
 name: api-conventions
 summary: api
-description: 本專案的 API 撰寫規範(api 目錄底下的 *.js)。當新增或修改 api 檔案、搬移 api 的歸屬、決定 api 函式名稱,或審查既有 api 寫法時使用。規則:禁用 axios(原生請求可用但不建議);api 檔名對得上頁面目錄的第一層資料夾,對不上的放 project.js;請求實例只建在 api 目錄的設定檔一支;命名為 api + Method + endpoint 各段(GET 也要寫出 method,{id} 一律大寫 ID);每支一律回 { config, status, data };動態網址用 {key} 模板;不包 try/catch。
+description: 本專案的 API 撰寫規範(api 目錄底下的 *.js)。當新增或修改 api 檔案、搬移 api 的歸屬、決定 api 函式名稱,或審查既有 api 寫法時使用。規則:禁用 axios(原生請求可用但不建議);api 的資源對得上頁面目錄的第一層資料夾(資源是檔名;再分服務層時是那一層),對不上的放 project.js;請求實例建在 api 目錄的設定檔(再分服務層時每層一支);命名為 api + Method + endpoint 各段(GET 也要寫出 method,{id} 一律大寫 ID);每支一律回 { config, status, data };動態網址用 {key} 模板;不包 try/catch。
 ---
 
 # API 撰寫規範
@@ -34,7 +34,7 @@ export const apiGetMemberInfo = (data) => fetchApi.get('member/info', data)
 - **原生 `fetch` / `XMLHttpRequest` 可以用,但會被提醒**(規則 `apiClient`,建議級不擋)。
   它能動,只是繞過共用實例 —— 攔截器帶的 `LineIdToken` 那類共用參數不會生效。
   打外部服務、要上傳進度時才用,不要順手用。
-- **實例只建在 `.config.js` 一支**(規則 `apiSource`,擋)。
+- **實例建在 `.config.js`**(規則 `apiSource`,擋)。api 目錄再分層時,每一層各自一支。
   每支 api 各自 `onFetchApi()` 的話,攔截器要各設一次;漏掉一支不會報錯,
   只會在某個頁面靜靜地少帶參數,通常要等後端說「這支怎麼沒帶 token」才發現。
 
@@ -64,6 +64,25 @@ export const apiGetMemberInfo = (data) => fetchApi.get('member/info', data)
 
 判斷依「實際被哪些第一層資料夾的頁面使用」,不是依 API 路徑字面 ——
 路徑開頭是 `member/` 的 api 未必歸 member 那一支。
+
+### api 目錄再分一層的情況
+
+後端分成好幾個服務時(各自的網域、各自的 token),api 目錄底下可以再分一層,
+**每一層放自己的 `.config.js`**:
+
+```
+<api 目錄>/
+  .config.js            預設服務的連線設定
+  <服務名>/
+    .config.js          這個服務自己的 baseURL 與攔截器
+    <功能>.js           這個服務的 api,import 同層的 .config.js
+```
+
+這時**資源是那個服務資料夾**,底下的檔名是功能分檔,不必對得上頁面資料夾。
+規則靠「那一層有沒有自己的 `.config.js`」分辨:有就是服務層,
+沒有的話那一層只是把檔案分類收好,資源仍然是檔名。
+
+沒有多服務的專案不必分層 —— 扁平的一層就夠,多一層只是讓路徑變長。
 
 ## 3. 命名:api + Method + endpoint
 

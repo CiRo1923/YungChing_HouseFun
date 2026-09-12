@@ -3,6 +3,7 @@
 // 與 CSS 規則分開的理由跟 rules-global.mjs 一樣:適用範圍不同(這裡看的是 .js / .vue
 // 的請求寫法與 _api 的檔案歸屬),混在一起之後想加第四類規則就得整個重切。
 
+import fs from 'node:fs'
 import path from 'node:path'
 import {
   API_DIR,
@@ -94,16 +95,47 @@ const checkApiClient = ({ rel, text }) => {
 // 同一支 api 被多個頁面共用時,共用的是「呼叫它的 action」,那寫在各自的
 // use*Actions 裡;api 檔案本身仍然只放一份。
 
+/**
+ * 這一支 api 屬於哪一個資源 —— 要拿去對照頁面資料夾的那個名字。
+ *
+ * 三種擺法:
+ *
+ *   扁平       `_api/member.js`        → 資源是檔名 `member`
+ *   服務分層   `_api/buy/house.js`     → 資源是資料夾 `buy`
+ *   單純分類   `_api/群組/member.js`    → 資源仍是檔名 `member`
+ *
+ * **分出前兩者的是「那一層有沒有自己的 .config.js」。**
+ * api 目錄再分一層的理由,是那個服務有自己的連線設定(各自的 baseURL 與 token)——
+ * 有 .config.js 就是一個服務,底下的檔案是它的功能分檔(house / list / common),
+ * 那些檔名是功能不是資源,拿去對照頁面資料夾的話每一支都會被報「對不上」。
+ *
+ * 沒有 .config.js 的資料夾只是把檔案分類收好,資源仍然是檔名。
+ * 用「有沒有連線設定」判斷而不是「有沒有分層」,才分得出這兩種 ——
+ * 只看有沒有資料夾的話,任何一層資料夾都會被當成服務。
+ */
+const apiResourceOf = (rel, root) => {
+  const parts = rel.slice(`${API_DIR}/`.length).split('/')
+  if (parts.length === 1) return path.basename(parts[0], '.js')
+
+  const ownConfig = path.join(root, ...API_DIR.split('/'), parts[0], CONFIG_FILE)
+
+  return fs.existsSync(ownConfig) ? parts[0] : path.basename(parts.at(-1), '.js')
+}
+
 const checkApiScope = ({ rel, root }) => {
   if (!isApiFile(rel)) return []
 
   const folders = listViewFolders(root)
   if (!folders) return []
 
-  const name = path.basename(rel, '.js')
+  const name = apiResourceOf(rel, root)
   if (folders.has(name) || name === SHARED_API_FILE || ALLOWED_STANDALONE.has(name)) return []
 
   const near = findNearFolder(folders, name)
+
+  /* 多層時對不上的是那個服務資料夾,不是檔名 —— 訊息要指到實際要改的東西,
+     說「檔名 buy.js」會讓人去找一支不存在的檔案。 */
+  const where = name === path.basename(rel, '.js') ? `檔名 ${name}.js` : `資料夾 ${name}/`
 
   return [
     issueOf(
@@ -111,8 +143,8 @@ const checkApiScope = ({ rel, root }) => {
       1,
       'apiScope',
       near
-        ? `檔名 ${name}.js 對不上資料夾 —— ${VIEWS_DIR} 底下是 ${near}/,兩邊要一致(改檔名或改資料夾名)`
-        : `檔名 ${name}.js 在 ${VIEWS_DIR} 底下沒有對應的資料夾 —— api 依資料夾切分,對不上的一律搬進 ${SHARED_API_FILE}.js`
+        ? `${where} 對不上資料夾 —— ${VIEWS_DIR} 底下是 ${near}/,兩邊要一致(改這裡或改資料夾名)`
+        : `${where} 在 ${VIEWS_DIR} 底下沒有對應的資料夾 —— api 依資料夾切分,對不上的一律搬進 ${SHARED_API_FILE}.js`
     ),
   ]
 }
@@ -133,7 +165,7 @@ const checkApiSource = ({ rel, text }) => {
         rel,
         lineNoOf(text, text.search(/\bonFetchApi\s*\(/)),
         'apiSource',
-        `api 檔案不要自己呼叫 onFetchApi —— 實例只建在 ${CONFIG_FILE} 一支,否則攔截器要各設一次,漏掉不會報錯`
+        `api 檔案不要自己呼叫 onFetchApi —— 實例建在 ${CONFIG_FILE},api 檔案 import 它;每支各建一個的話,攔截器要各設一次,漏掉不會報錯`
       )
     )
   }
@@ -148,7 +180,7 @@ const checkApiSource = ({ rel, text }) => {
         rel,
         1,
         'apiSource',
-        `請求要用 ${API_DIR}/${CONFIG_FILE} 匯出的實例 —— import 它再呼叫,不要自建`
+        `請求要用 ${CONFIG_FILE} 匯出的實例 —— import 它再呼叫,不要自建`
       )
     )
   }
@@ -361,7 +393,7 @@ export const API_RULE_TITLE = {
 export const API_RULE_HINT = {
   apiClient: `axios 一律不用;原生請求能用但會繞過 ${CONFIG_FILE} 的攔截器`,
   apiScope: `${API_DIR} 的檔名要對得上 ${VIEWS_DIR} 的第一層,對不上的放 ${SHARED_API_FILE}.js`,
-  apiSource: `實例只建在 ${CONFIG_FILE} 一支,api 檔案 import 它即可`,
+  apiSource: `實例建在 ${CONFIG_FILE}(api 目錄再分層時,每一層各自一支),api 檔案 import 它即可`,
   apiNaming: 'api + Method + endpoint 各段(method 寫在前面,GET 也要寫)',
   apiReturn: `一律回 { ${RETURN_FIELDS.join(', ')} }`,
 }
