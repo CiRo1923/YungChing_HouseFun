@@ -99,6 +99,15 @@ delete   member/pet/{id}      →  apiDeleteMemberPetID
 postForm photo/upload         →  apiPostFormPhotoUpload
 ```
 
+- **連字號與底線的段落接成一個駝峰字**:`verification-code` → `VerificationCode`、
+  `questionnaire/q3_1` → `QuestionnaireQ31`。端點用哪一種符號分詞是後端的事,
+  函式名一律接成駝峰 —— 兩種分開處理的話,寫的人每次都要先看是哪一種。
+- **端點固定帶的前綴段不計入**(版本段、服務名那種)。哪幾段不計入由
+  `.tools/lint/project-config.mjs` 的 `API_NAMING_IGNORED_SEGMENTS` 列出;
+  **更好的做法是把固定前綴併進連線設定的 baseURL**,端點只留真正的路徑 ——
+  那樣函式名與端點一眼對得起來,也不必維護那份清單。
+- **路徑參數要計入**(`{id}` / `${id}` 都算)。它與固定前綴的寫法一樣,
+  差別只在值從哪裡來 —— 工具不猜,所以要排除的前綴一律列進設定。
 - **method 寫在前面** —— 第一眼就知道這支是查詢還是寫入。
 - **GET 也要寫出來**。不寫的話,看到一個沒有 method 的名字分不出它是查詢還是新增;
   而且同一個 endpoint 有多個 method 時,只有其中一支沒寫,規則就不齊。

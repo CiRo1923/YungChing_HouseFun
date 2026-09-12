@@ -473,7 +473,7 @@ const upperFirst = (s) => s.charAt(0).toUpperCase() + s.slice(1)
  * 兩個 action 名稱算不算同一個 —— 比對時忽略底線。
  *
  * endpoint 裡出現底線時(`questionnaire/q3_1`),api 那層照著寫成
- * `apiPostQuestionnaireQ3_1`,名字與網址一眼對得起來;
+ * `apiPostQuestionnaireQ31`,名字與網址一眼對得起來;
  * 但 action 是程式裡到處被呼叫的識別字,底線夾在數字中間讀起來卡,
  * 所以那一層寫成 `onApiPostQuestionnaireQ31`。
  *

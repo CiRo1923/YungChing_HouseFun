@@ -7,6 +7,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import {
   API_DIR,
+  API_NAMING_IGNORED_SEGMENTS,
   SHARED_API_FILE,
   STANDALONE_APIS,
   VIEWS_DIR,
@@ -257,12 +258,52 @@ const stripApiWord = (segment) => {
   return m ? m[1] : segment
 }
 
+/**
+ * 連字號與底線接起來的段落,轉成一個駝峰字。
+ *
+ *   verification-code  →  verificationCode
+ *   q3_1               →  q31
+ *
+ * **兩種分詞符號同一種處理。** 端點用哪一種是後端的事,函式名一律接成駝峰 ——
+ * 「連字號要轉、底線不轉」的話,寫的人每次都得先看那一段是哪一種符號,
+ * 而兩種在畫面上長得很像。
+ *
+ * 連字號在識別字裡不合法,原樣留著的話期望名會長出 `Verification-code`
+ * 這種東西 —— 不管怎麼命名都對不上,那幾支會永遠紅著。
+ */
+const camelOf = (segment) =>
+  segment
+    .split(/[-_]+/)
+    .filter(Boolean)
+    .map((part, i) => (i === 0 ? part : part.charAt(0).toUpperCase() + part.slice(1)))
+    .join('')
+
+/**
+ * 端點裡不計入函式名的那幾段 —— 由設定列出(API_NAMING_IGNORED_SEGMENTS)。
+ *
+ * 典型是固定前綴:所有端點都帶的版本段或服務名(`api/v1/buy/list` 的 `v1`)。
+ * 不排掉的話,每一支的期望名都多出那一段,而那一段每一支都一樣。
+ *
+ * **插值不自動排除,要排的話把變數名列進設定。** 工具分不出這兩種:
+ *
+ *   `${version}`  固定前綴,不是端點語意 —— 要排
+ *   `${id}`       路徑參數,是端點的一段(`apiGetVoucherItemID` 的 ID)—— 不能排
+ *
+ * 兩者形狀一模一樣,差別只在「值從哪裡來」,而那要看 import 才知道。
+ * 自動排除所有插值的話,路徑參數會整批從函式名裡消失 ——
+ * 那種誤判比多一段 Version 嚴重得多,所以這裡不猜,一律交給設定。
+ */
+const isIgnoredSegment = (cleaned) =>
+  API_NAMING_IGNORED_SEGMENTS.some((s) => s.toLowerCase() === cleaned.toLowerCase())
+
 const segmentsOf = (endpoint) =>
   endpoint
     .split('?')[0]
     .split('/')
-    .map((s) => s.replace(/\$\{\s*([^}]*)\s*\}/g, '$1').replace(/[{}]/g, ''))
-    .map(stripApiWord)
+    .map((seg) => {
+      const cleaned = seg.replace(/\$\{\s*([^}]*)\s*\}/g, '$1').replace(/[{}]/g, '')
+      return isIgnoredSegment(cleaned) ? '' : camelOf(stripApiWord(cleaned))
+    })
     .filter(Boolean)
 
 /** 期望的函式名(全小寫,只用來比對) */

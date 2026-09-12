@@ -69,9 +69,11 @@ import {
 } from './lint-core.mjs'
 import { aliasListOf, importGroupOf, tailwindThemeOf } from './rules-code.mjs'
 import { IS_SOURCE_PROJECT, unusedConfigNames } from './rules-global.mjs'
+import { currentFingerprints, fingerprintDiff } from './checksum.mjs'
 import {
   ACTIONS_DIR_NAME,
   API_DIR,
+  API_NAMING_IGNORED_SEGMENTS,
   BREAKPOINTS,
   BUILD_CONFIG_FILES,
   COLOR_CSS_DIR,
@@ -1688,6 +1690,40 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
     keyword: 'method 寫在前面',
   },
   {
+    /* 端點用連字號分詞時,函式名把它接成一個駝峰字 ——
+       連字號在識別字裡不合法,原樣留著的話期望名會長出 `Verification-code`,
+       那種名字寫不出來,那幾支不管怎麼命名都會紅。 */
+    name: 'apiNaming 連字號的端點接成駝峰',
+    rule: 'apiNaming',
+    file: `${A}/${PROBE_PAGE_ALPHA}.js`,
+    code:
+      `import { fetchApi } from './.config.js'\n\n` +
+      `export const apiPostVerificationCode = (data) => fetchApi.post('verification-code', data)\n`,
+    expect: 0,
+  },
+  {
+    /* 底線不處理 —— 它在識別字裡是合法字元,端點寫 q3_1 函式名就照樣寫 Q3_1。
+       連底線一起吃掉的話,那種命名會全部對不上,而它們本來是對的。 */
+    name: 'apiNaming 底線的端點也接成駝峰',
+    rule: 'apiNaming',
+    file: `${A}/${PROBE_PAGE_ALPHA}.js`,
+    code:
+      `import { fetchApi } from './.config.js'\n\n` +
+      `export const apiPostQuestionQ31 = (data) => fetchApi.post('question/q3_1', data)\n`,
+    expect: 0,
+  },
+  {
+    // 建議名也不能帶連字號 —— 照著建議改的人要能直接貼上去
+    name: 'apiNaming 連字號端點的建議名不含連字號',
+    rule: 'apiNaming',
+    file: `${A}/${PROBE_PAGE_ALPHA}.js`,
+    code:
+      `import { fetchApi } from './.config.js'\n\n` +
+      `export const apiPostWrongName = (data) => fetchApi.post('verification-code', data)\n`,
+    expect: 1,
+    keyword: 'apiPostVerificationCode',
+  },
+  {
     /* 端點本身帶 api 字樣時,那一段不計入名字 —— 函式名已經以 api 開頭,
        再帶一次會組出 apiGetApiADSearch 這種名字。 */
     name: 'apiNaming 端點的 api 前綴不計入名字',
@@ -1975,7 +2011,7 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
     code:
       `export const useSelfTestAlphaActions = () => {\n` +
       `  const onApiPostQuestionnaireQ31 = async () => {\n` +
-      `    const { config, status, data } = await apiPostQuestionnaireQ3_1({})\n\n` +
+      `    const { config, status, data } = await apiPostQuestionnaireQ31({})\n\n` +
       `    return { config, status, data }\n` +
       `  }\n\n` +
       `  return { onApiPostQuestionnaireQ31 }\n` +
@@ -1989,13 +2025,13 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
     code:
       `export const useSelfTestAlphaActions = () => {\n` +
       `  const onApiPostQuestionnaireQ99 = async () => {\n` +
-      `    const { config, status, data } = await apiPostQuestionnaireQ3_1({})\n\n` +
+      `    const { config, status, data } = await apiPostQuestionnaireQ31({})\n\n` +
       `    return { config, status, data }\n` +
       `  }\n\n` +
       `  return { onApiPostQuestionnaireQ99 }\n` +
       `}\n`,
     expect: 1,
-    keyword: 'apiPostQuestionnaireQ3_1',
+    keyword: 'apiPostQuestionnaireQ31',
   },
   {
     // 回傳寫完整，才不會同時命中 storeActionReturn（那條另有案例）
@@ -2802,6 +2838,77 @@ const onCheckApiLayers = () => {
   }
 }
 
+/**
+ * 端點裡的固定前綴段不計入函式名 —— 由設定列出(API_NAMING_IGNORED_SEGMENTS)。
+ *
+ * 有些專案的端點固定帶版本段或服務名(`api/v1/buy/list`),那幾段每一支都一樣,
+ * 對讀的人沒有意義;不排掉的話每一支的期望名都多出那一段。
+ *
+ * 這一則用設定實際列出來的那幾段造探針,沒有設定就跳過 ——
+ * 空陣列(本專案就是)代表這個專案沒有那種前綴,驗不到東西是正常的。
+ */
+const onCheckIgnoredSegments = () => {
+  if (!API_NAMING_IGNORED_SEGMENTS.length) return
+
+  const [ignored] = API_NAMING_IGNORED_SEGMENTS
+  const rel = `${A}/${PROBE_PAGE_ALPHA}.js`
+  const code =
+    `import { fetchApi } from './.config.js'\n\n` +
+    `export const apiGetProbeThing = (data) => fetchApi.get('${ignored}/probe/thing', data)\n`
+
+  const issues = lintText(root, rel, code).filter((i) => i.rule === 'apiNaming')
+
+  report(
+    !issues.length,
+    `apiNaming 設定列出的前綴段(${ignored})不計入函式名`,
+    issues.map((i) => i.detail)
+  )
+}
+
+/**
+ * 指紋清單要跟現在的規則一致 —— 只在來源檢查。
+ *
+ * 共用規則的指紋跟著規則一起複製到每個專案,非來源那邊靠它認出「規則被改過」。
+ * 來源改了規則卻忘了更新指紋的話,那份清單一到別的專案就全部對不上 ——
+ * 每一支都被報成「被改過」,而實際上那邊一個字都沒動。
+ *
+ * 一整批這種誤報的結果是整條規則被關掉,所以這裡在來源就先擋下來。
+ */
+const onCheckRuleFingerprints = () => {
+  /* 指紋涵蓋哪幾支 —— 這一則在哪一種專案都要驗。
+     產生指紋的那一支自己一定要列入:排除它的話,改掉它就能讓比對永遠通過,
+     那是一道只有知道的人才找得到的後門,而保護在那之後看起來仍然正常。
+     另外兩支則是每個專案本來就可以動的東西,列入的話一裝上去就全部報。 */
+  {
+    const covered = Object.keys(currentFingerprints())
+    const problems = []
+
+    if (!covered.includes('checksum.mjs')) problems.push('少了 checksum.mjs 自己 —— 改掉它就能繞過比對')
+    for (const own of ['project-config.mjs', 'rules-project.mjs']) {
+      if (covered.includes(own)) problems.push(`${own} 不該列入 —— 那是每個專案自己的東西`)
+    }
+
+    report(!problems.length, '共用規則的指紋涵蓋範圍正確', problems)
+  }
+
+  /* 清單是不是最新的,只有來源驗得到 —— 別的專案那份清單是跟著規則複製過來的,
+     對不上代表那邊改了共用規則,那件事由規則 ruleTampered 在檢查時報,不在這裡。 */
+  if (!IS_SOURCE_PROJECT) {
+    skipped.push({ name: '共用規則的指紋清單是最新的', need: 'sourceProject' })
+    return
+  }
+
+  const diff = fingerprintDiff()
+
+  report(
+    !diff.length,
+    '共用規則的指紋清單是最新的',
+    diff.length
+      ? [`${diff.map((d) => `${d.name} ${d.state}`).join('、')};改完規則要跑 npm run rules:seal`]
+      : []
+  )
+}
+
 const onCheckProjectRules = () => {
   const codes = Object.keys(projectRules.PROJECT_RULE_TITLE ?? {})
   if (!codes.length) return
@@ -3220,6 +3327,9 @@ const SKIP_REASON = {
   breakpoints: '這個專案的 BREAKPOINTS 是空陣列(不做響應式),兩條斷點規則本來就整條略過。',
   suffixNaming:
     '這個專案的色票用語意命名(COLOR_HUE_SOURCE 設成 value),取碼那幾條規則本來就整類跳過。',
+  sourceProject:
+    '這個專案不是規範工具的來源(SOURCE_PROJECT_NAME 與 PROJECT_NAMES 對不上),' +
+    '指紋清單是跟著規則複製過來的,對不上由規則 ruleTampered 在檢查時報。',
 }
 
 const report = (ok, name, extra = []) => {
@@ -3388,7 +3498,9 @@ try {
   onCheckThemeBlocks()
   onCheckRuleCrash()
   onCheckProjectRules()
+  onCheckRuleFingerprints()
   onCheckApiLayers()
+  onCheckIgnoredSegments()
 
   for (const c of MAJORITY_CASES) {
     const actual = majorityHueSource(c.style)
