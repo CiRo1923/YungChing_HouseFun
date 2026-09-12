@@ -17,7 +17,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "lint:css": "node .tools/lint/lint.mjs",
-    "diff:css": "node ./.tools/lint/diff-output.mjs",
+    "diff:css": "node ./.tools/lint/diff-output-project.mjs",
     "test:css": "node .tools/lint/self-test.mjs",
     "sort:color": "node .tools/lint/guard-file.mjs --write",
     "format": "prettier --write .",
