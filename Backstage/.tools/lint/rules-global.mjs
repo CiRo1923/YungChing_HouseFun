@@ -26,6 +26,10 @@ import {
   warnOf,
 } from './shared.mjs'
 
+/* 指紋的產生與比對都在 checksum.mjs —— 規則只問「對不對得上」,
+   怎麼算指紋是那一支的事,兩邊各寫一份的話會有一天算出不同的值。 */
+import { fingerprintDiff } from './checksum.mjs'
+
 // --- 規則 projectName:不得寫死專案名稱、不得跨專案引用 -----------------------
 //
 // 為什麼:專案名稱寫進程式碼之後,這份檔案就只能待在這個專案。
@@ -499,15 +503,55 @@ const checkConfigItem = ({ root, rel, text }) => {
   })
 }
 
+// --- 規則 ruleTampered:共用規則只有來源能改 ----------------------------------
+//
+// 規則是每個專案都拿到的同一套。在某個專案改了它,那個專案的檢查結果就與別人不同 ——
+// 而且改動會在下一次整套更新時被蓋掉。蓋掉的當下沒有人會發現,
+// 只知道「本來不報的東西怎麼又開始報了」,而原因在幾個月前的另一次更新裡。
+//
+// 專案要調整檢查行為時有兩條正當的路,都不必動共用規則:
+//
+//    設定值不同        改 project-config.mjs 的值
+//    只有這裡要的規範  寫進 rules-project.mjs(代號以 project: 開頭)
+//
+// **來源那邊不比對** —— 規則本來就在那裡長,每改一行都報一次等於不能工作。
+// 來源改完規則後跑 `npm run rules:seal` 更新指紋,新的指紋跟著規則一起複製出去。
+//
+// 沒有指紋清單時也不比對:那是還沒封存過的狀態(例如剛接手的舊專案),
+// 一律報「每一支都被改過」只會讓人把整條規則關掉。
+
+const checkRuleTampered = ({ rel }) => {
+  /* 掛在設定檔上報 —— 那是每個專案都會打開的一支,
+     而被改的規則檔可能有好幾支,逐支報只會讓同一件事洗版。 */
+  if (rel !== '.tools/lint/project-config.mjs') return []
+  if (IS_SOURCE_PROJECT) return []
+
+  const diff = fingerprintDiff()
+  if (!diff.length) return []
+
+  return [
+    issueOf(
+      rel,
+      1,
+      'ruleTampered',
+      `共用規則與來源不一致(${diff.map((d) => `${d.name} ${d.state}`).join('、')})—— ` +
+        `那幾支下次整套更新時會被蓋掉;要調整檢查行為的話,設定值改 project-config.mjs,` +
+        `只有這個專案要的規範寫進 rules-project.mjs`
+    ),
+  ]
+}
+
 export const GLOBAL_CHECKS = [
   checkProjectName,
   checkAbsolutePath,
   checkPlainText,
   checkSelfContained,
   checkConfigItem,
+  checkRuleTampered,
 ]
 
 export const GLOBAL_RULE_TITLE = {
+  ruleTampered: '共用規則被改過(只有來源能改)',
   projectName: '寫死專案名稱',
   absolutePath: '寫了某一台機器上才有的路徑',
   plainText: '用了 emoji 或裝飾符號',
@@ -516,6 +560,7 @@ export const GLOBAL_RULE_TITLE = {
 }
 
 export const GLOBAL_RULE_HINT = {
+  ruleTampered: '設定值改 project-config.mjs;只有這個專案要的規範寫進 rules-project.mjs',
   projectName: '專案名稱不寫進程式碼與文件 —— 網域 / 路徑 / 識別字走環境變數或設定檔',
   absolutePath:
     '路徑一律相對專案根目錄 —— 磁碟機代號、家目錄、file://、往上跳三層以上都只在特定電腦上成立',
