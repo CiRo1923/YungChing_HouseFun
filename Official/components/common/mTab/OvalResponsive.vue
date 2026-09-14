@@ -4,7 +4,7 @@ import '@css/_modules/common/mTab/ovalResponsiveVariables.css'
 import '@css/_modules/common/mTab/common.css'
 import '@css/_modules/common/mTab/ovalResponsive.css'
 
-import { onMergeTabConfig, useTabCore } from './.composables/useTabCore.js'
+import { onMergeTabConfig, useTabCore } from './.composables/useCore.js'
 
 const emits = defineEmits(['click', 'changed'])
 const props = defineProps({

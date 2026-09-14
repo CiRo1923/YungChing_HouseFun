@@ -128,7 +128,9 @@ export const onResolveByDevice = (value, device) => {
     m: ['m', 'tm'],
   }
 
-  if (value != null && typeof value !== 'object') return value
+  // null / undefined 也走這條原樣回傳:typeof null 是 'object',不特別擋的話
+  // 它會被當成裝置物件,往下讀 value[key] 就是讀 null 的屬性。
+  if (value == null || typeof value !== 'object') return value
 
   const keys = breakpointDeviceKeys[device] || []
   const matchedKey = keys.find((key) => value[key] != null && value[key] !== false)

@@ -2,7 +2,7 @@
 import '@css/_modules/buy/mTooltip/variables.css'
 import '@css/_modules/buy/mTooltip/common.css'
 
-import { onResolveByDevice } from '@js/_projectPrototype.js'
+import { onResolveByDevice } from './.composables/useCore.js'
 
 const common = useCommonStore()
 const { device } = storeToRefs(common)

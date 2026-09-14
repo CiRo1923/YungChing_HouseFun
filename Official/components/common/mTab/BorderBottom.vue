@@ -4,9 +4,7 @@ import '@css/_modules/common/mTab/borderBottomVariables.css'
 import '@css/_modules/common/mTab/common.css'
 import '@css/_modules/common/mTab/borderBottom.css'
 
-import { onMergeTabConfig, useTabCore } from './.composables/useTabCore.js'
-
-import { onResolveByDevice } from '@js/_projectPrototype.js'
+import { onMergeTabConfig, onResolveByDevice, useTabCore } from './.composables/useCore.js'
 
 /* change 是 select 模式專用的出口 —— 那個模式下不會有 click。
   帶 to / href 的項目要導頁時,由使用端接這個事件自己處理
