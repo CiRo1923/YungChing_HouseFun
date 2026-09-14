@@ -28,7 +28,7 @@
   },
   "prettier.requireConfig": true,
 
-  // CSS 規範守門(見 .claude/rules/css-conventions.md)。
+  // CSS 規範守門。
   // 需要擴充 emeraldwalk.RunOnSave —— 沒裝也不影響開發,dev server 執行中時
   // .vite/css-guard.mjs 一樣會做同樣的事;這裡是給「沒跑 dev 也要生效」的情境。
   "emeraldwalk.runonsave": {

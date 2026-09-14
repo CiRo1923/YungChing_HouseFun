@@ -181,7 +181,7 @@ export default defineNuxtConfig({
       },
     },
     plugins: [
-      // 存檔時檢查 CSS 規範:色票檔自動排序,其他檔案印警告(見 .claude/rules/css-conventions.md)
+      // 存檔時檢查 CSS 規範:色票檔自動排序,其他檔案印警告
       CssGuardPlugin() as never,
       SvgSpritemapBuildPlugin(CONFIG.svg, `${CONFIG.imgs}/svg/spritemap.svg`) as never,
       SvgSpritemapDevPlugin(CONFIG.svg) as never,

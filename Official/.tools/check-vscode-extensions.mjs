@@ -12,7 +12,7 @@
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { BOLD, DIM, RESET, YELLOW } from './css/colors.mjs'
+import { BOLD, DIM, RESET, YELLOW } from './lint/colors.mjs'
 
 /** 要檢查的擴充:id 用資料夾前綴比對(擴充目錄名是 <id>-<版本>) */
 const REQUIRED = [
@@ -72,7 +72,6 @@ const main = () => {
   }
 
   out.push(`${DIM}  設定已經寫好在 .vscode/settings.json,裝完重開視窗就會生效。${RESET}`)
-  out.push(`${DIM}  規範見 .claude/rules/css-conventions.md 的「四層守門」。${RESET}`)
   out.push('')
 
   console.error(out.join('\n'))

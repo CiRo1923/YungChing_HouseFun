@@ -25,7 +25,7 @@ git show <commit>^:Official/components/buy/mItem/SwitchItem.vue
 ## 撈回來之後
 
 **不要照原樣貼回去** —— 那些檔案是舊寫法(template 帶 tailwind、樣式留在 `<style>`),
-要照 [css-conventions.md](./css-conventions.md) 重拆:
+要照 [css-module-variables](../skills/css-module-variables/SKILL.md) 重拆:
 
 - `SwitchItem` 是 **mItem 的變體**(檔案在 `components/buy/mItem/` 底下),
   所以 module 放 `_modules/buy/mItem/`、檔名 `switchItem.css` / `switchItemVariables.css`、

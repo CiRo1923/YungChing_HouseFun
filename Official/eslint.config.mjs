@@ -319,7 +319,7 @@ export default createConfigForNuxt(
       // warn 不是 error —— 既有使用點多為內部 UI 字串,不值得逐一加 disable 註解。
       // 但新增的 v-html(特別是渲染 API 回傳內容的)該被看見;XSS 的真正防線在後端 sanitize。
       'vue/no-v-html': 'warn',
-      // 樣式一律走 script setup 的 JS import,<style> 區塊不留(見 css-conventions.md 規則 3)
+      // 樣式一律走 script setup 的 JS import,<style> 區塊不留(見 skill component-conventions)
       'vue/no-empty-component-block': 'warn',
       'vue/no-multiple-template-root': 'off',
       'vue/multi-word-component-names': 'off',
