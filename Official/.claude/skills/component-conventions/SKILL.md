@@ -1,7 +1,7 @@
 ---
 name: component-conventions
 summary: 元件檔案的形狀
-description: 本專案共用元件目錄底下 .vue 的撰寫規範。當新增共用元件、調整元件開頭的 import,或審查既有元件寫法時使用。規則:元件的樣式寫在 CSS 模組裡、由元件自己 import,少了那一行會報違規(工具不自動補,因為它看不出該載哪一支);import 依分組排列(樣式 → 共用邏輯 → 共用函式 → 其他),這一半不報違規,存檔時直接排好。分組定義在 .tools/lint/project-config.mjs 的 IMPORT_ORDER_GROUPS。
+description: 本專案共用元件目錄底下 .vue 的撰寫規範。當新增共用元件、調整元件開頭的 import,或審查既有元件寫法時使用。規則:元件的樣式放在元件自己資料夾底下的樣式子資料夾、由元件自己 import,少了那一行會報違規(工具不自動補,因為它看不出該載哪一支);import 依分組排列(樣式 → 共用邏輯 → 共用函式 → 其他),這一半不報違規,存檔時直接排好。分組定義在 .tools/lint/project-config.mjs 的 IMPORT_ORDER_GROUPS。
 ---
 
 # 元件檔案的形狀
@@ -18,19 +18,36 @@ description: 本專案共用元件目錄底下 .vue 的撰寫規範。當新增�
 
 ## 一、樣式一定要 import
 
-**元件的樣式寫在 CSS 模組裡,由元件自己載入。**
+**元件的樣式放在元件自己的資料夾裡,由元件自己載入。**
+
+樣式收在元件資料夾底下的一層子資料夾(名稱定義在
+`.tools/lint/project-config.mjs` 的 `MODULE_CSS_DIR_NAME`),
+路徑用相對的 —— 那幾支就在旁邊,不必繞道 alias。
 
 ```vue
 <script setup>
-import '@css/_modules/mAnchor/variables.css'
-import '@css/_modules/mAnchor/common.css'
+import './.css/variables.css'
+import './.css/common.css'
 </script>
 ```
 
-範例裡的 alias 與資料夾只是示意 —— **每個專案的 alias 名稱、CSS 模組位置、
-元件底下有沒有再分一層(共用 / 平台 / 某個功能),都不一樣。**
-實際的位置看建置設定的 `resolve.alias` 與 `.tools/lint/project-config.mjs`;
-規則讀的也是那兩處,所以換一個專案時規則會跟著走,這份文件的範例不會。
+範例裡的資料夾名與檔名只是示意 —— **每個專案的樣式資料夾叫什麼、
+一個模組拆幾支、元件底下有沒有再分一層(共用 / 平台 / 某個功能),都不一樣。**
+實際的名稱看 `.tools/lint/project-config.mjs`;規則讀的也是那一份,
+所以換一個專案時規則會跟著走,這份文件的範例不會。
+
+**一支元件要帶走的東西在同一個資料夾裡。** 畫面、樣式、變數放在一起,
+複製到別的專案時不會漏掉半邊,刪掉元件時也不會在別的目錄留下沒有人用的樣式。
+樣式再收進一層,是為了讓元件資料夾第一眼只看到 `.vue` ——
+一個模組常常有五六支 css,混在一起要找哪一支是元件得先略過一整片。
+
+一支元件本來沒有自己的資料夾(直接放在分類資料夾底下)而現在要加樣式時,
+**先幫它建一個同名資料夾,`.vue` 搬進去並改名 `index.vue`** ——
+名稱裡不會因此多一段(自動注入會略過 `index` 那一層),使用端一行都不用改。
+
+跨模組共用的變數是例外:兩個以上的元件都要用的那幾支,放集中目錄
+(`CSS_MODULES_DIR`)。放進其中一個元件的資料夾的話,另一個元件就得去
+import 別人的檔案,而刪掉那個元件時會連帶弄壞它。
 
 少了那一行,這支元件被放進別的頁面時樣式不會跟著來 ——
 而它在原本那一頁看起來是正常的,因為同一頁的別支元件已經把樣式載進來了。
@@ -38,7 +55,7 @@ import '@css/_modules/mAnchor/common.css'
 不像是「這支元件少載了一行」。
 
 **這一條報違規,工具不自動補。** 工具看得出「這支沒有載入樣式」,
-看不出這支元件的樣式該放在哪一支 CSS 模組 ——
+看不出這支元件的樣式該放在哪一支 css ——
 自動補一行等於替開發者決定檔案要叫什麼、要不要跟別支共用。
 
 檢查:規則 `importOrder`。
@@ -49,7 +66,7 @@ import '@css/_modules/mAnchor/common.css'
 
 ```vue
 <script setup>
-import '@css/_modules/mAnchor/common.css'
+import './.css/common.css'
 import { useAnchor } from './.composables/useAnchor.js'
 import { onScrollTo } from '@js/scroll.js'
 import { computed } from 'vue'
@@ -79,7 +96,7 @@ import { computed } from 'vue'
 那種區塊整塊不動 —— 排錯一行的代價遠高於少排一次。
 
 **只管組與組之間的先後,不管同一組裡面怎麼排。**
-樣式那一組的組內順序(變數檔要排在版型檔之前)由 CSS 模組的規則在管,
+樣式那一組的組內順序(變數檔要排在版型檔之前)由模組樣式的規則在管,
 兩條都去管組內順序的話,同一行會被指出兩種不同的修法。
 
 ## 與相鄰規範的界線

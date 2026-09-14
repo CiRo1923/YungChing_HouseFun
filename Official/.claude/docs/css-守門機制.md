@@ -16,48 +16,54 @@
 
 ## 檢查的規則
 
+範圍那一欄寫的是**通則**（頁面目錄、元件目錄、api 目錄…），不是實際路徑 ——
+每個專案的資料夾擺法不一樣，這份文件會跟著規範系統整套複製到下一個專案，
+寫死路徑的話搬過去就是錯的敘述。**實際路徑看 `.tools/lint/project-config.mjs`**，
+規則讀的也是那一份，所以換專案時規則會跟著走，這份文件不必改。
+
 | 代號 | 抓什麼 | 範圍 | 自動修正 |
 | --- | --- | --- | --- |
 | `color` | 硬寫色碼、`rgba()` 直接寫數值、template 的 `text-[#333]` | `.css` 全文、`.vue` 的 `<style>` 與 template | ✗（提示既有變數名） |
 | `colorFile` | 色票檔的取碼命名、值的形狀、分組檔與共用檔撞色值 | `_common/color*.css` | ✗（命名要人工改，牽動使用端） |
 | `colorSort` | 色票檔的排列順序（彩虹 + 每類由淺到深） | `_common/color*.css` | 排序 ✓（存檔就修好） |
-| `tailwind` | template 使用 utility class | `src/components/**/*.vue` | ✗ |
-| `theme` | 用到被 theme 整組覆寫掉、實際不存在的 class | `src/**` | ✗ |
+| `tailwind` | template 使用 utility class | 元件目錄的 `.vue` | ✗ |
+| `theme` | 用到被 theme 整組覆寫掉、實際不存在的 class | 原始碼 | ✗ |
 | `themeNaming` | theme 整組覆寫後，重新定義的值又用了 `sm` / `md` / `lg` | 專案根的樣式設定檔 | ✗ |
 | `moduleOrder` | 變數檔排在版型檔後面（變數要先定義完，版型才取用） | `.vue` 的模組 css import | ✗ |
-| `moduleScope` | 模組 css 混入別的模組或非 `m-` 開頭的 class | `_modules/**` | ✗ |
-| `moduleVar` | 同屬性兩個以上級距值（該搬到 `***Variables.css`） | `_modules/**`（Variables 檔除外） | ✗ |
-| `variable` | 命名沒對齊 tailwind、級距用 `sm`/`md`/`lg`、斷點沒三份成套 | `_modules/**` | ✗ |
-| `projectName` | 寫死專案名稱 | 只有規範系統自身（`.claude/`、`.tools/`、`plugins/`、`.githooks/`） | ✗ |
+| `moduleScope` | 模組 css 混入別的模組或非 `m-` 開頭的 class | 元件的樣式子資料夾 | ✗ |
+| `moduleLocation` | 對得上某個元件的樣式留在集中目錄（該搬進那個元件的資料夾） | 共用變數目錄 | ✗ |
+| `moduleVar` | 同屬性兩個以上級距值（該搬到 `***Variables.css`） | 元件的樣式子資料夾與共用變數目錄（Variables 檔除外） | ✗ |
+| `variable` | 命名沒對齊 tailwind、級距用 `sm`/`md`/`lg`、斷點沒三份成套 | 元件的樣式子資料夾與共用變數目錄 | ✗ |
+| `projectName` | 寫死專案名稱 | 只有規範系統自身（清單見設定的 TOOLING_DIRS） | ✗ |
 | `absolutePath` | 寫了某一台機器上的路徑（磁碟機代號、家目錄、`file://`）、跨專案引用 | 原始碼與規範系統自身 | ✗ |
 | `plainText` | 用了 emoji 或裝飾符號 | 原始碼與規範系統自身 | ✗ |
 | `selfContained` | 寫了「同上」「同 2」「參考第三節」這類把讀者送去別處的寫法 | 原始碼與規範系統自身 | ✗ |
-| `importAlias` | 離開自己資料夾的相對路徑沒改用 alias | `src/**` 的 `.js` / `.vue` | ✗ |
-| `deprecated` | 已淘汰的寫法（`apiParams`、`inject('route')`、actions 留 `console.log`） | `src/**` 的 `.js` / `.vue` | ✗ |
-| `apiClient` | `axios`（擋）、原生請求 `new XMLHttpRequest` / `$fetch(` / `fetch(`（建議） | `src/**`（`.export.js` 除外） | ✗ |
-| `apiScope` | `_api` 的資源對不上 `src/views` 第一層資料夾（資源是檔名；api 再分服務層時是那一層） | `src/scripts/_api/**/*.js` | ✗ |
-| `apiSource` | api 檔案自己呼叫 `onFetchApi` 建實例 | `src/scripts/_api/**/*.js` | ✗ |
-| `apiNaming` | 函式名對不上 endpoint、少方法後綴、`{id}` 沒寫大寫 `ID` | `src/scripts/_api/**/*.js` | ✗ |
-| `storeDir` | 資料夾不叫 `stores` | `src/**` | ✗ |
-| `storeDeclare` | store 裡寫了 function（`computed` 可以） | `src/stores/*.js` | ✗ |
-| `storeNaming` | 匯出名不是 `use{名稱}Store` | `src/stores/*.js` | ✗ |
-| `storeScope` | 檔名對不上 `src/views` 第一層資料夾 | `src/stores/*.js` | ✗ |
-| `storeActions` | `.composables` 檔名不是 `use{名稱}Actions.js` | `src/stores/.composables/*.js` | ✗ |
-| `storeLayer` | 有向後端要資料的頁面，store 沒有對應的層 | `src/stores/*.js` | ✗ |
-| `pageApiData` | 頁面自建 `apiData` / `apiResult` / `apiList` / `apiInfo` | `src/views/**/*.vue` | ✗ |
-| `storeApiDefault` | 有 `apiData` 卻沒有 `apiDefault` | `src/stores/*.js` | ✗ |
-| `storeResetDefault` | reset 手寫預設值,沒用 `apiDefault` | `src/stores/.composables/*.js` | ✗ |
-| `storeActionNaming` | 呼叫 api 的 action 命名對不上該支 api | `src/stores/.composables/*.js` | ✗ |
-| `storeActionReturn` | 打了 api 的 action 沒有 `return { config, status, data }` | `src/stores/.composables/*.js` | ✗ |
-| `storeToRefs` | 取 store 的值沒走 `storeToRefs`（直接解構或讀成 `const`） | `src/**` | ✗ |
-| `pageActionNaming` | 頁面包裝 action 的命名沒有去掉 `Api` 或對不上 | `src/**/*.vue` | ✗ |
-| `pageApiImport` | 頁面直接 import api（建議級，不擋） | `src/**/*.vue` | ✗ |
-| `importOrder` | 元件沒有載入樣式（樣式要由元件自己 import） | `src/components/**/*.vue` | ✗（工具看不出該載哪一支） |
+| `importAlias` | 離開自己資料夾的相對路徑沒改用 alias | 原始碼裡的 `.js` 與 `.vue` | ✗ |
+| `deprecated` | 已淘汰的寫法（`apiParams`、`inject('route')`、actions 留 `console.log`） | 原始碼裡的 `.js` 與 `.vue` | ✗ |
+| `apiClient` | `axios`（擋）、原生請求 `new XMLHttpRequest` / `$fetch(` / `fetch(`（建議） | 原始碼（`.export.js` 除外） | ✗ |
+| `apiScope` | `_api` 的資源對不上頁面目錄第一層的資料夾（資源是檔名；api 再分服務層時是那一層） | api 目錄 | ✗ |
+| `apiSource` | api 檔案自己呼叫 `onFetchApi` 建實例 | api 目錄 | ✗ |
+| `apiNaming` | 函式名對不上 endpoint、少方法後綴、`{id}` 沒寫大寫 `ID` | api 目錄 | ✗ |
+| `storeDir` | 資料夾不叫 `stores` | 原始碼 | ✗ |
+| `storeDeclare` | store 裡寫了 function（`computed` 可以） | store 目錄 | ✗ |
+| `storeNaming` | 匯出名不是 `use{名稱}Store` | store 目錄 | ✗ |
+| `storeScope` | 檔名對不上頁面目錄第一層的資料夾 | store 目錄 | ✗ |
+| `storeActions` | `.composables` 檔名不是 `use{名稱}Actions.js` | actions 目錄 | ✗ |
+| `storeLayer` | 有向後端要資料的頁面，store 沒有對應的層 | store 目錄 | ✗ |
+| `pageApiData` | 頁面自建 `apiData` / `apiResult` / `apiList` / `apiInfo` | 頁面目錄的 `.vue` | ✗ |
+| `storeApiDefault` | 有 `apiData` 卻沒有 `apiDefault` | store 目錄 | ✗ |
+| `storeResetDefault` | reset 手寫預設值,沒用 `apiDefault` | actions 目錄 | ✗ |
+| `storeActionNaming` | 呼叫 api 的 action 命名對不上該支 api | actions 目錄 | ✗ |
+| `storeActionReturn` | 打了 api 的 action 沒有 `return { config, status, data }` | actions 目錄 | ✗ |
+| `storeToRefs` | 取 store 的值沒走 `storeToRefs`（直接解構或讀成 `const`） | 原始碼 | ✗ |
+| `pageActionNaming` | 頁面包裝 action 的命名沒有去掉 `Api` 或對不上 | 原始碼裡的 `.vue` | ✗ |
+| `pageApiImport` | 頁面直接 import api（建議級，不擋） | 原始碼裡的 `.vue` | ✗ |
+| `importOrder` | 元件沒有載入樣式（樣式要由元件自己 import） | 元件目錄的 `.vue` | ✗（工具看不出該載哪一支） |
 | `configItem` | 專案設定檔多了沒有任何規則讀的項目 | `.tools/lint/project-config.mjs` | ✗（來源專案只提醒，見下方說明） |
 | `ruleCrashed` | 規則自己執行失敗（多半是漏了 import），那支檔案沒被那條規則檢查 | 全部 | ✗ |
 | `ruleTampered` | 共用規則與來源的指紋對不上（只有來源能改規則） | `.tools/lint/project-config.mjs`（只在非來源專案比對） | ✗ |
-| （宣告順序） | store / actions 的宣告順序 | `src/**/*.vue` | 排序 ✓（不報違規） |
-| （import 分組順序） | 元件的 import 依分組排：樣式 → 共用邏輯 → 共用函式 → 其他 | `src/components/**/*.vue` | 排序 ✓（不報違規） |
+| （宣告順序） | store / actions 的宣告順序 | 原始碼裡的 `.vue` | 排序 ✓（不報違規） |
+| （import 分組順序） | 元件的 import 依分組排：樣式 → 共用邏輯 → 共用函式 → 其他 | 元件目錄的 `.vue` | 排序 ✓（不報違規） |
 
 Store 規則的判斷寫在 [.tools/lint/rules-store.mjs](../.tools/lint/rules-store.mjs)，規範內容見共用文件庫的 `Store規範.md`。
 
@@ -67,7 +73,7 @@ API 規則的判斷寫在 [.tools/lint/rules-api.mjs](../.tools/lint/rules-api.m
 
 api 目錄底下可以再分一層「服務」（各自的網域與 token），那一層要有自己的 `.config.js`——規則靠它分辨「服務層」與「單純分類」：有設定檔的那一層就是資源，沒有的話資源仍是檔名。
 
-`apiScope` 的資料夾清單是**動態讀 `src/views` 第一層**，不是寫死的——新增資料夾時規則會自動跟上。不屬於任何資料夾的檔案寫進設定檔的 `STANDALONE_APIS`（`.tools/lint/project-config.mjs`），目前有 `project`（跨資料夾共用）、`json`（靜態 json 不打後端）、`petFair`（獨立功能）。
+`apiScope` 的資料夾清單是**動態讀頁面目錄的第一層**，不是寫死的——新增資料夾時規則會自動跟上。不屬於任何資料夾的檔案寫進設定檔的 `STANDALONE_APIS`（`.tools/lint/project-config.mjs`），目前有 `project`（跨資料夾共用）、`json`（靜態 json 不打後端）、`petFair`（獨立功能）。
 
 要加例外時改的是那份設定，不是規則檔裡的 `ALLOWED_STANDALONE`——後者是規則從設定長出來的，改它等於在規則裡寫死這個專案的東西，換一個專案就是錯的。store 那邊同理，設定項是 `STANDALONE_STORES`。
 
@@ -197,7 +203,7 @@ api 目錄底下可以再分一層「服務」（各自的網域與 token），�
 
 ### `moduleScope`：一支模組 css 只寫自己那組 class
 
-class 前綴由**資料夾名**推出（`mForm/` → `m-form`、`mDatePicker/` → `m-date-picker`），該資料夾底下的選擇器只能是這個前綴、`--modifier`（含 `p:` 這類斷點前綴）與 `j` 開頭的 JS hook class。
+class 前綴由**元件的資料夾名**推出（`mForm/` → `m-form`、`mDatePicker/` → `m-date-picker`）——也就是樣式那一層**外面**的那個資料夾，不是樣式資料夾本身。該元件底下的選擇器只能是這個前綴、`--modifier`（含 `p:` 這類斷點前綴）與 `j` 開頭的 JS hook class。
 
 這條同時管**變體收斂**：組件放在某模組的子資料夾底下，它就是那個模組的變體，class 要跟著母體走——`mItem/` 底下出現 `.m-switch-item-header` 會被抓，應該是 `.m-item-switch-header`。只搬資料夾而 class 不動，「看到 class 就能找到檔案」就失效了。
 
@@ -287,17 +293,38 @@ class 前綴由**資料夾名**推出（`mForm/` → `m-form`、`mDatePicker/` �
 
 ## 五層觸發
 
-| 層 | 檔案 | 時機 |
-| --- | --- | --- |
-| dev server | [plugins/vite-plugin-css-guard.js](../plugins/vite-plugin-css-guard.js) | 跑 `npm run dev` 時存檔 |
-| 編輯器 | [.vscode/settings.json](../.vscode/settings.json) 的 `emeraldwalk.runonsave` | 存檔（沒跑 dev 也生效） |
-| AI 寫檔 | [.claude/hooks/enforce-conventions.cjs](../.claude/hooks/enforce-conventions.cjs)（PreToolUse，**阻擋式**） | Claude 寫入前 |
-| 對話 | [.claude/hooks/css-guard-prompt.cjs](../.claude/hooks/css-guard-prompt.cjs) | 每次送出訊息 |
-| commit | [.githooks/pre-commit](../.githooks/pre-commit) | `git commit` |
+| 層 | 檔案 | 時機 | 對誰生效 |
+| --- | --- | --- | --- |
+| dev server | [.tools/lint/dev-server-plugin.mjs](../.tools/lint/dev-server-plugin.mjs)（各框架自己接，職責見下方） | 跑開發伺服器時存檔 | 所有人 |
+| 編輯器 | [.vscode/settings.json](../.vscode/settings.json) 的 `emeraldwalk.runonsave` | 存檔（沒跑 dev 也生效） | 所有人 |
+| AI 寫檔 | [.claude/hooks/enforce-conventions.cjs](../.claude/hooks/enforce-conventions.cjs)（PreToolUse，**阻擋式**） | AI 助理寫入前 | **只有 AI 助理** |
+| 對話 | [.claude/hooks/css-guard-prompt.cjs](../.claude/hooks/css-guard-prompt.cjs) | 每次送出訊息 | 只有 AI 助理 |
+| commit | [.githooks/pre-commit](../.githooks/pre-commit) | `git commit` | 所有人 |
 
-前兩層與後兩層**只警告不阻擋**；只有 AI 寫檔那層是阻擋式，而且**只擋這次改動新增的違規**——既有存量照樣放行，否則 AI 連碰都不能碰既有檔案。
+**唯一會擋下違規的是 AI 寫檔那層，而它只對 AI 助理生效。** 用助理的人寫錯會被擋下來，手動改的人只看到提醒——同一份規範，兩種人的強制力不一樣。
+
+那一層擋的也只是**這次改動新增的違規**，既有存量照樣放行，否則 AI 連碰都不能碰既有檔案。
+
+commit 那層目前只提醒，但**有一種情況會擋：規則自己的驗證沒過**。兩者的差別在於「擋下來之後做得到嗎」——既有的違規存量清不完，擋下來只會逼人繞過整個 hook；而規則壞掉是一兩行的事，當場修得完，何況它不修的代價是「規則安靜地不再檢查任何東西，而畫面顯示通過」。
+
+**存量清乾淨之後，commit 那層要改成違規也擋**（把 `exit 0` 改成累計失敗再離開）。那時它擋不到任何人，卻能讓「新寫的程式碼一律合規」變成事實。改的時候不要留跳過的旗標——一個「緊急時可以跳過」的開關會在幾週內變成「每次都加」。
 
 那支 hook **不含任何規則判斷**，全部委派給 `.tools/lint` 引擎（`lintText`）。原本是五支各自寫判斷的 `enforce-*.cjs`，規則有兩份實作遲早會漂移，而且漂移時的現象是「AI 被擋但人存檔通過」，不會有人發現。
+
+### dev server 那層要長什麼樣
+
+**每個專案的建置工具不一樣**（Vite、Nuxt、webpack），掛外掛的方式也不同，所以這一層**沒有一支可以直接複製的檔案**。但它的職責在每個專案都一樣，只有四件事：
+
+| 做什麼 | 為什麼 |
+| --- | --- |
+| 監看存檔 | 用 watcher 而不是模組圖的更新事件——後者只對「已經進模組圖」的檔案觸發，存到當前頁面沒載入的元件時完全沒有反應 |
+| 去抖 | 一次存檔會觸發好幾個事件（格式化、自動修正、編輯器的原子替換各寫一次檔），不去抖的話同一份警告連印三四次 |
+| 執行 `node .tools/lint/guard-file.mjs <檔案>` | 那支是為這件事設計的介面：吃一個檔案路徑，自動修正該修的，把結果印到標準輸出 |
+| 把輸出原樣印出來 | 訊息長什麼樣由引擎決定 |
+
+**這一層絕對不要 import 引擎的內部函式。** 自己組一份「排序 + 檢查 + 印出」的話，引擎調整介面時那支外掛會在載入當下就失敗——而那一層平常沒有人盯著它有沒有活著，要到有人主動測試才會發現。
+
+範圍（哪些副檔名要檢查）也讀 `.tools/lint/project-config.mjs` 的 `SCANNABLE_EXTENSIONS`，不要自己寫一份清單：漏掉一種，那類檔案存檔時就完全不會被檢查，而且沒有任何徵兆。
 
 編輯器那層需要擴充 `emeraldwalk.RunOnSave`（已列入 [.vscode/extensions.json](../.vscode/extensions.json)）。沒裝也不影響開發——dev server 執行中時 vite 外掛會做同樣的事。
 
@@ -315,7 +342,7 @@ class 前綴由**資料夾名**推出（`mForm/` → `m-form`、`mDatePicker/` �
 
 ```powershell
 npm run lint:css                          # 全專案掃描
-npm run lint:css src/components/mForm     # 只檢查指定檔案或目錄
+npm run lint:css <檔案或目錄>              # 只檢查那幾支
 npm run test:css                          # 規則自我驗證（改過 lint-core 後要跑）
 npm run sort:color                        # 色票檔自動排序
 npm run hooks:install                     # 重新指向 .githooks（postinstall 會自動跑）
@@ -357,7 +384,7 @@ node .tools/lint/lint.mjs --json        # JSON 輸出，供程式解析
 | 7 支 store | 分層對不上頁面。現況是按資料語意分（`list` / `voucher` / `mission`），規範是按頁面分（`index` / `detail`，撞名時用 `missions.detail`）。逐支對照頁面重新分層 |
 | 11 支頁面 | 自建 `apiData`，多在問卷與發票登錄流程 |
 
-`tailwind` 那 802 筆是新規範造成的——本專案原本允許在組件 template 直接寫 utility，`src/components` 底下 59 支有 57 支中招。這條是刻意不做基準線的，存量會一直看得見。
+`tailwind` 那 802 筆是新規範造成的——本專案原本允許在組件 template 直接寫 utility，元件目錄 底下 59 支有 57 支中招。這條是刻意不做基準線的，存量會一直看得見。
 
 `theme` / `moduleOrder` / `colorFile` / `colorSort` 目前是 0，代表現況本來就符合；規則是否有效由 `npm run test:css` 保證，不是靠這個數字。
 

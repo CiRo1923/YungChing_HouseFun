@@ -30,16 +30,21 @@
 
   // CSS 規範守門。
   // 需要擴充 emeraldwalk.RunOnSave —— 沒裝也不影響開發,dev server 執行中時
-  // .vite/css-guard.mjs 一樣會做同樣的事;這裡是給「沒跑 dev 也要生效」的情境。
+  // .tools/lint/dev-server-plugin.mjs 一樣會做同樣的事;這裡是給「沒跑 dev 也要生效」的情境。
   "emeraldwalk.runonsave": {
     "autoClearConsole": true,
     "commands": [
       {
-        // 存檔 .vue / .css → 色票檔自動排序 + 五條規範全部檢查,逐筆印出。
-        "match": "\\.(vue|css)$",
+        // 存檔時:色票檔自動排序 + 規範全部檢查,逐筆印出。
+        //
+        // 副檔名要與 .tools/lint/project-config.mjs 的 SCANNABLE_EXTENSIONS 一致。
+        //    json 沒辦法 import 那份設定,只能人工同步 —— 那邊改了這裡要跟著改。
+        //    少列一種,那種檔案存檔時就完全不會被檢查,而且不會有任何徵兆:
+        //    api、store、actions 都是 .js,漏掉等於整區沒有守門。
+        "match": "\\.(vue|css|js|mjs|cjs|md)$",
         "cmd": "node \"${workspaceFolder}/.tools/lint/guard-file.mjs\" \"${file}\""
 
-        // ⚠️ 刻意不設 autoShowOutputPanel —— 存檔時把焦點搶去輸出面板太干擾,
+        // 注意:刻意不設 autoShowOutputPanel —— 存檔時把焦點搶去輸出面板太干擾,
         //    正在打字的游標會跑掉。訊息留在「Run On Save」面板,要看的時候自己切過去。
         //
         //    真的想要自動彈的話是 "autoShowOutputPanel": "error",

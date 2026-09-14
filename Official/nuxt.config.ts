@@ -7,7 +7,7 @@ import SvgSpritemapDevPlugin, {
   SvgSpritemapBuildPlugin,
   spritemapRoute as devSpritemapRoute,
 } from './.vite/svg-spritemap.mjs'
-import CssGuardPlugin from './.vite/css-guard.mjs'
+import CssGuardPlugin from './.tools/lint/dev-server-plugin.mjs'
 import { getPageComponentDirs } from './.tools/page-component-dirs'
 import { getStoreComposableImports, getStoreImports } from './.tools/store-composable-imports'
 import { ViteImageOptimizer } from 'vite-plugin-image-optimizer'

@@ -15,13 +15,15 @@ import { CHECKSUM_FILE, recordedFingerprints } from './checksum.mjs'
 import { isColorNamingConfigFit, isHueSourceFit } from './color-order.mjs'
 import { hasBreakpointVars, hasResponsiveStyles } from './lint-core.mjs'
 import { IS_SOURCE_PROJECT } from './rules-global.mjs'
-import { detectViewResourceDepth } from './shared.mjs'
+import { detectViewResourceDepth, isModuleCss, isModuleStyle, listFiles, toRel } from './shared.mjs'
 import {
   API_DIR,
   BREAKPOINTS,
   BUILD_CONFIG_FILES,
   COLOR_CSS_DIR,
   COMPONENTS_DIR,
+  COMPONENT_DIRS,
+  MODULE_CSS_DIR_NAME,
   CSS_MODULES_DIR,
   PARALLEL_AWAIT_HELPER,
   STORE_DIR,
@@ -36,6 +38,19 @@ const hasDir = (root, rel) => {
 }
 
 const firstExistingFile = (root, names) => names.find((n) => fs.existsSync(path.join(root, n))) ?? null
+
+/**
+ * 專案裡所有的 css(相對路徑)。
+ *
+ * 模組樣式那幾條的前提是「有沒有那種檔案」,不是「目錄在不在」——
+ * 元件目錄在任何專案都存在,拿它當條件等於永遠成立,
+ * 而那幾條其實一個檔案都掃不到,結果卻顯示通過。
+ */
+const cssFilesOf = (root) =>
+  [...COMPONENT_DIRS, CSS_MODULES_DIR]
+    .flatMap((dir) => listFiles(root, dir))
+    .map((abs) => toRel(root, abs))
+    .filter((rel) => rel.endsWith('.css'))
 
 /**
  * 每一項前提:缺了它,rules 列出的那幾條規則就完全不會有結果。
@@ -106,11 +121,22 @@ const REQUIREMENTS = [
     why: '色票檔裡有一整類變數的命名形狀對不上目前的設定 —— 可能是全部(色相清單或分隔符不同),也可能是帶透明度的那一類(透明度兩碼怎麼接不同)。那一類的取碼檢查會完全沒有結果,而畫面上看起來是全部通過。改設定就會恢復。',
   },
   {
-    label: 'CSS 模組目錄',
-    rules: ['moduleOrder', 'moduleScope', 'moduleVar', 'variable'],
-    check: (root) => (hasDir(root, CSS_MODULES_DIR) ? CSS_MODULES_DIR : null),
-    need: `要有 CSS 模組目錄(目前設定為 ${CSS_MODULES_DIR})`,
-    why: '這四條只檢查模組目錄底下的檔案。目錄不存在時掃不到任何檔案,結果一律是通過。',
+    /* 判準是「有沒有那種檔案」,不是「目錄在不在」——
+       元件目錄在任何專案都存在,拿它當條件等於永遠成立,
+       而那幾條其實一個檔案都掃不到。 */
+    label: '元件自己的樣式',
+    rules: ['moduleScope'],
+    check: (root) => cssFilesOf(root).some(isModuleCss),
+    need: `元件資料夾底下要有樣式(收在各元件的 ${MODULE_CSS_DIR_NAME} 資料夾裡)`,
+    why: 'class 前綴是從元件的資料夾名推出來的,所以這條只看元件自己的樣式。樣式還放在集中目錄的話,它一個檔案都掃不到 —— 結果一律是通過,而那些檔案其實沒有人在看。',
+  },
+  {
+    /* 這三條與「屬於哪一個元件」無關,兩種位置都要守 */
+    label: '模組樣式',
+    rules: ['moduleOrder', 'moduleVar', 'variable'],
+    check: (root) => cssFilesOf(root).some(isModuleStyle),
+    need: `元件資料夾底下的 ${MODULE_CSS_DIR_NAME} 或集中目錄 ${CSS_MODULES_DIR} 要有樣式`,
+    why: '這三條看的是模組樣式,元件自己的與跨模組共用的都算。兩種位置都沒有檔案時掃不到任何東西,結果一律是通過。',
   },
   {
     label: 'api 目錄',

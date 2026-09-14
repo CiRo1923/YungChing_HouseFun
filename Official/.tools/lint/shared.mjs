@@ -15,6 +15,8 @@ import {
   COMPONENT_FOLDERS,
   CONVENTION_RULES_DIR,
   CONVENTION_SKILLS_DIR,
+  CSS_MODULES_DIR,
+  MODULE_CSS_DIR_NAME,
   PROJECT_DOCS_DIR,
   SCANNABLE_RE,
   SKIP_DIRS,
@@ -39,6 +41,7 @@ export {
   CONVENTION_SKILLS_DIR,
   CSS_MODULES_DIR,
   IMPORT_ORDER_GROUPS,
+  MODULE_CSS_DIR_NAME,
   PARALLEL_AWAIT_HELPER,
   WRITING_STYLE_SCOPE,
   PROJECT_CONFIG_FILES,
@@ -343,6 +346,67 @@ export const isComponentFile = (rel) => {
   if (COMPONENT_DIRS.some((dir) => rel.startsWith(`${dir}/`))) return true
 
   return COMPONENT_FOLDERS.some((folder) => rel.includes(`/${folder}/`))
+}
+
+/**
+ * 這支 css 是不是某個元件自己的樣式。
+ *
+ * **元件的樣式放在元件資料夾底下的那個子資料夾裡**(名稱見設定的
+ * MODULE_CSS_DIR_NAME),與它的 .vue 在一起。一支元件要帶走的東西
+ * (畫面、樣式、變數)在同一個資料夾,複製到別的專案時不會漏掉半邊,
+ * 刪掉元件時也不會在別的目錄留下沒有人用的樣式。
+ *
+ * 判斷只看位置,不看檔名 —— 一個模組拆幾支、各自叫什麼是那個模組自己的事
+ * (版型一支、變數一支、子元件各一支都可以)。
+ */
+export const isModuleCss = (rel) =>
+  rel.endsWith('.css') &&
+  rel.includes(`/${MODULE_CSS_DIR_NAME}/`) &&
+  COMPONENT_DIRS.some((dir) => rel.startsWith(`${dir}/`))
+
+/**
+ * 這支 css 是不是跨模組共用的樣式。
+ *
+ * 有些變數兩個以上的模組都要用(表單的尺寸級距、日期選擇器也吃同一份)。
+ * 那種東西不屬於任何一個元件 —— 放進其中一個元件的資料夾,
+ * 另一個元件就得去 import 別人的檔案,而刪掉那個元件時會連帶弄壞它。
+ * 所以共用的那幾支留在集中目錄。
+ *
+ * **與 isModuleCss 的界線:問「這支屬於哪一個元件」。**
+ * 答得出來就放那個元件的資料夾,答不出來(兩個以上在用)才放集中目錄。
+ * 兩種位置各有各的規則範圍:元件的樣式要檢查 class 前綴(它有 class),
+ * 共用變數只檢查變數怎麼命名(它沒有 class)。
+ */
+export const isSharedCss = (rel) => rel.endsWith('.css') && rel.startsWith(`${CSS_MODULES_DIR}/`)
+
+/**
+ * 這支 css 是不是模組樣式(兩種位置都算)。
+ *
+ * 變數怎麼命名、尺寸值要不要分斷點這幾條,元件自己的樣式與跨模組共用的變數
+ * 都要守 —— 那些判斷與「這支屬於哪一個元件」無關。
+ *
+ * **每條規則各寫一次「兩種位置」的話,加第三種位置時要改的地方散在各處**,
+ * 而漏掉的那一條不會報錯,只是從此不再檢查那個位置。
+ *
+ * 只管元件自己那一種的規則(class 前綴)直接用 isModuleCss ——
+ * 共用變數檔沒有 class,拿前綴去檢查它只會報一整片。
+ */
+export const isModuleStyle = (rel) => isModuleCss(rel) || isSharedCss(rel)
+
+/**
+ * 這支 css 屬於哪一個元件 —— 取樣式那一層外面的資料夾名。
+ *
+ * 元件的樣式收在元件資料夾底下的子資料夾裡,所以模組名是它的上一層:
+ * 一個叫 mForm 的元件,它樣式資料夾裡的每一支 css 都屬於 mForm。
+ *
+ * 不在那種位置時回 null,由呼叫端跳過 ——
+ * 推不出它屬於誰,猜一個的話會用錯的前綴去報一整片。
+ */
+export const moduleFolderOf = (rel) => {
+  const segments = rel.split('/')
+  const at = segments.lastIndexOf(MODULE_CSS_DIR_NAME)
+
+  return at > 0 ? segments[at - 1] : null
 }
 
 /**

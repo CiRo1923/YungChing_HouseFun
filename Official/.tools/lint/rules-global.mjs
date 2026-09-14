@@ -15,6 +15,13 @@ import {
   ABSOLUTE_PATH_SCOPE,
   WRITING_STYLE_SCOPE,
   PROJECT_NAMES,
+  VIEWS_DIR,
+  STORE_DIR,
+  API_DIR,
+  CSS_MODULES_DIR,
+  COLOR_CSS_DIR,
+  COMPONENTS_DIR,
+  COMPONENT_DIRS,
   PROJECT_NAME_SCOPE,
   SOURCE_PROJECT_NAME,
   TOOLING_PREFIXES,
@@ -72,6 +79,38 @@ const patternOf = (name) =>
 const PROJECT_NAME_RE = PROJECT_NAMES.map(patternOf)
 
 /**
+ * 這個專案的目錄擺法 —— 寫進規範系統的檔案裡,搬到下一個專案就是錯的敘述。
+ *
+ * 名稱不是唯一會過期的東西:一句「只檢查某某目錄底下的元件」如果把實際路徑寫出來,
+ * 在資料夾擺法不同的專案(原始碼直接放專案根的那種)就完全對不上,
+ * 而讀的人會照著去找一個不存在的目錄。
+ *
+ * **只取含斜線的值。** 單段的值(`pages`、`stores`)在中文敘述裡到處都是
+ * (「store 目錄」「頁面 pages 底下」),抓了全是誤報,而一條每次報幾十筆的規則
+ * 會被整條忽略 —— 那時連真正該擋的也沒人看。
+ *
+ * **也不用通用的路徑形狀。** 那會連 import 路徑、網址、指路的句子、
+ * 佔位符一起抓,同樣是幾十筆起跳。這裡認的是「這個專案的設定值」,
+ * 換一個專案就換一批 —— 那正是它要防的事。
+ *
+ * 值取自設定的既有項目,不另外開一項:那幾個本來就是「這個專案的目錄在哪」,
+ * 再開一份清單就要人工同步,而忘了同步不會報錯,只會讓這條安靜地少抓幾種。
+ *
+ * 對外提供是為了讓驗證案例直接取這一份 —— 那邊自己挑一個設定項的話,
+ * 挑到的值在別的專案可能是單段的(原始碼直接放專案根的專案,頁面目錄就叫
+ * `pages`),那一則案例在那種專案永遠驗不到東西,而失敗的訊息看起來像規則壞了。
+ */
+export const PROJECT_DIR_VALUES = [
+  ...new Set(
+    [VIEWS_DIR, STORE_DIR, API_DIR, CSS_MODULES_DIR, COLOR_CSS_DIR, COMPONENTS_DIR, ...COMPONENT_DIRS].filter(
+      (dir) => dir.includes('/')
+    )
+  ),
+]
+
+const PROJECT_DIR_RE = PROJECT_DIR_VALUES.map((dir) => new RegExp(escapeRe(dir), 'g'))
+
+/**
  * 這條規則**只管規範系統自身** —— 檢查工具、skills、hooks,
  * 以及規範自己的說明文件。那些會整批複製到下一個專案。
  *
@@ -102,6 +141,25 @@ const checkProjectName = ({ rel, text }) => {
           lineNoOf(text, m.index),
           'projectName',
           `寫死了專案名稱「${m[0]}」 —— 網域 / 路徑 / 識別字走環境變數或設定檔,這支檔案才搬得到別的專案`
+        )
+      )
+    }
+  }
+
+  /* 目錄擺法與名稱是同一件事的兩面:兩者都只在這個專案成立,
+     寫進去之後搬到下一個專案就是錯的敘述。 */
+  for (const re of PROJECT_DIR_RE) {
+    for (const m of text.matchAll(re)) {
+      if (seen.has(m[0])) continue
+      seen.add(m[0])
+
+      issues.push(
+        issueOf(
+          rel,
+          lineNoOf(text, m.index),
+          'projectName',
+          `寫死了這個專案的目錄「${m[0]}」 —— 每個專案的資料夾擺法不一樣,` +
+            `改成通則(頁面目錄、元件目錄)或指向 .tools/lint/project-config.mjs 的設定`
         )
       )
     }

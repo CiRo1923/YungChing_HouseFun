@@ -49,6 +49,18 @@ export const STORE_DIR = 'stores'
 /** 行為(actions)。放在 store 目錄底下的這個子資料夾 */
 export const ACTIONS_DIR_NAME = '.composables'
 
+/**
+ * 元件的樣式。放在元件資料夾底下的這個子資料夾。
+ *
+ * 元件要帶走的東西(畫面、樣式、變數)在同一個資料夾裡,複製到別的專案時
+ * 不會漏掉半邊,刪掉元件時也不會在別的目錄留下沒有人用的樣式。
+ * 樣式再收進一層子資料夾,是為了讓元件資料夾第一眼只看到 .vue ——
+ * 一個模組常常有五六支 css,混在一起要找哪一支是元件得先略過一整片。
+ *
+ * 點開頭與 actions 那一層同樣的理由:排序時沉在最上面,與元件檔分得開。
+ */
+export const MODULE_CSS_DIR_NAME = '.css'
+
 /** api 定義 */
 export const API_DIR = 'scripts/_api'
 

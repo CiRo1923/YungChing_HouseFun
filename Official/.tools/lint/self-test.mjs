@@ -73,7 +73,7 @@ import {
   onWrapMountedCalls,
 } from './lint-core.mjs'
 import { aliasListOf, importGroupOf, tailwindThemeOf } from './rules-code.mjs'
-import { IS_SOURCE_PROJECT, unusedConfigNames } from './rules-global.mjs'
+import { IS_SOURCE_PROJECT, PROJECT_DIR_VALUES, unusedConfigNames } from './rules-global.mjs'
 import { CHECKSUM_FILE, currentFingerprints, fingerprintDiff, isSkipped } from './checksum.mjs'
 import {
   ACTIONS_DIR_NAME,
@@ -84,8 +84,10 @@ import {
   COLOR_CSS_DIR,
   COLOR_CSS_PREFIX,
   COMPONENTS_DIR,
+  COMPONENT_DIRS,
   CSS_MODULES_DIR,
   IMPORT_ORDER_GROUPS,
+  MODULE_CSS_DIR_NAME,
   PARALLEL_AWAIT_HELPER,
   PROJECT_DOCS_DIR,
   PROJECT_NAMES,
@@ -126,14 +128,48 @@ const PROBE = '__css-self-test__'
    路徑寫死的話,換一個專案改了設定,驗證仍然在原本的位置建探測檔,
    驗到的就不是那個專案的設定,而且會顯示通過。 */
 
-/** CSS 模組規則的探測檔 */
-const M = `${CSS_MODULES_DIR}/${PROBE}`
+/**
+ * 跨模組共用樣式的探測檔 —— 那幾支放在集中目錄。
+ *
+ * 變數命名與斷點那幾條兩種位置都管(元件自己的樣式、跨模組共用的變數),
+ * 這一組驗的是後者。前者由下面的 S 驗,兩種位置各有案例守著。
+ *
+ * 名字刻意與元件那一組不同 —— 對得上某個元件的樣式本來就該搬進那個元件的資料夾
+ * (規則 moduleLocation),同名的話這一整組都會被它報一筆。
+ */
+const M = `${CSS_MODULES_DIR}/${PROBE}Shared`
 
 /** 共用元件規則的探測檔(template 不寫 tailwind class 那條) */
 const C = `${COMPONENTS_DIR}/${PROBE}`
 
-/** moduleScope 靠資料夾名推出 class 前綴,所以要放在合乎模組命名的資料夾底下 */
-const S = `${CSS_MODULES_DIR}/mCssSelfTest` // 前綴為 m-css-self-test
+/**
+ * 探測用的模組名。
+ *
+ * 不帶上面那個探測前綴,是因為 class 前綴要從資料夾名推出來
+ * (`mCssSelfTest` → `m-css-self-test`),而帶底線的名字推不出模組前綴。
+ *
+ * **只寫這一份** —— 元件那邊與集中目錄那邊都用它,清除時也靠它認名字。
+ * 各處自己寫一次字面的話,改名時漏掉哪一處不會報錯,
+ * 只會留下一個看起來像真元件的資料夾。
+ */
+const PROBE_MODULE = 'mCssSelfTest'
+
+/**
+ * 元件自己的樣式的探測檔。
+ *
+ * 元件的 css 收在元件資料夾底下的樣式那一層,而 class 前綴是那一層外面的
+ * 資料夾名推出來的,所以路徑要完整帶到樣式那一層。
+ */
+const SC = `${COMPONENTS_DIR}/${PROBE_MODULE}`
+const S = `${SC}/${MODULE_CSS_DIR_NAME}`
+
+/**
+ * 「對得上元件的樣式留在集中目錄」那一則的探測檔。
+ *
+ * 名字與上面那個探測元件相同 —— 規則要判斷的正是「這支樣式屬於某個元件」,
+ * 所以集中目錄這一支要與元件同名才驗得到。
+ */
+const L = `${CSS_MODULES_DIR}/${PROBE_MODULE}`
 
 /**
  * api 規則看的是「檔名對不對得上頁面目錄的資料夾」,所以探測檔要放在 api 目錄底下。
@@ -217,7 +253,7 @@ const D = `${PROJECT_NAME_SCOPE[0]}${PROBE}`
  */
 const PD = `${PROJECT_DOCS_DIR}/${PROBE}`
 
-const PROBE_DIRS = [M, C, S, A, T, `${T}/${ACTIONS_DIR_NAME}`, P, D, PD]
+const PROBE_DIRS = [M, C, SC, L, A, T, `${T}/${ACTIONS_DIR_NAME}`, P, D, PD]
 
 /**
  * 從探測用的頁面檔,走相對路徑指到 api 目錄底下某一支檔案。
@@ -1081,6 +1117,32 @@ const CSS_CASES = [
     keyword: '收斂',
   },
 
+  // ---------- 規則 moduleLocation ----------
+  //
+  // 集中目錄留給跨模組共用的變數。一支樣式的名字對得上某個實際存在的元件時,
+  // 它就屬於那個元件 —— 留在集中目錄的話,class 前綴那條不會檢查它,
+  // 而且沒有任何訊息:違規數字反而變少,看起來像程式碼變好了。
+  {
+    /* 探測用的元件資料夾在 onPrepare 就建好了(moduleScope 那幾則要用),
+       所以這個名字一定對得上一個實際存在的元件。 */
+    name: 'moduleLocation 對得上元件的樣式不可以留在集中目錄',
+    file: `${L}/common.css`,
+    code: `.m-css-self-test {\n  @apply flex;\n}`,
+    expect: 1,
+    rule: 'moduleLocation',
+    keyword: 'mCssSelfTest',
+  },
+  {
+    /* 對不上任何元件的就是跨模組共用的那種,留在集中目錄是對的。
+       報它的話,共用變數會被逼著塞進某一個元件的資料夾,
+       而另一個元件就得去 import 別人的檔案。 */
+    name: 'moduleLocation 對不上任何元件的共用變數留在集中目錄不算違規',
+    file: `${M}/sharedVariables.css`,
+    code: `:root {\n  --probe-shared-pc-w: 10px;\n  --probe-shared-tablet-w: 10px;\n  --probe-shared-mobile-w: 10px;\n}`,
+    expect: 0,
+    rule: 'moduleLocation',
+  },
+
   // ---------- 規則 themeNaming ----------
   //
   // 檢查的是樣式設定檔本身，不是使用端。theme 是整組覆寫，
@@ -1234,6 +1296,53 @@ const RULE_CASES = [
     file: `${M}/probe-name2.js`,
     code: `export const API = import.meta.env.VITE_APP_APIPATH\n`,
     expect: 0,
+  },
+
+  /* 目錄擺法與名稱是同一件事的兩面 —— 兩者都只在這個專案成立,
+     寫進規範系統的檔案裡,搬到下一個專案就是錯的敘述。
+     案例的內容一律從設定值組出來,不寫死字面路徑:
+     寫死的話,別的專案跑這支驗證會因為「那不是它的目錄」而失敗。 */
+  {
+    /* 內容取規則實際會用的那一批值,不挑特定的設定項 ——
+       挑到的那一項在別的專案可能是單段的(原始碼直接放專案根的專案,
+       頁面目錄就叫 `pages`),而規則刻意不抓單段值,
+       那時這一則在那種專案永遠驗不到東西,失敗的訊息卻看起來像規則壞了。 */
+    name: 'projectName 規範系統裡寫死這個專案的目錄',
+    file: `${D}/probe-dir.md`,
+    code: `只檢查 ${PROJECT_DIR_VALUES[0]} 底下的檔案\n`,
+    expect: 1,
+    rule: 'projectName',
+    keyword: '寫死了這個專案的目錄',
+    needs: 'projectDirValues',
+  },
+  {
+    /* 佔位符是正確的寫法 —— 讀的人知道要換成自己的路徑,
+       而這份文件搬到下一個專案仍然成立。 */
+    name: 'projectName 指令範例用佔位符不誤報',
+    file: `${D}/probe-dir-placeholder.md`,
+    code: 'npm run lint:css <檔案或目錄>\n',
+    expect: 0,
+    rule: 'projectName',
+  },
+  {
+    /* 單段的名字在中文敘述裡到處都是(「store 目錄」「頁面放 pages」),
+       抓了全是誤報,而一條每次報幾十筆的規則會被整條忽略。 */
+    name: 'projectName 目錄名的最後一段出現在敘述裡不誤報',
+    file: `${D}/probe-dir-single.md`,
+    code: `狀態放在 ${STORE_DIR.split('/').at(-1)} 這一層\n`,
+    expect: 0,
+    rule: 'projectName',
+  },
+  {
+    /* 教人填設定的文件本來就要寫出實際的目錄值 —— 標了豁免就整份跳過。
+       內容同樣取規則會用的那一批,挑特定設定項的話,
+       那一項是單段值的專案本來就不會被抓,這一則等於什麼都沒驗到。 */
+    name: 'projectName 標了豁免的文件可以寫出目錄值',
+    file: `${D}/probe-dir-exempt.md`,
+    code: `<!-- lint-project-name-exempt: 這份在教人填設定 -->\n\n設定填 ${PROJECT_DIR_VALUES[0]}\n`,
+    expect: 0,
+    rule: 'projectName',
+    needs: 'projectDirValues',
   },
   {
     /* 路徑形狀的問題全部歸 absolutePath 這一條,不與 projectName 重複計算 ——
@@ -3418,15 +3527,19 @@ const cleanup = () => {
     fs.rmSync(path.join(root, dir), { recursive: true, force: true })
   }
 
-  /* 有三處的探測檔沒有自己的資料夾可以整個刪掉,要掃過去認名字清乾淨。
-     逐一列出檔名的話,以後新增一支就要記得回來補一行 —— 忘了補不會報錯,
-     只會留下一支看起來像真的設定檔、色票或頁面資料夾的垃圾。
+  /* 上面那一輪只刪得掉「這一版列出來的」那幾個資料夾。案例會實際寫檔,
+     而兩種東西不在那份清單裡:上一次中途失敗留下的,以及改名之前的舊名字 ——
+     兩者都不會報錯,只會留下一個看起來像真元件、真色票、真頁面的資料夾,
+     而下一次執行會把它們當成真的讀進去,驗證結果開始受殘留影響。
 
-     色票目錄與頁面目錄一定要掃:案例會實際寫檔,而上一次中途失敗留下的東西
-     不在 created 清單裡(那份只記這次 onPrepare 建的)。留著的話,
-     下一次執行會把它們當成真的色票與頁面讀進去,驗證結果就開始受殘留影響。 */
+     所以每一個「案例會寫檔的目錄」都要掃過去認名字。逐一列出檔名的話,
+     以後新增一支就要記得回來補一行,忘了補同樣沒有徵兆。 */
+  const isProbeName = (name) => name.includes(PROBE) || name.includes(PROBE_MODULE)
+
   const sweeps = [
-    { dir: root, match: (name) => name.includes(PROBE) },
+    { dir: root, match: isProbeName },
+    { dir: path.join(root, ...CSS_MODULES_DIR.split('/')), match: isProbeName },
+    ...COMPONENT_DIRS.map((dir) => ({ dir: path.join(root, ...dir.split('/')), match: isProbeName })),
     {
       dir: path.join(root, ...COLOR_CSS_DIR.split('/')),
       match: (name) => name.startsWith(PROBE_COLOR_PREFIX),
@@ -3476,6 +3589,7 @@ const skipped = []
 const NEEDS_MET = {
   breakpoints: BREAKPOINTS.length > 0,
   suffixNaming: isSuffixNamingChecked,
+  projectDirValues: PROJECT_DIR_VALUES.length > 0,
 }
 
 /** 前提不成立時要講的那一句 —— 只列名字的話,看的人分不出是設定造成的還是規則壞了 */
@@ -3486,6 +3600,10 @@ const SKIP_REASON = {
   sourceProject:
     '這個專案不是規範工具的來源(SOURCE_PROJECT_NAME 與 PROJECT_NAMES 對不上),' +
     '指紋清單是跟著規則複製過來的,對不上由規則 ruleTampered 在檢查時報。',
+  projectDirValues:
+    '這個專案的目錄設定沒有一個是多段的(例如頁面直接叫 pages),' +
+    '而「寫死這個專案的目錄」那條刻意只抓多段值 —— 單段的名字在中文敘述裡到處都是,' +
+    '抓了全是誤報。沒有多段值可抓時,那條規則本來就不會報任何東西。',
 }
 
 const report = (ok, name, extra = []) => {

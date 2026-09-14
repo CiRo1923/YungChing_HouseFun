@@ -57,7 +57,7 @@ const isActionsFile = (rel) => rel.startsWith(`${STORE_DIR}/`) && isInActions(re
 // 抓的是「同一個名稱的其他寫法」:少了字尾 s、首字大寫、兩者都有。
 // 全站混用兩種寫法的話,每次寫 import 都要先確認這一支是哪一種。
 
-/** store 目錄的最後一層,例如設定為 `src/stores` 時就是 `stores` */
+/** store 目錄的最後一層 —— 設定寫的是完整路徑,這裡只取末端那一段 */
 const STORE_DIR_NAME = STORE_DIR.split('/').pop()
 
 /** 同一個名稱容易被寫成的其他樣子 —— 大小寫與單複數的組合,不含正確的那一個 */
