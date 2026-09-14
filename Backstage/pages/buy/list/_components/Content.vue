@@ -1,10 +1,10 @@
 <script setup>
 const {
-  onApiPOSTPublishRenewal,
+  onApiPostVasPublishRenewal,
   onResetPojectData,
-  onApiPOSTPublishSubmit,
-  onApiPOSTRealEstateRestoreToOnline,
-  onApiGETPublishGetPublishResponse,
+  onApiPostVasPublishSubmit,
+  onApiPostBuyRealEstateRestoreToOnline,
+  onApiGetVasPublishGetPublishResponse,
   onGoldenPopup,
   onAutoRefreshPopup,
 } = useBuyProjectActions()
@@ -13,10 +13,10 @@ const { searchDatas, searchPagination, apiCommentsData, apiDealData } = storeToR
 const {
   searchSelectItems,
   searchSelectCount,
-  onApiPOSTRealEstateOffline,
-  onApiPOSTRealEstateDeal,
-  onApiGETRealEstateCaseViewCounts,
-  onApiPOSTRealEstateRemove,
+  onApiPostBuyRealEstateOffline,
+  onApiPostBuyRealEstateDeal,
+  onApiGetBuyRealEstateCaseViewCounts,
+  onApiPostBuyRealEstateRemove,
   onCommentPopup,
 } = useBuyListActions()
 const { onAlert, onCustom, onApiPromise } = usePopupActions()
@@ -74,7 +74,7 @@ const onRenewalClick = async (objectData) => {
     onApiPromise('open')
 
     const hfIDs = objectData ? [objectData.hfID] : searchSelectItems.value
-    const { status, data } = await onApiPOSTPublishRenewal(hfIDs)
+    const { status, data } = await onApiPostVasPublishRenewal(hfIDs)
     await new Promise((resolve) => {
       emits('update', resolve)
     })
@@ -132,11 +132,11 @@ const onPublishClick = async (objectData) => {
     const apiTasks = []
 
     if (renewalIDs.length) {
-      apiTasks.push(onApiPOSTPublishSubmit(renewalIDs))
+      apiTasks.push(onApiPostVasPublishSubmit(renewalIDs))
     }
 
     if (onlineIDs.length) {
-      apiTasks.push(onApiPOSTRealEstateRestoreToOnline(onlineIDs))
+      apiTasks.push(onApiPostBuyRealEstateRestoreToOnline(onlineIDs))
     }
 
     const results = await Promise.all(apiTasks)
@@ -144,7 +144,7 @@ const onPublishClick = async (objectData) => {
     isSuccess = results.every(({ status }) => status === 200)
 
     if (objectData) {
-      await onApiGETPublishGetPublishResponse(objectData.hfID)
+      await onApiGetVasPublishGetPublishResponse(objectData.hfID)
     }
 
     await new Promise((resolve) => {
@@ -212,7 +212,7 @@ const onOfflineClick = async (objectData) => {
 
     const hfIDs = objectData ? [objectData.hfID] : searchSelectItems.value
 
-    await onApiPOSTRealEstateOffline(hfIDs)
+    await onApiPostBuyRealEstateOffline(hfIDs)
     await new Promise((resolve) => {
       emits('update', resolve)
     })
@@ -261,7 +261,7 @@ const onDealClick = async (objectData) => {
     onApiPromise('open')
 
     const hfIDs = objectData ? [objectData.hfID] : searchSelectItems.value
-    await onApiPOSTRealEstateDeal(hfIDs)
+    await onApiPostBuyRealEstateDeal(hfIDs)
     await new Promise((resolve) => {
       emits('update', resolve)
     })
@@ -283,7 +283,7 @@ const onRemoveClick = async (objectData) => {
   })
 
   if (isRemove) {
-    await onApiPOSTRealEstateRemove(hfIDs)
+    await onApiPostBuyRealEstateRemove(hfIDs)
 
     await new Promise((resolve) => {
       emits('update', resolve)
@@ -327,7 +327,7 @@ const onViewClick = async (objectData) => {
 
   onApiPromise('open')
 
-  const { status, data } = await onApiGETRealEstateCaseViewCounts(hfID)
+  const { status, data } = await onApiGetBuyRealEstateCaseViewCounts(hfID)
 
   if (status === 200) {
     await onCustom({

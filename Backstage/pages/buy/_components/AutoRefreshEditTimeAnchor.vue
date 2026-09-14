@@ -2,8 +2,8 @@
 const buyProject = useBuyProjectStore()
 const { autoRefresh } = storeToRefs(buyProject)
 const {
-  onApiGETRefreshGetPlanInfo,
-  onApiPOSTRefreshSavePlan,
+  onApiGetVasRefreshGetPlanInfo,
+  onApiPostVasRefreshSavePlan,
   onAutoRefreshPopup,
   onAutoRefreshSuccess,
   onResetPojectData,
@@ -29,7 +29,7 @@ const onClick = async () => {
 
   onResetPojectData('autoRefresh') // 清空 autoRefresh 選取的資料
 
-  const { status, data } = await onApiGETRefreshGetPlanInfo()
+  const { status, data } = await onApiGetVasRefreshGetPlanInfo()
 
   if (status !== 200) return
 
@@ -66,7 +66,7 @@ const onClick = async () => {
   }
 
   onApiPromise('open')
-  await onApiPOSTRefreshSavePlan()
+  await onApiPostVasRefreshSavePlan()
   onApiPromise('close')
 
   await onAutoRefreshSuccess(props.update)

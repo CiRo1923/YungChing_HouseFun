@@ -1,9 +1,9 @@
 <script setup>
-// import { apiGETCommunities } from '@js/_api/buy/index.js'
+// import { apiGetBuyCommunities } from '@js/_api/buy/index.js'
 
 // const buyProject = useBuyProjectStore()
 // const { options } = storeToRefs(buyProject)
-const { onApiGETCommunities } = useBuyProjectActions()
+const { onApiGetBuyCommunities } = useBuyProjectActions()
 const buyPublish = useBuyPublishStore()
 const { apiData } = storeToRefs(buyPublish)
 
@@ -18,7 +18,7 @@ const radioOptions = readonly([
   },
 ])
 const onCommunities = async (keyword, setOptions) => {
-  const { status, data } = await onApiGETCommunities({
+  const { status, data } = await onApiGetBuyCommunities({
     cityID: apiData.value.caseInfo.cityID,
     districtID: apiData.value.caseInfo.districtID,
     road: apiData.value.caseInfo.road,

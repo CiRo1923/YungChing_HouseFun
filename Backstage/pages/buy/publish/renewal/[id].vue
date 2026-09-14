@@ -7,8 +7,8 @@ const buyProject = useBuyProjectStore()
 const { renewal } = storeToRefs(buyProject)
 const buyPublish = useBuyPublishStore()
 const { statusData } = storeToRefs(buyPublish)
-const { onApiGetPublishAvailablePlans, onApiPOSTPublishSubmit } = useBuyProjectActions()
-const { onUnsavedChanges, onApiGERealEstateCaseStatus, onApiPOSTRealEstateReadToPublish } =
+const { onApiGetVasPublishAvailablePlans, onApiPostVasPublishSubmit } = useBuyProjectActions()
+const { onUnsavedChanges, onApiGetBuyRealEstateCaseStatusHfID, onApiPostBuyRealEstateReadToPublish } =
   useBuyPublishActions()
 const { onAlert, onApiPromise, onApiErrorServerToClient } = usePopupActions()
 const route = useRoute()
@@ -33,7 +33,7 @@ const { onSnapshotSave } = onUnsavedChanges(() => renewal.value.apiData)
 const onDraftSubmit = async () => {
   onApiPromise('open')
 
-  const { status } = await onApiPOSTRealEstateReadToPublish(hfID.value)
+  const { status } = await onApiPostBuyRealEstateReadToPublish(hfID.value)
 
   onApiPromise('close')
 
@@ -56,7 +56,7 @@ const onSaveSubmit = async (validate, setTouched) => {
   if (valid) {
     onApiPromise('open')
 
-    const { status } = await onApiPOSTPublishSubmit([hfID.value])
+    const { status } = await onApiPostVasPublishSubmit([hfID.value])
 
     onApiPromise('close')
 
@@ -79,7 +79,7 @@ const onSaveSubmit = async (validate, setTouched) => {
 
 // 先取得 物件狀態
 await useAsyncData(`case-status-renewal-${hfID.value}`, () =>
-  onApiGERealEstateCaseStatus(hfID.value)
+  onApiGetBuyRealEstateCaseStatusHfID(hfID.value)
 )
 
 // 如果 額度沒有過期 isExpired (true 過期 / false 未過期) 無法進入頁面
@@ -96,7 +96,7 @@ if (!statusData.value.isExpired) {
     )
   )
 } else {
-  await onWithLoadingAll([onApiGetPublishAvailablePlans(hfID.value)])
+  await onWithLoadingAll([onApiGetVasPublishAvailablePlans(hfID.value)])
   // 資料就位後才立基準,否則載入途中的空值會被當成「使用者清空了選擇」
   onSnapshotSave()
 }

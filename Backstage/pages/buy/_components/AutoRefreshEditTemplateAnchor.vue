@@ -2,8 +2,8 @@
 const buyProject = useBuyProjectStore()
 const { autoRefresh } = storeToRefs(buyProject)
 const {
-  onApiGETRefreshTemplateGetTemplateInfo,
-  onApiPOSTRefreshTemplateSaveTemplate,
+  onApiGetVasRefreshTemplateGetTemplateInfo,
+  onApiPostVasRefreshTemplateSaveTemplate,
   onAutoRefreshTemplateFlow,
 } = useBuyProjectActions()
 const { onCustom, onApiPromise } = usePopupActions()
@@ -26,7 +26,7 @@ const onClick = async () => {
   autoRefresh.value.templateSaveTime.apiData.templateID = templateID
   autoRefresh.value.templateSaveTime.apiData.isCustom = isCustom
 
-  const { status, data } = await onApiGETRefreshTemplateGetTemplateInfo()
+  const { status, data } = await onApiGetVasRefreshTemplateGetTemplateInfo()
 
   if (status !== 200) return
 
@@ -73,7 +73,7 @@ const onClick = async () => {
   }
 
   onApiPromise('open')
-  await onApiPOSTRefreshTemplateSaveTemplate()
+  await onApiPostVasRefreshTemplateSaveTemplate()
   onApiPromise('close')
 
   // 編輯儲存後回到選擇範本，繼續完整套用流程（確認範本時間 → 續約 → 儲存）

@@ -16,10 +16,10 @@ definePageMeta({
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
 const buyProject = useBuyProjectStore()
 const {
-  onApiGETRealEstateTypeSelectOptions,
-  onApiGETRealEstateLegalUsageSelectOptions,
-  onApiPOSTRealEstateRestoreToOnline,
-  onApiGETRealEstateFeatureCheckOptions,
+  onApiGetBuyRealEstateTypeSelectOptions,
+  onApiGetBuyRealEstateLegalUsageSelectOptions,
+  onApiPostBuyRealEstateRestoreToOnline,
+  onApiGetBuyRealEstateFeatureCheckOptions,
 } = useBuyProjectActions()
 const buyPublish = useBuyPublishStore()
 const { apiData, pingData, statusData } = storeToRefs(buyPublish)
@@ -27,10 +27,10 @@ const { apiData, pingData, statusData } = storeToRefs(buyPublish)
 const {
   onAllPromise,
   onUnsavedChanges,
-  onApiGERealEstateCaseStatus,
-  onApiGETRealEstate,
-  onApiPOSTRealEstateDraft,
-  onApiPOSTRealEstate,
+  onApiGetBuyRealEstateCaseStatusHfID,
+  onApiGetBuyRealEstateHfID,
+  onApiPostStringBuyRealEstateDraftHfID,
+  onApiPostStringBuyRealEstateHfID,
 } = useBuyPublishActions()
 const { onAlert, onConfirm, onApiPromise, onApiErrorServerToClient } = usePopupActions()
 const route = useRoute()
@@ -44,15 +44,15 @@ const { onSnapshotSave } = onUnsavedChanges(() => ({
 }))
 
 const onTypeSelectOptionsUpdate = async () => {
-  return await onApiGETRealEstateTypeSelectOptions()
+  return await onApiGetBuyRealEstateTypeSelectOptions()
 }
 
 const onUsageSelectOptionsUpdate = async () => {
-  return await onApiGETRealEstateLegalUsageSelectOptions()
+  return await onApiGetBuyRealEstateLegalUsageSelectOptions()
 }
 
 const onFeatureCheckOptionsUpdate = async () => {
-  return await onApiGETRealEstateFeatureCheckOptions()
+  return await onApiGetBuyRealEstateFeatureCheckOptions()
 }
 
 const onAlertSuccess = async (content) => {
@@ -70,7 +70,7 @@ const onAlertSuccess = async (content) => {
 const onDraft = async () => {
   onApiPromise('open')
 
-  const { status } = await onApiPOSTRealEstateDraft(hfID.value)
+  const { status } = await onApiPostStringBuyRealEstateDraftHfID(hfID.value)
 
   onApiPromise('close')
 
@@ -92,7 +92,7 @@ const onSave = async (validate, setTouched) => {
   if (valid) {
     onApiPromise('open')
 
-    const { status } = await onApiPOSTRealEstate(hfID.value)
+    const { status } = await onApiPostStringBuyRealEstateHfID(hfID.value)
 
     onApiPromise('close')
 
@@ -123,7 +123,7 @@ const onRenewal = async (validate, setTouched) => {
     if (isExpired) {
       onApiPromise('open')
 
-      const { status } = await onApiPOSTRealEstate(hfID.value)
+      const { status } = await onApiPostStringBuyRealEstateHfID(hfID.value)
 
       onApiPromise('close')
 
@@ -173,7 +173,7 @@ const onRenewal = async (validate, setTouched) => {
         if (caseStatus === 1) {
           onApiPromise('open')
 
-          const { status } = await onApiPOSTRealEstate(hfID.value)
+          const { status } = await onApiPostStringBuyRealEstateHfID(hfID.value)
 
           onApiPromise('close')
 
@@ -185,7 +185,7 @@ const onRenewal = async (validate, setTouched) => {
         } else if (caseStatus === 4) {
           onApiPromise('open')
 
-          const { status } = await onApiPOSTRealEstateRestoreToOnline([hfID.value])
+          const { status } = await onApiPostBuyRealEstateRestoreToOnline([hfID.value])
 
           onApiPromise('close')
 
@@ -212,8 +212,8 @@ const onOptionsUpdate = async () => {
 
 await onWithLoadingAll([
   ...onAllPromise(),
-  useAsyncData(`case-status-basic-${hfID.value}`, () => onApiGERealEstateCaseStatus(hfID.value)),
-  useAsyncData(`detail-${hfID.value}`, () => onApiGETRealEstate(hfID.value)),
+  useAsyncData(`case-status-basic-${hfID.value}`, () => onApiGetBuyRealEstateCaseStatusHfID(hfID.value)),
+  useAsyncData(`detail-${hfID.value}`, () => onApiGetBuyRealEstateHfID(hfID.value)),
 ])
 
 const { refresh: refreshOptions } = await useAsyncData(

@@ -1,15 +1,15 @@
 import {
-  apiGETCommonPlanAggregate,
-  apiGETRealEstateSearchFilter,
-  apiPOSTRealEstateCaseAggregate,
-  apiPOSTRealEstateSearch,
-  apiPOSTRealEstateOffline,
-  apiPOSTRealEstateDeal,
-  apiPOSTRealEstateRemove,
-  apiGETRealEstateCaseViewCounts,
-  apiGETCommentssearchCommentFilter,
-  apiPOSTCommentsSearch,
-  apiPOSTCommentsUpdateReplyStatue,
+  apiGetVasCommonPlanAggregate,
+  apiGetBuyRealEstateSearchFilter,
+  apiGetBuyRealEstateCaseAggregate,
+  apiPostBuyRealEstateSearch,
+  apiPostBuyRealEstateOffline,
+  apiPostBuyRealEstateDeal,
+  apiPostBuyRealEstateRemove,
+  apiGetBuyRealEstateCaseViewCounts,
+  apiGetBuyCommentsSearchCommentFilter,
+  apiPostBuyCommentsSearch,
+  apiPostBuyCommentsUpdateReplyStatue,
 } from '@js/_api/buy/list.js'
 
 // import { useBuyProjectStore } from '@stores/buy/project.js'
@@ -70,8 +70,8 @@ export default () => {
       (item) => selectedIds.has(item.hfID) && item._checked.publish && !item._checked.isExpired
     )
   })
-  const onApiGETCommonPlanAggregate = async () => {
-    const { config, status, data } = await apiGETCommonPlanAggregate()
+  const onApiGetVasCommonPlanAggregate = async () => {
+    const { config, status, data } = await apiGetVasCommonPlanAggregate()
 
     if (status === 200) {
       planAggregate.value = data
@@ -82,10 +82,10 @@ export default () => {
     return { config, status, data }
   }
 
-  const onApiGETRealEstateSearchFilter = async () => {
+  const onApiGetBuyRealEstateSearchFilter = async () => {
     if (serachOptions.value.purpose) return false
 
-    const { config, status, data } = await apiGETRealEstateSearchFilter()
+    const { config, status, data } = await apiGetBuyRealEstateSearchFilter()
 
     if (status === 200) {
       const keyMap = {
@@ -109,8 +109,8 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiPOSTRealEstateCaseAggregate = async () => {
-    const { config, status, data } = await apiPOSTRealEstateCaseAggregate()
+  const onApiGetBuyRealEstateCaseAggregate = async () => {
+    const { config, status, data } = await apiGetBuyRealEstateCaseAggregate()
 
     if (status === 200) {
       aggregate.value = data
@@ -121,11 +121,11 @@ export default () => {
     return { config, status, data }
   }
 
-  const onApiPOSTRealEstateSearch = async (caseStatusToken) => {
+  const onApiPostBuyRealEstateSearch = async (caseStatusToken) => {
     // pg 可能被手動改成非數字或 0 / 負數，一律回退第 1 頁（NaN >= 1 為 false）
     const queryPage = Number.parseInt(route.query.pg, 10)
     const page = queryPage >= 1 ? queryPage : 1
-    const { config, status, data } = await apiPOSTRealEstateSearch({
+    const { config, status, data } = await apiPostBuyRealEstateSearch({
       is7DayExpirerFilterer: false,
       caseStatusToken, // 刊登中: 1、草稿: 2、已成交: 3、已下架: 4
       page,
@@ -209,8 +209,8 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiPOSTRealEstateOffline = async (hfIDs) => {
-    const { config, status, data } = await apiPOSTRealEstateOffline({
+  const onApiPostBuyRealEstateOffline = async (hfIDs) => {
+    const { config, status, data } = await apiPostBuyRealEstateOffline({
       hfIDs,
     })
 
@@ -221,8 +221,8 @@ export default () => {
     return { config, status, data }
   }
 
-  const onApiPOSTRealEstateDeal = async (hfIDs) => {
-    const { config, status, data } = await apiPOSTRealEstateDeal({
+  const onApiPostBuyRealEstateDeal = async (hfIDs) => {
+    const { config, status, data } = await apiPostBuyRealEstateDeal({
       hfIDs,
       ...apiDealData.value,
     })
@@ -233,8 +233,8 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiPOSTRealEstateRemove = async (hfIDs) => {
-    const { config, status, data } = await apiPOSTRealEstateRemove({
+  const onApiPostBuyRealEstateRemove = async (hfIDs) => {
+    const { config, status, data } = await apiPostBuyRealEstateRemove({
       hfIDs,
     })
 
@@ -244,8 +244,8 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGETRealEstateCaseViewCounts = async (hfID) => {
-    const { config, status, data } = await apiGETRealEstateCaseViewCounts({
+  const onApiGetBuyRealEstateCaseViewCounts = async (hfID) => {
+    const { config, status, data } = await apiGetBuyRealEstateCaseViewCounts({
       hfID,
     })
 
@@ -255,8 +255,8 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGETCommentssearchCommentFilter = async () => {
-    const { config, status, data } = await apiGETCommentssearchCommentFilter()
+  const onApiGetBuyCommentsSearchCommentFilter = async () => {
+    const { config, status, data } = await apiGetBuyCommentsSearchCommentFilter()
 
     if (status === 200) {
       const keyMap = {
@@ -273,8 +273,8 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiPOSTCommentsSearch = async () => {
-    const { config, status, data } = await apiPOSTCommentsSearch({
+  const onApiPostBuyCommentsSearch = async () => {
+    const { config, status, data } = await apiPostBuyCommentsSearch({
       pageSize: 9,
       ...apiCommentsData.value,
     })
@@ -298,8 +298,8 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiPOSTCommentsUpdateReplyStatue = async () => {
-    const { config, status, data } = await apiPOSTCommentsUpdateReplyStatue(
+  const onApiPostBuyCommentsUpdateReplyStatue = async () => {
+    const { config, status, data } = await apiPostBuyCommentsUpdateReplyStatue(
       apiCommentUpdateData.value
     )
 
@@ -343,7 +343,7 @@ export default () => {
   const onCommentPopup = async () => {
     onApiPromise('open')
 
-    const { status } = await onApiPOSTCommentsSearch()
+    const { status } = await onApiPostBuyCommentsSearch()
 
     onApiPromise('close')
 
@@ -353,7 +353,7 @@ export default () => {
   }
   // 彈窗內搜尋（不關閉重開彈窗，資料直接響應更新；loading 由呼叫端控制）
   const onCommentSearch = async () => {
-    const { status } = await onApiPOSTCommentsSearch()
+    const { status } = await onApiPostBuyCommentsSearch()
 
     return { status }
   }
@@ -372,17 +372,17 @@ export default () => {
     commentsSelectCount,
     renewalCanNotPublishData,
     renewalNotExpiredData,
-    onApiGETCommonPlanAggregate,
-    onApiGETRealEstateSearchFilter,
-    onApiPOSTRealEstateCaseAggregate,
-    onApiPOSTRealEstateSearch,
-    onApiPOSTRealEstateOffline,
-    onApiPOSTRealEstateDeal,
-    onApiPOSTRealEstateRemove,
-    onApiGETRealEstateCaseViewCounts,
-    onApiGETCommentssearchCommentFilter,
-    onApiPOSTCommentsSearch,
-    onApiPOSTCommentsUpdateReplyStatue,
+    onApiGetVasCommonPlanAggregate,
+    onApiGetBuyRealEstateSearchFilter,
+    onApiGetBuyRealEstateCaseAggregate,
+    onApiPostBuyRealEstateSearch,
+    onApiPostBuyRealEstateOffline,
+    onApiPostBuyRealEstateDeal,
+    onApiPostBuyRealEstateRemove,
+    onApiGetBuyRealEstateCaseViewCounts,
+    onApiGetBuyCommentsSearchCommentFilter,
+    onApiPostBuyCommentsSearch,
+    onApiPostBuyCommentsUpdateReplyStatue,
     onSyncCheckedDatas,
     onCommentPopup,
     onCommentSearch,

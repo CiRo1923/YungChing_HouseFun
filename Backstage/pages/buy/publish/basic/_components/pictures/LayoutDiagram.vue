@@ -4,7 +4,7 @@ const { onIsLoading } = useCommonActions()
 // const buyProject = useBuyProjectStore()
 const buyPublish = useBuyPublishStore()
 const { apiData } = storeToRefs(buyPublish)
-const { onApiPOSTRealEstatePicUpload } = useBuyPublishActions()
+const { onApiPostFormBuyRealEstatePicUpload } = useBuyPublishActions()
 const route = useRoute()
 const hfID = computed(() => route.params.id)
 
@@ -19,7 +19,7 @@ const message = computed(() => {
 
 const onUploaded = async (items, done) => {
   onIsLoading(true)
-  const { status, data } = await onApiPOSTRealEstatePicUpload({
+  const { status, data } = await onApiPostFormBuyRealEstatePicUpload({
     hfID: hfID.value,
     imgType: 2, // (1: 物件圖片; 2: 格局圖)
     imgUpload: items[0].file,

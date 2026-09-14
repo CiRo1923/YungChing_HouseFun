@@ -4,7 +4,7 @@ const { onIsLoading } = useCommonActions()
 // const buyProject = useBuyProjectStore()
 const buyPublish = useBuyPublishStore()
 const { apiData } = storeToRefs(buyPublish)
-const { onApiPOSTRealEstatePicUpload } = useBuyPublishActions()
+const { onApiPostFormBuyRealEstatePicUpload } = useBuyPublishActions()
 const route = useRoute()
 const hfID = computed(() => route.params.id)
 const hasCasePictures = computed(() => apiData.value.caseInfo?.casePictures.length !== 0)
@@ -27,7 +27,7 @@ const onPicturesDelete = () => {
 
 const onUploaded = async (items, done) => {
   onIsLoading(true)
-  const { status, data } = await onApiPOSTRealEstatePicUpload({
+  const { status, data } = await onApiPostFormBuyRealEstatePicUpload({
     hfID: hfID.value,
     imgType: 1, // (1: 物件圖片; 2: 格局圖)
     imgUpload: items[0].file,

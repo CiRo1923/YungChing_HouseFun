@@ -13,14 +13,14 @@ const buyProject = useBuyProjectStore()
 // const { options } = storeToRefs(buyProject)
 // const buyPublish = useBuyPublishStore()
 // const { apiData } = storeToRefs(buyPublish)
-const { onApiPOSTRealEstateNewCase } = useBuyPublishActions()
+const { onApiPostBuyRealEstateNewCase } = useBuyPublishActions()
 const { onApiPromise } = usePopupActions()
 const router = useRouter()
-// const newCaseAsync = useAsyncData('newCase', () => onApiPOSTRealEstateNewCase())
+// const newCaseAsync = useAsyncData('newCase', () => onApiPostBuyRealEstateNewCase())
 
 const onCreate = async () => {
   onApiPromise('open')
-  const { status, data } = await onApiPOSTRealEstateNewCase()
+  const { status, data } = await onApiPostBuyRealEstateNewCase()
   onApiPromise('close')
 
   if (status === 200) {

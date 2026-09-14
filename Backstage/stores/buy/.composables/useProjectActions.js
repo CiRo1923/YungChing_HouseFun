@@ -1,50 +1,50 @@
 import {
   apiGetCommonServerTime,
-  apiGETCitySelectOptions,
-  apiGETDistrictSelectOptions,
-  apiGetPublishAvailablePlans,
-  apiPOSTPublishSubmit,
-  apiPOSTRealEstateRestoreToOnline,
-  apiPOSTPublishRenewal,
-  apiGETPublishGetPublishResponse,
-  apiGETGoldenGetPlanList,
-  apiPOSTGoldenSetPlanSingle,
-  apiGETRefreshCurrentPlansForCase,
-  apiGETRefreshNewPlan,
-  apiGETRefreshGetPlanInfo,
-  apiGETRefreshAvailablePlans,
-  apiPOSTRefreshSavePlan,
-  apiGETRefreshTemplateAvailableTemplates,
-  apiPOSTRefreshSavePlanTemplate,
-  apiGETRefreshTemplateGetTemplateInfo,
-  apiPOSTRefreshTemplateSaveTemplate,
+  apiGetBuyCitySelectOptions,
+  apiGetBuyCityCodeDistrictSelectOptions,
+  apiGetVasPublishAvailablePlans,
+  apiPostVasPublishSubmit,
+  apiPostBuyRealEstateRestoreToOnline,
+  apiPostVasPublishRenewal,
+  apiGetVasPublishGetPublishResponse,
+  apiGetVasGoldenGetPlanList,
+  apiPostVasGoldenSetPlanSingle,
+  apiGetVasRefreshCurrentPlansForCase,
+  apiGetVasRefreshNewPlan,
+  apiGetVasRefreshGetPlanInfo,
+  apiGetVasRefreshAvailablePlans,
+  apiPostVasRefreshSavePlan,
+  apiGetVasRefreshTemplateAvailableTemplates,
+  apiPostVasRefreshSavePlanTemplate,
+  apiGetVasRefreshTemplateGetTemplateInfo,
+  apiPostVasRefreshTemplateSaveTemplate,
 } from '@js/_api/buy/common.js'
 
 import {
-  apiGETRealEstatePurposeCheckOptions,
-  apiGETRoad,
-  apiGETRealEstateTypeSelectOptions,
-  apiGETRealEstateLegalUsageSelectOptions,
-  apiGETRealEstateZoingCheckOptions,
-  apiGETRealEstateZoingCitySelectOptions,
-  apiGETRealEstateZoingLandSelectOptions,
-  apiGETRealEstateAgeIdentifySelectOptions,
-  apiGETRealEstateFloorSelectOptions,
-  apiGETCommunities,
-  apiGETRealEstateFaceSelectOptions,
-  apiGETRealEstateStructionSelectOptions,
-  apiGETRealEstateBarrierFreeCheckOptions,
-  apiGETRealEstateManageTypeSelectOptions,
-  apiGETRealEstateManageDutySelectOptions,
-  apiGETRealEstateManagePayPeriodSelectOptions,
-  apiGETRealEstateParkingModeSelectOptions,
-  apiGETRealEstateParkingTypeSelectOptions,
-  apiGETRealEstateParkingRegSelectOptions,
-  apiGETRealEstateParkingPayPeriodSelectOptions,
-  apiGETRealEstateVideoDisplaySelectOptions,
-  apiGETRealEstateVideoTypeSelectOptions,
-  apiGETRealEstateFeatureCheckOptions,
-  apiGETRealEstatePosterDataSourceSelectOptions,
+  apiGetBuyRealEstatePurposeCheckOptions,
+  apiGetBuyCityCodeDistrictCodeRoad,
+  apiGetBuyRealEstateTypeSelectOptions,
+  apiGetBuyRealEstateLegalUsageSelectOptions,
+  apiGetBuyRealEstateZoingCheckOptions,
+  apiGetBuyRealEstateZoingCitySelectOptions,
+  apiGetBuyRealEstateZoingLandSelectOptions,
+  apiGetBuyRealEstateAgeIdentifySelectOptions,
+  apiGetBuyRealEstateFloorSelectOptions,
+  apiGetBuyCommunities,
+  apiGetBuyRealEstateFaceSelectOptions,
+  apiGetBuyRealEstateStructionSelectOptions,
+  apiGetBuyRealEstateBarrierFreeCheckOptions,
+  apiGetBuyRealEstateManageTypeSelectOptions,
+  apiGetBuyRealEstateManageDutySelectOptions,
+  apiGetBuyRealEstateManagePayPeriodSelectOptions,
+  apiGetBuyRealEstateParkingModeSelectOptions,
+  apiGetBuyRealEstateParkingTypeSelectOptions,
+  apiGetBuyRealEstateParkingRegSelectOptions,
+  apiGetBuyRealEstateParkingPayPeriodSelectOptions,
+  apiGetBuyRealEstateVideoDisplaySelectOptions,
+  apiGetBuyRealEstateVideoTypeSelectOptions,
+  apiGetBuyRealEstateFeatureCheckOptions,
+  apiGetBuyRealEstatePosterDataSourceSelectOptions,
 } from '@js/_api/buy/publish.js'
 
 import { onFormatDate } from '@js/_prototype.js'
@@ -85,10 +85,10 @@ export default () => {
     return { config, status, data }
   }
 
-  const onApiGETRealEstatePurposeCheckOptions = async () => {
+  const onApiGetBuyRealEstatePurposeCheckOptions = async () => {
     if (options.value.casePurpose) return false
 
-    const { config, status, data } = await apiGETRealEstatePurposeCheckOptions()
+    const { config, status, data } = await apiGetBuyRealEstatePurposeCheckOptions()
 
     if (status === 200) {
       options.value.casePurpose = data || []
@@ -98,10 +98,10 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGETCitySelectOptions = async () => {
+  const onApiGetBuyCitySelectOptions = async () => {
     if (options.value.city) return false
 
-    const { config, status, data } = await apiGETCitySelectOptions()
+    const { config, status, data } = await apiGetBuyCitySelectOptions()
 
     if (status === 200) {
       options.value.city = data || []
@@ -111,8 +111,8 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGETDistrictSelectOptions = async (cityID) => {
-    const { config, status, data } = await apiGETDistrictSelectOptions({
+  const onApiGetBuyCityCodeDistrictSelectOptions = async (cityID) => {
+    const { config, status, data } = await apiGetBuyCityCodeDistrictSelectOptions({
       cityCode: cityID,
     })
 
@@ -128,8 +128,8 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGETRoad = async (cityID, AreaID) => {
-    const { config, status, data } = await apiGETRoad({
+  const onApiGetBuyCityCodeDistrictCodeRoad = async (cityID, AreaID) => {
+    const { config, status, data } = await apiGetBuyCityCodeDistrictCodeRoad({
       cityCode: cityID,
       districtCode: AreaID,
     })
@@ -144,10 +144,10 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGETRealEstateTypeSelectOptions = async () => {
+  const onApiGetBuyRealEstateTypeSelectOptions = async () => {
     const { casePurposeToken } = apiData.value.caseInfo
 
-    const { config, status, data } = await apiGETRealEstateTypeSelectOptions({
+    const { config, status, data } = await apiGetBuyRealEstateTypeSelectOptions({
       purposeToken: casePurposeToken,
     })
 
@@ -159,10 +159,10 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGETRealEstateLegalUsageSelectOptions = async () => {
+  const onApiGetBuyRealEstateLegalUsageSelectOptions = async () => {
     const { casePurposeToken } = apiData.value.caseInfo
 
-    const { config, status, data } = await apiGETRealEstateLegalUsageSelectOptions({
+    const { config, status, data } = await apiGetBuyRealEstateLegalUsageSelectOptions({
       purposeToken: casePurposeToken,
     })
 
@@ -174,10 +174,10 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGETRealEstateZoingCheckOptions = async () => {
+  const onApiGetBuyRealEstateZoingCheckOptions = async () => {
     if (options.value.caseZoing) return false
 
-    const { config, status, data } = await apiGETRealEstateZoingCheckOptions()
+    const { config, status, data } = await apiGetBuyRealEstateZoingCheckOptions()
 
     if (status === 200) {
       options.value.caseZoing = data || []
@@ -187,10 +187,10 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGETRealEstateZoingCitySelectOptions = async () => {
+  const onApiGetBuyRealEstateZoingCitySelectOptions = async () => {
     if (options.value.zoingCity) return false
 
-    const { config, status, data } = await apiGETRealEstateZoingCitySelectOptions()
+    const { config, status, data } = await apiGetBuyRealEstateZoingCitySelectOptions()
 
     if (status === 200) {
       options.value.zoingCity = data || []
@@ -200,10 +200,10 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGETRealEstateZoingLandSelectOptions = async () => {
+  const onApiGetBuyRealEstateZoingLandSelectOptions = async () => {
     if (options.value.zoingLand) return false
 
-    const { config, status, data } = await apiGETRealEstateZoingLandSelectOptions()
+    const { config, status, data } = await apiGetBuyRealEstateZoingLandSelectOptions()
 
     if (status === 200) {
       options.value.zoingLand = data || []
@@ -213,10 +213,10 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGETRealEstateAgeIdentifySelectOptions = async () => {
+  const onApiGetBuyRealEstateAgeIdentifySelectOptions = async () => {
     if (options.value.ageIdentify) return false
 
-    const { config, status, data } = await apiGETRealEstateAgeIdentifySelectOptions()
+    const { config, status, data } = await apiGetBuyRealEstateAgeIdentifySelectOptions()
 
     if (status === 200) {
       options.value.ageIdentify = data || []
@@ -226,10 +226,10 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGETRealEstateFloorSelectOptions = async () => {
+  const onApiGetBuyRealEstateFloorSelectOptions = async () => {
     if (options.value.floor) return false
 
-    const { config, status, data } = await apiGETRealEstateFloorSelectOptions()
+    const { config, status, data } = await apiGetBuyRealEstateFloorSelectOptions()
 
     if (status === 200) {
       options.value.floor = data || []
@@ -239,8 +239,8 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGETCommunities = async (params) => {
-    const { config, status, data } = await apiGETCommunities(params)
+  const onApiGetBuyCommunities = async (params) => {
+    const { config, status, data } = await apiGetBuyCommunities(params)
 
     if (status !== 200) {
       onApiError(config, status, data)
@@ -248,10 +248,10 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGETRealEstateFaceSelectOptions = async () => {
+  const onApiGetBuyRealEstateFaceSelectOptions = async () => {
     if (options.value.face) return false
 
-    const { config, status, data } = await apiGETRealEstateFaceSelectOptions()
+    const { config, status, data } = await apiGetBuyRealEstateFaceSelectOptions()
 
     if (status === 200) {
       options.value.face = data || []
@@ -261,10 +261,10 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGETRealEstateStructionSelectOptions = async () => {
+  const onApiGetBuyRealEstateStructionSelectOptions = async () => {
     if (options.value.structure) return false
 
-    const { config, status, data } = await apiGETRealEstateStructionSelectOptions()
+    const { config, status, data } = await apiGetBuyRealEstateStructionSelectOptions()
 
     if (status === 200) {
       options.value.structure = data || []
@@ -274,10 +274,10 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGETRealEstateBarrierFreeCheckOptions = async () => {
+  const onApiGetBuyRealEstateBarrierFreeCheckOptions = async () => {
     if (options.value.barrierFree) return false
 
-    const { config, status, data } = await apiGETRealEstateBarrierFreeCheckOptions()
+    const { config, status, data } = await apiGetBuyRealEstateBarrierFreeCheckOptions()
 
     if (status === 200) {
       options.value.barrierFree = data || []
@@ -287,10 +287,10 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGETRealEstateManageTypeSelectOptions = async () => {
+  const onApiGetBuyRealEstateManageTypeSelectOptions = async () => {
     if (options.value.manageType) return false
 
-    const { config, status, data } = await apiGETRealEstateManageTypeSelectOptions()
+    const { config, status, data } = await apiGetBuyRealEstateManageTypeSelectOptions()
 
     if (status === 200) {
       options.value.manageType = data || []
@@ -300,10 +300,10 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGETRealEstateManageDutySelectOptions = async () => {
+  const onApiGetBuyRealEstateManageDutySelectOptions = async () => {
     if (options.value.manageDuty) return false
 
-    const { config, status, data } = await apiGETRealEstateManageDutySelectOptions()
+    const { config, status, data } = await apiGetBuyRealEstateManageDutySelectOptions()
 
     if (status === 200) {
       options.value.manageDuty = data || []
@@ -313,10 +313,10 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGETRealEstateManagePayPeriodSelectOptions = async () => {
+  const onApiGetBuyRealEstateManagePayPeriodSelectOptions = async () => {
     if (options.value.managePay) return false
 
-    const { config, status, data } = await apiGETRealEstateManagePayPeriodSelectOptions()
+    const { config, status, data } = await apiGetBuyRealEstateManagePayPeriodSelectOptions()
 
     if (status === 200) {
       options.value.managePay = data || []
@@ -326,10 +326,10 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGETRealEstateParkingModeSelectOptions = async () => {
+  const onApiGetBuyRealEstateParkingModeSelectOptions = async () => {
     if (options.value.parkingMode) return false
 
-    const { config, status, data } = await apiGETRealEstateParkingModeSelectOptions()
+    const { config, status, data } = await apiGetBuyRealEstateParkingModeSelectOptions()
 
     if (status === 200) {
       options.value.parkingMode = data || []
@@ -339,10 +339,10 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGETRealEstateParkingTypeSelectOptions = async () => {
+  const onApiGetBuyRealEstateParkingTypeSelectOptions = async () => {
     if (options.value.parkingType) return false
 
-    const { config, status, data } = await apiGETRealEstateParkingTypeSelectOptions()
+    const { config, status, data } = await apiGetBuyRealEstateParkingTypeSelectOptions()
 
     if (status === 200) {
       options.value.parkingType = data || []
@@ -352,10 +352,10 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGETRealEstateParkingRegSelectOptions = async () => {
+  const onApiGetBuyRealEstateParkingRegSelectOptions = async () => {
     if (options.value.parkingReg) return false
 
-    const { config, status, data } = await apiGETRealEstateParkingRegSelectOptions()
+    const { config, status, data } = await apiGetBuyRealEstateParkingRegSelectOptions()
 
     if (status === 200) {
       options.value.parkingReg = data || []
@@ -365,10 +365,10 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGETRealEstateParkingPayPeriodSelectOptions = async () => {
+  const onApiGetBuyRealEstateParkingPayPeriodSelectOptions = async () => {
     if (options.value.parkingPayPeriod) return false
 
-    const { config, status, data } = await apiGETRealEstateParkingPayPeriodSelectOptions()
+    const { config, status, data } = await apiGetBuyRealEstateParkingPayPeriodSelectOptions()
 
     if (status === 200) {
       options.value.parkingPayPeriod = data || []
@@ -378,10 +378,10 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGETRealEstateVideoDisplaySelectOptions = async () => {
+  const onApiGetBuyRealEstateVideoDisplaySelectOptions = async () => {
     if (options.value.videoDisplay) return false
 
-    const { config, status, data } = await apiGETRealEstateVideoDisplaySelectOptions()
+    const { config, status, data } = await apiGetBuyRealEstateVideoDisplaySelectOptions()
 
     if (status === 200) {
       options.value.videoDisplay = data || []
@@ -391,10 +391,10 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGETRealEstateVideoTypeSelectOptions = async () => {
+  const onApiGetBuyRealEstateVideoTypeSelectOptions = async () => {
     if (options.value.videoType) return false
 
-    const { config, status, data } = await apiGETRealEstateVideoTypeSelectOptions()
+    const { config, status, data } = await apiGetBuyRealEstateVideoTypeSelectOptions()
 
     if (status === 200) {
       options.value.videoType = data || []
@@ -404,9 +404,9 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGETRealEstateFeatureCheckOptions = async () => {
+  const onApiGetBuyRealEstateFeatureCheckOptions = async () => {
     const { casePurposeToken } = apiData.value.caseInfo
-    const { config, status, data } = await apiGETRealEstateFeatureCheckOptions({
+    const { config, status, data } = await apiGetBuyRealEstateFeatureCheckOptions({
       purposeToken: casePurposeToken,
     })
 
@@ -418,10 +418,10 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGETRealEstatePosterDataSourceSelectOptions = async () => {
+  const onApiGetBuyRealEstatePosterDataSourceSelectOptions = async () => {
     if (options.value.posterDataSource) return false
 
-    const { config, status, data } = await apiGETRealEstatePosterDataSourceSelectOptions()
+    const { config, status, data } = await apiGetBuyRealEstatePosterDataSourceSelectOptions()
 
     if (status === 200) {
       options.value.posterDataSource = data || []
@@ -431,8 +431,8 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGetPublishAvailablePlans = async (hfID) => {
-    const { config, status, data } = await apiGetPublishAvailablePlans({
+  const onApiGetVasPublishAvailablePlans = async (hfID) => {
+    const { config, status, data } = await apiGetVasPublishAvailablePlans({
       userID: 0,
       hfID,
     })
@@ -447,8 +447,8 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiPOSTPublishRenewal = async (hfIDs) => {
-    const { config, status, data } = await apiPOSTPublishRenewal({
+  const onApiPostVasPublishRenewal = async (hfIDs) => {
+    const { config, status, data } = await apiPostVasPublishRenewal({
       userID: 0,
       hfIDs,
       ...renewal.value.apiData,
@@ -460,8 +460,8 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiPOSTPublishSubmit = async (hfIDs) => {
-    const { config, status, data } = await apiPOSTPublishSubmit({
+  const onApiPostVasPublishSubmit = async (hfIDs) => {
+    const { config, status, data } = await apiPostVasPublishSubmit({
       userID: 0,
       hfIDs,
       ...renewal.value.apiData,
@@ -473,8 +473,8 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiPOSTRealEstateRestoreToOnline = async (hfIDs) => {
-    const { config, status, data } = await apiPOSTRealEstateRestoreToOnline({
+  const onApiPostBuyRealEstateRestoreToOnline = async (hfIDs) => {
+    const { config, status, data } = await apiPostBuyRealEstateRestoreToOnline({
       hfIDs,
     })
 
@@ -484,8 +484,8 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGETPublishGetPublishResponse = async (hfID) => {
-    const { config, status, data } = await apiGETPublishGetPublishResponse({
+  const onApiGetVasPublishGetPublishResponse = async (hfID) => {
+    const { config, status, data } = await apiGetVasPublishGetPublishResponse({
       hfID,
     })
 
@@ -499,8 +499,8 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGETGoldenGetPlanList = async () => {
-    const { config, status, data } = await apiGETGoldenGetPlanList()
+  const onApiGetVasGoldenGetPlanList = async () => {
+    const { config, status, data } = await apiGetVasGoldenGetPlanList()
 
     if (status === 200) {
       golden.value.plans = data
@@ -510,8 +510,8 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiPOSTGoldenSetPlanSingle = async (hfID) => {
-    const { config, status, data } = await apiPOSTGoldenSetPlanSingle({
+  const onApiPostVasGoldenSetPlanSingle = async (hfID) => {
+    const { config, status, data } = await apiPostVasGoldenSetPlanSingle({
       userID: 0,
       hfID,
       ...golden.value.apiData,
@@ -525,8 +525,8 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGETRefreshCurrentPlansForCase = async (hfID) => {
-    const { config, status, data } = await apiGETRefreshCurrentPlansForCase({
+  const onApiGetVasRefreshCurrentPlansForCase = async (hfID) => {
+    const { config, status, data } = await apiGetVasRefreshCurrentPlansForCase({
       userID: 0,
       hfID,
     })
@@ -541,8 +541,8 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGETRefreshNewPlan = async (hfID) => {
-    const { config, status, data } = await apiGETRefreshNewPlan({
+  const onApiGetVasRefreshNewPlan = async (hfID) => {
+    const { config, status, data } = await apiGetVasRefreshNewPlan({
       userId: 0,
       hfID,
     })
@@ -553,9 +553,9 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGETRefreshGetPlanInfo = async () => {
+  const onApiGetVasRefreshGetPlanInfo = async () => {
     const { hfID, vasID } = autoRefresh.value.save.apiData
-    const { config, status, data } = await apiGETRefreshGetPlanInfo({
+    const { config, status, data } = await apiGetVasRefreshGetPlanInfo({
       userId: 0,
       hfID,
       vasID,
@@ -569,9 +569,9 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGETRefreshAvailablePlans = async () => {
+  const onApiGetVasRefreshAvailablePlans = async () => {
     const { hfID, listSelectedRefreshTime } = autoRefresh.value.save.apiData
-    const { config, status, data } = await apiGETRefreshAvailablePlans({
+    const { config, status, data } = await apiGetVasRefreshAvailablePlans({
       userID: 0,
       hfID,
       expectedCount: listSelectedRefreshTime.length,
@@ -587,8 +587,8 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiPOSTRefreshSavePlan = async () => {
-    const { config, status, data } = await apiPOSTRefreshSavePlan({
+  const onApiPostVasRefreshSavePlan = async () => {
+    const { config, status, data } = await apiPostVasRefreshSavePlan({
       userID: 0,
       ...autoRefresh.value.save.apiData,
     })
@@ -599,8 +599,8 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGETRefreshTemplateAvailableTemplates = async (hfID) => {
-    const { config, status, data } = await apiGETRefreshTemplateAvailableTemplates({
+  const onApiGetVasRefreshTemplateAvailableTemplates = async (hfID) => {
+    const { config, status, data } = await apiGetVasRefreshTemplateAvailableTemplates({
       hfID,
     })
 
@@ -614,8 +614,8 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiPOSTRefreshSavePlanTemplate = async () => {
-    const { config, status, data } = await apiPOSTRefreshSavePlanTemplate({
+  const onApiPostVasRefreshSavePlanTemplate = async () => {
+    const { config, status, data } = await apiPostVasRefreshSavePlanTemplate({
       userID: 0,
       ...autoRefresh.value.templateSave.apiData,
     })
@@ -626,8 +626,8 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGETRefreshTemplateGetTemplateInfo = async () => {
-    const { config, status, data } = await apiGETRefreshTemplateGetTemplateInfo({
+  const onApiGetVasRefreshTemplateGetTemplateInfo = async () => {
+    const { config, status, data } = await apiGetVasRefreshTemplateGetTemplateInfo({
       userId: 0,
       ...autoRefresh.value.templateSaveTime.apiData,
     })
@@ -639,8 +639,8 @@ export default () => {
     return { config, status, data }
   }
 
-  const onApiPOSTRefreshTemplateSaveTemplate = async () => {
-    const { config, status, data } = await apiPOSTRefreshTemplateSaveTemplate(
+  const onApiPostVasRefreshTemplateSaveTemplate = async () => {
+    const { config, status, data } = await apiPostVasRefreshTemplateSaveTemplate(
       autoRefresh.value.templateSaveTime.apiData
     )
 
@@ -677,7 +677,7 @@ export default () => {
 
     if (isSure) {
       onApiPromise('open')
-      const { status } = await onApiPOSTGoldenSetPlanSingle(objectData.hfID)
+      const { status } = await onApiPostVasGoldenSetPlanSingle(objectData.hfID)
 
       onApiPromise('close')
 
@@ -703,7 +703,7 @@ export default () => {
 
   const onAutoRefreshPopup = async (objectData) => {
     onApiPromise('open')
-    const { status } = await onApiGETRefreshCurrentPlansForCase(objectData.hfID)
+    const { status } = await onApiGetVasRefreshCurrentPlansForCase(objectData.hfID)
 
     onApiPromise('close')
 
@@ -747,7 +747,7 @@ export default () => {
   }
   // 增加刷新次數 popup
   const onAutoRefreshAddTimePopup = async (objectData) => {
-    const { status, data } = await onApiGETRefreshNewPlan(objectData.hfID)
+    const { status, data } = await onApiGetVasRefreshNewPlan(objectData.hfID)
 
     if (status === 200) {
       const { isSure: isAddTime, item } = await onCustom({
@@ -834,7 +834,7 @@ export default () => {
   const onAutoRefreshTemplatePopup = async (objectData) => {
     onApiPromise('open')
 
-    const { status } = await onApiGETRefreshTemplateAvailableTemplates(objectData.hfID)
+    const { status } = await onApiGetVasRefreshTemplateAvailableTemplates(objectData.hfID)
 
     onApiPromise('close')
 
@@ -849,7 +849,7 @@ export default () => {
          * 燈箱頂端的 PageBuyPublishInfo 從 customData.data 取 caseTitle /
          * caseAddr / picURLCover 等欄位;傳範本清單進來的話,那幾個欄位一個都
          * 對不到,照片與標題就整塊空白。
-         * 範本清單本身不必經由這裡 —— onApiGETRefreshTemplateAvailableTemplates
+         * 範本清單本身不必經由這裡 —— onApiGetVasRefreshTemplateAvailableTemplates
          * 已經寫進 autoRefresh.templateSave.list,燈箱是從 store 讀的。
          */
         data: objectData,
@@ -994,7 +994,7 @@ export default () => {
       // 續約 popup（次數不相同才需要選額度）
       if (count > 0) {
         onApiPromise('open')
-        await onApiGETRefreshAvailablePlans()
+        await onApiGetVasRefreshAvailablePlans()
         onApiPromise('close')
 
         const renewal = await onAutoRefreshTemplateRenewalPopup()
@@ -1006,7 +1006,7 @@ export default () => {
     }
 
     onApiPromise('open')
-    await onApiPOSTRefreshSavePlanTemplate()
+    await onApiPostVasRefreshSavePlanTemplate()
     onApiPromise('close')
 
     await onAutoRefreshSuccess(autoRefreshTemplateUpdate)
@@ -1112,48 +1112,48 @@ export default () => {
 
   return {
     onApiGetCommonServerTime,
-    onApiGETRealEstatePurposeCheckOptions,
-    onApiGETCitySelectOptions,
-    onApiGETDistrictSelectOptions,
-    onApiGETRoad,
-    onApiGETRealEstateTypeSelectOptions,
-    onApiGETRealEstateLegalUsageSelectOptions,
-    onApiGETRealEstateZoingCheckOptions,
-    onApiGETRealEstateZoingCitySelectOptions,
-    onApiGETRealEstateZoingLandSelectOptions,
-    onApiGETRealEstateAgeIdentifySelectOptions,
-    onApiGETRealEstateFloorSelectOptions,
-    onApiGETCommunities,
-    onApiGETRealEstateFaceSelectOptions,
-    onApiGETRealEstateStructionSelectOptions,
-    onApiGETRealEstateBarrierFreeCheckOptions,
-    onApiGETRealEstateManageTypeSelectOptions,
-    onApiGETRealEstateManageDutySelectOptions,
-    onApiGETRealEstateManagePayPeriodSelectOptions,
-    onApiGETRealEstateParkingModeSelectOptions,
-    onApiGETRealEstateParkingTypeSelectOptions,
-    onApiGETRealEstateParkingRegSelectOptions,
-    onApiGETRealEstateParkingPayPeriodSelectOptions,
-    onApiGETRealEstateVideoDisplaySelectOptions,
-    onApiGETRealEstateVideoTypeSelectOptions,
-    onApiGETRealEstateFeatureCheckOptions,
-    onApiGETRealEstatePosterDataSourceSelectOptions,
-    onApiGetPublishAvailablePlans,
-    onApiPOSTPublishRenewal,
-    onApiPOSTPublishSubmit,
-    onApiPOSTRealEstateRestoreToOnline,
-    onApiGETPublishGetPublishResponse,
-    onApiGETGoldenGetPlanList,
-    onApiPOSTGoldenSetPlanSingle,
-    onApiGETRefreshCurrentPlansForCase,
-    onApiGETRefreshNewPlan,
-    onApiGETRefreshGetPlanInfo,
-    onApiGETRefreshAvailablePlans,
-    onApiPOSTRefreshSavePlan,
-    onApiGETRefreshTemplateAvailableTemplates,
-    onApiPOSTRefreshSavePlanTemplate,
-    onApiGETRefreshTemplateGetTemplateInfo,
-    onApiPOSTRefreshTemplateSaveTemplate,
+    onApiGetBuyRealEstatePurposeCheckOptions,
+    onApiGetBuyCitySelectOptions,
+    onApiGetBuyCityCodeDistrictSelectOptions,
+    onApiGetBuyCityCodeDistrictCodeRoad,
+    onApiGetBuyRealEstateTypeSelectOptions,
+    onApiGetBuyRealEstateLegalUsageSelectOptions,
+    onApiGetBuyRealEstateZoingCheckOptions,
+    onApiGetBuyRealEstateZoingCitySelectOptions,
+    onApiGetBuyRealEstateZoingLandSelectOptions,
+    onApiGetBuyRealEstateAgeIdentifySelectOptions,
+    onApiGetBuyRealEstateFloorSelectOptions,
+    onApiGetBuyCommunities,
+    onApiGetBuyRealEstateFaceSelectOptions,
+    onApiGetBuyRealEstateStructionSelectOptions,
+    onApiGetBuyRealEstateBarrierFreeCheckOptions,
+    onApiGetBuyRealEstateManageTypeSelectOptions,
+    onApiGetBuyRealEstateManageDutySelectOptions,
+    onApiGetBuyRealEstateManagePayPeriodSelectOptions,
+    onApiGetBuyRealEstateParkingModeSelectOptions,
+    onApiGetBuyRealEstateParkingTypeSelectOptions,
+    onApiGetBuyRealEstateParkingRegSelectOptions,
+    onApiGetBuyRealEstateParkingPayPeriodSelectOptions,
+    onApiGetBuyRealEstateVideoDisplaySelectOptions,
+    onApiGetBuyRealEstateVideoTypeSelectOptions,
+    onApiGetBuyRealEstateFeatureCheckOptions,
+    onApiGetBuyRealEstatePosterDataSourceSelectOptions,
+    onApiGetVasPublishAvailablePlans,
+    onApiPostVasPublishRenewal,
+    onApiPostVasPublishSubmit,
+    onApiPostBuyRealEstateRestoreToOnline,
+    onApiGetVasPublishGetPublishResponse,
+    onApiGetVasGoldenGetPlanList,
+    onApiPostVasGoldenSetPlanSingle,
+    onApiGetVasRefreshCurrentPlansForCase,
+    onApiGetVasRefreshNewPlan,
+    onApiGetVasRefreshGetPlanInfo,
+    onApiGetVasRefreshAvailablePlans,
+    onApiPostVasRefreshSavePlan,
+    onApiGetVasRefreshTemplateAvailableTemplates,
+    onApiPostVasRefreshSavePlanTemplate,
+    onApiGetVasRefreshTemplateGetTemplateInfo,
+    onApiPostVasRefreshTemplateSaveTemplate,
     onGoldenPopup,
     onAutoRefreshPopup,
     onAutoRefreshAddTimePopup,

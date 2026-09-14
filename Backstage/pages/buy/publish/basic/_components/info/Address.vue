@@ -3,7 +3,7 @@ import { onNormalizeAddressText } from '@js/_projectPrototype.js'
 
 const buyProject = useBuyProjectStore()
 const { options } = storeToRefs(buyProject)
-const { onApiGETDistrictSelectOptions, onApiGETRoad } = useBuyProjectActions()
+const { onApiGetBuyCityCodeDistrictSelectOptions, onApiGetBuyCityCodeDistrictCodeRoad } = useBuyProjectActions()
 const buyPublish = useBuyPublishStore()
 const { apiData, address, statusData } = storeToRefs(buyPublish)
 const { onAddress } = useBuyPublishActions()
@@ -34,7 +34,7 @@ const onCityChange = async ({ source } = {}) => {
 
   if (!cityID) return
 
-  await onApiGETDistrictSelectOptions(cityID)
+  await onApiGetBuyCityCodeDistrictSelectOptions(cityID)
 
   areas.value = options.value.area
 }
@@ -49,7 +49,7 @@ const onAreaChange = async ({ source } = {}) => {
 
   if (!cityID || !districtID) return
 
-  const { status, data } = await onApiGETRoad(cityID, districtID)
+  const { status, data } = await onApiGetBuyCityCodeDistrictCodeRoad(cityID, districtID)
 
   if (status === 200) {
     roads.value = data

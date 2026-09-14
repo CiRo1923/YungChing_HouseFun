@@ -8,13 +8,13 @@ definePageMeta({
 
 const buyProject = useBuyProjectStore()
 const { onUseMeta, onWithLoadingAll, onIsLoading } = useCommonActions()
-const { onApiGetPublishAvailablePlans, onApiGETGoldenGetPlanList } = useBuyProjectActions()
+const { onApiGetVasPublishAvailablePlans, onApiGetVasGoldenGetPlanList } = useBuyProjectActions()
 const {
-  onApiGETCommonPlanAggregate,
-  onApiGETRealEstateSearchFilter,
-  onApiPOSTRealEstateCaseAggregate,
-  onApiPOSTRealEstateSearch,
-  onApiGETCommentssearchCommentFilter,
+  onApiGetVasCommonPlanAggregate,
+  onApiGetBuyRealEstateSearchFilter,
+  onApiGetBuyRealEstateCaseAggregate,
+  onApiPostBuyRealEstateSearch,
+  onApiGetBuyCommentsSearchCommentFilter,
 } = useBuyListActions()
 const { onApiErrorServerToClient } = usePopupActions()
 const route = useRoute()
@@ -25,7 +25,7 @@ const funEventsItem = ['publish', 'deal', 'remove']
 const contentEventsItem = ['editor', 'deal', 'remove']
 
 const onUpdate = async (done) => {
-  const result = await onApiPOSTRealEstateSearch(2)
+  const result = await onApiPostBuyRealEstateSearch(2)
 
   if (typeof done === 'function') done()
 
@@ -37,13 +37,13 @@ const listDraft = useAsyncData('list-draft', () => onUpdate(), {
 })
 
 await onWithLoadingAll([
-  useAsyncData('list-search-filter', () => onApiGETRealEstateSearchFilter()),
-  useAsyncData('list-plan-aggergate-draft', () => onApiGETCommonPlanAggregate()),
-  useAsyncData('list-case-aggregate-draft', () => onApiPOSTRealEstateCaseAggregate()),
+  useAsyncData('list-search-filter', () => onApiGetBuyRealEstateSearchFilter()),
+  useAsyncData('list-plan-aggergate-draft', () => onApiGetVasCommonPlanAggregate()),
+  useAsyncData('list-case-aggregate-draft', () => onApiGetBuyRealEstateCaseAggregate()),
   listDraft,
-  useAsyncData('available-plans-draft', () => onApiGetPublishAvailablePlans()),
-  useAsyncData('golden-planList-draft', () => onApiGETGoldenGetPlanList()),
-  useAsyncData('comments-search-draft', () => onApiGETCommentssearchCommentFilter()),
+  useAsyncData('available-plans-draft', () => onApiGetVasPublishAvailablePlans()),
+  useAsyncData('golden-planList-draft', () => onApiGetVasGoldenGetPlanList()),
+  useAsyncData('comments-search-draft', () => onApiGetBuyCommentsSearchCommentFilter()),
 ])
 
 // 換頁 (pg) 時頁面元件不會重建,loading 改由這支 asyncData 的狀態驅動

@@ -1,7 +1,7 @@
 <script setup>
 const {
-  onApiGETRefreshAvailablePlans,
-  onApiPOSTRefreshSavePlan,
+  onApiGetVasRefreshAvailablePlans,
+  onApiPostVasRefreshSavePlan,
   onAutoRefreshAddTimePopup,
   onAutoRefreshRenewalPopup,
   onAutoRefreshSuccess,
@@ -34,7 +34,7 @@ const onClick = async () => {
     if (!isAddTime) return
 
     onApiPromise('open')
-    await onApiGETRefreshAvailablePlans()
+    await onApiGetVasRefreshAvailablePlans()
     onApiPromise('close')
 
     // 請選擇額度 popup
@@ -46,7 +46,7 @@ const onClick = async () => {
   }
 
   onApiPromise('open')
-  await onApiPOSTRefreshSavePlan()
+  await onApiPostVasRefreshSavePlan()
   onApiPromise('close')
 
   await onAutoRefreshSuccess(props.update)

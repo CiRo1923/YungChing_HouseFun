@@ -8,13 +8,13 @@ definePageMeta({
 
 const buyProject = useBuyProjectStore()
 const { onUseMeta, onWithLoadingAll, onIsLoading } = useCommonActions()
-const { onApiGetPublishAvailablePlans, onApiGETGoldenGetPlanList } = useBuyProjectActions()
+const { onApiGetVasPublishAvailablePlans, onApiGetVasGoldenGetPlanList } = useBuyProjectActions()
 const {
-  onApiGETCommonPlanAggregate,
-  onApiGETRealEstateSearchFilter,
-  onApiPOSTRealEstateCaseAggregate,
-  onApiPOSTRealEstateSearch,
-  onApiGETCommentssearchCommentFilter,
+  onApiGetVasCommonPlanAggregate,
+  onApiGetBuyRealEstateSearchFilter,
+  onApiGetBuyRealEstateCaseAggregate,
+  onApiPostBuyRealEstateSearch,
+  onApiGetBuyCommentsSearchCommentFilter,
 } = useBuyListActions()
 const { onApiErrorServerToClient } = usePopupActions()
 const route = useRoute()
@@ -47,7 +47,7 @@ const options = [
 ]
 
 const onUpdate = async (done) => {
-  const result = await onApiPOSTRealEstateSearch(4)
+  const result = await onApiPostBuyRealEstateSearch(4)
 
   if (typeof done === 'function') done()
 
@@ -59,13 +59,13 @@ const listOffline = useAsyncData('list-offline', () => onUpdate(), {
 })
 
 await onWithLoadingAll([
-  useAsyncData('list-search-filter', () => onApiGETRealEstateSearchFilter()),
-  useAsyncData('list-plan-aggergate-offline', () => onApiGETCommonPlanAggregate()),
-  useAsyncData('list-case-aggregate-offline', () => onApiPOSTRealEstateCaseAggregate()),
+  useAsyncData('list-search-filter', () => onApiGetBuyRealEstateSearchFilter()),
+  useAsyncData('list-plan-aggergate-offline', () => onApiGetVasCommonPlanAggregate()),
+  useAsyncData('list-case-aggregate-offline', () => onApiGetBuyRealEstateCaseAggregate()),
   listOffline,
-  useAsyncData('available-plans-offline', () => onApiGetPublishAvailablePlans()),
-  useAsyncData('golden-planList-offline', () => onApiGETGoldenGetPlanList()),
-  useAsyncData('comments-search-offline', () => onApiGETCommentssearchCommentFilter()),
+  useAsyncData('available-plans-offline', () => onApiGetVasPublishAvailablePlans()),
+  useAsyncData('golden-planList-offline', () => onApiGetVasGoldenGetPlanList()),
+  useAsyncData('comments-search-offline', () => onApiGetBuyCommentsSearchCommentFilter()),
 ])
 
 // 換頁 (pg) 時頁面元件不會重建,loading 改由這支 asyncData 的狀態驅動

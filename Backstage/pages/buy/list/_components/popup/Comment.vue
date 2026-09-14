@@ -1,7 +1,7 @@
 <script setup>
 const buyList = useBuyListStore()
 const { apiCommentsData, apiCommentUpdateData } = storeToRefs(buyList)
-const { commentsSelectItems, onCommentPopup, onCommentSearch, onApiPOSTCommentsUpdateReplyStatue } =
+const { commentsSelectItems, onCommentPopup, onCommentSearch, onApiPostBuyCommentsUpdateReplyStatue } =
   useBuyListActions()
 // const popup = usePopupStore()
 // const { promise } = storeToRefs(popup)
@@ -39,7 +39,7 @@ const onReplyClick = async (type, item) => {
 
   apiCommentUpdateData.value.isReply = isReply
   onApiPromise('open')
-  const { status } = await onApiPOSTCommentsUpdateReplyStatue()
+  const { status } = await onApiPostBuyCommentsUpdateReplyStatue()
   onApiPromise('close')
 
   if (status !== 200) return

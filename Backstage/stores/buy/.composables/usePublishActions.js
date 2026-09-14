@@ -1,11 +1,11 @@
 import {
-  apiPOSTRealEstateNewCase,
-  apiGETRealEstate,
-  apiPOSTRealEstate,
-  apiPOSTRealEstateDraft,
-  apiPOSTRealEstatePicUpload,
-  apiPOSTRealEstateReadToPublish,
-  apiGERealEstateCaseStatus,
+  apiPostBuyRealEstateNewCase,
+  apiGetBuyRealEstateHfID,
+  apiPostStringBuyRealEstateHfID,
+  apiPostStringBuyRealEstateDraftHfID,
+  apiPostFormBuyRealEstatePicUpload,
+  apiPostBuyRealEstateReadToPublish,
+  apiGetBuyRealEstateCaseStatusHfID,
 } from '@js/_api/buy/publish.js'
 
 import { onToFixed } from '@js/_prototype.js'
@@ -20,26 +20,26 @@ export default () => {
   const buyProject = useBuyProjectStore()
   const { options } = storeToRefs(buyProject)
   const {
-    onApiGETRealEstatePurposeCheckOptions,
-    onApiGETCitySelectOptions,
-    onApiGETRealEstateZoingCheckOptions,
-    onApiGETRealEstateZoingCitySelectOptions,
-    onApiGETRealEstateZoingLandSelectOptions,
-    onApiGETRealEstateAgeIdentifySelectOptions,
-    onApiGETRealEstateFloorSelectOptions,
-    onApiGETRealEstateFaceSelectOptions,
-    onApiGETRealEstateStructionSelectOptions,
-    onApiGETRealEstateBarrierFreeCheckOptions,
-    onApiGETRealEstateManageTypeSelectOptions,
-    onApiGETRealEstateManageDutySelectOptions,
-    onApiGETRealEstateManagePayPeriodSelectOptions,
-    onApiGETRealEstateParkingModeSelectOptions,
-    onApiGETRealEstateParkingTypeSelectOptions,
-    onApiGETRealEstateParkingRegSelectOptions,
-    onApiGETRealEstateParkingPayPeriodSelectOptions,
-    onApiGETRealEstateVideoDisplaySelectOptions,
-    onApiGETRealEstateVideoTypeSelectOptions,
-    onApiGETRealEstatePosterDataSourceSelectOptions,
+    onApiGetBuyRealEstatePurposeCheckOptions,
+    onApiGetBuyCitySelectOptions,
+    onApiGetBuyRealEstateZoingCheckOptions,
+    onApiGetBuyRealEstateZoingCitySelectOptions,
+    onApiGetBuyRealEstateZoingLandSelectOptions,
+    onApiGetBuyRealEstateAgeIdentifySelectOptions,
+    onApiGetBuyRealEstateFloorSelectOptions,
+    onApiGetBuyRealEstateFaceSelectOptions,
+    onApiGetBuyRealEstateStructionSelectOptions,
+    onApiGetBuyRealEstateBarrierFreeCheckOptions,
+    onApiGetBuyRealEstateManageTypeSelectOptions,
+    onApiGetBuyRealEstateManageDutySelectOptions,
+    onApiGetBuyRealEstateManagePayPeriodSelectOptions,
+    onApiGetBuyRealEstateParkingModeSelectOptions,
+    onApiGetBuyRealEstateParkingTypeSelectOptions,
+    onApiGetBuyRealEstateParkingRegSelectOptions,
+    onApiGetBuyRealEstateParkingPayPeriodSelectOptions,
+    onApiGetBuyRealEstateVideoDisplaySelectOptions,
+    onApiGetBuyRealEstateVideoTypeSelectOptions,
+    onApiGetBuyRealEstatePosterDataSourceSelectOptions,
     onValueGetText,
     onReplaceImageSize,
   } = useBuyProjectActions()
@@ -166,8 +166,8 @@ export default () => {
     // console.log(apiData.value.caseInfo[pinKey])
     // console.log(apiData.value.caseInfo[mKey])
   }
-  const onApiPOSTRealEstateNewCase = async () => {
-    const { config, status, data } = await apiPOSTRealEstateNewCase({
+  const onApiPostBuyRealEstateNewCase = async () => {
+    const { config, status, data } = await apiPostBuyRealEstateNewCase({
       caseType: 4, //  (1:直營, 2:加盟, 3:複製, 4:B端)
     })
 
@@ -177,8 +177,8 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGETRealEstate = async (hfID) => {
-    const { config, status, data } = await apiGETRealEstate({
+  const onApiGetBuyRealEstateHfID = async (hfID) => {
+    const { config, status, data } = await apiGetBuyRealEstateHfID({
       hfID,
     })
 
@@ -245,8 +245,8 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiPOSTRealEstateDraft = async (hfID) => {
-    const { config, status, data } = await apiPOSTRealEstateDraft({
+  const onApiPostStringBuyRealEstateDraftHfID = async (hfID) => {
+    const { config, status, data } = await apiPostStringBuyRealEstateDraftHfID({
       hfID,
       ...apiData.value,
     })
@@ -257,8 +257,8 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiPOSTRealEstate = async (hfID) => {
-    const { config, status, data } = await apiPOSTRealEstate({
+  const onApiPostStringBuyRealEstateHfID = async (hfID) => {
+    const { config, status, data } = await apiPostStringBuyRealEstateHfID({
       hfID,
       ...apiData.value,
     })
@@ -274,8 +274,8 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiPOSTRealEstatePicUpload = async (params) => {
-    const { config, status, data } = await apiPOSTRealEstatePicUpload(params)
+  const onApiPostFormBuyRealEstatePicUpload = async (params) => {
+    const { config, status, data } = await apiPostFormBuyRealEstatePicUpload(params)
 
     if (status !== 200) {
       onApiError(config, status, data)
@@ -283,8 +283,8 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiPOSTRealEstateReadToPublish = async (hfID) => {
-    const { config, status, data } = await apiPOSTRealEstateReadToPublish({
+  const onApiPostBuyRealEstateReadToPublish = async (hfID) => {
+    const { config, status, data } = await apiPostBuyRealEstateReadToPublish({
       hfID,
     })
 
@@ -294,8 +294,8 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGERealEstateCaseStatus = async (hfID) => {
-    const { config, status, data } = await apiGERealEstateCaseStatus({
+  const onApiGetBuyRealEstateCaseStatusHfID = async (hfID) => {
+    const { config, status, data } = await apiGetBuyRealEstateCaseStatusHfID({
       hfID,
     })
 
@@ -309,30 +309,30 @@ export default () => {
   }
   const onAllPromise = () => {
     return [
-      useAsyncData('purpose-options', () => onApiGETRealEstatePurposeCheckOptions()),
-      useAsyncData('city-options', () => onApiGETCitySelectOptions()),
-      useAsyncData('zoing-options', () => onApiGETRealEstateZoingCheckOptions()),
-      useAsyncData('zoingCity-options', () => onApiGETRealEstateZoingCitySelectOptions()),
-      useAsyncData('zoingLand-options', () => onApiGETRealEstateZoingLandSelectOptions()),
-      useAsyncData('ageIdentify-options', () => onApiGETRealEstateAgeIdentifySelectOptions()),
-      useAsyncData('floor-options', () => onApiGETRealEstateFloorSelectOptions()),
-      useAsyncData('face-options', () => onApiGETRealEstateFaceSelectOptions()),
-      useAsyncData('structure-options', () => onApiGETRealEstateStructionSelectOptions()),
-      useAsyncData('barrierFree-options', () => onApiGETRealEstateBarrierFreeCheckOptions()),
-      useAsyncData('manageType-options', () => onApiGETRealEstateManageTypeSelectOptions()),
-      useAsyncData('manageDuty-options', () => onApiGETRealEstateManageDutySelectOptions()),
-      useAsyncData('managePay-options', () => onApiGETRealEstateManagePayPeriodSelectOptions()),
-      useAsyncData('parkingMode-options', () => onApiGETRealEstateParkingModeSelectOptions()),
-      useAsyncData('parkingType-options', () => onApiGETRealEstateParkingTypeSelectOptions()),
-      useAsyncData('parkingReg-options', () => onApiGETRealEstateParkingRegSelectOptions()),
+      useAsyncData('purpose-options', () => onApiGetBuyRealEstatePurposeCheckOptions()),
+      useAsyncData('city-options', () => onApiGetBuyCitySelectOptions()),
+      useAsyncData('zoing-options', () => onApiGetBuyRealEstateZoingCheckOptions()),
+      useAsyncData('zoingCity-options', () => onApiGetBuyRealEstateZoingCitySelectOptions()),
+      useAsyncData('zoingLand-options', () => onApiGetBuyRealEstateZoingLandSelectOptions()),
+      useAsyncData('ageIdentify-options', () => onApiGetBuyRealEstateAgeIdentifySelectOptions()),
+      useAsyncData('floor-options', () => onApiGetBuyRealEstateFloorSelectOptions()),
+      useAsyncData('face-options', () => onApiGetBuyRealEstateFaceSelectOptions()),
+      useAsyncData('structure-options', () => onApiGetBuyRealEstateStructionSelectOptions()),
+      useAsyncData('barrierFree-options', () => onApiGetBuyRealEstateBarrierFreeCheckOptions()),
+      useAsyncData('manageType-options', () => onApiGetBuyRealEstateManageTypeSelectOptions()),
+      useAsyncData('manageDuty-options', () => onApiGetBuyRealEstateManageDutySelectOptions()),
+      useAsyncData('managePay-options', () => onApiGetBuyRealEstateManagePayPeriodSelectOptions()),
+      useAsyncData('parkingMode-options', () => onApiGetBuyRealEstateParkingModeSelectOptions()),
+      useAsyncData('parkingType-options', () => onApiGetBuyRealEstateParkingTypeSelectOptions()),
+      useAsyncData('parkingReg-options', () => onApiGetBuyRealEstateParkingRegSelectOptions()),
       useAsyncData('parkingPayPeriod-options', () =>
-        onApiGETRealEstateParkingPayPeriodSelectOptions()
+        onApiGetBuyRealEstateParkingPayPeriodSelectOptions()
       ),
-      useAsyncData('videoDisplay-options', () => onApiGETRealEstateVideoDisplaySelectOptions()),
-      useAsyncData('videoType-options', () => onApiGETRealEstateVideoTypeSelectOptions()),
-      // useAsyncData('feature-options', () => onApiGETRealEstateFeatureCheckOptions()),
+      useAsyncData('videoDisplay-options', () => onApiGetBuyRealEstateVideoDisplaySelectOptions()),
+      useAsyncData('videoType-options', () => onApiGetBuyRealEstateVideoTypeSelectOptions()),
+      // useAsyncData('feature-options', () => onApiGetBuyRealEstateFeatureCheckOptions()),
       useAsyncData('posterDataSource-options', () =>
-        onApiGETRealEstatePosterDataSourceSelectOptions()
+        onApiGetBuyRealEstatePosterDataSourceSelectOptions()
       ),
     ]
   }
@@ -345,13 +345,13 @@ export default () => {
     onPingVaild,
     onPingUnitChange,
     onPinSqMetersConvert,
-    onApiPOSTRealEstateNewCase,
-    onApiGETRealEstate,
-    onApiPOSTRealEstateDraft,
-    onApiPOSTRealEstate,
-    onApiPOSTRealEstatePicUpload,
-    onApiPOSTRealEstateReadToPublish,
-    onApiGERealEstateCaseStatus,
+    onApiPostBuyRealEstateNewCase,
+    onApiGetBuyRealEstateHfID,
+    onApiPostStringBuyRealEstateDraftHfID,
+    onApiPostStringBuyRealEstateHfID,
+    onApiPostFormBuyRealEstatePicUpload,
+    onApiPostBuyRealEstateReadToPublish,
+    onApiGetBuyRealEstateCaseStatusHfID,
     onAllPromise,
   }
 }

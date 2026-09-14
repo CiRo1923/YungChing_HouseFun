@@ -1,77 +1,75 @@
-import { fetchApi, version } from '@js/_api/config.js'
+import { fetchApi } from '@js/_api/.config.js'
 
 // server 時間
-export const apiGetCommonServerTime = async (data) =>
-  await fetchApi.get(`api/${version}/common/server-time`, data)
+export const apiGetCommonServerTime = async (data) => await fetchApi.get(`common/server-time`, data)
 
 // 縣市選單 (明細)
-export const apiGETCitySelectOptions = async (data) =>
-  await fetchApi.get(`api/${version}/buy/city/select-options`, data)
+export const apiGetBuyCitySelectOptions = async (data) =>
+  await fetchApi.get(`buy/city/select-options`, data)
 
 // 區域選單 (明細)
-export const apiGETDistrictSelectOptions = async (data) =>
-  await fetchApi.get(`api/${version}/buy/{cityCode}/district/select-options`, data)
+export const apiGetBuyCityCodeDistrictSelectOptions = async (data) =>
+  await fetchApi.get(`buy/{cityCode}/district/select-options`, data)
 
 // 查詢刊登方案 (列表 & 明細流程)
-export const apiGetPublishAvailablePlans = async (data) =>
-  await fetchApi.get(`api/${version}/vas/Publish/AvailablePlans`, data)
+export const apiGetVasPublishAvailablePlans = async (data) =>
+  await fetchApi.get(`vas/Publish/AvailablePlans`, data)
 
 // 建立刊登 [單筆 / 批次] 刊登額度過期使用 (列表 & 明細流程)
-export const apiPOSTPublishSubmit = async (data) =>
-  await fetchApi.post(`api/${version}/vas/Publish/Submit`, data)
+export const apiPostVasPublishSubmit = async (data) =>
+  await fetchApi.post(`vas/Publish/Submit`, data)
 
 // 建立刊登 [單筆 / 批次] 刊登額度尚未過期使用 (列表 & 明細流程)
-export const apiPOSTRealEstateRestoreToOnline = async (data) =>
-  await fetchApi.post(`api/${version}/buy/realEstate/RestoreToOnline`, data)
+export const apiPostBuyRealEstateRestoreToOnline = async (data) =>
+  await fetchApi.post(`buy/realEstate/RestoreToOnline`, data)
 
 // 物件續刊 [單筆 / 批次] (列表 & 明細流程)
-export const apiPOSTPublishRenewal = async (data) =>
-  await fetchApi.post(`api/${version}/vas/Publish/Renewal`, data)
+export const apiPostVasPublishRenewal = async (data) =>
+  await fetchApi.post(`vas/Publish/Renewal`, data)
 
 // 查詢物件刊登狀態 (列表 & 明細流程)
-export const apiGETPublishGetPublishResponse = async (data) =>
-  await fetchApi.get(`api/${version}/vas/Publish/GetPublishResponse`, data)
+export const apiGetVasPublishGetPublishResponse = async (data) =>
+  await fetchApi.get(`vas/Publish/GetPublishResponse`, data)
 
 // 黃金曝光方案 (列表 & 明細流程)
-export const apiGETGoldenGetPlanList = async (data) =>
-  await fetchApi.get(`api/${version}/vas/Golden/GetPlanList`, data)
+export const apiGetVasGoldenGetPlanList = async (data) =>
+  await fetchApi.get(`vas/Golden/GetPlanList`, data)
 
 // 單一物件 設定黃金曝光 (列表 & 明細流程)
-export const apiPOSTGoldenSetPlanSingle = async (data) =>
-  await fetchApi.post(`api/${version}/vas/Golden/SetPlanSingle`, data)
+export const apiPostVasGoldenSetPlanSingle = async (data) =>
+  await fetchApi.post(`vas/Golden/SetPlanSingle`, data)
 
 // 自動刷新設定 (列表 & 明細流程)
-export const apiGETRefreshCurrentPlansForCase = async (data) =>
-  await fetchApi.get(`api/${version}/vas/Refresh/CurrentPlansForCase`, data)
+export const apiGetVasRefreshCurrentPlansForCase = async (data) =>
+  await fetchApi.get(`vas/Refresh/CurrentPlansForCase`, data)
 
 // 新增自動刷新時間 (列表 & 明細流程)
-export const apiGETRefreshNewPlan = async (data) =>
-  await fetchApi.get(`api/${version}/vas/Refresh/NewPlan`, data)
+export const apiGetVasRefreshNewPlan = async (data) => await fetchApi.get(`vas/Refresh/NewPlan`, data)
 
 // 修改自動刷新時間 (列表 & 明細流程)
-export const apiGETRefreshGetPlanInfo = async (data) =>
-  await fetchApi.get(`api/${version}/vas/Refresh/GetPlanInfo`, data)
+export const apiGetVasRefreshGetPlanInfo = async (data) =>
+  await fetchApi.get(`vas/Refresh/GetPlanInfo`, data)
 
 // 自動刷新選擇額度 (列表 & 明細流程)
-export const apiGETRefreshAvailablePlans = async (data) =>
-  await fetchApi.get(`api/${version}/vas/Refresh/AvailablePlans`, data)
+export const apiGetVasRefreshAvailablePlans = async (data) =>
+  await fetchApi.get(`vas/Refresh/AvailablePlans`, data)
 
 // 單一物件 自動刷新儲存 (列表 & 明細流程)
-export const apiPOSTRefreshSavePlan = async (data) =>
-  await fetchApi.post(`api/${version}/vas/Refresh/SavePlan`, data)
+export const apiPostVasRefreshSavePlan = async (data) =>
+  await fetchApi.post(`vas/Refresh/SavePlan`, data)
 
 // 自動刷新範本設定 (列表 & 明細流程)
-export const apiGETRefreshTemplateAvailableTemplates = async (data) =>
-  await fetchApi.get(`api/${version}/vas/Refresh/Template/AvailableTemplates`, data)
+export const apiGetVasRefreshTemplateAvailableTemplates = async (data) =>
+  await fetchApi.get(`vas/Refresh/Template/AvailableTemplates`, data)
 
 // 取得自動刷新範本時間 (列表 & 明細流程)
-export const apiGETRefreshTemplateGetTemplateInfo = async (data) =>
-  await fetchApi.get(`api/${version}/vas/Refresh/Template/GetTemplateInfo`, data)
+export const apiGetVasRefreshTemplateGetTemplateInfo = async (data) =>
+  await fetchApi.get(`vas/Refresh/Template/GetTemplateInfo`, data)
 
 // 單一物件 自動刷新範本時間儲存 (列表 & 明細流程)
-export const apiPOSTRefreshTemplateSaveTemplate = async (data) =>
-  await fetchApi.post(`api/${version}/vas/Refresh/Template/SaveTemplate`, data)
+export const apiPostVasRefreshTemplateSaveTemplate = async (data) =>
+  await fetchApi.post(`vas/Refresh/Template/SaveTemplate`, data)
 
 // 單一物件 自動刷新範本儲存 (列表 & 明細流程)
-export const apiPOSTRefreshSavePlanTemplate = async (data) =>
-  await fetchApi.post(`api/${version}/vas/Refresh/SavePlan/template`, data)
+export const apiPostVasRefreshSavePlanTemplate = async (data) =>
+  await fetchApi.post(`vas/Refresh/SavePlan/template`, data)

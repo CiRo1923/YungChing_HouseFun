@@ -4,13 +4,13 @@ const { onUseMeta, onWithLoadingAll } = useCommonActions()
 const buyProject = useBuyProjectStore()
 // const { renewal } = storeToRefs(buyProject)
 const {
-  onApiGetPublishAvailablePlans,
-  onApiGETPublishGetPublishResponse,
-  onApiGETGoldenGetPlanList,
+  onApiGetVasPublishAvailablePlans,
+  onApiGetVasPublishGetPublishResponse,
+  onApiGetVasGoldenGetPlanList,
 } = useBuyProjectActions()
 const buyPublish = useBuyPublishStore()
 const { statusData } = storeToRefs(buyPublish)
-const { onApiGERealEstateCaseStatus } = useBuyPublishActions()
+const { onApiGetBuyRealEstateCaseStatusHfID } = useBuyPublishActions()
 const { onApiErrorServerToClient } = usePopupActions()
 
 const route = useRoute()
@@ -28,18 +28,18 @@ const hfID = computed(() => route.params.id)
 
 // 先取得 物件狀態
 await useAsyncData(`case-status-renewal-${hfID.value}`, () =>
-  onApiGERealEstateCaseStatus(hfID.value)
+  onApiGetBuyRealEstateCaseStatusHfID(hfID.value)
 )
 
 await onWithLoadingAll([
-  useAsyncData(`case-status-finish-${hfID.value}`, () => onApiGERealEstateCaseStatus(hfID.value)),
+  useAsyncData(`case-status-finish-${hfID.value}`, () => onApiGetBuyRealEstateCaseStatusHfID(hfID.value)),
   useAsyncData(`available-plans-publish-finish-${hfID.value}`, () =>
-    onApiGetPublishAvailablePlans(hfID.value)
+    onApiGetVasPublishAvailablePlans(hfID.value)
   ),
   useAsyncData(`get-publish-response-finish-${hfID.value}`, () =>
-    onApiGETPublishGetPublishResponse(hfID.value)
+    onApiGetVasPublishGetPublishResponse(hfID.value)
   ),
-  useAsyncData('golden-planList-finish', () => onApiGETGoldenGetPlanList()),
+  useAsyncData('golden-planList-finish', () => onApiGetVasGoldenGetPlanList()),
 ])
 
 onUseMeta({
