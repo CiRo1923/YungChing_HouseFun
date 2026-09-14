@@ -3,6 +3,8 @@ name: shared-components-sync
 description: Backstage 與 Official 共用元件(mForm / mPopup / ImgSrc / SvgIcon)的同步規則 —— 功能必須一致、樣式各自獨立。修改這些元件時必讀。
 ---
 
+<!-- lint-project-name-exempt: 這支只有本專案有,不會複製到別的專案;內容是兩邊的共用元件各自放在哪,路徑是要記錄的資料本身 -->
+
 # 共用元件同步規則
 
 ## 適用範圍
