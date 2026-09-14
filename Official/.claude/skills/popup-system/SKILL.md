@@ -57,7 +57,7 @@ const onAfterLeave = () => {
 ### 絕對不要這樣寫
 
 ```js
-// ✗ 這是原始版本,會死鎖
+// 這是原始版本,會死鎖
 const onOverlayEnter = () => { if (isOpen.value) isShowPopup.value = true }
 // 外層 v-if="isOpen || isShowOverlay"
 ```

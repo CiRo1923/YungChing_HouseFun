@@ -7,8 +7,8 @@
 | 組件 | 內容 | 之後想做什麼會用到 |
 |---|---|---|
 | `components/buy/mItem/SwitchItem.vue` | 可展開收合的項目,含遮罩高度計算(`maskRows` 控制收合時顯示幾行、`hasMask` 支援 p / t / m 分別設定) | **可展開的清單項目** |
-| `components/buy/mItem/Main.vue` | 被 SwitchItem 使用 | 同上 |
-| `components/buy/mItem/Container.vue` | 被 Main 使用 | 同上 |
+| `components/buy/mItem/Main.vue` | 被 SwitchItem 使用 | **可展開的清單項目** |
+| `components/buy/mItem/Container.vue` | 被 Main 使用 | **可展開的清單項目** |
 | `components/buy/mAccordion/Content.vue` | 空殼 —— `m-accordion-*` 連 CSS 都不存在,`<style>` 是空的 | (參考價值低) |
 | `components/buy/mDialog.vue` | 氣泡對話框,有 `--arrow-bottom` / `--arrow-right` 箭頭(用 border 畫,pc 8px 9px 0、tablet / mobile 4px 5px 0)與 `--px-*` / `--h-*` modifier | **氣泡提示框** |
 
@@ -32,5 +32,5 @@ git show <commit>^:Official/components/buy/mItem/SwitchItem.vue
   class 收斂成 **`m-item-switch-*`**(不是 `m-switch-item-*`)。
 - `mDialog` 的箭頭尺寸三個斷點不同,拆成 `--dialog-arrow-pc-*` / `-tablet-*` / `-mobile-*`。
 
-> ⚠️ 這份清單要跟著 git 走才有意義 —— 換一台電腦、換一個人接手都看得到。
+> 這份清單要跟著 git 走才有意義 —— 換一台電腦、換一個人接手都看得到。
 > Claude 的本機記憶(`~/.claude/projects/.../memory/`)**不會跨電腦**,別依賴它。

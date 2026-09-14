@@ -48,7 +48,7 @@ description: 動到錯誤頁或 404 導向前必須先讀。說明 error.vue 為
 const [, channel] = route.path.split('/')
 ```
 
-⚠ 404 到完全不存在的路由時(例如 `/aaa`),`route.matched` 和 `route.meta` 都是空的,
+注意:404 到完全不存在的路由時(例如 `/aaa`),`route.matched` 和 `route.meta` 都是空的,
 **只有 `path` 可靠**,不要試圖用 `meta.channel`。
 
 各頻道的入口現況:
