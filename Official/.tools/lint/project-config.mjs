@@ -437,27 +437,6 @@ export const TAILWIND_THEME_OVERRIDES = {
   screens: {
     label: '斷點',
     dead: ['sm', 'md', 'lg', 'xl', '2xl'],
-    available: [
-      'm',
-      't',
-      'tm',
-      'pt',
-      'p',
-      'pMin',
-      'pMax',
-      'mLandscape',
-      'notsupport',
-      'firefox',
-      'IE',
-    ],
-  },
-
-  /** 字體,寫法是 `font-值` */
-  fontFamily: {
-    label: '字體',
-    prefix: 'font-',
-    dead: ['sans', 'serif', 'mono'],
-    available: ['default'],
   },
 
   /** 字級,寫法是 `text-值` */
@@ -465,21 +444,20 @@ export const TAILWIND_THEME_OVERRIDES = {
     label: '字級',
     prefix: 'text-',
     dead: ['xs', 'sm', 'base', 'lg', 'xl', '2xl', '3xl', '4xl', '5xl', '6xl', '7xl', '8xl', '9xl'],
-    available: ['vmp', 'vmt', 'vmm', 'vmmls'],
   },
 
-  /**
-   * 陰影,寫法是 `shadow-值`。
-   *
-   * available 是空的 —— 本專案沒有任何 shadow preset。
-   * 陰影一律走模組自己的變數加原生 box-shadow:preset 的值必定帶色碼
-   * (那會繞過色票檔),而且無法分斷點。
-   */
+  /** 陰影,寫法是 `shadow-值` */
   boxShadow: {
     label: '陰影',
     prefix: 'shadow-',
     dead: ['sm', 'md', 'lg', 'xl', '2xl', 'inner', 'none'],
-    available: [],
+  },
+
+  /** 字族,寫法是 `font-值` */
+  fontFamily: {
+    label: '字族',
+    prefix: 'font-',
+    dead: ['sans', 'serif', 'mono'],
   },
 }
 

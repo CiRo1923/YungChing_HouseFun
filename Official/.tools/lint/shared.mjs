@@ -140,18 +140,61 @@ export const maskCssComments = (text) => maskBy(text, /\/\*[\s\S]*?\*\//g)
 export const maskHtmlComments = (text) => maskBy(text, /<!--[\s\S]*?-->/g)
 
 /**
+ * 這個位置在不在字串裡。
+ *
+ * 用來分辨「程式碼寫出來的資料」與「寫給人讀的註解」——
+ * 前者一定包在引號裡,後者不是。兩種用途都走這一份:
+ * 裝飾符號那條要分辨「印出來的訊息」與「註解」,
+ * 豁免標記要分辨「寫成資料的那串字」與「真的在宣告豁免」。
+ *
+ * 只看同一行:跨行的模板字串會被判成不在字串裡,那個方向是「多報一筆」,
+ * 看到的人自己判斷得出來;反過來放行才危險 —— 漏掉的違規不會有人發現。
+ *
+ * 跳脫過的引號(`\'`)不算開頭或結尾,否則一句 `don\'t` 會把後面整行
+ * 都算成字串外,那一行的符號就全部漏掉。
+ */
+export const isInsideString = (line, index) => {
+  const quotes = { "'": 0, '"': 0, '`': 0 }
+
+  for (let i = 0; i < index; i += 1) {
+    const char = line[i]
+    if (char === '\\') {
+      i += 1
+      continue
+    }
+    if (char in quotes) quotes[char] += 1
+  }
+
+  return Object.values(quotes).some((count) => count % 2 === 1)
+}
+
+/**
  * 這份檔案有沒有標某一條規則的豁免。
  *
  * 標記的形狀是 `lint-<規則>-exempt: 理由`,而且**一定要寫在註解裡** ——
  * CSS 的區塊註解、JS 的行註解、HTML 的註解都算。整份檔案跳過那一條檢查。
  *
  * **只認註解裡的那一份,是因為程式碼本身也會寫出這串字。**
- * 定義比對式的那一行(`const XXX_EXEMPT_RE = /lint-xxx-exempt/`)就含有它 ——
+ * 定義比對式的那一行(`const XXX_EXEMPT_RE = /lint-xxx-exempt/`)就含有它,
+ * 驗證案例的內容裡也會整段寫出一個標記當作要檢查的資料 ——
  * 只看「整份文字有沒有出現」的話,定義規則的那支檔案永遠豁免自己,
  * 於是那條規則對它完全失效,而且不會有任何徵兆。
  *
- * 判斷方式是看標記前面有沒有註解起頭。跨行註解中間、又不是以 `*` 起頭的那種行
- * 會被判成不在註解裡 —— 那個方向是「照常檢查」,看到的人自己判斷得出來;
+ * 判斷要同時滿足兩件事:
+ *
+ *   標記前面有註解起頭   `//`、`/*`、`<!--`,或跨行註解裡以 `*` 起頭的那種行
+ *   標記不在字串裡       在引號中的是資料,不是宣告
+ *   標記不在範例區塊裡   說明文件舉例時會整段寫出一個標記,那是給人看的範例
+ *
+ * 少了那兩個條件的話,把一整個標記寫進字串
+ * (`` const probe = `<!-- lint-xxx-exempt: … -->` ``)、
+ * 或在說明文件裡舉一個標記當範例,都會被當成宣告 ——
+ * 前面確實有註解的起頭,只是它屬於字串或範例的內容。
+ * 那支檔案會整份被放行,而放行的當下沒有任何訊息:
+ * 一份在說明「這條規則抓什麼」的文件,會因為舉了例子而讓自己不被那條規則檢查。
+ *
+ * 跨行註解中間、又不是以 `*` 起頭的那種行會被判成不在註解裡 ——
+ * 那個方向是「照常檢查」,看到的人自己判斷得出來;
  * 反過來誤放行才危險,漏掉的違規不會有人發現。
  *
  * 判準收在這裡一份 —— 每條規則各寫一次的話,改了一處忘了另一處,
@@ -160,9 +203,22 @@ export const maskHtmlComments = (text) => maskBy(text, /<!--[\s\S]*?-->/g)
 export const hasExemptMark = (text, name) => {
   const markRe = new RegExp(`lint-${name}-exempt`)
 
+  /* 範例區塊(三個反引號圍起來的那一段)裡的是給人看的範例,不是宣告。
+     圍欄那一行自己也算在內 —— 它本來就不會有標記,算進去只是少一個邊界情況。 */
+  let inExample = false
+
   return text.split('\n').some((line) => {
+    if (/^\s*```/.test(line)) {
+      inExample = !inExample
+      return false
+    }
+    if (inExample) return false
+
     const at = line.search(markRe)
     if (at === -1) return false
+
+    // 在引號中的那一份是資料(例如驗證案例的內容),不是在宣告豁免
+    if (isInsideString(line, at)) return false
 
     const before = line.slice(0, at)
 

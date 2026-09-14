@@ -19,6 +19,7 @@ import {
   SOURCE_PROJECT_NAME,
   TOOLING_PREFIXES,
   hasExemptMark,
+  isInsideString,
   issueOf,
   lineNoOf,
   listFiles,
@@ -51,12 +52,15 @@ import { fingerprintDiff } from './checksum.mjs'
 /**
  * 從專案名稱組出比對式。
  *
- * 設定填的是名稱本身(`Royal Canin`),不是正規表示式 —— 換專案的人要填的是
+ * 設定填的是名稱本身,不是正規表示式 —— 換專案的人要填的是
  * 「這個專案叫什麼」,不該連帶要會寫比對式。
  *
  * 組出來的比對式涵蓋名稱的各種寫法:名稱裡的空白對應到實際寫法中的
- * 空白、底線、連字號,或是完全連在一起(`royalcanin`、`royal-canin`、
- * `Royal_Canin` 都算),大小寫一律不分。
+ * 空白、底線、連字號,或是完全連在一起,大小寫一律不分。
+ * 也就是說,一個兩個字的名稱,四種寫法都會被抓到。
+ *
+ * 這裡刻意不舉實際名稱當範例 —— 這支檔案會複製到下一個專案,
+ * 舉了就等於把某一個專案的名字寫進規則,而那正是這條規則在擋的事。
  *
  * 名稱以外的字元會被跳脫 —— 名字裡有 `.` 或 `+` 的專案才不會變成萬用字元。
  */
@@ -230,33 +234,6 @@ const TERMINAL_MARKS = new Set(['✔', '✓', '✗', '⛔', '⚠'])
  * 所以不分場合一律放行。
  */
 const ARROW_MARKS = new Set(['→', '←', '↔'])
-
-/**
- * 這個位置在不在字串裡。
- *
- * 用來分辨「工具要印出來的訊息」與「寫給人讀的註解」——
- * 前者一定包在引號裡,後者不是。
- *
- * 只看同一行:跨行的模板字串會被判成不在字串裡,那個方向是「多報一筆」,
- * 看到的人自己判斷得出來;反過來放行才危險 —— 漏掉的裝飾符號不會有人發現。
- *
- * 跳脫過的引號(`\'`)不算開頭或結尾,否則一句 `don\'t` 會把後面整行
- * 都算成字串外,那一行的符號就全部漏掉。
- */
-const isInsideString = (line, index) => {
-  const quotes = { "'": 0, '"': 0, '`': 0 }
-
-  for (let i = 0; i < index; i += 1) {
-    const char = line[i]
-    if (char === '\\') {
-      i += 1
-      continue
-    }
-    if (char in quotes) quotes[char] += 1
-  }
-
-  return Object.values(quotes).some((count) => count % 2 === 1)
-}
 
 /**
  * 圖形符號與 emoji 的字元範圍 —— 各類圖示、雜項符號、裝飾記號與箭頭。

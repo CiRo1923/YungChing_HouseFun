@@ -539,13 +539,40 @@ const THEME_GROUPS = Object.entries(TAILWIND_THEME_OVERRIDES)
   .map(([key, group]) => ({ ...group, key }))
   .filter((g) => deadPatternOf(g))
 
-const DEAD_RE = THEME_GROUPS.length
-  ? new RegExp(THEME_GROUPS.map(deadPatternOf).join('|'), 'g')
-  : null
+/**
+ * 這個專案**實際**整組覆寫了的那幾類。
+ *
+ * 設定列的是「tailwind 有哪幾類、各類的內建值叫什麼」,與專案無關;
+ * 某一類在這個專案有沒有被整組覆寫,要讀專案自己的 tailwind 設定才知道。
+ *
+ * 不分這兩件事的話,只要一類被列進設定,沒有覆寫它的專案就會被整批誤報 ——
+ * 而訊息還會寫著「這一類已整組覆寫」,那句話在那個專案是假的。
+ *
+ * 依 root 快取:一次全專案掃描會對每一支檔案問一次,而答案在同一次執行裡不變。
+ */
+let overriddenCache = null
+
+const overriddenGroupsOf = (root) => {
+  if (overriddenCache?.root === root) return overriddenCache.groups
+
+  const overridden = tailwindThemeOf(root)
+  const groups = THEME_GROUPS.filter((g) => g.key in overridden)
+
+  overriddenCache = { root, groups }
+
+  return groups
+}
+
+/** 這個專案要抓的那些消失的 class;一類都沒被覆寫時回 null(整條不檢查) */
+const deadReOf = (root) => {
+  const groups = overriddenGroupsOf(root)
+
+  return groups.length ? new RegExp(groups.map(deadPatternOf).join('|'), 'g') : null
+}
 
 /** 命中的是哪一類 —— 訊息要寫出那一類還剩哪些值可用 */
-const groupOfHit = (hit) =>
-  THEME_GROUPS.find((g) => (g.prefix ? hit.startsWith(g.prefix) : hit.endsWith(':')))
+const groupOfHit = (hit, root) =>
+  overriddenGroupsOf(root).find((g) => (g.prefix ? hit.startsWith(g.prefix) : hit.endsWith(':')))
 
 /**
  * 「這一類還剩哪些值可用」直接從專案的 tailwind 設定讀出來,不另外維護一份 ——
@@ -553,7 +580,7 @@ const groupOfHit = (hit) =>
  * (指著一個已經改掉的名字叫人去用)。
  */
 const DEAD_REASON = (hit, root) => {
-  const group = groupOfHit(hit)
+  const group = groupOfHit(hit, root)
   if (!group) return `${hit} 不存在`
 
   const available = tailwindThemeOf(root)[group.key] ?? []
@@ -567,14 +594,18 @@ const maskScript = (text) =>
   text.replace(/<script\b[^>]*>([\s\S]*?)<\/script>/gi, (m) => m.replace(/[^\n]/g, ' '))
 
 const checkDeadThemeClass = ({ rel, text, isVue, root }) => {
-  // 設定裡沒有任何整組覆寫時這條不檢查 —— 那種專案的內建 class 全部都還在
-  if (!DEAD_RE || !isInSrc(rel)) return []
+  if (!isInSrc(rel)) return []
+
+  /* 這個專案一類都沒有整組覆寫時不檢查 —— 那種專案的內建 class 全部都還在,
+     照設定清單去抓的話,每一支用了 text-sm 的檔案都會被報「不存在」。 */
+  const deadRe = deadReOf(root)
+  if (!deadRe) return []
 
   const scope = isVue ? maskScript(text) : text
   const issues = []
   const seen = new Set()
 
-  for (const m of scope.matchAll(DEAD_RE)) {
+  for (const m of scope.matchAll(deadRe)) {
     if (seen.has(m[0])) continue
     seen.add(m[0])
 

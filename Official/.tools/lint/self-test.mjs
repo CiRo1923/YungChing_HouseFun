@@ -3,7 +3,7 @@
 //
 //   npm run test:css
 //
-// ⚠️ 為什麼需要這個:npm run lint:css 通過只代表「現在的程式碼沒有違規」,
+// 為什麼需要這個:npm run lint:css 通過只代表「現在的程式碼沒有違規」,
 //    不代表「規則還有效」。改壞一條 regex 之後全案照樣通過 —— 那條規則從此靜靜失效,
 //    等到有人寫出違規才發現,而那時已經散了一堆。
 //    這支反過來測工具本身:餵違規進去必須被抓、餵合法寫法進去必須放行。
@@ -11,10 +11,10 @@
 // 走的是 lintFile 的完整路徑(而不是直接呼叫各個 check),所以連「哪個路徑跑哪些檢查」
 // 的分派邏輯也一起驗到。
 //
-// ⚠️ 探測檔會實際寫進專案目錄(檢查依路徑前綴決定要不要跑,不能寫在別處)。
+// 注意:探測檔會實際寫進專案目錄(檢查依路徑前綴決定要不要跑,不能寫在別處)。
 //    每次執行前會先清掉前一次的殘骸,結束時(含中途丟例外)一定會刪除。
 //
-// ⚠️ dev server 執行中時跑這支,自動產生型別的外掛(unplugin-vue-components)
+// 注意:dev server 執行中時跑這支,自動產生型別的外掛(unplugin-vue-components)
 //    會掃到 src/components/ 底下的探測檔,把它們寫進 components.d.ts ——
 //    探測檔刪掉之後那些宣告仍會殘留。看到 d.ts 多出 CssSelfTest* 就是這個原因,
 //    直接 git checkout 還原即可,不要 commit 進去。
@@ -39,14 +39,19 @@
 //
 // lint-project-name-exempt: 要驗「專案名稱有沒有被抓到」,案例裡就必須出現本專案的名稱
 // lint-absolute-path-exempt: 要驗「絕對路徑有沒有被抓到」,案例裡就必須出現絕對路徑
+// lint-plain-text-exempt: 要驗「裝飾符號有沒有被抓到」,案例裡就必須出現那些符號
+// lint-self-contained-exempt: 要驗「同上那類寫法有沒有被抓到」,案例裡就必須出現那些詞
 
+import { execFileSync } from 'node:child_process'
 import fs from 'node:fs'
+import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import {
   COLOR_NAME_SEPARATOR,
   addColorDecls,
   expectedSuffix,
+  withAlpha,
   HUE_LIST_TEXT,
   hueOf,
   isSorted,
@@ -69,7 +74,7 @@ import {
 } from './lint-core.mjs'
 import { aliasListOf, importGroupOf, tailwindThemeOf } from './rules-code.mjs'
 import { IS_SOURCE_PROJECT, unusedConfigNames } from './rules-global.mjs'
-import { currentFingerprints, fingerprintDiff, isSkipped } from './checksum.mjs'
+import { CHECKSUM_FILE, currentFingerprints, fingerprintDiff, isSkipped } from './checksum.mjs'
 import {
   ACTIONS_DIR_NAME,
   API_DIR,
@@ -133,7 +138,7 @@ const S = `${CSS_MODULES_DIR}/mCssSelfTest` // 前綴為 m-css-self-test
 /**
  * api 規則看的是「檔名對不對得上頁面目錄的資料夾」,所以探測檔要放在 api 目錄底下。
  *
- * ⚠️ 放**子資料夾**而不是直接放在 api 目錄第一層 —— 探測檔名會與正式檔案撞名,
+ * 注意:放**子資料夾**而不是直接放在 api 目錄第一層 —— 探測檔名會與正式檔案撞名,
  *    直接放的話會覆蓋掉真的 api 檔案。規則只看檔名,放子資料夾一樣驗得到。
  */
 const A = `${API_DIR}/${PROBE}`
@@ -326,7 +331,7 @@ const PROBE_COLOR_SORT_FILE = `${PROBE_COLOR_PREFIX}Sort.css`
 /**
  * 探測用的樣式設定檔 —— 擺在專案根,因為那條規則只看專案根的設定檔。
  *
- * ⚠️ **不能用專案真正的 tailwind 設定檔名** —— 案例會實際寫入內容,
+ * 注意:**不能用專案真正的 tailwind 設定檔名** —— 案例會實際寫入內容,
  *    用真名就會把專案的設定整份蓋掉。名字取得夠特別,誤留下來一眼看得出是什麼。
  */
 const BUILD_STYLE_CONFIG = `${PROBE}.config.js`
@@ -388,9 +393,33 @@ const PROBE_PROJECT_SLUG = (PROJECT_NAMES[0] ?? '').replace(/\s+/g, '')
 /** `common` → `Common` —— 從設定值組出 store 名稱時要用 */
 const pascalOf = (name) => name.charAt(0).toUpperCase() + name.slice(1)
 
+/**
+ * 「別的工具帶 --write 執行」那一則要用的探測檔。
+ *
+ * 放在系統的暫存目錄,不放專案裡 —— 這一則不靠路徑決定跑哪些檢查
+ * (其他探測檔要靠),而放在規則那一層的話,它存在的那一瞬間會被算進指紋,
+ * 剛好就是這一則要驗的東西。位置由系統給,不寫死任何一台機器的路徑。
+ */
+const PROBE_WRITE_FILE = path.join(os.tmpdir(), `${PROBE}-write.mjs`)
+
 /** 探測用的色值與變數名 —— 用不太可能撞到的值,避免與專案既有色票重複 */
 const PROBE_COLOR_VAR = '--gray-4d2c'
 const PROBE_COLOR_HEX = '#4d2c1e'
+
+/**
+ * 「色票值引用別的變數」那一則要用的基礎色與它轉換後的樣子。
+ *
+ * 基礎色取探測色票自己就有的那一支 —— 規則查基礎色查的是色票目錄掃出來的
+ * 那一份,不是案例內容裡寫了什麼。借用專案色票裡剛好有的名字(例如 `--black`)
+ * 的話,案例在沒有那支變數的專案必定失敗,而訊息是「預期會轉換,實際沒有變動」,
+ * 看起來像規則壞了 —— 實際上是案例綁死了某一種色票命名。
+ *
+ * 轉換後的色值與名字都用規則自己的算法推,不寫死:透明度怎麼接成後綴是設定,
+ * 寫死一種的話,另一種慣例的專案會過不了。
+ */
+const PROBE_REF_ALPHA = '0.3'
+const PROBE_REF_HEX = withAlpha(PROBE_COLOR_HEX, PROBE_REF_ALPHA)
+const PROBE_REF_VAR = `--${hueOf(PROBE_COLOR_VAR, PROBE_REF_HEX, 'name')}${COLOR_NAME_SEPARATOR}${expectedSuffix(PROBE_REF_HEX)}`
 
 /**
  * 帶透明度的探測色,以及它在**目前設定下**應該叫什麼。
@@ -500,8 +529,14 @@ const onPrepare = () => {
  * 取設定裡那一類第一個消失的值來造內容:斷點寫成 `值:`,其餘寫成 `前綴值`
  * (例如字級是 `text-sm`、陰影是 `shadow-md`)。
  *
- * 那一類沒有列出任何消失的值時(專案沒有整組覆寫那一類),
- * 改成驗「不報」—— 用一個一定不存在的名字,確認規則不會誤報。
+ * **這個專案有沒有整組覆寫那一類,決定同一段內容該不該被報。**
+ * 設定列的是「tailwind 有哪幾類」,與專案無關 —— 每個專案都會拿到整份清單,
+ * 但只有自己真的覆寫掉的那幾類才該提醒。所以沒覆寫時改成驗「不報」,
+ * 而且探針照樣用那個內建值:用一個不存在的名字的話,
+ * 驗到的只是「規則不會無中生有」,驗不到「沒覆寫就不該報」。
+ *
+ * 判斷取規則讀的那一份(tailwindThemeOf)—— 這裡自己再判一次的話,
+ * 規則改了條件而驗證沒跟上,這幾則會開始亂報。
  */
 /**
  * 驗「這個專案實際有的 class 不會被誤報成已消失」。
@@ -547,7 +582,7 @@ const themeCaseOf = (key, file, codeOf) => {
 
   if (!dead) {
     return {
-      name: `theme ${key} 沒有整組覆寫時不誤報`,
+      name: `theme ${key} 沒有列出任何內建值時不誤報`,
       rule: 'theme',
       file,
       code: codeOf(group?.prefix ? `${group.prefix}self-test-none` : 'selfTestNone:'),
@@ -556,6 +591,19 @@ const themeCaseOf = (key, file, codeOf) => {
   }
 
   const cls = group.prefix ? `${group.prefix}${dead}` : `${dead}:`
+
+  /* 這個專案沒有整組覆寫這一類 —— 那些內建值都還在,用了不是違規。
+     報出來的話,每一支用到它的檔案都會被指著說「不存在」,
+     而訊息還會寫「已整組覆寫」,那句話在這個專案是假的。 */
+  if (!(key in tailwindThemeOf(root))) {
+    return {
+      name: `theme 這個專案沒有整組覆寫${group.label}時,用內建值不算違規`,
+      rule: 'theme',
+      file,
+      code: codeOf(cls),
+      expect: 0,
+    }
+  }
 
   return {
     name: `theme 已被覆寫掉的${group.label}`,
@@ -882,6 +930,7 @@ const CSS_CASES = [
   ),
   themeCaseOf('fontSize', `${M}/theme2.css`, (cls) => `.m-probe {\n  @apply ${cls};\n}`),
   themeCaseOf('boxShadow', `${M}/theme3.css`, (cls) => `.m-probe {\n  @apply ${cls};\n}`),
+  themeCaseOf('fontFamily', `${M}/theme7.css`, (cls) => `.m-probe {\n  @apply ${cls};\n}`),
   aliveThemeCaseOf(`${M}/theme4.css`),
   {
     name: 'theme 色票變數名內含 sm/md 不誤報',
@@ -1036,8 +1085,15 @@ const CSS_CASES = [
   //
   // 檢查的是樣式設定檔本身，不是使用端。theme 是整組覆寫，
   // 重新定義的值再用 sm / md / lg 等於把剛拿掉的問題原樣搬回來。
+  //
+  // 這幾則一律指定 rule，只計 themeNaming 這一條。探測用的樣式設定檔
+  // 放在專案根（規則就是去那裡找設定，放別處驗不到），而原始碼也放在專案根的
+  // 專案（沒有 src 那一層的擺法）會把它一起當成原始碼掃 ——
+  // 那時案例內容裡的 `sm:` 會被「用到已消失的 class」那條當成斷點前綴，
+  // 每一則都多報一筆。不指定的話,同一份案例在兩種擺法的專案會有兩種結果。
   {
     name: 'themeNaming theme 直接定義了尺寸縮寫',
+    rule: 'themeNaming',
     file: `${BUILD_STYLE_CONFIG}`,
     code:
       `export default {\n` +
@@ -1052,6 +1108,7 @@ const CSS_CASES = [
     /* extend 底下是「補充」，內建值都還在，不是整組覆寫 ——
        那裡用 tailwind 自己的級距名是正常的，不該報。 */
     name: 'themeNaming extend 底下的不算整組覆寫',
+    rule: 'themeNaming',
     file: `${BUILD_STYLE_CONFIG}`,
     code:
       `export default {\n` +
@@ -1065,6 +1122,7 @@ const CSS_CASES = [
   },
   {
     name: 'themeNaming 說得出用途的名字不誤報',
+    rule: 'themeNaming',
     file: `${BUILD_STYLE_CONFIG}`,
     code:
       `export default {\n` +
@@ -1078,6 +1136,7 @@ const CSS_CASES = [
     /* 值常常定義在另一支檔案再 import 進設定檔 —— 那一支也要檢查，
        否則把名字搬過去就繞過了規則。 */
     name: 'themeNaming 值定義在另一支檔案也要檢查',
+    rule: 'themeNaming',
     file: `${THEME_SOURCE_FILE}`,
     code: `export const boxShadow = {\n  lg: '0 0 20px #000',\n  default: '0 0 4px #000',\n}\n`,
     expect: 1,
@@ -1085,6 +1144,7 @@ const CSS_CASES = [
   },
   {
     name: 'themeNaming 標了豁免註解就整份放行',
+    rule: 'themeNaming',
     file: `${BUILD_STYLE_CONFIG}`,
     code:
       `// lint-theme-naming-exempt: 沿用設計系統既有的命名\n` +
@@ -1319,6 +1379,18 @@ const RULE_CASES = [
     keyword: '✗',
   },
   {
+    /* 「在字串裡」不是通行證 —— 放行的條件有兩個,要同時成立:
+       是狀態記號(那份清單裡的),而且寫在字串裡。
+       少了前一個條件的話,任何 emoji 只要包進引號就能過,
+       而印出來的訊息正是客戶最常看到的那一批文字。 */
+    name: 'plainText 不是狀態記號的符號,寫在字串裡照樣抓',
+    file: `${D}/probe-status-other.mjs`,
+    code: `console.log('🔧 已自動排序')\n`,
+    expect: 1,
+    rule: 'plainText',
+    keyword: '🔧',
+  },
+  {
     // 對照表的箭頭是資訊本身,換成文字反而讓整欄對不齊
     name: 'plainText 對照表的箭頭不算裝飾',
     file: `${D}/probe-table.md`,
@@ -1339,6 +1411,28 @@ const RULE_CASES = [
     file: `${D}/probe-fake-exempt.mjs`,
     code: `const EXEMPT_RE = /lint-plain-text-exempt/\n// ✅ 這一行是註解\n`,
     expect: 1,
+    keyword: '✅',
+  },
+  {
+    /* 驗證案例的內容裡會整段寫出一個豁免標記當作要檢查的資料 ——
+       標記前面確實有註解的起頭,但它屬於字串的內容,不是在宣告豁免。
+       算它的話,寫這種案例的檔案會整份被放行,而放行的當下沒有任何訊息。 */
+    name: 'plainText 豁免標記寫在字串裡不算宣告',
+    file: `${D}/probe-exempt-in-string.mjs`,
+    code: `const probe = \`<!-- lint-plain-text-exempt: 這是資料 -->\`\n// ✅ 這一行是註解\n`,
+    expect: 1,
+    rule: 'plainText',
+    keyword: '✅',
+  },
+  {
+    /* 說明文件舉例時會整段寫出一個豁免標記,那是給人看的範例,不是宣告。
+       算它的話,一份在說明「這條規則抓什麼」的文件會因為舉了例子
+       而讓自己不被那條規則檢查,而且沒有任何徵兆。 */
+    name: 'plainText 豁免標記寫在範例區塊裡不算宣告',
+    file: `${D}/probe-exempt-in-example.md`,
+    code: '# 說明\n\n要放行時這樣標:\n\n```css\n/* lint-plain-text-exempt: 這是範例 */\n```\n\n這份自己沒有標,所以 ✅ 這個符號照樣要被抓。\n',
+    expect: 1,
+    rule: 'plainText',
     keyword: '✅',
   },
   {
@@ -2596,9 +2690,14 @@ const LEGACY_RGBA_CASES = [
   {
     name: 'rgba:色票值引用別的變數時查得到基礎色',
     rel: `${COLOR_CSS_DIR}/${PROBE_COLOR_FILE}`,
-    code: `:root {\n  /* black */\n  --black: #000;\n  --black-30: rgba(var(--black), 0.3);\n}\n`,
-    expect: '--black-4d: #0000004d;',
-    renamed: ['--black-30 -> --black-4d'],
+    code:
+      `:root {\n` +
+      `  /* gray */\n` +
+      `  ${PROBE_COLOR_VAR}: ${PROBE_COLOR_HEX};\n` +
+      `  ${PROBE_COLOR_VAR}-30: rgba(var(${PROBE_COLOR_VAR}), ${PROBE_REF_ALPHA});\n` +
+      `}\n`,
+    expect: `${PROBE_REF_VAR}: ${PROBE_REF_HEX};`,
+    renamed: [`${PROBE_COLOR_VAR}-30 -> ${PROBE_REF_VAR}`],
   },
   {
     /* hexToRgb 要先知道那個衍生變數被用在哪幾種透明度,才知道要建幾個變數。
@@ -2902,6 +3001,38 @@ const onCheckRuleFingerprints = () => {
     report(!problems.length, '共用規則的指紋涵蓋範圍正確', problems)
   }
 
+  /* 只有「直接執行指紋那一支」才可以動清單。
+     別的工具帶 --write 跑(色票排序就是)而它 import 了指紋模組時,
+     不可以順手封存 —— 那等於把被改過的共用規則蓋章,下一次比對當然一致,
+     而保護就這樣安靜地失效,沒有任何訊息。
+
+     用子行程驗:argv 帶著 --write 的,是「別的工具」那一種情境。 */
+  {
+    const file = path.join(root, ...CHECKSUM_FILE.split('/'))
+    const before = fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : null
+    const probe = PROBE_WRITE_FILE
+    const problems = []
+
+    fs.writeFileSync(
+      probe,
+      `import '${pathToFileURL(path.join(root, '.tools/lint/checksum.mjs')).href}'\n`,
+      'utf8'
+    )
+
+    try {
+      execFileSync(process.execPath, [probe, '--write'], { cwd: root, stdio: 'pipe' })
+
+      const after = fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : null
+      if (before !== after) problems.push('別的工具帶 --write 執行時,指紋清單被改寫了')
+    } catch (err) {
+      problems.push(`探測跑不起來:${err.message}`)
+    } finally {
+      if (fs.existsSync(probe)) fs.unlinkSync(probe)
+    }
+
+    report(!problems.length, '指紋清單只有直接執行那一支時才會被改寫', problems)
+  }
+
   /* 清單是不是最新的,只有來源驗得到 —— 別的專案那份清單是跟著規則複製過來的,
      對不上代表那邊改了共用規則,那件事由規則 ruleTampered 在檢查時報,不在這裡。 */
   if (!IS_SOURCE_PROJECT) {
@@ -3035,6 +3166,20 @@ const onCheckThemeBlocks = () => {
     '色票:原本沒有色相標籤的檔案,排序後也不會多出標籤',
     gotLabels ? ['排序替它加上了色相標籤'] : ['排序沒有生效']
   )
+
+  /* 色系之間要空一行 —— 那是規範,每個專案都一樣,不跟著檔案現況走。
+     沒有這一則的話,重建時把空行當成可丟棄的空白,整份會變成連續一大串,
+     而排序是自動改檔:被刪掉的分隔不會有人收到通知。
+
+     探針的名字要認得出色相(上面那一則的 --probe-a / --probe-b 認不出,
+     兩支都算「未知色」,同一組裡本來就不該有空行)。 */
+  const hued = ':root {\n  --black-0000: #000000;\n  --white-ffff: #ffffff;\n}\n'
+  const huedSorted = sortColorCss(hued) ?? hued
+  const blankBetweenHues = /;\n\s*\n\s*--/.test(huedSorted)
+
+  report(blankBetweenHues, '色票:沒有標籤時,色系之間仍然空一行', [
+    `排出來的內容:${JSON.stringify(huedSorted)}`,
+  ])
 
   /* 兩組主題時不自動加變數 —— 新變數在淺色與深色該是不同的值,那是設計決定。
      猜一個填進去的話,畫面會錯得很安靜:看起來有值,只是顏色不對。 */
