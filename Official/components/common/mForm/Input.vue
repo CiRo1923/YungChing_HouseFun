@@ -400,7 +400,7 @@ defineExpose({
             tabindex="-1"
             @click="onClear"
           >
-            <CommonSvgIcon icon="icon_xmark" class="m-form-clear-icon" />
+            <CommonMSvgIcon icon="icon_xmark" class="m-form-clear-icon" />
           </button>
           <span v-if="formatLength" class="m-form-length" :class="setClass.length">
             {{ formatLength }}

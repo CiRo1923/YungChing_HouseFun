@@ -214,13 +214,13 @@ onUnmounted(() => {
     @mouseleave="onMouseLeave"
     @click="onClick"
   >
-    <CommonSvgIcon
+    <CommonMSvgIcon
       :icon="icon.name"
       :class="setClass.icon"
       v-if="icon && icon.position === 'left'"
     />
     <em class="m-tooltip-label" :class="setClass.label" v-if="props.label">{{ props.label }}</em>
-    <CommonSvgIcon
+    <CommonMSvgIcon
       :icon="icon.name"
       :class="setClass.icon"
       v-if="icon && icon.position === 'right'"

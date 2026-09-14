@@ -12,7 +12,7 @@ const props = defineProps({
 
 <template>
   <small class="m-error-message">
-    <CommonSvgIcon icon="icon_exclamation_o" class="m-error-message-icon" />
+    <CommonMSvgIcon icon="icon_exclamation_o" class="m-error-message-icon" />
     <em>{{ props.message }}</em>
   </small>
 </template>

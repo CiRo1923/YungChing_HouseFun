@@ -202,7 +202,7 @@ watch(
             tabindex="-1"
             @click="onClear"
           >
-            <CommonSvgIcon icon="icon_xmark" class="m-form-clear-icon" />
+            <CommonMSvgIcon icon="icon_xmark" class="m-form-clear-icon" />
           </button>
           <button
             type="button"
@@ -210,7 +210,7 @@ watch(
             tabindex="-1"
             @click="onToggleVisible"
           >
-            <CommonSvgIcon
+            <CommonMSvgIcon
               :icon="isVisible ? 'icon_eye' : 'icon_eye_hidden'"
               class="m-form-password-eye-icon"
             />

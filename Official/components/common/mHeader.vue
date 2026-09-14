@@ -7,14 +7,14 @@ import '@css/_modules/common/mHeader/common.css'
   <div class="m-header">
     <div class="m-header-container">
       <div class="m-header-logo">
-        <CommonImgSrc
+        <CommonMFigure
           src="buy/logo_text.svg"
           alt="好房網HouseFun"
           :setClass="{
             main: 'm-header-logo-text',
           }"
         />
-        <CommonImgSrc
+        <CommonMFigure
           src="buy/logo_icon.svg"
           alt=""
           :setClass="{

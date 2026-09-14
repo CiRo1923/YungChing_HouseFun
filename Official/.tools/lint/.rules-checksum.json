@@ -4,15 +4,15 @@
   "colors.mjs": "569d6edb931b66c2",
   "dev-server-plugin.mjs": "fa66bb85c0c3ecf4",
   "guard-file.mjs": "4e5abc0c98063613",
-  "lint-core.mjs": "f7e3f267bb02cb94",
+  "lint-core.mjs": "327b3c64c42f7d36",
   "lint.mjs": "df1c710b6e08416e",
   "preflight.mjs": "bd6a359d078204d3",
   "rules-api.mjs": "b832ef344c1c936b",
-  "rules-code.mjs": "930dda4680cca689",
-  "rules-global.mjs": "3abc530503cbcb80",
+  "rules-code.mjs": "86b35b141e71dbd9",
+  "rules-global.mjs": "30a333eeec4e06f3",
   "rules-page.mjs": "b6c2ca808159e5ab",
   "rules-store.mjs": "d10f9d28c95fda1f",
-  "self-test.mjs": "0bf591b4de115cb6",
+  "self-test.mjs": "13ef68a26c78c8b2",
   "shared.mjs": "4ce441f2c284a1be",
-  "test-shapes.mjs": "3ac96ed8362887c6"
+  "test-shapes.mjs": "f7d31bec416a052f"
 }

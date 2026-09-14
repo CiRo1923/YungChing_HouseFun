@@ -1,4 +1,4 @@
-/* mFigure(components/common/ImgSrc.vue)的變數預設值。
+/* mFigure(components/common/mFigure.vue)的變數預設值。
    全專案都是同一種樣式、沒有逐頁指定的需求,所以不開 modifier,只分 pc / tablet / mobile。
    唯一的 modifier 是 group-hover:--image-scale(外層容器 hover 時放大圖片)。 */
 

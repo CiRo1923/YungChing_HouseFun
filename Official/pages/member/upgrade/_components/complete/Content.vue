@@ -13,7 +13,7 @@ const maskPhone = onGetCookie(UPGRADECOMPLETE)
     您的登入帳號已改為<br />
     <b class="tm:text-[24px] p:text-[30px]">{{ maskPhone }}</b>
   </div>
-  <CommonImgSrc
+  <CommonMFigure
     src="member/upgrade/complete/complete.svg"
     :setClass="{
       main: 'mx-auto my-[35px] h-[170px] w-[160px]',

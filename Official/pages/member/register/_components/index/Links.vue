@@ -27,7 +27,7 @@ const memberRegister = useMemberAuthRegisterStore()
             </h3>
             <p class="tm:text-[16px] p:text-[18px]">{{ item.description }}</p>
           </header>
-          <CommonImgSrc
+          <CommonMFigure
             :src="item.image"
             alt=""
             :setClass="{

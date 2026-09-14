@@ -50,7 +50,7 @@ const onIsDone = (index) => index + 1 <= config.value.step
       v-for="(item, index) in props.items"
       :key="item.text"
     >
-      <CommonSvgIcon :icon="item.icon" class="m-step-icon" />
+      <CommonMSvgIcon :icon="item.icon" class="m-step-icon" />
       <em class="m-step-label" :class="setClass.label">{{ item.text }}</em>
     </li>
   </ul>

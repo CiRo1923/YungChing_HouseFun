@@ -1214,14 +1214,28 @@ const componentDirOf = (root, name) => {
   return null
 }
 
-/** 走訪元件目錄,找同名的資料夾或同名的 .vue(後者代表那支元件還沒有自己的資料夾) */
+/**
+ * 這個資料夾是元件本身,還是只是把元件分類起來的一層 ——
+ * 直接放著 `.vue` 的才是元件。
+ *
+ * 元件目錄底下常常先分幾個大類(共用的、某個功能的),每一類底下才是元件。
+ * 分類層不分辨出來的話,一支放在分類資料夾底下的樣式會被判成「屬於那個分類」,
+ * 而照著搬的結果是好幾個元件的樣式全堆進同一個資料夾 ——
+ * 元件與樣式的對應關係反而消失,正好是這條規則要達成的相反。
+ */
+const isComponentFolder = (dir) =>
+  fs.readdirSync(dir, { withFileTypes: true }).some((item) => item.isFile() && item.name.endsWith('.vue'))
+
+/** 走訪元件目錄,找同名的元件資料夾或同名的 .vue(後者代表那支元件還沒有自己的資料夾) */
 const findComponentFolder = (dir, name) => {
   for (const item of fs.readdirSync(dir, { withFileTypes: true })) {
     const full = path.join(dir, item.name)
 
     if (item.isDirectory()) {
-      if (item.name === name) return full
+      if (item.name === name && isComponentFolder(full)) return full
 
+      /* 名字對上了但那是分類層時也繼續往深處找 ——
+         同一個名字可能在更底下有一個真的元件。 */
       const deeper = findComponentFolder(full, name)
       if (deeper) return deeper
       continue
@@ -1237,22 +1251,32 @@ const checkModuleLocation = ({ rel, root }) => {
   if (!isSharedCss(rel)) return []
 
   /* 名字從路徑推:`<集中目錄>/mForm/common.css` 的模組名是 mForm,
-     `<集中目錄>/mForm.css` 也是 —— 兩種擺法都有專案在用。 */
+     `<集中目錄>/mForm.css` 也是 —— 兩種擺法都有專案在用。
+
+     集中目錄底下也可能先分一層類(`<集中目錄>/<分類>/mChart/common.css`),
+     所以由深到淺試每一段資料夾名,第一個對得上實際元件的就是歸屬 ——
+     只看第一段的話,那一段常常是分類名,會把一整批不同元件的樣式
+     都判成屬於同一個「元件」。 */
   const parts = rel.slice(`${CSS_MODULES_DIR}/`.length).split('/')
-  const moduleName = parts.length > 1 ? parts[0] : parts[0].replace(/\.css$/i, '')
+  const folders = parts.slice(0, -1)
+  const candidates = folders.length ? [...folders].reverse() : [parts[0].replace(/\.css$/i, '')]
 
-  const target = componentDirOf(root, moduleName)
-  if (!target) return []
+  for (const moduleName of candidates) {
+    const target = componentDirOf(root, moduleName)
+    if (!target) continue
 
-  return [
-    issueOf(
-      rel,
-      1,
-      'moduleLocation',
-      `這支樣式屬於元件 ${moduleName} —— 搬進 ${target}/${MODULE_CSS_DIR_NAME}/,` +
-        `留在集中目錄的話「模組 css 只能寫自己那組 class」那條不會檢查它,而且沒有任何訊息`
-    ),
-  ]
+    return [
+      issueOf(
+        rel,
+        1,
+        'moduleLocation',
+        `這支樣式屬於元件 ${moduleName} —— 搬進 ${target}/${MODULE_CSS_DIR_NAME}/,` +
+          `留在集中目錄的話「模組 css 只能寫自己那組 class」那條不會檢查它,而且沒有任何訊息`
+      ),
+    ]
+  }
+
+  return []
 }
 
 // --- 自動修正用的工具 -------------------------------------------------------

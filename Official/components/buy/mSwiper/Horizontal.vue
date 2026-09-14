@@ -114,7 +114,7 @@ defineExpose({
         :disabled="isBeginning"
         @click="onPrev"
       >
-        <CommonSvgIcon :icon="navConfig.icon.prev" class="m-swiper-nav-icon" />
+        <CommonMSvgIcon :icon="navConfig.icon.prev" class="m-swiper-nav-icon" />
       </button>
 
       <button
@@ -124,7 +124,7 @@ defineExpose({
         :disabled="isEnd"
         @click="onNext"
       >
-        <CommonSvgIcon :icon="navConfig.icon.next" class="m-swiper-nav-icon" />
+        <CommonMSvgIcon :icon="navConfig.icon.next" class="m-swiper-nav-icon" />
       </button>
     </template>
   </div>

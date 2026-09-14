@@ -159,7 +159,7 @@ onUnmounted(() => {
             main: 'flex-col gap-y-[4px]',
           }"
         >
-          <CommonSvgIcon icon="icon_tel" class="h-[24px] w-[24px] p-[3px]" />
+          <CommonMSvgIcon icon="icon_tel" class="h-[24px] w-[24px] p-[3px]" />
           <em class="text-center text-[14px] leading-[1.2]">來電<br />洽詢</em>
         </CommonMAnchor>
       </li>
@@ -170,7 +170,7 @@ onUnmounted(() => {
           }"
           @click="onPopupMessage"
         >
-          <CommonSvgIcon icon="icon_dialogue" class="h-[24px] w-[24px] p-[3px]" />
+          <CommonMSvgIcon icon="icon_dialogue" class="h-[24px] w-[24px] p-[3px]" />
           <em class="text-center text-[14px] leading-[1.2]">預約<br />留言</em>
         </CommonMAnchor>
       </li>

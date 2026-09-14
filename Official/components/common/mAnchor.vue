@@ -113,7 +113,7 @@ const onClick = (e) => {
     @click="onClick"
   >
     <slot>
-      <CommonSvgIcon
+      <CommonMSvgIcon
         :icon="icon.name"
         :class="setClass.icon"
         v-if="icon.position === 'left' && icon.name"
@@ -121,7 +121,7 @@ const onClick = (e) => {
       <em class="m-anchor-text" :class="setClass.text" v-if="props.text">
         {{ props.text }}
       </em>
-      <CommonSvgIcon
+      <CommonMSvgIcon
         :icon="icon.name"
         :class="setClass.icon"
         v-if="icon.position === 'right' && icon.name"

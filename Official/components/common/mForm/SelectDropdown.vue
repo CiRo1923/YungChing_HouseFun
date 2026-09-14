@@ -166,7 +166,7 @@ defineExpose({
             v-html="model || placeholder.value"
             ref="selectRef"
           />
-          <CommonSvgIcon
+          <CommonMSvgIcon
             icon="caret_large_down"
             class="m-form-icon"
             :class="setClass.icon"

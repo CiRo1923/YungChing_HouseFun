@@ -1,5 +1,5 @@
-import SvgIcon from '@components/common/SvgIcon.vue'
+import mSvgIcon from '@components/common/mSvgIcon.vue'
 
 export default defineNuxtPlugin((nuxtApp) => {
-  nuxtApp.vueApp.component('SvgIcon', SvgIcon)
+  nuxtApp.vueApp.component('mSvgIcon', mSvgIcon)
 })

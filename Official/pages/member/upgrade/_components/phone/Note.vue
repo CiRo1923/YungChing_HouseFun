@@ -20,7 +20,7 @@ const items = readonly([
         v-for="(item, index) in items"
         :key="`${item.content}_${index}`"
       >
-        <CommonSvgIcon
+        <CommonMSvgIcon
           icon="icon_check_solid"
           class="h-[20px] w-[20px] shrink-0 p-[2px] text-[--green-8b0d]"
         />

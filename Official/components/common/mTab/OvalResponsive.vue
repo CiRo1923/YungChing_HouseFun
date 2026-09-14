@@ -95,7 +95,7 @@ const onTransitionEnd = async (e) => {
             v-bind="onHeaderBind(item)"
             @click="onAnchorClick(item, index)"
           >
-            <CommonSvgIcon :icon="item.icon" class="m-tab-icon" />
+            <CommonMSvgIcon :icon="item.icon" class="m-tab-icon" />
             <slot name="anchor" :item="item" :index="index">
               <em class="m-tab-anchor-label">{{ item[config.schema.label] }}</em>
             </slot>

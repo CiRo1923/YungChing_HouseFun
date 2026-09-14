@@ -27,7 +27,7 @@ const addressInfo = computed(() => {
     <template v-for="(data, index) in addressInfo" :key="`${data.id}_${index}`">
       <li v-if="data.value">
         <p class="flex items-center gap-x-[3px] tracking-wider tm:text-[14px] p:text-[16px]">
-          <CommonSvgIcon
+          <CommonMSvgIcon
             :icon="data.icon"
             class="h-[18px] w-[18px] shrink-0 p-[1px] text-[--gray-999]"
           />

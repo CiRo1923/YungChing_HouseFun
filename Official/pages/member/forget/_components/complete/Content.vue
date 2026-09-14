@@ -1,5 +1,5 @@
 <template>
-  <CommonImgSrc
+  <CommonMFigure
     src="member/forget/complete/complete.svg"
     alt=""
     :setClass="{

@@ -53,6 +53,6 @@ onUnmounted(() => {
     }"
     @click="onCkick"
   >
-    <CommonSvgIcon icon="icon_top_arrow" class="m-top-icon" />
+    <CommonMSvgIcon icon="icon_top_arrow" class="m-top-icon" />
   </button>
 </template>

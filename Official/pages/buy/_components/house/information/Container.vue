@@ -65,7 +65,7 @@ const hasAnyContent = computed(() => props.items.some((data) => hasColumnContent
                       :class="value.tools.class?.main"
                       v-if="value.tools"
                     >
-                      <CommonSvgIcon
+                      <CommonMSvgIcon
                         :icon="value.tools.icon"
                         :class="value.tools.class?.icon"
                         v-if="value.tools.icon"

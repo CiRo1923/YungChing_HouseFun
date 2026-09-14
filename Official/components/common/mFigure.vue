@@ -28,7 +28,7 @@ const resolveBundledImg = (raw) => {
   const hit = MAP[toKey(raw)]
   if (hit) return bust(hit)
 
-  console.warn('[ImgSrc] not found:', toKey(raw))
+  console.warn('[mFigure] not found:', toKey(raw))
   return encodeURI(raw)
 }
 
@@ -186,7 +186,7 @@ onMounted(() => {
 
   <div class="m-figure --error" :class="setClass.main" v-else>
     <div class="m-figure-error">
-      <CommonSvgIcon class="m-figure-error-icon" icon="icon_image_error" />
+      <CommonMSvgIcon class="m-figure-error-icon" icon="icon_image_error" />
     </div>
   </div>
 </template>

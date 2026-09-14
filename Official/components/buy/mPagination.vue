@@ -136,7 +136,7 @@ const onBind = (page) => {
         v-bind="config.nowPage <= 1 ? { type: 'button', disabled: true } : onBind(1)"
         aria-label="第一頁"
       >
-        <CommonSvgIcon icon="chevron_left" class="m-pagination-arrow-icon" />
+        <CommonMSvgIcon icon="chevron_left" class="m-pagination-arrow-icon" />
       </component>
       <ol class="m-pagination-list">
         <li v-for="(page, index) in visiblePages" :key="`${page}_${index}`">
@@ -164,7 +164,7 @@ const onBind = (page) => {
         "
         aria-label="最後一頁"
       >
-        <CommonSvgIcon icon="chevron_right" class="m-pagination-arrow-icon" />
+        <CommonMSvgIcon icon="chevron_right" class="m-pagination-arrow-icon" />
       </component>
     </div>
   </div>

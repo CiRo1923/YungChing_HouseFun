@@ -90,7 +90,7 @@ watch(
     <PageBuyHouseBasicFlags :ids="ids" />
     <!-- 格局圖 -->
     <div class="h-full" v-if="modeID === 'floorPlan'">
-      <CommonImgSrc
+      <CommonMFigure
         :src="media.floorPlan"
         :alt="`${caseName} 格局圖`"
         :setClass="{
@@ -119,7 +119,7 @@ watch(
         >
           <div class="flex h-full flex-col items-center justify-center break-keep">
             <!-- {{ onImageSize(item) }} -->
-            <CommonImgSrc :src="item" :alt="`${caseName} 物件照片`" />
+            <CommonMFigure :src="item" :alt="`${caseName} 物件照片`" />
           </div>
         </BuyMSwiperHorizontal>
         <small
@@ -128,7 +128,7 @@ watch(
           {{ imageIndex }} / {{ images.length }}
         </small>
       </template>
-      <CommonImgSrc
+      <CommonMFigure
         src="common/default_image.jpg"
         :alt="`${caseName} 物件照片`"
         :setClass="{

@@ -61,7 +61,7 @@ const badgesItems = computed(() => {
         },
       }"
     />
-    <CommonImgSrc
+    <CommonMFigure
       :src="images[0]"
       :alt="`${props.item.title} 物件封面圖`"
       :setClass="{

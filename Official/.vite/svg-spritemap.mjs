@@ -2,7 +2,7 @@
 //
 //   _svg/*.svg  →  單一 <svg>,每檔一個 <symbol id="檔名">
 //
-// 供 components/common/SvgIcon.vue 以 <use xlink:href="…/spritemap.svg#icon_search" /> 引用。
+// 供 components/common/mSvgIcon.vue 以 <use xlink:href="…/spritemap.svg#icon_search" /> 引用。
 // dev 與 build 共用 createSpritemap,兩邊產出才不會不一致。
 //
 // ⚠️ 產物需與原套件等價,下列細節是比對其輸出後定出來的,動之前先看懂:
@@ -11,13 +11,13 @@
 //      沒有 viewBox 的檔案直接跳過(無法決定 <use> 的尺寸)。
 //   ② 每個 <symbol> 後面緊跟一個 <use>,width / height 取自 viewBox 的第 3、4 值,
 //      y 為前面所有 height 的累加。這些 <use> 只影響「單獨開啟 spritemap.svg 時
-//      能不能看到圖」,對 SvgIcon 的 #id 引用沒有作用,保留是為了與原套件等價
+//      能不能看到圖」,對 mSvgIcon 的 #id 引用沒有作用,保留是為了與原套件等價
 //      (對應原套件設定的 use: true / view: false)。
 //   ③ 檔案依 localeCompare 排序,確保產物穩定(影響 <use> 的 y 值順序)。
 //   ④ SVGO 設定沿用原套件:preset-default 但停用 removeEmptyAttrs /
 //      moveGroupAttrsToElems / collapseGroups —— 這三個會破壞 symbol 結構。
 //
-// ⚠️ 輸出檔名不帶 hash:SvgIcon 以固定路徑加 ?v=appHash 破快取(見 nuxt.config.ts
+// ⚠️ 輸出檔名不帶 hash:mSvgIcon 以固定路徑加 ?v=appHash 破快取(見 nuxt.config.ts
 //    的 runtimeConfig.public.spritePath / spriteVersion)。加上 hash 會讓該路徑失效。
 
 import { readdir, readFile } from 'node:fs/promises'
@@ -216,8 +216,8 @@ export default function SvgSpritemapDevPlugin(svgDirName = '_svg') {
  *
  * ⚠️ emitFile 的 fileName 是相對於 build.outDir,而 Nuxt 只把 outDir 底下的
  *    assetsDir(`_nuxt/`)搬進 .output/public/。少了這段前綴,檔案會留在
- *    client dist 的頂層而不會出現在產物裡(SvgIcon 取用的路徑是
- *    baseURL + buildAssetsDir + spritePath,見 components/common/SvgIcon.vue)。
+ *    client dist 的頂層而不會出現在產物裡(mSvgIcon 取用的路徑是
+ *    baseURL + buildAssetsDir + spritePath,見 components/common/mSvgIcon.vue)。
  *
  * 只在 client build 產出:server build 那份不會被任何地方取用。
  */

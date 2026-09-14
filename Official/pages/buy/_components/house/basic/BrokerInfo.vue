@@ -41,7 +41,7 @@ const companyInfo = computed(() => {
     {{ broker }}
   </pre> -->
   <div class="flex gap-x-[12px]">
-    <CommonImgSrc
+    <CommonMFigure
       :src="broker.imageUrl ?? 'buy/house/no_image.png'"
       :alt="broker.name ?? '經紀人'"
       :setClass="{
@@ -71,7 +71,7 @@ const companyInfo = computed(() => {
                 v-if="item.href || item.onClick"
               />
               <p class="inline-flex items-center" :class="item.class" v-else>
-                <CommonSvgIcon :icon="item.icon" class="h-[16px] w-[16px] p-[1px]" />
+                <CommonMSvgIcon :icon="item.icon" class="h-[16px] w-[16px] p-[1px]" />
                 <em class="text-[14px]">{{ item.label }}</em>
               </p>
             </li>

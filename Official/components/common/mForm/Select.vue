@@ -327,7 +327,7 @@ onUnmounted(() => {
               {{ placeholder.value }}
             </template>
           </div>
-          <CommonSvgIcon
+          <CommonMSvgIcon
             icon="caret_large_down"
             class="m-form-icon"
             :class="setClass.icon"

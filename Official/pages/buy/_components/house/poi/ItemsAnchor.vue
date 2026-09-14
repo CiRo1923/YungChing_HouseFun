@@ -41,7 +41,7 @@ const onClick = (index) => {
         </small>
         <p class="grow">{{ item.name }}</p>
         <span class="flex shrink-0 items-center justify-center gap-x-[5px]">
-          <CommonSvgIcon icon="icon_walk" class="h-[16px] w-[16px] p-[1px] text-[--gray-999]" />
+          <CommonMSvgIcon icon="icon_walk" class="h-[16px] w-[16px] p-[1px] text-[--gray-999]" />
           <small>{{ item.distanceMeter }} 公尺</small>
         </span>
       </button>

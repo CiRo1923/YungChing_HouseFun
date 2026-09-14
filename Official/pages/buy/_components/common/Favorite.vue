@@ -44,7 +44,7 @@ const onClick = async () => {
       :class="setClass.button.default"
       @click="onClick"
     >
-      <CommonSvgIcon icon="icon_love_o" class="h-[30px] w-[30px] p-[3px]" />
+      <CommonMSvgIcon icon="icon_love_o" class="h-[30px] w-[30px] p-[3px]" />
     </button>
   </div>
 </template>

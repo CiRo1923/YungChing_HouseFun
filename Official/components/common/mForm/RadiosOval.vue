@@ -135,7 +135,7 @@ onSelected()
             @change="onChange(item)"
           />
           <!-- v-if="item[config.schema.value] == selected" 用 == 會有形態別問題 '1' (string) !== 1 (int) -->
-          <CommonSvgIcon
+          <CommonMSvgIcon
             icon="icon_check_solid"
             class="m-form-icon"
             v-if="item[config.schema.value] == selected"

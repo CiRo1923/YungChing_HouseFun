@@ -51,7 +51,7 @@ onUnmounted(() => {
   <ul class="flex items-center gap-x-[10px]">
     <template v-for="(data, idx) in addressInfo">
       <li class="flex items-center" v-if="data.value" :key="`${data.id}_${idx}`">
-        <CommonSvgIcon
+        <CommonMSvgIcon
           :icon="data.icon.name"
           class="p-[1px] tm:h-[16px] tm:w-[16px] p:h-[18px] p:w-[18px]"
           :class="data.icon.color"

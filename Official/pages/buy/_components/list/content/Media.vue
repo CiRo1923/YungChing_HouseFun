@@ -56,7 +56,7 @@ const badgesItems = computed(() => {
         main: 'bottom-[5px] left-[5px]',
       }"
     />
-    <CommonImgSrc
+    <CommonMFigure
       :src="images[0]"
       :alt="`${props.item.title} 物件封面圖`"
       :setClass="{

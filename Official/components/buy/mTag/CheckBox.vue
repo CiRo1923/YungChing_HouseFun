@@ -122,7 +122,7 @@ const onChange = () => {
       @change="onChange"
     />
     <span class="m-tag-assist">
-      <CommonSvgIcon icon="icon_check_solid" class="m-tag-icon" :class="setClass.icon" />
+      <CommonMSvgIcon icon="icon_check_solid" class="m-tag-icon" :class="setClass.icon" />
       <small class="m-tag-assist-label" v-if="config.assist !== null">
         {{ config.assist }}
       </small>

@@ -394,7 +394,7 @@ onUnmounted(() => {
           @click="onButtonClick(item, index)"
         >
           <em class="m-sort-label">{{ item.label }}</em>
-          <CommonSvgIcon icon="caret_large_down" class="m-sort-icon" v-if="item.sort" />
+          <CommonMSvgIcon icon="caret_large_down" class="m-sort-icon" v-if="item.sort" />
         </button>
       </li>
     </ul>
@@ -414,7 +414,7 @@ onUnmounted(() => {
       v-if="mode === 'dropdown'"
     >
       <em class="m-sort-select-label">{{ dropdownLabel }}</em>
-      <CommonSvgIcon icon="caret_large_down" class="m-sort-select-icon" />
+      <CommonMSvgIcon icon="caret_large_down" class="m-sort-select-icon" />
     </button>
   </div>
   <template v-if="mode === 'dropdown'">
@@ -451,7 +451,7 @@ onUnmounted(() => {
                   ]"
                   @click="onDropdownItemClick(item, index)"
                 >
-                  <CommonSvgIcon
+                  <CommonMSvgIcon
                     icon="icon_check_solid"
                     class="m-sort-dropdown-anchor-icon"
                     v-if="activeIndex === index"

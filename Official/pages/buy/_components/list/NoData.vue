@@ -14,7 +14,7 @@ const onRemove = (item) => {
   <div
     class="mx-auto max-w-[725px] items-center py-[30px] m:space-y-[15px] pt:flex pt:gap-x-[35px]"
   >
-    <CommonImgSrc
+    <CommonMFigure
       src="common/no_data.svg"
       :setClass="{
         main: 'mx-auto h-[138px] w-[150px] shrink-0',

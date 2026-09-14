@@ -7,7 +7,7 @@ const { community } = storeToRefs(buyHouse)
   <div
     class="overflow-hidden rounded-[10px] bg-[--gray-f2] m:h-[244px] pt:h-[214px] pt:w-[170px] pt:shrink-0"
   >
-    <CommonImgSrc
+    <CommonMFigure
       :src="community.imageUrl"
       :alt="`${community?.name ?? ''} 社區照片`"
       :setClass="{

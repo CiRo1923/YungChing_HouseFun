@@ -172,6 +172,20 @@ const S = `${SC}/${MODULE_CSS_DIR_NAME}`
 const L = `${CSS_MODULES_DIR}/${PROBE_MODULE}`
 
 /**
+ * 元件目錄底下的分類層,以及分類層底下的那支元件。
+ *
+ * 元件目錄常常先分幾個大類,每一類底下才是元件;集中目錄也跟著分同樣的類。
+ * 「這支樣式屬於哪一個元件」如果只看集中目錄的第一段,取到的會是分類名 ——
+ * 一整批不同元件的樣式都會被判成屬於同一個「元件」,照著搬就全堆進同一個資料夾。
+ *
+ * 名字都帶著探測元件的名字,清除時掃元件目錄第一層就認得出來。
+ */
+const PROBE_GROUP = `${PROBE_MODULE}Group`
+const PROBE_NESTED_MODULE = `${PROBE_MODULE}Chart`
+const GC = `${COMPONENTS_DIR}/${PROBE_GROUP}`
+const GL = `${CSS_MODULES_DIR}/${PROBE_GROUP}`
+
+/**
  * api 規則看的是「檔名對不對得上頁面目錄的資料夾」,所以探測檔要放在 api 目錄底下。
  *
  * 注意:放**子資料夾**而不是直接放在 api 目錄第一層 —— 探測檔名會與正式檔案撞名,
@@ -198,6 +212,16 @@ const PROBE_PAGE_PREFIX = 'selfTest'
  * 不必為它多寫一條清除規則(多寫一條就會有忘了改的一天,而殘留不會報錯)。
  */
 const PROBE_VIEW_GROUP = `${PROBE_PAGE_PREFIX}Group`
+
+/**
+ * 這個名字是不是驗證自己造出來的。
+ *
+ * 兩個地方都要問這件事:結束時要把自己造的東西刪乾淨,而判斷「這個專案自己
+ * 有沒有東西可以比對」時要把它們扣掉。各寫一份的話,新增一種探測名只改了一邊 ——
+ * 不是留下殘留,就是把探測檔當成專案自己的內容拿去比對,兩種都不會報錯。
+ */
+const isProbeName = (name) =>
+  name.includes(PROBE) || name.includes(PROBE_MODULE) || name.startsWith(PROBE_PAGE_PREFIX)
 
 /**
  * 探測用頁面資源資料夾的路徑。
@@ -253,7 +277,7 @@ const D = `${PROJECT_NAME_SCOPE[0]}${PROBE}`
  */
 const PD = `${PROJECT_DOCS_DIR}/${PROBE}`
 
-const PROBE_DIRS = [M, C, SC, L, A, T, `${T}/${ACTIONS_DIR_NAME}`, P, D, PD]
+const PROBE_DIRS = [M, C, SC, L, GC, GL, A, T, `${T}/${ACTIONS_DIR_NAME}`, P, D, PD]
 
 /**
  * 從探測用的頁面檔,走相對路徑指到 api 目錄底下某一支檔案。
@@ -533,6 +557,18 @@ const onPrepare = () => {
     `${viewResourceDir(PROBE_PAGE_PLURAL)}/${PROBE_CLASH_FOLDER_B}/${PROBE_PAGE_FILE}`,
     probePage
   )
+
+  /* 探測用的元件 —— 「這支樣式屬於哪一個元件」那條規則要拿樣式的名字
+     與實際存在的元件比對,所以元件本身要先在那裡。
+
+     元件資料夾裡一定要有 `.vue`:規則就是靠這件事分辨「元件」與
+     「只把元件分類起來的那一層」,只建空資料夾的話兩者長得一模一樣。
+
+     一支放在元件目錄第一層,一支放在分類層底下,兩種擺法各驗得到。 */
+  const probeComponent = `<template>\n  <div class="m-probe"></div>\n</template>\n`
+
+  onCreateIfMissing(`${SC}/Index.vue`, probeComponent)
+  onCreateIfMissing(`${GC}/${PROBE_NESTED_MODULE}/Index.vue`, probeComponent)
 
   onCreateIfMissing(
     `${COLOR_CSS_DIR}/${PROBE_COLOR_FILE}`,
@@ -1142,6 +1178,26 @@ const CSS_CASES = [
     expect: 0,
     rule: 'moduleLocation',
   },
+  {
+    /* 集中目錄先分一層類的擺法:歸屬是分類底下那支元件,不是分類本身。
+       指的是分類的話,那一類底下每一支元件的樣式都會被叫去同一個資料夾,
+       元件與樣式的對應關係反而消失。 */
+    name: 'moduleLocation 分類層底下的樣式屬於那支元件,不是分類',
+    file: `${GL}/${PROBE_NESTED_MODULE}/common.css`,
+    code: `.m-css-self-test-chart {\n  @apply flex;\n}`,
+    expect: 1,
+    rule: 'moduleLocation',
+    keyword: PROBE_NESTED_MODULE,
+  },
+  {
+    /* 分類資料夾本身不是元件(它底下放的是元件,不是畫面)——
+       名字對得上一個分類就搬的話,真正跨元件共用的變數會被塞進某一類裡面。 */
+    name: 'moduleLocation 名字只對得上分類層的樣式留在集中目錄不算違規',
+    file: `${GL}/shared.css`,
+    code: `:root {\n  --probe-group-pc-w: 10px;\n  --probe-group-tablet-w: 10px;\n  --probe-group-mobile-w: 10px;\n}`,
+    expect: 0,
+    rule: 'moduleLocation',
+  },
 
   // ---------- 規則 themeNaming ----------
   //
@@ -1296,6 +1352,16 @@ const RULE_CASES = [
     file: `${M}/probe-name2.js`,
     code: `export const API = import.meta.env.VITE_APP_APIPATH\n`,
     expect: 0,
+  },
+  {
+    /* 名稱連寫起來常常就是某個更長的英文字的一部分(識別字、套件名尤其容易),
+       那種不是在講這個專案。前後緊鄰英數字時一律不算命中 ——
+       不然每一份有那種識別字的檔案都會被報一次,而一條全是誤報的規則會被整條忽略。 */
+    name: 'projectName 名稱只是更長的英文字的一部分時不誤報',
+    file: `${M}/probe-name-boundary.js`,
+    code: `export const plugin = 'in${PROBE_PROJECT_SLUG}Functions'\n`,
+    expect: 0,
+    rule: 'projectName',
   },
 
   /* 目錄擺法與名稱是同一件事的兩面 —— 兩者都只在這個專案成立,
@@ -2703,6 +2769,22 @@ const HUE_SOURCE_CASES = [
  * 而換專案時那一整片「對不上資料夾」就沒有東西指出真正的原因。
  */
 const onCheckViewDepth = () => {
+  /* 偵測是拿這個專案實際的頁面擺法算的,所以頁面目錄裡要先有頁面。
+     一個剛裝上這套工具、還沒有任何頁面的專案,那裡只剩驗證自己建的探測資料夾 ——
+     算出來的是探測檔的形狀,與設定對不上是正常的。那時失敗的訊息會看起來像
+     偵測壞了,而真正的情況只是還沒有東西可以比對。 */
+  const viewsAbs = path.join(root, ...VIEWS_DIR.split('/'))
+  const ownPages = fs.existsSync(viewsAbs)
+    ? fs
+        .readdirSync(viewsAbs, { withFileTypes: true })
+        .filter((item) => item.isDirectory() && !isProbeName(item.name))
+    : []
+
+  if (!ownPages.length) {
+    skipped.push({ name: '頁面資源的層級偵測得出來,而且與設定一致', need: 'ownViewPages' })
+    return
+  }
+
   const detected = detectViewResourceDepth(root)
 
   report(
@@ -3534,8 +3616,6 @@ const cleanup = () => {
 
      所以每一個「案例會寫檔的目錄」都要掃過去認名字。逐一列出檔名的話,
      以後新增一支就要記得回來補一行,忘了補同樣沒有徵兆。 */
-  const isProbeName = (name) => name.includes(PROBE) || name.includes(PROBE_MODULE)
-
   const sweeps = [
     { dir: root, match: isProbeName },
     { dir: path.join(root, ...CSS_MODULES_DIR.split('/')), match: isProbeName },
@@ -3544,10 +3624,7 @@ const cleanup = () => {
       dir: path.join(root, ...COLOR_CSS_DIR.split('/')),
       match: (name) => name.startsWith(PROBE_COLOR_PREFIX),
     },
-    {
-      dir: path.join(root, ...VIEWS_DIR.split('/')),
-      match: (name) => name.startsWith(PROBE_PAGE_PREFIX),
-    },
+    { dir: path.join(root, ...VIEWS_DIR.split('/')), match: isProbeName },
   ]
 
   for (const { dir, match } of sweeps) {
@@ -3600,6 +3677,9 @@ const SKIP_REASON = {
   sourceProject:
     '這個專案不是規範工具的來源(SOURCE_PROJECT_NAME 與 PROJECT_NAMES 對不上),' +
     '指紋清單是跟著規則複製過來的,對不上由規則 ruleTampered 在檢查時報。',
+  ownViewPages:
+    '這個專案的頁面目錄裡還沒有自己的頁面(只有驗證自己建的探測資料夾),' +
+    '「頁面資源在第幾層」是照實際擺法偵測的,沒有頁面可比對時算出來的是探測檔的形狀。',
   projectDirValues:
     '這個專案的目錄設定沒有一個是多段的(例如頁面直接叫 pages),' +
     '而「寫死這個專案的目錄」那條刻意只抓多段值 —— 單段的名字在中文敘述裡到處都是,' +

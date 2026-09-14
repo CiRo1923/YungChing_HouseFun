@@ -1,4 +1,4 @@
-/* mFigure(components/common/ImgSrc.vue)版型。
+/* mFigure(components/common/mFigure.vue)版型。
    可調的尺寸與顏色走 var(),值定義在 variables.css;純結構性的置中、transition 直接寫。 */
 
 .m-figure {

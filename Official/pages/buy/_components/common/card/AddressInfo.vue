@@ -37,7 +37,7 @@ const items = computed(() => {
     <template v-for="(data, index) in items" :key="`${data.id}_${index}`">
       <li v-if="data.label">
         <p class="flex items-center gap-x-[5px] tracking-wider" v-if="!data.to">
-          <CommonSvgIcon
+          <CommonMSvgIcon
             :icon="data.icon"
             class="h-[14px] w-[14px] shrink-0 p-[1px] text-[--gray-999]"
           />

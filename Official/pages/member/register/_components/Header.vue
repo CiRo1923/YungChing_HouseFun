@@ -52,7 +52,7 @@ const setClass = computed(() => {
       </header>
       <slot />
     </div>
-    <CommonImgSrc
+    <CommonMFigure
       :src="config.image"
       alt=""
       :setClass="{

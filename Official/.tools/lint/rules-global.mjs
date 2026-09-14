@@ -70,11 +70,21 @@ import { fingerprintDiff } from './checksum.mjs'
  * 舉了就等於把某一個專案的名字寫進規則,而那正是這條規則在擋的事。
  *
  * 名稱以外的字元會被跳脫 —— 名字裡有 `.` 或 `+` 的專案才不會變成萬用字元。
+ *
+ * **前後要接得上邊界**,名稱剛好藏在一個更長的英文字裡時才不會被當成專案名 ——
+ * 一個兩段的名字連寫起來,常常就是某個常見英文字的一部分,那種誤報每份檔案都來一次。
+ *
+ * 邊界不用 `\b`:那個記號要求兩側一邊是英數、一邊不是,而中文字兩側都不是英數 ——
+ * 名稱是中文的專案,寫在中文句子裡永遠不成立,整條規則會靜靜地不再抓到任何東西。
+ * 改成只擋「緊鄰英數字」:中文句子裡的名稱照樣抓得到,英文字中間的那一段則放行。
  */
 const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
 const patternOf = (name) =>
-  new RegExp(name.trim().split(/\s+/).map(escapeRe).join('[\\s_-]?'), 'i')
+  new RegExp(
+    `(?<![A-Za-z0-9])${name.trim().split(/\s+/).map(escapeRe).join('[\\s_-]?')}(?![A-Za-z0-9])`,
+    'i'
+  )
 
 const PROJECT_NAME_RE = PROJECT_NAMES.map(patternOf)
 

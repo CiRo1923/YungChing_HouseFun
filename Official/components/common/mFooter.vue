@@ -136,7 +136,7 @@ onUnmounted(() => {
         <ul class="m-footer-stores">
           <li v-for="(item, index) in stores" :key="`${item.id}_${index}`">
             <a :href="item.href" class="m-footer-store-anchor" target="_blank" rel="noopener">
-              <CommonImgSrc
+              <CommonMFigure
                 :src="item.src"
                 :alt="item.alt"
                 :setClass="{
@@ -170,7 +170,7 @@ onUnmounted(() => {
             <ul class="m-footer-links-items">
               <li v-for="(item, idx) in link" :key="`links_${link.label}_${idx}_${index}`">
                 <a :href="item.href" class="m-footer-link" target="_blank" rel="noopener">
-                  <CommonSvgIcon :icon="item.icon" class="m-footer-link-icon" />
+                  <CommonMSvgIcon :icon="item.icon" class="m-footer-link-icon" />
                   <em>{{ item.label }}</em>
                 </a>
               </li>

@@ -295,7 +295,7 @@ const onChange = async () => {
             v-else
           />
 
-          <CommonSvgIcon icon="icon_check_solid" class="m-form-icon" :class="setClass.icon" />
+          <CommonMSvgIcon icon="icon_check_solid" class="m-form-icon" :class="setClass.icon" />
 
           <slot>
             <em class="m-form-label" :class="setClass.label" v-if="config.label">

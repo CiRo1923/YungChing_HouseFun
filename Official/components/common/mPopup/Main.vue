@@ -137,7 +137,7 @@ onUnmounted(() => {
           <div class="m-popup-header" :class="setClass.header" v-if="title || $slots.headerTools">
             <slot name="header">
               <p class="m-popup-title" :class="setClass.headerTitle">
-                <CommonSvgIcon
+                <CommonMSvgIcon
                   :icon="icon"
                   class="m-popup-icon"
                   :class="[setClass.icon, { '--defaule-color': !setClass.icon }]"
@@ -153,7 +153,7 @@ onUnmounted(() => {
               @click="onExistClose"
               v-if="hasExistClose"
             >
-              <CommonSvgIcon icon="icon_xmark" class="m-popup-anchor-close-icon" />
+              <CommonMSvgIcon icon="icon_xmark" class="m-popup-anchor-close-icon" />
             </button>
 
             <div class="m-popup-tools" :class="setClass.headerTools" v-if="$slots.headerTools">

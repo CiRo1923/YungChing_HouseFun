@@ -76,7 +76,7 @@ onUnmounted(() => {
       class="flex items-center gap-x-[3px] text-[12px] text-[--orange-f74c]"
       v-if="latestMessageTime"
     >
-      <CommonSvgIcon icon="icon_dialogue" class="h-[16px] w-[16px] shrink-0 p-[2px]" />
+      <CommonMSvgIcon icon="icon_dialogue" class="h-[16px] w-[16px] shrink-0 p-[2px]" />
       {{ latestMessageTime }} 分鐘前已留言
     </li>
   </ul>

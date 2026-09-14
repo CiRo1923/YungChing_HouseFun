@@ -108,7 +108,7 @@ onUnmounted(() => {
           :disabled="isPrevDisabled"
           @click="onPrev"
         >
-          <SvgIcon class="m-swiper-ctrl-icon" :icon="config.icon.prev" />
+          <mSvgIcon class="m-swiper-ctrl-icon" :icon="config.icon.prev" />
         </button>
       </li>
       <li>
@@ -118,7 +118,7 @@ onUnmounted(() => {
           :disabled="isNextDisabled"
           @click="onNext"
         >
-          <SvgIcon class="m-swiper-ctrl-icon" :icon="config.icon.next" />
+          <mSvgIcon class="m-swiper-ctrl-icon" :icon="config.icon.next" />
         </button>
       </li>
     </ul>

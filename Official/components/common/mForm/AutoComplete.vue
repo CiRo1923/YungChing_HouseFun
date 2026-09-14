@@ -452,9 +452,9 @@ onUnmounted(() => {
             @click="onClear"
             v-if="config.isExistClose && !config.isDisabled"
           >
-            <CommonSvgIcon icon="icon_xmark" class="m-form-clear-icon" />
+            <CommonMSvgIcon icon="icon_xmark" class="m-form-clear-icon" />
           </button>
-          <CommonSvgIcon icon="icon_search" class="m-form-autocomplete-icon" />
+          <CommonMSvgIcon icon="icon_search" class="m-form-autocomplete-icon" />
         </div>
       </div>
     </Field>
