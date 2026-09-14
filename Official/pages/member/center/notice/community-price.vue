@@ -1,5 +1,6 @@
 <script setup>
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
+const { onApiGetMemberNotificationsSummary } = useMemberCenterActions()
 const { onApiErrorServerToClient } = usePopupActions()
 
 definePageMeta({
@@ -9,7 +10,7 @@ definePageMeta({
   middleware: [() => {}],
 })
 
-await onWithLoadingAll([])
+await onWithLoadingAll([onApiGetMemberNotificationsSummary()])
 
 onUseMeta({
   title: '會員中心 | 好房 HouseFun',

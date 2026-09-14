@@ -6,11 +6,11 @@ const colorHref = getChannelColorHref('member')
 
 const common = useCommonStore()
 const { isLoading } = storeToRefs(common)
-const { onRestoreAuthToken } = useMemberAuthProjectActions()
 const memberAuthProject = useMemberAuthProjectStore()
-const { userData } = storeToRefs(memberAuthProject)
 const memberCenter = useMemberCenterStore()
+const { userData } = storeToRefs(memberAuthProject)
 const { access } = storeToRefs(memberCenter)
+const { onRestoreAuthToken } = useMemberAuthProjectActions()
 const { onApiAuthMe, onApiAuthLogout, onRestoreAccessData } = useMemberProjectActions()
 
 // 掛載 member 頻道色票(同步 composable 一律放在 await 之前)
@@ -28,10 +28,15 @@ const onInit = async () => {
   await onRestoreAuthToken()
   await onRestoreAccessData()
 
-  // userData 已經有值就不重打:登入頁換完 token 後自己取過一次
+  // 這個服務的會員資料已經有了就不重打:登入頁換完 token 後自己取過一次
   // (pages/member/login/index.vue),導頁進來會再走一次 onInit,
   // 沒有這道閘 me 會被打兩次 —— 失敗時連跳兩個錯誤 alert。
-  if (access.value.data && !userData.value) {
+  //
+  // 判準看 memberId 而不是 userData 本身:userData 是 buy 與會員中心共用的一份,
+  // 而 memberId 只有 member BFF 的 auth/me 會給。從 buy 頻道進來時 userData 已經
+  // 有值(buy 的形狀,沒有 memberId),用「有沒有值」當判準會把這支一起擋掉,
+  // 帶不出 notifications 那幾支必填的 X-Member-Id。
+  if (access.value.data && !userData.value?.memberId) {
     await onApiAuthMe()
   }
 }

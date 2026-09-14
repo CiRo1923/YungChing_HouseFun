@@ -7,6 +7,11 @@ export const useMemberCenterStore = defineStore('memberCenter', () => {
   const access = ref({
     data: null,
   })
+  // 通知總覽五個分頁的未讀數與保留規則。五頁共用同一份,不屬於其中任何一頁,
+  // 所以層名不對應頁面 —— 各分頁自己的清單另外分層。
+  const noticeSummary = ref({
+    data: null,
+  })
   // 通知總覽的五個分頁,每一個都是獨立頁面(tab 是 router-link)。
   const noticeTabs = readonly([
     {
@@ -192,6 +197,7 @@ export const useMemberCenterStore = defineStore('memberCenter', () => {
   return {
     access,
     navs,
+    noticeSummary,
     noticeTabs,
   }
 })
