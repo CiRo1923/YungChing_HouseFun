@@ -1,4 +1,4 @@
-import { apiAuthRegisterVerificationCode, apiAuthRegister } from '@js/_api/memberAuth/register.js'
+import { apiPostMemberAuthRegisterVerificationCode, apiPostMemberAuthRegister } from '@js/_api/memberAuth/register.js'
 
 export default () => {
   const memberRegister = useMemberAuthRegisterStore()
@@ -7,7 +7,7 @@ export default () => {
 
   const onApiAuthRegisterVerificationCode = async (channel) => {
     const { countdownData, apiData } = type.value
-    const { config, status, data } = await apiAuthRegisterVerificationCode({
+    const { config, status, data } = await apiPostMemberAuthRegisterVerificationCode({
       mobilePhone: apiData.mobilePhone,
       channel,
     })
@@ -25,7 +25,7 @@ export default () => {
   }
 
   const onApiAuthRegister = async (channel) => {
-    const { config, status, data } = await apiAuthRegister({
+    const { config, status, data } = await apiPostMemberAuthRegister({
       channel,
       ...type.value.apiData,
     })

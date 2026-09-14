@@ -1,7 +1,6 @@
-import { version, fetchApi } from '@js/_api/buy/.config.js'
+import { fetchApi } from '@js/_api/buy/.config.js'
 
-export const apiBuyHouse = async (data) =>
-  await fetchApi.get(`api/${version}/buy/house/{hfid}`, data)
+export const apiGetBuyHouseHfid = async (data) => await fetchApi.get(`buy/house/{hfid}`, data)
 
-export const apiBuyHousePoi = async (data) =>
-  await fetchApi.get(`api/${version}/buy/house/{hfid}/poi`, data)
+export const apiGetBuyHouseHfidPoi = async (data) =>
+  await fetchApi.get(`buy/house/{hfid}/poi`, data)

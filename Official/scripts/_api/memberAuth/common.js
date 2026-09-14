@@ -1,7 +1,6 @@
-import { version, fetchApi } from '@js/_api/memberAuth/.config.js'
+import { fetchApi } from '@js/_api/memberAuth/.config.js'
 
-export const apiAuthToken = async (data) =>
-  await fetchApi.post(`api/${version}/member/auth/token`, data)
+export const apiPostMemberAuthToken = async (data) => await fetchApi.post(`member/auth/token`, data)
 
-export const apiAuthHandoffToken = async (data) =>
-  await fetchApi.get(`api/${version}/member/auth/handoff/token`, data)
+export const apiGetMemberAuthHandoffToken = async (data) =>
+  await fetchApi.get(`member/auth/handoff/token`, data)

@@ -1,4 +1,4 @@
-import { apiAuthPasswordResetRequest, apiAuthPasswordResetConfirm } from '@js/_api/memberAuth/forget.js'
+import { apiPostMemberAuthPasswordResetRequest, apiPostMemberAuthPasswordResetConfirm } from '@js/_api/memberAuth/forget.js'
 import { enCrypto, deCrypto } from '@js/.crypto/index.js'
 import { FORGETRESET, FORGETCOMPLETE } from '@js/_storage.js'
 
@@ -17,7 +17,7 @@ export default () => {
   // 發送驗證碼。管道由呼叫端指定(目前一律 sms,見 store 的 verificationChannels)。
   const onApiAuthPasswordResetRequest = async (verificationChannel) => {
     const { mobilePhone } = verify.value.apiData
-    const { config, status, data } = await apiAuthPasswordResetRequest({
+    const { config, status, data } = await apiPostMemberAuthPasswordResetRequest({
       mobilePhone,
       verificationChannel,
     })
@@ -92,7 +92,7 @@ export default () => {
   const onApiAuthPasswordResetConfirm = async () => {
     const { mobilePhone, verificationCode, resetToken } = verify.value.apiData
     const { newPassword, confirmPassword } = resetPassword.value.apiData
-    const { config, status, data } = await apiAuthPasswordResetConfirm({
+    const { config, status, data } = await apiPostMemberAuthPasswordResetConfirm({
       mobilePhone,
       verificationCode,
       resetToken,

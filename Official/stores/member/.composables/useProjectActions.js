@@ -1,4 +1,4 @@
-import { apiAuthTokenExchange, apiAuthMe, apiAuthLogout } from '@js/_api/member/common.js'
+import { apiPostAuthTokenExchange, apiGetAuthMe, apiPostAuthLogout } from '@js/_api/member/common.js'
 
 import { onFormatDate } from '@js/_prototype.js'
 import { MEMBERACCESSDATA } from '@js/_storage.js'
@@ -20,7 +20,7 @@ export default () => {
   const { onApiError } = usePopupActions()
 
   const onApiAuthTokenExchange = async () => {
-    const { config, status, data } = await apiAuthTokenExchange({
+    const { config, status, data } = await apiPostAuthTokenExchange({
       encryptedToken: authToken.value.longToken,
     })
 
@@ -37,7 +37,7 @@ export default () => {
   // 會員資料寫回 memberAuth 的 userData:那是「誰登入了」的單一來源,
   // header 的登入狀態與 buy 頻道都讀它,不另外複製一份。
   const onApiAuthMe = async () => {
-    const { config, status, data } = await apiAuthMe()
+    const { config, status, data } = await apiGetAuthMe()
 
     if (status === 200) {
       userData.value = data
@@ -50,7 +50,7 @@ export default () => {
 
   // 登出成功後把登入狀態清乾淨:store 與 cookie 都要,否則重整又會被還原回來。
   const onApiAuthLogout = async () => {
-    const { config, status, data } = await apiAuthLogout()
+    const { config, status, data } = await apiPostAuthLogout()
 
     if (status === 200) {
       onMemberAuthReset()

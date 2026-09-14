@@ -1,5 +1,5 @@
 import { useBuyListStore } from '@stores/buy/list.js'
-import { apiRegion, apiMrt } from '@js/_api/buy/common.js'
+import { apiGetRegion, apiGetMrt } from '@js/_api/buy/common.js'
 
 export default defineNuxtRouteMiddleware(async (to) => {
   const pinia = useNuxtApp().$pinia
@@ -9,13 +9,13 @@ export default defineNuxtRouteMiddleware(async (to) => {
   const defaultListPath = `/buy/${region.value.defaultIDs}_region/?pg=1`
   const defaultMrtPath = `/buy/${mrt.value.defaultIDs}_mrt/?pg=1`
 
-  // 取得 region 選項(縣市 + 區域);未載入時打 apiRegion 並寫回 store,
+  // 取得 region 選項(縣市 + 區域);未載入時打 apiGetRegion 並寫回 store,
   // 讓頁面的 onApiRegion(if region.options 直接略過)不必重打。API 失敗回 null。
   const ensureRegionOptions = async () => {
     if (region.value.options) return region.value.options
 
     try {
-      const { status, data } = await apiRegion()
+      const { status, data } = await apiGetRegion()
 
       if (status !== 200) return null
 
@@ -31,12 +31,12 @@ export default defineNuxtRouteMiddleware(async (to) => {
     }
   }
 
-  // 取得 mrt 選項(運營商 / 線路 / 站點);未載入時打 apiMrt 並寫回 store(頁面 onApiMrt 可略過)。
+  // 取得 mrt 選項(運營商 / 線路 / 站點);未載入時打 apiGetMrt 並寫回 store(頁面 onApiMrt 可略過)。
   const ensureMrtOptions = async () => {
     if (mrt.value.options) return mrt.value.options
 
     try {
-      const { status, data } = await apiMrt()
+      const { status, data } = await apiGetMrt()
 
       if (status !== 200) return null
 
@@ -91,7 +91,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     )
   }
 
-  // region 代碼驗證:必須為數字,且存在於 apiRegion(縣市 / 區域 id);否則回預設 01。
+  // region 代碼驗證:必須為數字,且存在於 apiGetRegion(縣市 / 區域 id);否則回預設 01。
   // 擋掉 abc_region(非數字 → 後端當無篩選、全站曝光)與 99_region(數字但無此縣市 → 顯示 null)。
   const regionFilter = filters.find((item) => /_region$/.test(item))
 
@@ -124,7 +124,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     }
   }
 
-  // mrt 代碼驗證:必須為數字,且存在於 apiMrt(運營商 / 線路 / 站點 id);否則回預設線路。
+  // mrt 代碼驗證:必須為數字,且存在於 apiGetMrt(運營商 / 線路 / 站點 id);否則回預設線路。
   const mrtFilter = filters.find((item) => /_mrt$/.test(item))
 
   if (mrtFilter) {

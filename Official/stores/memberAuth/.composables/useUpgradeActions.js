@@ -1,11 +1,11 @@
 import {
-  apiAuthEmailUpgradeVerificationCode,
-  apiAuthEmailUpgradeVerificationCodeVerify,
-  apiAuthEmailUpgradeMobileCheck,
-  apiAuthEmailUpgradeMobileVerificationCode,
-  apiAuthEmailUpgradeMobileVerificationCodeVerify,
-  apiAuthEmailUpgradeBind,
-  apiAuthEmailUpgradeMerge,
+  apiPostMemberAuthEmailUpgradeEmailVerificationCode,
+  apiPostMemberAuthEmailUpgradeEmailVerificationCodeVerify,
+  apiPostMemberAuthEmailUpgradeMobileCheck,
+  apiPostMemberAuthEmailUpgradeMobileVerificationCode,
+  apiPostMemberAuthEmailUpgradeMobileVerificationCodeVerify,
+  apiPostMemberAuthEmailUpgradeBind,
+  apiPostMemberAuthEmailUpgradeMerge,
 } from '@js/_api/memberAuth/upgrade.js'
 import { enCrypto, deCrypto } from '@js/.crypto/index.js'
 import {
@@ -28,7 +28,7 @@ export default () => {
 
   const onApiAuthEmailUpgradeVerificationCode = async () => {
     const { apiData } = email.value
-    const { config, status, data } = await apiAuthEmailUpgradeVerificationCode(apiData)
+    const { config, status, data } = await apiPostMemberAuthEmailUpgradeEmailVerificationCode(apiData)
 
     email.value.apiResult = null
 
@@ -103,7 +103,7 @@ export default () => {
   }
   const onApiAuthEmailUpgradeVerificationCodeVerify = async () => {
     const { apiData } = emailVerify.value
-    const { config, status, data } = await apiAuthEmailUpgradeVerificationCodeVerify(apiData)
+    const { config, status, data } = await apiPostMemberAuthEmailUpgradeEmailVerificationCodeVerify(apiData)
 
     emailVerify.value.apiResult = null
 
@@ -142,7 +142,7 @@ export default () => {
     if (!onCheckUpgradeToken()) return memberUpgrade.apiTokenInvalid
 
     const { apiData } = phone.value
-    const { config, status, data } = await apiAuthEmailUpgradeMobileCheck(
+    const { config, status, data } = await apiPostMemberAuthEmailUpgradeMobileCheck(
       apiData,
       onUpgradeTokenConfig()
     )
@@ -184,7 +184,7 @@ export default () => {
     if (!onCheckUpgradeToken()) return memberUpgrade.apiTokenInvalid
 
     const { apiData } = phone.value
-    const { config, status, data } = await apiAuthEmailUpgradeMobileVerificationCode(
+    const { config, status, data } = await apiPostMemberAuthEmailUpgradeMobileVerificationCode(
       apiData,
       onUpgradeTokenConfig()
     )
@@ -251,7 +251,7 @@ export default () => {
     if (!onCheckUpgradeToken()) return memberUpgrade.apiTokenInvalid
 
     const { apiData } = phoneVerify.value
-    const { config, status, data } = await apiAuthEmailUpgradeMobileVerificationCodeVerify(
+    const { config, status, data } = await apiPostMemberAuthEmailUpgradeMobileVerificationCodeVerify(
       apiData,
       onUpgradeTokenConfig()
     )
@@ -294,7 +294,7 @@ export default () => {
     if (!onCheckUpgradeToken()) return memberUpgrade.apiTokenInvalid
 
     const { apiData } = bind.value
-    const { config, status, data } = await apiAuthEmailUpgradeBind(apiData, onUpgradeTokenConfig())
+    const { config, status, data } = await apiPostMemberAuthEmailUpgradeBind(apiData, onUpgradeTokenConfig())
 
     if (status === 200) {
       onUpgradeCompleted(data)
@@ -324,7 +324,7 @@ export default () => {
     if (!onCheckUpgradeToken()) return memberUpgrade.apiTokenInvalid
 
     const { apiData } = merge.value
-    const { config, status, data } = await apiAuthEmailUpgradeMerge(apiData, onUpgradeTokenConfig())
+    const { config, status, data } = await apiPostMemberAuthEmailUpgradeMerge(apiData, onUpgradeTokenConfig())
 
     if (status === 200) {
       onUpgradeCompleted(data)

@@ -1,5 +1,5 @@
-import { apiRegion, apiMrt } from '@js/_api/buy/common.js'
-import { apiBuyList, apiBuyListFocus, apiBuySuggest } from '@js/_api/buy/list.js'
+import { apiGetRegion, apiGetMrt } from '@js/_api/buy/common.js'
+import { apiGetBuyList, apiGetBuyListFocus, apiGetBuySuggest } from '@js/_api/buy/list.js'
 import { onResolveByDevice } from '@js/_projectPrototype.js'
 
 export default () => {
@@ -238,7 +238,7 @@ export default () => {
   const onApiRegion = async () => {
     if (region.value.options) return false
 
-    const { config, status, data } = await apiRegion()
+    const { config, status, data } = await apiGetRegion()
 
     if (status === 200) {
       const { items } = data
@@ -258,7 +258,7 @@ export default () => {
   const onApiMrt = async () => {
     if (mrt.value.options) return false
 
-    const { config, status, data } = await apiMrt()
+    const { config, status, data } = await apiGetMrt()
 
     if (status === 200) {
       const { items } = data
@@ -279,7 +279,7 @@ export default () => {
   }
 
   const onApiBuyListFocus = async () => {
-    const { config, status, data } = await apiBuyListFocus({
+    const { config, status, data } = await apiGetBuyListFocus({
       purpose: content.value.apiData.purpose,
       ...(isChannelRegion.value ? { region: region.value.ids || region.value.all } : {}),
       ...(isChannelMrt.value ? { mrt: mrt.value.ids || mrt.value.all } : {}),
@@ -297,7 +297,7 @@ export default () => {
 
   const onApiBuyList = async (targetRoute = route) => {
     const { query } = targetRoute
-    const { config, status, data } = await apiBuyList({
+    const { config, status, data } = await apiGetBuyList({
       ...(isChannelRegion.value ? { region: region.value.ids || region.value.all } : {}),
       ...(isChannelMrt.value ? { mrt: mrt.value.ids || mrt.value.all } : {}),
       ...content.value.apiData,
@@ -328,7 +328,7 @@ export default () => {
 
   const onApiBuySuggest = async () => {
     const { kw, region } = content.value.apiData
-    const { config, status, data } = await apiBuySuggest({
+    const { config, status, data } = await apiGetBuySuggest({
       kw,
       region,
       limit: null,

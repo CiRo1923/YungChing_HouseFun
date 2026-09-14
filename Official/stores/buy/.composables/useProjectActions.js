@@ -1,10 +1,10 @@
 import {
-  apiAuthTokenExchange,
-  apiAuthMe,
-  apiAuthLogout,
-  apiMessages,
-  apiMessagesVerifyCode,
-  apiMessagesResendCode,
+  apiPostBuyAuthTokenExchange,
+  apiGetBuyAuthMe,
+  apiPostBuyAuthLogout,
+  apiPostBuyMessages,
+  apiPostBuyMessagesVerifyCode,
+  apiPostBuyMessagesResendCode,
 } from '@js/_api/buy/common.js'
 
 import { onFormatDate } from '@js/_prototype.js'
@@ -52,7 +52,7 @@ export default () => {
   const { onLogin } = useBuyPopupActions()
 
   const onApiAuthTokenExchange = async () => {
-    const { config, status, data } = await apiAuthTokenExchange({
+    const { config, status, data } = await apiPostBuyAuthTokenExchange({
       encryptedToken: authToken.value.longToken,
     })
 
@@ -66,7 +66,7 @@ export default () => {
     return { config, status, data }
   }
   const onApiAuthMe = async () => {
-    const { config, status, data } = await apiAuthMe()
+    const { config, status, data } = await apiGetBuyAuthMe()
 
     if (status === 200) {
       userData.value = data
@@ -77,7 +77,7 @@ export default () => {
     return { config, status, data }
   }
   const onApiAuthLogout = async () => {
-    const { config, status, data } = await apiAuthLogout()
+    const { config, status, data } = await apiPostBuyAuthLogout()
 
     if (status === 200) {
       onReset()
@@ -157,7 +157,7 @@ export default () => {
   }
 
   const onApiMessages = async (isReplaceMessage) => {
-    const { config, status, data } = await apiMessages(message.value.apiData)
+    const { config, status, data } = await apiPostBuyMessages(message.value.apiData)
 
     if (status === 200 || status === 201) {
       const { verificationToken, developmentVerificationCode, verificationExpiresAt } = data
@@ -176,7 +176,7 @@ export default () => {
     return { config, status, data }
   }
   const onApiMessagesVerifyCode = async () => {
-    const { config, status, data } = await apiMessagesVerifyCode(apiVerifyCodeData.value)
+    const { config, status, data } = await apiPostBuyMessagesVerifyCode(apiVerifyCodeData.value)
 
     if (status === 200) {
       message.value.data = data // 如果沒有驗證過會需要驗證驗證完會回傳棉花糖資訊
@@ -187,7 +187,7 @@ export default () => {
     return { config, status, data }
   }
   const onApiMessagesResendCode = async () => {
-    const { config, status, data } = await apiMessagesResendCode({
+    const { config, status, data } = await apiPostBuyMessagesResendCode({
       verificationToken: apiVerifyCodeData.value.verificationToken,
     })
 

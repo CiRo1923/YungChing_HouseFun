@@ -1,4 +1,4 @@
-import { apiBuyHouse, apiBuyHousePoi } from '@js/_api/buy/house.js'
+import { apiGetBuyHouseHfid, apiGetBuyHouseHfidPoi } from '@js/_api/buy/house.js'
 
 export default () => {
   const buyHouseStores = useBuyHouseStore()
@@ -7,7 +7,7 @@ export default () => {
   const route = useRoute()
   const onApiBuyHouse = async () => {
     const { params } = route
-    const { config, status, data } = await apiBuyHouse({
+    const { config, status, data } = await apiGetBuyHouseHfid({
       hfid: params.hfid,
     })
 
@@ -49,7 +49,7 @@ export default () => {
   }
   const onApiBuyHousePoi = async () => {
     const { params } = route
-    const { config, status, data } = await apiBuyHousePoi({
+    const { config, status, data } = await apiGetBuyHouseHfidPoi({
       hfid: params.hfid,
     })
 

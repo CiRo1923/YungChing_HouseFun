@@ -1,4 +1,4 @@
-import { apiAuthToken, apiAuthHandoffToken } from '@js/_api/memberAuth/common.js'
+import { apiPostMemberAuthToken, apiGetMemberAuthHandoffToken } from '@js/_api/memberAuth/common.js'
 
 import { onFormatDate } from '@js/_prototype.js'
 import { AUTHTOKEN } from '@js/_storage.js'
@@ -15,7 +15,7 @@ export default () => {
   const { onApiError } = usePopupActions()
 
   const onApiAuthToken = async ({ channel, deviceId, rememberMe = true }) => {
-    const { config, status, data } = await apiAuthToken({
+    const { config, status, data } = await apiPostMemberAuthToken({
       channel,
       deviceId,
       rememberMe,
@@ -33,7 +33,7 @@ export default () => {
   }
 
   const onApiAuthHandoffToken = async (channel) => {
-    const { config, status, data } = await apiAuthHandoffToken({
+    const { config, status, data } = await apiGetMemberAuthHandoffToken({
       channel,
     })
 
@@ -77,7 +77,7 @@ export default () => {
   const onGetAuthTokenCookie = async () => {
     const raw = onAuthTokenCookie().value
 
-    console.log(raw)
+    // console.log(raw)
 
     if (!raw) return null
 
@@ -108,7 +108,7 @@ export default () => {
     const cached = await onGetAuthTokenCookie()
     if (cached) authToken.value = cached
 
-    console.log(cached)
+    // console.log(cached)
 
     return cached
   }

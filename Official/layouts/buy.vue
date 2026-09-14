@@ -1,6 +1,6 @@
 <script setup>
 import { getChannelColorHref } from '@js/runtime/channelColor.js'
-import { apiBuyHouse } from '@js/_api/buy/house.js'
+import { apiGetBuyHouseHfid } from '@js/_api/buy/house.js'
 
 // buy 頻道色票的 hash URL(集中在 _channelColor 用 ?url 引用)。
 const colorHref = getChannelColorHref('buy')
@@ -64,7 +64,7 @@ if (import.meta.server) {
 
   try {
     if (route.name === 'buy-house-hfid') {
-      const { status, data } = await apiBuyHouse({ hfid: route.params.hfid })
+      const { status, data } = await apiGetBuyHouseHfid({ hfid: route.params.hfid })
 
       if (status === 200) onSetSeo(data.seo)
     } else if (route.name === 'buy-list-filters') {
