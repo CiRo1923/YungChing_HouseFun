@@ -15,15 +15,19 @@ import { CHECKSUM_FILE, recordedFingerprints } from './checksum.mjs'
 import { isColorNamingConfigFit, isHueSourceFit } from './color-order.mjs'
 import { hasBreakpointVars, hasResponsiveStyles } from './lint-core.mjs'
 import { IS_SOURCE_PROJECT } from './rules-global.mjs'
-import { detectViewResourceDepth } from './shared.mjs'
+import { detectViewResourceDepth, isModuleCss, isModuleStyle, listFiles, toRel } from './shared.mjs'
 import {
   API_DIR,
   BREAKPOINTS,
+  BREAKPOINT_SCREENS,
   BUILD_CONFIG_FILES,
   COLOR_CSS_DIR,
   COMPONENTS_DIR,
+  COMPONENT_DIRS,
+  MODULE_CSS_DIR_NAME,
   CSS_MODULES_DIR,
   PARALLEL_AWAIT_HELPER,
+  PLAIN_TEXT_EXCLUDED_DIRS,
   STORE_DIR,
   STYLE_CONFIG_FILES,
   VIEW_RESOURCE_DEPTH,
@@ -36,6 +40,19 @@ const hasDir = (root, rel) => {
 }
 
 const firstExistingFile = (root, names) => names.find((n) => fs.existsSync(path.join(root, n))) ?? null
+
+/**
+ * 專案裡所有的 css(相對路徑)。
+ *
+ * 模組樣式那幾條的前提是「有沒有那種檔案」,不是「目錄在不在」——
+ * 元件目錄在任何專案都存在,拿它當條件等於永遠成立,
+ * 而那幾條其實一個檔案都掃不到,結果卻顯示通過。
+ */
+const cssFilesOf = (root) =>
+  [...COMPONENT_DIRS, CSS_MODULES_DIR]
+    .flatMap((dir) => listFiles(root, dir))
+    .map((abs) => toRel(root, abs))
+    .filter((rel) => rel.endsWith('.css'))
 
 /**
  * 每一項前提:缺了它,rules 列出的那幾條規則就完全不會有結果。
@@ -69,7 +86,7 @@ const REQUIREMENTS = [
   },
   {
     label: '色票目錄',
-    rules: ['color', 'colorFile'],
+    rules: ['color', 'colorFile', 'colorSort'],
     check: (root) => (hasDir(root, COLOR_CSS_DIR) ? COLOR_CSS_DIR : null),
     need: `要有色票目錄(目前設定為 ${COLOR_CSS_DIR})`,
     why: '色票變數的定義來源在那裡。目錄不存在時,等於一個色票變數都沒定義,顏色檢查與色票排序都不會有結果。',
@@ -106,11 +123,23 @@ const REQUIREMENTS = [
     why: '色票檔裡有一整類變數的命名形狀對不上目前的設定 —— 可能是全部(色相清單或分隔符不同),也可能是帶透明度的那一類(透明度兩碼怎麼接不同)。那一類的取碼檢查會完全沒有結果,而畫面上看起來是全部通過。改設定就會恢復。',
   },
   {
-    label: 'CSS 模組目錄',
-    rules: ['moduleOrder', 'moduleScope', 'moduleVar', 'variable'],
-    check: (root) => (hasDir(root, CSS_MODULES_DIR) ? CSS_MODULES_DIR : null),
-    need: `要有 CSS 模組目錄(目前設定為 ${CSS_MODULES_DIR})`,
-    why: '這四條只檢查模組目錄底下的檔案。目錄不存在時掃不到任何檔案,結果一律是通過。',
+    /* 判準是「有沒有那種檔案」,不是「目錄在不在」——
+       元件目錄在任何專案都存在,拿它當條件等於永遠成立,
+       而那幾條其實一個檔案都掃不到。 */
+    label: '元件自己的樣式',
+    rules: ['moduleScope'],
+    check: (root) => cssFilesOf(root).some(isModuleCss),
+    need: `元件資料夾底下要有樣式(收在各元件的 ${MODULE_CSS_DIR_NAME} 資料夾裡)`,
+    why: 'class 前綴是從元件的資料夾名推出來的,所以這條只看元件自己的樣式。樣式還放在集中目錄的話,它一個檔案都掃不到 —— 結果一律是通過,而那些檔案其實沒有人在看。',
+  },
+  {
+    /* 前三條與「屬於哪一個元件」無關,兩種位置都要守;
+       最後一條看的正是「這支該不該留在集中目錄」,同樣要有模組樣式才驗得到。 */
+    label: '模組樣式',
+    rules: ['moduleOrder', 'moduleVar', 'variable', 'moduleLocation'],
+    check: (root) => cssFilesOf(root).some(isModuleStyle),
+    need: `元件資料夾底下的 ${MODULE_CSS_DIR_NAME} 或集中目錄 ${CSS_MODULES_DIR} 要有樣式`,
+    why: '這三條看的是模組樣式,元件自己的與跨模組共用的都算。兩種位置都沒有檔案時掃不到任何東西,結果一律是通過。',
   },
   {
     label: 'api 目錄',
@@ -121,7 +150,7 @@ const REQUIREMENTS = [
   },
   {
     label: 'store 目錄',
-    rules: ['storeDeclare', 'storeNaming', 'storeScope', 'storeActions', 'storeActionNaming', 'storeActionReturn', 'storeApiDefault', 'storeResetDefault', 'storeLayer'],
+    rules: ['storeDeclare', 'storeNaming', 'storeScope', 'storeActions', 'storeActionNaming', 'storeActionReturn', 'storeApiDefault', 'storeResetDefault', 'storeLayer', 'storeDir'],
     check: (root) => (hasDir(root, STORE_DIR) ? STORE_DIR : null),
     need: `要有 store 目錄(目前設定為 ${STORE_DIR})`,
     why: 'store 與 actions 的規則以那個目錄為範圍。位置不符時,store 的寫法完全不會被檢查。',
@@ -176,6 +205,19 @@ const REQUIREMENTS = [
     why: '設定填了斷點,但 CSS 模組裡找不到任何一個帶斷點的變數。這種情況下每一個尺寸值都會被要求拆成三份,等於要補上一大批永遠相同的值 —— 不做響應式的專案應該把 BREAKPOINTS 設成空陣列。',
   },
   {
+    label: '斷點的前綴涵蓋關係',
+    rules: ['breakpointPrefix'],
+
+    /*
+     * 不做響應式的專案留空物件是刻意的,不是缺東西 —— 那時整條略過。
+     * 有分斷點卻沒填的話要講出來:那條從此不檢查任何東西,
+     * 而少列一個前綴的後果是使用端寫了卻沒有效果,很難查。
+     */
+    check: () => !BREAKPOINTS.length || Object.keys(BREAKPOINT_SCREENS).length > 0,
+    need: '設定裡要填 BREAKPOINT_SCREENS(每個 @screen 區塊該列出哪幾種前綴)',
+    why: '這個專案有分斷點,但沒有填 @screen 與前綴的涵蓋關係 —— 「級距要在每個斷點列齊前綴」那條會整條略過,而少列一種的後果是使用端傳了級距卻在那個斷點沒有效果。',
+  },
+  {
     label: '並行載入的包裝函式',
     rules: ['pageAwaitAll'],
     check: () => PARALLEL_AWAIT_HELPER.name || null,
@@ -184,12 +226,39 @@ const REQUIREMENTS = [
   },
   {
     label: '共用元件目錄',
-    rules: ['tailwind'],
+    rules: ['tailwind', 'importOrder', 'componentApiImport', 'vueFileName'],
     check: (root) => (hasDir(root, COMPONENTS_DIR) ? COMPONENTS_DIR : null),
     need: `要有共用元件目錄(目前設定為 ${COMPONENTS_DIR})`,
-    why: '「元件的 template 不寫 tailwind class」只針對共用元件。目錄不存在時這條不會有結果。',
+    why: '這三條只針對共用元件:template 不寫 utility class、元件要自己載入樣式、元件不能直接 import api。目錄不存在時都不會有結果。',
   },
 ]
+
+/**
+ * 不依賴任何前提的規則 —— 它們隨時都在檢查,沒有「這次沒有作用」的情況。
+ *
+ * 上面每一項寫的是「缺了什麼、哪幾條會靜靜地不作用」,而那份 `rules` 是手寫的:
+ * **漏列一條不會有任何徵兆** —— 那條規則照樣因為缺前提而掃不到東西,
+ * 但「哪幾條沒有作用」的清單不會提到它,看的人以為它通過了。
+ *
+ * 所以每一條規則都要有歸屬:不是被某一項前提涵蓋,就是列在這裡。
+ * 兩邊都沒有(或兩邊都有)會被規則自己的驗證當場報出來,不必靠人記得。
+ *
+ * 這幾條看的是「文字怎麼寫」與「程式怎麼寫」,判斷只用檔案內容,
+ * 不必先有某個目錄或設定檔存在。
+ */
+export const NO_PREREQUISITE_RULES = [
+  'ruleCrashed',
+  'configItem',
+  'projectName',
+  'absolutePath',
+  'plainText',
+  'selfContained',
+  'deprecated',
+  'storeToRefs',
+]
+
+/** 每一項前提涵蓋到的規則(全部項目的聯集)—— 規則自己的驗證拿它比對完整性 */
+export const PREFLIGHT_RULES = [...new Set(REQUIREMENTS.flatMap((r) => r.rules))]
 
 /**
  * 回傳缺前提的項目清單(每項含缺什麼、影響哪幾條、會怎樣)。
@@ -219,6 +288,15 @@ export const onReportPreflight = (root, { print = console.error } = {}) => {
     print('  設定檔多出沒有人讀的項目時只提醒,不擋;其他專案則是一律擋。')
     print('  共用規則的指紋不比對(規則在這裡長,每改一行都報一次等於不能工作);')
     print('  改完規則要跑 npm run rules:seal 重新封存,新的清單才跟著規則複製出去。')
+  }
+
+  /* 專案自己關掉的範圍要講出來 —— 那不是「缺了什麼」,是設定裡填的,
+     但結果一樣是有一塊沒有被檢查過。不講的話,那幾層看起來與通過沒有兩樣。 */
+  if (PLAIN_TEXT_EXCLUDED_DIRS.length) {
+    print('')
+    print(`「不用 emoji 與裝飾符號」這條不檢查以下目錄(設定 PLAIN_TEXT_EXCLUDED_DIRS):`)
+    for (const dir of PLAIN_TEXT_EXCLUDED_DIRS) print(`  ${dir}`)
+    print('  那幾層的其他檢查照常適用。')
   }
 
   if (!missing.length) return missing

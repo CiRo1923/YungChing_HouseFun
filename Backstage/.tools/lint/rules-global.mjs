@@ -15,13 +15,24 @@ import {
   ABSOLUTE_PATH_SCOPE,
   WRITING_STYLE_SCOPE,
   PROJECT_NAMES,
+  VIEWS_DIR,
+  STORE_DIR,
+  API_DIR,
+  CSS_MODULES_DIR,
+  COLOR_CSS_DIR,
+  COMPONENTS_DIR,
+  COMPONENT_DIRS,
+  PLAIN_TEXT_EXCLUDED_DIRS,
   PROJECT_NAME_SCOPE,
   SOURCE_PROJECT_NAME,
   TOOLING_PREFIXES,
   hasExemptMark,
+  isInsideString,
+  isUnderAny,
   issueOf,
   lineNoOf,
   listFiles,
+  maskTemplateContent,
   toRel,
   warnOf,
 } from './shared.mjs'
@@ -51,21 +62,66 @@ import { fingerprintDiff } from './checksum.mjs'
 /**
  * 從專案名稱組出比對式。
  *
- * 設定填的是名稱本身(`Royal Canin`),不是正規表示式 —— 換專案的人要填的是
+ * 設定填的是名稱本身,不是正規表示式 —— 換專案的人要填的是
  * 「這個專案叫什麼」,不該連帶要會寫比對式。
  *
  * 組出來的比對式涵蓋名稱的各種寫法:名稱裡的空白對應到實際寫法中的
- * 空白、底線、連字號,或是完全連在一起(`royalcanin`、`royal-canin`、
- * `Royal_Canin` 都算),大小寫一律不分。
+ * 空白、底線、連字號,或是完全連在一起,大小寫一律不分。
+ * 也就是說,一個兩個字的名稱,四種寫法都會被抓到。
+ *
+ * 這裡刻意不舉實際名稱當範例 —— 這支檔案會複製到下一個專案,
+ * 舉了就等於把某一個專案的名字寫進規則,而那正是這條規則在擋的事。
  *
  * 名稱以外的字元會被跳脫 —— 名字裡有 `.` 或 `+` 的專案才不會變成萬用字元。
+ *
+ * **前後要接得上邊界**,名稱剛好藏在一個更長的英文字裡時才不會被當成專案名 ——
+ * 一個兩段的名字連寫起來,常常就是某個常見英文字的一部分,那種誤報每份檔案都來一次。
+ *
+ * 邊界不用 `\b`:那個記號要求兩側一邊是英數、一邊不是,而中文字兩側都不是英數 ——
+ * 名稱是中文的專案,寫在中文句子裡永遠不成立,整條規則會靜靜地不再抓到任何東西。
+ * 改成只擋「緊鄰英數字」:中文句子裡的名稱照樣抓得到,英文字中間的那一段則放行。
  */
 const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
 const patternOf = (name) =>
-  new RegExp(name.trim().split(/\s+/).map(escapeRe).join('[\\s_-]?'), 'i')
+  new RegExp(
+    `(?<![A-Za-z0-9])${name.trim().split(/\s+/).map(escapeRe).join('[\\s_-]?')}(?![A-Za-z0-9])`,
+    'i'
+  )
 
 const PROJECT_NAME_RE = PROJECT_NAMES.map(patternOf)
+
+/**
+ * 這個專案的目錄擺法 —— 寫進規範系統的檔案裡,搬到下一個專案就是錯的敘述。
+ *
+ * 名稱不是唯一會過期的東西:一句「只檢查某某目錄底下的元件」如果把實際路徑寫出來,
+ * 在資料夾擺法不同的專案(原始碼直接放專案根的那種)就完全對不上,
+ * 而讀的人會照著去找一個不存在的目錄。
+ *
+ * **只取含斜線的值。** 單段的值(`pages`、`stores`)在中文敘述裡到處都是
+ * (「store 目錄」「頁面 pages 底下」),抓了全是誤報,而一條每次報幾十筆的規則
+ * 會被整條忽略 —— 那時連真正該擋的也沒人看。
+ *
+ * **也不用通用的路徑形狀。** 那會連 import 路徑、網址、指路的句子、
+ * 佔位符一起抓,同樣是幾十筆起跳。這裡認的是「這個專案的設定值」,
+ * 換一個專案就換一批 —— 那正是它要防的事。
+ *
+ * 值取自設定的既有項目,不另外開一項:那幾個本來就是「這個專案的目錄在哪」,
+ * 再開一份清單就要人工同步,而忘了同步不會報錯,只會讓這條安靜地少抓幾種。
+ *
+ * 對外提供是為了讓驗證案例直接取這一份 —— 那邊自己挑一個設定項的話,
+ * 挑到的值在別的專案可能是單段的(原始碼直接放專案根的專案,頁面目錄就叫
+ * `pages`),那一則案例在那種專案永遠驗不到東西,而失敗的訊息看起來像規則壞了。
+ */
+export const PROJECT_DIR_VALUES = [
+  ...new Set(
+    [VIEWS_DIR, STORE_DIR, API_DIR, CSS_MODULES_DIR, COLOR_CSS_DIR, COMPONENTS_DIR, ...COMPONENT_DIRS].filter(
+      (dir) => dir.includes('/')
+    )
+  ),
+]
+
+const PROJECT_DIR_RE = PROJECT_DIR_VALUES.map((dir) => new RegExp(escapeRe(dir), 'g'))
 
 /**
  * 這條規則**只管規範系統自身** —— 檢查工具、skills、hooks,
@@ -98,6 +154,25 @@ const checkProjectName = ({ rel, text }) => {
           lineNoOf(text, m.index),
           'projectName',
           `寫死了專案名稱「${m[0]}」 —— 網域 / 路徑 / 識別字走環境變數或設定檔,這支檔案才搬得到別的專案`
+        )
+      )
+    }
+  }
+
+  /* 目錄擺法與名稱是同一件事的兩面:兩者都只在這個專案成立,
+     寫進去之後搬到下一個專案就是錯的敘述。 */
+  for (const re of PROJECT_DIR_RE) {
+    for (const m of text.matchAll(re)) {
+      if (seen.has(m[0])) continue
+      seen.add(m[0])
+
+      issues.push(
+        issueOf(
+          rel,
+          lineNoOf(text, m.index),
+          'projectName',
+          `寫死了這個專案的目錄「${m[0]}」 —— 每個專案的資料夾擺法不一樣,` +
+            `改成通則(頁面目錄、元件目錄)或指向 .tools/lint/project-config.mjs 的設定`
         )
       )
     }
@@ -232,33 +307,6 @@ const TERMINAL_MARKS = new Set(['✔', '✓', '✗', '⛔', '⚠'])
 const ARROW_MARKS = new Set(['→', '←', '↔'])
 
 /**
- * 這個位置在不在字串裡。
- *
- * 用來分辨「工具要印出來的訊息」與「寫給人讀的註解」——
- * 前者一定包在引號裡,後者不是。
- *
- * 只看同一行:跨行的模板字串會被判成不在字串裡,那個方向是「多報一筆」,
- * 看到的人自己判斷得出來;反過來放行才危險 —— 漏掉的裝飾符號不會有人發現。
- *
- * 跳脫過的引號(`\'`)不算開頭或結尾,否則一句 `don\'t` 會把後面整行
- * 都算成字串外,那一行的符號就全部漏掉。
- */
-const isInsideString = (line, index) => {
-  const quotes = { "'": 0, '"': 0, '`': 0 }
-
-  for (let i = 0; i < index; i += 1) {
-    const char = line[i]
-    if (char === '\\') {
-      i += 1
-      continue
-    }
-    if (char in quotes) quotes[char] += 1
-  }
-
-  return Object.values(quotes).some((count) => count % 2 === 1)
-}
-
-/**
  * 圖形符號與 emoji 的字元範圍 —— 各類圖示、雜項符號、裝飾記號與箭頭。
  *
  * **不含變體選擇子**(跟在符號後面讓它顯示成彩色的那個字元)。
@@ -270,28 +318,55 @@ const isInsideString = (line, index) => {
  */
 const DECORATIVE_RE = /[\u{1F000}-\u{1FAFF}\u{2190}-\u{21FF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}]/gu
 
+/**
+ * 原始碼裡會被這條檢查的副檔名。
+ *
+ * 這一條看的是「寫給人讀的說明文字」,在原始碼裡那就是註解 ——
+ * 樣式、程式與元件這幾種檔案才有註解要守這件事。
+ *
+ * 規範系統自身不受這份清單限制:那一層整批複製到下一個專案,
+ * 每一種檔案裡的文字都是交接時對方要讀的,說明文件尤其是。
+ *
+ * 每個專案的副檔名都一樣,所以這份寫在規則裡,不進專案設定。
+ */
+const PLAIN_TEXT_SOURCE_RE = /\.(css|js|ts|vue)$/i
 
 const checkPlainText = ({ rel, text }) => {
+  /* 專案指定不檢查的那幾層 —— 文字不是這個團隊在寫的地方
+     (整包複製進來的元件、產生器吐出來的檔案)。報出來也沒有人能改,
+     而一條一直報「改不了的東西」的規則會連同真正該改的一起被略過。
+     排除的範圍會列在檢查結果的開頭,不會安靜地少檢查一塊。 */
+  if (isUnderAny(rel, PLAIN_TEXT_EXCLUDED_DIRS)) return []
+
   if (!WRITING_STYLE_SCOPE.some((prefix) => rel.startsWith(prefix))) return []
+
+  const inTooling = TOOLING_PREFIXES.some((prefix) => rel.startsWith(prefix))
+  if (!inTooling && !PLAIN_TEXT_SOURCE_RE.test(rel)) return []
+
   if (hasExemptMark(text, 'plain-text')) return []
+
+  /* .vue 的畫面區段只看裡面的註解。畫面上的文字是內容本身(標題、按鈕上的字),
+     那裡出現什麼符號由設計與文案決定;寫在那裡的註解則是給接手的人讀的,
+     與程式碼旁邊的註解沒有兩樣。 */
+  const scanned = rel.endsWith('.vue') ? maskTemplateContent(text) : text
 
   const issues = []
   const seen = new Set()
 
-  const lines = text.split('\n')
+  const lines = scanned.split('\n')
 
-  for (const m of text.matchAll(DECORATIVE_RE)) {
+  for (const m of scanned.matchAll(DECORATIVE_RE)) {
     const mark = m[0]
 
     if (ARROW_MARKS.has(mark)) continue
 
-    const line = lineNoOf(text, m.index)
+    const line = lineNoOf(scanned, m.index)
 
     /* 狀態記號只有工具印出來的那一份合法 —— 判斷它在不在字串裡。
        行內位置要從整份文字的位置換算回來:比對是對整份做的,
        而判斷字串只看同一行。 */
     if (TERMINAL_MARKS.has(mark)) {
-      const lineStart = text.lastIndexOf('\n', m.index - 1) + 1
+      const lineStart = scanned.lastIndexOf('\n', m.index - 1) + 1
       if (isInsideString(lines[line - 1], m.index - lineStart)) continue
     }
 

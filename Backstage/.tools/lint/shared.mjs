@@ -15,6 +15,8 @@ import {
   COMPONENT_FOLDERS,
   CONVENTION_RULES_DIR,
   CONVENTION_SKILLS_DIR,
+  CSS_MODULES_DIR,
+  MODULE_CSS_DIR_NAME,
   PROJECT_DOCS_DIR,
   SCANNABLE_RE,
   SKIP_DIRS,
@@ -30,17 +32,22 @@ export {
   API_DIR,
   API_NAMING_IGNORED_SEGMENTS,
   BREAKPOINTS,
+  BREAKPOINT_SCREENS,
   BUILD_CONFIG_FILES,
   COLOR_CSS_DIR,
   COMPONENTS_DIR,
   COMPONENT_DIRS,
   COMPONENT_FOLDERS,
+  CONVENTION_DOCS_DIR,
   CONVENTION_RULES_DIR,
   CONVENTION_SKILLS_DIR,
   CSS_MODULES_DIR,
+  GENERATED_FILES,
   IMPORT_ORDER_GROUPS,
+  MODULE_CSS_DIR_NAME,
   PARALLEL_AWAIT_HELPER,
   WRITING_STYLE_SCOPE,
+  PLAIN_TEXT_EXCLUDED_DIRS,
   PROJECT_CONFIG_FILES,
   PROJECT_DOCS_DIR,
   PROJECT_NAMES,
@@ -57,6 +64,7 @@ export {
   STANDALONE_APIS,
   STANDALONE_STORES,
   STORE_DIR,
+  STORE_SETUP_CALLS,
   TAILWIND_THEME_OVERRIDES,
   TOOLING_PREFIXES,
   VIEW_RESOURCE_DEPTH,
@@ -140,18 +148,152 @@ export const maskCssComments = (text) => maskBy(text, /\/\*[\s\S]*?\*\//g)
 export const maskHtmlComments = (text) => maskBy(text, /<!--[\s\S]*?-->/g)
 
 /**
+ * 遮蔽 `//` 開頭的行註解。
+ *
+ * 在引號裡的不算 —— 網址的 `https://` 也長這樣,遮下去會把那一行後半段
+ * (常常還有別的程式碼)一起吃掉。
+ */
+const maskLineComments = (text) =>
+  text
+    .split('\n')
+    .map((line) => {
+      const at = line.indexOf('//')
+      if (at === -1 || isInsideString(line, at)) return line
+
+      return line.slice(0, at) + ' '.repeat(line.length - at)
+    })
+    .join('\n')
+
+/**
+ * 遮蔽這種檔案裡的每一種註解。
+ *
+ * 註解是寫給人讀的,裡面**舉例寫出一段不合規範的程式碼是正常的** ——
+ * 「這裡不要寫成 `text-sm`」這句說明本身就含有那個名字。拿規則去檢查它,
+ * 報出來的那一筆沒有人能修:照著改等於把說明改壞。
+ *
+ * 一次處理三種註解,依副檔名決定要遮哪幾種:
+ *
+ *   `/* *\/`      樣式與程式共用的區塊註解,一律遮
+ *   `//`          程式的行註解
+ *   `<!-- -->`    畫面區段的註解
+ *
+ * 先遮區塊再遮行 —— 反過來的話,區塊註解裡如果有 `//`,
+ * 那一行後半段會先被當成行註解處理,區塊的結尾就找不到了。
+ *
+ * 需要讀註解的檢查不要用這個(豁免標記、色票的色相分類標籤、
+ * 文字寫法那幾條檢查的正是註解本身)。
+ */
+export const maskComments = (rel, text) => {
+  let out = maskCssComments(text)
+
+  if (/\.(vue|html)$/i.test(rel)) out = maskHtmlComments(out)
+  if (/\.(vue|js|mjs|cjs|ts)$/i.test(rel)) out = maskLineComments(out)
+
+  return out
+}
+
+/**
+ * 取出 .vue 的畫面區段(`<template>` 裡面那一段)與它在整份檔案裡的位置。
+ *
+ * 位置要一起回傳 —— 違規的行號是對整份檔案算的,只拿內容的話,
+ * 報出來的行號會少掉畫面區段前面那幾行。
+ *
+ * 沒有畫面區段(純邏輯的 .vue、或根本不是 .vue)時回 null。
+ */
+export const templateRangeOf = (text) => {
+  const start = text.search(/<template[^>]*>/)
+  if (start === -1) return null
+
+  const openEnd = text.indexOf('>', start) + 1
+  const close = text.lastIndexOf('</template>')
+  if (close === -1) return null
+
+  return { body: text.slice(openEnd, close), offset: openEnd }
+}
+
+/**
+ * 把畫面區段的內容遮成空白,只留裡面的註解。
+ *
+ * 畫面上的文字是內容本身(標題、按鈕上的字、給使用者看的提示),
+ * 那裡出現什麼符號由設計與文案決定;寫在那裡的**註解**則是給接手的人讀的,
+ * 與程式碼旁邊的註解沒有兩樣,該守的規矩一樣要守。
+ *
+ * 遮成等長空白而不是刪掉,行號與欄位都不會跑掉 ——
+ * 違規要指到正確的那一行,刪掉之後行號就對不上原始檔案了。
+ */
+export const maskTemplateContent = (text) => {
+  const tpl = templateRangeOf(text)
+  if (!tpl) return text
+
+  let kept = ''
+  let last = 0
+
+  for (const m of tpl.body.matchAll(/<!--[\s\S]*?-->/g)) {
+    kept += tpl.body.slice(last, m.index).replace(/[^\n]/g, ' ') + m[0]
+    last = m.index + m[0].length
+  }
+
+  kept += tpl.body.slice(last).replace(/[^\n]/g, ' ')
+
+  return text.slice(0, tpl.offset) + kept + text.slice(tpl.offset + tpl.body.length)
+}
+
+/**
+ * 這個位置在不在字串裡。
+ *
+ * 用來分辨「程式碼寫出來的資料」與「寫給人讀的註解」——
+ * 前者一定包在引號裡,後者不是。兩種用途都走這一份:
+ * 裝飾符號那條要分辨「印出來的訊息」與「註解」,
+ * 豁免標記要分辨「寫成資料的那串字」與「真的在宣告豁免」。
+ *
+ * 只看同一行:跨行的模板字串會被判成不在字串裡,那個方向是「多報一筆」,
+ * 看到的人自己判斷得出來;反過來放行才危險 —— 漏掉的違規不會有人發現。
+ *
+ * 跳脫過的引號(`\'`)不算開頭或結尾,否則一句 `don\'t` 會把後面整行
+ * 都算成字串外,那一行的符號就全部漏掉。
+ */
+export const isInsideString = (line, index) => {
+  const quotes = { "'": 0, '"': 0, '`': 0 }
+
+  for (let i = 0; i < index; i += 1) {
+    const char = line[i]
+    if (char === '\\') {
+      i += 1
+      continue
+    }
+    if (char in quotes) quotes[char] += 1
+  }
+
+  return Object.values(quotes).some((count) => count % 2 === 1)
+}
+
+/**
  * 這份檔案有沒有標某一條規則的豁免。
  *
  * 標記的形狀是 `lint-<規則>-exempt: 理由`,而且**一定要寫在註解裡** ——
  * CSS 的區塊註解、JS 的行註解、HTML 的註解都算。整份檔案跳過那一條檢查。
  *
  * **只認註解裡的那一份,是因為程式碼本身也會寫出這串字。**
- * 定義比對式的那一行(`const XXX_EXEMPT_RE = /lint-xxx-exempt/`)就含有它 ——
+ * 定義比對式的那一行(`const XXX_EXEMPT_RE = /lint-xxx-exempt/`)就含有它,
+ * 驗證案例的內容裡也會整段寫出一個標記當作要檢查的資料 ——
  * 只看「整份文字有沒有出現」的話,定義規則的那支檔案永遠豁免自己,
  * 於是那條規則對它完全失效,而且不會有任何徵兆。
  *
- * 判斷方式是看標記前面有沒有註解起頭。跨行註解中間、又不是以 `*` 起頭的那種行
- * 會被判成不在註解裡 —— 那個方向是「照常檢查」,看到的人自己判斷得出來;
+ * 判斷要同時滿足兩件事:
+ *
+ *   標記前面有註解起頭   `//`、`/*`、`<!--`,或跨行註解裡以 `*` 起頭的那種行
+ *   標記不在字串裡       在引號中的是資料,不是宣告
+ *   標記不在範例區塊裡   說明文件舉例時會整段寫出一個標記,那是給人看的範例
+ *
+ * 少了那兩個條件的話,把一整個標記寫進字串
+ * (`` const probe = `<!-- lint-xxx-exempt: … -->` ``)、
+ * 或在說明文件裡舉一個標記當範例,都會被當成宣告 ——
+ * 前面確實有註解的起頭,只是它屬於字串或範例的內容。
+ * 那支檔案會整份被放行,而放行的當下沒有任何訊息:
+ * 一份在說明「這條規則抓什麼」的文件,會因為舉了例子而讓自己不被那條規則檢查。
+ *
+ * 跨行註解中間、又不是以 `*` 起頭的那種行會被判成不在註解裡 ——
+ * 那個方向是「照常檢查」,看到的人自己判斷得出來;
  * 反過來誤放行才危險,漏掉的違規不會有人發現。
  *
  * 判準收在這裡一份 —— 每條規則各寫一次的話,改了一處忘了另一處,
@@ -160,9 +302,22 @@ export const maskHtmlComments = (text) => maskBy(text, /<!--[\s\S]*?-->/g)
 export const hasExemptMark = (text, name) => {
   const markRe = new RegExp(`lint-${name}-exempt`)
 
+  /* 範例區塊(三個反引號圍起來的那一段)裡的是給人看的範例,不是宣告。
+     圍欄那一行自己也算在內 —— 它本來就不會有標記,算進去只是少一個邊界情況。 */
+  let inExample = false
+
   return text.split('\n').some((line) => {
+    if (/^\s*```/.test(line)) {
+      inExample = !inExample
+      return false
+    }
+    if (inExample) return false
+
     const at = line.search(markRe)
     if (at === -1) return false
+
+    // 在引號中的那一份是資料(例如驗證案例的內容),不是在宣告豁免
+    if (isInsideString(line, at)) return false
 
     const before = line.slice(0, at)
 
@@ -208,6 +363,35 @@ export const listViewResources = (root) => {
 export const listViewFolders = (root) => {
   const resources = listViewResources(root)
   return resources && new Set(resources.map((r) => r.name))
+}
+
+/**
+ * 每一個資源資料夾底下再分的那一層,名字收成一份。
+ *
+ * **store 分層時,檔名對應的是這一層。** 一個資源大到要拆成好幾支 store 的時候
+ * (買、租、會員各有好幾個畫面),store 會放進子資料夾,而檔名指的是那個資源
+ * 底下的某一個畫面 —— 拿它去比對第一層的話一個都對不上,
+ * 那種專案的每一支 store 都會被報「沒有對應的資料夾」。
+ *
+ * 只收資料夾名,不管它在哪一個資源底下 —— store 的子資料夾名不一定等於
+ * 頁面的第一層(把認證相關的幾支聚成一個資料夾是常見的做法),
+ * 綁著比對的話那種聚法就都成了違規,而它們其實都對得上某一個畫面。
+ *
+ * 底線開頭的不算 —— 那是放元件的地方,不是畫面。
+ */
+export const listViewSubFolders = (root) => {
+  const resources = listViewResources(root)
+  if (!resources) return null
+
+  const names = new Set()
+
+  for (const { abs } of resources) {
+    for (const item of fs.readdirSync(abs, { withFileTypes: true })) {
+      if (item.isDirectory() && !item.name.startsWith('_')) names.add(item.name)
+    }
+  }
+
+  return names
 }
 
 /**
@@ -290,6 +474,67 @@ export const isComponentFile = (rel) => {
 }
 
 /**
+ * 這支 css 是不是某個元件自己的樣式。
+ *
+ * **元件的樣式放在元件資料夾底下的那個子資料夾裡**(名稱見設定的
+ * MODULE_CSS_DIR_NAME),與它的 .vue 在一起。一支元件要帶走的東西
+ * (畫面、樣式、變數)在同一個資料夾,複製到別的專案時不會漏掉半邊,
+ * 刪掉元件時也不會在別的目錄留下沒有人用的樣式。
+ *
+ * 判斷只看位置,不看檔名 —— 一個模組拆幾支、各自叫什麼是那個模組自己的事
+ * (版型一支、變數一支、子元件各一支都可以)。
+ */
+export const isModuleCss = (rel) =>
+  rel.endsWith('.css') &&
+  rel.includes(`/${MODULE_CSS_DIR_NAME}/`) &&
+  COMPONENT_DIRS.some((dir) => rel.startsWith(`${dir}/`))
+
+/**
+ * 這支 css 是不是跨模組共用的樣式。
+ *
+ * 有些變數兩個以上的模組都要用(表單的尺寸級距、日期選擇器也吃同一份)。
+ * 那種東西不屬於任何一個元件 —— 放進其中一個元件的資料夾,
+ * 另一個元件就得去 import 別人的檔案,而刪掉那個元件時會連帶弄壞它。
+ * 所以共用的那幾支留在集中目錄。
+ *
+ * **與 isModuleCss 的界線:問「這支屬於哪一個元件」。**
+ * 答得出來就放那個元件的資料夾,答不出來(兩個以上在用)才放集中目錄。
+ * 兩種位置各有各的規則範圍:元件的樣式要檢查 class 前綴(它有 class),
+ * 共用變數只檢查變數怎麼命名(它沒有 class)。
+ */
+export const isSharedCss = (rel) => rel.endsWith('.css') && rel.startsWith(`${CSS_MODULES_DIR}/`)
+
+/**
+ * 這支 css 是不是模組樣式(兩種位置都算)。
+ *
+ * 變數怎麼命名、尺寸值要不要分斷點這幾條,元件自己的樣式與跨模組共用的變數
+ * 都要守 —— 那些判斷與「這支屬於哪一個元件」無關。
+ *
+ * **每條規則各寫一次「兩種位置」的話,加第三種位置時要改的地方散在各處**,
+ * 而漏掉的那一條不會報錯,只是從此不再檢查那個位置。
+ *
+ * 只管元件自己那一種的規則(class 前綴)直接用 isModuleCss ——
+ * 共用變數檔沒有 class,拿前綴去檢查它只會報一整片。
+ */
+export const isModuleStyle = (rel) => isModuleCss(rel) || isSharedCss(rel)
+
+/**
+ * 這支 css 屬於哪一個元件 —— 取樣式那一層外面的資料夾名。
+ *
+ * 元件的樣式收在元件資料夾底下的子資料夾裡,所以模組名是它的上一層:
+ * 一個叫 mForm 的元件,它樣式資料夾裡的每一支 css 都屬於 mForm。
+ *
+ * 不在那種位置時回 null,由呼叫端跳過 ——
+ * 推不出它屬於誰,猜一個的話會用錯的前綴去報一整片。
+ */
+export const moduleFolderOf = (rel) => {
+  const segments = rel.split('/')
+  const at = segments.lastIndexOf(MODULE_CSS_DIR_NAME)
+
+  return at > 0 ? segments[at - 1] : null
+}
+
+/**
  * 這個檔案是不是放行為(actions)的那個子資料夾底下的檔案。
  *
  * 判斷方式是「路徑裡有沒有那個子資料夾」,不比對固定前綴 ——
@@ -338,7 +583,19 @@ const SKIP_DIR = new RegExp(
  * 判斷只寫在這裡一份,全專案掃描與單檔檢查都呼叫它 ——
  * 兩處各寫一次的話,會出現「整批掃描跳過、但存檔時照樣報」這種說不通的落差。
  */
-export const isProjectDocs = (rel) => rel === PROJECT_DOCS_DIR || rel.startsWith(`${PROJECT_DOCS_DIR}/`)
+export const isProjectDocs = (rel) => isUnderAny(rel, [PROJECT_DOCS_DIR])
+
+/**
+ * 這支檔案在不在列出的那幾層底下 —— 比對的是從專案根算起的路徑。
+ *
+ * 比對路徑而不是資料夾名:名字比對會連帶跳過別處同名的資料夾,
+ * 而那一處可能正是要檢查的。想排除兩個位置就列兩筆,範圍寫得出來也看得出來。
+ *
+ * 目錄本身與它底下的全部檔案都算。清單是空的時候一律回 false ——
+ * 沒有填就是沒有要排除任何東西。
+ */
+export const isUnderAny = (rel, dirs) =>
+  dirs.some((dir) => rel === dir || rel.startsWith(`${dir}/`))
 
 /**
  * 取出 markdown 檔頭 `---` 之間的欄位。

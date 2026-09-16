@@ -1,7 +1,7 @@
 ---
 name: page-conventions
 summary: 頁面
-description: 本專案的頁面撰寫規範(頁面目錄底下的 .vue 與其元件)。當在頁面新增 api 呼叫、包裝 action、放置 api 回來的資料、調整 onMounted 的初次載入,或審查既有頁面寫法時使用。規則:api 資料一律放 store,頁面不要自己 ref 一份;元件一律不能直接 import api(沒有例外),頁面也擋但可在檔頭標 lint-page-api-exempt 放行一次性的請求;onMounted 裡的請求一律用並行載入的包裝函式一起發出,單支也包,存檔時自動包好;包裝 function 命名為 on + endpoint(去掉 Api 與 method 那一段,postForm 連 Form 一起去掉);只有這一頁要用的邏輯寫在這一頁,第二個頁面也要用時才搬進 use*Actions;掛在 api 回傳物件上的自訂欄位一律加 _ 前綴。
+description: 本專案的頁面撰寫規範(頁面目錄底下的 .vue 與其元件)。當在頁面新增 api 呼叫、包裝 action、放置 api 回來的資料、調整 onMounted 的初次載入,或審查既有頁面寫法時使用。規則:頁面的 .vue 檔名首字小寫(它對應的是一個網址,不是標籤;底線開頭的資料夾裡放的不是頁面,那裡面照元件那一套首字大寫);api 資料一律放 store,頁面不要自己 ref 一份;元件一律不能直接 import api(沒有例外),頁面也擋但可在檔頭標 lint-page-api-exempt 放行一次性的請求;onMounted 裡的請求一律用並行載入的包裝函式一起發出,單支也包,存檔時自動包好;包裝 function 命名為 on + endpoint(去掉 Api 與 method 那一段,postForm 連 Form 一起去掉;在協調好幾件事的函式不受這條約束 —— 名字講的是那件事);只有這一頁要用的邏輯寫在這一頁,第二個頁面也要用時才搬進 use*Actions;掛在 api 回傳物件上的自訂欄位一律加 _ 前綴。
 ---
 
 # 頁面撰寫規範
@@ -23,7 +23,29 @@ description: 本專案的頁面撰寫規範(頁面目錄底下的 .vue 與其元
 與 [[store-conventions]] 分開:那支管「store 與 actions 自己怎麼寫」,
 這支管「頁面怎麼使用它們」。
 
-## 1. api 資料放 store,頁面不要自己 ref 一份
+## 1. 頁面的檔名首字小寫
+
+**頁面目錄底下的 `.vue` 一律首字小寫**(`index.vue`、`detail.vue`、
+`cardOrderStatus.vue`)。頁面對應的是一個**網址**,不是標籤 ——
+網址一向是小寫的,store 的檔名與層名也是這一套,一路對得起來。
+
+**底線開頭的資料夾裡放的不是頁面**(`_components` 那種:只給某一頁用的元件、
+畫面片段)。那裡面的 `.vue` 照元件那一套命名,**首字大寫** ——
+它們在畫面裡是標籤,詳見 [[component-conventions]]。
+
+```
+views/member/
+  index.vue              ← 頁面
+  cardOrderStatus.vue    ← 頁面
+  _components/
+    Form.vue             ← 只給這一頁用的元件,首字大寫
+```
+
+分辨方式:**它是不是一個網址?** 是就小寫,不是就大寫。
+
+檢查:規則 `vueFileName`(擋)。
+
+## 2. api 資料放 store,頁面不要自己 ref 一份
 
 規則 `pageApiData`(擋)。
 
@@ -43,7 +65,7 @@ const { detail } = storeToRefs(usePetsStore())
 
 畫面狀態(開關、輸入值、目前分頁)留在元件裡是對的,這條只管 api 回來的資料。
 
-## 2. 誰可以直接 import api
+## 3. 誰可以直接 import api
 
 正常路徑是:api → `use*Actions.js`(寫進 store)→ 頁面讀 store。
 直接 import api 的話,拿到的資料就停在那一支檔案裡 —— 沒有進 store,
@@ -81,7 +103,7 @@ import { apiPostQuestionnaire } from '@api/question.js'
 (那幾個目錄底下**所有層級**都算)與 `COMPONENT_FOLDERS`
 (頁面目錄底下要視為元件的資料夾名)。
 
-## 3. 進入頁面要拿的資料一起發出
+## 4. 進入頁面要拿的資料一起發出
 
 規則 `pageAwaitAll`(擋,但**存檔時會自動包好**)。
 
@@ -120,7 +142,7 @@ onMounted(async () => {
 `PARALLEL_AWAIT_HELPER`。**專案沒有這支共用函式時,把 `name` 設成空字串,
 這條規則就會整條略過** —— 有些框架自己就會處理並行載入,不需要這一層。
 
-## 4. 包裝 function 的命名
+## 5. 包裝 function 的命名
 
 規則 `pageActionNaming`(擋)。三層命名一路對得上,往下各去掉一段:
 
@@ -147,7 +169,36 @@ action    onApiPostFormPhotoUpload
 沒有後續處理、只是 `onMounted` 直接呼叫的話,直接 `await onApiGetXxx()` 就好,
 不必多包。
 
-## 5. 只有這一頁要用的邏輯,寫在這一頁
+### 在協調好幾件事的函式不受這條約束
+
+這條要求名字對得上那支 api,前提是**那支 api 就是這個函式的全部** ——
+名字才說得出「這裡打的是哪一支」。函式在協調好幾件事時前提不成立:
+
+```js
+const onSure = async () => {
+  const { valid } = await formRef.value.validate()
+  if (!valid) return
+
+  await onApiPostBuyMessages(...)
+  // 之後還要 resolve、關彈窗
+}
+```
+
+`onSure` 講的是「使用者按了確認鈕」,那支 api 只是中間一步。
+改成 api 的名字反而更難懂 —— 讀的人會以為它只是那支 api 的包裝。
+
+規則用兩個訊號認出這種函式,有一個成立就不要求改名:
+
+| 訊號 | 意思 |
+| --- | --- |
+| 等了第二件事 | 表單驗證、跳彈窗、另一支請求 —— 那支 api 只是其中一步 |
+| 那支被條件包住 | 有條件才打的一步(「已經有資料就不重打」),不是這個函式的全部 |
+
+**前後開關讀取狀態不算「協調好幾件事」** —— 那種形狀本來就是這條預期的寫法
+(上面那段就寫著「通常還會接 callback、開關 loading」),放過它的話,
+真正該對齊名字的那一批會整片消失。
+
+## 6. 只有這一頁要用的邏輯,寫在這一頁
 
 `use*Actions.js` 裡的 action,基本盤是做兩件事:打 api、把結果寫回 store 的
 `apiData` 與 `data`。
@@ -164,7 +215,7 @@ action    onApiPostFormPhotoUpload
 判斷方式很簡單:第一頁寫在頁面;第二頁也需要時,搬進 action 做一次。
 不要為了「以後可能會用到」提前搬。
 
-## 6. 自訂欄位加 `_` 前綴
+## 7. 自訂欄位加 `_` 前綴
 
 掛在**「api 回傳物件」**上的前端自訂屬性一律加 `_`,與 api 欄位區隔:
 

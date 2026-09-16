@@ -55,22 +55,29 @@ import { PAGE_CHECKS, PAGE_RULE_HINT, PAGE_RULE_TITLE } from './rules-page.mjs'
 import { STORE_CHECKS, STORE_RULE_HINT, STORE_RULE_TITLE } from './rules-store.mjs'
 import {
   BREAKPOINTS,
+  BREAKPOINT_SCREENS,
   COLOR_CSS_DIR,
   COMPONENTS_DIR,
+  COMPONENT_DIRS,
   CSS_MODULES_DIR,
+  MODULE_CSS_DIR_NAME,
   SHARED_MODULE_VARIABLES,
   TAILWIND_THEME_OVERRIDES,
   isInSrc,
+  maskComments,
   maskCssComments,
   maskHtmlComments,
   isProjectDocs,
   hasExemptMark,
+  isModuleCss,
+  isModuleStyle,
+  isSharedCss,
+  moduleFolderOf,
   issueOf,
   lineNoOf,
+  templateRangeOf,
   toRel,
 } from './shared.mjs'
-
-const MODULES_PREFIX = `${CSS_MODULES_DIR}/`
 
 // 走訪與共用工具都在 shared.mjs —— 全站規範那支也要用,擺這裡會變成循環相依
 // isWarn 也轉出去 —— 「哪些違規只是建議、不擋」的判斷五層守門共用同一份,
@@ -457,22 +464,10 @@ const isTailwindUtility = (rawClass) => {
   return TW_PREFIX.some((p) => body.startsWith(p))
 }
 
-/** 取出 .vue 的 <template> 區段(含位移,回報行號要用) */
-const extractTemplate = (text) => {
-  const start = text.search(/<template[^>]*>/)
-  if (start === -1) return null
-
-  const openEnd = text.indexOf('>', start) + 1
-  const close = text.lastIndexOf('</template>')
-  if (close === -1) return null
-
-  return { body: text.slice(openEnd, close), offset: openEnd }
-}
-
 const checkTailwindInComponents = ({ rel, text }) => {
   if (!rel.startsWith(`${COMPONENTS_DIR}/`) || !rel.endsWith('.vue')) return []
 
-  const tpl = extractTemplate(text)
+  const tpl = templateRangeOf(text)
   if (!tpl) return []
 
   // 被 <!-- --> 註解掉的 template 是死程式碼,裡面的 class 不算違規。
@@ -501,7 +496,7 @@ const checkTailwindInComponents = ({ rel, text }) => {
             rel,
             lineNoOf(text, tpl.offset + m.index),
             'tailwind',
-            `template 使用 tailwind class ${cls} —— 樣式搬進 ${CSS_MODULES_DIR}/,template 只留組件 class 與 --modifier`
+            `template 使用 tailwind class ${cls} —— 樣式搬進這支元件自己的 css(與它的 .vue 放在同一個資料夾),template 只留組件 class 與 --modifier`
           )
         )
       }
@@ -539,13 +534,40 @@ const THEME_GROUPS = Object.entries(TAILWIND_THEME_OVERRIDES)
   .map(([key, group]) => ({ ...group, key }))
   .filter((g) => deadPatternOf(g))
 
-const DEAD_RE = THEME_GROUPS.length
-  ? new RegExp(THEME_GROUPS.map(deadPatternOf).join('|'), 'g')
-  : null
+/**
+ * 這個專案**實際**整組覆寫了的那幾類。
+ *
+ * 設定列的是「tailwind 有哪幾類、各類的內建值叫什麼」,與專案無關;
+ * 某一類在這個專案有沒有被整組覆寫,要讀專案自己的 tailwind 設定才知道。
+ *
+ * 不分這兩件事的話,只要一類被列進設定,沒有覆寫它的專案就會被整批誤報 ——
+ * 而訊息還會寫著「這一類已整組覆寫」,那句話在那個專案是假的。
+ *
+ * 依 root 快取:一次全專案掃描會對每一支檔案問一次,而答案在同一次執行裡不變。
+ */
+let overriddenCache = null
+
+const overriddenGroupsOf = (root) => {
+  if (overriddenCache?.root === root) return overriddenCache.groups
+
+  const overridden = tailwindThemeOf(root)
+  const groups = THEME_GROUPS.filter((g) => g.key in overridden)
+
+  overriddenCache = { root, groups }
+
+  return groups
+}
+
+/** 這個專案要抓的那些消失的 class;一類都沒被覆寫時回 null(整條不檢查) */
+const deadReOf = (root) => {
+  const groups = overriddenGroupsOf(root)
+
+  return groups.length ? new RegExp(groups.map(deadPatternOf).join('|'), 'g') : null
+}
 
 /** 命中的是哪一類 —— 訊息要寫出那一類還剩哪些值可用 */
-const groupOfHit = (hit) =>
-  THEME_GROUPS.find((g) => (g.prefix ? hit.startsWith(g.prefix) : hit.endsWith(':')))
+const groupOfHit = (hit, root) =>
+  overriddenGroupsOf(root).find((g) => (g.prefix ? hit.startsWith(g.prefix) : hit.endsWith(':')))
 
 /**
  * 「這一類還剩哪些值可用」直接從專案的 tailwind 設定讀出來,不另外維護一份 ——
@@ -553,7 +575,7 @@ const groupOfHit = (hit) =>
  * (指著一個已經改掉的名字叫人去用)。
  */
 const DEAD_REASON = (hit, root) => {
-  const group = groupOfHit(hit)
+  const group = groupOfHit(hit, root)
   if (!group) return `${hit} 不存在`
 
   const available = tailwindThemeOf(root)[group.key] ?? []
@@ -567,14 +589,21 @@ const maskScript = (text) =>
   text.replace(/<script\b[^>]*>([\s\S]*?)<\/script>/gi, (m) => m.replace(/[^\n]/g, ' '))
 
 const checkDeadThemeClass = ({ rel, text, isVue, root }) => {
-  // 設定裡沒有任何整組覆寫時這條不檢查 —— 那種專案的內建 class 全部都還在
-  if (!DEAD_RE || !isInSrc(rel)) return []
+  if (!isInSrc(rel)) return []
 
-  const scope = isVue ? maskScript(text) : text
+  /* 這個專案一類都沒有整組覆寫時不檢查 —— 那種專案的內建 class 全部都還在,
+     照設定清單去抓的話,每一支用了 text-sm 的檔案都會被報「不存在」。 */
+  const deadRe = deadReOf(root)
+  if (!deadRe) return []
+
+  /* 註解裡舉例寫出一個已經消失的 class 是正常的(「這裡不要再用 text-sm」
+     那句說明本身就含有它)—— 報出來的那一筆沒有人能修,照著改等於把說明改壞。
+     每一種註解都要遮:樣式、程式、畫面區段各有各的寫法。 */
+  const scope = maskComments(rel, isVue ? maskScript(text) : text)
   const issues = []
   const seen = new Set()
 
-  for (const m of scope.matchAll(DEAD_RE)) {
+  for (const m of scope.matchAll(deadRe)) {
     if (seen.has(m[0])) continue
     seen.add(m[0])
 
@@ -597,25 +626,31 @@ const checkDeadThemeClass = ({ rel, text, isVue, root }) => {
 // 順序錯的話,版型取用當下變數還沒定義,吃到的是空值。
 
 /**
- * 「這行 import 指到 CSS 模組目錄」的判斷。
+ * 「這行 import 指到某一支模組樣式」的判斷。
  *
- * 認的是模組目錄的最後一層資料夾名(例如設定為 `src/assets/css/_modules` 時
- * 認的是 `_modules/`),不比對完整路徑 —— import 多半寫成 alias 或相對路徑,
- * 兩種寫法都不會出現完整的目錄路徑。
+ * 兩種都算:
  *
- * 資料夾名從設定算出來,不寫死 —— 寫死之後,模組放在別的資料夾名的專案,
- * 這條會完全不再命中任何檔案,而且不會有任何徵兆。
+ *   相對路徑         元件載入自己資料夾裡的那幾支(`./variables.css`)
+ *   集中目錄的路徑   跨模組共用的變數(認資料夾名,因為 import 多半寫成 alias)
+ *
+ * 色票那類全域載入的樣式不會出現在元件裡,所以不必另外排除;
+ * 真的出現了也只會被當成一支版型檔,不影響「變數要排在版型之前」的判斷。
+ *
+ * 資料夾名從設定算出來,不寫死 —— 寫死之後,共用變數放在別的資料夾名的專案,
+ * 那一半會完全不再命中,而且不會有任何徵兆。
  */
 const MODULES_DIR_LEAF = CSS_MODULES_DIR.split('/').pop()
-const MODULE_IMPORT_RE = new RegExp(
-  `import\\s+['"]([^'"]*${MODULES_DIR_LEAF}\\/[^'"]+\\.css)['"]`,
-  'g'
-)
+const CSS_IMPORT_RE = /import\s+['"]([^'"]+\.css)['"]/g
+
+const isModuleImportPath = (spec) =>
+  spec.startsWith('./') || spec.startsWith('../') || spec.includes(`${MODULES_DIR_LEAF}/`)
 
 const checkModuleImportOrder = ({ rel, text, isVue }) => {
   if (!isVue) return []
 
-  const imports = [...text.matchAll(MODULE_IMPORT_RE)].map((m) => ({
+  const imports = [...text.matchAll(CSS_IMPORT_RE)]
+    .filter((m) => isModuleImportPath(m[1]))
+    .map((m) => ({
     path: m[1],
     isVariables: /variables\.css$/i.test(m[1]),
     line: lineNoOf(text, m.index),
@@ -642,6 +677,101 @@ const checkModuleImportOrder = ({ rel, text, isVue }) => {
   return issues
 }
 
+// --- 規則 breakpointPrefix:級距在每個斷點都要列齊前綴 ------------------------
+//
+// 級距 class 由使用端傳進來(`p:--px-20`、`tm:--py-8`),CSS 這邊要為每一個
+// 會命中的斷點各寫一次選擇器。少列一種的話,使用端那樣寫了在那個斷點沒有效果 ——
+// 畫面上是「這個間距沒生效」,而那一行 class 看起來完全正常。
+//
+// 哪個 @screen 區塊該列哪幾種前綴由設定決定(BREAKPOINT_SCREENS)——
+// 各專案的斷點名與涵蓋關係都不一樣,寫死在這裡的話換一個專案就整批誤報。
+//
+// **只有「這支檔案裡某處帶過前綴」的名字才算父層可傳入的級距。**
+//    從來沒帶過前綴的是元件自己的變體(尺寸、狀態),使用端不會寫 `p:--size-md`,
+//    要求它列出前綴變體是誤報,而一條整批誤報的規則會被整條忽略。
+
+/** `&.\-\-px-20` 與 `&.p\:\-\-px-20` 都認,分別取出前綴與級距名 */
+const SCALE_CLASS_RE = /&\.(?:([a-z]{1,3})\\:)?\\-\\-([a-z]+-[\w.]+)\s*[,{]/g
+
+/**
+ * 取出每一個 `@screen` 區塊的範圍(名稱、內容、起始位置)。
+ *
+ * 用大括號配對而不是 regex —— 區塊裡面還有巢狀的選擇器,
+ * regex 抓到的結尾會是第一個右大括號,只涵蓋到區塊的開頭幾行。
+ */
+const screenBlocksOf = (text) => {
+  const blocks = []
+
+  for (const m of text.matchAll(/@screen\s+([\w-]+)\s*\{/g)) {
+    let depth = 0
+
+    for (let i = m.index + m[0].length - 1; i < text.length; i += 1) {
+      if (text[i] === '{') depth += 1
+      else if (text[i] === '}') {
+        depth -= 1
+        if (depth === 0) {
+          blocks.push({ screen: m[1], body: text.slice(m.index, i), at: m.index })
+          break
+        }
+      }
+    }
+  }
+
+  return blocks
+}
+
+const checkBreakpointPrefix = ({ rel, text: raw }) => {
+  if (!isModuleStyle(rel)) return []
+  if (!Object.keys(BREAKPOINT_SCREENS).length) return []
+
+  const text = maskCssComments(raw)
+
+  /* 先認出哪些名字是「父層可傳入的級距」—— 整支檔案裡帶過前綴的那些。
+     這一輪要掃全文,不能只看單一區塊:同一個級距常常只在某一個斷點帶前綴。 */
+  const scales = new Set()
+  for (const m of text.matchAll(SCALE_CLASS_RE)) if (m[1]) scales.add(m[2])
+  if (!scales.size) return []
+
+  const issues = []
+
+  for (const { screen, body, at } of screenBlocksOf(text)) {
+    const expect = BREAKPOINT_SCREENS[screen]
+    if (!expect) continue
+
+    /* 無前綴的寫法代表「所有斷點都套用」,每一個區塊都要有 ——
+       這一份是規則要求的,不寫進設定(每個專案都一樣)。 */
+    const wanted = ['', ...expect]
+    const found = new Map()
+
+    for (const m of body.matchAll(SCALE_CLASS_RE)) {
+      const [, prefix = '', scale] = m
+      if (!scales.has(scale)) continue
+
+      if (!found.has(scale)) found.set(scale, { prefixes: new Set(), at: at + m.index })
+      found.get(scale).prefixes.add(prefix)
+    }
+
+    for (const [scale, { prefixes, at: hit }] of found) {
+      const missing = wanted.filter((prefix) => !prefixes.has(prefix))
+      if (!missing.length) continue
+
+      issues.push(
+        issueOf(
+          rel,
+          lineNoOf(text, hit),
+          'breakpointPrefix',
+          `@screen ${screen} 裡的 --${scale} 少了 ${missing
+            .map((prefix) => (prefix ? `${prefix}:--${scale}` : `--${scale}(無前綴)`))
+            .join(' / ')} —— ` +
+            `使用端那樣寫的話,這個斷點下不會有任何效果,而那一行 class 看起來完全正常`
+        )
+      )
+    }
+  }
+
+  return issues
+}
+
 // --- 規則 moduleVar:級距覆寫要寫在 Variables 檔 -----------------------------
 //
 // 同一屬性出現兩個以上不同值的覆寫 class(&.--px-24 與 &.--px-15)即為一組級距,
@@ -659,7 +789,7 @@ const isScaleValue = (value) => /^\d/.test(value)
 const isVariablesFile = (rel) => /variables\.css$/i.test(rel)
 
 const checkModuleVariables = ({ rel, text: raw }) => {
-  if (!rel.startsWith(MODULES_PREFIX) || !rel.endsWith('.css')) return []
+  if (!isModuleStyle(rel)) return []
   if (isVariablesFile(rel)) return []
 
   const text = maskCssComments(raw)
@@ -683,7 +813,11 @@ const checkModuleVariables = ({ rel, text: raw }) => {
         rel,
         firstLine,
         'moduleVar',
-        `--${prop}-* 有 ${values.size} 個級距值(${[...values.keys()].join(' / ')})—— 級距組要搬到 ${target};跨模組共用則放 ${SHARED_MODULE_VARIABLES}`
+        `--${prop}-* 有 ${values.size} 個級距值(${[...values.keys()].join(' / ')})—— 級距組要搬到 ${target}` +
+          /* 集中目錄還沒有共用變數檔的專案(樣式都跟著元件走,那一層是空的)
+             把設定留空 —— 指一個不存在的位置比不講更糟,照著做會建出
+             一支沒有人知道為什麼在那裡的檔案。 */
+          (SHARED_MODULE_VARIABLES ? `;跨模組共用則放 ${SHARED_MODULE_VARIABLES}` : '')
       )
     })
 }
@@ -723,7 +857,7 @@ const LONG_NAME_RE = new RegExp(
 )
 
 const checkVariableNaming = ({ rel, text: raw }) => {
-  if (!rel.startsWith(MODULES_PREFIX)) return []
+  if (!isModuleStyle(rel)) return []
 
   const text = maskCssComments(raw)
   const issues = []
@@ -766,7 +900,7 @@ const T_SHIRT_VAR_RE = new RegExp(
 )
 
 const checkTShirtSizing = ({ rel, text: raw }) => {
-  if (!rel.startsWith(MODULES_PREFIX)) return []
+  if (!isModuleStyle(rel)) return []
 
   const text = maskCssComments(raw)
   const issues = []
@@ -925,10 +1059,19 @@ const BREAKPOINT_VAR_RE = new RegExp(`(--[\\w-]*?)-(${BREAKPOINT_ALT})-([\\w-]+)
  * 連斷點叫什麼都不知道,無從比對。不過那個方向不會被忽略:
  * 那些檔案本來就會被「尺寸值要分斷點」報一整片,一眼就看得到。
  */
-/** CSS 模組底下有沒有任何一支檔案符合條件 */
+/**
+ * 模組樣式底下有沒有任何一支檔案符合條件。
+ *
+ * 兩種位置都要走過:元件自己的樣式在元件目錄底下,跨模組共用的變數在集中目錄。
+ * 只看其中一種的話,樣式全部放在另一種位置的專案會得到「一個都沒用到」,
+ * 而那個結論會讓前提檢查說反話。
+ */
 const someModuleCss = (root, test) => {
-  const dir = path.join(root, ...CSS_MODULES_DIR.split('/'))
-  if (!fs.existsSync(dir)) return false
+  const dirs = [...COMPONENT_DIRS, CSS_MODULES_DIR]
+    .map((rel) => path.join(root, ...rel.split('/')))
+    .filter((dir) => fs.existsSync(dir))
+
+  if (!dirs.length) return false
 
   const walk = (current) => {
     for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
@@ -945,7 +1088,7 @@ const someModuleCss = (root, test) => {
     return false
   }
 
-  return walk(dir)
+  return dirs.some(walk)
 }
 
 export const hasBreakpointVars = (root) => {
@@ -977,7 +1120,7 @@ const checkBreakpointSet = ({ rel, text: raw }) => {
   if (!BREAKPOINTS.length) return []
 
   // 豁免標記寫在註解裡,所以要先判斷,再把註解遮掉
-  if (!rel.startsWith(MODULES_PREFIX) || hasExemptMark(raw, 'breakpoint')) return []
+  if (!isModuleStyle(rel) || hasExemptMark(raw, 'breakpoint')) return []
 
   const text = maskCssComments(raw)
   const groups = new Map()
@@ -1029,7 +1172,7 @@ const SIZE_VALUE_RE = /^-?\d*\.?\d+(px|rem|em|vw|vh|%)$/
 const NEUTRAL_VALUE = new Set(['0', '0px', 'auto', 'none', 'inherit', 'initial', 'transparent', '100%'])
 
 const checkBreakpointNeeded = ({ rel, text: raw }) => {
-  if (!rel.startsWith(MODULES_PREFIX) || !/variables\.css$/i.test(rel)) return []
+  if (!isModuleStyle(rel) || !/variables\.css$/i.test(rel)) return []
 
   // 豁免標記寫在註解裡,所以要先判斷,再把註解遮掉
   if (hasExemptMark(raw, 'breakpoint')) return []
@@ -1078,14 +1221,17 @@ const checkBreakpointNeeded = ({ rel, text: raw }) => {
 /** mForm → m-form;mDatePicker → m-date-picker */
 const toKebab = (name) => name.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase()
 
-/** 從檔案路徑推出這支 css 允許的 class 前綴;推不出來回傳 null(不檢查) */
+/**
+ * 從檔案路徑推出這支 css 允許的 class 前綴;推不出來回傳 null(不檢查)。
+ *
+ * 元件的樣式與它的 .vue 放在同一個資料夾,所以資料夾名就是模組名 ——
+ * mForm 那個資料夾底下的每一支 css,class 一律是 `m-form` 開頭。
+ *
+ * 名字不是 `m` 開頭接大寫的話推不出前綴(那不是這套命名裡的模組),回 null。
+ */
 const modulePrefixOf = (rel) => {
-  const rest = rel.slice(MODULES_PREFIX.length)
-  const segments = rest.split('/')
-
-  // _modules/mForm/selection.css → mForm;_modules/mForm.css → mForm
-  const moduleName = segments.length > 1 ? segments[0] : segments[0].replace(/\.css$/i, '')
-  if (!/^m[A-Z]/.test(moduleName)) return null
+  const moduleName = moduleFolderOf(rel)
+  if (!moduleName || !/^m[A-Z]/.test(moduleName)) return null
 
   return toKebab(moduleName)
 }
@@ -1093,10 +1239,24 @@ const modulePrefixOf = (rel) => {
 /** 選擇器行裡的 class token(含 CSS escape 的 \-\- 寫法) */
 const CLASS_TOKEN_RE = /\.((?:\\.|[\w-])+)/g
 
+/**
+ * 建置工具的關聯機制 class —— 不是任何模組的 class,而是「父層或兄弟的狀態」的掛勾。
+ *
+ * 父層掛上它,底下的元件就能對父層的 hover / focus 有反應。使用端掛在外面,
+ * 元件的樣式裡要寫得出那個條件,否則這種連動沒有辦法做。
+ *
+ * 具名的寫法(`group/card`)是同一種東西,取斜線前那一段比對。
+ *
+ * 這幾個名字由建置工具定義,與專案無關,所以寫在規則裡,不進專案設定。
+ */
+const STRUCTURAL_CLASSES = new Set(['group', 'peer'])
+
+const isStructuralClass = (cls) => STRUCTURAL_CLASSES.has(cls.split('/')[0])
+
 const unescapeClass = (raw) => raw.replace(/\\/g, '')
 
 const checkModuleScope = ({ rel, text: raw }) => {
-  if (!rel.startsWith(MODULES_PREFIX) || !rel.endsWith('.css')) return []
+  if (!isModuleCss(rel)) return []
 
   const prefix = modulePrefixOf(rel)
   if (!prefix) return []
@@ -1118,6 +1278,7 @@ const checkModuleScope = ({ rel, text: raw }) => {
 
       if (cls.startsWith('--')) continue // modifier / 狀態
       if (/^j[A-Z]/.test(cls)) continue // 純給 JS 抓的 hook class
+      if (isStructuralClass(cls)) continue // 父層 / 兄弟狀態的掛勾,不是模組的 class
       if (cls === prefix || cls.startsWith(`${prefix}-`)) continue // 自己的 class
       if (seen.has(cls)) continue
       seen.add(cls)
@@ -1136,6 +1297,94 @@ const checkModuleScope = ({ rel, text: raw }) => {
   })
 
   return issues
+}
+
+// --- 規則 moduleLocation:元件的樣式要放在元件自己的資料夾 ---------------------
+//
+// 集中目錄是留給「跨模組共用的變數」的 —— 兩個以上的元件都要用、不屬於任何一支。
+// 一支樣式的名字對得上某個實際存在的元件時,它就屬於那個元件,要搬過去。
+//
+// **這條擋的是一種安靜的失效。** class 前綴那條只看元件自己的樣式,
+// 所以留在集中目錄的檔案不會被它檢查 —— 不是報錯,是完全沒有訊息:
+// 違規數字還會因此變少,看起來像程式碼變好了。
+// 規則改了位置而存量沒搬的專案,正是靠這條才知道有一批檔案沒有人在看。
+
+/** 這個名字對得上哪一個實際存在的元件 —— 對不上回 null(那就是共用的,留在原地) */
+const componentDirOf = (root, name) => {
+  for (const dir of COMPONENT_DIRS) {
+    const base = path.join(root, ...dir.split('/'))
+    if (!fs.existsSync(base)) continue
+
+    const found = findComponentFolder(base, name)
+    if (found) return toRel(root, found)
+  }
+
+  return null
+}
+
+/**
+ * 這個資料夾是元件本身,還是只是把元件分類起來的一層 ——
+ * 直接放著 `.vue` 的才是元件。
+ *
+ * 元件目錄底下常常先分幾個大類(共用的、某個功能的),每一類底下才是元件。
+ * 分類層不分辨出來的話,一支放在分類資料夾底下的樣式會被判成「屬於那個分類」,
+ * 而照著搬的結果是好幾個元件的樣式全堆進同一個資料夾 ——
+ * 元件與樣式的對應關係反而消失,正好是這條規則要達成的相反。
+ */
+const isComponentFolder = (dir) =>
+  fs.readdirSync(dir, { withFileTypes: true }).some((item) => item.isFile() && item.name.endsWith('.vue'))
+
+/** 走訪元件目錄,找同名的元件資料夾或同名的 .vue(後者代表那支元件還沒有自己的資料夾) */
+const findComponentFolder = (dir, name) => {
+  for (const item of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, item.name)
+
+    if (item.isDirectory()) {
+      if (item.name === name && isComponentFolder(full)) return full
+
+      /* 名字對上了但那是分類層時也繼續往深處找 ——
+         同一個名字可能在更底下有一個真的元件。 */
+      const deeper = findComponentFolder(full, name)
+      if (deeper) return deeper
+      continue
+    }
+
+    if (item.name === `${name}.vue`) return path.join(dir, name)
+  }
+
+  return null
+}
+
+const checkModuleLocation = ({ rel, root }) => {
+  if (!isSharedCss(rel)) return []
+
+  /* 名字從路徑推:`<集中目錄>/mForm/common.css` 的模組名是 mForm,
+     `<集中目錄>/mForm.css` 也是 —— 兩種擺法都有專案在用。
+
+     集中目錄底下也可能先分一層類(`<集中目錄>/<分類>/mChart/common.css`),
+     所以由深到淺試每一段資料夾名,第一個對得上實際元件的就是歸屬 ——
+     只看第一段的話,那一段常常是分類名,會把一整批不同元件的樣式
+     都判成屬於同一個「元件」。 */
+  const parts = rel.slice(`${CSS_MODULES_DIR}/`.length).split('/')
+  const folders = parts.slice(0, -1)
+  const candidates = folders.length ? [...folders].reverse() : [parts[0].replace(/\.css$/i, '')]
+
+  for (const moduleName of candidates) {
+    const target = componentDirOf(root, moduleName)
+    if (!target) continue
+
+    return [
+      issueOf(
+        rel,
+        1,
+        'moduleLocation',
+        `這支樣式屬於元件 ${moduleName} —— 搬進 ${target}/${MODULE_CSS_DIR_NAME}/,` +
+          `留在集中目錄的話「模組 css 只能寫自己那組 class」那條不會檢查它,而且沒有任何訊息`
+      ),
+    ]
+  }
+
+  return []
 }
 
 // --- 自動修正用的工具 -------------------------------------------------------
@@ -1370,7 +1619,9 @@ const CHECKS = [
   checkDeadThemeClass,
   checkModuleImportOrder,
   checkModuleScope,
+  checkModuleLocation,
   checkModuleVariables,
+  checkBreakpointPrefix,
   checkVariableNaming,
   checkTShirtSizing,
   checkThemeNaming,
@@ -1436,6 +1687,19 @@ export const lintText = (root, rel, text, definedVars) => {
 export const lintFile = (root, abs, definedVars) =>
   lintText(root, toRel(root, abs), fs.readFileSync(abs, 'utf8'), definedVars)
 
+/**
+ * 不是給人遵守的規範,而是工具自己的狀態回報。
+ *
+ * 其餘每一條規則都要在寫法規範(`.claude/skills/`)或跨規則的共同前提
+ * (`.claude/rules/`)裡講到 —— 被一條沒有寫在規範裡的規則擋下來,
+ * 看到的只是一個陌生的代號,而照著規範做的人不可能事先知道有這回事。
+ *
+ * 這一條不一樣:它報的是「某條規則這次執行失敗了」,沒有任何寫法可以遵守。
+ * 把它也要求寫進規範的話,那一段只會寫成「工具壞掉時會報這個」——
+ * 對讀規範的人沒有用,而規則自己的驗證會比對兩邊,所以要在這裡講明。
+ */
+export const TOOL_STATE_RULES = ['ruleCrashed']
+
 /** 規則代號 → 標題與修正提示,五層共用 */
 export const RULE_TITLE = {
   /* 規則自己壞掉 —— 不是程式碼違規,但要跟違規一起被看到:
@@ -1449,7 +1713,9 @@ export const RULE_TITLE = {
   themeNaming: 'tailwind theme 自己定義的值用了尺寸縮寫',
   moduleOrder: '模組 css 的引入順序',
   moduleScope: '模組 css 混入了別的 class',
+  moduleLocation: '元件的樣式放在集中目錄,不在元件自己的資料夾裡',
   moduleVar: '模組級距變數的歸屬',
+  breakpointPrefix: '級距在某個斷點少列了前綴',
   variable: '模組變數的命名或斷點',
   ...GLOBAL_RULE_TITLE,
   ...API_RULE_TITLE,
@@ -1465,12 +1731,14 @@ export const RULE_HINT = {
   color: `色票定義在 ${COLOR_CSS_DIR}/${COLOR_CSS_PREFIX}*.css,使用端寫 var(--色名-色碼)`,
   colorFile: `跨分組共用的色值收進 ${SHARED_COLOR_CSS_PATH};命名要人工改,改名會牽動每一個使用端`,
   colorSort: '存檔或 npm run sort:color 就會排好,不必自己動手',
-  tailwind: `樣式搬進 ${CSS_MODULES_DIR}/,template 只留組件 class 與 --modifier`,
+  tailwind: `樣式搬進這支元件自己的 css(與它的 .vue 放在同一個資料夾),template 只留組件 class 與 --modifier`,
   theme: `theme 的 ${THEME_GROUPS.map((g) => g.key).join(' / ')} 是整組覆寫,內建 key 全部不存在`,
   themeNaming: '整組覆寫後重新定義的值不要再用 sm / md / lg —— 改用說得出用途的名字或實際數值',
   moduleOrder: '變數檔一律排在版型檔之前 —— 變數先定義完,版型才取用',
   moduleScope: '一支模組 css 只能寫自己那組 class,變體的 class 也要收斂成同一個前綴',
+  moduleLocation: '搬進那支元件自己的資料夾 —— 留在集中目錄的話,class 前綴那條不會檢查它',
   moduleVar: '同屬性兩個以上級距值要搬到 ***Variables.css',
+  breakpointPrefix: '每個 @screen 區塊都要列齊會命中該斷點的前綴變體',
   variable: '命名對齊 tailwind(w / h / p / rounded / leading);尺寸值要三個斷點成套,級距用實際數值不用 sm / md / lg',
   ...GLOBAL_RULE_HINT,
   ...API_RULE_HINT,

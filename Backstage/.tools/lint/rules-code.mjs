@@ -17,6 +17,8 @@ import {
   VIEWS_DIR,
   issueOf,
   lineNoOf,
+  maskHtmlComments,
+  templateRangeOf,
 } from './shared.mjs'
 
 /* 「這個檔案是不是原始碼」的判斷收在 shared.mjs 一份 —— 原始碼放在哪由設定決定,
@@ -37,7 +39,7 @@ const isCommentLine = (line) => /^\s*(?:\/\/|\/\*|\*)/.test(line.trim() ? line :
 // 相對路徑含 `..` 且解析後落在某個 alias 目錄下 → 改用**最深層**那個 alias。
 // 同層的 ./Foo 不管(那是正常寫法,擋了只會製造噪音)。
 //
-// 為什麼:`../../../scripts/_api/x.js` 這種路徑,搬動檔案時要一層層重算,
+// 為什麼:`../../../<別的資料夾>/x.js` 這種路徑,搬動檔案時要一層層重算,
 // 而且看不出它到底指到哪裡。alias 寫法搬檔案時完全不用改。
 //
 // alias 表直接讀專案的建置設定,不另外維護一份 —— 兩份表就會有對不上的一天,
@@ -819,6 +821,89 @@ const IMPORT_SPEC_RE = /^import\s+(?:[^'"\n]*?from\s*)?['"]([^'"]+)['"]/gm
 /** 樣式是第一組 —— 「一定要有」檢查的就是這一組有沒有出現 */
 const STYLE_GROUP = 0
 
+/**
+ * 這支元件有沒有自己的 class。
+ *
+ * 有一種元件自己完全不寫 class:它把設定往下傳給另一支元件,畫面與樣式
+ * 都由被轉手的那支負責。**那種元件沒有樣式可以載入** —— 要求它載一支,
+ * 等於要它去 import 別人的樣式,或為它建一支空檔案。
+ *
+ * 判斷看的是靜態寫出來的 class。動態綁定(`:class="setClass.main"`)不算 ——
+ * 那個值由使用端傳進來,樣式該由傳進來的那一方負責。
+ *
+ * 被註解掉的那一段不算 —— 那是死程式碼,裡面的 class 不會產生任何樣式。
+ */
+const hasOwnClass = (text) => {
+  const tpl = templateRangeOf(text)
+  if (!tpl) return false
+
+  return /\sclass\s*=\s*"[^"]/.test(maskHtmlComments(tpl.body))
+}
+
+// --- 規則 vueFileName:.vue 的檔名怎麼取 --------------------------------------
+//
+// 兩種檔案的命名方向相反,分辨的是「它是不是一個網址」:
+//
+//   元件   首字大寫(PascalCase)—— 它在別的畫面裡被當成一個標籤寫出來,
+//          而標籤的慣例就是大寫開頭;檔名與標籤一致才找得到它在哪
+//   頁面   首字小寫(camelCase)—— 它對應的是一個網址,不是標籤,
+//          而網址一向是小寫的;與 store 檔名、api 函式的命名也是同一套
+//
+// 元件資料夾底下那支「就是這個元件」的檔案叫 `Index.vue`:自動注入會略過
+// 那一層,所以使用端寫的是資料夾名本身。取名 `Main.vue` 的話,名字裡會多出
+// 一段不帶資訊的字,而讀的人看不出資料夾裡哪一支才是這個元件。
+//
+// 頁面目錄底下,底線開頭的資料夾裡放的不是頁面(元件、片段那些),
+// 所以那裡面的 .vue 照元件那一套命名。
+
+/** 元件資料夾的主檔;`Main.vue` 是該被改掉的那一種 */
+const MAIN_FILE_NAME = 'Index.vue'
+const LEGACY_MAIN_RE = /^main\.vue$/i
+
+/** 底線開頭的資料夾 —— 不對應網址的那些(元件、片段) */
+const isUnderscoreFolder = (rel) => /\/_[^/]+\//.test(rel)
+
+const isComponentVue = (rel) =>
+  rel.startsWith(`${COMPONENTS_DIR}/`) ||
+  (rel.startsWith(`${VIEWS_DIR}/`) && isUnderscoreFolder(rel))
+
+const isPageVue = (rel) => rel.startsWith(`${VIEWS_DIR}/`) && !isUnderscoreFolder(rel)
+
+const checkVueFileName = ({ rel }) => {
+  if (!rel.endsWith('.vue')) return []
+
+  const base = path.basename(rel)
+  const first = base[0]
+  const report = (detail) => [issueOf(rel, 1, 'vueFileName', detail)]
+
+  if (isComponentVue(rel)) {
+    if (LEGACY_MAIN_RE.test(base)) {
+      return report(
+        `元件資料夾的主檔要叫 ${MAIN_FILE_NAME} —— 自動注入會略過那一層,` +
+          `使用端寫的是資料夾名本身;取名 Main 會讓那個名字多出一段不帶資訊的字`
+      )
+    }
+
+    if (first !== first.toUpperCase()) {
+      return report(
+        `元件的檔名首字要大寫(${base} → ${first.toUpperCase()}${base.slice(1)})—— ` +
+          `它在別的畫面裡是一個標籤,檔名與標籤一致才找得到它在哪`
+      )
+    }
+
+    return []
+  }
+
+  if (isPageVue(rel) && first !== first.toLowerCase()) {
+    return report(
+      `頁面的檔名首字要小寫(${base} → ${first.toLowerCase()}${base.slice(1)})—— ` +
+        `頁面對應的是一個網址,不是標籤;store 的檔名與層名也是這一套`
+    )
+  }
+
+  return []
+}
+
 const checkImportOrder = ({ rel, text }) => {
   if (!rel.startsWith(`${COMPONENTS_DIR}/`) || !rel.endsWith('.vue')) return []
 
@@ -826,6 +911,11 @@ const checkImportOrder = ({ rel, text }) => {
     (m) => importGroupOf(m[1]) === STYLE_GROUP
   )
   if (hasStyle) return []
+
+  /* 自己完全不寫 class 的轉手元件沒有樣式可載,這條的前提不成立。
+     報它的話只有兩條路:去 import 別人的樣式,或建一支空的樣式檔 ——
+     兩種都比違規本身更糟。 */
+  if (!hasOwnClass(text)) return []
 
   return [
     issueOf(
@@ -906,19 +996,21 @@ export const onSortImports = (text, rel) => {
   return changed ? nextLines.join('\n') : null
 }
 
-export const CODE_CHECKS = [checkImportAlias, checkDeprecated, checkImportOrder]
+export const CODE_CHECKS = [checkImportAlias, checkDeprecated, checkImportOrder, checkVueFileName]
 
 /* composableOrder 沒有出現在這兩張表裡 —— 它不報違規,存檔時直接把順序排好。
    自動修正的行為在 onSortComposables。 */
 
 export const CODE_RULE_TITLE = {
   importOrder: '元件沒有載入樣式',
+  vueFileName: '.vue 的檔名怎麼取',
   importAlias: 'import 沒有使用 alias',
   deprecated: '已淘汰的寫法',
 }
 
 export const CODE_RULE_HINT = {
   importOrder: '元件的樣式寫在 CSS 模組裡,由元件自己 import(分組順序存檔時自動排好)',
+  vueFileName: '元件首字大寫、主檔叫 Index.vue;頁面首字小寫',
   importAlias: '離開自己資料夾的相對路徑改用 @ alias',
   deprecated: 'apiParams / inject(route) 已淘汰;actions 不留 console.log、不 bare 透傳',
 }

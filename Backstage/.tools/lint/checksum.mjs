@@ -104,11 +104,17 @@ export const fingerprintDiff = () => {
     }))
 }
 
-if (process.argv.includes('--write')) {
+/* 只有「直接執行這一支」才動指紋清單。
+   少了這個判斷的話,任何帶 --write 的指令(例如色票排序)只要 import 了這支,
+   就會順手把現在的內容封存起來 —— 被改過的共用規則因此被蓋章,
+   下一次比對當然一致,而保護就這樣安靜地失效了。 */
+const isMain = process.argv[1]?.endsWith('checksum.mjs')
+
+if (isMain && process.argv.includes('--write')) {
   const file = path.join(root, ...CHECKSUM_FILE.split('/'))
   fs.writeFileSync(file, `${JSON.stringify(currentFingerprints(), null, 2)}\n`, 'utf8')
   console.log(`已更新 ${CHECKSUM_FILE}(${Object.keys(currentFingerprints()).length} 支規則檔)`)
-} else if (process.argv[1]?.endsWith('checksum.mjs')) {
+} else if (isMain) {
   const diff = fingerprintDiff()
 
   /* 沒有清單與比對通過是兩件事,訊息要分得開 —— 都說「一致」的話,

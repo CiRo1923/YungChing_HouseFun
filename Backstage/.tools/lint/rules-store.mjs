@@ -9,6 +9,7 @@ import {
   ACTIONS_DIR_NAME,
   STANDALONE_STORES,
   STORE_DIR,
+  STORE_SETUP_CALLS,
   VIEWS_DIR,
   bodyRangeOf,
   findNearFolder,
@@ -18,6 +19,7 @@ import {
   issueOf,
   lineNoOf,
   listViewFolders,
+  listViewSubFolders,
   viewResourceDirOf,
 } from './shared.mjs'
 
@@ -57,7 +59,7 @@ const isActionsFile = (rel) => rel.startsWith(`${STORE_DIR}/`) && isInActions(re
 // 抓的是「同一個名稱的其他寫法」:少了字尾 s、首字大寫、兩者都有。
 // 全站混用兩種寫法的話,每次寫 import 都要先確認這一支是哪一種。
 
-/** store 目錄的最後一層,例如設定為 `src/stores` 時就是 `stores` */
+/** store 目錄的最後一層 —— 設定寫的是完整路徑,這裡只取末端那一段 */
 const STORE_DIR_NAME = STORE_DIR.split('/').pop()
 
 /** 同一個名稱容易被寫成的其他樣子 —— 大小寫與單複數的組合,不含正確的那一個 */
@@ -120,6 +122,25 @@ const FN_DECLARE_RE =
 /** const x = ref(…) 的 ref 部分 */
 const INIT_CALL_RE = /^\s*(?:export\s+)?(?:const|let|var)\s+(\w+)\s*=\s*(?:await\s+)?(\w+)\s*\(/
 
+/**
+ * 這個呼叫可不可以出現在 store 裡。
+ *
+ * 三種算數:
+ *
+ *   狀態的初始化      ref / computed / readonly 那幾支
+ *   取用另一個 store  pinia 的正常用法,不是行為
+ *   讀設定、讀環境    把執行期的值讀出來組初始值 —— 哪幾支由專案填
+ *                     (STORE_SETUP_CALLS),因為各框架讀設定的方式不一樣
+ *
+ * 判準抽出來是為了讓驗證直接測得到:多數專案那份設定是空的,
+ * 靠實際檔案來驗的話,「清單裡的那幾支會被放行」這件事永遠沒有人守。
+ */
+export const isStoreDeclareCall = (name, setupCalls = STORE_SETUP_CALLS) =>
+  DECLARE_CALLS.has(name) ||
+  /^use[A-Z]\w*Store$/.test(name) ||
+  name === 'storeToRefs' ||
+  setupCalls.includes(name)
+
 /** 物件屬性寫成函式:onDo: () => {} / onDo: function () {} */
 const OBJECT_METHOD_RE = /^\s*(\w+)\s*:\s*(?:async\s*)?(?:function\b|\([^)]*\)\s*=>|\w+\s*=>)/
 
@@ -141,10 +162,7 @@ const checkStoreDeclare = ({ rel, text }) => {
 
     const init = line.match(INIT_CALL_RE)
 
-    // 取用另一個 store(useXxxStore / storeToRefs)是 pinia 的正常用法,不是行為
-    const isStoreAccess = /^use[A-Z]\w*Store$/.test(init?.[2] ?? '') || init?.[2] === 'storeToRefs'
-
-    if (init && !DECLARE_CALLS.has(init[2]) && !isStoreAccess) {
+    if (init && !isStoreDeclareCall(init[2])) {
       issues.push(
         issueOf(
           rel,
@@ -206,13 +224,28 @@ const checkStoreNaming = ({ rel, text }) => {
 const checkStoreScope = ({ rel, root }) => {
   if (!isStoreFile(rel)) return []
 
+  const name = path.basename(rel, '.js')
+  if (ALLOWED_STANDALONE.has(name)) return []
+
+  /* store 放進子資料夾時,檔名指的是那個資源底下的某一個畫面,不是第一層 ——
+     拿第一層去比對的話,分層的專案每一支都會被報「沒有對應的資料夾」,
+     而它們其實都對得上。分層本身是支援的(storeLayer 那條就在管它)。 */
+  const isNested = rel.slice(`${STORE_DIR}/`.length).includes('/')
+
   const folders = listViewFolders(root)
   if (!folders) return []
 
-  const name = path.basename(rel, '.js')
-  if (folders.has(name) || ALLOWED_STANDALONE.has(name)) return []
+  /* 分層時,那一層都算數:子資料夾有時是把同一個資源的幾支聚在一起(檔名對第二層),
+     有時只是分類(檔名仍對第一層)。只認其中一層的話,另一種擺法會整批誤報,
+     而它們都對得上某一個畫面 —— 這條要的就是那件事。 */
+  const candidates = isNested
+    ? new Set([...folders, ...(listViewSubFolders(root) ?? [])])
+    : folders
 
-  const near = findNearFolder(folders, name)
+  if (candidates.has(name)) return []
+
+  const near = findNearFolder(candidates, name)
+  const where = isNested ? `${VIEWS_DIR} 底下(含各資源再分的那一層)` : VIEWS_DIR
 
   return [
     issueOf(
@@ -220,8 +253,8 @@ const checkStoreScope = ({ rel, root }) => {
       1,
       'storeScope',
       near
-        ? `檔名 ${name}.js 對不上資料夾 —— ${VIEWS_DIR} 底下是 ${near}/,兩邊要一致(改檔名或改資料夾名)`
-        : `檔名 ${name}.js 在 ${VIEWS_DIR} 底下沒有對應的資料夾 —— store 依頁面資料夾切分;跨頁面的基礎建設才加進 ALLOWED_STANDALONE,並在那裡寫清楚理由`
+        ? `檔名 ${name}.js 對不上資料夾 —— ${where}是 ${near}/,兩邊要一致(改檔名或改資料夾名)`
+        : `檔名 ${name}.js 在 ${where}沒有對應的資料夾 —— store 依頁面資料夾切分;跨頁面的基礎建設才加進 ALLOWED_STANDALONE,並在那裡寫清楚理由`
     ),
   ]
 }

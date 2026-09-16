@@ -4,8 +4,14 @@
 #   1. 色票檔排序不對 → 自動排序並重新 git add(無害的純順序調整)
 #   2. 本次 staged 的檔案 → 跑規範檢查(css / api / store / page 四類都在內),印提醒
 #
-# 只警告不阻擋 commit(與開發伺服器外掛、存檔守門一致)——
-# 存量還沒清完,擋下來只會逼人加 --no-verify,反而讓守門機制形同虛設。
+# **規範違規只提醒,不擋 commit;規則自己壞掉才擋。**
+#
+# 兩者的差別在於「擋下來之後做得到嗎」:規則壞掉是一兩行的事,當場修得完;
+# 而既有的違規存量清不完,擋下來只會逼人繞過整個 hook,那時連規則壞掉也不會被擋。
+#
+# 存量清乾淨之後,這裡要改成違規也擋 —— 那時擋不到任何人,
+# 卻能讓「新寫的程式碼一律合規」變成事實。**不要留跳過的旗標**:
+# 它會從「緊急時用」變成「每次都用」,那時規範等於不存在,而大家還以為有守門。
 #
 # 此 hook 由 .githooks/ 進版控,經 core.hooksPath 生效(npm run hooks:install,
 # postinstall 會自動跑)。
@@ -17,6 +23,7 @@
 
 YELLOW='\033[33m'
 GREEN='\033[32m'
+RED='\033[31m'
 RESET='\033[0m'
 
 # 副檔名要與 .tools/lint/project-config.mjs 的 SCANNABLE_EXTENSIONS 一致。
@@ -82,14 +89,42 @@ for root in $ROOTS; do
     fi
   done
 
-  # --- 2. 規範檢查(只看 staged 的檔案)--------------------------------------
+  # --- 2. 規則自己有沒有壞掉(這次動到規則檔才跑)-----------------------------
+  #
+  # 規則改壞了、或改完忘了重新封存指紋,commit 當下不擋的話完全沒有徵兆 ——
+  # 那份對不上的指紋一路複製到別的專案,那邊會整批報「規則被改過」,
+  # 而他們一個字都沒動。
+  #
+  # 只在這次有動到規則檔時跑(大約兩秒),一般的 commit 不會被拖慢。
+
+  if echo "$FILES" | grep -qE '^\.tools/lint/.*\.mjs$'; then
+    if ! (cd "$root" && npm run test:css --silent); then
+      printf "\n${RED}規則自己的驗證沒有通過,這次 commit 停下來。${RESET}\n"
+      printf "${RED}  上面列出是哪幾則沒過。要再跑一次:npm run test:css${RESET}\n"
+      printf "${RED}  改完規則忘了重新封存指紋也會停在這裡:npm run rules:seal${RESET}\n"
+      printf "${RED}  為什麼這一項擋、而規範違規只提醒:規則壞掉之後它不會報錯,${RESET}\n"
+      printf "${RED}     只是安靜地不再檢查任何東西,而畫面上顯示的是通過 —— 那種問題${RESET}\n"
+      printf "${RED}     要幾個月後才會有人發現。修它通常是一兩行的事,當場就做得完。${RESET}\n\n"
+      exit 1
+    fi
+  fi
+
+  # --- 3. 規範檢查(只看 staged 的檔案)--------------------------------------
 
   # shellcheck disable=SC2086
   if ! (cd "$root" && node .tools/lint/lint.mjs $FILES); then
-    printf "\n${YELLOW}以上是本次 commit 檔案的規範提醒,commit 照常完成。${RESET}\n"
-    printf "${YELLOW}  需要協助時,在 Claude Code 對話框輸入「修正」或「好」,Claude Code 會接手處理${RESET}\n"
-    printf "${YELLOW}     (它已經知道是哪個檔案、哪幾行)。${RESET}\n"
-    printf "${YELLOW}     此訊息僅為提醒,不會影響 commit;為了讓寫法保持一致,建議找時間調整。${RESET}\n\n"
+    # 兩條路都寫出來,而且不指名任何一個產品 —— 自己照訊息改的人要知道
+    # 「每一筆都寫了怎麼改」,用 AI 面板的人要知道可以直接交給它。
+    # 只寫其中一條的話,另一種人每次 commit 都被指到一個與他無關的地方。
+    #
+    # 也要寫出「為什麼現在不擋」:只說「照常完成」的話,這段黃字每次都出現,
+    # 幾次之後就被當成背景雜訊,而看的人不知道它以後會變成擋下來。
+    printf "\n${YELLOW}以上是這次 commit 檔案的規範提醒 —— commit 已經完成,這些不會擋下你。${RESET}\n"
+    printf "${YELLOW}  怎麼修:每一筆後面都寫了要改成什麼,照著改就對了。${RESET}\n"
+    printf "${YELLOW}  用 AI 面板的話:把這段貼進去,或直接說「修正」。${RESET}\n"
+    printf "${YELLOW}  再看一次:npm run lint:css <檔案>${RESET}\n"
+    printf "${YELLOW}  為什麼現在不擋:專案還有一批既有的違規沒清完,現在擋下來只會逼人繞過整個檢查。${RESET}\n"
+    printf "${YELLOW}     清完之後這裡會改成違規就擋 —— 到那時新寫的程式碼一律要合規。${RESET}\n\n"
   fi
 done
 

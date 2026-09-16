@@ -558,9 +558,13 @@ const buildBlockBody = (items, indent, withLabels) => {
     const hue = hueOf(item.name, item.value)
     const label = hue === null ? 'other' : HUE_LABEL[hue]
 
-    if (withLabels && label !== currentHue) {
+    /* 色系換一組就空一行 —— 標籤有沒有跟著出現要看這份檔案原本的風格,
+       但分組本身不分風格:一整片連續的變數要靠逐行讀名字才知道換色系了。
+       排序會打散原本的位置,人手寫的分組空行留在原地也對不上,
+       所以由這裡重新放。 */
+    if (label !== currentHue) {
       if (lines.length) lines.push('')
-      lines.push(`${indent}/* ${label} */`)
+      if (withLabels) lines.push(`${indent}/* ${label} */`)
       currentHue = label
     }
 
@@ -583,6 +587,9 @@ const buildBlockBody = (items, indent, withLabels) => {
  *
  * 用現況判斷而不是設定:多一個設定就要每個專案回答一次「你要不要標頭」,
  * 而答案早就寫在他們的色票檔裡了。
+ *
+ * **管的只有標籤,不含分組的空行。** 色系之間空一行是規範(見色票的寫法規範),
+ * 每個專案都一樣,所以不看現況 —— 一整片連續的變數要逐行讀名字才知道換色系了。
  */
 const hasHueLabels = (items) =>
   items.some((item) => (item.comments ?? []).some(isHueLabel))

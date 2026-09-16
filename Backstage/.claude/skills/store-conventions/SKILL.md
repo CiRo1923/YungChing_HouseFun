@@ -1,7 +1,7 @@
 ---
 name: store-conventions
 summary: store / actions
-description: 本專案的 store 與 actions 撰寫規範(store 目錄的 *.js 與 .composables/use*Actions.js)。當新增或修改 store、搬移狀態歸屬、取用 store 的值、新增呼叫 api 的 action,或審查既有 store 寫法時使用。規則:store 只放宣告(變數與 computed),function 一律進 .composables/use*Actions.js;檔名與分層跟著頁面目錄的資料夾走,層裡面有 data 還是 apiData 看這一頁與後端的往來而定;送出參數的預設值集中成 const apiDefault = readonly({ … });取值一律走 storeToRefs,直接解構或賦值會斷掉響應;action 命名為 onApi + api 函式名,一律 return { config, status, data };action 基本只覆寫 apiData 與 data,只有一頁要用的邏輯寫在頁面、多頁共用的自訂欄位(_ 開頭)才寫進 action。
+description: 本專案的 store 與 actions 撰寫規範(store 目錄的 *.js 與 .composables/use*Actions.js)。當新增或修改 store、搬移狀態歸屬、取用 store 的值、新增呼叫 api 的 action,或審查既有 store 寫法時使用。規則:store 檔名對得上頁面資料夾(一個資源拆成好幾支時放進子資料夾,那時檔名指的是資源底下的那一個畫面);store 只放宣告(變數與 computed),function 一律進 .composables/use*Actions.js;檔名與分層跟著頁面目錄的資料夾走,層裡面有 data 還是 apiData 看這一頁與後端的往來而定;送出參數的預設值集中成 const apiDefault = readonly({ … });取值一律走 storeToRefs,直接解構或賦值會斷掉響應;action 命名為 onApi + api 函式名,一律 return { config, status, data };action 基本只覆寫 apiData 與 data,只有一頁要用的邏輯寫在頁面、多頁共用的自訂欄位(_ 開頭)才寫進 action。
 ---
 
 # store / actions 撰寫規範
@@ -47,6 +47,22 @@ export const useExchangeStore = defineStore('exchange', () => {
 ## 2. 分層跟著頁面
 
 規則 `storeScope`(檔名)與 `storeLayer`(分層),都會擋。
+
+**檔名對得上頁面目錄的資料夾。** 一個資源一支 store(`member.js` 對
+`member/`),跨頁面的基礎建設放例外清單(設定的 `STANDALONE_STORES`)。
+
+**一個資源大到要拆成好幾支時,把它們放進子資料夾。** 那時檔名指的是
+「那個資源底下的某一個畫面」,規則兩層都認:
+
+```
+stores/member.js              →  views/member/          一支管整個資源
+stores/member/center.js       →  views/member/center/   拆開之後,檔名指的是那個畫面
+stores/memberAuth/forget.js   →  views/member/forget/   子資料夾是把相關的幾支聚在一起
+```
+
+最後一種的子資料夾名(`memberAuth`)與頁面的第一層(`member`)不一樣 ——
+那是正常的:子資料夾只是把認證相關的幾支收在一起,而**檔名仍然對得上某一個畫面**。
+規則看的是檔名,不是子資料夾名。
 
 **一個頁面一層,層名就是頁面名(首字小寫)。**
 
@@ -171,6 +187,31 @@ detail.value.delivery.apiData = { ...apiDefault.detail.delivery }
   之後每次 reset 都還原成被改過的值,而且完全沒有徵兆。
 - **reset 不要手寫預設值**。散在各處的話,改一個欄位要同時記得改 store 的初始值
   與每一支 reset,漏掉一邊不會報錯 —— 只會在「送出前先重填一次」的流程裡帶到舊值。
+
+### 預設值要看執行期的設定時
+
+有些預設值依環境而不同(開發環境先帶一組測試用的值,正式環境留空)。
+那個設定要在 store 建立的當下就讀到 —— 搬進 actions 的話,
+預設值就不能再是一份靜態宣告,而那正是這一條要求的形狀。
+
+**所以在 store 裡讀設定是可以的:**
+
+```js
+const config = useRuntimeConfig()
+const isDev = config.public.APP_MODE === 'dev'
+
+const apiDefault = readonly({
+  account: isDev ? '0900000000' : null,
+  password: isDev ? '12345678' : null,
+})
+```
+
+「store 只放宣告」那條(`storeDeclare`)認得這種呼叫 —— 哪幾支算「讀設定」
+由專案填(設定的 `STORE_SETUP_CALLS`),因為各框架讀設定的方式不一樣:
+有的是一支函式,有的直接讀建置時注入的變數(那種不是呼叫,本來就不會被報)。
+
+**只填「讀出來就結束」的那幾支。** 會打 api、會改狀態的一律不要列 ——
+那是行為,列進去等於讓那條規則對這個專案失效,而且看不出來。
 
 ## 4. 取值一律走 storeToRefs
 
