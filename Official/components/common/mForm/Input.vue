@@ -1,7 +1,7 @@
 <script setup>
-import '@css/_modules/common/mForm/variables.css'
-import '@css/_modules/common/mForm/common.css'
-import '@css/_modules/common/mForm/inputText.css'
+import './.css/variables.css'
+import './.css/common.css'
+import './.css/inputText.css'
 
 import { useInputTextCore } from './.composables/useInputTextCore.js'
 import useValidateEvents from './.composables/useValidateEvents.js'
@@ -425,7 +425,7 @@ defineExpose({
       class="m-form-error"
       :class="setClass.error"
     >
-      <CommonMErrorMessageElem :message="message" />
+      <CommonMErrorMessage :message="message" />
     </ErrorMessage>
   </div>
 </template>

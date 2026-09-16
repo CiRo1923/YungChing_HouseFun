@@ -1,8 +1,8 @@
 <script setup>
-import '@css/_modules/buy/mTitle/variables.css'
-import '@css/_modules/buy/mTitle/borderBottomVariables.css'
-import '@css/_modules/buy/mTitle/common.css'
-import '@css/_modules/buy/mTitle/borderBottom.css'
+import './.css/variables.css'
+import './.css/borderBottomVariables.css'
+import './.css/common.css'
+import './.css/borderBottom.css'
 
 const props = defineProps({
   title: {

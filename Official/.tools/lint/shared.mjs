@@ -37,6 +37,7 @@ export {
   COMPONENTS_DIR,
   COMPONENT_DIRS,
   COMPONENT_FOLDERS,
+  CONVENTION_DOCS_DIR,
   CONVENTION_RULES_DIR,
   CONVENTION_SKILLS_DIR,
   CSS_MODULES_DIR,
@@ -44,6 +45,7 @@ export {
   MODULE_CSS_DIR_NAME,
   PARALLEL_AWAIT_HELPER,
   WRITING_STYLE_SCOPE,
+  PLAIN_TEXT_EXCLUDED_DIRS,
   PROJECT_CONFIG_FILES,
   PROJECT_DOCS_DIR,
   PROJECT_NAMES,
@@ -141,6 +143,52 @@ export const maskCssComments = (text) => maskBy(text, /\/\*[\s\S]*?\*\//g)
 
 /** 遮蔽 template 的 HTML 註解 */
 export const maskHtmlComments = (text) => maskBy(text, /<!--[\s\S]*?-->/g)
+
+/**
+ * 取出 .vue 的畫面區段(`<template>` 裡面那一段)與它在整份檔案裡的位置。
+ *
+ * 位置要一起回傳 —— 違規的行號是對整份檔案算的,只拿內容的話,
+ * 報出來的行號會少掉畫面區段前面那幾行。
+ *
+ * 沒有畫面區段(純邏輯的 .vue、或根本不是 .vue)時回 null。
+ */
+export const templateRangeOf = (text) => {
+  const start = text.search(/<template[^>]*>/)
+  if (start === -1) return null
+
+  const openEnd = text.indexOf('>', start) + 1
+  const close = text.lastIndexOf('</template>')
+  if (close === -1) return null
+
+  return { body: text.slice(openEnd, close), offset: openEnd }
+}
+
+/**
+ * 把畫面區段的內容遮成空白,只留裡面的註解。
+ *
+ * 畫面上的文字是內容本身(標題、按鈕上的字、給使用者看的提示),
+ * 那裡出現什麼符號由設計與文案決定;寫在那裡的**註解**則是給接手的人讀的,
+ * 與程式碼旁邊的註解沒有兩樣,該守的規矩一樣要守。
+ *
+ * 遮成等長空白而不是刪掉,行號與欄位都不會跑掉 ——
+ * 違規要指到正確的那一行,刪掉之後行號就對不上原始檔案了。
+ */
+export const maskTemplateContent = (text) => {
+  const tpl = templateRangeOf(text)
+  if (!tpl) return text
+
+  let kept = ''
+  let last = 0
+
+  for (const m of tpl.body.matchAll(/<!--[\s\S]*?-->/g)) {
+    kept += tpl.body.slice(last, m.index).replace(/[^\n]/g, ' ') + m[0]
+    last = m.index + m[0].length
+  }
+
+  kept += tpl.body.slice(last).replace(/[^\n]/g, ' ')
+
+  return text.slice(0, tpl.offset) + kept + text.slice(tpl.offset + tpl.body.length)
+}
 
 /**
  * 這個位置在不在字串裡。
@@ -458,7 +506,19 @@ const SKIP_DIR = new RegExp(
  * 判斷只寫在這裡一份,全專案掃描與單檔檢查都呼叫它 ——
  * 兩處各寫一次的話,會出現「整批掃描跳過、但存檔時照樣報」這種說不通的落差。
  */
-export const isProjectDocs = (rel) => rel === PROJECT_DOCS_DIR || rel.startsWith(`${PROJECT_DOCS_DIR}/`)
+export const isProjectDocs = (rel) => isUnderAny(rel, [PROJECT_DOCS_DIR])
+
+/**
+ * 這支檔案在不在列出的那幾層底下 —— 比對的是從專案根算起的路徑。
+ *
+ * 比對路徑而不是資料夾名:名字比對會連帶跳過別處同名的資料夾,
+ * 而那一處可能正是要檢查的。想排除兩個位置就列兩筆,範圍寫得出來也看得出來。
+ *
+ * 目錄本身與它底下的全部檔案都算。清單是空的時候一律回 false ——
+ * 沒有填就是沒有要排除任何東西。
+ */
+export const isUnderAny = (rel, dirs) =>
+  dirs.some((dir) => rel === dir || rel.startsWith(`${dir}/`))
 
 /**
  * 取出 markdown 檔頭 `---` 之間的欄位。

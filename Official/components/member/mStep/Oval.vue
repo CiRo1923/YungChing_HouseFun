@@ -1,8 +1,8 @@
 <script setup>
-import '@css/_modules/member/mStep/variables.css'
-import '@css/_modules/member/mStep/ovalVariables.css'
-import '@css/_modules/member/mStep/common.css'
-import '@css/_modules/member/mStep/oval.css'
+import './.css/variables.css'
+import './.css/ovalVariables.css'
+import './.css/common.css'
+import './.css/oval.css'
 
 const props = defineProps({
   // 每一步的 { icon, text } —— 步驟的內容與數量都由使用端決定

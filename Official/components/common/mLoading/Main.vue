@@ -1,6 +1,6 @@
 <script setup>
-import '@css/_modules/common/mLoading/variables.css'
-import '@css/_modules/common/mLoading/common.css'
+import './.css/variables.css'
+import './.css/common.css'
 
 const props = defineProps({
   config: {

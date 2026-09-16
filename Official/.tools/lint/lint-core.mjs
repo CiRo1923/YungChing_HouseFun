@@ -73,6 +73,7 @@ import {
   moduleFolderOf,
   issueOf,
   lineNoOf,
+  templateRangeOf,
   toRel,
 } from './shared.mjs'
 
@@ -461,22 +462,10 @@ const isTailwindUtility = (rawClass) => {
   return TW_PREFIX.some((p) => body.startsWith(p))
 }
 
-/** 取出 .vue 的 <template> 區段(含位移,回報行號要用) */
-const extractTemplate = (text) => {
-  const start = text.search(/<template[^>]*>/)
-  if (start === -1) return null
-
-  const openEnd = text.indexOf('>', start) + 1
-  const close = text.lastIndexOf('</template>')
-  if (close === -1) return null
-
-  return { body: text.slice(openEnd, close), offset: openEnd }
-}
-
 const checkTailwindInComponents = ({ rel, text }) => {
   if (!rel.startsWith(`${COMPONENTS_DIR}/`) || !rel.endsWith('.vue')) return []
 
-  const tpl = extractTemplate(text)
+  const tpl = templateRangeOf(text)
   if (!tpl) return []
 
   // 被 <!-- --> 註解掉的 template 是死程式碼,裡面的 class 不算違規。

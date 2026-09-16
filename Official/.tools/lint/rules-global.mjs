@@ -22,14 +22,17 @@ import {
   COLOR_CSS_DIR,
   COMPONENTS_DIR,
   COMPONENT_DIRS,
+  PLAIN_TEXT_EXCLUDED_DIRS,
   PROJECT_NAME_SCOPE,
   SOURCE_PROJECT_NAME,
   TOOLING_PREFIXES,
   hasExemptMark,
   isInsideString,
+  isUnderAny,
   issueOf,
   lineNoOf,
   listFiles,
+  maskTemplateContent,
   toRel,
   warnOf,
 } from './shared.mjs'
@@ -315,28 +318,55 @@ const ARROW_MARKS = new Set(['→', '←', '↔'])
  */
 const DECORATIVE_RE = /[\u{1F000}-\u{1FAFF}\u{2190}-\u{21FF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}]/gu
 
+/**
+ * 原始碼裡會被這條檢查的副檔名。
+ *
+ * 這一條看的是「寫給人讀的說明文字」,在原始碼裡那就是註解 ——
+ * 樣式、程式與元件這幾種檔案才有註解要守這件事。
+ *
+ * 規範系統自身不受這份清單限制:那一層整批複製到下一個專案,
+ * 每一種檔案裡的文字都是交接時對方要讀的,說明文件尤其是。
+ *
+ * 每個專案的副檔名都一樣,所以這份寫在規則裡,不進專案設定。
+ */
+const PLAIN_TEXT_SOURCE_RE = /\.(css|js|ts|vue)$/i
 
 const checkPlainText = ({ rel, text }) => {
+  /* 專案指定不檢查的那幾層 —— 文字不是這個團隊在寫的地方
+     (整包複製進來的元件、產生器吐出來的檔案)。報出來也沒有人能改,
+     而一條一直報「改不了的東西」的規則會連同真正該改的一起被略過。
+     排除的範圍會列在檢查結果的開頭,不會安靜地少檢查一塊。 */
+  if (isUnderAny(rel, PLAIN_TEXT_EXCLUDED_DIRS)) return []
+
   if (!WRITING_STYLE_SCOPE.some((prefix) => rel.startsWith(prefix))) return []
+
+  const inTooling = TOOLING_PREFIXES.some((prefix) => rel.startsWith(prefix))
+  if (!inTooling && !PLAIN_TEXT_SOURCE_RE.test(rel)) return []
+
   if (hasExemptMark(text, 'plain-text')) return []
+
+  /* .vue 的畫面區段只看裡面的註解。畫面上的文字是內容本身(標題、按鈕上的字),
+     那裡出現什麼符號由設計與文案決定;寫在那裡的註解則是給接手的人讀的,
+     與程式碼旁邊的註解沒有兩樣。 */
+  const scanned = rel.endsWith('.vue') ? maskTemplateContent(text) : text
 
   const issues = []
   const seen = new Set()
 
-  const lines = text.split('\n')
+  const lines = scanned.split('\n')
 
-  for (const m of text.matchAll(DECORATIVE_RE)) {
+  for (const m of scanned.matchAll(DECORATIVE_RE)) {
     const mark = m[0]
 
     if (ARROW_MARKS.has(mark)) continue
 
-    const line = lineNoOf(text, m.index)
+    const line = lineNoOf(scanned, m.index)
 
     /* 狀態記號只有工具印出來的那一份合法 —— 判斷它在不在字串裡。
        行內位置要從整份文字的位置換算回來:比對是對整份做的,
        而判斷字串只看同一行。 */
     if (TERMINAL_MARKS.has(mark)) {
-      const lineStart = text.lastIndexOf('\n', m.index - 1) + 1
+      const lineStart = scanned.lastIndexOf('\n', m.index - 1) + 1
       if (isInsideString(lines[line - 1], m.index - lineStart)) continue
     }
 

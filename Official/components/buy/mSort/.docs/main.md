@@ -262,28 +262,28 @@ const onClick = (item) => {
     },
   },
   {
-    label: 'option1 小 ➜ 大',
+    label: 'option1 小 → 大',
     value: {
       key: '1',
       sort: 1,
     },
   },
   {
-    label: 'option1 大 ➜ 小',
+    label: 'option1 大 → 小',
     value: {
       key: '1',
       sort: 2,
     },
   },
   {
-    label: 'option2 低 ➜ 高',
+    label: 'option2 低 → 高',
     value: {
       key: '2',
       sort: 1,
     },
   },
   {
-    label: 'option2 高 ➜ 低',
+    label: 'option2 高 → 低',
     value: {
       key: '2',
       sort: 2,

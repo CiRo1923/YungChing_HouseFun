@@ -1,6 +1,6 @@
 <script setup>
-import '@css/_modules/common/mForm/labelVariables.css'
-import '@css/_modules/common/mForm/label.css'
+import './.css/labelVariables.css'
+import './.css/label.css'
 
 const props = defineProps({
   label: {

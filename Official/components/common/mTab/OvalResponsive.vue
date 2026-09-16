@@ -1,8 +1,8 @@
 <script setup>
-import '@css/_modules/common/mTab/variables.css'
-import '@css/_modules/common/mTab/ovalResponsiveVariables.css'
-import '@css/_modules/common/mTab/common.css'
-import '@css/_modules/common/mTab/ovalResponsive.css'
+import './.css/variables.css'
+import './.css/ovalResponsiveVariables.css'
+import './.css/common.css'
+import './.css/ovalResponsive.css'
 
 import { onMergeTabConfig, useTabCore } from './.composables/useCore.js'
 

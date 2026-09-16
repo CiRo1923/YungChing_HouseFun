@@ -1,8 +1,8 @@
 <script setup>
-import '@css/_modules/common/mPopup/variables.css'
-import '@css/_modules/common/mPopup/promiseVariables.css'
-import '@css/_modules/common/mPopup/common.css'
-import '@css/_modules/common/mPopup/promise.css'
+import './.css/variables.css'
+import './.css/promiseVariables.css'
+import './.css/common.css'
+import './.css/promise.css'
 
 const popup = usePopupStore()
 const { promise } = storeToRefs(popup)

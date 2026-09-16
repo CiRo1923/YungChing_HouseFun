@@ -1,8 +1,8 @@
 <script setup>
-import '@css/_modules/buy/mTag/variables.css'
-import '@css/_modules/buy/mTag/checkboxVariables.css'
-import '@css/_modules/buy/mTag/common.css'
-import '@css/_modules/buy/mTag/checkbox.css'
+import './.css/variables.css'
+import './.css/checkboxVariables.css'
+import './.css/common.css'
+import './.css/checkbox.css'
 
 import { onDeepMerge } from '@js/_prototype.js'
 

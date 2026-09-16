@@ -1,5 +1,5 @@
 <script setup>
-// ⚠ 暫時的 popup 動畫 / 死鎖驗證頁,驗完請整個 pages/demo 目錄移除。
+// 注意:暫時的 popup 動畫 / 死鎖驗證頁,驗完請整個 pages/demo 目錄移除。
 // 路由:/demo/popup
 const popup = usePopupStore()
 const { customData, customCheck } = storeToRefs(popup)

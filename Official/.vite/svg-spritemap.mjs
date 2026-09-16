@@ -5,7 +5,7 @@
 // 供 components/common/mSvgIcon.vue 以 <use xlink:href="…/spritemap.svg#icon_search" /> 引用。
 // dev 與 build 共用 createSpritemap,兩邊產出才不會不一致。
 //
-// ⚠️ 產物需與原套件等價,下列細節是比對其輸出後定出來的,動之前先看懂:
+// 注意:產物需與原套件等價,下列細節是比對其輸出後定出來的,動之前先看懂:
 //
 //   ① <symbol> 只保留 id 與 viewBox,內容取最佳化後 <svg> 的子節點;
 //      沒有 viewBox 的檔案直接跳過(無法決定 <use> 的尺寸)。
@@ -17,7 +17,7 @@
 //   ④ SVGO 設定沿用原套件:preset-default 但停用 removeEmptyAttrs /
 //      moveGroupAttrsToElems / collapseGroups —— 這三個會破壞 symbol 結構。
 //
-// ⚠️ 輸出檔名不帶 hash:mSvgIcon 以固定路徑加 ?v=appHash 破快取(見 nuxt.config.ts
+// 注意:輸出檔名不帶 hash:mSvgIcon 以固定路徑加 ?v=appHash 破快取(見 nuxt.config.ts
 //    的 runtimeConfig.public.spritePath / spriteVersion)。加上 hash 會讓該路徑失效。
 
 import { readdir, readFile } from 'node:fs/promises'
@@ -50,7 +50,7 @@ const SVGO_CONFIG = {
 // 另外 xmlns 系列由外層 <svg> 提供,data-* 是設計工具留下的備註。
 // 會影響外觀的(如 overflow="visible")不在此列,一律保留。
 //
-// ⚠️ 原套件走白名單(svg-element-attributes 的「全域屬性 + svg∩symbol 交集」),
+// 注意:原套件走白名單(svg-element-attributes 的「全域屬性 + svg∩symbol 交集」),
 //    這裡改用排除清單,是為了濾個屬性不必再多背一個依賴。
 //    與原產物比對:71 個 symbol 只有 icon_image_error 少了 `x="0" y="0"`(共 12 bytes)——
 //    那是 SVG 的預設值,且 symbol 被 <use> 引用時位置由 use 決定,不影響渲染。
@@ -127,7 +127,7 @@ const createSpritemap = async (svgDir) => {
     const symbol = outputDocument.createElement('symbol')
 
     // 原 <svg> 剩下的屬性要一併帶過來(例:overflow="visible"),否則該圖示的裁切行為會變。
-    // ⚠️ 順序照原套件:其餘屬性 → id → viewBox。xmldom 的 setAttribute 對新屬性是往後附加,
+    // 注意:順序照原套件:其餘屬性 → id → viewBox。xmldom 的 setAttribute 對新屬性是往後附加,
     //    先設 viewBox 會讓它排到 id 前面,序列化結果就與原產物不一致。
     Array.from(svg.attributes || []).forEach((attribute) => {
       const { name, value } = attribute
@@ -214,7 +214,7 @@ export default function SvgSpritemapDevPlugin(svgDirName = '_svg') {
 /**
  * build:產出實體檔案;fileName 不帶 hash,見檔頭說明。
  *
- * ⚠️ emitFile 的 fileName 是相對於 build.outDir,而 Nuxt 只把 outDir 底下的
+ * 注意:emitFile 的 fileName 是相對於 build.outDir,而 Nuxt 只把 outDir 底下的
  *    assetsDir(`_nuxt/`)搬進 .output/public/。少了這段前綴,檔案會留在
  *    client dist 的頂層而不會出現在產物裡(mSvgIcon 取用的路徑是
  *    baseURL + buildAssetsDir + spritePath,見 components/common/mSvgIcon.vue)。

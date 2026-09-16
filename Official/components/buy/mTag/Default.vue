@@ -1,6 +1,6 @@
 <script setup>
-import '@css/_modules/buy/mTag/variables.css'
-import '@css/_modules/buy/mTag/common.css'
+import './.css/variables.css'
+import './.css/common.css'
 
 const props = defineProps({
   label: {

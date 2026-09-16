@@ -1,6 +1,6 @@
 <script setup>
-import '@css/_modules/common/mNav/appVariables.css'
-import '@css/_modules/common/mNav/app.css'
+import './.css/appVariables.css'
+import './.css/app.css'
 
 const common = useCommonStore()
 const { device } = storeToRefs(common)

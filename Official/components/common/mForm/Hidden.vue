@@ -1,6 +1,6 @@
 <script setup>
-import '@css/_modules/common/mForm/variables.css'
-import '@css/_modules/common/mForm/common.css'
+import './.css/variables.css'
+import './.css/common.css'
 
 import useValidateEvents from './.composables/useValidateEvents.js'
 
@@ -38,14 +38,14 @@ const config = computed(() => {
     maxlength: null,
     /* 這個欄位要在哪些時機自動驗證。
 
-      ⚠️ 這支渲染的是 <input type="hidden"> —— 使用者碰不到它,**永遠不會 blur / change**,
+      注意:這支渲染的是 <input type="hidden"> —— 使用者碰不到它,**永遠不會 blur / change**,
           所以那兩個時機在這裡等於沒有:實際生效的只有 touchedModelUpdate,
           而它要靠送出時的 setTouched(true) 才會開。
 
       這正是它需要的行為 —— Hidden 幾乎都綁「一組欄位的合格旗標」(多欄位的 computed),
       填到一半或程式自己連動清值時不該跳紅字,送出後才即時反映。
 
-      ⚠️ 傳陣列是「完整指定」,沒列到的一律不驗 —— 不是在預設值上疊加。
+      注意:傳陣列是「完整指定」,沒列到的一律不驗 —— 不是在預設值上疊加。
          詳見 .composables/useValidateEvents.js */
     validateEvents: ['blur', 'change', 'touchedModelUpdate'],
     ...props.config,
@@ -100,7 +100,7 @@ defineExpose({
       :class="setClass.error"
       v-slot="{ message }"
     >
-      <CommonMErrorMessageElem :class="setClass.errorMessage" :message="message" />
+      <CommonMErrorMessage :class="setClass.errorMessage" :message="message" />
     </ErrorMessage>
   </div>
 </template>

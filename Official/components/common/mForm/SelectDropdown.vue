@@ -1,8 +1,8 @@
 <script setup>
-import '@css/_modules/common/mForm/variables.css'
-import '@css/_modules/common/mForm/selectVariables.css'
-import '@css/_modules/common/mForm/common.css'
-import '@css/_modules/common/mForm/select.css'
+import './.css/variables.css'
+import './.css/selectVariables.css'
+import './.css/common.css'
+import './.css/select.css'
 
 import { onMergeDropdownConfig, useDropdownCore } from './.composables/useDropdownCore.js'
 import useValidateEvents from './.composables/useValidateEvents.js'
@@ -189,7 +189,7 @@ defineExpose({
       :class="setClass.error"
       v-slot="{ message }"
     >
-      <CommonMErrorMessageElem :message="message" />
+      <CommonMErrorMessage :message="message" />
     </ErrorMessage>
   </div>
   <Teleport to="body">

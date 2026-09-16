@@ -27,7 +27,7 @@ const DEFAULTS = {
 const onPixelRegex = (unit) =>
   new RegExp(`"[^"]+"|'[^']+'|url\\([^)]+\\)|var\\([^)]+\\)|(\\d*\\.?\\d+)${unit}`, 'g')
 
-// ⚠️ 不可換成 Number.prototype.toFixed —— 它在 .5 的邊界採「就近偶數」,
+// 注意:不可換成 Number.prototype.toFixed —— 它在 .5 的邊界採「就近偶數」,
 //    這裡要的是「多算一位再進位」。兩者結果會在末位差一,產物就與舊版不一致了。
 const onToFixed = (number, precision) => {
   const multiplier = 10 ** (precision + 1)

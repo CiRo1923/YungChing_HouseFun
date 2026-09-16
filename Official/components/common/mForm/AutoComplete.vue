@@ -1,8 +1,8 @@
 <script setup>
-import '@css/_modules/common/mForm/variables.css'
-import '@css/_modules/common/mForm/autocompleteVariables.css'
-import '@css/_modules/common/mForm/common.css'
-import '@css/_modules/common/mForm/autocomplete.css'
+import './.css/variables.css'
+import './.css/autocompleteVariables.css'
+import './.css/common.css'
+import './.css/autocomplete.css'
 
 import { useInputTextCore } from './.composables/useInputTextCore.js'
 import useValidateEvents from './.composables/useValidateEvents.js'
@@ -465,7 +465,7 @@ onUnmounted(() => {
       :name="props.name"
       v-slot="{ message }"
     >
-      <CommonMErrorMessageElem :message="message" />
+      <CommonMErrorMessage :message="message" />
     </ErrorMessage>
   </div>
   <Teleport to="body">

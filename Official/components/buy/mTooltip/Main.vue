@@ -1,6 +1,6 @@
 <script setup>
-import '@css/_modules/buy/mTooltip/variables.css'
-import '@css/_modules/buy/mTooltip/common.css'
+import './.css/variables.css'
+import './.css/common.css'
 
 import { onResolveByDevice } from './.composables/useCore.js'
 

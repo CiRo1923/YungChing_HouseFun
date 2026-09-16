@@ -1,8 +1,8 @@
 <script setup>
-import '@css/_modules/common/mForm/variables.css'
-import '@css/_modules/common/mForm/radiosOvalVariables.css'
-import '@css/_modules/common/mForm/common.css'
-import '@css/_modules/common/mForm/radiosOval.css'
+import './.css/variables.css'
+import './.css/radiosOvalVariables.css'
+import './.css/common.css'
+import './.css/radiosOval.css'
 
 import useValidateEvents from './.composables/useValidateEvents.js'
 
@@ -160,7 +160,7 @@ onSelected()
       :class="setClass.error"
       v-slot="{ message }"
     >
-      <CommonMErrorMessageElem :message="message" />
+      <CommonMErrorMessage :message="message" />
     </ErrorMessage>
   </div>
 </template>

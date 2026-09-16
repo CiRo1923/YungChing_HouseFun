@@ -82,7 +82,7 @@ const onExpand = (atRule, name, items) => {
   atRule.replaceWith(generated)
 }
 
-// ⚠️ 必須用 AtRule visitor(走訪階段),不能用 Once(前置階段)。
+// 注意:必須用 AtRule visitor(走訪階段),不能用 Once(前置階段)。
 //    舊 postcss-each 就是 visitor,展開時機在 nesting 之後;若改用 Once 提前展開,
 //    nesting 會看到已展開的巢狀規則並自行展平,產生
 //      :is(.editor .a,.editor .b)::after   而非   .editor :is(.a,.b)::after

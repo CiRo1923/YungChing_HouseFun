@@ -16,7 +16,7 @@
 //   | ① var() | **會**(它是真的 CSS 變數,可能有別處在用) | 純整數清單被升冪(見下方 legacy 說明) |
 //   | ② $name | **不會**(展開後宣告即移除) | 維持原始碼順序 |
 //
-// ⚠️ ② 沒有作用域概念 —— postcss-import 合併後整份 CSS 共用一個表,
+// 注意:② 沒有作用域概念 —— postcss-import 合併後整份 CSS 共用一個表,
 //    定義在哪個檔案都看得到。同名重複定義時後者覆蓋前者,且不會警告。
 
 // 把 `(a, b, c)` 解析成 ['a','b','c'];允許換行與尾逗號。
@@ -44,7 +44,7 @@ const onSplitList = (text) =>
     .map((item) => item.trim())
     .filter(Boolean)
 
-// ⚠️ 刻意重現舊 postcss-each-variables 的排序行為,讓產物與舊版位元組完全一致。
+// 注意:刻意重現舊 postcss-each-variables 的排序行為,讓產物與舊版位元組完全一致。
 // 舊版把清單「以值當物件 key」保存,而 JS 物件的整數 key 會被引擎排到最前面並升冪輸出:
 //   --border: (4, 3, 1)      → 1, 3, 4      純整數 → 升冪
 //   --leading: (1.5, 1.2)    → 原順序        非整數 → 維持插入順序
@@ -89,7 +89,7 @@ const eachVariables = () => ({
 
     for (const rule of emptied) rule.remove()
 
-    // ⚠️ 不要因為「兩個表都空」就提早 return —— 那會讓 `@each $v in $nope`
+    // 注意:不要因為「兩個表都空」就提早 return —— 那會讓 `@each $v in $nope`
     //    完全不受檢查,接著被 loop 當成「只有一個項目、值是字面 `$nope`」展開一次,
     //    產出一條選擇器裡帶著 `$nope` 的垃圾規則,且沒有任何錯誤訊息。
     root.walkAtRules('each', (atRule) => {

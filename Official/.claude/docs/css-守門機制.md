@@ -36,7 +36,7 @@
 | `variable` | 命名沒對齊 tailwind、級距用 `sm`/`md`/`lg`、斷點沒三份成套 | 元件的樣式子資料夾與共用變數目錄 | ✗ |
 | `projectName` | 寫死專案名稱 | 只有規範系統自身（清單見設定的 TOOLING_DIRS） | ✗ |
 | `absolutePath` | 寫了某一台機器上的路徑（磁碟機代號、家目錄、`file://`）、跨專案引用 | 原始碼與規範系統自身 | ✗ |
-| `plainText` | 用了 emoji 或裝飾符號 | 原始碼與規範系統自身 | ✗ |
+| `plainText` | 用了 emoji 或裝飾符號 | 規範系統自身整層，加上原始碼的 `.css` / `.js` / `.ts` / `.vue` | ✗ |
 | `selfContained` | 寫了「同上」「同 2」「參考第三節」這類把讀者送去別處的寫法 | 原始碼與規範系統自身 | ✗ |
 | `importAlias` | 離開自己資料夾的相對路徑沒改用 alias | 原始碼裡的 `.js` 與 `.vue` | ✗ |
 | `deprecated` | 已淘汰的寫法（`apiParams`、`inject('route')`、actions 留 `console.log`） | 原始碼裡的 `.js` 與 `.vue` | ✗ |
@@ -44,6 +44,7 @@
 | `apiScope` | `_api` 的資源對不上頁面目錄第一層的資料夾（資源是檔名；api 再分服務層時是那一層） | api 目錄 | ✗ |
 | `apiSource` | api 檔案自己呼叫 `onFetchApi` 建實例 | api 目錄 | ✗ |
 | `apiNaming` | 函式名對不上 endpoint、少方法後綴、`{id}` 沒寫大寫 `ID` | api 目錄 | ✗ |
+| `apiReturn` | 自己組回傳卻少了 `config` / `status` / `data` 其中一件 | api 目錄 | ✗ |
 | `storeDir` | 資料夾不叫 `stores` | 原始碼 | ✗ |
 | `storeDeclare` | store 裡寫了 function（`computed` 可以） | store 目錄 | ✗ |
 | `storeNaming` | 匯出名不是 `use{名稱}Store` | store 目錄 | ✗ |
@@ -57,7 +58,8 @@
 | `storeActionReturn` | 打了 api 的 action 沒有 `return { config, status, data }` | actions 目錄 | ✗ |
 | `storeToRefs` | 取 store 的值沒走 `storeToRefs`（直接解構或讀成 `const`） | 原始碼 | ✗ |
 | `pageActionNaming` | 頁面包裝 action 的命名沒有去掉 `Api` 或對不上 | 原始碼裡的 `.vue` | ✗ |
-| `pageApiImport` | 頁面直接 import api（建議級，不擋） | 原始碼裡的 `.vue` | ✗ |
+| `pageApiImport` | 頁面直接 import api（可在檔頭標 `lint-page-api-exempt` 放行一次性的請求） | 原始碼裡的 `.vue` | ✗ |
+| `componentApiImport` | 元件直接 import api（沒有例外，標了豁免記號也一樣擋） | 元件目錄的 `.vue` | ✗ |
 | `importOrder` | 元件沒有載入樣式（樣式要由元件自己 import） | 元件目錄的 `.vue` | ✗（工具看不出該載哪一支） |
 | `configItem` | 專案設定檔多了沒有任何規則讀的項目 | `.tools/lint/project-config.mjs` | ✗（來源專案只提醒，見下方說明） |
 | `ruleCrashed` | 規則自己執行失敗（多半是漏了 import），那支檔案沒被那條規則檢查 | 全部 | ✗ |
@@ -168,6 +170,21 @@ api 目錄底下可以再分一層「服務」（各自的網域與 token），�
 **「在引號中」不是通行證。** 不在清單裡的符號寫在字串裡一樣會被報：`print('🔧 已自動排序')` 照抓，因為那個圖示沒有幫讀者分出哪一筆有問題，只是把一句話裝飾了一次。要放行一個新的狀態記號是規則本身要改，把它加進清單。
 
 二、**對照表裡表示「變成」的箭頭**（`舊名稱 → 新名稱`）。那是資訊本身，不是裝飾——換成文字反而讓整欄對不齊、更難讀，所以不分場合都放行。
+
+三、**畫面上給使用者看的文字**（元件與頁面 `<template>` 裡的內容）。那是內容本身：標題、按鈕上的字、提示語——要不要放一個圖示由設計與文案決定，不是規範系統要管的事。
+
+**畫面區段裡的註解不在此列，照樣抓。** 那是寫給接手的人讀的，與程式碼旁邊的註解沒有兩樣——放行的話，同一句話只要寫進畫面區段就繞過了整條規則。
+
+範圍是規範系統整層（每一種檔案，說明文件尤其是——那一層會整批複製到下一個專案），加上原始碼裡的 `.css`、`.js`、`.ts`、`.vue`。這一條在原始碼裡看的是註解，而註解就出現在那幾種檔案裡。
+
+放行有兩種方式，用途不一樣：
+
+| 方式 | 用在什麼情況 | 影響範圍 |
+| --- | --- | --- |
+| 檔頭標 `lint-plain-text-exempt` 並寫明理由 | 這一份檔案本身要寫出那些符號 | 那一份檔案 |
+| 設定 `PLAIN_TEXT_EXCLUDED_DIRS` 列出目錄 | 整個目錄的文字不是這個團隊在寫的：整包複製進來的元件、產生器吐出來的檔案 | 那幾層底下的全部檔案 |
+
+判斷方式：**這裡的文字，我們改得動嗎？** 改得動就是要修；真的改不動（下次更新會被整包覆蓋）才列進設定。設定比對的是從專案根算起的路徑，不是資料夾名——別處另一個同名資料夾照常檢查。排除的範圍會列在檢查結果的開頭，那幾層的其他檢查照常適用。
 
 兩份清單分別是 `rules-global.mjs` 的 `TERMINAL_MARKS`（狀態記號，只在字串裡放行）與 `ARROW_MARKS`（箭頭，一律放行）。確實需要保留別的符號時（例如在說明規則本身），檔頭標 `lint-plain-text-exempt` 並寫明理由，整份跳過——標記要寫在註解裡，程式碼裡的字面值不算。
 

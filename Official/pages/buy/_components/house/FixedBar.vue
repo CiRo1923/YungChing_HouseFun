@@ -21,7 +21,7 @@ const route = useRoute()
 const isDeviceM = computed(() => device.value === 'm')
 
 // 開「詢問與留言」彈窗(內容與 PC 版共用 popupMessage,手機以 bottomSheet 呈現)。
-// ⚠️ 必須自己初始化:PC 版是由 basic/Comment.vue 的 onInit 設定 houseId,
+// 注意:必須自己初始化:PC 版是由 basic/Comment.vue 的 onInit 設定 houseId,
 //    但那支是 v-if="!isDeviceM",手機版根本不渲染 —— 少了這兩行,
 //    送出的會是上一次留言留下的物件 id(例如列表頁點過的別間房子)。
 const onPopupMessage = async () => {
@@ -53,7 +53,7 @@ const onSetFixedBottomHeight = (height) => {
   document.documentElement.style.setProperty(FIXED_BOTTOM_VAR, `${height}px`)
 }
 
-// ⚠️ 變數掛在 documentElement 上,不會隨元件卸載自動消失。
+// 注意:變數掛在 documentElement 上,不會隨元件卸載自動消失。
 //    離開本頁(SPA 換頁)或切到非手機時務必歸零,否則列表頁等會殘留一段空白 padding。
 watch(bottomBarRef, (el) => {
   bottomBarObserver?.disconnect()
@@ -194,7 +194,7 @@ onUnmounted(() => {
       @apply relative pl-[20px];
 
       /* 分隔線:用 ::before 而非獨立的 li,語意上才不會多出一個空項目。
-         ⚠️ 用 absolute 貼齊 li 左邊界(即 padding 之外),線的兩側才會是
+         注意:用 absolute 貼齊 li 左邊界(即 padding 之外),線的兩側才會是
             前一項的 padding-right 與本項的 padding-left —— 等寬、對稱。
             若讓 ::before 留在文檔流內,它會被推到 padding-left 之後,線就偏右了。 */
       &::before {

@@ -1,6 +1,6 @@
 <script setup>
-import '@css/_modules/buy/mSwiper/variables.css'
-import '@css/_modules/buy/mSwiper/common.css'
+import './.css/variables.css'
+import './.css/common.css'
 import { useSwiperCore } from '@components/buy/mSwiper/.composables/useSwiperCore.js'
 
 const emits = defineEmits(['change'])

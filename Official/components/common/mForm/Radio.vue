@@ -1,10 +1,10 @@
 ﻿<script setup>
-import '@css/_modules/common/mForm/variables.css'
-import '@css/_modules/common/mForm/selectionVariables.css'
-import '@css/_modules/common/mForm/radioVariables.css'
-import '@css/_modules/common/mForm/common.css'
-import '@css/_modules/common/mForm/selection.css'
-import '@css/_modules/common/mForm/radio.css'
+import './.css/variables.css'
+import './.css/selectionVariables.css'
+import './.css/radioVariables.css'
+import './.css/common.css'
+import './.css/selection.css'
+import './.css/radio.css'
 
 import useValidateEvents from './.composables/useValidateEvents.js'
 
@@ -136,7 +136,7 @@ const onChange = () => {
       :class="setClass.error"
       v-slot="{ message }"
     >
-      <CommonMErrorMessageElem :message="message" />
+      <CommonMErrorMessage :message="message" />
     </ErrorMessage>
   </div>
 </template>

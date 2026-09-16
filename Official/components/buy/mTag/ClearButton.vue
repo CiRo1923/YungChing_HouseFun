@@ -1,8 +1,8 @@
 <script setup>
-import '@css/_modules/buy/mTag/variables.css'
-import '@css/_modules/buy/mTag/clearButtonVariables.css'
-import '@css/_modules/buy/mTag/common.css'
-import '@css/_modules/buy/mTag/clearButton.css'
+import './.css/variables.css'
+import './.css/clearButtonVariables.css'
+import './.css/common.css'
+import './.css/clearButton.css'
 
 const emits = defineEmits(['click'])
 const props = defineProps({

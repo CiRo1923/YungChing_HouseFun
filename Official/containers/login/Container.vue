@@ -23,7 +23,7 @@ const onClick = ({ item }) => {
   // 兩個 tab 的欄位都設了 validateEvents 不含 modelUpdate,清值不會觸發驗證,
   // 所以這裡清完就結束 —— 不必再補驗一次去搶下最新結果、也不必回頭清錯誤。
   //
-  // ⚠️ 別改用 resetForm():它會把欄位還原成「Field 註冊當下」的值,而切過去的那個
+  // 注意:別改用 resetForm():它會把欄位還原成「Field 註冊當下」的值,而切過去的那個
   //    tab 是此刻才掛載的 —— dev 模式 store 帶有預設帳密,剛清掉的值會被填回去。
   onReset()
 }

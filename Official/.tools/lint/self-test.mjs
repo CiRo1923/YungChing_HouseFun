@@ -71,7 +71,9 @@ import {
   onSortComposables,
   onSortImports,
   onWrapMountedCalls,
+  RULE_TITLE,
 } from './lint-core.mjs'
+import { NO_PREREQUISITE_RULES, PREFLIGHT_RULES } from './preflight.mjs'
 import { aliasListOf, importGroupOf, tailwindThemeOf } from './rules-code.mjs'
 import { IS_SOURCE_PROJECT, PROJECT_DIR_VALUES, unusedConfigNames } from './rules-global.mjs'
 import { CHECKSUM_FILE, currentFingerprints, fingerprintDiff, isSkipped } from './checksum.mjs'
@@ -82,6 +84,7 @@ import {
   BREAKPOINTS,
   BUILD_CONFIG_FILES,
   COLOR_CSS_DIR,
+  CONVENTION_DOCS_DIR,
   COLOR_CSS_PREFIX,
   COMPONENTS_DIR,
   COMPONENT_DIRS,
@@ -103,6 +106,7 @@ import {
 } from './project-config.mjs'
 import {
   detectViewResourceDepth,
+  isUnderAny,
   listConventionRules,
   listConventionSkills,
   listViewFolders,
@@ -1521,6 +1525,35 @@ const RULE_CASES = [
     keyword: '裝飾符號',
   },
   {
+    /* 畫面上的文字是內容本身(標題、按鈕上的字、給使用者看的提示)——
+       那裡出現什麼符號由設計與文案決定,不是規範系統要管的事。 */
+    name: 'plainText 畫面上的文字不檢查',
+    file: `${P}/ProbeMarkTemplate.vue`,
+    code: `<template>\n  <div class="m-probe">\u{1f527} 設定</div>\n</template>\n`,
+    expect: 0,
+    rule: 'plainText',
+  },
+  {
+    /* 畫面區段裡的註解是寫給接手的人讀的,與程式碼旁邊的註解沒有兩樣 ——
+       放行的話,同一句話寫在畫面區段裡就繞過了整條規則。 */
+    name: 'plainText 畫面區段裡的註解照樣抓',
+    file: `${P}/ProbeMarkTplComment.vue`,
+    code: `<template>\n  <!-- ✅ 這一段之後要拆成兩個區塊 -->\n  <div class="m-probe"></div>\n</template>\n`,
+    expect: 1,
+    rule: 'plainText',
+    keyword: '✅',
+  },
+  {
+    /* 原始碼那側只看樣式、程式與元件 —— 這一條在原始碼裡看的是註解,
+       而註解就出現在那幾種檔案裡。規範系統自身不受這個限制:
+       那一層整批複製到下一個專案,說明文件正是交接時對方要讀的。 */
+    name: 'plainText 原始碼的其他副檔名不檢查',
+    file: `${P}/probe-mark.md`,
+    code: `# 筆記\n\n\u{1f527} 這一頁的資料來源要換掉。\n`,
+    expect: 0,
+    rule: 'plainText',
+  },
+  {
     /* 專案文件那一層一條規則都不跑 —— 那裡有自己的檢查工具,
        兩套工具掃同一層的話,判準會各自演化。 */
     name: 'plainText 專案文件不檢查',
@@ -2836,6 +2869,128 @@ const onCheckConfigItem = () => {
   const extras = unusedConfigNames(configText, sources).map((i) => i.name)
 
   report(!extras.length, '本專案的設定檔沒有多出沒人讀的項目', extras.length ? [extras.join('、')] : [])
+}
+
+/**
+ * 每一條規則都要被說明文件講到。
+ *
+ * 規則寫在程式裡,而看的人是從說明文件知道「這套工具在管什麼」的。
+ * 新增一條規則卻忘了寫進去,那條規則照樣在擋,但**沒有人找得到它在管什麼、
+ * 為什麼**——照文件找的人會以為沒有這一條,被擋下來時只看得到一個陌生的代號。
+ *
+ * 各類寫法的規範(skills)裡有提不算數:那幾份講的是「這一類程式怎麼寫」,
+ * 一條規則可能橫跨好幾類,也可能哪一類都不屬於(文字怎麼寫的那幾條)。
+ * 說明文件那一層才是「有哪些規則」的完整清單。
+ */
+const onCheckRulesDocumented = () => {
+  const dir = path.join(root, ...CONVENTION_DOCS_DIR.split('/'))
+
+  if (!fs.existsSync(dir)) {
+    skipped.push({ name: '每一條規則都有寫進說明文件', need: 'conventionDocs' })
+    return
+  }
+
+  const text = fs
+    .readdirSync(dir)
+    .filter((name) => name.endsWith('.md'))
+    .map((name) => fs.readFileSync(path.join(dir, name), 'utf8'))
+    .join('\n')
+
+  const missing = Object.keys(RULE_TITLE).filter((rule) => !new RegExp(`\`${rule}\``).test(text))
+
+  report(
+    !missing.length,
+    '每一條規則都有寫進說明文件',
+    missing.length ? [`說明文件裡找不到:${missing.join('、')}`] : []
+  )
+}
+
+/**
+ * 每一條規則都要講清楚「它依不依賴前提」。
+ *
+ * 前提檢查的每一項寫著「缺了什麼、哪幾條會因此不作用」,而那份清單是手寫的 ——
+ * **漏列一條不會有任何徵兆**:那條規則照樣因為缺前提而掃不到東西,
+ * 但「哪幾條沒有作用」的訊息不會提到它,看的人以為它通過了。
+ *
+ * 所以每一條規則都要有歸屬:被某一項前提涵蓋,或列在「不依賴前提」那份清單裡。
+ * 兩邊都沒有就是漏了;兩邊都有則是兩種說法打架,照樣要報。
+ */
+const onCheckPreflightCoverage = () => {
+  const rules = Object.keys(RULE_TITLE)
+  const covered = new Set(PREFLIGHT_RULES)
+  const free = new Set(NO_PREREQUISITE_RULES)
+
+  /* 專案自己的規則不列入 —— 那幾條由專案自己維護,來源的前提清單不會知道它們。
+     前綴取規則載入那一側的同一份,不在這裡再寫一次字面值。 */
+  const shared = rules.filter((rule) => !rule.startsWith(PROJECT_RULE_PREFIX))
+
+  const orphan = shared.filter((rule) => !covered.has(rule) && !free.has(rule))
+  const both = shared.filter((rule) => covered.has(rule) && free.has(rule))
+
+  const problems = []
+  if (orphan.length) {
+    problems.push(
+      `沒有說它依不依賴前提:${orphan.join('、')} —— ` +
+        `依賴某個目錄或設定就加進那一項的 rules,否則列進 NO_PREREQUISITE_RULES`
+    )
+  }
+  if (both.length) problems.push(`兩種說法都寫了:${both.join('、')}`)
+
+  report(!problems.length, '每一條規則都講清楚了依不依賴前提', problems)
+}
+
+/**
+ * 這支檔案裡定義的每一個檢查,都要真的被執行到。
+ *
+ * 檢查是寫成一支一支的函式,再列在執行的地方逐一呼叫。**寫了函式卻忘了列上去
+ * 是不會有任何徵兆的**:總數不會變少(它本來就沒被算過)、不會報錯、
+ * 也不會有紅字 —— 看起來與「這個檢查通過了」一模一樣,而它從來沒有跑過。
+ *
+ * 所以拿這支檔案自己的內容比對:定義了哪幾個、執行的地方呼叫了哪幾個。
+ * 少了誰就報出來,名字也一併印出來,不必自己去翻。
+ */
+const onCheckEveryCheckRuns = () => {
+  const text = fs.readFileSync(fileURLToPath(import.meta.url), 'utf8')
+
+  const defined = [...text.matchAll(/^const (onCheck\w+) = /gm)].map((m) => m[1])
+  const called = new Set([...text.matchAll(/\b(onCheck\w+)\(\)/g)].map((m) => m[1]))
+  const missing = defined.filter((name) => !called.has(name))
+
+  report(
+    !missing.length,
+    '這支檔案定義的每一個檢查都有被執行到',
+    missing.length ? [`定義了卻沒有被呼叫:${missing.join('、')}`] : []
+  )
+}
+
+/**
+ * 「在不在列出的那幾層底下」的判準 —— 排除清單靠它決定哪些檔案不檢查。
+ *
+ * 直接餵判準函式假的清單,不靠專案自己的設定:多數專案那份清單是空的,
+ * 靠設定來驗的話,那種專案等於完全沒有驗到 —— 而清單空的時候正是
+ * 「一筆都不該排除」這個最重要的行為。
+ */
+const onCheckUnderAny = () => {
+  const cases = [
+    { rel: 'components/vendor/Chart.vue', dirs: ['components/vendor'], hit: true, why: '在排除的那一層底下' },
+    { rel: 'components/vendor', dirs: ['components/vendor'], hit: true, why: '目錄本身' },
+    {
+      rel: 'pages/buy/vendor/Index.vue',
+      dirs: ['components/vendor'],
+      hit: false,
+      why: '別處的同名資料夾照常檢查(比對的是路徑,不是名字)',
+    },
+    { rel: 'components/vendorList/Index.vue', dirs: ['components/vendor'], hit: false, why: '名字只是開頭相同' },
+    { rel: 'components/vendor/Chart.vue', dirs: [], hit: false, why: '清單是空的就一筆都不排除' },
+  ]
+
+  const wrong = cases.filter((c) => isUnderAny(c.rel, c.dirs) !== c.hit)
+
+  report(
+    !wrong.length,
+    '排除清單:比對的是路徑,而且清單空的時候一筆都不排除',
+    wrong.map((c) => `${c.why} —— ${c.rel} 預期${c.hit ? '排除' : '不排除'}`)
+  )
 
   /* 來源的判定 —— 設定裡的來源名稱與這個專案自己的名稱對得上就是來源。
      兩邊都從設定取,不寫死任何一個名字:寫死的話,換一個專案這則不是永遠通過
@@ -3677,6 +3832,9 @@ const SKIP_REASON = {
   sourceProject:
     '這個專案不是規範工具的來源(SOURCE_PROJECT_NAME 與 PROJECT_NAMES 對不上),' +
     '指紋清單是跟著規則複製過來的,對不上由規則 ruleTampered 在檢查時報。',
+  conventionDocs:
+    '這個專案還沒有規範系統自己的說明文件那一層(CONVENTION_DOCS_DIR),' +
+    '所以比不出「哪幾條規則沒有被講到」。',
   ownViewPages:
     '這個專案的頁面目錄裡還沒有自己的頁面(只有驗證自己建的探測資料夾),' +
     '「頁面資源在第幾層」是照實際擺法偵測的,沒有頁面可比對時算出來的是探測檔的形狀。',
@@ -3856,12 +4014,16 @@ try {
 
   onCheckViewDepth()
   onCheckConfigItem()
+  onCheckUnderAny()
+  onCheckRulesDocumented()
+  onCheckPreflightCoverage()
   onCheckThemeBlocks()
   onCheckRuleCrash()
   onCheckProjectRules()
   onCheckRuleFingerprints()
   onCheckApiLayers()
   onCheckIgnoredSegments()
+  onCheckEveryCheckRuns()
 
   for (const c of MAJORITY_CASES) {
     const actual = majorityHueSource(c.style)

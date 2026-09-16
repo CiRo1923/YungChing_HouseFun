@@ -2,7 +2,7 @@
 // Nuxt 的錯誤頁必須放在 srcDir 根目錄(本專案 pages / components / layouts 都在根,srcDir 即為根)。
 // 放在 pages/ 底下只會變成 /error 這個一般路由,showError 不會用它。
 //
-// ⚠ 刻意不套 <NuxtLayout name="buy">:那個 layout 會 await callOnce(onInit) 打 auth API、
+// 注意:刻意不套 <NuxtLayout name="buy">:那個 layout 會 await callOnce(onInit) 打 auth API、
 //   SSR 還會預抓 SEO。錯誤頁常常正是 API 出狀況時顯示的,再打一次若又失敗,
 //   錯誤頁自己就渲染不出來,只能落到 Nitro 的兜底畫面。這裡維持零外部相依。
 const props = defineProps({
@@ -29,7 +29,7 @@ const onBackClick = () => clearError({ redirect: '/home' })
 <template>
   <div class="flex min-h-screen flex-col items-center justify-center bg-[--white] px-[16px]">
     <div class="text-center">
-      <CommonSvgIcon
+      <CommonMSvgIcon
         icon="icon_exclamation_o"
         class="text-[--gray-999] tm:h-[40px] tm:w-[40px] p:h-[48px] p:w-[48px]"
       />

@@ -1,8 +1,8 @@
 <script setup>
-import '@css/_modules/common/mForm/variables.css'
-import '@css/_modules/common/mForm/passwordVariables.css'
-import '@css/_modules/common/mForm/common.css'
-import '@css/_modules/common/mForm/password.css'
+import './.css/variables.css'
+import './.css/passwordVariables.css'
+import './.css/common.css'
+import './.css/password.css'
 
 import useValidateEvents from './.composables/useValidateEvents.js'
 
@@ -236,7 +236,7 @@ watch(
       class="m-form-error"
       :class="setClass.error"
     >
-      <CommonMErrorMessageElem :message="message" />
+      <CommonMErrorMessage :message="message" />
     </ErrorMessage>
   </div>
 </template>

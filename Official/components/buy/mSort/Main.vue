@@ -1,6 +1,6 @@
 <script setup>
-import '@css/_modules/buy/mSort/variables.css'
-import '@css/_modules/buy/mSort/common.css'
+import './.css/variables.css'
+import './.css/common.css'
 
 const common = useCommonStore()
 const { device } = storeToRefs(common)

@@ -1,6 +1,6 @@
 <script setup>
-import '@css/_modules/buy/mChart/variables.css'
-import '@css/_modules/buy/mChart/common.css'
+import './.css/variables.css'
+import './.css/common.css'
 
 import useChartScale from './.composables/useChartScale.js'
 import useChartPath from './.composables/useChartPath.js'

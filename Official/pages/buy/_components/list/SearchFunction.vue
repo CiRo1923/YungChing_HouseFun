@@ -17,11 +17,11 @@ const emits = defineEmits(['apiSearch', 'routerPush', 'suggest'])
 const searchFunctionRef = ref(null)
 const isFixed = ref(false)
 // 滑入動畫的第二段:--fixed 先讓元素定位到視窗上方外側,下一個 frame 才加 --in 滑進來。
-// ⚠️ 兩段不能併成一個 class:同一個 frame 內同時套用「定位」與「最終位置」,
+// 注意:兩段不能併成一個 class:同一個 frame 內同時套用「定位」與「最終位置」,
 //    瀏覽器沒有可插補的起始值,transition 不會播,會變成硬切。
 const isFixedIn = ref(false)
 // 進場當下的捲動位置,拿來當退場門檻。
-// ⚠️ 不能在 fixed 後改用 getBoundingClientRect 判斷:元素一旦脫離文檔流,
+// 注意:不能在 fixed 後改用 getBoundingClientRect 判斷:元素一旦脫離文檔流,
 //    rect 永遠貼在視窗頂端 → 判定回「未超過」→ 取消 fixed → 又符合進場條件,來回抖動。
 //    進退場共用同一個門檻值才對稱。
 const fixedFromY = ref(0)
@@ -125,7 +125,7 @@ const onScroll = () => {
 
   // 未置頂時元素仍在文檔流中,可直接量
   if (el.getBoundingClientRect().bottom <= 0) {
-    // ⚠️ 順序不能反:置頂後 Condition / Filter 會被 v-if 拔掉,
+    // 注意:順序不能反:置頂後 Condition / Filter 會被 v-if 拔掉,
     //    等 isFixed 設好再量會量到矮版高度,placeholder 就會偏矮
     fixedHeight.value = el.offsetHeight
     fixedFromY.value = window.scrollY

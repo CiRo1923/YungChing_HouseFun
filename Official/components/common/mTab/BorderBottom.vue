@@ -1,8 +1,8 @@
 <script setup>
-import '@css/_modules/common/mTab/variables.css'
-import '@css/_modules/common/mTab/borderBottomVariables.css'
-import '@css/_modules/common/mTab/common.css'
-import '@css/_modules/common/mTab/borderBottom.css'
+import './.css/variables.css'
+import './.css/borderBottomVariables.css'
+import './.css/common.css'
+import './.css/borderBottom.css'
 
 import { onMergeTabConfig, onResolveByDevice, useTabCore } from './.composables/useCore.js'
 

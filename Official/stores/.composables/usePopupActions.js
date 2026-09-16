@@ -46,7 +46,7 @@ export default () => {
   }
   // 需要「回報結果但不關閉」時使用(例如 isClose: false 的按鈕自行驗證後回報)
   const onCustomSettle = (isSure = false, item = null) => onSettle(customCheck, isSure, item)
-  // ⚠ 開啟時必須「無條件覆寫每一個欄位」:關閉只清 id,其餘資料留到這裡才被蓋掉,
+  // 注意:開啟時必須「無條件覆寫每一個欄位」:關閉只清 id,其餘資料留到這裡才被蓋掉,
   //   否則退場動畫期間 popup 會瞬間變空(內容消失、寬度跳回預設)。
   //   日後在 store 新增欄位時,這三個開啟函式也要一併補上賦值。
   const onAlert = (data) => {
