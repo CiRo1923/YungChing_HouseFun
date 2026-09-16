@@ -1,7 +1,8 @@
-/* mForm 的 label 變體專屬變數。
+/* 欄位標題的專屬變數。
 
-   注意:class 是 `.m-label` 不是 `.m-form-label` —— `.m-form-label` 已經被
-   CheckBox / Radio / RadiosOval 用在「選項文字」上,兩者是不同元素,不能合併命名。
+   這支元件獨立於 mForm 之外 —— 表單裡的 `.m-form-label` 指的是 CheckBox /
+   Radio / RadiosOval 的「選項文字」,與欄位標題是不同的東西。
+   兩者各自成一個模組,名字就不必互相遷就。
 
    字級不定在這裡 —— 欄位標題會有大有小,由使用端 setClass 傳 tailwind class。 */
 

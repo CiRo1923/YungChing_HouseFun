@@ -32,6 +32,7 @@ export {
   API_DIR,
   API_NAMING_IGNORED_SEGMENTS,
   BREAKPOINTS,
+  BREAKPOINT_SCREENS,
   BUILD_CONFIG_FILES,
   COLOR_CSS_DIR,
   COMPONENTS_DIR,
@@ -41,6 +42,7 @@ export {
   CONVENTION_RULES_DIR,
   CONVENTION_SKILLS_DIR,
   CSS_MODULES_DIR,
+  GENERATED_FILES,
   IMPORT_ORDER_GROUPS,
   MODULE_CSS_DIR_NAME,
   PARALLEL_AWAIT_HELPER,
@@ -143,6 +145,51 @@ export const maskCssComments = (text) => maskBy(text, /\/\*[\s\S]*?\*\//g)
 
 /** 遮蔽 template 的 HTML 註解 */
 export const maskHtmlComments = (text) => maskBy(text, /<!--[\s\S]*?-->/g)
+
+/**
+ * 遮蔽 `//` 開頭的行註解。
+ *
+ * 在引號裡的不算 —— 網址的 `https://` 也長這樣,遮下去會把那一行後半段
+ * (常常還有別的程式碼)一起吃掉。
+ */
+const maskLineComments = (text) =>
+  text
+    .split('\n')
+    .map((line) => {
+      const at = line.indexOf('//')
+      if (at === -1 || isInsideString(line, at)) return line
+
+      return line.slice(0, at) + ' '.repeat(line.length - at)
+    })
+    .join('\n')
+
+/**
+ * 遮蔽這種檔案裡的每一種註解。
+ *
+ * 註解是寫給人讀的,裡面**舉例寫出一段不合規範的程式碼是正常的** ——
+ * 「這裡不要寫成 `text-sm`」這句說明本身就含有那個名字。拿規則去檢查它,
+ * 報出來的那一筆沒有人能修:照著改等於把說明改壞。
+ *
+ * 一次處理三種註解,依副檔名決定要遮哪幾種:
+ *
+ *   `/* *\/`      樣式與程式共用的區塊註解,一律遮
+ *   `//`          程式的行註解
+ *   `<!-- -->`    畫面區段的註解
+ *
+ * 先遮區塊再遮行 —— 反過來的話,區塊註解裡如果有 `//`,
+ * 那一行後半段會先被當成行註解處理,區塊的結尾就找不到了。
+ *
+ * 需要讀註解的檢查不要用這個(豁免標記、色票的色相分類標籤、
+ * 文字寫法那幾條檢查的正是註解本身)。
+ */
+export const maskComments = (rel, text) => {
+  let out = maskCssComments(text)
+
+  if (/\.(vue|html)$/i.test(rel)) out = maskHtmlComments(out)
+  if (/\.(vue|js|mjs|cjs|ts)$/i.test(rel)) out = maskLineComments(out)
+
+  return out
+}
 
 /**
  * 取出 .vue 的畫面區段(`<template>` 裡面那一段)與它在整份檔案裡的位置。

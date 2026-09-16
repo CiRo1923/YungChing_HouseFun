@@ -73,7 +73,7 @@ summary: 動規範系統之前先整個檢查一遍，確認沒有另一處在�
 
 | 分類 | 管的是什麼 | 規範寫在哪 |
 | --- | --- | --- |
-| **css** | 樣式檔自己怎麼寫:色票命名、模組變數、模組的 class 範圍 | `.claude/skills/` 的 color-naming、css-module-variables |
+| **css** | 樣式怎麼寫:色票命名、模組變數、模組的 class 範圍與擺放位置、utility class 怎麼用 | `.claude/skills/` 的 color-naming、css-module-variables、tailwind-usage |
 | **component** | 共用元件的檔案形狀:載入了什麼、開頭那幾行怎麼排 | `.claude/skills/component-conventions` |
 | **頁面** | 頁面怎麼取資料、怎麼包裝 api 呼叫、元件與資料的關係 | `.claude/skills/page-conventions` |
 | **stores** | store 與 actions 自己怎麼寫、分層、宣告順序 | `.claude/skills/` 的 store-conventions、composable-order |

@@ -1,4 +1,4 @@
-/* mForm 的 label —— 欄位標題,data-required 有值時在前面補上必填標記。
+/* 欄位標題 —— data-required 有值時在前面補上必填標記。
    字級由使用端傳(標題會有大有小)。 */
 
 .m-label {

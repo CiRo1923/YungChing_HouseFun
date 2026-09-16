@@ -1,7 +1,7 @@
 ---
 name: component-conventions
 summary: 元件檔案的形狀
-description: 本專案共用元件目錄底下 .vue 的撰寫規範。當新增共用元件、調整元件開頭的 import,或審查既有元件寫法時使用。規則:元件的樣式放在元件自己資料夾底下的樣式子資料夾、由元件自己 import,少了那一行會報違規(工具不自動補,因為它看不出該載哪一支);import 依分組排列(樣式 → 共用邏輯 → 共用函式 → 其他),這一半不報違規,存檔時直接排好。分組定義在 .tools/lint/project-config.mjs 的 IMPORT_ORDER_GROUPS。
+description: 本專案共用元件目錄底下 .vue 的撰寫規範。當新增共用元件、調整元件開頭的 import,或審查既有元件寫法時使用。規則:元件的樣式放在元件自己資料夾底下的樣式子資料夾、由元件自己 import,少了那一行會報違規(工具不自動補,因為它看不出該載哪一支;自己完全不寫 class、只把設定往下傳的轉手型元件沒有樣式可載,不在此列);import 依分組排列(樣式 → 共用邏輯 → 共用函式 → 其他),這一半不報違規,存檔時直接排好。分組定義在 .tools/lint/project-config.mjs 的 IMPORT_ORDER_GROUPS。
 ---
 
 # 元件檔案的形狀
@@ -58,6 +58,29 @@ import 別人的檔案,而刪掉那個元件時會連帶弄壞它。
 看不出這支元件的樣式該放在哪一支 css ——
 自動補一行等於替開發者決定檔案要叫什麼、要不要跟別支共用。
 
+### 轉手型元件不在這條的範圍內
+
+有一種元件自己完全不寫 class:它把設定往下傳給另一支元件,
+畫面與樣式都由被轉手的那支負責。
+
+```vue
+<template>
+  <CommonCustomPopup :setClass="{ main: '--px-20' }">
+    <slot />
+  </CommonCustomPopup>
+</template>
+```
+
+**那種元件沒有樣式可以載入**,所以規則不報它。硬要它載一支的話只有兩條路 ——
+去 import 別人的樣式(刪掉那支元件時這裡跟著壞),或建一支空的樣式檔
+(下一個人看到會以為裡面本來有東西被誤刪了)。兩種都比違規本身更糟。
+
+判斷看的是**靜態寫出來的 class**。動態綁定(`:class="setClass.main"`)不算 ——
+那個值由使用端傳進來,樣式該由傳進來的那一方負責;
+被註解掉的那一段也不算,那是死程式碼,不會產生任何樣式。
+
+寫了自己的 class 就不是轉手型,照樣要載入樣式。
+
 檢查:規則 `importOrder`。
 
 ## 二、import 依分組排列
@@ -106,6 +129,7 @@ import { computed } from 'vue'
 | 規範 | 管什麼 |
 | --- | --- |
 | **這一份**(component-conventions) | 元件自己的檔案形狀:載入了什麼、開頭那幾行怎麼排 |
+| tailwind-usage | 元件的 template 裡**寫什麼 class**:只留組件自身 class 與 `--modifier`,排版與尺寸寫進元件自己的 css |
 | page-conventions | 元件與資料的關係:元件一律不能直接 import api,資料由使用它的頁面傳進來或寫進 store |
 | import-alias | import 的**路徑**怎麼寫:離開自己資料夾的相對路徑改用 `@` alias |
 | composable-order | `useXxxStore()` / `useXxxActions()` 這些**宣告**的順序,存檔時自動排 |

@@ -55,6 +55,7 @@ import { PAGE_CHECKS, PAGE_RULE_HINT, PAGE_RULE_TITLE } from './rules-page.mjs'
 import { STORE_CHECKS, STORE_RULE_HINT, STORE_RULE_TITLE } from './rules-store.mjs'
 import {
   BREAKPOINTS,
+  BREAKPOINT_SCREENS,
   COLOR_CSS_DIR,
   COMPONENTS_DIR,
   COMPONENT_DIRS,
@@ -63,6 +64,7 @@ import {
   SHARED_MODULE_VARIABLES,
   TAILWIND_THEME_OVERRIDES,
   isInSrc,
+  maskComments,
   maskCssComments,
   maskHtmlComments,
   isProjectDocs,
@@ -594,7 +596,10 @@ const checkDeadThemeClass = ({ rel, text, isVue, root }) => {
   const deadRe = deadReOf(root)
   if (!deadRe) return []
 
-  const scope = isVue ? maskScript(text) : text
+  /* 註解裡舉例寫出一個已經消失的 class 是正常的(「這裡不要再用 text-sm」
+     那句說明本身就含有它)—— 報出來的那一筆沒有人能修,照著改等於把說明改壞。
+     每一種註解都要遮:樣式、程式、畫面區段各有各的寫法。 */
+  const scope = maskComments(rel, isVue ? maskScript(text) : text)
   const issues = []
   const seen = new Set()
 
@@ -672,6 +677,101 @@ const checkModuleImportOrder = ({ rel, text, isVue }) => {
   return issues
 }
 
+// --- 規則 breakpointPrefix:級距在每個斷點都要列齊前綴 ------------------------
+//
+// 級距 class 由使用端傳進來(`p:--px-20`、`tm:--py-8`),CSS 這邊要為每一個
+// 會命中的斷點各寫一次選擇器。少列一種的話,使用端那樣寫了在那個斷點沒有效果 ——
+// 畫面上是「這個間距沒生效」,而那一行 class 看起來完全正常。
+//
+// 哪個 @screen 區塊該列哪幾種前綴由設定決定(BREAKPOINT_SCREENS)——
+// 各專案的斷點名與涵蓋關係都不一樣,寫死在這裡的話換一個專案就整批誤報。
+//
+// **只有「這支檔案裡某處帶過前綴」的名字才算父層可傳入的級距。**
+//    從來沒帶過前綴的是元件自己的變體(尺寸、狀態),使用端不會寫 `p:--size-md`,
+//    要求它列出前綴變體是誤報,而一條整批誤報的規則會被整條忽略。
+
+/** `&.\-\-px-20` 與 `&.p\:\-\-px-20` 都認,分別取出前綴與級距名 */
+const SCALE_CLASS_RE = /&\.(?:([a-z]{1,3})\\:)?\\-\\-([a-z]+-[\w.]+)\s*[,{]/g
+
+/**
+ * 取出每一個 `@screen` 區塊的範圍(名稱、內容、起始位置)。
+ *
+ * 用大括號配對而不是 regex —— 區塊裡面還有巢狀的選擇器,
+ * regex 抓到的結尾會是第一個右大括號,只涵蓋到區塊的開頭幾行。
+ */
+const screenBlocksOf = (text) => {
+  const blocks = []
+
+  for (const m of text.matchAll(/@screen\s+([\w-]+)\s*\{/g)) {
+    let depth = 0
+
+    for (let i = m.index + m[0].length - 1; i < text.length; i += 1) {
+      if (text[i] === '{') depth += 1
+      else if (text[i] === '}') {
+        depth -= 1
+        if (depth === 0) {
+          blocks.push({ screen: m[1], body: text.slice(m.index, i), at: m.index })
+          break
+        }
+      }
+    }
+  }
+
+  return blocks
+}
+
+const checkBreakpointPrefix = ({ rel, text: raw }) => {
+  if (!isModuleStyle(rel)) return []
+  if (!Object.keys(BREAKPOINT_SCREENS).length) return []
+
+  const text = maskCssComments(raw)
+
+  /* 先認出哪些名字是「父層可傳入的級距」—— 整支檔案裡帶過前綴的那些。
+     這一輪要掃全文,不能只看單一區塊:同一個級距常常只在某一個斷點帶前綴。 */
+  const scales = new Set()
+  for (const m of text.matchAll(SCALE_CLASS_RE)) if (m[1]) scales.add(m[2])
+  if (!scales.size) return []
+
+  const issues = []
+
+  for (const { screen, body, at } of screenBlocksOf(text)) {
+    const expect = BREAKPOINT_SCREENS[screen]
+    if (!expect) continue
+
+    /* 無前綴的寫法代表「所有斷點都套用」,每一個區塊都要有 ——
+       這一份是規則要求的,不寫進設定(每個專案都一樣)。 */
+    const wanted = ['', ...expect]
+    const found = new Map()
+
+    for (const m of body.matchAll(SCALE_CLASS_RE)) {
+      const [, prefix = '', scale] = m
+      if (!scales.has(scale)) continue
+
+      if (!found.has(scale)) found.set(scale, { prefixes: new Set(), at: at + m.index })
+      found.get(scale).prefixes.add(prefix)
+    }
+
+    for (const [scale, { prefixes, at: hit }] of found) {
+      const missing = wanted.filter((prefix) => !prefixes.has(prefix))
+      if (!missing.length) continue
+
+      issues.push(
+        issueOf(
+          rel,
+          lineNoOf(text, hit),
+          'breakpointPrefix',
+          `@screen ${screen} 裡的 --${scale} 少了 ${missing
+            .map((prefix) => (prefix ? `${prefix}:--${scale}` : `--${scale}(無前綴)`))
+            .join(' / ')} —— ` +
+            `使用端那樣寫的話,這個斷點下不會有任何效果,而那一行 class 看起來完全正常`
+        )
+      )
+    }
+  }
+
+  return issues
+}
+
 // --- 規則 moduleVar:級距覆寫要寫在 Variables 檔 -----------------------------
 //
 // 同一屬性出現兩個以上不同值的覆寫 class(&.--px-24 與 &.--px-15)即為一組級距,
@@ -713,7 +813,11 @@ const checkModuleVariables = ({ rel, text: raw }) => {
         rel,
         firstLine,
         'moduleVar',
-        `--${prop}-* 有 ${values.size} 個級距值(${[...values.keys()].join(' / ')})—— 級距組要搬到 ${target};跨模組共用則放 ${SHARED_MODULE_VARIABLES}`
+        `--${prop}-* 有 ${values.size} 個級距值(${[...values.keys()].join(' / ')})—— 級距組要搬到 ${target}` +
+          /* 集中目錄還沒有共用變數檔的專案(樣式都跟著元件走,那一層是空的)
+             把設定留空 —— 指一個不存在的位置比不講更糟,照著做會建出
+             一支沒有人知道為什麼在那裡的檔案。 */
+          (SHARED_MODULE_VARIABLES ? `;跨模組共用則放 ${SHARED_MODULE_VARIABLES}` : '')
       )
     })
 }
@@ -1135,6 +1239,20 @@ const modulePrefixOf = (rel) => {
 /** 選擇器行裡的 class token(含 CSS escape 的 \-\- 寫法) */
 const CLASS_TOKEN_RE = /\.((?:\\.|[\w-])+)/g
 
+/**
+ * 建置工具的關聯機制 class —— 不是任何模組的 class,而是「父層或兄弟的狀態」的掛勾。
+ *
+ * 父層掛上它,底下的元件就能對父層的 hover / focus 有反應。使用端掛在外面,
+ * 元件的樣式裡要寫得出那個條件,否則這種連動沒有辦法做。
+ *
+ * 具名的寫法(`group/card`)是同一種東西,取斜線前那一段比對。
+ *
+ * 這幾個名字由建置工具定義,與專案無關,所以寫在規則裡,不進專案設定。
+ */
+const STRUCTURAL_CLASSES = new Set(['group', 'peer'])
+
+const isStructuralClass = (cls) => STRUCTURAL_CLASSES.has(cls.split('/')[0])
+
 const unescapeClass = (raw) => raw.replace(/\\/g, '')
 
 const checkModuleScope = ({ rel, text: raw }) => {
@@ -1160,6 +1278,7 @@ const checkModuleScope = ({ rel, text: raw }) => {
 
       if (cls.startsWith('--')) continue // modifier / 狀態
       if (/^j[A-Z]/.test(cls)) continue // 純給 JS 抓的 hook class
+      if (isStructuralClass(cls)) continue // 父層 / 兄弟狀態的掛勾,不是模組的 class
       if (cls === prefix || cls.startsWith(`${prefix}-`)) continue // 自己的 class
       if (seen.has(cls)) continue
       seen.add(cls)
@@ -1502,6 +1621,7 @@ const CHECKS = [
   checkModuleScope,
   checkModuleLocation,
   checkModuleVariables,
+  checkBreakpointPrefix,
   checkVariableNaming,
   checkTShirtSizing,
   checkThemeNaming,
@@ -1567,6 +1687,19 @@ export const lintText = (root, rel, text, definedVars) => {
 export const lintFile = (root, abs, definedVars) =>
   lintText(root, toRel(root, abs), fs.readFileSync(abs, 'utf8'), definedVars)
 
+/**
+ * 不是給人遵守的規範,而是工具自己的狀態回報。
+ *
+ * 其餘每一條規則都要在寫法規範(`.claude/skills/`)或跨規則的共同前提
+ * (`.claude/rules/`)裡講到 —— 被一條沒有寫在規範裡的規則擋下來,
+ * 看到的只是一個陌生的代號,而照著規範做的人不可能事先知道有這回事。
+ *
+ * 這一條不一樣:它報的是「某條規則這次執行失敗了」,沒有任何寫法可以遵守。
+ * 把它也要求寫進規範的話,那一段只會寫成「工具壞掉時會報這個」——
+ * 對讀規範的人沒有用,而規則自己的驗證會比對兩邊,所以要在這裡講明。
+ */
+export const TOOL_STATE_RULES = ['ruleCrashed']
+
 /** 規則代號 → 標題與修正提示,五層共用 */
 export const RULE_TITLE = {
   /* 規則自己壞掉 —— 不是程式碼違規,但要跟違規一起被看到:
@@ -1582,6 +1715,7 @@ export const RULE_TITLE = {
   moduleScope: '模組 css 混入了別的 class',
   moduleLocation: '元件的樣式放在集中目錄,不在元件自己的資料夾裡',
   moduleVar: '模組級距變數的歸屬',
+  breakpointPrefix: '級距在某個斷點少列了前綴',
   variable: '模組變數的命名或斷點',
   ...GLOBAL_RULE_TITLE,
   ...API_RULE_TITLE,
@@ -1604,6 +1738,7 @@ export const RULE_HINT = {
   moduleScope: '一支模組 css 只能寫自己那組 class,變體的 class 也要收斂成同一個前綴',
   moduleLocation: '搬進那支元件自己的資料夾 —— 留在集中目錄的話,class 前綴那條不會檢查它',
   moduleVar: '同屬性兩個以上級距值要搬到 ***Variables.css',
+  breakpointPrefix: '每個 @screen 區塊都要列齊會命中該斷點的前綴變體',
   variable: '命名對齊 tailwind(w / h / p / rounded / leading);尺寸值要三個斷點成套,級距用實際數值不用 sm / md / lg',
   ...GLOBAL_RULE_HINT,
   ...API_RULE_HINT,

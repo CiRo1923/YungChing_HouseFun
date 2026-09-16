@@ -1,6 +1,6 @@
 <script setup>
-import './.css/labelVariables.css'
-import './.css/label.css'
+import './.css/variables.css'
+import './.css/common.css'
 
 const props = defineProps({
   label: {

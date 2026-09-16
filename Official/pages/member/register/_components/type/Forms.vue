@@ -90,7 +90,7 @@ const onWorkBrandChange = () => {
         v-if="item.label?.type === 'line'"
       />
 
-      <CommonMFormLabel
+      <CommonMLabel
         :label="item.label.text"
         class="text-[16px]"
         :config="{

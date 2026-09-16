@@ -14,7 +14,7 @@
   @apply relative z-0;
 }
 
-.m-table-body-content {
+.m-tab-body-content {
   @apply overflow-hidden border-transparent;
 }
 

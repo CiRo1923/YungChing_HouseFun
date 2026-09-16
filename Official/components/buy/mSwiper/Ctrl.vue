@@ -1,4 +1,7 @@
 <script setup>
+import './.css/variables.css'
+import './.css/common.css'
+
 import { useCommonStore } from '@stores/common.js'
 import useCommonActions from '@stores/.composables/useCommonActions.js'
 

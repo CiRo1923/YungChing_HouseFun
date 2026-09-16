@@ -19,6 +19,7 @@ import { detectViewResourceDepth, isModuleCss, isModuleStyle, listFiles, toRel }
 import {
   API_DIR,
   BREAKPOINTS,
+  BREAKPOINT_SCREENS,
   BUILD_CONFIG_FILES,
   COLOR_CSS_DIR,
   COMPONENTS_DIR,
@@ -202,6 +203,19 @@ const REQUIREMENTS = [
     check: (root) => !BREAKPOINTS.length || hasBreakpointVars(root),
     need: `專案要實際用到設定的斷點(目前設定為 ${BREAKPOINTS.join(' / ') || '(空)'}),不用的話把 BREAKPOINTS 設成空陣列`,
     why: '設定填了斷點,但 CSS 模組裡找不到任何一個帶斷點的變數。這種情況下每一個尺寸值都會被要求拆成三份,等於要補上一大批永遠相同的值 —— 不做響應式的專案應該把 BREAKPOINTS 設成空陣列。',
+  },
+  {
+    label: '斷點的前綴涵蓋關係',
+    rules: ['breakpointPrefix'],
+
+    /*
+     * 不做響應式的專案留空物件是刻意的,不是缺東西 —— 那時整條略過。
+     * 有分斷點卻沒填的話要講出來:那條從此不檢查任何東西,
+     * 而少列一個前綴的後果是使用端寫了卻沒有效果,很難查。
+     */
+    check: () => !BREAKPOINTS.length || Object.keys(BREAKPOINT_SCREENS).length > 0,
+    need: '設定裡要填 BREAKPOINT_SCREENS(每個 @screen 區塊該列出哪幾種前綴)',
+    why: '這個專案有分斷點,但沒有填 @screen 與前綴的涵蓋關係 —— 「級距要在每個斷點列齊前綴」那條會整條略過,而少列一種的後果是使用端傳了級距卻在那個斷點沒有效果。',
   },
   {
     label: '並行載入的包裝函式',

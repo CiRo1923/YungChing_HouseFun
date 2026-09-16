@@ -105,7 +105,7 @@ const onTransitionEnd = async (e) => {
       <slot name="headerTools" />
     </div>
     <div class="m-tab-body" :class="setClass.body">
-      <div class="m-table-body-content">
+      <div class="m-tab-body-content">
         <!-- 單一區塊 -->
         <ul class="m-tab-body-items" v-if="config.containerMode === 'single'">
           <li class="m-tab-body-item">

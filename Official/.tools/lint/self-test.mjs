@@ -72,6 +72,7 @@ import {
   onSortImports,
   onWrapMountedCalls,
   RULE_TITLE,
+  TOOL_STATE_RULES,
 } from './lint-core.mjs'
 import { NO_PREREQUISITE_RULES, PREFLIGHT_RULES } from './preflight.mjs'
 import { aliasListOf, importGroupOf, tailwindThemeOf } from './rules-code.mjs'
@@ -82,13 +83,17 @@ import {
   API_DIR,
   API_NAMING_IGNORED_SEGMENTS,
   BREAKPOINTS,
+  BREAKPOINT_SCREENS,
   BUILD_CONFIG_FILES,
   COLOR_CSS_DIR,
   CONVENTION_DOCS_DIR,
+  CONVENTION_RULES_DIR,
+  CONVENTION_SKILLS_DIR,
   COLOR_CSS_PREFIX,
   COMPONENTS_DIR,
   COMPONENT_DIRS,
   CSS_MODULES_DIR,
+  GENERATED_FILES,
   IMPORT_ORDER_GROUPS,
   MODULE_CSS_DIR_NAME,
   PARALLEL_AWAIT_HELPER,
@@ -96,6 +101,7 @@ import {
   PROJECT_NAMES,
   PROJECT_NAME_SCOPE,
   SHARED_API_FILE,
+  SHARED_MODULE_VARIABLES,
   SOURCE_PROJECT_NAME,
   SRC_DIR,
   STANDALONE_STORES,
@@ -218,14 +224,30 @@ const PROBE_PAGE_PREFIX = 'selfTest'
 const PROBE_VIEW_GROUP = `${PROBE_PAGE_PREFIX}Group`
 
 /**
- * 這個名字是不是驗證自己造出來的。
+ * 這段文字裡有沒有驗證自己造出來的名字。
  *
- * 兩個地方都要問這件事:結束時要把自己造的東西刪乾淨,而判斷「這個專案自己
- * 有沒有東西可以比對」時要把它們扣掉。各寫一份的話,新增一種探測名只改了一邊 ——
- * 不是留下殘留,就是把探測檔當成專案自己的內容拿去比對,兩種都不會報錯。
+ * 三個地方都要問這件事:結束時要把自己造的東西刪乾淨、判斷「這個專案自己
+ * 有沒有東西可以比對」時要把它們扣掉、清理自動產生的清單時要認出哪幾行是探測的。
+ * 各寫一份的話,新增一種探測名只改了一邊 —— 不是留下殘留,
+ * 就是把探測檔當成專案自己的內容拿去比對,兩種都不會報錯。
+ *
+ * 用「含有」而不是「開頭是」,所以一整行文字也問得動:自動產生的清單裡,
+ * 探測元件的名字出現在行的中間(前面有縮排與識別字)。
  */
-const isProbeName = (name) =>
-  name.includes(PROBE) || name.includes(PROBE_MODULE) || name.startsWith(PROBE_PAGE_PREFIX)
+const isProbeName = (text) =>
+  text.includes(PROBE) || text.includes(PROBE_MODULE) || text.includes(PROBE_PAGE_PREFIX)
+
+/**
+ * 把提到探測名字的行清掉,其餘一個字都不動。
+ *
+ * 收尾的清理與它的驗證共用這一份 —— 驗證自己再寫一次過濾的話,
+ * 驗的就不是真正在跑的那段程式碼,清理壞掉時它照樣會通過。
+ */
+const withoutProbeLines = (text) =>
+  text
+    .split('\n')
+    .filter((line) => !isProbeName(line))
+    .join('\n')
 
 /**
  * 探測用頁面資源資料夾的路徑。
@@ -533,6 +555,24 @@ const onCreateIfMissing = (rel, content = null) => {
   created.push(abs)
 }
 
+/**
+ * 開一個探測用的目錄,而且**只開自己的** —— 那裡已經有東西就不動它,回傳 null。
+ *
+ * 驗證會建東西再刪掉,而刪的那一步沒有辦法分辨「這是我剛建的」與
+ * 「這本來就在」。目錄已存在時 `mkdirSync` 不會有任何反應(遞迴建立本來就
+ * 允許已存在),於是刪的時候把別人的東西一起帶走 —— 專案真正的程式碼消失,
+ * 而驗證照常顯示全部通過,沒有任何訊息。
+ *
+ * 所以規矩是:**自己建得起來才繼續,建不起來就跳過那一則。**
+ * 少驗一則會被寫進「這次跳過了哪幾則」,刪掉別人的檔案則沒有人會知道。
+ */
+const makeProbeDir = (abs) => {
+  if (fs.existsSync(abs)) return null
+
+  fs.mkdirSync(abs, { recursive: true })
+  return abs
+}
+
 /** 規則要比對的對象 —— 頁面資料夾、色票、建置設定 */
 const onPrepare = () => {
   onCreateIfMissing(viewResourceDir(PROBE_PAGE_ALPHA))
@@ -712,6 +752,58 @@ const API_ALIAS_IMPORT = apiAliasImportOf('member.js') ?? apiImportPathOf(P, 'me
  * 兩份的差別在於綁不綁專案 —— 樣式那幾條依賴各專案自己的色票位置與
  * tailwind 覆寫,換專案要跟著換;結構那幾條只依賴目錄設定,可以整段搬。
  */
+/**
+ * 「級距要在每個斷點列齊前綴」那幾則案例。
+ *
+ * 內容從設定組出來(哪個 `@screen` 要列哪幾種前綴),不寫死斷點名 ——
+ * 各專案的斷點叫什麼都不一樣,寫死的話那種專案永遠驗不到東西,
+ * 而失敗的訊息看起來像規則壞了。
+ *
+ * 沒有分斷點的專案(設定是空物件)回空陣列,那幾則跳過並說明原因。
+ */
+const breakpointPrefixCases = () => {
+  const [screen, prefixes] = Object.entries(BREAKPOINT_SCREENS)[0] ?? []
+  if (!screen || prefixes.length < 2) return []
+
+  const scale = 'px-20'
+  const selector = (list) => list.map((p) => `    &.${p ? `${p}\\:` : ''}\\-\\-${scale},`).join('\n')
+
+  /* 母體 class 用探測元件的名字 —— 模組 css 只能寫自己那組 class,
+     用別的名字會同時命中那一條,案例就分不出抓到的是哪一條。 */
+  const block = (list) =>
+    `@screen ${screen} {\n  .m-css-self-test {\n${selector(list).replace(/,$/, ' {')}\n` +
+    `      --probe-px: 20px;\n    }\n  }\n}\n`
+
+  return [
+    {
+      name: 'breakpointPrefix 少列一種前綴要報',
+      file: `${S}/probeBreakpointShort.css`,
+      code: block(['', prefixes[0]]),
+      expect: 1,
+      rule: 'breakpointPrefix',
+      keyword: prefixes[prefixes.length - 1],
+    },
+    {
+      name: 'breakpointPrefix 列齊了不誤報',
+      file: `${S}/probeBreakpointFull.css`,
+      code: block(['', ...prefixes]),
+      expect: 0,
+      rule: 'breakpointPrefix',
+    },
+    {
+      /* 從來沒帶過前綴的名字是元件自己的變體(尺寸、狀態),
+         使用端不會在它前面加斷點前綴,要求列出變體是誤報。 */
+      name: 'breakpointPrefix 沒帶過前綴的變體不受這條約束',
+      file: `${S}/probeBreakpointVariant.css`,
+      code:
+        `@screen ${screen} {\n  .m-css-self-test {\n    &.\\-\\-size-md {\n` +
+        `      --probe-px: 20px;\n    }\n  }\n}\n`,
+      expect: 0,
+      rule: 'breakpointPrefix',
+    },
+  ]
+}
+
 const CSS_CASES = [
   // ---------- 規則 color ----------
   {
@@ -1021,6 +1113,33 @@ const CSS_CASES = [
     code: `<script setup>\nconst size = 'text-sm'\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
     expect: 0,
   },
+  {
+    /* 註解裡舉例寫出一個已經消失的 class 是正常的 ——
+       「這裡不要再用它」那句說明本身就含有那個名字,
+       報出來的那一筆沒有人能修:照著改等於把說明改壞。 */
+    name: 'theme 程式的行註解裡舉例不算違規',
+    file: `${A}/probeThemeComment.js`,
+    code: `export const isVariant = (c) => /:/.test(c) // 例如 text-sm 這種前綴寫法\n`,
+    expect: 0,
+    rule: 'theme',
+  },
+  {
+    name: 'theme 樣式的註解裡舉例不算違規',
+    file: `${M}/probeThemeComment.css`,
+    code: `/* 這裡不要再用 text-sm */\n.m-probe {\n  @apply flex;\n}\n`,
+    expect: 0,
+    rule: 'theme',
+  },
+  {
+    /* 網址裡的兩條斜線不是註解的起頭。當成註解遮掉的話,那一行後半段
+       (常常還有真正要檢查的程式碼)會一起消失,而漏掉的違規不會有人發現。 */
+    name: 'theme 網址裡的斜線不算註解,同一行的 class 照樣抓',
+    file: `${A}/probeThemeUrl.js`,
+    code: `export const cls = { url: 'https://example.com/x', size: 'text-sm' }\n`,
+    expect: 1,
+    rule: 'theme',
+    keyword: 'text-sm',
+  },
 
   // ---------- 規則 moduleOrder ----------
   {
@@ -1148,6 +1267,34 @@ const CSS_CASES = [
     file: `${S}/scope3.css`,
     code: `.m-css-self-test {\n  &.\\-\\-active,\n  &.p\\:\\-\\-px-24 {\n    @apply flex;\n  }\n}\n\n.m-css-self-test-title {\n  @apply block;\n}`,
     expect: 0,
+  },
+  {
+    /* 父層掛上關聯機制的 class,底下的元件才能對父層的 hover 有反應。
+       那不是別的模組,是建置工具提供的掛勾 —— 報它的話,
+       這種連動就沒有一種寫得出來的形狀。 */
+    name: 'moduleScope 父層狀態的掛勾不算別的模組',
+    file: `${S}/structural.css`,
+    code: `.group:hover .m-css-self-test {\n  @apply flex;\n}\n\n.peer:checked ~ .m-css-self-test {\n  @apply block;\n}\n`,
+    expect: 0,
+    rule: 'moduleScope',
+  },
+  {
+    /* 具名的寫法是同一種東西,取斜線前那一段比對 */
+    name: 'moduleScope 具名的掛勾也放行',
+    file: `${S}/structuralNamed.css`,
+    code: `.group\\/card:hover .m-css-self-test {\n  @apply flex;\n}\n`,
+    expect: 0,
+    rule: 'moduleScope',
+  },
+  {
+    /* 放行的只有那兩個名字 —— 開頭長得像也不算,
+       不然 `.grouped` 這種一般 class 會跟著被放過。 */
+    name: 'moduleScope 名字開頭像掛勾但不是的照樣報',
+    file: `${S}/structuralLike.css`,
+    code: `.grouped .m-css-self-test {\n  @apply flex;\n}\n`,
+    expect: 1,
+    rule: 'moduleScope',
+    keyword: 'grouped',
   },
   {
     name: 'moduleScope 變體 class 要收斂成母體前綴',
@@ -1290,6 +1437,22 @@ const CSS_CASES = [
     keyword: '級距值',
   },
   {
+    /* 集中目錄還沒有共用變數檔的專案(樣式都跟著元件走,那一層是空的)
+       把設定留空,訊息就只講「搬到模組自己的 Variables 檔」——
+       指一個不存在的位置比不講更糟:照著做會建出一支沒有人知道為什麼在那裡的檔案。
+
+       兩種設定各驗一次,取的是規則實際讀的那一份值,不在這裡另外判斷。 */
+    name: `moduleVar 提示${SHARED_MODULE_VARIABLES ? '指向共用變數檔' : '不指向不存在的共用變數檔'}`,
+    file: `${M}/probeSharedHint.css`,
+    code:
+      `.m-probe {\n` +
+      `  &.\\-\\-py-24 {\n    --probe-py: 24px;\n  }\n\n` +
+      `  &.\\-\\-py-15 {\n    --probe-py: 15px;\n  }\n}`,
+    expect: 1,
+    rule: 'moduleVar',
+    keyword: SHARED_MODULE_VARIABLES || '級距組要搬到',
+  },
+  {
     name: 'moduleVar 單一值不擋',
     file: `${M}/probe2.css`,
     code: `.m-probe {\n  &.\\-\\-px-24 {\n    --probe-px: 24px;\n  }\n}`,
@@ -1315,6 +1478,16 @@ const CSS_CASES = [
       `  &.\\-\\-range-end {\n    border-top-right-radius: 5px;\n  }\n}`,
     expect: 0,
   },
+
+  // ---------- 規則 breakpointPrefix ----------
+  //
+  // 級距 class 由使用端傳進來,CSS 這邊要為每一個會命中的斷點各寫一次選擇器。
+  // 少列一種的話,使用端那樣寫了在那個斷點沒有效果 —— 畫面上是「這個間距沒生效」,
+  // 而那一行 class 看起來完全正常。
+  //
+  // 內容一律從設定組出來(哪個 @screen 要列哪幾種前綴),不寫死斷點名 ——
+  // 各專案的斷點名不一樣,寫死的話那種專案永遠驗不到東西。
+  ...breakpointPrefixCases(),
 ]
 
 /**
@@ -2249,6 +2422,34 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
     expect: 1,
     keyword: '沒有載入樣式',
   },
+  {
+    /* 自己完全不寫 class 的轉手元件:設定往下傳,畫面與樣式都由被轉手的那支負責。
+       它沒有樣式可以載入,報它的話只有兩條路 —— 去 import 別人的樣式,
+       或建一支空的樣式檔,兩種都比違規本身更糟。 */
+    name: 'importOrder 自己不寫 class 的轉手元件不必載入樣式',
+    rule: 'importOrder',
+    file: `${C}/Order4.vue`,
+    code: `<template>\n  <CommonProbeInner :config="config">\n    <slot />\n  </CommonProbeInner>\n</template>\n`,
+    expect: 0,
+  },
+  {
+    /* 動態綁定的 class 由使用端傳進來,樣式該由傳進來的那一方負責 ——
+       只有這種的元件同樣算沒有自己的 class。 */
+    name: 'importOrder 只有動態綁定 class 的元件也算轉手',
+    rule: 'importOrder',
+    file: `${C}/Order5.vue`,
+    code: `<template>\n  <CommonProbeInner :class="setClass.main" />\n</template>\n`,
+    expect: 0,
+  },
+  {
+    /* 被註解掉的那一段是死程式碼,裡面的 class 不會產生任何樣式 ——
+       拿它當「這支有自己的樣式」的證據,會讓真正該報的那一支被放過。 */
+    name: 'importOrder 只有註解掉的 class 不算有自己的樣式',
+    rule: 'importOrder',
+    file: `${C}/Order6.vue`,
+    code: `<template>\n  <!-- <div class="m-probe"></div> -->\n  <CommonProbeInner />\n</template>\n`,
+    expect: 0,
+  },
 
   // ---------- 規則 importAlias / deprecated / composableOrder ----------
   {
@@ -2872,6 +3073,66 @@ const onCheckConfigItem = () => {
 }
 
 /**
+ * 自動產生的清單:探測的那幾行清得掉,專案自己的內容一個字都不能動。
+ *
+ * 這一道是在收尾時跑的,跑完就沒有痕跡 —— 壞掉的話不會有任何徵兆,
+ * 只是那份清單開始累積指向不存在檔案的行,而看到的人不知道那是什麼。
+ *
+ * 在暫存目錄裡試,不碰這個專案的清單。
+ */
+const onCheckGeneratedCleanup = () => {
+  /* 內容用實際的形狀造:自動注入的清單一行就是一個元件,
+     名字出現在行的中間(前面有縮排與識別字)。 */
+  const own = `    CommonHeader: typeof import('./components/common/Header.vue')['default']`
+  const probeComponent = `    Probe1: typeof import('./components/${PROBE}/Tw1.vue')['default']`
+  const probePage = `    Probe2: typeof import('./views/${PROBE_PAGE_PREFIX}Alpha/Index.vue')['default']`
+
+  const cleaned = withoutProbeLines([own, probeComponent, probePage, own].join('\n'))
+  const problems = []
+
+  if (cleaned.includes(PROBE) || cleaned.includes(PROBE_PAGE_PREFIX)) {
+    problems.push('探測的那幾行沒有被清乾淨')
+  }
+  if (cleaned !== `${own}\n${own}`) {
+    problems.push('專案自己的那幾行被動到了 —— 那份清單裡其他的內容不能碰')
+  }
+
+  report(!problems.length, '自動產生的清單只清探測的那幾行', problems)
+}
+
+/**
+ * 探測目錄只開自己的,已經存在的一律不碰。
+ *
+ * 驗證會建東西再刪掉。刪的那一步沒辦法分辨「這是我剛建的」與「這本來就在」——
+ * 一旦探針的名字撞到專案真實的資料夾,結束時就會把裡面真正的程式碼一起刪掉,
+ * 而畫面上照常顯示全部通過。
+ *
+ * 在暫存目錄裡試,不碰這個專案。
+ */
+const onCheckProbeDirSafety = () => {
+  const base = fs.mkdtempSync(path.join(os.tmpdir(), 'lint-probe-dir-'))
+  const problems = []
+
+  try {
+    const fresh = path.join(base, 'fresh')
+    if (makeProbeDir(fresh) !== fresh || !fs.existsSync(fresh)) problems.push('不存在的目錄沒有被建起來')
+
+    const taken = path.join(base, 'taken')
+    const real = path.join(taken, 'real.js')
+
+    fs.mkdirSync(taken)
+    fs.writeFileSync(real, 'export const real = 1\n', 'utf8')
+
+    if (makeProbeDir(taken) !== null) problems.push('已經有東西的目錄要回 null,那一則才會跳過')
+    if (!fs.existsSync(real)) problems.push('已經存在的檔案被動到了')
+  } finally {
+    fs.rmSync(base, { recursive: true, force: true })
+  }
+
+  report(!problems.length, '探測目錄只開自己的,已經存在的一律不碰', problems)
+}
+
+/**
  * 每一條規則都要被說明文件講到。
  *
  * 規則寫在程式裡,而看的人是從說明文件知道「這套工具在管什麼」的。
@@ -2902,6 +3163,56 @@ const onCheckRulesDocumented = () => {
     !missing.length,
     '每一條規則都有寫進說明文件',
     missing.length ? [`說明文件裡找不到:${missing.join('、')}`] : []
+  )
+}
+
+/**
+ * 每一條規則都要被寫法規範講到。
+ *
+ * 說明文件那一層(前一則在比對的)是「有哪些規則」的總表,給的是概觀;
+ * **寫法規範才是動手之前會讀的那一份** —— 要寫什麼、為什麼、不這樣做會怎樣。
+ *
+ * 規則只存在於程式裡的話,照著規範做的人不可能事先知道有這回事:
+ * 寫完被擋下來,看到的是一個陌生的代號,而他讀過的那幾份規範一個字都沒提。
+ * 那種規則的存量會一直長大 —— 不是有人不守,是沒有人知道。
+ *
+ * 工具自己的狀態回報(某條規則執行失敗)不在此列,那種沒有寫法可以遵守,
+ * 由 TOOL_STATE_RULES 明確列出。
+ */
+const onCheckRulesInConventions = () => {
+  const dirs = [CONVENTION_SKILLS_DIR, CONVENTION_RULES_DIR]
+    .map((dir) => path.join(root, ...dir.split('/')))
+    .filter((dir) => fs.existsSync(dir))
+
+  if (!dirs.length) {
+    skipped.push({ name: '每一條規則都有寫進寫法規範', need: 'conventionDocs' })
+    return
+  }
+
+  const readAll = (dir) =>
+    fs.readdirSync(dir, { withFileTypes: true }).flatMap((item) => {
+      const full = path.join(dir, item.name)
+      if (item.isDirectory()) return readAll(full)
+
+      return item.name.endsWith('.md') ? [fs.readFileSync(full, 'utf8')] : []
+    })
+
+  const text = dirs.flatMap(readAll).join('\n')
+  const state = new Set(TOOL_STATE_RULES)
+
+  const missing = Object.keys(RULE_TITLE).filter(
+    (rule) => !state.has(rule) && !rule.startsWith(PROJECT_RULE_PREFIX) && !text.includes(rule)
+  )
+
+  report(
+    !missing.length,
+    '每一條規則都有寫進寫法規範',
+    missing.length
+      ? [
+          `寫法規範裡找不到:${missing.join('、')} —— ` +
+            `照著規範做的人不會知道有這條,被擋下來時只看得到一個陌生的代號`,
+        ]
+      : []
   )
 }
 
@@ -3240,43 +3551,50 @@ const WRAP_MOUNTED_CASES = [
  *
  * 這一則實際建出兩種形狀再刪掉,不用寫死任何專案的目錄名。
  */
-const onCheckApiLayers = () => {
-  const folders = [...(listViewFolders(root) ?? [])]
-  if (!folders.length) return
+const API_LAYER_CASE_NAMES = [
+  'apiScope 服務分層:那一層有自己的 .config.js 時,資源是那一層',
+  'apiScope 單純分類:那一層沒有 .config.js 時,資源仍是檔名',
+  'apiScope 分類層底下檔名對不上,照樣要報',
+]
 
-  const resource = folders[0] // 拿這個專案真的有的頁面資源來造探針
+const onCheckApiLayers = () => {
+  /* 資源名取「驗證自己建的那個頁面資料夾」,不是專案真實的第一個資源。
+     這一則要的只是「一個對得上頁面資料夾的名字」—— 規則判斷的是
+     「這一層有沒有自己的 .config.js」,不是名字叫什麼。
+
+     用真實資源名的話,api 目錄底下那個同名的資料夾多半本來就存在
+     (設定正確的專案一定有),而這一則結束時會把它刪掉 ——
+     連同裡面真正的 api 檔案。 */
+  const resource = [...(listViewFolders(root) ?? [])].find(isProbeName)
+
+  if (!resource) {
+    for (const name of API_LAYER_CASE_NAMES) skipped.push({ name, need: 'probeViewFolder' })
+    return
+  }
+
   const apiAbs = path.join(root, ...API_DIR.split('/'))
-  const svc = path.join(apiAbs, resource)
-  const group = path.join(apiAbs, `${PROBE}Group`)
+  const svc = makeProbeDir(path.join(apiAbs, resource))
+  const group = makeProbeDir(path.join(apiAbs, `${PROBE}Group`))
+
+  if (!svc || !group) {
+    for (const name of API_LAYER_CASE_NAMES) skipped.push({ name, need: 'probeDirFree' })
+    return
+  }
 
   const code = `import { fetchApi } from '@js/_api/.config.js'\n\nexport const apiGetX = (data) => fetchApi.get('x', data)\n`
   const scopeOf = (rel) => lintText(root, rel, code).filter((i) => i.rule === 'apiScope')
 
   try {
-    fs.mkdirSync(svc, { recursive: true })
-    fs.mkdirSync(group, { recursive: true })
     fs.writeFileSync(path.join(svc, '.config.js'), 'export const fetchApi = {}\n', 'utf8')
 
     const asService = scopeOf(`${API_DIR}/${resource}/list.js`)
-    report(
-      !asService.length,
-      'apiScope 服務分層:那一層有自己的 .config.js 時,資源是那一層',
-      asService.map((i) => i.detail)
-    )
+    report(!asService.length, API_LAYER_CASE_NAMES[0], asService.map((i) => i.detail))
 
     const asGroup = scopeOf(`${API_DIR}/${PROBE}Group/${resource}.js`)
-    report(
-      !asGroup.length,
-      'apiScope 單純分類:那一層沒有 .config.js 時,資源仍是檔名',
-      asGroup.map((i) => i.detail)
-    )
+    report(!asGroup.length, API_LAYER_CASE_NAMES[1], asGroup.map((i) => i.detail))
 
     const bad = scopeOf(`${API_DIR}/${PROBE}Group/${PROBE}Nowhere.js`)
-    report(
-      bad.length === 1,
-      'apiScope 分類層底下檔名對不上,照樣要報',
-      bad.length ? [] : ['對不上的檔名沒有被報出來']
-    )
+    report(bad.length === 1, API_LAYER_CASE_NAMES[2], bad.length ? [] : ['對不上的檔名沒有被報出來'])
   } finally {
     fs.rmSync(svc, { recursive: true, force: true })
     fs.rmSync(group, { recursive: true, force: true })
@@ -3759,6 +4077,32 @@ const SORT_COMPOSABLE_CASES = [
   },
 ]
 
+/**
+ * 把自動產生的清單裡「提到探測名字」的行清掉。
+ *
+ * 驗證會在元件目錄底下實際建出探測檔,而建置工具在背景監看那一層 ——
+ * 它看到新檔案就登記進清單,而探測檔刪掉之後那幾行留著,指向一個不存在的檔案。
+ * 不清的話會跟著 commit 擴散出去,看到的人不知道那是什麼:
+ * 那幾個名字在專案裡根本找不到。
+ *
+ * **只刪提到探測名字的那幾行,其餘一個字都不動** —— 那份清單裡其他的東西
+ * 是專案真正的內容,而它隨時可能正被別人修改。
+ *
+ * 監看是非同步的:清完之後它才反應過來的那一次仍會留下幾行,
+ * 那幾行會在下一次執行時被這裡清掉(判斷看的是內容,不是「這次是誰寫的」)。
+ */
+const onCleanGeneratedLists = () => {
+  for (const rel of GENERATED_FILES) {
+    const abs = path.join(root, ...rel.split('/'))
+    if (!fs.existsSync(abs)) continue
+
+    const before = fs.readFileSync(abs, 'utf8')
+    const after = withoutProbeLines(before)
+
+    if (after !== before) fs.writeFileSync(abs, after, 'utf8')
+  }
+}
+
 const cleanup = () => {
   for (const dir of PROBE_DIRS) {
     fs.rmSync(path.join(root, dir), { recursive: true, force: true })
@@ -3794,6 +4138,10 @@ const cleanup = () => {
   while (created.length) {
     fs.rmSync(created.pop(), { recursive: true, force: true })
   }
+
+  /* 探測檔都刪掉之後才清清單 —— 反過來的話,刪檔案這一步會再驚動監看的工具,
+     剛清好的那幾行又被寫回去。 */
+  onCleanGeneratedLists()
 }
 
 let failed = 0
@@ -3832,6 +4180,13 @@ const SKIP_REASON = {
   sourceProject:
     '這個專案不是規範工具的來源(SOURCE_PROJECT_NAME 與 PROJECT_NAMES 對不上),' +
     '指紋清單是跟著規則複製過來的,對不上由規則 ruleTampered 在檢查時報。',
+  probeViewFolder:
+    '頁面目錄裡沒有驗證自己建的資料夾(頁面目錄的位置設錯時會這樣),' +
+    '而這幾則要一個對得上頁面資料夾的名字才驗得起來。' +
+    '改用專案真實的資源名是不行的 —— 那會在結束時刪掉同名的真實 api 目錄。',
+  probeDirFree:
+    'api 目錄底下已經有同名的資料夾,這幾則跳過。' +
+    '驗證只刪自己建起來的東西:已經存在的一律不碰,否則刪的時候會把真正的檔案一起帶走。',
   conventionDocs:
     '這個專案還沒有規範系統自己的說明文件那一層(CONVENTION_DOCS_DIR),' +
     '所以比不出「哪幾條規則沒有被講到」。',
@@ -4015,7 +4370,10 @@ try {
   onCheckViewDepth()
   onCheckConfigItem()
   onCheckUnderAny()
+  onCheckProbeDirSafety()
+  onCheckGeneratedCleanup()
   onCheckRulesDocumented()
+  onCheckRulesInConventions()
   onCheckPreflightCoverage()
   onCheckThemeBlocks()
   onCheckRuleCrash()

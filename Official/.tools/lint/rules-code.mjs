@@ -17,6 +17,8 @@ import {
   VIEWS_DIR,
   issueOf,
   lineNoOf,
+  maskHtmlComments,
+  templateRangeOf,
 } from './shared.mjs'
 
 /* 「這個檔案是不是原始碼」的判斷收在 shared.mjs 一份 —— 原始碼放在哪由設定決定,
@@ -819,6 +821,25 @@ const IMPORT_SPEC_RE = /^import\s+(?:[^'"\n]*?from\s*)?['"]([^'"]+)['"]/gm
 /** 樣式是第一組 —— 「一定要有」檢查的就是這一組有沒有出現 */
 const STYLE_GROUP = 0
 
+/**
+ * 這支元件有沒有自己的 class。
+ *
+ * 有一種元件自己完全不寫 class:它把設定往下傳給另一支元件,畫面與樣式
+ * 都由被轉手的那支負責。**那種元件沒有樣式可以載入** —— 要求它載一支,
+ * 等於要它去 import 別人的樣式,或為它建一支空檔案。
+ *
+ * 判斷看的是靜態寫出來的 class。動態綁定(`:class="setClass.main"`)不算 ——
+ * 那個值由使用端傳進來,樣式該由傳進來的那一方負責。
+ *
+ * 被註解掉的那一段不算 —— 那是死程式碼,裡面的 class 不會產生任何樣式。
+ */
+const hasOwnClass = (text) => {
+  const tpl = templateRangeOf(text)
+  if (!tpl) return false
+
+  return /\sclass\s*=\s*"[^"]/.test(maskHtmlComments(tpl.body))
+}
+
 const checkImportOrder = ({ rel, text }) => {
   if (!rel.startsWith(`${COMPONENTS_DIR}/`) || !rel.endsWith('.vue')) return []
 
@@ -826,6 +847,11 @@ const checkImportOrder = ({ rel, text }) => {
     (m) => importGroupOf(m[1]) === STYLE_GROUP
   )
   if (hasStyle) return []
+
+  /* 自己完全不寫 class 的轉手元件沒有樣式可載,這條的前提不成立。
+     報它的話只有兩條路:去 import 別人的樣式,或建一支空的樣式檔 ——
+     兩種都比違規本身更糟。 */
+  if (!hasOwnClass(text)) return []
 
   return [
     issueOf(

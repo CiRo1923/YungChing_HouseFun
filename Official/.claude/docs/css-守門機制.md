@@ -30,9 +30,10 @@
 | `theme` | 用到被 theme 整組覆寫掉、實際不存在的 class | 原始碼 | ✗ |
 | `themeNaming` | theme 整組覆寫後，重新定義的值又用了 `sm` / `md` / `lg` | 專案根的樣式設定檔 | ✗ |
 | `moduleOrder` | 變數檔排在版型檔後面（變數要先定義完，版型才取用） | `.vue` 的模組 css import | ✗ |
-| `moduleScope` | 模組 css 混入別的模組或非 `m-` 開頭的 class | 元件的樣式子資料夾 | ✗ |
+| `moduleScope` | 模組 css 混入別的模組或非 `m-` 開頭的 class（建置工具的關聯掛勾 group / peer 不算） | 元件的樣式子資料夾 | ✗ |
 | `moduleLocation` | 對得上某個元件的樣式留在集中目錄（該搬進那個元件的資料夾） | 共用變數目錄 | ✗ |
 | `moduleVar` | 同屬性兩個以上級距值（該搬到 `***Variables.css`） | 元件的樣式子資料夾與共用變數目錄（Variables 檔除外） | ✗ |
+| `breakpointPrefix` | 父層可傳入的級距在某個 @screen 區塊少列了會命中該斷點的前綴變體 | 元件的樣式子資料夾與共用變數目錄 | ✗ |
 | `variable` | 命名沒對齊 tailwind、級距用 `sm`/`md`/`lg`、斷點沒三份成套 | 元件的樣式子資料夾與共用變數目錄 | ✗ |
 | `projectName` | 寫死專案名稱 | 只有規範系統自身（清單見設定的 TOOLING_DIRS） | ✗ |
 | `absolutePath` | 寫了某一台機器上的路徑（磁碟機代號、家目錄、`file://`）、跨專案引用 | 原始碼與規範系統自身 | ✗ |
@@ -60,7 +61,7 @@
 | `pageActionNaming` | 頁面包裝 action 的命名沒有去掉 `Api` 或對不上 | 原始碼裡的 `.vue` | ✗ |
 | `pageApiImport` | 頁面直接 import api（可在檔頭標 `lint-page-api-exempt` 放行一次性的請求） | 原始碼裡的 `.vue` | ✗ |
 | `componentApiImport` | 元件直接 import api（沒有例外，標了豁免記號也一樣擋） | 元件目錄的 `.vue` | ✗ |
-| `importOrder` | 元件沒有載入樣式（樣式要由元件自己 import） | 元件目錄的 `.vue` | ✗（工具看不出該載哪一支） |
+| `importOrder` | 元件沒有載入樣式（樣式要由元件自己 import；自己完全不寫 class 的轉手元件不在此列） | 元件目錄的 `.vue` | ✗（工具看不出該載哪一支） |
 | `configItem` | 專案設定檔多了沒有任何規則讀的項目 | `.tools/lint/project-config.mjs` | ✗（來源專案只提醒，見下方說明） |
 | `ruleCrashed` | 規則自己執行失敗（多半是漏了 import），那支檔案沒被那條規則檢查 | 全部 | ✗ |
 | `ruleTampered` | 共用規則與來源的指紋對不上（只有來源能改規則） | `.tools/lint/project-config.mjs`（只在非來源專案比對） | ✗ |
