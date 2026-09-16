@@ -3,7 +3,7 @@ import { Form } from 'vee-validate'
 
 const buyProject = useBuyProjectStore()
 const { message, cottonCandyCheckbox } = storeToRefs(buyProject)
-const { onApiMessages } = useBuyProjectActions()
+const { onApiPostBuyMessages } = useBuyProjectActions()
 const { onCustom, onCustomClose, onPromise } = usePopupActions()
 
 const formRef = ref(null)
@@ -36,7 +36,7 @@ const onSure = async () => {
   for (let i = 0; i < cottonCandyCheckbox.value.length; i += 1) {
     message.value.apiData.houseId = cottonCandyCheckbox.value[i]
 
-    await onApiMessages()
+    await onApiPostBuyMessages()
   }
   onPromise('close')
 

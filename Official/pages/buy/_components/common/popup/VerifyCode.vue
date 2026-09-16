@@ -6,8 +6,8 @@ const { serverTime } = storeToRefs(project)
 const buyProject = useBuyProjectStore()
 const { apiVerifyCodeData, countdownData } = storeToRefs(buyProject)
 const {
-  onApiMessagesVerifyCode,
-  onApiMessagesResendCode,
+  onApiPostBuyMessagesVerifyCode,
+  onApiPostBuyMessagesResendCode,
   onPopupCottonCandy,
   onPopupMessageSucess,
 } = useBuyProjectActions()
@@ -15,11 +15,11 @@ const { onPromise, onCustomSettle } = usePopupActions()
 
 const formRef = ref(null)
 
-const onSubmit = async () => {
+const onBuyMessagesResendCode = async () => {
   // 期間以 CommonMPopupPromise 遮罩擋住操作（疊在驗證 popup 內，取代自管的防連點旗標）
   // 成功後 action 會更新 countdownData.expires → 元件內 watch expires 自動重新倒數
   onPromise('open')
-  await onApiMessagesResendCode()
+  await onApiPostBuyMessagesResendCode()
   onPromise('close')
 }
 
@@ -39,7 +39,7 @@ const onSure = async () => {
   // 驗證通過才回報結果;此處不關閉,交由後續流程接手畫面
   onCustomSettle(true)
   onPromise('open')
-  const { status, data } = await onApiMessagesVerifyCode()
+  const { status, data } = await onApiPostBuyMessagesVerifyCode()
   onPromise('close')
 
   if (status === 200) {
@@ -95,7 +95,7 @@ const onSure = async () => {
           button: '--h-35 --px-15',
           buttonText: 'text-[14px]',
         }"
-        @submit="onSubmit"
+        @submit="onBuyMessagesResendCode"
       />
     </Form>
   </CommonCustomPopup>

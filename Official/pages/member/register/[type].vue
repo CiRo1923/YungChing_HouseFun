@@ -9,7 +9,7 @@ const {
   onApiGETBranchSelectOptions,
   onApiGETBranchStoreSelectOptions,
 } = useManageActions()
-const { onApiAuthRegisterVerificationCode, onApiAuthRegister, reset } =
+const { onApiPostMemberAuthRegisterVerificationCode, onApiPostMemberAuthRegister, reset } =
   useMemberAuthRegisterActions()
 const memberRegister = useMemberAuthRegisterStore()
 const { type } = storeToRefs(memberRegister)
@@ -38,21 +38,21 @@ onUseMeta({
 
 const onVerifySubmit = async () => {
   await onApiGetCommonServerTime()
-  await onApiAuthRegisterVerificationCode('member')
+  await onApiPostMemberAuthRegisterVerificationCode('member')
 }
 
-const onCityChange = async (cityId) => {
+const onGETDistrictSelectOptions = async (cityId) => {
   await onApiGETDistrictSelectOptions(cityId)
 }
 
-const onWorkAreaChange = async ({ cityId, areaId }) => {
+const onGETBranchSelectOptions = async ({ cityId, areaId }) => {
   await onApiGETBranchSelectOptions({
     cityCode: cityId,
     districtCode: areaId,
   })
 }
 
-const onBrandChange = async ({ cityId, areaId, brandId }) => {
+const onGETBranchStoreSelectOptions = async ({ cityId, areaId, brandId }) => {
   await onApiGETBranchStoreSelectOptions({
     cityCode: cityId,
     districtCode: areaId,
@@ -70,7 +70,7 @@ const onSumit = async (validate, setTouched) => {
 
   if (!valid) return
 
-  const { status } = await onApiAuthRegister('member')
+  const { status } = await onApiPostMemberAuthRegister('member')
 
   if (status === 200) {
     router.push({
@@ -123,14 +123,14 @@ onInit()
       />
       <PageMemberRegisterTypeLandlordForm
         @verifySubmit="onVerifySubmit"
-        @cityChange="onCityChange"
+        @cityChange="onGETDistrictSelectOptions"
         v-if="information.id === 'landlord'"
       />
       <PageMemberRegisterTypeAgentForm
         @verifySubmit="onVerifySubmit"
-        @cityChange="onCityChange"
-        @workAreaChange="onWorkAreaChange"
-        @workBrandChange="onBrandChange"
+        @cityChange="onGETDistrictSelectOptions"
+        @workAreaChange="onGETBranchSelectOptions"
+        @workBrandChange="onGETBranchStoreSelectOptions"
         v-if="information.id === 'agent'"
       />
       <CommonMAnchor

@@ -6,12 +6,12 @@ definePageMeta({
 })
 
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
-const { onApiBuyHouse, onApiBuyHousePoi } = useBuyHouseActions()
+const { onApiGetBuyHouseHfid, onApiGetBuyHouseHfidPoi } = useBuyHouseActions()
 const { onApiGETRealEstateTypeSelectOptions } = useManageActions()
 const { onRestoreChannel } = useBuyProjectActions()
 
 // H1 由共用 Header 讀 project.seo.h1 輸出:
-// SSR 由 middleware/buySeo 預抓、client 由本頁 onApiBuyHouse → onSetSeo 更新、
+// SSR 由 middleware/buySeo 預抓、client 由本頁 onApiGetBuyHouseHfid → onSetSeo 更新、
 // 換頁清空由 middleware/seoReset 處理(勿用 onUnmounted,會晚於新頁設值而誤清)。
 
 const route = useRoute()
@@ -23,8 +23,8 @@ onRestoreChannel()
 
 await onWithLoadingAll([
   useAsyncData('type-options', () => onApiGETRealEstateTypeSelectOptions()),
-  useAsyncData(`buy-detail-${hfid.value}`, () => onApiBuyHouse()),
-  useAsyncData(`buy-detail-poi-${hfid.value}`, () => onApiBuyHousePoi()),
+  useAsyncData(`buy-detail-${hfid.value}`, () => onApiGetBuyHouseHfid()),
+  useAsyncData(`buy-detail-poi-${hfid.value}`, () => onApiGetBuyHouseHfidPoi()),
 ])
 
 onUseMeta({

@@ -1,21 +1,20 @@
 <script setup>
 import { getChannelColorHref } from '@js/runtime/channelColor.js'
-import { apiGetBuyHouseHfid } from '@js/_api/buy/house.js'
 
 // buy 頻道色票的 hash URL(集中在 _channelColor 用 ?url 引用)。
 const colorHref = getChannelColorHref('buy')
 
 const common = useCommonStore()
 const { isLoading } = storeToRefs(common)
-const { onGetAuthTokenCookie, onApiAuthHandoffToken, onRestoreAuthToken } =
+const { onGetAuthTokenCookie, onApiGetMemberAuthHandoffToken, onRestoreAuthToken } =
   useMemberAuthProjectActions()
 const buyProject = useBuyProjectStore()
 const { access } = storeToRefs(buyProject)
 const {
   onPopupLogin,
-  onApiAuthTokenExchange,
-  onApiAuthMe,
-  onApiAuthLogout,
+  onApiPostBuyAuthTokenExchange,
+  onApiGetBuyAuthMe,
+  onApiPostBuyAuthLogout,
   onRestoreAccessData,
   onGetAccessDataCookie,
 } = useBuyProjectActions()
@@ -48,7 +47,7 @@ const onInit = async () => {
   await onRestoreAccessData()
 
   if (access.value.data) {
-    await onApiAuthMe()
+    await onApiGetBuyAuthMe()
   }
 }
 
@@ -57,22 +56,20 @@ const onInit = async () => {
 await callOnce(onInit)
 
 // SSR 預抓 SEO:layout(含 Header)的渲染早於頁面 <slot>,若不在此先備好 project.seo,
-// Header 的資料型 H1 在 SSR 會是空的。只在 server 跑(client 由各頁 onApiBuyXxx 反應式更新);
-// 為 best-effort,失敗不得中斷渲染。
+// Header 的資料型 H1 在 SSR 會是空的。走各頁自己的 action,seo 由那支寫進 store。
+// 只在 server 跑(client 端由頁面自己打);為 best-effort,失敗不得中斷渲染。
 if (import.meta.server) {
-  const { onSetSeo } = useCommonActions()
-
   try {
     if (route.name === 'buy-house-hfid') {
-      const { status, data } = await apiGetBuyHouseHfid({ hfid: route.params.hfid })
+      const { onApiGetBuyHouseHfid } = useBuyHouseActions()
 
-      if (status === 200) onSetSeo(data.seo)
+      await onApiGetBuyHouseHfid()
     } else if (route.name === 'buy-list-filters') {
-      const { onChannel, onGetBuyListParams, onApiBuyList } = useBuyListActions()
+      const { onChannel, onGetBuyListParams, onApiGetBuyList } = useBuyListActions()
 
       onChannel()
       onGetBuyListParams()
-      await onApiBuyList()
+      await onApiGetBuyList()
     }
   } catch {
     // 靜默:SEO 預抓失敗不影響頁面渲染
@@ -91,9 +88,9 @@ const onAccessCheck = async () => {
 
   if (authToken) {
     // authToken 仍有效 → 打另一支 SSO API 重新換發 accessData
-    await onApiAuthHandoffToken('buy')
-    await onApiAuthTokenExchange()
-    await onApiAuthMe()
+    await onApiGetMemberAuthHandoffToken('buy')
+    await onApiPostBuyAuthTokenExchange()
+    await onApiGetBuyAuthMe()
   }
 }
 
@@ -112,7 +109,7 @@ watch(
 <template>
   <div class="l-wrap">
     <CommonHeader>
-      <CommonMLogStatus @login="onPopupLogin" @logout="onApiAuthLogout" />
+      <CommonMLogStatus @login="onPopupLogin" @logout="onApiPostBuyAuthLogout" />
     </CommonHeader>
     <main class="l-body relative z-0">
       <slot />
@@ -124,7 +121,7 @@ watch(
         }"
       />
     </footer>
-    <CommonMLoadingMain
+    <CommonMLoading
       :config="{
         isFixed: true,
       }"

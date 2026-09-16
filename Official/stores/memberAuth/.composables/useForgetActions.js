@@ -15,7 +15,7 @@ export default () => {
   const router = useRouter()
 
   // 發送驗證碼。管道由呼叫端指定(目前一律 sms,見 store 的 verificationChannels)。
-  const onApiAuthPasswordResetRequest = async (verificationChannel) => {
+  const onApiPostMemberAuthPasswordResetRequest = async (verificationChannel) => {
     const { mobilePhone } = verify.value.apiData
     const { config, status, data } = await apiPostMemberAuthPasswordResetRequest({
       mobilePhone,
@@ -89,7 +89,7 @@ export default () => {
 
   // 驗證碼 + 新密碼一起送出。成功即完成:後端會撤銷該會員的登入 session(requireRelogin),
   // 所以完成頁請使用者重新登入,這裡不寫任何登入狀態。
-  const onApiAuthPasswordResetConfirm = async () => {
+  const onApiPostMemberAuthPasswordResetConfirm = async () => {
     const { mobilePhone, verificationCode, resetToken } = verify.value.apiData
     const { newPassword, confirmPassword } = resetPassword.value.apiData
     const { config, status, data } = await apiPostMemberAuthPasswordResetConfirm({
@@ -229,8 +229,8 @@ export default () => {
   }
 
   return {
-    onApiAuthPasswordResetRequest,
-    onApiAuthPasswordResetConfirm,
+    onApiPostMemberAuthPasswordResetRequest,
+    onApiPostMemberAuthPasswordResetConfirm,
     onSaveVerify,
     onSetCookie,
     onGetCookie,

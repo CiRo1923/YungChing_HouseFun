@@ -59,7 +59,7 @@ const onClose = (item) => {
   -->
   <ClientOnly>
     <Teleport to="#box">
-      <CommonMPopupMain
+      <CommonMPopup
         :id="props.id"
         :config="props.config"
         :setClass="{
@@ -105,7 +105,7 @@ const onClose = (item) => {
         <template #note v-if="$slots.note">
           <slot name="note" />
         </template>
-      </CommonMPopupMain>
+      </CommonMPopup>
     </Teleport>
   </ClientOnly>
 </template>

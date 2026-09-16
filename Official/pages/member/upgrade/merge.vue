@@ -8,8 +8,8 @@ const memberUpgrade = useMemberAuthUpgradeStore()
 const { phone } = storeToRefs(memberUpgrade)
 const {
   onGetCookie,
-  onApiAuthEmailUpgradeMobileCheck,
-  onApiAuthEmailUpgradeMobileVerificationCode,
+  onApiPostMemberAuthEmailUpgradeMobileCheck,
+  onApiPostMemberAuthEmailUpgradeMobileVerificationCode,
 } = useMemberAuthUpgradeActions()
 const { onApiPromise } = usePopupActions()
 const router = useRouter()
@@ -63,7 +63,7 @@ const isMergeRequired = (result) => result?.availability === 2 && result?.requir
 const onAuthEmailUpgradeMobileCheck = async () => {
   if (isMergeRequired(phone.value.checkResult)) return
 
-  const { status, data } = await onApiAuthEmailUpgradeMobileCheck()
+  const { status, data } = await onApiPostMemberAuthEmailUpgradeMobileCheck()
 
   if (status === 200 && isMergeRequired(data)) return
 
@@ -89,10 +89,10 @@ onUseMeta({
 // 合併同樣要先驗證手機:merge 的 req 需要 mobileVerificationToken,
 // 而那個值只能從 mobile/verification-code/verify 取得。
 // 所以這裡只負責發驗證碼並進驗證頁,驗證通過後由那頁依 availability 決定打 merge。
-const onAuthEmailUpgradeMobileVerificationCode = async () => {
+const onMemberAuthEmailUpgradeMobileVerificationCode = async () => {
   onApiPromise('open')
 
-  const { status } = await onApiAuthEmailUpgradeMobileVerificationCode()
+  const { status } = await onApiPostMemberAuthEmailUpgradeMobileVerificationCode()
 
   onApiPromise('close')
 
@@ -118,7 +118,7 @@ const btns = readonly([
       main: '--border-green-9c33 hover:--bg-green-ffe9',
       text: 'text-[--green-6a2d]',
     },
-    onClick: onAuthEmailUpgradeMobileVerificationCode,
+    onClick: onMemberAuthEmailUpgradeMobileVerificationCode,
   },
   {
     label: '改用其他手機號碼',

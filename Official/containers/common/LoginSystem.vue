@@ -36,7 +36,7 @@ const onClose = async (item) => {
 </script>
 
 <template>
-  <CommonMPopupMain
+  <CommonMPopup
     id="loginSystem"
     :config="{
       mode: {
@@ -73,5 +73,5 @@ const onClose = async (item) => {
     <template #note v-if="$slots.note">
       <slot name="note" />
     </template>
-  </CommonMPopupMain>
+  </CommonMPopup>
 </template>

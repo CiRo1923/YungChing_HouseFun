@@ -26,7 +26,7 @@ const onClick = async () => {
   if (!userData.value) {
     const { status } = (await onPopupLogin()) ?? {}
 
-    // onApiAuthMe 回傳 200 才往下
+    // onApiGetBuyAuthMe 回傳 200 才往下
     if (status !== 200) return
 
     console.log(100)

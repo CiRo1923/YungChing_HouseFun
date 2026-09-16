@@ -19,7 +19,7 @@ export default () => {
   const { onSetAuthTokenCookie, onReset: onMemberAuthReset } = useMemberAuthProjectActions()
   const { onApiError } = usePopupActions()
 
-  const onApiAuthTokenExchange = async () => {
+  const onApiPostAuthTokenExchange = async () => {
     const { config, status, data } = await apiPostAuthTokenExchange({
       encryptedToken: authToken.value.longToken,
     })
@@ -36,7 +36,7 @@ export default () => {
 
   // 會員資料寫回 memberAuth 的 userData:那是「誰登入了」的單一來源,
   // header 的登入狀態與 buy 頻道都讀它,不另外複製一份。
-  const onApiAuthMe = async () => {
+  const onApiGetAuthMe = async () => {
     const { config, status, data } = await apiGetAuthMe()
 
     if (status === 200) {
@@ -49,7 +49,7 @@ export default () => {
   }
 
   // 登出成功後把登入狀態清乾淨:store 與 cookie 都要,否則重整又會被還原回來。
-  const onApiAuthLogout = async () => {
+  const onApiPostAuthLogout = async () => {
     const { config, status, data } = await apiPostAuthLogout()
 
     if (status === 200) {
@@ -136,9 +136,9 @@ export default () => {
   }
 
   return {
-    onApiAuthTokenExchange,
-    onApiAuthMe,
-    onApiAuthLogout,
+    onApiPostAuthTokenExchange,
+    onApiGetAuthMe,
+    onApiPostAuthLogout,
     onSetAccessDataCookie,
     onGetAccessDataCookie,
     onRestoreAccessData,

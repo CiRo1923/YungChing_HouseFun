@@ -14,7 +14,7 @@ export default () => {
   const { access } = storeToRefs(buyProject)
   const { onApiError } = usePopupActions()
 
-  const onApiAuthToken = async ({ channel, deviceId, rememberMe = true }) => {
+  const onApiPostMemberAuthToken = async ({ channel, deviceId, rememberMe = true }) => {
     const { config, status, data } = await apiPostMemberAuthToken({
       channel,
       deviceId,
@@ -32,7 +32,7 @@ export default () => {
     return { config, status, data }
   }
 
-  const onApiAuthHandoffToken = async (channel) => {
+  const onApiGetMemberAuthHandoffToken = async (channel) => {
     const { config, status, data } = await apiGetMemberAuthHandoffToken({
       channel,
     })
@@ -123,8 +123,8 @@ export default () => {
   }
 
   return {
-    onApiAuthToken,
-    onApiAuthHandoffToken,
+    onApiPostMemberAuthToken,
+    onApiGetMemberAuthHandoffToken,
     onSetAuthTokenCookie,
     onGetAuthTokenCookie,
     onRestoreAuthToken,

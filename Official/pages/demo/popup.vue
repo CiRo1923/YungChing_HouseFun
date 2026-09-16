@@ -261,7 +261,7 @@ const onClearLog = () => {
         </li>
         <li>
           <CommonMAnchor
-            text="測試 4:同上,改用遞迴"
+            text="測試 4:A → B → 上一步 → A,改用遞迴"
             :setClass="{
               main: '--oval --bg-green-8b0d --h-45 --text-white --px-20 --text-center',
             }"

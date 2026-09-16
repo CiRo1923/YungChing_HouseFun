@@ -422,7 +422,7 @@ export const onValueToDateRange = (today, date, format) => {
   const calendarDateOf = (d0) =>
     makeUtcDate(d0.getUTCFullYear(), d0.getUTCMonth() + 1, d0.getUTCDate())
 
-  // 同上，但無效日期回 null
+  // 取某個瞬間在 UTC 的年月日、轉成「日曆日期」(UTC noon)，無效日期回 null
   const safeCalendarDate = (d0) => (isNaN(d0.getTime()) ? null : calendarDateOf(d0))
 
   const parseUtcDateString = (s) => {
@@ -700,7 +700,7 @@ export const timeFormat = {
    * 把各種 input 轉成「毫秒 ms」
    * 支援：
    * - number：預設視為 ms（也可開 auto 判斷秒/毫秒）
-   * - '300'：同上（純數字字串）
+   * - '300'：純數字字串，同樣預設視為 ms
    * - '1500ms' / '30s' / '5m' / '2h'
    * - 'mm:ss' 例如 '03:15'
    * - 'hh:mm:ss' 例如 '01:02:03'
@@ -855,7 +855,7 @@ export const countdown = {
    * 嘗試把各種輸入轉成毫秒時間戳 (ms)
    * 支援：
    * - number：視為 ms（也支援秒，會自動判斷）
-   * - numeric string：同上
+   * - numeric string：同樣視為 ms，一樣會自動判斷秒
    * - ISO string：2026-02-05T11:32:45.5052229+08:00
    * - YYYY-MM-DD / YYYY/MM/DD / YYYY.MM.DD
    * - YYYY-MM-DD HH:mm:ss / YYYY/MM/DD HH:mm:ss / YYYY.MM.DD HH:mm:ss

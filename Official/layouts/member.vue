@@ -11,7 +11,7 @@ const memberCenter = useMemberCenterStore()
 const { userData } = storeToRefs(memberAuthProject)
 const { access } = storeToRefs(memberCenter)
 const { onRestoreAuthToken } = useMemberAuthProjectActions()
-const { onApiAuthMe, onApiAuthLogout, onRestoreAccessData } = useMemberProjectActions()
+const { onApiGetAuthMe, onApiPostAuthLogout, onRestoreAccessData } = useMemberProjectActions()
 
 // 掛載 member 頻道色票(同步 composable 一律放在 await 之前)
 useHead({
@@ -37,7 +37,7 @@ const onInit = async () => {
   // 有值(buy 的形狀,沒有 memberId),用「有沒有值」當判準會把這支一起擋掉,
   // 帶不出 notifications 那幾支必填的 X-Member-Id。
   if (access.value.data && !userData.value?.memberId) {
-    await onApiAuthMe()
+    await onApiGetAuthMe()
   }
 }
 
@@ -54,7 +54,7 @@ await callOnce(onInit)
           login: 'account',
           logout: 'login',
         }"
-        @logout="onApiAuthLogout"
+        @logout="onApiPostAuthLogout"
       />
     </CommonHeader>
     <!-- <CommonHeader>
@@ -74,7 +74,7 @@ await callOnce(onInit)
       /> 
     </CommonHeader>
     -->
-    <!-- <CommonHeader @login="onPopupLogin" @logout="onApiAuthLogout" /> -->
+    <!-- <CommonHeader @login="onPopupLogin" @logout="onApiPostAuthLogout" /> -->
     <main class="l-body relative z-0 tm:mt-[20px] p:mt-[30px]">
       <slot />
     </main>
@@ -85,7 +85,7 @@ await callOnce(onInit)
         }"
       />
     </footer>
-    <CommonMLoadingMain
+    <CommonMLoading
       :config="{
         isFixed: true,
       }"

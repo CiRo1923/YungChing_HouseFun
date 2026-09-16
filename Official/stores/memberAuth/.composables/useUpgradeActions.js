@@ -26,7 +26,7 @@ export default () => {
   // 那時直接呼叫 navigateTo / useRouter 可能已經沒有 Nuxt context。
   const router = useRouter()
 
-  const onApiAuthEmailUpgradeVerificationCode = async () => {
+  const onApiPostMemberAuthEmailUpgradeEmailVerificationCode = async () => {
     const { apiData } = email.value
     const { config, status, data } = await apiPostMemberAuthEmailUpgradeEmailVerificationCode(apiData)
 
@@ -101,7 +101,7 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiAuthEmailUpgradeVerificationCodeVerify = async () => {
+  const onApiPostMemberAuthEmailUpgradeEmailVerificationCodeVerify = async () => {
     const { apiData } = emailVerify.value
     const { config, status, data } = await apiPostMemberAuthEmailUpgradeEmailVerificationCodeVerify(apiData)
 
@@ -138,7 +138,7 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiAuthEmailUpgradeMobileCheck = async () => {
+  const onApiPostMemberAuthEmailUpgradeMobileCheck = async () => {
     if (!onCheckUpgradeToken()) return memberUpgrade.apiTokenInvalid
 
     const { apiData } = phone.value
@@ -180,7 +180,7 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiAuthEmailUpgradeMobileVerificationCode = async () => {
+  const onApiPostMemberAuthEmailUpgradeMobileVerificationCode = async () => {
     if (!onCheckUpgradeToken()) return memberUpgrade.apiTokenInvalid
 
     const { apiData } = phone.value
@@ -218,7 +218,9 @@ export default () => {
       onClearCookie(PHONEEXCEEDED)
     } else if (status === 400 || status === 404) {
       // 後端有給明確原因的可預期錯誤 → 只顯示 message,不套用通用錯誤彈窗。
-      // 同上,不寫進 apiResult,免得輸入表單被超限呈現取代掉。
+      //
+      // 不寫進 apiResult:那是給「整頁換成超限呈現」用的,驗證碼錯誤這種
+      // 若寫進去,輸入表單會整個被取代掉,使用者連改都沒得改。
       const { message } = data
 
       onAlert({
@@ -247,7 +249,7 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiAuthEmailUpgradeMobileVerificationCodeVerify = async () => {
+  const onApiPostMemberAuthEmailUpgradeMobileVerificationCodeVerify = async () => {
     if (!onCheckUpgradeToken()) return memberUpgrade.apiTokenInvalid
 
     const { apiData } = phoneVerify.value
@@ -290,7 +292,7 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiAuthEmailUpgradeBind = async () => {
+  const onApiPostMemberAuthEmailUpgradeBind = async () => {
     if (!onCheckUpgradeToken()) return memberUpgrade.apiTokenInvalid
 
     const { apiData } = bind.value
@@ -320,7 +322,7 @@ export default () => {
   }
   // 與 bind 的差別只在「號碼已有帳號」→ 改走整併。回應同型,成功處理共用 onUpgradeCompleted。
   // loading 與 bind 一樣交給呼叫端(phone-verify)控制。
-  const onApiAuthEmailUpgradeMerge = async () => {
+  const onApiPostMemberAuthEmailUpgradeMerge = async () => {
     if (!onCheckUpgradeToken()) return memberUpgrade.apiTokenInvalid
 
     const { apiData } = merge.value
@@ -504,13 +506,13 @@ export default () => {
   }
 
   return {
-    onApiAuthEmailUpgradeVerificationCode,
-    onApiAuthEmailUpgradeVerificationCodeVerify,
-    onApiAuthEmailUpgradeMobileCheck,
-    onApiAuthEmailUpgradeMobileVerificationCode,
-    onApiAuthEmailUpgradeMobileVerificationCodeVerify,
-    onApiAuthEmailUpgradeBind,
-    onApiAuthEmailUpgradeMerge,
+    onApiPostMemberAuthEmailUpgradeEmailVerificationCode,
+    onApiPostMemberAuthEmailUpgradeEmailVerificationCodeVerify,
+    onApiPostMemberAuthEmailUpgradeMobileCheck,
+    onApiPostMemberAuthEmailUpgradeMobileVerificationCode,
+    onApiPostMemberAuthEmailUpgradeMobileVerificationCodeVerify,
+    onApiPostMemberAuthEmailUpgradeBind,
+    onApiPostMemberAuthEmailUpgradeMerge,
     onPopupCustomer,
     onSetCookie,
     onGetCookie,

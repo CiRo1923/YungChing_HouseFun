@@ -5,7 +5,7 @@ export default () => {
   const { lifeMap } = storeToRefs(buyHouseStores)
   const { onSetSeo } = useCommonActions()
   const route = useRoute()
-  const onApiBuyHouse = async () => {
+  const onApiGetBuyHouseHfid = async () => {
     const { params } = route
     const { config, status, data } = await apiGetBuyHouseHfid({
       hfid: params.hfid,
@@ -47,7 +47,7 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiBuyHousePoi = async () => {
+  const onApiGetBuyHouseHfidPoi = async () => {
     const { params } = route
     const { config, status, data } = await apiGetBuyHouseHfidPoi({
       hfid: params.hfid,
@@ -55,14 +55,13 @@ export default () => {
 
     if (status === 200) {
       lifeMap.value = data
-      console.log(data)
     }
 
     return { config, status, data }
   }
 
   return {
-    onApiBuyHouse,
-    onApiBuyHousePoi,
+    onApiGetBuyHouseHfid,
+    onApiGetBuyHouseHfidPoi,
   }
 }

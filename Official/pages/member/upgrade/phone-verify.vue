@@ -8,10 +8,10 @@ const memberUpgrade = useMemberAuthUpgradeStore()
 const { phone, phoneVerify } = storeToRefs(memberUpgrade)
 const {
   onGetCookie,
-  onApiAuthEmailUpgradeMobileVerificationCode,
-  onApiAuthEmailUpgradeMobileVerificationCodeVerify,
-  onApiAuthEmailUpgradeBind,
-  onApiAuthEmailUpgradeMerge,
+  onApiPostMemberAuthEmailUpgradeMobileVerificationCode,
+  onApiPostMemberAuthEmailUpgradeMobileVerificationCodeVerify,
+  onApiPostMemberAuthEmailUpgradeBind,
+  onApiPostMemberAuthEmailUpgradeMerge,
 } = useMemberAuthUpgradeActions()
 const { onApiPromise } = usePopupActions()
 const router = useRouter()
@@ -28,7 +28,7 @@ definePageMeta({
       // verificationToken 只活在 store(沒有寫 cookie),重整後必然是空的 →
       // 本頁的驗證與重送都缺這個值,畫面只會停在「驗證碼已失效」。
       // 與其讓使用者卡在死畫面,不如退回上一頁重新輸入號碼、重新發送。
-      const { phoneVerify } = useMemberAuthUpgradeStore()
+      const { phoneVerify } = storeToRefs(useMemberAuthUpgradeStore())
 
       // 沒有 upgradeToken(未經上一頁進來、或已過 expiresAt 被瀏覽器清掉)→
       // 後續 mobile API 都缺 header X-Upgrade-Token,打不了,退回上一頁重跑。
@@ -37,7 +37,7 @@ definePageMeta({
         !raw ||
         !deCrypto(raw) ||
         (exceededRaw && deCrypto(exceededRaw)) ||
-        !phoneVerify.apiData.verificationToken
+        !phoneVerify.value.apiData.verificationToken
       ) {
         return navigateTo(
           {
@@ -68,10 +68,10 @@ onUseMeta({
 // 驗證手機驗證碼。回傳 availability 給下一段決定要綁定還是整併 —— 驗證失敗回 null。
 // loading 由這裡開啟;通過時「不關」,留給接續的綁定 / 整併收尾,
 // 中間才不會閃一次關閉再開啟,失敗則在這裡自己關掉。
-const onAuthEmailUpgradeMobileVerificationCodeVerify = async () => {
+const onMemberAuthEmailUpgradeMobileVerificationCodeVerify = async () => {
   onApiPromise('open')
 
-  const { status, data } = await onApiAuthEmailUpgradeMobileVerificationCodeVerify()
+  const { status, data } = await onApiPostMemberAuthEmailUpgradeMobileVerificationCodeVerify()
 
   if (status === 200) return data?.availability ?? null
 
@@ -87,7 +87,7 @@ const onAuthEmailUpgradeMobileVerificationCodeVerify = async () => {
 // 也省掉一份要跨頁維護的旗標。能走到本頁的組合只有 0/1(綁定)與 2(整併),兩者互斥。
 const onAuthEmailUpgradeComplete = async (availability) => {
   const { status } =
-    availability === 2 ? await onApiAuthEmailUpgradeMerge() : await onApiAuthEmailUpgradeBind()
+    availability === 2 ? await onApiPostMemberAuthEmailUpgradeMerge() : await onApiPostMemberAuthEmailUpgradeBind()
 
   onApiPromise('close')
 
@@ -101,7 +101,7 @@ const onAuthEmailUpgradeComplete = async (availability) => {
 const onReSend = async () => {
   onApiPromise('open')
 
-  const { status } = await onApiAuthEmailUpgradeMobileVerificationCode()
+  const { status } = await onApiPostMemberAuthEmailUpgradeMobileVerificationCode()
 
   onApiPromise('close')
 
@@ -120,7 +120,7 @@ const onReSend = async () => {
 
 // 驗證通過 → 接著綁定 / 整併完成升級。兩支是同一個動作的兩段,loading 一路包到底。
 const onSumit = async () => {
-  const availability = await onAuthEmailUpgradeMobileVerificationCodeVerify()
+  const availability = await onMemberAuthEmailUpgradeMobileVerificationCodeVerify()
 
   if (availability === null) return
 

@@ -22,9 +22,9 @@ import './.css/common.css'
           }"
         />
       </div>
-      <CommonMNavMain>
+      <CommonMNav>
         <slot name="nav" />
-      </CommonMNavMain>
+      </CommonMNav>
     </div>
   </div>
 </template>

@@ -77,6 +77,7 @@ import {
 import { NO_PREREQUISITE_RULES, PREFLIGHT_RULES } from './preflight.mjs'
 import { aliasListOf, importGroupOf, tailwindThemeOf } from './rules-code.mjs'
 import { IS_SOURCE_PROJECT, PROJECT_DIR_VALUES, unusedConfigNames } from './rules-global.mjs'
+import { isStoreDeclareCall } from './rules-store.mjs'
 import { CHECKSUM_FILE, currentFingerprints, fingerprintDiff, isSkipped } from './checksum.mjs'
 import {
   ACTIONS_DIR_NAME,
@@ -302,6 +303,9 @@ const D = `${PROJECT_NAME_SCOPE[0]}${PROBE}`
  * 引用一段不合規範的範例程式碼都是正常的。
  */
 const PD = `${PROJECT_DOCS_DIR}/${PROBE}`
+
+/** 檔名規則那幾則的內容 —— 它們看的是檔名,內容只要是一支合法的元件就好 */
+const probeVue = `<template>\n  <div class="m-probe"></div>\n</template>\n`
 
 const PROBE_DIRS = [M, C, SC, L, GC, GL, A, T, `${T}/${ACTIONS_DIR_NAME}`, P, D, PD]
 
@@ -2123,6 +2127,16 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
     expect: 1,
     keyword: 'selfTestPets/',
   },
+  {
+    /* store 大到要拆成好幾支時會放進子資料夾,那時檔名指的是那個資源底下的
+       某一個畫面 —— 拿第一層去比對的話,分層的專案每一支都會被報
+       「沒有對應的資料夾」,而它們其實都對得上。 */
+    name: 'storeScope 分層的 store 對得上資源底下那一層',
+    file: `${T}/${PROBE_PAGE_SUB_FOLDER}.js`,
+    code: `import { defineStore } from 'pinia'\n\nexport const useProbeStore = defineStore('probe', () => {\n  const list = ref(null)\n\n  return { list }\n})\n`,
+    expect: 0,
+    rule: 'storeScope',
+  },
   /* 這一則驗的正是「例外清單」這個機制,所以要用清單裡的值,不能寫死某個名字 ——
      清單(STANDALONE_STORES)每個專案不一樣。清單是空的時候整則跳過:
      沒有例外可驗的專案,硬塞一個名字進去只會變成「一支對不上資料夾的 store」。 */
@@ -2426,6 +2440,57 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
     /* 自己完全不寫 class 的轉手元件:設定往下傳,畫面與樣式都由被轉手的那支負責。
        它沒有樣式可以載入,報它的話只有兩條路 —— 去 import 別人的樣式,
        或建一支空的樣式檔,兩種都比違規本身更糟。 */
+    /* 主檔取名 Main.vue 的話,使用端的名字會多出一段不帶資訊的字 ——
+       讀的人看不出資料夾裡哪一支才是這個元件。 */
+    name: 'vueFileName 元件主檔叫 Main.vue 要報',
+    rule: 'vueFileName',
+    file: `${C}/Main.vue`,
+    code: probeVue,
+    expect: 1,
+    keyword: 'Index.vue',
+  },
+  {
+    /* 元件在別的畫面裡是一個標籤,而標籤的慣例是大寫開頭 —— 
+       檔名與標籤不一致的話,看到標籤要猜它在哪一支檔案。 */
+    name: 'vueFileName 元件檔名首字小寫要報',
+    rule: 'vueFileName',
+    file: `${C}/index.vue`,
+    code: probeVue,
+    expect: 1,
+    keyword: '首字要大寫',
+  },
+  {
+    name: 'vueFileName 元件主檔叫 Index.vue 不誤報',
+    rule: 'vueFileName',
+    file: `${C}/Index.vue`,
+    code: probeVue,
+    expect: 0,
+  },
+  {
+    name: 'vueFileName 頁面檔名首字大寫要報',
+    rule: 'vueFileName',
+    file: `${viewResourceDir(PROBE_PAGE_ALPHA)}/ProbeDetail.vue`,
+    code: probeVue,
+    expect: 1,
+    keyword: '首字要小寫',
+  },
+  {
+    /* 頁面目錄底下,底線開頭的資料夾裡放的不是頁面(元件、片段那些),
+       所以那裡面的檔案照元件那一套命名。 */
+    name: 'vueFileName 頁面底下底線資料夾裡的照元件那一套',
+    rule: 'vueFileName',
+    file: `${viewResourceDir(PROBE_PAGE_ALPHA)}/_components/Form.vue`,
+    code: probeVue,
+    expect: 0,
+  },
+  {
+    name: 'vueFileName 元件子檔首字大寫不誤報',
+    rule: 'vueFileName',
+    file: `${C}/Promise.vue`,
+    code: `<template>\n  <div class="m-probe"></div>\n</template>\n`,
+    expect: 0,
+  },
+  {
     name: 'importOrder 自己不寫 class 的轉手元件不必載入樣式',
     rule: 'importOrder',
     file: `${C}/Order4.vue`,
@@ -2816,6 +2881,31 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
   {
     /* 這條只管「進入頁面就要拿的資料」。使用者觸發的動作是單一動作，
       包成陣列反而多一層，不該被抓。 */
+    /* 沒有 await 的呼叫不是在等請求 —— 有些函式的名字是 api 那一套命名
+       (處理 api 錯誤、重播上一次的結果),但它做的事是同步的。
+       包進陣列不會讓任何東西變快,而且存檔時的自動包裝也不會動它:
+       報了卻沒有動靜,訊息還說「會自動包好」。 */
+    name: 'pageAwaitAll 沒有 await 的呼叫不算請求',
+    file: `${P}/ProbeAwaitSync.vue`,
+    code: `<script setup>\nonMounted(() => {\n  onApiErrorReplay()\n})\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
+    expect: 0,
+    rule: 'pageAwaitAll',
+  },
+  {
+    /* 後面那支用到前面出現過的東西時不能一起發出(同時開始,誰先回來不一定)——
+       自動包裝也是這樣判的,所以規則也不報:報了的話訊息說「存檔時會自動包好」,
+       而存檔之後什麼都沒發生。 */
+    name: 'pageAwaitAll 那幾支不能一起發出時不報',
+    file: `${P}/ProbeAwaitDepend.vue`,
+    code:
+      `<script setup>\nonMounted(async () => {\n` +
+      `  await onApiGetProbeOne(probeId)\n` +
+      `  await onApiGetProbeTwo(probeId)\n` +
+      `})\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
+    expect: 0,
+    rule: 'pageAwaitAll',
+  },
+  {
     name: 'pageAwaitAll 事件處理函式不受限制',
     file: `${P}/Await3.vue`,
     code: `<script setup>\nconst { onApiGetSelfTestAlpha } = useSelfTestAlphaActions()\n\nconst onSelfTestAlpha = async () => {\n  await onApiGetSelfTestAlpha()\n}\n</script>\n\n<template>\n  <div class="m-probe" @click="onSelfTestAlpha"></div>\n</template>\n`,
@@ -2850,6 +2940,47 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
   },
   {
     // onApiPromise / onApiError 是通用工具，不對應任何一支 api
+    /* 函式在協調好幾件事時,名字講的是那件事(使用者按了確認、進入畫面要準備什麼),
+       那支 api 只是其中一步。改成 api 的名字反而更難懂 ——
+       讀的人會以為它只是那支 api 的包裝。 */
+    name: 'pageActionNaming 等了第二件事就不是單純包裝',
+    file: `${P}/ProbeFlow.vue`,
+    code:
+      `<script setup>\nconst onSure = async () => {\n` +
+      `  const { valid } = await formRef.value.validate()\n` +
+      `  if (!valid) return\n\n` +
+      `  await onApiPostProbeThing()\n` +
+      `}\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
+    expect: 0,
+    rule: 'pageActionNaming',
+  },
+  {
+    /* 有條件才打的那一步(「已經有資料就不重打」)不是這個函式的全部 */
+    name: 'pageActionNaming 被條件包住的那一步不是單純包裝',
+    file: `${P}/ProbeGuard.vue`,
+    code:
+      `<script setup>\nconst onInit = async () => {\n` +
+      `  if (!probeData.value) {\n    await onApiGetProbeThing()\n  }\n` +
+      `}\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
+    expect: 0,
+    rule: 'pageActionNaming',
+  },
+  {
+    /* 前後開關讀取狀態仍然是單純包裝 —— 這條規範本來就預期那種形狀,
+       放過它的話,真正該對齊名字的那一批會整片消失。 */
+    name: 'pageActionNaming 只開關讀取狀態仍要對齊名字',
+    file: `${P}/ProbeLoading.vue`,
+    code:
+      `<script setup>\nconst onSortChange = async () => {\n` +
+      `  onApiPromise('open')\n` +
+      `  await onApiGetProbeThing()\n` +
+      `  onApiPromise('close')\n` +
+      `}\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
+    expect: 1,
+    rule: 'pageActionNaming',
+    keyword: 'onProbeThing',
+  },
+  {
     name: 'pageActionNaming 通用工具不受限制',
     file: `${P}/Submit.vue`,
     code: `<script setup>\nconst { onApiPromise, onApiError } = useProjectActions()\n\nconst onSubmit = async () => {\n  onApiPromise('open')\n  onApiError({}, 500, {})\n}\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
@@ -3281,6 +3412,35 @@ const onCheckEveryCheckRuns = () => {
  * 靠設定來驗的話,那種專案等於完全沒有驗到 —— 而清單空的時候正是
  * 「一筆都不該排除」這個最重要的行為。
  */
+/**
+ * store 裡可以呼叫什麼 —— 含「讀設定」那一類。
+ *
+ * 直接餵判準函式假的清單,不靠專案自己的設定:多數專案那份清單是空的,
+ * 靠設定來驗的話,「清單裡的那幾支會被放行」這件事永遠沒有人守,
+ * 而那正是這次新增的部分。
+ */
+const onCheckStoreDeclareCall = () => {
+  const setup = ['useProbeRuntimeConfig']
+
+  const cases = [
+    { name: 'ref', allow: true, why: '狀態的初始化' },
+    { name: 'computed', allow: true, why: '衍生狀態' },
+    { name: 'useMemberStore', allow: true, why: '取用另一個 store' },
+    { name: 'storeToRefs', allow: true, why: '取用另一個 store 的值' },
+    { name: 'useProbeRuntimeConfig', allow: true, why: '讀設定(清單裡的那一支)' },
+    { name: 'useProbeActions', allow: false, why: '行為 —— 不在清單裡就照樣報' },
+    { name: 'onApiGetProbe', allow: false, why: '打 api' },
+  ]
+
+  const wrong = cases.filter((c) => isStoreDeclareCall(c.name, setup) !== c.allow)
+
+  report(
+    !wrong.length,
+    'store 裡可以呼叫的東西:讀設定那一類放行,行為照樣報',
+    wrong.map((c) => `${c.why} —— ${c.name}() 預期${c.allow ? '放行' : '報出來'}`)
+  )
+}
+
 const onCheckUnderAny = () => {
   const cases = [
     { rel: 'components/vendor/Chart.vue', dirs: ['components/vendor'], hit: true, why: '在排除的那一層底下' },
@@ -4370,6 +4530,7 @@ try {
   onCheckViewDepth()
   onCheckConfigItem()
   onCheckUnderAny()
+  onCheckStoreDeclareCall()
   onCheckProbeDirSafety()
   onCheckGeneratedCleanup()
   onCheckRulesDocumented()

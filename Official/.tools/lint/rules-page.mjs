@@ -18,6 +18,7 @@ import {
   hasExemptMark,
   issueOf,
   lineNoOf,
+  maskComments,
 } from './shared.mjs'
 
 const ACTIONS_DIR = `${STORE_DIR}/${ACTIONS_DIR_NAME}`
@@ -92,6 +93,38 @@ const ACTION_UTILS = new Set(['onApiPromise', 'onApiError'])
 
 const PAGE_FN_RE = /const\s+(\w+)\s*=\s*(?:async\s*)?\([^)]*\)\s*=>\s*\{/g
 
+/**
+ * 這個函式是不是「單純包裝那一支 action」。
+ *
+ * 這條要求名字對得上它打的那一支 api,前提是**那支 api 就是這個函式的全部** ——
+ * 名字才說得出「這裡打的是哪一支」。函式在協調好幾件事時前提不成立:
+ * 它的名字講的是那件事(使用者按了確認、進入畫面要準備什麼),
+ * 改成 api 的名字反而更難懂 —— 讀的人會以為它只是那支 api 的包裝。
+ *
+ * 兩個訊號,有一個成立就不是單純包裝:
+ *
+ *   等了第二件事      表單驗證、跳彈窗、另一支請求 —— 那支 action 只是其中一步
+ *   那支被條件包住    有條件才打的一步(「已經有資料就不重打」),不是這個函式的全部
+ *
+ * 判斷前先把註解遮掉 —— 註解裡舉例寫出一個 await 或條件,不該影響判斷。
+ */
+const isPlainWrapper = (body, called) => {
+  const text = maskComments('probe.js', body)
+
+  if ([...text.matchAll(/\bawait\b/g)].length > 1) return false
+
+  const at = text.search(new RegExp(`\\b${called}\\s*\\(`))
+  if (at === -1) return true
+
+  let depth = 0
+  for (let i = text.indexOf('{') + 1; i < at; i += 1) {
+    if (text[i] === '{') depth += 1
+    else if (text[i] === '}') depth -= 1
+  }
+
+  return depth === 0
+}
+
 const checkPageActionNaming = ({ rel, text }) => {
   // 元件也會包裝 action,不限頁面目錄
   if (!isInSrc(rel) || !rel.endsWith('.vue')) return []
@@ -113,6 +146,8 @@ const checkPageActionNaming = ({ rel, text }) => {
 
     if (!called.length) continue
     if (called.length > 1) continue // 打多支時無法斷定該用哪一支的名字
+    // 在協調好幾件事的函式,名字講的是那件事,不是它打的那一支 api
+    if (!isPlainWrapper(body, called[0])) continue
 
     const withoutApi = called[0].replace(/^onApi/, '')
 
@@ -291,9 +326,6 @@ const checkPageApiImport = ({ rel, text, root }) => {
 
 const { name: PARALLEL_HELPER, source: PARALLEL_HELPER_SOURCE } = PARALLEL_AWAIT_HELPER
 
-/** 呼叫 action 的形狀:onApiXxx( … ) */
-const ACTION_CALL_RE = /\bon(?:Api|Json)\w*\s*\(/g
-
 /**
  * onMounted( … ) 的完整內容,連同它在原文的起訖位置。
  *
@@ -321,19 +353,21 @@ const mountedBlockOf = (text) => {
 const checkPageAwaitAll = ({ rel, text }) => {
   if (!PARALLEL_HELPER || !isPageFile(rel)) return []
 
-  const block = mountedBlockOf(text)
-  if (!block) return []
+  /* 報的條件與自動修正動手的條件是同一個 —— 兩邊各判一次的話,
+     會出現「規則報了、存檔卻沒有任何動靜」,而看的人不知道該怎麼辦:
+     訊息說「存檔時會自動包好」,但它不會。 */
+  const groups = wrappableGroupsOf(text, rel)
+  if (!groups.length) return []
 
-  const calls = [...block.body.matchAll(ACTION_CALL_RE)]
-  if (!calls.length) return []
-  if (block.body.includes(`${PARALLEL_HELPER}(`)) return []
+  const count = groups.reduce((sum, group) => sum + group.length, 0)
+  const block = mountedBlockOf(text)
 
   return [
     issueOf(
       rel,
       lineNoOf(text, block.start),
       'pageAwaitAll',
-      `onMounted 裡的 ${calls.length} 支請求要用 ${PARALLEL_HELPER}([ … ]) 包起來 —— 一支一支等的話,使用者等的是每一支的時間加總;存檔時會自動包好`
+      `onMounted 裡的 ${count} 支請求要用 ${PARALLEL_HELPER}([ … ]) 包起來 —— 一支一支等的話,使用者等的是每一支的時間加總;存檔時會自動包好`
     ),
   ]
 }
@@ -386,25 +420,34 @@ const canRunTogether = (calls) => {
  *    判斷不出來就整段留著,讓規則報出來由人處理 —— 少改一段沒有損失,
  *    改壞一段卻不會有任何徵兆。
  */
-export const onWrapMountedCalls = (text, rel) => {
-  if (!PARALLEL_HELPER || !isPageFile(rel)) return null
+/**
+ * onMounted 裡「可以一起發出」的那幾組呼叫。
+ *
+ * **規則與自動修正共用這一份。** 兩邊各判一次的話,兩種方向都會出事:
+ * 判得比自動修正寬,就會報一批存檔後沒有任何動靜的違規(訊息還說「會自動包好」);
+ * 判得比它窄,則是自動改了一段規則根本沒報的程式碼。
+ *
+ * 三個條件同時成立才算:
+ *
+ *   整行就是 `await onApiXxx( … )`   沒有 await 就沒有在等待,包起來不會讓任何東西變快;
+ *                                    接收回傳值的那種包進陣列之後就拿不到結果
+ *   那幾行是連續的                   中間夾了別的語句代表有順序,跨過去合併會把安排打散
+ *   後面那支沒有用到前面的東西       一起發出就是同時開始,誰先回來不一定
+ */
+const wrappableGroupsOf = (text, rel) => {
+  if (!PARALLEL_HELPER || !isPageFile(rel)) return []
 
   const block = mountedBlockOf(text)
-  if (!block) return null
-  if (block.body.includes(`${PARALLEL_HELPER}(`)) return null
+  if (!block) return []
+  if (block.body.includes(`${PARALLEL_HELPER}(`)) return []
 
-  const lines = block.body.split('\n')
   const hits = []
 
-  lines.forEach((line, i) => {
+  block.body.split('\n').forEach((line, i) => {
     const m = line.match(AWAIT_CALL_LINE_RE)
     if (m) hits.push({ index: i, indent: m[1], call: m[2].trim() })
   })
 
-  if (!hits.length) return null
-
-  /* 連續的那幾行才併在一起 —— 中間夾了別的語句代表那幾支之間有順序,
-     跨過去合併會把「先做這件事再打那支」的安排打散。 */
   const groups = []
   for (const hit of hits) {
     const last = groups.at(-1)
@@ -412,9 +455,15 @@ export const onWrapMountedCalls = (text, rel) => {
     else groups.push([hit])
   }
 
-  const usable = groups.filter((g) => canRunTogether(g.map((h) => h.call)))
+  return groups.filter((g) => canRunTogether(g.map((h) => h.call)))
+}
+
+export const onWrapMountedCalls = (text, rel) => {
+  const usable = wrappableGroupsOf(text, rel)
   if (!usable.length) return null
 
+  const block = mountedBlockOf(text)
+  const lines = block.body.split('\n')
   const next = [...lines]
   for (const group of usable) {
     const calls = group.map((h) => h.call).join(', ')

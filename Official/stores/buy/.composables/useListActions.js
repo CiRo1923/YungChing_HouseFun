@@ -235,7 +235,7 @@ export default () => {
 
   // const { apiData, options: projectOptions } = storeToRefs(projectStores)
 
-  const onApiRegion = async () => {
+  const onApiGetRegion = async () => {
     if (region.value.options) return false
 
     const { config, status, data } = await apiGetRegion()
@@ -255,7 +255,7 @@ export default () => {
     return { config, status, data }
   }
 
-  const onApiMrt = async () => {
+  const onApiGetMrt = async () => {
     if (mrt.value.options) return false
 
     const { config, status, data } = await apiGetMrt()
@@ -278,7 +278,7 @@ export default () => {
     return { config, status, data }
   }
 
-  const onApiBuyListFocus = async () => {
+  const onApiGetBuyListFocus = async () => {
     const { config, status, data } = await apiGetBuyListFocus({
       purpose: content.value.apiData.purpose,
       ...(isChannelRegion.value ? { region: region.value.ids || region.value.all } : {}),
@@ -295,7 +295,7 @@ export default () => {
     return { config, status, data }
   }
 
-  const onApiBuyList = async (targetRoute = route) => {
+  const onApiGetBuyList = async (targetRoute = route) => {
     const { query } = targetRoute
     const { config, status, data } = await apiGetBuyList({
       ...(isChannelRegion.value ? { region: region.value.ids || region.value.all } : {}),
@@ -326,7 +326,7 @@ export default () => {
     return { config, status, data }
   }
 
-  const onApiBuySuggest = async () => {
+  const onApiGetBuySuggest = async () => {
     const { kw, region } = content.value.apiData
     const { config, status, data } = await apiGetBuySuggest({
       kw,
@@ -513,11 +513,11 @@ export default () => {
     commonParams,
     commonQuery,
     condition,
-    onApiRegion,
-    onApiMrt,
-    onApiBuyList,
-    onApiBuyListFocus,
-    onApiBuySuggest,
+    onApiGetRegion,
+    onApiGetMrt,
+    onApiGetBuyList,
+    onApiGetBuyListFocus,
+    onApiGetBuySuggest,
     onChannel,
     onParseFilters,
     onGetBuyListParams,

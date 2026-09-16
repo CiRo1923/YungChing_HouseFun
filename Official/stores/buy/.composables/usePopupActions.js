@@ -3,35 +3,36 @@ import { onDeepMerge } from '@js/_prototype.js'
 export default () => {
   const { onCustom } = usePopupActions()
   const buyPopup = useBuyPopupStore()
+  const { buttons } = storeToRefs(buyPopup)
   const popupActions = usePopupActions()
   const { onMergeBtns } = popupActions
   const onAlert = (data) => {
-    const buttons = buyPopup.buttons.alert
+    const alertBtns = buttons.value.alert
 
     return popupActions.onAlert({
       ...data,
       ...{
-        btns: onMergeBtns(buttons, data.btns),
+        btns: onMergeBtns(alertBtns, data.btns),
       },
     })
   }
   const onConfirm = (data) => {
-    const buttons = buyPopup.buttons.confirm
+    const confirmBtns = buttons.value.confirm
 
     return popupActions.onConfirm({
       ...data,
       ...{
-        btns: onMergeBtns(buttons, data.btns),
+        btns: onMergeBtns(confirmBtns, data.btns),
       },
     })
   }
   const onLogin = (data) => {
-    const buttons = buyPopup.buttons.login
+    const loginBtns = buttons.value.login
 
     return onCustom({
       id: 'loginSystem',
       title: data?.title || '會員登入',
-      btns: onDeepMerge(buttons, data?.btns),
+      btns: onDeepMerge(loginBtns, data?.btns),
     })
   }
 

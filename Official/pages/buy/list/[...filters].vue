@@ -9,7 +9,7 @@ const buyList = useBuyListStore()
 const { region, mrt, pagination, content, keyword } = storeToRefs(buyList)
 
 // H1 由共用 Header 讀 project.seo.h1 輸出:SSR 由 middleware/buySeo 預抓、
-// client 由本頁 onApiBuyList → onSetSeo 更新、換頁清空由 middleware/seoReset 處理。
+// client 由本頁 onApiGetBuyList → onSetSeo 更新、換頁清空由 middleware/seoReset 處理。
 const {
   onApiGETRealEstatePurposeCheckOptions,
   onApiGETRealEstateTypeSelectOptions,
@@ -24,11 +24,11 @@ const {
   commonParams,
   commonQuery,
   onGetBuyListParams,
-  onApiRegion,
-  onApiMrt,
-  onApiBuyListFocus,
-  onApiBuyList,
-  onApiBuySuggest,
+  onApiGetRegion,
+  onApiGetMrt,
+  onApiGetBuyListFocus,
+  onApiGetBuyList,
+  onApiGetBuySuggest,
   onChannel,
 } = useBuyListActions()
 const { onApiErrorServerToClient } = usePopupActions()
@@ -65,11 +65,11 @@ const paramsChannel = computed(() =>
 const data = computed(() => content.value.data || [])
 const hasData = computed(() => data.value?.length !== 0 || false)
 
-// 關鍵字建議:選項由 onApiBuySuggest 寫進 store 的 keyword.options,子層自己讀。
+// 關鍵字建議:選項由 onApiGetBuySuggest 寫進 store 的 keyword.options,子層自己讀。
 // 初次載入先抓一次當預設清單;輸入時 SearchKeyword 會把 AutoComplete 的
 // setOptions 傳上來,打完再回填以解除讀取中狀態
 const onBuySuggest = async (setOptions) => {
-  await onApiBuySuggest()
+  await onApiGetBuySuggest()
 
   setOptions?.(keyword.value.options)
 
@@ -80,20 +80,20 @@ onChannel()
 onGetBuyListParams()
 
 // buy-list / buy-list-focus 不掛 watch:初次載入抓一次,後續導航 / 搜尋一律由
-// 路由守衛 (onRouteChanged) 與 onApiSearch 顯式呼叫,避免 watch 與手動呼叫重複
+// 路由守衛 (onRouteChanged) 與 onBuyList 顯式呼叫,避免 watch 與手動呼叫重複
 await onWithLoadingAll([
   // server time 只用於「天」級距相對時間,初次載入抓一次即可,換頁不需重打
   useAsyncData('common-server-time', () => onApiGetCommonServerTime()),
-  useAsyncData('region-options', () => onApiRegion()),
-  useAsyncData('mrt-options', () => onApiMrt()),
+  useAsyncData('region-options', () => onApiGetRegion()),
+  useAsyncData('mrt-options', () => onApiGetMrt()),
   useAsyncData('purpose-options', () => onApiGETRealEstatePurposeCheckOptions()),
   useAsyncData('type-options', () => onApiGETRealEstateTypeSelectOptions()),
   useAsyncData('face-options', () => onApiGETRealEstateFaceSelectOptions()),
   useAsyncData('parking-options', () => onApiGETRealEstateParkingModeSelectOptions()),
   useAsyncData('near-options', () => onApiGETRealEstateNearByCheckOptions()),
   useAsyncData('features-options', () => onApiGETRealEstateFeatureCheckOptions()),
-  useAsyncData('buy-list-focus', () => onApiBuyListFocus()),
-  useAsyncData('buy-list', () => onApiBuyList()),
+  useAsyncData('buy-list-focus', () => onApiGetBuyListFocus()),
+  useAsyncData('buy-list', () => onApiGetBuyList()),
   useAsyncData('buy-suggest', () => onBuySuggest()),
 ])
 
@@ -107,7 +107,7 @@ const onRouteChanged = async (to) => {
   onGetBuyListParams(to)
 
   onIsLoading(true)
-  await awaitAllPromise([onApiBuyList(to), onApiBuyListFocus()])
+  await awaitAllPromise([onApiGetBuyList(to), onApiGetBuyListFocus()])
   onIsLoading(false)
 
   if (import.meta.client) {
@@ -119,9 +119,9 @@ const onRouteChanged = async (to) => {
 }
 
 // 原地搜尋(不改 URL):以目前路由重打 buy-list
-const onApiSearch = async () => {
+const onBuyList = async () => {
   onIsLoading(true)
-  await onApiBuyList()
+  await onApiGetBuyList()
   onIsLoading(false)
 }
 
@@ -169,7 +169,7 @@ onUnmounted(() => {
   <div class="bg-[--white] pt:pt-[12px]">
     <PageBuyListTabOvalResponsive />
     <PageBuyListSearchFunction
-      @apiSearch="onApiSearch"
+      @apiSearch="onBuyList"
       @routerPush="onRoutePush"
       @suggest="onBuySuggest"
     />
@@ -178,7 +178,7 @@ onUnmounted(() => {
     <PageBuyListFocus />
     <CommonMContent class="--hasBgColor pt:--rounded-20 pt:--py-20 p:--px-30 m:--pb-20 tm:--px-16 t:mx-[10px]">
       <PageBuyListSearchFilter
-        @click="onApiSearch"
+        @click="onBuyList"
         @click:routePush="onRoutePush"
         v-if="!isDeviceM"
       />

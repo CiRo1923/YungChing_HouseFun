@@ -5,7 +5,7 @@ const { onUseMeta, onWithLoadingAll } = useCommonActions()
 const { onApiPromise } = usePopupActions()
 const memberUpgrade = useMemberAuthUpgradeStore()
 const { email } = storeToRefs(memberUpgrade)
-const { onGetCookie, onClearCookie, onApiAuthEmailUpgradeVerificationCode, reset } =
+const { onGetCookie, onClearCookie, onApiPostMemberAuthEmailUpgradeEmailVerificationCode, reset } =
   useMemberAuthUpgradeActions()
 const router = useRouter()
 
@@ -32,10 +32,10 @@ onUseMeta({
 })
 
 // 寄送 email 驗證碼 → 成功才進驗證頁
-const onAuthEmailUpgradeVerificationCode = async () => {
+const onMemberAuthEmailUpgradeEmailVerificationCode = async () => {
   onApiPromise('open')
 
-  const { status } = await onApiAuthEmailUpgradeVerificationCode()
+  const { status } = await onApiPostMemberAuthEmailUpgradeEmailVerificationCode()
 
   onApiPromise('close')
 
@@ -47,7 +47,7 @@ const onAuthEmailUpgradeVerificationCode = async () => {
 }
 
 const onSumit = async () => {
-  await onAuthEmailUpgradeVerificationCode()
+  await onMemberAuthEmailUpgradeEmailVerificationCode()
 }
 
 // 超限是綁「這個 email」而不是綁人 → 給一個回到表單的出口,讓使用者改用其他 email。

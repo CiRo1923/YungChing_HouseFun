@@ -25,7 +25,7 @@ const options = computed(() => {
   })
 })
 
-// tab 是 router-link,點擊已透過導航觸發 onRouteChanged → onApiBuyList;
+// tab 是 router-link,點擊已透過導航觸發 onRouteChanged → onApiGetBuyList;
 // 不再 emit 'click'(會再走 onApiSearch),避免同一次點擊打兩次 API。
 const onClick = (data) => {
   const { item } = data

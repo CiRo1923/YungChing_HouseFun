@@ -1,7 +1,7 @@
 <script setup>
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
 const memberForget = useMemberAuthForgetStore()
-const { onApiAuthPasswordResetRequest, onSaveVerify, reset } = useMemberAuthForgetActions()
+const { onApiPostMemberAuthPasswordResetRequest, onSaveVerify, reset } = useMemberAuthForgetActions()
 const { onApiPromise } = usePopupActions()
 const router = useRouter()
 
@@ -22,10 +22,10 @@ onUseMeta({
 
 // 發送(或重送)驗證碼。管道目前一律 sms;
 // 未來可能改發 LINE,值集中在 store 的 verificationChannels。
-const onSendCode = async () => {
+const onMemberAuthPasswordResetRequest = async () => {
   onApiPromise('open')
 
-  await onApiAuthPasswordResetRequest(memberForget.verificationChannels.sms)
+  await onApiPostMemberAuthPasswordResetRequest(memberForget.verificationChannels.sms)
 
   onApiPromise('close')
 }
@@ -65,6 +65,6 @@ onInit()
         step: 1,
       }"
     />
-    <PageMemberForgetIndexContent @sendCode="onSendCode" @submit="onSumit" />
+    <PageMemberForgetIndexContent @sendCode="onMemberAuthPasswordResetRequest" @submit="onSumit" />
   </CommonMContainer>
 </template>

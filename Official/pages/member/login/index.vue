@@ -1,7 +1,7 @@
 <script setup>
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
-const { onApiAuthToken, onReset: onMemberAuthReset } = useMemberAuthProjectActions()
-const { onApiAuthTokenExchange, onApiAuthMe, onClearCookies, onReset } = useMemberProjectActions()
+const { onApiPostMemberAuthToken, onReset: onMemberAuthReset } = useMemberAuthProjectActions()
+const { onApiPostAuthTokenExchange, onApiGetAuthMe, onClearCookies, onReset } = useMemberProjectActions()
 const { onApiPromise } = usePopupActions()
 const router = useRouter()
 
@@ -14,7 +14,7 @@ definePageMeta({
 const loginContainerRef = ref(null)
 
 // 進到登入頁一律先把登入狀態清乾淨 —— store 與 cookie 都要,與登出同一組動作
-// (見 stores/member/.composables/useProjectActions.js 的 onApiAuthLogout)。
+// (見 stores/member/.composables/useProjectActions.js 的 onApiPostAuthLogout)。
 // 帶著舊的 authToken / accessData 重新登入,換 token 那一步會吃到過期的憑證。
 onMemberAuthReset()
 onReset()
@@ -45,7 +45,7 @@ const onAuthToken = async () => {
 
   onApiPromise('open')
 
-  const { status } = await onApiAuthToken({
+  const { status } = await onApiPostMemberAuthToken({
     channel: 'member-web',
   })
 
@@ -54,8 +54,8 @@ const onAuthToken = async () => {
     return
   }
 
-  const { status: exchangeStatus } = await onApiAuthTokenExchange()
-  const { status: meStatus } = exchangeStatus === 200 ? await onApiAuthMe() : {}
+  const { status: exchangeStatus } = await onApiPostAuthTokenExchange()
+  const { status: meStatus } = exchangeStatus === 200 ? await onApiGetAuthMe() : {}
 
   onApiPromise('close')
 

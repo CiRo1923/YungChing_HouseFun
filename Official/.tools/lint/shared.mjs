@@ -64,6 +64,7 @@ export {
   STANDALONE_APIS,
   STANDALONE_STORES,
   STORE_DIR,
+  STORE_SETUP_CALLS,
   TAILWIND_THEME_OVERRIDES,
   TOOLING_PREFIXES,
   VIEW_RESOURCE_DEPTH,
@@ -362,6 +363,35 @@ export const listViewResources = (root) => {
 export const listViewFolders = (root) => {
   const resources = listViewResources(root)
   return resources && new Set(resources.map((r) => r.name))
+}
+
+/**
+ * 每一個資源資料夾底下再分的那一層,名字收成一份。
+ *
+ * **store 分層時,檔名對應的是這一層。** 一個資源大到要拆成好幾支 store 的時候
+ * (買、租、會員各有好幾個畫面),store 會放進子資料夾,而檔名指的是那個資源
+ * 底下的某一個畫面 —— 拿它去比對第一層的話一個都對不上,
+ * 那種專案的每一支 store 都會被報「沒有對應的資料夾」。
+ *
+ * 只收資料夾名,不管它在哪一個資源底下 —— store 的子資料夾名不一定等於
+ * 頁面的第一層(把認證相關的幾支聚成一個資料夾是常見的做法),
+ * 綁著比對的話那種聚法就都成了違規,而它們其實都對得上某一個畫面。
+ *
+ * 底線開頭的不算 —— 那是放元件的地方,不是畫面。
+ */
+export const listViewSubFolders = (root) => {
+  const resources = listViewResources(root)
+  if (!resources) return null
+
+  const names = new Set()
+
+  for (const { abs } of resources) {
+    for (const item of fs.readdirSync(abs, { withFileTypes: true })) {
+      if (item.isDirectory() && !item.name.startsWith('_')) names.add(item.name)
+    }
+  }
+
+  return names
 }
 
 /**

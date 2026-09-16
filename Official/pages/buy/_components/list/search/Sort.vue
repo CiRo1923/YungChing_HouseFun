@@ -82,7 +82,7 @@ const emits = defineEmits(['click:routePush'])
 // const data = computed(() => content.value.data || [])
 const apiData = computed(() => content.value.apiData || {})
 
-// 攤平後的排序值序列(需與 BuyMSortMain dropdown 攤平邏輯一致):
+// 攤平後的排序值序列(需與 BuyMSort dropdown 攤平邏輯一致):
 // 無方向的選項 → [sort];有方向 → 依 asc、desc 且有 value 者
 const flatValues = computed(() =>
   options.flatMap((item) => {
@@ -116,7 +116,7 @@ const onClick = (item) => {
 </script>
 
 <template>
-  <BuyMSortMain
+  <BuyMSort
     :options="options"
     :config="{
       index: activeIndex,

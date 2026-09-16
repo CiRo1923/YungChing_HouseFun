@@ -8,8 +8,8 @@ const { phone } = storeToRefs(memberUpgrade)
 const {
   onGetCookie,
   onClearCookie,
-  onApiAuthEmailUpgradeMobileCheck,
-  onApiAuthEmailUpgradeMobileVerificationCode,
+  onApiPostMemberAuthEmailUpgradeMobileCheck,
+  onApiPostMemberAuthEmailUpgradeMobileVerificationCode,
   onPopupCustomer,
   reset,
 } = useMemberAuthUpgradeActions()
@@ -75,7 +75,7 @@ const onAuthEmailUpgradeMobileCheck = async () => {
 
   onApiPromise('open')
 
-  const { status, data } = await onApiAuthEmailUpgradeMobileCheck()
+  const { status, data } = await onApiPostMemberAuthEmailUpgradeMobileCheck()
 
   if (status !== 200) {
     onApiPromise('close')
@@ -105,8 +105,8 @@ const onAuthEmailUpgradeMobileCheck = async () => {
 }
 
 // 發送驗證碼 → 成功才進驗證頁。承接上一段未關的 loading。
-const onAuthEmailUpgradeMobileVerificationCode = async () => {
-  const { status } = await onApiAuthEmailUpgradeMobileVerificationCode()
+const onMemberAuthEmailUpgradeMobileVerificationCode = async () => {
+  const { status } = await onApiPostMemberAuthEmailUpgradeMobileVerificationCode()
 
   onApiPromise('close')
 
@@ -132,7 +132,7 @@ const onSumit = async () => {
 
   if (!canVerify) return
 
-  await onAuthEmailUpgradeMobileVerificationCode()
+  await onMemberAuthEmailUpgradeMobileVerificationCode()
 }
 
 // upgradeToken 由上一頁(email 驗證成功)寫進 cookie;本頁 URL 不帶這個值,

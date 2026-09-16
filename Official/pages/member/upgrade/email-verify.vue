@@ -8,8 +8,8 @@ const memberUpgrade = useMemberAuthUpgradeStore()
 const { email, emailVerify } = storeToRefs(memberUpgrade)
 const {
   onGetCookie,
-  onApiAuthEmailUpgradeVerificationCode,
-  onApiAuthEmailUpgradeVerificationCodeVerify,
+  onApiPostMemberAuthEmailUpgradeEmailVerificationCode,
+  onApiPostMemberAuthEmailUpgradeEmailVerificationCodeVerify,
   onPopupCustomer,
   reset,
 } = useMemberAuthUpgradeActions()
@@ -59,7 +59,7 @@ onUseMeta({
 const onAuthEmailUpgradeVerificationCode = async () => {
   onApiPromise('open')
 
-  const { status } = await onApiAuthEmailUpgradeVerificationCode()
+  const { status } = await onApiPostMemberAuthEmailUpgradeEmailVerificationCode()
 
   onApiPromise('close')
 
@@ -81,7 +81,7 @@ const onAuthEmailUpgradeVerificationCode = async () => {
 const onAuthEmailUpgradeVerificationCodeVerify = async () => {
   onApiPromise('open')
 
-  const { status, data } = await onApiAuthEmailUpgradeVerificationCodeVerify()
+  const { status, data } = await onApiPostMemberAuthEmailUpgradeEmailVerificationCodeVerify()
 
   onApiPromise('close')
 

@@ -6,7 +6,7 @@
   --anchor-px: 0;
   --anchor-py: 0;
 
-  /* rounded 同上:base 給 0(等同無圓角),.--rounded-XX 再覆蓋成實際值。
+  /* rounded 的 base 給 0(等同無圓角),.--rounded-XX 再覆蓋成實際值。
      直接寫在 base 而不綁一個 .--rounded 開關 —— 圓角大小已由 modifier 決定,
      沒帶 modifier 就是 0,不需要額外的「要不要圓角」旗標。 */
   --anchor-rounded: 0;

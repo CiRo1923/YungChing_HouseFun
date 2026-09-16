@@ -17,7 +17,7 @@ export default () => {
   const { onApiGetCommonServerTime } = useProjectActions()
   const memberProjct = useMemberAuthProjectStore()
   const { authToken, userData } = storeToRefs(memberProjct)
-  const { onApiAuthToken, onSetAuthTokenCookie, onReset } = useMemberAuthProjectActions()
+  const { onApiPostMemberAuthToken, onSetAuthTokenCookie, onReset } = useMemberAuthProjectActions()
   const buyProject = useBuyProjectStore()
   const { channel, access, message, countdownData, apiVerifyCodeData, cottonCandyCheckbox } =
     storeToRefs(buyProject)
@@ -51,7 +51,7 @@ export default () => {
   const { onPromise, onCustom, onApiError, onApiPromise } = usePopupActions()
   const { onLogin } = useBuyPopupActions()
 
-  const onApiAuthTokenExchange = async () => {
+  const onApiPostBuyAuthTokenExchange = async () => {
     const { config, status, data } = await apiPostBuyAuthTokenExchange({
       encryptedToken: authToken.value.longToken,
     })
@@ -65,7 +65,7 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiAuthMe = async () => {
+  const onApiGetBuyAuthMe = async () => {
     const { config, status, data } = await apiGetBuyAuthMe()
 
     if (status === 200) {
@@ -76,7 +76,7 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiAuthLogout = async () => {
+  const onApiPostBuyAuthLogout = async () => {
     const { config, status, data } = await apiPostBuyAuthLogout()
 
     if (status === 200) {
@@ -156,7 +156,7 @@ export default () => {
     onSetAccessDataCookie(null)
   }
 
-  const onApiMessages = async (isReplaceMessage) => {
+  const onApiPostBuyMessages = async (isReplaceMessage) => {
     const { config, status, data } = await apiPostBuyMessages(message.value.apiData)
 
     if (status === 200 || status === 201) {
@@ -175,7 +175,7 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiMessagesVerifyCode = async () => {
+  const onApiPostBuyMessagesVerifyCode = async () => {
     const { config, status, data } = await apiPostBuyMessagesVerifyCode(apiVerifyCodeData.value)
 
     if (status === 200) {
@@ -186,7 +186,7 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiMessagesResendCode = async () => {
+  const onApiPostBuyMessagesResendCode = async () => {
     const { config, status, data } = await apiPostBuyMessagesResendCode({
       verificationToken: apiVerifyCodeData.value.verificationToken,
     })
@@ -211,15 +211,15 @@ export default () => {
 
     onApiPromise('open')
 
-    const { status } = await onApiAuthToken({
+    const { status } = await onApiPostMemberAuthToken({
       channel: 'buy',
     })
 
     let result = null
 
     if (status === 200) {
-      await onApiAuthTokenExchange()
-      result = await onApiAuthMe()
+      await onApiPostBuyAuthTokenExchange()
+      result = await onApiGetBuyAuthMe()
     }
 
     onApiPromise('close')
@@ -228,7 +228,7 @@ export default () => {
   }
   const onPopupVerifyCode = async () => {
     onPromise('open')
-    const { status, data } = await onApiMessages(true)
+    const { status, data } = await onApiPostBuyMessages(true)
     await onApiGetCommonServerTime()
     onPromise('close')
 
@@ -342,16 +342,16 @@ export default () => {
     isChannelMrt,
     onSaveChannel,
     onRestoreChannel,
-    onApiAuthTokenExchange,
-    onApiAuthMe,
-    onApiAuthLogout,
+    onApiPostBuyAuthTokenExchange,
+    onApiGetBuyAuthMe,
+    onApiPostBuyAuthLogout,
     onSetAccessDataCookie,
     onGetAccessDataCookie,
     onRestoreAccessData,
     onClearCookies,
-    onApiMessages,
-    onApiMessagesVerifyCode,
-    onApiMessagesResendCode,
+    onApiPostBuyMessages,
+    onApiPostBuyMessagesVerifyCode,
+    onApiPostBuyMessagesResendCode,
     onPopupLogin,
     onPopupVerifyCode,
     onPopupCottonCandy,

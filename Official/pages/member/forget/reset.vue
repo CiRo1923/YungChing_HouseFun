@@ -5,7 +5,7 @@ import { deCrypto } from '@js/.crypto/index.js'
 const { onUseMeta, onWithLoadingAll } = useCommonActions()
 const memberForget = useMemberAuthForgetStore()
 const { verify } = storeToRefs(memberForget)
-const { onGetCookie, onApiAuthPasswordResetConfirm, reset } = useMemberAuthForgetActions()
+const { onGetCookie, onApiPostMemberAuthPasswordResetConfirm, reset } = useMemberAuthForgetActions()
 const { onApiPromise } = usePopupActions()
 const router = useRouter()
 
@@ -53,10 +53,10 @@ onUseMeta({
 
 // 驗證碼與新密碼一起送出(這條流程只有 confirm 會驗證碼)。
 // 驗證碼錯誤時 action 會導回步驟 1,所以這裡只處理成功的去向。
-const onSumit = async () => {
+const onMemberAuthPasswordResetConfirm = async () => {
   onApiPromise('open')
 
-  const { status } = await onApiAuthPasswordResetConfirm()
+  const { status } = await onApiPostMemberAuthPasswordResetConfirm()
 
   onApiPromise('close')
 
@@ -95,6 +95,6 @@ onInit()
         step: 2,
       }"
     />
-    <PageMemberForgetResetContent @submit="onSumit" />
+    <PageMemberForgetResetContent @submit="onMemberAuthPasswordResetConfirm" />
   </CommonMContainer>
 </template>

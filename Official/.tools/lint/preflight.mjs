@@ -226,7 +226,7 @@ const REQUIREMENTS = [
   },
   {
     label: '共用元件目錄',
-    rules: ['tailwind', 'importOrder', 'componentApiImport'],
+    rules: ['tailwind', 'importOrder', 'componentApiImport', 'vueFileName'],
     check: (root) => (hasDir(root, COMPONENTS_DIR) ? COMPONENTS_DIR : null),
     need: `要有共用元件目錄(目前設定為 ${COMPONENTS_DIR})`,
     why: '這三條只針對共用元件:template 不寫 utility class、元件要自己載入樣式、元件不能直接 import api。目錄不存在時都不會有結果。',

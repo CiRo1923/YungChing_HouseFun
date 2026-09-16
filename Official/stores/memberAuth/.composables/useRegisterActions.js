@@ -5,7 +5,7 @@ export default () => {
   const { type } = storeToRefs(memberRegister)
   const { onApiError } = usePopupActions()
 
-  const onApiAuthRegisterVerificationCode = async (channel) => {
+  const onApiPostMemberAuthRegisterVerificationCode = async (channel) => {
     const { countdownData, apiData } = type.value
     const { config, status, data } = await apiPostMemberAuthRegisterVerificationCode({
       mobilePhone: apiData.mobilePhone,
@@ -24,7 +24,7 @@ export default () => {
     return { config, status, data }
   }
 
-  const onApiAuthRegister = async (channel) => {
+  const onApiPostMemberAuthRegister = async (channel) => {
     const { config, status, data } = await apiPostMemberAuthRegister({
       channel,
       ...type.value.apiData,
@@ -43,8 +43,8 @@ export default () => {
   }
 
   return {
-    onApiAuthRegisterVerificationCode,
-    onApiAuthRegister,
+    onApiPostMemberAuthRegisterVerificationCode,
+    onApiPostMemberAuthRegister,
     reset,
   }
 }

@@ -4,6 +4,7 @@ export default () => {
   const popup = usePopupStore()
   const {
     promise,
+    buttons,
     alertCheck,
     confirmCheck,
     customCheck,
@@ -14,19 +15,19 @@ export default () => {
     apiError,
   } = storeToRefs(popup)
   // dataBtns 只需帶要覆寫的欄位,依 type 比對基準按鈕合併回完整資訊,順序一律以 dataBtns 為主
-  // buttons 有給時視為完整集合,dataBtns 未提到的按鈕接在後面
-  // buttons 未給時僅以 popup.buttons.confirm 補欄位,顆數由 dataBtns 決定(同 type 可重複)
-  const onMergeBtns = (dataBtns, buttons) => {
-    if (!dataBtns) return buttons || null
+  // givenBtns 有給時視為完整集合,dataBtns 未提到的按鈕接在後面
+  // 未給時僅以 store 的 confirm 基準按鈕補欄位,顆數由 dataBtns 決定(同 type 可重複)
+  const onMergeBtns = (dataBtns, givenBtns) => {
+    if (!dataBtns) return givenBtns || null
 
-    const baseBtns = buttons || popup.buttons.confirm
+    const baseBtns = givenBtns || buttons.value.confirm
     const mergedBtns = dataBtns.map((btn) => {
       const matchBtn = baseBtns.find(({ type }) => type === btn.type)
 
       return matchBtn ? onDeepMerge({}, matchBtn, btn) : { ...btn }
     })
 
-    if (!buttons) return mergedBtns
+    if (!givenBtns) return mergedBtns
 
     const restBtns = baseBtns.filter(({ type }) => !dataBtns.some((btn) => btn.type === type))
 
@@ -53,13 +54,13 @@ export default () => {
     // 前一個 alert 還沒結算就被蓋掉 → 先以「未確認」收掉,避免它的 await 永久卡住
     onSettle(alertCheck)
 
-    const buttons = popup.buttons.alert
+    const alertBtns = buttons.value.alert
 
     alertData.value.id = 'alertSystem'
     alertData.value.title = data.title
     alertData.value.icon = data.icon
     alertData.value.content = data.content
-    alertData.value.btns = onDeepMerge(buttons, data.btns)
+    alertData.value.btns = onDeepMerge(alertBtns, data.btns)
     alertData.value.hasExistClose = data.hasExistClose !== undefined ? data.hasExistClose : true
     alertData.value.setClass = data.setClass
 
@@ -85,13 +86,13 @@ export default () => {
   const onConfirm = (data) => {
     onSettle(confirmCheck)
 
-    const buttons = popup.buttons.confirm
+    const confirmBtns = buttons.value.confirm
 
     confirmData.value.id = 'confirmSystem'
     confirmData.value.title = data.title
     confirmData.value.icon = data.icon
     confirmData.value.content = data.content
-    confirmData.value.btns = onMergeBtns(data.btns, buttons)
+    confirmData.value.btns = onMergeBtns(data.btns, confirmBtns)
     confirmData.value.hasExistClose = data.hasExistClose !== undefined ? data.hasExistClose : true
     confirmData.value.setClass = data.setClass
 

@@ -1,6 +1,6 @@
 ---
 name: popup-system
-description: 修改 popup(alert / confirm / custom / apiPromise)的顯示狀態機、Promise 結算、進出場動畫前必須先讀。記錄兩條不可違反的不變式與三個已修過的 bug(死鎖打不開、Promise 永久 pending、TypeError 連鎖)。觸發時機 - 要改 components/common/mPopup/Main.vue、stores/.composables/usePopupActions.js、containers/common/{CustomPopup,AlertSystem,ConfirmSystem,LoginSystem}.vue、assets/css/_common/vueTransition.css 的 popup 段落;或使用者回報 popup「打不開 / 只剩遮罩 / 關不掉 / 動畫沒播 / 流程卡住不往下走」。
+description: 修改 popup(alert / confirm / custom / apiPromise)的顯示狀態機、Promise 結算、進出場動畫前必須先讀。記錄兩條不可違反的不變式與三個已修過的 bug(死鎖打不開、Promise 永久 pending、TypeError 連鎖)。觸發時機 - 要改 components/common/mPopup/Index.vue、stores/.composables/usePopupActions.js、containers/common/{CustomPopup,AlertSystem,ConfirmSystem,LoginSystem}.vue、assets/css/_common/vueTransition.css 的 popup 段落;或使用者回報 popup「打不開 / 只剩遮罩 / 關不掉 / 動畫沒播 / 流程卡住不往下走」。
 ---
 
 <!-- lint-project-name-exempt: 這支只有本專案有,不會複製到別的專案;內容是 popup 涉及哪幾支檔案,路徑是要記錄的資料本身 -->
@@ -16,16 +16,16 @@ description: 修改 popup(alert / confirm / custom / apiPromise)的顯示狀態�
 |---|---|
 | `stores/popup.js` | 狀態:`alertData` / `confirmData` / `customData` / `apiPromiseData`(各含 `id`)、`alertCheck` / `confirmCheck` / `customCheck`(Promise 的 resolver) |
 | `stores/.composables/usePopupActions.js` | 開啟 / 關閉 / 結算。**唯一能碰 `xxxCheck` 的地方** |
-| `components/common/mPopup/Main.vue` | 顯示狀態機與兩層 Transition。每個 popup 實例比對 `props.id === keyID` |
+| `components/common/mPopup/Index.vue` | 顯示狀態機與兩層 Transition。每個 popup 實例比對 `props.id === keyID` |
 | `containers/common/*.vue` | 各型別的外框(AlertSystem / ConfirmSystem / CustomPopup / LoginSystem) |
 | `assets/css/_common/vueTransition.css` | `popup-overlay-*` / `popup-zoom-*` / `popup-bottomSheet-*`。**不得出現 `.m-xxx` 選擇器** |
-| `assets/css/_modules/common/mPopup/*.css` | 元件外觀,由 `Main.vue` 於 script 頂部 import(variables 先、common 後) |
+| `assets/css/_modules/common/mPopup/*.css` | 元件外觀,由 `Index.vue` 於 script 頂部 import(variables 先、common 後) |
 
 ---
 
 ## 不變式 1:顯示狀態由 `watch(isOpen)` 驅動,禁止依賴 transition 事件
 
-`Main.vue` 有兩個 flag,對應兩層 Transition:
+`Index.vue` 有兩個 flag,對應兩層 Transition:
 
 ```js
 const isShowOverlay = ref(false)  // 外層 .m-popup(遮罩,由 :before 畫)

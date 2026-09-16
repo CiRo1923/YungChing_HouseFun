@@ -4,6 +4,7 @@ const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
 const { isChannelMrt, onSearchParams } = useBuyProjectActions()
 const buyProject = useBuyProjectStore()
+const { channelTabs } = storeToRefs(buyProject)
 const buyHouse = useBuyHouseStore()
 const { breadcrumb } = storeToRefs(buyHouse)
 
@@ -23,7 +24,7 @@ const items = computed(() => {
 
   if (!isDeviceM.value) return list
 
-  const tab = buyProject.channelTabs.find(
+  const tab = channelTabs.value.find(
     (item) => item.id === (isChannelMrt.value ? 'mrt' : 'region')
   )
 

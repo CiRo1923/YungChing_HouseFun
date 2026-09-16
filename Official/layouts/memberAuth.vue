@@ -6,10 +6,6 @@ const colorHref = getChannelColorHref('member')
 
 const common = useCommonStore()
 const { isLoading } = storeToRefs(common)
-// const memberProject = useMemberProjectStore()
-// const { accessData } = storeToRefs(memberProject)
-// const { onPopupLogin, onApiAuthMe, onApiAuthLogout } = useBuyProjectActions()
-// const popupLoginContainerRef = ref(null)
 
 // 掛載 buy 頻道色票(同步 composable 一律放在 await 之前)
 useHead({
@@ -21,15 +17,6 @@ useHead({
   ],
 })
 
-// const onInit = async () => {
-//   if (accessData.value) {
-//     await onApiAuthMe()
-//   }
-// }
-
-// SSR 首屏就取得:callOnce 於 server 執行一次,userData 隨 Pinia payload 帶到 client,不重打。
-// 放在 setup 最後,await 之後不再有同步 composable。
-// await callOnce(onInit)
 </script>
 
 <template>
@@ -50,7 +37,6 @@ useHead({
         }"
       />
     </CommonHeader>
-    <!-- <CommonHeader @login="onPopupLogin" @logout="onApiAuthLogout" /> -->
     <main class="l-body relative z-0 tm:mt-[20px] p:mt-[55px]">
       <slot />
     </main>
@@ -61,7 +47,7 @@ useHead({
         }"
       />
     </footer>
-    <CommonMLoadingMain
+    <CommonMLoading
       :config="{
         isFixed: true,
       }"

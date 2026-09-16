@@ -4,7 +4,7 @@ const { apiPromiseData } = storeToRefs(popup)
 </script>
 
 <template>
-  <CommonMPopupMain
+  <CommonMPopup
     id="apiPromiseSystem"
     :setClass="{
       main: 'p:--py-40 tm:--py-24 p:--px-60 tm:--px-30',
@@ -13,5 +13,5 @@ const { apiPromiseData } = storeToRefs(popup)
     <CommonMLoadingContainer>
       <p class="text-center" v-html="apiPromiseData.content" />
     </CommonMLoadingContainer>
-  </CommonMPopupMain>
+  </CommonMPopup>
 </template>

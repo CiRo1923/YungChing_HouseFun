@@ -421,18 +421,18 @@ const setClass = computed(() => {
 僅 icon、hover、預設位置（上方置中）：
 
 ```html
-<BuyMTooltipMain
+<BuyMTooltip
   :config="{ icon: 'icon_vr' }"
   :setClass="{ icon: 'h-[16px] w-[16px]' }"
 >
   <template #content>132456</template>
-</BuyMTooltipMain>
+</BuyMTooltip>
 ```
 
 文字 + 點擊觸發 + 依裝置切換位置：
 
 ```html
-<BuyMTooltipMain
+<BuyMTooltip
   label="說明"
   :config="{
     events: 'click',
@@ -440,7 +440,7 @@ const setClass = computed(() => {
   }"
 >
   <template #content>提示內容</template>
-</BuyMTooltipMain>
+</BuyMTooltip>
 ```
 
 ---

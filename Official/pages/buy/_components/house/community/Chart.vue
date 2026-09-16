@@ -15,7 +15,7 @@ const series = computed(() => {
 </script>
 
 <template>
-  <BuyMChartMain
+  <BuyMChart
     :series="series"
     :tooltip="{
       formatter: (ctx) => {
