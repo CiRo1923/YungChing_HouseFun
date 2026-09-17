@@ -269,6 +269,7 @@ export const SKIP_DIRS = [
  */
 export const STANDALONE_STORES = [
   'common', // 跨頁面共用
+  'project', // 全站層級(縣市選項、伺服器時間、加值方案),不隸屬任何一頁
   'popup', // 彈窗系統
   'rent', // 租屋資料,目前沒有對應的頁面資料夾
 ]

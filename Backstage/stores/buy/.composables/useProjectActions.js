@@ -18,7 +18,7 @@ import {
   apiPostVasRefreshSavePlanTemplate,
   apiGetVasRefreshTemplateGetTemplateInfo,
   apiPostVasRefreshTemplateSaveTemplate,
-} from '@js/_api/buy/common.js'
+} from '@js/_api/buy/project.js'
 
 import {
   apiGetBuyRealEstatePurposeCheckOptions,
