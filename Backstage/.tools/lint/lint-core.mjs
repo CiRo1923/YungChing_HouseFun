@@ -76,9 +76,11 @@ import {
   isModuleStyle,
   isSharedCss,
   moduleFolderOf,
+  registerScanCache,
   classPrefixOf,
   selectorClassesOf,
   issueOf,
+  warnOf,
   lineNoOf,
   templateRangeOf,
   toRel,
@@ -461,51 +463,74 @@ const stripVariants = (cls) => {
   return cls.slice(last)
 }
 
+/** 去掉 variant 前綴與 `!` 重要標記,回傳 utility 本體 */
+const utilityBodyOf = (rawClass) => stripVariants(rawClass.replace(/^!/, '')).replace(/^!/, '')
+
 const isTailwindUtility = (rawClass) => {
-  const body = stripVariants(rawClass.replace(/^!/, '')).replace(/^!/, '')
+  const body = utilityBodyOf(rawClass)
   if (!body) return false
   if (isProjectClass(body)) return false
   if (TW_EXACT.has(body)) return true
   return TW_PREFIX.some((p) => body.startsWith(p))
 }
 
-const checkTailwindInComponents = ({ rel, text }) => {
-  if (!rel.startsWith(`${COMPONENTS_DIR}/`) || !rel.endsWith('.vue')) return []
+const CLASS_ATTR_RE = /(?::|v-bind:)?class\s*=\s*"([^"]*)"|(?::|v-bind:)?class\s*=\s*'([^']*)'/g
 
+/**
+ * 畫面區段裡出現的每一個 class 名稱,連同它那個 class 屬性在整份檔案裡的位置。
+ *
+ * 動態綁定(`:class`)只取引號包住的字面值 —— 變數與三元運算靜態判讀不出來。
+ * 被 `<!-- -->` 註解掉的畫面區段是死程式碼,裡面的 class 不算;
+ * 用等長空白取代而不是刪掉,行號才不會跑掉。
+ *
+ * 位置回傳原始 index 而不是行號,由呼叫端自己換算 ——
+ * 看畫面區段 class 的規則不只一條,取法各寫一份的話,
+ * 兩邊對「哪些算 class、哪一行」的認定會開始不一樣。
+ */
+const templateClassTokensOf = (text) => {
   const tpl = templateRangeOf(text)
   if (!tpl) return []
 
-  // 被 <!-- --> 註解掉的 template 是死程式碼,裡面的 class 不算違規。
-  // 用等長空白取代而不是刪除,行號才不會跑掉。
   const body = tpl.body.replace(/<!--[\s\S]*?-->/g, (m) => m.replace(/[^\n]/g, ' '))
+  const tokens = []
+
+  for (const m of body.matchAll(CLASS_ATTR_RE)) {
+    const raw = m[1] ?? m[2] ?? ''
+    const isDynamic = /^(?::|v-bind:)/.test(m[0].trimStart())
+    const chunks = isDynamic ? [...raw.matchAll(/['"]([^'"]+)['"]/g)].map((x) => x[1]) : [raw]
+
+    for (const chunk of chunks) {
+      for (const cls of chunk.split(/\s+/)) {
+        if (cls) tokens.push({ cls, index: tpl.offset + m.index })
+      }
+    }
+  }
+
+  return tokens
+}
+
+/* 範圍只有共用元件目錄。容器(彈窗、廣告這類系統元件)與版型不在內 ——
+   那兩層是依頁面組起來的版面,不是會被到處放的模組:沒有模組前綴、
+   也沒有自己的樣式資料夾,套上去等於要求整層改名搬家。
+   那兩層仍受文字類規則約束(註解不用裝飾符號那幾條)。 */
+const checkTailwindInComponents = ({ rel, text }) => {
+  if (!rel.startsWith(`${COMPONENTS_DIR}/`) || !rel.endsWith('.vue')) return []
 
   const issues = []
   const seen = new Set()
 
-  const attrRe = /(?::|v-bind:)?class\s*=\s*"([^"]*)"|(?::|v-bind:)?class\s*=\s*'([^']*)'/g
+  for (const { cls, index } of templateClassTokensOf(text)) {
+    if (!isTailwindUtility(cls) || seen.has(cls)) continue
+    seen.add(cls)
 
-  for (const m of body.matchAll(attrRe)) {
-    const raw = m[1] ?? m[2] ?? ''
-    const isDynamic = /^(?::|v-bind:)/.test(m[0].trimStart())
-
-    // 動態綁定只取引號包住的字面 class,其餘(變數、三元運算)無法靜態判讀
-    const candidates = isDynamic ? [...raw.matchAll(/['"]([^'"]+)['"]/g)].map((x) => x[1]) : [raw]
-
-    for (const chunk of candidates) {
-      for (const cls of chunk.split(/\s+/)) {
-        if (!cls || !isTailwindUtility(cls) || seen.has(cls)) continue
-        seen.add(cls)
-
-        issues.push(
-          issueOf(
-            rel,
-            lineNoOf(text, tpl.offset + m.index),
-            'tailwind',
-            `template 使用 tailwind class ${cls} —— 樣式搬進這支元件自己的 css(與它的 .vue 放在同一個資料夾),template 只留組件 class 與 --modifier`
-          )
-        )
-      }
-    }
+    issues.push(
+      issueOf(
+        rel,
+        lineNoOf(text, index),
+        'tailwind',
+        `template 使用 tailwind class ${cls} —— 樣式搬進這支元件自己的 css(與它的 .vue 放在同一個資料夾),template 只留組件 class 與 --modifier`
+      )
+    )
   }
 
   return issues
@@ -827,6 +852,58 @@ const checkModuleVariables = ({ rel, text: raw }) => {
     })
 }
 
+// --- 規則 truncateClass:單行省略改用 line-clamp-1 ---------------------------
+//
+// tailwind 的 truncate 是「不換行 + 超出的部分顯示省略號」,只能做一行。
+// 要改成兩行時它幫不上忙,得換成 line-clamp-2 —— 也就是換一個行數就換一種寫法,
+// 而截幾行是會被調整的值(同一張卡片在列表裡一行、在詳情頁兩行)。
+//
+// line-clamp-1 做的是同一件事,而且與 line-clamp-2、line-clamp-3 是同一組,
+// 改行數只動數字;一組級距寫成 --line-1 / --line-2 也才對得起來。
+//
+// 這條是建議級:truncate 現在這樣寫不會壞,只是改行數時要整句換掉。
+
+const APPLY_RE = /@apply([^;{}]*)/g
+
+const TRUNCATE_DETAIL =
+  'truncate 改用 line-clamp-1 —— truncate 只能做一行,要換成兩行時得整句換成 line-clamp-2;' +
+  'line-clamp 這一組改行數只動數字,截幾行才有辦法交給使用端決定'
+
+/** 帶不帶 variant 前綴、有沒有 ! 都算同一個 utility */
+const isTruncateClass = (cls) => utilityBodyOf(cls) === 'truncate'
+
+/**
+ * 兩個位置都看:樣式檔 `@apply` 後面的清單,以及畫面區段裡的 class 屬性。
+ *
+ * 畫面區段那一份走 templateClassTokensOf —— 動態綁定只取引號包住的字面值,
+ * 所以 `:class="truncate"`(把行數當 prop 傳進來的那種寫法)不會被算進來。
+ */
+const checkTruncateClass = ({ rel, text: raw }) => {
+  /* 只看樣式檔與 .vue —— class 名稱只會寫在這兩種檔案裡。
+     不限範圍的話,規則自己的驗證案例(程式碼裡寫著違規長相的字串)
+     會被當成違規報出來,而那正是它該有的樣子。 */
+  if (!rel.endsWith('.css') && !rel.endsWith('.vue')) return []
+
+  const text = maskCssComments(raw)
+  const issues = []
+
+  for (const m of text.matchAll(APPLY_RE)) {
+    if (m[1].split(/\s+/).some(isTruncateClass)) {
+      issues.push(warnOf(rel, lineNoOf(text, m.index), 'truncateClass', TRUNCATE_DETAIL))
+    }
+  }
+
+  if (rel.endsWith('.vue')) {
+    for (const { cls, index } of templateClassTokensOf(raw)) {
+      if (isTruncateClass(cls)) {
+        issues.push(warnOf(rel, lineNoOf(raw, index), 'truncateClass', TRUNCATE_DETAIL))
+      }
+    }
+  }
+
+  return issues
+}
+
 // --- 規則 variable:模組變數的命名與斷點 -------------------------------------
 //
 // 命名   -w / -h / -p / -m / -border / -text-size,不要 -width / -height / -padding
@@ -887,7 +964,22 @@ const VAR_DEFINE_RE = /(--[\w-]+)['"]?\s*:/g
 /** 變數的引用;第二個捕獲是 `,` 時代表有後備值 */
 const VAR_USE_RE = /var\(\s*(--[\w-]+)\s*([,)])/g
 
+/**
+ * 建置工具那種把變數寫在方括號裡的引用(`text-[--x]`、`bg-[--x]`)。
+ *
+ * 它編譯出來就是 `var(--x)`,壞掉的方式一模一樣 ——
+ * 少看這一種的話,元件的畫面區段與 `@apply` 那一大片引用全部不會被檢查,
+ * 而那正是最常整批換名、最常漏掉的地方。
+ *
+ * 這種寫法沒有後備值可寫,所以不必像 `var()` 那樣分辨。
+ */
+const ARBITRARY_VAR_RE = /\[(--[\w-]+)\]/g
+
 let definedVarCache = null
+
+registerScanCache(() => {
+  definedVarCache = null
+})
 
 /**
  * 全案定義過的 css 變數。
@@ -933,10 +1025,23 @@ const checkUnknownVar = ({ rel, text: raw, root }) => {
   const issues = []
   const seen = new Set()
 
-  for (const m of text.matchAll(VAR_USE_RE)) {
-    const name = m[1]
+  /* 兩種引用寫法都要看:`var(--x)` 與方括號那種(`text-[--x]`)。
+     方括號那種編譯出來就是 var(),壞掉的方式一樣,只是沒有後備值可寫。 */
+  const uses = [
+    ...[...text.matchAll(VAR_USE_RE)].map((m) => ({
+      name: m[1],
+      index: m.index,
+      hasFallback: m[2] === ',',
+    })),
+    ...[...text.matchAll(ARBITRARY_VAR_RE)].map((m) => ({
+      name: m[1],
+      index: m.index,
+      hasFallback: false,
+    })),
+  ]
 
-    if (m[2] === ',') continue // 有後備值,變數缺了也不會讓樣式消失
+  for (const { name, index, hasFallback } of uses) {
+    if (hasFallback) continue // 有後備值,變數缺了也不會讓樣式消失
     if (defined.has(name) || own.has(name) || seen.has(name)) continue
 
     seen.add(name)
@@ -944,9 +1049,9 @@ const checkUnknownVar = ({ rel, text: raw, root }) => {
     issues.push(
       issueOf(
         rel,
-        lineNoOf(text, m.index),
+        lineNoOf(text, index),
         'unknownVar',
-        `var(${name}) 全案找不到定義 —— 瀏覽器會把整條宣告丟掉,` +
+        `${name} 全案找不到定義 —— 瀏覽器會把整條宣告丟掉,` +
           `畫面上那一段樣式直接消失,而且不會有任何錯誤訊息;` +
           `先確認變數名有沒有打錯,或那個色票 / 級距還沒建立`
       )
@@ -1703,6 +1808,7 @@ const CHECKS = [
   checkModuleScope,
   checkModuleLocation,
   checkModuleVariables,
+  checkTruncateClass,
   checkBreakpointPrefix,
   checkVariableNaming,
   checkUnknownVar,
@@ -1798,6 +1904,7 @@ export const RULE_TITLE = {
   moduleScope: '模組 css 混入了別的 class',
   moduleLocation: '元件的樣式放在集中目錄,不在元件自己的資料夾裡',
   moduleVar: '模組級距變數的歸屬',
+  truncateClass: '單行省略用了 truncate,不是 line-clamp-1',
   breakpointPrefix: '級距在某個斷點少列了前綴',
   variable: '模組變數的命名或斷點',
   unknownVar: '用到沒有定義的 css 變數',
@@ -1822,6 +1929,8 @@ export const RULE_HINT = {
   moduleScope: '一支模組 css 只能寫自己那組 class,變體的 class 也要收斂成同一個前綴',
   moduleLocation: '搬進那支元件自己的資料夾 —— 留在集中目錄的話,class 前綴那條不會檢查它',
   moduleVar: '同屬性兩個以上級距值要搬到 ***Variables.css',
+  truncateClass:
+    'truncate 換成 line-clamp-1 —— 與 line-clamp-2、line-clamp-3 是同一組,改行數只動數字',
   breakpointPrefix: '每個 @screen 區塊都要列齊會命中該斷點的前綴變體',
   variable: '命名對齊 tailwind(w / h / p / rounded / leading);尺寸值要三個斷點成套,級距用實際數值不用 sm / md / lg',
   unknownVar: 'var(--x) 引用的變數全案要找得到定義 —— 找不到時瀏覽器會把整條宣告丟掉,樣式安靜地消失',
