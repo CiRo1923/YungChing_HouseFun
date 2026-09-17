@@ -26,6 +26,7 @@ import {
   COMPONENT_DIRS,
   MODULE_CSS_DIR_NAME,
   CSS_MODULES_DIR,
+  DEEP_CLONE_HELPER,
   FORM_GROUP_VALIDATOR,
   FRAMEWORKS,
   PARALLEL_AWAIT_HELPER,
@@ -187,6 +188,15 @@ const REQUIREMENTS = [
     why: 'store 與 actions 的規則以那個目錄為範圍。位置不符時,store 的寫法完全不會被檢查。',
   },
   {
+    /* 這條要分得出「哪一處已經是深拷貝」,而那是靠專案那支共用函式的名字認的。
+       沒有那支函式時,每一處還原都會被當成展開一層 —— 而且沒有修法可以提供。 */
+    label: '深拷貝的共用函式',
+    rules: ['storeDefaultClone'],
+    check: () => DEEP_CLONE_HELPER.name || null,
+    need: '設定裡的 DEEP_CLONE_HELPER 要填專案那支深拷貝函式的名字與來源',
+    why: '「從 apiDefault 還原時有沒有深拷貝」是靠那個名字認出來的。沒有填的時候這條整條略過 —— 報出來的話每一處還原都是違規,而專案裡沒有那支函式可以改成。',
+  },
+  {
     label: '頁面目錄',
     rules: ['apiScope', 'storeScope', 'storeLayer', 'pageApiData', 'pageActionNaming', 'pageApiImport'],
     check: (root) => (hasDir(root, VIEWS_DIR) ? VIEWS_DIR : null),
@@ -296,6 +306,8 @@ export const NO_PREREQUISITE_RULES = [
   'componentClass',
   'componentFolder',
   'viewFolder',
+  /* 只看檔案裡的 class 怎麼寫,不必先有某個目錄或設定檔存在 */
+  'truncateClass',
   /* 這條自己掃全案收集「定義過哪些變數」,不依賴任何目錄或設定存在 ——
      專案沒有 css 變數時它一個引用都掃不到,結果就是通過,不是誤報。 */
   'unknownVar',

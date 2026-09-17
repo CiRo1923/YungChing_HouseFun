@@ -542,6 +542,30 @@ export const moduleFolderOf = (rel) => {
 /** mForm → m-form;mDatePicker → m-date-picker */
 export const toKebab = (name) => name.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase()
 
+/** 畫面區段裡第一個帶前綴的靜態 class */
+const COMPONENT_CLASS_RE = /class="([^"]*\bm-[a-z0-9-]+[^"]*)"/
+
+/**
+ * 這支元件自己的組件 class —— 畫面區段裡第一個帶前綴的靜態 class。
+ *
+ * 兩個地方問同一件事:「資料夾名對不對得上 class」要拿它比對資料夾推出的前綴,
+ * 「這支樣式屬於哪一個元件」要拿 class 反查是哪一支元件 ——
+ * 判斷收在這裡一份,各寫一次的話兩邊對「哪一個才是自己的 class」會開始不一樣。
+ *
+ * 只看畫面區段:程式那一側的字串裡也可能出現 class 名(設定物件、範例資料),
+ * 那些不是這支元件掛在自己身上的。
+ */
+export const componentClassOf = (text) => {
+  const range = templateRangeOf(text)
+  if (!range) return null
+
+  const scanned = maskHtmlComments(range.body)
+  const line = COMPONENT_CLASS_RE.exec(scanned)
+  if (!line) return null
+
+  return /\bm-[a-z0-9-]+/.exec(line[1])?.[0] ?? null
+}
+
 /**
  * 資料夾名推出它的組件 class 前綴;推不出來回 null(不檢查)。
  *
@@ -708,6 +732,25 @@ export const listFiles = (root, target) => {
     return entry.isDirectory() ? listFiles(root, rel) : isScannable(next) ? [next] : []
   })
 }
+
+/*
+ * 跨檔判斷用的索引(誰定義過這個 css 變數、誰從 apiDefault 還原)
+ * 都是整份掃一次之後快取起來的 —— 每一支檔案各自掃全案的話會慢得離譜。
+ *
+ * 快取的前提是「這段期間磁碟上的檔案沒有變」。規則自己的驗證不是那樣:
+ * 它一則一則把探測檔寫進專案再跑檢查,上一則建好的索引對下一則就是舊的,
+ * 而舊索引的徵狀是「跨檔的那幾則案例莫名其妙地過或不過」。
+ *
+ * 所以每一份索引都在這裡登記自己怎麼清空,由寫檔的那一方統一呼叫。
+ * 各自 export 一支清空函式的話,新增一份索引時不會有人記得去呼叫它。
+ */
+const scanCacheResets = []
+
+/** 登記一份索引的清空方式;回傳值不使用,只是為了能寫在宣告旁邊 */
+export const registerScanCache = (reset) => scanCacheResets.push(reset)
+
+/** 清空全部跨檔索引 —— 專案裡的檔案在這個程序執行期間被改寫之後要呼叫 */
+export const resetScanCaches = () => scanCacheResets.forEach((reset) => reset())
 
 /**
  * 每一段 import 的起訖行 —— 一段 import 常常跨好幾行(具名匯入一行一個)。

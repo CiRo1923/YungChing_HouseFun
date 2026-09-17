@@ -93,6 +93,7 @@ import {
   BREAKPOINTS,
   BREAKPOINT_SCREENS,
   BUILD_CONFIG_FILES,
+  DEEP_CLONE_HELPER,
   COLOR_CSS_DIR,
   CONVENTION_DOCS_DIR,
   CONVENTION_RULES_DIR,
@@ -122,12 +123,14 @@ import {
   VIEW_UNDERSCORE_FOLDERS,
 } from './project-config.mjs'
 import {
+  classPrefixOf,
   detectViewResourceDepth,
   isUnderAny,
   listConventionRules,
   listConventionSkills,
   listViewFolders,
   listViewSubFolders,
+  resetScanCaches,
 } from './shared.mjs'
 import { BOLD, GREEN, RED, RESET, YELLOW } from './colors.mjs'
 
@@ -666,10 +669,15 @@ const onPrepare = () => {
      「只把元件分類起來的那一層」,只建空資料夾的話兩者長得一模一樣。
 
      一支放在元件目錄第一層,一支放在分類層底下,兩種擺法各驗得到。 */
-  const probeComponent = `<template>\n  <div class="m-probe"></div>\n</template>\n`
+  /* class 跟著自己的資料夾名走(`mCssSelfTest` → `.m-css-self-test`)——
+     探測元件也要是合規的元件。寫成一個通用的 class 的話,
+     「這支樣式掛在哪一支元件身上」那種反查會把每一支用同名 class 的樣式
+     都指向這裡,而那是測試環境自己造成的,不是規則判錯。 */
+  const probeComponentOf = (folder) =>
+    `<template>\n  <div class="${classPrefixOf(folder)}"></div>\n</template>\n`
 
-  onCreateIfMissing(`${SC}/Index.vue`, probeComponent)
-  onCreateIfMissing(`${GC}/${PROBE_NESTED_MODULE}/Index.vue`, probeComponent)
+  onCreateIfMissing(`${SC}/Index.vue`, probeComponentOf(PROBE_MODULE))
+  onCreateIfMissing(`${GC}/${PROBE_NESTED_MODULE}/Index.vue`, probeComponentOf(PROBE_NESTED_MODULE))
 
   onCreateIfMissing(
     `${COLOR_CSS_DIR}/${PROBE_COLOR_FILE}`,
@@ -1085,6 +1093,51 @@ const CSS_CASES = [
     expect: 0,
   },
 
+  // ---------- 規則 truncateClass ----------
+  {
+    rule: 'truncateClass',
+    name: 'truncateClass @apply 用了 truncate',
+    file: `${M}/truncate1.css`,
+    code: `.m-probe {\n  @apply truncate;\n}\n`,
+    expect: 0,
+    expectWarn: 1,
+    keyword: 'line-clamp-1',
+  },
+  {
+    rule: 'truncateClass',
+    name: 'truncateClass line-clamp-1 不報',
+    file: `${M}/truncate2.css`,
+    code: `.m-probe {\n  @apply line-clamp-1;\n}\n`,
+    expect: 0,
+    expectWarn: 0,
+  },
+  {
+    rule: 'truncateClass',
+    name: 'truncateClass 帶斷點前綴一樣要報',
+    file: `${M}/truncate3.css`,
+    code: `@screen ${BREAKPOINTS[0]} {\n  .m-probe {\n    @apply p:truncate;\n  }\n}\n`,
+    expect: 0,
+    expectWarn: 1,
+  },
+  {
+    rule: 'truncateClass',
+    name: 'truncateClass 畫面區段的 class 也要報',
+    file: `${C}/Truncate1.vue`,
+    code: `<template>\n  <div class="m-probe truncate"></div>\n</template>\n`,
+    expect: 0,
+    expectWarn: 1,
+  },
+  {
+    /* 「要截幾行」正是靠一個叫 truncate 的 prop 傳進來的 ——
+       動態綁定裡的變數名算進來的話,正確的寫法會被報成違規。 */
+    rule: 'truncateClass',
+    name: 'truncateClass 動態綁定的變數名不算',
+    file: `${C}/Truncate2.vue`,
+    code: `<template>\n  <div class="m-probe" :class="truncate"></div>\n</template>\n`,
+    expect: 0,
+    expectWarn: 0,
+  },
+
   // ---------- 規則 tailwind ----------
   {
     rule: 'tailwind',
@@ -1161,9 +1214,12 @@ const CSS_CASES = [
   themeCaseOf('fontFamily', `${M}/theme7.css`, (cls) => `.m-probe {\n  @apply ${cls};\n}`),
   aliveThemeCaseOf(`${M}/theme4.css`),
   {
+    /* 變數自己定義、自己引用 —— 不借用專案的色票。
+       借用的話,那個名字在別的專案不存在:「引用不到定義」那條會報一筆,
+       而這則看起來像規則壞了,實際上錯的是案例。 */
     name: 'theme 色票變數名內含 sm/md 不誤報',
     file: `${M}/theme5.css`,
-    code: `.m-probe {\n  @apply text-[--gray-9e];\n  --probe-md-size: 10px;\n}`,
+    code: `.m-probe {\n  --probe-sm-size: 10px;\n  --probe-md-size: 10px;\n  @apply text-[--probe-sm-size];\n}`,
     expect: 0,
   },
   {
@@ -1290,9 +1346,12 @@ const CSS_CASES = [
     keyword: '沒有分斷點',
   },
   {
+    /* 顏色用 currentColor,不借用專案的色票 —— 借用的話那個名字在別的專案
+       不存在,「引用不到定義」那條會報一筆,而這則看起來像規則壞了。
+       寫成色碼也不行:那會被「不要硬寫色碼」那條抓。 */
     name: 'variable 顏色與中性值不用分斷點',
     file: `${M}/need2Variables.css`,
-    code: `:root {\n  --probe-color: var(--white);\n  --probe-px: 0;\n  --probe-h: auto;\n  --probe-z: 3;\n  --probe-leading: 1.5;\n  --probe-w: 100%;\n}`,
+    code: `:root {\n  --probe-color: currentColor;\n  --probe-px: 0;\n  --probe-h: auto;\n  --probe-z: 3;\n  --probe-leading: 1.5;\n  --probe-w: 100%;\n}`,
     expect: 0,
   },
   {
@@ -2151,6 +2210,7 @@ const RULE_CASES = [
   },
   {
     // 原生請求是建議級：印出來提醒，但不擋、不列入阻擋計數
+    rule: 'apiClient',
     name: 'apiClient 原生請求只給建議',
     file: `${A}/selfTestAlpha.js`,
     code: `import { fetchApi } from '@js/_api/.config.js'\n\nconst xhr = new XMLHttpRequest()\n`,
@@ -2965,6 +3025,17 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
     expect: 0,
   },
   {
+    /* 方括號那種引用(`text-[--x]`)編譯出來就是 var(),壞掉的方式一模一樣。
+       少看這一種的話,元件的畫面區段與 @apply 那一大片引用全部不會被檢查 ——
+       而那正是最常整批換名、最常漏掉的地方。 */
+    name: 'unknownVar 方括號寫的引用也要檢查',
+    rule: 'unknownVar',
+    file: `${M}/probeArbitraryVar.css`,
+    code: `.m-probe {\n  @apply text-[--probe-never-defined-anywhere];\n}\n`,
+    expect: 1,
+    keyword: '找不到定義',
+  },
+  {
     /* 元件動態綁定的 `'--x': 值` 也是定義 —— 少認它的話,
        那些由程式算出來的尺寸會被整批誤報,而它們完全正確。 */
     name: 'unknownVar 元件動態綁定的變數算有定義',
@@ -3146,24 +3217,68 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
     keyword: '沒有 apiDefault',
   },
   {
-    /* 有陣列本身沒有錯,還原那一側寫對了就沒事 —— 而這條看不到那一側
-       (宣告在 store、還原在別支檔案)。所以它是建議級:擋的話,
-       那一筆無論怎麼改都消不掉,而修不掉的違規會讓整份清單被當成背景雜訊。 */
-    name: 'storeDefaultClone apiDefault 裡有陣列只給建議',
+    /* 會出事的是「那一層有陣列」加上「有人用展開一層還原它」兩件事同時成立。
+       只看其中一件的話,報出來的那一筆在還原處寫對的情況下也消不掉,
+       而修不掉的違規會讓整份清單被當成背景雜訊。 */
+    rule: 'storeDefaultClone',
+    needs: 'deepCloneHelper',
+    name: 'storeDefaultClone 有陣列而且有人展開一層還原',
+    file: `${T}/${PROBE_PAGE_ALPHA}.js`,
+    code: `import { defineStore } from 'pinia'\n\nexport const use${pascalOf(PROBE_PAGE_ALPHA)}Store = defineStore('${PROBE_PAGE_ALPHA}', () => {\n  const apiDefault = readonly({ detail: { Id: null, ItemList: [] } })\n  const detail = ref({ apiData: null })\n\n  return { apiDefault, detail }\n})\n`,
+    context: {
+      [`${T}/${ACTIONS_DIR_NAME}/use${pascalOf(PROBE_PAGE_ALPHA)}Actions.js`]: `export const use${pascalOf(PROBE_PAGE_ALPHA)}Actions = () => {\n  const onReset = (store) => {\n    store.detail.apiData = { ...store.apiDefault.detail }\n  }\n\n  return { onReset }\n}\n`,
+    },
+    expect: 1,
+    keyword: 'ItemList',
+  },
+  {
+    /* 還原處已經深拷貝了就沒有問題 —— 這一則是這條規則最重要的那一半:
+       寫對了要能消得掉,否則它就只是一句永遠在的提醒。 */
+    rule: 'storeDefaultClone',
+    needs: 'deepCloneHelper',
+    name: 'storeDefaultClone 還原處已經深拷貝就不報',
+    file: `${T}/${PROBE_PAGE_ALPHA}.js`,
+    code: `import { defineStore } from 'pinia'\n\nexport const use${pascalOf(PROBE_PAGE_ALPHA)}Store = defineStore('${PROBE_PAGE_ALPHA}', () => {\n  const apiDefault = readonly({ detail: { Id: null, ItemList: [] } })\n  const detail = ref({ apiData: null })\n\n  return { apiDefault, detail }\n})\n`,
+    context: {
+      [`${T}/${ACTIONS_DIR_NAME}/use${pascalOf(PROBE_PAGE_ALPHA)}Actions.js`]: `import { ${DEEP_CLONE_HELPER.name} } from '${DEEP_CLONE_HELPER.source}'\n\nexport const use${pascalOf(PROBE_PAGE_ALPHA)}Actions = () => {\n  const onReset = (store) => {\n    store.detail.apiData = ${DEEP_CLONE_HELPER.name}(store.apiDefault.detail)\n  }\n\n  return { onReset }\n}\n`,
+    },
+    expect: 0,
+  },
+  {
+    /* 沒有人還原那一層的話,那個陣列不會被複製到任何地方 —— 沒有可出事的地方。 */
+    rule: 'storeDefaultClone',
+    needs: 'deepCloneHelper',
+    name: 'storeDefaultClone 沒有人還原就不報',
     file: `${T}/${PROBE_PAGE_ALPHA}.js`,
     code: `import { defineStore } from 'pinia'\n\nexport const use${pascalOf(PROBE_PAGE_ALPHA)}Store = defineStore('${PROBE_PAGE_ALPHA}', () => {\n  const apiDefault = readonly({ detail: { Id: null, ItemList: [] } })\n  const detail = ref({ apiData: null })\n\n  return { apiDefault, detail }\n})\n`,
     expect: 0,
-    expectWarn: 1,
+  },
+  {
+    /* 整份展開(`{ ...store.apiDefault }`)沒有指名哪一層,
+       所以每一層都被複製到 —— 有陣列的那一層照樣會出事。 */
+    rule: 'storeDefaultClone',
+    needs: 'deepCloneHelper',
+    name: 'storeDefaultClone 整份展開也算命中',
+    file: `${T}/${PROBE_PAGE_ALPHA}.js`,
+    code: `import { defineStore } from 'pinia'\n\nexport const use${pascalOf(PROBE_PAGE_ALPHA)}Store = defineStore('${PROBE_PAGE_ALPHA}', () => {\n  const apiDefault = readonly({ detail: { Id: null, ItemList: [] } })\n  const detail = ref({ apiData: null })\n\n  return { apiDefault, detail }\n})\n`,
+    context: {
+      [`${T}/${ACTIONS_DIR_NAME}/use${pascalOf(PROBE_PAGE_ALPHA)}Actions.js`]: `export const use${pascalOf(PROBE_PAGE_ALPHA)}Actions = () => {\n  const onReset = (store) => {\n    store.detail.apiData = { ...store.apiDefault }\n  }\n\n  return { onReset }\n}\n`,
+    },
+    expect: 1,
     keyword: 'ItemList',
   },
   {
     /* 全是單純值的那一層不必深拷貝 —— 每一支 store 都提醒一次的話,
        真正該看的那幾筆會被淹掉。 */
-    name: 'storeDefaultClone 沒有陣列就不提醒',
+    rule: 'storeDefaultClone',
+    needs: 'deepCloneHelper',
+    name: 'storeDefaultClone 沒有陣列就不報',
     file: `${T}/${PROBE_PAGE_ALPHA}.js`,
     code: `import { defineStore } from 'pinia'\n\nexport const use${pascalOf(PROBE_PAGE_ALPHA)}Store = defineStore('${PROBE_PAGE_ALPHA}', () => {\n  const apiDefault = readonly({ detail: { Id: null, Name: null } })\n  const detail = ref({ apiData: null })\n\n  return { apiDefault, detail }\n})\n`,
+    context: {
+      [`${T}/${ACTIONS_DIR_NAME}/use${pascalOf(PROBE_PAGE_ALPHA)}Actions.js`]: `export const use${pascalOf(PROBE_PAGE_ALPHA)}Actions = () => {\n  const onReset = (store) => {\n    store.detail.apiData = { ...store.apiDefault.detail }\n  }\n\n  return { onReset }\n}\n`,
+    },
     expect: 0,
-    expectWarn: 0,
   },
   {
     name: 'storeApiDefault 有 apiDefault 不誤報',
@@ -3778,9 +3893,11 @@ const onCheckCaseFilesInProbeDirs = () => {
     })
   }
 
-  const leftover = [...new Set(CASES.map((c) => c.file).filter(Boolean))].filter(
-    (file) => !willBeCleaned(file)
-  )
+  /* 案例自己那一支,加上它為了跨檔情境鋪的那幾支(context)——
+     兩種都是寫進專案的檔案,漏掉哪一種都會留東西在專案裡。 */
+  const written = CASES.flatMap((c) => [c.file, ...Object.keys(c.context ?? {})])
+
+  const leftover = [...new Set(written.filter(Boolean))].filter((file) => !willBeCleaned(file))
 
   report(
     !leftover.length,
@@ -3909,6 +4026,55 @@ const onCheckPreflightCoverage = () => {
   if (both.length) problems.push(`兩種說法都寫了:${both.join('、')}`)
 
   report(!problems.length, '每一條規則都講清楚了依不依賴前提', problems)
+}
+
+/**
+ * 每一條建議級的規則,都要有一則案例驗到「它是建議,不是要擋的」。
+ *
+ * 建議級不列入阻擋計數,所以級別寫錯了不會有任何徵兆:該擋的那條變成只是提醒,
+ * 而案例的 expect 照樣對得上、清單上看起來仍然通過。要到某天有人問
+ * 「這個為什麼沒擋住」才會發現。
+ *
+ * 「哪幾條是建議級」直接讀規則的原始碼(呼叫 warnOf 的那幾處)——
+ * 另外維護一份清單的話,新增一條建議級規則時那份清單不會跟著長,
+ * 而漏掉的那條正是這裡要抓的。
+ */
+const WARN_RULE_RE = /warnOf\(\s*[\s\S]{0,160}?'([\w:]+)'/g
+
+/** 不是用 CASES 驗的建議級規則 —— 各自有獨立的驗證,列在這裡才看得出不是漏掉 */
+const WARN_VERIFIED_ELSEWHERE = {
+  configItem: '兩種身分的級別相反,由 onCheckConfigItem 各驗一次',
+}
+
+const onCheckWarnRulesVerified = () => {
+  const here = fileURLToPath(import.meta.url)
+  const dir = path.dirname(here)
+
+  const text = fs
+    .readdirSync(dir)
+    .filter((name) => name.endsWith('.mjs') && name !== path.basename(here))
+    .map((name) => fs.readFileSync(path.join(dir, name), 'utf8'))
+    .join('\n')
+
+  /* 只留真的是規則代號的 —— warnOf 的參數裡若有別的字串,抓出來的會是雜訊,
+     而雜訊會讓這一條變成「每次都報一個不存在的規則」,最後被當成壞掉的檢查。 */
+  const warnRules = [...new Set([...text.matchAll(WARN_RULE_RE)].map((m) => m[1]))].filter(
+    (rule) => RULE_TITLE[rule]
+  )
+
+  const verified = new Set(CASES.filter((c) => c.expectWarn > 0).map((c) => c.rule))
+  const missing = warnRules.filter((rule) => !verified.has(rule) && !WARN_VERIFIED_ELSEWHERE[rule])
+
+  report(
+    !missing.length,
+    '每一條建議級的規則都有案例驗到它是建議',
+    missing.length
+      ? [
+          `沒有驗到建議級:${missing.join('、')} —— ` +
+            '案例加上 expectWarn,或在 WARN_VERIFIED_ELSEWHERE 寫清楚它在哪裡驗',
+        ]
+      : []
+  )
 }
 
 /**
@@ -4936,6 +5102,9 @@ const NEEDS_MET = {
   /* 判準與規則那一側同一個值 —— 那邊留空就整條略過,這裡跟著跳過它的案例。
      另寫一份判斷的話,有一天兩邊會對不上:規則不跑而案例還在等它報。 */
   formGroupValidator: !!FORM_GROUP_VALIDATOR,
+  /* 沒有那支深拷貝函式的專案,「還原時有沒有深拷貝」分不出來,規則整條略過。
+     判準取規則那一側同一個值,不在這裡另寫一份。 */
+  deepCloneHelper: !!DEEP_CLONE_HELPER.name,
 }
 
 /** 前提不成立時要講的那一句 —— 只列名字的話,看的人分不出是設定造成的還是規則壞了 */
@@ -4949,6 +5118,9 @@ const SKIP_REASON = {
   formGroupValidator:
     '這個專案沒有填 FORM_GROUP_VALIDATOR(沒有那種把一組控制項包起來的元件),' +
     '「一組控制項各自帶驗證」那條本來就整條略過。',
+  deepCloneHelper:
+    '這個專案沒有填 DEEP_CLONE_HELPER(沒有那支深拷貝的共用函式),' +
+    '「從 apiDefault 還原要深拷貝」那條分不出哪一處已經寫對,本來就整條略過。',
   probeViewFolder:
     '頁面目錄裡沒有驗證自己建的資料夾(頁面目錄的位置設錯時會這樣),' +
     '而這幾則要一個對得上頁面資料夾的名字才驗得起來。' +
@@ -5004,6 +5176,18 @@ try {
     // 有些案例放在模組子資料夾(moduleScope 要靠資料夾名推 class 前綴)
     fs.mkdirSync(path.dirname(abs), { recursive: true })
     fs.writeFileSync(abs, c.code, 'utf8')
+
+    /* 跨檔的規則要看別的檔案寫了什麼(誰從 apiDefault 還原、誰定義了這個變數),
+       那種案例用 context 把情境鋪出來,再檢查 c.file 那一支。 */
+    for (const [file, code] of Object.entries(c.context ?? {})) {
+      const at = path.join(root, file)
+      fs.mkdirSync(path.dirname(at), { recursive: true })
+      fs.writeFileSync(at, code, 'utf8')
+    }
+
+    /* 上一則案例建好的跨檔索引,對這一則就是舊的 —— 專案裡的檔案剛剛才被改寫。
+       不清的話,跨檔的案例會照著上一則的情境判斷,而看起來只是「莫名其妙地不過」。 */
+    resetScanCaches()
 
     const all = lintFile(root, abs, definedVars)
 
@@ -5165,6 +5349,7 @@ try {
   onCheckRulesDocumented()
   onCheckRulesInConventions()
   onCheckPreflightCoverage()
+  onCheckWarnRulesVerified()
   onCheckThemeBlocks()
   onCheckRuleCrash()
   onCheckProjectRules()

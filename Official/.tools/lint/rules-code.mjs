@@ -18,6 +18,7 @@ import {
   CSS_MODULES_DIR,
   COMPONENT_DIRS,
   classPrefixOf,
+  componentClassOf,
   listFiles,
   selectorClassesOf,
   isInActionsDir,
@@ -1226,20 +1227,8 @@ const checkFormGroupValidate = ({ rel, text }) => {
 // 只比對「第一個帶前綴的靜態 class」—— 那是這支元件自己的組件 class。
 // 底下的子元素(`.m-figure-caption`)與別的模組(轉手傳進來的)不在這條的範圍內。
 
-/** template 裡第一個 `m-` 開頭的靜態 class */
-const COMPONENT_CLASS_RE = /class="([^"]*\bm-[a-z0-9-]+[^"]*)"/
-
-const ownClassOf = (text, rel) => {
-  const range = templateRangeOf(text, rel)
-  if (!range) return null
-
-  const scanned = maskHtmlComments(text.slice(range.start, range.end))
-  const line = COMPONENT_CLASS_RE.exec(scanned)
-  if (!line) return null
-
-  return /\bm-[a-z0-9-]+/.exec(line[1])?.[0] ?? null
-}
-
+/* 範圍只有共用元件目錄。容器與版型那兩層是依頁面組起來的版面,
+   沒有模組前綴可以對照,這條對它們無從判斷。 */
 const checkComponentClass = ({ rel, text }) => {
   if (!rel.startsWith(`${COMPONENTS_DIR}/`) || !rel.endsWith('.vue')) return []
 
@@ -1247,7 +1236,7 @@ const checkComponentClass = ({ rel, text }) => {
   const prefix = classPrefixOf(folder)
   if (!prefix) return [] // 名字不是這套命名裡的模組,推不出前綴就不猜
 
-  const cls = ownClassOf(text, rel)
+  const cls = componentClassOf(text)
   if (!cls) return [] // 自己不寫 class 的轉手型元件
 
   if (cls === prefix || cls.startsWith(`${prefix}-`)) return []

@@ -8,6 +8,7 @@ import path from 'node:path'
 import {
   ACTIONS_DIR_NAME,
   DEEP_CLONE_HELPER,
+  SCAN_TARGETS,
   STANDALONE_STORES,
   STORE_DIR,
   STORE_SETUP_CALLS,
@@ -18,10 +19,12 @@ import {
   isInSrc,
   hasExemptMark,
   issueOf,
-  warnOf,
   lineNoOf,
+  listFiles,
   listViewFolders,
   listViewSubFolders,
+  registerScanCache,
+  toRel,
   viewResourceDirOf,
   withNamedImport,
 } from './shared.mjs'
@@ -771,28 +774,159 @@ const apiDefaultBlockOf = (text) => {
   return null
 }
 
+const { name: CLONE_HELPER, source: CLONE_HELPER_SOURCE } = DEEP_CLONE_HELPER
+
+/**
+ * { ...<任意運算式>.apiDefault.<路徑> } —— 後面可以再接要留著的欄位。
+ *
+ * 大括號與展開之間的空白單獨抓出來,替換時原樣放回去:
+ * 多行的物件字面值被壓成一行的話,排版工具會把整段重排,
+ * diff 裡就混著一堆與這次改動無關的行。
+ *
+ * 規則與自動修正用的是這同一份:一邊拿它找出「哪幾處還原得不對」,
+ * 另一邊拿它把那幾處換掉。兩份的話,報出來的與修好的會是不同的範圍。
+ */
+const SPREAD_DEFAULT_RE = /(\{\s*)\.\.\.\s*([\w.$[\]'"]*\bapiDefault\b[\w.$[\]'"]*)\s*(,|\})/g
+
+/** 這一處還原是不是已經深拷貝過了 —— 規則與自動修正問的是同一個問題 */
+const isDeepCloned = (expr) => Boolean(CLONE_HELPER) && expr.includes(`${CLONE_HELPER}(`)
+
 /** 欄位名: [ —— 陣列型的欄位 */
 const ARRAY_FIELD_RE = /(\w+)\s*:\s*\[/g
 
-const checkStoreDefaultClone = ({ rel, text }) => {
+/** apiDefault 的頂層 key 與它底下的內容(任何深度) */
+const topLevelEntriesOf = (body) => {
+  const inner = body.slice(1, -1)
+  const entries = new Map()
+
+  let depth = 0
+  let keyStart = 0
+  let key = null
+
+  for (let i = 0; i < inner.length; i += 1) {
+    const c = inner[i]
+
+    if (c === '{' || c === '[' || c === '(') depth += 1
+    else if (c === '}' || c === ']' || c === ')') depth -= 1
+    else if (depth === 0 && c === ':' && key === null) {
+      key = inner.slice(keyStart, i).trim().replace(/['"]/g, '')
+      keyStart = i + 1
+    } else if (depth === 0 && c === ',' && key !== null) {
+      entries.set(key, inner.slice(keyStart, i))
+      key = null
+      keyStart = i + 1
+    }
+  }
+
+  if (key !== null) entries.set(key, inner.slice(keyStart))
+
+  return entries
+}
+
+/** 這一層(含更深處)有沒有陣列欄位 */
+const arrayFieldsOf = (value) => [...new Set([...value.matchAll(ARRAY_FIELD_RE)].map((m) => m[1]))]
+
+/**
+ * 整份展開(`{ ...apiDefault }`)沒有指名哪一層,所以它命中每一個 key。
+ * 用一個不可能當成欄位名的記號表示,與真正的 key 分得開。
+ */
+const WHOLE_DEFAULT = '*'
+
+/** 被還原的是哪一層 —— `store.apiDefault.detail` 取 detail,整份展開取記號 */
+const restoredKeyOf = (expr) => {
+  const tail = expr.split('.').pop().replace(/\[|\]|['"]/g, '')
+
+  return tail === 'apiDefault' ? WHOLE_DEFAULT : tail
+}
+
+let spreadCache = null
+
+registerScanCache(() => {
+  spreadCache = null
+})
+
+/**
+ * 全案「展開一層還原 apiDefault」的每一處(已經深拷貝的不收)。
+ *
+ * 這條規則要回答的是「有沒有人用會出事的方式還原它」,而宣告在 store、
+ * 還原在 actions 或頁面,是不同的檔案 —— 所以整份建一次索引,逐檔比對時查它。
+ */
+const spreadUsesOf = (root) => {
+  if (spreadCache?.root === root) return spreadCache.map
+
+  const map = new Map()
+
+  for (const dir of SCAN_TARGETS) {
+    for (const abs of listFiles(root, dir)) {
+      if (!/\.(vue|js)$/i.test(abs)) continue
+
+      try {
+        collectSpreadUses(map, toRel(root, abs), fs.readFileSync(abs, 'utf8'))
+      } catch {
+        // 讀不到某一支就跳過,不要因此讓整條規則失效
+      }
+    }
+  }
+
+  spreadCache = { root, map }
+
+  return map
+}
+
+/** 把一支檔案裡展開一層的那幾處收進索引 */
+const collectSpreadUses = (map, rel, text) => {
+  for (const m of text.matchAll(SPREAD_DEFAULT_RE)) {
+    const expr = m[2]
+    if (isDeepCloned(expr)) continue
+
+    const key = restoredKeyOf(expr)
+    if (!map.has(key)) map.set(key, [])
+    map.get(key).push({ rel, line: lineNoOf(text, m.index) })
+  }
+}
+
+const checkStoreDefaultClone = ({ rel, text, root }) => {
+  /* 專案沒有那支深拷貝函式時整條略過 —— 分不出哪一處已經寫對,
+     報出來的每一筆都沒有修法可以照著做。前提清單會講出這件事。 */
+  if (!CLONE_HELPER) return []
   if (!isStoreFile(rel)) return []
 
   const block = apiDefaultBlockOf(text)
   if (!block) return []
 
-  const fields = [...block.body.matchAll(ARRAY_FIELD_RE)].map((m) => m[1])
-  if (!fields.length) return []
+  /* 全案索引 + 這支檔案自己的那幾處。
+     自己那一份要另外算 —— 索引是整份建好之後快取的,而存檔守門拿到的是
+     **還沒寫進磁碟**的內容:剛改成深拷貝的那一行,索引裡還是舊的寫法。 */
+  const uses = new Map(spreadUsesOf(root))
+  const own = new Map()
+  collectSpreadUses(own, rel, text)
+  for (const [key, list] of own) uses.set(key, list)
 
-  const names = [...new Set(fields)].join('、')
+  const whole = uses.get(WHOLE_DEFAULT) ?? []
+  const issues = []
 
-  return [
-    warnOf(
-      rel,
-      lineNoOf(text, block.index),
-      'storeDefaultClone',
-      `apiDefault 裡有陣列欄位(${names})—— 還原那一層時要深拷貝;展開一層的話那個陣列仍然是唯讀的同一個,push 進不去,而且正式版沒有任何徵兆`
-    ),
-  ]
+  for (const [key, value] of topLevelEntriesOf(block.body)) {
+    const fields = arrayFieldsOf(value)
+    if (!fields.length) continue
+
+    const spots = [...(uses.get(key) ?? []), ...whole]
+    if (!spots.length) continue // 沒有人用展開一層還原它,這一層沒有問題
+
+    const where = spots.map(({ rel: at, line }) => `${at}:${line}`).join('、')
+
+    issues.push(
+      issueOf(
+        rel,
+        lineNoOf(text, block.index),
+        'storeDefaultClone',
+        `apiDefault.${key} 裡有陣列欄位(${fields.join('、')}),而 ${where} 用展開一層的方式還原它 —— ` +
+          `那個陣列仍然是唯讀的同一個,push 進不去,而且正式版沒有任何徵兆;` +
+          `還原處改成深拷貝(存檔時會自動換)`
+      )
+    )
+  }
+
+  return issues
 }
 
 // --- 自動修正:從 apiDefault 還原時改成深拷貝 --------------------------------
@@ -803,8 +937,8 @@ const checkStoreDefaultClone = ({ rel, text }) => {
 // 存檔時換成深拷貝,並補上那支函式的 import(少了 import 整支檔案會壞掉,
 // 比不修還糟)。
 //
-// **那一層全是單純值時也照樣換。** 規則看不到那一層裡有什麼
-// (宣告在 store、還原在 actions,是兩支檔案),而多拷貝一層沒有任何壞處;
+// **那一層全是單純值時也照樣換。** 自動修正看的是還原的那一行,
+// 手上沒有 store 那一側的內容(規則那一側才會去查它),而多拷貝一層沒有任何壞處;
 // 漏掉的那一次則是沒有徵兆的失效。
 //
 // 帶回幾個要留著的欄位(`{ ...apiDefault.x, itemId }`)時只換展開的那一段,
@@ -813,17 +947,6 @@ const checkStoreDefaultClone = ({ rel, text }) => {
 // **範圍是原始碼裡的每一支 .js 與 .vue**,不只 actions ——
 // 頁面自己的 composable 也會從 apiDefault 取初始值,那裡踩到的是同一件事。
 
-const { name: CLONE_HELPER, source: CLONE_HELPER_SOURCE } = DEEP_CLONE_HELPER
-
-/**
- * { ...<任意運算式>.apiDefault.<路徑> } —— 後面可以再接要留著的欄位。
- *
- * 大括號與展開之間的空白單獨抓出來,替換時原樣放回去:
- * 多行的物件字面值被壓成一行的話,排版工具會把整段重排,
- * diff 裡就混著一堆與這次改動無關的行。
- */
-const SPREAD_DEFAULT_RE = /(\{\s*)\.\.\.\s*([\w.$[\]'"]*\bapiDefault\b[\w.$[\]'"]*)\s*(,|\})/g
-
 export const onCloneApiDefault = (text, rel) => {
   if (!CLONE_HELPER) return null // 專案沒有這支共用函式
   if (!isInSrc(rel) || !/\.(vue|js)$/.test(rel)) return null
@@ -831,7 +954,7 @@ export const onCloneApiDefault = (text, rel) => {
   let changed = false
 
   const next = text.replace(SPREAD_DEFAULT_RE, (whole, open, expr, tail) => {
-    if (expr.includes(`${CLONE_HELPER}(`)) return whole
+    if (isDeepCloned(expr)) return whole
     changed = true
 
     // 後面還有欄位的話保留大括號與原本的換行,只把展開的那一段換掉
