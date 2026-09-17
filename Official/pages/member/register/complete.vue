@@ -1,13 +1,11 @@
 <script setup>
-const { onUseMeta, onWithLoadingAll } = useCommonActions()
+const { onUseMeta } = useCommonActions()
 
 definePageMeta({
   layout: 'member-auth',
   channel: 'memberAuth',
-  requiresAuth: false,
 })
 
-await onWithLoadingAll([])
 
 onUseMeta({
   title: '會員中心 | 好房 HouseFun',

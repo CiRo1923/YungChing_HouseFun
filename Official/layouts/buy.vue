@@ -55,27 +55,6 @@ const onInit = async () => {
 // 放在 setup 最後,await 之後不再有同步 composable。
 await callOnce(onInit)
 
-// SSR 預抓 SEO:layout(含 Header)的渲染早於頁面 <slot>,若不在此先備好 project.seo,
-// Header 的資料型 H1 在 SSR 會是空的。走各頁自己的 action,seo 由那支寫進 store。
-// 只在 server 跑(client 端由頁面自己打);為 best-effort,失敗不得中斷渲染。
-if (import.meta.server) {
-  try {
-    if (route.name === 'buy-house-hfid') {
-      const { onApiGetBuyHouseHfid } = useBuyHouseActions()
-
-      await onApiGetBuyHouseHfid()
-    } else if (route.name === 'buy-list-filters') {
-      const { onChannel, onGetBuyListParams, onApiGetBuyList } = useBuyListActions()
-
-      onChannel()
-      onGetBuyListParams()
-      await onApiGetBuyList()
-    }
-  } catch {
-    // 靜默:SEO 預抓失敗不影響頁面渲染
-  }
-}
-
 // 每次換頁(含首次 immediate)重新檢查 accessData 時效。
 // onGetAccessDataCookie 只驗 accessData;authToken 是否走 SSO 在這裡分開判斷。
 const onAccessCheck = async () => {

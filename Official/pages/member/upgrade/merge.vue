@@ -3,7 +3,7 @@ import { EMAILVERIFYTOKEN, PHONE } from '@js/_storage.js'
 import { onMaskPhone } from '@js/_projectPrototype.js'
 import { deCrypto } from '@js/.crypto/index.js'
 
-const { onUseMeta, onWithLoadingAll } = useCommonActions()
+const { onUseMeta } = useCommonActions()
 const memberUpgrade = useMemberAuthUpgradeStore()
 const { phone } = storeToRefs(memberUpgrade)
 const {
@@ -17,7 +17,6 @@ const router = useRouter()
 definePageMeta({
   layout: 'member-auth',
   channel: 'memberAuth',
-  requiresAuth: false,
   middleware: [
     () => {
       const raw = useCookie(EMAILVERIFYTOKEN).value
@@ -77,7 +76,7 @@ const onAuthEmailUpgradeMobileCheck = async () => {
   )
 }
 
-await onWithLoadingAll([onAuthEmailUpgradeMobileCheck()])
+await onAuthEmailUpgradeMobileCheck()
 
 onUseMeta({
   title: '會員中心 | 好房 HouseFun',

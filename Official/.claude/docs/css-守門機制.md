@@ -6,10 +6,11 @@
 這份說明的是「**規範怎麼被自動檢查**」——有哪些規則、判斷什麼、接到哪幾個觸發時機。
 判斷邏輯只有一份，五個時機共用它。
 
-其他三件事各自有專門的文件，這份不重複寫：
+其他幾件事各自有專門的文件，這份不重複寫：
 
 | 想知道什麼 | 看哪裡 |
 | --- | --- |
+| **這個專案現在還有多少存量、哪幾支要處理** | 專案自己的 `docs/`（那是各專案自己的數字，不跟著規範工具複製） |
 | **怎麼裝到另一個專案** | `.claude/docs/規範工具-安裝到新專案.md` |
 | **某一類程式該怎麼寫** | `.claude/skills/`：`api-conventions`（api）、`store-conventions`（store 與 actions）、`page-conventions`（頁面）、`color-naming` 與 `css-module-variables`（css）、`import-alias`、`composable-order` |
 | **跨規則的共同前提** | `.claude/rules/`：無法判斷一律問、修問題要治根、規範不能有兩份、註解與文件的寫法 |
@@ -33,7 +34,7 @@
 | `moduleScope` | 模組 css 混入別的模組或非 `m-` 開頭的 class（建置工具的關聯掛勾 group / peer 不算） | 元件的樣式子資料夾 | ✗ |
 | `moduleLocation` | 對得上某個元件的樣式留在集中目錄（該搬進那個元件的資料夾） | 共用變數目錄 | ✗ |
 | `moduleVar` | 同屬性兩個以上級距值（該搬到 `***Variables.css`） | 元件的樣式子資料夾與共用變數目錄（Variables 檔除外） | ✗ |
-| `breakpointPrefix` | 父層可傳入的級距在某個 @screen 區塊少列了會命中該斷點的前綴變體 | 元件的樣式子資料夾與共用變數目錄 | ✗ |
+| `breakpointPrefix` | 父層可傳入的級距在某個 `@screen` 區塊少列了會命中該斷點的前綴變體 | 元件的樣式子資料夾與共用變數目錄 | ✗ |
 | `variable` | 命名沒對齊 tailwind、級距用 `sm`/`md`/`lg`、斷點沒三份成套 | 元件的樣式子資料夾與共用變數目錄 | ✗ |
 | `projectName` | 寫死專案名稱 | 只有規範系統自身（清單見設定的 TOOLING_DIRS） | ✗ |
 | `absolutePath` | 寫了某一台機器上的路徑（磁碟機代號、家目錄、`file://`）、跨專案引用 | 原始碼與規範系統自身 | ✗ |
@@ -54,14 +55,19 @@
 | `storeLayer` | 有向後端要資料的頁面，store 沒有對應的層 | store 目錄 | ✗ |
 | `pageApiData` | 頁面自建 `apiData` / `apiResult` / `apiList` / `apiInfo` | 頁面目錄的 `.vue` | ✗ |
 | `storeApiDefault` | 有 `apiData` 卻沒有 `apiDefault` | store 目錄 | ✗ |
+| `viewFolder` | 頁面目錄的資料夾首字大寫、分隔方式與同一層的 `.vue` 檔名不同套（自己寫路由表的專案用駝峰，檔案系統路由的專案放行連字號，兩種都擋底線與連續大寫），或底線資料夾不在允許的清單裡 | 頁面目錄 | ✗ |
+| `componentClass` | 元件資料夾名推出的 class 與 template 寫的對不上 | 共用元件目錄的 `.vue` | ✗ |
+| `componentFolder` | 元件直接放在分類資料夾底下,沒有自己的資料夾 | 共用元件目錄的 `.vue` | ✗ |
+| `storeDefaultClone` | `apiDefault` 裡有陣列欄位，還原時要深拷貝（建議，不擋——還原寫在另一支檔案，這條看不到那一側） | store 目錄 | ✗ |
 | `storeResetDefault` | reset 手寫預設值,沒用 `apiDefault` | actions 目錄 | ✗ |
 | `storeActionNaming` | 呼叫 api 的 action 命名對不上該支 api | actions 目錄 | ✗ |
 | `storeActionReturn` | 打了 api 的 action 沒有 `return { config, status, data }` | actions 目錄 | ✗ |
 | `storeToRefs` | 取 store 的值沒走 `storeToRefs`（直接解構或讀成 `const`） | 原始碼 | ✗ |
 | `pageActionNaming` | 頁面包裝 action 的命名沒有去掉 `Api` 或對不上 | 原始碼裡的 `.vue` | ✗ |
+| `pageAwaitAll` | 進入頁面要拿的資料一支一支等，沒有一起發出 | 頁面目錄的 `.vue` | 包起來 ✓（存檔時） |
 | `pageApiImport` | 頁面直接 import api（可在檔頭標 `lint-page-api-exempt` 放行一次性的請求） | 原始碼裡的 `.vue` | ✗ |
 | `componentApiImport` | 元件直接 import api（沒有例外，標了豁免記號也一樣擋） | 元件目錄的 `.vue` | ✗ |
-| `vueFileName` | 元件的 .vue 檔名首字沒大寫、主檔叫 Main.vue，或頁面的 .vue 檔名首字沒小寫 | 元件目錄與頁面目錄的 `.vue` | ✗ |
+| `vueFileName` | 元件的 .vue 檔名首字沒大寫、主檔叫 Main.vue、頁面的 .vue 檔名首字沒小寫，或檔名不是駝峰（連字號、底線、連續大寫）。檔案系統路由的專案裡，頁面檔名就是網址的一段，那裡放行連字號，底線與連續大寫照擋 —— 哪一種由設定 `PROJECT_FRAMEWORK` 決定 | 元件目錄與頁面目錄的 `.vue` | ✗ |
 | `importOrder` | 元件沒有載入樣式（樣式要由元件自己 import；自己完全不寫 class 的轉手元件不在此列） | 元件目錄的 `.vue` | ✗（工具看不出該載哪一支） |
 | `configItem` | 專案設定檔多了沒有任何規則讀的項目 | `.tools/lint/project-config.mjs` | ✗（來源專案只提醒，見下方說明） |
 | `ruleCrashed` | 規則自己執行失敗（多半是漏了 import），那支檔案沒被那條規則檢查 | 全部 | ✗ |
@@ -161,7 +167,7 @@ api 目錄底下可以再分一層「服務」（各自的網域與 token），�
 | `✅ 正確的寫法` / `❌ 錯誤的寫法` | `正確的寫法：` / `錯誤的寫法：` |
 | `🔧 已自動排序` | `已自動排序` |
 
-**兩種情況不算裝飾，規則不抓：**
+**三種情況不算裝飾，規則不抓：**
 
 一、**工具在終端機印出來的狀態**（通過、違規、擋下、提醒各一個記號）。那不是文件，是程式跑起來當下的回饋；一排訊息裡要能一眼分出哪幾筆有問題。
 
@@ -173,9 +179,11 @@ api 目錄底下可以再分一層「服務」（各自的網域與 token），�
 
 二、**對照表裡表示「變成」的箭頭**（`舊名稱 → 新名稱`）。那是資訊本身，不是裝飾——換成文字反而讓整欄對不齊、更難讀，所以不分場合都放行。
 
-三、**畫面上給使用者看的文字**（元件與頁面 `<template>` 裡的內容）。那是內容本身：標題、按鈕上的字、提示語——要不要放一個圖示由設計與文案決定，不是規範系統要管的事。
+三、**畫面上給使用者看的文字**。那是內容本身：標題、按鈕上的字、提示語——要不要放一個圖示由設計與文案決定，不是規範系統要管的事。
 
-**畫面區段裡的註解不在此列，照樣抓。** 那是寫給接手的人讀的，與程式碼旁邊的註解沒有兩樣——放行的話，同一句話只要寫進畫面區段就繞過了整條規則。
+範圍是**元件與頁面**，而且不分它寫在哪一段：直接寫在畫面區段裡的、抽成設定物件往下傳的、`readonly([…])` 那種範例資料，都是同一種東西。只放行畫面區段的話，等於在說「同一句文案放這裡可以、抽出來就不行」——那是在管元件怎麼組織，不是在管文字。
+
+**兩種情況不在此列，照樣抓：** 元件與頁面裡的**註解**（那是寫給接手的人讀的，與程式碼旁邊的註解沒有兩樣），以及 store、api 那幾層的字串（那裡的字串是參數、端點、狀態代碼，不是給人看的文案）。
 
 範圍是規範系統整層（每一種檔案，說明文件尤其是——那一層會整批複製到下一個專案），加上原始碼裡的 `.css`、`.js`、`.ts`、`.vue`。這一條在原始碼裡看的是註解，而註解就出現在那幾種檔案裡。
 
@@ -368,46 +376,6 @@ npm run hooks:install                     # 重新指向 .githooks（postinstall
 node .tools/lint/guard-file.mjs <檔案>       # 單檔守門（自動修正 + 檢查）
 node .tools/lint/lint.mjs --json        # JSON 輸出，供程式解析
 ```
-
-## 存量基準線
-
-全專案掃描 433 個檔案，**1085 筆違規**（比對日期 2026-09-11）：
-
-| 規則 | 筆數 |
-| --- | --- |
-| `tailwind` | 802 |
-| `color` | 74 |
-| `apiNaming` | 64 |
-| `variable` | 63 |
-| `pageActionNaming` | 16 |
-| `storeToRefs` | 14 |
-| `pageApiData` | 11 |
-| `storeActionReturn` | 10 |
-| `storeLayer` | 7 |
-| `deprecated` | 7 |
-| `storeActionNaming` | 7 |
-| `pageAwaitAll` | 7 |
-| `moduleScope` | 2 |
-| `apiSource` | 1 |
-| 其餘 | 0 |
-
-`projectName` 是 0——這條只管規範系統自身，原始碼裡的品牌名是內容不是違規。
-
-**待逐項處理的具體違規**（每一筆都會改到實際行為，要一項一項來）：
-
-| 檔案 | 問題 |
-| --- | --- |
-| `_api/json.js` | 自己呼叫 `onFetchApi` 建了第二個實例 |
-| 64 支 api 函式 | 缺方法後綴（GET 也要加），少數還有 endpoint 對不上 |
-| 7 個 action | `onApi*` 名稱對不上實際呼叫的 api（`onApiMemberPets` → `apiMemberPet`） |
-| 7 支 store | 分層對不上頁面。現況是按資料語意分（`list` / `voucher` / `mission`），規範是按頁面分（`index` / `detail`，撞名時用 `missions.detail`）。逐支對照頁面重新分層 |
-| 11 支頁面 | 自建 `apiData`，多在問卷與發票登錄流程 |
-
-`tailwind` 那 802 筆是新規範造成的——本專案原本允許在組件 template 直接寫 utility，元件目錄 底下 59 支有 57 支中招。這條是刻意不做基準線的，存量會一直看得見。
-
-`theme` / `moduleOrder` / `colorFile` / `colorSort` 目前是 0，代表現況本來就符合；規則是否有效由 `npm run test:css` 保證，不是靠這個數字。
-
-這些是既有存量，不是新寫出來的問題。清到 0 之後，任何新增的違規都會很顯眼。
 
 ## 改規則時
 

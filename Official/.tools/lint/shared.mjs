@@ -30,6 +30,7 @@ export {
   ABSOLUTE_PATH_SCOPE,
   ACTIONS_DIR_NAME,
   API_DIR,
+  DEEP_CLONE_HELPER,
   API_NAMING_IGNORED_SEGMENTS,
   BREAKPOINTS,
   BREAKPOINT_SCREENS,
@@ -42,8 +43,10 @@ export {
   CONVENTION_RULES_DIR,
   CONVENTION_SKILLS_DIR,
   CSS_MODULES_DIR,
+  FRAMEWORKS,
   GENERATED_FILES,
   IMPORT_ORDER_GROUPS,
+  IS_FILE_BASED_ROUTING,
   MODULE_CSS_DIR_NAME,
   PARALLEL_AWAIT_HELPER,
   WRITING_STYLE_SCOPE,
@@ -68,6 +71,7 @@ export {
   TAILWIND_THEME_OVERRIDES,
   TOOLING_PREFIXES,
   VIEW_RESOURCE_DEPTH,
+  VIEW_UNDERSCORE_FOLDERS,
   VIEWS_DIR,
 } from './project-config.mjs'
 
@@ -534,6 +538,22 @@ export const moduleFolderOf = (rel) => {
   return at > 0 ? segments[at - 1] : null
 }
 
+/** mForm → m-form;mDatePicker → m-date-picker */
+export const toKebab = (name) => name.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase()
+
+/**
+ * 資料夾名推出它的組件 class 前綴;推不出來回 null(不檢查)。
+ *
+ * 名字不是 `m` 開頭接大寫的話不是這套命名裡的模組 —— 猜一個的話,
+ * 會拿錯的前綴去報一整片。
+ *
+ * 元件的 .vue 與它的樣式都靠這一份推算:樣式那側問「這支 css 屬於誰」,
+ * 元件那側問「template 的 class 對不對得上資料夾」。兩邊各寫一份的話,
+ * 會出現「css 過了但 template 沒過」這種自己打架的結果。
+ */
+export const classPrefixOf = (folderName) =>
+  folderName && /^m[A-Z]/.test(folderName) ? toKebab(folderName) : null
+
 /**
  * 這個檔案是不是放行為(actions)的那個子資料夾底下的檔案。
  *
@@ -686,4 +706,137 @@ export const listFiles = (root, target) => {
     if (SKIP_DIR.test(rel) || isProjectDocs(rel)) return []
     return entry.isDirectory() ? listFiles(root, rel) : isScannable(next) ? [next] : []
   })
+}
+
+/**
+ * 每一段 import 的起訖行 —— 一段 import 常常跨好幾行(具名匯入一行一個)。
+ *
+ * 用「以 import 開頭的行」當作一段的話,插入點會落在某一段的中間,
+ * 那支檔案會整支壞掉 —— 語法錯誤,而且是自動修正造成的。
+ */
+const importBlocksOf = (lines) => {
+  const blocks = []
+  let start = -1
+  let depth = 0
+
+  lines.forEach((line, i) => {
+    if (start === -1) {
+      if (!/^\s*import\b/.test(line)) return
+      start = i
+      depth = 0
+    }
+
+    depth += (line.match(/\{/g) ?? []).length - (line.match(/\}/g) ?? []).length
+
+    // 括號收完、而且這一行是整段的結尾(有 from '…' 或就是 import '…')
+    if (depth <= 0 && /from\s*['"][^'"]+['"]|^\s*import\s*['"][^'"]+['"]/.test(line)) {
+      blocks.push({ start, end: i })
+      start = -1
+      depth = 0
+    }
+  })
+
+  return blocks
+}
+
+/**
+ * 補上一支共用函式的 import —— 已經有就原樣回傳。
+ *
+ * 自動修正把某個寫法換成共用函式之後,那支函式一定要 import 得到,
+ * 否則整支檔案會因為找不到它而壞掉 —— 比不修還糟。
+ *
+ * 三種情況:已經 import 過(不動)、同一支來源已經 import 別的東西
+ * (加進那一行的大括號裡)、都沒有(放在最後一行 import 之後)。
+ */
+export const withNamedImport = (text, name, source) => {
+  const lines = text.split('\n')
+  const blocks = importBlocksOf(lines)
+  const body = blocks.map((b) => lines.slice(b.start, b.end + 1).join('\n')).join('\n')
+
+  if (new RegExp(`\\b${name}\\b`).test(body)) return text
+
+  const escaped = source.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const fromSource = new RegExp(`from\\s*['"]${escaped}['"]`)
+
+  // 同一支來源已經 import 別的東西時,加進那一段的大括號裡
+  const same = blocks.find((b) => {
+    const text = lines.slice(b.start, b.end + 1).join('\n')
+    return fromSource.test(text) && text.includes('{')
+  })
+
+  if (same) {
+    const at = lines.slice(same.start, same.end + 1).findIndex((line) => line.includes('{'))
+    const i = same.start + at
+    lines[i] = lines[i].replace(/\{\s*/, `{ ${name}, `)
+    return lines.join('\n')
+  }
+
+  const statement = `import { ${name} } from '${source}'`
+  const last = blocks.at(-1)
+
+  if (!last) {
+    // 一行 import 都沒有的 .vue —— 放在 <script> 之後;連那個都沒有就不動
+    const scriptLine = lines.findIndex((line) => /<script\b/.test(line))
+    if (scriptLine === -1) return text
+    lines.splice(scriptLine + 1, 0, statement)
+  } else {
+    lines.splice(last.end + 1, 0, statement)
+  }
+
+  return lines.join('\n')
+}
+
+/** 選擇器行裡的 class token(含 CSS escape 的 \-\- 寫法) */
+const CLASS_TOKEN_RE = /\.((?:\\.|[\w-])+)/g
+
+/**
+ * 一支 css 的選擇器裡出現過哪些 class。
+ *
+ * 回傳 `[{ cls, line }]` —— class 名(escape 已還原)與它在第幾行。
+ *
+ * 只從**選擇器**取,三種東西一律不算:
+ *
+ *   宣告區塊裡的值    `opacity 0.3s,` 的 `.3s` 不是 class
+ *   括號裡的續行      `linear-gradient(142.26deg,` 的 `.26deg` 也不是
+ *   附加在自己後面的  `&.scrollbar` 是「同時掛著什麼」的條件,不是在定義它
+ *
+ * 兩個地方要問同一件事:模組 css 只能寫自己那組 class(看的是「這裡定義了誰」),
+ * 以及元件寫的 class 有沒有對應的樣式(看的是「誰被定義過」)。
+ * 各寫一份的話,其中一邊修了誤判、另一邊沒修,兩條規則就開始對同一份檔案講不同的話。
+ */
+export const selectorClassesOf = (raw) => {
+  const text = maskCssComments(raw)
+  const found = []
+
+  let depth = 0
+  let inDecl = false
+
+  text.split(/\r?\n/).forEach((rawLine, i) => {
+    const line = rawLine.trim()
+    const inValue = depth > 0
+
+    depth += (line.match(/\(/g) ?? []).length - (line.match(/\)/g) ?? []).length
+    if (depth < 0) depth = 0
+
+    if (inValue) return
+
+    if (inDecl) {
+      if (line.endsWith(';') || line.endsWith('}')) inDecl = false
+      return
+    }
+
+    if (!/[{,]\s*$/.test(line) || line.startsWith('@')) {
+      if (line.includes(':') && !line.endsWith('{') && !line.endsWith(';')) inDecl = true
+      return
+    }
+
+    for (const m of line.matchAll(CLASS_TOKEN_RE)) {
+      const prev = m.index > 0 ? line[m.index - 1] : ''
+      if (prev && !/[\s>+~,(]/.test(prev)) continue
+
+      found.push({ cls: m[1].replace(/\\/g, ''), line: i + 1 })
+    }
+  })
+
+  return found
 }

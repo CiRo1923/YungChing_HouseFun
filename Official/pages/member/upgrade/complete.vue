@@ -2,12 +2,11 @@
 import { UPGRADECOMPLETE } from '@js/_storage.js'
 import { deCrypto } from '@js/.crypto/index.js'
 
-const { onUseMeta, onWithLoadingAll } = useCommonActions()
+const { onUseMeta } = useCommonActions()
 
 definePageMeta({
   layout: 'member-auth',
   channel: 'memberAuth',
-  requiresAuth: false,
   middleware: [
     () => {
       const raw = useCookie(UPGRADECOMPLETE).value
@@ -28,7 +27,6 @@ definePageMeta({
   ],
 })
 
-await onWithLoadingAll([])
 
 onUseMeta({
   title: '會員中心 | 好房 HouseFun',

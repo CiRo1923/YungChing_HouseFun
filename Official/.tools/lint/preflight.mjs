@@ -26,8 +26,11 @@ import {
   COMPONENT_DIRS,
   MODULE_CSS_DIR_NAME,
   CSS_MODULES_DIR,
+  FRAMEWORKS,
   PARALLEL_AWAIT_HELPER,
+  PROJECT_FRAMEWORK,
   PLAIN_TEXT_EXCLUDED_DIRS,
+  SHARED_MODULE_VARIABLES,
   STORE_DIR,
   STYLE_CONFIG_FILES,
   VIEW_RESOURCE_DEPTH,
@@ -69,6 +72,33 @@ const REQUIREMENTS = [
     check: () => (IS_SOURCE_PROJECT || recordedFingerprints() ? CHECKSUM_FILE : null),
     need: `要有 ${CHECKSUM_FILE} —— 那份清單由規範工具的來源跑 npm run rules:seal 產生,跟著規則一起複製過來`,
     why: '沒有清單就沒有東西可以比對,這條會整條略過。在這個專案改了共用規則的話,不會有人發現,而改動會在下一次整套更新時被蓋掉。',
+  },
+  {
+    /* 這個值只用來組提示訊息,不做路徑檢查 —— 所以它指錯位置時不會有任何徵兆:
+       規則照常通過,只有訊息悄悄指向一個不存在的地方,而照著做的人
+       會建出一支沒有人知道為什麼在那裡的檔案。
+       樣式從集中目錄搬進元件資料夾之後最容易變成這樣。
+
+       留空是正常的(樣式都跟著元件走、沒有跨模組共用的位置),那時不檢查。 */
+    label: '跨模組共用的變數檔',
+    rules: ['moduleVar'],
+    check: (root) =>
+      !SHARED_MODULE_VARIABLES ||
+      fs.existsSync(path.join(root, ...CSS_MODULES_DIR.split('/'), ...SHARED_MODULE_VARIABLES.split('/')))
+        ? SHARED_MODULE_VARIABLES || '(留空)'
+        : null,
+    need: `設定的 SHARED_MODULE_VARIABLES 指到的檔案要真的存在,或把它留空`,
+    why: '這個值只用來組提示訊息。指到不存在的位置時規則照常通過,只有訊息悄悄指錯 —— 照著做的人會把東西放進一個不該存在的地方。',
+  },
+  {
+    /* 填錯字(`Nuxt`、`nuxt3`、`vue`)時,比對不成立就一律當成自己寫路由表 ——
+       那正好是「要求頁面改名」的那一種,而檔案系統路由的專案照著改就是改網址。
+       值認不得時要當場講出來,不能安靜地退回其中一種。 */
+    label: '框架的設定',
+    rules: ['vueFileName'],
+    check: () => FRAMEWORKS.includes(PROJECT_FRAMEWORK),
+    need: `設定裡的 PROJECT_FRAMEWORK 要填這幾個其中一個:${FRAMEWORKS.join(' / ')}(目前填的是 ${PROJECT_FRAMEWORK || '(空)'})`,
+    why: '頁面檔名可以怎麼取,看的是網址從哪裡來 —— 檔案系統路由的專案檔名就是網址的一段,連字號要放行。這一項認不得時會退回「自己寫路由表」那一套,結果是那一批頁面被整批要求改成駝峰,而照著改就是把網址改掉,既有的連結會失效。',
   },
   {
     label: '建置設定檔',
@@ -150,7 +180,7 @@ const REQUIREMENTS = [
   },
   {
     label: 'store 目錄',
-    rules: ['storeDeclare', 'storeNaming', 'storeScope', 'storeActions', 'storeActionNaming', 'storeActionReturn', 'storeApiDefault', 'storeResetDefault', 'storeLayer', 'storeDir'],
+    rules: ['storeDeclare', 'storeNaming', 'storeScope', 'storeActions', 'storeActionNaming', 'storeActionReturn', 'storeApiDefault', 'storeDefaultClone', 'storeResetDefault', 'storeLayer', 'storeDir'],
     check: (root) => (hasDir(root, STORE_DIR) ? STORE_DIR : null),
     need: `要有 store 目錄(目前設定為 ${STORE_DIR})`,
     why: 'store 與 actions 的規則以那個目錄為範圍。位置不符時,store 的寫法完全不會被檢查。',
@@ -255,6 +285,9 @@ export const NO_PREREQUISITE_RULES = [
   'selfContained',
   'deprecated',
   'storeToRefs',
+  'componentClass',
+  'componentFolder',
+  'viewFolder',
 ]
 
 /** 每一項前提涵蓋到的規則(全部項目的聯集)—— 規則自己的驗證拿它比對完整性 */

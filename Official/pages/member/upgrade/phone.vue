@@ -2,7 +2,7 @@
 import { EMAILVERIFYTOKEN, PHONEEXCEEDED } from '@js/_storage.js'
 import { deCrypto } from '@js/.crypto/index.js'
 
-const { onUseMeta, onWithLoadingAll } = useCommonActions()
+const { onUseMeta } = useCommonActions()
 const memberUpgrade = useMemberAuthUpgradeStore()
 const { phone } = storeToRefs(memberUpgrade)
 const {
@@ -19,7 +19,6 @@ const router = useRouter()
 definePageMeta({
   layout: 'member-auth',
   channel: 'memberAuth',
-  requiresAuth: false,
   middleware: [
     () => {
       const raw = useCookie(EMAILVERIFYTOKEN).value
@@ -47,7 +46,6 @@ const exceededMessage = computed(() => {
   return [details?.[0], message].filter(Boolean).join('<br />')
 })
 
-await onWithLoadingAll([])
 
 onUseMeta({
   title: '會員中心 | 好房 HouseFun',

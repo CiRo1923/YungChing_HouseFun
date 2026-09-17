@@ -52,5 +52,10 @@
         ]
       }
     ]
+  },
+  "permissions": {
+    "allow": [
+      "Bash(git -C .. add -A Official/)"
+    ]
   }
 }

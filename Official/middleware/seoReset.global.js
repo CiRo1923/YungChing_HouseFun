@@ -7,11 +7,9 @@
 export default defineNuxtRouteMiddleware(() => {
   if (import.meta.server) return
 
-  const nuxtApp = useNuxtApp()
+  if (useNuxtApp().isHydrating) return
 
-  if (nuxtApp.isHydrating) return
-
-  const project = useProjectStore(nuxtApp.$pinia)
+  const project = useProjectStore()
 
   project.seo = { h1: '' }
 })

@@ -12,9 +12,20 @@
 //    命令列介面只有「吃一個檔案路徑、把結果印到標準輸出」這一個約定,
 //    內部怎麼改都不會波及到它們。
 //
-//   1. 色票檔 → 自動排序(只動順序,不動色值),有動就回報
-//   2. 任何 .vue / .css → 空的規則區塊自動移除
-//   3. 全部規範檢查,違規逐筆印出
+// 存檔時做的事,依序:
+//
+//   1. 色票檔 → 依規則重新排序(只動順序,不動色值)
+//   2. 已廢除的 rgba 寫法 → 轉成 8 碼色票變數。色票裡還沒有那個顏色時一併補進去,
+//      色值變了連帶要改名的,全站使用端一起換 —— **這一項會動到別的檔案**
+//   3. 任何 .vue / .css → 空的規則區塊移除
+//   4. 宣告順序與 import 分組 → 重新排好
+//   5. onMounted 裡的請求 → 用並行載入的包裝函式包起來
+//   6. 從 apiDefault 還原的地方 → 補上深拷貝
+//   7. 剩下的規範檢查,違規逐筆印出
+//
+// **前面六項會直接改寫檔案內容,不只是提醒。** 規則訊息裡寫著
+// 「存檔時會自動包好」「存檔時自動排序」的那幾條,講的就是這一層;
+// 存檔守門沒有接上的話,那幾句話不成立,而訊息還是照樣那樣寫。
 //
 // 色票檔在哪由 .tools/lint/project-config.mjs 決定,這裡不寫死路徑 ——
 // 每個專案的目錄擺法不一樣,寫死之後換一個專案就找不到檔案。
@@ -38,6 +49,7 @@ import {
   RULE_TITLE,
   checkSharedColors,
   lintFile,
+  onCloneApiDefault,
   onFixLegacyRgba,
   onRemoveEmptyRules,
   onSortComposables,
@@ -290,6 +302,22 @@ const onWrapMounted = () => {
   lines.push(`${rel} 進入頁面要拿的資料已自動包成一起發出。`, '')
 }
 
+/**
+ * 從 apiDefault 還原送出參數 —— 存檔時換成深拷貝。
+ *
+ * apiDefault 是唯讀的而且是深層的,展開一層只複製到最外面那一層:
+ * 裡面的陣列還是原本那一個唯讀的陣列,還原之後 push 進不去,
+ * 而且正式版沒有任何徵兆。補不上那支函式的 import 時整個不動。
+ */
+const onCloneDefaults = () => {
+  const original = fs.readFileSync(abs, 'utf8')
+  const cloned = onCloneApiDefault(original, rel)
+  if (!cloned) return
+
+  fs.writeFileSync(abs, cloned, 'utf8')
+  lines.push(`${rel} 從 apiDefault 還原的地方已自動改成深拷貝。`, '')
+}
+
 const readJson = (file, fallback) => {
   try {
     return JSON.parse(fs.readFileSync(file, 'utf8'))
@@ -382,6 +410,7 @@ try {
     onSortDeclarations()
     onSortComponentImports()
     onWrapMounted()
+    onCloneDefaults()
   }
 
   if (!writeOnly) onLint()

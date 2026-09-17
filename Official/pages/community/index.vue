@@ -4,7 +4,6 @@
 // (onLoginClick + CommonLoginSystem),留著會讓人誤以為 login 有兩套實作。
 // 在 community layout 建好之前,本頁沒有 layout 包裹,只會渲染頁面內容本身。
 definePageMeta({
-  requiresAuth: false,
   title: '社區',
 })
 </script>

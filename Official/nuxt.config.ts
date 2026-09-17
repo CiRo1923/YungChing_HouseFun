@@ -275,5 +275,10 @@ export default defineNuxtConfig({
   },
   nitro: {
     preset: 'node-server',
+    // 上面那組 alias 只作用於前端打包,伺服器層是另一個執行環境,要再給它一次。
+    // 少了這裡,server 目錄底下就只能用相對路徑往上跳,而那種路徑搬動檔案就會斷。
+    alias: {
+      '@js': fileURLToPath(new URL(`./${CONFIG.js}`, import.meta.url)),
+    },
   },
 })

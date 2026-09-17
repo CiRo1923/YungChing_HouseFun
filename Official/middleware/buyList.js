@@ -1,57 +1,27 @@
+// 買屋列表的網址正規化:舊網址相容、region 與 mrt 互斥、代碼合法性。
+//
+// 掛在列表頁上而不是全站:這裡每一條判斷都只看 /buy 的網址,
+// 設成全站的話,會員、租屋、社區每一次換頁都要先跑完整段才發現不是自己的事。
 import { useBuyListStore } from '@stores/buy/list.js'
-import { apiGetRegion, apiGetMrt } from '@js/_api/buy/common.js'
 
 export default defineNuxtRouteMiddleware(async (to) => {
-  const pinia = useNuxtApp().$pinia
-  const list = useBuyListStore(pinia)
+  const list = useBuyListStore()
   const { region, mrt } = storeToRefs(list)
+  const { onChannel, onGetBuyListParams, onApiGetRegion, onApiGetMrt, onApiGetBuyList } =
+    useBuyListActions()
 
   const defaultListPath = `/buy/${region.value.defaultIDs}_region/?pg=1`
   const defaultMrtPath = `/buy/${mrt.value.defaultIDs}_mrt/?pg=1`
 
-  // 取得 region 選項(縣市 + 區域);未載入時打 apiGetRegion 並寫回 store,
-  // 讓頁面的 onApiGetRegion(if region.options 直接略過)不必重打。API 失敗回 null。
-  const ensureRegionOptions = async () => {
-    if (region.value.options) return region.value.options
-
+  // 代碼合法性要拿選項清單來比對。取不到就不驗 ——
+  // 為了選項的 api 一時失敗,把使用者導去預設列表,比讓那個網址過去更糟。
+  //
+  // 選項怎麼取、載過就不重取,都在 action 裡;這裡只負責「取不到也要走得下去」。
+  const onLoadOptions = async (loadOptions) => {
     try {
-      const { status, data } = await apiGetRegion()
-
-      if (status !== 200) return null
-
-      region.value.all = data.items.map((city) => city.id).join(',')
-      region.value.options = data.items.map((city) => ({
-        ...city,
-        areas: [{ id: city.id, name: '全區' }, ...city.areas],
-      }))
-
-      return region.value.options
+      await loadOptions()
     } catch {
-      return null
-    }
-  }
-
-  // 取得 mrt 選項(運營商 / 線路 / 站點);未載入時打 apiGetMrt 並寫回 store(頁面 onApiGetMrt 可略過)。
-  const ensureMrtOptions = async () => {
-    if (mrt.value.options) return mrt.value.options
-
-    try {
-      const { status, data } = await apiGetMrt()
-
-      if (status !== 200) return null
-
-      mrt.value.all = data.items.map((item) => item.id).join(',')
-      mrt.value.options = data.items.map((item) => ({
-        ...item,
-        lines: item.lines.map((line) => ({
-          ...line,
-          stations: [{ id: line.id, name: '全站' }, ...line.stations],
-        })),
-      }))
-
-      return mrt.value.options
-    } catch {
-      return null
+      // 靜默:取不到選項時跳過代碼驗證
     }
   }
 
@@ -104,7 +74,9 @@ export default defineNuxtRouteMiddleware(async (to) => {
     let isValid = isNumeric
 
     if (isNumeric) {
-      const options = await ensureRegionOptions()
+      await onLoadOptions(onApiGetRegion)
+
+      const options = region.value.options
 
       // options 取不到(API 失敗)時不誤擋,維持數字檢查結果
       if (options) {
@@ -133,8 +105,11 @@ export default defineNuxtRouteMiddleware(async (to) => {
     let isValid = isNumeric
 
     if (isNumeric) {
-      const options = await ensureMrtOptions()
+      await onLoadOptions(onApiGetMrt)
 
+      const options = mrt.value.options
+
+      // options 取不到(API 失敗)時不誤擋,維持數字檢查結果
       if (options) {
         const validIds = new Set()
 
@@ -159,4 +134,12 @@ export default defineNuxtRouteMiddleware(async (to) => {
   if (to.path === '/buy' || to.path === '/buy/') {
     return navigateTo(defaultListPath, { replace: true })
   }
+
+  // 網址確定之後才取列表 —— 上面每一條都可能改寫網址,先取的話會對著舊條件打一次。
+  //
+  // 放在這裡而不是頁面的 setup:H1 由共用的頁首輸出,而頁首的渲染早於頁面的 setup。
+  // 換頁守衛跑在頁面元件建立之前,所以這裡寫進 store 的 seo,頁首渲染時就讀得到。
+  onChannel(to)
+  onGetBuyListParams(to)
+  await onApiGetBuyList(to)
 })

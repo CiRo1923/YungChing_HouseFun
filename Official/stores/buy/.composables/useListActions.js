@@ -1,5 +1,6 @@
 import { apiGetRegion, apiGetMrt } from '@js/_api/buy/common.js'
 import { apiGetBuyList, apiGetBuyListFocus, apiGetBuySuggest } from '@js/_api/buy/list.js'
+import { onDeepClone } from '@js/_prototype.js'
 import { onResolveByDevice } from '@js/_projectPrototype.js'
 
 export default () => {
@@ -442,7 +443,7 @@ export default () => {
   // 重置搜尋:清空所有篩選值與 label,回到 store 預設(區域 / 捷運回預設 id)。
   // 導回預設列表由呼叫端負責(router.push),此處只還原 store 狀態。
   const onResetSearch = () => {
-    content.value.apiData = { ...buyListStore.apiDefault.content }
+    content.value.apiData = onDeepClone(buyListStore.apiDefault.content)
 
     // 區域 / 捷運:id 回預設,label 由 helper 依 ids 重算。
     // 路由切換不會重跑各下拉的 onInit,故 label 一律直接設定;設空字串會露出 placeholder。

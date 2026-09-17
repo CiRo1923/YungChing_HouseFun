@@ -1,6 +1,6 @@
 ---
 name: shared-components-sync
-description: Backstage 與 Official 共用元件(mForm / mPopup、圖片、SVG 圖示)的同步規則 —— 功能必須一致、樣式各自獨立;後兩支的檔名兩邊不同(Backstage 是 ImgSrc / SvgIcon,Official 是 mFigure / mSvgIcon)。修改這些元件時必讀。
+description: Backstage 與 Official 共用元件(mForm / mPopup、圖片、SVG 圖示、錯誤訊息、標籤)的同步規則 —— 功能必須一致、樣式各自獨立。修改這些元件時必讀。
 ---
 
 <!-- lint-project-name-exempt: 這支只有本專案有,不會複製到別的專案;內容是兩邊的共用元件各自放在哪,路徑是要記錄的資料本身 -->
@@ -11,30 +11,20 @@ description: Backstage 與 Official 共用元件(mForm / mPopup、圖片、SVG �
 
 以下元件在 **Backstage** 與 **Official** 兩個專案都有一份,**功能必須保持一致**:
 
-| 元件 | Backstage | Official |
+| 這支元件 | 位置(兩邊相同) | 標籤 |
 | --- | --- | --- |
-| mForm | `components/common/mForm/` | `components/common/mForm/` |
-| mPopup | `components/common/mPopup/` | `components/common/mPopup/` |
-| 圖片 | `components/common/ImgSrc.vue` | `components/common/mFigure.vue` |
-| SVG 圖示 | `components/common/SvgIcon.vue` | `components/common/mSvgIcon.vue` |
+| 表單 | `components/common/mForm/` | `<CommonMForm…>` |
+| 彈窗 | `components/common/mPopup/` | `<CommonMPopup>` |
+| 圖片 | `components/common/mFigure/` | `<CommonMFigure>` |
+| SVG 圖示 | `components/common/mSvgIcon/` | `<CommonMSvgIcon>`,另有全域註冊的 `<mSvgIcon>` |
+| 錯誤訊息 | `components/common/mErrorMessage/` | `<CommonMErrorMessage>` |
+| 標籤 | `components/common/mLabel/` | `<CommonMLabel>` |
 
-mForm 與 mPopup 兩欄看起來一樣,是因為兩個專案在同一個 repo 根底下並排、
-各自的內部路徑結構相同,差別只在最外層是哪一個專案目錄。
+兩個專案的內部路徑結構相同,所以位置只有一欄 —— 差別只在最外層是哪一個專案目錄。
+每一支都是資料夾:元件本體是 `Index.vue`,樣式收在同一層的 `.css/` 底下。
 
-**後兩支的檔名兩邊不同。** Official 把元件名對齊了它的樣式目錄
-(`mFigure` / `mSvgIcon`),Backstage 還是原本的名字。
-**那是檔名的差異,不是功能的差異** —— 這張表以外的每一條同步規則照樣適用,
-改動仍然要兩邊一起做。
-
-對照時看這一行認人:
-
-| 這支元件 | Backstage 的檔名 | Official 的檔名 | Official 的標籤 |
-| --- | --- | --- | --- |
-| 圖片 | `ImgSrc.vue` | `mFigure.vue` | `<CommonMFigure>` |
-| SVG 圖示 | `SvgIcon.vue` | `mSvgIcon.vue` | `<CommonMSvgIcon>`,另有全域註冊的 `<mSvgIcon>` |
-
-Official 的 SVG 圖示還有一個地方要跟著改:`plugins/svgicon.client.js` 把它
-全域註冊成 `mSvgIcon`,所以那支元件改名時**要連同 plugin 的 import 與註冊名一起改**,
+SVG 圖示還有一個地方要跟著改:`plugins/svgicon.client.js` 把它全域註冊成
+`mSvgIcon`,所以那支元件改名或搬位置時**要連同 plugin 的 import 與註冊名一起改**,
 漏了的話 plugin 在載入當下就會失敗。
 
 ## 核心原則

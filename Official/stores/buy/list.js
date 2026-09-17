@@ -1,3 +1,5 @@
+import { onDeepClone } from '@js/_prototype.js'
+
 export const useBuyListStore = defineStore('buyList', () => {
   const basicRouteName = 'buy-list-filters'
   const focus = ref(null)
@@ -26,7 +28,7 @@ export const useBuyListStore = defineStore('buyList', () => {
   })
   const content = ref({
     data: null,
-    apiData: { ...apiDefault.content },
+    apiData: onDeepClone(apiDefault.content),
   })
 
   const region = ref({

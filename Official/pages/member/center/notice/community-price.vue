@@ -1,16 +1,16 @@
 <script setup>
-const { onUseMeta, onWithLoadingAll } = useCommonActions()
+const { onUseMeta } = useCommonActions()
 const { onApiGetMemberNotificationsSummary } = useMemberCenterActions()
 const { onApiErrorServerToClient } = usePopupActions()
 
 definePageMeta({
   layout: 'member',
   channel: 'member',
+  // 登入機制還沒接上,目前沒有任何地方讀這個值 —— 接上之後由路由守衛依它決定要不要擋
   requiresAuth: true,
-  middleware: [() => {}],
 })
 
-await onWithLoadingAll([onApiGetMemberNotificationsSummary()])
+await onApiGetMemberNotificationsSummary()
 
 onUseMeta({
   title: '會員中心 | 好房 HouseFun',

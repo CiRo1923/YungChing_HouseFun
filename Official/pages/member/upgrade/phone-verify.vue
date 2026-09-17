@@ -3,7 +3,7 @@ import { EMAILVERIFYTOKEN, PHONE, PHONEEXCEEDED } from '@js/_storage.js'
 import { onMaskPhone } from '@js/_projectPrototype.js'
 import { deCrypto } from '@js/.crypto/index.js'
 
-const { onUseMeta, onWithLoadingAll } = useCommonActions()
+const { onUseMeta } = useCommonActions()
 const memberUpgrade = useMemberAuthUpgradeStore()
 const { phone, phoneVerify } = storeToRefs(memberUpgrade)
 const {
@@ -19,7 +19,6 @@ const router = useRouter()
 definePageMeta({
   layout: 'member-auth',
   channel: 'memberAuth',
-  requiresAuth: false,
   middleware: [
     () => {
       const raw = useCookie(EMAILVERIFYTOKEN).value
@@ -56,7 +55,6 @@ const apiData = computed(() => phoneVerify.value.apiData)
 // 只用於顯示;要打 API 時請用未遮蔽的 apiData.mobilePhone
 const maskPhone = computed(() => onMaskPhone(phone.value.apiData.mobilePhone))
 
-await onWithLoadingAll([])
 
 onUseMeta({
   title: '會員中心 | 好房 HouseFun',

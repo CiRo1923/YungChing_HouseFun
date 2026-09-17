@@ -8,7 +8,6 @@ const { onCustom, onCustomClose } = usePopupActions()
 definePageMeta({
   layout: 'member',
   channel: 'member',
-  requiresAuth: false,
 })
 
 const logs = ref([])

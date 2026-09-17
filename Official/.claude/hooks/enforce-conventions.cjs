@@ -93,10 +93,15 @@ const main = async () => {
 
   let before = ''
   let after = ''
+  /* 新檔案沒有「既有的違規」可言 —— 這件事要單獨記住,不能靠 before 是不是空字串來推。
+     有幾條規則只看路徑(檔名怎麼取、資料夾怎麼命名),那種違規在空內容上照樣會報:
+     把它算進「既有」的話,新檔案永遠不會因為放錯位置或取錯名字而被擋下來,
+     而那正是最該當場擋住的時機 —— 檔案建好之後才發現,連帶要改每一個使用端。 */
+  const isNewFile = !fs.existsSync(abs)
 
   if (typeof ti.content === 'string') {
     // Write:新檔案的話 before 是空字串
-    before = fs.existsSync(abs) ? fs.readFileSync(abs, 'utf8') : ''
+    before = isNewFile ? '' : fs.readFileSync(abs, 'utf8')
     after = ti.content
   } else {
     const rebuilt = reconstructForEdit(abs, ti)
@@ -114,7 +119,9 @@ const main = async () => {
 
   const keyOf = (i) => `${i.rule}::${i.detail}`
 
-  const existing = new Set(core.lintText(ROOT, rel, before, definedVars).map(keyOf))
+  const existing = new Set(
+    isNewFile ? [] : core.lintText(ROOT, rel, before, definedVars).map(keyOf)
+  )
 
   // 建議級不擋寫入 —— 它的用意是提醒人想一下,不是要求非改不可;
   // 擋在這裡的話 AI 會為了通過而繞路,反而寫出更奇怪的程式碼。

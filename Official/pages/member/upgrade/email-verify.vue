@@ -3,7 +3,7 @@ import { EMAILVALUE, EMAILVERIFY, EMAILEXCEEDED } from '@js/_storage.js'
 import { onMaskEmail } from '@js/_projectPrototype.js'
 import { deCrypto } from '@js/.crypto/index.js'
 
-const { onUseMeta, onWithLoadingAll } = useCommonActions()
+const { onUseMeta } = useCommonActions()
 const memberUpgrade = useMemberAuthUpgradeStore()
 const { email, emailVerify } = storeToRefs(memberUpgrade)
 const {
@@ -19,7 +19,6 @@ const router = useRouter()
 definePageMeta({
   layout: 'member-auth',
   channel: 'memberAuth',
-  requiresAuth: false,
   middleware: [
     () => {
       const exceededRaw = useCookie(EMAILEXCEEDED).value
@@ -46,7 +45,6 @@ const apiData = computed(() => emailVerify.value.apiData)
 // 只用於顯示;要打 API 時請用未遮蔽的 apiData.email
 const maskEmail = computed(() => onMaskEmail(email.value.apiData.email))
 
-await onWithLoadingAll([])
 
 onUseMeta({
   title: '會員中心 | 好房 HouseFun',

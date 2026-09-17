@@ -1,7 +1,7 @@
 <script setup>
 import { Form } from 'vee-validate'
 
-const { onUseMeta, onWithLoadingAll } = useCommonActions()
+const { onUseMeta } = useCommonActions()
 const { onApiGetCommonServerTime } = useProjectActions()
 const {
   onApiGETCitySelectOptions,
@@ -19,7 +19,6 @@ const router = useRouter()
 definePageMeta({
   layout: 'member-auth',
   channel: 'memberAuth',
-  requiresAuth: false,
 })
 
 const memberType = computed(() => route.params.type)
@@ -27,7 +26,7 @@ const information = computed(() =>
   memberRegister.links.find((item) => item.id === memberType.value)
 )
 
-await onWithLoadingAll([onApiGETCitySelectOptions()])
+await onApiGETCitySelectOptions()
 
 onUseMeta({
   title: `${information.value.title} - 會員中心 | 好房 HouseFun`,

@@ -331,6 +331,19 @@ const DECORATIVE_RE = /[\u{1F000}-\u{1FAFF}\u{2190}-\u{21FF}\u{2600}-\u{27BF}\u{
  */
 const PLAIN_TEXT_SOURCE_RE = /\.(css|js|ts|vue)$/i
 
+/**
+ * 這支檔案是不是「畫面那一側」的 —— 元件與頁面。
+ *
+ * 那兩種地方的字串字面值多半是**畫面文案**:標題、按鈕上的字、提示語,
+ * 只是有的直接寫在畫面區段裡,有的抽成 config 物件往下傳。
+ * 兩者是同一種東西,放行的判準跟著文字的性質走,不跟著它寫在哪一段走。
+ *
+ * store 與 api 那幾層不算 —— 那裡的字串是參數、端點、狀態代碼,不是給人看的文案。
+ */
+const isViewFile = (rel) =>
+  /\.vue$/i.test(rel) &&
+  (rel.startsWith(`${VIEWS_DIR}/`) || COMPONENT_DIRS.some((dir) => rel.startsWith(`${dir}/`)))
+
 const checkPlainText = ({ rel, text }) => {
   /* 專案指定不檢查的那幾層 —— 文字不是這個團隊在寫的地方
      (整包複製進來的元件、產生器吐出來的檔案)。報出來也沒有人能改,
@@ -361,14 +374,20 @@ const checkPlainText = ({ rel, text }) => {
     if (ARROW_MARKS.has(mark)) continue
 
     const line = lineNoOf(scanned, m.index)
+    const lineStart = scanned.lastIndexOf('\n', m.index - 1) + 1
+    const inString = isInsideString(lines[line - 1], m.index - lineStart)
 
     /* 狀態記號只有工具印出來的那一份合法 —— 判斷它在不在字串裡。
        行內位置要從整份文字的位置換算回來:比對是對整份做的,
        而判斷字串只看同一行。 */
-    if (TERMINAL_MARKS.has(mark)) {
-      const lineStart = scanned.lastIndexOf('\n', m.index - 1) + 1
-      if (isInsideString(lines[line - 1], m.index - lineStart)) continue
-    }
+    if (TERMINAL_MARKS.has(mark) && inString) continue
+
+    /* 元件與頁面的字串字面值是**畫面文案**,與寫在畫面區段裡的文字是同一種東西 ——
+       同一句話放 template 可以、抽成 config 物件往下傳就不行的話,
+       那是在管元件怎麼組織,不是在管文字。
+       註解照樣抓:那是寫給接手的人讀的,與程式碼旁邊的註解沒有兩樣
+       (掃描前已經把畫面區段遮掉,所以這裡看到的字串都在程式那一側)。 */
+    if (inString && isViewFile(rel)) continue
 
     // 同一個符號只報一次 —— 一份文件裡同一個圖示常常出現幾十次
     if (seen.has(mark)) continue
@@ -489,7 +508,7 @@ const checkSelfContained = ({ rel, text }) => {
 // 那是正常的工作過程,擋下來只會讓人繞過檢查。
 
 /** 設定檔在規範工具自己的目錄裡,那個位置不隨專案而不同 */
-const CONFIG_FILE = '.tools/lint/project-config.mjs'
+export const CONFIG_FILE = '.tools/lint/project-config.mjs'
 
 const CONFIG_EXPORT_RE = /^export const ([A-Za-z_$][\w$]*)/gm
 
@@ -549,33 +568,40 @@ export const unusedConfigNames = (text, sources) =>
 export const IS_SOURCE_PROJECT =
   !!SOURCE_PROJECT_NAME && PROJECT_NAMES.some((name) => patternOf(name).test(SOURCE_PROJECT_NAME))
 
-const checkConfigItem = ({ root, rel, text }) => {
-  if (rel !== CONFIG_FILE) return []
-
-  return unusedConfigNames(text, toolingSourcesOf(root)).map(({ name, index }) => {
-    const line = lineNoOf(text, index)
-
-    /* 來源那一邊只提醒:規則與設定是一起長的,先加設定、再改規則去讀它,
-       中間必然有一段「還沒有人用」的狀態。 */
-    if (IS_SOURCE_PROJECT) {
-      return warnOf(
+/**
+ * 多出來的一項該擋還是只提醒 —— 看這個專案是不是規範工具的來源。
+ *
+ * 來源那一邊只提醒:規則與設定是一起長的,先加設定、再改規則去讀它,
+ * 中間必然有一段「還沒有人用」的狀態,每次都擋等於不能工作。
+ * 其他專案一律擋:那一項在那裡永遠不會有作用,而且來源更新時會對不上。
+ *
+ * 身分可以傳進來,預設是這個專案實際的身分 —— 兩種身分的行為相反,
+ * 而規則跑在哪一種專案上只會走到其中一邊。傳得進來才驗得到另一邊。
+ */
+export const configItemIssueOf = (rel, line, name, isSource = IS_SOURCE_PROJECT) =>
+  isSource
+    ? warnOf(
         rel,
         line,
         'configItem',
         `${name} 目前沒有任何規則讀它 —— 這個專案是規範工具的來源,所以只是提醒;` +
           `規則那一側還沒改完的話這是正常的,確定不會用到就把它拿掉`
       )
-    }
+    : issueOf(
+        rel,
+        line,
+        'configItem',
+        `${name} 沒有任何規則讀它 —— 設定項有哪些由規範工具的來源決定,` +
+          `專案只把既有項目改成自己的值;多出來的一項不會有任何作用,` +
+          `而下一個人會以為某條規則吃這個值`
+      )
 
-    return issueOf(
-      rel,
-      line,
-      'configItem',
-      `${name} 沒有任何規則讀它 —— 設定項有哪些由規範工具的來源決定,` +
-        `專案只把既有項目改成自己的值;多出來的一項不會有任何作用,` +
-        `而下一個人會以為某條規則吃這個值`
-    )
-  })
+const checkConfigItem = ({ root, rel, text }) => {
+  if (rel !== CONFIG_FILE) return []
+
+  return unusedConfigNames(text, toolingSourcesOf(root)).map(({ name, index }) =>
+    configItemIssueOf(rel, lineNoOf(text, index), name)
+  )
 }
 
 // --- 規則 ruleTampered:共用規則只有來源能改 ----------------------------------

@@ -2,12 +2,11 @@
 import { FORGETCOMPLETE } from '@js/_storage.js'
 import { deCrypto } from '@js/.crypto/index.js'
 
-const { onUseMeta, onWithLoadingAll } = useCommonActions()
+const { onUseMeta } = useCommonActions()
 
 definePageMeta({
   layout: 'member',
   channel: 'member',
-  requiresAuth: false,
   middleware: [
     () => {
       const raw = useCookie(FORGETCOMPLETE).value
@@ -28,7 +27,6 @@ definePageMeta({
   ],
 })
 
-await onWithLoadingAll([])
 
 onUseMeta({
   title: '密碼設定完成 | 好房 HouseFun',

@@ -1,5 +1,5 @@
 <script setup>
-const { onUseMeta, onWithLoadingAll } = useCommonActions()
+const { onUseMeta } = useCommonActions()
 const memberForget = useMemberAuthForgetStore()
 const { onApiPostMemberAuthPasswordResetRequest, onSaveVerify, reset } = useMemberAuthForgetActions()
 const { onApiPromise } = usePopupActions()
@@ -8,10 +8,8 @@ const router = useRouter()
 definePageMeta({
   layout: 'member-auth',
   channel: 'memberAuth',
-  requiresAuth: false,
 })
 
-await onWithLoadingAll([])
 
 onUseMeta({
   title: '忘記密碼 | 好房 HouseFun',

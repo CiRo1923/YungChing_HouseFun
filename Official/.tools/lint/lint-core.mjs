@@ -50,6 +50,7 @@ export { onSortComposables, onSortImports } from './rules-code.mjs'
 
 // 存檔時把進入頁面要拿的資料包成一起發出 —— 判斷與修正都在 rules-page.mjs
 export { onWrapMountedCalls } from './rules-page.mjs'
+export { onCloneApiDefault } from './rules-store.mjs'
 import { GLOBAL_CHECKS, GLOBAL_RULE_HINT, GLOBAL_RULE_TITLE } from './rules-global.mjs'
 import { PAGE_CHECKS, PAGE_RULE_HINT, PAGE_RULE_TITLE } from './rules-page.mjs'
 import { STORE_CHECKS, STORE_RULE_HINT, STORE_RULE_TITLE } from './rules-store.mjs'
@@ -73,6 +74,8 @@ import {
   isModuleStyle,
   isSharedCss,
   moduleFolderOf,
+  classPrefixOf,
+  selectorClassesOf,
   issueOf,
   lineNoOf,
   templateRangeOf,
@@ -1218,26 +1221,15 @@ const checkBreakpointNeeded = ({ rel, text: raw }) => {
 // class 前綴要跟著母體走(mItem/ 底下不該出現 `m-switch-item-header`,
 // 應該是 `m-item-switch-header`)。
 
-/** mForm → m-form;mDatePicker → m-date-picker */
-const toKebab = (name) => name.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase()
-
 /**
  * 從檔案路徑推出這支 css 允許的 class 前綴;推不出來回傳 null(不檢查)。
  *
  * 元件的樣式與它的 .vue 放在同一個資料夾,所以資料夾名就是模組名 ——
  * mForm 那個資料夾底下的每一支 css,class 一律是 `m-form` 開頭。
  *
- * 名字不是 `m` 開頭接大寫的話推不出前綴(那不是這套命名裡的模組),回 null。
+ * 資料夾名怎麼推成前綴由 classPrefixOf 決定(元件的 template 那側問的是同一件事)。
  */
-const modulePrefixOf = (rel) => {
-  const moduleName = moduleFolderOf(rel)
-  if (!moduleName || !/^m[A-Z]/.test(moduleName)) return null
-
-  return toKebab(moduleName)
-}
-
-/** 選擇器行裡的 class token(含 CSS escape 的 \-\- 寫法) */
-const CLASS_TOKEN_RE = /\.((?:\\.|[\w-])+)/g
+const modulePrefixOf = (rel) => classPrefixOf(moduleFolderOf(rel))
 
 /**
  * 建置工具的關聯機制 class —— 不是任何模組的 class,而是「父層或兄弟的狀態」的掛勾。
@@ -1253,48 +1245,41 @@ const STRUCTURAL_CLASSES = new Set(['group', 'peer'])
 
 const isStructuralClass = (cls) => STRUCTURAL_CLASSES.has(cls.split('/')[0])
 
-const unescapeClass = (raw) => raw.replace(/\\/g, '')
-
-const checkModuleScope = ({ rel, text: raw }) => {
+const checkModuleScope = ({ rel, text }) => {
   if (!isModuleCss(rel)) return []
 
   const prefix = modulePrefixOf(rel)
   if (!prefix) return []
 
-  const text = maskCssComments(raw)
-
   const issues = []
   const seen = new Set()
 
-  text.split(/\r?\n/).forEach((raw, i) => {
-    const line = raw.trim()
+  /* 「選擇器裡出現過哪些 class」的抽取收在 shared.mjs 一份 ——
+     元件那一側也要問同一件事(寫出來的 class 有沒有對應的樣式)。
+     各寫一份的話,其中一邊修了誤判、另一邊沒修,
+     兩條規則就開始對同一份檔案講不同的話。 */
+  for (const { cls: raw, line } of selectorClassesOf(text)) {
+    // 斷點前綴要先剝掉 —— `&.p\:\-\-px-24` 的本體是 `--px-24`,那是 modifier
+    const cls = stripVariants(raw)
 
-    // 只看選擇器行 —— 宣告(`--x: 1px;`)與 at-rule 不算
-    if (!/[{,]\s*$/.test(line) || line.startsWith('@')) return
+    if (cls.startsWith('--')) continue // modifier / 狀態
+    if (/^j[A-Z]/.test(cls)) continue // 純給 JS 抓的 hook class
+    if (isStructuralClass(cls)) continue // 父層 / 兄弟狀態的掛勾,不是模組的 class
+    if (cls === prefix || cls.startsWith(`${prefix}-`)) continue // 自己的 class
+    if (seen.has(cls)) continue
+    seen.add(cls)
 
-    for (const m of line.matchAll(CLASS_TOKEN_RE)) {
-      // 斷點前綴要先剝掉 —— `&.p\:\-\-px-24` 的本體是 `--px-24`,那是 modifier
-      const cls = stripVariants(unescapeClass(m[1]))
-
-      if (cls.startsWith('--')) continue // modifier / 狀態
-      if (/^j[A-Z]/.test(cls)) continue // 純給 JS 抓的 hook class
-      if (isStructuralClass(cls)) continue // 父層 / 兄弟狀態的掛勾,不是模組的 class
-      if (cls === prefix || cls.startsWith(`${prefix}-`)) continue // 自己的 class
-      if (seen.has(cls)) continue
-      seen.add(cls)
-
-      issues.push(
-        issueOf(
-          rel,
-          i + 1,
-          'moduleScope',
-          cls.startsWith('m-')
-            ? `.${cls} 是別的模組的 class —— 這支檔案只能寫 .${prefix} 系列;變體的 class 也要收斂成 .${prefix}-* 開頭`
-            : `.${cls} 不是 m- 開頭的模組 class —— 模組 css 只能寫 .${prefix} 系列與 --modifier`
-        )
+    issues.push(
+      issueOf(
+        rel,
+        line,
+        'moduleScope',
+        cls.startsWith('m-')
+          ? `.${cls} 是別的模組的 class —— 這支檔案只能寫 .${prefix} 系列;變體的 class 也要收斂成 .${prefix}-* 開頭`
+          : `.${cls} 不是 m- 開頭的模組 class —— 模組 css 只能寫 .${prefix} 系列與 --modifier`
       )
-    }
-  })
+    )
+  }
 
   return issues
 }

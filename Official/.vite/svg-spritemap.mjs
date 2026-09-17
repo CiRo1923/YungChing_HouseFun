@@ -2,7 +2,7 @@
 //
 //   _svg/*.svg  →  單一 <svg>,每檔一個 <symbol id="檔名">
 //
-// 供 components/common/mSvgIcon.vue 以 <use xlink:href="…/spritemap.svg#icon_search" /> 引用。
+// 供 components/common/mSvgIcon/Index.vue 以 <use xlink:href="…/spritemap.svg#icon_search" /> 引用。
 // dev 與 build 共用 createSpritemap,兩邊產出才不會不一致。
 //
 // 注意:產物需與原套件等價,下列細節是比對其輸出後定出來的,動之前先看懂:
@@ -217,7 +217,7 @@ export default function SvgSpritemapDevPlugin(svgDirName = '_svg') {
  * 注意:emitFile 的 fileName 是相對於 build.outDir,而 Nuxt 只把 outDir 底下的
  *    assetsDir(`_nuxt/`)搬進 .output/public/。少了這段前綴,檔案會留在
  *    client dist 的頂層而不會出現在產物裡(mSvgIcon 取用的路徑是
- *    baseURL + buildAssetsDir + spritePath,見 components/common/mSvgIcon.vue)。
+ *    baseURL + buildAssetsDir + spritePath,見 components/common/mSvgIcon/Index.vue)。
  *
  * 只在 client build 產出:server build 那份不會被任何地方取用。
  */

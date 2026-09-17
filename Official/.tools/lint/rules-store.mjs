@@ -7,6 +7,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import {
   ACTIONS_DIR_NAME,
+  DEEP_CLONE_HELPER,
   STANDALONE_STORES,
   STORE_DIR,
   STORE_SETUP_CALLS,
@@ -17,10 +18,12 @@ import {
   isInSrc,
   hasExemptMark,
   issueOf,
+  warnOf,
   lineNoOf,
   listViewFolders,
   listViewSubFolders,
   viewResourceDirOf,
+  withNamedImport,
 } from './shared.mjs'
 
 /** 行為放在 store 目錄底下的這個子資料夾 */
@@ -695,6 +698,11 @@ const checkActionReturn = ({ rel, text }) => {
 //
 // 預設值散在各處的話:改一個欄位要同時記得改 store 的初始值與每一支 reset,
 // 漏掉一邊不會報錯 —— 只會在「送出前先重填一次」的流程裡帶到舊值。
+//
+// **readonly 是深層的**,所以這一層裡有陣列或巢狀物件時,
+// 展開一層還原(`{ ...apiDefault.x }`)複製到的只有最外面那一層 ——
+// 陣列仍然是唯讀的那一個,還原之後寫不進去,而且正式版沒有任何徵兆。
+// 那種情況要深拷貝(專案自己的深拷貝工具,或 `structuredClone(toRaw(x))`)。
 
 const checkStoreApiDefault = ({ rel, text }) => {
   if (!isStoreFile(rel)) return []
@@ -725,7 +733,129 @@ const checkStoreApiDefault = ({ rel, text }) => {
   ]
 }
 
+// --- 規則 storeDefaultClone:apiDefault 裡的陣列要提醒深拷貝 -----------------
+//
+// `readonly` 是深層的,所以展開一層還原(`{ ...apiDefault.x }`)複製到的
+// 只有最外面那一層 —— 裡面的陣列仍然是 apiDefault 那一個唯讀的陣列。
+// 還原之後 `push` 進不去,長度永遠是 0。
+//
+// **開發時看得到 Vue 的警告,正式版完全沒有徵兆**:畫面上是「按了新增卻沒反應」,
+// 而那一行 push 看起來完全正常。checkbox 群組綁陣列時特別容易遇到 ——
+// `v-model` 是就地增刪,不是整組換掉。
+//
+// 這條看的是 apiDefault 裡有沒有陣列,不是還原怎麼寫 ——
+// 兩者在不同檔案(宣告在 store、還原在 actions),而檢查是一支一支跑的。
+//
+// **所以它是建議級的,不擋。** 有陣列本身沒有錯,還原的地方寫對了就沒事,
+// 但這條看不到那一側 —— 擋的話,那一筆無論怎麼改都消不掉,
+// 而一條修不掉的違規會讓整份清單失去意義:看的人開始習慣「有幾筆是正常的」。
+//
+// 巢狀物件不納入:apiDefault 的分層本身就是巢狀,那樣每一支都會被報一次。
+
+/** const apiDefault = readonly({ … }) 的整段內容;找不到回 null */
+const apiDefaultBlockOf = (text) => {
+  const start = /\bconst\s+apiDefault\s*=\s*\w*\s*\(?\s*\{/.exec(text)
+  if (!start) return null
+
+  const from = start.index + start[0].length - 1
+  let depth = 0
+
+  for (let i = from; i < text.length; i += 1) {
+    if (text[i] === '{') depth += 1
+    else if (text[i] === '}') {
+      depth -= 1
+      if (depth === 0) return { body: text.slice(from, i + 1), index: from }
+    }
+  }
+
+  return null
+}
+
+/** 欄位名: [ —— 陣列型的欄位 */
+const ARRAY_FIELD_RE = /(\w+)\s*:\s*\[/g
+
+const checkStoreDefaultClone = ({ rel, text }) => {
+  if (!isStoreFile(rel)) return []
+
+  const block = apiDefaultBlockOf(text)
+  if (!block) return []
+
+  const fields = [...block.body.matchAll(ARRAY_FIELD_RE)].map((m) => m[1])
+  if (!fields.length) return []
+
+  const names = [...new Set(fields)].join('、')
+
+  return [
+    warnOf(
+      rel,
+      lineNoOf(text, block.index),
+      'storeDefaultClone',
+      `apiDefault 裡有陣列欄位(${names})—— 還原那一層時要深拷貝;展開一層的話那個陣列仍然是唯讀的同一個,push 進不去,而且正式版沒有任何徵兆`
+    ),
+  ]
+}
+
+// --- 自動修正:從 apiDefault 還原時改成深拷貝 --------------------------------
+//
+// `{ ...store.apiDefault.x }` 只複製最外面那一層,裡面的陣列仍然是
+// apiDefault 那一個唯讀的陣列 —— 還原之後 push 進不去,而且正式版沒有徵兆。
+//
+// 存檔時換成深拷貝,並補上那支函式的 import(少了 import 整支檔案會壞掉,
+// 比不修還糟)。
+//
+// **那一層全是單純值時也照樣換。** 規則看不到那一層裡有什麼
+// (宣告在 store、還原在 actions,是兩支檔案),而多拷貝一層沒有任何壞處;
+// 漏掉的那一次則是沒有徵兆的失效。
+//
+// 帶回幾個要留著的欄位(`{ ...apiDefault.x, itemId }`)時只換展開的那一段,
+// 後面的欄位原樣留著 —— 那是刻意保留的值,不是預設值。
+//
+// **範圍是原始碼裡的每一支 .js 與 .vue**,不只 actions ——
+// 頁面自己的 composable 也會從 apiDefault 取初始值,那裡踩到的是同一件事。
+
+const { name: CLONE_HELPER, source: CLONE_HELPER_SOURCE } = DEEP_CLONE_HELPER
+
+/**
+ * { ...<任意運算式>.apiDefault.<路徑> } —— 後面可以再接要留著的欄位。
+ *
+ * 大括號與展開之間的空白單獨抓出來,替換時原樣放回去:
+ * 多行的物件字面值被壓成一行的話,排版工具會把整段重排,
+ * diff 裡就混著一堆與這次改動無關的行。
+ */
+const SPREAD_DEFAULT_RE = /(\{\s*)\.\.\.\s*([\w.$[\]'"]*\bapiDefault\b[\w.$[\]'"]*)\s*(,|\})/g
+
+export const onCloneApiDefault = (text, rel) => {
+  if (!CLONE_HELPER) return null // 專案沒有這支共用函式
+  if (!isInSrc(rel) || !/\.(vue|js)$/.test(rel)) return null
+
+  let changed = false
+
+  const next = text.replace(SPREAD_DEFAULT_RE, (whole, open, expr, tail) => {
+    if (expr.includes(`${CLONE_HELPER}(`)) return whole
+    changed = true
+
+    // 後面還有欄位的話保留大括號與原本的換行,只把展開的那一段換掉
+    return tail === ',' ? `${open}...${CLONE_HELPER}(${expr}),` : `${CLONE_HELPER}(${expr})`
+  })
+
+  if (!changed) return null
+
+  const withImport = withNamedImport(next, CLONE_HELPER, CLONE_HELPER_SOURCE)
+
+  // 補不上 import 就整個不動 —— 換了寫法卻找不到那支函式的話,整支檔案會壞掉,
+  // 比不修還糟。留著由規則報出來,交給人處理。
+  return new RegExp(`^\\s*import\\s[^\\n]*\\b${CLONE_HELPER}\\b`, 'm').test(withImport)
+    ? withImport
+    : null
+}
+
 // --- 規則 storeResetDefault:reset 不要手寫預設值 ----------------------------
+//
+// 看的是「整組賦值卻自己列一份預設值」:`apiData = { A: null, B: [] }`。
+// 展開 apiDefault 之後再帶回幾個要留著的欄位
+// (`{ ...apiDefault.x, itemId }`)是放行的 —— 預設值仍然只有一份。
+//
+// 逐欄位寫入(`apiData.A = null`)不在這條的範圍內。
 
 /** apiData = { … } 的字面值賦值 */
 const RESET_LITERAL_RE = /\.apiData\s*=\s*\{([^}]*)\}/g
@@ -740,7 +870,7 @@ const checkResetDefault = ({ rel, text }) => {
         rel,
         lineNoOf(text, m.index),
         'storeResetDefault',
-        `reset 手寫了預設值 —— 改用 { ...store.apiDefault.{對應的 key} },預設值只留一份,改欄位時不會漏改這裡`
+        `reset 手寫了預設值 —— 改成從 store.apiDefault.{對應的 key} 還原,預設值只留一份,改欄位時不會漏改這裡;那一層裡有陣列或巢狀物件時要深拷貝,展開一層的話它們仍然是唯讀的,寫不進去也沒有徵兆`
       )
     )
 }
@@ -817,6 +947,7 @@ const checkStoreToRefs = ({ rel, text }) => {
 export const STORE_CHECKS = [
   checkStoreToRefs,
   checkStoreApiDefault,
+  checkStoreDefaultClone,
   checkResetDefault,
   checkActionApiNaming,
   checkActionReturn,
@@ -837,6 +968,7 @@ export const STORE_RULE_TITLE = {
   storeActionNaming: '呼叫 api 的 action 命名',
   storeActionReturn: 'action 的回傳形狀',
   storeApiDefault: '缺少 apiDefault',
+  storeDefaultClone: 'apiDefault 裡有陣列,還原要深拷貝',
   storeResetDefault: 'reset 手寫預設值',
   storeLayer: 'store 分層對不上頁面資料夾',
   storeToRefs: '取 store 的值沒走 storeToRefs',
@@ -851,6 +983,7 @@ export const STORE_RULE_HINT = {
   storeActionNaming: 'onApi + api 函式名 —— 從 action 名字看得出它打哪一支 api',
   storeActionReturn: '打了 api 的 action 一律 return { config, status, data }',
   storeApiDefault: '送出參數的預設值集中成 const apiDefault = readonly({ … })',
+  storeDefaultClone: '有陣列的那一層,還原時要深拷貝 —— 展開一層的話陣列仍然是唯讀的同一個',
   storeResetDefault: 'reset 用 { ...store.apiDefault.xxx },不要手寫',
   storeLayer: `一個頁面一層;子資料夾只是分類時不佔一層,標豁免並寫理由`,
   storeToRefs: '取值一律 const { … } = storeToRefs(store) —— 直接解構或賦值會斷掉響應',

@@ -123,11 +123,32 @@ const apiResourceOf = (rel, root) => {
   return fs.existsSync(ownConfig) ? parts[0] : path.basename(parts.at(-1), '.js')
 }
 
+/**
+ * api 的資料夾結構,是不是一路對得上頁面的資料夾結構。
+ *
+ * `_api/buy/list.js` 對 `<頁面目錄>/buy/list/` —— 整段路徑都在,那就沒有對不上的問題。
+ *
+ * 這是「單一服務、api 依頻道分資料夾」那種擺法:整個專案只有一份連線設定,
+ * 資料夾純粹是把檔案收好。沒有這一段的話,那種專案只剩兩條路 ——
+ * 補一支沒有作用的 .config.js 讓規則以為那是服務,或把每一支檔名塞進例外清單,
+ * 兩種都是為了讓規則過而改程式碼,而不是程式碼真的有問題。
+ */
+const mirrorsViewPath = (rel, root) => {
+  const parts = rel.slice(`${API_DIR}/`.length).split('/')
+  if (parts.length === 1) return false
+
+  const segments = [...parts.slice(0, -1), path.basename(parts.at(-1), '.js')]
+
+  return fs.existsSync(path.join(root, ...VIEWS_DIR.split('/'), ...segments))
+}
+
 const checkApiScope = ({ rel, root }) => {
   if (!isApiFile(rel)) return []
 
   const folders = listViewFolders(root)
   if (!folders) return []
+
+  if (mirrorsViewPath(rel, root)) return []
 
   const name = apiResourceOf(rel, root)
   if (folders.has(name) || name === SHARED_API_FILE || ALLOWED_STANDALONE.has(name)) return []

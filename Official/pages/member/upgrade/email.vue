@@ -1,7 +1,7 @@
 <script setup>
 import { EMAILEXCEEDED } from '@js/_storage.js'
 
-const { onUseMeta, onWithLoadingAll } = useCommonActions()
+const { onUseMeta } = useCommonActions()
 const { onApiPromise } = usePopupActions()
 const memberUpgrade = useMemberAuthUpgradeStore()
 const { email } = storeToRefs(memberUpgrade)
@@ -12,7 +12,6 @@ const router = useRouter()
 definePageMeta({
   layout: 'member-auth',
   channel: 'memberAuth',
-  requiresAuth: false,
 })
 
 // details 只取第一筆(後端第一筆即為要呈現的原因),後面的忽略
@@ -22,7 +21,6 @@ const exceededMessage = computed(() => {
   return [details?.[0], message].filter(Boolean).join('<br />')
 })
 
-await onWithLoadingAll([])
 
 onUseMeta({
   title: '會員中心 | 好房 HouseFun',

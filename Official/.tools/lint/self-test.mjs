@@ -71,12 +71,19 @@ import {
   onSortComposables,
   onSortImports,
   onWrapMountedCalls,
+  onCloneApiDefault,
   RULE_TITLE,
   TOOL_STATE_RULES,
 } from './lint-core.mjs'
 import { NO_PREREQUISITE_RULES, PREFLIGHT_RULES } from './preflight.mjs'
 import { aliasListOf, importGroupOf, tailwindThemeOf } from './rules-code.mjs'
-import { IS_SOURCE_PROJECT, PROJECT_DIR_VALUES, unusedConfigNames } from './rules-global.mjs'
+import {
+  CONFIG_FILE,
+  IS_SOURCE_PROJECT,
+  PROJECT_DIR_VALUES,
+  configItemIssueOf,
+  unusedConfigNames,
+} from './rules-global.mjs'
 import { isStoreDeclareCall } from './rules-store.mjs'
 import { CHECKSUM_FILE, currentFingerprints, fingerprintDiff, isSkipped } from './checksum.mjs'
 import {
@@ -96,6 +103,7 @@ import {
   CSS_MODULES_DIR,
   GENERATED_FILES,
   IMPORT_ORDER_GROUPS,
+  IS_FILE_BASED_ROUTING,
   MODULE_CSS_DIR_NAME,
   PARALLEL_AWAIT_HELPER,
   PROJECT_DOCS_DIR,
@@ -110,6 +118,7 @@ import {
   TAILWIND_THEME_OVERRIDES,
   VIEW_RESOURCE_DEPTH,
   VIEWS_DIR,
+  VIEW_UNDERSCORE_FOLDERS,
 } from './project-config.mjs'
 import {
   detectViewResourceDepth,
@@ -117,6 +126,7 @@ import {
   listConventionRules,
   listConventionSkills,
   listViewFolders,
+  listViewSubFolders,
 } from './shared.mjs'
 import { BOLD, GREEN, RED, RESET, YELLOW } from './colors.mjs'
 
@@ -265,8 +275,16 @@ const viewResourceDir = (resource) =>
     ? `${VIEWS_DIR}/${PROBE_VIEW_GROUP}/${resource}`
     : `${VIEWS_DIR}/${resource}`
 
-/** 頁面規則的探測檔 —— 資源在第幾層由設定決定 */
-const P = viewResourceDir(PROBE)
+/**
+ * 頁面規則的探測檔 —— 資源在第幾層由設定決定。
+ *
+ * 名字不帶底線:頁面目錄的資料夾一律對應網址,底線開頭的那種是列在設定裡的例外
+ * (規則 viewFolder)。用底線開頭的探測名的話,每一則放在這裡的案例
+ * 都會先撞到那一條,而它們要驗的根本是別的規則。
+ *
+ * 清理仍然認得它 —— 探測名的判斷(isProbeName)也認 PROBE_PAGE_PREFIX 這個開頭。
+ */
+const P = viewResourceDir(`${PROBE_PAGE_PREFIX}Probe`)
 
 /**
  * 探針用的一組斷點變數,每個斷點各一份。
@@ -308,6 +326,24 @@ const PD = `${PROJECT_DOCS_DIR}/${PROBE}`
 const probeVue = `<template>\n  <div class="m-probe"></div>\n</template>\n`
 
 const PROBE_DIRS = [M, C, SC, L, GC, GL, A, T, `${T}/${ACTIONS_DIR_NAME}`, P, D, PD]
+
+/**
+ * 案例會寫檔、但不在 PROBE_DIRS 底下的那幾層 —— 靠**名字**認出探測檔。
+ *
+ * 那幾層與正式檔案混在一起(色票檔、頁面目錄的第一層),整個刪掉會刪到真的東西,
+ * 所以逐一比對名字。`dir` 空字串代表專案根。
+ *
+ * cleanup 與「案例的檔案清不清得掉」那道檢查讀的是這同一份 ——
+ * 各寫一份的話,新增一個位置時只有其中一邊跟著改,而漏掉的那一邊不會報錯:
+ * 不是清不掉,就是明明清得掉卻被報成會殘留。
+ */
+const PROBE_SWEEPS = [
+  { dir: '', match: isProbeName },
+  { dir: CSS_MODULES_DIR, match: isProbeName },
+  ...COMPONENT_DIRS.map((dir) => ({ dir, match: isProbeName })),
+  { dir: COLOR_CSS_DIR, match: (name) => name.startsWith(PROBE_COLOR_PREFIX) },
+  { dir: VIEWS_DIR, match: isProbeName },
+]
 
 /**
  * 從探測用的頁面檔,走相對路徑指到 api 目錄底下某一支檔案。
@@ -1148,6 +1184,7 @@ const CSS_CASES = [
   // ---------- 規則 moduleOrder ----------
   {
     name: 'moduleOrder 變數檔排在版型檔後面',
+    rule: 'moduleOrder',
     file: `${C}/Order1.vue`,
     code: `<script setup>\nimport '@css/_modules/mProbe/common.css'\nimport '@css/_modules/mProbe/variables.css'\n</script>\n`,
     expect: 1,
@@ -1155,6 +1192,7 @@ const CSS_CASES = [
   },
   {
     name: 'moduleOrder 正確順序不誤報',
+    rule: 'moduleOrder',
     file: `${C}/Order2.vue`,
     code: `<script setup>\nimport '@css/_modules/mProbe/variables.css'\nimport '@css/_modules/mProbe/inputVariables.css'\nimport '@css/_modules/mProbe/common.css'\nimport '@css/_modules/mProbe/input.css'\n</script>\n`,
     expect: 0,
@@ -1299,6 +1337,63 @@ const CSS_CASES = [
     expect: 1,
     rule: 'moduleScope',
     keyword: 'grouped',
+  },
+  {
+    /* 值寫不下而折行時只會折在括號裡(漸層、calc 那些)。
+       把續行當成選擇器的話,`linear-gradient(142.26deg,` 的下一行會被讀成 `.26deg`,
+       而那一段完全正常 —— 排版工具自己折的。 */
+    name: 'moduleScope 值折行的小數不算 class',
+    file: `${S}/gradient.css`,
+    code: `.m-css-self-test {\n  background-image: linear-gradient(\n    142.26deg,\n    var(--white) 10.65%,\n    var(--white) 88.71%\n  );\n}`,
+    expect: 0,
+    rule: 'moduleScope',
+  },
+  {
+    /* 括號閉上之後照樣要檢查 —— 不然一個漸層就讓整支檔案的後半段失去檢查。 */
+    name: 'moduleScope 值折行結束後照樣檢查',
+    file: `${S}/gradientThenScope.css`,
+    code: `.m-css-self-test {\n  background-image: linear-gradient(\n    142.26deg,\n    var(--white) 10.65%\n  );\n}\n\n.l-body {\n  @apply block;\n}`,
+    expect: 1,
+    rule: 'moduleScope',
+    keyword: 'l-body',
+  },
+  {
+    /* 緊接在 `&` 後面的是「同一個元素還掛著什麼」的條件,不是在定義那個 class ——
+       共用的捲軸 class 由使用端掛上去,這裡只是「掛了它的時候」。
+       報它的話,這種條件式的樣式沒有一種寫得出來的形狀。 */
+    name: 'moduleScope 複合選擇器裡的附加 class 不算定義',
+    file: `${S}/compound.css`,
+    code: `.m-css-self-test {\n  &.scrollbar.\\-\\-y {\n    @apply flex;\n  }\n}`,
+    expect: 0,
+    rule: 'moduleScope',
+  },
+  {
+    /* 祖先是別的 class 時照樣要報 —— 那是「別人底下的我」,
+       與「我身上還掛著什麼」是兩件事。 */
+    name: 'moduleScope 祖先是別的 class 照樣報',
+    file: `${S}/ancestor.css`,
+    code: `.l-body .m-css-self-test {\n  @apply flex;\n}`,
+    expect: 1,
+    rule: 'moduleScope',
+    keyword: 'l-body',
+  },
+  {
+    /* 一筆宣告可以跨好幾行,而且每一行都以逗號收尾 —— 那個形狀與並列的選擇器
+       一模一樣。不追蹤的話,`opacity 0.3s,` 裡的 `.3s` 會被讀成 class。 */
+    name: 'moduleScope 跨行宣告裡的時間值不算 class',
+    file: `${S}/transition.css`,
+    code: `.m-css-self-test {\n  transition:\n    opacity 0.3s,\n    visibility 0.3s;\n}`,
+    expect: 0,
+    rule: 'moduleScope',
+  },
+  {
+    /* 宣告收尾之後照樣檢查 —— 不然一筆跨行的宣告就讓整支檔案的後半段失去檢查。 */
+    name: 'moduleScope 跨行宣告結束後照樣檢查',
+    file: `${S}/transitionThen.css`,
+    code: `.m-css-self-test {\n  transition:\n    opacity 0.3s,\n    visibility 0.3s;\n}\n\n.l-body {\n  @apply block;\n}`,
+    expect: 1,
+    rule: 'moduleScope',
+    keyword: 'l-body',
   },
   {
     name: 'moduleScope 變體 class 要收斂成母體前綴',
@@ -1650,13 +1745,15 @@ const RULE_CASES = [
   // 那類正當內容的數量遠多於真正的違規,清單會被淹沒。
   {
     name: 'projectName:原始碼裡的品牌名是內容,不報',
-    file: `${P}/ProbeBrandName.vue`,
+    rule: 'projectName',
+    file: `${P}/probeBrandName.vue`,
     code: `<template>\n  <p>RoyalCanin</p>\n</template>\n`,
     expect: 0,
   },
   {
     name: 'absolutePath:原始碼裡的絕對路徑照樣報',
-    file: `${P}/ProbeAbsolutePath.vue`,
+    rule: 'absolutePath',
+    file: `${P}/probeAbsolutePath.vue`,
     code: `<script setup>\n// 圖片放在 C:/work/assets/\n</script>\n`,
     expect: 1,
     keyword: '只在特定電腦上成立',
@@ -1696,7 +1793,8 @@ const RULE_CASES = [
   },
   {
     name: 'plainText 原始碼的註解也算',
-    file: `${P}/ProbeMark.vue`,
+    rule: 'plainText',
+    file: `${P}/probeMark.vue`,
     code: `<script setup>\n// \u{1f527} 存檔時會自動排序\n</script>\n`,
     expect: 1,
     keyword: '裝飾符號',
@@ -1705,16 +1803,43 @@ const RULE_CASES = [
     /* 畫面上的文字是內容本身(標題、按鈕上的字、給使用者看的提示)——
        那裡出現什麼符號由設計與文案決定,不是規範系統要管的事。 */
     name: 'plainText 畫面上的文字不檢查',
-    file: `${P}/ProbeMarkTemplate.vue`,
+    file: `${P}/probeMarkTemplate.vue`,
     code: `<template>\n  <div class="m-probe">\u{1f527} 設定</div>\n</template>\n`,
     expect: 0,
     rule: 'plainText',
   },
   {
+    /* 同一句文案,有的直接寫在畫面區段裡,有的抽成 config 物件往下傳 ——
+       兩者是同一種東西。只放行畫面區段的話,等於在管元件怎麼組織,不是在管文字。 */
+    name: 'plainText 元件裡當成資料寫的畫面文案也放行',
+    rule: 'plainText',
+    file: `${SC}/Index.vue`,
+    code: `<script setup>\nconst config = { content: '成交速度 ↑ 2.5 倍' }\n</script>\n\n<template>\n  <p>{{ config.content }}</p>\n</template>\n`,
+    expect: 0,
+  },
+  {
+    /* 註解照樣抓 —— 那是寫給接手的人讀的,與程式碼旁邊的註解沒有兩樣。 */
+    name: 'plainText 元件裡的註解照樣抓',
+    rule: 'plainText',
+    file: `${SC}/Index.vue`,
+    code: `<script setup>\n// ⚠️ 這裡要小心\nconst a = 1\n</script>\n\n<template>\n  <p>x</p>\n</template>\n`,
+    expect: 1,
+    keyword: '裝飾符號',
+  },
+  {
+    /* store 與 api 那幾層的字串是參數、端點、狀態代碼,不是給人看的文案。 */
+    name: 'plainText store 裡的字串不算畫面文案,照樣抓',
+    rule: 'plainText',
+    file: `${T}/${PROBE_PAGE_ALPHA}.js`,
+    code: `export const label = '★ 標記'\n`,
+    expect: 1,
+    keyword: '裝飾符號',
+  },
+  {
     /* 畫面區段裡的註解是寫給接手的人讀的,與程式碼旁邊的註解沒有兩樣 ——
        放行的話,同一句話寫在畫面區段裡就繞過了整條規則。 */
     name: 'plainText 畫面區段裡的註解照樣抓',
-    file: `${P}/ProbeMarkTplComment.vue`,
+    file: `${P}/probeMarkTplComment.vue`,
     code: `<template>\n  <!-- ✅ 這一段之後要拆成兩個區塊 -->\n  <div class="m-probe"></div>\n</template>\n`,
     expect: 1,
     rule: 'plainText',
@@ -2412,6 +2537,7 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
   // 寫死某個 alias 的話,換一個命名的專案這幾則會驗不到東西。
   {
     name: 'importOrder 依分組排列不誤報',
+    rule: 'importOrder',
     file: `${C}/Order1.vue`,
     code: `<script setup>\n${orderedImportsOf().join('\n')}\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
     expect: 0,
@@ -2460,6 +2586,141 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
     keyword: '首字要大寫',
   },
   {
+    /* 頁面目錄的資料夾是網址的一段,而網址一向是小寫的。
+       探針一律建在不帶底線的頁面資料夾底下 —— 用 PROBE 那個名字的話,
+       它自己就是底線開頭,每一則都會先撞到下面那一條。 */
+    name: 'viewFolder 資料夾首字大寫要報',
+    rule: 'viewFolder',
+    file: `${viewResourceDir(PROBE_PAGE_ALPHA)}/Detail/index.vue`,
+    code: probeVue,
+    expect: 1,
+    keyword: '首字要小寫',
+  },
+  {
+    /* 底線資料夾不是網址的一段,允許的名字列在設定裡 —— 開放自由命名的話,
+       那個例外會愈開愈大,而每一個都要讀的人自己猜它算不算網址。 */
+    name: 'viewFolder 底線資料夾不在清單裡要報',
+    rule: 'viewFolder',
+    file: `${viewResourceDir(PROBE_PAGE_ALPHA)}/_pages/Probe.vue`,
+    code: probeVue,
+    expect: 1,
+    keyword: VIEW_UNDERSCORE_FOLDERS.join('、'),
+  },
+  {
+    name: 'viewFolder 清單裡的底線資料夾不誤報',
+    rule: 'viewFolder',
+    file: `${viewResourceDir(PROBE_PAGE_ALPHA)}/${VIEW_UNDERSCORE_FOLDERS[0]}/Probe.vue`,
+    code: probeVue,
+    expect: 0,
+  },
+  {
+    /* 資料夾的分隔方式與同一層的 .vue 檔名同一套 —— 兩者都在回答
+       「這一段是不是網址」。資料夾寬、檔案嚴的話,同一個名字寫成資料夾就過、
+       寫成檔案就報。檔案系統路由的專案裡那一層就是網址,連字號放行。 */
+    name: 'viewFolder 資料夾帶連字號依網址從哪裡來決定',
+    rule: 'viewFolder',
+    file: `${viewResourceDir(PROBE_PAGE_ALPHA)}/probe-detail/index.vue`,
+    code: probeVue,
+    expect: IS_FILE_BASED_ROUTING ? 0 : 1,
+    ...(IS_FILE_BASED_ROUTING ? {} : { keyword: '駝峰' }),
+  },
+  {
+    /* 連續大寫兩種專案都擋:網址裡的大寫在有的伺服器上不分大小寫,
+       同一個畫面會有兩個網址進得去。 */
+    name: 'viewFolder 資料夾連續大寫一律要報',
+    rule: 'viewFolder',
+    file: `${viewResourceDir(PROBE_PAGE_ALPHA)}/probeQRCode/index.vue`,
+    code: probeVue,
+    expect: 1,
+  },
+  {
+    /* 點開頭的資料夾是另一套慣例(放 composable 那種),不受這條約束。 */
+    name: 'viewFolder 點開頭的資料夾放行',
+    rule: 'viewFolder',
+    file: `${viewResourceDir(PROBE_PAGE_ALPHA)}/.composables/probe.js`,
+    code: `export const useProbe = () => ({})\n`,
+    expect: 0,
+  },
+  {
+    /* 只看首字大小寫的話,連字號、底線、連續大寫都會通過 ——
+       同一個專案裡好幾種分隔方式並存時,找一支檔案要先想它是哪一種寫法。 */
+    name: 'vueFileName 檔名不是駝峰要報',
+    rule: 'vueFileName',
+    file: `${C}/Probe-Item.vue`,
+    code: probeVue,
+    expect: 1,
+    keyword: '駝峰',
+  },
+  {
+    name: 'vueFileName 連續大寫要報',
+    rule: 'vueFileName',
+    file: `${C}/QRCode.vue`,
+    code: probeVue,
+    expect: 1,
+    keyword: '駝峰',
+  },
+  {
+    name: 'vueFileName 駝峰不誤報',
+    rule: 'vueFileName',
+    file: `${C}/QrCode.vue`,
+    code: probeVue,
+    expect: 0,
+  },
+  {
+    /* 模組 css 的 class 前綴是從資料夾名推出來的,兩者對不上的話那一側
+       會推出一個沒有人在用的前綴 —— 而沒有樣式檔的元件連那個訊息都沒有。 */
+    name: 'componentClass 資料夾名對不上 template 的 class',
+    rule: 'componentClass',
+    file: `${SC}/Index.vue`,
+    code: `<template>\n  <div class="m-css-self-text"></div>\n</template>\n`,
+    expect: 1,
+    keyword: 'm-css-self-test',
+  },
+  {
+    name: 'componentClass 對得上就不誤報',
+    rule: 'componentClass',
+    file: `${SC}/Index.vue`,
+    code: `<template>\n  <div class="m-css-self-test"></div>\n</template>\n`,
+    expect: 0,
+  },
+  {
+    /* 底下的子元素照樣是這個模組的 class,不是別的模組。 */
+    name: 'componentClass 子元素的 class 帶著母體前綴,不誤報',
+    rule: 'componentClass',
+    file: `${SC}/Item.vue`,
+    code: `<template>\n  <li class="m-css-self-test-item"></li>\n</template>\n`,
+    expect: 0,
+  },
+  {
+    /* 自己完全不寫 class 的轉手型元件沒有 class 可以對,這條的前提不成立。 */
+    name: 'componentClass 轉手型元件不受這條約束',
+    rule: 'componentClass',
+    file: `${SC}/Pass.vue`,
+    code: `<template>\n  <CommonMPopup :setClass="{ main: '--px-20' }">\n    <slot />\n  </CommonMPopup>\n</template>\n`,
+    expect: 0,
+  },
+  {
+    /* 一支元件遲早會有樣式、子元件,那時才建資料夾就要動到每一個使用端
+       (自動注入的名稱跟著路徑走)。 */
+    name: 'componentFolder 直接放在分類資料夾底下要報',
+    rule: 'componentFolder',
+    /* 探測檔一律放在探測目錄底下(那幾層 cleanup 會清掉)——
+       放在元件目錄第一層的話,跑完一次就留一支沒有人認得的 .vue 在專案裡。
+       這個資料夾名不是 m 開頭,對這條規則來說就是「分類層」,驗得到同一件事。 */
+    file: `${C}/Loose.vue`,
+    code: probeVue,
+    expect: 1,
+    keyword: '自己的資料夾',
+  },
+  {
+    /* 同一個模組底下好幾支是正常的 —— 那個資料夾就是元件本身,不是分類。 */
+    name: 'componentFolder 模組資料夾底下的子檔案不誤報',
+    rule: 'componentFolder',
+    file: `${SC}/Item.vue`,
+    code: probeVue,
+    expect: 0,
+  },
+  {
     name: 'vueFileName 元件主檔叫 Index.vue 不誤報',
     rule: 'vueFileName',
     file: `${C}/Index.vue`,
@@ -2484,6 +2745,36 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
     expect: 0,
   },
   {
+    /* 頁面檔名可以怎麼取,看的是網址從哪裡來。檔案系統路由的專案裡,
+       檔名就是網址的一段 —— 連字號是網址分隔字詞的寫法,要求改成駝峰
+       等於要求把網址改掉,既有的連結會失效。自己寫路由表的專案沒有這回事:
+       `path` 與檔名各寫各的,檔名只是內部的名字,照駝峰那一套。 */
+    name: 'vueFileName 頁面檔名帶連字號依網址從哪裡來決定',
+    rule: 'vueFileName',
+    file: `${viewResourceDir(PROBE_PAGE_ALPHA)}/probe-detail.vue`,
+    code: probeVue,
+    expect: IS_FILE_BASED_ROUTING ? 0 : 1,
+    ...(IS_FILE_BASED_ROUTING ? {} : { keyword: '駝峰' }),
+  },
+  {
+    /* 底線兩種專案都擋:網址用連字號分隔字詞,底線不是那個慣例;
+       自己寫路由表的專案則是連字號與底線都不用。 */
+    name: 'vueFileName 頁面檔名帶底線一律要報',
+    rule: 'vueFileName',
+    file: `${viewResourceDir(PROBE_PAGE_ALPHA)}/probe_detail.vue`,
+    code: probeVue,
+    expect: 1,
+  },
+  {
+    /* 連續大寫兩種專案都擋:網址裡的大寫在有的伺服器上不分大小寫,
+       同一個畫面會有兩個網址進得去。 */
+    name: 'vueFileName 頁面檔名連續大寫一律要報',
+    rule: 'vueFileName',
+    file: `${viewResourceDir(PROBE_PAGE_ALPHA)}/probeQRCode.vue`,
+    code: probeVue,
+    expect: 1,
+  },
+  {
     name: 'vueFileName 元件子檔首字大寫不誤報',
     rule: 'vueFileName',
     file: `${C}/Promise.vue`,
@@ -2495,6 +2786,16 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
     rule: 'importOrder',
     file: `${C}/Order4.vue`,
     code: `<template>\n  <CommonProbeInner :config="config">\n    <slot />\n  </CommonProbeInner>\n</template>\n`,
+    expect: 0,
+  },
+  {
+    /* 寫了 class,但那幾個名字全案都沒有對應的樣式 —— 外觀完全由使用端傳進來,
+       那幾個 class 只是掛載點。它同樣沒有樣式可載,照著補就得建一支空的樣式檔。
+       所以判準是「寫出來的那幾個有沒有人在定義」,不是「有沒有寫 class」。 */
+    name: 'importOrder 只當掛載點、沒有人定義樣式的 class 不算',
+    rule: 'importOrder',
+    file: `${C}/Order5.vue`,
+    code: `<template>\n  <div class="${PROBE}-mount-only">\n    <slot />\n  </div>\n</template>\n`,
     expect: 0,
   },
   {
@@ -2527,14 +2828,14 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
        深到會被「跨專案引用」那條一起抓。那是另一條規則的判定,不該讓這則跟著失敗。 */
     name: 'importAlias 相對路徑跳出資料夾',
     rule: 'importAlias',
-    file: `${P}/Detail.vue`,
+    file: `${P}/detail.vue`,
     code: `<script setup>\n/* lint-page-api-exempt: 這則在驗 import 路徑的寫法 */\nimport { onDo } from '${apiImportPathOf(P, 'home.js')}'\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
     expect: 1,
     keyword: 'home.js',
   },
   {
     name: 'importAlias 同層相對路徑不誤報',
-    file: `${P}/List.vue`,
+    file: `${P}/list.vue`,
     code: `<script setup>\n/* lint-page-api-exempt: 這則在驗 import 路徑的寫法 */\nimport { onDo } from './.composables/useDo.js'\nimport { fetchApi } from '@js/_api/.config.js'\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
     expect: 0,
   },
@@ -2563,7 +2864,7 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
     /* 宣告順序不報違規,存檔時直接排好 —— 驗證在 SORT_COMPOSABLE_CASES。
       這則確認它**不會**產生違規訊息:順序倒置的檔案掃出來要是 0 筆。 */
     name: 'composableOrder 順序倒置不報違規(改為自動排序)',
-    file: `${P}/Order.vue`,
+    file: `${P}/order.vue`,
     code: `<script setup>\nconst popup = usePopupStore()\nconst common = useCommonStore()\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
     expect: 0,
   },
@@ -2702,6 +3003,26 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
     keyword: '沒有 apiDefault',
   },
   {
+    /* 有陣列本身沒有錯,還原那一側寫對了就沒事 —— 而這條看不到那一側
+       (宣告在 store、還原在別支檔案)。所以它是建議級:擋的話,
+       那一筆無論怎麼改都消不掉,而修不掉的違規會讓整份清單被當成背景雜訊。 */
+    name: 'storeDefaultClone apiDefault 裡有陣列只給建議',
+    file: `${T}/${PROBE_PAGE_ALPHA}.js`,
+    code: `import { defineStore } from 'pinia'\n\nexport const use${pascalOf(PROBE_PAGE_ALPHA)}Store = defineStore('${PROBE_PAGE_ALPHA}', () => {\n  const apiDefault = readonly({ detail: { Id: null, ItemList: [] } })\n  const detail = ref({ apiData: null })\n\n  return { apiDefault, detail }\n})\n`,
+    expect: 0,
+    expectWarn: 1,
+    keyword: 'ItemList',
+  },
+  {
+    /* 全是單純值的那一層不必深拷貝 —— 每一支 store 都提醒一次的話,
+       真正該看的那幾筆會被淹掉。 */
+    name: 'storeDefaultClone 沒有陣列就不提醒',
+    file: `${T}/${PROBE_PAGE_ALPHA}.js`,
+    code: `import { defineStore } from 'pinia'\n\nexport const use${pascalOf(PROBE_PAGE_ALPHA)}Store = defineStore('${PROBE_PAGE_ALPHA}', () => {\n  const apiDefault = readonly({ detail: { Id: null, Name: null } })\n  const detail = ref({ apiData: null })\n\n  return { apiDefault, detail }\n})\n`,
+    expect: 0,
+    expectWarn: 0,
+  },
+  {
     name: 'storeApiDefault 有 apiDefault 不誤報',
     file: `${T}/${PROBE_PAGE_ALPHA}.js`,
     code: `import { defineStore } from 'pinia'\n\nexport const use${pascalOf(PROBE_PAGE_ALPHA)}Store = defineStore('${PROBE_PAGE_ALPHA}', () => {\n  const apiDefault = readonly({ detail: { Id: null } })\n  const detail = ref({ apiData: null })\n\n  return { apiDefault, detail }\n})\n`,
@@ -2741,6 +3062,17 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
     file: `${T}/.composables/usePopupActions.js`,
     code: `export const usePopupActions = () => {\n  const onReset = () => {\n    detail.value.apiData = { ...store.apiDefault.detail }\n    other.value.apiData = null\n  }\n\n  return { onReset }\n}\n`,
     expect: 0,
+  },
+
+  {
+    /* 「先指定要操作誰,再讓使用者填細節」的流程裡,重設要留著操作對象。
+       展開之後把它帶回去仍然只有一份預設值,所以放行 ——
+       報它的話,那種流程只剩下逐欄位清除可寫,而那種寫法漏一個欄位不會有人發現。 */
+    name: 'storeResetDefault 展開後帶回要留的欄位不誤報',
+    file: `${T}/.composables/useKeepActions.js`,
+    code: `export const useKeepActions = () => {\n  const onReset = () => {\n    const { itemId } = save.value.apiData\n\n    save.value.apiData = { ...store.apiDefault.save, itemId }\n  }\n\n  return { onReset }\n}\n`,
+    expect: 0,
+    rule: 'storeResetDefault',
   },
 
   // ---------- 規則 storeActionReturn ----------
@@ -2787,7 +3119,7 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
     /* 讀取那支維持短名，刪除那支保留 method。
        全部都帶的話，最常用的那支名字反而變長。 */
     name: 'pageActionNaming 撞名時讀取維持短名、刪除帶 method',
-    file: `${P}/PetClash.vue`,
+    file: `${P}/petClash.vue`,
     code:
       `<script setup>\n` +
       `const { onApiGetMemberPetID, onApiDeleteMemberPetID } = useMemberActions()\n\n` +
@@ -2799,7 +3131,7 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
   {
     // 刪除那支去掉了 method，會與讀取那支同名
     name: 'pageActionNaming 撞名時刪除那支去掉 method 要報',
-    file: `${P}/PetClash2.vue`,
+    file: `${P}/petClash2.vue`,
     code:
       `<script setup>\n` +
       `const { onApiGetMemberPetID, onApiDeleteMemberPetID } = useMemberActions()\n\n` +
@@ -2813,7 +3145,7 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
     /* 整組都沒有讀取時（新增與刪除撞在一起），每一支都帶 method ——
        沒有哪一支是預設操作。 */
     name: 'pageActionNaming 撞名組裡沒有讀取時每支都帶 method',
-    file: `${P}/PetClash3.vue`,
+    file: `${P}/petClash3.vue`,
     code:
       `<script setup>\n` +
       `const { onApiPostMemberPetID, onApiDeleteMemberPetID } = useMemberActions()\n\n` +
@@ -2824,7 +3156,7 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
   },
   {
     name: 'pageActionNaming 頁面包裝名稱對不上 action',
-    file: `${P}/Voucher.vue`,
+    file: `${P}/voucher.vue`,
     code: `<script setup>\nconst { onApiGetMemberVoucherID } = useMemberActions()\n\nconst onVoucherDetail = async () => {\n  await onApiGetMemberVoucherID({})\n}\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
     expect: 1,
     keyword: 'onMemberVoucherID',
@@ -2832,14 +3164,14 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
   {
     // 頁面那層要把 Api 與 method 兩段都拿掉：onApiGetMemberVoucherID → onMemberVoucherID
     name: 'pageActionNaming 正確命名不誤報',
-    file: `${P}/Voucher2.vue`,
+    file: `${P}/voucher2.vue`,
     code: `<script setup>\nconst { onApiGetMemberVoucherID } = useMemberActions()\n\nconst onMemberVoucherID = async () => {\n  await onApiGetMemberVoucherID({})\n}\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
     expect: 0,
   },
   {
     // method 沒去掉的舊寫法要被抓出來
     name: 'pageActionNaming 沒去掉 method 那一段要被抓',
-    file: `${P}/Voucher3.vue`,
+    file: `${P}/voucher3.vue`,
     code: `<script setup>\nconst { onApiGetMemberVoucherID } = useMemberActions()\n\nconst onGetMemberVoucherID = async () => {\n  await onApiGetMemberVoucherID({})\n}\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
     expect: 1,
     keyword: 'onMemberVoucherID',
@@ -2848,7 +3180,7 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
     /* postForm 這個 method 連後面的 Form 一起去掉：Form 講的是送出格式（表單），
       不是 endpoint 的一部分。留著會讓這一頁的命名與其他 api 對不齊。 */
     name: 'pageActionNaming postForm 的 Form 也要去掉',
-    file: `${P}/Upload.vue`,
+    file: `${P}/upload.vue`,
     code: `<script setup>\nconst { onApiPostFormPhotoUpload } = useMemberActions()\n\nconst onPhotoUpload = async () => {\n  await onApiPostFormPhotoUpload({})\n}\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
     expect: 0,
   },
@@ -2865,7 +3197,7 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
   {
     // 進入頁面要拿的資料一支一支等的話，使用者等的是每一支的時間加總
     name: 'pageAwaitAll onMounted 的請求沒有一起發出',
-    file: `${P}/Await1.vue`,
+    file: `${P}/await1.vue`,
     code: `<script setup>\nconst { onApiGetSelfTestAlpha } = useSelfTestAlphaActions()\n\nonMounted(async () => {\n  await onApiGetSelfTestAlpha()\n})\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
     /* 包裝函式叫什麼從設定取 —— 專案沒有那支共用函式時這條會整條略過,
        名字不一樣的專案也比對不到,兩種情況都與規則本身無關。 */
@@ -2874,7 +3206,7 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
   },
   {
     name: 'pageAwaitAll 已經包好的不誤報',
-    file: `${P}/Await2.vue`,
+    file: `${P}/await2.vue`,
     code: `<script setup>\nimport { awaitAllPromise } from '@js/_prototype.js'\n\nconst { onApiGetSelfTestAlpha } = useSelfTestAlphaActions()\n\nonMounted(async () => {\n  await awaitAllPromise([onApiGetSelfTestAlpha()])\n})\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
     expect: 0,
   },
@@ -2886,7 +3218,7 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
        包進陣列不會讓任何東西變快,而且存檔時的自動包裝也不會動它:
        報了卻沒有動靜,訊息還說「會自動包好」。 */
     name: 'pageAwaitAll 沒有 await 的呼叫不算請求',
-    file: `${P}/ProbeAwaitSync.vue`,
+    file: `${P}/probeAwaitSync.vue`,
     code: `<script setup>\nonMounted(() => {\n  onApiErrorReplay()\n})\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
     expect: 0,
     rule: 'pageAwaitAll',
@@ -2896,7 +3228,7 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
        自動包裝也是這樣判的,所以規則也不報:報了的話訊息說「存檔時會自動包好」,
        而存檔之後什麼都沒發生。 */
     name: 'pageAwaitAll 那幾支不能一起發出時不報',
-    file: `${P}/ProbeAwaitDepend.vue`,
+    file: `${P}/probeAwaitDepend.vue`,
     code:
       `<script setup>\nonMounted(async () => {\n` +
       `  await onApiGetProbeOne(probeId)\n` +
@@ -2907,7 +3239,7 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
   },
   {
     name: 'pageAwaitAll 事件處理函式不受限制',
-    file: `${P}/Await3.vue`,
+    file: `${P}/await3.vue`,
     code: `<script setup>\nconst { onApiGetSelfTestAlpha } = useSelfTestAlphaActions()\n\nconst onSelfTestAlpha = async () => {\n  await onApiGetSelfTestAlpha()\n}\n</script>\n\n<template>\n  <div class="m-probe" @click="onSelfTestAlpha"></div>\n</template>\n`,
     expect: 0,
   },
@@ -2915,7 +3247,7 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
     /* 用 alias 寫路徑,才只命中這一條 —— 相對路徑會同時觸發「離開自己資料夾要用 alias」,
       那樣就分不出抓到的是哪一條規則。alias 與 api 目錄位置都從專案設定算出來。 */
     name: 'pageApiImport 頁面直接 import api 要擋',
-    file: `${P}/Direct.vue`,
+    file: `${P}/direct.vue`,
     code: `<script setup>\nimport { apiGetMemberInfo } from '${apiAliasImportOf('member.js') ?? apiImportPathOf(P, 'member.js')}'\n\nconst onLoad = () => apiGetMemberInfo()\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
     expect: 1,
     keyword: '頁面直接 import 了 api',
@@ -2924,7 +3256,7 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
     /* 一次性的請求(送出後就不再用)直接打是合理的,標了豁免就跳過整支。
        「真的是一次性」與「偷懶沒寫 actions」寫出來一模一樣,所以由人標、理由留在程式碼裡。 */
     name: 'pageApiImport 標了豁免就放行',
-    file: `${P}/DirectExempt.vue`,
+    file: `${P}/directExempt.vue`,
     code: `<script setup>\n/* lint-page-api-exempt: 送出問卷,結果不顯示在畫面上 */\nimport { apiGetMemberInfo } from '${apiAliasImportOf('member.js') ?? apiImportPathOf(P, 'member.js')}'\n\nconst onLoad = () => apiGetMemberInfo()\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
     expect: 0,
   },
@@ -2944,7 +3276,7 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
        那支 api 只是其中一步。改成 api 的名字反而更難懂 ——
        讀的人會以為它只是那支 api 的包裝。 */
     name: 'pageActionNaming 等了第二件事就不是單純包裝',
-    file: `${P}/ProbeFlow.vue`,
+    file: `${P}/probeFlow.vue`,
     code:
       `<script setup>\nconst onSure = async () => {\n` +
       `  const { valid } = await formRef.value.validate()\n` +
@@ -2957,7 +3289,7 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
   {
     /* 有條件才打的那一步(「已經有資料就不重打」)不是這個函式的全部 */
     name: 'pageActionNaming 被條件包住的那一步不是單純包裝',
-    file: `${P}/ProbeGuard.vue`,
+    file: `${P}/probeGuard.vue`,
     code:
       `<script setup>\nconst onInit = async () => {\n` +
       `  if (!probeData.value) {\n    await onApiGetProbeThing()\n  }\n` +
@@ -2969,7 +3301,7 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
     /* 前後開關讀取狀態仍然是單純包裝 —— 這條規範本來就預期那種形狀,
        放過它的話,真正該對齊名字的那一批會整片消失。 */
     name: 'pageActionNaming 只開關讀取狀態仍要對齊名字',
-    file: `${P}/ProbeLoading.vue`,
+    file: `${P}/probeLoading.vue`,
     code:
       `<script setup>\nconst onSortChange = async () => {\n` +
       `  onApiPromise('open')\n` +
@@ -2982,7 +3314,7 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
   },
   {
     name: 'pageActionNaming 通用工具不受限制',
-    file: `${P}/Submit.vue`,
+    file: `${P}/submit.vue`,
     code: `<script setup>\nconst { onApiPromise, onApiError } = useProjectActions()\n\nconst onSubmit = async () => {\n  onApiPromise('open')\n  onApiError({}, 500, {})\n}\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
     expect: 0,
   },
@@ -2990,20 +3322,20 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
   // ---------- 規則 pageApiData ----------
   {
     name: 'pageApiData 頁面自建 apiData',
-    file: `${P}/Detail.vue`,
+    file: `${P}/detail.vue`,
     code: `<script setup>\nconst apiData = ref(null)\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
     expect: 1,
     keyword: '頁面自建了 apiData',
   },
   {
     name: 'pageApiData 從 store 取用不誤報',
-    file: `${P}/List.vue`,
+    file: `${P}/list.vue`,
     code: `<script setup>\nconst exchange = useExchangeStore()\nconst { detail } = storeToRefs(exchange)\nconst apiData = computed(() => detail.value.apiData)\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
     expect: 0,
   },
   {
     name: 'pageApiData 一般畫面狀態不誤報',
-    file: `${P}/Panel.vue`,
+    file: `${P}/panel.vue`,
     code: `<script setup>\nconst isOpen = ref(false)\nconst keyword = ref('')\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
     expect: 0,
   },
@@ -3011,35 +3343,35 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
   // ---------- 規則 storeToRefs ----------
   {
     name: 'storeToRefs 直接解構 store',
-    file: `${P}/Direct2.vue`,
+    file: `${P}/direct2.vue`,
     code: `<script setup>\nconst { info } = useMemberStore()\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
     expect: 1,
     keyword: '直接解構',
   },
   {
     name: 'storeToRefs 把 store 屬性讀成 const',
-    file: `${P}/Direct3.vue`,
+    file: `${P}/direct3.vue`,
     code: `<script setup>\nconst member = useMemberStore()\nconst info = member.info\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
     expect: 1,
     keyword: '斷了',
   },
   {
     name: 'storeToRefs 正確寫法不誤報',
-    file: `${P}/Direct4.vue`,
+    file: `${P}/direct4.vue`,
     code: `<script setup>\nconst member = useMemberStore()\nconst { info } = storeToRefs(member)\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
     expect: 0,
   },
   {
     // $ 開頭是 pinia 自己的 API，不是取值
     name: 'storeToRefs pinia API 不誤報',
-    file: `${P}/Direct5.vue`,
+    file: `${P}/direct5.vue`,
     code: `<script setup>\nconst member = useMemberStore()\nconst reset = member.$reset\nmember.$patch({ info: null })\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
     expect: 0,
   },
   {
     // use*Actions 是一般 composable，不是 store，直接解構才是對的
     name: 'storeToRefs actions 直接解構不誤報',
-    file: `${P}/Direct6.vue`,
+    file: `${P}/direct6.vue`,
     code: `<script setup>\nconst { onApiGetMemberInfo } = useMemberActions()\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
     expect: 0,
   },
@@ -3192,15 +3524,35 @@ const onCheckConfigItem = () => {
       : [`預期 ${JSON.stringify(expect)},實際 ${JSON.stringify(found)}`]
   )
 
-  const configText = fs.readFileSync(path.join(root, '.tools/lint/project-config.mjs'), 'utf8')
+  const configText = fs.readFileSync(path.join(root, ...CONFIG_FILE.split('/')), 'utf8')
+  const toolingDir = path.dirname(CONFIG_FILE)
+  const configName = path.basename(CONFIG_FILE)
   const sources = fs
-    .readdirSync(path.join(root, '.tools/lint'))
-    .filter((name) => name.endsWith('.mjs') && name !== 'project-config.mjs')
-    .map((name) => fs.readFileSync(path.join(root, '.tools/lint', name), 'utf8'))
+    .readdirSync(path.join(root, ...toolingDir.split('/')))
+    .filter((name) => name.endsWith('.mjs') && name !== configName)
+    .map((name) => fs.readFileSync(path.join(root, ...toolingDir.split('/'), name), 'utf8'))
 
   const extras = unusedConfigNames(configText, sources).map((i) => i.name)
 
   report(!extras.length, '本專案的設定檔沒有多出沒人讀的項目', extras.length ? [extras.join('、')] : [])
+
+  /* 同一個違規在兩種身分下的級別相反,而規則跑在哪一種專案上只會走到其中一邊 ——
+     不把兩邊都驗過的話,壞掉的那一邊要到換專案時才會發現,而那時的徵狀是
+     「設定檔多出的項目沒有被擋」:沒有訊息,看起來與通過一樣。 */
+  const asSource = configItemIssueOf(CONFIG_FILE, 1, 'NOBODY_READS', true)
+  const asOther = configItemIssueOf(CONFIG_FILE, 1, 'NOBODY_READS', false)
+
+  report(
+    asSource.level === 'warn',
+    'configItem 在來源專案只提醒',
+    asSource.level === 'warn' ? [] : [`預期 warn,實際 ${asSource.level}`]
+  )
+
+  report(
+    asOther.level === 'error',
+    'configItem 在其他專案要擋',
+    asOther.level === 'error' ? [] : [`預期 error,實際 ${asOther.level}`]
+  )
 }
 
 /**
@@ -3261,6 +3613,37 @@ const onCheckProbeDirSafety = () => {
   }
 
   report(!problems.length, '探測目錄只開自己的,已經存在的一律不碰', problems)
+}
+
+/**
+ * 每一則案例的檔案都落在探測目錄底下。
+ *
+ * cleanup 清的是那幾個目錄(PROBE_DIRS)。案例把檔案寫在別的地方時,
+ * 跑完一次就留一支在專案裡 —— 那支檔案沒有人認得,而且會被規則掃到,
+ * 看起來像專案自己有一筆違規。
+ */
+const onCheckCaseFilesInProbeDirs = () => {
+  /** 這支檔案跑完會不會被清掉 —— 判準與 cleanup 讀的是同一份 */
+  const willBeCleaned = (file) => {
+    if (PROBE_DIRS.some((dir) => file.startsWith(`${dir}/`))) return true
+
+    return PROBE_SWEEPS.some(({ dir, match }) => {
+      if (dir && !file.startsWith(`${dir}/`)) return false
+
+      const [first] = (dir ? file.slice(dir.length + 1) : file).split('/')
+      return Boolean(first) && match(first)
+    })
+  }
+
+  const leftover = [...new Set(CASES.map((c) => c.file).filter(Boolean))].filter(
+    (file) => !willBeCleaned(file)
+  )
+
+  report(
+    !leftover.length,
+    '每一則案例寫出去的檔案都清得掉',
+    leftover.map((file) => `${file} 跑完會留在專案裡 —— 放進探測目錄,或讓檔名認得出是探測檔`)
+  )
 }
 
 /**
@@ -3663,6 +4046,73 @@ const WRAP_MOUNTED_CASES = [
 ]
 
 /**
+ * 「從 apiDefault 還原時改成深拷貝」的自動修正驗證。
+ *
+ * apiDefault 是唯讀的而且是深層的:展開一層只複製到最外面那一層,
+ * 裡面的陣列仍然是原本那一個唯讀的陣列 —— 還原之後 push 進不去,
+ * 長度永遠是 0,而且正式版沒有任何徵兆。
+ *
+ * 這個功能會直接改動程式碼,所以「補不上 import 就整個不動」也要驗:
+ * 換了寫法卻找不到那支函式的話,整支檔案會壞掉,比不修還糟。
+ *
+ *   code     改寫前的內容
+ *   rel      這支檔案的位置;沒填就當成 actions 檔
+ *   expect   改寫後必須出現的片段;null 代表「應該完全不動」
+ */
+const CLONE_DEFAULT_CASES = [
+  {
+    name: '展開一層會換成深拷貝,import 也補上',
+    code: `import { apiGet } from '@js/_api/alpha.js'\n\nexport const useAlphaActions = () => {\n  const onReset = () => {\n    detail.value.apiData = { ...store.apiDefault.detail }\n  }\n}\n`,
+    expect: [
+      'detail.value.apiData = onDeepClone(store.apiDefault.detail)',
+      "import { onDeepClone } from '@js/_prototype.js'",
+    ],
+  },
+  {
+    /* 後面那幾個欄位是呼叫端刻意留著的值,不是預設值 —— 只換展開的那一段。 */
+    name: '帶回要留著的欄位時只換展開的那一段',
+    code: `import { apiGet } from '@js/_api/alpha.js'\n\nexport const useAlphaActions = () => {\n  const onReset = () => {\n    save.value.apiData = { ...store.apiDefault.save, itemId }\n  }\n}\n`,
+    expect: ['save.value.apiData = { ...onDeepClone(store.apiDefault.save), itemId }'],
+  },
+  {
+    name: '已經是深拷貝就不動',
+    code: `import { onDeepClone } from '@js/_prototype.js'\n\nexport const useAlphaActions = () => {\n  const onReset = () => {\n    detail.value.apiData = onDeepClone(store.apiDefault.detail)\n  }\n}\n`,
+    expect: null,
+  },
+  {
+    /* 具名匯入常常一行一個,整段跨好幾行。把「以 import 開頭的那一行」
+       當成一整段的話,補上去的那一行會插進這一段的中間 ——
+       整支檔案變成語法錯誤,而且是自動修正自己造成的。 */
+    name: '多行的 import 不會被插在中間',
+    code: `import {\n  apiGetAlpha,\n  apiGetBeta,\n} from '@js/_api/alpha.js'\n\nexport const useAlphaActions = () => {\n  const onReset = () => {\n    detail.value.apiData = { ...store.apiDefault.detail }\n  }\n}\n`,
+    expect: [
+      "} from '@js/_api/alpha.js'\nimport { onDeepClone } from '@js/_prototype.js'",
+      'detail.value.apiData = onDeepClone(store.apiDefault.detail)',
+    ],
+  },
+  {
+    /* 同一支來源已經 import 別的東西時加進那一段裡,不要再開一行。 */
+    name: '同一支來源已經有多行 import 時加進那一段',
+    code: `import {\n  onFormatDate,\n} from '@js/_prototype.js'\n\nexport const useAlphaActions = () => {\n  const onReset = () => {\n    detail.value.apiData = { ...store.apiDefault.detail }\n  }\n}\n`,
+    expect: ['{ onDeepClone,'],
+  },
+  {
+    /* 頁面自己的 composable 也會從 apiDefault 取初始值,踩到的是同一件事 ——
+       範圍只限 actions 的話,那一層漏掉而且沒有任何徵兆。 */
+    name: 'actions 以外的檔案也會修',
+    code: `import { useAlphaStore } from '@stores/alpha.js'\n\nexport const useCore = () => {\n  const onAdd = () => {\n    list.value.push({ ...alpha.apiDefault.item })\n  }\n}\n`,
+    rel: `${VIEWS_DIR}/selfTestAlpha/.composables/core.js`,
+    expect: ['list.value.push(onDeepClone(alpha.apiDefault.item))'],
+  },
+  {
+    /* 一行 import 都沒有時補不上去 —— 那時換掉寫法會讓整支檔案找不到那支函式。 */
+    name: '補不上 import 就整個不動',
+    code: `export const useAlphaActions = () => {\n  const onReset = () => {\n    detail.value.apiData = { ...store.apiDefault.detail }\n  }\n}\n`,
+    expect: null,
+  },
+]
+
+/**
  * 元件 import 分組順序的自動排序驗證。
  *
  * 這個功能會**直接改動程式碼**,所以除了「排對順序」之外,
@@ -3715,6 +4165,7 @@ const API_LAYER_CASE_NAMES = [
   'apiScope 服務分層:那一層有自己的 .config.js 時,資源是那一層',
   'apiScope 單純分類:那一層沒有 .config.js 時,資源仍是檔名',
   'apiScope 分類層底下檔名對不上,照樣要報',
+  'apiScope 資料夾結構對得上頁面的,不必有自己的 .config.js',
 ]
 
 const onCheckApiLayers = () => {
@@ -3755,6 +4206,21 @@ const onCheckApiLayers = () => {
 
     const bad = scopeOf(`${API_DIR}/${PROBE}Group/${PROBE}Nowhere.js`)
     report(bad.length === 1, API_LAYER_CASE_NAMES[2], bad.length ? [] : ['對不上的檔名沒有被報出來'])
+
+    /* 整個專案只有一份連線設定、api 資料夾純粹把檔案依頻道收好的擺法:
+       `_api/<資源>/<畫面>.js` 對 `<頁面目錄>/<資源>/<畫面>/`,整段路徑都在。
+       不認這種的話,那種專案只剩兩條路 —— 補一支沒有作用的 .config.js,
+       或把每一支檔名塞進例外清單,兩種都是為了讓規則過而改程式碼。 */
+    const viewSub = [...(listViewSubFolders(root) ?? [])].find((name) =>
+      fs.existsSync(path.join(root, ...VIEWS_DIR.split('/'), resource, name))
+    )
+
+    if (viewSub) {
+      const mirrored = scopeOf(`${API_DIR}/${resource}/${viewSub}.js`)
+      report(!mirrored.length, API_LAYER_CASE_NAMES[3], mirrored.map((i) => i.detail))
+    } else {
+      skipped.push({ name: API_LAYER_CASE_NAMES[3], need: 'probeViewSubFolder' })
+    }
   } finally {
     fs.rmSync(svc, { recursive: true, force: true })
     fs.rmSync(group, { recursive: true, force: true })
@@ -4275,18 +4741,8 @@ const cleanup = () => {
 
      所以每一個「案例會寫檔的目錄」都要掃過去認名字。逐一列出檔名的話,
      以後新增一支就要記得回來補一行,忘了補同樣沒有徵兆。 */
-  const sweeps = [
-    { dir: root, match: isProbeName },
-    { dir: path.join(root, ...CSS_MODULES_DIR.split('/')), match: isProbeName },
-    ...COMPONENT_DIRS.map((dir) => ({ dir: path.join(root, ...dir.split('/')), match: isProbeName })),
-    {
-      dir: path.join(root, ...COLOR_CSS_DIR.split('/')),
-      match: (name) => name.startsWith(PROBE_COLOR_PREFIX),
-    },
-    { dir: path.join(root, ...VIEWS_DIR.split('/')), match: isProbeName },
-  ]
-
-  for (const { dir, match } of sweeps) {
+  for (const { dir: rel, match } of PROBE_SWEEPS) {
+    const dir = rel ? path.join(root, ...rel.split('/')) : root
     if (!fs.existsSync(dir)) continue
 
     for (const name of fs.readdirSync(dir)) {
@@ -4455,6 +4911,25 @@ try {
     report(!problems.length, `wrapMounted ${c.name}`, problems)
   }
 
+  /* 從 apiDefault 還原時的深拷貝自動修正。
+     同樣會改寫程式碼,所以「不該動的絕對不能動」也要驗 ——
+     補不上 import 卻換了寫法的話,整支檔案會找不到那支函式。 */
+  for (const c of CLONE_DEFAULT_CASES) {
+    const rel = c.rel ?? `${STORE_DIR}/${ACTIONS_DIR_NAME}/useAlphaActions.js`
+    const result = onCloneApiDefault(c.code, rel)
+    const problems = []
+
+    if (c.expect === null) {
+      if (result !== null) problems.push(`預期完全不動,實際改成:\n${result}`)
+    } else if (result === null) {
+      problems.push('預期會換成深拷貝,實際沒有變動')
+    } else if (!c.expect.every((line) => result.includes(line))) {
+      problems.push(`預期含有 ${JSON.stringify(c.expect)},實際:\n${result}`)
+    }
+
+    report(!problems.length, `cloneDefault ${c.name}`, problems)
+  }
+
   /* 跨檔案的撞色檢查:分組色票與共用色票用了同一個色值。
      它不走 lintFile(單檔看不到全貌),所以上面每一個案例都不會經過它 ——
      這裡直接呼叫一次,確認它跑得起來而且回傳的是違規清單的形狀。
@@ -4532,6 +5007,7 @@ try {
   onCheckUnderAny()
   onCheckStoreDeclareCall()
   onCheckProbeDirSafety()
+  onCheckCaseFilesInProbeDirs()
   onCheckGeneratedCleanup()
   onCheckRulesDocumented()
   onCheckRulesInConventions()
