@@ -1,3 +1,6 @@
+// lint-api-client-exempt: 這支面板打的不是產品的 api,是它自己的除錯端點 ——
+// 共用實例的攔截器會帶上產品的參數與錯誤格式,套在除錯請求上反而不對。
+//
 // 開發用浮動 Console / Network / Element / Application 面板 —— 框架無關「共用核心」。
 // 顯示在頁面右下角,查看 console 訊息、網路請求、DOM/CSS、storage,並可裝置模擬(iframe)。
 //

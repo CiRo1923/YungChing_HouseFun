@@ -210,13 +210,27 @@ const ABSOLUTE_PATH_RE =
   /(?<![\w.-])(?:[A-Za-z]:[\\/]|file:\/\/|\/(?:Users|home|Volumes|mnt)\/)[\w.\-\\/]*/g
 
 /**
- * 連續往上跳三層以上的 import —— 那已經跳出專案根,指到的是別的專案。
+ * 往上跳的 import —— 跳到專案外面的才是問題。
  *
  * 只認 import 與 require 這兩種語句,而且路徑必須從引號後直接開始 ——
  * 允許前面有東西的話,一般的字串內容也會被當成路徑比對。
  */
-const CROSS_PROJECT_IMPORT_RE =
-  /(?:import|require)\b[^'"\n]*['"]((?:\.\.\/){3,}[^'"\n]*)['"]/g
+const RELATIVE_IMPORT_RE = /(?:import|require)\b[^'"\n]*['"](\.\.\/[^'"\n]*)['"]/g
+
+/**
+ * 這個相對路徑有沒有跳出專案根。
+ *
+ * **跳幾層才算跳出去,要看引用它的那支檔案在第幾層** ——
+ * 固定用層數判斷的話,深一點的目錄裡正常的引用會被誤報:
+ * 第四層的檔案要回到原始碼根目錄,本來就得往上三層。
+ *
+ * 所以把路徑對那支檔案解析一次,再看結果還在不在專案裡 ——
+ * 解析完仍以 `../` 開頭就是跳出去了,那個位置只在特定電腦上成立。
+ */
+const isOutsideProject = (rel, importPath) =>
+  path.posix
+    .normalize(path.posix.join(path.posix.dirname(rel), importPath))
+    .startsWith('../')
 
 /**
  * 這條規則**涵蓋原始碼與規範系統自身**,範圍比「不寫死專案名稱」那條大。
@@ -247,13 +261,15 @@ const checkAbsolutePath = ({ rel, text }) => {
     )
   }
 
-  for (const m of text.matchAll(CROSS_PROJECT_IMPORT_RE)) {
+  for (const m of text.matchAll(RELATIVE_IMPORT_RE)) {
+    if (!isOutsideProject(rel, m[1])) continue
+
     issues.push(
       issueOf(
         rel,
         lineNoOf(text, m.index),
         'absolutePath',
-        `跨專案引用 ${m[1]} —— 往上跳這麼多層已經離開專案根目錄,指到的是別人機器上才有的位置`
+        `跨專案引用 ${m[1]} —— 從這支檔案的位置往上跳,已經離開專案根目錄,指到的是別人機器上才有的位置`
       )
     )
   }

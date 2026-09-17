@@ -102,6 +102,7 @@ import {
   COMPONENT_DIRS,
   CSS_MODULES_DIR,
   GENERATED_FILES,
+  FORM_GROUP_VALIDATOR,
   IMPORT_ORDER_GROUPS,
   IS_FILE_BASED_ROUTING,
   MODULE_CSS_DIR_NAME,
@@ -131,6 +132,22 @@ import {
 import { BOLD, GREEN, RED, RESET, YELLOW } from './colors.mjs'
 
 const root = path.resolve(fileURLToPath(import.meta.url), '../../..')
+
+/**
+ * 這條規則是不是每個專案都有的那一套。
+ *
+ * 專案自己的規則(`rules-project.mjs`,代號帶 `project:` 前綴)不算 ——
+ * 它們由那個專案自己維護,來源這邊的文件、寫法規範、前提清單都不會提到它們。
+ * 拿來源的清單去要求它們,結果是每一個有專案規則的地方都固定紅字,
+ * 而那個紅字說的是「文件沒寫」,實際上是**沒有地方可以寫**。
+ *
+ * 那幾條靠另一道把關:`onCheckProjectRules` 要求每一條都有自己的驗證案例,
+ * 而案例與規則寫在同一支檔案裡,改了規則忘了改案例會當場被抓到。
+ *
+ * 判斷收在這裡一份 —— 底下有好幾項驗證都要問同一件事,
+ * 各寫一次的話,新增一項時很容易漏掉其中一處(這正是發生過的事)。
+ */
+const isSharedRule = (rule) => !rule.startsWith(PROJECT_RULE_PREFIX)
 
 // 探測用的色票要等 onPrepare 建好才讀得到,所以這裡先放著,執行時再更新
 let definedVars = loadDefinedColorVars(root)
@@ -913,7 +930,10 @@ const CSS_CASES = [
     expect: 0,
   },
   {
+    /* 只計 color —— 探針用的是不存在的變數名,「引用不到定義」那條會另外報,
+       而這則要驗的是「用了變數就不算硬寫色碼」。 */
     name: 'color 用變數不誤報',
+    rule: 'color',
     file: `${M}/c.css`,
     code: `.m-probe {\n  color: var(--gray-333);\n  background: rgba(var(--white-rgb), 0.4);\n}`,
     expect: 0,
@@ -1696,7 +1716,7 @@ const RULE_CASES = [
       「離開自己資料夾要用 alias」,而那取決於專案的目錄有幾層深。
 
       這三行各自命中的規則:
-        第 1 行  absolutePath(往上跳三層以上)
+        第 1 行  absolutePath(往上跳的層數多到離開了專案根)
         第 2 行  absolutePath(磁碟機代號)
         第 3 行  absolutePath(家目錄)
       合計 3 筆。 */
@@ -1708,6 +1728,19 @@ const RULE_CASES = [
       `import c from '/Users/someone/somewhere/src/c.js'\n`,
     expect: 3,
     keyword: '跨專案',
+  },
+  {
+    /* 往上跳三層,但這支檔案本來就埋得夠深,解析完仍在專案裡 —— 不是跨專案引用。
+       固定用層數判斷的話,深一點的目錄裡正常的引用會被整批誤報,
+       而需要寫字面路徑的場合(建置工具的 glob)連改都改不掉。
+
+       探測檔自己再往下三層,所以「往上三層」一定還在探測目錄裡 ——
+       深度不跟著設定的目錄段數跑,換一種擺法結果仍然相同。 */
+    name: 'absolutePath 往上跳但仍在專案內不誤報',
+    rule: 'absolutePath',
+    file: `${M}/deep/nested/inner/probeInside.js`,
+    code: `import a from '../../../probe.js'\n`,
+    expect: 0,
   },
 
   // ---------- .md 也要被檢查（skills、rules、說明文件都是 .md）----------
@@ -2124,6 +2157,17 @@ const RULE_CASES = [
     expect: 0,
     expectWarn: 1,
     keyword: '繞過',
+  },
+  {
+    /* 檔頭標了理由就整支放行 —— 有些檔案打的根本不是產品的 api
+       (開發用的除錯面板、只在本機跑的工具),那些請求本來就不需要共用的攔截器。
+       沒有出口的話那幾筆每次都再印一遍而且改不掉,
+       一條一直報「改不了的東西」的規則最後會連同真正該改的一起被略過。 */
+    name: 'apiClient 檔頭標了豁免就放行',
+    file: `${A}/selfTestAlpha.js`,
+    code: `// lint-api-client-exempt: 這支打的是本機除錯端點,不需要共用攔截器\n\nconst xhr = new XMLHttpRequest()\n`,
+    expect: 0,
+    expectWarn: 0,
   },
   {
     // 原生 fetch 與 XMLHttpRequest 一樣是建議級：繞過共用實例，攔截器帶的參數不會生效
@@ -2614,6 +2658,25 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
     expect: 0,
   },
   {
+    /* 底線那一層不是網址,**它底下的層級也不是** —— 那裡面放的是元件,
+       分類資料夾跟著元件那一套(首字大寫)。拿頁面那一套去要求它改成小寫的話,
+       會變成「大寫的元件裝在小寫的資料夾裡」,與元件命名那條互相矛盾。 */
+    name: 'viewFolder 底線資料夾底下的分類層不誤報',
+    rule: 'viewFolder',
+    file: `${viewResourceDir(PROBE_PAGE_ALPHA)}/${VIEW_UNDERSCORE_FOLDERS[0]}/Edit/Probe.vue`,
+    code: probeVue,
+    expect: 0,
+  },
+  {
+    /* 底線資料夾自己的名字照舊檢查 —— 停止往下檢查的是它**底下**那幾層 */
+    name: 'viewFolder 不在清單裡的底線資料夾照樣要報',
+    rule: 'viewFolder',
+    file: `${viewResourceDir(PROBE_PAGE_ALPHA)}/_unknownProbe/Edit/Probe.vue`,
+    code: probeVue,
+    expect: 1,
+    keyword: VIEW_UNDERSCORE_FOLDERS.join('、'),
+  },
+  {
     /* 資料夾的分隔方式與同一層的 .vue 檔名同一套 —— 兩者都在回答
        「這一段是不是網址」。資料夾寬、檔案嚴的話,同一個名字寫成資料夾就過、
        寫成檔案就報。檔案系統路由的專案裡那一層就是網址,連字號放行。 */
@@ -2775,6 +2838,44 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
     expect: 1,
   },
   {
+    /* 一個迴圈跑出來、名字裡沒有迭代變數 —— 那幾個是同一個欄位的幾個選項,
+       每一個都自己驗的話,同一句訊息會在畫面上重複好幾行。 */
+    name: 'formGroupValidate 一組控制項各自帶驗證要報',
+    rule: 'formGroupValidate',
+    needs: 'formGroupValidator',
+    file: `${C}/GroupProbe.vue`,
+    code:
+      `<template>\n  <div class="m-probe">\n` +
+      `    <ProbeControl name="probe" :rules="rules" v-for="(item, i) in items" :key="i" />\n` +
+      `  </div>\n</template>\n`,
+    expect: 1,
+    keyword: '各自帶了驗證',
+  },
+  {
+    /* 名字裡帶了迭代變數 → 每一個都是獨立的欄位,各自驗證是對的 */
+    name: 'formGroupValidate 名字帶迭代變數不誤報',
+    rule: 'formGroupValidate',
+    needs: 'formGroupValidator',
+    file: `${C}/GroupProbeNamed.vue`,
+    code:
+      `<template>\n  <div class="m-probe">\n` +
+      `    <ProbeControl :name="\`probe-\${i}\`" :rules="rules" v-for="(item, i) in items" :key="i" />\n` +
+      `  </div>\n</template>\n`,
+    expect: 0,
+  },
+  {
+    /* 驗證掛在外層、控制項自己不帶 rules —— 正是這條要的寫法 */
+    name: 'formGroupValidate 驗證掛在外層不誤報',
+    rule: 'formGroupValidate',
+    needs: 'formGroupValidator',
+    file: `${C}/GroupProbeWrapped.vue`,
+    code:
+      `<template>\n  <div class="m-probe">\n` +
+      `    <ProbeControl name="probe" v-for="(item, i) in items" :key="i" />\n` +
+      `  </div>\n</template>\n`,
+    expect: 0,
+  },
+  {
     name: 'vueFileName 元件子檔首字大寫不誤報',
     rule: 'vueFileName',
     file: `${C}/Promise.vue`,
@@ -2832,6 +2933,48 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
     code: `<script setup>\n/* lint-page-api-exempt: 這則在驗 import 路徑的寫法 */\nimport { onDo } from '${apiImportPathOf(P, 'home.js')}'\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
     expect: 1,
     keyword: 'home.js',
+  },
+  {
+    /* 一次收一整批檔案的那種呼叫,吃的也是路徑 —— 只看 import 語句的話它完全不被檢查,
+       而這種路徑失效時**不會報錯**:收到的是空的一批,用它的地方靜靜地拿不到東西。
+       只計 importAlias —— 探針的相對路徑在某些擺法下會深到被別條一起抓。 */
+    name: 'importAlias 一次收一批的呼叫也要用 alias',
+    rule: 'importAlias',
+    file: `${P}/globProbe.vue`,
+    code: `<script setup>\nconst MAP = import.meta.glob('${apiImportPathOf(P, '*.js')}', { eager: true })\n</script>\n\n<template>\n  <div class="m-probe">{{ MAP }}</div>\n</template>\n`,
+    expect: 1,
+    keyword: '*.js',
+  },
+  {
+    /* var(--不存在) 不會報錯,瀏覽器把整條宣告丟掉就算了 —— 畫面上那一段樣式
+       整片消失,而每一個檢查工具都顯示通過。最常踩到的時機是把元件搬到
+       色票命名不同的專案。 */
+    name: 'unknownVar 引用不到定義的變數要報',
+    rule: 'unknownVar',
+    file: `${M}/probeUnknownVar.css`,
+    code: `.m-probe {\n  color: var(--probe-never-defined-anywhere);\n}\n`,
+    expect: 1,
+    keyword: '找不到定義',
+  },
+  {
+    /* 帶後備值是刻意的寫法 —— 變數沒有時用後備值,樣式不會消失 */
+    name: 'unknownVar 有後備值不誤報',
+    rule: 'unknownVar',
+    file: `${M}/probeFallbackVar.css`,
+    code: `.m-probe {\n  padding: var(--probe-never-defined-anywhere, 8px);\n}\n`,
+    expect: 0,
+  },
+  {
+    /* 元件動態綁定的 `'--x': 值` 也是定義 —— 少認它的話,
+       那些由程式算出來的尺寸會被整批誤報,而它們完全正確。 */
+    name: 'unknownVar 元件動態綁定的變數算有定義',
+    rule: 'unknownVar',
+    file: `${C}/VarProbe.vue`,
+    code:
+      `<script setup>\nconst style = { '--probe-runtime-size': '10px' }\n</script>\n\n` +
+      `<template>\n  <div class="m-probe" :style="style">{{ style }}</div>\n</template>\n\n` +
+      `<style>\n.m-probe {\n  width: var(--probe-runtime-size);\n}\n</style>\n`,
+    expect: 0,
   },
   {
     name: 'importAlias 同層相對路徑不誤報',
@@ -3671,7 +3814,12 @@ const onCheckRulesDocumented = () => {
     .map((name) => fs.readFileSync(path.join(dir, name), 'utf8'))
     .join('\n')
 
-  const missing = Object.keys(RULE_TITLE).filter((rule) => !new RegExp(`\`${rule}\``).test(text))
+  /* 專案自己的規則不列入 —— 這一層的文件分兩種,兩種它都放不進去:
+     來源那幾支整套複製時會被覆蓋,專案自己那幾支記的是待辦與數字,不是規則說明。
+     它們的說明就寫在 rules-project.mjs 的規則旁邊。 */
+  const missing = Object.keys(RULE_TITLE)
+    .filter(isSharedRule)
+    .filter((rule) => !new RegExp(`\`${rule}\``).test(text))
 
   report(
     !missing.length,
@@ -3715,7 +3863,7 @@ const onCheckRulesInConventions = () => {
   const state = new Set(TOOL_STATE_RULES)
 
   const missing = Object.keys(RULE_TITLE).filter(
-    (rule) => !state.has(rule) && !rule.startsWith(PROJECT_RULE_PREFIX) && !text.includes(rule)
+    (rule) => !state.has(rule) && isSharedRule(rule) && !text.includes(rule)
   )
 
   report(
@@ -3745,9 +3893,8 @@ const onCheckPreflightCoverage = () => {
   const covered = new Set(PREFLIGHT_RULES)
   const free = new Set(NO_PREREQUISITE_RULES)
 
-  /* 專案自己的規則不列入 —— 那幾條由專案自己維護,來源的前提清單不會知道它們。
-     前綴取規則載入那一側的同一份,不在這裡再寫一次字面值。 */
-  const shared = rules.filter((rule) => !rule.startsWith(PROJECT_RULE_PREFIX))
+  /* 專案自己的規則不列入 —— 那幾條由專案自己維護,來源的前提清單不會知道它們 */
+  const shared = rules.filter(isSharedRule)
 
   const orphan = shared.filter((rule) => !covered.has(rule) && !free.has(rule))
   const both = shared.filter((rule) => covered.has(rule) && free.has(rule))
@@ -4786,6 +4933,9 @@ const NEEDS_MET = {
   breakpoints: BREAKPOINTS.length > 0,
   suffixNaming: isSuffixNamingChecked,
   projectDirValues: PROJECT_DIR_VALUES.length > 0,
+  /* 判準與規則那一側同一個值 —— 那邊留空就整條略過,這裡跟著跳過它的案例。
+     另寫一份判斷的話,有一天兩邊會對不上:規則不跑而案例還在等它報。 */
+  formGroupValidator: !!FORM_GROUP_VALIDATOR,
 }
 
 /** 前提不成立時要講的那一句 —— 只列名字的話,看的人分不出是設定造成的還是規則壞了 */
@@ -4796,6 +4946,9 @@ const SKIP_REASON = {
   sourceProject:
     '這個專案不是規範工具的來源(SOURCE_PROJECT_NAME 與 PROJECT_NAMES 對不上),' +
     '指紋清單是跟著規則複製過來的,對不上由規則 ruleTampered 在檢查時報。',
+  formGroupValidator:
+    '這個專案沒有填 FORM_GROUP_VALIDATOR(沒有那種把一組控制項包起來的元件),' +
+    '「一組控制項各自帶驗證」那條本來就整條略過。',
   probeViewFolder:
     '頁面目錄裡沒有驗證自己建的資料夾(頁面目錄的位置設錯時會這樣),' +
     '而這幾則要一個對得上頁面資料夾的名字才驗得起來。' +
@@ -4868,7 +5021,7 @@ try {
       實際上是探針多命中了那個專案的新規則。專案自己的規則由 PROJECT_CASES 驗,
       那裡每一則都用 `rule` 指定是哪一條,所以不受這個排除影響。 */
     const ofRule = (list) =>
-      c.rule ? list.filter((i) => i.rule === c.rule) : list.filter((i) => !i.rule.startsWith(PROJECT_RULE_PREFIX))
+      c.rule ? list.filter((i) => i.rule === c.rule) : list.filter((i) => isSharedRule(i.rule))
 
     const issues = ofRule(all.filter((i) => i.level !== 'warn'))
     const warns = ofRule(all.filter((i) => i.level === 'warn'))

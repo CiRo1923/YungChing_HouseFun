@@ -23,6 +23,11 @@
   --popup-header-tablet-text-size: 20px;
   --popup-header-mobile-text-size: 20px;
 
+  /* 標題列裡圖示與文字的間隔 */
+  --popup-header-pc-gap-x: 10px;
+  --popup-header-tablet-gap-x: 10px;
+  --popup-header-mobile-gap-x: 10px;
+
   --popup-header-icon-pc-p: 3px;
   --popup-header-icon-tablet-p: 3px;
   --popup-header-icon-mobile-p: 3px;

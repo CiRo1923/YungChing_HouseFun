@@ -13,6 +13,7 @@ import {
   VIEWS_DIR,
   bodyRangeOf,
   findNearFolder,
+  hasExemptMark,
   isInSrc,
   issueOf,
   lineNoOf,
@@ -62,6 +63,15 @@ const RAW_REQUEST_RE = /\bnew\s+XMLHttpRequest\b|\$fetch\s*\(|(?<![\w.$])fetch\s
 const checkApiClient = ({ rel, text }) => {
   if (!isInSrc(rel)) return []
   if (rel.endsWith(`${API_DIR}/${EXPORT_FILE}`)) return [] // 共用實作本身
+
+  /* 有非用不可的理由時,在檔頭標 `lint-api-client-exempt: 理由` 放行整支。
+     典型的情況是那支檔案打的根本不是產品的 api(開發用的除錯面板、
+     只在本機跑的工具)—— 那些請求本來就不需要共用的攔截器與錯誤格式。
+
+     沒有出口的話,那幾筆每一次檢查都會再印一遍,而且一筆都改不掉 ——
+     一條一直報「改不了的東西」的規則,最後會連同真正該改的那幾筆一起被略過。
+     理由寫在標記旁邊,看的人當場知道為什麼,不必去翻別的地方。 */
+  if (hasExemptMark(text, 'api-client')) return []
 
   const issues = []
 

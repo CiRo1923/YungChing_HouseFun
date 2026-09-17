@@ -36,13 +36,14 @@
 | `moduleVar` | 同屬性兩個以上級距值（該搬到 `***Variables.css`） | 元件的樣式子資料夾與共用變數目錄（Variables 檔除外） | ✗ |
 | `breakpointPrefix` | 父層可傳入的級距在某個 `@screen` 區塊少列了會命中該斷點的前綴變體 | 元件的樣式子資料夾與共用變數目錄 | ✗ |
 | `variable` | 命名沒對齊 tailwind、級距用 `sm`/`md`/`lg`、斷點沒三份成套 | 元件的樣式子資料夾與共用變數目錄 | ✗ |
+| `unknownVar` | `var(--x)` 引用的變數全案找不到定義 —— 瀏覽器會把整條宣告丟掉，樣式安靜地消失（帶後備值的 `var(--x, 20px)` 不算；元件動態綁的 `'--x': 值` 算定義） | 原始碼的 `.css` 與 `.vue` | ✗ |
 | `projectName` | 寫死專案名稱 | 只有規範系統自身（清單見設定的 TOOLING_DIRS） | ✗ |
 | `absolutePath` | 寫了某一台機器上的路徑（磁碟機代號、家目錄、`file://`）、跨專案引用 | 原始碼與規範系統自身 | ✗ |
 | `plainText` | 用了 emoji 或裝飾符號 | 規範系統自身整層，加上原始碼的 `.css` / `.js` / `.ts` / `.vue` | ✗ |
 | `selfContained` | 寫了「同上」「同 2」「參考第三節」這類把讀者送去別處的寫法 | 原始碼與規範系統自身 | ✗ |
-| `importAlias` | 離開自己資料夾的相對路徑沒改用 alias | 原始碼裡的 `.js` 與 `.vue` | ✗ |
+| `importAlias` | 離開自己資料夾的相對路徑沒改用 alias（`import.meta.glob` 那種一次收一整批的呼叫也算 —— 它找不到檔案不會報錯，只回一批空的） | 原始碼裡的 `.js` 與 `.vue` | ✗ |
 | `deprecated` | 已淘汰的寫法（`apiParams`、`inject('route')`、actions 留 `console.log`） | 原始碼裡的 `.js` 與 `.vue` | ✗ |
-| `apiClient` | `axios`（擋）、原生請求 `new XMLHttpRequest` / `$fetch(` / `fetch(`（建議） | 原始碼（`.export.js` 除外） | ✗ |
+| `apiClient` | `axios`（擋）、原生請求 `new XMLHttpRequest` / `$fetch(` / `fetch(`（建議）。整支本來就不該走共用實例時（除錯面板、本機工具），檔頭標 `lint-api-client-exempt: 理由` 放行 | 原始碼（`.export.js` 除外） | ✗ |
 | `apiScope` | `_api` 的資源對不上頁面目錄第一層的資料夾（資源是檔名；api 再分服務層時是那一層） | api 目錄 | ✗ |
 | `apiSource` | api 檔案自己呼叫 `onFetchApi` 建實例 | api 目錄 | ✗ |
 | `apiNaming` | 函式名對不上 endpoint、少方法後綴、`{id}` 沒寫大寫 `ID` | api 目錄 | ✗ |
@@ -68,6 +69,7 @@
 | `pageApiImport` | 頁面直接 import api（可在檔頭標 `lint-page-api-exempt` 放行一次性的請求） | 原始碼裡的 `.vue` | ✗ |
 | `componentApiImport` | 元件直接 import api（沒有例外，標了豁免記號也一樣擋） | 元件目錄的 `.vue` | ✗ |
 | `vueFileName` | 元件的 .vue 檔名首字沒大寫、主檔叫 Main.vue、頁面的 .vue 檔名首字沒小寫，或檔名不是駝峰（連字號、底線、連續大寫）。檔案系統路由的專案裡，頁面檔名就是網址的一段，那裡放行連字號，底線與連續大寫照擋 —— 哪一種由設定 `PROJECT_FRAMEWORK` 決定 | 元件目錄與頁面目錄的 `.vue` | ✗ |
+| `formGroupValidate` | 一組共用同一個名字的控制項（一個迴圈跑出來、名字裡沒有迴圈變數）各自帶了 `rules` —— 每一個都會驗一次、各顯示一則同樣的訊息。驗證要掛在包住整組的那支元件上（設定 `FORM_GROUP_VALIDATOR`），只顯示一則 | 所有 `.vue` 的畫面區段 | ✗ |
 | `importOrder` | 元件沒有載入樣式（樣式要由元件自己 import；自己完全不寫 class 的轉手元件不在此列） | 元件目錄的 `.vue` | ✗（工具看不出該載哪一支） |
 | `configItem` | 專案設定檔多了沒有任何規則讀的項目 | `.tools/lint/project-config.mjs` | ✗（來源專案只提醒，見下方說明） |
 | `ruleCrashed` | 規則自己執行失敗（多半是漏了 import），那支檔案沒被那條規則檢查 | 全部 | ✗ |

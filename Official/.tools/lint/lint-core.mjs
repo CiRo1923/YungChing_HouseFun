@@ -62,9 +62,11 @@ import {
   COMPONENT_DIRS,
   CSS_MODULES_DIR,
   MODULE_CSS_DIR_NAME,
+  SCAN_TARGETS,
   SHARED_MODULE_VARIABLES,
   TAILWIND_THEME_OVERRIDES,
   isInSrc,
+  listFiles,
   maskComments,
   maskCssComments,
   maskHtmlComments,
@@ -859,6 +861,101 @@ const LONG_NAME_RE = new RegExp(
   'g'
 )
 
+// --- 規則 unknownVar:用到沒有定義的 css 變數 ---------------------------------
+//
+// `var(--不存在)` **不會報錯** —— 瀏覽器把整條宣告丟掉就算了。
+// 症狀是「框線和底色整片不見」,而每一個檢查工具都顯示通過:
+// 那個落差很難從結果反推原因。
+//
+// 最常踩到的時機是把元件搬到另一個專案 —— 那邊的色票命名不一樣,
+// 元件引用的名字一個都對不上,整批樣式安靜地失效。
+//
+// 定義有兩種形狀,兩種都要認:樣式裡的 `--x: 值`,以及元件動態綁定的
+// `'--x': 值`(名字包在引號裡)。少認後者的話,那些由程式算出來的尺寸
+// 會被整批誤報,而它們完全正確。
+//
+// 帶後備值的 `var(--x, 20px)` 不算 —— 那是刻意寫的,變數沒有時用後備值,
+// 樣式不會消失。
+
+// 與色票那一套的界線:那邊問「這個**色值**有沒有現成的變數」(色值 → 變數名,
+// 只看色票目錄),這裡問「這個**名字**有沒有被定義過」(名字 → 有或沒有,要看全案
+// —— 模組變數、元件動態綁的也算)。兩個問題不同,所以各自收集,不共用同一份索引。
+
+/** 變數的定義:`--x:` 與 `'--x':` 兩種形狀 */
+const VAR_DEFINE_RE = /(--[\w-]+)['"]?\s*:/g
+
+/** 變數的引用;第二個捕獲是 `,` 時代表有後備值 */
+const VAR_USE_RE = /var\(\s*(--[\w-]+)\s*([,)])/g
+
+let definedVarCache = null
+
+/**
+ * 全案定義過的 css 變數。
+ *
+ * 一支一支檔案各自掃全案的話會慢得離譜,所以整份建一次索引 ——
+ * 與「誰被定義過」那一類的判斷同一個做法。
+ */
+const definedVarsOf = (root) => {
+  if (definedVarCache?.root === root) return definedVarCache.set
+
+  const set = new Set()
+
+  for (const dir of SCAN_TARGETS) {
+    for (const abs of listFiles(root, dir)) {
+      if (!/\.(css|vue|js)$/i.test(abs)) continue
+
+      try {
+        const text = maskComments(toRel(root, abs), fs.readFileSync(abs, 'utf8'))
+        for (const m of text.matchAll(VAR_DEFINE_RE)) set.add(m[1])
+      } catch {
+        // 讀不到某一支就跳過,不要因此讓整條規則失效
+      }
+    }
+  }
+
+  definedVarCache = { root, set }
+
+  return set
+}
+
+const checkUnknownVar = ({ rel, text: raw, root }) => {
+  if (!isInSrc(rel) || !/\.(css|vue)$/i.test(rel)) return []
+
+  const text = maskComments(rel, raw)
+
+  /* 全案索引 + 這支檔案自己定義的。
+     自己那一份要另外算 —— 索引是整份建好之後快取的,而存檔守門拿到的是
+     **還沒寫進磁碟**的內容:剛加的變數不在索引裡,會被報成「找不到定義」。 */
+  const defined = definedVarsOf(root)
+  const own = new Set()
+  for (const m of text.matchAll(VAR_DEFINE_RE)) own.add(m[1])
+
+  const issues = []
+  const seen = new Set()
+
+  for (const m of text.matchAll(VAR_USE_RE)) {
+    const name = m[1]
+
+    if (m[2] === ',') continue // 有後備值,變數缺了也不會讓樣式消失
+    if (defined.has(name) || own.has(name) || seen.has(name)) continue
+
+    seen.add(name)
+
+    issues.push(
+      issueOf(
+        rel,
+        lineNoOf(text, m.index),
+        'unknownVar',
+        `var(${name}) 全案找不到定義 —— 瀏覽器會把整條宣告丟掉,` +
+          `畫面上那一段樣式直接消失,而且不會有任何錯誤訊息;` +
+          `先確認變數名有沒有打錯,或那個色票 / 級距還沒建立`
+      )
+    )
+  }
+
+  return issues
+}
+
 const checkVariableNaming = ({ rel, text: raw }) => {
   if (!isModuleStyle(rel)) return []
 
@@ -1608,6 +1705,7 @@ const CHECKS = [
   checkModuleVariables,
   checkBreakpointPrefix,
   checkVariableNaming,
+  checkUnknownVar,
   checkTShirtSizing,
   checkThemeNaming,
   checkBreakpointSet,
@@ -1702,6 +1800,7 @@ export const RULE_TITLE = {
   moduleVar: '模組級距變數的歸屬',
   breakpointPrefix: '級距在某個斷點少列了前綴',
   variable: '模組變數的命名或斷點',
+  unknownVar: '用到沒有定義的 css 變數',
   ...GLOBAL_RULE_TITLE,
   ...API_RULE_TITLE,
   ...STORE_RULE_TITLE,
@@ -1725,6 +1824,7 @@ export const RULE_HINT = {
   moduleVar: '同屬性兩個以上級距值要搬到 ***Variables.css',
   breakpointPrefix: '每個 @screen 區塊都要列齊會命中該斷點的前綴變體',
   variable: '命名對齊 tailwind(w / h / p / rounded / leading);尺寸值要三個斷點成套,級距用實際數值不用 sm / md / lg',
+  unknownVar: 'var(--x) 引用的變數全案要找得到定義 —— 找不到時瀏覽器會把整條宣告丟掉,樣式安靜地消失',
   ...GLOBAL_RULE_HINT,
   ...API_RULE_HINT,
   ...STORE_RULE_HINT,
