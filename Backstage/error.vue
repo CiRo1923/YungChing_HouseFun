@@ -27,7 +27,7 @@ const onBackClick = () => clearError({ redirect: '/buy/list/publish' })
     <div
       class="mx-auto flex flex-col items-center px-[16px] text-center tm:py-[80px] p:max-w-[1232px] p:py-[120px]"
     >
-      <CommonSvgIcon
+      <CommonMSvgIcon
         icon="icon_circle_exclamation"
         class="text-[--gray-ccce] tm:h-[40px] tm:w-[40px] p:h-[48px] p:w-[48px]"
       />

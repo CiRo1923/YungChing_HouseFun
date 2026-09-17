@@ -19,7 +19,7 @@ const setClass = computed(() => {
 </script>
 
 <template>
-  <BuyMItemMain
+  <BuyMItem
     :data="props.data"
     :setClass="{
       main: setClass.main,

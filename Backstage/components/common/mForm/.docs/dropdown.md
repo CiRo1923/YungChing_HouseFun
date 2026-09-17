@@ -50,7 +50,7 @@
 
 ### config.arrowType
 
-- `caret`：顯示 `CommonSvgIcon` 的 `caret_large_down`。
+- `caret`：顯示 `CommonMSvgIcon` 的 `caret_large_down`。
 - `arrow`：顯示 CSS 三角形 `.m-form-icon-arrow`。
 
 ## setClass key

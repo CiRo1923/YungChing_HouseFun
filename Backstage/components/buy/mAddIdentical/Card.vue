@@ -1,8 +1,8 @@
 <script setup>
-import '@css/_modules/buy/mAddIdentical/variables.css'
-import '@css/_modules/buy/mAddIdentical/cardVariables.css'
-import '@css/_modules/buy/mAddIdentical/common.css'
-import '@css/_modules/buy/mAddIdentical/card.css'
+import './.css/variables.css'
+import './.css/cardVariables.css'
+import './.css/common.css'
+import './.css/card.css'
 
 import { useAddIdenticalCore } from './.composables/useAddIdenticalCore.js'
 
@@ -47,7 +47,7 @@ const { model, config, setClass, onAddClick, onRemoveClick } = useAddIdenticalCo
           @click="onRemoveClick(index)"
           v-if="config.keepDelItems < model.length"
         >
-          <CommonSvgIcon icon="icon_xmark" class="m-add-identical-clear-icon" />
+          <CommonMSvgIcon icon="icon_xmark" class="m-add-identical-clear-icon" />
         </button>
         <div class="m-add-identical-data">
           <slot :data="item" :index="index" />

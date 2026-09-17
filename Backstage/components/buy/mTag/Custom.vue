@@ -1,8 +1,8 @@
 <script setup>
-import '@css/_modules/buy/mTag/variables.css'
-import '@css/_modules/buy/mTag/customVariables.css'
-import '@css/_modules/buy/mTag/common.css'
-import '@css/_modules/buy/mTag/custom.css'
+import './.css/variables.css'
+import './.css/customVariables.css'
+import './.css/common.css'
+import './.css/custom.css'
 
 const emits = defineEmits(['update:modelValue', 'blur', 'remove'])
 const props = defineProps({
@@ -214,13 +214,13 @@ onBeforeUnmount(() => {
       setClass.main,
     ]"
   >
-    <CommonSvgIcon
+    <CommonMSvgIcon
       icon="icon_check_solid"
       class="m-tag-icon --checked"
       :class="setClass.icon"
       v-if="hasCheckValue"
     />
-    <CommonSvgIcon
+    <CommonMSvgIcon
       icon="icon_plus_circle"
       class="m-tag-icon"
       :class="setClass.icon"
@@ -254,7 +254,7 @@ onBeforeUnmount(() => {
         @click.stop="onClear"
         v-if="!config.isDisabled && isFocus"
       >
-        <CommonSvgIcon icon="icon_xmark" class="m-tag-clear-icon" />
+        <CommonMSvgIcon icon="icon_xmark" class="m-tag-clear-icon" />
       </button>
     </div>
     <button
@@ -265,7 +265,7 @@ onBeforeUnmount(() => {
       @click.stop="onRemove"
       v-if="!config.isDisabled && hasCheckValue"
     >
-      <CommonSvgIcon icon="icon_xmark_circle" class="m-tag-remove-icon" />
+      <CommonMSvgIcon icon="icon_xmark_circle" class="m-tag-remove-icon" />
     </button>
     <span class="m-tag-mirror" ref="mirrorRef">
       {{ mirrorText || ' ' }}

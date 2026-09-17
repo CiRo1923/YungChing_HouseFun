@@ -5,6 +5,7 @@ import { Form } from 'vee-validate'
 
 definePageMeta({
   layout: 'buy',
+  // 登入機制還沒接上,目前沒有任何地方讀這個值 —— 接上之後由路由守衛依它決定要不要擋
   requiresAuth: true,
   title: '物件資料編輯',
   // hfID 一定是數字。validate 在元件載入前就攔下,不會帶著壞掉的 id 去打 API,
@@ -13,7 +14,7 @@ definePageMeta({
 })
 
 // const common = useCommonStore()
-const { onUseMeta, onWithLoadingAll } = useCommonActions()
+const { onUseMeta } = useCommonActions()
 const buyProject = useBuyProjectStore()
 const {
   onApiGetBuyRealEstateTypeSelectOptions,
@@ -43,15 +44,15 @@ const { onSnapshotSave } = onUnsavedChanges(() => ({
   ping: pingData.value,
 }))
 
-const onTypeSelectOptionsUpdate = async () => {
+const onBuyRealEstateTypeSelectOptions = async () => {
   return await onApiGetBuyRealEstateTypeSelectOptions()
 }
 
-const onUsageSelectOptionsUpdate = async () => {
+const onBuyRealEstateLegalUsageSelectOptions = async () => {
   return await onApiGetBuyRealEstateLegalUsageSelectOptions()
 }
 
-const onFeatureCheckOptionsUpdate = async () => {
+const onBuyRealEstateFeatureCheckOptions = async () => {
   return await onApiGetBuyRealEstateFeatureCheckOptions()
 }
 
@@ -202,15 +203,15 @@ const onRenewal = async (validate, setTouched) => {
 
 const onOptionsUpdate = async () => {
   await Promise.all([
-    onTypeSelectOptionsUpdate(),
-    onUsageSelectOptionsUpdate(),
-    onFeatureCheckOptionsUpdate(),
+    onBuyRealEstateTypeSelectOptions(),
+    onBuyRealEstateLegalUsageSelectOptions(),
+    onBuyRealEstateFeatureCheckOptions(),
   ])
 
   return true
 }
 
-await onWithLoadingAll([
+await Promise.all([
   ...onAllPromise(),
   useAsyncData(`case-status-basic-${hfID.value}`, () => onApiGetBuyRealEstateCaseStatusHfID(hfID.value)),
   useAsyncData(`detail-${hfID.value}`, () => onApiGetBuyRealEstateHfID(hfID.value)),

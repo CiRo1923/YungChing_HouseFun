@@ -91,7 +91,7 @@ const items = shallowReadonly([
           class="flex flex-1 flex-col gap-y-[24px] rounded-[15px] bg-[--gray-f7] py-[32px] tm:px-[16px] p:px-[40px]"
         >
           <p class="flex shrink-0 items-center justify-center gap-x-[5px] text-[--green-6a2d]">
-            <CommonSvgIcon :icon="item.icon" class="h-[18px] w-[18px]" />
+            <CommonMSvgIcon :icon="item.icon" class="h-[18px] w-[18px]" />
             <b class="text-[20px] font-medium">{{ item.title }}</b>
           </p>
           <div class="grow space-y-[8px] tracking-wider">
@@ -107,7 +107,7 @@ const items = shallowReadonly([
                 v-for="(time, idx) in item.content.value"
                 :key="`${time}_${idx}_${index}`"
               >
-                <BuyMTimeMain
+                <BuyMTime
                   :text="time"
                   :setClass="{
                     main: '--h-30 p:--w-85 tm:--w-80',

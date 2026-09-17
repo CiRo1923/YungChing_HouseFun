@@ -69,7 +69,7 @@ const onSure = async () => {
             v-for="(item, index) in listTimeSpan"
             :key="`${item.timeID}_${item.timeDescription}_${index}`"
           >
-            <BuyMTimeMain
+            <BuyMTime
               name="listSelectedRefreshTime"
               :text="item.timeDescription"
               v-model="autoRefresh.save.apiData.listSelectedRefreshTime"

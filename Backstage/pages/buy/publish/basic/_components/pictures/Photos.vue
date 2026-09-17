@@ -3,18 +3,18 @@
 const { onIsLoading } = useCommonActions()
 // const buyProject = useBuyProjectStore()
 const buyPublish = useBuyPublishStore()
-const { apiData } = storeToRefs(buyPublish)
+const { apiData, pictures } = storeToRefs(buyPublish)
 const { onApiPostFormBuyRealEstatePicUpload } = useBuyPublishActions()
 const route = useRoute()
 const hfID = computed(() => route.params.id)
 const hasCasePictures = computed(() => apiData.value.caseInfo?.casePictures.length !== 0)
 
 const message = computed(() => {
-  const picturesLength = buyPublish.pictures.maxCount
+  const picturesLength = pictures.value.maxCount
   const { caseInfo } = apiData.value
   const casePictures = caseInfo.casePictures || []
   const casePicturesLength = casePictures.length
-  const basicText = `圖片大小不可超過 ${buyPublish.pictures.maxSizeMB} MB，僅支援 jpg、png、gif 格式，拖動照片調整排序，`
+  const basicText = `圖片大小不可超過 ${pictures.value.maxSizeMB} MB，僅支援 jpg、png、gif 格式，拖動照片調整排序，`
 
   return casePicturesLength >= picturesLength
     ? `${basicText}已達可上傳張數上限`
@@ -25,7 +25,7 @@ const onPicturesDelete = () => {
   apiData.value.caseInfo.casePictures = []
 }
 
-const onUploaded = async (items, done) => {
+const onBuyRealEstatePicUpload = async (items, done) => {
   onIsLoading(true)
   const { status, data } = await onApiPostFormBuyRealEstatePicUpload({
     hfID: hfID.value,
@@ -69,8 +69,8 @@ const onUploaded = async (items, done) => {
       v-model="apiData.caseInfo.casePictures"
       :config="{
         accept: '.jpg, .jpeg, .png, .gif',
-        maxCount: buyPublish.pictures.maxCount,
-        maxSizeMB: buyPublish.pictures.maxSizeMB,
+        maxCount: pictures.value.maxCount,
+        maxSizeMB: pictures.value.maxSizeMB,
         maxCountHiddenButton: true,
         placeholder: {
           default: '點擊或拖曳圖片到這裡上傳',
@@ -88,7 +88,7 @@ const onUploaded = async (items, done) => {
         appendBody: 'text-[16px]',
         appendText: 'text-[16px]',
       }"
-      @uploaded="onUploaded"
+      @uploaded="onBuyRealEstatePicUpload"
     />
   </div>
 </template>

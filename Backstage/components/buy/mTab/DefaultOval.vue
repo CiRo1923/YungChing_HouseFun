@@ -1,8 +1,8 @@
 <script setup>
-import '@css/_modules/buy/mTab/variables.css'
-import '@css/_modules/buy/mTab/defaultOvalVariables.css'
-import '@css/_modules/buy/mTab/common.css'
-import '@css/_modules/buy/mTab/defaultOval.css'
+import './.css/variables.css'
+import './.css/defaultOvalVariables.css'
+import './.css/common.css'
+import './.css/defaultOval.css'
 
 import { onDeepMerge } from '@js/_prototype.js'
 
@@ -220,7 +220,7 @@ onUnmounted(() => {
           v-bind="onHeaderBind(item)"
           @click="onClick(item, index, $event)"
         >
-          <CommonSvgIcon
+          <CommonMSvgIcon
             :icon="config.icon.name || item.icon"
             class="m-tab-icon"
             v-if="!isDeviceM && (config.icon.name || item.icon)"
@@ -232,7 +232,7 @@ onUnmounted(() => {
       </li>
     </ul>
     <div class="m-tab-body" :class="setClass.body" v-if="config.containerMode">
-      <div class="m-table-body-content">
+      <div class="m-tab-body-content">
         <!-- 單一區塊 -->
         <ul class="m-tab-body-items" v-if="config.containerMode === 'single'">
           <li class="m-tab-body-item">

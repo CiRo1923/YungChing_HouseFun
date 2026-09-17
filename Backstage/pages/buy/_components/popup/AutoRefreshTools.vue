@@ -21,7 +21,7 @@ const items = computed(() => {
   >
     <p class="flex flex-row-reverse items-center justify-center gap-x-[3px]">
       <span>餘額</span>
-      <CommonSvgIcon icon="icon_double_star" class="h-[18px] w-[18px]" />
+      <CommonMSvgIcon icon="icon_double_star" class="h-[18px] w-[18px]" />
     </p>
     <BuyMSeparator
       :items="items"

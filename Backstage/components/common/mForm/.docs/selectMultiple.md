@@ -35,7 +35,7 @@
       <div class="m-form-type">
         <slot />
       </div>
-      <CommonSvgIcon class="m-form-icon" />
+      <CommonMSvgIcon class="m-form-icon" />
       <i class="m-form-icon-arrow" />
     </button>
   </div>
@@ -54,7 +54,7 @@
               <ul class="m-form-dropdown-options">
                 <li class="m-form-dropdown-item">
                   <button class="m-form-dropdown-button">
-                    <CommonSvgIcon class="m-form-dropdown-icon" />
+                    <CommonMSvgIcon class="m-form-dropdown-icon" />
                     <em class="m-form-dropdown-label">
                       <slot name="option" :item="item" />
                     </em>
@@ -171,7 +171,7 @@ const items = [
 
 ### config.arrowType
 
-- `caret`：顯示 `CommonSvgIcon` 的 `caret_large_down`。
+- `caret`：顯示 `CommonMSvgIcon` 的 `caret_large_down`。
 - `arrow`：顯示 CSS 三角形 `.m-form-icon-arrow`。
 
 ### config.maxItems / config.maxItem

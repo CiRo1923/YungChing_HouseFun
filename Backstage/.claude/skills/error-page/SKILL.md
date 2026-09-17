@@ -27,7 +27,7 @@ description: 動到錯誤頁、404 導向或分頁參數(pg)防呆前必須先�
 **這在本專案是安全的**:`layouts/buy.vue` 只渲染 header / footer,`components/buy/mHeader.vue`
 只依賴 `device`,沒有任何 API 呼叫。
 
-> ⚠ 姊妹專案 Official **不能這樣做** —— 它的 `layouts/buy.vue` 會 `await callOnce(onInit)`
+> 注意:姊妹專案 Official **不能這樣做** —— 它的 `layouts/buy.vue` 會 `await callOnce(onInit)`
 > 打 auth API、SSR 還會預抓 SEO。錯誤頁常常正是 API 出狀況時顯示的,再打一次若又失敗,
 > 錯誤頁自己就渲染不出來。Official 的錯誤頁刻意零外部相依。
 
@@ -70,7 +70,7 @@ if (import.meta.server) {
 const [, channel] = route.path.split('/')
 ```
 
-⚠ 404 到完全不存在的路由時(例如 `/aaa`),`route.matched` 和 `route.meta` 都是空的,
+注意:404 到完全不存在的路由時(例如 `/aaa`),`route.matched` 和 `route.meta` 都是空的,
 **只有 `path` 可靠**,不要試圖用 `meta.channel`。
 
 **卡住的原因**:`layouts/rent.vue` 存在,但 `pages/rent` 還沒開發 —— 判斷得出 rent 也沒地方導。

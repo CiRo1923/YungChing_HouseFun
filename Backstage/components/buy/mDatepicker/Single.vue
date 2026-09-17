@@ -1,6 +1,6 @@
 <script setup>
-import '@css/_modules/buy/mDatepicker/variables.css'
-import '@css/_modules/buy/mDatepicker/common.css'
+import './.css/variables.css'
+import './.css/common.css'
 
 /* 單一日期選擇。自己實作,不依賴第三方套件。
 
@@ -237,7 +237,7 @@ const onFocusout = (e) => {
 }
 
 /* 選定的統一出口:收合 → 回報值 → 下一輪再發 selected。
-  ⚠️ 走 dateModel 而不是直接 emit —— 它的 setter 會把現有的時間接回去,
+  注意:走 dateModel 而不是直接 emit —— 它的 setter 會把現有的時間接回去,
       直接 emit 會把時間那半整個蓋掉。 */
 const onCommit = (value) => {
   if (!value) return
@@ -308,7 +308,7 @@ onMounted(() => {
                 @pointerdown="onCalendarButtonPointerdown($event)"
                 ref="iconRef"
               >
-                <CommonSvgIcon icon="icon_calendar" />
+                <CommonMSvgIcon icon="icon_calendar" class="m-datepicker-icon-svg" />
               </button>
             </div>
           </div>
@@ -342,7 +342,7 @@ onMounted(() => {
       v-slot="{ message }"
       v-if="(config.altInput && !isActive) || !config.altInput"
     >
-      <BuyMErrorMessageElem :message="message" />
+      <CommonMErrorMessage :message="message" />
     </ErrorMessage>
   </div>
 

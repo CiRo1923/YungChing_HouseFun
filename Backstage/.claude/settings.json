@@ -52,5 +52,10 @@
         ]
       }
     ]
+  },
+  "permissions": {
+    "allow": [
+      "PowerShell(node .tools/lint/lint.mjs src/components/platform/mSocial 2>&1)"
+    ]
   }
 }

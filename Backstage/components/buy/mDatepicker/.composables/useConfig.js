@@ -1,7 +1,7 @@
 /* mDatepicker 的預設設定。Single(日期)與 Time(時間)各一份,
   合併方式對齊 mForm 的 defaultDropdownConfig / onMergeDropdownConfig。
 
-  ⚠️ 這些鍵是對外契約 —— 呼叫端(pages)傳進來的 config 就是照這份,不要改名。 */
+  注意:這些鍵是對外契約 —— 呼叫端(pages)傳進來的 config 就是照這份,不要改名。 */
 
 import { onNormalizeFormat } from './useDateCore.js'
 
@@ -93,7 +93,7 @@ export const defaultTimeConfig = {
   validateEvents: ['blur', 'change', 'touchedModelUpdate'],
 }
 
-/* ⚠️ format 要在合併「之後」再正規化一次 —— 呼叫端只給 { model: 'YYYYMMDD' } 時,
+/* 注意:format 要在合併「之後」再正規化一次 —— 呼叫端只給 { model: 'YYYYMMDD' } 時,
     正規化會把 datePicker 補上,漏做的話輸入框那邊會拿到 undefined。 */
 export const onMergeDateConfig = (config = {}) => {
   const merged = { ...defaultDateConfig, ...config }

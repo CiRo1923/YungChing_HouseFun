@@ -1,6 +1,6 @@
 <script setup>
-import '@css/_modules/buy/mDatepicker/variables.css'
-import '@css/_modules/buy/mDatepicker/common.css'
+import './.css/variables.css'
+import './.css/common.css'
 
 /* 單一時間選擇。與 Single(日期)是兩支獨立元件,共用 .composables 與同一份樣式。
 
@@ -255,7 +255,7 @@ onMounted(() => {
               @pointerdown="onIconPointerdown($event)"
               ref="iconRef"
             >
-              <CommonSvgIcon :icon="config.icon" />
+              <CommonMSvgIcon :icon="config.icon" class="m-datepicker-icon-svg" />
             </button>
           </div>
         </div>
@@ -270,7 +270,7 @@ onMounted(() => {
       v-slot="{ message }"
       v-if="(config.altInput && !isActive) || !config.altInput"
     >
-      <BuyMErrorMessageElem :message="message" />
+      <CommonMErrorMessage :message="message" />
     </ErrorMessage>
   </div>
 

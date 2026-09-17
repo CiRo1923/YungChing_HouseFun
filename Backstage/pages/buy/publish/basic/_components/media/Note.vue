@@ -13,7 +13,7 @@ const note = readonly({
 </script>
 
 <template>
-  <BuyMItemMain
+  <BuyMItem
     :data="note"
     :setClass="{
       container: 'text-[14px] text-[--gray-999]',

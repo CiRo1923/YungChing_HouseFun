@@ -1,4 +1,4 @@
-export const rentProjectStore = defineStore('rentProject', () => {
+export const useRentProjectStore = defineStore('rentProject', () => {
   const NAME = '好房網快租 Housefun'
 
   return {

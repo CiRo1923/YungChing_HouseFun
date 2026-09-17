@@ -1,8 +1,8 @@
 <script setup>
-import '@css/_modules/common/mForm/variables.css'
-import '@css/_modules/common/mForm/searchVariables.css'
-import '@css/_modules/common/mForm/common.css'
-import '@css/_modules/common/mForm/search.css'
+import './.css/variables.css'
+import './.css/searchVariables.css'
+import './.css/common.css'
+import './.css/search.css'
 
 import { useTextCore } from './.composables/useTextCore.js'
 
@@ -87,9 +87,9 @@ const onFocus = (value) => {
           tabindex="-1"
           @click="onClear"
         >
-          <CommonSvgIcon icon="icon_xmark" class="m-form-clear-icon" />
+          <CommonMSvgIcon icon="icon_xmark" class="m-form-clear-icon" />
         </button>
-        <CommonSvgIcon icon="icon_search" class="m-form-search-icon" />
+        <CommonMSvgIcon icon="icon_search" class="m-form-search-icon" />
       </div>
     </div>
   </div>

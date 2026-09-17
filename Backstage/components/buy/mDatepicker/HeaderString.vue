@@ -1,4 +1,7 @@
 <script setup>
+import './.css/variables.css'
+import './.css/common.css'
+
 // headerMode: 'string' —— 年月只顯示文字(2026-08),換月靠左右箭頭。
 const props = defineProps({
   label: {
@@ -27,7 +30,7 @@ defineEmits(['prev', 'next'])
         :disabled="props.prevDisabled"
         @click="$emit('prev')"
       >
-        <CommonSvgIcon icon="chevron_left" class="m-datepicker-calendar-arrow-icon" />
+        <CommonMSvgIcon icon="chevron_left" class="m-datepicker-calendar-arrow-icon" />
       </button>
     </li>
 
@@ -42,7 +45,7 @@ defineEmits(['prev', 'next'])
         :disabled="props.nextDisabled"
         @click="$emit('next')"
       >
-        <CommonSvgIcon icon="chevron_right" class="m-datepicker-calendar-arrow-icon" />
+        <CommonMSvgIcon icon="chevron_right" class="m-datepicker-calendar-arrow-icon" />
       </button>
     </li>
   </ul>

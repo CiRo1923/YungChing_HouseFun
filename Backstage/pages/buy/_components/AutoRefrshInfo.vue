@@ -61,7 +61,7 @@ const setClass = computed(() => {
             class="flex flex-wrap items-center justify-start m:gap-[6px] t:gap-[8px] p:gap-x-[16px] p:gap-y-[8px]"
           >
             <li v-for="(time, idx) in item.listTimeSpan" :key="`${time}_${idx}_${index}`">
-              <BuyMTimeMain
+              <BuyMTime
                 :text="time"
                 :setClass="{
                   main: '--h-30 p:--w-85 tm:--w-76',

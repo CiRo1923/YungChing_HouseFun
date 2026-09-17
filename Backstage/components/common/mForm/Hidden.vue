@@ -1,6 +1,6 @@
 <script setup>
-import '@css/_modules/common/mForm/variables.css'
-import '@css/_modules/common/mForm/common.css'
+import './.css/variables.css'
+import './.css/common.css'
 
 import useValidateEvents from './.composables/useValidateEvents.js'
 
@@ -37,7 +37,7 @@ const config = computed(() => {
     length: null,
     minlength: null,
     maxlength: null,
-    /* 驗證時機。⚠️ 這支渲染的是 <input type="hidden"> —— 使用者碰不到它,
+    /* 驗證時機。注意:這支渲染的是 <input type="hidden"> —— 使用者碰不到它,
       **永遠不會 blur / change**,所以那兩個時機在這裡等於沒有:
       實際生效的只有 touchedModelUpdate,而它要靠送出時的 setTouched(true) 才會開。
 
@@ -99,7 +99,7 @@ defineExpose({
       :class="setClass.error"
       v-slot="{ message }"
     >
-      <BuyMErrorMessageElem :class="setClass.errorMessage" :message="message" />
+      <CommonMErrorMessage :class="setClass.errorMessage" :message="message" />
     </ErrorMessage>
   </div>
 </template>

@@ -1,6 +1,6 @@
 <script setup>
-import '@css/_modules/buy/mItem/variables.css'
-import '@css/_modules/buy/mItem/common.css'
+import './.css/variables.css'
+import './.css/common.css'
 
 // 自己遞迴呼叫自己(<m-item-container>),要有 name 才找得到
 defineOptions({

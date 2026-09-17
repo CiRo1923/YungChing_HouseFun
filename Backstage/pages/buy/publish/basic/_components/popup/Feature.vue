@@ -76,7 +76,7 @@ const example2 = readonly({
         </li>
         <li class="m:space-y-[10px] pt:flex pt:gap-x-[40px]">
           <b class="font-semibold m:block pt:w-[55px] pt:shrink-0">範例二</b>
-          <BuyMItemMain
+          <BuyMItem
             :data="example2"
             :setClass="{
               container: 'text-[--gray-666]',

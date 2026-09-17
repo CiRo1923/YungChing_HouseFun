@@ -1,4 +1,7 @@
 <script setup>
+import './.css/variables.css'
+import './.css/common.css'
+
 // 月份面板。headerMode: 'panel' 時點月份會展開這個。
 const props = defineProps({
   months: {

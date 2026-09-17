@@ -40,7 +40,7 @@ const items = shallowReadonly([
   >
     <template v-for="(item, idx) in items" :key="`${item.id}_${idx}`">
       <li class="flex items-center gap-x-[5px]" v-if="item.value">
-        <CommonSvgIcon :icon="item.icon" class="h-[16px] w-[16px]" />
+        <CommonMSvgIcon :icon="item.icon" class="h-[16px] w-[16px]" />
         <component :is="item.component">{{ item.value }}</component>
       </li>
     </template>

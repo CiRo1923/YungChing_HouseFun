@@ -94,7 +94,7 @@ const onActionClick = (item) => {
 <template>
   <!-- {{ checkedIDs }} -->
   <div class="grow" v-if="hasData">
-    <PageBuyListPopupCommentFuncitonsMain
+    <PageBuyListPopupCommentFuncitons
       @click:reply="onFunctionsClick('reply')"
       @click:noReply="onFunctionsClick('noReply')"
     />

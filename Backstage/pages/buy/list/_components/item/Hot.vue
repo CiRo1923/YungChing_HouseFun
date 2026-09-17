@@ -61,7 +61,7 @@ const items = computed(() => {
           v-if="item.as === 'button'"
         />
         <div class="flex items-center gap-x-[4px]" v-else>
-          <CommonSvgIcon :icon="item.icon" class="h-[16px] w-[16px]" />
+          <CommonMSvgIcon :icon="item.icon" class="h-[16px] w-[16px]" />
           <p>{{ item.content }}</p>
         </div>
       </li>

@@ -1,0 +1,90 @@
+/* mHeader 的版型,以及 @screen 的斷點對應。 */
+.m-header {
+  @apply mx-auto flex items-center;
+  @apply h-[--header-h] max-w-[--header-max-w] px-[--header-px];
+}
+
+.m-header-logo-text {
+  @apply h-[--header-logo-text-h] w-[--header-logo-text-w];
+}
+
+.m-header-logo-icon {
+  @apply ml-[--header-logo-icon-ml] h-[--header-logo-icon-h] w-[--header-logo-icon-w];
+}
+
+.m-header-logo {
+  @apply flex shrink-0 items-center;
+
+  /*
+   * 「管理後台」字樣。用後代選擇器而不給 class 是刻意的 ——
+   * 這是 module 自己渲染的固定文字,全站只有這一處,沒有各頁自訂的需求。
+   * 注意:這條是 (0,1,1),使用端 setClass 的 utility 是 (0,1,0),蓋不過它。
+   */
+  > em {
+    @apply ml-[--header-label-ml];
+    @apply text-[length:--header-label-text-size] text-[--header-label-color];
+  }
+}
+
+@screen p {
+  .m-header {
+    --header-h: var(--header-pc-h);
+    --header-px: var(--header-pc-px);
+    --header-max-w: var(--header-pc-max-w);
+    --header-label-ml: var(--header-label-pc-ml);
+    --header-label-text-size: var(--header-label-pc-text-size);
+  }
+
+  .m-header-logo-text {
+    --header-logo-text-w: var(--header-logo-text-pc-w);
+    --header-logo-text-h: var(--header-logo-text-pc-h);
+  }
+
+  .m-header-logo-icon {
+    --header-logo-icon-w: var(--header-logo-icon-pc-w);
+    --header-logo-icon-h: var(--header-logo-icon-pc-h);
+    --header-logo-icon-ml: var(--header-logo-icon-pc-ml);
+  }
+}
+
+@screen t {
+  .m-header {
+    --header-h: var(--header-tablet-h);
+    --header-px: var(--header-tablet-px);
+    --header-max-w: var(--header-tablet-max-w);
+    --header-label-ml: var(--header-label-tablet-ml);
+    --header-label-text-size: var(--header-label-tablet-text-size);
+  }
+
+  .m-header-logo-text {
+    --header-logo-text-w: var(--header-logo-text-tablet-w);
+    --header-logo-text-h: var(--header-logo-text-tablet-h);
+  }
+
+  .m-header-logo-icon {
+    --header-logo-icon-w: var(--header-logo-icon-tablet-w);
+    --header-logo-icon-h: var(--header-logo-icon-tablet-h);
+    --header-logo-icon-ml: var(--header-logo-icon-tablet-ml);
+  }
+}
+
+@screen m {
+  .m-header {
+    --header-h: var(--header-mobile-h);
+    --header-px: var(--header-mobile-px);
+    --header-max-w: var(--header-mobile-max-w);
+    --header-label-ml: var(--header-label-mobile-ml);
+    --header-label-text-size: var(--header-label-mobile-text-size);
+  }
+
+  .m-header-logo-text {
+    --header-logo-text-w: var(--header-logo-text-mobile-w);
+    --header-logo-text-h: var(--header-logo-text-mobile-h);
+  }
+
+  .m-header-logo-icon {
+    --header-logo-icon-w: var(--header-logo-icon-mobile-w);
+    --header-logo-icon-h: var(--header-logo-icon-mobile-h);
+    --header-logo-icon-ml: var(--header-logo-icon-mobile-ml);
+  }
+}

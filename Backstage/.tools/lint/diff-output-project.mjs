@@ -7,12 +7,12 @@
 // 比對的是「每個 (media query, selector) 底下有哪些宣告」——
 // 忽略空白、宣告順序、規則出現順序,只看樣式的實質內容。
 //
-// ⚠️ 為什麼要比產物而不是比原始碼:module 的重構(變數化、合併 @screen、
+// 注意:為什麼要比產物而不是比原始碼:module 的重構(變數化、合併 @screen、
 //    調整巢狀結構)在原始碼上是大改動,但產物往往一個位元組都沒變。
 //    反過來,看起來無害的一行也可能讓某個斷點整條宣告失效 ——
 //    只有產物看得出來。
 //
-// 完整流程(⚠️ 第 2 步有個會咬人的坑,見下):
+// 完整流程(注意:第 2 步有個會咬人的坑,見下):
 //
 //   1. npm run build && node .tools/lint/diff-output-project.mjs --collect /tmp/new.css
 //   2. git checkout <基準 commit> -- .        # 取出重構前的原始碼
@@ -20,7 +20,7 @@
 //   3. git checkout HEAD -- .                 # 還原
 //   4. node .tools/lint/diff-output-project.mjs /tmp/old.css /tmp/new.css
 //
-// ⚠️ 第 3 步的 `git checkout HEAD -- .` **只會還原 HEAD 裡有的檔案** ——
+// 注意:第 3 步的 `git checkout HEAD -- .` **只會還原 HEAD 裡有的檔案** ——
 //    基準 commit 有、而 HEAD 已經刪掉的檔案會留在工作區(而且是 staged 的新增)。
 //    還原後一定要看 `git status`:多出來的檔案要自己刪掉。
 //    實際踩過:一次比對把 276 支早已刪除的第三方語言檔帶了回來。
@@ -107,7 +107,7 @@ const parse = (css) => {
     const body = css.slice(bodyStart, i - 1)
     const media = stack.join(' && ')
 
-    // ⚠️ 選擇器不能直接 split(',') —— class 名裡可能有轉義的逗號
+    // 注意:選擇器不能直接 split(',') —— class 名裡可能有轉義的逗號
     // (例如 tailwind 的 shadow-[0_2px_4px_rgba(0,0,0,.3)])。只在未轉義處切。
     for (const sel of prelude.split(/(?<!\\),/)) {
       const key = `${media}||${sel.trim().replace(/\s+/g, ' ')}`

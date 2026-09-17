@@ -1,5 +1,5 @@
 <script setup>
-// ⚠ 暫時的 mDatepicker 驗證頁,驗完請整個 pages/demo 目錄移除。
+// 注意:暫時的 mDatepicker 驗證頁,驗完請整個 pages/demo 目錄移除。
 // 路由:/demo/datepicker
 definePageMeta({
   // 驗證頁不要 layout 的頁首頁尾 —— 只看元件本身

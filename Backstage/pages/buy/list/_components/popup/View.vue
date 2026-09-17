@@ -49,7 +49,7 @@ const total = computed(() => customData.value.data.reduce((sum, item) => sum + i
       }"
     >
       <template #isGolden="{ value }">
-        <CommonSvgIcon
+        <CommonMSvgIcon
           icon="icon_check_solid"
           class="mx-auto h-[20px] w-[20px] text-[--orange-e646]"
           :class="{ invisible: !value }"

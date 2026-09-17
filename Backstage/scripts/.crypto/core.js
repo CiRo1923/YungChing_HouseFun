@@ -312,7 +312,7 @@ export const cbcDecrypt = (cipherBytes, keyBytes, ivBytes) => {
 export const serializeValue = (value) => (typeof value === 'string' ? value : JSON.stringify(value))
 
 // { 或 [ 開頭視為 JSON,true / false / null 視為原生值,其餘一律維持字串。
-// ⚠️ 純數字字串刻意不轉回數字 —— guid、商品代碼這類值本來就是字串,
+// 注意:純數字字串刻意不轉回數字 —— guid、商品代碼這類值本來就是字串,
 //    轉成數字會掉前導 0('007' → 7),也可能超過安全整數範圍。
 export const parseValue = (text) => {
   if (typeof text !== 'string') return text

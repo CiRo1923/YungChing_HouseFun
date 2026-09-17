@@ -17,7 +17,7 @@ const message = computed(() => {
     : `${basicText}還差 <span class="text-[--orange-e646]">1</span> 張符合優質排序`
 })
 
-const onUploaded = async (items, done) => {
+const onBuyRealEstatePicUpload = async (items, done) => {
   onIsLoading(true)
   const { status, data } = await onApiPostFormBuyRealEstatePicUpload({
     hfID: hfID.value,
@@ -55,7 +55,7 @@ const onUploaded = async (items, done) => {
         overlay: 'text-[16px]',
         text: 'text-[16px]',
       }"
-      @uploaded="onUploaded"
+      @uploaded="onBuyRealEstatePicUpload"
     />
   </div>
 </template>

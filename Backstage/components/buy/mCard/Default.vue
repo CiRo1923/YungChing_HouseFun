@@ -1,6 +1,6 @@
 <script setup>
-import '@css/_modules/buy/mCard/variables.css'
-import '@css/_modules/buy/mCard/common.css'
+import './.css/variables.css'
+import './.css/common.css'
 
 const props = defineProps({
   setClass: {

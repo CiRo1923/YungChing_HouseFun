@@ -19,6 +19,7 @@ import {
   issueOf,
   lineNoOf,
   maskComments,
+  withNamedImport,
 } from './shared.mjs'
 
 const ACTIONS_DIR = `${STORE_DIR}/${ACTIONS_DIR_NAME}`
@@ -483,37 +484,7 @@ export const onWrapMountedCalls = (text, rel) => {
  * 沒有這一步的話,自動包完的頁面會因為找不到那支函式而整頁壞掉,
  * 比沒有包更糟。
  */
-const withHelperImport = (text) => {
-  if (new RegExp(`\\b${PARALLEL_HELPER}\\b`).test(text.split('\n').filter((l) => /^\s*import\s/.test(l)).join('\n'))) {
-    return text
-  }
-
-  const lines = text.split('\n')
-
-  // 已經從同一支來源 import 別的東西時,加進那一行的大括號裡
-  const sameSource = lines.findIndex((l) =>
-    new RegExp(`^\\s*import\\s*\\{[^}]*\\}\\s*from\\s*['"]${PARALLEL_HELPER_SOURCE.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}['"]`).test(l)
-  )
-
-  if (sameSource !== -1) {
-    lines[sameSource] = lines[sameSource].replace(/\{\s*/, `{ ${PARALLEL_HELPER}, `)
-    return lines.join('\n')
-  }
-
-  // 沒有的話放在最後一行 import 之後
-  const lastImport = lines.reduce((acc, l, i) => (/^\s*import\s/.test(l) ? i : acc), -1)
-  const statement = `import { ${PARALLEL_HELPER} } from '${PARALLEL_HELPER_SOURCE}'`
-
-  if (lastImport === -1) {
-    const scriptLine = lines.findIndex((l) => /<script\b/.test(l))
-    if (scriptLine === -1) return text
-    lines.splice(scriptLine + 1, 0, statement)
-  } else {
-    lines.splice(lastImport + 1, 0, statement)
-  }
-
-  return lines.join('\n')
-}
+const withHelperImport = (text) => withNamedImport(text, PARALLEL_HELPER, PARALLEL_HELPER_SOURCE)
 
 export const PAGE_CHECKS = [
   checkPageApiData,

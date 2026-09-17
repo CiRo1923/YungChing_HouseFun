@@ -85,7 +85,7 @@ onMounted(() => {
           :key="`${item.id}_${index}`"
           v-if="!onIsHidden(item)"
         >
-          <CommonMFormLabel
+          <CommonMLabel
             :label="item.label"
             :config="{
               isRequired: item.isRequired,
@@ -96,7 +96,7 @@ onMounted(() => {
             v-if="item.label || $slots[`${item.id}_label`]"
           >
             <slot :name="`${item.id}_label`" />
-          </CommonMFormLabel>
+          </CommonMLabel>
           <div class="overflow-hidden pt:grow">
             <component :is="item.component" v-bind="onBind(item)" v-on="onEvents(item)" />
           </div>

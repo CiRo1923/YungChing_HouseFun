@@ -1,7 +1,9 @@
 <script setup>
+// serverTime 只讀不取 —— 取它的是使用這支元件的那幾頁。
+// 元件自己去要資料的話,它出現幾次就打幾次;而這一支在成交彈窗裡,
+// 每開一次彈窗就會再打一次,那個時間點取到的值與頁面其他地方也不一致。
 const buyProject = useBuyProjectStore()
 const { serverTime } = storeToRefs(buyProject)
-const { onApiGetCommonServerTime } = useBuyProjectActions()
 const buyList = useBuyListStore()
 const { apiDealData } = storeToRefs(buyList)
 const props = defineProps({
@@ -39,8 +41,6 @@ const onInit = () => {
   }
 }
 
-await useAsyncData('common-server-time', () => onApiGetCommonServerTime())
-
 onInit()
 </script>
 
@@ -50,7 +50,7 @@ onInit()
       class="space-y-[16px] rounded-[15px] bg-[--gray-f7] py-[32px] text-center tm:px-[16px] p:px-[40px]"
     >
       <div class="m:space-y-[16px] pt:inline-flex pt:gap-x-[16px]">
-        <CommonMFormLabel
+        <CommonMLabel
           label="成交日期"
           :setClass="{
             main: 'text-[16px] pt:shrink-0 p:flex p:h-[40px] p:items-center',

@@ -7,7 +7,7 @@
 //   validateEvents: ['blur']          完整指定:只在離開欄位時驗
 //   validateEvents: []                自動驗證全關,只剩 submit 時的主動 validate()
 //
-// ⚠️ 傳陣列是「完整指定」而非在預設值上疊加 —— 沒列到的一律關閉。
+// 注意:傳陣列是「完整指定」而非在預設值上疊加 —— 沒列到的一律關閉。
 //    想保留原本行為只拿掉一項,要把其餘項目寫出來,例如清空值不想跳紅字就用
 //    ['blur', 'change'](把 modelUpdate 拿掉)。
 
@@ -40,7 +40,7 @@ export const VALIDATE_EVENT_PROPS = {
 
     blur         `v-bind="field"` 綁的 handleBlur 會設 touched(原始碼裡只有它設)
     送出         Form 的 slot 提供 setTouched(true),把所有欄位一起標記
-                 ⚠️ 頁面的送出流程要呼叫它,漏了就退回「只有 blur 會開」
+                 注意:頁面的送出流程要呼叫它,漏了就退回「只有 blur 會開」
 
   所以行為是:送出前碰過的欄位才即時驗;送出後全部即時驗(補填完紅字馬上消失)。
 
@@ -54,7 +54,7 @@ export const TOUCHED_MODEL_UPDATE = 'touchedModelUpdate'
 const KNOWN_EVENTS = new Set([...Object.keys(VALIDATE_EVENT_PROPS), TOUCHED_MODEL_UPDATE])
 
 // source 可以是陣列、ref,或 getter(() => config.value.validateEvents)。
-// ⚠️ 用 toValue 而非 unref —— unref 不會呼叫 getter,會把函式本身當成值傳下去,
+// 注意:用 toValue 而非 unref —— unref 不會呼叫 getter,會把函式本身當成值傳下去,
 //    於是 Array.isArray 判否、一律回傳「不覆寫」,設定就靜默失效了。
 //
 // fieldName 是這個元件註冊給 vee-validate 的名稱,只有 touchedModelUpdate 會用到。

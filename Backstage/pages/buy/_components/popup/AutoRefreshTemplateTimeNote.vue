@@ -25,7 +25,7 @@ const note = computed(() => {
 </script>
 
 <template>
-  <BuyMItemMain
+  <BuyMItem
     :data="note"
     :setClass="{
       main: 'text-[14px] text-[--gray-666]',

@@ -54,7 +54,7 @@ onUnmounted(() => {
         </span>
       </div>
     </div>
-    <CommonImgSrc
+    <CommonMFigure
       :src="props.data.cover"
       :alt="props.data.title"
       :setClass="{

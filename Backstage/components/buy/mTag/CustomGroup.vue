@@ -1,6 +1,6 @@
 <script setup>
-import '@css/_modules/buy/mTag/customGroupVariables.css'
-import '@css/_modules/buy/mTag/customGroup.css'
+import './.css/customGroupVariables.css'
+import './.css/customGroup.css'
 
 const emits = defineEmits(['update:modelValue'])
 const props = defineProps({

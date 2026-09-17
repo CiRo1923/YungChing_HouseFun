@@ -1,10 +1,10 @@
 <script setup>
-import '@css/_modules/common/mForm/variables.css'
-import '@css/_modules/common/mForm/selectionVariables.css'
-import '@css/_modules/common/mForm/checkboxVariables.css'
-import '@css/_modules/common/mForm/common.css'
-import '@css/_modules/common/mForm/selection.css'
-import '@css/_modules/common/mForm/checkbox.css'
+import './.css/variables.css'
+import './.css/selectionVariables.css'
+import './.css/checkboxVariables.css'
+import './.css/common.css'
+import './.css/selection.css'
+import './.css/checkbox.css'
 
 import useValidateEvents from './.composables/useValidateEvents.js'
 
@@ -95,7 +95,7 @@ const config = computed(() => {
       /* 驗證時機。勾選類控制項兩件事都刻意不做:
 
         不吃 blur    用鍵盤 Tab 經過卻還沒選就跳紅字,那是誤報。
-                     ⚠️ 不驗證不代表不記錄 —— vee-validate 的 handleBlur 仍會標記
+                     注意:不驗證不代表不記錄 —— vee-validate 的 handleBlur 仍會標記
                         touched,所以下面那個時機照樣運作。
         不吃 change  change 就是「使用者剛選了它」,那時跳紅字等於一切就罵人 ——
                      radio 由 false 切成 true 讓一組欄位顯示出來時最明顯。
@@ -302,7 +302,7 @@ const onChange = async () => {
             :disabled="config.isDisabled"
             @change="onChange"
           />
-          <CommonSvgIcon icon="icon_check_solid" class="m-form-icon" :class="setClass.icon" />
+          <CommonMSvgIcon icon="icon_check_solid" class="m-form-icon" :class="setClass.icon" />
           <slot>
             <em :class="setClass.label" v-if="config.label">
               {{ config.label }}
@@ -318,7 +318,7 @@ const onChange = async () => {
       :class="setClass.error"
       v-slot="{ message }"
     >
-      <BuyMErrorMessageElem :message="message" />
+      <CommonMErrorMessage :message="message" />
     </ErrorMessage>
   </div>
 </template>

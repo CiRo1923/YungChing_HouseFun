@@ -1,7 +1,7 @@
 <script setup>
-import '@css/_modules/buy/mStep/arrowVariables.css'
-import '@css/_modules/buy/mStep/common.css'
-import '@css/_modules/buy/mStep/arrow.css'
+import './.css/arrowVariables.css'
+import './.css/common.css'
+import './.css/arrow.css'
 
 const props = defineProps({
   options: {
@@ -50,12 +50,12 @@ const setClass = computed(() => {
       v-for="(item, index) in props.options"
       :key="`${item.label}_${index}`"
     >
-      <CommonSvgIcon
+      <CommonMSvgIcon
         icon="chevron_right"
         class="m-step-icon --pending"
         v-if="index > config.active"
       />
-      <CommonSvgIcon
+      <CommonMSvgIcon
         :icon="config.icon"
         class="m-step-icon"
         :class="setClass.icon"

@@ -35,7 +35,7 @@ const onClick = (item) => {
     >
       排序
     </span>
-    <BuyMSortMain
+    <BuyMSort
       :options="props.options"
       :config="{
         index: 0,

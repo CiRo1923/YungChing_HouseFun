@@ -17,7 +17,7 @@ const { isLoading } = storeToRefs(common)
       <BuyMFooter />
     </footer>
   </div>
-  <CommonMLoadingMain
+  <CommonMLoading
     :config="{
       isFixed: true,
     }"

@@ -1,8 +1,8 @@
 <script setup>
-import '@css/_modules/buy/mTable/variables.css'
-import '@css/_modules/buy/mTable/checkboxResponsiveVariables.css'
-import '@css/_modules/buy/mTable/common.css'
-import '@css/_modules/buy/mTable/checkboxResponsive.css'
+import './.css/variables.css'
+import './.css/checkboxResponsiveVariables.css'
+import './.css/common.css'
+import './.css/checkboxResponsive.css'
 
 import useTableCore from './.composables/useTableCore'
 
@@ -230,7 +230,7 @@ onUnmounted(() => {
                     (isDeviceM && !$slots[`${column.id}_m`])
                   "
                 >
-                  <BuyMTableTBodyValue :value="getScopeValue(item, column)" :config="column" />
+                  <BuyMTableTbodyValue :value="getScopeValue(item, column)" :config="column" />
                 </slot>
                 <!-- device pt 單獨使用 -->
                 <slot
@@ -241,7 +241,7 @@ onUnmounted(() => {
                   :column="column"
                   v-if="!isDeviceM && $slots[`${column.id}_pt`]"
                 >
-                  <BuyMTableTBodyValue :value="getScopeValue(item, column)" :config="column" />
+                  <BuyMTableTbodyValue :value="getScopeValue(item, column)" :config="column" />
                 </slot>
                 <!-- device m 單獨使用 -->
                 <slot
@@ -252,7 +252,7 @@ onUnmounted(() => {
                   :column="column"
                   v-if="isDeviceM && $slots[`${column.id}_m`]"
                 >
-                  <BuyMTableTBodyValue :value="getScopeValue(item, column)" :config="column" />
+                  <BuyMTableTbodyValue :value="getScopeValue(item, column)" :config="column" />
                 </slot>
               </td>
             </tr>
@@ -265,7 +265,7 @@ onUnmounted(() => {
               :colspan="visibleThead.length + 1"
             >
               <div class="m-table-no-data" :class="setClass.noData">
-                <CommonSvgIcon :icon="config.noData.icon" v-if="config.noData.icon" />
+                <CommonMSvgIcon :icon="config.noData.icon" v-if="config.noData.icon" />
                 <p v-html="config.noData.message" />
               </div>
             </td>
@@ -292,7 +292,7 @@ onUnmounted(() => {
                 :index="rowIndex"
                 :column="column"
               >
-                <BuyMTableTBodyValue :value="getScopeValue(item, column)" :config="column" />
+                <BuyMTableTbodyValue :value="getScopeValue(item, column)" :config="column" />
               </slot>
             </td>
           </tr>

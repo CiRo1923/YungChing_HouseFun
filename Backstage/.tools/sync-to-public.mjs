@@ -19,7 +19,7 @@ import { spawn } from 'node:child_process'
 // .acceptance 是驗收測試報告(含規格比對與缺陷清單),屬對內資料,不隨原始碼出去。
 // .api.json 是後端的 swagger 規格,只給開發時查 API 用 —— 同樣屬對內資料,
 // 而且它在專案根目錄、不經任何建置,漏掉就會原樣被同步與打包出去。
-// ⚠️ docs/ 不在這裡 —— 元件的文件與範例頁對協作方有用,照樣送出去。
+// 注意:docs/ 不在這裡 —— 元件的文件與範例頁對協作方有用,照樣送出去。
 const TOOLING_NAMES = ['.claude', '.agents', '.acceptance', '.api.json']
 
 /* 只排除同步、壓縮檔仍要收的項目 —— 那份是自己的備份,要能還原成完整可跑的專案。
@@ -48,7 +48,7 @@ const SYNC_EXCLUDE_NAMES = new Set([
   「只有在這個位置才要排除」的不夠精確(比對名稱會誤傷任何同名目錄)。
 
   pages/demo  暫時的元件驗證頁(見那幾支檔案的檔頭),對協作方沒有意義。
-              ⚠️ 只排除同步 —— 備份仍要收,而且本地 dev 照樣開得起來。 */
+              注意:只排除同步 —— 備份仍要收,而且本地 dev 照樣開得起來。 */
 const SYNC_EXCLUDE_PATHS = ['pages/demo']
 
 // 壓縮時只拿掉工具設定與文件,其餘一律收進壓縮檔
@@ -340,7 +340,7 @@ function formatTimestamp() {
   整個 build 被判定成失敗 —— 而 build 其實成功了,只是這台機器還沒把發布用的
   repo clone 下來。CI 或別的腳本串起來時那個差別很致命。
 
-  ⚠️ 這只涵蓋「還沒準備好」。真正做到一半才出錯(壓縮失敗、複製失敗、push 失敗)
+  注意:這只涵蓋「還沒準備好」。真正做到一半才出錯(壓縮失敗、複製失敗、push 失敗)
       仍然要回非零 —— 那時目標端可能已經被清空,不能靜靜當作沒事。 */
 function skip(...lines) {
   console.warn(`[sync-to-public] 跳過同步 —— ${lines[0]}`)

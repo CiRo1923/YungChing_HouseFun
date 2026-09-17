@@ -3,6 +3,8 @@ name: popup-system
 description: 修改 popup(alert / confirm / custom / apiPromise)的顯示狀態機、Promise 結算、進出場動畫前必須先讀。記錄兩條不可違反的不變式,以及它們各自防住的三個 bug(死鎖打不開、Promise 永久 pending、TypeError 連鎖)。觸發時機 - 要改 components/common/mPopup/Main.vue、stores/.composables/usePopupActions.js、containers/buy/common/{CustomPopup,AlertSystem,ConfirmSystem}.vue、assets/css/_modules/common/mPopup/*.css、assets/css/_common/vueTransition.css 的 popup 段落;或使用者回報 popup「打不開 / 只剩遮罩 / 關不掉 / 動畫沒播 / 流程卡住不往下走」。
 ---
 
+<!-- lint-project-name-exempt: 這支只有本專案有,不會複製到別的專案;內容是 popup 涉及哪幾支檔案,路徑是要記錄的資料本身 -->
+
 # Popup 系統
 
 全站只有一個 popup 顯示層。**同一時間只會有一個 popup 可見**,由 `keyID` 的優先序決定:
@@ -70,7 +72,7 @@ const onAfterLeave = () => {
 ### 舊寫法為什麼會死鎖(勿回頭)
 
 ```js
-// ✗ 已移除的實作
+// 已移除的實作
 const onOverlayEnter = () => {
   if (isOpen.value) isShowPopup.value = true
 }

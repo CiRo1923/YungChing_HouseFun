@@ -23,6 +23,27 @@
 //    而它其實會隨專案不同)。停下來說明是哪一條規則判錯了、什麼東西會隨專案不同,
 //    由開發者決定要不要加進來源。哪一個專案是來源,見下方 SOURCE_PROJECT_NAME。
 
+/**
+ * 這個專案用的框架 —— `vite` 或 `nuxt`。
+ *
+ * 決定的是**網址從哪裡來**,而那件事會反過來管到頁面檔名可以怎麼取:
+ *
+ *   vite   路由表是自己寫的,`path` 與檔名各寫各的 —— 檔名換一個字不會動到網址,
+ *          所以頁面檔名跟著專案內部的命名慣例走(駝峰)
+ *   nuxt   檔案系統路由:檔名**就是**網址的一段。`actual-subscribe.vue`
+ *          對應 `/actual-subscribe`,改成駝峰等於把網址改掉 ——
+ *          既有的連結會失效,搜尋引擎收錄的也會指到不存在的位置
+ *
+ * 所以填 nuxt 的專案,頁面檔名允許連字號(那是網址的寫法,與資料夾同一套);
+ * 填 vite 的專案維持駝峰。填錯的方向不一樣,但兩種都看得出來:
+ * 該填 nuxt 卻填了 vite,那一批頁面會整批被要求改名,而照著改就是改網址;
+ * 反過來則是頁面檔名從此可以混用兩種分隔寫法,找一支檔案要先想它是哪一種。
+ *
+ * 元件不受這一項影響 —— 元件是標籤,不是網址,兩種專案都用大寫開頭的駝峰。
+ */
+export const PROJECT_FRAMEWORK = 'nuxt'
+
+
 /** 頁面。api 檔名、store 檔名、store 分層都對照這個目錄底下的資源資料夾 */
 export const VIEWS_DIR = 'pages'
 
@@ -117,6 +138,24 @@ export const COMPONENT_DIRS = ['components', 'containers', 'layouts']
  *    同一個名字在不同專案可能是頁面也可能是元件。
  */
 export const COMPONENT_FOLDERS = ['_components']
+
+/**
+ * 頁面目錄底下,底線開頭的資料夾只能叫這幾個名字。
+ *
+ * 頁面目錄的資料夾一律對應網址,所以名字是小寫的。底線開頭的那種是例外 ——
+ * 它不是一段網址,是「放在頁面旁邊、只給這一頁用的東西」。
+ *
+ * **開放讓人自由命名的話,那個例外會愈開愈大**:今天多一個放工具的、
+ * 明天多一個放型別的,而每一個都要讀的人自己猜它是不是網址的一部分。
+ * 列成清單之後,名字不在裡面就會被報出來,要新增得先改這裡 ——
+ * 那一步就是「這個例外值得存在嗎」的討論。
+ *
+ * 點開頭的資料夾不受這條約束(`.composables` 那種),那是另一套慣例。
+ *
+ * **清單留空代表不做這項檢查**,那條規則會整條略過。
+ */
+export const VIEW_UNDERSCORE_FOLDERS = ['_components']
+
 
 /** CSS 模組(每個模組一個子資料夾) */
 export const CSS_MODULES_DIR = 'assets/css/_modules'
@@ -231,7 +270,6 @@ export const SKIP_DIRS = [
 export const STANDALONE_STORES = [
   'common', // 跨頁面共用
   'popup', // 彈窗系統
-  'index', // store 的彙總入口
   'rent', // 租屋資料,目前沒有對應的頁面資料夾
 ]
 
@@ -307,6 +345,26 @@ export const PARALLEL_AWAIT_HELPER = {
   name: 'awaitAllPromise',
   source: '@js/_prototype.js',
 }
+
+/**
+ * 深拷貝的共用函式 —— 從 apiDefault 還原送出參數時用它,存檔會自動換成這個寫法。
+ *
+ * apiDefault 是唯讀的,而且是深層的:展開一層(`{ ...apiDefault.x }`)
+ * 只複製到最外面那一層,裡面的陣列仍然是 apiDefault 那一個唯讀的陣列 ——
+ * 還原之後 push 進不去,長度永遠是 0。開發時看得到警告,正式版沒有任何徵兆。
+ *
+ * 兩個欄位:
+ *   name    函式名稱
+ *   source  它從哪裡來(自動補 import 時要用)
+ *
+ * 專案沒有這支共用函式時,把 name 設成空字串,自動修正那一段就整段略過 ——
+ * 檢查結果旁邊會列出「這條這次沒有作用」,不會安靜地跳過。
+ */
+export const DEEP_CLONE_HELPER = {
+  name: 'onDeepClone',
+  source: '@js/_prototype.js',
+}
+
 
 /**
  * 本專案自己的名稱 —— 這幾種寫法出現在程式碼或文件裡就是違規。
@@ -653,6 +711,19 @@ export const CONVENTION_SKILLS_DIR = `${AI_CONFIG_DIR}/skills`
  * 但沒有人找得到它在管什麼、為什麼 —— 規則自己的驗證會比對兩邊,不必靠人記得。
  */
 export const CONVENTION_DOCS_DIR = `${AI_CONFIG_DIR}/docs`
+
+/** 認得的框架 —— PROJECT_FRAMEWORK 只能填這幾個其中一個 */
+export const FRAMEWORKS = ['vite', 'nuxt']
+
+/**
+ * 頁面檔名是不是網址的一段。
+ *
+ * 檔案系統路由的框架(nuxt)是:檔名直接變成網址,改檔名就是改網址。
+ * 自己寫路由表的(vite)不是:`path` 與檔名各寫各的,檔名只是內部的名字。
+ *
+ * 規則問的是這件事,不是「用了哪個框架」—— 框架名只是專案回答得出來的問法。
+ */
+export const IS_FILE_BASED_ROUTING = PROJECT_FRAMEWORK === 'nuxt'
 
 /**
  * 原始碼放在專案根目錄時,SRC_DIR 會是空字串或 `.`(Nuxt 那種擺法:

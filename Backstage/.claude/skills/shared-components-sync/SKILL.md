@@ -1,7 +1,9 @@
 ---
 name: shared-components-sync
-description: Backstage 與 Official 共用元件(mForm / mPopup / ImgSrc / SvgIcon)的同步規則 —— 功能必須一致、樣式各自獨立。修改這些元件時必讀。
+description: Backstage 與 Official 共用元件(mForm / mPopup、圖片、SVG 圖示、錯誤訊息、標籤)的同步規則 —— 功能必須一致、樣式各自獨立。修改這些元件時必讀。
 ---
+
+<!-- lint-project-name-exempt: 這支只有本專案有,不會複製到別的專案;內容是兩邊的共用元件各自放在哪,路徑是要記錄的資料本身 -->
 
 # 共用元件同步規則
 
@@ -9,15 +11,21 @@ description: Backstage 與 Official 共用元件(mForm / mPopup / ImgSrc / SvgIc
 
 以下元件在 **Backstage** 與 **Official** 兩個專案都有一份,**功能必須保持一致**:
 
-| 元件    | Backstage                       | Official                        |
-| ------- | ------------------------------- | ------------------------------- |
-| mForm   | `components/common/mForm/`      | `components/common/mForm/`      |
-| mPopup  | `components/common/mPopup/`     | `components/common/mPopup/`     |
-| ImgSrc  | `components/common/ImgSrc.vue`  | `components/common/ImgSrc.vue`  |
-| SvgIcon | `components/common/SvgIcon.vue` | `components/common/SvgIcon.vue` |
+| 這支元件 | 位置(兩邊相同) | 標籤 |
+| --- | --- | --- |
+| 表單 | `components/common/mForm/` | `<CommonMForm…>` |
+| 彈窗 | `components/common/mPopup/` | `<CommonMPopup>` |
+| 圖片 | `components/common/mFigure/` | `<CommonMFigure>` |
+| SVG 圖示 | `components/common/mSvgIcon/` | `<CommonMSvgIcon>`,另有全域註冊的 `<mSvgIcon>` |
+| 錯誤訊息 | `components/common/mErrorMessage/` | `<CommonMErrorMessage>` |
+| 標籤 | `components/common/mLabel/` | `<CommonMLabel>` |
 
-兩個專案在同一個 repo 根底下並排,各自的內部路徑結構相同 ——
-所以上面那張表的兩欄看起來一樣,差別只在最外層是哪一個專案目錄。
+兩個專案的內部路徑結構相同,所以位置只有一欄 —— 差別只在最外層是哪一個專案目錄。
+每一支都是資料夾:元件本體是 `Index.vue`,樣式收在同一層的 `.css/` 底下。
+
+SVG 圖示還有一個地方要跟著改:`plugins/svgicon.client.js` 把它全域註冊成
+`mSvgIcon`,所以那支元件改名或搬位置時**要連同 plugin 的 import 與註冊名一起改**,
+漏了的話 plugin 在載入當下就會失敗。
 
 ## 核心原則
 
@@ -37,7 +45,7 @@ description: Backstage 與 Official 共用元件(mForm / mPopup / ImgSrc / SvgIc
 
 > `npm run build` 最後會接 `sync:public`。找不到發布 repo 時它**印警告後跳過、回 exit 0**(2026-09-07 改;在那之前是 exit 1,舊的紀錄說「exit code 1 是正常的」已不成立)。所以現在 **exit code 非零就是真的有問題**,不要放過。
 
-## ⚠️ 驗證時機:「碰過才即時驗」(2026-09-07,兩邊一致)
+## 驗證時機:「碰過才即時驗」(兩邊一致)
 
 這是 mForm 全系列的行為契約,**兩邊的 `validateEvents` 預設與 `useValidateEvents`
 必須保持一致**。改動它就是改全站表單的手感,不要只改一邊。
@@ -51,7 +59,7 @@ description: Backstage 與 Official 共用元件(mForm / mPopup / ImgSrc / SvgIc
 「值一動就驗」只在該欄位 **touched 之後**才生效。它解掉的是三種誤報 ——
 多欄位合成的 computed 填到一半、程式自己連動清值、radio 切換讓一組欄位顯示出來。
 
-### ⛔ 新增送出點時一定要呼叫 setTouched(true)
+### 新增送出點時一定要呼叫 setTouched(true)
 
 **這是最容易漏、而且漏了不會報錯的一件事。** touched 只有兩個來源:
 
@@ -82,7 +90,7 @@ const validate = async () => {
 }
 ```
 
-> ⚠️ **不要改用 vee-validate 的 `submitCount` 判斷** —— 兩邊的送出都是手動呼叫
+> **不要改用 vee-validate 的 `submitCount` 判斷** —— 兩邊的送出都是手動呼叫
 > slot 的 `validate()`,不是 `handleSubmit`,`submitCount` 永遠是 0。
 > (`handleSubmit` 內建就會 touch 全部欄位,但改用它等於重寫所有頁面的送出流程。)
 
@@ -100,7 +108,7 @@ const validate = async () => {
 | RadiosOval | `() => \`${props.name}_radios\`` |
 | 一個元件有多個 Field | 傳陣列,語意是「任一個碰過就算」 |
 
-⚠️ **轉手型元件**(自己不掛 Field、把 config 往下傳的,如 Official 的 Continuous /
+**轉手型元件**(自己不掛 Field、把 config 往下傳的,如 Official 的 Continuous /
 VerifyCountdown)的預設**要跟著子元件走** —— 傳 `null` 會蓋掉子元件的預設,
 讓機制退回「值一動就驗」。
 
@@ -110,10 +118,10 @@ VerifyCountdown)的預設**要跟著子元件走** —— 傳 `null` 會蓋掉�
 
 ### mForm 的 composable 分層不同
 
-|          | Backstage                                                                 | Official                                                                            |
-| -------- | ------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| | Backstage | Official |
+| --- | --- | --- |
 | 文字輸入 | `useTextCore.js` —— 較厚,回傳 `model` / `onInput` / `onEnter` / `onClear` | `useInputTextCore.js` —— 很薄,只回傳 `isFocus` / `config` / `setClass`,邏輯留在元件 |
-| 下拉     | `useDropdownCore.js`                                                      | `useDropdownCore.js`,多一個 `onDropdownActive`                                      |
+| 下拉 | `useDropdownCore.js` | `useDropdownCore.js`,多一個 `onDropdownActive` |
 
 `placeholder` / `hasClearButton` 在 Backstage 是定義在 `useTextCore` 的 `textConfigDefault`,不在元件檔裡 —— 用 grep 找元件檔的 config 會誤判成「缺這兩項」。
 

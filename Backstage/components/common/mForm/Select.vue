@@ -1,8 +1,8 @@
 <script setup>
-import '@css/_modules/common/mForm/variables.css'
-import '@css/_modules/common/mForm/dropdownVariables.css'
-import '@css/_modules/common/mForm/common.css'
-import '@css/_modules/common/mForm/dropdown.css'
+import './.css/variables.css'
+import './.css/dropdownVariables.css'
+import './.css/common.css'
+import './.css/dropdown.css'
 
 import { onMergeDropdownConfig, useDropdownCore } from './.composables/useDropdownCore.js'
 import useValidateEvents from './.composables/useValidateEvents.js'
@@ -368,7 +368,7 @@ onUnmounted(() => {
               {{ displayLabel }}
             </template>
           </div>
-          <CommonSvgIcon
+          <CommonMSvgIcon
             icon="caret_large_down"
             class="m-form-icon"
             :class="setClass.icon"
@@ -388,7 +388,7 @@ onUnmounted(() => {
       :class="setClass.error"
       v-slot="{ message }"
     >
-      <BuyMErrorMessageElem :message="message" />
+      <CommonMErrorMessage :message="message" />
     </ErrorMessage>
   </div>
   <Teleport to="body">

@@ -1,14 +1,11 @@
 <script setup>
-// const common = useCommonStore()
-const { onWithLoadingAll } = useCommonActions()
-
 definePageMeta({
   layout: 'buy',
+  // 登入機制還沒接上,目前沒有任何地方讀這個值 —— 接上之後由路由守衛依它決定要不要擋
   requiresAuth: true,
   title: '出售物件刊登',
 })
 
-await onWithLoadingAll([])
 </script>
 
 <template>

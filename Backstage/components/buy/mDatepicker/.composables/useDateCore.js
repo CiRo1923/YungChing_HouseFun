@@ -1,6 +1,6 @@
 /* 日期的解析與格式化。純函式,不持有任何 Vue 狀態 —— Single / Time / Calendar 共用。
 
-  ⚠️ 一律避開 new Date('YYYY-MM-DD'):那會被當成 UTC 解析,在台灣時區會退成前一天,
+  注意:一律避開 new Date('YYYY-MM-DD'):那會被當成 UTC 解析,在台灣時區會退成前一天,
       iOS Safari 更是直接給 Invalid Date。內部解析固定用本地時間中午 12:00,
       日期比較時再轉成 00:00:00。 */
 
@@ -170,7 +170,7 @@ export const onSplitDateTimeFormat = (format) => {
     .split(/\s+/)
     .filter(Boolean)
 
-  /* ⚠️ 用「特徵」找段落,不要靠位置(segments[0] 是日期、[1] 是時間)——
+  /* 注意:用「特徵」找段落,不要靠位置(segments[0] 是日期、[1] 是時間)——
       只給時間段的 format 會被誤判成日期,順序反過來寫也會錯。
 
       日期段認大寫 Y / M / D,時間段認小寫 hh / mm / ss 或帶冒號的字面值,
@@ -193,7 +193,7 @@ export const onGetDatePrecision = (format) => {
 }
 
 /* format 有沒有「可以選」的時間欄位 —— 決定要不要並排那個時間輸入框。
-  ⚠️ 不是看有沒有時間段:'YYYY-MM-DD 00:00:00' 有時間段,但三欄都是數字字面值,
+  注意:不是看有沒有時間段:'YYYY-MM-DD 00:00:00' 有時間段,但三欄都是數字字面值,
       意思是「不給選時間,可是值要帶滿 00:00:00」—— 那時不該長出時間欄。
       判斷交給 useTimeCore,它本來就負責「哪幾欄可選」。 */
 export const onHasTimeFormat = (format) => {
@@ -218,7 +218,7 @@ export const onFormatYMD = (y, m, d, format) => {
 /* 依 format 反解:先把兩邊的非文數字都去掉,再用 format 裡 Y/M/D 的**位置**去切值。
   這樣 20260819 與 2026-08-19 都吃得下,不必為每種分隔符寫一條正則。
 
-  ⚠️ format 只到年或只到月時(YYYY / YYYY-MM),缺的那幾段補 1 ——
+  注意:format 只到年或只到月時(YYYY / YYYY-MM),缺的那幾段補 1 ——
       Date 需要完整的年月日才建得起來,少一段會得到 Invalid Date。
       補 1 而不是補「今天」:同一個值不該因為今天是幾號而解析出不同結果。 */
 export const onParseByFormat = (value, format) => {

@@ -1,6 +1,6 @@
 <script setup>
-import '@css/_modules/buy/mDatepicker/variables.css'
-import '@css/_modules/buy/mDatepicker/common.css'
+import './.css/variables.css'
+import './.css/common.css'
 
 /* 區間日期選擇。起訖各一個輸入框,共用同一個日曆浮層。
 
@@ -165,7 +165,7 @@ const setClass = computed(() => ({
 }))
 
 /* 點欄位就從那一端開始選。
-  ⚠️ 這裡不清任何值 —— 清了 draft 卻沒清 model 的話,欄位還顯示舊日期、
+  注意:這裡不清任何值 —— 清了 draft 卻沒清 model 的話,欄位還顯示舊日期、
       日曆卻沒有區間色,兩邊對不上。「舊的訖要不要作廢」在選到新的起始日時才判斷
       (見 onSelect:新的起始日晚於原本的訖才作廢)。 */
 const onFieldPointerdown = (e, field) => {
@@ -187,7 +187,7 @@ const onFormatDate = (value) => {
 /* 每選一次就寫回,不等整個區間選完 —— 點了起始日,那個值要立刻出現在起的欄位上。
   兩端都有值才收合。
 
-  ⚠️ 走 onEmitPair 而不是直接 emit —— 它只覆蓋日期那半,
+  注意:走 onEmitPair 而不是直接 emit —— 它只覆蓋日期那半,
       兩個時間欄位已經填的值不會被日期的選取洗掉。 */
 const onCommit = () => {
   const { start, end } = draft.value
@@ -307,7 +307,7 @@ onMounted(() => {
                   @pointerdown="onFieldPointerdown($event, 'start')"
                   ref="iconRef"
                 >
-                  <CommonSvgIcon icon="icon_calendar" />
+                  <CommonMSvgIcon icon="icon_calendar" class="m-datepicker-icon-svg" />
                 </button>
               </div>
             </div>
@@ -372,7 +372,7 @@ onMounted(() => {
                   class="m-datepicker-icon"
                   @pointerdown="onFieldPointerdown($event, 'end')"
                 >
-                  <CommonSvgIcon icon="icon_calendar" />
+                  <CommonMSvgIcon icon="icon_calendar" class="m-datepicker-icon-svg" />
                 </button>
               </div>
             </div>
@@ -406,7 +406,7 @@ onMounted(() => {
       v-slot="{ message }"
       v-if="!isActive"
     >
-      <BuyMErrorMessageElem :message="message" />
+      <CommonMErrorMessage :message="message" />
     </ErrorMessage>
   </div>
 

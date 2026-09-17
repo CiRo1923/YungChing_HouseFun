@@ -359,7 +359,7 @@ const onCommentClick = async (objectData) => {
   >
     <!-- 有資料 -->
     <template v-if="hasData">
-      <PageBuyListFunctionsMain
+      <PageBuyListFunctions
         :eventsItems="props.funEventsItem"
         @click:renewal="onRenewalClick"
         @click:publish="onPublishClick"
@@ -372,7 +372,7 @@ const onCommentClick = async (objectData) => {
         <template #sort>
           <slot name="sort" :sortFun="onSortUpdate" />
         </template>
-      </PageBuyListFunctionsMain>
+      </PageBuyListFunctions>
       <ul class="divide-y-[1px] divide-[--gray-e5] border-b-[1px] border-b-[--gray-e5]">
         <li
           class="transition-colors duration-300 tm:py-[24px] p:px-[16px] p:py-[40px]"
@@ -380,7 +380,7 @@ const onCommentClick = async (objectData) => {
           v-for="(item, index) in searchDatas"
           :key="`${item.hfID}_${index}`"
         >
-          <PageBuyListItemMain
+          <PageBuyListItem
             :data="item"
             :eventsItems="contentEventsItem"
             v-model:checked="item._checked.value"
@@ -403,7 +403,7 @@ const onCommentClick = async (objectData) => {
                 :autoRefreshFun="onAutoRefreshClick"
               />
             </template>
-          </PageBuyListItemMain>
+          </PageBuyListItem>
           <!-- <pre>
             {{ item }}
           </pre> -->

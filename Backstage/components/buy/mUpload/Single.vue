@@ -1,8 +1,8 @@
 <script setup>
-import '@css/_modules/buy/mUpload/variables.css'
-import '@css/_modules/buy/mUpload/singleVariables.css'
-import '@css/_modules/buy/mUpload/common.css'
-import '@css/_modules/buy/mUpload/single.css'
+import './.css/variables.css'
+import './.css/singleVariables.css'
+import './.css/common.css'
+import './.css/single.css'
 
 import useValidateEvents from '@components/common/mForm/.composables/useValidateEvents.js'
 
@@ -57,7 +57,7 @@ const config = computed(() => ({
   validateEvents: ['blur', 'change', 'touchedModelUpdate'],
   ...props.config,
 }))
-/* ⚠️ `name` 宣告在下面,這裡靠 getter 延後求值 —— 它只在 render 讀 validateOn 時才執行,
+/* 注意:`name` 宣告在下面,這裡靠 getter 延後求值 —— 它只在 render 讀 validateOn 時才執行,
     那時 name 已經建立好了。改成直接傳 `name` 會撞到 TDZ。 */
 const validateOn = useValidateEvents(
   () => config.value.validateEvents,
@@ -540,7 +540,7 @@ watch(
               draggable="false"
             />
             <div class="m-upload-single-overlay" :class="setClass.overlay">
-              <CommonSvgIcon icon="icon_upload" class="m-upload-single-icon" />
+              <CommonMSvgIcon icon="icon_upload" class="m-upload-single-icon" />
               <span>點擊或拖曳重新上傳</span>
             </div>
           </div>
@@ -549,12 +549,12 @@ watch(
             class="m-upload-single-remove"
             @click.stop="onRemoveImage(handleChange, validate)"
           >
-            <CommonSvgIcon icon="icon_xmark" class="m-upload-single-remove-icon" />
+            <CommonMSvgIcon icon="icon_xmark" class="m-upload-single-remove-icon" />
           </button>
         </template>
 
         <div class="m-upload-single-empty" v-else>
-          <CommonSvgIcon icon="icon_upload" class="m-upload-single-icon" />
+          <CommonMSvgIcon icon="icon_upload" class="m-upload-single-icon" />
           <span class="m-upload-single-text" :class="setClass.text">{{ config.placeholder }}</span>
         </div>
       </div>
@@ -568,6 +568,6 @@ watch(
     :class="setClass.error"
     v-slot="{ message }"
   >
-    <BuyMErrorMessageElem :message="message" />
+    <CommonMErrorMessage :message="message" />
   </ErrorMessage>
 </template>

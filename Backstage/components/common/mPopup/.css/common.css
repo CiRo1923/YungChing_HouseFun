@@ -1,0 +1,156 @@
+.m-popup {
+  @apply fixed inset-0 z-[3] flex m:px-[16px];
+
+  &:before {
+    @apply absolute inset-0 bg-[--popup-overlay-bg-color] backdrop-blur-[--popup-overlay-blur] content-default;
+  }
+
+  &.\-\-zoom {
+    @apply items-center justify-center;
+
+    .m-popup-container {
+      @apply max-w-full rounded-[--popup-container-rounded];
+    }
+  }
+
+  &.\-\-bottomSheet {
+    @apply flex-col justify-end;
+
+    .m-popup-container {
+      @apply w-full rounded-t-[--popup-container-rounded-t];
+    }
+  }
+}
+
+.m-popup-container {
+  @apply relative flex max-h-[92%] w-[--popup-w] flex-col overflow-hidden bg-[--popup-container-bg-color] px-[--popup-px] py-[--popup-py];
+}
+
+.m-popup-header {
+  border-bottom-width: var(--popup-header-border);
+
+  @apply flex shrink-0 items-center border-b-[--popup-header-border-color] pb-[--popup-header-pb] text-[--gray-333] m:flex-wrap;
+}
+
+.m-popup-title {
+  @apply order-1 flex shrink-0 items-center gap-x-[--popup-header-gap-x];
+  @apply text-[length:--popup-header-text-size];
+
+  /*
+   * 標題裡的粗體字。用後代選擇器而不給 class 是刻意的 ——
+   * 全站 popup 標題的字重一致,由 module 全權決定。
+   * 注意:這條是 (0,1,1),使用端 setClass 的 utility 是 (0,1,0),蓋不過它。
+   */
+  > b {
+    @apply font-medium;
+  }
+}
+
+.m-popup-icon {
+  @apply h-[--popup-header-icon-size] w-[--popup-header-icon-size] p-[--popup-header-icon-p];
+
+  &.\-\-defaule-color {
+    @apply text-[--popup-header-icon-color];
+  }
+}
+
+.m-popup-anchor-close {
+  @apply ml-auto flex h-[--popup-header-anchor-size] w-[--popup-header-anchor-size] shrink-0 items-center justify-center p-[--popup-header-anchor-p] text-[--popup-header-anchor-color] m:order-2 pt:order-3;
+
+}
+
+/* 關閉鈕的圖示撐滿按鈕(尺寸由 .m-popup-anchor-close 決定) */
+.m-popup-anchor-close-icon {
+  @apply h-full w-full;
+}
+
+.m-popup-tools {
+  @apply flex grow items-center m:order-3 m:mt-[--popup-tools-mt] pt:order-2 pt:mx-[--popup-tools-mx];
+}
+
+.m-popup-body {
+  /*
+    捲軸貼著內容會顯得很擠(手機版尤其明顯)。body 往兩側擴張到 container 的 padding 區,
+    再用等寬的 padding 把內容推回原位 —— 內容位置與 header / footer 維持對齊,
+    捲軸則落進 padding 區,與內容之間空出 --popup-body-px。
+    不改 container 的 padding,是因為那會連帶把 header 的底線拉寬。
+  */
+  margin-inline: calc(var(--popup-body-px) * -1);
+
+  @apply grow overflow-hidden px-[--popup-body-px];
+
+  &:not(:only-child) {
+    @apply mt-[--popup-body-mt];
+  }
+}
+
+.m-popup-footer {
+  @apply mt-[--popup-footer-mt];
+}
+
+@screen p {
+  .m-popup {
+    --popup-overlay-blur: var(--popup-overlay-pc-blur);
+    --popup-container-rounded: var(--popup-container-pc-rounded);
+    --popup-container-rounded-t: var(--popup-container-pc-rounded-t);
+    --popup-px: var(--popup-container-pc-px);
+    --popup-py: var(--popup-container-pc-py);
+    --popup-header-pb: var(--popup-header-pc-pb);
+    --popup-header-border: var(--popup-header-pc-border);
+    --popup-header-text-size: var(--popup-header-pc-text-size);
+    --popup-header-gap-x: var(--popup-header-pc-gap-x);
+    --popup-header-icon-p: var(--popup-header-icon-pc-p);
+    --popup-header-icon-size: var(--popup-header-icon-pc-size);
+    --popup-header-anchor-p: var(--popup-header-anchor-pc-p);
+    --popup-header-anchor-size: var(--popup-header-anchor-pc-size);
+    --popup-tools-mx: var(--popup-tools-pc-mx);
+    --popup-body-mt: var(--popup-body-pc-mt);
+    --popup-body-px: var(--popup-body-pc-px);
+    --popup-footer-mt: var(--popup-footer-pc-mt);
+  }
+}
+
+@screen t {
+  .m-popup {
+    --popup-overlay-blur: var(--popup-overlay-tablet-blur);
+    --popup-container-rounded: var(--popup-container-tablet-rounded);
+    --popup-container-rounded-t: var(--popup-container-tablet-rounded-t);
+    --popup-px: var(--popup-container-tablet-px);
+    --popup-py: var(--popup-container-tablet-py);
+    --popup-header-pb: var(--popup-header-tablet-pb);
+    --popup-header-border: var(--popup-header-tablet-border);
+    --popup-header-text-size: var(--popup-header-tablet-text-size);
+    --popup-header-gap-x: var(--popup-header-tablet-gap-x);
+    --popup-header-icon-p: var(--popup-header-icon-tablet-p);
+    --popup-header-icon-size: var(--popup-header-icon-tablet-size);
+    --popup-header-anchor-p: var(--popup-header-anchor-tablet-p);
+    --popup-header-anchor-size: var(--popup-header-anchor-tablet-size);
+    --popup-tools-mx: var(--popup-tools-tablet-mx);
+    --popup-body-mt: var(--popup-body-tablet-mt);
+    --popup-body-px: var(--popup-body-tablet-px);
+    --popup-footer-mt: var(--popup-footer-tablet-mt);
+  }
+}
+
+@screen m {
+  .m-popup {
+    --popup-overlay-blur: var(--popup-overlay-mobile-blur);
+    --popup-container-rounded: var(--popup-container-mobile-rounded);
+    --popup-container-rounded-t: var(--popup-container-mobile-rounded-t);
+    --popup-px: var(--popup-container-mobile-px);
+    --popup-py: var(--popup-container-mobile-py);
+    --popup-header-pb: var(--popup-header-mobile-pb);
+    --popup-header-border: var(--popup-header-mobile-border);
+    --popup-header-text-size: var(--popup-header-mobile-text-size);
+    --popup-header-gap-x: var(--popup-header-mobile-gap-x);
+    --popup-header-icon-p: var(--popup-header-icon-mobile-p);
+    --popup-header-icon-size: var(--popup-header-icon-mobile-size);
+    --popup-header-anchor-p: var(--popup-header-anchor-mobile-p);
+    --popup-header-anchor-size: var(--popup-header-anchor-mobile-size);
+    --popup-w: var(--popup-mobile-w);
+    --popup-tools-mt: var(--popup-tools-mobile-mt);
+    --popup-body-mt: var(--popup-body-mobile-mt);
+    --popup-body-px: var(--popup-body-mobile-px);
+    --popup-footer-mt: var(--popup-footer-mobile-mt);
+  }
+}

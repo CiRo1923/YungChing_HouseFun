@@ -11,7 +11,7 @@ const onClose = (item) => {
 </script>
 
 <template>
-  <CommonMPopupMain id="alertSystem" :setClass="alert.setClass">
+  <CommonMPopup id="alertSystem" :setClass="alert.setClass">
     <div class="text-[16px]" :class="alert.setClass?.content" v-html="alert.content" />
     <template #footer>
       <div class="text-center">
@@ -32,5 +32,5 @@ const onClose = (item) => {
         </ul>
       </div>
     </template>
-  </CommonMPopupMain>
+  </CommonMPopup>
 </template>

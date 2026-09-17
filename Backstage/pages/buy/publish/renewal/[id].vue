@@ -2,7 +2,7 @@
 import { Form } from 'vee-validate'
 
 // const common = useCommonStore()
-const { onUseMeta, onWithLoadingAll } = useCommonActions()
+const { onUseMeta } = useCommonActions()
 const buyProject = useBuyProjectStore()
 const { renewal } = storeToRefs(buyProject)
 const buyPublish = useBuyPublishStore()
@@ -18,6 +18,7 @@ const requestURL = useRequestURL()
 
 definePageMeta({
   layout: 'buy',
+  // 登入機制還沒接上,目前沒有任何地方讀這個值 —— 接上之後由路由守衛依它決定要不要擋
   requiresAuth: true,
   title: '出售物件刊登',
   // hfID 一定是數字。validate 在元件載入前就攔下,不會帶著壞掉的 id 去打 API,
@@ -30,7 +31,7 @@ const hfID = computed(() => route.params.id)
 // 這頁使用者選的是刊登額度(renewal.apiData.planID)
 const { onSnapshotSave } = onUnsavedChanges(() => renewal.value.apiData)
 
-const onDraftSubmit = async () => {
+const onBuyRealEstateReadToPublish = async () => {
   onApiPromise('open')
 
   const { status } = await onApiPostBuyRealEstateReadToPublish(hfID.value)
@@ -96,7 +97,7 @@ if (!statusData.value.isExpired) {
     )
   )
 } else {
-  await onWithLoadingAll([onApiGetVasPublishAvailablePlans(hfID.value)])
+  await Promise.all([onApiGetVasPublishAvailablePlans(hfID.value)])
   // 資料就位後才立基準,否則載入途中的空值會被當成「使用者清空了選擇」
   onSnapshotSave()
 }
@@ -137,7 +138,7 @@ onMounted(() => {
     >
       <PageBuyPublishRenewalContent />
       <PageBuyPublishRenewalSubmitButtons
-        @click:draft="onDraftSubmit()"
+        @click:draft="onBuyRealEstateReadToPublish()"
         @click:save="() => onSaveSubmit(validate, setTouched)"
       />
     </Form>

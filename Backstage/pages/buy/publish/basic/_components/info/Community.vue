@@ -1,8 +1,4 @@
 <script setup>
-// import { apiGetBuyCommunities } from '@js/_api/buy/index.js'
-
-// const buyProject = useBuyProjectStore()
-// const { options } = storeToRefs(buyProject)
 const { onApiGetBuyCommunities } = useBuyProjectActions()
 const buyPublish = useBuyPublishStore()
 const { apiData } = storeToRefs(buyPublish)
@@ -17,7 +13,7 @@ const radioOptions = readonly([
     value: true,
   },
 ])
-const onCommunities = async (keyword, setOptions) => {
+const onBuyCommunities = async (keyword, setOptions) => {
   const { status, data } = await onApiGetBuyCommunities({
     cityID: apiData.value.caseInfo.cityID,
     districtID: apiData.value.caseInfo.districtID,
@@ -83,7 +79,7 @@ const onCommunityChange = (item) => {
         main: '--h-40 --px-12 --py-8 m:w-full',
         dropdownLabel: 'text-[14px]',
       }"
-      @input="onCommunities"
+      @input="onBuyCommunities"
       @change="onCommunityChange"
     />
   </PageBuyPublishBasicRadiosOval>

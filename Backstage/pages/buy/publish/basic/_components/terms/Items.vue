@@ -49,7 +49,7 @@ const data = shallowReadonly({
 </script>
 
 <template>
-  <BuyMItemMain
+  <BuyMItem
     :data="data"
     :config="{
       header: {

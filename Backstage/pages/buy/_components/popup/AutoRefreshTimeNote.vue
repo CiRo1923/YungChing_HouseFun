@@ -13,7 +13,7 @@ const note = shallowReadonly({
 </script>
 
 <template>
-  <BuyMItemMain
+  <BuyMItem
     :data="note"
     :setClass="{
       main: 'text-[16px] text-[--gray-666]',

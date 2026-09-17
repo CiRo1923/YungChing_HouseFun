@@ -11,7 +11,7 @@ const onHighQualityWordCount = (length) => {
 </script>
 
 <template>
-  <BuyMCkEditor4
+  <BuyMCkeditor4
     v-model="apiData.caseInfo.caseDescription"
     :config="{
       loadMessage: '編輯器建置中...',
@@ -37,5 +37,5 @@ const onHighQualityWordCount = (length) => {
       </p>
       <small class="pt:ml-[10px]">字數限制：{{ length }} / {{ maxlength }}</small>
     </template>
-  </BuyMCkEditor4>
+  </BuyMCkeditor4>
 </template>

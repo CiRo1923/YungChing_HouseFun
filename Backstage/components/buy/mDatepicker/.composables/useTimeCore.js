@@ -10,7 +10,7 @@
   不可選、輸出時照抄那個字面。所以「要不要出現這一欄」與「要不要能改」是同一件事的兩面,
   呼叫端只要改 format,不必再多開一個開關。
 
-  ⚠️ 一律當 24 小時制 —— 後台不做 AM/PM,hh 與 HH 都吃,語意相同。 */
+  注意:一律當 24 小時制 —— 後台不做 AM/PM,hh 與 HH 都吃,語意相同。 */
 
 const DEFAULT_FORMAT = 'hh:mm:ss'
 
@@ -52,7 +52,7 @@ export const onHasPart = (format, type) =>
   onParseTimeFormat(format).parts.some((part) => part.editable && part.type === type)
 
 /* 把值解析成 { hour, minute, second }。
-  ⚠️ 不依 format 的位置去切 —— 呼叫端存進來的值不一定跟 format 同一種精度
+  注意:不依 format 的位置去切 —— 呼叫端存進來的值不一定跟 format 同一種精度
       (format 是 hh:mm,值卻是 09:30:00 很常見),照位置切會把秒讀成分。
       統一用「冒號分段」讀,缺的補 0。 */
 export const onParseTime = (value) => {

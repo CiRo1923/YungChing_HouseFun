@@ -37,7 +37,7 @@ const videoPicture = computed(() => {
       class="flex items-center justify-center overflow-hidden rounded-[10px] bg-[--gray-f7] font-semibold leading-[1.5] text-[--gray-666] tm:h-[175px] tm:w-[311px] p:h-[163px] p:w-[290px] p:text-[30px]"
       v-if="apiData.caseInfo.caseVideoDisplayToken === 1 && videoPicture"
     >
-      <CommonImgSrc
+      <CommonMFigure
         :src="videoPicture"
         :setClass="{
           main: 'relative h-full w-full',
@@ -49,7 +49,7 @@ const videoPicture = computed(() => {
       class="flex items-center justify-center overflow-hidden rounded-[10px] bg-[--gray-f7] font-semibold leading-[1.5] text-[--gray-666] tm:h-[390px] tm:w-[311px] p:h-[363px] p:w-[290px] p:text-[30px]"
       v-if="apiData.caseInfo.caseVideoDisplayToken === 2 && videoPicture"
     >
-      <CommonImgSrc
+      <CommonMFigure
         :src="videoPicture"
         :setClass="{
           main: 'relative h-full w-full',

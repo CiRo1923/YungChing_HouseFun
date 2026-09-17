@@ -37,7 +37,7 @@ export const useCalendar = (config, model, options = {}) => {
 
   const onFormat = (type = 'datePicker') => onPickFormat(config.value.format, type)
 
-  /* ⚠️ 一定要先把 format 的時間段切掉再組字 —— onFormatYMD 只認得 YYYY / MM / DD,
+  /* 注意:一定要先把 format 的時間段切掉再組字 —— onFormatYMD 只認得 YYYY / MM / DD,
       直接餵 'YYYY-MM-DD hh:mm' 給它,時間那半會原封不動留在輸出裡
       (得到 '2026-09-04 hh:mm')。
 
@@ -111,7 +111,7 @@ export const useCalendar = (config, model, options = {}) => {
   /* 年 / 月清單一律列出完整範圍,超出 min / max 的由 onYearDisabled / onMonthDisabled
     標成不能點 —— 與日曆格子的行為一致(那邊也是照樣顯示、只給 --disabled)。
 
-    ⚠️ 不要改回「不列出」:清單少了幾格看起來像資料壞了,而且使用者無法從畫面上
+    注意:不要改回「不列出」:清單少了幾格看起來像資料壞了,而且使用者無法從畫面上
         知道那些月份是被上限擋掉的。 */
   const yearOptions = computed(() => {
     /* 上限取「今年」與 maxDate 的年較晚的那個 —— maxDate 落在未來時要選得到,
@@ -297,7 +297,7 @@ export const useCalendar = (config, model, options = {}) => {
       ? onRangeClassOf(Number(currYear.value) * 100 + Number(monthIndex) + 1)
       : []
 
-  /* ⚠️ 狀態那幾個維持「互斥、只回一個」的優先鏈 —— 原本就是這個行為,
+  /* 注意:狀態那幾個維持「互斥、只回一個」的優先鏈 —— 原本就是這個行為,
       改成全部並存會讓「今天且被選中」的格子同時吃到 --curr 與 --today,
       畫面會變。區間的 class 是**附加**上去的,不影響那條鏈。 */
   const onBindStateClass = (item) => {

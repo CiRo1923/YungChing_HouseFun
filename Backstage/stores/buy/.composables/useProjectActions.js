@@ -47,7 +47,7 @@ import {
   apiGetBuyRealEstatePosterDataSourceSelectOptions,
 } from '@js/_api/buy/publish.js'
 
-import { onFormatDate } from '@js/_prototype.js'
+import { onFormatDate, onDeepClone } from '@js/_prototype.js'
 
 import { useBuyProjectStore } from '@stores/buy/project.js'
 import { useBuyPublishStore } from '@stores/buy/publish.js'
@@ -711,7 +711,7 @@ export default () => {
       /*
        * 封面圖沿用列表帶進來的那張。
        *
-       * ⚠️ RefreshCurrentPlansForCase 的回應沒有 picURLCover,而自動刷新流程
+       * 注意:RefreshCurrentPlansForCase 的回應沒有 picURLCover,而自動刷新流程
        * 後續的每個燈箱(設定 / 選範本 / 確認)都是拿 autoRefresh.info 當物件
        * 資料 —— 不補的話那些燈箱的封面圖全是空的。
        *
@@ -844,7 +844,7 @@ export default () => {
         title: '請選擇範本',
         icon: 'icon_copy',
         /*
-         * ⚠️ 這裡要傳物件資料,不是上面那支 API 的回應。
+         * 注意:這裡要傳物件資料,不是上面那支 API 的回應。
          *
          * 燈箱頂端的 PageBuyPublishInfo 從 customData.data 取 caseTitle /
          * caseAddr / picURLCover 等欄位;傳範本清單進來的話,那幾個欄位一個都
@@ -1035,30 +1035,55 @@ export default () => {
     onApiPromise('close')
   }
 
+  // 整組還原成預設值,再把「呼叫端先寫進來的操作對象」帶回去 ——
+  // 那幾個欄位決定這次操作的是哪一筆資料,後面的 api 靠它們,不能跟著清掉。
+  //
+  // 深拷貝是必要的:apiDefault 是深層唯讀的,展開一層的話裡面的陣列仍然是
+  // 唯讀的同一個,還原之後勾選寫不進去,而正式版沒有任何徵兆。
   const onResetPojectData = (type) => {
+    const { apiDefault } = projectStores
+
     if (type === 'renewal' || !type) {
-      renewal.value.apiData.planID = null
+      renewal.value.apiData = onDeepClone(apiDefault.renewal)
     }
 
     if (type === 'golden' || !type) {
-      golden.value.apiData.planID = null
+      const { empID } = golden.value.apiData
+
+      golden.value.apiData = { ...onDeepClone(apiDefault.golden), empID }
     }
 
     if (type === 'autoRefresh' || !type) {
-      autoRefresh.value.save.apiData.planID = null
-      autoRefresh.value.save.apiData.listSelectedRefreshTime = []
+      const { hfID, vasID, empID } = autoRefresh.value.save.apiData
+
+      autoRefresh.value.save.apiData = {
+        ...onDeepClone(apiDefault.autoRefreshSave),
+        hfID,
+        vasID,
+        empID,
+      }
     }
 
     if (type === 'autoRefreshTemplate' || !type) {
+      const { hfID, isCustom, empID } = autoRefresh.value.templateSave.apiData
+
       autoRefresh.value.templateSave.selectedIndex = null
-      autoRefresh.value.templateSave.apiData.templateID = null
-      autoRefresh.value.templateSave.apiData.planID = null
-      autoRefresh.value.templateSave.apiData.listSelectedRefreshTime = []
+      autoRefresh.value.templateSave.apiData = {
+        ...onDeepClone(apiDefault.autoRefreshTemplateSave),
+        hfID,
+        isCustom,
+        empID,
+      }
     }
 
     if (type === 'autoRefreshSaveTemplate' || !type) {
-      autoRefresh.value.templateSaveTime.apiData.templateID = null
-      autoRefresh.value.templateSaveTime.apiData.listSelectedRefreshTime = []
+      const { isCustom, templateName } = autoRefresh.value.templateSaveTime.apiData
+
+      autoRefresh.value.templateSaveTime.apiData = {
+        ...onDeepClone(apiDefault.autoRefreshTemplateSaveTime),
+        isCustom,
+        templateName,
+      }
     }
   }
   const onValueGetText = (option, value) => {

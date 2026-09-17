@@ -22,7 +22,7 @@ const rules = computed(() => {
   return !!(cityID && districtID && road && (casePurposeToken.value !== '8' ? addrNum : true))
 })
 
-const onCityChange = async ({ source } = {}) => {
+const onBuyCityCodeDistrictSelectOptions = async ({ source } = {}) => {
   const { cityID } = apiData.value.caseInfo
 
   if (source !== 'init') {
@@ -39,7 +39,7 @@ const onCityChange = async ({ source } = {}) => {
   areas.value = options.value.area
 }
 
-const onAreaChange = async ({ source } = {}) => {
+const onBuyCityCodeDistrictCodeRoad = async ({ source } = {}) => {
   const { cityID, districtID } = apiData.value.caseInfo
 
   if (source !== 'init') {
@@ -192,8 +192,8 @@ const onPopupAddressGoogleMap = async () => {
         floor: 'm:w-[98px] pt:w-[86px]',
         ofFloor: 'm:w-[74px] pt:w-[45px]',
       }"
-      @change:city="onCityChange"
-      @change:area="onAreaChange"
+      @change:city="onBuyCityCodeDistrictSelectOptions"
+      @change:area="onBuyCityCodeDistrictCodeRoad"
       v-if="casePurposeToken !== '8'"
     />
     <BuyMAddress
@@ -237,8 +237,8 @@ const onPopupAddressGoogleMap = async () => {
         area: 't:w-[180px] p:w-[260px]',
         road: 't:w-[220px] p:w-[294px]',
       }"
-      @change:city="onCityChange"
-      @change:area="onAreaChange"
+      @change:city="onBuyCityCodeDistrictSelectOptions"
+      @change:area="onBuyCityCodeDistrictCodeRoad"
       v-if="casePurposeToken === '8'"
     />
   </CommonMFormHidden>

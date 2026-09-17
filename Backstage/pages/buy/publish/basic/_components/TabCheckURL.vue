@@ -34,7 +34,7 @@ const onClick = async (validate, setTouched) => {
 <template>
   <Form as="div" v-slot="{ validate, setTouched }">
     <div class="p:flex p:gap-x-[16px]">
-      <CommonMFormLabel
+      <CommonMLabel
         label="網址匯入"
         :config="{
           isRequired: false,

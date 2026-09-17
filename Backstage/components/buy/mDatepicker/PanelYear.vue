@@ -1,4 +1,7 @@
 <script setup>
+import './.css/variables.css'
+import './.css/common.css'
+
 // 年份面板。headerMode: 'panel' 時點年份會展開這個。
 
 const props = defineProps({
@@ -27,7 +30,7 @@ defineEmits(['select'])
 
 const listRef = ref(null)
 
-/* ⚠️ 年份清單通常上百筆(1911 起跳),不捲到選中的那年等於每次都要自己滑很久。
+/* 注意:年份清單通常上百筆(1911 起跳),不捲到選中的那年等於每次都要自己滑很久。
     用 offsetTop 算而不用 scrollIntoView —— 後者會連帶把整個頁面捲動,
     面板是 Teleport 到 body 的,一捲位置就跑掉了。 */
 onMounted(() => {

@@ -1,6 +1,6 @@
 <script setup>
-import '@css/_modules/common/mForm/variables.css'
-import '@css/_modules/common/mForm/common.css'
+import './.css/variables.css'
+import './.css/common.css'
 
 import { useTextCore } from './.composables/useTextCore.js'
 import useValidateEvents from './.composables/useValidateEvents.js'
@@ -360,7 +360,7 @@ watch(
             tabindex="-1"
             @click="onClear"
           >
-            <CommonSvgIcon icon="icon_xmark" class="m-form-clear-icon" />
+            <CommonMSvgIcon icon="icon_xmark" class="m-form-clear-icon" />
           </button>
           <span v-if="formatLength" class="m-form-length" :class="setClass.length">
             {{ formatLength }}
@@ -385,7 +385,7 @@ watch(
       class="m-form-error"
       :class="setClass.error"
     >
-      <BuyMErrorMessageElem :message="message" />
+      <CommonMErrorMessage :message="message" />
     </ErrorMessage>
   </div>
 </template>

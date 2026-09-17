@@ -1,9 +1,12 @@
 <script setup>
+import './.css/variables.css'
+import './.css/common.css'
+
 /* 日曆面板本體:header + 星期列 + 日期格。
   header 依 config.headerMode 換一支元件('string' 純文字 / 'panel' 點年月展開面板),
   面板模式下年、月各自是獨立元件,要改哪一種就只動那一支。
 
-  ⚠️ 這支只負責畫面 —— 日期狀態全在 props.calendar(useCalendar 的實例)裡,
+  注意:這支只負責畫面 —— 日期狀態全在 props.calendar(useCalendar 的實例)裡,
       由 Single 建立後傳進來,選了哪天用 emit 回報。 */
 
 const props = defineProps({
@@ -25,7 +28,7 @@ const props = defineProps({
 /* select   點日曆格子 —— 傳 datePicker 格式的日期字串
   selectYMD 點年 / 月清單而且那就是最終值(format 只到年或只到月)—— 傳 { y, m, d }
 
-  ⚠️ 時間不在這個浮層裡 —— format 帶時間段時,時間是**獨立的一個欄位**(Time.vue),
+  注意:時間不在這個浮層裡 —— format 帶時間段時,時間是**獨立的一個欄位**(Time.vue),
       由呼叫端並排放在日期欄位旁邊。 */
 const emits = defineEmits(['select', 'selectYMD'])
 
@@ -84,7 +87,7 @@ const onNext = () => {
 /* 換年的界限用 yearOptions 的頭尾判斷 —— 與 onChangeMonthDisabled 同一個依據。
   清單是由大到小排的。
 
-  ⚠️ 這支是「箭頭能不能按」,與 calendar.onYearDisabled(某一年能不能點)不同 ——
+  注意:這支是「箭頭能不能按」,與 calendar.onYearDisabled(某一年能不能點)不同 ——
       清單裡超出 min / max 的年份仍然列得出來、只是 disabled,所以翻到那裡是允許的。 */
 const onYearArrowDisabled = (step) => {
   const years = props.calendar.yearOptions.value
@@ -109,7 +112,7 @@ const onArrowDisabled = (step) => {
 /* 對齊 vue-datepicker-next 的層層下鑽:年 → 月 → 日。
   從 header 直接點月份則是 月 → 日,不會多繞一層年。
 
-  ⚠️ 精度停在這一層時,點下去就是「選定」而不是往下鑽 ——
+  注意:精度停在這一層時,點下去就是「選定」而不是往下鑽 ——
       format 為 YYYY 時點年就結束、YYYY-MM 時點月就結束,
       再往下鑽會選到 format 根本輸出不了的東西。 */
 const onSelectYear = (year) => {

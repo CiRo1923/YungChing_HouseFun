@@ -1,6 +1,6 @@
 <script setup>
 // const common = useCommonStore()
-const { onUseMeta, onWithLoadingAll } = useCommonActions()
+const { onUseMeta } = useCommonActions()
 const buyProject = useBuyProjectStore()
 // const { renewal } = storeToRefs(buyProject)
 const {
@@ -17,6 +17,7 @@ const route = useRoute()
 
 definePageMeta({
   layout: 'buy',
+  // 登入機制還沒接上,目前沒有任何地方讀這個值 —— 接上之後由路由守衛依它決定要不要擋
   requiresAuth: true,
   title: '出售物件刊登',
   // hfID 一定是數字。validate 在元件載入前就攔下,不會帶著壞掉的 id 去打 API,
@@ -31,7 +32,7 @@ await useAsyncData(`case-status-renewal-${hfID.value}`, () =>
   onApiGetBuyRealEstateCaseStatusHfID(hfID.value)
 )
 
-await onWithLoadingAll([
+await Promise.all([
   useAsyncData(`case-status-finish-${hfID.value}`, () => onApiGetBuyRealEstateCaseStatusHfID(hfID.value)),
   useAsyncData(`available-plans-publish-finish-${hfID.value}`, () =>
     onApiGetVasPublishAvailablePlans(hfID.value)
@@ -39,7 +40,7 @@ await onWithLoadingAll([
   useAsyncData(`get-publish-response-finish-${hfID.value}`, () =>
     onApiGetVasPublishGetPublishResponse(hfID.value)
   ),
-  useAsyncData('golden-planList-finish', () => onApiGetVasGoldenGetPlanList()),
+  callOnce('golden-planList-finish', () => onApiGetVasGoldenGetPlanList()),
 ])
 
 onUseMeta({

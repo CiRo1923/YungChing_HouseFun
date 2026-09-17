@@ -12,7 +12,7 @@ const onClose = (item) => {
 </script>
 
 <template>
-  <CommonMPopupMain id="confirmSystem" :setClass="confirm.setClass">
+  <CommonMPopup id="confirmSystem" :setClass="confirm.setClass">
     <div class="text-[16px]" :class="confirm.setClass?.content" v-html="confirm.content" />
     <template #footer>
       <div class="text-center">
@@ -38,5 +38,5 @@ const onClose = (item) => {
         </ul>
       </div>
     </template>
-  </CommonMPopupMain>
+  </CommonMPopup>
 </template>

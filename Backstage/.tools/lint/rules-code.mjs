@@ -10,8 +10,15 @@ import {
   BUILD_CONFIG_FILES,
   COMPONENTS_DIR,
   IMPORT_ORDER_GROUPS,
+  IS_FILE_BASED_ROUTING,
   PROJECT_CONFIG_FILES,
   STYLE_CONFIG_FILES,
+  VIEW_UNDERSCORE_FOLDERS,
+  CSS_MODULES_DIR,
+  COMPONENT_DIRS,
+  classPrefixOf,
+  listFiles,
+  selectorClassesOf,
   isInActionsDir,
   isInSrc,
   VIEWS_DIR,
@@ -822,22 +829,67 @@ const IMPORT_SPEC_RE = /^import\s+(?:[^'"\n]*?from\s*)?['"]([^'"]+)['"]/gm
 const STYLE_GROUP = 0
 
 /**
- * 這支元件有沒有自己的 class。
+ * 這個專案的樣式裡,定義過哪些 class。
  *
- * 有一種元件自己完全不寫 class:它把設定往下傳給另一支元件,畫面與樣式
- * 都由被轉手的那支負責。**那種元件沒有樣式可以載入** —— 要求它載一支,
- * 等於要它去 import 別人的樣式,或為它建一支空檔案。
+ * 掃一次就記住 —— 這條規則是逐檔跑的,每一支元件都重掃一遍的話,
+ * 一次全專案檢查會把所有 css 讀上幾十次。
  *
- * 判斷看的是靜態寫出來的 class。動態綁定(`:class="setClass.main"`)不算 ——
- * 那個值由使用端傳進來,樣式該由傳進來的那一方負責。
- *
- * 被註解掉的那一段不算 —— 那是死程式碼,裡面的 class 不會產生任何樣式。
+ * 「選擇器裡有哪些 class」的抽取與模組樣式那條共用同一份(selectorClassesOf),
+ * 兩邊問的是同一件事的兩面:那邊問「這裡定義了誰」,這裡問「誰被定義過」。
  */
-const hasOwnClass = (text) => {
+let styledCache = null
+
+const styledClassesOf = (root) => {
+  if (styledCache?.root === root) return styledCache.set
+
+  const set = new Set()
+
+  for (const dir of [...COMPONENT_DIRS, CSS_MODULES_DIR]) {
+    for (const abs of listFiles(root, dir)) {
+      if (!abs.endsWith('.css')) continue
+
+      try {
+        for (const { cls } of selectorClassesOf(fs.readFileSync(abs, 'utf8'))) set.add(cls)
+      } catch {
+        // 讀不到某一支就跳過,不要因此讓整條規則失效
+      }
+    }
+  }
+
+  styledCache = { root, set }
+
+  return set
+}
+
+/**
+ * 這支元件寫出來的 class,有沒有任何一個真的有樣式。
+ *
+ * 有兩種元件沒有樣式可以載入,而要求它們載一支的結果都一樣糟
+ * (去 import 別人的樣式,或建一支空檔案):
+ *
+ *   轉手型      自己完全不寫 class,把設定往下傳給另一支元件
+ *   只給掛勾    寫了 class,但那幾個名字全案都沒有對應的樣式 ——
+ *               外觀完全由使用端傳進來,那幾個 class 只是掛載點
+ *
+ * 所以判準不是「有沒有寫 class」,是「寫出來的那幾個有沒有人在定義」。
+ *
+ * 動態綁定(`:class="setClass.main"`)不算 —— 那個值由使用端傳進來,
+ * 樣式該由傳進來的那一方負責。被註解掉的那一段也不算,那是死程式碼。
+ */
+const hasStyledClass = (text, root) => {
   const tpl = templateRangeOf(text)
   if (!tpl) return false
 
-  return /\sclass\s*=\s*"[^"]/.test(maskHtmlComments(tpl.body))
+  const styled = styledClassesOf(root)
+  const body = maskHtmlComments(tpl.body)
+
+  for (const m of body.matchAll(/\sclass\s*=\s*"([^"]*)"/g)) {
+    for (const cls of m[1].split(/\s+/)) {
+      if (cls && styled.has(cls)) return true
+    }
+  }
+
+  return false
 }
 
 // --- 規則 vueFileName:.vue 的檔名怎麼取 --------------------------------------
@@ -855,10 +907,58 @@ const hasOwnClass = (text) => {
 //
 // 頁面目錄底下,底線開頭的資料夾裡放的不是頁面(元件、片段那些),
 // 所以那裡面的 .vue 照元件那一套命名。
+//
+// 頁面檔名還要再分一次,依這個專案的網址從哪裡來(設定 PROJECT_FRAMEWORK):
+//
+//   自己寫路由表   `path` 與檔名各寫各的 —— 檔名只是內部的名字,
+//                  跟著專案的命名慣例走(駝峰),連字號與底線都不用
+//   檔案系統路由   檔名**就是**網址的一段 —— 連字號是網址分隔字詞的寫法,
+//                  要放行;要求改成駝峰等於要求改網址,既有的連結會失效
+//
+// 兩種專案的底線與連續大寫都擋:網址裡的大寫在有的伺服器上不分大小寫,
+// 同一個畫面會有兩個網址進得去。
 
 /** 元件資料夾的主檔;`Main.vue` 是該被改掉的那一種 */
 const MAIN_FILE_NAME = 'Index.vue'
 const LEGACY_MAIN_RE = /^main\.vue$/i
+
+/**
+ * 駝峰以外的寫法 —— 連字號、底線,或連續兩個以上的大寫。
+ *
+ * 只看首字大小寫的話,`m-form-input.vue`、`user_card.vue` 都會通過,
+ * 而同一個專案裡三種分隔寫法並存時,搜尋、比對、複製一段過來都要先想「這支叫什麼」。
+ *
+ * 連續大寫也算(`APIList.vue`):自動注入把檔名原樣當成標籤的一部分,
+ * 那一段讀起來斷不出詞。
+ */
+const NOT_CAMEL_RE = /[-_]|[A-Z]{2,}/
+
+/**
+ * 網址那一側的分隔方式 —— 連字號放行,底線與連續大寫照擋。
+ *
+ * 檔案系統路由的專案裡,頁面的檔名與資料夾**就是**網址的一段:
+ * `actual-subscribe.vue` 對應 `/actual-subscribe`,而連字號正是網址
+ * 分隔字詞的寫法。要求改成駝峰等於要求把網址改掉 —— 既有的連結會失效,
+ * 搜尋引擎收錄的也會指到不存在的位置。
+ *
+ * 底線與連續大寫仍然擋:底線不是網址分隔字詞的慣例,而大寫在有的伺服器上
+ * 不分大小寫 —— 同一個畫面會有兩個網址進得去。
+ */
+const ROUTE_NAME_RE = /_|[A-Z]{2,}/
+
+/**
+ * 一個名字(檔名或資料夾名)該用哪一套分隔方式。
+ *
+ * 問的是同一件事:**這一段是不是網址**。是的話跟著網址的寫法走,
+ * 不是的話跟著專案內部的命名慣例走(駝峰)。頁面的檔名與頁面目錄的資料夾
+ * 都拿這一份判斷 —— 兩邊各寫一次的話,總有一天只改到其中一邊。
+ *
+ * 自己寫路由表的專案沒有「是網址」這回事:`path` 與檔案位置各寫各的,
+ * 名字只是專案內部的名字,所以一律駝峰。
+ * 哪一種由設定的 PROJECT_FRAMEWORK 決定,規則不自己猜框架。
+ */
+const nameShapeReFor = (isRouteSegment) =>
+  IS_FILE_BASED_ROUTING && isRouteSegment ? ROUTE_NAME_RE : NOT_CAMEL_RE
 
 /** 底線開頭的資料夾 —— 不對應網址的那些(元件、片段) */
 const isUnderscoreFolder = (rel) => /\/_[^/]+\//.test(rel)
@@ -875,6 +975,24 @@ const checkVueFileName = ({ rel }) => {
   const base = path.basename(rel)
   const first = base[0]
   const report = (detail) => [issueOf(rel, 1, 'vueFileName', detail)]
+
+  /* 首字大小寫看的是「它是標籤還是網址」,這一段看的是**分隔方式** ——
+     兩種寫法混在同一個專案裡,搜尋與比對都要先想「這支到底叫什麼」。
+
+     檔案系統路由的專案裡,頁面檔名就是網址的一段,那一套不適用:
+     連字號放行(網址就是這樣分隔字詞的),底線與連續大寫仍然擋。 */
+  if (
+    (isComponentVue(rel) || isPageVue(rel)) &&
+    nameShapeReFor(isPageVue(rel)).test(path.basename(rel, '.vue'))
+  ) {
+    return report(
+      IS_FILE_BASED_ROUTING && isPageVue(rel)
+        ? `頁面的檔名是網址的一段(${base})—— 不要用底線,也不要連續大寫;` +
+            `網址用連字號分隔字詞,而大寫在有的伺服器上會讓同一個畫面有兩個網址進得去`
+        : `.vue 的檔名要用駝峰(${base})—— 不要用連字號、底線,也不要連續大寫;` +
+            `同一個專案裡好幾種分隔方式並存時,找一支檔案要先想它是哪一種寫法`
+    )
+  }
 
   if (isComponentVue(rel)) {
     if (LEGACY_MAIN_RE.test(base)) {
@@ -904,7 +1022,171 @@ const checkVueFileName = ({ rel }) => {
   return []
 }
 
-const checkImportOrder = ({ rel, text }) => {
+// --- 規則 viewFolder:頁面目錄的資料夾怎麼命名 --------------------------------
+//
+// 頁面目錄的資料夾**一律對應網址**,所以名字跟著網址走:首字小寫。
+// 一個大寫開頭的資料夾在網址裡會變成一段大寫的路徑,與其他段落長得不一樣,
+// 而且有的伺服器對大小寫的處理不同 —— 同一個畫面可能有兩個網址進得去。
+//
+// 分隔方式與同一層的 `.vue` 檔名同一套,由設定的 PROJECT_FRAMEWORK 決定:
+// 自己寫路由表的專案用駝峰(資料夾只是專案內部的名字),檔案系統路由的專案
+// 放行連字號(那一層就是網址的一段)。兩邊都擋底線與連續大寫。
+// 資料夾寬、檔案嚴的話,同一個名字寫成資料夾就過、寫成檔案就報。
+//
+// 底線開頭的那種是例外:它不是一段網址,是「放在頁面旁邊、只給這一頁用的東西」。
+// **允許的名字列在設定裡(VIEW_UNDERSCORE_FOLDERS)** —— 開放自由命名的話,
+// 那個例外會愈開愈大,而每一個都要讀的人自己猜它是不是網址的一部分。
+//
+// 點開頭的資料夾(`.composables` 那種)不受這條約束,那是另一套慣例。
+
+/** 資料夾名的形狀:點開頭(另一套慣例)、底線開頭(例外清單)、其餘是網址的一段 */
+const isDotFolder = (name) => name.startsWith('.')
+const isUnderscoreName = (name) => name.startsWith('_')
+
+const checkViewFolder = ({ rel }) => {
+  if (!rel.startsWith(`${VIEWS_DIR}/`)) return []
+
+  const folders = rel.slice(`${VIEWS_DIR}/`.length).split('/').slice(0, -1)
+
+  for (const name of folders) {
+    if (isDotFolder(name)) continue
+
+    if (isUnderscoreName(name)) {
+      /* 清單留空代表這個專案不做這項檢查 —— 那時底線資料夾一律放行,
+         不是一律報:留空的專案會被每一支檔案報一次。 */
+      if (!VIEW_UNDERSCORE_FOLDERS.length) continue
+      if (VIEW_UNDERSCORE_FOLDERS.includes(name)) continue
+
+      return [
+        issueOf(
+          rel,
+          1,
+          'viewFolder',
+          `頁面目錄底下只能有這幾個底線資料夾:${VIEW_UNDERSCORE_FOLDERS.join('、')} —— ` +
+            `${name} 不在裡面;那一層不是網址的一段,要多一種用途得先決定它值不值得存在`
+        ),
+      ]
+    }
+
+    if (name[0] !== name[0].toLowerCase()) {
+      return [
+        issueOf(
+          rel,
+          1,
+          'viewFolder',
+          `頁面目錄的資料夾首字要小寫(${name} → ${name[0].toLowerCase()}${name.slice(1)})—— ` +
+            `那一層是網址的一段,而網址一向是小寫的`
+        ),
+      ]
+    }
+
+    /* 分隔方式與同一層的 .vue 檔名同一套 —— 兩者都在回答「這一段是不是網址」。
+       資料夾寬、檔案嚴的話,同一個名字寫成資料夾就過、寫成檔案就報。 */
+    if (nameShapeReFor(true).test(name)) {
+      return [
+        issueOf(
+          rel,
+          1,
+          'viewFolder',
+          IS_FILE_BASED_ROUTING
+            ? `頁面目錄的資料夾是網址的一段(${name})—— 不要用底線,也不要連續大寫;` +
+                `網址用連字號分隔字詞,而大寫在有的伺服器上會讓同一個畫面有兩個網址進得去`
+            : `頁面目錄的資料夾要用駝峰(${name})—— 不要用連字號、底線,也不要連續大寫;` +
+                `路由表裡的 path 與資料夾各寫各的,資料夾只是專案內部的名字,` +
+                `與同一層的 .vue 檔名同一套`
+        ),
+      ]
+    }
+  }
+
+  return []
+}
+
+// --- 規則 componentClass:資料夾名要對得上 template 的 class -------------------
+//
+// 資料夾 `mFigure` 對 `.m-figure`、`mSvgIcon` 對 `.m-svg-icon` ——
+// **模組 css 的 class 前綴就是從資料夾名推出來的**(那一側由 moduleScope 在管)。
+//
+// 兩者對不上時,樣式那一側會推出一個沒有人在用的前綴:元件寫 `.m-no-date`、
+// 資料夾推出 `.m-no-data`,於是寫進 css 的每一條都被報成「別的模組的 class」,
+// 或者反過來 —— css 寫對了前綴,template 卻吃不到。
+//
+// **沒有樣式檔的元件更看不出來**:那時 moduleScope 連看的機會都沒有,
+// 對不上這件事完全沒有訊息,要到有人替它建樣式檔的那一天才爆出來。
+// 所以這一條看的是 template,不是 css。
+//
+// 只比對「第一個帶前綴的靜態 class」—— 那是這支元件自己的組件 class。
+// 底下的子元素(`.m-figure-caption`)與別的模組(轉手傳進來的)不在這條的範圍內。
+
+/** template 裡第一個 `m-` 開頭的靜態 class */
+const COMPONENT_CLASS_RE = /class="([^"]*\bm-[a-z0-9-]+[^"]*)"/
+
+const ownClassOf = (text, rel) => {
+  const range = templateRangeOf(text, rel)
+  if (!range) return null
+
+  const scanned = maskHtmlComments(text.slice(range.start, range.end))
+  const line = COMPONENT_CLASS_RE.exec(scanned)
+  if (!line) return null
+
+  return /\bm-[a-z0-9-]+/.exec(line[1])?.[0] ?? null
+}
+
+const checkComponentClass = ({ rel, text }) => {
+  if (!rel.startsWith(`${COMPONENTS_DIR}/`) || !rel.endsWith('.vue')) return []
+
+  const folder = path.basename(path.dirname(rel))
+  const prefix = classPrefixOf(folder)
+  if (!prefix) return [] // 名字不是這套命名裡的模組,推不出前綴就不猜
+
+  const cls = ownClassOf(text, rel)
+  if (!cls) return [] // 自己不寫 class 的轉手型元件
+
+  if (cls === prefix || cls.startsWith(`${prefix}-`)) return []
+
+  return [
+    issueOf(
+      rel,
+      1,
+      'componentClass',
+      `資料夾 ${folder} 推出的 class 是 .${prefix},template 寫的是 .${cls} —— ` +
+        `模組 css 的前綴從資料夾名推,兩者對不上的話那支元件的樣式沒有人在看`
+    ),
+  ]
+}
+
+// --- 規則 componentFolder:元件要有自己的資料夾 -------------------------------
+//
+// 分類資料夾底下不要直接放 .vue —— 一支元件遲早會有樣式、composable、
+// 拆出來的子元件,那時才建資料夾就要動到每一個使用端(自動注入的名稱跟著路徑走)。
+//
+// 分辨「分類層」與「元件層」的方式:元件層是**它自己就是一個元件**,
+// 所以資料夾名是 `m` 開頭(mForm、mCard);分類層只是把性質相近的放在一起
+// (common、platform),名字不帶那個前綴。
+//
+// 所以 `mCard/Photo.vue`、`mForm/Input.vue` 是正常的(同一個模組的好幾支),
+// `platform/mCoin.vue` 才是這條要抓的 —— 它應該是 `platform/mCoin/Index.vue`。
+
+const checkComponentFolder = ({ rel }) => {
+  if (!rel.startsWith(`${COMPONENTS_DIR}/`) || !rel.endsWith('.vue')) return []
+
+  const folder = path.basename(path.dirname(rel))
+  if (classPrefixOf(folder)) return [] // 已經在自己的資料夾裡
+
+  const base = path.basename(rel, '.vue')
+
+  return [
+    issueOf(
+      rel,
+      1,
+      'componentFolder',
+      `這支元件直接放在分類資料夾底下 —— 建一個自己的資料夾` +
+        `(${base}/Index.vue),之後要加樣式、拆子元件時才不必動到每一個使用端`
+    ),
+  ]
+}
+
+const checkImportOrder = ({ rel, text, root }) => {
   if (!rel.startsWith(`${COMPONENTS_DIR}/`) || !rel.endsWith('.vue')) return []
 
   const hasStyle = [...text.matchAll(IMPORT_SPEC_RE)].some(
@@ -912,10 +1194,11 @@ const checkImportOrder = ({ rel, text }) => {
   )
   if (hasStyle) return []
 
-  /* 自己完全不寫 class 的轉手元件沒有樣式可載,這條的前提不成立。
-     報它的話只有兩條路:去 import 別人的樣式,或建一支空的樣式檔 ——
-     兩種都比違規本身更糟。 */
-  if (!hasOwnClass(text)) return []
+  /* 沒有樣式可載的元件,這條的前提不成立 —— 兩種:自己完全不寫 class 的轉手型,
+     以及寫了 class 但那幾個名字全案都沒有對應樣式的(外觀由使用端傳進來,
+     那幾個 class 只是掛載點)。報它的話只有兩條路:去 import 別人的樣式,
+     或建一支空的樣式檔,兩種都比違規本身更糟。 */
+  if (!hasStyledClass(text, root)) return []
 
   return [
     issueOf(
@@ -996,7 +1279,15 @@ export const onSortImports = (text, rel) => {
   return changed ? nextLines.join('\n') : null
 }
 
-export const CODE_CHECKS = [checkImportAlias, checkDeprecated, checkImportOrder, checkVueFileName]
+export const CODE_CHECKS = [
+  checkImportAlias,
+  checkDeprecated,
+  checkImportOrder,
+  checkVueFileName,
+  checkComponentClass,
+  checkComponentFolder,
+  checkViewFolder,
+]
 
 /* composableOrder 沒有出現在這兩張表裡 —— 它不報違規,存檔時直接把順序排好。
    自動修正的行為在 onSortComposables。 */
@@ -1004,6 +1295,9 @@ export const CODE_CHECKS = [checkImportAlias, checkDeprecated, checkImportOrder,
 export const CODE_RULE_TITLE = {
   importOrder: '元件沒有載入樣式',
   vueFileName: '.vue 的檔名怎麼取',
+  componentClass: '資料夾名對不上組件 class',
+  componentFolder: '元件沒有自己的資料夾',
+  viewFolder: '頁面目錄的資料夾命名',
   importAlias: 'import 沒有使用 alias',
   deprecated: '已淘汰的寫法',
 }
@@ -1011,6 +1305,9 @@ export const CODE_RULE_TITLE = {
 export const CODE_RULE_HINT = {
   importOrder: '元件的樣式寫在 CSS 模組裡,由元件自己 import(分組順序存檔時自動排好)',
   vueFileName: '元件首字大寫、主檔叫 Index.vue;頁面首字小寫',
+  componentClass: '資料夾 mXxx 對 .m-xxx —— 模組 css 的前綴是從資料夾名推出來的',
+  componentFolder: '分類資料夾底下不要直接放 .vue,建一個自己的資料夾',
+  viewFolder: '資料夾首字小寫(那是網址的一段);底線資料夾只能用設定裡列的那幾個名字',
   importAlias: '離開自己資料夾的相對路徑改用 @ alias',
   deprecated: 'apiParams / inject(route) 已淘汰;actions 不留 console.log、不 bare 透傳',
 }

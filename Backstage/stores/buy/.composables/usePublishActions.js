@@ -44,14 +44,14 @@ export default () => {
     onReplaceImageSize,
   } = useBuyProjectActions()
   const publishStores = useBuyPublishStore()
-  const { apiData, statusData, pingData } = storeToRefs(publishStores)
+  const { apiData, statusData, pingData, options: publishOptions } = storeToRefs(publishStores)
   const { onAlert, onConfirm, onApiError } = usePopupActions()
   const currentUnit = computed(() =>
-    publishStores.options.unit.find((item) => item.value === apiData.value.caseInfo.isCaseSqUnitPin)
+    publishOptions.value.unit.find((item) => item.value === apiData.value.caseInfo.isCaseSqUnitPin)
   )
   const pingUnitLabel = computed(
     () =>
-      publishStores.options.unit.find(
+      publishOptions.value.unit.find(
         (item) => item.value === apiData.value.caseInfo.isCaseSqUnitPin
       ).label
   )
@@ -96,7 +96,7 @@ export default () => {
     }
   }
   // 一律以表單當前值組地址。
-  // ⚠ 不要回頭讀 address(地圖定位的回傳):那是一次性的填入來源,填完就該由表單接手。
+  // 注意:不要回頭讀 address(地圖定位的回傳):那是一次性的填入來源,填完就該由表單接手。
   //   以前只要定位過一次就永遠回傳那份快照,之後在表單改路段,顯示不會跟著變。
   const onAddress = () => {
     const caseInfo = apiData.value.caseInfo
@@ -154,8 +154,8 @@ export default () => {
     const mKey = `${key}M`
     const isPin = unit.id === 'pin'
     const isSqMeters = unit.id === 'sqMeters'
-    const pinConf = publishStores.options.unit.find((u) => u.id === 'pin')
-    const mConf = publishStores.options.unit.find((u) => u.id === 'sqMeters')
+    const pinConf = publishOptions.value.unit.find((u) => u.id === 'pin')
+    const mConf = publishOptions.value.unit.find((u) => u.id === 'sqMeters')
     const onConvert = (value, conf) => Number(onToFixed(Number(value) * conf.convert, conf.toFixed))
 
     if (!pinConf || !mConf) return
@@ -235,10 +235,6 @@ export default () => {
       if (hasArea) {
         options.value.area = caseAddrDistrictOptions
       }
-
-      console.log(apiData.value.caseInfo)
-
-      // console.log(data)
     } else {
       onApiError(config, status, data)
     }

@@ -1,10 +1,10 @@
 <script setup>
-import '@css/_modules/common/mForm/variables.css'
-import '@css/_modules/common/mForm/selectionVariables.css'
-import '@css/_modules/common/mForm/radioItemVariables.css'
-import '@css/_modules/common/mForm/common.css'
-import '@css/_modules/common/mForm/selection.css'
-import '@css/_modules/common/mForm/radioItem.css'
+import './.css/variables.css'
+import './.css/selectionVariables.css'
+import './.css/radioItemVariables.css'
+import './.css/common.css'
+import './.css/selection.css'
+import './.css/radioItem.css'
 
 import useValidateEvents from './.composables/useValidateEvents.js'
 
@@ -123,7 +123,7 @@ const onChange = () => {
             :disabled="config.isDisabled"
             @change="onChange"
           />
-          <CommonSvgIcon icon="icon_check_solid" class="m-form-icon" :class="setClass.icon" />
+          <CommonMSvgIcon icon="icon_check_solid" class="m-form-icon" :class="setClass.icon" />
           <div class="m-form-radio-item-label" :class="setClass.label">
             <slot />
           </div>
@@ -137,7 +137,7 @@ const onChange = () => {
       :class="setClass.error"
       v-slot="{ message }"
     >
-      <BuyMErrorMessageElem :message="message" />
+      <CommonMErrorMessage :message="message" />
     </ErrorMessage>
   </div>
 </template>

@@ -1,8 +1,8 @@
 <script setup>
-import '@css/_modules/buy/mTab/variables.css'
-import '@css/_modules/buy/mTab/checkVariables.css'
-import '@css/_modules/buy/mTab/common.css'
-import '@css/_modules/buy/mTab/check.css'
+import './.css/variables.css'
+import './.css/checkVariables.css'
+import './.css/common.css'
+import './.css/check.css'
 
 const props = defineProps({
   options: {
@@ -164,7 +164,7 @@ onMounted(() => {
           v-bind="onHeaderBind(item)"
           @click="onClick(item, index)"
         >
-          <CommonSvgIcon
+          <CommonMSvgIcon
             icon="icon_check_solid"
             class="m-tab-check-anchor-icon"
             v-if="index === activeIndex"
@@ -176,7 +176,7 @@ onMounted(() => {
       </li>
     </ul>
     <div class="m-tab-body" :class="setClass.body">
-      <div class="m-table-body-content">
+      <div class="m-tab-body-content">
         <ul
           class="m-tab-body-items"
           :class="[animating, direction]"

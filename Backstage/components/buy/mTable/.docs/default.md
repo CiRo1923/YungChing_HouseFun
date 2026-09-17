@@ -134,7 +134,7 @@ const config = {
 | 名稱             | 說明                                                                             |
 | ---------------- | -------------------------------------------------------------------------------- |
 | `isTheadFixed`   | 是否啟用固定表頭。啟用後會依 `.m-table-container` 的捲動位置移動同一個 `thead`。 |
-| `noData.icon`    | 無資料時傳給 `CommonSvgIcon` 的 icon。沒有值時不顯示 icon。                      |
+| `noData.icon`    | 無資料時傳給 `CommonMSvgIcon` 的 icon。沒有值時不顯示 icon。                      |
 | `noData.message` | 無資料文字，使用 `v-html` 輸出。                                                 |
 
 ## Set Class
@@ -263,7 +263,7 @@ div.m-table.--default
         tr.m-table-tbody-tr.--empty
           td.m-table-tbody-td.--empty
             div.m-table-no-data
-              CommonSvgIcon
+              CommonMSvgIcon
               p
       tfoot.m-table-tfoot
         tr.m-table-tfoot-tr

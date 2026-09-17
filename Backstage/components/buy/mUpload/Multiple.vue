@@ -1,8 +1,8 @@
 <script setup>
-import '@css/_modules/buy/mUpload/variables.css'
-import '@css/_modules/buy/mUpload/multipleVariables.css'
-import '@css/_modules/buy/mUpload/common.css'
-import '@css/_modules/buy/mUpload/multiple.css'
+import './.css/variables.css'
+import './.css/multipleVariables.css'
+import './.css/common.css'
+import './.css/multiple.css'
 
 import useValidateEvents from '@components/common/mForm/.composables/useValidateEvents.js'
 
@@ -68,7 +68,7 @@ const config = computed(() => ({
   validateEvents: ['blur', 'change', 'touchedModelUpdate'],
   ...props.config,
 }))
-/* ⚠️ `name` 宣告在下面,這裡靠 getter 延後求值 —— 它只在 render 讀 validateOn 時才執行,
+/* 注意:`name` 宣告在下面,這裡靠 getter 延後求值 —— 它只在 render 讀 validateOn 時才執行,
     那時 name 已經建立好了。改成直接傳 `name` 會撞到 TDZ。 */
 const validateOn = useValidateEvents(
   () => config.value.validateEvents,
@@ -971,7 +971,7 @@ watch(
           v-if="hasAppendButton"
         >
           <div class="m-upload-multiple-append-body" :class="setClass.appendBody">
-            <CommonSvgIcon
+            <CommonMSvgIcon
               class="m-upload-multiple-append-icon"
               :icon="hasImages ? 'icon_plus_circle' : 'icon_upload'"
             />
@@ -990,6 +990,6 @@ watch(
     :class="setClass.error"
     v-slot="{ message }"
   >
-    <BuyMErrorMessageElem :message="message" />
+    <CommonMErrorMessage :message="message" />
   </ErrorMessage>
 </template>

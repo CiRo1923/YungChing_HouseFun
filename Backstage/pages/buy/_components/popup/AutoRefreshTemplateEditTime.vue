@@ -43,7 +43,7 @@ const onSure = async () => {
   >
     <Form as="div" class="tm:space-y-[16px] p:space-y-[30px]" ref="formRef">
       <div class="m:space-y-[16px] pt:flex pt:gap-x-[16px]">
-        <CommonMFormLabel
+        <CommonMLabel
           label="設定名稱"
           :setClass="{
             main: 'text-[16px] pt:shrink-0 p:flex p:h-[40px] p:items-center',
@@ -95,7 +95,7 @@ const onSure = async () => {
               v-for="(item, index) in listTimeSpan"
               :key="`${item.timeID}_${item.timeDescription}_${index}`"
             >
-              <BuyMTimeMain
+              <BuyMTime
                 name="listSelectedRefreshTime"
                 :text="item.timeDescription"
                 v-model="autoRefresh.templateSaveTime.apiData.listSelectedRefreshTime"

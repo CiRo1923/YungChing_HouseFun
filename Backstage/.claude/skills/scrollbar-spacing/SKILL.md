@@ -3,6 +3,8 @@ name: scrollbar-spacing
 description: 調整捲軸與內容之間的間距前必須先讀。說明 .scrollbar 的分層原則(basic.css 只管外觀,間距歸元件自己的 CSS 模組)、mPopup 與 mTable 兩種已實作的做法與各自的取捨,以及尚未實測 / 尚未處理的部分。觸發時機 - 要改 assets/css/_common/basic.css 的 .scrollbar、assets/css/_modules/common/mPopup/*.css、assets/css/_modules/buy/mTable.css、components/buy/mTable/.composables/useTableCore.js 的 isContainerScroll;或使用者回報「捲軸貼著內容 / 太擠 / 表格右邊縮排怪怪的 / 內容沒對齊」。
 ---
 
+<!-- lint-project-name-exempt: 這支只有本專案有,不會複製到別的專案;內容是捲軸間距寫在哪幾支檔案,路徑是要記錄的資料本身 -->
+
 # 捲軸與內容的間距
 
 驗收條目 **C-07**(手機版留言管理燈箱,篩選項目和捲軸太近)引出的一套處理方式。
@@ -16,7 +18,7 @@ PC 版的留言管理與瀏覽數燈箱也有同樣問題(捲軸貼著表格最�
 | 各元件自己的 CSS 模組                          | **間距屬於版面,歸元件自己管**。不得為了某個元件的間距去動 `basic.css`                       |
 
 曾經試過在 `basic.css` 加一個 `--scroll` 修飾符讓各處選用,**已否決** ——
-間距是元件的版面問題,不該進通用的捲軸樣式。同理也不要為此新造 class 名稱,
+間距是元件的版面問題,不該進通用的捲軸樣式。基於同一個理由,也不要為此新造 class 名稱,
 直接用元件本來就掛著的 `scrollbar --y` 當選擇器即可。
 
 ---

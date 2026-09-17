@@ -19,7 +19,7 @@ const data = shallowReadonly({
 </script>
 
 <template>
-  <BuyMItemMain
+  <BuyMItem
     :data="data"
     :setClass="{
       main: 'mt-[24px] text-[14px] text-[--gray-666] pt:shrink-0',

@@ -1,8 +1,8 @@
 <script setup>
-import '@css/_modules/buy/mUpload/variables.css'
-import '@css/_modules/buy/mUpload/multipleVariables.css'
-import '@css/_modules/buy/mUpload/common.css'
-import '@css/_modules/buy/mUpload/multiple.css'
+import './.css/variables.css'
+import './.css/multipleVariables.css'
+import './.css/common.css'
+import './.css/multiple.css'
 
 const emit = defineEmits(['remove', 'check'])
 const props = defineProps({
@@ -66,7 +66,7 @@ const onRemoveClick = () => {
         @pointerdown.stop
         @click.stop="onRemoveClick"
       >
-        <CommonSvgIcon icon="icon_xmark" class="m-upload-multiple-remove-icon" />
+        <CommonMSvgIcon icon="icon_xmark" class="m-upload-multiple-remove-icon" />
       </button>
     </div>
 
@@ -79,7 +79,7 @@ const onRemoveClick = () => {
         @pointerdown.stop
         @change="onCheckChange"
       />
-      <CommonSvgIcon
+      <CommonMSvgIcon
         icon="icon_check_solid"
         class="m-upload-checkbox-icon m-upload-multiple-check-icon"
         :class="props.setClass.icon"

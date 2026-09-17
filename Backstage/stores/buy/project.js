@@ -1,11 +1,41 @@
+import { onDeepClone } from '@js/_prototype.js'
+
 export const useBuyProjectStore = defineStore('buyProject', () => {
   const NAME = '好房網買屋 Housefun 管理後台'
+  const apiDefault = readonly({
+    renewal: {
+      planID: null,
+    },
+    autoRefreshSave: {
+      hfID: null,
+      vasID: null,
+      planID: null,
+      empID: null,
+      listSelectedRefreshTime: [],
+    },
+    autoRefreshTemplateSaveTime: {
+      templateID: null,
+      isCustom: null,
+      templateName: null,
+      listSelectedRefreshTime: [],
+    },
+    autoRefreshTemplateSave: {
+      hfID: null,
+      templateID: null,
+      planID: null,
+      isCustom: false,
+      empID: null,
+      listSelectedRefreshTime: [],
+    },
+    golden: {
+      planID: null,
+      empID: null,
+    },
+  })
   const serverTime = ref(null)
   const renewal = ref({
     data: null,
-    apiData: {
-      planID: null,
-    },
+    apiData: onDeepClone(apiDefault.renewal),
   })
   const autoRefresh = ref({
     data: null,
@@ -14,42 +44,21 @@ export const useBuyProjectStore = defineStore('buyProject', () => {
     availableInfo: null,
     availablePlans: null,
     save: {
-      apiData: {
-        hfID: null,
-        vasID: null,
-        planID: null,
-        empID: null,
-        listSelectedRefreshTime: [],
-      },
+      apiData: onDeepClone(apiDefault.autoRefreshSave),
     },
     templateSaveTime: {
-      apiData: {
-        templateID: null,
-        isCustom: null,
-        templateName: null,
-        listSelectedRefreshTime: [],
-      },
+      apiData: onDeepClone(apiDefault.autoRefreshTemplateSaveTime),
     },
     templateSave: {
       info: null,
       list: null,
       selectedIndex: null,
-      apiData: {
-        hfID: null,
-        templateID: null,
-        planID: null,
-        isCustom: false,
-        empID: null,
-        listSelectedRefreshTime: [],
-      },
+      apiData: onDeepClone(apiDefault.autoRefreshTemplateSave),
     },
   })
   const golden = ref({
     plans: null,
-    apiData: {
-      planID: null,
-      empID: null,
-    },
+    apiData: onDeepClone(apiDefault.golden),
   })
   const options = ref({
     casePurpose: null,
@@ -93,6 +102,7 @@ export const useBuyProjectStore = defineStore('buyProject', () => {
 
   return {
     NAME,
+    apiDefault,
     serverTime,
     renewal,
     golden,

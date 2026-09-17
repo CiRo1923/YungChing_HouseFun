@@ -37,7 +37,7 @@ const setClass = computed(() => {
     :class="setClass.main"
   >
     <p class="mr-[8px] flex items-center gap-x-[4px]" :class="setClass.label">
-      <CommonSvgIcon
+      <CommonMSvgIcon
         :icon="config.icon"
         class="h-[16px] w-[16px] shrink-0 text-[--orange-e646]"
         v-if="config.icon"

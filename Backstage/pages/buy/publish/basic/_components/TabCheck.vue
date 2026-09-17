@@ -23,7 +23,7 @@ const options = readonly([
   >
     <!-- 網址匯入 -->
     <template #content_0>
-      <PageBuyPublishBasicTabCheckURL />
+      <PageBuyPublishBasicTabCheckUrl />
     </template>
     <!-- 地址匯入 -->
     <template #content_1>
@@ -31,7 +31,7 @@ const options = readonly([
     </template>
     <!-- 建號匯入 -->
     <template #content_2>
-      <PageBuyPublishBasicTabCheckID />
+      <PageBuyPublishBasicTabCheckId />
     </template>
   </BuyMTabCheck>
 </template>

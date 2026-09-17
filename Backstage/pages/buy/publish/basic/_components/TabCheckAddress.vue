@@ -28,7 +28,7 @@ const items = readonly({
   ],
 })
 
-const onCityChange = async ({ source } = {}) => {
+const onBuyCityCodeDistrictSelectOptions = async ({ source } = {}) => {
   if (!apiData.value.caseInfo.cityID) {
     areas.value = []
     roads.value = []
@@ -47,7 +47,7 @@ const onCityChange = async ({ source } = {}) => {
   }
 }
 
-const onAreaChange = async ({ source } = {}) => {
+const onBuyCityCodeDistrictCodeRoad = async ({ source } = {}) => {
   const { cityID, districtID } = apiData.value.caseInfo
 
   if (source !== 'init') {
@@ -129,8 +129,8 @@ const onClick = async (validate, setTouched) => {
           ofNumber: 'm:w-[74px] pt:w-[50px]',
           floor: 'm:w-[98px] pt:w-[80px]',
         }"
-        @change:city="onCityChange"
-        @change:area="onAreaChange"
+        @change:city="onBuyCityCodeDistrictSelectOptions"
+        @change:area="onBuyCityCodeDistrictCodeRoad"
       />
       <BuyMAnchor
         text="匯入資料"

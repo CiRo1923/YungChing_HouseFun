@@ -1,8 +1,8 @@
 <script setup>
-import '@css/_modules/common/mForm/variables.css'
-import '@css/_modules/common/mForm/radiosOvalVariables.css'
-import '@css/_modules/common/mForm/common.css'
-import '@css/_modules/common/mForm/radiosOval.css'
+import './.css/variables.css'
+import './.css/radiosOvalVariables.css'
+import './.css/common.css'
+import './.css/radiosOval.css'
 
 import useValidateEvents from './.composables/useValidateEvents.js'
 
@@ -144,7 +144,7 @@ watch(
             @change="onChange(item)"
           />
           <!-- v-if="item[config.schema.value] == selected" 用 == 會有形態別問題 '1' (string) !== 1 (int) -->
-          <CommonSvgIcon
+          <CommonMSvgIcon
             icon="icon_check_solid"
             class="m-form-icon"
             v-if="item[config.schema.value] == selected"
@@ -169,7 +169,7 @@ watch(
       :class="setClass.error"
       v-slot="{ message }"
     >
-      <BuyMErrorMessageElem :message="message" />
+      <CommonMErrorMessage :message="message" />
     </ErrorMessage>
   </div>
 </template>

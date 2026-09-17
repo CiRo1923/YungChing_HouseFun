@@ -68,7 +68,7 @@ onUnmounted(() => {
       v-slot="{ item }"
     >
       <div class="flex items-center pt:gap-x-[3px]">
-        <CommonSvgIcon :icon="item.icon" class="h-[16px] w-[16px]" v-if="!isDeviceM" />
+        <CommonMSvgIcon :icon="item.icon" class="h-[16px] w-[16px]" v-if="!isDeviceM" />
         <p>
           {{ item.label }} <b>{{ item.total }}</b>
         </p>

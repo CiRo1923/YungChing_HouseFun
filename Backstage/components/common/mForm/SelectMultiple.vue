@@ -1,8 +1,8 @@
 <script setup>
-import '@css/_modules/common/mForm/variables.css'
-import '@css/_modules/common/mForm/dropdownVariables.css'
-import '@css/_modules/common/mForm/common.css'
-import '@css/_modules/common/mForm/dropdown.css'
+import './.css/variables.css'
+import './.css/dropdownVariables.css'
+import './.css/common.css'
+import './.css/dropdown.css'
 
 import { onMergeDropdownConfig, useDropdownCore } from './.composables/useDropdownCore.js'
 import SelectDropdownOptions from './SelectDropdownOptions.vue'
@@ -303,7 +303,7 @@ onUnmounted(() => {
         <div class="m-form-type" :class="setClass.type">
           <slot />
         </div>
-        <CommonSvgIcon
+        <CommonMSvgIcon
           icon="caret_large_down"
           class="m-form-icon"
           :class="setClass.icon"

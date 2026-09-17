@@ -1,8 +1,8 @@
 <script setup>
-import '@css/_modules/buy/mCard/variables.css'
-import '@css/_modules/buy/mCard/filterVariables.css'
-import '@css/_modules/buy/mCard/common.css'
-import '@css/_modules/buy/mCard/filter.css'
+import './.css/variables.css'
+import './.css/filterVariables.css'
+import './.css/common.css'
+import './.css/filter.css'
 
 const props = defineProps({
   title: {

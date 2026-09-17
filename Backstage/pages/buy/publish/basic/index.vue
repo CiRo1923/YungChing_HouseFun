@@ -3,12 +3,13 @@
 
 definePageMeta({
   layout: 'buy',
+  // 登入機制還沒接上,目前沒有任何地方讀這個值 —— 接上之後由路由守衛依它決定要不要擋
   requiresAuth: true,
   title: '物件刊登',
 })
 
 // const common = useCommonStore()
-const { onUseMeta, onWithLoadingAll } = useCommonActions()
+const { onUseMeta } = useCommonActions()
 const buyProject = useBuyProjectStore()
 // const { options } = storeToRefs(buyProject)
 // const buyPublish = useBuyPublishStore()
@@ -18,7 +19,7 @@ const { onApiPromise } = usePopupActions()
 const router = useRouter()
 // const newCaseAsync = useAsyncData('newCase', () => onApiPostBuyRealEstateNewCase())
 
-const onCreate = async () => {
+const onBuyRealEstateNewCase = async () => {
   onApiPromise('open')
   const { status, data } = await onApiPostBuyRealEstateNewCase()
   onApiPromise('close')
@@ -34,8 +35,6 @@ const onCreate = async () => {
     })
   }
 }
-
-await onWithLoadingAll([])
 
 onUseMeta({
   title: `物件管理 - 資料編輯 | ${buyProject.NAME}`,
@@ -55,7 +54,7 @@ onUseMeta({
       :setClass="{
         main: '--h-35 --px-20 --oval --bg-green-6a2d --text-white',
       }"
-      @click="onCreate"
+      @click="onBuyRealEstateNewCase"
     />
   </BuyMContainer>
 </template>

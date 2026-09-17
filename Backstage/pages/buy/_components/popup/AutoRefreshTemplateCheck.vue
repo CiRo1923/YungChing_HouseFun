@@ -38,7 +38,7 @@ const timeSpan = computed(() => template.value[selectedIndex.value]?.listTimeSpa
           class="flex flex-wrap items-center m:gap-x-[9px] t:gap-x-[12px] tm:gap-y-[12px] p:gap-x-[20px] p:gap-y-[16px]"
         >
           <li v-for="(time, index) in timeSpan" :key="`${time}_${index}`">
-            <BuyMTimeMain
+            <BuyMTime
               :text="time"
               :setClass="{
                 main: '--h-30 p:--w-85 tm:--w-76',

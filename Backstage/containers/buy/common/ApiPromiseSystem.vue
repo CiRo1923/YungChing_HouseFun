@@ -4,9 +4,9 @@ const { apiPromiseData } = storeToRefs(popup)
 </script>
 
 <template>
-  <CommonMPopupMain id="apiPromiseSystem">
+  <CommonMPopup id="apiPromiseSystem">
     <CommonMLoadingContainer>
       <p class="text-center" v-html="apiPromiseData.content" />
     </CommonMLoadingContainer>
-  </CommonMPopupMain>
+  </CommonMPopup>
 </template>

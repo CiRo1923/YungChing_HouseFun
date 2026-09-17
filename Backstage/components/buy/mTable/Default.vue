@@ -1,8 +1,8 @@
 <script setup>
-import '@css/_modules/buy/mTable/variables.css'
-import '@css/_modules/buy/mTable/defaultVariables.css'
-import '@css/_modules/buy/mTable/common.css'
-import '@css/_modules/buy/mTable/default.css'
+import './.css/variables.css'
+import './.css/defaultVariables.css'
+import './.css/common.css'
+import './.css/default.css'
 
 import useTableCore from './.composables/useTableCore'
 
@@ -106,7 +106,7 @@ const {
                   :index="rowIndex"
                   :column="column"
                 >
-                  <BuyMTableTBodyValue :value="getScopeValue(item, column)" :config="column" />
+                  <BuyMTableTbodyValue :value="getScopeValue(item, column)" :config="column" />
                 </slot>
               </td>
             </tr>
@@ -115,7 +115,7 @@ const {
           <tr class="m-table-tbody-tr --empty" :class="setClass.tbodyTr" v-else>
             <td class="m-table-tbody-td --empty" :class="setClass.tbodyTd" :colspan="thead.length">
               <div class="m-table-no-data" :class="setClass.noData">
-                <CommonSvgIcon :icon="config.noData.icon" v-if="config.noData.icon" />
+                <CommonMSvgIcon :icon="config.noData.icon" v-if="config.noData.icon" />
                 <p v-html="config.noData.message" />
               </div>
             </td>
@@ -142,7 +142,7 @@ const {
                 :index="rowIndex"
                 :column="column"
               >
-                <BuyMTableTBodyValue :value="getScopeValue(item, column)" :config="column" />
+                <BuyMTableTbodyValue :value="getScopeValue(item, column)" :config="column" />
               </slot>
             </td>
           </tr>

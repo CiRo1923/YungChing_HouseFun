@@ -1,4 +1,9 @@
 <script setup>
+import './.css/variables.css'
+import './.css/dropdownVariables.css'
+import './.css/dropdown.css'
+import './.css/common.css'
+
 const props = defineProps({
   options: {
     type: Array,
@@ -105,7 +110,7 @@ const dropdownOptionConfig = computed(() => {
         :disabled="item[optionConfig.schema.isDisabled] === true"
         @click="onItemClick(item, index)"
       >
-        <CommonSvgIcon
+        <CommonMSvgIcon
           icon="icon_check_solid"
           class="m-form-dropdown-icon"
           v-if="isActiveOption(item, index)"
