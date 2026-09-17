@@ -143,8 +143,10 @@
   }
 }
 
+/* 字級不寫在這裡 —— 下拉到處都會用到,同一支元件在不同畫面本來就該長得不一樣。
+   由使用端傳(setClass.dropdownLabel);不傳就繼承外層。 */
 .m-form-dropdown-label {
-  @apply relative text-[--form-dropdown-label-text-size];
+  @apply relative;
 }
 
 .m-form-dropdown-icon {
@@ -187,8 +189,6 @@
     --form-dropdown-button-rounded: var(--form-dropdown-button-pc-rounded);
     --form-dropdown-button-gap-x: var(--form-dropdown-button-pc-gap-x);
 
-    --form-dropdown-label-text-size: var(--form-dropdown-label-pc-text-size);
-
     --form-dropdown-icon-p: var(--form-dropdown-icon-pc-p);
     --form-dropdown-icon-size: var(--form-dropdown-icon-pc-size);
 
@@ -228,8 +228,6 @@
     --form-dropdown-button-rounded: var(--form-dropdown-button-tablet-rounded);
     --form-dropdown-button-gap-x: var(--form-dropdown-button-tablet-gap-x);
 
-    --form-dropdown-label-text-size: var(--form-dropdown-label-tablet-text-size);
-
     --form-dropdown-icon-p: var(--form-dropdown-icon-tablet-p);
     --form-dropdown-icon-size: var(--form-dropdown-icon-tablet-size);
 
@@ -268,8 +266,6 @@
     --form-dropdown-button-py: var(--form-dropdown-button-mobile-py);
     --form-dropdown-button-rounded: var(--form-dropdown-button-mobile-rounded);
     --form-dropdown-button-gap-x: var(--form-dropdown-button-mobile-gap-x);
-
-    --form-dropdown-label-text-size: var(--form-dropdown-label-b-text);
 
     --form-dropdown-icon-p: var(--form-dropdown-icon-mobile-p);
     --form-dropdown-icon-size: var(--form-dropdown-icon-mobile-size);

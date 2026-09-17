@@ -9,6 +9,7 @@ import path from 'node:path'
 import {
   BUILD_CONFIG_FILES,
   COMPONENTS_DIR,
+  FORM_GROUP_VALIDATOR,
   IMPORT_ORDER_GROUPS,
   IS_FILE_BASED_ROUTING,
   PROJECT_CONFIG_FILES,
@@ -356,6 +357,40 @@ const importedObjectKeysOf = (root, configFile, configText, name) => {
 const IMPORT_RE =
   /(?:import|export)\s[^'"]*?from\s*['"]([^'"]+)['"]|import\s*['"]([^'"]+)['"]|import\s*\(\s*['"]([^'"]+)['"]\s*\)/g
 
+/**
+ * 建置工具的「一次收一整批檔案」那種呼叫。
+ *
+ * 它吃的也是路徑,但寫法與 import 語句不同(一次可以給好幾條),
+ * 所以另外抓 —— 只看 import 語句的話,這種路徑完全不會被檢查。
+ *
+ * 第二個參數那個設定物件裡的字串(`'default'` 這種)會一起被取出來,
+ * 但它們不是相對路徑,下面那道「開頭是不是點」就會濾掉。
+ */
+const GLOB_CALL_RE = /import\.meta\.glob\s*\(([\s\S]*?)\)/g
+const GLOB_PATH_RE = /['"]([^'"]+)['"]/g
+
+/**
+ * 這份檔案裡每一個寫出路徑的位置。
+ *
+ * import 語句與那種一次收一批的呼叫都算 —— 兩者都會因為檔案搬家而失效,
+ * 而後者失效時**不會報錯**:收到的是空的一批,用它的地方靜靜地拿不到東西。
+ */
+const pathSpecsOf = (text) => {
+  const specs = []
+
+  for (const m of text.matchAll(IMPORT_RE)) {
+    specs.push({ spec: m[1] || m[2] || m[3], index: m.index })
+  }
+
+  for (const call of text.matchAll(GLOB_CALL_RE)) {
+    for (const p of call[1].matchAll(GLOB_PATH_RE)) {
+      specs.push({ spec: p[1], index: call.index + call[0].indexOf(p[0]) })
+    }
+  }
+
+  return specs
+}
+
 const checkImportAlias = ({ rel, text, root }) => {
   if (!isSourceFile(rel)) return []
 
@@ -365,9 +400,7 @@ const checkImportAlias = ({ rel, text, root }) => {
   const issues = []
   const seen = new Set()
 
-  for (const m of text.matchAll(IMPORT_RE)) {
-    const spec = m[1] || m[2] || m[3]
-
+  for (const { spec, index } of pathSpecsOf(text)) {
     if (!spec || spec[0] !== '.') continue // 只看相對路徑
     if (!spec.includes('..')) continue // 同層 ./ 是正常寫法
     if (seen.has(spec)) continue
@@ -384,7 +417,7 @@ const checkImportAlias = ({ rel, text, root }) => {
     issues.push(
       issueOf(
         rel,
-        lineNoOf(text, m.index),
+        lineNoOf(text, index),
         'importAlias',
         `'${spec}' 要改成 '${suggestion}' —— 離開自己資料夾的相對路徑改用 alias,搬檔案時才不必重算層數`
       )
@@ -1034,6 +1067,8 @@ const checkVueFileName = ({ rel }) => {
 // 資料夾寬、檔案嚴的話,同一個名字寫成資料夾就過、寫成檔案就報。
 //
 // 底線開頭的那種是例外:它不是一段網址,是「放在頁面旁邊、只給這一頁用的東西」。
+// **它底下的層級也不是網址**,所以走到那一層就不再往下檢查 ——
+// 那裡面放的是元件,歸元件那一套命名管(首字大寫)。
 // **允許的名字列在設定裡(VIEW_UNDERSCORE_FOLDERS)** —— 開放自由命名的話,
 // 那個例外會愈開愈大,而每一個都要讀的人自己猜它是不是網址的一部分。
 //
@@ -1049,13 +1084,18 @@ const checkViewFolder = ({ rel }) => {
   const folders = rel.slice(`${VIEWS_DIR}/`.length).split('/').slice(0, -1)
 
   for (const name of folders) {
-    if (isDotFolder(name)) continue
+    /* 走到不是網址的那一層就停 —— 它**底下**的層級也不是網址。
+       只跳過這一段而繼續往下檢查的話,`_components/Edit/` 的 Edit
+       會被當成網址的一段報首字大寫,而那個資料夾裡放的是大寫開頭的元件:
+       照著改會變成「大寫的元件裝在小寫的分類資料夾裡」,
+       與「底線資料夾裡照元件那一套命名」正好相反。 */
+    if (isDotFolder(name)) return []
 
     if (isUnderscoreName(name)) {
       /* 清單留空代表這個專案不做這項檢查 —— 那時底線資料夾一律放行,
          不是一律報:留空的專案會被每一支檔案報一次。 */
-      if (!VIEW_UNDERSCORE_FOLDERS.length) continue
-      if (VIEW_UNDERSCORE_FOLDERS.includes(name)) continue
+      if (!VIEW_UNDERSCORE_FOLDERS.length) return []
+      if (VIEW_UNDERSCORE_FOLDERS.includes(name)) return []
 
       return [
         issueOf(
@@ -1100,6 +1140,74 @@ const checkViewFolder = ({ rel }) => {
   }
 
   return []
+}
+
+// --- 規則 formGroupValidate:一組控制項共用一個驗證 ---------------------------
+//
+// 一個 `v-for` 跑出來的控制項,如果名字裡沒有帶到迭代變數,那幾個就是**同一個欄位**
+// 的幾個選項 —— 一題多選、一題單選的那種。名字裡帶了迭代變數(`name-${index}`)
+// 的則是各自獨立的欄位,不在這條的範圍內。
+//
+// 同一組的每一個都自己帶驗證時,每一個都會各驗一次、各產生一則訊息,
+// 而它們說的是同一件事(這一題還沒選)—— 畫面上那句話會重複好幾行。
+//
+// 做法是把驗證掛在包住整組的那一層(設定 FORM_GROUP_VALIDATOR),
+// 那一層只顯示一次;各個控制項只負責選取與錯誤外觀(由包裝那層把狀態傳下去)。
+//
+// 判準不看元件叫什麼名字 —— 看的是「一個迴圈、一個共用的名字、每個都自己驗」
+// 這個形狀,換一套表單元件仍然成立。
+
+/** 元件標籤的開頭(大寫開頭才是元件,原生標籤不算) */
+const COMPONENT_TAG_RE = /<([A-Z][A-Za-z0-9]*)\b/
+
+/** `v-for="(a, b) in list"` / `v-for="a in list"` 的迭代變數 */
+const vForVarsOf = (tag) => {
+  const m = /v-for="\s*\(?([^)]*?)\)?\s+(?:in|of)\s/.exec(tag)
+  if (!m) return null
+
+  return m[1]
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)
+}
+
+/** 標籤上綁的 name 值(靜態或動態都取字面) */
+const nameValueOf = (tag) => /\s:?name="([^"]*)"/.exec(tag)?.[1] ?? ''
+
+const checkFormGroupValidate = ({ rel, text }) => {
+  if (!FORM_GROUP_VALIDATOR || !rel.endsWith('.vue')) return []
+
+  const range = templateRangeOf(text)
+  if (!range) return []
+
+  const body = maskHtmlComments(range.body)
+  const issues = []
+
+  for (const m of body.matchAll(/<[A-Z][A-Za-z0-9]*\b[^>]*>/g)) {
+    const tag = m[0]
+    if (!COMPONENT_TAG_RE.test(tag)) continue
+    if (!/\s:?rules=/.test(tag)) continue
+
+    const vars = vForVarsOf(tag)
+    if (!vars) continue
+
+    /* 名字裡帶了迭代變數 → 每一個都是獨立的欄位,各自驗證是對的 */
+    const name = nameValueOf(tag)
+    if (vars.some((v) => new RegExp(`\\b${v}\\b`).test(name))) continue
+
+    issues.push(
+      issueOf(
+        rel,
+        lineNoOf(text, range.offset + m.index),
+        'formGroupValidate',
+        `這一組控制項各自帶了驗證 —— 它們共用同一個名字,每一個都會驗一次、` +
+          `各顯示一則同樣的訊息;把驗證掛在包住整組的 ${FORM_GROUP_VALIDATOR} 上,` +
+          `那一層只顯示一次,這裡只留選取與錯誤外觀`
+      )
+    )
+  }
+
+  return issues
 }
 
 // --- 規則 componentClass:資料夾名要對得上 template 的 class -------------------
@@ -1284,6 +1392,7 @@ export const CODE_CHECKS = [
   checkDeprecated,
   checkImportOrder,
   checkVueFileName,
+  checkFormGroupValidate,
   checkComponentClass,
   checkComponentFolder,
   checkViewFolder,
@@ -1295,6 +1404,7 @@ export const CODE_CHECKS = [
 export const CODE_RULE_TITLE = {
   importOrder: '元件沒有載入樣式',
   vueFileName: '.vue 的檔名怎麼取',
+  formGroupValidate: '一組控制項各自帶了驗證',
   componentClass: '資料夾名對不上組件 class',
   componentFolder: '元件沒有自己的資料夾',
   viewFolder: '頁面目錄的資料夾命名',
@@ -1305,6 +1415,7 @@ export const CODE_RULE_TITLE = {
 export const CODE_RULE_HINT = {
   importOrder: '元件的樣式寫在 CSS 模組裡,由元件自己 import(分組順序存檔時自動排好)',
   vueFileName: '元件首字大寫、主檔叫 Index.vue;頁面首字小寫',
+  formGroupValidate: `一組共用一個名字的控制項,驗證掛在包住整組的 ${FORM_GROUP_VALIDATOR} 上,只顯示一則訊息`,
   componentClass: '資料夾 mXxx 對 .m-xxx —— 模組 css 的前綴是從資料夾名推出來的',
   componentFolder: '分類資料夾底下不要直接放 .vue,建一個自己的資料夾',
   viewFolder: '資料夾首字小寫(那是網址的一段);底線資料夾只能用設定裡列的那幾個名字',

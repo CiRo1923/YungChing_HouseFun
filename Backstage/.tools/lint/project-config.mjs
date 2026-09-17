@@ -168,9 +168,12 @@ export const CSS_MODULES_DIR = 'assets/css/_modules'
  * 兩個以上模組都要用的,才收進這一支。
  *
  * 換一個專案時,共用變數檔的位置可能不一樣 —— 改這裡就好,
- * 規則的提示訊息會跟著指向正確的檔案。
+ * 規則的提示訊息會跟著指向正確的檔案。 *
+ * **本專案目前留空**:每一支樣式都收在它自己的元件資料夾裡,集中目錄是空的,
+ * 沒有哪一支變數檔是兩個以上模組共用的。留著舊路徑的話,那條規則的提示會叫人
+ * 把東西放進一個已經不存在的位置。
  */
-export const SHARED_MODULE_VARIABLES = 'common/mForm/variables.css'
+export const SHARED_MODULE_VARIABLES = ''
 
 /** 色票檔所在目錄 */
 export const COLOR_CSS_DIR = 'assets/css/_common'
@@ -346,6 +349,18 @@ export const PARALLEL_AWAIT_HELPER = {
   name: 'awaitAllPromise',
   source: '@js/_prototype.js',
 }
+
+/**
+ * 一組控制項共用一個驗證時,把它們包起來的那支元件。
+ *
+ * 一題多選、一題單選那幾個選項是「一組」—— 驗證講的是同一件事(這一題還沒選)。
+ * 每一個控制項自己帶驗證的話,同一句話會在畫面上重複好幾行;
+ * 掛在這支包裝元件上則只顯示一次,各個控制項只負責選取與錯誤外觀。
+ *
+ * 填元件在畫面上寫出來的名字(自動注入的話就是那個名字)。
+ * 專案沒有這種包裝元件時留空 —— 那條規則會整條略過,不會誤報。
+ */
+export const FORM_GROUP_VALIDATOR = 'CommonMFormHidden'
 
 /**
  * 深拷貝的共用函式 —— 從 apiDefault 還原送出參數時用它,存檔會自動換成這個寫法。

@@ -115,7 +115,7 @@ const dropdownOptionConfig = computed(() => {
           class="m-form-dropdown-icon"
           v-if="isActiveOption(item, index)"
         />
-        <em class="m-form-dropdown-label">
+        <em class="m-form-dropdown-label" :class="setClass.dropdownLabel">
           <slot
             name="option"
             :item="item"

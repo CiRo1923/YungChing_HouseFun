@@ -26,6 +26,7 @@ import {
   COMPONENT_DIRS,
   MODULE_CSS_DIR_NAME,
   CSS_MODULES_DIR,
+  FORM_GROUP_VALIDATOR,
   FRAMEWORKS,
   PARALLEL_AWAIT_HELPER,
   PROJECT_FRAMEWORK,
@@ -248,6 +249,13 @@ const REQUIREMENTS = [
     why: '這個專案有分斷點,但沒有填 @screen 與前綴的涵蓋關係 —— 「級距要在每個斷點列齊前綴」那條會整條略過,而少列一種的後果是使用端傳了級距卻在那個斷點沒有效果。',
   },
   {
+    label: '群組驗證的包裝元件',
+    rules: ['formGroupValidate'],
+    check: () => FORM_GROUP_VALIDATOR || null,
+    need: '設定裡要填 FORM_GROUP_VALIDATOR(一組控制項共用一個驗證時,把它們包起來的那支元件)',
+    why: '這條要求一組共用同一個名字的控制項不要各自帶驗證。專案沒有那種包裝元件時整條略過,不會誤報 —— 有些表單框架自己就會把同一組的訊息收斂成一則。',
+  },
+  {
     label: '並行載入的包裝函式',
     rules: ['pageAwaitAll'],
     check: () => PARALLEL_AWAIT_HELPER.name || null,
@@ -288,6 +296,9 @@ export const NO_PREREQUISITE_RULES = [
   'componentClass',
   'componentFolder',
   'viewFolder',
+  /* 這條自己掃全案收集「定義過哪些變數」,不依賴任何目錄或設定存在 ——
+     專案沒有 css 變數時它一個引用都掃不到,結果就是通過,不是誤報。 */
+  'unknownVar',
 ]
 
 /** 每一項前提涵蓋到的規則(全部項目的聯集)—— 規則自己的驗證拿它比對完整性 */

@@ -190,6 +190,11 @@ box-shadow: 0 4px 16px var(--gray-aab754);
 
 Tailwind arbitrary value 同樣用變數:`text-[--red-e01a]`、`bg-[--white]`、`border-[--gray-cdda]`。
 
+**寫出來的變數名要真的存在。** `var(--打錯的名字)` 不會報錯,瀏覽器只是把
+那一整條宣告丟掉 —— 畫面上是顏色整片不見,而檢查工具顯示通過。
+把元件搬到色票命名不同的專案時最容易整批踩到。
+檢查:規則 `unknownVar`(擋)。
+
 ### 例外:JS 物件內的顏色
 
 送往外部平台的 JS 物件(如 **LINE Flex Message** 的 `color` / `backgroundColor`)由該平台
