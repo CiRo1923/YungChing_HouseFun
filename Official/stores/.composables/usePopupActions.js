@@ -2,9 +2,11 @@ import { onDeepMerge, onBodyOverflowHiddenToggle } from '@js/_prototype.js'
 
 export default () => {
   const popup = usePopupStore()
+  // buttons 直接從 store 取:它是 readonly 常數,既不是 ref 也不是 reactive,
+  // storeToRefs 不會為它建立 ref —— 解構出來會是 undefined。
+  const { buttons } = popup
   const {
     promise,
-    buttons,
     alertCheck,
     confirmCheck,
     customCheck,
@@ -20,7 +22,7 @@ export default () => {
   const onMergeBtns = (dataBtns, givenBtns) => {
     if (!dataBtns) return givenBtns || null
 
-    const baseBtns = givenBtns || buttons.value.confirm
+    const baseBtns = givenBtns || buttons.confirm
     const mergedBtns = dataBtns.map((btn) => {
       const matchBtn = baseBtns.find(({ type }) => type === btn.type)
 
@@ -54,7 +56,7 @@ export default () => {
     // 前一個 alert 還沒結算就被蓋掉 → 先以「未確認」收掉,避免它的 await 永久卡住
     onSettle(alertCheck)
 
-    const alertBtns = buttons.value.alert
+    const alertBtns = buttons.alert
 
     alertData.value.id = 'alertSystem'
     alertData.value.title = data.title
@@ -86,7 +88,7 @@ export default () => {
   const onConfirm = (data) => {
     onSettle(confirmCheck)
 
-    const confirmBtns = buttons.value.confirm
+    const confirmBtns = buttons.confirm
 
     confirmData.value.id = 'confirmSystem'
     confirmData.value.title = data.title
