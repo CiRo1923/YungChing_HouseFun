@@ -60,7 +60,61 @@ export default () => {
     return { config, status, data }
   }
 
+  // 每個頻道的 access token 各自獨立,換發的流程一樣,差別只有這三項。
+  // 取用延到呼叫當下 —— 兩邊的 actions 都用到這一支,在頂層解構會變成互相依賴。
+  const ACCESS_CHANNELS = {
+    buy: () => {
+      const { onGetAccessDataCookie, onApiPostBuyAuthTokenExchange, onApiGetBuyAuthMe } =
+        useBuyProjectActions()
+
+      return {
+        onGetAccessData: onGetAccessDataCookie,
+        onExchange: onApiPostBuyAuthTokenExchange,
+        onMe: onApiGetBuyAuthMe,
+      }
+    },
+    member: () => {
+      const { onGetAccessDataCookie, onApiPostAuthTokenExchange, onApiGetAuthMe } =
+        useMemberProjectActions()
+
+      return {
+        onGetAccessData: onGetAccessDataCookie,
+        onExchange: onApiPostAuthTokenExchange,
+        onMe: onApiGetAuthMe,
+      }
+    },
+  }
+
+  // 這個頻道現在算不算登入中:短 token 還有效就算數,過期就用 30 天的長 token 換一張新的。
+  // 回傳 false 代表連長 token 都沒了 —— 要不要因此擋下來由呼叫端決定。
+  const onAccessCheck = async (channel) => {
+    const onResolveChannel = ACCESS_CHANNELS[channel]
+
+    if (!onResolveChannel) return false
+
+    const { onGetAccessData, onExchange, onMe } = onResolveChannel()
+
+    if (await onGetAccessData()) return true
+
+    const { onGetAuthTokenCookie, onApiGetMemberAuthHandoffToken } = useMemberAuthProjectActions()
+
+    if (!(await onGetAuthTokenCookie())) return false
+
+    const { status: handoffStatus } = await onApiGetMemberAuthHandoffToken(channel)
+
+    if (handoffStatus !== 200) return false
+
+    const { status: exchangeStatus } = await onExchange()
+
+    if (exchangeStatus !== 200) return false
+
+    const { status } = await onMe()
+
+    return status === 200
+  }
+
   return {
     onApiGetCommonServerTime,
+    onAccessCheck,
   }
 }

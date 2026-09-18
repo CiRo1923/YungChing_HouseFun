@@ -6,18 +6,12 @@ const colorHref = getChannelColorHref('buy')
 
 const common = useCommonStore()
 const { isLoading } = storeToRefs(common)
-const { onGetAuthTokenCookie, onApiGetMemberAuthHandoffToken, onRestoreAuthToken } =
-  useMemberAuthProjectActions()
+const { onAccessCheck } = useProjectActions()
 const buyProject = useBuyProjectStore()
 const { access } = storeToRefs(buyProject)
-const {
-  onPopupLogin,
-  onApiPostBuyAuthTokenExchange,
-  onApiGetBuyAuthMe,
-  onApiPostBuyAuthLogout,
-  onRestoreAccessData,
-  onGetAccessDataCookie,
-} = useBuyProjectActions()
+const { onRestoreAuthToken } = useMemberAuthProjectActions()
+const { onPopupLogin, onApiGetBuyAuthMe, onApiPostBuyAuthLogout, onRestoreAccessData } =
+  useBuyProjectActions()
 
 const footerRef = ref(null)
 const popupLoginContainerRef = ref(null)
@@ -55,29 +49,14 @@ const onInit = async () => {
 // 放在 setup 最後,await 之後不再有同步 composable。
 await callOnce(onInit)
 
-// 每次換頁(含首次 immediate)重新檢查 accessData 時效。
-// onGetAccessDataCookie 只驗 accessData;authToken 是否走 SSO 在這裡分開判斷。
-const onAccessCheck = async () => {
-  // accessData 仍有效 → 不用做事
-
-  if (await onGetAccessDataCookie()) return
-
-  // accessData 過期 / 未登入 → 再看 authToken(30 天)
-  const authToken = await onGetAuthTokenCookie()
-
-  if (authToken) {
-    // authToken 仍有效 → 打另一支 SSO API 重新換發 accessData
-    await onApiGetMemberAuthHandoffToken('buy')
-    await onApiPostBuyAuthTokenExchange()
-    await onApiGetBuyAuthMe()
-  }
-}
-
+// 每次換頁(含首次 immediate)重新檢查登入狀態的時效。
+// buy 的頁面不需要登入也看得到,所以續不回來就維持未登入,不擋。
+//
 // immediate + callback 內含 await → 用 runWithContext 保住 Nuxt instance,
 // 否則 await 之後呼叫 useCookie / $fetch 會噴「composable called outside setup」。
 watch(
   () => route.fullPath,
-  () => nuxtApp.runWithContext(onAccessCheck),
+  () => nuxtApp.runWithContext(() => onAccessCheck('buy')),
   {
     // 只在 client 觸發:server 沒有換頁、首次檢查也留給 client,避免 SSR 就打 API。
     immediate: import.meta.client,

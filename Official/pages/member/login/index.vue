@@ -3,6 +3,7 @@ const { onUseMeta } = useCommonActions()
 const { onApiPostMemberAuthToken, onReset: onMemberAuthReset } = useMemberAuthProjectActions()
 const { onApiPostAuthTokenExchange, onApiGetAuthMe, onClearCookies, onReset } = useMemberProjectActions()
 const { onApiPromise } = usePopupActions()
+const route = useRoute()
 const router = useRouter()
 
 definePageMeta({
@@ -36,6 +37,22 @@ onUseMeta({
 //
 // 三支一路包在同一個 loading 裡,中間不閃。換 token 沒過就留在原頁 ——
 // 會員中心的每一支 API 都要帶那個 bearer token,沒有它進去也取不到資料。
+// 被守衛送來這裡時,query 的 redirect 是原本要去的那一頁。只收單一個斜線開頭的站內路徑,
+// 其餘一律回通知總覽 —— 否則這個參數可以把人導去站外。
+const onRedirect = () => {
+  const { redirect } = route.query
+
+  if (typeof redirect === 'string' && /^\/(?!\/)/.test(redirect)) {
+    router.push(redirect)
+
+    return
+  }
+
+  router.push({
+    name: 'member-center-notice-price',
+  })
+}
+
 const onAuthToken = async () => {
   const { valid } = (await loginContainerRef.value?.form?.validate?.()) ?? {}
 
@@ -61,9 +78,7 @@ const onAuthToken = async () => {
   // 還是空的而再打一次 me,同一個錯誤就跳兩次窗。
   if (meStatus !== 200) return
 
-  router.push({
-    name: 'member-center-notice-price',
-  })
+  onRedirect()
 }
 
 // 驗證碼登入。
