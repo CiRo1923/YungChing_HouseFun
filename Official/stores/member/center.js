@@ -68,6 +68,11 @@ export const useMemberCenterStore = defineStore('memberCenter', () => {
       newPassword: null,
       confirmPassword: null,
     },
+    account: {
+      lastName: null,
+      firstName: null,
+      email: null,
+    },
   })
   const price = ref({
     data: null,
@@ -89,9 +94,16 @@ export const useMemberCenterStore = defineStore('memberCenter', () => {
     data: null,
     apiData: { ...apiDefault.actualPrice },
   })
-  // 修改密碼:送出後不顯示結果,成功是開彈窗、失敗是欄位下的訊息,所以這一層沒有 data。
+  // 修改密碼:成功是開彈窗,所以沒有 data。
+  // apiResult 放 400 回來的那一份 —— 既有密碼對不對只有後端知道,訊息要顯示在密碼欄位下方。
   const password = ref({
     apiData: { ...apiDefault.password },
+    apiResult: null,
+  })
+  // 帳號管理:data 放 profile 回來的整份(手機帳號要顯示),apiData 只有可改的那三個欄位。
+  const account = ref({
+    data: null,
+    apiData: { ...apiDefault.account },
   })
   const navs = readonly([
     {
@@ -249,5 +261,6 @@ export const useMemberCenterStore = defineStore('memberCenter', () => {
     communityPrice,
     actualPrice,
     password,
+    account,
   }
 })

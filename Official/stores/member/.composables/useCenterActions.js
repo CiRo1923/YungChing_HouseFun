@@ -2,13 +2,23 @@ import {
   apiGetMemberNotificationsSummary,
   apiGetMemberNotifications,
   apiPostMemberPasswordChange,
+  apiGetMemberProfile,
+  apiPutMemberProfile,
 } from '@js/_api/member/center.js'
 
 // 會員中心各頁的行為。auth 三支在同層的 useProjectActions.js。
 export default () => {
   const memberCenter = useMemberCenterStore()
-  const { noticeSummary, price, match, communityNew, communityPrice, actualPrice, password } =
-    storeToRefs(memberCenter)
+  const {
+    noticeSummary,
+    price,
+    match,
+    communityNew,
+    communityPrice,
+    actualPrice,
+    password,
+    account,
+  } = storeToRefs(memberCenter)
   const { onApiError } = usePopupActions()
 
   const onApiGetMemberNotificationsSummary = async () => {
@@ -98,9 +108,40 @@ export default () => {
   }
 
   // 既有密碼錯誤這類 400 是可預期的,訊息要顯示在欄位下方而不是彈窗(見 C203-1 的驗證規則),
-  // 所以這裡不接 400,交給頁面判斷。
+  // 所以留在 apiResult 讓欄位自己讀,不在這裡彈窗。
   const onApiPostMemberPasswordChange = async () => {
     const { config, status, data } = await apiPostMemberPasswordChange(password.value.apiData)
+
+    password.value.apiResult = status === 400 ? data : null
+
+    if (status !== 200 && status !== 400) {
+      onApiError(config, status, data)
+    }
+
+    return { config, status, data }
+  }
+
+  // 取回來的姓名與 E-Mail 直接填進 apiData —— 進到頁面時表單要帶著既有資料。
+  const onApiGetMemberProfile = async () => {
+    const { config, status, data } = await apiGetMemberProfile()
+
+    if (status !== 200) {
+      onApiError(config, status, data)
+
+      return { config, status, data }
+    }
+
+    account.value.data = data
+    account.value.apiData.lastName = data.lastName
+    account.value.apiData.firstName = data.firstName
+    account.value.apiData.email = data.email
+
+    return { config, status, data }
+  }
+
+  // 400 的訊息沒有對應到哪一個欄位,由頁面用彈窗顯示。
+  const onApiPutMemberProfile = async () => {
+    const { config, status, data } = await apiPutMemberProfile(account.value.apiData)
 
     if (status !== 200 && status !== 400) {
       onApiError(config, status, data)
@@ -123,6 +164,8 @@ export default () => {
     onApiGetMemberNotificationsCommunityPrice,
     onApiGetMemberNotificationsActualPrice,
     onApiPostMemberPasswordChange,
+    onApiGetMemberProfile,
+    onApiPutMemberProfile,
     onNoticeSummary,
   }
 }

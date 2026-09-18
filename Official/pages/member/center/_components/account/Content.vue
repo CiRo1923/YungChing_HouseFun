@@ -1,7 +1,8 @@
 <script setup>
 import { Form } from 'vee-validate'
 
-const { onApiPostMemberPasswordChange } = useMemberCenterActions()
+const { onApiPutMemberProfile } = useMemberCenterActions()
+const { onAlert } = usePopupActions()
 
 const emits = defineEmits(['complete'])
 
@@ -15,10 +16,16 @@ const onSubmit = async (validate, setTouched) => {
 
   if (!valid) return
 
-  // 400 的訊息由 action 寫進 apiResult,密碼欄位自己讀。
-  const { status } = await onApiPostMemberPasswordChange()
+  const { status, data } = await onApiPutMemberProfile()
 
-  if (status === 200) emits('complete')
+  if (status === 200) {
+    emits('complete')
+
+    return
+  }
+
+  // 400 的原因對不到某一個欄位,所以顯示在彈窗而不是欄位下方。
+  if (status === 400) onAlert({ content: data?.message })
 }
 </script>
 
@@ -28,9 +35,10 @@ const onSubmit = async (validate, setTouched) => {
     class="mx-auto space-y-[30px] m:rounded-[10px] m:bg-[--white] m:p-[20px] p:max-w-[400px]"
     v-slot="{ validate, setTouched }"
   >
-    <PageMemberCenterPasswordForm />
+    <PageMemberCenterAccountInfo />
+    <PageMemberCenterAccountForm />
     <CommonMAnchor
-      text="確認送出"
+      text="確認修改"
       :setClass="{
         main: '--oval --bg-orange-f74c --h-55 --text-white --px-20 --text-center w-full',
         text: 'text-[16px]',

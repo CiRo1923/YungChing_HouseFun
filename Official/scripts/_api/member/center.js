@@ -14,3 +14,8 @@ export const apiGetMemberNotifications = async (data) =>
 // 修改密碼。驗既有密碼、新密碼與再次輸入,成功後後端要求重新登入。
 export const apiPostMemberPasswordChange = async (data) =>
   await fetchApi.post(`member/password/change`, data)
+
+// 帳號管理。手機是帳號,只能讀;可改的是姓氏、名字與 E-Mail。
+export const apiGetMemberProfile = async (data) => await fetchApi.get(`member/profile`, data)
+
+export const apiPutMemberProfile = async (data) => await fetchApi.put(`member/profile`, data)

@@ -1,13 +1,11 @@
 /* mSeparator(components/common/mSeparator.vue)的變數。
    項目之間用 ::after 畫一條分隔線,線的位置跟著 gap 的一半走 ——
-   所以 --gap-x-XX 這個 modifier 要同時設「間距」與「線的位移」兩個變數。
-
-   2026-08-31 刪掉 --gap-x-30 / -24 / -10 三組(三個斷點各一份)—— 全案沒有使用端。
-   要加回來時從 git 歷史撈,格式照現存的 20 / 16 / 12 那三組(位移是間距的一半取負)。 */
+   所以 --gap-x-XX 這個 modifier 要同時設「間距」與「線的位移」兩個變數,
+   位移是間距的一半取負。要多一組級距時照這個格式,三個斷點各補一份。 */
 
 :root {
-  /* 分隔線 */
-  --separator-divider-bg-color: var(--gray-999);
+  /* 分隔線。顏色是單一預設值,使用端要換的話在父層重新指定這個變數就會繼承下去。 */
+  --separator-divider-bg-color: var(--gray-e5);
 
   --separator-divider-pc-h: 55%;
   --separator-divider-tablet-h: 55%;
@@ -24,8 +22,27 @@
      (直向排列的分隔線不需要靠右定位),給了 base 反而會多一條 right: 0。 */
 }
 
+/* 分隔線的顏色。顏色不分斷點,所以這一組寫在 @screen 外面;
+   要多一色時照這個格式再加一組,依色票由淺到深排。 */
+.m-separator {
+  &.\-\-divider-gray-e5 {
+    --separator-divider-bg-color: var(--gray-e5);
+  }
+
+  &.\-\-divider-gray-999 {
+    --separator-divider-bg-color: var(--gray-999);
+  }
+}
+
 @screen p {
   .m-separator {
+    &.\-\-gap-x-24,
+    &.p\:\-\-gap-x-24,
+    &.pt\:\-\-gap-x-24 {
+      --separator-gap-x: 24px;
+      --separator-divider-right: -12px;
+    }
+
     &.\-\-gap-x-20,
     &.p\:\-\-gap-x-20,
     &.pt\:\-\-gap-x-20 {
@@ -51,6 +68,14 @@
 
 @screen t {
   .m-separator {
+    &.\-\-gap-x-24,
+    &.pt\:\-\-gap-x-24,
+    &.tm\:\-\-gap-x-24,
+    &.t\:\-\-gap-x-24 {
+      --separator-gap-x: 24px;
+      --separator-divider-right: -12px;
+    }
+
     &.\-\-gap-x-20,
     &.pt\:\-\-gap-x-20,
     &.tm\:\-\-gap-x-20,
@@ -79,6 +104,13 @@
 
 @screen m {
   .m-separator {
+    &.\-\-gap-x-24,
+    &.tm\:\-\-gap-x-24,
+    &.m\:\-\-gap-x-24 {
+      --separator-gap-x: 24px;
+      --separator-divider-right: -12px;
+    }
+
     &.\-\-gap-x-20,
     &.tm\:\-\-gap-x-20,
     &.m\:\-\-gap-x-20 {
