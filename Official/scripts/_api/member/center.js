@@ -6,3 +6,11 @@ import { fetchApi } from '@js/_api/member/.config.js'
 // 通知總覽五個分頁的未讀數、保留天數、自動已讀秒數與可用通道,一次回齊。
 export const apiGetMemberNotificationsSummary = async (data) =>
   await fetchApi.get(`member/notifications/summary`, data)
+
+// 通知清單。五個分頁共用這一支,要哪一類由 category 決定。
+export const apiGetMemberNotifications = async (data) =>
+  await fetchApi.get(`member/notifications`, data)
+
+// 修改密碼。驗既有密碼、新密碼與再次輸入,成功後後端要求重新登入。
+export const apiPostMemberPasswordChange = async (data) =>
+  await fetchApi.post(`member/password/change`, data)

@@ -1,6 +1,6 @@
 <script setup>
 const { onUseMeta } = useCommonActions()
-const { onApiGetMemberNotificationsSummary } = useMemberCenterActions()
+const { onNoticeSummary, onApiGetMemberNotificationsCommunityPrice } = useMemberCenterActions()
 const { onApiErrorServerToClient } = usePopupActions()
 
 definePageMeta({
@@ -10,7 +10,8 @@ definePageMeta({
   requiresAuth: true,
 })
 
-await onApiGetMemberNotificationsSummary()
+await onNoticeSummary()
+await onApiGetMemberNotificationsCommunityPrice()
 
 onUseMeta({
   title: '會員中心 | 好房 HouseFun',

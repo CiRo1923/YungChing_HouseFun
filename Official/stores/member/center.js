@@ -16,6 +16,7 @@ export const useMemberCenterStore = defineStore('memberCenter', () => {
   const noticeTabs = readonly([
     {
       id: 'price',
+      category: 0,
       label: '買屋降價通知',
       to: {
         name: 'member-center-notice-price',
@@ -23,6 +24,7 @@ export const useMemberCenterStore = defineStore('memberCenter', () => {
     },
     {
       id: 'match',
+      category: 1,
       label: '配對物件新上架',
       to: {
         name: 'member-center-notice-match',
@@ -30,6 +32,7 @@ export const useMemberCenterStore = defineStore('memberCenter', () => {
     },
     {
       id: 'communityNew',
+      category: 2,
       label: '關注社區新上架',
       to: {
         name: 'member-center-notice-community-new',
@@ -37,6 +40,7 @@ export const useMemberCenterStore = defineStore('memberCenter', () => {
     },
     {
       id: 'communityPrice',
+      category: 3,
       label: '關注社區新行情',
       to: {
         name: 'member-center-notice-community-price',
@@ -44,12 +48,51 @@ export const useMemberCenterStore = defineStore('memberCenter', () => {
     },
     {
       id: 'actualPrice',
+      category: 4,
       label: '關注實登新行情',
       to: {
         name: 'member-center-notice-actual-price',
       },
     },
   ])
+  // 清單一次取幾筆,五個分頁一樣。
+  const NOTICE_PAGE_SIZE = 12
+  // 五個分頁的送出參數。category 取自 noticeTabs —— 那是同一個值,不另外寫一份;
+  // 層名就是 tab 的 id,兩邊對得起來。
+  const apiDefault = readonly({
+    ...Object.fromEntries(
+      noticeTabs.map(({ id, category }) => [id, { category, page: 1, pageSize: NOTICE_PAGE_SIZE }])
+    ),
+    password: {
+      currentPassword: null,
+      newPassword: null,
+      confirmPassword: null,
+    },
+  })
+  const price = ref({
+    data: null,
+    apiData: { ...apiDefault.price },
+  })
+  const match = ref({
+    data: null,
+    apiData: { ...apiDefault.match },
+  })
+  const communityNew = ref({
+    data: null,
+    apiData: { ...apiDefault.communityNew },
+  })
+  const communityPrice = ref({
+    data: null,
+    apiData: { ...apiDefault.communityPrice },
+  })
+  const actualPrice = ref({
+    data: null,
+    apiData: { ...apiDefault.actualPrice },
+  })
+  // 修改密碼:送出後不顯示結果,成功是開彈窗、失敗是欄位下的訊息,所以這一層沒有 data。
+  const password = ref({
+    apiData: { ...apiDefault.password },
+  })
   const navs = readonly([
     {
       label: '通知總覽',
@@ -199,5 +242,12 @@ export const useMemberCenterStore = defineStore('memberCenter', () => {
     navs,
     noticeSummary,
     noticeTabs,
+    apiDefault,
+    price,
+    match,
+    communityNew,
+    communityPrice,
+    actualPrice,
+    password,
   }
 })
