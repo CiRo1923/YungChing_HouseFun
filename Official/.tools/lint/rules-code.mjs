@@ -17,9 +17,11 @@ import {
   VIEW_UNDERSCORE_FOLDERS,
   CSS_MODULES_DIR,
   COMPONENT_DIRS,
+  STORE_DIR,
   classPrefixOf,
   componentClassOf,
   listFiles,
+  storeIndexOf,
   selectorClassesOf,
   isInActionsDir,
   isInSrc,
@@ -1267,8 +1269,12 @@ const checkComponentClass = ({ rel, text }) => {
 const checkComponentFolder = ({ rel }) => {
   if (!rel.startsWith(`${COMPONENTS_DIR}/`) || !rel.endsWith('.vue')) return []
 
-  const folder = path.basename(path.dirname(rel))
-  if (classPrefixOf(folder)) return [] // 已經在自己的資料夾裡
+  /* 路徑上任何一層是模組資料夾就放行 —— 一個模組底下再分子資料夾是正常的
+     (把彈窗、面板各收成一疊)。只看上一層的話,那些子資料夾裡的檔案會被當成
+     「放在分類資料夾底下」,而照著改是再包一層 Index.vue:名字沒變、位置更深,
+     原本那個判斷仍然不成立,下一次照樣報。 */
+  const folders = rel.slice(`${COMPONENTS_DIR}/`.length).split('/').slice(0, -1)
+  if (folders.some((name) => classPrefixOf(name))) return []
 
   const base = path.basename(rel, '.vue')
 
@@ -1376,7 +1382,163 @@ export const onSortImports = (text, rel) => {
   return changed ? nextLines.join('\n') : null
 }
 
+// --- 規則 componentDeps:元件的搭檔要列在檔頭 --------------------------------
+//
+// **有些元件不是一個自足的資料夾。** 它自己讀了某個 store 的話,只複製元件資料夾
+// 搬過去不會報錯 —— import 得到、畫面也編譯得過,只是那個 store 不存在,
+// 資料永遠是空的。找原因要從「為什麼沒反應」一路追到「原來少了一支 store」。
+//
+// 所以要在元件主檔的檔頭列出那幾支。**清單跟著檔案走**是重點:
+// 複製過去的人不會回來跑來源專案的指令,但他一定會打開那支檔案。
+//
+// **工具只算 store 這一類,而且只對這一類負責。** 該列的沒列、或列了一支
+// 已經不讀的 store,都報;清單裡其他東西(掛載用的容器、要一起搬的版型)一律放行 ——
+// 那些是人補上去的。
+//
+// 容器不自動算進來的理由:容器用了某支元件,多數時候只是使用端
+// (通用的錨點、圖片被十幾個地方用),而「為了驅動這支元件而存在的容器」
+// 與「剛好用到它的容器」從程式碼上分不出來。猜錯的方向是把一堆使用端
+// 寫進搬移清單,照著複製會把不相干的檔案一起搬走,比漏掉更難收拾。
+
+/** 檔頭清單的起頭;後面接的每一個看起來像檔案路徑的字都算一項 */
+const DEP_MARK = 'component-deps'
+const DEP_PATH_RE = /[\w.@/-]+\.(?:m?js|cjs|ts|vue)/g
+
+/** use{名稱}Store / use{名稱}Actions 的呼叫 */
+const STORE_CALL_RE = /\b(use[A-Z]\w*(?:Store|Actions))\s*\(/g
+
+/**
+ * 這支元件自己讀了哪幾支 store / actions —— 複製它的時候那幾支要一起帶走。
+ *
+ * 「匯出名 → 它在哪一支檔案」的索引收在 shared.mjs 一份 ——
+ * 取值那條規則也要問同一件事(這個屬性在 store 那一側長什麼樣子),
+ * 各建一份的話同一個專案會被走訪兩次,而且其中一份改了判準另一份不會跟著。
+ *
+ * 回傳排序過的相對路徑,規則與指令印的是同一份。
+ */
+export const componentDepsOf = (root, rel, text) => {
+  const { files: stores } = storeIndexOf(root)
+  const deps = new Set()
+
+  for (const m of text.matchAll(STORE_CALL_RE)) {
+    const file = stores.get(m[1])
+    if (file) deps.add(file)
+  }
+
+  return [...deps].sort()
+}
+
+/** 檔頭清單列了哪幾支;沒有那個標記回 null(與「列了但是空的」分開) */
+const declaredDepsOf = (text) => {
+  const at = text.indexOf(DEP_MARK)
+  if (at === -1) return null
+
+  /* 標記之後到那段註解結束為止 —— 註解結尾找不到時取整份,
+     那個方向只會多讀幾行,而漏讀會把清單截斷、報成「少列了」。 */
+  const end = text.indexOf('*/', at)
+
+  return [...text.slice(at + DEP_MARK.length, end === -1 ? undefined : end).matchAll(DEP_PATH_RE)]
+    .map((m) => m[0])
+    .sort()
+}
+
+const checkComponentDeps = ({ rel, text, root }) => {
+  if (!rel.startsWith(`${COMPONENTS_DIR}/`) || !rel.endsWith('.vue')) return []
+
+  const actual = componentDepsOf(root, rel, text)
+  const listed = declaredDepsOf(text) ?? []
+
+  const missing = actual.filter((file) => !listed.includes(file))
+
+  /* 多列的只看 store 這一類 —— 那一類工具算得準,列了一支已經不讀的就是過期。
+     其他項目(掛載用的容器、要一起搬的版型)是人自己補的,工具沒有立場說它多餘。 */
+  const stale = listed.filter((file) => file.startsWith(`${STORE_DIR}/`) && !actual.includes(file))
+
+  if (!missing.length && !stale.length) return []
+
+  const line = listed.length ? lineNoOf(text, text.indexOf(DEP_MARK)) : 1
+
+  if (!missing.length) {
+    return [
+      issueOf(
+        rel,
+        line,
+        'componentDeps',
+        `檔頭的 ${DEP_MARK} 列了 ${stale.join('、')},但這支元件已經不讀它了 —— 清單過期,拿掉那幾行`
+      ),
+    ]
+  }
+
+  return [
+    issueOf(
+      rel,
+      line,
+      'componentDeps',
+      `這支元件讀了 store,複製它的時候那幾支要一起帶走 —— 檔頭寫一段 ${DEP_MARK} 註解,列出:${actual.join('、')}` +
+        (stale.length ? `(${stale.join('、')} 已經不讀了,拿掉)` : '') +
+        ';只複製元件資料夾的話,搬過去不會報錯,只是那個 store 不存在,資料永遠是空的'
+    ),
+  ]
+}
+
+// --- 規則 spacerElement:不要用空元素當間隔 ----------------------------------
+//
+// 兩個元素之間要留空隙時用 css(gap / margin),不要放一個只有空白的元素。
+//
+// **Vue 編譯畫面區段時會把那個空白整個移除** —— `<span> </span>` 從一開始
+// 就沒有作用,而原始碼看起來像是有留一個空格。要真的留一個空白只有 `&nbsp;`
+// 做得到,但那是內容(文案裡本來就有的空格),不是排版。
+//
+// 兩種標籤除外:它們裡面的空白是內容的一部分,編譯器不會動。
+
+/** 空白有意義的標籤 —— 裡面的空格照原樣顯示 */
+const WHITESPACE_KEPT_TAGS = new Set(['pre', 'textarea'])
+
+/** <tag> </tag> —— 同一行、中間只有空白的元素 */
+const SPACER_ELEMENT_RE = /<([a-zA-Z][\w-]*)(?:\s[^>]*)?>[ \t]+<\/\1>/g
+
+/**
+ * `</b> <b>` —— 同一行,兩個元素之間只有空白。
+ *
+ * 只看「後面接的是開標籤」那一種:接閉標籤的是空元素,由上面那一式抓,
+ * 兩式都報的話同一個地方會出現兩筆,而修法只有一個。
+ *
+ * 換行不算 —— 含換行的空白在編譯時整個被移除,那種寫法本來就沒有在靠空白排版。
+ */
+const SPACER_BETWEEN_RE = />[ \t]+<(?!\/)[a-zA-Z]/g
+
+const checkSpacerElement = ({ rel, text }) => {
+  if (!rel.endsWith('.vue')) return []
+
+  const tpl = templateRangeOf(text)
+  if (!tpl) return []
+
+  const body = maskHtmlComments(tpl.body)
+
+  const empty = [...body.matchAll(SPACER_ELEMENT_RE)]
+    .filter(([, tag]) => !WHITESPACE_KEPT_TAGS.has(tag.toLowerCase()))
+    .map((m) => ({
+      index: m.index,
+      detail:
+        `<${m[1]}> 裡只有空白 —— 那個空白在編譯時就被移除了,它從一開始就沒有作用;` +
+        `要在兩個元素之間留空隙用 css 的 gap 或 margin,文案裡本來就有的空格才用 &nbsp;`,
+    }))
+
+  const between = [...body.matchAll(SPACER_BETWEEN_RE)].map((m) => ({
+    index: m.index,
+    detail:
+      '兩個元素之間靠一個空白留空隙 —— 排版工具把它折成兩行時那個空白就沒了,' +
+      '而原始碼看起來完全正常;間隔用 css 的 gap 或 margin,文案裡本來就有的空格才用 &nbsp;',
+  }))
+
+  return [...empty, ...between]
+    .sort((a, b) => a.index - b.index)
+    .map(({ index, detail }) => issueOf(rel, lineNoOf(text, tpl.offset + index), 'spacerElement', detail))
+}
+
 export const CODE_CHECKS = [
+  checkComponentDeps,
+  checkSpacerElement,
   checkImportAlias,
   checkDeprecated,
   checkImportOrder,
@@ -1399,6 +1561,8 @@ export const CODE_RULE_TITLE = {
   viewFolder: '頁面目錄的資料夾命名',
   importAlias: 'import 沒有使用 alias',
   deprecated: '已淘汰的寫法',
+  spacerElement: '用空元素當間隔',
+  componentDeps: '元件的搭檔沒有列在檔頭',
 }
 
 export const CODE_RULE_HINT = {
@@ -1410,4 +1574,6 @@ export const CODE_RULE_HINT = {
   viewFolder: '資料夾首字小寫(那是網址的一段);底線資料夾只能用設定裡列的那幾個名字',
   importAlias: '離開自己資料夾的相對路徑改用 @ alias',
   deprecated: 'apiParams / inject(route) 已淘汰;actions 不留 console.log、不 bare 透傳',
+  spacerElement: '空白在編譯時就被移除了 —— 間隔用 css 的 gap 或 margin',
+  componentDeps: '複製這支元件時要一起帶走的東西,列在它的檔頭(npm run deps 印得出來)',
 }

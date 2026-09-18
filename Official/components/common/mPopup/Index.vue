@@ -1,4 +1,9 @@
 <script setup>
+/* component-deps —— 複製這支元件時要一起帶走:
+   stores/.composables/useCommonActions.js
+   stores/buy/.composables/usePopupActions.js
+   stores/common.js
+   stores/popup.js */
 import './.css/variables.css'
 import './.css/common.css'
 

@@ -24,6 +24,7 @@ import {
   listViewFolders,
   listViewSubFolders,
   registerScanCache,
+  storeIndexOf,
   toRel,
   viewResourceDirOf,
   withNamedImport,
@@ -1017,12 +1018,29 @@ const checkResetDefault = ({ rel, text }) => {
 //   - `use*Actions()` 不是 store,那是一般 composable,直接解構就好
 
 /** const <name> = useXxxStore() —— 找出這個檔案裡的 store 實例名 */
-const STORE_INSTANCE_RE = /const\s+(\w+)\s*=\s*use\w+Store\s*\(\s*\)/g
+const STORE_INSTANCE_RE = /const\s+(\w+)\s*=\s*(use\w+Store)\s*\(\s*\)/g
 
 /** const { a, b } = useXxxStore() —— 直接解構,一定失去響應 */
 const STORE_DESTRUCTURE_RE = /const\s*\{[^}]*\}\s*=\s*use(\w+)Store\s*\(\s*\)/g
 
-const checkStoreToRefs = ({ rel, text }) => {
+/**
+ * 這個屬性在 store 那一側是不是「唯讀常數」—— `readonly({ … })` 包住的固定設定。
+ *
+ * 那種東西沒有響應性可言:沒有人會改它,所以「取出來就跟 store 斷了」的前提
+ * 不成立。而且照這條規則改會壞掉 —— storeToRefs 只收 ref 與 reactive,
+ * 拿到的會是 undefined,下一行取值就丟錯。
+ *
+ * 判斷讀的是 store 那一側的宣告:`readonly` 已經把「這東西不會變」寫在程式碼裡,
+ * 規則讀得到就不必再讓人標一次豁免。
+ */
+const isReadonlyConst = (root, storeName, prop) => {
+  const { files, readonly } = storeIndexOf(root)
+  const file = files.get(storeName)
+
+  return Boolean(file && readonly.get(file)?.has(prop))
+}
+
+const checkStoreToRefs = ({ rel, text, root }) => {
   if (!isInSrc(rel)) return []
   if (!/\.(vue|js)$/.test(rel)) return []
 
@@ -1040,17 +1058,21 @@ const checkStoreToRefs = ({ rel, text }) => {
     )
   }
 
-  // 實例名先收集起來,再看有沒有「把它的屬性讀出來存成 const」
-  const instances = [...text.matchAll(STORE_INSTANCE_RE)].map((m) => m[1])
-  if (!instances.length) return issues
+  /* 實例名連同它是哪一支 store 一起收 —— 後面要回頭查那個屬性在 store 那一側
+     是不是唯讀常數,只有實例名的話查不到。 */
+  const instances = new Map([...text.matchAll(STORE_INSTANCE_RE)].map((m) => [m[1], m[2]]))
+  if (!instances.size) return issues
 
-  for (const name of new Set(instances)) {
+  for (const [name, storeName] of instances) {
     // const x = member.info  ← 讀出來存成 const;$ 開頭是 pinia API,不算取值
     const readRe = new RegExp(`const\\s+(\\w+)\\s*=\\s*${name}\\.(?!\\$)(\\w+)`, 'g')
 
     for (const m of text.matchAll(readRe)) {
       // storeToRefs(member).xxx 這種寫法本身是對的
       if (/storeToRefs/.test(text.slice(Math.max(0, m.index - 40), m.index))) continue
+
+      // readonly({ … }) 包住的固定設定沒有響應性,改成 storeToRefs 反而會拿到 undefined
+      if (isReadonlyConst(root, storeName, m[2])) continue
 
       issues.push(
         issueOf(

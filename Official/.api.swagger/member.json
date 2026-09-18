@@ -7,9 +7,7 @@
   "paths": {
     "/": {
       "get": {
-        "tags": [
-          "Housefun.Bff.Member.Web"
-        ],
+        "tags": ["Housefun.Bff.Member.Web"],
         "summary": "檢查 Member Web BFF 是否可回應",
         "description": "用途：確認 Member Web BFF 服務目前可正常處理基本請求。架構補充：此健康檢查非規格書原始 API；會員中心服務範圍參考 C203-1 規格書第 2 頁。",
         "responses": {
@@ -28,9 +26,7 @@
     },
     "/api/{version}/member/menu": {
       "get": {
-        "tags": [
-          "Member"
-        ],
+        "tags": ["Member"],
         "summary": "Get member center menu and badge counts",
         "description": "取得會員中心功能選單、未讀提示與租屋／買屋刊登外部連結。 規格來源：C203-1 規格書第 2、3、4 頁。",
         "operationId": "Member_Menu",
@@ -79,9 +75,7 @@
     },
     "/api/{version}/member/notifications/summary": {
       "get": {
-        "tags": [
-          "Member"
-        ],
+        "tags": ["Member"],
         "summary": "Get notification tab counts and retention rules",
         "description": "取得通知總覽五類頁籤、未讀數、30 天可見期限、3 秒自動已讀門檻及可用通道。 規格來源：C203-1 規格書第 4、5、7、9 頁；C203-2 規格書第 2、3、4、9、11、12 頁。",
         "operationId": "Member_NotificationSummary",
@@ -130,9 +124,7 @@
     },
     "/api/{version}/member/notifications": {
       "get": {
-        "tags": [
-          "Member"
-        ],
+        "tags": ["Member"],
         "summary": "List member notifications by category",
         "description": "依通知類別分頁列出最近 30 天的站內通知卡片、已讀狀態、物件／社區摘要與操作連結。 規格來源：C203-1 規格書第 4、5、6、7、8、9、10 頁；C203-2 規格書第 9、11、12 頁。",
         "operationId": "Member_NotificationList",
@@ -205,9 +197,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "Member"
-        ],
+        "tags": ["Member"],
         "summary": "Delete selected notifications",
         "description": "刪除會員選取的站內通知；前端須先顯示確認提示，刪除後不可復原。 規格來源：C203-1 規格書第 6、8、9、10 頁。",
         "operationId": "Member_DeleteNotifications",
@@ -276,9 +266,7 @@
     },
     "/api/{version}/member/notifications/read": {
       "post": {
-        "tags": [
-          "Member"
-        ],
+        "tags": ["Member"],
         "summary": "Mark selected notifications as read",
         "description": "markAllVisible=true 時標記最近三十日全部可見通知，不受 category 限制；false 時 ids 不可為空。 規格來源：C203-1 規格書第 5、6、7 頁；C203-2 規格書第 12 頁。",
         "operationId": "Member_MarkNotificationsRead",
@@ -347,9 +335,7 @@
     },
     "/api/{version}/member/profile": {
       "get": {
-        "tags": [
-          "Member"
-        ],
+        "tags": ["Member"],
         "summary": "Get member account profile",
         "description": "取得會員帳號、姓氏、名字與 E-mail；手機帳號不可由會員中心修改。 規格來源：C203-1 規格書第 11 頁。",
         "operationId": "Member_Profile",
@@ -396,9 +382,7 @@
         }
       },
       "put": {
-        "tags": [
-          "Member"
-        ],
+        "tags": ["Member"],
         "summary": "Update editable member profile fields",
         "description": "更新會員姓氏、名字與 E-mail，並套用必填及 E-mail 格式驗證；手機帳號維持唯讀。 規格來源：C203-1 規格書第 11 頁。",
         "operationId": "Member_UpdateProfile",
@@ -467,9 +451,7 @@
     },
     "/api/{version}/member/password/change": {
       "post": {
-        "tags": [
-          "Member"
-        ],
+        "tags": ["Member"],
         "summary": "Change member password",
         "description": "驗證既有密碼、新密碼與再次輸入後更新密碼，完成後要求會員重新登入。 規格來源：C203-1 規格書第 12、13 頁。",
         "operationId": "Member_ChangePassword",
@@ -538,9 +520,7 @@
     },
     "/api/{version}/member/messages": {
       "get": {
-        "tags": [
-          "Member"
-        ],
+        "tags": ["Member"],
         "summary": "List member lead messages",
         "description": "依留言時間新到舊列出會員的物件留言紀錄與物件、經紀人、價格資訊。 規格來源：C203-1 規格書第 14、15 頁。",
         "operationId": "Member_MessageList",
@@ -605,9 +585,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "Member"
-        ],
+        "tags": ["Member"],
         "summary": "Delete selected member lead messages",
         "description": "批次刪除會員選取的留言紀錄；留言紀錄原則上持續保留，僅於會員主動刪除時移除。 規格來源：C203-1 規格書第 14、15 頁；留言資料非通知 inbox，另參考 C203-2 規格書第 3 頁。",
         "operationId": "Member_DeleteMessages",
@@ -676,9 +654,7 @@
     },
     "/api/{version}/member/subscriptions/search": {
       "get": {
-        "tags": [
-          "Member"
-        ],
+        "tags": ["Member"],
         "summary": "List saved search subscriptions",
         "description": "依建立時間新到舊列出買屋搜尋訂閱條件、標籤與新增配對物件數。 規格來源：C203-1 規格書第 15、16 頁；通知觸發規則另參考 C203-2 規格書第 4、7 頁。",
         "operationId": "Member_SearchSubscriptionList",
@@ -743,9 +719,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "Member"
-        ],
+        "tags": ["Member"],
         "summary": "Delete selected search subscriptions",
         "description": "批次刪除會員選取的買屋搜尋訂閱條件，刪除後不可復原。 規格來源：C203-1 規格書第 15、16 頁。",
         "operationId": "Member_DeleteSearchSubscriptions",
@@ -814,9 +788,7 @@
     },
     "/api/{version}/member/subscriptions/realprice": {
       "get": {
-        "tags": [
-          "Member"
-        ],
+        "tags": ["Member"],
         "summary": "List saved real-price subscriptions",
         "description": "依建立時間新到舊列出實登搜尋訂閱條件、標籤與最近一筆行情資訊。 規格來源：C203-1 規格書第 16、17 頁；通知觸發規則另參考 C203-2 規格書第 4、7 頁。",
         "operationId": "Member_RealPriceSubscriptionList",
@@ -881,9 +853,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "Member"
-        ],
+        "tags": ["Member"],
         "summary": "Delete selected real-price subscriptions",
         "description": "批次刪除會員選取的實登搜尋訂閱條件，刪除後不可復原。 規格來源：C203-1 規格書第 16、17 頁。",
         "operationId": "Member_DeleteRealPriceSubscriptions",
@@ -952,9 +922,7 @@
     },
     "/api/{version}/member/subscriptions/buy-objects": {
       "get": {
-        "tags": [
-          "Member"
-        ],
+        "tags": ["Member"],
         "summary": "List favorite houses and price-drop subscriptions",
         "description": "依訂閱時間新到舊列出買屋物件訂閱、降價資訊、經紀人資料及可用操作。 規格來源：C203-1 規格書第 17、18 頁；降價通知規則另參考 C203-2 規格書第 3、7 頁。",
         "operationId": "Member_BuyObjectSubscriptionList",
@@ -1019,9 +987,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "Member"
-        ],
+        "tags": ["Member"],
         "summary": "Delete selected favorite houses",
         "description": "批次刪除會員選取的買屋物件訂閱，刪除後不可復原。 規格來源：C203-1 規格書第 17、18 頁。",
         "operationId": "Member_DeleteBuyObjectSubscriptions",
@@ -1090,9 +1056,7 @@
     },
     "/api/{version}/member/subscriptions/communities": {
       "get": {
-        "tags": [
-          "Member"
-        ],
+        "tags": ["Member"],
         "summary": "List favorite community subscriptions",
         "description": "依訂閱時間新到舊列出社區訂閱、待售物件、最新成交單價及可用操作。 規格來源：C203-1 規格書第 18、19 頁；社區通知規則另參考 C203-2 規格書第 4、7 頁。",
         "operationId": "Member_CommunitySubscriptionList",
@@ -1157,9 +1121,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "Member"
-        ],
+        "tags": ["Member"],
         "summary": "Delete selected community subscriptions",
         "description": "批次刪除會員選取的社區訂閱，刪除後不可復原。 規格來源：C203-1 規格書第 18、19 頁。",
         "operationId": "Member_DeleteCommunitySubscriptions",
@@ -1228,9 +1190,7 @@
     },
     "/api/{version}/member/compare/buy-objects": {
       "get": {
-        "tags": [
-          "Member"
-        ],
+        "tags": ["Member"],
         "summary": "Get buy-object comparison list",
         "description": "取得 1 至 4 筆物件比較資料與價格、坪數、屋齡等優勢標籤。 規格來源：C203-1 規格書第 19、20、21 頁。",
         "operationId": "Member_BuyObjectCompare",
@@ -1279,9 +1239,7 @@
     },
     "/api/{version}/member/compare/buy-objects/items": {
       "post": {
-        "tags": [
-          "Member"
-        ],
+        "tags": ["Member"],
         "summary": "Add houses into compare list",
         "description": "將會員選取的物件加入物件比一比清單，清單上限為 4 筆。 規格來源：C203-1 規格書第 17、18、19、20、21 頁。",
         "operationId": "Member_AddBuyObjectCompareItems",
@@ -1350,9 +1308,7 @@
     },
     "/api/{version}/member/compare/buy-objects/{houseId}": {
       "delete": {
-        "tags": [
-          "Member"
-        ],
+        "tags": ["Member"],
         "summary": "Remove a house from compare list",
         "description": "從物件比一比清單移除指定物件。 規格來源：C203-1 規格書第 19、20、21 頁。",
         "operationId": "Member_RemoveBuyObjectCompareItem",
@@ -1410,9 +1366,7 @@
     },
     "/api/{version}/member/compare/communities": {
       "get": {
-        "tags": [
-          "Member"
-        ],
+        "tags": ["Member"],
         "summary": "Get community comparison list",
         "description": "取得 1 至 4 筆社區比較資料與單價、坪數、屋齡、車位比例等優勢標籤。 規格來源：C203-1 規格書第 21、22、23 頁。",
         "operationId": "Member_CommunityCompare",
@@ -1461,9 +1415,7 @@
     },
     "/api/{version}/member/compare/communities/items": {
       "post": {
-        "tags": [
-          "Member"
-        ],
+        "tags": ["Member"],
         "summary": "Add communities into compare list",
         "description": "將會員選取的社區加入社區比一比清單，清單上限為 4 筆。 規格來源：C203-1 規格書第 18、19、21、22、23 頁。",
         "operationId": "Member_AddCommunityCompareItems",
@@ -1532,9 +1484,7 @@
     },
     "/api/{version}/member/compare/communities/{communityId}": {
       "delete": {
-        "tags": [
-          "Member"
-        ],
+        "tags": ["Member"],
         "summary": "Remove a community from compare list",
         "description": "從社區比一比清單移除指定社區。 規格來源：C203-1 規格書第 21、22、23 頁。",
         "operationId": "Member_RemoveCommunityCompareItem",
@@ -1592,9 +1542,7 @@
     },
     "/api/{version}/auth/token/exchange": {
       "post": {
-        "tags": [
-          "MemberAuth"
-        ],
+        "tags": ["MemberAuth"],
         "summary": "交換 Member BFF bearer token",
         "description": "前端將 Member Auth handoff 取得的 AES-GCM 加密 token 傳給 Member BFF。Member BFF 解密後檢查 issuedAt 是否仍在交換時限內，再以 member-web channel 呼叫 Member Auth introspect；成功後簽發 Member BFF 專用 opaque bearer token，並保存對應的 Member Auth sessionId。 架構補充：此 token exchange 為 member-auth／member-bff 邊界 API；會員中心登入情境與帳號資料需求 參考 C203-1 規格書第 2、11、13 頁。",
         "operationId": "MemberAuth_ExchangeToken",
@@ -1643,9 +1591,7 @@
     },
     "/api/{version}/auth/me": {
       "get": {
-        "tags": [
-          "MemberAuth"
-        ],
+        "tags": ["MemberAuth"],
         "summary": "取得 Member BFF 會員資料",
         "description": "驗證 Member BFF 本地 opaque bearer token，並向 Member Auth 確認其全域 session 仍有效且身份一致， 成功後回傳會員中心需要的 HFMemberAccount 與 HFMemberProfile 資料。 規格來源：C203-1 規格書第 11 頁；token 與全域 session 驗證為 member-bff 架構補充。",
         "operationId": "MemberAuth_Me",
@@ -1686,9 +1632,7 @@
     },
     "/api/{version}/auth/logout": {
       "post": {
-        "tags": [
-          "MemberAuth"
-        ],
+        "tags": ["MemberAuth"],
         "summary": "登出 Member BFF 會員",
         "description": "以 Member BFF bearer token 找出對應 Member Auth sessionId，先撤銷 Member Auth 全域 session， 再刪除 Member BFF server-side token session。成功後同一全域 session 派生的頻道 token均不得繼續使用。 架構補充：此登出與 session 撤銷為 member-auth／member-bff 邊界 API；會員中心重新登入情境 參考 C203-1 規格書第 13 頁。",
         "operationId": "MemberAuth_Logout",
@@ -1731,11 +1675,7 @@
   "components": {
     "schemas": {
       "ActionLink": {
-        "required": [
-          "key",
-          "target",
-          "title"
-        ],
+        "required": ["key", "target", "title"],
         "type": "object",
         "properties": {
           "key": {
@@ -1751,9 +1691,7 @@
         "additionalProperties": false
       },
       "BatchAddCompareRequest": {
-        "required": [
-          "ids"
-        ],
+        "required": ["ids"],
         "type": "object",
         "properties": {
           "ids": {
@@ -1766,9 +1704,7 @@
         "additionalProperties": false
       },
       "BatchDeleteRequest": {
-        "required": [
-          "ids"
-        ],
+        "required": ["ids"],
         "type": "object",
         "properties": {
           "ids": {
@@ -1781,9 +1717,7 @@
         "additionalProperties": false
       },
       "BatchOperationResponse": {
-        "required": [
-          "message"
-        ],
+        "required": ["message"],
         "type": "object",
         "properties": {
           "success": {
@@ -1800,9 +1734,7 @@
         "additionalProperties": false
       },
       "BatchReadRequest": {
-        "required": [
-          "ids"
-        ],
+        "required": ["ids"],
         "type": "object",
         "properties": {
           "ids": {
@@ -1821,11 +1753,7 @@
         "additionalProperties": false
       },
       "BrokerContactCard": {
-        "required": [
-          "mobilePhone",
-          "name",
-          "shopName"
-        ],
+        "required": ["mobilePhone", "name", "shopName"],
         "type": "object",
         "properties": {
           "name": {
@@ -1863,11 +1791,7 @@
         "additionalProperties": false
       },
       "BuyObjectCompareItem": {
-        "required": [
-          "house",
-          "id",
-          "tags"
-        ],
+        "required": ["house", "id", "tags"],
         "type": "object",
         "properties": {
           "id": {
@@ -1886,9 +1810,7 @@
         "additionalProperties": false
       },
       "BuyObjectCompareResponse": {
-        "required": [
-          "items"
-        ],
+        "required": ["items"],
         "type": "object",
         "properties": {
           "limit": {
@@ -1905,13 +1827,7 @@
         "additionalProperties": false
       },
       "BuyObjectSubscriptionItem": {
-        "required": [
-          "actions",
-          "broker",
-          "house",
-          "id",
-          "subscribedAt"
-        ],
+        "required": ["actions", "broker", "house", "id", "subscribedAt"],
         "type": "object",
         "properties": {
           "id": {
@@ -1945,10 +1861,7 @@
         "additionalProperties": false
       },
       "BuyObjectSubscriptionListResponse": {
-        "required": [
-          "items",
-          "paging"
-        ],
+        "required": ["items", "paging"],
         "type": "object",
         "properties": {
           "compareLimit": {
@@ -1968,11 +1881,7 @@
         "additionalProperties": false
       },
       "ChangePasswordRequest": {
-        "required": [
-          "confirmPassword",
-          "currentPassword",
-          "newPassword"
-        ],
+        "required": ["confirmPassword", "currentPassword", "newPassword"],
         "type": "object",
         "properties": {
           "currentPassword": {
@@ -1988,10 +1897,7 @@
         "additionalProperties": false
       },
       "CommunityCard": {
-        "required": [
-          "id",
-          "name"
-        ],
+        "required": ["id", "name"],
         "type": "object",
         "properties": {
           "id": {
@@ -2016,10 +1922,7 @@
         "additionalProperties": false
       },
       "CommunityCompareItem": {
-        "required": [
-          "id",
-          "stats"
-        ],
+        "required": ["id", "stats"],
         "type": "object",
         "properties": {
           "id": {
@@ -2035,9 +1938,7 @@
         "additionalProperties": false
       },
       "CommunityCompareResponse": {
-        "required": [
-          "items"
-        ],
+        "required": ["items"],
         "type": "object",
         "properties": {
           "limit": {
@@ -2105,11 +2006,7 @@
         "additionalProperties": false
       },
       "CommunitySubscriptionItem": {
-        "required": [
-          "actions",
-          "id",
-          "subscribedAt"
-        ],
+        "required": ["actions", "id", "subscribedAt"],
         "type": "object",
         "properties": {
           "id": {
@@ -2143,10 +2040,7 @@
         "additionalProperties": false
       },
       "CommunitySubscriptionListResponse": {
-        "required": [
-          "items",
-          "paging"
-        ],
+        "required": ["items", "paging"],
         "type": "object",
         "properties": {
           "compareLimit": {
@@ -2166,20 +2060,12 @@
         "additionalProperties": false
       },
       "CompareTag": {
-        "enum": [
-          0,
-          1,
-          2
-        ],
+        "enum": [0, 1, 2],
         "type": "integer",
         "format": "int32"
       },
       "ExternalMenuLink": {
-        "required": [
-          "key",
-          "title",
-          "url"
-        ],
+        "required": ["key", "title", "url"],
         "type": "object",
         "properties": {
           "key": {
@@ -2195,11 +2081,7 @@
         "additionalProperties": false
       },
       "HouseCard": {
-        "required": [
-          "address",
-          "id",
-          "title"
-        ],
+        "required": ["address", "id", "title"],
         "type": "object",
         "properties": {
           "id": {
@@ -2260,13 +2142,7 @@
         "additionalProperties": false
       },
       "MemberBffAuthMemberResponse": {
-        "required": [
-          "displayName",
-          "memberId",
-          "memberType",
-          "registeredAt",
-          "stateCode"
-        ],
+        "required": ["displayName", "memberId", "memberType", "registeredAt", "stateCode"],
         "type": "object",
         "properties": {
           "mid": {
@@ -2310,11 +2186,7 @@
         "description": "會員中心頻道 /auth/me 回傳的會員資料。"
       },
       "MemberBffAuthTokenExchangeResponse": {
-        "required": [
-          "accessToken",
-          "expiresAt",
-          "tokenType"
-        ],
+        "required": ["accessToken", "expiresAt", "tokenType"],
         "type": "object",
         "properties": {
           "accessToken": {
@@ -2334,18 +2206,12 @@
         "description": "Member BFF bearer token 交換結果。"
       },
       "MemberBffAuthTokenExchangeResponseTokenType": {
-        "enum": [
-          0
-        ],
+        "enum": [0],
         "type": "integer",
         "format": "int32"
       },
       "MemberMenuResponse": {
-        "required": [
-          "externalLinks",
-          "items",
-          "memberId"
-        ],
+        "required": ["externalLinks", "items", "memberId"],
         "type": "object",
         "properties": {
           "memberId": {
@@ -2422,11 +2288,7 @@
         "additionalProperties": false
       },
       "MenuItem": {
-        "required": [
-          "key",
-          "path",
-          "title"
-        ],
+        "required": ["key", "path", "title"],
         "type": "object",
         "properties": {
           "key": {
@@ -2449,13 +2311,7 @@
         "additionalProperties": false
       },
       "MessageRecordItem": {
-        "required": [
-          "actions",
-          "broker",
-          "house",
-          "id",
-          "messageSentAt"
-        ],
+        "required": ["actions", "broker", "house", "id", "messageSentAt"],
         "type": "object",
         "properties": {
           "id": {
@@ -2489,10 +2345,7 @@
         "additionalProperties": false
       },
       "MessageRecordListResponse": {
-        "required": [
-          "items",
-          "paging"
-        ],
+        "required": ["items", "paging"],
         "type": "object",
         "properties": {
           "paging": {
@@ -2508,9 +2361,7 @@
         "additionalProperties": false
       },
       "NotificationBatchDeleteRequest": {
-        "required": [
-          "ids"
-        ],
+        "required": ["ids"],
         "type": "object",
         "properties": {
           "ids": {
@@ -2527,31 +2378,17 @@
         "description": "通知中心專用批次刪除請求；每筆 ID 均為 Notification UUID。"
       },
       "NotificationCategory": {
-        "enum": [
-          0,
-          1,
-          2,
-          3,
-          4
-        ],
+        "enum": [0, 1, 2, 3, 4],
         "type": "integer",
         "format": "int32"
       },
       "NotificationChannel": {
-        "enum": [
-          0,
-          1,
-          2,
-          3,
-          4
-        ],
+        "enum": [0, 1, 2, 3, 4],
         "type": "integer",
         "format": "int32"
       },
       "NotificationChannelCapability": {
-        "required": [
-          "channel"
-        ],
+        "required": ["channel"],
         "type": "object",
         "properties": {
           "channel": {
@@ -2564,14 +2401,7 @@
         "additionalProperties": false
       },
       "NotificationItem": {
-        "required": [
-          "actions",
-          "category",
-          "id",
-          "sentAt",
-          "tags",
-          "title"
-        ],
+        "required": ["actions", "category", "id", "sentAt", "tags", "title"],
         "type": "object",
         "properties": {
           "id": {
@@ -2621,11 +2451,7 @@
         "additionalProperties": false
       },
       "NotificationListResponse": {
-        "required": [
-          "category",
-          "items",
-          "paging"
-        ],
+        "required": ["category", "items", "paging"],
         "type": "object",
         "properties": {
           "category": {
@@ -2644,10 +2470,7 @@
         "additionalProperties": false
       },
       "NotificationSummaryResponse": {
-        "required": [
-          "channels",
-          "tabs"
-        ],
+        "required": ["channels", "tabs"],
         "type": "object",
         "properties": {
           "unreadCount": {
@@ -2678,10 +2501,7 @@
         "additionalProperties": false
       },
       "NotificationTab": {
-        "required": [
-          "category",
-          "title"
-        ],
+        "required": ["category", "title"],
         "type": "object",
         "properties": {
           "category": {
@@ -2716,9 +2536,7 @@
         "additionalProperties": false
       },
       "PasswordOperationResponse": {
-        "required": [
-          "message"
-        ],
+        "required": ["message"],
         "type": "object",
         "properties": {
           "success": {
@@ -2734,11 +2552,7 @@
         "additionalProperties": false
       },
       "RealPriceSubscriptionItem": {
-        "required": [
-          "conditionTags",
-          "id",
-          "regionName"
-        ],
+        "required": ["conditionTags", "id", "regionName"],
         "type": "object",
         "properties": {
           "id": {
@@ -2771,10 +2585,7 @@
         "additionalProperties": false
       },
       "RealPriceSubscriptionListResponse": {
-        "required": [
-          "items",
-          "paging"
-        ],
+        "required": ["items", "paging"],
         "type": "object",
         "properties": {
           "paging": {
@@ -2790,13 +2601,7 @@
         "additionalProperties": false
       },
       "SearchSubscriptionItem": {
-        "required": [
-          "actions",
-          "conditionPath",
-          "conditionTags",
-          "createdAt",
-          "id"
-        ],
+        "required": ["actions", "conditionPath", "conditionTags", "createdAt", "id"],
         "type": "object",
         "properties": {
           "id": {
@@ -2829,10 +2634,7 @@
         "additionalProperties": false
       },
       "SearchSubscriptionListResponse": {
-        "required": [
-          "items",
-          "paging"
-        ],
+        "required": ["items", "paging"],
         "type": "object",
         "properties": {
           "limit": {
@@ -2865,10 +2667,7 @@
         "additionalProperties": false
       },
       "UpdateMemberProfileRequest": {
-        "required": [
-          "firstName",
-          "lastName"
-        ],
+        "required": ["firstName", "lastName"],
         "type": "object",
         "properties": {
           "firstName": {

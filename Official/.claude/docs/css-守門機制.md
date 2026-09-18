@@ -36,6 +36,7 @@
 | `moduleVar` | 同屬性兩個以上級距值（該搬到 `***Variables.css`） | 元件的樣式子資料夾與共用變數目錄（Variables 檔除外） | ✗ |
 | `breakpointPrefix` | 父層可傳入的級距在某個 `@screen` 區塊少列了會命中該斷點的前綴變體 | 元件的樣式子資料夾與共用變數目錄 | ✗ |
 | `variable` | 命名沒對齊 tailwind、級距用 `sm`/`md`/`lg`、斷點沒三份成套 | 元件的樣式子資料夾與共用變數目錄 | ✗ |
+| `sharedVarScope` | 共用變數檔裡放了只有一個模組在實際引用的那幾組（該搬回那個模組的 Variables 檔）；一個使用者都沒有的不報 | 設定的共用變數檔（`SHARED_MODULE_VARIABLES`），留空就整條略過 | ✗ |
 | `truncateClass` | 單行省略寫成 `truncate`（建議）—— 改用 `line-clamp-1`，與 `line-clamp-2`、`line-clamp-3` 是同一組，換行數只動數字；`:class` 裡的變數名不算 | 原始碼的 `.css` 與 `.vue` | ✗ |
 | `unknownVar` | 引用的變數全案找不到定義（`var(--x)` 與方括號寫法 `text-[--x]` 都算） —— 瀏覽器會把整條宣告丟掉，樣式安靜地消失（帶後備值的 `var(--x, 20px)` 不算；元件動態綁的 `'--x': 值` 算定義） | 原始碼的 `.css` 與 `.vue` | ✗ |
 | `projectName` | 寫死專案名稱 | 只有規範系統自身（清單見設定的 TOOLING_DIRS） | ✗ |
@@ -60,11 +61,16 @@
 | `viewFolder` | 頁面目錄的資料夾首字大寫、分隔方式與同一層的 `.vue` 檔名不同套（自己寫路由表的專案用駝峰，檔案系統路由的專案放行連字號，兩種都擋底線與連續大寫），或底線資料夾不在允許的清單裡 | 頁面目錄 | ✗ |
 | `componentClass` | 元件資料夾名推出的 class 與 template 寫的對不上 | 共用元件目錄的 `.vue` | ✗ |
 | `componentFolder` | 元件直接放在分類資料夾底下,沒有自己的資料夾 | 共用元件目錄的 `.vue` | ✗ |
+| `componentDeps` | 元件不是自足的（自己讀 store、或有容器在版面上渲染它），檔頭沒有列出「複製時要一起帶走什麼」。清單由工具算，`npm run deps <元件>` 印得出來；列了卻已經用不到的也報 | 共用元件目錄的 `.vue`；要有自動注入的對照表（`GENERATED_FILES`），否則只算得出 store 那一半 | ✗ |
+| `spacerElement` | 用只有空白的元素當間隔（`<span> </span>`）—— 那個空白在編譯時就被移除，從一開始就沒有作用；`<pre>` 與 `<textarea>` 除外 | 原始碼的 `.vue`（只看畫面區段） | ✗ |
+| `apiTryCatch` | api 檔案自己包 try/catch（錯誤由共用實例統一轉成 `{ config, status, data }`，再包一層會把它吞掉） | api 目錄 | ✗ |
+| `apiPathParam` | 端點用樣板字串拼路徑，不是 `{key}` 模板（拼接的那一段不經過替換，同一個值會同時出現在路徑與 query） | api 目錄 | ✗ |
+| `customField` | 掛在 api 資料（`apiData` / `data` 底下）上的欄位名不在 api 規格文件裡（回傳與請求主體的欄位、網址上的參數都算），而且沒有 `_` 前綴。第三方套件的事件物件也叫 `data`，那種檔案在檔頭標 `lint-custom-field-exempt: 理由` 放行 —— 前端自己掛的要加底線；真的是後端給的就代表那份文件該重新匯出 | 原始碼的 `.js` 與 `.vue`；要有設定裡那份規格文件（`API_SPEC_FILE`），沒有的話整條略過 | ✗ |
 | `storeDefaultClone` | `apiDefault` 的某一層有陣列欄位，**而且**全案有人用展開一層的方式還原那一層（訊息會指出是哪一支檔案的哪一行）。還原處都用深拷貝、或沒有人還原它，都不報 | store 目錄；另外要有設定裡那支深拷貝函式（`DEEP_CLONE_HELPER`），沒有的話整條略過 | 還原處 ✓（存檔就換成深拷貝） |
 | `storeResetDefault` | reset 手寫預設值,沒用 `apiDefault` | actions 目錄 | ✗ |
 | `storeActionNaming` | 呼叫 api 的 action 命名對不上該支 api | actions 目錄 | ✗ |
 | `storeActionReturn` | 打了 api 的 action 沒有 `return { config, status, data }` | actions 目錄 | ✗ |
-| `storeToRefs` | 取 store 的值沒走 `storeToRefs`（直接解構或讀成 `const`） | 原始碼 | ✗ |
+| `storeToRefs` | 取 store 的值沒走 `storeToRefs`（`readonly({ … })` 包住的固定設定除外 —— 那種沒有響應性，改成 `storeToRefs` 反而拿到 `undefined`）（直接解構或讀成 `const`） | 原始碼 | ✗ |
 | `pageActionNaming` | 頁面包裝 action 的命名沒有去掉 `Api` 或對不上 | 原始碼裡的 `.vue` | ✗ |
 | `pageAwaitAll` | 進入頁面要拿的資料一支一支等，沒有一起發出 | 頁面目錄的 `.vue` | 包起來 ✓（存檔時） |
 | `pageApiImport` | 頁面直接 import api（可在檔頭標 `lint-page-api-exempt` 放行一次性的請求） | 原始碼裡的 `.vue` | ✗ |

@@ -70,6 +70,7 @@ import {
   onFixLegacyRgba,
   onSortComposables,
   onSortImports,
+  singleModuleVarsOf,
   onWrapMountedCalls,
   onCloneApiDefault,
   RULE_TITLE,
@@ -84,12 +85,14 @@ import {
   configItemIssueOf,
   unusedConfigNames,
 } from './rules-global.mjs'
+import { apiFieldNamesOf, specFieldsIn } from './rules-api.mjs'
 import { isStoreDeclareCall } from './rules-store.mjs'
 import { CHECKSUM_FILE, currentFingerprints, fingerprintDiff, isSkipped } from './checksum.mjs'
 import {
   ACTIONS_DIR_NAME,
   API_DIR,
   API_NAMING_IGNORED_SEGMENTS,
+  API_SPEC_DIR,
   BREAKPOINTS,
   BREAKPOINT_SCREENS,
   BUILD_CONFIG_FILES,
@@ -323,6 +326,23 @@ const breakpointVars = (suffix, { skipLast = false } = {}) => {
 }
 
 /**
+ * 規格文件裡真的有的一個欄位名,與一個文件裡一定沒有的名字。
+ *
+ * 名字從專案自己的規格文件現場取,不寫死 —— 寫死的話這幾則案例
+ * 會帶著某一個專案的 api 欄位名複製到下一個專案,而那裡沒有那個欄位,
+ * 案例只會開始失敗;欄位名也不該跟著工具到處跑。
+ *
+ * 取不到文件時是 null,那幾則案例整組跳過(規則那一側也是整條略過)。
+ */
+const apiSpecFields = (() => {
+  if (!API_SPEC_DIR) return null
+
+  const [known] = [...(specFieldsIn(path.join(root, API_SPEC_DIR)) ?? [])]
+
+  return known ? { known, unknown: `${PROBE_PAGE_PREFIX}CustomField` } : null
+})()
+
+/**
  * 規範系統自身的探測檔。
  *
  * skills、rules 與說明文件都是 .md,那些檔案會整批複製到下一個專案 ——
@@ -415,6 +435,15 @@ const apiAliasImportOf = (fileName) => {
    頁面探測檔的位置要用到它們。 */
 
 const PROBE_PAGE_ALPHA = `${PROBE_PAGE_PREFIX}Alpha`
+
+/**
+ * 「元件的搭檔」那幾則專用的名字。
+ *
+ * 那幾則要的是「這個 store 只有一支檔案」—— 搭檔清單是拿匯出的名字回推檔案的,
+ * 而別的案例也會用探測名建 store,兩支檔案匯出同一個名字時後建的那支會蓋掉前面,
+ * 算出來的路徑就指向另一則案例的檔案。名字分開才不會互相干擾。
+ */
+const PROBE_DEPS_PAGE = `${PROBE_PAGE_PREFIX}Deps`
 const PROBE_PAGE_PLURAL = `${PROBE_PAGE_PREFIX}Pets`
 
 /**
@@ -1312,6 +1341,28 @@ const CSS_CASES = [
     code: `/* lint-breakpoint-exempt: 只有桌機版有這個區塊 */\n:root {\n  --probe-${BREAKPOINTS[0]}-px: 24px;\n}`,
     expect: 0,
   },
+  {
+    /* 字級不吃這個標記:兩種字級都不需要它 —— 固定模組照規範分斷點就通過了,
+       通用元件的字級本來就不該寫在元件裡。放行的話,那個標記會讓
+       「還沒決定由誰定」看起來像「決定過了」。 */
+    rule: 'variable',
+    needs: 'breakpoints',
+    name: 'variable 字級不吃豁免標記',
+    file: `${M}/bp4Variables.css`,
+    code: `/* lint-breakpoint-exempt: 三個斷點都一樣 */\n:root {\n  --probe-text-size: 16px;\n}`,
+    expect: 1,
+    keyword: '字級不吃豁免標記',
+  },
+  {
+    /* 同一支檔案裡,非字級的那幾個照樣被標記放行 —— 這條收的只有字級。 */
+    rule: 'variable',
+    needs: 'breakpoints',
+    name: 'variable 豁免對非字級仍然有效',
+    file: `${M}/bp5Variables.css`,
+    code: `/* lint-breakpoint-exempt: 只有桌機版有這個區塊 */\n:root {\n  --probe-px: 24px;\n  --probe-text-size: 16px;\n}`,
+    expect: 1,
+    keyword: '字級不吃豁免標記',
+  },
 
   // ---------- 規則 variable:級距不用 sm / md / lg ----------
   {
@@ -1405,6 +1456,23 @@ const CSS_CASES = [
     file: `${S}/structuralNamed.css`,
     code: `.group\\/card:hover .m-css-self-test {\n  @apply flex;\n}\n`,
     expect: 0,
+    rule: 'moduleScope',
+  },
+  {
+    /* 轉場的 class 名字跟著畫面區段的 name 走,收斂成模組前綴的話兩邊就對不上 ——
+       而轉場失效不會報錯,只是動畫沒了。 */
+    name: 'moduleScope 轉場的六個 class 放行',
+    file: `${S}/transition.css`,
+    code: `.fade-enter-active,\n.fade-leave-active {\n  @apply opacity-100;\n}\n\n.fade-enter-from,\n.fade-leave-to {\n  @apply opacity-0;\n}\n`,
+    expect: 0,
+    rule: 'moduleScope',
+  },
+  {
+    /* 只有那六個後綴放行 —— 名字開頭像轉場但後綴不對的照樣報。 */
+    name: 'moduleScope 不是轉場後綴的照樣報',
+    file: `${S}/transitionLike.css`,
+    code: `.fade-enter-done {\n  @apply opacity-100;\n}\n`,
+    expect: 1,
     rule: 'moduleScope',
   },
   {
@@ -2534,9 +2602,7 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
       apiReturn 當成「自己組了一份物件回傳」—— 那會讓每一支帶參數的 api 都誤報 */
     name: 'apiReturn 直接回 fetchApi(含路徑參數)不誤報',
     file: `${A}/selfTestAlpha.js`,
-    code:
-      `import { fetchApi } from '@js/_api/.config.js'\n\n` +
-      'export const apiGetVoucherItemID = (id) => fetchApi.get(`voucher/item/${id}`)\n',
+    code: `import { fetchApi } from '@js/_api/.config.js'\n\nexport const apiGetVoucherItemID = (data) => fetchApi.get('voucher/item/{id}', data)\n`,
     expect: 0,
   },
   {
@@ -2840,6 +2906,16 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
     name: 'componentFolder 模組資料夾底下的子檔案不誤報',
     rule: 'componentFolder',
     file: `${SC}/Item.vue`,
+    code: probeVue,
+    expect: 0,
+  },
+  {
+    /* 一個模組底下再分子資料夾是正常的(把彈窗、面板各收成一疊)。
+       只看上一層的話這種檔案會被要求再包一層 Index.vue —— 名字沒變、位置更深,
+       那個判斷仍然不成立,下一次照樣報。 */
+    name: 'componentFolder 模組再分子資料夾也不誤報',
+    rule: 'componentFolder',
+    file: `${SC}/popup/Delete.vue`,
     code: probeVue,
     expect: 0,
   },
@@ -3215,6 +3291,197 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
     code: `import { defineStore } from 'pinia'\n\nexport const use${pascalOf(PROBE_PAGE_ALPHA)}Store = defineStore('${PROBE_PAGE_ALPHA}', () => {\n  const detail = ref({ apiData: null })\n\n  return { detail }\n})\n`,
     expect: 1,
     keyword: '沒有 apiDefault',
+  },
+  // ---------- 規則 componentDeps ----------
+  {
+    /* 自己讀 store 的元件不是自足的:複製它的資料夾過去,那支 store 不會跟著走,
+       而畫面上看不出少了什麼 —— 只是永遠不顯示。 */
+    rule: 'componentDeps',
+    name: 'componentDeps 讀了 store 卻沒列在檔頭要報',
+    file: `${C}/Deps1.vue`,
+    code: `<script setup>\nconst probe = use${pascalOf(PROBE_DEPS_PAGE)}Store()\n</script>\n\n<template>\n  <div class="m-probe">{{ probe }}</div>\n</template>\n`,
+    context: {
+      [`${T}/${PROBE_DEPS_PAGE}.js`]: `import { defineStore } from 'pinia'\n\nexport const use${pascalOf(PROBE_DEPS_PAGE)}Store = defineStore('${PROBE_DEPS_PAGE}', () => {\n  const detail = ref(null)\n\n  return { detail }\n})\n`,
+    },
+    expect: 1,
+    keyword: 'component-deps',
+  },
+  {
+    rule: 'componentDeps',
+    name: 'componentDeps 檔頭列齊了就不報',
+    file: `${C}/Deps2.vue`,
+    code: `<script setup>\n/* component-deps —— 複製這支元件時要一起帶走:\n   ${T}/${PROBE_DEPS_PAGE}.js */\nconst probe = use${pascalOf(PROBE_DEPS_PAGE)}Store()\n</script>\n\n<template>\n  <div class="m-probe">{{ probe }}</div>\n</template>\n`,
+    context: {
+      [`${T}/${PROBE_DEPS_PAGE}.js`]: `import { defineStore } from 'pinia'\n\nexport const use${pascalOf(PROBE_DEPS_PAGE)}Store = defineStore('${PROBE_DEPS_PAGE}', () => {\n  const detail = ref(null)\n\n  return { detail }\n})\n`,
+    },
+    expect: 0,
+  },
+  {
+    /* 自足的元件不必列 —— 每一支都要寫一段的話,真正該看的那幾支會被淹掉。 */
+    rule: 'componentDeps',
+    name: 'componentDeps 自足的元件不必列',
+    file: `${C}/Deps3.vue`,
+    code: `<script setup>\nconst props = defineProps({ text: { type: String, default: '' } })\n</script>\n\n<template>\n  <div class="m-probe">{{ props.text }}</div>\n</template>\n`,
+    expect: 0,
+  },
+  {
+    /* 清單會過期:元件不再讀那支 store 之後,留著的那一行會讓人多複製一份用不到的東西。 */
+    rule: 'componentDeps',
+    name: 'componentDeps 清單過期要報',
+    file: `${C}/Deps4.vue`,
+    code: `<script setup>\n/* component-deps: ${T}/${PROBE_PAGE_ALPHA}.js */\nconst props = defineProps({ text: { type: String, default: '' } })\n</script>\n\n<template>\n  <div class="m-probe">{{ props.text }}</div>\n</template>\n`,
+    expect: 1,
+    keyword: '清單過期',
+  },
+
+  // ---------- 規則 spacerElement ----------
+  {
+    rule: 'spacerElement',
+    name: 'spacerElement 只有空白的元素要報',
+    file: `${C}/Spacer1.vue`,
+    code: `<template>\n  <div class="m-probe"><b>甲</b><span> </span><b>乙</b></div>\n</template>\n`,
+    expect: 1,
+    keyword: '編譯時就被移除',
+  },
+  {
+    /* 有內容的元素不算 —— 這條抓的是「裡面只有空白」的那一種。 */
+    rule: 'spacerElement',
+    name: 'spacerElement 有內容的元素不誤報',
+    file: `${C}/Spacer2.vue`,
+    code: `<template>\n  <div class="m-probe"><span>甲</span></div>\n</template>\n`,
+    expect: 0,
+  },
+  {
+    /* pre 與 textarea 裡的空白是內容的一部分,編譯器不會動它。 */
+    rule: 'spacerElement',
+    name: 'spacerElement 空白有意義的標籤不受約束',
+    file: `${C}/Spacer3.vue`,
+    code: `<template>\n  <div class="m-probe"><pre> </pre></div>\n</template>\n`,
+    expect: 0,
+  },
+  {
+    rule: 'spacerElement',
+    name: 'spacerElement 兩個元素之間的空白要報',
+    file: `${C}/Spacer5.vue`,
+    code: `<template>\n  <div class="m-probe"><b>甲</b> <b>乙</b></div>\n</template>\n`,
+    expect: 1,
+    keyword: '折成兩行',
+  },
+  {
+    /* 折行的空白在編譯時整個被移除,那種寫法本來就沒有在靠空白排版。 */
+    rule: 'spacerElement',
+    name: 'spacerElement 換行不算靠空白排版',
+    file: `${C}/Spacer6.vue`,
+    code: `<template>\n  <div class="m-probe">\n    <b>甲</b>\n    <b>乙</b>\n  </div>\n</template>\n`,
+    expect: 0,
+  },
+  {
+    /* 元素後面接的是文字時,那個空白是文案的一部分。 */
+    rule: 'spacerElement',
+    name: 'spacerElement 元素後面接文字不誤報',
+    file: `${C}/Spacer7.vue`,
+    code: `<template>\n  <div class="m-probe"><b>甲</b> 乙</div>\n</template>\n`,
+    expect: 0,
+  },
+  {
+    /* 被註解掉的畫面區段是死程式碼。 */
+    rule: 'spacerElement',
+    name: 'spacerElement 註解掉的不算',
+    file: `${C}/Spacer4.vue`,
+    code: `<template>\n  <div class="m-probe">\n    <!-- <span> </span> -->\n  </div>\n</template>\n`,
+    expect: 0,
+  },
+
+  // ---------- 規則 apiTryCatch / apiPathParam ----------
+  {
+    rule: 'apiTryCatch',
+    name: 'apiTryCatch api 自己包 try/catch 要報',
+    file: `${A}/selfTestAlpha.js`,
+    code: `import { fetchApi } from '@js/_api/.config.js'\n\nexport const apiGetSelfTestAlpha = async (data) => {\n  try {\n    return await fetchApi.get('selftestalpha', data)\n  } catch {\n    return null\n  }\n}\n`,
+    expect: 1,
+    keyword: 'try/catch',
+  },
+  {
+    rule: 'apiTryCatch',
+    name: 'apiTryCatch 直接回傳不誤報',
+    file: `${A}/selfTestAlpha.js`,
+    code: `import { fetchApi } from '@js/_api/.config.js'\n\nexport const apiGetSelfTestAlpha = (data) => fetchApi.get('selftestalpha', data)\n`,
+    expect: 0,
+  },
+  {
+    /* 註解裡寫出一段示範的 try 是說明,不是程式碼。 */
+    rule: 'apiTryCatch',
+    name: 'apiTryCatch 註解裡的不算',
+    file: `${A}/selfTestAlpha.js`,
+    code: `import { fetchApi } from '@js/_api/.config.js'\n\n// 不要寫成 try {\nexport const apiGetSelfTestAlpha = (data) => fetchApi.get('selftestalpha', data)\n`,
+    expect: 0,
+  },
+  {
+    rule: 'apiPathParam',
+    name: 'apiPathParam 端點用拼接要報',
+    file: `${A}/selfTestAlpha.js`,
+    code:
+      `import { fetchApi } from '@js/_api/.config.js'\n\n` +
+      'export const apiGetSelfTestAlphaID = (data) => fetchApi.get(`selftestalpha/${data.id}`)\n',
+    expect: 1,
+    keyword: '{key}',
+  },
+  {
+    rule: 'apiPathParam',
+    name: 'apiPathParam {key} 模板不誤報',
+    file: `${A}/selfTestAlpha.js`,
+    code: `import { fetchApi } from '@js/_api/.config.js'\n\nexport const apiGetSelfTestAlphaID = (data) => fetchApi.get('selftestalpha/{id}', data)\n`,
+    expect: 0,
+  },
+
+  // ---------- 規則 customField ----------
+  {
+    /* 規格文件裡沒有這個名字 —— 那是前端自己掛上去的,要加底線。 */
+    rule: 'customField',
+    needs: 'apiSpec',
+    name: 'customField 文件裡沒有的欄位要加底線',
+    file: `${T}/${PROBE_PAGE_ALPHA}.js`,
+    code: `const onProbe = (store) => {\n  store.detail.apiData.${apiSpecFields?.unknown} = true\n}\n`,
+    expect: 1,
+    keyword: apiSpecFields?.unknown,
+  },
+  {
+    /* 後端真的有這個欄位,那是寫回去,不是自訂的 —— 加底線反而錯。 */
+    rule: 'customField',
+    needs: 'apiSpec',
+    name: 'customField 文件裡有的欄位不誤報',
+    file: `${T}/${PROBE_PAGE_ALPHA}.js`,
+    code: `const onProbe = (store) => {\n  store.detail.apiData.${apiSpecFields?.known} = true\n}\n`,
+    expect: 0,
+  },
+  {
+    /* 加了底線就是宣告「這是前端自己的」,名字在不在文件裡都不必再問。 */
+    rule: 'customField',
+    needs: 'apiSpec',
+    name: 'customField 加了底線就不報',
+    file: `${T}/${PROBE_PAGE_ALPHA}.js`,
+    code: `const onProbe = (store) => {\n  store.detail.apiData._${apiSpecFields?.unknown} = true\n}\n`,
+    expect: 0,
+  },
+  {
+    /* `data` 是很通用的名字,第三方套件的事件物件也用它 —— 那是別人的介面,
+       改名等於改壞,所以要有一個出口。 */
+    rule: 'customField',
+    needs: 'apiSpec',
+    name: 'customField 檔頭標了豁免就放行',
+    file: `${T}/${PROBE_PAGE_ALPHA}.js`,
+    code: `// lint-custom-field-exempt: 這裡的 data 是第三方編輯器的事件物件,不是 api 資料\n\nconst onProbe = (e) => {\n  e.data.${apiSpecFields?.unknown} = true\n}\n`,
+    expect: 0,
+  },
+  {
+    /* 只看 api 資料那兩個容器底下 —— 一般的畫面狀態不受這條約束,
+       它們本來就不是後端給的東西,每一個都要加底線的話整支檔案都是違規。 */
+    rule: 'customField',
+    needs: 'apiSpec',
+    name: 'customField 不是 api 資料的物件不受約束',
+    file: `${T}/${PROBE_PAGE_ALPHA}.js`,
+    code: `const onProbe = (state) => {\n  state.panel.${apiSpecFields?.unknown} = true\n}\n`,
+    expect: 0,
   },
   {
     /* 會出事的是「那一層有陣列」加上「有人用展開一層還原它」兩件事同時成立。
@@ -3612,6 +3879,31 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
     code: `<script setup>\nconst member = useMemberStore()\nconst info = member.info\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
     expect: 1,
     keyword: '斷了',
+  },
+  {
+    /* readonly({ … }) 包住的固定設定沒有響應性 —— 沒有人會改它,
+       所以「取出來就跟 store 斷了」的前提不成立。而且照這條改會壞掉:
+       storeToRefs 只收 ref 與 reactive,拿到的是 undefined,下一行取值就丟錯。 */
+    rule: 'storeToRefs',
+    name: 'storeToRefs 唯讀常數不誤報',
+    file: `${T}/${ACTIONS_DIR_NAME}/use${pascalOf(PROBE_DEPS_PAGE)}Actions.js`,
+    code: `export default () => {\n  const probe = use${pascalOf(PROBE_DEPS_PAGE)}Store()\n  const btns = probe.buttons\n\n  return { btns }\n}\n`,
+    context: {
+      [`${T}/${PROBE_DEPS_PAGE}.js`]: `import { defineStore } from 'pinia'\n\nexport const use${pascalOf(PROBE_DEPS_PAGE)}Store = defineStore('${PROBE_DEPS_PAGE}', () => {\n  const buttons = readonly({ sure: [] })\n  const detail = ref(null)\n\n  return { buttons, detail }\n})\n`,
+    },
+    expect: 0,
+  },
+  {
+    /* 同一支 store 裡真的會變的那一個照樣要報 —— 這條放行的只有唯讀常數。 */
+    rule: 'storeToRefs',
+    name: 'storeToRefs 唯讀常數之外照樣報',
+    file: `${T}/${ACTIONS_DIR_NAME}/use${pascalOf(PROBE_DEPS_PAGE)}Actions.js`,
+    code: `export default () => {\n  const probe = use${pascalOf(PROBE_DEPS_PAGE)}Store()\n  const info = probe.detail\n\n  return { info }\n}\n`,
+    context: {
+      [`${T}/${PROBE_DEPS_PAGE}.js`]: `import { defineStore } from 'pinia'\n\nexport const use${pascalOf(PROBE_DEPS_PAGE)}Store = defineStore('${PROBE_DEPS_PAGE}', () => {\n  const buttons = readonly({ sure: [] })\n  const detail = ref(null)\n\n  return { buttons, detail }\n})\n`,
+    },
+    expect: 1,
+    keyword: 'storeToRefs',
   },
   {
     name: 'storeToRefs 正確寫法不誤報',
@@ -4134,6 +4426,95 @@ const onCheckStoreDeclareCall = () => {
     !wrong.length,
     'store 裡可以呼叫的東西:讀設定那一類放行,行為照樣報',
     wrong.map((c) => `${c.why} —— ${c.name}() 預期${c.allow ? '放行' : '報出來'}`)
+  )
+}
+
+/**
+ * 共用變數檔裡哪幾組其實只有一個模組在用。
+ *
+ * 直接餵判準函式假的資料,不靠專案自己的共用變數檔:多數專案那一份是空的
+ * (樣式都跟著元件走),靠實際檔案來驗的話,這條的判準永遠沒有人守。
+ */
+const onCheckSingleModuleVars = () => {
+  const defined = new Set(['--probe-shared-px', '--probe-only-one', '--probe-nobody'])
+
+  const usedBy = new Map([
+    ['--probe-shared-px', new Set(['mProbeForm', 'mProbeDatepicker'])],
+    ['--probe-only-one', new Set(['mProbeForm'])],
+  ])
+
+  const got = singleModuleVarsOf(defined, usedBy)
+  const problems = []
+
+  if (got.length !== 1) {
+    problems.push(`預期只報一組,實際 ${got.length} 組:${got.map(([n]) => n).join('、')}`)
+  } else {
+    const [[name, owner]] = got
+    if (name !== '--probe-only-one') problems.push(`報錯了對象:${name}`)
+    if (owner !== 'mProbeForm') problems.push(`指錯了模組:${owner}`)
+  }
+
+  report(
+    !problems.length,
+    '共用變數檔:兩個模組在用的放行、只有一個的要報、沒有人用的不算',
+    problems
+  )
+}
+
+/**
+ * 規格文件裡的欄位名要從兩種位置收:properties 與 parameters。
+ *
+ * 直接餵判準函式一份最小的規格,不靠專案自己那一份:每個專案的 api 不一樣,
+ * 靠實際文件來驗的話,「網址上的參數也算數」這件事在沒有那種 api 的專案
+ * 永遠沒有人守 —— 而漏收它的後果是那些參數被要求加底線,加了就送不出去。
+ */
+const onCheckApiFieldSources = () => {
+  const names = apiFieldNamesOf({
+    paths: {
+      '/probe/{probePathParam}': {
+        get: {
+          parameters: [{ name: 'probePathParam' }, { name: 'probeQueryParam' }],
+          responses: { 200: { schema: { properties: { probeBodyField: {} } } } },
+        },
+      },
+    },
+  })
+
+  const missing = ['probePathParam', 'probeQueryParam', 'probeBodyField'].filter(
+    (name) => !names.has(name)
+  )
+
+  report(
+    !missing.length,
+    '規格文件的欄位名:properties 與 parameters 兩種都要收',
+    missing.map((name) => `${name} 沒有被收進索引 —— 它會被當成前端自己掛的欄位`)
+  )
+}
+
+/**
+ * 被中斷時也要清掉探測檔。
+ *
+ * 這件事沒辦法在同一個程序裡真的驗(要送訊號給自己、還要等它處理完),
+ * 所以驗的是「有沒有掛上去」—— 拿這支檔案自己的內容比對。
+ *
+ * 值得為它寫一則的理由:那幾支探測檔看起來像真的元件、色票與頁面,
+ * 殘留之後下一次檢查會把它們當成專案內容,而這套工具還會被整批複製到
+ * 別的專案 —— 跟著過去之後,那邊沒有人知道它們是什麼、也不敢刪。
+ */
+const onCheckCleanupOnSignal = () => {
+  const text = fs.readFileSync(fileURLToPath(import.meta.url), 'utf8')
+  const missing = ['SIGINT', 'SIGTERM'].filter(
+    (signal) => !new RegExp(`process\\.once\\([^)]*|['"]${signal}['"]`).test(text)
+  )
+
+  const wired = /for \(const signal of \[[^\]]*\]\) \{\s*process\.once\(signal, \(\) => \{\s*cleanup\(\)/.test(
+    text
+  )
+
+  report(
+    wired && !missing.length,
+    '被中斷時也會清掉探測檔',
+    wired ? [] : ['cleanup 沒有掛在中斷訊號上 —— 中途停掉的話,那一批探測檔會留在專案裡']
   )
 }
 
@@ -5073,6 +5454,24 @@ const cleanup = () => {
   onCleanGeneratedLists()
 }
 
+/*
+ * 被中斷時也要清乾淨。
+ *
+ * 主流程的 try/finally 攔得到「跑完」與「拋錯」,攔不到訊號 ——
+ * 按下中斷鍵、或程序被外面殺掉,那一批探測檔就留在專案裡了。
+ *
+ * 留下來的後果不只是多幾個檔案:它們看起來像真的元件、色票與頁面,
+ * 下一次檢查會把它們當成專案內容掃進去(違規數字莫名其妙地跳),
+ * 而最麻煩的是這套工具會被整批複製到別的專案 —— 那幾支跟著過去之後,
+ * 那邊沒有人知道它們是什麼、也不敢刪。
+ */
+for (const signal of ['SIGINT', 'SIGTERM', 'SIGHUP']) {
+  process.once(signal, () => {
+    cleanup()
+    process.exit(130)
+  })
+}
+
 let failed = 0
 
 /* 總數由這裡累加,不在最後把各組的長度加總 —— 加總要記得每一組都列進去,
@@ -5105,6 +5504,8 @@ const NEEDS_MET = {
   /* 沒有那支深拷貝函式的專案,「還原時有沒有深拷貝」分不出來,規則整條略過。
      判準取規則那一側同一個值,不在這裡另寫一份。 */
   deepCloneHelper: !!DEEP_CLONE_HELPER.name,
+  /* 沒有 api 規格文件的專案分不出「這個欄位名是不是後端給的」,規則整條略過。 */
+  apiSpec: Boolean(apiSpecFields),
 }
 
 /** 前提不成立時要講的那一句 —— 只列名字的話,看的人分不出是設定造成的還是規則壞了 */
@@ -5121,6 +5522,9 @@ const SKIP_REASON = {
   deepCloneHelper:
     '這個專案沒有填 DEEP_CLONE_HELPER(沒有那支深拷貝的共用函式),' +
     '「從 apiDefault 還原要深拷貝」那條分不出哪一處已經寫對,本來就整條略過。',
+  apiSpec:
+    '這個專案沒有 api 規格文件(設定的 API_SPEC_DIR 留空或檔案不在),' +
+    '「前端自己掛的欄位要加底線」那條分不出哪些名字是後端給的,本來就整條略過。',
   probeViewFolder:
     '頁面目錄裡沒有驗證自己建的資料夾(頁面目錄的位置設錯時會這樣),' +
     '而這幾則要一個對得上頁面資料夾的名字才驗得起來。' +
@@ -5343,6 +5747,9 @@ try {
   onCheckConfigItem()
   onCheckUnderAny()
   onCheckStoreDeclareCall()
+  onCheckSingleModuleVars()
+  onCheckApiFieldSources()
+  onCheckCleanupOnSignal()
   onCheckProbeDirSafety()
   onCheckCaseFilesInProbeDirs()
   onCheckGeneratedCleanup()

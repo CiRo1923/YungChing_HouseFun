@@ -7,9 +7,7 @@
   "paths": {
     "/api/{version}/buy/list": {
       "get": {
-        "tags": [
-          "Buy"
-        ],
+        "tags": ["Buy"],
         "summary": "Buy list (search + tabs + sorting + paging)",
         "description": "用途：執行 Buy 的 List 作業。HTTP 方法：GET；路由：/api/{version}/buy/list。",
         "parameters": [
@@ -249,9 +247,7 @@
     },
     "/api/{version}/buy/list/focus": {
       "get": {
-        "tags": [
-          "Buy"
-        ],
+        "tags": ["Buy"],
         "summary": "Buy list focus items",
         "description": "Golden exposure items for the list page focus block. Filters only by purpose and region or MRT station context; response items reuse the normal buy list item DTO.",
         "parameters": [
@@ -324,9 +320,7 @@
     },
     "/api/{version}/buy/house/{hfid}": {
       "get": {
-        "tags": [
-          "Buy"
-        ],
+        "tags": ["Buy"],
         "summary": "Buy house detail",
         "description": "用途：執行 Buy 的 House Detail 作業。HTTP 方法：GET；路由：/api/{version}/buy/house/{hfid}。",
         "parameters": [
@@ -375,9 +369,7 @@
     },
     "/api/{version}/buy/house/{hfid}/poi": {
       "get": {
-        "tags": [
-          "Buy"
-        ],
+        "tags": ["Buy"],
         "summary": "Buy house life map POI items",
         "description": "Detail page life-map POI items. Uses the existing POI cache mechanism and reuses PoiItem DTO.",
         "parameters": [
@@ -426,9 +418,7 @@
     },
     "/api/{version}/buy/suggest": {
       "get": {
-        "tags": [
-          "Buy"
-        ],
+        "tags": ["Buy"],
         "summary": "Keyword suggest (community/road/mrt/school/keyword)",
         "description": "用途：執行 Buy 的 Suggest 作業。HTTP 方法：GET；路由：/api/{version}/buy/suggest。",
         "parameters": [
@@ -501,9 +491,7 @@
     },
     "/api/{version}/region": {
       "get": {
-        "tags": [
-          "Buy"
-        ],
+        "tags": ["Buy"],
         "summary": "Get region city and area reference data",
         "description": "用途：執行 Buy 的 Region 作業。HTTP 方法：GET；路由：/api/{version}/region。",
         "parameters": [
@@ -543,9 +531,7 @@
     },
     "/api/{version}/mrt": {
       "get": {
-        "tags": [
-          "Buy"
-        ],
+        "tags": ["Buy"],
         "summary": "Get MRT operators, lines, and stations",
         "description": "用途：執行 Buy 的 Mrt 作業。HTTP 方法：GET；路由：/api/{version}/mrt。",
         "parameters": [
@@ -585,9 +571,7 @@
     },
     "/api/{version}/dirface": {
       "get": {
-        "tags": [
-          "Buy"
-        ],
+        "tags": ["Buy"],
         "summary": "Get direction face reference data",
         "description": "用途：執行 Buy 的 Dir Face 作業。HTTP 方法：GET；路由：/api/{version}/dirface。",
         "parameters": [
@@ -627,9 +611,7 @@
     },
     "/api/{version}/buy/subscriptions/search-conditions": {
       "post": {
-        "tags": [
-          "Buy"
-        ],
+        "tags": ["Buy"],
         "summary": "Subscribe a search condition (max 10 per user)",
         "description": "用途：執行 Buy 的 Subscribe Search Conditions 作業。HTTP 方法：POST；路由：/api/{version}/buy/subscriptions/search-conditions。",
         "parameters": [
@@ -690,9 +672,7 @@
     },
     "/api/{version}/buy/subscriptions/price-drop": {
       "post": {
-        "tags": [
-          "Buy"
-        ],
+        "tags": ["Buy"],
         "summary": "Subscribe price-drop for a house",
         "description": "用途：執行 Buy 的 Subscribe Price Drop 作業。HTTP 方法：POST；路由：/api/{version}/buy/subscriptions/price-drop。",
         "parameters": [
@@ -753,9 +733,7 @@
     },
     "/api/{version}/buy/messages": {
       "post": {
-        "tags": [
-          "Buy"
-        ],
+        "tags": ["Buy"],
         "summary": "建立買屋留言",
         "description": "建立買屋留言。若同一瀏覽器中的手機尚未於 1 小時內完成驗證， 系統會先建立待驗證留言並回傳驗證資訊；驗證完成後才會正式寫入留言。 若已驗證，則直接寫入留言並回傳棉花糖推薦物件列表。",
         "parameters": [
@@ -816,9 +794,7 @@
     },
     "/api/{version}/buy/messages/verify-code": {
       "post": {
-        "tags": [
-          "Buy"
-        ],
+        "tags": ["Buy"],
         "summary": "驗證買屋留言手機驗證碼",
         "description": "驗證待留言的手機驗證碼。驗證成功後會將原本暫存的留言正式寫入， 並回傳與一般留言完成相同的回應格式。",
         "parameters": [
@@ -879,9 +855,7 @@
     },
     "/api/{version}/buy/messages/resend-code": {
       "post": {
-        "tags": [
-          "Buy"
-        ],
+        "tags": ["Buy"],
         "summary": "重新發送買屋留言手機驗證碼",
         "description": "重新發送待留言的手機驗證碼。驗證碼建立 1 分鐘後才可重新發送， 第一版簡訊為 mock，會回傳開發測試用驗證碼。",
         "parameters": [
@@ -942,9 +916,7 @@
     },
     "/api/{version}/buy/auth/token/exchange": {
       "post": {
-        "tags": [
-          "BuyAuth"
-        ],
+        "tags": ["BuyAuth"],
         "summary": "以 Member Auth 加密 token 交換 Buy BFF 專用 bearer token。",
         "description": "用途：執行 Buy Auth 的 Exchange Token 作業。HTTP 方法：POST；路由：/api/{version}/buy/auth/token/exchange。",
         "parameters": [
@@ -1032,9 +1004,7 @@
     },
     "/api/{version}/buy/auth/me": {
       "get": {
-        "tags": [
-          "BuyAuth"
-        ],
+        "tags": ["BuyAuth"],
         "summary": "以 Buy BFF bearer token 取得買屋頻道會員資料。",
         "description": "用途：執行 Buy Auth 的 Me 作業。HTTP 方法：GET；路由：/api/{version}/buy/auth/me。",
         "parameters": [
@@ -1114,9 +1084,7 @@
     },
     "/api/{version}/buy/auth/logout": {
       "post": {
-        "tags": [
-          "BuyAuth"
-        ],
+        "tags": ["BuyAuth"],
         "summary": "撤銷 Buy BFF bearer token，清除買屋頻道登入狀態。",
         "description": "用途：執行 Buy Auth 的 Logout 作業。HTTP 方法：POST；路由：/api/{version}/buy/auth/logout。",
         "parameters": [
@@ -1176,9 +1144,7 @@
     },
     "/": {
       "get": {
-        "tags": [
-          "Housefun.Bff.Buy.Web"
-        ],
+        "tags": ["Housefun.Bff.Buy.Web"],
         "summary": "檢查 Buy Web BFF 是否可回應",
         "description": "用途：確認 Buy Web BFF 服務目前可正常處理基本請求。",
         "responses": {
@@ -1197,9 +1163,7 @@
     },
     "/api/{version}/buy/mail/test": {
       "post": {
-        "tags": [
-          "MailTest"
-        ],
+        "tags": ["MailTest"],
         "summary": "發送一封測試信，供部署後驗證 Amazon SES 設定。",
         "description": "用途：執行 Mail Test 的 Send 作業。HTTP 方法：POST；路由：/api/{version}/buy/mail/test。",
         "parameters": [
@@ -1269,9 +1233,7 @@
   "components": {
     "schemas": {
       "ActualPriceBlock": {
-        "required": [
-          "items"
-        ],
+        "required": ["items"],
         "type": "object",
         "properties": {
           "totalCount": {
@@ -1300,11 +1262,7 @@
         "additionalProperties": false
       },
       "ActualPriceItem": {
-        "required": [
-          "date",
-          "id",
-          "yearMonth"
-        ],
+        "required": ["date", "id", "yearMonth"],
         "type": "object",
         "properties": {
           "id": {
@@ -1458,10 +1416,7 @@
         "additionalProperties": false
       },
       "AiDecorStyle": {
-        "required": [
-          "images",
-          "style"
-        ],
+        "required": ["images", "style"],
         "type": "object",
         "properties": {
           "style": {
@@ -1478,9 +1433,7 @@
         "additionalProperties": false
       },
       "BreadcrumbItem": {
-        "required": [
-          "text"
-        ],
+        "required": ["text"],
         "type": "object",
         "properties": {
           "text": {
@@ -1695,14 +1648,7 @@
         "additionalProperties": false
       },
       "BuyHouseDetailResponse": {
-        "required": [
-          "badges",
-          "basic",
-          "hfid",
-          "media",
-          "pricing",
-          "seo"
-        ],
+        "required": ["badges", "basic", "hfid", "media", "pricing", "seo"],
         "type": "object",
         "properties": {
           "id": {
@@ -1784,14 +1730,7 @@
         "additionalProperties": false
       },
       "BuyListItem": {
-        "required": [
-          "address",
-          "badges",
-          "hfid",
-          "media",
-          "pin",
-          "title"
-        ],
+        "required": ["address", "badges", "hfid", "media", "pin", "title"],
         "type": "object",
         "properties": {
           "id": {
@@ -1929,11 +1868,7 @@
         "additionalProperties": false
       },
       "BuyListResponse": {
-        "required": [
-          "items",
-          "paging",
-          "tabs"
-        ],
+        "required": ["items", "paging", "tabs"],
         "type": "object",
         "properties": {
           "query": {
@@ -1958,26 +1893,12 @@
         "additionalProperties": false
       },
       "BuyOrderBy": {
-        "enum": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8,
-          9,
-          10
-        ],
+        "enum": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
         "type": "integer",
         "format": "int32"
       },
       "BuySuggestResponse": {
-        "required": [
-          "items"
-        ],
+        "required": ["items"],
         "type": "object",
         "properties": {
           "items": {
@@ -1990,12 +1911,7 @@
         "additionalProperties": false
       },
       "BuyTab": {
-        "enum": [
-          0,
-          1,
-          2,
-          3
-        ],
+        "enum": [0, 1, 2, 3],
         "type": "integer",
         "format": "int32"
       },
@@ -2022,11 +1938,7 @@
         "additionalProperties": false
       },
       "BuyViewMode": {
-        "enum": [
-          0,
-          1,
-          2
-        ],
+        "enum": [0, 1, 2],
         "type": "integer",
         "format": "int32"
       },
@@ -2165,11 +2077,7 @@
         "additionalProperties": false
       },
       "CommunityPriceTrendItem": {
-        "required": [
-          "date",
-          "monthLabel",
-          "yearMonth"
-        ],
+        "required": ["date", "monthLabel", "yearMonth"],
         "type": "object",
         "properties": {
           "date": {
@@ -2206,11 +2114,7 @@
         "additionalProperties": false
       },
       "CreateMessageRequest": {
-        "required": [
-          "houseId",
-          "name",
-          "phone"
-        ],
+        "required": ["houseId", "name", "phone"],
         "type": "object",
         "properties": {
           "houseId": {
@@ -2245,11 +2149,7 @@
         "additionalProperties": false
       },
       "CreateMessageRequestSource": {
-        "enum": [
-          0,
-          1,
-          2
-        ],
+        "enum": [0, 1, 2],
         "type": "integer",
         "format": "int32"
       },
@@ -2305,23 +2205,12 @@
         "additionalProperties": false
       },
       "CreateMessageResponseReason": {
-        "enum": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
+        "enum": [0, 1, 2, 3, 4, 5, 6, 7],
         "type": "integer",
         "format": "int32"
       },
       "DirFaceItem": {
-        "required": [
-          "name"
-        ],
+        "required": ["name"],
         "type": "object",
         "properties": {
           "id": {
@@ -2335,9 +2224,7 @@
         "additionalProperties": false
       },
       "DirFaceResponse": {
-        "required": [
-          "items"
-        ],
+        "required": ["items"],
         "type": "object",
         "properties": {
           "items": {
@@ -2380,11 +2267,7 @@
         "additionalProperties": false
       },
       "HouseBasic": {
-        "required": [
-          "address",
-          "purpose",
-          "title"
-        ],
+        "required": ["address", "purpose", "title"],
         "type": "object",
         "properties": {
           "caseUsageToken": {
@@ -2478,10 +2361,7 @@
         "additionalProperties": false
       },
       "HouseHighlightItem": {
-        "required": [
-          "context",
-          "title"
-        ],
+        "required": ["context", "title"],
         "type": "object",
         "properties": {
           "title": {
@@ -2494,9 +2374,7 @@
         "additionalProperties": false
       },
       "HouseMedia": {
-        "required": [
-          "images"
-        ],
+        "required": ["images"],
         "type": "object",
         "properties": {
           "images": {
@@ -2620,9 +2498,7 @@
         "additionalProperties": false
       },
       "ListMedia": {
-        "required": [
-          "images"
-        ],
+        "required": ["images"],
         "type": "object",
         "properties": {
           "images": {
@@ -2723,22 +2599,12 @@
         "additionalProperties": false
       },
       "MessageVerificationResponseReason": {
-        "enum": [
-          0,
-          1,
-          2,
-          3
-        ],
+        "enum": [0, 1, 2, 3],
         "type": "integer",
         "format": "int32"
       },
       "MrtLineItem": {
-        "required": [
-          "code",
-          "id",
-          "name",
-          "stations"
-        ],
+        "required": ["code", "id", "name", "stations"],
         "type": "object",
         "properties": {
           "id": {
@@ -2760,12 +2626,7 @@
         "additionalProperties": false
       },
       "MrtOperatorItem": {
-        "required": [
-          "code",
-          "id",
-          "lines",
-          "name"
-        ],
+        "required": ["code", "id", "lines", "name"],
         "type": "object",
         "properties": {
           "id": {
@@ -2787,9 +2648,7 @@
         "additionalProperties": false
       },
       "MrtResponse": {
-        "required": [
-          "items"
-        ],
+        "required": ["items"],
         "type": "object",
         "properties": {
           "items": {
@@ -2802,11 +2661,7 @@
         "additionalProperties": false
       },
       "MrtStationItem": {
-        "required": [
-          "code",
-          "id",
-          "name"
-        ],
+        "required": ["code", "id", "name"],
         "type": "object",
         "properties": {
           "id": {
@@ -3033,9 +2888,7 @@
         "additionalProperties": false
       },
       "PoiItem": {
-        "required": [
-          "name"
-        ],
+        "required": ["name"],
         "type": "object",
         "properties": {
           "name": {
@@ -3075,10 +2928,7 @@
         "additionalProperties": false
       },
       "RecommendBlock": {
-        "required": [
-          "agentPick",
-          "hotForYou"
-        ],
+        "required": ["agentPick", "hotForYou"],
         "type": "object",
         "properties": {
           "agentPick": {
@@ -3097,10 +2947,7 @@
         "additionalProperties": false
       },
       "RegionAreaItem": {
-        "required": [
-          "id",
-          "name"
-        ],
+        "required": ["id", "name"],
         "type": "object",
         "properties": {
           "id": {
@@ -3127,11 +2974,7 @@
         "additionalProperties": false
       },
       "RegionCityItem": {
-        "required": [
-          "areas",
-          "id",
-          "name"
-        ],
+        "required": ["areas", "id", "name"],
         "type": "object",
         "properties": {
           "id": {
@@ -3150,9 +2993,7 @@
         "additionalProperties": false
       },
       "RegionResponse": {
-        "required": [
-          "items"
-        ],
+        "required": ["items"],
         "type": "object",
         "properties": {
           "items": {
@@ -3165,9 +3006,7 @@
         "additionalProperties": false
       },
       "ResendMessageCodeRequest": {
-        "required": [
-          "verificationToken"
-        ],
+        "required": ["verificationToken"],
         "type": "object",
         "properties": {
           "verificationToken": {
@@ -3257,7 +3096,7 @@
           "robots": {
             "type": "string"
           },
-          "jsonLd": { }
+          "jsonLd": {}
         },
         "additionalProperties": false
       },
@@ -3291,9 +3130,7 @@
         "additionalProperties": false
       },
       "SubscribePriceDropRequest": {
-        "required": [
-          "houseId"
-        ],
+        "required": ["houseId"],
         "type": "object",
         "properties": {
           "houseId": {
@@ -3319,18 +3156,12 @@
         "additionalProperties": false
       },
       "SubscribePriceDropResponseReason": {
-        "enum": [
-          0,
-          1,
-          2
-        ],
+        "enum": [0, 1, 2],
         "type": "integer",
         "format": "int32"
       },
       "SubscribeSearchConditionRequest": {
-        "required": [
-          "conditionPath"
-        ],
+        "required": ["conditionPath"],
         "type": "object",
         "properties": {
           "conditionPath": {
@@ -3346,11 +3177,7 @@
         "additionalProperties": false
       },
       "SubscribeSearchConditionRequestSource": {
-        "enum": [
-          0,
-          1,
-          2
-        ],
+        "enum": [0, 1, 2],
         "type": "integer",
         "format": "int32"
       },
@@ -3375,22 +3202,12 @@
         "additionalProperties": false
       },
       "SubscribeSearchConditionResponseReason": {
-        "enum": [
-          0,
-          1,
-          2,
-          3
-        ],
+        "enum": [0, 1, 2, 3],
         "type": "integer",
         "format": "int32"
       },
       "SuggestItem": {
-        "required": [
-          "query",
-          "text",
-          "type",
-          "value"
-        ],
+        "required": ["query", "text", "type", "value"],
         "type": "object",
         "properties": {
           "type": {
@@ -3456,10 +3273,7 @@
         "additionalProperties": false
       },
       "VerifyMessageCodeRequest": {
-        "required": [
-          "verificationCode",
-          "verificationToken"
-        ],
+        "required": ["verificationCode", "verificationToken"],
         "type": "object",
         "properties": {
           "verificationToken": {

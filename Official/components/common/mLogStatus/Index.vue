@@ -1,4 +1,8 @@
 <script setup>
+/* component-deps —— 複製這支元件時要一起帶走:
+   stores/.composables/useCommonActions.js
+   stores/common.js
+   stores/memberAuth/project.js */
 import './.css/variables.css'
 import './.css/common.css'
 

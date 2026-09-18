@@ -8,6 +8,7 @@ import path from 'node:path'
 import {
   API_DIR,
   API_NAMING_IGNORED_SEGMENTS,
+  API_SPEC_DIR,
   SHARED_API_FILE,
   STANDALONE_APIS,
   VIEWS_DIR,
@@ -18,6 +19,8 @@ import {
   issueOf,
   lineNoOf,
   listViewFolders,
+  maskComments,
+  registerScanCache,
   warnOf,
 } from './shared.mjs'
 
@@ -446,8 +449,207 @@ const checkApiReturn = ({ rel, text }) => {
   return issues
 }
 
+// --- 規則 apiTryCatch:api 不要自己包 try/catch ------------------------------
+//
+// 共用實例已經統一處理錯誤,失敗也會轉成 { config, status, data } 回來 ——
+// 使用端靠 status 判斷成功與否。
+//
+// 再包一層 try/catch 會把錯誤吞在裡面:catch 那一段回傳的東西通常沒有 status,
+// 使用端的判斷就失效了,而畫面上看起來只是「這一支永遠成功」。
+
+const TRY_RE = /\btry\s*\{/g
+
+const checkApiTryCatch = ({ rel, text: raw }) => {
+  if (!isApiFile(rel)) return []
+
+  const text = maskComments(rel, raw)
+
+  return [...text.matchAll(TRY_RE)].map((m) =>
+    issueOf(
+      rel,
+      lineNoOf(text, m.index),
+      'apiTryCatch',
+      `api 不要自己包 try/catch —— ${EXPORT_FILE} 已經把失敗也轉成 { ${RETURN_FIELDS.join(', ')} },` +
+        `再包一層會把錯誤吞掉,使用端的 status 判斷就失效了,而畫面上看起來只是這一支永遠成功`
+    )
+  )
+}
+
+// --- 規則 apiPathParam:動態網址用 {key} 模板 --------------------------------
+//
+// 路徑上的參數寫成 `{id}`,呼叫端帶一個扁平物件進來 ——
+// 共用實例會把 {id} 換成值,並且把用過的那個 key 從 query / body 裡排除。
+//
+// 用樣板字串自己拼的話,那一段不經過替換:那個值只出現在網址上,
+// 而它原本也在參數物件裡,於是同一個值被送兩次(一次在路徑、一次在 query)。
+// 更麻煩的是 endpoint 從此不是一個固定字串,對照 api 文件時搜不到它。
+
+/** fetchApi.get(`…${…}…`) —— 端點用樣板字串拼出來的那種 */
+const TEMPLATE_ENDPOINT_RE = /fetchApi\.\w+\s*\(\s*`([^`]*\$\{[^`]*)`/g
+
+const checkApiPathParam = ({ rel, text: raw }) => {
+  if (!isApiFile(rel)) return []
+
+  const text = maskComments(rel, raw)
+
+  return [...text.matchAll(TEMPLATE_ENDPOINT_RE)].map((m) =>
+    issueOf(
+      rel,
+      lineNoOf(text, m.index),
+      'apiPathParam',
+      `端點 ${m[1]} 是拼出來的 —— 路徑參數寫成 {key} 模板,值由呼叫端帶在參數物件裡;` +
+        `自己拼的話那個值不會從 query / body 排除,同一個值會被送兩次,端點也不再是一個搜得到的固定字串`
+    )
+  )
+}
+
+// --- 規則 customField:前端自己掛的欄位要加底線 ------------------------------
+//
+// api 回來的資料上再掛前端自己要用的屬性(展開狀態、算好的金額)時,
+// 名字前面加一個底線,與後端給的欄位分開。
+//
+// 不加的話有兩種後果,而且都不會報錯:下一個人看到那個 key 會當成後端給的,
+// 去翻 api 文件卻找不到;後端哪天真的加了同名欄位,前端寫的那一份會被蓋掉。
+//
+// **「這個名字是不是後端給的」靠 api 規格文件認**(設定的 API_SPEC_DIR)——
+// 沒有那份文件就分不出來,規則整條略過。文件過期的徵狀是「後端新加的欄位
+// 被要求加底線」,那時要重新匯出文件,不是照著加。
+
+/** api 回來的資料放在層裡的這兩個欄位 —— 名字由 store 規範決定 */
+const API_DATA_CONTAINERS = ['apiData', 'data']
+
+/** <容器>.<路徑>.<key> = —— 取最後那一段 key,那是這次要掛上去的名字 */
+const CONTAINER_ASSIGN_RE = new RegExp(
+  `\\.(?:${API_DATA_CONTAINERS.join('|')})((?:\\.[A-Za-z_$][\\w$]*)+)\\s*=(?!=)`,
+  'g'
+)
+
+let apiFieldCache = null
+
+registerScanCache(() => {
+  apiFieldCache = null
+})
+
+/**
+ * 規格文件裡出現過的每一個欄位名。
+ *
+ * 整份走過一遍收 properties 的 key,不分是哪一支 api 的 ——
+ * 這條要回答的只是「後端的世界裡有沒有這個名字」,不是「這一支 api 回不回它」。
+ * 對得更細的話,要先知道這個變數是哪一支 api 的回傳,而那是跨好幾層的推斷。
+ */
+export const apiFieldNamesOf = (spec) => {
+  const names = new Set()
+
+  const walk = (node) => {
+    if (!node || typeof node !== 'object') return
+
+    /* 兩種來源都算:回傳與請求主體的欄位寫在 properties,網址上的參數
+       (query 與路徑參數)寫在 parameters 的 name。這條問的是
+       「後端的世界裡有沒有這個名字」,兩邊都是後端定義的。
+
+       少收 parameters 那一半的話,那些參數會被當成前端自己掛上去的,
+       而照著加底線之後那支 api 就送不出去了 —— 後端收不到它要的參數。 */
+    if (node.properties) Object.keys(node.properties).forEach((key) => names.add(key))
+
+    if (Array.isArray(node.parameters)) {
+      for (const param of node.parameters) {
+        if (param?.name) names.add(param.name)
+      }
+    }
+
+    Object.values(node).forEach(walk)
+  }
+
+  walk(spec)
+
+  return names
+}
+
+/**
+ * 規格文件那個資料夾底下每一份 json 的欄位名,合起來算一份索引。
+ *
+ * 沒有設定、資料夾不在、裡面一份 json 都沒有,都回 null —— 沒有比對基準,
+ * 那條規則整條略過(前提清單會講出這件事)。
+ */
+export const specFieldsIn = (dir) => {
+  let files = []
+
+  try {
+    files = fs.readdirSync(dir).filter((name) => name.toLowerCase().endsWith('.json'))
+  } catch {
+    return null // 資料夾不在
+  }
+
+  const names = new Set()
+
+  for (const name of files) {
+    try {
+      for (const field of apiFieldNamesOf(JSON.parse(fs.readFileSync(path.join(dir, name), 'utf8')))) {
+        names.add(field)
+      }
+    } catch {
+      // 某一份壞掉或不是規格文件就跳過它,不要因此讓整條規則失效
+    }
+  }
+
+  return names.size ? names : null
+}
+
+const specFieldsOf = (root) => {
+  if (apiFieldCache?.root === root) return apiFieldCache.names
+  if (!API_SPEC_DIR) return null
+
+  const names = specFieldsIn(path.join(root, API_SPEC_DIR))
+
+  apiFieldCache = { root, names }
+
+  return names
+}
+
+const checkCustomField = ({ rel, text, root }) => {
+  if (!isInSrc(rel) || !/\.(vue|js)$/.test(rel)) return []
+
+  /* 檔頭標 `lint-custom-field-exempt: 理由` 放行整支。
+     `data` 是個很通用的名字,第三方套件的事件物件也用它(編輯器的貼上事件
+     就是 `e.data.dataValue`)—— 那是別人的介面,改名等於改壞,
+     而規則分不出「store 的那一層」與「剛好也叫 data 的東西」。
+
+     沒有出口的話,那幾筆每次都再印一遍而且一筆都改不掉,
+     而一條一直報「改不了的東西」的規則,最後會連同真正該改的一起被略過。 */
+  if (hasExemptMark(text, 'custom-field')) return []
+
+  const fields = specFieldsOf(root)
+  if (!fields?.size) return []
+
+  const issues = []
+  const seen = new Set()
+
+  for (const m of text.matchAll(CONTAINER_ASSIGN_RE)) {
+    const key = m[1].split('.').pop()
+
+    if (key.startsWith('_') || fields.has(key) || seen.has(key)) continue
+    seen.add(key)
+
+    issues.push(
+      issueOf(
+        rel,
+        lineNoOf(text, m.index),
+        'customField',
+        `${key} 不在 api 規格文件裡 —— 前端自己掛上去的欄位名前面加一個底線(_${key}),` +
+          `與後端給的欄位分開;下一個人才不會拿它去翻 api 文件,後端加了同名欄位時也不會蓋掉。` +
+          `這其實是後端給的欄位的話,代表 ${API_SPEC_DIR} 該重新匯出了`
+      )
+    )
+  }
+
+  return issues
+}
+
 export const API_CHECKS = [
   checkApiClient,
+  checkApiTryCatch,
+  checkApiPathParam,
+  checkCustomField,
   checkApiScope,
   checkApiSource,
   checkApiNaming,
@@ -460,6 +662,9 @@ export const API_RULE_TITLE = {
   apiSource: 'api 實例的來源不對',
   apiNaming: 'api 函式的命名',
   apiReturn: 'api 的回傳形狀',
+  apiTryCatch: 'api 自己包了 try/catch',
+  apiPathParam: '動態網址用拼接,不是 {key} 模板',
+  customField: '前端自己掛的欄位沒有加底線',
 }
 
 export const API_RULE_HINT = {
@@ -467,5 +672,9 @@ export const API_RULE_HINT = {
   apiScope: `${API_DIR} 的檔名要對得上 ${VIEWS_DIR} 的第一層,對不上的放 ${SHARED_API_FILE}.js`,
   apiSource: `實例建在 ${CONFIG_FILE}(api 目錄再分層時,每一層各自一支),api 檔案 import 它即可`,
   apiNaming: 'api + Method + endpoint 各段(method 寫在前面,GET 也要寫)',
+  apiTryCatch: `錯誤由 ${EXPORT_FILE} 統一處理,api 自己包會把它吞掉`,
+  apiPathParam: '路徑參數寫成 {key},值由呼叫端帶在參數物件裡',
+  customField:
+    '規格文件裡沒有這個欄位名 —— 前端自己掛的加底線;真的是後端給的就重新匯出那份文件',
   apiReturn: `一律回 { ${RETURN_FIELDS.join(', ')} }`,
 }

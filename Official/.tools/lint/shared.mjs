@@ -21,6 +21,7 @@ import {
   SCANNABLE_RE,
   SKIP_DIRS,
   SRC_PREFIX,
+  STORE_DIR,
   TOOLING_PREFIXES,
   VIEW_RESOURCE_DEPTH,
   VIEWS_DIR,
@@ -30,6 +31,7 @@ export {
   ABSOLUTE_PATH_SCOPE,
   ACTIONS_DIR_NAME,
   API_DIR,
+  API_SPEC_DIR,
   DEEP_CLONE_HELPER,
   API_NAMING_IGNORED_SEGMENTS,
   BREAKPOINTS,
@@ -751,6 +753,58 @@ export const registerScanCache = (reset) => scanCacheResets.push(reset)
 
 /** 清空全部跨檔索引 —— 專案裡的檔案在這個程序執行期間被改寫之後要呼叫 */
 export const resetScanCaches = () => scanCacheResets.forEach((reset) => reset())
+
+let storeIndexCache = null
+
+registerScanCache(() => {
+  storeIndexCache = null
+})
+
+/** const x = readonly(…) —— 但 readonly(ref(…)) 不算,那是真的會變的狀態 */
+const READONLY_CONST_RE = /const\s+(\w+)\s*=\s*readonly\(\s*(?!ref\b)/g
+
+/**
+ * store 目錄的索引,兩件事一起建:
+ *
+ *   files     匯出名(use{名稱}Store / use{名稱}Actions)→ 它在哪一支檔案
+ *   readonly  每一支檔案裡「唯讀常數」的名字
+ *
+ * 兩邊問的都是「這個名字在 store 那一側是什麼」,掃的是同一批檔案 ——
+ * 各建一份的話,同一個專案會被走訪兩次,而且其中一份改了判準另一份不會跟著。
+ *
+ * 匯出名認兩種寫法:store 多半是具名匯出,actions 則常常是預設匯出、
+ * 靠檔名自動注入出函式名。只認具名的話,actions 那一半永遠查不到。
+ */
+export const storeIndexOf = (root) => {
+  if (storeIndexCache?.root === root) return storeIndexCache.index
+
+  const files = new Map()
+  const readonlyConsts = new Map()
+
+  for (const abs of listFiles(root, STORE_DIR)) {
+    if (!abs.endsWith('.js')) continue
+
+    const rel = toRel(root, abs)
+    const base = path.basename(rel, '.js')
+    if (/^use[A-Z]/.test(base)) files.set(base, rel)
+
+    try {
+      const text = fs.readFileSync(abs, 'utf8')
+
+      for (const m of text.matchAll(/export\s+const\s+(use\w+)/g)) files.set(m[1], rel)
+
+      const names = new Set([...text.matchAll(READONLY_CONST_RE)].map((m) => m[1]))
+      if (names.size) readonlyConsts.set(rel, names)
+    } catch {
+      // 讀不到某一支就跳過,不要因此讓整條規則失效
+    }
+  }
+
+  const index = { files, readonly: readonlyConsts }
+  storeIndexCache = { root, index }
+
+  return index
+}
 
 /**
  * 每一段 import 的起訖行 —— 一段 import 常常跨好幾行(具名匯入一行一個)。

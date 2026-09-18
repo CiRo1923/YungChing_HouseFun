@@ -1,9 +1,12 @@
 <script setup>
+/* component-deps —— 複製這支元件時要一起帶走:
+   stores/.composables/useCommonActions.js
+   stores/common.js */
 import './.css/variables.css'
 import './.css/common.css'
 
-import { useCommonStore } from '@stores/common.js'
 import useCommonActions from '@stores/.composables/useCommonActions.js'
+import { useCommonStore } from '@stores/common.js'
 
 const common = useCommonStore()
 const { device } = storeToRefs(common)

@@ -311,6 +311,14 @@ pinia 的 store 實例是 reactive 物件,值一旦「取出來」就跟 store �
 - **寫入**:`member.info = x` 是對的,只有「讀出來存成 `const`」才有問題
 - **`$` 開頭的 pinia API**:`$patch` / `$reset` / `$subscribe` / `$state`
 - **`use*Actions()`**:那是一般 composable,不是 store,直接解構就好
+- **`readonly({ … })` 包住的固定設定**:那種東西沒有響應性可言 ——
+  沒有人會改它,所以「取出來就跟 store 斷了」的前提不成立
+
+最後那一種規則會自己認出來:它到 store 那一側看那個屬性的宣告,
+是 `readonly({ … })`(不是 `readonly(ref(…))`)就跳過,不必標豁免。
+
+**而且那種情況照這條改會壞掉** —— `storeToRefs` 只收 ref 與 reactive,
+`readonly({ … })` 兩者皆非,拿到的是 `undefined`,下一行取值就丟錯。
 
 ## 5. action 命名:onApi + api 函式名
 

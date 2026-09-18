@@ -1,4 +1,8 @@
 <script setup>
+/* component-deps —— 複製這支元件時要一起帶走:
+   stores/.composables/useCommonActions.js
+   stores/.composables/useNavActions.js
+   stores/common.js */
 import './.css/variables.css'
 import './.css/common.css'
 
@@ -6,7 +10,6 @@ const common = useCommonStore()
 const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
 const { menu } = useNavActions()
-
 const route = useRoute()
 const isDevicePT = computed(() => /^(p|t)$/.test(device.value))
 const isDeviceM = computed(() => device.value === 'm')

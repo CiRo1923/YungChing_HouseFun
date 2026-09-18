@@ -3,9 +3,10 @@ import { fetchApi } from '@js/_api/member/.config.js'
 // Member Auth 的 handoff token 換成這個服務專用的 bearer token。
 //
 // encryptedToken 走 query 而不是 body(這支與 buy 的 token/exchange 在這點上不同),
-// 所以直接接在路徑後面 —— onFetchApi 對 POST 會把物件當 body 送。
-export const apiPostAuthTokenExchange = async ({ encryptedToken }) =>
-  await fetchApi.post(`auth/token/exchange?encryptedToken=${encodeURIComponent(encryptedToken)}`)
+// 所以寫成 {key} 放在 query 位置 —— onFetchApi 會把它從參數物件填進網址,
+// 填過的 key 不再進 body,POST 的物件才不會把同一個值送第二次。
+export const apiPostAuthTokenExchange = async (data) =>
+  await fetchApi.post(`auth/token/exchange?encryptedToken={encryptedToken}`, data)
 
 export const apiGetAuthMe = async (data) => await fetchApi.get(`auth/me`, data)
 
