@@ -1,4 +1,6 @@
 <script setup>
+/* component-deps —— 複製這支元件時要一起帶走:
+   stores/popup.js */
 import './.css/variables.css'
 import './.css/promiseVariables.css'
 import './.css/common.css'

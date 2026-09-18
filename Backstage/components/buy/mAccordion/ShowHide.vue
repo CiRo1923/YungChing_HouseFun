@@ -1,4 +1,7 @@
 <script setup>
+/* component-deps —— 複製這支元件時要一起帶走:
+   stores/.composables/useCommonActions.js
+   stores/common.js */
 const common = useCommonStore()
 const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()

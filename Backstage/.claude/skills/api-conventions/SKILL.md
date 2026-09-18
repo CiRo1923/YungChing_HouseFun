@@ -156,10 +156,18 @@ export const apiGetMemberMissionModuleID = (data) =>
 
 舊的 `apiParams`(用位置參數接路徑)**已淘汰**,規則 `deprecated` 會擋。
 
+**不要用樣板字串自己拼路徑**(`` fetchApi.get(`member/voucher/${data.id}`) ``)。
+規則 `apiPathParam`(擋)。自己拼的那一段不經過替換:那個值只出現在網址上,
+而它原本也在參數物件裡 —— 同一個值被送兩次,一次在路徑、一次在 query。
+endpoint 也從此不是一個固定字串,拿去對照 api 文件時搜不到它。
+
 ## 6. 不包 try/catch
 
-`.export.js` 已經統一處理錯誤並轉成 `{ config, status, data }`。
-再包一層 try/catch 只會把錯誤吞掉,讓 `status` 判斷失效。
+規則 `apiTryCatch`(擋)。`.export.js` 已經統一處理錯誤並轉成
+`{ config, status, data }`,使用端靠 `status` 判斷成功與否。
+
+再包一層 try/catch 會把錯誤吞在裡面:`catch` 那一段回傳的東西通常沒有 `status`,
+使用端的判斷就失效了 —— 而畫面上看起來只是「這一支永遠成功」。
 
 ## 相關
 

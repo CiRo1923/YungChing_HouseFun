@@ -18,6 +18,7 @@ import { IS_SOURCE_PROJECT } from './rules-global.mjs'
 import { detectViewResourceDepth, isModuleCss, isModuleStyle, listFiles, toRel } from './shared.mjs'
 import {
   API_DIR,
+  API_SPEC_DIR,
   BREAKPOINTS,
   BREAKPOINT_SCREENS,
   BUILD_CONFIG_FILES,
@@ -30,6 +31,7 @@ import {
   FORM_GROUP_VALIDATOR,
   FRAMEWORKS,
   PARALLEL_AWAIT_HELPER,
+  POPUP_DIR_NAME,
   PROJECT_FRAMEWORK,
   PLAIN_TEXT_EXCLUDED_DIRS,
   SHARED_MODULE_VARIABLES,
@@ -83,7 +85,7 @@ const REQUIREMENTS = [
 
        留空是正常的(樣式都跟著元件走、沒有跨模組共用的位置),那時不檢查。 */
     label: '跨模組共用的變數檔',
-    rules: ['moduleVar'],
+    rules: ['moduleVar', 'sharedVarScope'],
     check: (root) =>
       !SHARED_MODULE_VARIABLES ||
       fs.existsSync(path.join(root, ...CSS_MODULES_DIR.split('/'), ...SHARED_MODULE_VARIABLES.split('/')))
@@ -175,17 +177,35 @@ const REQUIREMENTS = [
   },
   {
     label: 'api 目錄',
-    rules: ['apiClient', 'apiScope', 'apiSource', 'apiNaming', 'apiReturn'],
+    rules: ['apiClient', 'apiScope', 'apiSource', 'apiNaming', 'apiReturn', 'apiTryCatch', 'apiPathParam'],
     check: (root) => (hasDir(root, API_DIR) ? API_DIR : null),
     need: `要有 api 目錄(目前設定為 ${API_DIR})`,
     why: 'api 的五條規則只看那個目錄底下的檔案。目錄位置不符時,api 寫法完全不會被檢查。',
   },
   {
     label: 'store 目錄',
-    rules: ['storeDeclare', 'storeNaming', 'storeScope', 'storeActions', 'storeActionNaming', 'storeActionReturn', 'storeApiDefault', 'storeDefaultClone', 'storeResetDefault', 'storeLayer', 'storeDir'],
+    rules: ['componentDeps', 'storeDeclare', 'storeNaming', 'storeScope', 'storeActions', 'storeActionNaming', 'storeActionReturn', 'storeApiDefault', 'storeDefaultClone', 'storeResetDefault', 'storeLayer', 'storeDir'],
     check: (root) => (hasDir(root, STORE_DIR) ? STORE_DIR : null),
     need: `要有 store 目錄(目前設定為 ${STORE_DIR})`,
     why: 'store 與 actions 的規則以那個目錄為範圍。位置不符時,store 的寫法完全不會被檢查。',
+  },
+  {
+    /* 這條要分得出「這個欄位名是不是後端給的」,而那只有規格文件答得出來。
+       沒有文件時每一個欄位都會被當成前端自訂的 —— 整批誤報。 */
+    label: 'api 的規格文件',
+    rules: ['customField'],
+    check: (root) => Boolean(API_SPEC_DIR) && fs.existsSync(path.join(root, API_SPEC_DIR)),
+    need: `要有後端匯出的 api 規格文件 —— 跟後端要 swagger 的網址,把匯出的 json 放進 ${API_SPEC_DIR || '(設定 API_SPEC_DIR)'}`,
+    why: '「前端自己掛的欄位要加底線」靠那份文件認出哪些名字是後端給的。沒有文件時這條整條略過 —— 報出來的話每一個欄位名都是違規,而那全是誤報。',
+  },
+  {
+    /* 各專案的慣例用語不同(popup、modal、dialog)—— 填錯或留空時,
+       規則一個檔案都掃不到,而那與「全部放對了」在畫面上長得一樣。 */
+    label: '彈窗資料夾的慣例名',
+    rules: ['popupLocation'],
+    check: () => POPUP_DIR_NAME || null,
+    need: '設定裡的 POPUP_DIR_NAME 要填這個專案收彈窗的資料夾名,沒有這種慣例就留空',
+    why: '「彈窗要收在頁面的元件層底下」靠那個名字認出哪幾支是彈窗。留空的時候這條整條略過 —— 放錯位置不會有人發現。',
   },
   {
     /* 這條要分得出「哪一處已經是深拷貝」,而那是靠專案那支共用函式的名字認的。
@@ -198,7 +218,7 @@ const REQUIREMENTS = [
   },
   {
     label: '頁面目錄',
-    rules: ['apiScope', 'storeScope', 'storeLayer', 'pageApiData', 'pageActionNaming', 'pageApiImport'],
+    rules: ['apiScope', 'storeScope', 'storeLayer', 'pageApiData', 'pageActionNaming', 'pageApiImport', 'popupLocation'],
     check: (root) => (hasDir(root, VIEWS_DIR) ? VIEWS_DIR : null),
     need: `要有頁面目錄(目前設定為 ${VIEWS_DIR})`,
     why: 'api 檔名、store 檔名與分層都是拿頁面目錄的第一層資料夾來對照。目錄不存在時,那些對照沒有比對基準,頁面規則也掃不到檔案。',
@@ -306,8 +326,9 @@ export const NO_PREREQUISITE_RULES = [
   'componentClass',
   'componentFolder',
   'viewFolder',
-  /* 只看檔案裡的 class 怎麼寫,不必先有某個目錄或設定檔存在 */
+  /* 這兩條只看檔案內容怎麼寫(class、畫面區段的標籤),不必先有某個目錄或設定檔 */
   'truncateClass',
+  'spacerElement',
   /* 這條自己掃全案收集「定義過哪些變數」,不依賴任何目錄或設定存在 ——
      專案沒有 css 變數時它一個引用都掃不到,結果就是通過,不是誤報。 */
   'unknownVar',

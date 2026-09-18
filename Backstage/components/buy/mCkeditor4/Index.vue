@@ -1,4 +1,6 @@
 <script setup>
+/* lint-custom-field-exempt: 這支裡的 e.data.dataValue 是編輯器貼上事件的介面,
+   由套件定義,不是 api 回來的資料 —— 加底線的話編輯器讀不到那個值,貼上的內容會整段消失。 */
 import '@css/_plugin/ckeditor4.css'
 
 const emits = defineEmits(['update:modelValue'])

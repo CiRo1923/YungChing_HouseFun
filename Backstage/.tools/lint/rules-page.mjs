@@ -10,7 +10,9 @@ import {
   ACTIONS_DIR_NAME,
   API_DIR,
   PARALLEL_AWAIT_HELPER,
+  POPUP_DIR_NAME,
   STORE_DIR,
+  VIEW_UNDERSCORE_FOLDERS,
   VIEWS_DIR,
   bodyRangeOf,
   isComponentFile,
@@ -102,10 +104,17 @@ const PAGE_FN_RE = /const\s+(\w+)\s*=\s*(?:async\s*)?\([^)]*\)\s*=>\s*\{/g
  * 它的名字講的是那件事(使用者按了確認、進入畫面要準備什麼),
  * 改成 api 的名字反而更難懂 —— 讀的人會以為它只是那支 api 的包裝。
  *
- * 兩個訊號,有一個成立就不是單純包裝:
+ * 三個訊號,有一個成立就不是單純包裝:
  *
  *   等了第二件事      表單驗證、跳彈窗、另一支請求 —— 那支 action 只是其中一步
+ *   還做了第二件事    同步呼叫另一個行為(記錄完再關掉、送出後再重置)
  *   那支被條件包住    有條件才打的一步(「已經有資料就不重打」),不是這個函式的全部
+ *
+ * 第二件事不一定會被 await —— 不回傳 Promise 的行為(關閉彈窗、重置狀態)
+ * 直接呼叫就結束了。只認 await 的話,那種函式會被當成單純包裝,
+ * 而它的名字講的是那件事,改成 api 的名字之後看的人會以為它只打了一支 api。
+ *
+ * 開關讀取狀態與錯誤處理不算第二件事(ACTION_UTILS)—— 那是包裝本來就要做的。
  *
  * 判斷前先把註解遮掉 —— 註解裡舉例寫出一個 await 或條件,不該影響判斷。
  */
@@ -113,6 +122,12 @@ const isPlainWrapper = (body, called) => {
   const text = maskComments('probe.js', body)
 
   if ([...text.matchAll(/\bawait\b/g)].length > 1) return false
+
+  const behaviors = new Set(
+    [...text.matchAll(/\b(on[A-Z]\w*)\s*\(/g)].map((m) => m[1]).filter((n) => !ACTION_UTILS.has(n))
+  )
+
+  if (behaviors.size > 1) return false
 
   const at = text.search(new RegExp(`\\b${called}\\s*\\(`))
   if (at === -1) return true
@@ -486,7 +501,43 @@ export const onWrapMountedCalls = (text, rel) => {
  */
 const withHelperImport = (text) => withNamedImport(text, PARALLEL_HELPER, PARALLEL_HELPER_SOURCE)
 
+// --- 規則 popupLocation:彈窗收在頁面的元件層底下 ----------------------------
+//
+// 頁面目錄底下那幾層資料夾對應的是網址,而彈窗不是一個網址 —— 它是被某一頁
+// 叫出來的東西。放在頁面那幾層裡的話,看目錄的人會以為多了一頁,
+// 而路由表裡找不到它。
+//
+// 所以彈窗一律收在元件層底下(設定的 VIEW_UNDERSCORE_FOLDERS,通常是 _components)。
+//
+// **放在元件層的哪一層,看它被誰用**:只有某一個子單元用就收在那個子單元底下,
+// 整個大單元共用才放在元件層的第一層。這一半沒有工具在檢查 —— 工具算得出
+// 現在誰在用,看不出「以後會不會有第二個地方要用」。判斷方式寫在頁面規範裡。
+
+const checkPopupLocation = ({ rel }) => {
+  if (!POPUP_DIR_NAME) return [] // 這個專案沒有彈窗資料夾的慣例
+  if (!rel.startsWith(`${VIEWS_DIR}/`) || !rel.endsWith('.vue')) return []
+
+  const segments = rel.split('/')
+  const at = segments.lastIndexOf(POPUP_DIR_NAME)
+  if (at === -1) return []
+
+  // 彈窗資料夾之前的那幾層裡,要有一層是元件層
+  if (segments.slice(0, at).some((name) => VIEW_UNDERSCORE_FOLDERS.includes(name))) return []
+
+  return [
+    issueOf(
+      rel,
+      1,
+      'popupLocation',
+      `彈窗要收在頁面的元件層底下(${VIEW_UNDERSCORE_FOLDERS.join(' / ')})—— ` +
+        `現在這個位置的每一層對應的都是網址,而彈窗不是一個網址;` +
+        `看目錄的人會以為多了一頁,而路由表裡找不到它`
+    ),
+  ]
+}
+
 export const PAGE_CHECKS = [
+  checkPopupLocation,
   checkPageApiData,
   checkPageActionNaming,
   checkPageApiImport,
@@ -494,6 +545,7 @@ export const PAGE_CHECKS = [
 ]
 
 export const PAGE_RULE_TITLE = {
+  popupLocation: '彈窗放在對應網址的那幾層裡',
   pageApiData: '頁面自建 api 資料',
   pageActionNaming: '頁面包裝 action 的命名',
   pageApiImport: '頁面直接 import api',
@@ -502,6 +554,7 @@ export const PAGE_RULE_TITLE = {
 }
 
 export const PAGE_RULE_HINT = {
+  popupLocation: `彈窗收在 ${VIEW_UNDERSCORE_FOLDERS.join(' / ')} 底下 —— 頁面那幾層對應的是網址`,
   pageApiData: 'api 資料放 store,頁面不要自己 ref 一份 —— 跳 popup / 換頁回來才不會消失',
   pageActionNaming: 'on + endpoint(去掉 Api 與 method)—— 三層命名一路對得上',
   pageApiImport: `api 走 ${ACTIONS_DIR} 進 store,頁面讀 store`,

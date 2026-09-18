@@ -509,7 +509,7 @@ const templateClassTokensOf = (text) => {
   return tokens
 }
 
-/* 範圍只有共用元件目錄。容器(彈窗、廣告這類系統元件)與版型不在內 ——
+/* 範圍只有共用元件目錄。容器(掛在版面上的系統元件)與版型不在內 ——
    那兩層是依頁面組起來的版面,不是會被到處放的模組:沒有模組前綴、
    也沒有自己的樣式資料夾,套上去等於要求整層改名搬家。
    那兩層仍受文字類規則約束(註解不用裝飾符號那幾條)。 */
@@ -850,6 +850,88 @@ const checkModuleVariables = ({ rel, text: raw }) => {
           (SHARED_MODULE_VARIABLES ? `;跨模組共用則放 ${SHARED_MODULE_VARIABLES}` : '')
       )
     })
+}
+
+// --- 規則 sharedVarScope:共用變數檔只放真的跨模組的那幾組 -------------------
+//
+// 共用變數檔是留給「兩個以上的元件都要用」的那幾組級距。只有一個模組在用的
+// 放在那裡,對那個模組來說它的值就跑到別的檔案去了 —— 改的時候要開兩支,
+// 刪掉那個元件時也不會有人想到要清掉這一段。
+//
+// 「以後可能也會用到」不算 —— 那個以後常常不會來,而清單會一直長。
+// 真的第二個模組要用的時候再搬過去,那時兩邊都看得到它確實被共用。
+//
+// 判斷要看全案:哪幾支模組樣式引用了這個變數。所以整份建一次索引,
+// 與「誰定義過這個變數」那一份同一個做法。
+
+/**
+ * 只有一個模組在用的變數 —— 回傳 [變數名, 那個模組] 的清單。
+ *
+ * 判準抽出來讓驗證直接測得到:多數專案的共用變數檔是空的(樣式都跟著元件走),
+ * 靠實際檔案來驗的話,這條的判準永遠沒有人守。
+ *
+ * 一個使用者都沒有的不列入 —— 那是另一件事(沒有人用的變數),
+ * 而且剛加上去、還沒接上使用端的那一刻也長這樣,報它只會擋住正在做的事。
+ */
+export const singleModuleVarsOf = (defined, usedBy) =>
+  [...defined]
+    .map((name) => [name, [...(usedBy.get(name) ?? [])]])
+    .filter(([, modules]) => modules.length === 1)
+    .map(([name, modules]) => [name, modules[0]])
+
+let sharedVarCache = null
+
+registerScanCache(() => {
+  sharedVarCache = null
+})
+
+/** 每個變數被哪幾個模組引用過(只看模組自己的樣式) */
+const varUsersOf = (root) => {
+  if (sharedVarCache?.root === root) return sharedVarCache.usedBy
+
+  const usedBy = new Map()
+
+  for (const dir of COMPONENT_DIRS) {
+    for (const abs of listFiles(root, dir)) {
+      const rel = toRel(root, abs)
+      if (!isModuleCss(rel)) continue
+
+      const owner = moduleFolderOf(rel)
+      if (!owner) continue
+
+      try {
+        const text = maskCssComments(fs.readFileSync(abs, 'utf8'))
+
+        for (const m of [...text.matchAll(VAR_USE_RE), ...text.matchAll(ARBITRARY_VAR_RE)]) {
+          if (!usedBy.has(m[1])) usedBy.set(m[1], new Set())
+          usedBy.get(m[1]).add(owner)
+        }
+      } catch {
+        // 讀不到某一支就跳過,不要因此讓整條規則失效
+      }
+    }
+  }
+
+  sharedVarCache = { root, usedBy }
+
+  return usedBy
+}
+
+const checkSharedVarScope = ({ rel, text: raw, root }) => {
+  if (!SHARED_MODULE_VARIABLES || !rel.endsWith(SHARED_MODULE_VARIABLES)) return []
+
+  const text = maskCssComments(raw)
+  const defined = new Set([...text.matchAll(VAR_DEFINE_RE)].map((m) => m[1]))
+
+  return singleModuleVarsOf(defined, varUsersOf(root)).map(([name, owner]) => ({
+    ...issueOf(
+      rel,
+      lineNoOf(text, text.indexOf(name)),
+      'sharedVarScope',
+      `${name} 只有 ${owner} 在用 —— 搬回那個模組自己的 Variables 檔;` +
+        `留在共用檔的話,改它要開兩支檔案,而那個元件被刪掉時這一段不會有人想到要清`
+    ),
+  }))
 }
 
 // --- 規則 truncateClass:單行省略改用 line-clamp-1 ---------------------------
@@ -1321,11 +1403,27 @@ const RESPONSIVE_RE = /@screen\s+[\w-]|@media[^{]*\b(?:min|max)-width\b/
 
 export const hasResponsiveStyles = (root) => someModuleCss(root, (text) => RESPONSIVE_RE.test(text))
 
+/**
+ * 字級不吃斷點的豁免標記。
+ *
+ * 字級分兩種,而兩種的正確做法相反:全站只有一種樣貌的固定模組,字級寫在元件裡、
+ * 分斷點定義成變數;到處會用到的通用元件則不寫死,留給使用端傳。
+ *
+ * 兩種在程式碼上長得一樣,工具分不出來 —— 但**兩種都不會需要這個標記**:
+ * 前者照規範分斷點就通過了,後者根本不該把值寫在元件裡。
+ * 放行的話,那個標記會讓「還沒決定由誰定」看起來像「決定過了」,
+ * 而它蓋掉的正是唯一會提醒人去想這件事的那一筆。
+ *
+ * 命名規範要求字級一律以 -text-size 結尾,所以認名字就夠。
+ */
+const isTextSizeVar = (name) => name.endsWith('-text-size')
+
 const checkBreakpointSet = ({ rel, text: raw }) => {
   if (!BREAKPOINTS.length) return []
+  if (!isModuleStyle(rel)) return []
 
   // 豁免標記寫在註解裡,所以要先判斷,再把註解遮掉
-  if (!isModuleStyle(rel) || hasExemptMark(raw, 'breakpoint')) return []
+  const exempt = hasExemptMark(raw, 'breakpoint')
 
   const text = maskCssComments(raw)
   const groups = new Map()
@@ -1343,6 +1441,7 @@ const checkBreakpointSet = ({ rel, text: raw }) => {
     if (!missing.length) continue
 
     const [prefix, suffix] = key.split('|')
+    if (exempt && !isTextSizeVar(`${prefix}-${suffix}`)) continue
     issues.push(
       issueOf(
         rel,
@@ -1380,7 +1479,7 @@ const checkBreakpointNeeded = ({ rel, text: raw }) => {
   if (!isModuleStyle(rel) || !/variables\.css$/i.test(rel)) return []
 
   // 豁免標記寫在註解裡,所以要先判斷,再把註解遮掉
-  if (hasExemptMark(raw, 'breakpoint')) return []
+  const exempt = hasExemptMark(raw, 'breakpoint')
 
   const text = maskCssComments(raw)
   const root = text.match(/:root\s*\{([\s\S]*?)\n\}/)
@@ -1400,12 +1499,18 @@ const checkBreakpointNeeded = ({ rel, text: raw }) => {
     if (NEUTRAL_VALUE.has(value.trim())) return
     if (!SIZE_VALUE_RE.test(value.trim())) return
 
+    const isTextSize = isTextSizeVar(name)
+    if (exempt && !isTextSize) return
+
     issues.push(
       issueOf(
         rel,
         baseLine + i,
         'variable',
-        `${name}: ${value.trim()} 是尺寸值卻沒有分斷點 —— 拆成 ${name.replace(/^--/, '--')}(中性)加上 -pc- / -tablet- / -mobile- 三份;三個斷點值相同也要拆(例外請標 /* lint-breakpoint-exempt: 理由 */)`
+        `${name}: ${value.trim()} 是尺寸值卻沒有分斷點 —— 拆成 ${name.replace(/^--/, '--')}(中性)加上 -pc- / -tablet- / -mobile- 三份;三個斷點值相同也要拆` +
+          (isTextSize
+            ? ';字級不吃豁免標記 —— 固定模組的字級照規範分斷點就通過了,通用元件的字級本來就不該寫在元件裡,兩種都不需要那個標記'
+            : '(例外請標 /* lint-breakpoint-exempt: 理由 */)')
       )
     )
   })
@@ -1447,6 +1552,27 @@ const STRUCTURAL_CLASSES = new Set(['group', 'peer'])
 
 const isStructuralClass = (cls) => STRUCTURAL_CLASSES.has(cls.split('/')[0])
 
+/**
+ * 轉場的那六個 class —— 名字由畫面區段的 `<Transition name="…">` 決定,
+ * 框架自動在後面接這幾個後綴。
+ *
+ * 它們不能收斂成模組前綴:名字與 template 寫的那個 name 是一組的,
+ * 改了樣式這一側就對不上,而轉場失效不會報錯,只是動畫沒了。
+ *
+ * 後綴由框架定義,與專案無關,所以寫在規則裡,不進專案設定。
+ * (轉場的名字本身仍然建議帶模組前綴,那樣兩邊都看得出它屬於誰。)
+ */
+const TRANSITION_SUFFIXES = [
+  '-enter-from',
+  '-enter-active',
+  '-enter-to',
+  '-leave-from',
+  '-leave-active',
+  '-leave-to',
+]
+
+const isTransitionClass = (cls) => TRANSITION_SUFFIXES.some((suffix) => cls.endsWith(suffix))
+
 const checkModuleScope = ({ rel, text }) => {
   if (!isModuleCss(rel)) return []
 
@@ -1467,6 +1593,7 @@ const checkModuleScope = ({ rel, text }) => {
     if (cls.startsWith('--')) continue // modifier / 狀態
     if (/^j[A-Z]/.test(cls)) continue // 純給 JS 抓的 hook class
     if (isStructuralClass(cls)) continue // 父層 / 兄弟狀態的掛勾,不是模組的 class
+    if (isTransitionClass(cls)) continue // 轉場的六個 class,名字跟著 template 的 name 走
     if (cls === prefix || cls.startsWith(`${prefix}-`)) continue // 自己的 class
     if (seen.has(cls)) continue
     seen.add(cls)
@@ -1495,6 +1622,13 @@ const checkModuleScope = ({ rel, text }) => {
 // 所以留在集中目錄的檔案不會被它檢查 —— 不是報錯,是完全沒有訊息:
 // 違規數字還會因此變少,看起來像程式碼變好了。
 // 規則改了位置而存量沒搬的專案,正是靠這條才知道有一批檔案沒有人在看。
+//
+// **歸屬只看檔名,不看裡面寫了哪些 class。** 用 class 反查看起來更準
+// (「這支寫的是 .m-card-* 所以屬於 mCard」),實際上歸屬會變成不唯一:
+// 一支樣式裡本來就會出現別的模組的 class(狀態掛勾、轉手傳進去的),
+// 那時反查會指向好幾個元件,而規則只能挑一個說出來 —— 挑錯的那次,
+// 照著搬就是把樣式放進不相干的元件資料夾。
+// 檔名對不上元件的那幾支,由 componentFolder 與 componentClass 從元件那一側看。
 
 /** 這個名字對得上哪一個實際存在的元件 —— 對不上回 null(那就是共用的,留在原地) */
 const componentDirOf = (root, name) => {
@@ -1809,6 +1943,7 @@ const CHECKS = [
   checkModuleLocation,
   checkModuleVariables,
   checkTruncateClass,
+  checkSharedVarScope,
   checkBreakpointPrefix,
   checkVariableNaming,
   checkUnknownVar,
@@ -1905,6 +2040,7 @@ export const RULE_TITLE = {
   moduleLocation: '元件的樣式放在集中目錄,不在元件自己的資料夾裡',
   moduleVar: '模組級距變數的歸屬',
   truncateClass: '單行省略用了 truncate,不是 line-clamp-1',
+  sharedVarScope: '共用變數檔裡放了只有一個模組在用的那幾組',
   breakpointPrefix: '級距在某個斷點少列了前綴',
   variable: '模組變數的命名或斷點',
   unknownVar: '用到沒有定義的 css 變數',
@@ -1931,6 +2067,7 @@ export const RULE_HINT = {
   moduleVar: '同屬性兩個以上級距值要搬到 ***Variables.css',
   truncateClass:
     'truncate 換成 line-clamp-1 —— 與 line-clamp-2、line-clamp-3 是同一組,改行數只動數字',
+  sharedVarScope: '共用變數檔只放兩個以上模組都要用的;只有一個在用的搬回那個模組',
   breakpointPrefix: '每個 @screen 區塊都要列齊會命中該斷點的前綴變體',
   variable: '命名對齊 tailwind(w / h / p / rounded / leading);尺寸值要三個斷點成套,級距用實際數值不用 sm / md / lg',
   unknownVar: 'var(--x) 引用的變數全案要找得到定義 —— 找不到時瀏覽器會把整條宣告丟掉,樣式安靜地消失',
