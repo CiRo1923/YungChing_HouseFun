@@ -34,7 +34,6 @@ export default () => {
   const { onSetSeo } = useCommonActions()
   const { isChannelRegion, isChannelMrt, onSaveChannel } = useBuyProjectActions()
   const { onValueGetText } = useManageActions()
-  const route = useRoute()
   const commonParams = computed(() => {
     const paramsPurpose = content.value.apiData.purpose
       ? `${content.value.apiData.purpose}_purpose`
@@ -199,11 +198,12 @@ export default () => {
       .map((item) => item.label)
       .join('、')
 
-  // 搜尋條件:一律以「網址(route)」為準 → 只有按搜尋(URL 改變)才更新,
+  // 搜尋條件:一律以「網址」為準 → 只有按搜尋(URL 改變)才更新,
   // 不受下拉即時勾選(content.apiData / label / ids 皆為 v-model,勾選當下就變)影響。
   // 回傳 [{ label, value }] 陣列(縣市 / 區域 / 捷運多組會拆開)。
-  const condition = computed(() => {
-    const parsed = onParseFilters(route)
+  // 路由由使用端傳入,使用端自己包成 computed 才會跟著那一頁變動。
+  const onCondition = (targetRoute) => {
+    const parsed = onParseFilters(targetRoute)
 
     // 區域與捷運互斥,只會有一個 channel;各自把 route 上的選取拆成多項並標記 key
     const channelItems = isChannelRegion.value
@@ -232,9 +232,7 @@ export default () => {
       { label: priceLabel, value: parsed.price ?? '', key: 'price' },
       { label: roomLabel, value: parsed.room ?? '', key: 'room' },
     ]
-  })
-
-  // const { apiData, options: projectOptions } = storeToRefs(projectStores)
+  }
 
   const onApiGetRegion = async () => {
     if (region.value.options) return false
@@ -296,7 +294,8 @@ export default () => {
     return { config, status, data }
   }
 
-  const onApiGetBuyList = async (targetRoute = route) => {
+  // 以下幾支的路由一律由呼叫端傳入 —— 換頁守衛裡取到的是上一頁,沒有安全的預設值。
+  const onApiGetBuyList = async (targetRoute) => {
     const { query } = targetRoute
     const { config, status, data } = await apiGetBuyList({
       ...(isChannelRegion.value ? { region: region.value.ids || region.value.all } : {}),
@@ -345,7 +344,7 @@ export default () => {
     return { config, status, data }
   }
 
-  const onChannel = (targetRoute = route) => {
+  const onChannel = (targetRoute) => {
     const filters = targetRoute.params.filters
     const list = Array.isArray(filters) ? filters : filters ? [filters] : []
     const hasRegion = !!list.find((item) => /region/.test(item))
@@ -355,7 +354,7 @@ export default () => {
     // channel 一改變即存 storage,供明細頁 reload 後還原
     onSaveChannel()
   }
-  const onParseFilters = (targetRoute = route) => {
+  const onParseFilters = (targetRoute) => {
     const { filters } = targetRoute.params
     const list = Array.isArray(filters) ? filters : filters ? [filters] : []
 
@@ -379,7 +378,7 @@ export default () => {
     return { ...parsed, ...targetRoute.query }
   }
 
-  const onGetBuyListParams = (targetRoute = route) => {
+  const onGetBuyListParams = (targetRoute) => {
     const parseFilters = onParseFilters(targetRoute)
 
     // region
@@ -513,7 +512,7 @@ export default () => {
     isChannelMrt,
     commonParams,
     commonQuery,
-    condition,
+    onCondition,
     onApiGetRegion,
     onApiGetMrt,
     onApiGetBuyList,

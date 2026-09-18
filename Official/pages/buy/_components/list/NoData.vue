@@ -1,7 +1,10 @@
 <script setup>
-const { condition, onRemoveCondition } = useBuyListActions()
+const { onCondition, onRemoveCondition } = useBuyListActions()
+const route = useRoute()
 
 const emits = defineEmits(['routerPush'])
+
+const condition = computed(() => onCondition(route))
 
 const onRemove = (item) => {
   // 先改 store(移除該筆),再請頁面 routePush → 改 URL 才真正套用並重查

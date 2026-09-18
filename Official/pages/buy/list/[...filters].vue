@@ -7,7 +7,6 @@ const { onUseMeta, onIsLoading, onResize } = useCommonActions()
 const { onApiGetCommonServerTime } = useProjectActions()
 const buyList = useBuyListStore()
 const { region, mrt, pagination, content, keyword } = storeToRefs(buyList)
-
 // H1 由共用 Header 讀 project.seo.h1 輸出。列表本身(含 seo)在 middleware/buyList
 // 就取好了 —— 頁首的渲染早於這裡的 setup,放在這一頁取的話 SSR 的 H1 會是空的。
 // 換頁清空由 middleware/seoReset 處理。
@@ -41,12 +40,6 @@ definePageMeta({
 })
 
 const isDeviceM = computed(() => device.value === 'm')
-// const channel = computed(() => {
-//   if (isChannelRegion.value) return 'region'
-//   if (isChannelMrt.value) return 'mrt'
-
-//   return ''
-// })
 const paramsRegion = computed(() => {
   const { ids } = region.value
 
@@ -110,7 +103,7 @@ onUseMeta({
 // 原地搜尋(不改 URL):以目前路由重打 buy-list
 const onBuyList = async () => {
   onIsLoading(true)
-  await onApiGetBuyList()
+  await onApiGetBuyList(route)
   onIsLoading(false)
 }
 
@@ -163,16 +156,6 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <!-- <pre>{{ onParseFilters() }}</pre> -->
-  <!-- <pre>
-    {{ route }}
-  </pre> -->
-  <!-- <div>
-    <pre
-      >{{ options.city }}
-    </pre>
-  </div> -->
-
   <div class="bg-[--white] pt:pt-[12px]">
     <PageBuyListTabOvalResponsive />
     <PageBuyListSearchFunction
@@ -195,7 +178,7 @@ onUnmounted(() => {
       </pre> -->
       <template v-if="hasData">
         <PageBuyListContent />
-        <BuyMPagination
+        <CommonMPagination
           :route="{
             name: buyList.basicRouteName,
             params: route.params,

@@ -4,7 +4,8 @@ const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
 const buyList = useBuyListStore()
 const { region } = storeToRefs(buyList)
-const { condition, onResetSearch } = useBuyListActions()
+const { onCondition, onResetSearch } = useBuyListActions()
+const route = useRoute()
 const router = useRouter()
 
 const buttons = readonly([
@@ -20,6 +21,7 @@ const buttons = readonly([
 ])
 
 const isDeviceP = computed(() => device.value === 'p')
+const condition = computed(() => onCondition(route))
 const conditionsLabel = computed(() => condition.value.map((item) => item.label).join('、'))
 
 function onClearAll() {
