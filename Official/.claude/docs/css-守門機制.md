@@ -56,6 +56,7 @@
 | `storeScope` | 檔名對不上頁面目錄第一層的資料夾 | store 目錄 | ✗ |
 | `storeActions` | `.composables` 檔名不是 `use{名稱}Actions.js` | actions 目錄 | ✗ |
 | `storeLayer` | 有向後端要資料的頁面，store 沒有對應的層 | store 目錄 | ✗ |
+| `popupLocation` | 彈窗放在對應網址的那幾層裡（該收在元件層底下）。資料夾名由設定 `POPUP_DIR_NAME` 決定，留空就整條略過。「放元件層的哪一層」看它被誰用，那一半沒有工具檢查 | 頁面目錄的 `.vue` | ✗ |
 | `pageApiData` | 頁面自建 `apiData` / `apiResult` / `apiList` / `apiInfo` | 頁面目錄的 `.vue` | ✗ |
 | `storeApiDefault` | 有 `apiData` 卻沒有 `apiDefault` | store 目錄 | ✗ |
 | `viewFolder` | 頁面目錄的資料夾首字大寫、分隔方式與同一層的 `.vue` 檔名不同套（自己寫路由表的專案用駝峰，檔案系統路由的專案放行連字號，兩種都擋底線與連續大寫），或底線資料夾不在允許的清單裡 | 頁面目錄 | ✗ |

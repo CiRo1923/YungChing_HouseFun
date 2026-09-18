@@ -111,6 +111,7 @@ import {
   IS_FILE_BASED_ROUTING,
   MODULE_CSS_DIR_NAME,
   PARALLEL_AWAIT_HELPER,
+  POPUP_DIR_NAME,
   PROJECT_DOCS_DIR,
   PROJECT_NAMES,
   PROJECT_NAME_SCOPE,
@@ -3812,6 +3813,33 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
     rule: 'pageActionNaming',
   },
   {
+    /* 第二件事不一定會被 await —— 不回傳 Promise 的行為(關閉彈窗、重置狀態)
+       直接呼叫就結束了。只認 await 的話,這種函式會被當成單純包裝,
+       而它的名字講的是那件事。 */
+    name: 'pageActionNaming 沒有 await 的第二件事也算協調',
+    file: `${P}/probeFlow.vue`,
+    code:
+      `<script setup>\nconst onClose = (item) => {\n` +
+      `  onApiPostProbeThing(item)\n` +
+      `  onProbeClose(item)\n` +
+      `}\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
+    expect: 0,
+    rule: 'pageActionNaming',
+  },
+  {
+    /* 開關讀取狀態與錯誤處理不算第二件事 —— 那是包裝本來就要做的,
+       所以這一支仍然要對齊名字。 */
+    name: 'pageActionNaming 只開關讀取狀態仍算單純包裝',
+    file: `${P}/probeFlow.vue`,
+    code:
+      `<script setup>\nconst onWrongName = async () => {\n` +
+      `  onApiPromise('open')\n  await onApiGetProbeThing()\n  onApiPromise('close')\n` +
+      `}\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
+    expect: 1,
+    keyword: 'onProbeThing',
+    rule: 'pageActionNaming',
+  },
+  {
     /* 有條件才打的那一步(「已經有資料就不重打」)不是這個函式的全部 */
     name: 'pageActionNaming 被條件包住的那一步不是單純包裝',
     file: `${P}/probeGuard.vue`,
@@ -3841,6 +3869,36 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
     name: 'pageActionNaming 通用工具不受限制',
     file: `${P}/submit.vue`,
     code: `<script setup>\nconst { onApiPromise, onApiError } = useProjectActions()\n\nconst onSubmit = async () => {\n  onApiPromise('open')\n  onApiError({}, 500, {})\n}\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
+    expect: 0,
+  },
+
+  // ---------- 規則 popupLocation ----------
+  {
+    /* 頁面目錄那幾層對應的是網址,而彈窗不是一個網址 ——
+       放在那裡的話,看目錄的人會以為多了一頁,而路由表裡找不到它。 */
+    rule: 'popupLocation',
+    needs: 'popupDir',
+    name: 'popupLocation 彈窗放在對應網址的那一層要報',
+    file: `${P}/${POPUP_DIR_NAME}/Probe.vue`,
+    code: probeVue,
+    expect: 1,
+    keyword: '不是一個網址',
+  },
+  {
+    rule: 'popupLocation',
+    needs: 'popupDir',
+    name: 'popupLocation 收在元件層底下不誤報',
+    file: `${P}/${VIEW_UNDERSCORE_FOLDERS[0]}/${POPUP_DIR_NAME}/Probe.vue`,
+    code: probeVue,
+    expect: 0,
+  },
+  {
+    /* 元件層底下再分幾層是正常的 —— 只有某一個子單元用的彈窗收在那個子單元底下。 */
+    rule: 'popupLocation',
+    needs: 'popupDir',
+    name: 'popupLocation 元件層底下再分子單元也不誤報',
+    file: `${P}/${VIEW_UNDERSCORE_FOLDERS[0]}/detail/${POPUP_DIR_NAME}/Probe.vue`,
+    code: probeVue,
     expect: 0,
   },
 
@@ -5506,6 +5564,8 @@ const NEEDS_MET = {
   deepCloneHelper: !!DEEP_CLONE_HELPER.name,
   /* 沒有 api 規格文件的專案分不出「這個欄位名是不是後端給的」,規則整條略過。 */
   apiSpec: Boolean(apiSpecFields),
+  /* 沒有彈窗資料夾慣例的專案,那條規則整條略過。 */
+  popupDir: Boolean(POPUP_DIR_NAME),
 }
 
 /** 前提不成立時要講的那一句 —— 只列名字的話,看的人分不出是設定造成的還是規則壞了 */
@@ -5522,6 +5582,9 @@ const SKIP_REASON = {
   deepCloneHelper:
     '這個專案沒有填 DEEP_CLONE_HELPER(沒有那支深拷貝的共用函式),' +
     '「從 apiDefault 還原要深拷貝」那條分不出哪一處已經寫對,本來就整條略過。',
+  popupDir:
+    '這個專案沒有填 POPUP_DIR_NAME(沒有收彈窗的資料夾慣例),' +
+    '「彈窗要收在頁面的元件層底下」那條本來就整條略過。',
   apiSpec:
     '這個專案沒有 api 規格文件(設定的 API_SPEC_DIR 留空或檔案不在),' +
     '「前端自己掛的欄位要加底線」那條分不出哪些名字是後端給的,本來就整條略過。',

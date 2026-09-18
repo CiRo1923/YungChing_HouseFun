@@ -31,6 +31,7 @@ import {
   FORM_GROUP_VALIDATOR,
   FRAMEWORKS,
   PARALLEL_AWAIT_HELPER,
+  POPUP_DIR_NAME,
   PROJECT_FRAMEWORK,
   PLAIN_TEXT_EXCLUDED_DIRS,
   SHARED_MODULE_VARIABLES,
@@ -198,6 +199,15 @@ const REQUIREMENTS = [
     why: '「前端自己掛的欄位要加底線」靠那份文件認出哪些名字是後端給的。沒有文件時這條整條略過 —— 報出來的話每一個欄位名都是違規,而那全是誤報。',
   },
   {
+    /* 各專案的慣例用語不同(popup、modal、dialog)—— 填錯或留空時,
+       規則一個檔案都掃不到,而那與「全部放對了」在畫面上長得一樣。 */
+    label: '彈窗資料夾的慣例名',
+    rules: ['popupLocation'],
+    check: () => POPUP_DIR_NAME || null,
+    need: '設定裡的 POPUP_DIR_NAME 要填這個專案收彈窗的資料夾名,沒有這種慣例就留空',
+    why: '「彈窗要收在頁面的元件層底下」靠那個名字認出哪幾支是彈窗。留空的時候這條整條略過 —— 放錯位置不會有人發現。',
+  },
+  {
     /* 這條要分得出「哪一處已經是深拷貝」,而那是靠專案那支共用函式的名字認的。
        沒有那支函式時,每一處還原都會被當成展開一層 —— 而且沒有修法可以提供。 */
     label: '深拷貝的共用函式',
@@ -208,7 +218,7 @@ const REQUIREMENTS = [
   },
   {
     label: '頁面目錄',
-    rules: ['apiScope', 'storeScope', 'storeLayer', 'pageApiData', 'pageActionNaming', 'pageApiImport'],
+    rules: ['apiScope', 'storeScope', 'storeLayer', 'pageApiData', 'pageActionNaming', 'pageApiImport', 'popupLocation'],
     check: (root) => (hasDir(root, VIEWS_DIR) ? VIEWS_DIR : null),
     need: `要有頁面目錄(目前設定為 ${VIEWS_DIR})`,
     why: 'api 檔名、store 檔名與分層都是拿頁面目錄的第一層資料夾來對照。目錄不存在時,那些對照沒有比對基準,頁面規則也掃不到檔案。',

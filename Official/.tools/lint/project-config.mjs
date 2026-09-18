@@ -177,6 +177,17 @@ export const COMPONENT_FOLDERS = ['_components']
  */
 export const VIEW_UNDERSCORE_FOLDERS = ['_components']
 
+/**
+ * 彈窗收在哪個資料夾名底下 —— 各專案的慣例用語不同(popup、modal、dialog)。
+ *
+ * 規則用它認出「這支是彈窗」,再檢查它收在頁面的元件層底下
+ * (上面那個 VIEW_UNDERSCORE_FOLDERS)。**沒有這種慣例的專案留空字串**,
+ * 那條規則就整條略過。
+ *
+ * 寫死在規則裡的話,換一個叫 modal 的專案那條規則一個檔案都掃不到 ——
+ * 不是報錯,是安靜地不再檢查任何東西。
+ */
+export const POPUP_DIR_NAME = 'popup'
 
 /** CSS 模組(每個模組一個子資料夾) */
 export const CSS_MODULES_DIR = 'assets/css/_modules'
