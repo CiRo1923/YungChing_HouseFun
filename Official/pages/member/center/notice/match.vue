@@ -6,7 +6,7 @@ const { onApiErrorServerToClient } = usePopupActions()
 definePageMeta({
   layout: 'member',
   channel: 'member',
-  // 登入機制還沒接上,目前沒有任何地方讀這個值 —— 接上之後由路由守衛依它決定要不要擋
+  // 由 middleware/auth.global.js 讀:登入狀態續不回來就導回登入頁
   requiresAuth: true,
 })
 

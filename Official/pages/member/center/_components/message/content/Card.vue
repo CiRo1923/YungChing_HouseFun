@@ -1,15 +1,17 @@
 <script setup>
 import { numberComma, onFormatDate } from '@js/_prototype.js'
 
-const emits = defineEmits(['update:isSelected', 'delete'])
+const emits = defineEmits(['delete'])
+// 勾選方塊是卡片的一部分(設計稿上它在卡片內),但選取的是整份清單的狀態 ——
+// 所以值由使用端持有,這裡只把 v-model 轉給裡面的 checkbox。
+const selectedIds = defineModel({
+  type: Array,
+  default: () => [],
+})
 const props = defineProps({
   item: {
     type: Object,
     default: () => ({}),
-  },
-  isSelected: {
-    type: Boolean,
-    default: false,
   },
 })
 
@@ -23,15 +25,14 @@ const actions = computed(() => props.item.actions || [])
 <template>
   <div class="flex tm:flex-col tm:gap-y-[10px] p:gap-x-[20px] p:py-[20px]">
     <CommonMFormCheckBox
-      :name="`message_${props.item.id}`"
-      :modelValue="props.isSelected"
+      name="messageIds"
+      v-model="selectedIds"
       :config="{
-        validateEvents: [],
+        value: props.item.id,
       }"
       :setClass="{
-        main: 'shrink-0',
+        main: '--checkbox-green-8d0d shrink-0',
       }"
-      @update:modelValue="emits('update:isSelected', $event)"
     />
     <CommonMFigure
       :src="house.imageUrl"

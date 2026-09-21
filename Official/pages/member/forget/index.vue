@@ -1,6 +1,9 @@
 <script setup>
 const { onUseMeta } = useCommonActions()
+const memberAuthProject = useMemberAuthProjectStore()
 const memberForget = useMemberAuthForgetStore()
+const { userData } = storeToRefs(memberAuthProject)
+const { verify } = storeToRefs(memberForget)
 const { onApiPostMemberAuthPasswordResetRequest, onSaveVerify, reset } = useMemberAuthForgetActions()
 const { onApiPromise } = usePopupActions()
 const router = useRouter()
@@ -45,6 +48,10 @@ const onSumit = () => {
 // 所以這一頁重整後一律重新開始:重填號碼、重新發碼(60 秒冷卻由後端擋)。
 const onInit = () => {
   reset.onVerify()
+
+  // 從會員中心的密碼管理過來時是登入狀態,號碼直接帶入,不必再打一次;
+  // 仍然可以改成別支號碼。直接開這個網址或重整時沒有登入狀態,維持空白自己填。
+  if (userData.value?.mobilePhone) verify.value.apiData.mobilePhone = userData.value.mobilePhone
 }
 
 onInit()

@@ -21,17 +21,11 @@ const onToggleAll = () => {
   selectedIds.value = isAllSelected.value ? [] : items.value.map(({ id }) => id)
 }
 
-const onToggle = (id, isSelected) => {
-  selectedIds.value = isSelected
-    ? [...selectedIds.value, id]
-    : selectedIds.value.filter((selectedId) => selectedId !== id)
-}
-
 // 刪除前一律先確認,刪完重新取清單(頁碼可能因此變動,由頁面決定)。
 const onDelete = async (ids) => {
   const { isSure } = await onConfirm({
     title: '刪除提醒',
-    content: '您刪除的留言將無法復原',
+    content: '您刪除的留言紀錄將無法復原',
     btns: [{ type: 'sure', label: '確定刪除' }],
   })
 
@@ -45,33 +39,32 @@ const onDelete = async (ids) => {
 
 <template>
   <div class="space-y-[10px]">
-    <div class="flex items-center gap-x-[15px] rounded-[5px] bg-[--gray-f7] px-[15px] py-[10px]">
+    <div class="flex items-center gap-x-[24px] rounded-[5px] bg-[--gray-f7] px-[15px] py-[10px]">
       <CommonMFormCheckBox
         name="messageAll"
         :modelValue="isAllSelected"
         :config="{
-          validateEvents: [],
+          mode: 'boolean',
+        }"
+        :setClass="{
+          main: '--checkbox-green-8d0d',
         }"
         @update:modelValue="onToggleAll"
-      />
-      <p class="text-[14px]">
-        共
-        <b class="text-[--orange-f74c]">{{ selectedIds.length }}</b>
-        筆
-      </p>
+      >
+        <p class="text-[16px]">
+          共
+          <b class="text-[--orange-f74c]">{{ selectedIds.length }}</b>
+          筆
+        </p>
+      </CommonMFormCheckBox>
       <CommonMAnchor
         text="刪除"
         :config="{
           isDisabled: selectedIds.length === 0,
-          icon: {
-            name: 'icon_trash_can',
-            position: 'left',
-          },
         }"
         :setClass="{
-          main: '--oval --border-gray-e5 --h-35 --px-15 --text-gray-666 gap-x-[5px]',
+          main: '--oval --border-gray-e5 --h-25 --px-15 --text-gray-666',
           text: 'text-[14px]',
-          icon: 'h-[16px] w-[16px]',
         }"
         @click="onDelete(selectedIds)"
       />
@@ -84,8 +77,7 @@ const onDelete = async (ids) => {
       >
         <PageMemberCenterMessageContentCard
           :item="item"
-          :isSelected="selectedIds.includes(item.id)"
-          @update:isSelected="onToggle(item.id, $event)"
+          v-model="selectedIds"
           @delete="onDelete([item.id])"
         />
       </li>

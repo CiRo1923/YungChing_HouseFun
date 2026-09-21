@@ -119,7 +119,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "MemberBffBearer": []
+          }
+        ]
       }
     },
     "/api/{version}/member/notifications": {
@@ -194,7 +199,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "MemberBffBearer": []
+          }
+        ]
       },
       "delete": {
         "tags": ["Member"],
@@ -261,7 +271,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "MemberBffBearer": []
+          }
+        ]
       }
     },
     "/api/{version}/member/notifications/read": {
@@ -330,7 +345,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "MemberBffBearer": []
+          }
+        ]
       }
     },
     "/api/{version}/member/profile": {
@@ -1627,7 +1647,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "MemberBffBearer": []
+          }
+        ]
       }
     },
     "/api/{version}/auth/logout": {
@@ -1668,7 +1693,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "MemberBffBearer": []
+          }
+        ]
       }
     }
   },
@@ -1686,6 +1716,189 @@
           },
           "target": {
             "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ActualPriceBlock": {
+        "required": ["items"],
+        "type": "object",
+        "properties": {
+          "totalCount": {
+            "maximum": 2147483647,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "currentYearCount": {
+            "maximum": 2147483647,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ActualPriceItem"
+            }
+          },
+          "moreLink": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ActualPriceItem": {
+        "required": ["date", "id", "yearMonth"],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "recordCount": {
+            "maximum": 2147483647,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "yearMonth": {
+            "type": "string"
+          },
+          "dealKind": {
+            "type": "string",
+            "nullable": true
+          },
+          "address": {
+            "type": "string",
+            "nullable": true
+          },
+          "buildingName": {
+            "type": "string",
+            "nullable": true
+          },
+          "caseType": {
+            "type": "string",
+            "nullable": true
+          },
+          "caseTypeID": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "price": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "priceNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "parkingPrice": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "unitPrice": {
+            "type": "number",
+            "format": "double"
+          },
+          "unitPriceNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "areaPin": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "areaPinNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "landPin": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "floor": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "floorText": {
+            "type": "string",
+            "nullable": true
+          },
+          "totalFloor": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "buildingAge": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "layoutText": {
+            "type": "string",
+            "nullable": true
+          },
+          "room": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "livingRoom": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "bathRoom": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "similarity": {
+            "maximum": 99,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AddonInfo": {
+        "type": "object",
+        "properties": {
+          "room": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "living": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "bath": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "balcony": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -1752,6 +1965,51 @@
         },
         "additionalProperties": false
       },
+      "BrokerCard": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "store": {
+            "type": "string",
+            "nullable": true
+          },
+          "brand": {
+            "type": "string",
+            "nullable": true
+          },
+          "imageUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "storeUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "agency": {
+            "type": "string",
+            "nullable": true
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true
+          },
+          "extension": {
+            "type": "string",
+            "nullable": true
+          },
+          "badges": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "BrokerContactCard": {
         "required": ["mobilePhone", "name", "shopName"],
         "type": "object",
@@ -1785,6 +2043,144 @@
           },
           "title": {
             "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "BuyListItem": {
+        "required": ["address", "badges", "hfid", "media", "pin", "title"],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "hfid": {
+            "type": "string"
+          },
+          "caseNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "maxLength": 25,
+            "minLength": 0,
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "county": {
+            "type": "string",
+            "nullable": true
+          },
+          "district": {
+            "type": "string",
+            "nullable": true
+          },
+          "community": {
+            "$ref": "#/components/schemas/CommunityBrief"
+          },
+          "purpose": {
+            "type": "string",
+            "nullable": true
+          },
+          "purposeID": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "caseType": {
+            "type": "string",
+            "nullable": true
+          },
+          "caseTypeID": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "price": {
+            "type": "number",
+            "format": "double"
+          },
+          "isPriceIncludeParking": {
+            "type": "boolean"
+          },
+          "lastPrice": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "priceDrop": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "unitPrice": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "isBelowActualPrice": {
+            "type": "boolean"
+          },
+          "pin": {
+            "$ref": "#/components/schemas/PinInfo"
+          },
+          "layout": {
+            "$ref": "#/components/schemas/LayoutInfo"
+          },
+          "features": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "floor": {
+            "$ref": "#/components/schemas/FloorInfo"
+          },
+          "buildAge": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "hasParking": {
+            "type": "boolean"
+          },
+          "parkPrice": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "parking": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ParkingItem"
+            },
+            "nullable": true
+          },
+          "badges": {
+            "$ref": "#/components/schemas/MediaBadges"
+          },
+          "media": {
+            "$ref": "#/components/schemas/ListMedia"
+          },
+          "actualPrice": {
+            "$ref": "#/components/schemas/ActualPriceBlock"
+          },
+          "broker": {
+            "$ref": "#/components/schemas/BrokerCard"
+          },
+          "lastUpdateTime": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "latestMessageTime": {
+            "type": "string",
+            "format": "date-time",
             "nullable": true
           }
         },
@@ -1892,6 +2288,20 @@
           },
           "confirmPassword": {
             "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CommunityBrief": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -2080,6 +2490,27 @@
         },
         "additionalProperties": false
       },
+      "FloorInfo": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "to": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "up": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "HouseCard": {
         "required": ["address", "id", "title"],
         "type": "object",
@@ -2127,6 +2558,79 @@
           "imageUrl": {
             "type": "string",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "LayoutInfo": {
+        "type": "object",
+        "properties": {
+          "room": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "living": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "bath": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "hasAddon": {
+            "type": "boolean"
+          },
+          "addon": {
+            "$ref": "#/components/schemas/AddonInfo"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ListMedia": {
+        "required": ["images"],
+        "type": "object",
+        "properties": {
+          "images": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          "floorPlan": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "MediaBadges": {
+        "type": "object",
+        "properties": {
+          "gold": {
+            "type": "boolean"
+          },
+          "new": {
+            "type": "boolean"
+          },
+          "vr": {
+            "type": "boolean"
+          },
+          "aiTour": {
+            "type": "boolean"
+          },
+          "aiDecor": {
+            "type": "boolean"
+          },
+          "videoTour": {
+            "type": "boolean"
+          },
+          "floorPlan": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -2429,6 +2933,14 @@
             "format": "double",
             "nullable": true
           },
+          "newListingCount": {
+            "maximum": 2147483647,
+            "minimum": 0,
+            "type": "integer",
+            "description": "配對物件通知在本次通知批次新增的物件數量。",
+            "format": "int32",
+            "nullable": true
+          },
           "tags": {
             "type": "array",
             "items": {
@@ -2436,7 +2948,7 @@
             }
           },
           "house": {
-            "$ref": "#/components/schemas/HouseCard"
+            "$ref": "#/components/schemas/BuyListItem"
           },
           "community": {
             "$ref": "#/components/schemas/CommunityCard"
@@ -2535,6 +3047,41 @@
         },
         "additionalProperties": false
       },
+      "ParkingItem": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "type": "string",
+            "nullable": true
+          },
+          "amount": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "reg": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "expense": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "isParkingExpenseInclude": {
+            "type": "boolean"
+          },
+          "payPeriod": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "PasswordOperationResponse": {
         "required": ["message"],
         "type": "object",
@@ -2547,6 +3094,82 @@
           },
           "message": {
             "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "PinInfo": {
+        "type": "object",
+        "properties": {
+          "platform": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "build": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "main": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "balcony": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "terrace": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "stairwell": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "mezzanine": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "basement": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "other": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "totalAttached": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "amenities": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "parking": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "amenitiesRatio": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "land": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -2682,6 +3305,14 @@
           }
         },
         "additionalProperties": false
+      }
+    },
+    "securitySchemes": {
+      "MemberBffBearer": {
+        "type": "http",
+        "description": "請貼上 Member BFF /auth/token/exchange 回傳的 accessToken；Swagger 會自動加上 Bearer 前綴。",
+        "scheme": "bearer",
+        "bearerFormat": "Member BFF opaque token"
       }
     }
   },
