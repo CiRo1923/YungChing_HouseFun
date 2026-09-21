@@ -1,6 +1,10 @@
 <script setup>
 const { onUseMeta } = useCommonActions()
+const memberCenter = useMemberCenterStore()
+const { message } = storeToRefs(memberCenter)
+const { onApiGetMemberMessages } = useMemberCenterActions()
 const { onApiErrorServerToClient } = usePopupActions()
+const route = useRoute()
 
 definePageMeta({
   layout: 'member',
@@ -9,6 +13,16 @@ definePageMeta({
   requiresAuth: true,
 })
 
+// 分頁器是 router-link,頁碼跟著網址走 —— 重整與分享都會停在同一頁。
+const onMemberMessages = async () => {
+  message.value.apiData.page = Number(route.query.pg) || 1
+
+  await onApiGetMemberMessages()
+}
+
+await onMemberMessages()
+
+watch(() => route.query.pg, onMemberMessages)
 
 onUseMeta({
   title: '會員中心 | 好房 HouseFun',
@@ -29,6 +43,7 @@ onMounted(() => {
       class="p:--hasBgColor pt:--rounded-20 p:--py-25 t:--py-20 p:--px-40 m:--pb-20 tm:--px-16 grow t:mx-[10px]"
     >
       <PageMemberCenterHeader title="留言紀錄" />
+      <PageMemberCenterMessageContent @deleted="onMemberMessages" />
     </CommonMContent>
   </CommonMContainer>
 </template>

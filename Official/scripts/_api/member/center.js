@@ -19,3 +19,9 @@ export const apiPostMemberPasswordChange = async (data) =>
 export const apiGetMemberProfile = async (data) => await fetchApi.get(`member/profile`, data)
 
 export const apiPutMemberProfile = async (data) => await fetchApi.put(`member/profile`, data)
+
+// 留言紀錄。刪除收 ids 陣列,一次可刪多筆。
+export const apiGetMemberMessages = async (data) => await fetchApi.get(`member/messages`, data)
+
+export const apiDeleteMemberMessages = async (data) =>
+  await fetchApi.delete(`member/messages`, data)

@@ -55,14 +55,18 @@ export const useMemberCenterStore = defineStore('memberCenter', () => {
       },
     },
   ])
-  // 清單一次取幾筆,五個分頁一樣。
-  const NOTICE_PAGE_SIZE = 12
-  // 五個分頁的送出參數。category 取自 noticeTabs —— 那是同一個值,不另外寫一份;
+  // 清單一次取幾筆,會員中心每一份清單都用這個值。
+  const LIST_PAGE_SIZE = 20
+  // 通知五個分頁的送出參數。category 取自 noticeTabs —— 那是同一個值,不另外寫一份;
   // 層名就是 tab 的 id,兩邊對得起來。
   const apiDefault = readonly({
     ...Object.fromEntries(
-      noticeTabs.map(({ id, category }) => [id, { category, page: 1, pageSize: NOTICE_PAGE_SIZE }])
+      noticeTabs.map(({ id, category }) => [id, { category, page: 1, pageSize: LIST_PAGE_SIZE }])
     ),
+    message: {
+      page: 1,
+      pageSize: LIST_PAGE_SIZE,
+    },
     password: {
       currentPassword: null,
       newPassword: null,
@@ -104,6 +108,11 @@ export const useMemberCenterStore = defineStore('memberCenter', () => {
   const account = ref({
     data: null,
     apiData: { ...apiDefault.account },
+  })
+  // 留言紀錄:data 放清單與分頁資訊。
+  const message = ref({
+    data: null,
+    apiData: { ...apiDefault.message },
   })
   const navs = readonly([
     {
@@ -262,5 +271,6 @@ export const useMemberCenterStore = defineStore('memberCenter', () => {
     actualPrice,
     password,
     account,
+    message,
   }
 })

@@ -4,6 +4,8 @@ import {
   apiPostMemberPasswordChange,
   apiGetMemberProfile,
   apiPutMemberProfile,
+  apiGetMemberMessages,
+  apiDeleteMemberMessages,
 } from '@js/_api/member/center.js'
 
 // 會員中心各頁的行為。auth 三支在同層的 useProjectActions.js。
@@ -18,6 +20,7 @@ export default () => {
     actualPrice,
     password,
     account,
+    message,
   } = storeToRefs(memberCenter)
   const { onApiError } = usePopupActions()
 
@@ -150,6 +153,32 @@ export default () => {
     return { config, status, data }
   }
 
+  const onApiGetMemberMessages = async () => {
+    const { config, status, data } = await apiGetMemberMessages(message.value.apiData)
+
+    if (status !== 200) {
+      onApiError(config, status, data)
+
+      return { config, status, data }
+    }
+
+    message.value.data = data
+
+    return { config, status, data }
+  }
+
+  // 一次刪一筆或多筆都走這支,ids 由呼叫端決定。刪完由呼叫端重取清單 ——
+  // 刪掉最後一筆時頁碼可能要往前退,那是頁面才知道的事。
+  const onApiDeleteMemberMessages = async (ids) => {
+    const { config, status, data } = await apiDeleteMemberMessages({ ids })
+
+    if (status !== 200) {
+      onApiError(config, status, data)
+    }
+
+    return { config, status, data }
+  }
+
   // 五個通知分頁共用同一份未讀數:SSR 取過之後 client 不重打,換分頁時重取。
   const onNoticeSummary = async () =>
     await callOnce('member-notice-summary', onApiGetMemberNotificationsSummary, {
@@ -166,6 +195,8 @@ export default () => {
     onApiPostMemberPasswordChange,
     onApiGetMemberProfile,
     onApiPutMemberProfile,
+    onApiGetMemberMessages,
+    onApiDeleteMemberMessages,
     onNoticeSummary,
   }
 }
