@@ -1,119 +1,93 @@
-.select-overlay-enter-active,
-.select-overlay-leave-active,
-.datepicker-fixed-overlay-enter-active,
-.datepicker-fixed-overlay-leave-active {
-  @apply transition-opacitys duration-150;
+/* 共用的轉場動畫。由進入點一次載入，任何元件與頁面寫
+   <Transition name="anim-fade"> 就能取用。
+
+   名字照「效果」取，不照「哪支元件在用」取 —— 綁元件的話，第二支元件想用
+   同一種動畫時，畫面上就會出現 name="datepicker" 卻不是日曆的怪事，
+   而下一個人看到會以為用錯了。
+
+   同一種效果只留一組。秒數在同一類效果裡統一（淡入淡出一律 0.2 秒），
+   不因為使用端不同而各開一份 —— 差 0.05 秒看不出來，但兩份會各自演化。
+
+   複製元件到別的專案時這支檔案要一起帶走，並確認新專案的進入點有載入它。
+   沒有它不會報錯也不會少畫面，只是切換的當下直接跳、沒有漸變。 */
+
+/* 淡入淡出。最常用的一組，浮層、提示、遮罩內容都用它 */
+.anim-fade-enter-active,
+.anim-fade-leave-active {
+  @apply transition-opacitys duration-200;
 }
 
-.select-overlay-enter-from,
-.select-overlay-leave-to,
-.datepicker-fixed-overlay-enter-from,
-.datepicker-fixed-overlay-leave-to {
+.anim-fade-enter-from,
+.anim-fade-leave-to {
   @apply opacity-0;
 }
 
-.select-overlay-leave-from,
-.select-overlay-enter-to,
-.datepicker-fixed-overlay-leave-from,
-.datepicker-fixed-overlay-enter-to {
+.anim-fade-enter-to,
+.anim-fade-leave-from {
   @apply opacity-100;
 }
 
-.dropdown-enter-active,
-.dropdown-leave-active,
-.autocomplete-enter-active,
-.autocomplete-leave-active {
-  will-change: height;
+/* 淡入淡出，隱藏時連同 visibility 一起關掉。
+   浮層疊在別的元素上面時用這一組 —— 只有 opacity 為 0 的元素仍然接得到點擊，
+   蓋住的那一塊會點不下去 */
+.anim-fade-visible-enter-active,
+.anim-fade-visible-leave-active {
+  will-change: opacity;
 
-  @apply overflow-hidden transition-heights duration-300;
+  @apply visible opacity-100 transition-opacitys duration-200;
 }
 
-.dropdown-enter-from,
-.dropdown-leave-to,
-.autocomplete-enter-from,
-.autocomplete-leave-to {
-  @apply !h-0;
+.anim-fade-visible-enter-from,
+.anim-fade-visible-leave-to {
+  @apply invisible opacity-0;
 }
 
-/* accordion 展開更多搜尋 */
-.accordion-enter-active,
-.accordion-leave-active {
-  will-change: max-height;
-
-  @apply overflow-hidden transition-heights duration-300;
+/* 淡入淡出，但淡出慢半拍。
+   兩層疊在一起時外層用這一組（遮罩等裡面的內容先收完再淡出）——
+   兩層同時消失的話，內容會在半透明的遮罩上閃一下 */
+.anim-fade-out-late-enter-active,
+.anim-fade-out-late-leave-active {
+  @apply transition-opacitys duration-200;
 }
 
-.accordion-enter-from,
-.accordion-leave-to {
-  @apply !max-h-0;
+.anim-fade-out-late-leave-active {
+  transition-delay: 0.15s;
 }
 
-.accordion-enter-to,
-.accordion-leave-from {
-  @apply max-h-[1000px];
-}
-
-.select-fixed-enter-active,
-.select-fixed-leave-active,
-.datepicker-range-quickly-fixed-enter-active,
-.datepicker-range-quickly-fixed-leave-active {
-  @apply transition-transform duration-200;
-}
-
-.select-fixed-enter-from,
-.select-fixed-leave-to,
-.datepicker-range-quickly-fixed-enter-from,
-.datepicker-range-quickly-fixed-leave-to {
-  @apply translate-y-full;
-}
-
-.select-fixed-enter-to,
-.select-fixed-leave-from,
-.datepicker-range-quickly-fixed-enter-to,
-.datepicker-range-quickly-fixed-leave-from {
-  @apply translate-y-0;
-}
-
-/* overlay */
-.popup-overlay-enter-active,
-.popup-overlay-leave-active {
-  transition: opacity 0.15s ease;
-}
-
-/* 進場：先出現 overlay */
-.popup-overlay-enter-from,
-.popup-overlay-leave-to {
+.anim-fade-out-late-enter-from,
+.anim-fade-out-late-leave-to {
   @apply opacity-0;
 }
 
-.popup-overlay-enter-to,
-.popup-overlay-leave-from {
+.anim-fade-out-late-enter-to,
+.anim-fade-out-late-leave-from {
   @apply opacity-100;
 }
 
-/* 離場：等 bomb 先收掉，再 fade overlay */
-.popup-overlay-leave-active {
-  transition-delay: 0.1s;
+/* 淡入淡出，但淡入慢半拍。
+   兩層疊在一起時裡層用這一組（等外層的遮罩先出現才進場），
+   離場則立刻開始，讓外層等它 */
+.anim-fade-in-late-enter-active,
+.anim-fade-in-late-leave-active {
+  @apply transition-opacitys duration-200;
 }
 
-/* fade */
-.popup-fade-enter-active,
-.popup-fade-leave-active {
-  transition: opacity 0.2s ease;
+.anim-fade-in-late-enter-active {
+  transition-delay: 0.15s;
 }
 
-.popup-fade-enter-from,
-.popup-fade-leave-to {
-  opacity: 0;
+.anim-fade-in-late-enter-from,
+.anim-fade-in-late-leave-to {
+  @apply opacity-0;
 }
 
-.popup-fade-enter-to,
-.popup-fade-leave-from {
-  opacity: 1;
+.anim-fade-in-late-enter-to,
+.anim-fade-in-late-leave-from {
+  @apply opacity-100;
 }
 
-/* bomb */
-@keyframes popup-bomb {
+/* 彈跳，進場慢半拍。兩層疊在一起時裡層用（等外層的遮罩先出現才彈進來） */
+@keyframes anim-bounce {
   0% {
     transform: scale(0);
   }
@@ -131,18 +105,16 @@
   }
 }
 
-.popup-bomb-enter-active {
-  animation: popup-bomb 0.2s 0.075s both;
-  /* 0.075s delay = 等 overlay 先出現 */
+.anim-bounce-enter-active {
+  animation: anim-bounce 0.2s 0.15s both;
 }
 
-.popup-bomb-leave-active {
-  animation: popup-bomb 0.2s reverse both;
-  /* 關閉時先跑 bomb */
+.anim-bounce-leave-active {
+  animation: anim-bounce 0.2s reverse both;
 }
 
-/* zoom */
-@keyframes popup-bomb {
+/* 縮放，從無到有。比彈跳收斂，用在不需要強調的浮層 */
+@keyframes anim-zoom {
   from {
     transform: scale(0);
   }
@@ -151,119 +123,104 @@
   }
 }
 
-/* zoom：container 縮放。delay 讓 overlay 先浮現一半再彈出 */
-.popup-zoom-enter-active {
-  animation: popup-bomb 0.1s 0.075s both;
+.anim-zoom-enter-active {
+  animation: anim-zoom 0.1s 0.15s both;
 }
 
-.popup-zoom-leave-active {
-  animation: popup-bomb 0.1s reverse both;
+.anim-zoom-leave-active {
+  animation: anim-zoom 0.1s reverse both;
 }
 
-/* bottomSheet：container 由下滑出 / 滑回 */
-.popup-bottomSheet-enter-active,
-.popup-bottomSheet-leave-active {
-  transition: transform 0.15s ease;
-}
-
-/* 進場：等 overlay 完整淡入(0.15s)後才滑上來;delay 期間 container 仍在畫面外 */
-.popup-bottomSheet-enter-active {
-  transition-delay: 0.15s;
-}
-
-.popup-bottomSheet-enter-from,
-.popup-bottomSheet-leave-to {
-  @apply translate-y-full;
-}
-
-.popup-bottomSheet-enter-to,
-.popup-bottomSheet-leave-from {
-  @apply translate-y-0;
-}
-
-.datepicker-enter-active,
-.datepicker-leave-active {
-  will-change: opacity;
-  transition: opacity 0.3s;
-
-  @apply visible opacity-100;
-}
-
-.datepicker-enter-from,
-.datepicker-leave-to {
-  @apply invisible opacity-0;
-}
-
-.datepicker-overlay-enter-active,
-.datepicker-overlay-leave-active {
-  transition: opacity calc(0.3s / 2);
-}
-
-.datepicker-overlay-enter-from,
-.datepicker-overlay-leave-to {
-  @apply opacity-0;
-}
-
-.datepicker-overlay-enter-to,
-.datepicker-overlay-leave-from {
-  @apply opacity-100;
-}
-
-.datepicker-bomb-enter-active,
-.datepicker-bomb-leave-active {
+/* 淡入加微幅縮放。比 anim-zoom 輕，元素不會整個消失到看不見 */
+.anim-zoom-soft-enter-active,
+.anim-zoom-soft-leave-active {
   transition:
-    opacity 0.3s,
-    transform 0.3s;
+    opacity 0.2s,
+    transform 0.2s;
 }
 
-.datepicker-bomb-enter-from,
-.datepicker-bomb-leave-to {
+.anim-zoom-soft-enter-from,
+.anim-zoom-soft-leave-to {
   @apply scale-95 opacity-0;
 }
 
-.datepicker-bomb-enter-to,
-.datepicker-bomb-leave-from {
+.anim-zoom-soft-enter-to,
+.anim-zoom-soft-leave-from {
   @apply scale-100 opacity-100;
 }
 
-/* popup-promise-overlay（.m-popup-promise） */
-/* 進場：先漸入(0→0.3s)；離場：後漸出(delay 0.15s 等 message 先收) */
-.popup-promise-overlay-enter-active,
-.popup-promise-overlay-leave-active {
-  transition: opacity 0.3s ease;
+/* 由下往上滑入。貼齊螢幕底部的面板用 */
+.anim-slide-up-enter-active,
+.anim-slide-up-leave-active {
+  @apply transition-transform duration-200;
 }
 
-.popup-promise-overlay-leave-active {
+.anim-slide-up-enter-from,
+.anim-slide-up-leave-to {
+  @apply translate-y-full;
+}
+
+.anim-slide-up-enter-to,
+.anim-slide-up-leave-from {
+  @apply translate-y-0;
+}
+
+/* 由下往上滑入,進場慢半拍。
+
+   兩層疊在一起時裡層用 —— 等外層的遮罩先出現才滑上來,
+   否則面板會在還沒變暗的背景上滑動。離場則立刻開始,讓外層等它。
+
+   與上面那組分開,是因為沒有遮罩的貼底面板(選單、日曆)不該慢半拍 ——
+   加了 delay 會讓它們開起來變鈍。這與 anim-fade 和 anim-fade-in-late
+   是同一種拆法。 */
+.anim-slide-up-late-enter-active,
+.anim-slide-up-late-leave-active {
+  @apply transition-transform duration-200;
+}
+
+.anim-slide-up-late-enter-active {
   transition-delay: 0.15s;
 }
 
-.popup-promise-overlay-enter-from,
-.popup-promise-overlay-leave-to {
-  @apply opacity-0;
+.anim-slide-up-late-enter-from,
+.anim-slide-up-late-leave-to {
+  @apply translate-y-full;
 }
 
-.popup-promise-overlay-enter-to,
-.popup-promise-overlay-leave-from {
-  @apply opacity-100;
+.anim-slide-up-late-enter-to,
+.anim-slide-up-late-leave-from {
+  @apply translate-y-0;
 }
 
-/* popup-promise（.m-popup-promise-message） */
-/* 進場：後漸入(delay 0.15s 等 overlay 先出現)；離場：先漸出(0→0.3s) */
-.popup-promise-enter-active,
-.popup-promise-leave-active {
-  transition: opacity 0.3s ease;
+/* 高度展開。下拉選單、搜尋建議這類內容高度算得出來的用 */
+.anim-collapse-enter-active,
+.anim-collapse-leave-active {
+  will-change: height;
+
+  @apply overflow-hidden transition-heights duration-300;
 }
 
-.popup-promise-enter-active {
-  transition-delay: 0.15s;
+.anim-collapse-enter-from,
+.anim-collapse-leave-to {
+  @apply !h-0;
 }
 
-.popup-promise-enter-from,
-.popup-promise-leave-to {
-  @apply opacity-0;
+/* 高度展開，改用高度上限。
+   內容高度事先算不出來時用這一組 —— 上限值要大於實際內容，
+   否則展開到一半就停住；代價是動畫速度會比實際內容高一些 */
+.anim-collapse-max-enter-active,
+.anim-collapse-max-leave-active {
+  will-change: max-height;
+
+  @apply overflow-hidden transition-heights duration-300;
 }
 
-.popup-promise-enter-to,
-.popup-promise-leave-from {
-  @apply opacity-100;
+.anim-collapse-max-enter-from,
+.anim-collapse-max-leave-to {
+  @apply !max-h-0;
+}
+
+.anim-collapse-max-enter-to,
+.anim-collapse-max-leave-from {
+  @apply max-h-[1000px];
 }

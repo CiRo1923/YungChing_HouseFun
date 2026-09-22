@@ -1,6 +1,6 @@
 import CONFIG from './config.js'
 import plugin from 'tailwindcss/plugin'
-import { fontFamily, boxShadow, dropShadow } from './tailwind.extend.js'
+import { fontFamily, boxShadow, dropShadow } from './tailwind.theme.js'
 import { onSetWidth, onColorWithAlpha } from './tailwind.function.js'
 
 module.exports = {

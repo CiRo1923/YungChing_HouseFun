@@ -22,7 +22,7 @@ const total = computed(() => customData.value.data.reduce((sum, item) => sum + i
 </script>
 
 <template>
-  <BuyCommonCustomPopup
+  <CommonCustomPopup
     id="popupView"
     :setClass="{
       main: 'p:--w-1200 t:--w-720',
@@ -56,5 +56,5 @@ const total = computed(() => customData.value.data.reduce((sum, item) => sum + i
         />
       </template>
     </BuyMTableDefault>
-  </BuyCommonCustomPopup>
+  </CommonCustomPopup>
 </template>

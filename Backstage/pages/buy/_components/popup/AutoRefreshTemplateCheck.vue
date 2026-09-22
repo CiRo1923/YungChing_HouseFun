@@ -11,7 +11,7 @@ const timeSpan = computed(() => template.value[selectedIndex.value]?.listTimeSpa
 </script>
 
 <template>
-  <BuyCommonCustomPopup
+  <CommonCustomPopup
     id="popupAutoRefreshTemplateCheck"
     :setClass="{
       main: 'p:--w-1200 t:--w-720',
@@ -49,5 +49,5 @@ const timeSpan = computed(() => template.value[selectedIndex.value]?.listTimeSpa
         </ul>
       </div>
     </div>
-  </BuyCommonCustomPopup>
+  </CommonCustomPopup>
 </template>

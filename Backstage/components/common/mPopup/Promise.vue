@@ -11,9 +11,9 @@ const { promise } = storeToRefs(popup)
 </script>
 
 <template>
-  <Transition name="popup-promise-overlay">
+  <Transition name="anim-fade-out-late">
     <div class="m-popup-promise" v-if="promise.status === 'open'">
-      <Transition name="popup-promise">
+      <Transition name="anim-fade-in-late">
         <p
           class="m-popup-promise-message"
           v-html="promise.message"

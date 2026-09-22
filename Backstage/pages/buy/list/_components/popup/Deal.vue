@@ -1,9 +1,9 @@
 <script setup>
 import { Form } from 'vee-validate'
 
+const { searchSelectCount } = useBuyListActions()
 const popup = usePopupStore()
 const { customData } = storeToRefs(popup)
-const { searchSelectCount } = useBuyListActions()
 const { onCustomClose } = usePopupActions()
 const formRef = ref(null)
 const publishInfo = computed(() => {
@@ -44,7 +44,7 @@ const onSure = async () => {
 </script>
 
 <template>
-  <BuyCommonCustomPopup
+  <CommonCustomPopup
     id="popupDeal"
     :setClass="{
       main: 'p:--w-1200 t:--w-720',
@@ -60,5 +60,5 @@ const onSure = async () => {
     <Form as="div" class="tm:mt-[16px] p:mt-[24px]" ref="formRef">
       <PageBuyDealInfo :data="publishInfo" />
     </Form>
-  </BuyCommonCustomPopup>
+  </CommonCustomPopup>
 </template>

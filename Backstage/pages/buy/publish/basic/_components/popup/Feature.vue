@@ -55,7 +55,7 @@ const example2 = readonly({
 </script>
 
 <template>
-  <BuyCommonCustomPopup
+  <CommonCustomPopup
     id="popupFeature"
     :setClass="{
       main: 'p:--w-1200 t:--w-720',
@@ -85,5 +85,5 @@ const example2 = readonly({
         </li>
       </ol>
     </div>
-  </BuyCommonCustomPopup>
+  </CommonCustomPopup>
 </template>

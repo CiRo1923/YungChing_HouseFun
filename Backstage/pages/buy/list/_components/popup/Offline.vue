@@ -1,11 +1,11 @@
 <script setup>
+const { searchSelectCount } = useBuyListActions()
 const popup = usePopupStore()
 const { customData } = storeToRefs(popup)
-const { searchSelectCount } = useBuyListActions()
 </script>
 
 <template>
-  <BuyCommonCustomPopup
+  <CommonCustomPopup
     id="popupOffline"
     :setClass="{
       main: 'p:--w-800 t:--w-600',
@@ -26,5 +26,5 @@ const { searchSelectCount } = useBuyListActions()
         </b>
       </p>
     </div>
-  </BuyCommonCustomPopup>
+  </CommonCustomPopup>
 </template>

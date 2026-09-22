@@ -1,7 +1,7 @@
 <script setup>
 const common = useCommonStore()
-const buyProject = useBuyProjectStore()
 const { isLoading } = storeToRefs(common)
+const buyProject = useBuyProjectStore()
 </script>
 
 <template>
@@ -24,8 +24,8 @@ const { isLoading } = storeToRefs(common)
     v-if="isLoading"
   />
   <div id="box">
-    <BuyCommonAlertSystem />
-    <BuyCommonConfirmSystem />
-    <BuyCommonApiPromiseSystem />
+    <CommonAlertSystem />
+    <CommonConfirmSystem />
+    <CommonApiPromiseSystem />
   </div>
 </template>

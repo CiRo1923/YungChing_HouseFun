@@ -1,6 +1,6 @@
 ---
 name: popup-system
-description: 修改 popup(alert / confirm / custom / apiPromise)的顯示狀態機、Promise 結算、進出場動畫前必須先讀。記錄兩條不可違反的不變式,以及它們各自防住的三個 bug(死鎖打不開、Promise 永久 pending、TypeError 連鎖)。觸發時機 - 要改 components/common/mPopup/Main.vue、stores/.composables/usePopupActions.js、containers/buy/common/{CustomPopup,AlertSystem,ConfirmSystem}.vue、assets/css/_modules/common/mPopup/*.css、assets/css/_common/vueTransition.css 的 popup 段落;或使用者回報 popup「打不開 / 只剩遮罩 / 關不掉 / 動畫沒播 / 流程卡住不往下走」。
+description: 修改 popup(alert / confirm / custom / apiPromise)的顯示狀態機、Promise 結算、進出場動畫前必須先讀。記錄兩條不可違反的不變式,以及它們各自防住的三個 bug(死鎖打不開、Promise 永久 pending、TypeError 連鎖)。觸發時機 - 要改 components/common/mPopup/Index.vue、stores/.composables/usePopupActions.js、containers/common/{CustomPopup,AlertSystem,ConfirmSystem,ApiPromiseSystem}.vue、components/common/mPopup/.css/*.css、assets/css/_common/vueTransition.css 的 popup 段落;或使用者回報 popup「打不開 / 只剩遮罩 / 關不掉 / 動畫沒播 / 流程卡住不往下走」。
 ---
 
 <!-- lint-project-name-exempt: 這支只有本專案有,不會複製到別的專案;內容是 popup 涉及哪幾支檔案,路徑是要記錄的資料本身 -->
@@ -10,30 +10,59 @@ description: 修改 popup(alert / confirm / custom / apiPromise)的顯示狀態�
 全站只有一個 popup 顯示層。**同一時間只會有一個 popup 可見**,由 `keyID` 的優先序決定:
 `alertData.id || confirmData.id || customData.id || apiPromiseData.id`。
 
-> 本專案已與並排的另一個專案對齊:兩條不變式都已套用,
-> popup 元件搬到共用層,store 與 composable 不再分頻道專屬版本。
+popup 的機制與並排的另一個專案是同一套:相同的檔案位置、相同的開啟函式、
+相同的兩條不變式。**樣式與每一次開啟時傳入的設定各自獨立**,不必一致。
 
 ## 檔案分工
 
-| 檔案                                              | 負責                                                                                                                                                                                                         |
-| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `stores/popup.js`                                 | 狀態:`alertData` / `confirmData` / `customData` / `apiPromiseData`(各含 `id`)、`alertCheck` / `confirmCheck` / `customCheck`(Promise 的 resolver)、`buttons` 與 `setClass`(alert / confirm 的預設按鈕與外觀) |
-| `stores/.composables/usePopupActions.js`          | 開啟 / 關閉 / 結算。**是唯一能碰 `xxxCheck` 的地方**                                                                                                                                                         |
-| `components/common/mPopup/Main.vue`               | 顯示狀態機與兩層 Transition。每個 popup 實例比對 `props.id === keyID`                                                                                                                                        |
-| `containers/buy/common/*.vue`                     | 各型別的外框(AlertSystem / ConfirmSystem / CustomPopup / ApiPromiseSystem)                                                                                                                                   |
-| `assets/css/_modules/common/mPopup/variables.css` | 尺寸 / 色彩變數與 `--w-1200` ~ `--w-300` 寬度修飾符。改樣式優先動這裡                                                                                                                                        |
-| `assets/css/_modules/common/mPopup/common.css`    | `.m-popup*` 的版面規則(由 `Main.vue` import)                                                                                                                                                                 |
-| `assets/css/_common/vueTransition.css`            | `popup-overlay-*` / `popup-zoom-*`。**不得出現 `.m-xxx` 選擇器**                                                                                                                                             |
+| 檔案                                            | 負責                                                                                                                                                                                       |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `stores/popup.js`                               | 狀態:`alertData` / `confirmData` / `customData` / `apiPromiseData`(各含 `id`)、`alertCheck` / `confirmCheck` / `customCheck`(Promise 的 resolver)、`buttons`(alert / confirm 的基準按鈕) |
+| `stores/.composables/usePopupActions.js`        | 開啟 / 關閉 / 結算。**是唯一能碰 `xxxCheck` 的地方**                                                                                                                                       |
+| `components/common/mPopup/Index.vue`            | 顯示狀態機與兩層 Transition。每個 popup 實例比對 `props.id === keyID`                                                                                                                      |
+| `containers/common/*.vue`                       | 各型別的外框(AlertSystem / ConfirmSystem / CustomPopup / ApiPromiseSystem)                                                                                                                 |
+| `components/common/mPopup/.css/variables.css`   | 尺寸 / 色彩變數與 `--w-1200` ~ `--w-300` 寬度修飾符。改樣式優先動這裡                                                                                                                      |
+| `components/common/mPopup/.css/common.css`      | `.m-popup*` 的版面規則(由 `Index.vue` import)                                                                                                                                              |
+| `assets/css/_common/vueTransition.css`          | 全站共用的轉場動畫,依效果命名(`anim-fade-out-late` / `anim-bounce` / `anim-zoom` / `anim-slide-up-late` 等)。**不得出現 `.m-xxx` 選擇器**                                                |
 
-**與 Official 的差異**:本專案**沒有 bottomSheet 模式**,PC / 平板 / 手機一律 zoom ——
-`Main.vue` 的 `--zoom` class 與 `<Transition name="popup-zoom">` 都是寫死的,
-不吃 Official 那套 `config.mode` + `device` 機制(`.--zoom` 修飾符保留著,日後要加模式才有掛點)。
+## 三種進出場模式
+
+`config.mode` 接受 `'bomb'` / `'zoom'` / `'bottomSheet'`,也可以用物件依裝置各給一種
+(`{ p: 'zoom', m: 'bottomSheet' }`,鍵是 `p` / `pt` / `tm` / `t` / `m`)。
+
+模式名不直接當成動畫名 —— 轉場的名字講的是「什麼效果」,不綁哪一支元件在用,
+所以 `Index.vue` 裡明寫一份對照:
+
+```js
+const MODE_ANIMATIONS = {
+  zoom: 'anim-zoom',
+  bomb: 'anim-bounce',
+  bottomSheet: 'anim-slide-up-late',
+}
+```
+
+模式這個值同時決定兩件事,所以**新增一種模式時三個地方都要有,少一個不會報錯**:
+
+| 用途             | 產生的東西                     | 定義在                                       |
+| ---------------- | ------------------------------ | -------------------------------------------- |
+| 進出場動畫       | 對照表指到的 `anim-*`          | `assets/css/_common/vueTransition.css`       |
+| 模式與動畫的對應 | `MODE_ANIMATIONS` 的一筆       | `components/common/mPopup/Index.vue`         |
+| 容器在畫面上的位置 | `.--<模式>` 修飾符            | `components/common/mPopup/.css/common.css`   |
+
+對照表漏了那一筆會落回 `anim-zoom`(播錯動畫);修飾符漏了則是容器少掉定位規則、
+貼在左上角。兩種都不會有錯誤訊息。
+
+`bomb` 與 `zoom` 的版面相同,差別只在動畫曲線(bomb 會過衝再回彈),
+所以 `.--bomb` 與 `.--zoom` 共用同一段定位規則,不是各寫一份。
+
+**兩組 keyframes 的名字必須不同。** 同名的後者會蓋掉前者,而 CSS 不會有任何警告 ——
+症狀是某一種模式播出了另一種的動畫。
 
 ---
 
 ## 不變式 1:顯示狀態由 `watch(isOpen)` 驅動,禁止依賴 transition 事件
 
-`Main.vue` 有兩個 flag,對應兩層 Transition:
+`Index.vue` 有兩個 flag,對應兩層 Transition:
 
 ```js
 const isShowOverlay = ref(false) // 外層 .m-popup(遮罩)
@@ -69,10 +98,10 @@ const onAfterLeave = () => {
 另外兩層都必須維持 `v-if`,**不要改成 `v-show`**(會讓每個 popup 常駐一個 `.m-popup`
 在 DOM,污染 `querySelector`)。
 
-### 舊寫法為什麼會死鎖(勿回頭)
+### 這種寫法會死鎖,不要改成這樣
 
 ```js
-// 已移除的實作
+// 不可採用
 const onOverlayEnter = () => {
   if (isOpen.value) isShowPopup.value = true
 }
@@ -84,9 +113,9 @@ const onOverlayEnter = () => {
 `@afterLeave` 永遠不來 → `isShowOverlay` 永遠 `true` → 永遠不會再有 `@enter`。
 **該 popup 從此開不起來,只能重整頁面。**
 
-當年沒被回報出來是運氣:AutoRefresh 流程每次重開 popup 前都剛好有 `await` API
-(`onAutoRefreshAddTimePopup` 開頭的 `onApiGETRefreshNewPlan`),加上 `onApiPromise('open')`
-會佔用 `keyID` 讓前一個 popup 確實走完退場。**做出「純前端的上一步」(不打 API)就會立刻踩中。**
+這個死鎖不一定測得出來:重開之前只要有一段 `await`(例如 AutoRefresh 流程開頭那支 API,
+加上 `onApiPromise('open')` 會佔用 `keyID`),前一個 popup 就有時間走完退場,症狀被蓋掉。
+**「純前端的上一步」(不打 API)會立刻踩中。**
 
 ---
 
@@ -145,25 +174,32 @@ console 有 `is not a function` → 第三條。
 
 進出場的先後**全部靠 CSS delay**,JS 不參與時序:
 
-```css
-.popup-overlay-enter-active,
-.popup-overlay-leave-active {
-  transition: opacity 0.15s ease;
-}
-.popup-overlay-leave-active {
-  transition-delay: 0.1s;
-} /* 等 container 收完 */
+外層遮罩用「淡出慢半拍」那一組,內層內容用帶進場 delay 的那一組,兩邊的 delay 互相搭配:
 
-.popup-zoom-enter-active {
-  animation: popup-bomb 0.1s 0.075s both;
-} /* delay 讓遮罩先浮現 */
-.popup-zoom-leave-active {
-  animation: popup-bomb 0.1s reverse both;
+```css
+/* 外層遮罩:離場等 container 先收完 */
+.anim-fade-out-late-enter-active,
+.anim-fade-out-late-leave-active {
+  @apply transition-opacitys duration-200;
+}
+.anim-fade-out-late-leave-active {
+  transition-delay: 0.15s;
+}
+
+/* 內層內容:進場等遮罩先浮現 */
+.anim-zoom-enter-active {
+  animation: anim-zoom 0.1s 0.15s both;
+}
+.anim-zoom-leave-active {
+  animation: anim-zoom 0.1s reverse both;
 }
 ```
 
 **`vueTransition.css` 內不得出現 `.m-xxx` 選擇器**(只有註解可提及元件名)。需要綁元件 class
 的規則放到該元件自己的 CSS 模組。
+
+那一支是全站共用的,裡面的動畫**依效果命名、不綁使用它的元件** —— 同一組
+`anim-fade-out-late` 同時給彈窗的遮罩與等待提示的遮罩用。改秒數之前先確認還有誰在用。
 
 ---
 
@@ -176,7 +212,9 @@ console 有 `is not a function` → 第三條。
 - [ ] `grep "Check\.value"` 只在 `stores/.composables/usePopupActions.js` 有結果
 - [ ] `vueTransition.css` 的 popup 段落沒有 `.m-xxx` 選擇器
 - [ ] 兩層都是 `v-if`
-- [ ] 尺寸 / 色彩改在 `_modules/common/mPopup/variables.css`,沒有把數值寫死回 `Main.vue` 的 template
+- [ ] 尺寸 / 色彩改在 `components/common/mPopup/.css/variables.css`,沒有把數值寫死回 `Index.vue` 的 template
+- [ ] 新增進出場模式時,`MODE_ANIMATIONS` 的一筆、對應的 `anim-*` 動畫、`.--<模式>` 的定位規則三者都有
+- [ ] 每一組 keyframes 的名字都不重複(同名會安靜地互相覆蓋)
 
 ## 多步流程的寫法
 

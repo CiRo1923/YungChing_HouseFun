@@ -33,17 +33,6 @@ export const usePopupStore = defineStore('popup', () => {
       },
     ],
   })
-  // alert / confirm 沒帶 setClass 時的預設外觀
-  const setClass = readonly({
-    alert: {
-      main: 'p:--w-450 t:--w-300',
-      content: 'text-center',
-    },
-    confirm: {
-      main: 'p:--w-450 t:--w-300',
-      content: 'text-center',
-    },
-  })
   const alertData = reactive({
     id: null,
     title: null,
@@ -87,7 +76,6 @@ export const usePopupStore = defineStore('popup', () => {
     customCheck,
     promise,
     buttons,
-    setClass,
     alertData,
     confirmData,
     customData,

@@ -394,7 +394,7 @@ onUnmounted(() => {
     </ErrorMessage>
   </div>
   <Teleport to="body">
-    <Transition name="dropdown" @beforeLeave="onCloseDropdown" appear>
+    <Transition name="anim-collapse" @beforeLeave="onCloseDropdown" appear>
       <div
         class="m-form-dropdown --select"
         :class="[setClass.dropdown, { '--open': isOpen }]"

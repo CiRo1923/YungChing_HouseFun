@@ -347,7 +347,7 @@ onMounted(() => {
   </div>
 
   <Teleport to="body">
-    <Transition :name="isPopup ? 'datepicker-overlay' : 'datepicker'" appear @enter="onOpen">
+    <Transition :name="isPopup ? 'anim-fade' : 'anim-fade-visible'" appear @enter="onOpen">
       <div
         class="m-datepicker-calendar"
         :class="{ '--popup': isPopup }"
@@ -355,7 +355,7 @@ onMounted(() => {
         v-if="isActive"
         @click.self="isPopup ? onToggle(false) : null"
       >
-        <Transition name="datepicker-bomb" appear>
+        <Transition name="anim-zoom-soft" appear>
           <BuyMDatepickerCalendar
             :name="props.name"
             :config="config"

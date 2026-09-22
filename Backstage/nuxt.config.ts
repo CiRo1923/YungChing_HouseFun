@@ -21,6 +21,8 @@ const imageAssetDir = CONFIG.imgs.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace
 const imageAssetInclude = new RegExp(`${imageAssetDir}/(?!svg/spritemap\\.svg$)`)
 
 export default defineNuxtConfig({
+  // 日期是各專案自己的值,定義在 config.js —— 這份設定整套複製到新專案時不會帶走它。
+  compatibilityDate: CONFIG.compatibilityDate,
   experimental: {
     appManifest: false,
   },

@@ -2,6 +2,9 @@ import { onDeepMerge, onBodyOverflowHiddenToggle } from '@js/_prototype.js'
 
 export default () => {
   const popup = usePopupStore()
+  // buttons 直接從 store 取:它是 readonly 常數,既不是 ref 也不是 reactive,
+  // storeToRefs 不會為它建立 ref —— 解構出來會是 undefined。
+  const { buttons } = popup
   const {
     promise,
     alertCheck,
@@ -12,16 +15,14 @@ export default () => {
     customData,
     apiPromiseData,
     apiError,
-    buttons,
-    setClass,
   } = storeToRefs(popup)
   // dataBtns 只需帶要覆寫的欄位,依 type 比對基準按鈕合併回完整資訊,順序一律以 dataBtns 為主
   // givenBtns 有給時視為完整集合,dataBtns 未提到的按鈕接在後面
-  // givenBtns 未給時僅以 store 的 buttons.confirm 補欄位,顆數由 dataBtns 決定(同 type 可重複)
+  // 未給時僅以 store 的 confirm 基準按鈕補欄位,顆數由 dataBtns 決定(同 type 可重複)
   const onMergeBtns = (dataBtns, givenBtns) => {
     if (!dataBtns) return givenBtns || null
 
-    const baseBtns = givenBtns || buttons.value.confirm
+    const baseBtns = givenBtns || buttons.confirm
     const mergedBtns = dataBtns.map((btn) => {
       const matchBtn = baseBtns.find(({ type }) => type === btn.type)
 
@@ -55,16 +56,15 @@ export default () => {
     // 前一個 alert 還沒結算就被蓋掉 → 先以「未確認」收掉,避免它的 await 永久卡住
     onSettle(alertCheck)
 
-    const alertBtns = buttons.value.alert
-    const alertSetClass = setClass.value.alert
+    const alertBtns = buttons.alert
 
     alertData.value.id = 'alertSystem'
     alertData.value.title = data.title
-    alertData.value.icon = data.icon || 'icon_circle_exclamation'
+    alertData.value.icon = data.icon
     alertData.value.content = data.content
-    alertData.value.btns = onDeepMerge(alertBtns, data.btns)
+    alertData.value.btns = onMergeBtns(data.btns, alertBtns)
     alertData.value.hasExistClose = data.hasExistClose !== undefined ? data.hasExistClose : true
-    alertData.value.setClass = onDeepMerge({ ...alertSetClass }, data.setClass) || alertSetClass
+    alertData.value.setClass = data.setClass
 
     onBodyOverflowHiddenToggle(true)
 
@@ -88,17 +88,15 @@ export default () => {
   const onConfirm = (data) => {
     onSettle(confirmCheck)
 
-    const confirmBtns = buttons.value.confirm
-    const confirmSetClass = setClass.value.confirm
+    const confirmBtns = buttons.confirm
 
     confirmData.value.id = 'confirmSystem'
     confirmData.value.title = data.title
-    confirmData.value.icon = data.icon || 'icon_circle_exclamation'
+    confirmData.value.icon = data.icon
     confirmData.value.content = data.content
     confirmData.value.btns = onMergeBtns(data.btns, confirmBtns)
     confirmData.value.hasExistClose = data.hasExistClose !== undefined ? data.hasExistClose : true
-    confirmData.value.setClass =
-      onDeepMerge({ ...confirmSetClass }, data.setClass) || confirmSetClass
+    confirmData.value.setClass = data.setClass
 
     onBodyOverflowHiddenToggle(true)
 
@@ -118,8 +116,10 @@ export default () => {
     onBodyOverflowHiddenToggle(false)
   }
   const onCustom = async (data) => {
-    // 若已有「不同 id」的 custom popup 開著,先關掉並等一個 flush 再開新的,
-    // 讓舊 popup 的 leave 與新 popup 的 enter 不會擠在同一個同步 flush。
+    // 若已有「不同 id」的 custom popup 開著,先關掉並等一個 flush 再開新的。
+    // 否則舊 popup 的 leave 與新 popup 的 enter 會擠在同一個同步 flush,
+    // 兩個 <Teleport to="#box"> 同時 patch 會搶錨點,
+    // 觸發 "Cannot read properties of null (reading 'insertBefore')"。
     if (customData.value.id && customData.value.id !== data.id) {
       onCustomClose()
       await nextTick()
@@ -174,23 +174,27 @@ export default () => {
       }
       const apiMessage = data.Message || data.message || data.title
       const message = statusMessages[status] || apiMessage
-      // 400 / 401 的 Message 是給使用者看的說明,不需要再附上 API 位址
-      const content =
-        /^(400|401)$/.test(status) && data.Message
-          ? message
-          : `${config.url}<br />${status} 錯誤:<br />${message}`
+      const content = `${config.url}<br />${status} 錯誤:<br />${message}`
 
       onAlert({
         title,
+        icon: 'icon_circle_exclamation',
         content,
+        setClass: {
+          main: 'p:--w-450 t:--w-300',
+          content: 'text-center',
+        },
       })
     }
   }
+  // SSR 期間存下的錯誤在 client 補跳一次。重播完一定要清掉 ——
+  // apiError 留著的話,每一支頁面的 onMounted 都會再跳同一個錯誤窗。
   const onApiErrorServerToClient = () => {
     if (apiError.value) {
       const { config, status, data } = apiError.value
 
       onApiError(config, status, data)
+      onApiErrorClear()
     }
   }
   const onApiErrorClear = () => {

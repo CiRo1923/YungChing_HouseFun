@@ -4,8 +4,8 @@ import { Form } from 'vee-validate'
 // const common = useCommonStore()
 const { onUseMeta } = useCommonActions()
 const buyProject = useBuyProjectStore()
-const { renewal } = storeToRefs(buyProject)
 const buyPublish = useBuyPublishStore()
+const { renewal } = storeToRefs(buyProject)
 const { statusData } = storeToRefs(buyPublish)
 const { onApiGetVasPublishAvailablePlans, onApiPostVasPublishSubmit } = useBuyProjectActions()
 const { onUnsavedChanges, onApiGetBuyRealEstateCaseStatusHfID, onApiPostBuyRealEstateReadToPublish } =
@@ -41,7 +41,12 @@ const onBuyRealEstateReadToPublish = async () => {
   if (status === 200) {
     onSnapshotSave()
     onAlert({
+      icon: 'icon_circle_exclamation',
       content: '儲存成功',
+      setClass: {
+        main: 'p:--w-450 t:--w-300',
+        content: 'text-center',
+      },
     })
   }
 }
@@ -65,7 +70,12 @@ const onSaveSubmit = async (validate, setTouched) => {
       onSnapshotSave()
 
       const isAlert = await onAlert({
+        icon: 'icon_circle_exclamation',
         content: '物件刊登完成',
+        setClass: {
+          main: 'p:--w-450 t:--w-300',
+          content: 'text-center',
+        },
       })
 
       if (isAlert) {

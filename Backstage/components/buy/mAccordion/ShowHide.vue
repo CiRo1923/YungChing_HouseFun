@@ -92,7 +92,7 @@ onUnmounted(() => {
       <div class="m-accordion-show" :class="setClass.show">
         <slot />
       </div>
-      <Transition name="accordion">
+      <Transition name="anim-collapse-max">
         <div v-show="isShow" class="m-accordion-hide" :class="setClass.hide">
           <slot name="hide" :isAccordion="isAccordion" :onToggle="onToggle" />
         </div>

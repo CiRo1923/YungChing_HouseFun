@@ -1,5 +1,5 @@
 <template>
-  <BuyCommonCustomPopup
+  <CommonCustomPopup
     id="popupAutoRefreshSuccess"
     :setClass="{
       main: 'p:--w-800 t:--w-600',
@@ -16,5 +16,5 @@
       />
       <p class="text-[--gray-666] tm:text-[14px] p:text-[16px]">設定將於隔日生效</p>
     </div>
-  </BuyCommonCustomPopup>
+  </CommonCustomPopup>
 </template>

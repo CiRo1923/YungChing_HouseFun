@@ -48,7 +48,7 @@ const onSure = async () => {
 </script>
 
 <template>
-  <BuyCommonCustomPopup
+  <CommonCustomPopup
     id="popupAutoRefreshRenewal"
     :setClass="{
       main: 'p:--w-1200 t:--w-720',
@@ -120,5 +120,5 @@ const onSure = async () => {
         </CommonMFormHidden>
       </Form>
     </div>
-  </BuyCommonCustomPopup>
+  </CommonCustomPopup>
 </template>

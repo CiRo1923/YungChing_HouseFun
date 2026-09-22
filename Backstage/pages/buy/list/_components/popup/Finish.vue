@@ -22,7 +22,7 @@ const hasFinishInfo = computed(() => true)
 </script>
 
 <template>
-  <BuyCommonCustomPopup
+  <CommonCustomPopup
     id="popupFinish"
     :setClass="{
       main: 'p:--w-1200 t:--w-720',
@@ -36,5 +36,5 @@ const hasFinishInfo = computed(() => true)
       }"
       v-if="hasFinishInfo"
     />
-  </BuyCommonCustomPopup>
+  </CommonCustomPopup>
 </template>

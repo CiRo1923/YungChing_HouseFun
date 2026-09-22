@@ -9,7 +9,7 @@ const onClick = (data) => {
 </script>
 
 <template>
-  <BuyCommonCustomPopup
+  <CommonCustomPopup
     id="popupAddressGoogleMap"
     :setClass="{
       main: 'p:--w-1200 t:--w-720',
@@ -30,5 +30,5 @@ const onClick = (data) => {
         />
       </ClientOnly>
     </div>
-  </BuyCommonCustomPopup>
+  </CommonCustomPopup>
 </template>

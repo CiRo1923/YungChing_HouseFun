@@ -575,7 +575,7 @@ onUnmounted(() => {
     </ErrorMessage>
   </div>
   <Teleport to="body">
-    <Transition name="autocomplete" @afterLeave="onCloseDropdown" appear>
+    <Transition name="anim-collapse" @afterLeave="onCloseDropdown" appear>
       <div
         class="m-form-autocomplete-dropdown"
         :class="setClass.dropdown"

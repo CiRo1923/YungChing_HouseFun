@@ -1,9 +1,15 @@
 <script setup>
 /* component-deps —— 複製這支元件時要一起帶走:
    stores/.composables/useCommonActions.js
-   stores/.composables/usePopupActions.js
    stores/common.js
-   stores/popup.js */
+   stores/.composables/usePopupActions.js
+   stores/popup.js
+   assets/css/_common/vueTransition.css
+     彈窗的進出場動畫定義在這裡。沒有它不會報錯也不會少畫面,只是開關的當下直接跳、沒有漸變。
+   containers/common/AlertSystem.vue
+   containers/common/ConfirmSystem.vue
+   containers/common/CustomPopup.vue
+   containers/common/ApiPromiseSystem.vue */
 import './.css/variables.css'
 import './.css/common.css'
 
@@ -57,7 +63,8 @@ const icon = computed(() => activeData.value.icon)
 
 const config = computed(() => {
   return {
-    mode: 'zoom', // 'zoom' | 'bottomSheet' : {p: 'zoom' | 'bottomSheet', pt: 'zoom' | 'bottomSheet', tm: 'zoom' | 'bottomSheet', t: 'zoom' | 'bottomSheet', m: 'zoom' | 'bottomSheet'}`
+    // 'bomb' | 'zoom' | 'bottomSheet',或用物件依裝置各給一種:{ p, pt, tm, t, m }
+    mode: 'zoom',
     ...props.config,
   }
 })
@@ -68,10 +75,23 @@ const mode = computed(() => {
   return typeof mode === 'object' && mode !== null ? mode[device.value] || 'zoom' : mode
 })
 
-// Transition name：popup-zoom | popup-bottomSheet
-const transitionName = computed(() => `popup-${mode.value}`)
+/* 每一種開闔模式配一種進出的動畫。
 
-// container className：--zoom | --bottomSheet
+  名字不用模式名組出來(popup-zoom 那種)——
+  轉場的名字講的是「什麼效果」,不綁哪一支元件在用,
+  所以這裡要明寫對照,改動畫時看得出換成了哪一種。
+
+  zoom 與 bomb 的版面完全相同(見 .css/common.css),差別只在這裡:
+  zoom 是直線放大,bomb 會先衝過頭再彈回來。 */
+const MODE_ANIMATIONS = {
+  zoom: 'anim-zoom',
+  bomb: 'anim-bounce',
+  bottomSheet: 'anim-slide-up-late',
+}
+
+const transitionName = computed(() => MODE_ANIMATIONS[mode.value] || MODE_ANIMATIONS.zoom)
+
+// container className：--bomb | --zoom | --bottomSheet
 const modeClass = computed(() => `--${mode.value}`)
 
 const setClass = computed(() => {
@@ -134,7 +154,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <Transition name="popup-overlay">
+  <Transition name="anim-fade-out-late">
     <div class="m-popup" :class="[modeClass, setClass.main]" v-if="isShowOverlay">
       <Transition :name="transitionName" @afterLeave="onAfterLeave">
         <div class="m-popup-container" :class="setClass.container" v-if="isShowPopup">

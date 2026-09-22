@@ -1,13 +1,13 @@
 <script setup>
 import { Form } from 'vee-validate'
 
+const { searchSelectCount, renewalCanNotPublishData, renewalNotExpiredData } = useBuyListActions()
 // const buyProject = useBuyProjectStore()
 // const { searchSelectItems } = storeToRefs(buyProject)
 // const buyList = useBuyListStore()
 // const { searchDatas } = storeToRefs(buyList)
 const popup = usePopupStore()
 const { customData } = storeToRefs(popup)
-const { searchSelectCount, renewalCanNotPublishData, renewalNotExpiredData } = useBuyListActions()
 const { onCustomClose } = usePopupActions()
 const formRef = ref(null)
 const publishInfo = computed(() => {
@@ -66,7 +66,7 @@ const onSure = async () => {
 </script>
 
 <template>
-  <BuyCommonCustomPopup
+  <CommonCustomPopup
     id="popupRenewal"
     :setClass="{
       main: 'p:--w-1200 t:--w-720',
@@ -139,7 +139,7 @@ const onSure = async () => {
         </ul>
       </li>
     </ul>
-  </BuyCommonCustomPopup>
+  </CommonCustomPopup>
 </template>
 
 <style lang="postcss">

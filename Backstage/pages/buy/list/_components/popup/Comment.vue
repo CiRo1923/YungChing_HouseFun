@@ -69,7 +69,7 @@ const onClickSearch = async () => {
 </script>
 
 <template>
-  <BuyCommonCustomPopup
+  <CommonCustomPopup
     id="popupComment"
     :setClass="{
       main: 'p:--w-1200 t:--w-720',
@@ -82,5 +82,5 @@ const onClickSearch = async () => {
       @click:noReply="(item) => onReplyClick('noReply', item)"
     />
     <PageBuyListPopupCommentPagination />
-  </BuyCommonCustomPopup>
+  </CommonCustomPopup>
 </template>

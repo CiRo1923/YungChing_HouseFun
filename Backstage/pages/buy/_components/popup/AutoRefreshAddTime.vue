@@ -34,7 +34,7 @@ const onSure = async () => {
 </script>
 
 <template>
-  <BuyCommonCustomPopup
+  <CommonCustomPopup
     id="popupAutoRefreshAddTime"
     :setClass="{
       main: 'p:--w-1200 t:--w-720',
@@ -101,5 +101,5 @@ const onSure = async () => {
         }"
       />
     </Form>
-  </BuyCommonCustomPopup>
+  </CommonCustomPopup>
 </template>

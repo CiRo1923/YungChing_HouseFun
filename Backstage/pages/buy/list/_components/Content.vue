@@ -1,4 +1,6 @@
 <script setup>
+const buyList = useBuyListStore()
+const { searchDatas, searchPagination, apiCommentsData, apiDealData } = storeToRefs(buyList)
 const {
   onApiPostVasPublishRenewal,
   onResetPojectData,
@@ -8,8 +10,6 @@ const {
   onGoldenPopup,
   onAutoRefreshPopup,
 } = useBuyProjectActions()
-const buyList = useBuyListStore()
-const { searchDatas, searchPagination, apiCommentsData, apiDealData } = storeToRefs(buyList)
 const {
   searchSelectItems,
   searchSelectCount,
@@ -88,11 +88,21 @@ const onRenewalClick = async (objectData) => {
       if (isAllSuccess) {
         onAlert({
           title: '物件續刊完成',
+          icon: 'icon_circle_exclamation',
           content: '請確認物件是否已續刊',
+          setClass: {
+            main: 'p:--w-450 t:--w-300',
+            content: 'text-center',
+          },
         })
       } else {
         onAlert({
+          icon: 'icon_circle_exclamation',
           content: error.errorMessage,
+          setClass: {
+            main: 'p:--w-450 t:--w-300',
+            content: 'text-center',
+          },
         })
       }
     }
@@ -194,6 +204,10 @@ const onPublishClick = async (objectData) => {
     title: '物件刊登完成',
     icon: 'icon_check_solid',
     content: '請確認物件是否已刊登',
+    setClass: {
+      main: 'p:--w-450 t:--w-300',
+      content: 'text-center',
+    },
   })
 }
 
@@ -221,7 +235,12 @@ const onOfflineClick = async (objectData) => {
 
     onAlert({
       title: '物件下架完成',
+      icon: 'icon_circle_exclamation',
       content: '請確認物件是否已下架',
+      setClass: {
+        main: 'p:--w-450 t:--w-300',
+        content: 'text-center',
+      },
     })
   }
 }

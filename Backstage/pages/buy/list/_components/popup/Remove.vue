@@ -5,7 +5,7 @@ const { customData } = storeToRefs(popup)
 </script>
 
 <template>
-  <BuyCommonCustomPopup
+  <CommonCustomPopup
     id="popupRemove"
     :setClass="{
       main: 'p:--w-800 t:--w-600',
@@ -20,5 +20,5 @@ const { customData } = storeToRefs(popup)
         您確定要<span class="text-[--orange-e646]">刪除</span>選擇的物件嗎？
       </p>
     </div>
-  </BuyCommonCustomPopup>
+  </CommonCustomPopup>
 </template>

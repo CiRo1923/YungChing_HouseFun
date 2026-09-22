@@ -10,7 +10,7 @@ const text = computed(() => (isReply.value ? '已回覆' : isNoReply.value ? '�
 </script>
 
 <template>
-  <BuyCommonCustomPopup
+  <CommonCustomPopup
     id="popupCommentsReply"
     :setClass="{
       main: 'p:--w-800 t:--w-600',
@@ -27,5 +27,5 @@ const text = computed(() => (isReply.value ? '已回覆' : isNoReply.value ? '�
         確定將此則留言設為 <b class="font-medium">[{{ text }}]</b>?
       </p>
     </div>
-  </BuyCommonCustomPopup>
+  </CommonCustomPopup>
 </template>

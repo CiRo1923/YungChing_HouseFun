@@ -84,7 +84,12 @@ export default () => {
 
       const { isSure } = await onConfirm({
         title: '尚未儲存',
+        icon: 'icon_circle_exclamation',
         content: '您有未儲存的變更，如果現在離開，剛剛輸入的資料將不會被保留。',
+        setClass: {
+          main: 'p:--w-450 t:--w-300',
+          content: 'text-center',
+        },
       })
 
       return isSure
@@ -261,7 +266,12 @@ export default () => {
 
     if (status === 200) {
       onAlert({
+        icon: 'icon_circle_exclamation',
         content: '儲存成功',
+        setClass: {
+          main: 'p:--w-450 t:--w-300',
+          content: 'text-center',
+        },
       })
       // console.log(data)
     } else {

@@ -400,7 +400,7 @@ onUnmounted(() => {
   </div>
   <template v-if="currentMode === 'dropdown'">
     <Teleport to="body">
-      <Transition name="dropdown" @afterLeave="onCloseDropdown" appear>
+      <Transition name="anim-collapse" @afterLeave="onCloseDropdown" appear>
         <div class="m-sort-dropdown" ref="dropdownRef" v-if="isActive && sortOptions.length > 0">
           <ul class="m-sort-dropdown-list scrollbar --y">
             <li

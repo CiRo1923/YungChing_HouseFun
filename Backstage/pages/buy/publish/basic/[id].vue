@@ -16,15 +16,14 @@ definePageMeta({
 // const common = useCommonStore()
 const { onUseMeta } = useCommonActions()
 const buyProject = useBuyProjectStore()
+const buyPublish = useBuyPublishStore()
+const { apiData, pingData, statusData } = storeToRefs(buyPublish)
 const {
   onApiGetBuyRealEstateTypeSelectOptions,
   onApiGetBuyRealEstateLegalUsageSelectOptions,
   onApiPostBuyRealEstateRestoreToOnline,
   onApiGetBuyRealEstateFeatureCheckOptions,
 } = useBuyProjectActions()
-const buyPublish = useBuyPublishStore()
-const { apiData, pingData, statusData } = storeToRefs(buyPublish)
-
 const {
   onAllPromise,
   onUnsavedChanges,
@@ -62,6 +61,7 @@ const onAlertSuccess = async (content) => {
     icon: 'icon_check_solid',
     content,
     setClass: {
+      main: 'p:--w-450 t:--w-300',
       icon: 'text-[--orange-e646]',
       content: 'text-[--gray-666] tracking-wider',
     },
@@ -162,6 +162,7 @@ const onRenewal = async (validate, setTouched) => {
           },
         ],
         setClass: {
+          main: 'p:--w-450 t:--w-300',
           icon: 'text-[--orange-e646]',
           content: 'text-[--gray-666] tracking-wider',
         },

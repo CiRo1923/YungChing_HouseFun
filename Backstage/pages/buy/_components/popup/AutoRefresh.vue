@@ -34,7 +34,7 @@ const publishInfo = computed(() => {
 </script>
 
 <template>
-  <BuyCommonCustomPopup
+  <CommonCustomPopup
     id="popupAutoRefresh"
     :setClass="{
       main: 'p:--w-1200 t:--w-720',
@@ -72,5 +72,5 @@ const publishInfo = computed(() => {
         <PageBuyAutoRefrshInfo :update="props.update" />
       </div>
     </div>
-  </BuyCommonCustomPopup>
+  </CommonCustomPopup>
 </template>

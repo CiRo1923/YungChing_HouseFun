@@ -42,7 +42,7 @@ const onSure = async () => {
 </script>
 
 <template>
-  <BuyCommonCustomPopup
+  <CommonCustomPopup
     id="popupGolden"
     :setClass="{
       main: 'p:--w-1200 t:--w-720',
@@ -53,5 +53,5 @@ const onSure = async () => {
     <Form as="div" class="tm:mt-[16px] p:mt-[24px]" ref="formRef">
       <PageBuyGoldenInfo />
     </Form>
-  </BuyCommonCustomPopup>
+  </CommonCustomPopup>
 </template>
