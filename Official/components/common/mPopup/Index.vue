@@ -1,10 +1,15 @@
 <script setup>
 /* component-deps —— 複製這支元件時要一起帶走:
-   assets/css/_common/vueTransition.css
    stores/.composables/useCommonActions.js
-   stores/.composables/usePopupActions.js
    stores/common.js
-   stores/popup.js */
+   stores/.composables/usePopupActions.js
+   stores/popup.js
+   assets/css/_common/vueTransition.css
+     彈窗的進出場動畫定義在這裡。沒有它不會報錯也不會少畫面,只是開關的當下直接跳、沒有漸變。
+   containers/common/AlertSystem.vue
+   containers/common/ConfirmSystem.vue
+   containers/common/CustomPopup.vue
+   containers/common/ApiPromiseSystem.vue */
 import './.css/variables.css'
 import './.css/common.css'
 

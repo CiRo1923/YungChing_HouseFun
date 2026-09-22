@@ -882,6 +882,104 @@ const API_ALIAS_IMPORT = apiAliasImportOf('member.js') ?? apiImportPathOf(P, 'me
  *
  * 沒有分斷點的專案(設定是空物件)回空陣列,那幾則跳過並說明原因。
  */
+/**
+ * 「頁面的 class 不要靠斷點蓋掉基底」那幾則案例。
+ *
+ * 前綴從設定取,不寫死 —— 規則那一側整條略過的條件是
+ * `BREAKPOINT_SCREENS` 為空,所以這裡也照那份設定決定要不要產生案例:
+ *
+ *   不做響應式的專案      設定是空物件 → 一則都不產生
+ *   前綴叫別的名字的專案  用它自己的前綴,不會寫死 m: / pt:
+ *
+ * 寫死的話兩種專案都會整組失敗,而 commit 前那一層看到規則的驗證沒過就會擋下來 ——
+ * 失敗的原因與規則本身無關,看的人會以為規則壞了。
+ *
+ * **「不誤報」那幾則也要一起不產生。** 規則整條略過時它什麼都不報,
+ * 那幾則會通過 —— 而那是假通過:看起來像規則判對了,實際上它根本沒有跑。
+ */
+const breakpointOverrideCases = () => {
+  const all = [...new Set(Object.values(BREAKPOINT_SCREENS).flat())]
+  if (all.length < 2) return []
+
+  // 取兩個不同的前綴:一個當「蓋掉基底的那個」,一個當「另一組斷點」
+  const [one, other] = all
+  const page = (name, cls) => ({
+    file: `${P}/${name}.vue`,
+    rule: 'breakpointOverride',
+    code: `<template>\n  <p class="${cls}">內容</p>\n</template>\n`,
+  })
+
+  return [
+    {
+      /* 先給四邊再用斷點蓋掉左右 —— 要知道那個斷點的左右間距是多少,
+         得先看基底寫了什麼、再找哪一段蓋了它。 */
+      ...page('probeOverride', `p-[15px] ${one}:px-[20px]`),
+      name: 'breakpointOverride 基底被斷點蓋掉要報',
+      expect: 1,
+      keyword: '蓋掉',
+    },
+    {
+      // 同一個 utility 直接被蓋掉是最明顯的那種
+      ...page('probeOverrideSame', `px-[15px] ${one}:px-[20px]`),
+      name: 'breakpointOverride 同名被蓋掉也要報',
+      expect: 1,
+      keyword: '蓋掉',
+    },
+    {
+      // 每個斷點各寫一次就是這條要的寫法,不可以被報
+      ...page('probeOverrideOk', `${other}:px-[15px] ${one}:px-[20px]`),
+      name: 'breakpointOverride 各斷點各寫一次不誤報',
+      expect: 0,
+    },
+    {
+      /* hover / focus 那種狀態前綴本來就是「某個狀態下才蓋掉」,那是它們的用途。
+         把狀態前綴也算進來的話,每一個 hover 變色都會被報。 */
+      ...page('probeOverrideState', 'px-[15px] hover:px-[20px]'),
+      name: 'breakpointOverride 狀態前綴不算覆寫',
+      expect: 0,
+    },
+    {
+      /* 不同屬性不算覆寫 —— 基底給間距、斷點改字級是兩回事。
+         只要「有基底又有斷點」就報的話,幾乎每一行 class 都會中。 */
+      ...page('probeOverrideOther', `px-[15px] ${one}:text-[14px]`),
+      name: 'breakpointOverride 不同屬性不誤報',
+      expect: 0,
+    },
+    {
+      /* 同一個 utility 前綴會產出兩種不同的 CSS 屬性:
+         text-[--色票] 是 color,text-[數字px] 是 font-size —— 它們不互相覆蓋。
+
+         只看前綴的話,「基底給顏色、斷點給字級」這種最常見的寫法會被整批報。
+         實際發生過:一個專案掃出 82 筆,全部是這個形狀。 */
+      ...page('probeOverrideColorSize', `text-[--probe-color] ${one}:text-[18px]`),
+      name: 'breakpointOverride 顏色與字級不算同一個屬性',
+      context: {
+        [`${M}/probeOverrideColorVar.css`]: `:root {\n  --probe-color: #333;\n}\n`,
+      },
+      expect: 0,
+    },
+    {
+      // 字級被字級蓋掉才是真的覆寫,分辨型別之後這一種仍要抓得到
+      ...page('probeOverrideSizeSize', `text-[14px] ${one}:text-[13px]`),
+      name: 'breakpointOverride 字級被字級蓋掉要報',
+      expect: 1,
+      keyword: '蓋掉',
+    },
+    {
+      /* 標了型別提示的也算長度 —— 那正是規範要求的寫法
+         (見 css-module-variables:border 與 text 要標 length:)。
+         不認的話,照規範寫的那些反而漏掉。 */
+      ...page('probeOverrideLengthHint', `text-[length:--probe-size] ${one}:text-[13px]`),
+      name: 'breakpointOverride 標了 length 的字級也算長度',
+      context: {
+        [`${M}/probeOverrideSizeVar.css`]: `:root {\n  --probe-size: 14px;\n}\n`,
+      },
+      expect: 1,
+      keyword: '蓋掉',
+    },
+  ]
+}
+
 const breakpointPrefixCases = () => {
   const [screen, prefixes] = Object.entries(BREAKPOINT_SCREENS)[0] ?? []
   if (!screen || prefixes.length < 2) return []
@@ -4048,99 +4146,7 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
     expect: 1,
     keyword: '元件不能直接 import api',
   },
-  // ---------- 規則 breakpointOverride ----------
-  {
-    /* 先給四邊再用斷點蓋掉左右 —— 要知道手機的左右間距是多少,
-       得先看基底寫了什麼、再找哪一段蓋了它。 */
-    name: 'breakpointOverride 基底被斷點蓋掉要報',
-    file: `${P}/probeOverride.vue`,
-    rule: 'breakpointOverride',
-    code: `<template>\n  <div class="p-[15px] m:px-[20px]">內容</div>\n</template>\n`,
-    expect: 1,
-    keyword: '蓋掉',
-  },
-  {
-    // 同一個 utility 直接被蓋掉是最明顯的那種
-    name: 'breakpointOverride 同名被蓋掉也要報',
-    file: `${P}/probeOverrideSame.vue`,
-    rule: 'breakpointOverride',
-    code: `<template>\n  <div class="px-[15px] m:px-[20px]">內容</div>\n</template>\n`,
-    expect: 1,
-    keyword: '蓋掉',
-  },
-  {
-    // 每個斷點各寫一次就是這條要的寫法,不可以被報
-    name: 'breakpointOverride 各斷點各寫一次不誤報',
-    file: `${P}/probeOverrideOk.vue`,
-    rule: 'breakpointOverride',
-    code: `<template>\n  <div class="p:px-[15px] m:px-[20px]">內容</div>\n</template>\n`,
-    expect: 0,
-  },
-  {
-    /* 平板以上一組、手機一組 —— 實務上最常見的分法,兩組加起來涵蓋全部。
-       兩邊都帶前綴,誰也沒有蓋掉誰。 */
-    name: 'breakpointOverride 平板以上與手機各一組不誤報',
-    file: `${P}/probeOverridePtM.vue`,
-    rule: 'breakpointOverride',
-    code: `<template>\n  <div class="pt:px-[15px] m:px-[20px]">內容</div>\n</template>\n`,
-    expect: 0,
-  },
-  {
-    /* hover / focus 那種狀態前綴本來就是「某個狀態下才蓋掉」,那是它們的用途。
-       把狀態前綴也算進來的話,每一個 hover 變色都會被報。 */
-    name: 'breakpointOverride 狀態前綴不算覆寫',
-    file: `${P}/probeOverrideState.vue`,
-    rule: 'breakpointOverride',
-    code: `<template>\n  <div class="px-[15px] hover:px-[20px]">內容</div>\n</template>\n`,
-    expect: 0,
-  },
-  {
-    /* 不同屬性不算覆寫 —— 基底給間距、斷點改字級是兩回事。
-       只要「有基底又有斷點」就報的話,幾乎每一行 class 都會中。 */
-    name: 'breakpointOverride 不同屬性不誤報',
-    file: `${P}/probeOverrideOther.vue`,
-    rule: 'breakpointOverride',
-    code: `<template>\n  <div class="px-[15px] m:text-[14px]">內容</div>\n</template>\n`,
-    expect: 0,
-  },
-  {
-    /* 同一個 utility 前綴會產出兩種不同的 CSS 屬性:
-       text-[--色票] 是 color,text-[數字px] 是 font-size —— 它們不互相覆蓋。
-
-       只看前綴的話,「基底給顏色、斷點給字級」這種最常見的寫法會被整批報。
-       實際發生過:一個專案掃出 82 筆,全部是這個形狀。 */
-    name: 'breakpointOverride 顏色與字級不算同一個屬性',
-    file: `${P}/probeOverrideColorSize.vue`,
-    rule: 'breakpointOverride',
-    code: `<template>\n  <p class="text-[--probe-color] p:text-[18px] tm:text-[16px]">內容</p>\n</template>\n`,
-    context: {
-      [`${M}/probeOverrideColorVar.css`]: `:root {\n  --probe-color: #333;\n}\n`,
-    },
-    expect: 0,
-  },
-  {
-    // 字級被字級蓋掉才是真的覆寫,分辨型別之後這一種仍要抓得到
-    name: 'breakpointOverride 字級被字級蓋掉要報',
-    file: `${P}/probeOverrideSizeSize.vue`,
-    rule: 'breakpointOverride',
-    code: `<template>\n  <p class="text-[14px] m:text-[13px]">內容</p>\n</template>\n`,
-    expect: 1,
-    keyword: '蓋掉',
-  },
-  {
-    /* 標了型別提示的也算長度 —— 那正是規範要求的寫法
-       (見 css-module-variables:border 與 text 要標 length:)。
-       不認的話,照規範寫的那些反而漏掉。 */
-    name: 'breakpointOverride 標了 length 的字級也算長度',
-    file: `${P}/probeOverrideLengthHint.vue`,
-    rule: 'breakpointOverride',
-    code: `<template>\n  <p class="text-[length:--probe-size] m:text-[13px]">內容</p>\n</template>\n`,
-    context: {
-      [`${M}/probeOverrideSizeVar.css`]: `:root {\n  --probe-size: 14px;\n}\n`,
-    },
-    expect: 1,
-    keyword: '蓋掉',
-  },
+  ...breakpointOverrideCases(),
   // ---------- 規則 popupId ----------
   {
     /* 每個彈窗實例靠自己的 id 判斷要不要顯示 —— 沒有 id 的那個永遠不會出現。

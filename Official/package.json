@@ -24,6 +24,7 @@
     "deps": "node .tools/component-deps.mjs",
     "rules:seal": "node .tools/lint/checksum.mjs --write",
     "rules:verify": "node .tools/lint/checksum.mjs",
+    "rules:sync": "node .tools/lint/sync-rules-project.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "hooks:install": "node .tools/install-git-hooks.mjs",
