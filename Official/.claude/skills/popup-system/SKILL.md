@@ -18,7 +18,7 @@ description: 修改 popup(alert / confirm / custom / apiPromise)的顯示狀態�
 | `stores/.composables/usePopupActions.js` | 開啟 / 關閉 / 結算。**唯一能碰 `xxxCheck` 的地方** |
 | `components/common/mPopup/Index.vue` | 顯示狀態機與兩層 Transition。每個 popup 實例比對 `props.id === keyID` |
 | `containers/common/*.vue` | 各型別的外框(AlertSystem / ConfirmSystem / CustomPopup / ApiPromiseSystem) |
-| `assets/css/_common/vueTransition.css` | `popup-overlay-*` / `popup-bomb-*` / `popup-zoom-*` / `popup-bottomSheet-*`。**不得出現 `.m-xxx` 選擇器** |
+| `assets/css/_common/vueTransition.css` | 全站共用的轉場動畫,依效果命名(`anim-fade-out-late` / `anim-bounce` / `anim-zoom` / `anim-slide-up-late` 等)。**不得出現 `.m-xxx` 選擇器** |
 | `components/common/mPopup/.css/*.css` | 元件外觀,由 `Index.vue` 於 script 頂部 import(variables 先、common 後) |
 
 登入彈窗是買屋頻道自己的流程,不是共用 popup 的型別:外框在 `containers/project/LoginSystem.vue`,
@@ -31,14 +31,27 @@ description: 修改 popup(alert / confirm / custom / apiPromise)的顯示狀態�
 `config.mode` 接受 `'bomb'` / `'zoom'` / `'bottomSheet'`,也可以用物件依裝置各給一種
 (`{ p: 'zoom', m: 'bottomSheet' }`,鍵是 `p` / `pt` / `tm` / `t` / `m`)。
 
-`Index.vue` 把這個值同時用在兩個地方,所以**新增一種模式時兩邊都要有,少一邊不會報錯**:
+模式名不直接當成動畫名 —— 轉場的名字講的是「什麼效果」,不綁哪一支元件在用,
+所以 `Index.vue` 裡明寫一份對照:
+
+```js
+const MODE_ANIMATIONS = {
+  zoom: 'anim-zoom',
+  bomb: 'anim-bounce',
+  bottomSheet: 'anim-slide-up-late',
+}
+```
+
+模式這個值同時決定兩件事,所以**新增一種模式時三個地方都要有,少一個不會報錯**:
 
 | 用途 | 產生的東西 | 定義在 |
 |---|---|---|
-| 進出場動畫 | `popup-<模式>` transition | `assets/css/_common/vueTransition.css` |
+| 進出場動畫 | 對照表指到的 `anim-*` | `assets/css/_common/vueTransition.css` |
+| 模式與動畫的對應 | `MODE_ANIMATIONS` 的一筆 | `components/common/mPopup/Index.vue` |
 | 容器在畫面上的位置 | `.--<模式>` 修飾符 | `components/common/mPopup/.css/common.css` |
 
-只有動畫沒有修飾符時,容器會少掉定位規則、貼在左上角;只有修飾符沒有動畫則是直接跳出,沒有漸變。
+對照表漏了那一筆會落回 `anim-zoom`(播錯動畫);修飾符漏了則是容器少掉定位規則、
+貼在左上角。兩種都不會有錯誤訊息。
 
 `bomb` 與 `zoom` 的版面相同,差別只在動畫曲線(bomb 會過衝再回彈),
 所以 `.--bomb` 與 `.--zoom` 共用同一段定位規則,不是各寫一份。
@@ -158,20 +171,21 @@ const onAlertClose = (isSure = false, item = null) => {
 進出場的先後**全部靠 CSS delay**,JS 不參與時序:
 
 ```css
-/* 遮罩:.m-popup 的 opacity(連帶整個子樹) */
-.popup-overlay-enter-active,
-.popup-overlay-leave-active { transition: opacity 0.15s ease; }
-.popup-overlay-leave-active { transition-delay: 0.1s; }   /* 等 container 收完 */
+/* 外層遮罩:離場等 container 先收完 */
+.anim-fade-out-late-enter-active,
+.anim-fade-out-late-leave-active { @apply transition-opacitys duration-200; }
+.anim-fade-out-late-leave-active { transition-delay: 0.15s; }
 
 /* zoom:delay 讓遮罩先浮現一半再彈出 */
-.popup-zoom-enter-active { animation: popup-zoom 0.1s 0.075s both; }
-.popup-zoom-leave-active { animation: popup-zoom 0.1s reverse both; }
+.anim-zoom-enter-active { animation: anim-zoom 0.1s 0.15s both; }
+.anim-zoom-leave-active { animation: anim-zoom 0.1s reverse both; }
 
-/* bottomSheet:等遮罩完整淡入(0.15s)後才滑上來 */
-.popup-bottomSheet-enter-active { transition-delay: 0.15s; }
+/* bottomSheet:等遮罩淡入後才滑上來 */
+.anim-slide-up-late-enter-active { transition-delay: 0.15s; }
 ```
 
 - **`vueTransition.css` 內不得出現 `.m-xxx` 選擇器**(只有註解可提及元件名)。需要綁元件 class 的規則放 `components/common/mPopup/.css/`。
+- 那一支是全站共用的,裡面的動畫**依效果命名、不綁使用它的元件** —— 同一組 `anim-fade-out-late` 同時給彈窗的遮罩與等待提示的遮罩用。改秒數之前先確認還有誰在用。
 
 ---
 
@@ -186,6 +200,7 @@ const onAlertClose = (isSure = false, item = null) => {
 - [ ] `grep "Check\.value"` 只在 `usePopupActions.js` 有結果
 - [ ] `vueTransition.css` 的 popup 段落沒有 `.m-xxx` 選擇器
 - [ ] 兩層都是 `v-if`(不要改成 `v-show`,會讓每個 popup 都常駐一個 `.m-popup` 在 DOM,污染 `querySelector`)
+- [ ] 新增進出場模式時,`MODE_ANIMATIONS` 的一筆、對應的 `anim-*` 動畫、`.--<模式>` 的定位規則三者都有
 
 ## 驗證方式
 
