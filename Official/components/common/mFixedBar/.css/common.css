@@ -1,0 +1,38 @@
+/* mFixedBar(components/common/mFixedBar/Index.vue)版型。
+
+   固定在畫面底部的常駐列。**要在哪幾個斷點固定由使用端決定** ——
+   帶了 --fixed 的斷點才脫離文檔流貼在底部,沒帶的斷點就是一般的區塊,
+   留在原本的位置。同一列在手機固定、在桌機接在清單上方,就是靠這個。
+
+   外觀(底色、內距、圓角)一概不在這裡 —— 每一個使用端都不一樣,由使用端自己給。 */
+
+@screen p {
+  .m-fixed-bar {
+    &.\-\-fixed,
+    &.p\:\-\-fixed,
+    &.pt\:\-\-fixed {
+      @apply fixed inset-x-0 bottom-0 z-[2];
+    }
+  }
+}
+
+@screen t {
+  .m-fixed-bar {
+    &.\-\-fixed,
+    &.pt\:\-\-fixed,
+    &.tm\:\-\-fixed,
+    &.t\:\-\-fixed {
+      @apply fixed inset-x-0 bottom-0 z-[2];
+    }
+  }
+}
+
+@screen m {
+  .m-fixed-bar {
+    &.\-\-fixed,
+    &.tm\:\-\-fixed,
+    &.m\:\-\-fixed {
+      @apply fixed inset-x-0 bottom-0 z-[2];
+    }
+  }
+}

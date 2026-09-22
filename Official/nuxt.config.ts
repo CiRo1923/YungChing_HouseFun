@@ -24,8 +24,8 @@ const imageAssetDir = CONFIG.imgs.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace
 const imageAssetInclude = new RegExp(`${imageAssetDir}/(?!svg/spritemap\\.svg$)`)
 
 export default defineNuxtConfig({
-  // 鎖定 Nuxt 的預設行為基準日 —— 不設會 fallback 到 2025-07-15 並每次啟動都跳 NUXT_B5001 警告。
-  compatibilityDate: '2026-08-27',
+  // 日期是各專案自己的值,定義在 config.js —— 這份設定整套複製到新專案時不會帶走它。
+  compatibilityDate: CONFIG.compatibilityDate,
   // 開發除錯面板放在 .dev/(非 plugins/ 目錄 → Nuxt 不會自動掃描),需於此明示載入進入點。
   // 好處:core.js 不必被 ignore,Vite 會照常監看它 → 改 core 只要 F5/HMR 即生效,不必重啟 dev。
   //

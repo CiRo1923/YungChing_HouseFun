@@ -24,7 +24,7 @@
 
 | 代號 | 抓什麼 | 範圍 | 自動修正 |
 | --- | --- | --- | --- |
-| `color` | 硬寫色碼、`rgba()` 直接寫數值、template 的 `text-[#333]` | `.css` 全文、`.vue` 的 `<style>` 與 template | ✗（提示既有變數名） |
+| `color` | 硬寫色碼、`rgba()` 直接寫數值、template 的 `text-[#333]`。吃不到色票的檔案（寫的是色票掛載點的祖先、或在 app 之前就載入）標 `lint-color-exempt` 跳過整份 | `.css` 全文、`.vue` 的 `<style>` 與 template | ✗（提示既有變數名） |
 | `colorFile` | 色票檔的取碼命名、值的形狀、分組檔與共用檔撞色值 | `_common/color*.css` | ✗（命名要人工改，牽動使用端） |
 | `colorSort` | 色票檔的排列順序（彩虹 + 每類由淺到深） | `_common/color*.css` | 排序 ✓（存檔就修好） |
 | `tailwind` | template 使用 utility class | 元件目錄的 `.vue` | ✗ |
@@ -62,7 +62,8 @@
 | `viewFolder` | 頁面目錄的資料夾首字大寫、分隔方式與同一層的 `.vue` 檔名不同套（自己寫路由表的專案用駝峰，檔案系統路由的專案放行連字號，兩種都擋底線與連續大寫），或底線資料夾不在允許的清單裡 | 頁面目錄 | ✗ |
 | `componentClass` | 元件資料夾名推出的 class 與 template 寫的對不上 | 共用元件目錄的 `.vue` | ✗ |
 | `componentFolder` | 元件直接放在分類資料夾底下,沒有自己的資料夾 | 共用元件目錄的 `.vue` | ✗ |
-| `componentDeps` | 元件不是自足的（自己讀 store、或有容器在版面上渲染它），檔頭沒有列出「複製時要一起帶走什麼」。清單由工具算，`npm run deps <元件>` 印得出來；列了卻已經用不到的也報 | 共用元件目錄的 `.vue`；要有自動注入的對照表（`GENERATED_FILES`），否則只算得出 store 那一半 | ✗ |
+| `transitionShared` | 轉場的樣式定義在元件自己的 `.css` 或 `<style>` 裡 —— 要搬到共用的轉場樣式檔，別的元件才找得到。只看「有沒有定義轉場」，動畫內容是人要決定的 | 共用元件目錄的 `.css` 與 `.vue` | ✗ |
+| `componentDeps` | 元件不是自足的（自己讀 store、用了定義在別處的轉場樣式、或有容器在版面上渲染它），檔頭沒有列出「複製時要一起帶走什麼」。工具自己算的是 store 與轉場樣式檔兩類（`<Transition>` 寫死的名字，以及動態綁定裡引號內的字面；接變數算不出來的才跳過），`npm run deps <元件>` 印得出來；這兩類列了卻已經用不到的也報。容器那一類是人補的，工具不碰 | 共用元件目錄的 `.vue`；要有自動注入的對照表（`GENERATED_FILES`），否則只算得出 store 那一半 | ✗ |
 | `spacerElement` | 用只有空白的元素當間隔（`<span> </span>`）—— 那個空白在編譯時就被移除，從一開始就沒有作用；`<pre>` 與 `<textarea>` 除外 | 原始碼的 `.vue`（只看畫面區段） | ✗ |
 | `apiTryCatch` | api 檔案自己包 try/catch（錯誤由共用實例統一轉成 `{ config, status, data }`，再包一層會把它吞掉） | api 目錄 | ✗ |
 | `apiPathParam` | 端點用樣板字串拼路徑，不是 `{key}` 模板（拼接的那一段不經過替換，同一個值會同時出現在路徑與 query） | api 目錄 | ✗ |
@@ -71,15 +72,18 @@
 | `storeResetDefault` | reset 手寫預設值,沒用 `apiDefault` | actions 目錄 | ✗ |
 | `storeActionNaming` | 呼叫 api 的 action 命名對不上該支 api | actions 目錄 | ✗ |
 | `storeActionReturn` | 打了 api 的 action 沒有 `return { config, status, data }` | actions 目錄 | ✗ |
-| `storeToRefs` | 取 store 的值沒走 `storeToRefs`（`readonly({ … })` 包住的固定設定除外 —— 那種沒有響應性，改成 `storeToRefs` 反而拿到 `undefined`）（直接解構或讀成 `const`） | 原始碼 | ✗ |
+| `storeToRefs` | 最外層取 store 的值沒走 `storeToRefs`（直接解構或讀成 `const`）。兩種不算：`readonly({ … })` 包住的固定設定沒有響應性，改成 `storeToRefs` 反而拿到 `undefined`；函式或 computed 主體裡的取值是「這一刻的值」，拿到就用掉 | 原始碼 | ✗ |
 | `pageActionNaming` | 頁面包裝 action 的命名沒有去掉 `Api` 或對不上 | 原始碼裡的 `.vue` | ✗ |
 | `pageAwaitAll` | 進入頁面要拿的資料一支一支等，沒有一起發出 | 頁面目錄的 `.vue` | 包起來 ✓（存檔時） |
 | `pageApiImport` | 頁面直接 import api（可在檔頭標 `lint-page-api-exempt` 放行一次性的請求） | 原始碼裡的 `.vue` | ✗ |
+| `breakpointOverride` | 頁面的 class 先寫一個基底再用斷點蓋掉它（`p-[15px] m:px-[20px]`）—— 每個斷點各寫一次。`hover:` 那類狀態前綴不算 | 頁面目錄的 `.vue` | ✗ |
+| `popupId` | 彈窗的 id 對不起來：宣告端沒寫 id、開了一個沒人宣告的 id、或宣告了卻沒有人會開它。動態綁的 `:id` 與開啟函式內建的那幾個 id 不算 | 原始碼（跨檔案比對） | ✗ |
 | `componentApiImport` | 元件直接 import api（沒有例外，標了豁免記號也一樣擋） | 元件目錄的 `.vue` | ✗ |
 | `vueFileName` | 元件的 .vue 檔名首字沒大寫、主檔叫 Main.vue、頁面的 .vue 檔名首字沒小寫，或檔名不是駝峰（連字號、底線、連續大寫）。檔案系統路由的專案裡，頁面檔名就是網址的一段，那裡放行連字號，底線與連續大寫照擋 —— 哪一種由設定 `PROJECT_FRAMEWORK` 決定 | 元件目錄與頁面目錄的 `.vue` | ✗ |
 | `formGroupValidate` | 一組共用同一個名字的控制項（一個迴圈跑出來、名字裡沒有迴圈變數）各自帶了 `rules` —— 每一個都會驗一次、各顯示一則同樣的訊息。驗證要掛在包住整組的那支元件上（設定 `FORM_GROUP_VALIDATOR`），只顯示一則 | 所有 `.vue` 的畫面區段 | ✗ |
 | `importOrder` | 元件沒有載入樣式（樣式要由元件自己 import；自己完全不寫 class 的轉手元件不在此列） | 元件目錄的 `.vue` | ✗（工具看不出該載哪一支） |
 | `configItem` | 專案設定檔多了沒有任何規則讀的項目 | `.tools/lint/project-config.mjs` | ✗（來源專案只提醒，見下方說明） |
+| `buildCommands` | 三個環境的指令名對不上（`dev` 開發、`deploy` 測試機、`build` 正式機）、`--mode` 與指令名不同名、或 `.env.<環境>` 沒成套。讀的是 `package.json`，掛在建置設定檔上報（`.json` 不在掃描範圍，加進去的話 `package.json` 的 `name` 會被「不寫死專案名稱」誤報） | 建置設定檔（`BUILD_CONFIG_FILES` 列的那幾支） | ✗ |
 | `ruleCrashed` | 規則自己執行失敗（多半是漏了 import），那支檔案沒被那條規則檢查 | 全部 | ✗ |
 | `ruleTampered` | 共用規則與來源的指紋對不上（只有來源能改規則） | `.tools/lint/project-config.mjs`（只在非來源專案比對） | ✗ |
 | （宣告順序） | store / actions 的宣告順序 | 原始碼裡的 `.vue` | 排序 ✓（不報違規） |

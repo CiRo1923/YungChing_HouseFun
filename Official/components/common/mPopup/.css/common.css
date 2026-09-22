@@ -5,7 +5,9 @@
     @apply absolute inset-0 bg-[--popup-overlay-bg-color] backdrop-blur-[--popup-overlay-blur] content-default;
   }
 
-  &.\-\-zoom {
+  /* zoom 與 bomb 的版面相同,差別只在進出場的動畫曲線(見 assets/css/_common/vueTransition.css) */
+  &.\-\-zoom,
+  &.\-\-bomb {
     @apply items-center justify-center;
 
     .m-popup-container {

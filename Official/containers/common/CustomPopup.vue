@@ -1,7 +1,9 @@
 <script setup>
 const popup = usePopupStore()
 const { customData } = storeToRefs(popup)
-const buyPopup = useBuyPopupStore()
+// buttons 直接從 store 取:它是 readonly 常數,既不是 ref 也不是 reactive,
+// storeToRefs 不會為它建立 ref —— 解構出來會是 undefined。
+const { buttons } = popup
 const { onMergeBtns, onCustomClose, onCustomSettle } = usePopupActions()
 const emits = defineEmits(['sure'])
 const props = defineProps({
@@ -24,9 +26,9 @@ const isConfirmBtns = computed(() => !!(customData.value.btns === 'confirm'))
 
 const footerBtns = computed(() => {
   return isAlertBtns.value
-    ? buyPopup.buttons.alert
+    ? buttons.alert
     : isConfirmBtns.value
-      ? buyPopup.buttons.confirm
+      ? buttons.confirm
       : onMergeBtns(customData.value.btns)
 })
 
@@ -52,13 +54,21 @@ const onClose = (item) => {
 
 <template>
   <!--
-    用 ClientOnly 包 Teleport:popup 純由互動驅動、不需 SSR。
-    Nuxt SSR 下多個 Teleport 指向同一 #box,hydration 後 teleport 內部錨點可能損壞,
+    傳送目標是框架自己渲染的那個容器(#teleports,位置在應用程式根節點之後)——
+    不必在版型裡自己放一個。自己放的那種要先確認它真的存在:
+    目標找不到時 Teleport 不會報錯,彈窗就是不出現。
+
+    用 ClientOnly 包起來:popup 純由互動驅動、不需 SSR。
+    多個 Teleport 指向同一個容器時,hydration 後內部的錨點可能損壞,
     更新時丟出 "Cannot read properties of null (reading 'insertBefore')"。
     ClientOnly 讓 teleport 只在 client 端全新掛載,錨點乾淨。
+
+    改用框架自己的容器之後這一層還需不需要,要實際測過才知道 ——
+    沒測之前先留著:拿掉之後那個錯誤只在特定的開關順序下才出現,
+    平常點不出來,而它一出現就是整個彈窗系統壞掉。
   -->
   <ClientOnly>
-    <Teleport to="#box">
+    <Teleport to="#teleports">
       <CommonMPopup
         :id="props.id"
         :config="props.config"
@@ -71,6 +81,9 @@ const onClose = (item) => {
       >
         <template #header v-if="$slots.header">
           <slot name="header" />
+        </template>
+        <template #headerTools v-if="$slots.headerTools">
+          <slot name="headerTools" />
         </template>
         <slot>
           <div

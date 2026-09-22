@@ -62,7 +62,7 @@ export default () => {
     alertData.value.title = data.title
     alertData.value.icon = data.icon
     alertData.value.content = data.content
-    alertData.value.btns = onDeepMerge(alertBtns, data.btns)
+    alertData.value.btns = onMergeBtns(data.btns, alertBtns)
     alertData.value.hasExistClose = data.hasExistClose !== undefined ? data.hasExistClose : true
     alertData.value.setClass = data.setClass
 

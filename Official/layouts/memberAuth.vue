@@ -1,27 +1,11 @@
 <script setup>
-import { getChannelColorHref } from '@js/runtime/channelColor.js'
-
-// member 頻道色票的 hash URL(集中在 _channelColor 用 ?url 引用)。
-const colorHref = getChannelColorHref('member')
-
 const common = useCommonStore()
 const { isLoading } = storeToRefs(common)
-
-// 掛載 buy 頻道色票(同步 composable 一律放在 await 之前)
-useHead({
-  link: [
-    {
-      rel: 'stylesheet',
-      href: colorHref,
-    },
-  ],
-})
-
 </script>
 
 <template>
   <div class="l-wrap">
-    <CommonHeader>
+    <ProjectHeader>
       <CommonMAnchor
         text="回首頁"
         :config="{
@@ -36,7 +20,7 @@ useHead({
           icon: 'h-[16px] w-[16px] p-[2px] text-[--gray-999]',
         }"
       />
-    </CommonHeader>
+    </ProjectHeader>
     <main class="l-body relative z-0 tm:mt-[20px] p:mt-[55px]">
       <slot />
     </main>

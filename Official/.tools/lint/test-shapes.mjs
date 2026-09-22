@@ -75,9 +75,7 @@ const DIR_NAMES = {
 /** 有原始碼那一層的專案,把它加在每一個目錄前面 —— 兩種擺法的差別只有這件事 */
 const SRC_LAYER = 'src'
 const under = (value) =>
-  Array.isArray(value)
-    ? value.map((one) => `${SRC_LAYER}/${one}`)
-    : `${SRC_LAYER}/${value}`
+  Array.isArray(value) ? value.map((one) => `${SRC_LAYER}/${one}`) : `${SRC_LAYER}/${value}`
 
 const nestedDirs = Object.fromEntries(
   Object.entries(DIR_NAMES).map(([name, value]) => [name, under(value)])

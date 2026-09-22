@@ -18,6 +18,7 @@ import {
   CSS_MODULES_DIR,
   MODULE_CSS_DIR_NAME,
   PROJECT_DOCS_DIR,
+  SCAN_TARGETS,
   SCANNABLE_RE,
   SKIP_DIRS,
   SRC_PREFIX,
@@ -44,6 +45,7 @@ export {
   CONVENTION_DOCS_DIR,
   CONVENTION_RULES_DIR,
   CONVENTION_SKILLS_DIR,
+  BUILTIN_POPUP_IDS,
   CSS_MODULES_DIR,
   FORM_GROUP_VALIDATOR,
   FRAMEWORKS,
@@ -52,6 +54,7 @@ export {
   IS_FILE_BASED_ROUTING,
   MODULE_CSS_DIR_NAME,
   PARALLEL_AWAIT_HELPER,
+  POPUP_TAGS,
   POPUP_DIR_NAME,
   WRITING_STYLE_SCOPE,
   PLAIN_TEXT_EXCLUDED_DIRS,
@@ -70,6 +73,7 @@ export {
   SRC_DIR,
   STANDALONE_APIS,
   STANDALONE_STORES,
+  STORE_INSTANCE_FILE,
   STORE_DIR,
   STORE_SETUP_CALLS,
   TAILWIND_THEME_OVERRIDES,
@@ -151,6 +155,26 @@ const maskBy = (text, re) => text.replace(re, (m) => m.replace(/[^\n]/g, ' '))
  * 文字寫法那幾條檢查的正是註解本身)。
  */
 export const maskCssComments = (text) => maskBy(text, /\/\*[\s\S]*?\*\//g)
+
+/**
+ * 所有 import 寫法:具名匯入、整包匯入、動態 import。
+ *
+ * **放在這裡是因為有兩條規則要用**(哪些檔案不可以 import api、
+ * 相對路徑該不該改成 alias)。各自寫一份的話,多認一種寫法時只會改到其中一邊 ——
+ * 另一條從此漏掉那種寫法,而漏掉不會報錯,只是那種 import 再也不被檢查。
+ *
+ * 比對式帶 g,用之前要注意 lastIndex(用 matchAll 或每次重新建立)。
+ */
+export const IMPORT_RE =
+  /(?:import|export)\s[^'"]*?from\s*['"]([^'"]+)['"]|import\s*['"]([^'"]+)['"]|import\s*\(\s*['"]([^'"]+)['"]\s*\)/g
+
+/**
+ * 箭頭函式的宣告:`const 名字 = (參數) => {`。
+ *
+ * **放在這裡是因為有兩條規則要用**(頁面包裝 action 的命名、action 自己的形狀)。
+ * 兩邊各寫一份的話,函式的寫法多一種變化時只會補到其中一邊。
+ */
+export const ARROW_FN_RE = /const\s+(\w+)\s*=\s*(?:async\s*)?\([^)]*\)\s*=>\s*\{/g
 
 /** 遮蔽 template 的 HTML 註解 */
 export const maskHtmlComments = (text) => maskBy(text, /<!--[\s\S]*?-->/g)
@@ -595,6 +619,14 @@ export const classPrefixOf = (folderName) =>
 export const isInActionsDir = (rel) => rel.includes(`/${ACTIONS_DIR_NAME}/`)
 
 /**
+ * 放行為的那一層在哪 —— 兩個設定值組出來的路徑。
+ *
+ * 組出來的結果收在這裡一份:兩條規則的訊息都要寫出這個位置,
+ * 各組一次的話,兩個設定值的關係(誰在誰底下)就變成兩個地方各記一遍。
+ */
+export const ACTIONS_DIR_PATH = `${STORE_DIR}/${ACTIONS_DIR_NAME}`
+
+/**
  * 存檔時記下「這個檔案還有違規」的清單檔位置(相對專案根)。
  *
  * 這是存檔守門與對話提醒之間的唯一接點:存檔那層把檔名寫進去,
@@ -803,6 +835,106 @@ export const storeIndexOf = (root) => {
 
   const index = { files, readonly: readonlyConsts }
   storeIndexCache = { root, index }
+
+  return index
+}
+
+let transitionStyleCache = null
+
+registerScanCache(() => {
+  transitionStyleCache = null
+})
+
+/**
+ * 打了 api 之後一律回傳的三件。
+ *
+ * api 那一層與 action 那一層問的是同一件事(這三件在不在),所以只留這一份 ——
+ * 兩邊各寫一次的話,有一天其中一邊加了第四件,而另一邊的訊息還在說三件。
+ *
+ * 三件都要:少了 status 使用端得自己判斷成功失敗,少了 data 拿不到內容,
+ * 少了 config 錯誤處理時不知道是打哪一支、帶了什麼參數。
+ */
+export const API_RETURN_FIELDS = ['config', 'status', 'data']
+
+/**
+ * 一層裡放「那一層的主資料」的兩個欄位名 —— 名字由 store 規範決定。
+ *
+ * 兩條規則都要問同一件事,所以只留這一份:一條要知道「哪些欄位裡的名字是
+ * 後端給的」,另一條要知道「哪個欄位是主角、不必寫進 action 名字裡」。
+ */
+export const API_DATA_CONTAINERS = ['apiData', 'data']
+
+/**
+ * 轉場的那六個後綴 —— 畫面區段寫 `<Transition name="…">`,
+ * 框架自動在名字後面接這幾個,樣式那一側定義的就是接好的名字。
+ *
+ * 它們不能收斂成模組前綴:名字與畫面區段寫的那個 name 是一組的,
+ * 改了樣式這一側就對不上,而轉場失效不會報錯,只是動畫沒了。
+ *
+ * 後綴由框架定義,與專案無關,所以寫在這裡,不進專案設定。
+ */
+export const TRANSITION_SUFFIXES = [
+  '-enter-from',
+  '-enter-active',
+  '-enter-to',
+  '-leave-from',
+  '-leave-active',
+  '-leave-to',
+]
+
+/** 這個 class 是不是轉場的其中一個狀態 */
+export const isTransitionClass = (cls) => TRANSITION_SUFFIXES.some((s) => cls.endsWith(s))
+
+/* 後綴清單組出來的比對式 —— 清單改了這裡跟著改,不會有第二份要同步 */
+const TRANSITION_CLASS_RE = new RegExp(
+  `\\.([\\w-]+)(?:${TRANSITION_SUFFIXES.map((s) => s.replace(/-/g, '\\-')).join('|')})\\b`,
+  'g'
+)
+
+/**
+ * 這份樣式定義了哪幾組轉場 —— 回傳的是名字(不含後綴)。
+ *
+ * 判斷「元件自己寫了轉場」與「建立轉場名到檔案的索引」都問同一件事,
+ * 所以只留這一份。
+ */
+export const transitionNamesInCss = (text) =>
+  new Set([...maskCssComments(text).matchAll(TRANSITION_CLASS_RE)].map((m) => m[1]))
+
+/**
+ * 轉場名 → 定義它的樣式檔,掃全專案的 `.css` 建一份。
+ *
+ * 轉場的樣式常常收在一支共用檔案裡,由進入點一次載入,而不是跟著元件的資料夾走。
+ * 那支檔案沒有一起複製過去的話,元件搬過去**不會報錯也不會少畫面** ——
+ * 只是切換的當下沒有漸變,直接跳。要找原因得先想到「動畫是 css 在做的」,
+ * 再想到那支 css 根本不在這個專案裡。
+ *
+ * 只掃 `.css`:定義在元件自己 `<style>` 裡的轉場本來就跟著元件走,不必列。
+ *
+ * 路徑是掃出來的,所以是那個專案自己的擺法 —— 目錄層數不同的專案
+ * (有沒有 `src/` 那一層)各自算各自的,規則這一側不寫死。
+ */
+export const transitionStyleIndexOf = (root) => {
+  if (transitionStyleCache?.root === root) return transitionStyleCache.index
+
+  const index = new Map()
+
+  for (const target of SCAN_TARGETS) {
+    for (const abs of listFiles(root, target)) {
+      if (!abs.endsWith('.css')) continue
+
+      const rel = toRel(root, abs)
+
+      try {
+        for (const name of transitionNamesInCss(fs.readFileSync(abs, 'utf8'))) {
+          if (!index.has(name)) index.set(name, rel)
+        }
+      } catch {
+        // 讀不到某一支就跳過,不要因此讓整條規則失效
+      }
+    }
+  }
+
+  transitionStyleCache = { root, index }
 
   return index
 }

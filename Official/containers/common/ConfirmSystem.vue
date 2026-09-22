@@ -19,7 +19,7 @@ const onClose = (item) => {
   >
     <div
       class="text-center leading-[1.7]"
-      :class="setClass.container || 'm:text-[14px] pt:text-[20px]'"
+      :class="setClass.content || 'm:text-[14px] pt:text-[20px]'"
       v-html="confirm.content"
     />
     <template #footer>

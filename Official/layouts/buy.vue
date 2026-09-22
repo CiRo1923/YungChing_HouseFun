@@ -1,9 +1,4 @@
 <script setup>
-import { getChannelColorHref } from '@js/runtime/channelColor.js'
-
-// buy 頻道色票的 hash URL(集中在 _channelColor 用 ?url 引用)。
-const colorHref = getChannelColorHref('buy')
-
 const common = useCommonStore()
 const { isLoading } = storeToRefs(common)
 const { onAccessCheck } = useProjectActions()
@@ -22,16 +17,6 @@ const nuxtApp = useNuxtApp()
 // footer 元素 ref,提供給子孫元件(如 BuyMTop)動態計算避開 footer 的位置
 
 provide('footerRef', footerRef)
-
-// 掛載 buy 頻道色票(同步 composable 一律放在 await 之前)
-useHead({
-  link: [
-    {
-      rel: 'stylesheet',
-      href: colorHref,
-    },
-  ],
-})
 
 const onInit = async () => {
   // 啟動還原一次:從 cookie 取回 authToken 寫回 store(取代原本的 restore-auth-token plugin)。
@@ -66,9 +51,9 @@ watch(
 
 <template>
   <div class="l-wrap">
-    <CommonHeader>
+    <ProjectHeader>
       <CommonMLogStatus @login="onPopupLogin" @logout="onApiPostBuyAuthLogout" />
-    </CommonHeader>
+    </ProjectHeader>
     <main class="l-body relative z-0">
       <slot />
     </main>
@@ -89,13 +74,13 @@ watch(
   <div id="box">
     <CommonAlertSystem />
     <CommonConfirmSystem />
-    <CommonLoginSystem :container="popupLoginContainerRef">
+    <ProjectLoginSystem :container="popupLoginContainerRef">
       <!-- 預留之後有不一樣的 login -->
       <LoginContainer ref="popupLoginContainerRef" />
       <template #note>
         <LoginNote />
       </template>
-    </CommonLoginSystem>
+    </ProjectLoginSystem>
     <CommonApiPromiseSystem />
   </div>
 </template>

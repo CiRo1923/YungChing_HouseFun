@@ -1,5 +1,8 @@
 :root {
   /* red */
+  --red-e786: #ed7d86;
+  --red-e56a: #e8536a;
+  --red-e45c: #ef425c;
   --red-d111: #df1111;
 
   /* orange */
@@ -7,31 +10,53 @@
   --orange-f74c: #ff714c;
   --orange-e646: #ea6846;
 
+  /* yellow */
+  --yellow-ffbc: #fff7bc;
+
   /* green */
   --green-ffe9: #f4f8e9;
+  --green-efef: #e6f3ef;
   --green-9c33: #98cb33;
   --green-8b0d-66: #87b90d66;
   --green-8b0d: #87b90d;
+  --green-7b1c: #79b51c;
+  --green-4a7f: #49af7f;
   --green-6a2d: #67a12d;
+  --green-4847: #478947;
 
   /* blue */
+  --blue-efff: #eef4ff;
+  --blue-6dd7: #64d7d7;
+  --blue-69c1: #6f9bc1;
+  --blue-08dc-1a: #0087dc1a;
+  --blue-08dc: #0087dc;
+  --blue-26e1: #276ee1;
   --blue-0016-14: #02041614;
   --blue-0016-33: #02041633;
 
   /* white */
   --white: #fff;
+  --white-4d: #ffffff4d;
 
   /* gray */
   --gray-f7: #f7f7f7;
   --gray-f2: #f2f2f2;
+  --gray-ef: #efefef;
+  --gray-feea: #f1ecea;
+  --gray-ed: #ededed;
   --gray-e5-4d: #e5e5e54d;
   --gray-e5: #e5e5e5;
+  --gray-db: #dbdbdb;
   --gray-d8: #d8d8d8;
+  --gray-c8: #c8c8c8;
   --gray-ccce: #c3c8ce;
   --gray-999: #999;
   --gray-666: #666;
   --gray-33-4d: #3333334d;
   --gray-333: #333;
+  --gray-33-bf: #333333bf;
+  --gray-33-cc: #333333cc;
+  --gray-2338: #2f3338;
 
   /* black */
   --black-1a: #0000001a;
@@ -40,4 +65,5 @@
   --black-40: #00000040;
   --black-b3: #000000b3;
   --black: #000;
+  --black-99: #00000099;
 }

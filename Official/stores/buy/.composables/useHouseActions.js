@@ -4,10 +4,10 @@ export default () => {
   const buyHouseStores = useBuyHouseStore()
   const { lifeMap } = storeToRefs(buyHouseStores)
   const { onSetSeo } = useCommonActions()
-  const route = useRoute()
-  // 預設拿當前路由;換頁守衛呼叫時要把「要去的那一個」傳進來 ——
-  // 守衛跑在導航完成之前,那時 useRoute() 還是上一頁,取到的會是上一筆物件。
-  const onApiGetBuyHouseHfid = async (targetRoute = route) => {
+  // 路由一律由呼叫端傳進來,這裡不自己取 —— 換頁守衛跑在導航完成之前,
+  // 那時的「當前路由」還是上一頁,取到的會是上一筆物件。
+  // 守衛要傳它拿到的 to,頁面傳自己的 route。
+  const onApiGetBuyHouseHfid = async (targetRoute) => {
     const { params } = targetRoute
     const { config, status, data } = await apiGetBuyHouseHfid({
       hfid: params.hfid,
@@ -49,7 +49,7 @@ export default () => {
 
     return { config, status, data }
   }
-  const onApiGetBuyHouseHfidPoi = async (targetRoute = route) => {
+  const onApiGetBuyHouseHfidPoi = async (targetRoute) => {
     const { params } = targetRoute
     const { config, status, data } = await apiGetBuyHouseHfidPoi({
       hfid: params.hfid,

@@ -6,6 +6,9 @@ import {
   apiPutMemberProfile,
   apiGetMemberMessages,
   apiDeleteMemberMessages,
+  apiGetMemberSubscriptionsBuyObjects,
+  apiDeleteMemberSubscriptionsBuyObjects,
+  apiPostMemberCompareBuyObjectsItems,
 } from '@js/_api/member/center.js'
 
 // 會員中心各頁的行為。auth 三支在同層的 useProjectActions.js。
@@ -21,6 +24,7 @@ export default () => {
     password,
     account,
     message,
+    houseSubscribe,
   } = storeToRefs(memberCenter)
   const { onApiError } = usePopupActions()
 
@@ -179,6 +183,45 @@ export default () => {
     return { config, status, data }
   }
 
+  const onApiGetMemberSubscriptionsBuyObjects = async () => {
+    const { config, status, data } = await apiGetMemberSubscriptionsBuyObjects(
+      houseSubscribe.value.apiData
+    )
+
+    if (status !== 200) {
+      onApiError(config, status, data)
+
+      return { config, status, data }
+    }
+
+    houseSubscribe.value.data = data
+
+    return { config, status, data }
+  }
+
+  // 一次刪一筆或多筆都走這支,ids 由呼叫端決定。刪完由呼叫端重取清單 ——
+  // 刪掉最後一筆時頁碼可能要往前退,那是頁面才知道的事。
+  const onApiDeleteMemberSubscriptionsBuyObjects = async (ids) => {
+    const { config, status, data } = await apiDeleteMemberSubscriptionsBuyObjects({ ids })
+
+    if (status !== 200) {
+      onApiError(config, status, data)
+    }
+
+    return { config, status, data }
+  }
+
+  // 加進物件比一比。超過上限、或那一筆不能比較時後端回 400,訊息由呼叫端顯示。
+  const onApiPostMemberCompareBuyObjectsItems = async (ids) => {
+    const { config, status, data } = await apiPostMemberCompareBuyObjectsItems({ ids })
+
+    if (status !== 200 && status !== 400) {
+      onApiError(config, status, data)
+    }
+
+    return { config, status, data }
+  }
+
   // 五個通知分頁共用同一份未讀數:SSR 取過之後 client 不重打,換分頁時重取。
   const onNoticeSummary = async () =>
     await callOnce('member-notice-summary', onApiGetMemberNotificationsSummary, {
@@ -197,6 +240,9 @@ export default () => {
     onApiPutMemberProfile,
     onApiGetMemberMessages,
     onApiDeleteMemberMessages,
+    onApiGetMemberSubscriptionsBuyObjects,
+    onApiDeleteMemberSubscriptionsBuyObjects,
+    onApiPostMemberCompareBuyObjectsItems,
     onNoticeSummary,
   }
 }

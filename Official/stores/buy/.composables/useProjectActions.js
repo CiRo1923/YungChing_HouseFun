@@ -7,7 +7,7 @@ import {
   apiPostBuyMessagesResendCode,
 } from '@js/_api/buy/common.js'
 
-import { onFormatDate } from '@js/_prototype.js'
+import { onDeepClone, onDeepMerge, onFormatDate } from '@js/_prototype.js'
 import { BUYACCESSDATA, BUYCHANNEL } from '@js/_storage.js'
 import { enCrypto, deCrypto, enCryptoShort, deCryptoShort } from '@js/.crypto/index.js'
 
@@ -19,6 +19,9 @@ export default () => {
   const { authToken, userData } = storeToRefs(memberProjct)
   const { onApiPostMemberAuthToken, onSetAuthTokenCookie, onReset } = useMemberAuthProjectActions()
   const buyProject = useBuyProjectStore()
+  // loginButtons 直接從 store 取:它是 readonly 常數,既不是 ref 也不是 reactive,
+  // storeToRefs 不會為它建立 ref —— 解構出來會是 undefined。
+  const { loginButtons } = buyProject
   const { channel, access, message, countdownData, apiVerifyCodeData, cottonCandyCheckbox } =
     storeToRefs(buyProject)
 
@@ -49,7 +52,13 @@ export default () => {
   }
 
   const { onPromise, onCustom, onApiError, onApiPromise } = usePopupActions()
-  const { onLogin } = useBuyPopupActions()
+  // 登入彈窗是買屋頻道自己的流程,不是共用 popup 的一種型別,所以留在這一層
+  const onLogin = (data) =>
+    onCustom({
+      id: 'loginSystem',
+      title: data?.title || '會員登入',
+      btns: onDeepMerge(loginButtons, data?.btns),
+    })
 
   const onApiPostBuyAuthTokenExchange = async () => {
     const { config, status, data } = await apiPostBuyAuthTokenExchange({
@@ -324,8 +333,8 @@ export default () => {
       access.value.data = null
     },
     onMessage() {
-      message.value.apiData = { ...buyProject.apiDefault.message }
-      apiVerifyCodeData.value = { ...buyProject.apiDefault.verifyCode }
+      message.value.apiData = onDeepClone(buyProject.apiDefault.message)
+      apiVerifyCodeData.value = onDeepClone(buyProject.apiDefault.verifyCode)
       cottonCandyCheckbox.value = []
     },
   }

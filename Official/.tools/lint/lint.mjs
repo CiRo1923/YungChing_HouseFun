@@ -109,7 +109,9 @@ const onPrintGroup = (list, { level }) => {
       console.error('')
       console.error(`   ${CYAN}${file}${RESET}`)
       for (const i of items) {
-        console.error(`     ${color}${isWarnGroup ? '!' : '✗'}${RESET} ${DIM}L${i.line}${RESET} ${i.detail}`)
+        console.error(
+          `     ${color}${isWarnGroup ? '!' : '✗'}${RESET} ${DIM}L${i.line}${RESET} ${i.detail}`
+        )
       }
     }
   }
@@ -123,8 +125,12 @@ if (warns.length) onPrintGroup(warns, { level: 'warn' })
 console.error('')
 
 if (errors.length) {
-  const counts = [...errorRules.entries()].map(([rule, list]) => `${rule} ${list.length}`).join(' / ')
-  console.error(`${YELLOW}共 ${errors.length} 筆違規(${counts}),掃描 ${files.length} 個檔案。${RESET}`)
+  const counts = [...errorRules.entries()]
+    .map(([rule, list]) => `${rule} ${list.length}`)
+    .join(' / ')
+  console.error(
+    `${YELLOW}共 ${errors.length} 筆違規(${counts}),掃描 ${files.length} 個檔案。${RESET}`
+  )
 } else {
   console.error(`${GREEN}✔ 沒有要擋的違規(掃描 ${files.length} 個檔案)${RESET}`)
 }

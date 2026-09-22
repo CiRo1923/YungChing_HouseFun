@@ -36,6 +36,13 @@
 
 @screen p {
   .m-separator {
+    &.\-\-gap-x-30,
+    &.p\:\-\-gap-x-30,
+    &.pt\:\-\-gap-x-30 {
+      --separator-gap-x: 30px;
+      --separator-divider-right: -15px;
+    }
+
     &.\-\-gap-x-24,
     &.p\:\-\-gap-x-24,
     &.pt\:\-\-gap-x-24 {
@@ -68,6 +75,14 @@
 
 @screen t {
   .m-separator {
+    &.\-\-gap-x-30,
+    &.pt\:\-\-gap-x-30,
+    &.tm\:\-\-gap-x-30,
+    &.t\:\-\-gap-x-30 {
+      --separator-gap-x: 30px;
+      --separator-divider-right: -15px;
+    }
+
     &.\-\-gap-x-24,
     &.pt\:\-\-gap-x-24,
     &.tm\:\-\-gap-x-24,
@@ -104,6 +119,13 @@
 
 @screen m {
   .m-separator {
+    &.\-\-gap-x-30,
+    &.tm\:\-\-gap-x-30,
+    &.m\:\-\-gap-x-30 {
+      --separator-gap-x: 30px;
+      --separator-divider-right: -15px;
+    }
+
     &.\-\-gap-x-24,
     &.tm\:\-\-gap-x-24,
     &.m\:\-\-gap-x-24 {

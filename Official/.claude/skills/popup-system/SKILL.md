@@ -17,9 +17,34 @@ description: 修改 popup(alert / confirm / custom / apiPromise)的顯示狀態�
 | `stores/popup.js` | 狀態:`alertData` / `confirmData` / `customData` / `apiPromiseData`(各含 `id`)、`alertCheck` / `confirmCheck` / `customCheck`(Promise 的 resolver) |
 | `stores/.composables/usePopupActions.js` | 開啟 / 關閉 / 結算。**唯一能碰 `xxxCheck` 的地方** |
 | `components/common/mPopup/Index.vue` | 顯示狀態機與兩層 Transition。每個 popup 實例比對 `props.id === keyID` |
-| `containers/common/*.vue` | 各型別的外框(AlertSystem / ConfirmSystem / CustomPopup / LoginSystem) |
-| `assets/css/_common/vueTransition.css` | `popup-overlay-*` / `popup-zoom-*` / `popup-bottomSheet-*`。**不得出現 `.m-xxx` 選擇器** |
-| `assets/css/_modules/common/mPopup/*.css` | 元件外觀,由 `Index.vue` 於 script 頂部 import(variables 先、common 後) |
+| `containers/common/*.vue` | 各型別的外框(AlertSystem / ConfirmSystem / CustomPopup / ApiPromiseSystem) |
+| `assets/css/_common/vueTransition.css` | `popup-overlay-*` / `popup-bomb-*` / `popup-zoom-*` / `popup-bottomSheet-*`。**不得出現 `.m-xxx` 選擇器** |
+| `components/common/mPopup/.css/*.css` | 元件外觀,由 `Index.vue` 於 script 頂部 import(variables 先、common 後) |
+
+登入彈窗是買屋頻道自己的流程,不是共用 popup 的型別:外框在 `containers/project/LoginSystem.vue`,
+開啟它的 `onLogin` 與那組按鈕在 `stores/buy/` 的 project 那一層。
+
+---
+
+## 三種進出場模式
+
+`config.mode` 接受 `'bomb'` / `'zoom'` / `'bottomSheet'`,也可以用物件依裝置各給一種
+(`{ p: 'zoom', m: 'bottomSheet' }`,鍵是 `p` / `pt` / `tm` / `t` / `m`)。
+
+`Index.vue` 把這個值同時用在兩個地方,所以**新增一種模式時兩邊都要有,少一邊不會報錯**:
+
+| 用途 | 產生的東西 | 定義在 |
+|---|---|---|
+| 進出場動畫 | `popup-<模式>` transition | `assets/css/_common/vueTransition.css` |
+| 容器在畫面上的位置 | `.--<模式>` 修飾符 | `components/common/mPopup/.css/common.css` |
+
+只有動畫沒有修飾符時,容器會少掉定位規則、貼在左上角;只有修飾符沒有動畫則是直接跳出,沒有漸變。
+
+`bomb` 與 `zoom` 的版面相同,差別只在動畫曲線(bomb 會過衝再回彈),
+所以 `.--bomb` 與 `.--zoom` 共用同一段定位規則,不是各寫一份。
+
+**兩組 keyframes 的名字必須不同。** 同名的後者會蓋掉前者,而 CSS 不會有任何警告 ——
+症狀是某一種模式播出了另一種的動畫。
 
 ---
 
@@ -139,15 +164,14 @@ const onAlertClose = (isSure = false, item = null) => {
 .popup-overlay-leave-active { transition-delay: 0.1s; }   /* 等 container 收完 */
 
 /* zoom:delay 讓遮罩先浮現一半再彈出 */
-.popup-zoom-enter-active { animation: popup-bomb 0.1s 0.075s both; }
-.popup-zoom-leave-active { animation: popup-bomb 0.1s reverse both; }
+.popup-zoom-enter-active { animation: popup-zoom 0.1s 0.075s both; }
+.popup-zoom-leave-active { animation: popup-zoom 0.1s reverse both; }
 
 /* bottomSheet:等遮罩完整淡入(0.15s)後才滑上來 */
 .popup-bottomSheet-enter-active { transition-delay: 0.15s; }
 ```
 
-- **`vueTransition.css` 內不得出現 `.m-xxx` 選擇器**(只有註解可提及元件名)。需要綁元件 class 的規則放 `_modules/common/mPopup/`。
-- `mode` 由 `config.mode` 決定,可為字串或依裝置的物件(`{ m: 'bottomSheet' }`),解析後掛成 `.m-popup` 上的 `--zoom` / `--bottomSheet`,並決定 Transition 的 `name`(`popup-zoom` / `popup-bottomSheet`)。
+- **`vueTransition.css` 內不得出現 `.m-xxx` 選擇器**(只有註解可提及元件名)。需要綁元件 class 的規則放 `components/common/mPopup/.css/`。
 
 ---
 

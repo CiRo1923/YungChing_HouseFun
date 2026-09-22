@@ -28,7 +28,7 @@ onRestoreChannel()
 // 失敗要往上拋,伺服器端才會回 500。吞掉的話會送出一個內容是空的、狀態卻是 200 的頁面。
 await Promise.all([
   callOnce('type-options', () => onApiGETRealEstateTypeSelectOptions()),
-  callOnce(`buy-detail-poi-${hfid.value}`, () => onApiGetBuyHouseHfidPoi()),
+  callOnce(`buy-detail-poi-${hfid.value}`, () => onApiGetBuyHouseHfidPoi(route)),
 ])
 
 onUseMeta({

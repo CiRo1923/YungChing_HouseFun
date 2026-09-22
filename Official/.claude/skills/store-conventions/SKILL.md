@@ -313,12 +313,39 @@ pinia 的 store 實例是 reactive 物件,值一旦「取出來」就跟 store �
 - **`use*Actions()`**:那是一般 composable,不是 store,直接解構就好
 - **`readonly({ … })` 包住的固定設定**:那種東西沒有響應性可言 ——
   沒有人會改它,所以「取出來就跟 store 斷了」的前提不成立
+- **函式或 computed 主體裡的取值**:那是「這一刻的值」,拿到就用掉
 
-最後那一種規則會自己認出來:它到 store 那一側看那個屬性的宣告,
-是 `readonly({ … })`(不是 `readonly(ref(…))`)就跳過,不必標豁免。
+最後兩種規則會自己認出來,不必標豁免。
 
+`readonly({ … })` 那一種是到 store 那一側看那個屬性的宣告,
+是 `readonly({ … })`(不是 `readonly(ref(…))`)就跳過。
 **而且那種情況照這條改會壞掉** —— `storeToRefs` 只收 ref 與 reactive,
 `readonly({ … })` 兩者皆非,拿到的是 `undefined`,下一行取值就丟錯。
+
+### 為什麼函式裡的取值不算
+
+這條擋的是「取出來的值會被留下來,之後還有人讀它」—— 畫面 render 時讀、
+別的函式讀。寫在最外層的宣告是那種,寫在函式裡的不是:
+取值那一行到函式結束之間就是它的全部壽命。
+
+```js
+const data = json.member.tab            // 最外層：畫面之後都讀這一份，要走 storeToRefs
+
+const onTabs = async () => {
+  await onJsonMemberTab()
+  const data = json.member.tab          // 函式裡：等 api 回來之後讀一次，當場用掉
+}
+```
+
+**函式裡那一種照這條改反而會壞** —— 提到最外層的話,取值發生在 `await` 之前,
+拿到的是還沒填的那一份。computed 主體裡的也不必改:computed 每次重算都會重讀,
+響應性是 computed 自己在管的。
+
+規則數大括號來分辨:`.vue` 的 `<script setup>` 裡面直接就是最外層,
+而 store 與 actions 的 `.js` 整份包在一個函式裡(`defineStore` 的 setup、
+actions 的 `export default`),所以那一層不算。
+
+註解掉的程式碼不檢查 —— 那是死的,報出來的那一行打開檔案一看根本沒有作用。
 
 ## 5. action 命名:onApi + api 函式名
 

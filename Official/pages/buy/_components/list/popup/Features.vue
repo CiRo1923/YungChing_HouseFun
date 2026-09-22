@@ -1,16 +1,13 @@
 <script setup>
 const manage = useManageStore()
-const { options } = storeToRefs(manage)
 const buyList = useBuyListStore()
+const { options } = storeToRefs(manage)
 const { content } = storeToRefs(buyList)
 
 // const data = computed(() => content.value.data || [])
 const apiData = computed(() => content.value.apiData || {})
 
 const features = computed(() => options.value.features ?? [])
-// const popup = usePopupStore()
-// const { customCheck } = storeToRefs(popup)
-// const { onCustomClose } = useBuyPopupActions()
 </script>
 
 <template>

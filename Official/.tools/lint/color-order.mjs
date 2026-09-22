@@ -134,7 +134,11 @@ const hslOf = (hex) => {
 
   const s = d / (1 - Math.abs(2 * l - 1))
   const h =
-    max === r ? 60 * (((g - b) / d) % 6) : max === g ? 60 * ((b - r) / d + 2) : 60 * ((r - g) / d + 4)
+    max === r
+      ? 60 * (((g - b) / d) % 6)
+      : max === g
+        ? 60 * ((b - r) / d + 2)
+        : 60 * ((r - g) / d + 4)
 
   return { h: (h + 360) % 360, s, l }
 }
@@ -374,9 +378,7 @@ export const expectedSuffix = (value) => {
     core = SEMANTIC_BASES.has(expandShortHex(base)) ? '' : pickChars(base, short)
   } else if (base.length === 6) {
     const [r, g, b] = [0, 2, 4].map((i) => base.slice(i, i + 2))
-    core = SEMANTIC_BASES.has(base)
-      ? ''
-      : pickChars(base, r === g && g === b ? grayscale : normal)
+    core = SEMANTIC_BASES.has(base) ? '' : pickChars(base, r === g && g === b ? grayscale : normal)
   }
 
   if (core === null) return null
@@ -591,8 +593,7 @@ const buildBlockBody = (items, indent, withLabels) => {
  * **管的只有標籤,不含分組的空行。** 色系之間空一行是規範(見色票的寫法規範),
  * 每個專案都一樣,所以不看現況 —— 一整片連續的變數要逐行讀名字才知道換色系了。
  */
-const hasHueLabels = (items) =>
-  items.some((item) => (item.comments ?? []).some(isHueLabel))
+const hasHueLabels = (items) => items.some((item) => (item.comments ?? []).some(isHueLabel))
 
 /**
  * 把一組色票的內容換成給定的那幾筆(會先排序),回傳整份新的文字。

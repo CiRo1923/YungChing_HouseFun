@@ -10,11 +10,11 @@ const props = defineProps({
 const common = useCommonStore()
 const { device } = storeToRefs(common)
 const buyHouse = useBuyHouseStore()
-const { broker } = storeToRefs(buyHouse)
 const buyProject = useBuyProjectStore()
+const { broker } = storeToRefs(buyHouse)
 const { message } = storeToRefs(buyProject)
 const { reset } = useBuyProjectActions()
-const buyPopup = useBuyPopupStore()
+const popup = usePopupStore()
 const { onMergeBtns, onCustom } = usePopupActions()
 const route = useRoute()
 
@@ -31,44 +31,19 @@ const onPopupMessage = async () => {
   await onCustom({
     id: 'popupMessage',
     title: '詢問與留言',
-    btns: onMergeBtns(buyPopup.buttons.alert, [
-      {
-        label: '我要預約留言',
-        type: 'sure',
-        // 不自動關窗:驗證失敗要留在原地,由 popup/Message.vue 的 onSure 決定後續
-        isClose: false,
-      },
-    ]),
+    btns: onMergeBtns(
+      [
+        {
+          label: '我要預約留言',
+          type: 'sure',
+          // 不自動關窗:驗證失敗要留在原地,由 popup/Message.vue 的 onSure 決定後續
+          isClose: false,
+        },
+      ],
+      popup.buttons.alert
+    ),
   })
 }
-
-// 底部常駐 bar 是 fixed、不佔文檔流,把實際高度寫進 CSS 變數,
-// 讓 .l-footer 補等高 padding、BuyMTop 也依它往上讓位(見 assets/css/_common/layout.css)。
-// 高度由內容撐出(經紀人名 + 標籤一行、公司資訊兩行),字級一調就變,故用量測而非寫死。
-const FIXED_BOTTOM_VAR = '--fixed-bottom-height'
-const bottomBarRef = ref(null)
-let bottomBarObserver = null
-
-const onSetFixedBottomHeight = (height) => {
-  document.documentElement.style.setProperty(FIXED_BOTTOM_VAR, `${height}px`)
-}
-
-// 注意:變數掛在 documentElement 上,不會隨元件卸載自動消失。
-//    離開本頁(SPA 換頁)或切到非手機時務必歸零,否則列表頁等會殘留一段空白 padding。
-watch(bottomBarRef, (el) => {
-  bottomBarObserver?.disconnect()
-  bottomBarObserver = null
-
-  if (!el) {
-    onSetFixedBottomHeight(0)
-
-    return
-  }
-
-  onSetFixedBottomHeight(el.offsetHeight)
-  bottomBarObserver = new ResizeObserver(() => onSetFixedBottomHeight(el.offsetHeight))
-  bottomBarObserver.observe(el)
-})
 
 // 以下 isFixed 狀態機給「捲出 Basic 才出現」的 PC / 手機上方 bar 用(待補)。
 // 手機下方經紀人聯絡列不吃這組——它是常駐 bar,一開始就要顯示,跟 D-11 規格的
@@ -116,19 +91,14 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('scroll', onScroll)
   window.removeEventListener('resize', onScroll)
-
-  bottomBarObserver?.disconnect()
-  bottomBarObserver = null
-  onSetFixedBottomHeight(0)
 })
 </script>
 
 <template>
   <!-- PC 上方 bar、手機上方 bar 待確認後補上;此處先做手機下方經紀人聯絡列。
        常駐顯示,不吃 isFixed——頁面一載入就要看得到,不是捲動才出現。 -->
-  <div
-    class="fixed-bar-bottom fixed inset-x-0 bottom-0 z-[2] flex items-center gap-x-[10px] bg-[--gray-333] p-[20px] text-[--white]"
-    ref="bottomBarRef"
+  <CommonMFixedBar
+    class="fixed-bar-bottom --fixed flex items-center gap-x-[10px] bg-[--gray-333] p-[20px] text-[--white]"
     v-if="isDeviceM"
   >
     <div class="min-w-0 grow">
@@ -175,7 +145,7 @@ onUnmounted(() => {
         </CommonMAnchor>
       </li>
     </ul>
-  </div>
+  </CommonMFixedBar>
 </template>
 
 <style lang="postcss">

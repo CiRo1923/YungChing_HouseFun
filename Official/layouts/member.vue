@@ -1,9 +1,4 @@
 <script setup>
-import { getChannelColorHref } from '@js/runtime/channelColor.js'
-
-// member 頻道色票的 hash URL(集中在 _channelColor 用 ?url 引用)。
-const colorHref = getChannelColorHref('member')
-
 const common = useCommonStore()
 const { isLoading } = storeToRefs(common)
 const memberAuthProject = useMemberAuthProjectStore()
@@ -12,16 +7,6 @@ const { userData } = storeToRefs(memberAuthProject)
 const { access } = storeToRefs(memberCenter)
 const { onRestoreAuthToken } = useMemberAuthProjectActions()
 const { onApiGetAuthMe, onApiPostAuthLogout, onRestoreAccessData } = useMemberProjectActions()
-
-// 掛載 member 頻道色票(同步 composable 一律放在 await 之前)
-useHead({
-  link: [
-    {
-      rel: 'stylesheet',
-      href: colorHref,
-    },
-  ],
-})
 
 const onInit = async () => {
   // 啟動還原一次:從 cookie 取回 authToken 與這個服務的 accessData 寫回 store。
@@ -48,7 +33,7 @@ await callOnce(onInit)
 
 <template>
   <div class="l-wrap">
-    <CommonHeader>
+    <ProjectHeader>
       <CommonMLogStatus
         :config="{
           login: 'account',
@@ -56,8 +41,8 @@ await callOnce(onInit)
         }"
         @logout="onApiPostAuthLogout"
       />
-    </CommonHeader>
-    <!-- <CommonHeader>
+    </ProjectHeader>
+    <!-- <ProjectHeader>
       <CommonMAnchor
         text="回首頁"
         :config="{
@@ -72,9 +57,9 @@ await callOnce(onInit)
           icon: 'h-[16px] w-[16px] p-[2px] text-[--gray-999]',
         }"
       /> 
-    </CommonHeader>
+    </ProjectHeader>
     -->
-    <!-- <CommonHeader @login="onPopupLogin" @logout="onApiPostAuthLogout" /> -->
+    <!-- <ProjectHeader @login="onPopupLogin" @logout="onApiPostAuthLogout" /> -->
     <main class="l-body relative z-0 tm:mt-[20px] p:mt-[30px]">
       <slot />
     </main>

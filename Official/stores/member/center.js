@@ -4,6 +4,8 @@
 // authToken(SSO 長 token)由 Member Auth 發,access.data 是拿它換來的、
 // 只有這個服務認得的 bearer token —— 與 buy 的 access 各自獨立,不能互用。
 export const useMemberCenterStore = defineStore('memberCenter', () => {
+  // 側欄最後兩項要連去買屋清單,路由名稱以那一層持有的為準,不在這裡再寫一次。
+  const buyList = useBuyListStore()
   const access = ref({
     data: null,
   })
@@ -67,6 +69,10 @@ export const useMemberCenterStore = defineStore('memberCenter', () => {
       page: 1,
       pageSize: LIST_PAGE_SIZE,
     },
+    houseSubscribe: {
+      page: 1,
+      pageSize: LIST_PAGE_SIZE,
+    },
     password: {
       currentPassword: null,
       newPassword: null,
@@ -113,6 +119,105 @@ export const useMemberCenterStore = defineStore('memberCenter', () => {
   const message = ref({
     data: null,
     apiData: { ...apiDefault.message },
+  })
+  // 物件訂閱管理:data 放清單、分頁資訊,以及一次最多能比較幾筆(compareLimit)。
+  //
+  // api 目前回不到資料,所以先帶一份假的把版面撐起來 —— 欄位與 swagger 的
+  // BuyObjectSubscriptionItem 一致,三筆分別是「有降價」「沒降價」「不能比較」。
+  // api 通了之後這一份改回 null。
+  const houseSubscribe = ref({
+    data: {
+      compareLimit: 4,
+      paging: {
+        page: 1,
+        pageSize: LIST_PAGE_SIZE,
+        total: 3,
+      },
+      items: [
+        {
+          id: '1',
+          house: {
+            id: 'h1',
+            title: '忠誠四房車大降價屋主急售',
+            address: '台北市北投區泉源路華南巷',
+            communityName: '美之城社區',
+            totalPrice: 21088,
+            lastPrice: 13980,
+            unitPrice: 90.6,
+            buildPing: 20,
+            roomText: '2房(室)',
+            floorText: '4/12',
+            imageUrl: null,
+          },
+          broker: {
+            name: '郝惠邁',
+            mobilePhone: '02-12345678 # 1234',
+            shopName: '永慶房屋(股)公司',
+          },
+          caseType: '公寓',
+          subscribedAt: '2026-01-01T00:00:00',
+          priceDropAt: '2026-01-01T00:00:00',
+          priceDropAmount: 120,
+          canCompare: true,
+          actions: [],
+        },
+        {
+          id: '2',
+          house: {
+            id: 'h2',
+            title: '邊間四房雙主臥管理美廈',
+            address: '台北市萬華區康定路',
+            communityName: '晶麒社區',
+            totalPrice: 2800,
+            lastPrice: null,
+            unitPrice: 86.6,
+            buildPing: 28.5,
+            roomText: '2房(室)1廳1衛',
+            floorText: '4/12',
+            imageUrl: null,
+          },
+          broker: {
+            name: '郝惠邁',
+            mobilePhone: '02-12345678 # 1234',
+            shopName: '永慶房屋(股)公司',
+          },
+          caseType: '大樓',
+          subscribedAt: '2026-01-01T00:00:00',
+          priceDropAt: null,
+          priceDropAmount: null,
+          canCompare: true,
+          actions: [],
+        },
+        {
+          id: '3',
+          house: {
+            id: 'h3',
+            title: '運動公園管理美廈 鄰運動公園、無障礙進出方正格局',
+            address: '台北市萬華區康定路',
+            communityName: null,
+            totalPrice: 2800,
+            lastPrice: 3100,
+            unitPrice: 89,
+            buildPing: 28.5,
+            roomText: '2房(室)1廳1衛',
+            floorText: '4/12',
+            imageUrl: null,
+          },
+          broker: {
+            name: '郝惠邁',
+            mobilePhone: '02-12345678 # 1234',
+            shopName: '永慶房屋(股)公司',
+          },
+          caseType: '華廈',
+          subscribedAt: '2026-01-01T00:00:00',
+          priceDropAt: '2026-02-15T00:00:00',
+          priceDropAmount: 300,
+          canCompare: false,
+          actions: [],
+        },
+      ],
+    },
+    apiData: { ...apiDefault.houseSubscribe },
   })
   const navs = readonly([
     {
@@ -241,6 +346,9 @@ export const useMemberCenterStore = defineStore('memberCenter', () => {
     {
       label: '租屋刊登',
       icon: 'icon_rent_publish',
+      to: {
+        name: 'rent',
+      },
       class: {
         main: '--text-orange-e646',
       },
@@ -248,8 +356,12 @@ export const useMemberCenterStore = defineStore('memberCenter', () => {
       hasHover: false,
     },
     {
+      // 刊登的落點頁還沒有,先連去買屋清單。
       label: '買屋刊登',
       icon: 'icon_buy_publish',
+      to: {
+        name: buyList.basicRouteName,
+      },
       class: {
         main: '--text-orange-e646',
       },
@@ -272,5 +384,6 @@ export const useMemberCenterStore = defineStore('memberCenter', () => {
     password,
     account,
     message,
+    houseSubscribe,
   }
 })

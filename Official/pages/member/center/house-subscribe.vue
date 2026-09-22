@@ -1,6 +1,10 @@
 <script setup>
 const { onUseMeta } = useCommonActions()
+const memberCenter = useMemberCenterStore()
+const { houseSubscribe } = storeToRefs(memberCenter)
+const { onApiGetMemberSubscriptionsBuyObjects } = useMemberCenterActions()
 const { onApiErrorServerToClient } = usePopupActions()
+const route = useRoute()
 
 definePageMeta({
   layout: 'member',
@@ -9,6 +13,18 @@ definePageMeta({
   requiresAuth: true,
 })
 
+// 分頁器是 router-link,頁碼跟著網址走 —— 重整與分享都會停在同一頁。
+const onMemberSubscriptionsBuyObjects = async () => {
+  houseSubscribe.value.apiData.page = Number(route.query.pg) || 1
+
+  await onApiGetMemberSubscriptionsBuyObjects()
+}
+
+// api 目前回的是空清單,取回來會把假資料蓋掉,所以初次載入先不取 ——
+// 畫面吃 stores/member/center.js 的 houseSubscribe.data。
+// api 有資料之後這裡要加回 await onMemberSubscriptionsBuyObjects(),那一份假資料也改回 null。
+
+watch(() => route.query.pg, onMemberSubscriptionsBuyObjects)
 
 onUseMeta({
   title: '會員中心 | 好房 HouseFun',
@@ -29,6 +45,7 @@ onMounted(() => {
       class="p:--hasBgColor pt:--rounded-20 p:--py-25 t:--py-20 p:--px-40 m:--pb-20 tm:--px-16 grow t:mx-[10px]"
     >
       <PageMemberCenterHeader title="物件訂閱管理" />
+      <PageMemberCenterHouseSubscribeContent @changed="onMemberSubscriptionsBuyObjects" />
     </CommonMContent>
   </CommonMContainer>
 </template>

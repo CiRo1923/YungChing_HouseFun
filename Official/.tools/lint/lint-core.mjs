@@ -21,6 +21,7 @@ import {
   hexOf,
   hueOf,
   HUE_LIST_TEXT,
+  HUE_ORDER,
   isColorCssPath,
   isRgbVar,
   isSorted,
@@ -75,9 +76,11 @@ import {
   isModuleCss,
   isModuleStyle,
   isSharedCss,
+  isTransitionClass,
   moduleFolderOf,
   registerScanCache,
   classPrefixOf,
+  componentClassOf,
   selectorClassesOf,
   issueOf,
   warnOf,
@@ -102,7 +105,6 @@ export {
   toRel,
 } from './shared.mjs'
 
-
 /* 註解遮蔽(maskCssComments / maskHtmlComments)定義在 shared.mjs ——
    色票的解析也要用它找區塊邊界,各寫一份的話,兩邊對註解的認定會開始不一樣。 */
 
@@ -126,6 +128,20 @@ const styleRanges = (text, isVue) => {
 //
 // 不抓:色票檔本身、hexToRgb() 那行(色票的 -rgb 定義寫法)、
 //       JS 物件內的顏色(送往 LINE Flex 等外部平台,CSS 變數在那裡無效)。
+//
+// **有一種檔案吃不到色票,改用 var() 會讓宣告真的失效** ——
+// 那種在檔頭標 `lint-color-exempt` 並寫明理由,規則跳過整份。兩種情況:
+//
+//   色票掛在某個容器內的元素上,而這一支寫的是它的祖先(html / body)——
+//       CSS 變數只往後代繼承,祖先讀不到
+//   在 app 的程式碼之前就載入的樣式(由 HTML 直接引入,避免無樣式閃現)——
+//       那個時間點色票還沒有掛上去
+//
+// 照規則改的後果是**靜默的**:宣告失效之後元素改吃繼承來的顏色,
+// 畫面上「有顏色」只是不對 —— 比整片沒有顏色更難發現。
+//
+// 標記讀的是共用的 hasExemptMark,與其他規則同一套:寫在註解裡才算,
+// 字串與範例區塊裡的不算。
 
 const HEX_RE = /#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3,4})\b/
 const RGB_NUM_RE = /\brgba?\(\s*[\d.]/
@@ -133,6 +149,7 @@ const ARBITRARY_HEX_RE = /-\[#(?:[0-9a-fA-F]{3,8})\]/g
 
 const checkLiteralColor = ({ rel, text, isVue, definedVars }) => {
   if (isColorCssPath(rel)) return []
+  if (hasExemptMark(text, 'color')) return []
   if (!/\.(css|vue)$/i.test(rel)) return [] // .js 的色值多半是送外部平台用的,不在此限
 
   const issues = []
@@ -152,9 +169,7 @@ const checkLiteralColor = ({ rel, text, isVue, definedVars }) => {
        * 放哪一支色票,那是判斷題。報出來讓人決定,回「修正」或「好」再處理。
        */
       if (/hexToRgb\s*\(/.test(raw)) {
-        issues.push(
-          issueOf(rel, base + i, 'color', `hexToRgb() 已不使用 —— ${LEGACY_RGB_HINT}`)
-        )
+        issues.push(issueOf(rel, base + i, 'color', `hexToRgb() 已不使用 —— ${LEGACY_RGB_HINT}`))
         return
       }
 
@@ -345,7 +360,12 @@ const checkColorFile = ({ rel, text }) => {
    */
   if (!isSorted(text)) {
     issues.push(
-      issueOf(rel, 1, 'colorSort', '排序不符規則(彩虹 + 每類由淺到深)—— 存檔或 npm run sort:color 會自動修正')
+      issueOf(
+        rel,
+        1,
+        'colorSort',
+        '排序不符規則(彩虹 + 每類由淺到深)—— 存檔或 npm run sort:color 會自動修正'
+      )
     )
   }
 
@@ -403,6 +423,11 @@ export const checkSharedColors = (root) => {
 // 判定採「已知清單」而非反向排除 —— 寧可漏抓罕見 utility,
 //    也不要把 m-form / --px-15 這類專案自訂 class 誤報成違規。
 
+/* prettier-ignore —— 這份清單照 tailwind 的分類分行(display / position /
+  文字裝飾 / 可見性 / 無障礙 / 容器 / 框線 / 濾鏡 / overflow),
+  一行一類。排成一行一個的話 11 行會變成 50 多行,而且分類看不出來 ——
+  要判斷「某個 utility 漏了沒」時,是照分類去看的。 */
+// prettier-ignore
 const TW_EXACT = new Set([
   'flex', 'grid', 'block', 'inline', 'inline-block', 'inline-flex', 'inline-grid',
   'hidden', 'contents', 'table', 'flow-root', 'list-item',
@@ -416,6 +441,10 @@ const TW_EXACT = new Set([
   'overflow-hidden', 'overflow-auto', 'overflow-visible', 'overflow-scroll',
 ])
 
+/* prettier-ignore —— 與上面那份同樣的理由:照 tailwind 的分類分行
+  (尺寸 / 內距 / 外距 / 顏色 / 間隙 / 對齊 / 彈性 / 定位 / …),一行一類。
+  一行一個的話 20 行會變成 130 多行,而分類正是查漏的依據。 */
+// prettier-ignore
 const TW_PREFIX = [
   'w-', 'h-', 'min-w-', 'max-w-', 'min-h-', 'max-h-', 'size-',
   'p-', 'px-', 'py-', 'pt-', 'pr-', 'pb-', 'pl-', 'ps-', 'pe-',
@@ -553,9 +582,7 @@ const deadPatternOf = ({ prefix, dead }) => {
   const values = dead.map((v) => v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')
 
   // 沒有 prefix 的是斷點,寫法是「斷點:class」,所以結尾是冒號
-  return prefix
-    ? `(?<![\\w-])${prefix}(?:${values})(?![\\w-])`
-    : `(?<![\\w-])(?:${values}):`
+  return prefix ? `(?<![\\w-])${prefix}(?:${values})(?![\\w-])` : `(?<![\\w-])(?:${values}):`
 }
 
 /* 帶上設定裡的鍵名(screens / fontSize / boxShadow …)—— 訊息要寫出它,
@@ -681,10 +708,10 @@ const checkModuleImportOrder = ({ rel, text, isVue }) => {
   const imports = [...text.matchAll(CSS_IMPORT_RE)]
     .filter((m) => isModuleImportPath(m[1]))
     .map((m) => ({
-    path: m[1],
-    isVariables: /variables\.css$/i.test(m[1]),
-    line: lineNoOf(text, m.index),
-  }))
+      path: m[1],
+      isVariables: /variables\.css$/i.test(m[1]),
+      line: lineNoOf(text, m.index),
+    }))
 
   if (imports.length < 2) return []
 
@@ -818,6 +845,25 @@ const isScaleValue = (value) => /^\d/.test(value)
 
 const isVariablesFile = (rel) => /variables\.css$/i.test(rel)
 
+/**
+ * 這支模組樣式的變數檔該叫什麼。
+ *
+ * 檔名的前半是**變體名**,不是模組名:`selection.css` 配
+ * `selectionVariables.css`(selection 是 mForm 底下的一個變體)。
+ *
+ * 而模組的主樣式 `common.css` 不屬於任何變體 —— 它配的是 `variables.css`,
+ * 前面不加東西。算成 `commonVariables.css` 的話,規則會叫人去建一支
+ * 每個模組都沒有的檔案;而模組底下只有一支元件時,照著錯的推導會建出
+ * `mStepCard/.css/mStepCardVariables.css` 這種把資料夾名重複一次的檔名。
+ */
+const MODULE_MAIN_STYLE = 'common'
+
+const variablesFileFor = (rel) => {
+  const base = path.basename(rel, '.css')
+
+  return base === MODULE_MAIN_STYLE ? 'variables.css' : `${base}Variables.css`
+}
+
 const checkModuleVariables = ({ rel, text: raw }) => {
   if (!isModuleStyle(rel)) return []
   if (isVariablesFile(rel)) return []
@@ -832,10 +878,15 @@ const checkModuleVariables = ({ rel, text: raw }) => {
     if (!found.get(prop).has(value)) found.get(prop).set(value, lineNoOf(text, m.index))
   }
 
-  const base = path.basename(rel, '.css')
-  const target = `${base}Variables.css`
+  const target = variablesFileFor(rel)
+  const variablesHint = SHARED_MODULE_VARIABLES
+    ? /* 集中目錄還沒有共用變數檔的專案(樣式都跟著元件走,那一層是空的)
+         把設定留空 —— 指一個不存在的位置比不講更糟,照著做會建出
+         一支沒有人知道為什麼在那裡的檔案。 */
+      `;跨模組共用則放 ${SHARED_MODULE_VARIABLES}`
+    : ''
 
-  return [...found.entries()]
+  const issues = [...found.entries()]
     .filter(([, values]) => values.size >= 2)
     .map(([prop, values]) => {
       const [firstLine] = [...values.values()]
@@ -844,12 +895,82 @@ const checkModuleVariables = ({ rel, text: raw }) => {
         firstLine,
         'moduleVar',
         `--${prop}-* 有 ${values.size} 個級距值(${[...values.keys()].join(' / ')})—— 級距組要搬到 ${target}` +
-          /* 集中目錄還沒有共用變數檔的專案(樣式都跟著元件走,那一層是空的)
-             把設定留空 —— 指一個不存在的位置比不講更糟,照著做會建出
-             一支沒有人知道為什麼在那裡的檔案。 */
-          (SHARED_MODULE_VARIABLES ? `;跨模組共用則放 ${SHARED_MODULE_VARIABLES}` : '')
+          variablesHint
       )
     })
+
+  return [...issues, ...crossBreakpointLiterals(rel, text, target, variablesHint)]
+}
+
+/* 同一處在不同斷點寫了不同的字面值 —— 那是一組該收進變數的斷點值。
+
+  `text-[14px]` 在 pc、`text-[13px]` 在 mobile,兩邊各寫死一個數字。
+  規範要求的是定義成 css 變數、由模組樣式做斷點對應
+  (`--x: var(--x-pc)`),原因是改的時候要翻遍整支樣式才找得齊,
+  而漏掉一個斷點不會有任何徵兆。
+
+  **判準是「不同斷點的值不一樣」,不是「有沒有寫字面值」。**
+     三個斷點都寫 `text-[14px]` 只是重複,那個值根本不隨斷點變,
+     抽成變數反而多繞一層。把那種也報出來的話,一支樣式檔會冒出
+     十幾筆改了沒有意義的違規,而整條規則會因此被忽略。 */
+const UTILITY_LITERAL_RE = /([a-z]+(?:-[a-z]+)*)-\[(\d+(?:\.\d+)?)(px|rem|em|%)\]/g
+
+const crossBreakpointLiterals = (rel, text, target, variablesHint) => {
+  /* 選擇器鏈要跟著算 —— 不同選擇器底下的同一個 utility 是兩回事。
+     只看 utility 名的話,`.m-a` 的 14px 與 `.m-b` 的 13px 會被湊成一組。 */
+  const seen = new Map()
+
+  for (const { screen, body, at } of screenBlocksOf(text)) {
+    const stack = []
+    let offset = 0
+
+    for (const line of body.split('\n')) {
+      const trimmed = line.trim()
+      const selector = trimmed.match(/^([.&][^{]*)\{/)
+
+      if (selector) stack.push(selector[1].trim())
+
+      for (const m of trimmed.matchAll(UTILITY_LITERAL_RE)) {
+        const key = `${stack.join(' ')}|${m[1]}`
+        if (!seen.has(key)) seen.set(key, new Map())
+        // 同一個斷點裡重複寫同一個值不算兩筆,取第一次出現的位置
+        if (!seen.get(key).has(screen))
+          seen.get(key).set(screen, {
+            value: `${m[2]}${m[3]}`,
+            line: lineNoOf(text, at + offset),
+            utility: m[1],
+          })
+      }
+
+      for (let i = 0; i < (trimmed.match(/\}/g) ?? []).length; i += 1) stack.pop()
+      offset += line.length + 1
+    }
+  }
+
+  const issues = []
+
+  for (const byScreen of seen.values()) {
+    const values = [...byScreen.values()]
+    if (new Set(values.map((v) => v.value)).size < 2) continue
+
+    const [first] = values
+    const shown = [...byScreen.entries()].map(([s, v]) => `${s} ${v.value}`).join(' / ')
+
+    issues.push(
+      issueOf(
+        rel,
+        first.line,
+        'moduleVar',
+        `${first.utility}- 在不同斷點寫了不同的值(${shown})—— ` +
+          `那是一組斷點值,要定義成 css 變數放 ${target},` +
+          `再由這支樣式做斷點對應(--x: var(--x-pc));` +
+          `寫死的話改的時候要翻遍整支樣式,而漏掉一個斷點不會有任何徵兆` +
+          variablesHint
+      )
+    )
+  }
+
+  return issues
 }
 
 // --- 規則 sharedVarScope:共用變數檔只放真的跨模組的那幾組 -------------------
@@ -1016,7 +1137,9 @@ const SHORT_OF = {
 }
 
 const LONG_NAME_RE = new RegExp(
-  `(--[\\w-]*?)-(${Object.keys(SHORT_OF).sort((a, b) => b.length - a.length).join('|')})(?![\\w-])\\s*:`,
+  `(--[\\w-]*?)-(${Object.keys(SHORT_OF)
+    .sort((a, b) => b.length - a.length)
+    .join('|')})(?![\\w-])\\s*:`,
   'g'
 )
 
@@ -1054,14 +1177,66 @@ const VAR_USE_RE = /var\(\s*(--[\w-]+)\s*([,)])/g
  * 而那正是最常整批換名、最常漏掉的地方。
  *
  * 這種寫法沒有後備值可寫,所以不必像 `var()` 那樣分辨。
+ *
+ * **型別提示那種也要認:`text-[length:--x]`。**
+ *    `border-` 與 `text-` 同時有長度與顏色兩種版本,建置工具分不出來,
+ *    所以長度要標 `length:`(見 css-module-variables 那份規範)。
+ *    少認這一種的話,凡是標了型別的引用全部不會被檢查 ——
+ *    而字級與框線寬度幾乎都是那樣寫的,等於整類漏掉。
  */
-const ARBITRARY_VAR_RE = /\[(--[\w-]+)\]/g
+const ARBITRARY_VAR_RE = /\[(?:[a-z-]+:)?(--[\w-]+)\]/g
+
+/* 色票類的變數要另外看一眼 —— 見下方 paletteVarsOf。
+
+  「全案找得到定義」對色票來說不夠:色票是**全域載入**的那一支
+  (色票目錄底下的那幾支),而別的地方也可能定義出同名的變數 ——
+  元件自己的 variables.css、頁面裡動態綁的 style。那幾支是跟著元件
+  或那一頁載入的,使用端在別處的話根本讀不到。
+
+  症狀與打錯字一模一樣:瀏覽器讀不到變數就把整條宣告丟掉,顏色整片不見,
+  而四個檢查時機全部顯示通過 —— 那正是這條規則說明裡想防的情況,
+  只是原本的判準防得了打錯字、防不了「定義在讀不到的地方」。
+
+  判準只看名字:名字以色相開頭的(--red-…、--gray-…、--white)就是色票,
+  那種一律要在色票檔裡定義。色相清單取色票那一套的同一份,不在這裡重寫。 */
+const isPaletteName = (name) => {
+  const body = name.replace(/^--/, '')
+
+  return HUE_ORDER.some((hue) => body === hue || body.startsWith(`${hue}${COLOR_NAME_SEPARATOR}`))
+}
 
 let definedVarCache = null
+let paletteVarCache = null
 
 registerScanCache(() => {
   definedVarCache = null
+  paletteVarCache = null
 })
+
+/** 色票檔裡定義了哪些變數 —— 那幾支是全域載入的,任何地方都讀得到 */
+const paletteVarsOf = (root) => {
+  if (paletteVarCache?.root === root) return paletteVarCache.set
+
+  const set = new Set()
+
+  for (const dir of SCAN_TARGETS) {
+    for (const abs of listFiles(root, dir)) {
+      const rel = toRel(root, abs)
+      if (!isColorCssPath(rel)) continue
+
+      try {
+        const text = maskComments(rel, fs.readFileSync(abs, 'utf8'))
+        for (const m of text.matchAll(VAR_DEFINE_RE)) set.add(m[1])
+      } catch {
+        // 讀不到某一支就跳過,不要因此讓整條規則失效
+      }
+    }
+  }
+
+  paletteVarCache = { root, set }
+
+  return set
+}
 
 /**
  * 全案定義過的 css 變數。
@@ -1122,9 +1297,40 @@ const checkUnknownVar = ({ rel, text: raw, root }) => {
     })),
   ]
 
+  const palette = paletteVarsOf(root)
+  const inColorCss = isColorCssPath(rel)
+
   for (const { name, index, hasFallback } of uses) {
     if (hasFallback) continue // 有後備值,變數缺了也不會讓樣式消失
-    if (defined.has(name) || own.has(name) || seen.has(name)) continue
+    if (seen.has(name)) continue
+
+    /* 色票類的名字要在色票檔裡找得到 —— 定義在元件自己的 variables.css
+       或某一頁裡的不算,那幾支是跟著元件或那一頁載入的,使用端在別處就讀不到。
+       色票檔自己那幾支不受這條約束:它們正在定義色票,引用同一組是正常的。 */
+    if (isPaletteName(name) && !inColorCss) {
+      if (palette.has(name) || own.has(name)) continue
+
+      seen.add(name)
+
+      issues.push(
+        issueOf(
+          rel,
+          lineNoOf(text, index),
+          'unknownVar',
+          defined.has(name)
+            ? `${name} 是色票,卻不在色票檔裡 —— 它定義在別的地方(元件自己的變數檔、` +
+                `或某一頁裡動態綁的),那幾支是跟著那個元件或那一頁載入的,這裡讀不到;` +
+                `瀏覽器讀不到就把整條宣告丟掉,顏色整片不見,而且不會有任何錯誤訊息。` +
+                `把它搬進色票檔,或改用色票裡已經有的那一個`
+            : `${name} 全案找不到定義 —— 瀏覽器會把整條宣告丟掉,` +
+                `畫面上那一段樣式直接消失,而且不會有任何錯誤訊息;` +
+                `先確認變數名有沒有打錯,或那個色票還沒建立`
+        )
+      )
+      continue
+    }
+
+    if (defined.has(name) || own.has(name)) continue
 
     seen.add(name)
 
@@ -1181,10 +1387,7 @@ const T_SHIRT_CLASS_RE = new RegExp(
   'g'
 )
 
-const T_SHIRT_VAR_RE = new RegExp(
-  `(--[\\w-]*?)-(${T_SHIRT_SIZE.join('|')})(?![\\w-])\\s*:`,
-  'g'
-)
+const T_SHIRT_VAR_RE = new RegExp(`(--[\\w-]*?)-(${T_SHIRT_SIZE.join('|')})(?![\\w-])\\s*:`, 'g')
 
 const checkTShirtSizing = ({ rel, text: raw }) => {
   if (!isModuleStyle(rel)) return []
@@ -1229,7 +1432,6 @@ const checkTShirtSizing = ({ rel, text: raw }) => {
 // 改用說得出用途的名字(content / default)或實際數值。
 //
 // 這條檢查的是**設定檔本身**,不是使用端 —— 所以它只在掃到那支設定檔時跑。
-
 
 /**
  * 這一份內容裡,theme 各類直接定義了哪些值。
@@ -1333,7 +1535,6 @@ const checkThemeNaming = ({ rel, text, root }) => {
 const BREAKPOINT_ALT = BREAKPOINTS.join('|')
 
 const BREAKPOINT_VAR_RE = new RegExp(`(--[\\w-]*?)-(${BREAKPOINT_ALT})-([\\w-]+)\\s*:`, 'g')
-
 
 /**
  * 專案裡到底有沒有在用斷點變數 —— 拿來檢查 BREAKPOINTS 設定是不是填錯了。
@@ -1473,7 +1674,16 @@ const checkBreakpointSet = ({ rel, text: raw }) => {
  */
 const SIZE_VALUE_RE = /^-?\d*\.?\d+(px|rem|em|vw|vh|%)$/
 
-const NEUTRAL_VALUE = new Set(['0', '0px', 'auto', 'none', 'inherit', 'initial', 'transparent', '100%'])
+const NEUTRAL_VALUE = new Set([
+  '0',
+  '0px',
+  'auto',
+  'none',
+  'inherit',
+  'initial',
+  'transparent',
+  '100%',
+])
 
 const checkBreakpointNeeded = ({ rel, text: raw }) => {
   if (!isModuleStyle(rel) || !/variables\.css$/i.test(rel)) return []
@@ -1552,27 +1762,6 @@ const STRUCTURAL_CLASSES = new Set(['group', 'peer'])
 
 const isStructuralClass = (cls) => STRUCTURAL_CLASSES.has(cls.split('/')[0])
 
-/**
- * 轉場的那六個 class —— 名字由畫面區段的 `<Transition name="…">` 決定,
- * 框架自動在後面接這幾個後綴。
- *
- * 它們不能收斂成模組前綴:名字與 template 寫的那個 name 是一組的,
- * 改了樣式這一側就對不上,而轉場失效不會報錯,只是動畫沒了。
- *
- * 後綴由框架定義,與專案無關,所以寫在規則裡,不進專案設定。
- * (轉場的名字本身仍然建議帶模組前綴,那樣兩邊都看得出它屬於誰。)
- */
-const TRANSITION_SUFFIXES = [
-  '-enter-from',
-  '-enter-active',
-  '-enter-to',
-  '-leave-from',
-  '-leave-active',
-  '-leave-to',
-]
-
-const isTransitionClass = (cls) => TRANSITION_SUFFIXES.some((suffix) => cls.endsWith(suffix))
-
 const checkModuleScope = ({ rel, text }) => {
   if (!isModuleCss(rel)) return []
 
@@ -1640,6 +1829,59 @@ const componentDirOf = (root, name) => {
     if (found) return toRel(root, found)
   }
 
+  return componentDirByClass(root, name)
+}
+
+/**
+ * 用 class 前綴反查元件 —— 名字對不上時的第二種找法。
+ *
+ * 樣式資料夾的名字跟著**元件的 class** 走,不是跟著檔名:class 是 `m-figure`
+ * 的元件,樣式資料夾就叫 `mFigure/`,而那支 `.vue` 可能叫別的名字。
+ * 只比對名字的話,那種元件的樣式會被判成「跨模組共用的,留在集中目錄是對的」
+ * 而放行 —— 然後 class 前綴那條只看元件自己的樣式,也不會檢查它。
+ * 兩條規則都靜靜略過,那支樣式從此沒有人在看。
+ *
+ * 所以退一步:把資料夾名推成 class 前綴,再找哪一支元件寫的就是那個 class。
+ * 只在名字對不上時才做 —— 名字對得上的那些不必讀任何檔案內容。
+ */
+const componentDirByClass = (root, name) => {
+  const prefix = classPrefixOf(name)
+  if (!prefix) return null
+
+  for (const dir of COMPONENT_DIRS) {
+    const base = path.join(root, ...dir.split('/'))
+    if (!fs.existsSync(base)) continue
+
+    const found = findComponentByClass(base, prefix, name)
+    if (found) return toRel(root, found)
+  }
+
+  return null
+}
+
+/**
+ * 走訪元件目錄,找 template 寫著這個 class 的那一支,回傳樣式該搬去的資料夾。
+ *
+ * 那支元件已經在自己的資料夾裡(資料夾名推得出同一個 class)就回傳它;
+ * 還直接放在分類層底下的話,回傳它**應該要有**的那個資料夾 ——
+ * 名字跟著 class 走,與樣式資料夾同名,搬完兩邊就對得起來了。
+ */
+const findComponentByClass = (dir, prefix, name) => {
+  for (const item of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, item.name)
+
+    if (item.isDirectory()) {
+      const deeper = findComponentByClass(full, prefix, name)
+      if (deeper) return deeper
+      continue
+    }
+
+    if (!item.name.endsWith('.vue')) continue
+    if (componentClassOf(fs.readFileSync(full, 'utf8')) !== prefix) continue
+
+    return classPrefixOf(path.basename(dir)) === prefix ? dir : path.join(dir, name)
+  }
+
   return null
 }
 
@@ -1653,7 +1895,9 @@ const componentDirOf = (root, name) => {
  * 元件與樣式的對應關係反而消失,正好是這條規則要達成的相反。
  */
 const isComponentFolder = (dir) =>
-  fs.readdirSync(dir, { withFileTypes: true }).some((item) => item.isFile() && item.name.endsWith('.vue'))
+  fs
+    .readdirSync(dir, { withFileTypes: true })
+    .some((item) => item.isFile() && item.name.endsWith('.vue'))
 
 /** 走訪元件目錄,找同名的元件資料夾或同名的 .vue(後者代表那支元件還沒有自己的資料夾) */
 const findComponentFolder = (dir, name) => {
@@ -1759,7 +2003,8 @@ const LEGACY_RGBA_VAR_RE = /rgba\(\s*var\(\s*(--[\w-]+)\s*\)\s*,\s*([0-9.]+)\s*\
 const LEGACY_RGBA_HEX_RE = /rgba\(\s*(#[0-9a-fA-F]{3,8})\s*,\s*([0-9.]+)\s*\)/g
 
 /** 色票宣告的值:rgba(#hex, a) 或 rgba(var(--x), a) */
-const COLOR_VALUE_RGBA_RE = /^rgba\(\s*(#[0-9a-fA-F]{3,8}|var\(\s*--[\w-]+\s*\))\s*,\s*([0-9.]+)\s*\)$/
+const COLOR_VALUE_RGBA_RE =
+  /^rgba\(\s*(#[0-9a-fA-F]{3,8}|var\(\s*--[\w-]+\s*\))\s*,\s*([0-9.]+)\s*\)$/
 
 /**
  * 色票檔:把 rgba() 的值換成 8 碼,名字跟著重算。
@@ -1860,6 +2105,28 @@ const stripEmptyBlocks = (css) => {
   } while (out !== prev) // 巢狀空區塊要反覆清到收斂
 
   return out
+}
+
+/* 空的 class 屬性 —— `class=""`、`class=" "`、`:class=""`。
+
+  多半是刪掉最後一個 class 之後留下來的空殼。它不會出錯、也不會影響畫面,
+  但搜尋 class 名、比對兩支元件的時候會一直跳出來,而且下一個人看到
+  會猶豫「這裡是不是本來要放什麼」。
+
+  只清「整個屬性都是空的」那種 —— class="--x" 這類有內容的完全不碰。
+  動態綁定的 `:class=""` 同樣是空的,一起清。 */
+const EMPTY_CLASS_ATTR = /\s+:?class=(["'])\s*\1/g
+
+export const onRemoveEmptyClassAttr = (text, { rel = '' } = {}) => {
+  // 只處理 .vue 的畫面區段;.js / .css 裡出現這串多半是字串內容,不要動
+  if (!/\.vue$/i.test(rel)) return null
+
+  const out = text.replace(
+    /(<template\b[^>]*>)([\s\S]*)(<\/template>)/i,
+    (_m, open, body, close) => `${open}${body.replace(EMPTY_CLASS_ATTR, '')}${close}`
+  )
+
+  return out === text ? null : out
 }
 
 export const onRemoveEmptyRules = (text, { rel = '' } = {}) => {
@@ -2069,8 +2336,10 @@ export const RULE_HINT = {
     'truncate 換成 line-clamp-1 —— 與 line-clamp-2、line-clamp-3 是同一組,改行數只動數字',
   sharedVarScope: '共用變數檔只放兩個以上模組都要用的;只有一個在用的搬回那個模組',
   breakpointPrefix: '每個 @screen 區塊都要列齊會命中該斷點的前綴變體',
-  variable: '命名對齊 tailwind(w / h / p / rounded / leading);尺寸值要三個斷點成套,級距用實際數值不用 sm / md / lg',
-  unknownVar: 'var(--x) 引用的變數全案要找得到定義 —— 找不到時瀏覽器會把整條宣告丟掉,樣式安靜地消失',
+  variable:
+    '命名對齊 tailwind(w / h / p / rounded / leading);尺寸值要三個斷點成套,級距用實際數值不用 sm / md / lg',
+  unknownVar:
+    'var(--x) 引用的變數全案要找得到定義 —— 找不到時瀏覽器會把整條宣告丟掉,樣式安靜地消失',
   ...GLOBAL_RULE_HINT,
   ...API_RULE_HINT,
   ...STORE_RULE_HINT,

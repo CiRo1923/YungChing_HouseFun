@@ -1,56 +1,121 @@
 {
-  "editor.formatOnSave": true,
+  "//": [
+    "存檔時會發生的事,共五組。",
+    "",
+    "把這個資料夾整包複製到新專案時,這一份跟著走就能用（單專案版）——",
+    "指令直接跑本專案的 .tools/lint/guard-file.mjs。",
+    "一個 repo 裝了不只一個專案時,編輯器的工作區根在 repo 根、不在這裡,",
+    "那種情況要用 repo 根那份派工版（見 .claude/docs/規範工具-安裝到新專案.md 第六之二節)。"
+  ],
+
+  "//1-prettier": [
+    "一、Prettier 排版。",
+    "各語言分別指定一次,不能只寫頂層的 editor.defaultFormatter ——",
+    "有些語言 VSCode 另有內建的預設排版器,不明確指定就輪不到 prettier。"
+  ],
   "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[vue]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[css]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[postcss]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[javascript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[typescript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[json]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+
+  "//1b-postcss": [
+    "一之二、關掉編輯器內建的 CSS 診斷,改由 Tailwind IntelliSense 接手。",
+    "",
+    "樣式全部走 @apply 與 @screen（40 支樣式檔、200 多處)——",
+    "那兩個是 Tailwind 的指示詞,VSCode 內建的 CSS 語言服務不認得,",
+    "不關掉的話每一支樣式檔都被畫滿「Unknown at rule」的紅波浪,",
+    "而真正的錯誤會淹沒在裡面。",
+    "",
+    "這兩條是一組:關掉內建診斷之後,靠 includeLanguages 把",
+    "「@apply 後面接的 utility 存不存在」這件事補回來。",
+    "需要 bradlc.vscode-tailwindcss 擴充（見 .vscode/extensions.json)。"
+  ],
+  "css.validate": false,
+  "scss.validate": false,
+  "less.validate": false,
+  "postcss.validate": false,
+  "tailwindCSS.includeLanguages": {
+    "vue": "html",
+    "css": "css",
+    "postcss": "css"
+  },
+
+  "//2-eslint": [
+    "二、存檔套用 ESLint 的自動修正。",
+    "這個專案的 eslint 只管一件事:把空元素收合成自閉合（<div></div> → <div />)。",
+    "規範檢查不歸它管,那是 .tools/lint 的事（見 eslint.config.mjs 的檔頭)。",
+    "",
+    "只有 formatOnSave、沒有這一段的話,prettier 對成對標籤與自閉合兩種都不動,",
+    "收合永遠不會發生 —— 而 eslint.config.mjs 看起來是設好的。",
+    "",
+    "validate 一定要列 vue:擴充預設只驗 js / ts,不列的話自閉合那條",
+    "在 .vue 裡永遠不會觸發 —— 而那正是它唯一要管的檔案類型。",
+    "",
+    "設定檔是 eslint.config.mjs（flat config)。ESLint 9 起那是預設格式,",
+    "不必再設 useFlatConfig。"
+  ],
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
   },
-  "eslint.format.enable": false,
-  "eslint.validate": ["javascript", "vue"],
-  "eslint.workingDirectories": [
-    {
-      "mode": "auto"
-    }
+  "eslint.validate": ["javascript", "typescript", "vue"],
+
+  "//3-autoClosingTags": [
+    "三、打完開始標籤自動補上結束標籤。",
+    ".vue 的自動閉合由 Volar 提供,但它讀的是下面這三個鍵 ——",
+    "不明確開啟就沒有作用（VSCode 對 .vue 沒有內建的 html 行為)。",
+    "",
+    "這一項與上面第二項是兩件事:這裡是「打字時補出成對標籤」,",
+    "第二項是「存檔時把空的成對標籤收成自閉合」。"
   ],
-  "vue.complete.casing.tags": "pascal",
-  "vue.complete.casing.props": "camel",
-  "[vue]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.formatOnSave": true
-  },
-  "[css]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[postcss]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[javascript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
+  "html.autoClosingTags": true,
+  "javascript.autoClosingTags": true,
+  "typescript.autoClosingTags": true,
+
+  "//4-formatOnSave": [
+    "四、存檔才排版（不是打字時即時排)。",
+    "requireConfig 是安全閥:專案沒有 prettier 設定檔就完全不排版 ——",
+    "少了它,在沒有設定檔的專案存檔會套用別人的預設值,",
+    "整支檔案被重排成另一種風格,而那次 commit 看起來像是改了全部。",
+    "所以這個專案一定要有 .prettierrc.json,不然這一層等於沒開。"
+  ],
+  "editor.formatOnSave": true,
   "prettier.requireConfig": true,
 
-  // CSS 規範守門。
-  // 需要擴充 emeraldwalk.RunOnSave —— 沒裝也不影響開發,dev server 執行中時
-  // .tools/lint/dev-server-plugin.mjs 一樣會做同樣的事;這裡是給「沒跑 dev 也要生效」的情境。
+  "//4b-autoImports": [
+    "四之二、關掉 Volar 的自動 import 建議。",
+    "",
+    "store、actions、元件都由自動注入提供（見 .vite/autoImport/)——",
+    "程式裡本來就不寫 import。Volar 不知道這件事,會建議補一行,",
+    "而它猜的路徑多半是錯的（相對路徑、或指到 .nuxt 底下的暫存檔)。",
+    "補下去之後規範檢查會報 importAlias,而寫的人以為是編輯器幫的忙。"
+  ],
+  "vue.suggest.autoImports": false,
+
+  "//5-runonsave": [
+    "五、規範守門（存檔層)。",
+    "存檔時跑 guard-file.mjs:色票檔自動排序、空區塊自動移除、規範檢查逐筆印出。",
+    "需要 emeraldwalk.RunOnSave 擴充（見 .vscode/extensions.json)——",
+    "沒裝也能開發,開發伺服器執行中時它的外掛會做同樣的事。"
+  ],
   "emeraldwalk.runonsave": {
-    "autoClearConsole": true,
     "commands": [
       {
-        // 存檔時:色票檔自動排序 + 規範全部檢查,逐筆印出。
-        //
-        // 副檔名要與 .tools/lint/project-config.mjs 的 SCANNABLE_EXTENSIONS 一致。
-        //    json 沒辦法 import 那份設定,只能人工同步 —— 那邊改了這裡要跟著改。
-        //    少列一種,那種檔案存檔時就完全不會被檢查,而且不會有任何徵兆:
-        //    api、store、actions 都是 .js,漏掉等於整區沒有守門。
-        "match": "\\.(vue|css|js|mjs|cjs|md)$",
-        "cmd": "node \"${workspaceFolder}/.tools/lint/guard-file.mjs\" \"${file}\""
-
-        // 注意:刻意不設 autoShowOutputPanel —— 存檔時把焦點搶去輸出面板太干擾,
-        //    正在打字的游標會跑掉。訊息留在「Run On Save」面板,要看的時候自己切過去。
-        //
-        //    真的想要自動彈的話是 "autoShowOutputPanel": "error",
-        //    但**必須寫在這個 command 物件裡**,寫在外層(與 commands 同級)無效 ——
-        //    擴充是逐個 command 讀這個值的(out/extension.js 的 statusCode !== 0 判斷)。
+        "//": "副檔名的唯一來源是 .tools/lint/shared.mjs 的 SCANNABLE。這個設定檔沒有辦法引用它,那一份改動時要記得同步這一行",
+        "match": "\\.(vue|css|m?js|cjs|md)$",
+        "isAsync": true,
+        "cmd": "node .tools/lint/guard-file.mjs \"${file}\""
+      },
+      {
+        "//": "色票檔的排列可以自動處理,存檔時直接調整（只搬動位置,不改色值)",
+        "match": "assets[/\\\\]css[/\\\\]_common[/\\\\]color\\.css$",
+        "isAsync": true,
+        "cmd": "node .tools/lint/guard-file.mjs --write \"${file}\""
       }
     ]
-  }
+  },
+
+  "files.eol": "\n"
 }

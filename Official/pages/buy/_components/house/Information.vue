@@ -1,18 +1,21 @@
 <script setup>
-const buyPopup = useBuyPopupStore()
+const popup = usePopupStore()
 const { onMergeBtns, onCustom } = usePopupActions()
 const onPopup = async (id) => {
   if (id === 'popupMessage') {
     await onCustom({
       id,
       title: '詢問與留言',
-      btns: onMergeBtns(buyPopup.buttons.alert, [
-        {
-          label: '我要預約留言',
-          type: 'sure',
-          isClose: false,
-        },
-      ]),
+      btns: onMergeBtns(
+        [
+          {
+            label: '我要預約留言',
+            type: 'sure',
+            isClose: false,
+          },
+        ],
+        popup.buttons.alert
+      ),
     })
   }
 }

@@ -25,3 +25,14 @@ export const apiGetMemberMessages = async (data) => await fetchApi.get(`member/m
 
 export const apiDeleteMemberMessages = async (data) =>
   await fetchApi.delete(`member/messages`, data)
+
+// 物件訂閱管理。訂閱的是物件降價通知,刪除同樣收 ids 陣列。
+export const apiGetMemberSubscriptionsBuyObjects = async (data) =>
+  await fetchApi.get(`member/subscriptions/buy-objects`, data)
+
+export const apiDeleteMemberSubscriptionsBuyObjects = async (data) =>
+  await fetchApi.delete(`member/subscriptions/buy-objects`, data)
+
+// 加進物件比一比。一次可加多筆,上限由訂閱清單回的 compareLimit 給。
+export const apiPostMemberCompareBuyObjectsItems = async (data) =>
+  await fetchApi.post(`member/compare/buy-objects/items`, data)

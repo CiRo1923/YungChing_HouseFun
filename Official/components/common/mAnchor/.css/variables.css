@@ -54,6 +54,10 @@
     }
 
     /* bg color */
+    &.\-\-bg-white {
+      --anchor-bg-color: var(--white);
+    }
+
     &.\-\-bg-gray-f2 {
       --anchor-bg-color: var(--gray-f2);
     }

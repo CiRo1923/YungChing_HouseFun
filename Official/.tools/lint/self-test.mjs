@@ -66,6 +66,7 @@ import {
   lintFile,
   lintText,
   PROJECT_RULE_PREFIX,
+  onRemoveEmptyClassAttr,
   onRemoveEmptyRules,
   onFixLegacyRgba,
   onSortComposables,
@@ -73,15 +74,18 @@ import {
   singleModuleVarsOf,
   onWrapMountedCalls,
   onCloneApiDefault,
+  PENDING_CACHE_FILE,
   RULE_TITLE,
   TOOL_STATE_RULES,
+  isWarn,
 } from './lint-core.mjs'
 import { NO_PREREQUISITE_RULES, PREFLIGHT_RULES } from './preflight.mjs'
-import { aliasListOf, importGroupOf, tailwindThemeOf } from './rules-code.mjs'
+import { aliasListOf, importGroupOf, tailwindThemeOf, topLevelKeysOf } from './rules-code.mjs'
 import {
   CONFIG_FILE,
   IS_SOURCE_PROJECT,
   PROJECT_DIR_VALUES,
+  buildCommandProblemsOf,
   configItemIssueOf,
   unusedConfigNames,
 } from './rules-global.mjs'
@@ -115,6 +119,9 @@ import {
   PROJECT_DOCS_DIR,
   PROJECT_NAMES,
   PROJECT_NAME_SCOPE,
+  BUILTIN_POPUP_IDS,
+  POPUP_TAGS,
+  SCANNABLE_EXTENSIONS,
   SHARED_API_FILE,
   SHARED_MODULE_VARIABLES,
   SOURCE_PROJECT_NAME,
@@ -134,6 +141,7 @@ import {
   listConventionSkills,
   listViewFolders,
   listViewSubFolders,
+  maskComments,
   resetScanCaches,
 } from './shared.mjs'
 import { BOLD, GREEN, RED, RESET, YELLOW } from './colors.mjs'
@@ -167,6 +175,10 @@ let definedVars = loadDefinedColorVars(root)
  * 規則只看檔名,放子資料夾一樣驗得到。
  */
 const PROBE = '__css-self-test__'
+
+/* 驗「設定拆到另一支檔案也追得到」時,要有一組完整的設定檔可以讀 ——
+   那一組會實際建出來再刪掉,所以放在自己的資料夾裡,不與專案的設定撞名。 */
+const PROBE_THEME_DIR = '__css-self-test__-theme'
 
 /* 目錄位置一律從設定算出來(project-config.mjs)——
    驗證要驗的是「這個專案的設定底下規則能不能運作」。
@@ -227,6 +239,11 @@ const L = `${CSS_MODULES_DIR}/${PROBE_MODULE}`
  */
 const PROBE_GROUP = `${PROBE_MODULE}Group`
 const PROBE_NESTED_MODULE = `${PROBE_MODULE}Chart`
+
+/* 樣式資料夾名與元件檔名對不上、只有 class 對得上的那一組 —— 驗反查。
+   樣式資料夾跟著 class 走,而元件檔可以叫別的名字(那是規範允許的);
+   只比對名字的話這種樣式會被放行,而 class 前綴那條也不會檢查它。 */
+const PROBE_ALIAS_MODULE = `${PROBE_MODULE}Alias`
 const GC = `${COMPONENTS_DIR}/${PROBE_GROUP}`
 const GL = `${CSS_MODULES_DIR}/${PROBE_GROUP}`
 
@@ -582,6 +599,11 @@ const PROBE_WRITE_FILE = path.join(os.tmpdir(), `${PROBE}-write.mjs`)
 const PROBE_COLOR_VAR = '--gray-4d2c'
 const PROBE_COLOR_HEX = '#4d2c1e'
 
+/* 名字是色票形狀、但刻意**不**放進色票檔的那一個 ——
+   驗「定義在元件自己的變數檔裡的色票,使用端讀不到」。
+   名字要與上面那個探測色票不同:同一個的話它已經在色票檔裡,驗不到這件事。 */
+const PROBE_SCOPED_PALETTE_VAR = '--red-9a2f'
+
 /**
  * 「色票值引用別的變數」那一則要用的基礎色與它轉換後的樣子。
  *
@@ -708,6 +730,10 @@ const onPrepare = () => {
 
   onCreateIfMissing(`${SC}/Index.vue`, probeComponentOf(PROBE_MODULE))
   onCreateIfMissing(`${GC}/${PROBE_NESTED_MODULE}/Index.vue`, probeComponentOf(PROBE_NESTED_MODULE))
+
+  /* 檔名與資料夾名都推不出這個 class,只有 template 裡的 class 對得上。
+     反查要找得到它,不然那支樣式兩條規則都不會檢查。 */
+  onCreateIfMissing(`${C}/Alias.vue`, probeComponentOf(PROBE_ALIAS_MODULE))
 
   onCreateIfMissing(
     `${COLOR_CSS_DIR}/${PROBE_COLOR_FILE}`,
@@ -861,7 +887,8 @@ const breakpointPrefixCases = () => {
   if (!screen || prefixes.length < 2) return []
 
   const scale = 'px-20'
-  const selector = (list) => list.map((p) => `    &.${p ? `${p}\\:` : ''}\\-\\-${scale},`).join('\n')
+  const selector = (list) =>
+    list.map((p) => `    &.${p ? `${p}\\:` : ''}\\-\\-${scale},`).join('\n')
 
   /* 母體 class 用探測元件的名字 —— 模組 css 只能寫自己那組 class,
      用別的名字會同時命中那一條,案例就分不出抓到的是哪一條。 */
@@ -905,6 +932,25 @@ const CSS_CASES = [
     name: 'color 硬寫 hex',
     file: `${M}/a.css`,
     code: `.m-probe {\n  color: #333;\n}`,
+    expect: 1,
+    keyword: '硬寫色碼',
+  },
+  {
+    /* 有些檔案吃不到色票,改用 var() 會讓宣告真的失效:色票掛在某個容器內的
+       元素上而這一支寫的是它的祖先(變數只往後代繼承),或是在 app 之前就載入。
+       那種在檔頭標記並寫明理由,整份跳過。 */
+    rule: 'color',
+    name: 'color 檔頭標了豁免就整份放行',
+    file: `${M}/exempt.css`,
+    code: `/* lint-color-exempt: 這一支寫的是色票掛載點的祖先,var() 在這裡讀不到值 */\n.m-probe {\n  color: #333;\n}`,
+    expect: 0,
+  },
+  {
+    /* 標記寫在字串裡不算宣告 —— 與其他檔案級標記同一套判準。 */
+    rule: 'color',
+    name: 'color 豁免標記寫在字串裡不算',
+    file: `${M}/fakeExempt.css`,
+    code: `.m-probe {\n  content: 'lint-color-exempt';\n  color: #333;\n}`,
     expect: 1,
     keyword: '硬寫色碼',
   },
@@ -1236,8 +1282,10 @@ const CSS_CASES = [
 
      所以沒有列出任何消失的值時,案例就改成驗「不報」—— 用一個一定不會命中的
      class 名稱,確認規則在那種專案不會誤報。 */
-  themeCaseOf('screens', `${C}/Theme1.vue`, (cls) =>
-    `<template>\n  <div class="m-probe ${cls}m-probe-wide"></div>\n</template>\n`
+  themeCaseOf(
+    'screens',
+    `${C}/Theme1.vue`,
+    (cls) => `<template>\n  <div class="m-probe ${cls}m-probe-wide"></div>\n</template>\n`
   ),
   themeCaseOf('fontSize', `${M}/theme2.css`, (cls) => `.m-probe {\n  @apply ${cls};\n}`),
   themeCaseOf('boxShadow', `${M}/theme3.css`, (cls) => `.m-probe {\n  @apply ${cls};\n}`),
@@ -1567,6 +1615,17 @@ const CSS_CASES = [
     keyword: 'mCssSelfTest',
   },
   {
+    /* 樣式資料夾名與元件檔名對不上,只有 class 對得上 —— 反查要找得到。
+       只比對名字的話這支會被當成跨模組共用的而放行,
+       而 class 前綴那條只看元件自己的樣式,也不會檢查它:兩條都靜靜略過。 */
+    name: 'moduleLocation 檔名對不上、class 對得上的元件也要抓',
+    file: `${CSS_MODULES_DIR}/${PROBE_ALIAS_MODULE}/common.css`,
+    code: `.${classPrefixOf(PROBE_ALIAS_MODULE)} {\n  @apply flex;\n}`,
+    expect: 1,
+    rule: 'moduleLocation',
+    keyword: PROBE_ALIAS_MODULE,
+  },
+  {
     /* 對不上任何元件的就是跨模組共用的那種,留在集中目錄是對的。
        報它的話,共用變數會被逼著塞進某一個元件的資料夾,
        而另一個元件就得去 import 別人的檔案。 */
@@ -1713,6 +1772,54 @@ const CSS_CASES = [
       `  &.\\-\\-px-24 {\n    --probe-px: 24px;\n  }\n\n` +
       `  &.\\-\\-px-15 {\n    --probe-px: 15px;\n  }\n}`,
     expect: 0,
+  },
+  {
+    /* 同一處在不同斷點寫死了不同的值 —— 那是一組該收進變數的斷點值。
+       規範要求定義成 css 變數、由模組樣式做斷點對應,原因是改的時候
+       要翻遍整支樣式才找得齊,而漏掉一個斷點不會有任何徵兆。 */
+    name: 'moduleVar 不同斷點寫了不同的字面值要報',
+    file: `${M}/probeCrossBreakpoint.css`,
+    rule: 'moduleVar',
+    code:
+      `@screen p {\n  .m-probe-text {\n    @apply text-[14px];\n  }\n}\n\n` +
+      `@screen m {\n  .m-probe-text {\n    @apply text-[13px];\n  }\n}\n`,
+    expect: 1,
+    keyword: '在不同斷點寫了不同的值',
+  },
+  {
+    /* 三個斷點都寫同一個值只是重複,那個值根本不隨斷點變 ——
+       抽成變數反而多繞一層。把這種也報出來的話,一支樣式檔會冒出
+       十幾筆改了沒有意義的違規,而整條規則會因此被忽略。 */
+    name: 'moduleVar 不同斷點寫同一個值不誤報',
+    file: `${M}/probeSameAcrossBreakpoint.css`,
+    code:
+      `@screen p {\n  .m-probe-text {\n    @apply text-[14px];\n  }\n}\n\n` +
+      `@screen m {\n  .m-probe-text {\n    @apply text-[14px];\n  }\n}\n`,
+    expect: 0,
+  },
+  {
+    /* 不同選擇器底下的同一個 utility 是兩回事 ——
+       只看 utility 名的話,.m-a 的 14px 與 .m-b 的 13px 會被湊成一組。 */
+    name: 'moduleVar 不同選擇器的同名 utility 不湊成一組',
+    file: `${M}/probeOtherSelector.css`,
+    code:
+      `@screen p {\n  .m-probe-a {\n    @apply text-[14px];\n  }\n}\n\n` +
+      `@screen m {\n  .m-probe-b {\n    @apply text-[13px];\n  }\n}\n`,
+    expect: 0,
+  },
+  {
+    /* 檔名的前半是變體名,不是模組名:模組主樣式 common.css 配的是
+       variables.css,前面不加東西。算成 commonVariables.css 的話,
+       規則會叫人去建一支每個模組都沒有的檔案。 */
+    name: 'moduleVar 主樣式的變數檔是 variables.css 不是 commonVariables.css',
+    file: `${C}/.css/common.css`,
+    rule: 'moduleVar',
+    code:
+      `.m-css-self-test {\n` +
+      `  &.\\-\\-px-24 {\n    --probe-px: 24px;\n  }\n\n` +
+      `  &.\\-\\-px-15 {\n    --probe-px: 15px;\n  }\n}`,
+    expect: 1,
+    keyword: '搬到 variables.css',
   },
   {
     /* 狀態 modifier 長得跟級距一模一樣(同前綴、兩個值),
@@ -2229,7 +2336,6 @@ const RULE_CASES = [
 `,
     expect: 0,
   },
-
 
   // ---------- 規則 absolutePath ----------
   {
@@ -3113,6 +3219,71 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
     keyword: '找不到定義',
   },
   {
+    /* 標了型別提示的引用也要檢查。
+
+       border- 與 text- 同時有長度與顏色兩種版本,建置工具分不出來,
+       所以長度要寫成 text-[length:--x](見 css-module-variables 那份規範)。
+       少認這一種的話,凡是標了型別的引用全部不會被檢查 ——
+       而字級與框線寬度幾乎都是那樣寫的,等於整類漏掉。 */
+    name: 'unknownVar 標了型別提示的引用也要檢查',
+    rule: 'unknownVar',
+    file: `${M}/probeLengthHint.css`,
+    code: `.m-probe {\n  @apply text-[length:--probe-never-defined-anywhere];\n}\n`,
+    expect: 1,
+    keyword: '找不到定義',
+  },
+  {
+    /* 型別提示只是前綴,後面的變數名有定義就該放行 ——
+       只會報、不會放行的話,照著規範寫的每一個字級都會被報。 */
+    name: 'unknownVar 標了型別提示而變數有定義不誤報',
+    rule: 'unknownVar',
+    file: `${M}/probeLengthHintOk.css`,
+    code: `:root {\n  --probe-hint-size: 14px;\n}\n\n.m-probe {\n  @apply text-[length:--probe-hint-size];\n}\n`,
+    expect: 0,
+  },
+  {
+    /* 色票定義在元件自己的變數檔 —— 全案找得到,但使用端讀不到。
+
+       色票檔是全域載入的,元件的變數檔是跟著那支元件載入的。
+       用在別處時瀏覽器讀不到,整條宣告被丟掉,顏色整片不見 ——
+       而「全案有定義」這個判準會放行,四個檢查時機全部通過。
+       實際發生過:會員中心的價格用了只定義在另一個分組色票檔裡的紅色。 */
+    name: 'unknownVar 色票定義在元件自己的變數檔要報',
+    rule: 'unknownVar',
+    file: `${M}/probePaletteScope.css`,
+    code: `.m-probe {\n  @apply text-[${PROBE_SCOPED_PALETTE_VAR}];\n}\n`,
+    context: {
+      [`${C}/.css/probePaletteVars.css`]: `:root {\n  ${PROBE_SCOPED_PALETTE_VAR}: #9a2f2f;\n}\n`,
+    },
+    expect: 1,
+    keyword: '不在色票檔裡',
+  },
+  {
+    /* 同一個名字搬進色票檔就該放行 —— 只會報、不會放行的規則,
+       照著改了還是報,最後整條會被當成壞掉而略過。 */
+    name: 'unknownVar 色票在色票檔裡就不報',
+    rule: 'unknownVar',
+    file: `${M}/probePaletteOk.css`,
+    code: `.m-probe {\n  @apply text-[${PROBE_SCOPED_PALETTE_VAR}];\n}\n`,
+    context: {
+      [`${COLOR_CSS_DIR}/${PROBE_COLOR_PREFIX}Scope.css`]: `:root {\n  ${PROBE_SCOPED_PALETTE_VAR}: #9a2f2f;\n}\n`,
+    },
+    expect: 0,
+  },
+  {
+    /* 模組變數不受這條約束 —— 它們本來就該定義在元件自己的變數檔裡。
+       名字不以色相開頭,不算色票。判準要是放寬成「所有變數都得在色票檔」,
+       每一支元件的每一個級距變數都會被報,而那全是誤報。 */
+    name: 'unknownVar 模組變數定義在元件的變數檔不誤報',
+    rule: 'unknownVar',
+    file: `${M}/probeModuleVarScope.css`,
+    code: `.m-probe {\n  padding: var(--probe-module-px);\n}\n`,
+    context: {
+      [`${C}/.css/probeModuleVars.css`]: `:root {\n  --probe-module-px: 16px;\n}\n`,
+    },
+    expect: 0,
+  },
+  {
     /* 元件動態綁定的 `'--x': 值` 也是定義 —— 少認它的話,
        那些由程式算出來的尺寸會被整批誤報,而它們完全正確。 */
     name: 'unknownVar 元件動態綁定的變數算有定義',
@@ -3284,14 +3455,70 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
       `}\n`,
     expect: 0,
   },
+  {
+    /* 同一支 api 的兩個 action 常常寫進同一層的不同欄位:一個放那一頁的主資料,
+       另一個放下拉選項。只認層名的話兩支算出同一個建議名,其中一支必被報,
+       而照建議改會直接撞名 —— 那個名字已經被另一支佔著。 */
+    rule: 'storeActionNaming',
+    name: 'storeActionNaming 同一層的不同欄位靠欄位名分辨',
+    file: `${T}/.composables/useSelfTestBetaActions.js`,
+    code:
+      `export const useSelfTestBetaActions = () => {\n` +
+      `  const onApiVoucherListGetEdit = async () => {\n` +
+      `    const { config, status, data } = await apiVoucherListGet({})\n\n` +
+      `    edit.value.apiData = data\n\n` +
+      `    return { config, status, data }\n` +
+      `  }\n\n` +
+      `  const onApiVoucherListGetEditOptions = async () => {\n` +
+      `    const { config, status, data } = await apiVoucherListGet({})\n\n` +
+      `    edit.value.options = data\n\n` +
+      `    return { config, status, data }\n` +
+      `  }\n\n` +
+      `  return { onApiVoucherListGetEdit, onApiVoucherListGetEditOptions }\n` +
+      `}\n`,
+    expect: 0,
+  },
+  {
+    /* 主資料的欄位不加後綴 —— 那一層的主資料只有一份,帶上去不會增加任何
+       分辨用的資訊,只是讓名字變長。 */
+    rule: 'storeActionNaming',
+    name: 'storeActionNaming 主資料欄位不必寫進名字',
+    file: `${T}/.composables/useSelfTestGammaActions.js`,
+    code:
+      `export const useSelfTestGammaActions = () => {\n` +
+      `  const onApiVoucherListGetIndexApiData = async () => {\n` +
+      `    const { config, status, data } = await apiVoucherListGet({})\n\n` +
+      `    index.value.apiData = data\n\n` +
+      `    return { config, status, data }\n` +
+      `  }\n\n` +
+      `  const onApiVoucherListGetDetail = async () => {\n` +
+      `    const { config, status, data } = await apiVoucherListGet({})\n\n` +
+      `    detail.value.apiData = data\n\n` +
+      `    return { config, status, data }\n` +
+      `  }\n\n` +
+      `  return { onApiVoucherListGetIndexApiData, onApiVoucherListGetDetail }\n` +
+      `}\n`,
+    expect: 1,
+    keyword: 'onApiVoucherListGetIndex',
+  },
 
   // ---------- 規則 storeApiDefault / storeResetDefault ----------
   {
     name: 'storeApiDefault 有 apiData 卻沒有 apiDefault',
     file: `${T}/${PROBE_PAGE_ALPHA}.js`,
-    code: `import { defineStore } from 'pinia'\n\nexport const use${pascalOf(PROBE_PAGE_ALPHA)}Store = defineStore('${PROBE_PAGE_ALPHA}', () => {\n  const detail = ref({ apiData: null })\n\n  return { detail }\n})\n`,
+    code: `import { defineStore } from 'pinia'\n\nexport const use${pascalOf(PROBE_PAGE_ALPHA)}Store = defineStore('${PROBE_PAGE_ALPHA}', () => {\n  const detail = ref({ apiData: { Amount: 1, Id: null } })\n\n  return { detail }\n})\n`,
     expect: 1,
     keyword: '沒有 apiDefault',
+  },
+  {
+    /* apiData 這個名字有兩種用途,只有「送出去的參數」需要 apiDefault。
+       整份由後端給的那一種(apiData: null)沒有預設值可集中 ——
+       硬要有的話只能塞一個空物件,而那正是這條在防的「多一份沒有人讀的東西」。 */
+    rule: 'storeApiDefault',
+    name: 'storeApiDefault 整份由後端給的 apiData 不要求',
+    file: `${T}/${PROBE_PAGE_ALPHA}.js`,
+    code: `import { defineStore } from 'pinia'\n\nexport const use${pascalOf(PROBE_PAGE_ALPHA)}Store = defineStore('${PROBE_PAGE_ALPHA}', () => {\n  const edit = ref({ apiData: null })\n  const list = ref({ apiData: [] })\n\n  return { edit, list }\n})\n`,
+    expect: 0,
   },
   // ---------- 規則 componentDeps ----------
   {
@@ -3333,6 +3560,107 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
     code: `<script setup>\n/* component-deps: ${T}/${PROBE_PAGE_ALPHA}.js */\nconst props = defineProps({ text: { type: String, default: '' } })\n</script>\n\n<template>\n  <div class="m-probe">{{ props.text }}</div>\n</template>\n`,
     expect: 1,
     keyword: '清單過期',
+  },
+  {
+    /* 轉場的樣式常常收在共用檔案裡,由進入點一次載入 —— 沒跟著複製過去的話
+       不會報錯也不會少畫面,只是切換的當下直接跳。 */
+    rule: 'componentDeps',
+    name: 'componentDeps 轉場的樣式檔也要列',
+    file: `${C}/Deps5.vue`,
+    code: `<script setup>\nconst props = defineProps({ show: { type: Boolean, default: false } })\n</script>\n\n<template>\n  <Transition name="${PROBE}-fade">\n    <div v-if="props.show" class="m-probe"></div>\n  </Transition>\n</template>\n`,
+    context: {
+      [`${CSS_MODULES_DIR}/${PROBE}Transition.css`]: `.${PROBE}-fade-enter-active,\n.${PROBE}-fade-leave-active {\n  transition: opacity 0.2s ease;\n}\n`,
+    },
+    expect: 1,
+    keyword: `${PROBE}Transition.css`,
+  },
+  {
+    rule: 'componentDeps',
+    name: 'componentDeps 轉場的樣式檔列了就不報',
+    file: `${C}/Deps6.vue`,
+    code: `<script setup>\n/* component-deps —— 複製這支元件時要一起帶走:\n   ${CSS_MODULES_DIR}/${PROBE}Transition.css */\nconst props = defineProps({ show: { type: Boolean, default: false } })\n</script>\n\n<template>\n  <Transition name="${PROBE}-fade">\n    <div v-if="props.show" class="m-probe"></div>\n  </Transition>\n</template>\n`,
+    context: {
+      [`${CSS_MODULES_DIR}/${PROBE}Transition.css`]: `.${PROBE}-fade-enter-active,\n.${PROBE}-fade-leave-active {\n  transition: opacity 0.2s ease;\n}\n`,
+    },
+    expect: 0,
+  },
+  {
+    /* 接變數的名字要執行起來才知道是什麼 —— 猜一個會把不相干的樣式檔列進去。 */
+    rule: 'componentDeps',
+    name: 'componentDeps 動態綁定接變數的轉場名不算',
+    file: `${C}/Deps7.vue`,
+    code: `<script setup>\nconst props = defineProps({ anim: { type: String, default: '' } })\n</script>\n\n<template>\n  <Transition :name="props.anim">\n    <div class="m-probe"></div>\n  </Transition>\n</template>\n`,
+    context: {
+      [`${CSS_MODULES_DIR}/${PROBE}Transition.css`]: `.${PROBE}-fade-enter-active,\n.${PROBE}-fade-leave-active {\n  transition: opacity 0.2s ease;\n}\n`,
+    },
+    expect: 0,
+  },
+  {
+    /* 三元的兩個分支都是讀得出來的字面 —— 一支元件的轉場全部寫在三元裡是常見的,
+       只認寫死的話那種元件一個都算不到。 */
+    rule: 'componentDeps',
+    name: 'componentDeps 動態綁定裡的字面轉場名要算',
+    file: `${C}/Deps9.vue`,
+    code: `<script setup>\nconst props = defineProps({ isPopup: { type: Boolean, default: false } })\n</script>\n\n<template>\n  <Transition :name="props.isPopup ? '${PROBE}-fade' : '${PROBE}-plain'">\n    <div class="m-probe"></div>\n  </Transition>\n</template>\n`,
+    context: {
+      [`${CSS_MODULES_DIR}/${PROBE}Transition.css`]: `.${PROBE}-fade-enter-active,\n.${PROBE}-fade-leave-active {\n  transition: opacity 0.2s ease;\n}\n`,
+    },
+    expect: 1,
+    keyword: `${PROBE}Transition.css`,
+  },
+  {
+    /* 定義在元件自己資料夾底下的樣式本來就跟著元件走,不必列。 */
+    rule: 'componentDeps',
+    name: 'componentDeps 轉場定義在元件自己的樣式裡不必列',
+    file: `${C}/Deps8.vue`,
+    code: `<script setup>\nconst props = defineProps({ show: { type: Boolean, default: false } })\n</script>\n\n<template>\n  <Transition name="${PROBE}-own">\n    <div v-if="props.show" class="m-probe"></div>\n  </Transition>\n</template>\n`,
+    context: {
+      [`${C}/${MODULE_CSS_DIR_NAME}/common.css`]: `.${PROBE}-own-enter-active,\n.${PROBE}-own-leave-active {\n  transition: opacity 0.2s ease;\n}\n`,
+    },
+    expect: 0,
+  },
+
+  // ---------- 規則 transitionShared ----------
+  {
+    /* 寫在自己元件裡的那一份別人找不到,於是同一種動畫被實作第二次、第三次。 */
+    rule: 'transitionShared',
+    name: 'transitionShared 元件的樣式檔裡定義轉場要報',
+    file: `${S}/transition.css`,
+    code: `.${PROBE}-fade-enter-active,\n.${PROBE}-fade-leave-active {\n  transition: opacity 0.2s ease;\n}\n`,
+    expect: 1,
+    keyword: '共用的轉場樣式檔',
+  },
+  {
+    rule: 'transitionShared',
+    name: 'transitionShared 元件的 style 區段裡定義轉場也要報',
+    file: `${C}/Trans1.vue`,
+    code: `<template>\n  <div class="m-probe"></div>\n</template>\n\n<style>\n.${PROBE}-zoom-enter-active {\n  transition: transform 0.2s;\n}\n</style>\n`,
+    expect: 1,
+    keyword: '共用的轉場樣式檔',
+  },
+  {
+    /* 這條要人去做的正是「用共用檔裡現成的那一組」,用了當然不能報。 */
+    rule: 'transitionShared',
+    name: 'transitionShared 元件只是使用轉場不算定義',
+    file: `${C}/Trans2.vue`,
+    code: `<template>\n  <Transition name="${PROBE}-fade">\n    <div class="m-probe"></div>\n  </Transition>\n</template>\n`,
+    expect: 0,
+  },
+  {
+    /* 共用目錄本來就是這條要人搬過去的地方。 */
+    rule: 'transitionShared',
+    name: 'transitionShared 共用目錄裡的轉場不報',
+    file: `${CSS_MODULES_DIR}/${PROBE}Transition.css`,
+    code: `.${PROBE}-fade-enter-active,\n.${PROBE}-fade-leave-active {\n  transition: opacity 0.2s ease;\n}\n`,
+    expect: 0,
+  },
+  {
+    /* 註解掉的不算 —— 那段樣式沒有作用,報出來的人打開檔案會找不到要改什麼。 */
+    rule: 'transitionShared',
+    name: 'transitionShared 註解掉的不算',
+    file: `${S}/transitionOff.css`,
+    code: `/* .${PROBE}-fade-enter-active {\n  transition: opacity 0.2s ease;\n} */\n\n.m-css-self-test {\n  @apply block;\n}\n`,
+    expect: 0,
   },
 
   // ---------- 規則 spacerElement ----------
@@ -3563,7 +3891,7 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
        探測資料夾是 self-test 自己在頁面目錄底下建的,任何專案都對得上。 */
     name: 'storeApiDefault 沒包 readonly 要被抓',
     file: `${T}/${PROBE_PAGE_ALPHA}.js`,
-    code: `import { defineStore } from 'pinia'\n\nexport const useSelfTestAlphaStore = defineStore('selfTestAlpha', () => {\n  const apiDefault = { detail: { Id: null } }\n  const detail = ref({ apiData: null })\n\n  return { apiDefault, detail }\n})\n`,
+    code: `import { defineStore } from 'pinia'\n\nexport const useSelfTestAlphaStore = defineStore('selfTestAlpha', () => {\n  const apiDefault = { detail: { Id: null } }\n  const detail = ref({ apiData: { Id: null } })\n\n  return { apiDefault, detail }\n})\n`,
     expect: 1,
     keyword: 'readonly',
   },
@@ -3719,6 +4047,147 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
     code: `<script setup>\nimport { apiGetMemberInfo } from '${API_ALIAS_IMPORT}'\n\nconst onLoad = () => apiGetMemberInfo()\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
     expect: 1,
     keyword: '元件不能直接 import api',
+  },
+  // ---------- 規則 breakpointOverride ----------
+  {
+    /* 先給四邊再用斷點蓋掉左右 —— 要知道手機的左右間距是多少,
+       得先看基底寫了什麼、再找哪一段蓋了它。 */
+    name: 'breakpointOverride 基底被斷點蓋掉要報',
+    file: `${P}/probeOverride.vue`,
+    rule: 'breakpointOverride',
+    code: `<template>\n  <div class="p-[15px] m:px-[20px]">內容</div>\n</template>\n`,
+    expect: 1,
+    keyword: '蓋掉',
+  },
+  {
+    // 同一個 utility 直接被蓋掉是最明顯的那種
+    name: 'breakpointOverride 同名被蓋掉也要報',
+    file: `${P}/probeOverrideSame.vue`,
+    rule: 'breakpointOverride',
+    code: `<template>\n  <div class="px-[15px] m:px-[20px]">內容</div>\n</template>\n`,
+    expect: 1,
+    keyword: '蓋掉',
+  },
+  {
+    // 每個斷點各寫一次就是這條要的寫法,不可以被報
+    name: 'breakpointOverride 各斷點各寫一次不誤報',
+    file: `${P}/probeOverrideOk.vue`,
+    rule: 'breakpointOverride',
+    code: `<template>\n  <div class="p:px-[15px] m:px-[20px]">內容</div>\n</template>\n`,
+    expect: 0,
+  },
+  {
+    /* 平板以上一組、手機一組 —— 實務上最常見的分法,兩組加起來涵蓋全部。
+       兩邊都帶前綴,誰也沒有蓋掉誰。 */
+    name: 'breakpointOverride 平板以上與手機各一組不誤報',
+    file: `${P}/probeOverridePtM.vue`,
+    rule: 'breakpointOverride',
+    code: `<template>\n  <div class="pt:px-[15px] m:px-[20px]">內容</div>\n</template>\n`,
+    expect: 0,
+  },
+  {
+    /* hover / focus 那種狀態前綴本來就是「某個狀態下才蓋掉」,那是它們的用途。
+       把狀態前綴也算進來的話,每一個 hover 變色都會被報。 */
+    name: 'breakpointOverride 狀態前綴不算覆寫',
+    file: `${P}/probeOverrideState.vue`,
+    rule: 'breakpointOverride',
+    code: `<template>\n  <div class="px-[15px] hover:px-[20px]">內容</div>\n</template>\n`,
+    expect: 0,
+  },
+  {
+    /* 不同屬性不算覆寫 —— 基底給間距、斷點改字級是兩回事。
+       只要「有基底又有斷點」就報的話,幾乎每一行 class 都會中。 */
+    name: 'breakpointOverride 不同屬性不誤報',
+    file: `${P}/probeOverrideOther.vue`,
+    rule: 'breakpointOverride',
+    code: `<template>\n  <div class="px-[15px] m:text-[14px]">內容</div>\n</template>\n`,
+    expect: 0,
+  },
+  {
+    /* 同一個 utility 前綴會產出兩種不同的 CSS 屬性:
+       text-[--色票] 是 color,text-[數字px] 是 font-size —— 它們不互相覆蓋。
+
+       只看前綴的話,「基底給顏色、斷點給字級」這種最常見的寫法會被整批報。
+       實際發生過:一個專案掃出 82 筆,全部是這個形狀。 */
+    name: 'breakpointOverride 顏色與字級不算同一個屬性',
+    file: `${P}/probeOverrideColorSize.vue`,
+    rule: 'breakpointOverride',
+    code: `<template>\n  <p class="text-[--probe-color] p:text-[18px] tm:text-[16px]">內容</p>\n</template>\n`,
+    context: {
+      [`${M}/probeOverrideColorVar.css`]: `:root {\n  --probe-color: #333;\n}\n`,
+    },
+    expect: 0,
+  },
+  {
+    // 字級被字級蓋掉才是真的覆寫,分辨型別之後這一種仍要抓得到
+    name: 'breakpointOverride 字級被字級蓋掉要報',
+    file: `${P}/probeOverrideSizeSize.vue`,
+    rule: 'breakpointOverride',
+    code: `<template>\n  <p class="text-[14px] m:text-[13px]">內容</p>\n</template>\n`,
+    expect: 1,
+    keyword: '蓋掉',
+  },
+  {
+    /* 標了型別提示的也算長度 —— 那正是規範要求的寫法
+       (見 css-module-variables:border 與 text 要標 length:)。
+       不認的話,照規範寫的那些反而漏掉。 */
+    name: 'breakpointOverride 標了 length 的字級也算長度',
+    file: `${P}/probeOverrideLengthHint.vue`,
+    rule: 'breakpointOverride',
+    code: `<template>\n  <p class="text-[length:--probe-size] m:text-[13px]">內容</p>\n</template>\n`,
+    context: {
+      [`${M}/probeOverrideSizeVar.css`]: `:root {\n  --probe-size: 14px;\n}\n`,
+    },
+    expect: 1,
+    keyword: '蓋掉',
+  },
+  // ---------- 規則 popupId ----------
+  {
+    /* 每個彈窗實例靠自己的 id 判斷要不要顯示 —— 沒有 id 的那個永遠不會出現。
+       不認得的屬性框架就是靜靜忽略,所以畫面上完全沒有徵兆。 */
+    name: 'popupId 宣告端沒有寫 id 要報',
+    file: `${P}/probePopupNoId.vue`,
+    rule: 'popupId',
+    code: `<template>\n  <${POPUP_TAGS[0]}>內容</${POPUP_TAGS[0]}>\n</template>\n`,
+    expect: 1,
+    keyword: '沒有寫 id',
+  },
+  {
+    // 開一個沒有人宣告的 id:按下去什麼都不會發生,也不會報錯
+    name: 'popupId 開了沒有人宣告的 id 要報',
+    file: `${P}/probePopupOrphanOpen.vue`,
+    rule: 'popupId',
+    code: `<script setup>\nconst onOpen = () => onCustom({ id: 'probeNobodyDeclaresThis' })\n</script>\n\n<template>\n  <button type="button" @click="onOpen">開</button>\n</template>\n`,
+    expect: 1,
+    keyword: '沒有任何彈窗宣告',
+  },
+  {
+    // 宣告了卻沒有人會開:多半是改名時漏掉一邊
+    name: 'popupId 宣告了卻沒有人會開要報',
+    file: `${P}/probePopupOrphanDeclare.vue`,
+    rule: 'popupId',
+    code: `<template>\n  <${POPUP_TAGS[0]} id="probeNobodyOpensThis">內容</${POPUP_TAGS[0]}>\n</template>\n`,
+    expect: 1,
+    keyword: '沒有任何地方會開它',
+  },
+  {
+    /* 動態綁的 id 是變數,靜態算不出它的值 —— 那種不能當成「沒寫 id」。
+       CustomPopup 那種轉手型的元件就是這樣寫的,報下去等於每一支都中。 */
+    name: 'popupId 動態綁定的 id 不誤報',
+    file: `${P}/probePopupDynamic.vue`,
+    rule: 'popupId',
+    code: `<template>\n  <${POPUP_TAGS[0]} :id="props.id">內容</${POPUP_TAGS[0]}>\n</template>\n`,
+    expect: 0,
+  },
+  {
+    /* 開啟函式自己寫死的那幾個 id 不必有人呼叫 onCustom ——
+       它們由 onAlert / onConfirm 那幾支開,不走 onCustom。
+       不排除的話,每一個內建彈窗的實例都會被報「沒有人會開它」。 */
+    name: 'popupId 內建的 id 不必有 onCustom 開它',
+    file: `${P}/probePopupBuiltin.vue`,
+    rule: 'popupId',
+    code: `<template>\n  <${POPUP_TAGS[0]} id="${BUILTIN_POPUP_IDS[0]}">內容</${POPUP_TAGS[0]}>\n</template>\n`,
+    expect: 0,
   },
   {
     // 進入頁面要拿的資料一支一支等的話，使用者等的是每一支的時間加總
@@ -3983,7 +4452,38 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
     code: `<script setup>\nconst { onApiGetMemberInfo } = useMemberActions()\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
     expect: 0,
   },
-
+  {
+    /* 等 api 回來之後讀一次、當場用掉 —— 提到最外層反而會在 await 之前就讀。 */
+    rule: 'storeToRefs',
+    name: 'storeToRefs 函式主體裡的一次性取值不誤報',
+    file: `${P}/direct7.vue`,
+    code: `<script setup>\nconst json = useJsonStore()\n\nconst onTabs = async () => {\n  await onJsonMemberTab()\n\n  const data = json.member\n}\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
+    expect: 0,
+  },
+  {
+    /* computed 每次重算都會重讀,響應性是 computed 自己在管的。 */
+    rule: 'storeToRefs',
+    name: 'storeToRefs computed 主體裡的取值不誤報',
+    file: `${P}/direct8.vue`,
+    code: `<script setup>\nconst json = useJsonStore()\n\nconst max = computed(() => {\n  const limit = json.points\n\n  return limit\n})\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
+    expect: 0,
+  },
+  {
+    /* 同一種寫法搬到最外層就是這條在擋的那一種,照樣要報。 */
+    rule: 'storeToRefs',
+    name: 'storeToRefs 最外層的取值照樣報',
+    file: `${P}/direct9.vue`,
+    code: `<script setup>\nconst json = useJsonStore()\n\nconst data = json.member\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
+    expect: 1,
+  },
+  {
+    /* 註解掉的程式碼是死的,報出來的那一行打開檔案一看根本沒有作用。 */
+    rule: 'storeToRefs',
+    name: 'storeToRefs 註解掉的不算',
+    file: `${P}/direct10.vue`,
+    code: `<script setup>\nconst json = useJsonStore()\n\n// const data = json.member\n</script>\n\n<template>\n  <div class="m-probe"></div>\n</template>\n`,
+    expect: 0,
+  },
 ]
 
 /**
@@ -4052,7 +4552,11 @@ const HUE_SOURCE_CASES = [
     hue: 'gold',
   },
   { name: '色相來源:名字認不出時回 null', args: ['--btn-hover', '#c20016', 'name'], hue: null },
-  { name: '色相來源:語意名從色值算得出色相', args: ['--btn-hover', '#c20016', 'value'], hue: 'red' },
+  {
+    name: '色相來源:語意名從色值算得出色相',
+    args: ['--btn-hover', '#c20016', 'value'],
+    hue: 'red',
+  },
   { name: '色相來源:低飽和度歸灰', args: ['--text-sub', '#9e9e9e', 'value'], hue: 'gray' },
   { name: '色相來源:極亮的無彩色歸白', args: ['--bg-main', '#ffffff', 'value'], hue: 'white' },
   { name: '色相來源:極暗的無彩色歸黑', args: ['--text-main', '#000000', 'value'], hue: 'black' },
@@ -4095,9 +4599,7 @@ const onCheckViewDepth = () => {
   report(
     detected === VIEW_RESOURCE_DEPTH,
     '頁面資源的層級偵測得出來,而且與設定一致',
-    detected === VIEW_RESOURCE_DEPTH
-      ? []
-      : [`設定是 ${VIEW_RESOURCE_DEPTH},偵測結果是 ${detected}`]
+    detected === VIEW_RESOURCE_DEPTH ? [] : [`設定是 ${VIEW_RESOURCE_DEPTH},偵測結果是 ${detected}`]
   )
 }
 
@@ -4142,7 +4644,11 @@ const onCheckConfigItem = () => {
 
   const extras = unusedConfigNames(configText, sources).map((i) => i.name)
 
-  report(!extras.length, '本專案的設定檔沒有多出沒人讀的項目', extras.length ? [extras.join('、')] : [])
+  report(
+    !extras.length,
+    '本專案的設定檔沒有多出沒人讀的項目',
+    extras.length ? [extras.join('、')] : []
+  )
 
   /* 同一個違規在兩種身分下的級別相反,而規則跑在哪一種專案上只會走到其中一邊 ——
      不把兩邊都驗過的話,壞掉的那一邊要到換專案時才會發現,而那時的徵狀是
@@ -4206,7 +4712,8 @@ const onCheckProbeDirSafety = () => {
 
   try {
     const fresh = path.join(base, 'fresh')
-    if (makeProbeDir(fresh) !== fresh || !fs.existsSync(fresh)) problems.push('不存在的目錄沒有被建起來')
+    if (makeProbeDir(fresh) !== fresh || !fs.existsSync(fresh))
+      problems.push('不存在的目錄沒有被建起來')
 
     const taken = path.join(base, 'taken')
     const real = path.join(taken, 'real.js')
@@ -4437,6 +4944,51 @@ const onCheckWarnRulesVerified = () => {
  * 所以拿這支檔案自己的內容比對:定義了哪幾個、執行的地方呼叫了哪幾個。
  * 少了誰就報出來,名字也一併印出來,不必自己去翻。
  */
+/**
+ * 同一個比對式有沒有在規則檔裡出現第二次。
+ *
+ * 「判準只能有一份」是規範系統自己的第一原則(見 no-duplicate-rules)——
+ * 而它原本只靠人看。實際踩過:同一條規則要建跨檔案的索引、又要逐檔報違規,
+ * 兩處各寫一次同樣的比對式;改了其中一邊(例如多認一種寫法),
+ * 另一邊還是舊的 —— 索引裡有的東西,報違規那一輪卻認不出來。
+ *
+ * 那種不一致不會報錯,只會讓規則對某些寫法時靈時不靈。
+ *
+ * 判準只看「夠長、夠特別」的字面量:太短的片段(`\\d+`、`[a-z]+`)本來就會重複,
+ * 報出來全是雜訊,而那種重複也不構成兩份判準。
+ */
+const onCheckNoDuplicateMatchers = () => {
+  const files = fs
+    .readdirSync(path.join(root, '.tools/lint'))
+    .filter((name) => /^(rules-|lint-core)/.test(name) && name.endsWith('.mjs'))
+
+  const seen = new Map()
+
+  for (const name of files) {
+    const text = maskComments(name, fs.readFileSync(path.join(root, '.tools/lint', name), 'utf8'))
+
+    /* 取字面正則(`/…/flags`)—— 組出來的 new RegExp 各處的字串多半不同,
+       比對它們會報一堆假的重複。 */
+    for (const m of text.matchAll(/\/((?:[^/\\\n[]|\\.|\[(?:[^\]\\]|\\.)*\]){24,})\/[gimsuy]*/g)) {
+      const body = m[1]
+      if (!seen.has(body)) seen.set(body, [])
+      seen.get(body).push(name)
+    }
+  }
+
+  const duplicated = [...seen.entries()].filter(([, where]) => where.length > 1)
+
+  report(
+    !duplicated.length,
+    '同一個比對式沒有在規則檔裡寫第二次',
+    duplicated.map(
+      ([body, where]) =>
+        `/${body.slice(0, 50)}${body.length > 50 ? '…' : ''}/ 出現在 ${where.join('、')} —— ` +
+        `抽成一支共用的函式,兩邊各改一次的話會開始各自演化`
+    )
+  )
+}
+
 const onCheckEveryCheckRuns = () => {
   const text = fs.readFileSync(fileURLToPath(import.meta.url), 'utf8')
 
@@ -4526,6 +5078,64 @@ const onCheckSingleModuleVars = () => {
  * 靠實際文件來驗的話,「網址上的參數也算數」這件事在沒有那種 api 的專案
  * 永遠沒有人守 —— 而漏收它的後果是那些參數被要求加底線,加了就送不出去。
  */
+/**
+ * 三個環境的指令名。
+ *
+ * 直接驗判準本身,不走探測檔 —— 這條看的是專案根的 package.json,
+ * 而案例不可能去覆蓋真的那一支。
+ *
+ * 四種情況都要驗到,「從零開始的專案」那一種尤其重要:剛裝好的專案
+ * 三個指令都還沒有,這條要講出來(那是安裝的其中一步),不能安靜放過。
+ */
+const onCheckBuildCommands = () => {
+  const full = {
+    dev: 'vite --mode dev',
+    deploy: 'vite build --mode deploy',
+    build: 'vite build --mode build',
+  }
+  const envs = ['dev', 'deploy', 'build']
+
+  const cases = [
+    {
+      name: '三個指令齊全、mode 對得上、環境檔齊全',
+      got: buildCommandProblemsOf(full, envs),
+      want: 0,
+    },
+    { name: '全新的專案一個指令都沒有時要講出來', got: buildCommandProblemsOf({}, []), want: 1 },
+    {
+      name: 'mode 與指令名對不上要報',
+      got: buildCommandProblemsOf({ ...full, build: 'vite build --mode production' }, envs),
+      want: 1,
+    },
+    {
+      name: '缺一份環境檔要報',
+      got: buildCommandProblemsOf(full, ['dev', 'build']),
+      want: 1,
+    },
+    {
+      name: '完全不用環境檔的專案不報',
+      got: buildCommandProblemsOf(full, []),
+      want: 0,
+    },
+    {
+      name: '不用 --mode 的專案只看指令在不在',
+      got: buildCommandProblemsOf(
+        { dev: 'nuxt dev', deploy: 'nuxt build', build: 'nuxt generate' },
+        []
+      ),
+      want: 0,
+    },
+  ]
+
+  const failed = cases.filter(({ got, want }) => got.length !== want)
+
+  report(
+    !failed.length,
+    '三個環境的指令名:齊全、mode 對得上、環境檔成套',
+    failed.map(({ name, got, want }) => `${name} —— 預期 ${want} 筆,實際 ${got.length} 筆`)
+  )
+}
+
 const onCheckApiFieldSources = () => {
   const names = apiFieldNamesOf({
     paths: {
@@ -4565,9 +5175,10 @@ const onCheckCleanupOnSignal = () => {
     (signal) => !new RegExp(`process\\.once\\([^)]*|['"]${signal}['"]`).test(text)
   )
 
-  const wired = /for \(const signal of \[[^\]]*\]\) \{\s*process\.once\(signal, \(\) => \{\s*cleanup\(\)/.test(
-    text
-  )
+  const wired =
+    /for \(const signal of \[[^\]]*\]\) \{\s*process\.once\(signal, \(\) => \{\s*cleanup\(\)/.test(
+      text
+    )
 
   report(
     wired && !missing.length,
@@ -4578,7 +5189,12 @@ const onCheckCleanupOnSignal = () => {
 
 const onCheckUnderAny = () => {
   const cases = [
-    { rel: 'components/vendor/Chart.vue', dirs: ['components/vendor'], hit: true, why: '在排除的那一層底下' },
+    {
+      rel: 'components/vendor/Chart.vue',
+      dirs: ['components/vendor'],
+      hit: true,
+      why: '在排除的那一層底下',
+    },
     { rel: 'components/vendor', dirs: ['components/vendor'], hit: true, why: '目錄本身' },
     {
       rel: 'pages/buy/vendor/Index.vue',
@@ -4586,7 +5202,12 @@ const onCheckUnderAny = () => {
       hit: false,
       why: '別處的同名資料夾照常檢查(比對的是路徑,不是名字)',
     },
-    { rel: 'components/vendorList/Index.vue', dirs: ['components/vendor'], hit: false, why: '名字只是開頭相同' },
+    {
+      rel: 'components/vendorList/Index.vue',
+      dirs: ['components/vendor'],
+      hit: false,
+      why: '名字只是開頭相同',
+    },
     { rel: 'components/vendor/Chart.vue', dirs: [], hit: false, why: '清單是空的就一筆都不排除' },
   ]
 
@@ -4687,9 +5308,19 @@ const LEGACY_RGBA_CASES = [
  * `default: () => ({}),` 與 `if (…) return {}` 長得像空區塊,但都是正常的程式碼。
  */
 const EMPTY_RULE_CASES = [
-  { name: '空區塊會被移除', rel: 'a.css', code: `.m-a {\n  color: red;\n}\n\n.m-b {}\n`, changed: true },
+  {
+    name: '空區塊會被移除',
+    rel: 'a.css',
+    code: `.m-a {\n  color: red;\n}\n\n.m-b {}\n`,
+    changed: true,
+  },
   { name: '帶註解的區塊不算空', rel: 'a.css', code: `.m-b {\n  /* 之後補 */\n}\n`, changed: false },
-  { name: '沒有空區塊時不動檔案', rel: 'a.css', code: `.m-a {\n  color: red;\n}\n`, changed: false },
+  {
+    name: '沒有空區塊時不動檔案',
+    rel: 'a.css',
+    code: `.m-a {\n  color: red;\n}\n`,
+    changed: false,
+  },
   {
     name: 'default: () => ({}) 不可被當成空區塊',
     rel: 'a.css',
@@ -4733,6 +5364,60 @@ const EMPTY_RULE_CASES = [
     code: `const onNoop = () => {}\n`,
     changed: false,
     expectKeep: 'const onNoop = () => {}',
+  },
+]
+
+/**
+ * onRemoveEmptyClassAttr 的行為驗證。
+ *
+ * 與上面那一組同樣的道理:這個函式會自動改寫畫面區段,
+ * 判斷錯了就是刪掉別人寫的東西。所以「有內容的一定不能碰」比
+ * 「空的有沒有刪掉」更要緊 —— 前者出錯是畫面壞掉,後者只是沒清乾淨。
+ */
+const EMPTY_CLASS_CASES = [
+  {
+    name: '空的 class 屬性會被移除',
+    rel: 'a.vue',
+    code: `<template>\n  <p class="">文字</p>\n</template>\n`,
+    changed: true,
+    expectDrop: 'class=""',
+  },
+  {
+    name: '只有空白的 class 也算空',
+    rel: 'a.vue',
+    code: `<template>\n  <p class="   ">文字</p>\n</template>\n`,
+    changed: true,
+    expectDrop: 'class=',
+  },
+  {
+    name: '動態綁定的空 class 一樣移除',
+    rel: 'a.vue',
+    code: `<template>\n  <p :class="">文字</p>\n</template>\n`,
+    changed: true,
+    expectDrop: ':class=""',
+  },
+  {
+    name: '有內容的 class 不可被碰',
+    rel: 'a.vue',
+    code: `<template>\n  <p class="m-a --keep">文字</p>\n</template>\n`,
+    changed: false,
+    expectKeep: 'class="m-a --keep"',
+  },
+  {
+    /* script 裡出現同樣的字串是資料,不是屬性 —— 刪掉會改變程式的行為。
+       只處理 <template> 那一段就是為了這件事。 */
+    name: 'script 裡的同名字串不可被刪',
+    rel: 'a.vue',
+    code: `<script setup>\nconst attrs = { class: '' }\nconst raw = '<p class=""></p>'\n</script>\n\n<template>\n  <p class="m-a">文字</p>\n</template>\n`,
+    changed: false,
+    expectKeep: `'<p class=""></p>'`,
+  },
+  {
+    name: '.css / .js 一律不處理',
+    rel: 'a.js',
+    code: `const html = '<p class=""></p>'\n`,
+    changed: false,
+    expectKeep: 'class=""',
   },
 ]
 
@@ -4951,13 +5636,25 @@ const onCheckApiLayers = () => {
     fs.writeFileSync(path.join(svc, '.config.js'), 'export const fetchApi = {}\n', 'utf8')
 
     const asService = scopeOf(`${API_DIR}/${resource}/list.js`)
-    report(!asService.length, API_LAYER_CASE_NAMES[0], asService.map((i) => i.detail))
+    report(
+      !asService.length,
+      API_LAYER_CASE_NAMES[0],
+      asService.map((i) => i.detail)
+    )
 
     const asGroup = scopeOf(`${API_DIR}/${PROBE}Group/${resource}.js`)
-    report(!asGroup.length, API_LAYER_CASE_NAMES[1], asGroup.map((i) => i.detail))
+    report(
+      !asGroup.length,
+      API_LAYER_CASE_NAMES[1],
+      asGroup.map((i) => i.detail)
+    )
 
     const bad = scopeOf(`${API_DIR}/${PROBE}Group/${PROBE}Nowhere.js`)
-    report(bad.length === 1, API_LAYER_CASE_NAMES[2], bad.length ? [] : ['對不上的檔名沒有被報出來'])
+    report(
+      bad.length === 1,
+      API_LAYER_CASE_NAMES[2],
+      bad.length ? [] : ['對不上的檔名沒有被報出來']
+    )
 
     /* 整個專案只有一份連線設定、api 資料夾純粹把檔案依頻道收好的擺法:
        `_api/<資源>/<畫面>.js` 對 `<頁面目錄>/<資源>/<畫面>/`,整段路徑都在。
@@ -4969,7 +5666,11 @@ const onCheckApiLayers = () => {
 
     if (viewSub) {
       const mirrored = scopeOf(`${API_DIR}/${resource}/${viewSub}.js`)
-      report(!mirrored.length, API_LAYER_CASE_NAMES[3], mirrored.map((i) => i.detail))
+      report(
+        !mirrored.length,
+        API_LAYER_CASE_NAMES[3],
+        mirrored.map((i) => i.detail)
+      )
     } else {
       skipped.push({ name: API_LAYER_CASE_NAMES[3], need: 'probeViewSubFolder' })
     }
@@ -5024,7 +5725,8 @@ const onCheckRuleFingerprints = () => {
     const covered = Object.keys(currentFingerprints())
     const problems = []
 
-    if (!covered.includes('checksum.mjs')) problems.push('少了 checksum.mjs 自己 —— 改掉它就能繞過比對')
+    if (!covered.includes('checksum.mjs'))
+      problems.push('少了 checksum.mjs 自己 —— 改掉它就能繞過比對')
 
     /* 判準取 checksum 那邊的那一份,不在這裡重寫 —— 兩份會有一天對不上,
        而驗證顯示通過的同時,實際的排除範圍已經變了。 */
@@ -5033,7 +5735,8 @@ const onCheckRuleFingerprints = () => {
     }
 
     for (const own of ['project-config.mjs', 'rules-project.mjs', 'diff-output-project.mjs']) {
-      if (!isSkipped(own)) problems.push(`${own} 應該排除 —— 設定與 -project.mjs 結尾的都是專案自己的`)
+      if (!isSkipped(own))
+        problems.push(`${own} 應該排除 —— 設定與 -project.mjs 結尾的都是專案自己的`)
     }
 
     for (const shared of ['rules-global.mjs', 'lint-core.mjs', 'checksum.mjs']) {
@@ -5112,9 +5815,264 @@ const onCheckProjectRules = () => {
     !untested.length,
     '專案自己的規則每一條都有驗證案例',
     untested.length
-      ? [`這幾條沒有案例:${untested.join('、')}(案例寫在 rules-project.mjs 的 PROJECT_CASES,用 rule 指定是哪一條)`]
+      ? [
+          `這幾條沒有案例:${untested.join('、')}(案例寫在 rules-project.mjs 的 PROJECT_CASES,用 rule 指定是哪一條)`,
+        ]
       : []
   )
+}
+
+/**
+ * 五層守門有沒有真的接上引擎。
+ *
+ * 這支檔案其餘的案例驗的都是**引擎**:餵一段程式碼給 lintText,看它回什麼。
+ * 但引擎是對的、而**接線斷了**的時候,畫面上看到的是「檢查都通過了」——
+ * 不是報錯,是完全沒有訊息,而且每一層都各自安靜。
+ *
+ * 實際發生過三次,全是同一類:
+ *   送出訊息那層掃 git status,而 git 回的路徑基準與專案根不同 → 掃不到任何檔案
+ *   編輯器設定指向不存在的 .tools/lint/ → 存檔什麼都不發生
+ *   settings.json 沒掛上 PreToolUse → AI 寫檔完全不被擋
+ * 三次都是人工比對才發現的,而這支檔案照樣全部通過。
+ *
+ * 所以這一則**真的去執行那幾支入口程式**,拿同一支違規的探測檔,
+ * 確認每一層都得到與引擎相同的判定。不模擬編輯器、不模擬 Claude Code ——
+ * 那兩邊怎麼呼叫是它們的事,這裡只驗「被呼叫的那一支能不能正確回答」。
+ */
+const onCheckGuardWiring = () => {
+  const rel = `${C}/Wiring.vue`
+  const abs = path.join(root, rel)
+
+  /* 分類資料夾底下直接放 .vue —— 違反 componentFolder,
+     是最單純、不依賴任何專案設定的一條。 */
+  const code = '<template>\n  <div class="probe-wiring" />\n</template>\n'
+
+  fs.mkdirSync(path.dirname(abs), { recursive: true })
+
+  try {
+    // 基準:引擎自己怎麼看這支檔案
+    const expected = lintText(root, rel, code).filter((i) => !isWarn(i))
+
+    if (!expected.length) {
+      report(false, '守門接線的探測檔要能被引擎抓到', [
+        '探測檔沒有違規,這一則失去比對基準 —— 改用另一種確定會違規的寫法',
+      ])
+      return
+    }
+
+    const runNode = (args, input) => {
+      try {
+        return {
+          ok: true,
+          out: execFileSync(process.execPath, args, {
+            cwd: root,
+            input,
+            encoding: 'utf8',
+            stdio: ['pipe', 'pipe', 'pipe'],
+          }),
+          status: 0,
+        }
+      } catch (err) {
+        return { ok: false, out: `${err.stdout ?? ''}${err.stderr ?? ''}`, status: err.status }
+      }
+    }
+
+    /* --- AI 寫檔前 -----------------------------------------------------------
+       這一層要在**建檔之前**驗:它只擋「這次寫入新增的違規」,不擋既有存量。
+       檔案先放上去再問它,那筆違規就成了存量,它會放行 —— 而那是正確行為。 */
+    {
+      const hook = path.join(root, '.claude/hooks/enforce-conventions.cjs')
+
+      if (!fs.existsSync(hook)) {
+        report(false, 'AI 寫檔前那層(enforce-conventions)接得到引擎', [
+          `找不到 ${path.relative(root, hook)} —— 這一層等於沒有`,
+        ])
+      } else {
+        const r = runNode([hook], JSON.stringify({ tool_input: { file_path: abs, content: code } }))
+        const problems = []
+        let parsed = null
+
+        try {
+          parsed = JSON.parse(r.out || '{}')
+        } catch {
+          problems.push(`輸出不是 JSON:${r.out.slice(0, 120)}`)
+        }
+
+        const decision = parsed?.hookSpecificOutput?.permissionDecision
+
+        if (parsed && decision !== 'deny')
+          problems.push(
+            `新建一支違規的檔案要被擋下(permissionDecision: deny),實際 ${decision ?? '沒有回應'}`
+          )
+
+        report(!problems.length, 'AI 寫檔前那層(enforce-conventions)接得到引擎', problems)
+      }
+    }
+
+    fs.writeFileSync(abs, code, 'utf8')
+
+    // --- 編輯器存檔 / 開發伺服器共用的入口 -----------------------------------
+    {
+      const r = runNode([path.join(root, '.tools/lint/guard-file.mjs'), rel])
+      const problems = []
+
+      // 違規時結束碼要是 1 —— 編輯器擴充靠它決定要不要把輸出面板彈出來
+      if (r.status !== 1) problems.push(`結束碼應該是 1,實際 ${r.status}`)
+      if (!r.out.includes(expected[0].rule) && !r.out.includes(RULE_TITLE[expected[0].rule]))
+        problems.push(`輸出裡找不到引擎報的那條(${expected[0].rule}):${r.out.trim().slice(0, 120)}`)
+
+      report(!problems.length, '存檔守門(guard-file)接得到引擎', problems)
+    }
+
+    // --- 開發伺服器外掛:它只負責監看與轉呼叫,驗它指的那支存在 ---------------
+    {
+      const text = fs.readFileSync(path.join(root, '.tools/lint/dev-server-plugin.mjs'), 'utf8')
+      const guard = text.match(/const GUARD = '([^']+)'/)?.[1]
+      const problems = []
+
+      if (!guard) problems.push('找不到它要執行的那一支(const GUARD)')
+      else if (!fs.existsSync(path.join(root, guard)))
+        problems.push(`它指向 ${guard},而那支檔案不存在 —— 存檔時會靜靜地什麼都不做`)
+
+      report(!problems.length, '開發伺服器外掛指向的守門入口存在', problems)
+    }
+
+    // --- 送出對話訊息 --------------------------------------------------------
+    {
+      const hook = path.join(root, '.claude/hooks/css-guard-prompt.cjs')
+
+      if (!fs.existsSync(hook)) {
+        report(false, '送出訊息那層(css-guard-prompt)掃得到工作區', [
+          `找不到 ${path.relative(root, hook)} —— 這一層等於沒有`,
+        ])
+      } else {
+        /* 先清掉待處理清單 —— 那一層有兩條來源:git status 與這份快取。
+           不清的話,快取裡的殘留會讓它「掃得到」,而 git status 那條路徑
+           其實已經斷了 —— 這一則就成了假陽性。實際踩過:把路徑基準改壞,
+           這一則照樣通過,因為前一次執行的結果還留在快取裡。 */
+        fs.rmSync(path.join(root, ...PENDING_CACHE_FILE.split('/')), { force: true })
+
+        /* 這一層掃的是 git status,所以探測檔要是「未追蹤」的狀態才會被看到 ——
+           剛寫出來的檔案本來就是。掃不到的成因多半是路徑基準不對
+           (git 回的路徑相對 repo 根,而這一層用的是專案根),
+           那種情況不會報錯,只是清單永遠是空的。 */
+        const r = runNode([hook], '{}')
+        const problems = []
+
+        try {
+          JSON.parse(r.out || '{}')
+        } catch {
+          problems.push(`輸出不是 JSON:${r.out.slice(0, 120)}`)
+        }
+
+        /* 比對的是它寫出來的待處理清單,不是它印在對話裡的那幾行 ——
+           印出來的有筆數上限(工作區改動多的時候會截斷),
+           拿那個來比對的話,這一則會隨著當下有幾支檔案在改而時好時壞。
+           清單那一份是完整的,而且「掃到了沒有」正是這一則要問的事。 */
+        const pending = (() => {
+          try {
+            return JSON.parse(
+              fs.readFileSync(path.join(root, ...PENDING_CACHE_FILE.split('/')), 'utf8')
+            )
+          } catch {
+            return []
+          }
+        })()
+
+        if (!pending.includes(rel))
+          problems.push(
+            `工作區有一支違規的 ${rel},而這一層掃不到它 —— 成因多半是 git status 的路徑基準` +
+              `(git 回的路徑相對 repo 根,不是專案根),或是未追蹤的新資料夾被彙總成一行目錄名`
+          )
+
+        report(!problems.length, '送出訊息那層(css-guard-prompt)掃得到工作區', problems)
+
+        /* 待處理清單裡留著一個「只差大小寫」的舊路徑時要剔除。
+
+           Windows 與 macOS 的檔案系統對大小寫不敏感:資料夾改名成小寫之後,
+           清單裡的舊路徑用 existsSync 查仍然是「存在」—— 於是舊路徑被原樣
+           送去檢查,而規則看的就是傳進來的字串,報出「首字要小寫」,
+           指著一個已經改好的檔案。
+
+           看到的樣子是:對話每一輪都列出同一批違規,而全案掃描說通過。
+           兩邊對不上,訊息裡也看不出原因。 */
+        const pendingFile = path.join(root, ...PENDING_CACHE_FILE.split('/'))
+        // 路徑裡任何一個小寫字母換成大寫就夠了 —— 要的只是「與磁碟上不同」
+        const wrongCase = rel.replace(/[a-z]/, (c) => c.toUpperCase())
+
+        if (wrongCase !== rel) {
+          fs.mkdirSync(path.dirname(pendingFile), { recursive: true })
+          fs.writeFileSync(pendingFile, JSON.stringify([wrongCase]), 'utf8')
+
+          runNode([hook], '{}')
+
+          const left = (() => {
+            try {
+              return JSON.parse(fs.readFileSync(pendingFile, 'utf8'))
+            } catch {
+              return []
+            }
+          })()
+
+          report(
+            !left.includes(wrongCase),
+            '送出訊息那層:只差大小寫的舊路徑會被剔除',
+            left.includes(wrongCase)
+              ? [
+                  `${wrongCase} 的大小寫與磁碟上的不同,卻留在待處理清單裡 —— ` +
+                    `它會被原樣送去檢查,報出一個指著已經改好的檔案的違規`,
+                ]
+              : []
+          )
+        }
+      }
+    }
+
+    // --- commit 前 -----------------------------------------------------------
+    {
+      const hook = path.join(root, '.githooks/pre-commit')
+      const problems = []
+
+      if (!fs.existsSync(hook)) {
+        problems.push('找不到 .githooks/pre-commit —— 這一層等於沒有')
+      } else {
+        const text = fs.readFileSync(hook, 'utf8')
+
+        /* 它是 shell,沒辦法 import 設定,副檔名只能人工同步 ——
+           所以這裡幫忙比對。少列一種,那種檔案 commit 時完全不會被檢查,
+           而且不會有任何徵兆:api、store、actions 都是 .js。 */
+        for (const ext of SCANNABLE_EXTENSIONS) {
+          const listed = ext === 'mjs' || ext === 'js' ? /m\?js/.test(text) : text.includes(ext)
+          if (!listed)
+            problems.push(
+              `它篩選檔案的那一行沒有列到 .${ext} —— 那種檔案 commit 時不會被檢查(要與 project-config.mjs 的 SCANNABLE_EXTENSIONS 一致)`
+            )
+        }
+
+        if (!text.includes('.tools/lint/lint.mjs'))
+          problems.push('它沒有呼叫 .tools/lint/lint.mjs —— 這一層不會做任何檢查')
+
+        /* 動到規則檔的那種 commit 要跑規則自己的驗證,而且**沒過就要擋**。
+           這是這一層唯一會擋的一件事:規範違規只提醒(存量清不完,擋下來
+           只會逼人加 --no-verify),但規則壞掉是一兩行的事,當場修得完 ——
+           而放過去的話,那份對不上的指紋會一路複製到別的專案,
+           那邊會整批報「規則被改過」,而他們一個字都沒動。 */
+        if (!text.includes('test:css'))
+          problems.push(
+            '動到規則檔時它沒有跑規則自己的驗證(npm run test:css)—— ' +
+              '規則改壞了或忘了重新封存指紋,commit 當下不會有任何徵兆'
+          )
+        else if (!/exit 1/.test(text))
+          problems.push('它跑了規則的驗證卻不擋 —— 沒過照樣 commit 的話,那一段等於只是印字')
+      }
+
+      report(!problems.length, 'commit 前那層(pre-commit)的篩選與設定一致', problems)
+    }
+  } finally {
+    fs.rmSync(abs, { force: true })
+    // 探測檔被寫進待處理清單了 —— 留著的話下一輪對話會列出一支已經不存在的檔案
+    fs.rmSync(path.join(root, ...PENDING_CACHE_FILE.split('/')), { force: true })
+  }
 }
 
 const onCheckRuleCrash = () => {
@@ -5134,6 +6092,82 @@ const onCheckRuleCrash = () => {
     '規則壞掉時要報出來,不能安靜跳過',
     crashed.length ? [] : ['規則拋錯了,但檢查結果是空的 —— 那會顯示成通過']
   )
+}
+
+/**
+ * 樣式設定的解析 —— 兩件事壞了都會讓「用到不存在的 class」那條整條失效。
+ *
+ * 那條規則要先知道「這個專案整組覆寫了哪幾類」,而那份資料只能從設定檔解析。
+ * 解析回空的時候規則不會報錯,只是從此不報任何東西 —— 看起來像全部通過。
+ *
+ * 兩件事都實際踩過:
+ *   theme 拆到另一支檔案再 import 進來,解析只認寫在設定檔裡那一種
+ *   設定檔裡寫了註解,註解裡的大括號與冒號把解析的狀態機帶偏
+ */
+const onCheckThemeParsing = () => {
+  {
+    /* 註解不可以影響解析。設定檔裡本來就會寫註解說明每一組值是什麼 ——
+       不處理的話,寫了註解的專案整份設定讀成空的。 */
+    const body = [
+      '',
+      '  /* 這一段是人寫的說明:{ 大括號 } 與 : 冒號都可能出現 */',
+      '  screens: {',
+      '    p: { raw: "(min-width: 1024px)" },',
+      '  },',
+      '',
+      '  // 單行註解也要遮掉',
+      '  fontSize: {',
+      '    vmp: "1vw",',
+      '  },',
+    ].join('\n')
+
+    const keys = topLevelKeysOf(body)
+    const missing = ['screens', 'fontSize'].filter((k) => !keys.includes(k))
+
+    report(
+      !missing.length,
+      '樣式設定:註解不影響 key 的解析',
+      missing.length
+        ? [`這幾個 key 認不出來:${missing.join('、')}(實際認出 ${keys.join('、') || '無'})`]
+        : []
+    )
+  }
+
+  {
+    /* theme 拆到另一支檔案 —— tailwind.theme.js 就是為此存在的固定檔名。
+       只認寫在設定檔裡那一種的話,拆過的專案讀成空的。 */
+    const dir = path.join(root, PROBE_THEME_DIR)
+    const configFile = path.join(dir, 'tailwind.config.js')
+
+    fs.mkdirSync(dir, { recursive: true })
+    fs.writeFileSync(
+      configFile,
+      `import theme from './tailwind.theme.js'\n\nexport default {\n  content: [],\n  theme,\n}\n`,
+      'utf8'
+    )
+    fs.writeFileSync(
+      path.join(dir, 'tailwind.theme.js'),
+      `/* 說明用的註解 */\nexport default {\n  screens: {\n    p: {},\n  },\n  extend: {\n    width: {},\n  },\n}\n`,
+      'utf8'
+    )
+
+    try {
+      const theme = tailwindThemeOf(dir)
+      const problems = []
+
+      if (!Object.keys(theme).includes('screens'))
+        problems.push(
+          `theme 拆到 tailwind.theme.js 之後就讀不到了(實際讀到:${Object.keys(theme).join('、') || '空的'})`
+        )
+
+      // extend 底下是補充,不算整組覆寫 —— 混進來的話規則會把還在的內建值報成不存在
+      if (Object.keys(theme).includes('width')) problems.push('extend 底下的被當成整組覆寫了')
+
+      report(!problems.length, '樣式設定:theme 拆到另一支檔案也追得到', problems)
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true })
+    }
+  }
 }
 
 const onCheckThemeBlocks = () => {
@@ -5338,11 +6372,7 @@ const SORT_COMPOSABLE_CASES = [
       '// 這段在講彈窗\n' +
       'const popup = usePopupStore()\n' +
       '</script>\n',
-    expect: [
-      'const common = useCommonStore()',
-      '// 這段在講彈窗',
-      'const popup = usePopupStore()',
-    ],
+    expect: ['const common = useCommonStore()', '// 這段在講彈窗', 'const popup = usePopupStore()'],
   },
   {
     name: '順序倒置會被排回去',
@@ -5691,7 +6721,9 @@ try {
             `預期 ${c.expect} 筆${c.expectWarn === undefined ? '' : ` + 建議 ${c.expectWarn} 筆`}` +
               `${c.keyword ? `、含關鍵字「${c.keyword}」` : ''},實際 ${issues.length} 筆` +
               `${warns.length ? ` + 建議 ${warns.length} 筆` : ''}`,
-            ...all.map((i) => `L${i.line} [${i.rule}]${i.level === 'warn' ? '(建議)' : ''} ${i.detail}`),
+            ...all.map(
+              (i) => `L${i.line} [${i.rule}]${i.level === 'warn' ? '(建議)' : ''} ${i.detail}`
+            ),
           ]
     )
   }
@@ -5775,7 +6807,11 @@ try {
 
   for (const c of SORT_CASES) {
     const actual = isSorted(c.code)
-    report(actual === c.sorted, c.name, actual === c.sorted ? [] : [`預期 ${c.sorted},實際 ${actual}`])
+    report(
+      actual === c.sorted,
+      c.name,
+      actual === c.sorted ? [] : [`預期 ${c.sorted},實際 ${actual}`]
+    )
   }
 
   for (const c of HUE_SOURCE_CASES) {
@@ -5811,6 +6847,7 @@ try {
   onCheckUnderAny()
   onCheckStoreDeclareCall()
   onCheckSingleModuleVars()
+  onCheckBuildCommands()
   onCheckApiFieldSources()
   onCheckCleanupOnSignal()
   onCheckProbeDirSafety()
@@ -5820,12 +6857,15 @@ try {
   onCheckRulesInConventions()
   onCheckPreflightCoverage()
   onCheckWarnRulesVerified()
+  onCheckThemeParsing()
   onCheckThemeBlocks()
   onCheckRuleCrash()
+  onCheckGuardWiring()
   onCheckProjectRules()
   onCheckRuleFingerprints()
   onCheckApiLayers()
   onCheckIgnoredSegments()
+  onCheckNoDuplicateMatchers()
   onCheckEveryCheckRuns()
 
   for (const c of MAJORITY_CASES) {
@@ -5911,6 +6951,20 @@ try {
 
   for (const c of EMPTY_RULE_CASES) {
     const result = onRemoveEmptyRules(c.code, { rel: c.rel })
+    const out = result ?? c.code
+
+    const problems = []
+    if (c.changed ? result === null : result !== null) {
+      problems.push(`預期 ${c.changed ? '有' : '沒有'}變動,實際相反`)
+    }
+    if (c.expectKeep && !out.includes(c.expectKeep)) problems.push(`不該被刪:${c.expectKeep}`)
+    if (c.expectDrop && out.includes(c.expectDrop)) problems.push(`應該要刪掉:${c.expectDrop}`)
+
+    report(!problems.length, c.name, problems)
+  }
+
+  for (const c of EMPTY_CLASS_CASES) {
+    const result = onRemoveEmptyClassAttr(c.code, { rel: c.rel })
     const out = result ?? c.code
 
     const problems = []

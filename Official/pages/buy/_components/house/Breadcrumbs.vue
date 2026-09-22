@@ -2,11 +2,12 @@
 const common = useCommonStore()
 const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
-const { isChannelMrt, onSearchParams } = useBuyProjectActions()
+// channelTabs 是唯讀常數,直接從 store 取 —— storeToRefs 只認 ref 與 reactive,
+// 解構唯讀常數會拿到 undefined,而那要等到真的讀它的那一刻才丟錯。
 const buyProject = useBuyProjectStore()
-const { channelTabs } = storeToRefs(buyProject)
 const buyHouse = useBuyHouseStore()
 const { breadcrumb } = storeToRefs(buyHouse)
+const { isChannelMrt, onSearchParams } = useBuyProjectActions()
 
 const props = defineProps({
   setClass: {
@@ -24,7 +25,7 @@ const items = computed(() => {
 
   if (!isDeviceM.value) return list
 
-  const tab = channelTabs.value.find(
+  const tab = buyProject.channelTabs.find(
     (item) => item.id === (isChannelMrt.value ? 'mrt' : 'region')
   )
 

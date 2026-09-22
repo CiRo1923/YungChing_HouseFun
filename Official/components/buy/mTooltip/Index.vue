@@ -1,7 +1,9 @@
 <script setup>
 /* component-deps —— 複製這支元件時要一起帶走:
    stores/.composables/useCommonActions.js
-   stores/common.js */
+   stores/common.js
+   assets/css/_common/vueTransition.css
+     轉場動畫定義在這裡。沒有它不會報錯也不會少畫面,只是切換的當下直接跳、沒有漸變。 */
 import './.css/variables.css'
 import './.css/common.css'
 
@@ -230,7 +232,7 @@ onUnmounted(() => {
     />
   </component>
   <Teleport to="body">
-    <Transition name="tooltip" appear>
+    <Transition name="anim-fade" appear>
       <div
         class="m-tooltip-container"
         :class="[`--${position.align}-x`, `--${position.side}-y`, setClass.container]"

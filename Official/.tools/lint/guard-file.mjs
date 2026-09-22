@@ -17,7 +17,7 @@
 //   1. 色票檔 → 依規則重新排序(只動順序,不動色值)
 //   2. 已廢除的 rgba 寫法 → 轉成 8 碼色票變數。色票裡還沒有那個顏色時一併補進去,
 //      色值變了連帶要改名的,全站使用端一起換 —— **這一項會動到別的檔案**
-//   3. 任何 .vue / .css → 空的規則區塊移除
+//   3. 任何 .vue / .css → 空的規則區塊移除;.vue 的畫面區段還會清掉空的 class 屬性
 //   4. 宣告順序與 import 分組 → 重新排好
 //   5. onMounted 裡的請求 → 用並行載入的包裝函式包起來
 //   6. 從 apiDefault 還原的地方 → 補上深拷貝
@@ -51,6 +51,7 @@ import {
   lintFile,
   onCloneApiDefault,
   onFixLegacyRgba,
+  onRemoveEmptyClassAttr,
   onRemoveEmptyRules,
   onSortComposables,
   onSortImports,
@@ -114,8 +115,7 @@ const onSortOneColorFile = (file) => {
 }
 
 /** 排序完成的訊息 —— 指定單檔與整批排序印的是同一句話 */
-const sortedMessageOf = (rel) =>
-  `${rel} 排序不符規則,已自動依「彩虹 + 每類由淺到深」重新排序。`
+const sortedMessageOf = (rel) => `${rel} 排序不符規則,已自動依「彩虹 + 每類由淺到深」重新排序。`
 
 const onSortAllColorFiles = () => {
   const dir = path.join(root, ...COLOR_CSS_DIR.split('/'))
@@ -240,16 +240,28 @@ const onSortColorCss = () => {
 const onCleanEmptyRules = () => {
   const isVue = /\.vue$/i.test(rel)
   const original = fs.readFileSync(abs, 'utf8')
-  const cleaned = onRemoveEmptyRules(original, { rel })
+
+  /* 兩件事接在一起做:空的規則區塊、空的 class 屬性。
+     各自寫一次檔的話,存檔守門會印兩段訊息、也會讓編輯器重載兩次。 */
+  const withoutRules = onRemoveEmptyRules(original, { rel })
+  const base = withoutRules ?? original
+  const withoutClass = onRemoveEmptyClassAttr(base, { rel })
+
+  const cleaned = withoutClass ?? withoutRules
   if (!cleaned) return
 
   fs.writeFileSync(abs, cleaned, 'utf8')
-  lines.push(
-    isVue
-      ? `${rel} 有空的 <style> 區塊,已自動移除。`
-      : `${rel} 有空的規則區塊(產物不會有輸出),已自動移除。`,
-    ''
-  )
+
+  if (withoutRules)
+    lines.push(
+      isVue
+        ? `${rel} 有空的 <style> 區塊,已自動移除。`
+        : `${rel} 有空的規則區塊(產物不會有輸出),已自動移除。`
+    )
+
+  if (withoutClass) lines.push(`${rel} 有空的 class 屬性,已自動移除。`)
+
+  lines.push('')
 }
 
 /**

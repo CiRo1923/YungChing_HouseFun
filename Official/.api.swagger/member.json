@@ -542,7 +542,7 @@
       "get": {
         "tags": ["Member"],
         "summary": "List member lead messages",
-        "description": "依留言時間新到舊列出會員的物件留言紀錄與物件、經紀人、價格資訊。 規格來源：C203-1 規格書第 14、15 頁。",
+        "description": "依留言時間新到舊列出會員的物件留言紀錄與物件、經紀人、價格資訊。 規格來源：C203-1 規格書第 19、20 頁。",
         "operationId": "Member_MessageList",
         "parameters": [
           {
@@ -607,7 +607,7 @@
       "delete": {
         "tags": ["Member"],
         "summary": "Delete selected member lead messages",
-        "description": "批次刪除會員選取的留言紀錄；留言紀錄原則上持續保留，僅於會員主動刪除時移除。 規格來源：C203-1 規格書第 14、15 頁；留言資料非通知 inbox，另參考 C203-2 規格書第 3 頁。",
+        "description": "批次刪除會員選取的留言紀錄；留言紀錄原則上持續保留，僅於會員主動刪除時移除。 規格來源：C203-1 規格書第 19、20 頁；留言資料非通知 inbox，另參考 C203-2 規格書第 3 頁。",
         "operationId": "Member_DeleteMessages",
         "parameters": [
           {
@@ -810,7 +810,7 @@
       "get": {
         "tags": ["Member"],
         "summary": "List saved real-price subscriptions",
-        "description": "依建立時間新到舊列出實登搜尋訂閱條件、標籤與最近一筆行情資訊。 規格來源：C203-1 規格書第 16、17 頁；通知觸發規則另參考 C203-2 規格書第 4、7 頁。",
+        "description": "依建立時間新到舊列出實登搜尋訂閱條件、標籤與最近一筆行情資訊。 規格來源：C203-1 規格書第 21、22 頁；通知觸發規則另參考 C203-2 規格書第 4、7 頁。",
         "operationId": "Member_RealPriceSubscriptionList",
         "parameters": [
           {
@@ -875,7 +875,7 @@
       "delete": {
         "tags": ["Member"],
         "summary": "Delete selected real-price subscriptions",
-        "description": "批次刪除會員選取的實登搜尋訂閱條件，刪除後不可復原。 規格來源：C203-1 規格書第 16、17 頁。",
+        "description": "批次刪除會員選取的實登搜尋訂閱條件，刪除後不可復原。 規格來源：C203-1 規格書第 21、22 頁。",
         "operationId": "Member_DeleteRealPriceSubscriptions",
         "parameters": [
           {
@@ -944,7 +944,7 @@
       "get": {
         "tags": ["Member"],
         "summary": "List favorite houses and price-drop subscriptions",
-        "description": "依訂閱時間新到舊列出買屋物件訂閱、降價資訊、經紀人資料及可用操作。 規格來源：C203-1 規格書第 17、18 頁；降價通知規則另參考 C203-2 規格書第 3、7 頁。",
+        "description": "依訂閱時間新到舊列出買屋物件訂閱、降價資訊、經紀人資料及可用操作。 規格來源：C203-1 規格書第 22、23 頁；降價通知規則另參考 C203-2 規格書第 3、7 頁。",
         "operationId": "Member_BuyObjectSubscriptionList",
         "parameters": [
           {
@@ -1009,7 +1009,7 @@
       "delete": {
         "tags": ["Member"],
         "summary": "Delete selected favorite houses",
-        "description": "批次刪除會員選取的買屋物件訂閱，刪除後不可復原。 規格來源：C203-1 規格書第 17、18 頁。",
+        "description": "批次刪除會員選取的買屋物件訂閱，刪除後不可復原。 規格來源：C203-1 規格書第 22、23 頁。",
         "operationId": "Member_DeleteBuyObjectSubscriptions",
         "parameters": [
           {
@@ -1078,7 +1078,7 @@
       "get": {
         "tags": ["Member"],
         "summary": "List favorite community subscriptions",
-        "description": "依訂閱時間新到舊列出社區訂閱、待售物件、最新成交單價及可用操作。 規格來源：C203-1 規格書第 18、19 頁；社區通知規則另參考 C203-2 規格書第 4、7 頁。",
+        "description": "依訂閱時間新到舊列出社區訂閱、待售物件、最新成交單價及可用操作。 規格來源：C203-1 規格書第 23、24、25 頁；社區通知規則另參考 C203-2 規格書第 4、7 頁。",
         "operationId": "Member_CommunitySubscriptionList",
         "parameters": [
           {
@@ -1143,7 +1143,7 @@
       "delete": {
         "tags": ["Member"],
         "summary": "Delete selected community subscriptions",
-        "description": "批次刪除會員選取的社區訂閱，刪除後不可復原。 規格來源：C203-1 規格書第 18、19 頁。",
+        "description": "批次刪除會員選取的社區訂閱，刪除後不可復原。 規格來源：C203-1 規格書第 23、24、25 頁。",
         "operationId": "Member_DeleteCommunitySubscriptions",
         "parameters": [
           {
@@ -1212,7 +1212,7 @@
       "get": {
         "tags": ["Member"],
         "summary": "Get buy-object comparison list",
-        "description": "取得 1 至 4 筆物件比較資料與價格、坪數、屋齡等優勢標籤。 規格來源：C203-1 規格書第 19、20、21 頁。",
+        "description": "取得 1 至 4 筆物件比較資料與價格、坪數、屋齡等優勢標籤。 規格來源：C203-1 規格書第 25、26、27 頁。",
         "operationId": "Member_BuyObjectCompare",
         "parameters": [
           {
@@ -1261,7 +1261,7 @@
       "post": {
         "tags": ["Member"],
         "summary": "Add houses into compare list",
-        "description": "將會員選取的物件加入物件比一比清單，清單上限為 4 筆。 規格來源：C203-1 規格書第 17、18、19、20、21 頁。",
+        "description": "將會員選取的物件加入物件比一比清單，清單上限為 4 筆。 規格來源：C203-1 規格書第 23、25、26、27 頁。",
         "operationId": "Member_AddBuyObjectCompareItems",
         "parameters": [
           {
@@ -1330,7 +1330,7 @@
       "delete": {
         "tags": ["Member"],
         "summary": "Remove a house from compare list",
-        "description": "從物件比一比清單移除指定物件。 規格來源：C203-1 規格書第 19、20、21 頁。",
+        "description": "從物件比一比清單移除指定物件。 規格來源：C203-1 規格書第 25、26、27 頁。",
         "operationId": "Member_RemoveBuyObjectCompareItem",
         "parameters": [
           {
@@ -2186,8 +2186,14 @@
         },
         "additionalProperties": false
       },
+      "BuyObjectAdvantageTag": {
+        "enum": [0, 1, 2, 3, 4, 5, 6],
+        "type": "integer",
+        "description": "物件比較的欄位級優勢標籤。只有部分物件達最佳值時才標註；全部相同或有效值不足兩筆時不標註。 規格來源：C203-1 規格書第 25、26、27 頁。\r\n\r\n",
+        "format": "int32"
+      },
       "BuyObjectCompareItem": {
-        "required": ["house", "id", "tags"],
+        "required": ["advantageTags", "house", "id", "parking", "tags"],
         "type": "object",
         "properties": {
           "id": {
@@ -2196,10 +2202,45 @@
           "house": {
             "$ref": "#/components/schemas/HouseCard"
           },
+          "mainBalconyPing": {
+            "type": "number",
+            "description": "主建物與陽台坪數合計。",
+            "format": "double",
+            "nullable": true
+          },
+          "sharedPing": {
+            "type": "number",
+            "description": "共用部分坪數。",
+            "format": "double",
+            "nullable": true
+          },
+          "buildAge": {
+            "type": "number",
+            "description": "物件屋齡；優先物件值，其次社區值。",
+            "format": "double",
+            "nullable": true
+          },
+          "hasParking": {
+            "type": "boolean",
+            "description": "是否有車位；由物件主檔及有效 ParkingSpot 綜合判斷。"
+          },
+          "parking": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ParkingItem"
+            }
+          },
           "tags": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/CompareTag"
+            },
+            "description": "舊版概略標籤，為維持 v1 相容性保留；新功能請使用 advantageTags。"
+          },
+          "advantageTags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BuyObjectAdvantageTag"
             }
           }
         },
@@ -2242,6 +2283,17 @@
           "priceDropAmount": {
             "type": "number",
             "format": "double",
+            "nullable": true
+          },
+          "caseType": {
+            "type": "string",
+            "description": "物件型態顯示名稱；來源為 HFHouse.CaseType 對應 RFCaseType.CTName。",
+            "nullable": true
+          },
+          "priceDropAt": {
+            "type": "string",
+            "description": "訂閱記錄的最近降價時間；無記錄時回查最近一次有效價格異動，仍無資料則為 null。",
+            "format": "date-time",
             "nullable": true
           },
           "canCompare": {
@@ -2431,11 +2483,69 @@
           },
           "latestListingCount": {
             "type": "integer",
+            "description": "舊版排程快取欄位；不可作為目前待售數，新前端請使用 newListingCount7Days 與 activeListingCount。",
             "format": "int32"
           },
           "latestMarketCount": {
             "type": "integer",
+            "description": "舊版排程快取欄位，為維持 v1 相容性保留。",
             "format": "int32"
+          },
+          "buildAge": {
+            "type": "integer",
+            "description": "社區屋齡。",
+            "format": "int32",
+            "nullable": true
+          },
+          "totalHouse": {
+            "type": "integer",
+            "description": "社區總戶數。",
+            "format": "int32",
+            "nullable": true
+          },
+          "buildingPingMin": {
+            "type": "number",
+            "description": "社區權狀坪數區間下限。",
+            "format": "double",
+            "nullable": true
+          },
+          "buildingPingMax": {
+            "type": "number",
+            "description": "社區權狀坪數區間上限。",
+            "format": "double",
+            "nullable": true
+          },
+          "publicAreaRatio": {
+            "type": "number",
+            "description": "公設比百分比；依 PublicUnitPercent、PublicRate、有效物件 AmenitiesRatio 順序取得。",
+            "format": "double",
+            "nullable": true
+          },
+          "totalFloors": {
+            "type": "integer",
+            "description": "社區總樓高。",
+            "format": "int32",
+            "nullable": true
+          },
+          "newListingCount7Days": {
+            "maximum": 2147483647,
+            "minimum": 0,
+            "type": "integer",
+            "description": "社區內目前有效且七日內上架的物件數。",
+            "format": "int32"
+          },
+          "activeListingCount": {
+            "maximum": 2147483647,
+            "minimum": 0,
+            "type": "integer",
+            "description": "社區內目前有效上架的待售物件數。",
+            "format": "int32"
+          },
+          "latestDealUnitPrice": {
+            "type": "number",
+            "description": "社區最近一筆成交資料的單價。",
+            "format": "double",
+            "nullable": true
           },
           "canCompare": {
             "type": "boolean"
@@ -2472,6 +2582,7 @@
       "CompareTag": {
         "enum": [0, 1, 2],
         "type": "integer",
+        "description": "舊版概略比較標籤，為維持 v1 用戶端相容性而保留；新功能請使用 advantageTags。\r\n\r\n",
         "format": "int32"
       },
       "ExternalMenuLink": {
@@ -2834,9 +2945,20 @@
             "type": "string",
             "format": "date-time"
           },
+          "caseType": {
+            "type": "string",
+            "description": "物件型態顯示名稱；來源為 HFHouse.CaseType 對應 RFCaseType.CTName。",
+            "nullable": true
+          },
           "priceDropAmount": {
             "type": "number",
             "format": "double",
+            "nullable": true
+          },
+          "priceDropAt": {
+            "type": "string",
+            "description": "最近一次實際降價時間；若找不到有效降價異動紀錄則為 null。",
+            "format": "date-time",
             "nullable": true
           },
           "actions": {

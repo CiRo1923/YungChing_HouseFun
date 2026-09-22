@@ -22,12 +22,16 @@ import {
   componentClassOf,
   listFiles,
   storeIndexOf,
+  transitionNamesInCss,
+  transitionStyleIndexOf,
   selectorClassesOf,
   isInActionsDir,
   isInSrc,
   VIEWS_DIR,
   issueOf,
   lineNoOf,
+  IMPORT_RE,
+  maskComments,
   maskHtmlComments,
   templateRangeOf,
 } from './shared.mjs'
@@ -226,7 +230,16 @@ export const objectBodyAfter = (text, name) => {
  * 巢狀物件、陣列、字串裡的內容都要跳過 —— `screens` 底下每個斷點自己
  * 又是一個物件,不跳過的話 `raw` `min` `max` 會被當成斷點名。
  */
-export const topLevelKeysOf = (body) => {
+export const topLevelKeysOf = (rawBody) => {
+  /* 註解先遮掉 —— 裡面的大括號、冒號、引號會把下面這個狀態機帶偏,
+     而帶偏的結果是「一個 key 都認不出來」,不是報錯。
+     設定檔裡本來就會寫註解說明每一組值是什麼,不處理的話,
+     寫了註解的專案整份設定就讀成空的,而依賴它的規則從此不報任何東西。
+
+     兩種註解都要遮:設定檔是 JS,區塊註解與 `//` 行註解都會出現。
+     副檔名固定給 .js —— 這個函式拿到的是一段物件內容,不是整支檔案。 */
+  const body = maskComments('.js', rawBody)
+
   const keys = []
   let depth = 0
   let quote = null
@@ -298,29 +311,11 @@ export const tailwindThemeOf = (root) => {
 
   try {
     const text = fs.readFileSync(file, 'utf8')
-    const themeBody = objectBodyAfter(text, 'theme')
+    const found = themeBodyOf(root, file, text)
 
-    if (themeBody === null) return theme
+    if (found === null) return theme
 
-    // extend 底下是補充,不是整組覆寫 —— 整段挖掉再看剩下的
-    const extendBody = objectBodyAfter(themeBody, 'extend')
-    const overrideBody = extendBody === null ? themeBody : themeBody.replace(extendBody, '')
-
-    for (const group of topLevelKeysOf(overrideBody)) {
-      if (group === 'extend') continue
-
-      const body = objectBodyAfter(overrideBody, group)
-
-      if (body !== null) {
-        theme[group] = topLevelKeysOf(body)
-        continue
-      }
-
-      /* 簡寫:值從別的檔案 import 進來。找那支檔案裡的 `export const 名字 = {…}`。
-         追不到就記成空陣列 —— 那一類確實被覆寫了(規則要照樣提醒內建值消失),
-         只是列不出可用的值。 */
-      theme[group] = importedObjectKeysOf(root, file, text, group)
-    }
+    Object.assign(theme, overridesIn(root, found.file, found.text, found.body))
   } catch {
     // 讀不到就讓依賴它的規則自己跳過,不要因此讓整支工具失效
   }
@@ -330,11 +325,110 @@ export const tailwindThemeOf = (root) => {
   return theme
 }
 
+/**
+ * theme 的物件本體在哪 —— 可能就寫在設定檔裡,也可能拆到另一支再 import 進來。
+ *
+ * 回傳 `{ body, file, text }`:body 是那個物件的內容,file 與 text 是它所在的
+ * 那一支檔案(theme 底下某一類又是從第三支 import 進來時,要從**它**的位置去追)。
+ *
+ * **拆出去是常見的擺法**(tailwind.theme.js 就是為此存在)。
+ * 只認寫在設定檔裡那一種的話,拆過的專案會讀成空的 ——
+ * 而讀成空的不會報錯,只是「用到已經消失的 class」那條規則從此不報任何東西。
+ */
+const themeBodyOf = (root, file, text) => {
+  const inline = objectBodyAfter(text, 'theme')
+  if (inline !== null) return { body: inline, file, text }
+
+  /* 不是物件字面值,那就是個名字:`theme,`(簡寫)或 `theme: 別的名字`。
+     取那個名字,再去找它從哪一支檔案 import 進來。 */
+  const named = /\btheme\s*:\s*([A-Za-z_$][\w$]*)/.exec(text)
+  const name = named ? named[1] : /\btheme\s*,/.test(text) ? 'theme' : null
+
+  if (!name) return null
+
+  const spec = importSpecOf(text, name)
+  if (!spec) return null
+
+  for (const candidate of resolveCandidates(file, spec)) {
+    if (!fs.existsSync(candidate) || !fs.statSync(candidate).isFile()) continue
+
+    try {
+      const sub = fs.readFileSync(candidate, 'utf8')
+      /* 那一支可能寫成 `export default { … }`,也可能是
+         `export const theme = { … }` 再 default 出去 —— 兩種都要認。 */
+      const body = braceBodyAfterDefault(sub) ?? objectBodyAfter(sub, name)
+
+      if (body !== null) return { body, file: candidate, text: sub }
+    } catch {
+      // 讀不到就當作追不到,交給呼叫端回空的
+    }
+  }
+
+  return null
+}
+
+/** `export default {` 後面那個物件的內容 */
+const braceBodyAfterDefault = (text) => {
+  const m = /export\s+default\s*\{/.exec(text)
+
+  return m ? braceBodyOf(text, m.index + m[0].length - 1) : null
+}
+
+/** 這個名字是從哪一支檔案 import 進來的 —— 預設匯入與具名匯入都認 */
+const importSpecOf = (text, name) => {
+  const def = new RegExp(`import\\s+${name}\\s+from\\s*['"]([^'"]+)['"]`).exec(text)
+  if (def) return def[1]
+
+  const named = new RegExp(
+    `import\\s*\\{[^}]*\\b${name}\\b[^}]*\\}\\s*from\\s*['"]([^'"]+)['"]`
+  ).exec(text)
+
+  return named ? named[1] : null
+}
+
+/** 相對路徑要補副檔名才找得到檔案 */
+const resolveCandidates = (fromFile, spec) => {
+  if (!spec.startsWith('.')) return [] // 套件裡的,不是這個專案定義的
+
+  const target = path.resolve(path.dirname(fromFile), spec)
+
+  return [target, `${target}.js`, `${target}.mjs`, `${target}.ts`]
+}
+
+/**
+ * 一段 theme 本體裡,哪幾類是「整組覆寫」、各類有哪些值。
+ *
+ * extend 底下的是補充(內建值都還在),不算覆寫,所以整段挖掉再看剩下的。
+ */
+const overridesIn = (root, file, text, themeBody) => {
+  const out = {}
+  const extendBody = objectBodyAfter(themeBody, 'extend')
+  const overrideBody = extendBody === null ? themeBody : themeBody.replace(extendBody, '')
+
+  for (const group of topLevelKeysOf(overrideBody)) {
+    if (group === 'extend') continue
+
+    const body = objectBodyAfter(overrideBody, group)
+
+    if (body !== null) {
+      out[group] = topLevelKeysOf(body)
+      continue
+    }
+
+    /* 簡寫:值從別的檔案 import 進來。找那支檔案裡的 `export const 名字 = {…}`。
+       追不到就記成空陣列 —— 那一類確實被覆寫了(規則要照樣提醒內建值消失),
+       只是列不出可用的值。 */
+    out[group] = importedObjectKeysOf(root, file, text, group)
+  }
+
+  return out
+}
+
 /** 追 import 來源檔案裡的 `export const 名字 = { … }`,取第一層 key */
 const importedObjectKeysOf = (root, configFile, configText, name) => {
-  const m = new RegExp(
-    `import\\s*\\{[^}]*\\b${name}\\b[^}]*\\}\\s*from\\s*['"]([^'"]+)['"]`
-  ).exec(configText)
+  const m = new RegExp(`import\\s*\\{[^}]*\\b${name}\\b[^}]*\\}\\s*from\\s*['"]([^'"]+)['"]`).exec(
+    configText
+  )
 
   if (!m) return []
 
@@ -356,9 +450,6 @@ const importedObjectKeysOf = (root, configFile, configText, name) => {
 
   return []
 }
-
-const IMPORT_RE =
-  /(?:import|export)\s[^'"]*?from\s*['"]([^'"]+)['"]|import\s*['"]([^'"]+)['"]|import\s*\(\s*['"]([^'"]+)['"]\s*\)/g
 
 /**
  * 建置工具的「一次收一整批檔案」那種呼叫。
@@ -456,7 +547,12 @@ const checkDeprecated = ({ rel, text }) => {
     // route / router 一律用 useRoute() / useRouter()
     if (/\binject\s*\(\s*['"]rout(?:e|er)['"]\s*\)/.test(line)) {
       issues.push(
-        issueOf(rel, i + 1, 'deprecated', `inject('route' / 'router') 已淘汰 —— 改用 useRoute() / useRouter()`)
+        issueOf(
+          rel,
+          i + 1,
+          'deprecated',
+          `inject('route' / 'router') 已淘汰 —— 改用 useRoute() / useRouter()`
+        )
       )
     }
 
@@ -1340,7 +1436,9 @@ export const onSortImports = (text, rel) => {
   const flush = (items, from, to) => {
     if (items.length < 2) return
 
-    const sorted = [...items].sort((a, b) => a.group - b.group || items.indexOf(a) - items.indexOf(b))
+    const sorted = [...items].sort(
+      (a, b) => a.group - b.group || items.indexOf(a) - items.indexOf(b)
+    )
     if (sorted.every((item, i) => item === items[i])) return
 
     const rebuilt = sorted.flatMap((item) => lines.slice(item.start, item.end + 1))
@@ -1399,30 +1497,82 @@ export const onSortImports = (text, rel) => {
 // (通用的錨點、圖片被十幾個地方用),而「為了驅動這支元件而存在的容器」
 // 與「剛好用到它的容器」從程式碼上分不出來。猜錯的方向是把一堆使用端
 // 寫進搬移清單,照著複製會把不相干的檔案一起搬走,比漏掉更難收拾。
+//
+// **轉場的樣式檔算,而且是漏掉最不容易發現的那一種。** 元件寫
+// `<Transition name="popup-fade">`,而那個名字的樣式常常收在一支共用檔案裡,
+// 由進入點一次載入,不在元件的資料夾底下。沒有一起複製過去的話,
+// 元件**不會報錯也不會少畫面** —— 只是切換的當下沒有漸變,直接跳。
+//
+// 這一類算得準,所以工具自己算:名字是寫在畫面區段裡的,樣式那一側定義的
+// 就是同一個名字接上框架的後綴,兩邊對得起來,沒有「是搭檔還是剛好用到」的模糊地帶。
 
 /** 檔頭清單的起頭;後面接的每一個看起來像檔案路徑的字都算一項 */
 const DEP_MARK = 'component-deps'
-const DEP_PATH_RE = /[\w.@/-]+\.(?:m?js|cjs|ts|vue)/g
+const DEP_PATH_RE = /[\w.@/-]+\.(?:m?js|cjs|ts|vue|css)/g
 
 /** use{名稱}Store / use{名稱}Actions 的呼叫 */
 const STORE_CALL_RE = /\b(use[A-Z]\w*(?:Store|Actions))\s*\(/g
 
 /**
- * 這支元件自己讀了哪幾支 store / actions —— 複製它的時候那幾支要一起帶走。
+ * `<Transition>` 與 `<TransitionGroup>` 用到的轉場名字。
  *
- * 「匯出名 → 它在哪一支檔案」的索引收在 shared.mjs 一份 ——
- * 取值那條規則也要問同一件事(這個屬性在 store 那一側長什麼樣子),
+ * 兩種寫法都讀:直接寫死的 `name="popup-fade"`,以及動態綁定裡引號內的字面
+ * (`:name="isPopup ? 'a' : 'b'"` 讀得出 a 與 b 兩個)。後者一樣要算 ——
+ * 一支元件的轉場全部寫在三元裡是常見的,只認寫死的話那種元件一個都算不到。
+ *
+ * 動態綁定裡**算出來的**名字(接變數、用樣板字串拼)讀不出來,那種就跳過;
+ * 猜一個的話會把不相干的樣式檔寫進搬移清單。
+ */
+const TRANSITION_TAG_RE = /<Transition(?:Group)?\b[^>]*?>/g
+const NAME_ATTR_RE = /(:?)name="([^"]*)"/
+const NAME_LITERAL_RE = /'([\w-]+)'/g
+
+const transitionNamesOf = (text) => {
+  const names = new Set()
+
+  for (const [tag] of text.matchAll(TRANSITION_TAG_RE)) {
+    const attr = NAME_ATTR_RE.exec(tag)
+    if (!attr) continue
+
+    const [, dynamic, value] = attr
+
+    if (!dynamic) {
+      if (/^[\w-]+$/.test(value)) names.add(value)
+      continue
+    }
+
+    for (const m of value.matchAll(NAME_LITERAL_RE)) names.add(m[1])
+  }
+
+  return names
+}
+
+/**
+ * 這支元件複製的時候要一起帶走哪幾支檔案 —— 兩類:
+ *
+ *   store / actions   它自己讀的那幾支,不帶走的話資料永遠是空的
+ *   轉場樣式          它用到的轉場定義在哪,不帶走的話切換沒有漸變
+ *
+ * 兩份索引都收在 shared.mjs 各一份 —— 取值那條規則也要問 store 那一側的事,
  * 各建一份的話同一個專案會被走訪兩次,而且其中一份改了判準另一份不會跟著。
  *
  * 回傳排序過的相對路徑,規則與指令印的是同一份。
  */
 export const componentDepsOf = (root, rel, text) => {
   const { files: stores } = storeIndexOf(root)
+  const transitions = transitionStyleIndexOf(root)
   const deps = new Set()
 
   for (const m of text.matchAll(STORE_CALL_RE)) {
     const file = stores.get(m[1])
     if (file) deps.add(file)
+  }
+
+  for (const name of transitionNamesOf(text)) {
+    const file = transitions.get(name)
+
+    /* 定義在這支元件自己的樣式裡時索引查不到,那本來就跟著元件走,不必列。 */
+    if (file && !file.startsWith(`${path.dirname(rel)}/`)) deps.add(file)
   }
 
   return [...deps].sort()
@@ -1450,9 +1600,15 @@ const checkComponentDeps = ({ rel, text, root }) => {
 
   const missing = actual.filter((file) => !listed.includes(file))
 
-  /* 多列的只看 store 這一類 —— 那一類工具算得準,列了一支已經不讀的就是過期。
-     其他項目(掛載用的容器、要一起搬的版型)是人自己補的,工具沒有立場說它多餘。 */
-  const stale = listed.filter((file) => file.startsWith(`${STORE_DIR}/`) && !actual.includes(file))
+  /* 多列的只看工具自己算得準的那兩類:store 與轉場樣式檔。列了一支已經不讀的
+     store、或已經不用的轉場,就是過期。其他項目(掛載用的容器、要一起搬的版型)
+     是人自己補的,工具沒有立場說它多餘。 */
+  const transitionFiles = new Set(transitionStyleIndexOf(root).values())
+
+  const stale = listed.filter(
+    (file) =>
+      (file.startsWith(`${STORE_DIR}/`) || transitionFiles.has(file)) && !actual.includes(file)
+  )
 
   if (!missing.length && !stale.length) return []
 
@@ -1464,7 +1620,7 @@ const checkComponentDeps = ({ rel, text, root }) => {
         rel,
         line,
         'componentDeps',
-        `檔頭的 ${DEP_MARK} 列了 ${stale.join('、')},但這支元件已經不讀它了 —— 清單過期,拿掉那幾行`
+        `檔頭的 ${DEP_MARK} 列了 ${stale.join('、')},但這支元件已經不用它了 —— 清單過期,拿掉那幾行`
       ),
     ]
   }
@@ -1474,9 +1630,54 @@ const checkComponentDeps = ({ rel, text, root }) => {
       rel,
       line,
       'componentDeps',
-      `這支元件讀了 store,複製它的時候那幾支要一起帶走 —— 檔頭寫一段 ${DEP_MARK} 註解,列出:${actual.join('、')}` +
-        (stale.length ? `(${stale.join('、')} 已經不讀了,拿掉)` : '') +
-        ';只複製元件資料夾的話,搬過去不會報錯,只是那個 store 不存在,資料永遠是空的'
+      `複製這支元件的時候有幾支檔案要一起帶走 —— 檔頭寫一段 ${DEP_MARK} 註解,列出:${actual.join('、')}` +
+        (stale.length ? `(${stale.join('、')} 已經不用了,拿掉)` : '') +
+        ';只複製元件資料夾的話搬過去不會報錯,而是 store 不存在、資料永遠是空的,' +
+        '或是轉場的樣式沒跟過去、切換的當下直接跳沒有漸變'
+    ),
+  ]
+}
+
+// --- 規則 transitionShared:轉場的樣式一律放共用檔 ----------------------------
+//
+// **寫轉場之前先去共用的轉場樣式檔看有沒有現成的。** 淡入淡出、縮放、滑入、
+// 高度展開 —— 這幾種每個專案都會用到好幾次,而寫在自己元件裡的那一份,
+// 別人找不到也不會想到要找。於是同一種動畫被實作第二次、第三次,
+// 秒數各差一點,畫面上就出現「明明都是淡入,這裡比較快」的不一致。
+//
+// **沒有適合的就在共用檔新增一組,而且名字要取得夠通用。** 名字照效果取
+// (fade / zoom / slide-up),不照元件或位置取(popup-fade / tooltip-content /
+// backdrop)—— 綁了元件或角色的名字,下一個人即使看到了也不敢用:
+// 他要做的不是彈窗,而那個名字寫著 popup。
+//
+// 這條與「元件的樣式放在元件自己的資料夾」不衝突,兩者分的是不同的東西:
+// 長相(顏色、間距、字級)屬於那支元件,而動作(怎麼進場、怎麼離場)是跨元件的詞彙。
+//
+// 判準只看「這份樣式有沒有定義轉場」,不看它長什麼樣 ——
+// 動畫內容是人要決定的,工具只認得出位置放錯了。
+
+const checkTransitionShared = ({ rel, text }) => {
+  if (!rel.startsWith(`${COMPONENTS_DIR}/`)) return []
+  if (!/\.(css|vue)$/.test(rel)) return []
+
+  /* .vue 只看樣式區段 —— 畫面區段寫的 name 是「用」不是「定義」,
+     而那正是這條要人去做的事。 */
+  const styles = rel.endsWith('.vue')
+    ? [...text.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join('\n')
+    : text
+
+  const names = [...transitionNamesInCss(styles)].sort()
+  if (!names.length) return []
+
+  return [
+    issueOf(
+      rel,
+      lineNoOf(text, text.indexOf(names[0])),
+      'transitionShared',
+      `這裡定義了轉場(${names.join('、')})—— 搬到共用的轉場樣式檔,` +
+        '別的元件才找得到、也才不會有人把同一種動畫再實作一次;' +
+        '共用檔裡已經有同樣效果的話直接用那一組,名字照效果取(fade / zoom / slide-up),' +
+        '不要取成 popup-fade 這種綁元件、或 backdrop 這種綁位置的名字'
     ),
   ]
 }
@@ -1533,11 +1734,14 @@ const checkSpacerElement = ({ rel, text }) => {
 
   return [...empty, ...between]
     .sort((a, b) => a.index - b.index)
-    .map(({ index, detail }) => issueOf(rel, lineNoOf(text, tpl.offset + index), 'spacerElement', detail))
+    .map(({ index, detail }) =>
+      issueOf(rel, lineNoOf(text, tpl.offset + index), 'spacerElement', detail)
+    )
 }
 
 export const CODE_CHECKS = [
   checkComponentDeps,
+  checkTransitionShared,
   checkSpacerElement,
   checkImportAlias,
   checkDeprecated,
@@ -1563,6 +1767,7 @@ export const CODE_RULE_TITLE = {
   deprecated: '已淘汰的寫法',
   spacerElement: '用空元素當間隔',
   componentDeps: '元件的搭檔沒有列在檔頭',
+  transitionShared: '轉場的樣式寫在元件裡',
 }
 
 export const CODE_RULE_HINT = {
@@ -1576,4 +1781,5 @@ export const CODE_RULE_HINT = {
   deprecated: 'apiParams / inject(route) 已淘汰;actions 不留 console.log、不 bare 透傳',
   spacerElement: '空白在編譯時就被移除了 —— 間隔用 css 的 gap 或 margin',
   componentDeps: '複製這支元件時要一起帶走的東西,列在它的檔頭(npm run deps 印得出來)',
+  transitionShared: '轉場放共用的轉場樣式檔,先看有沒有現成的;要新增就照效果命名,別人才用得到',
 }

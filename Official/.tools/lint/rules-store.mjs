@@ -6,10 +6,13 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import {
-  ACTIONS_DIR_NAME,
+  ACTIONS_DIR_PATH,
+  API_DATA_CONTAINERS,
+  API_RETURN_FIELDS,
   DEEP_CLONE_HELPER,
   SCAN_TARGETS,
   STANDALONE_STORES,
+  STORE_INSTANCE_FILE,
   STORE_DIR,
   STORE_SETUP_CALLS,
   VIEWS_DIR,
@@ -23,15 +26,18 @@ import {
   listFiles,
   listViewFolders,
   listViewSubFolders,
+  maskComments,
+  maskTemplateContent,
   registerScanCache,
+  ARROW_FN_RE,
   storeIndexOf,
   toRel,
   viewResourceDirOf,
   withNamedImport,
 } from './shared.mjs'
 
-/** 行為放在 store 目錄底下的這個子資料夾 */
-const ACTIONS_DIR = `${STORE_DIR}/${ACTIONS_DIR_NAME}`
+/** 行為放在 store 目錄底下的這個子資料夾 —— 路徑組在 shared.mjs 一份 */
+const ACTIONS_DIR = ACTIONS_DIR_PATH
 
 /**
  * 不對應任何頁面資料夾、但確實需要獨立存在的 store。
@@ -53,9 +59,10 @@ const isStoreFile = (rel) =>
   rel.startsWith(`${STORE_DIR}/`) &&
   rel.endsWith('.js') &&
   !isInActions(rel) &&
-  path.basename(rel) !== 'index.js' // pinia 實例本身
+  path.basename(rel) !== STORE_INSTANCE_FILE // pinia 實例本身,不是一個 store
 
-const isActionsFile = (rel) => rel.startsWith(`${STORE_DIR}/`) && isInActions(rel) && rel.endsWith('.js')
+const isActionsFile = (rel) =>
+  rel.startsWith(`${STORE_DIR}/`) && isInActions(rel) && rel.endsWith('.js')
 
 // --- 規則 storeDir:store 資料夾全站只用一種名稱 -----------------------------
 //
@@ -73,9 +80,7 @@ const STORE_DIR_NAME = STORE_DIR.split('/').pop()
 const wrongDirNamesOf = (name) => {
   const capitalized = name.charAt(0).toUpperCase() + name.slice(1)
   const singular = name.endsWith('s') ? name.slice(0, -1) : null
-  const singularCapitalized = singular
-    ? singular.charAt(0).toUpperCase() + singular.slice(1)
-    : null
+  const singularCapitalized = singular ? singular.charAt(0).toUpperCase() + singular.slice(1) : null
 
   return [...new Set([capitalized, singular, singularCapitalized].filter(Boolean))].filter(
     (v) => v !== name
@@ -163,7 +168,9 @@ const checkStoreDeclare = ({ rel, text }) => {
 
     const fn = line.match(FN_DECLARE_RE)
     if (fn) {
-      issues.push(issueOf(rel, i + 1, 'storeDeclare', `store 裡宣告了 function ${fn[1] ?? fn[2]} —— ${hint}`))
+      issues.push(
+        issueOf(rel, i + 1, 'storeDeclare', `store 裡宣告了 function ${fn[1] ?? fn[2]} —— ${hint}`)
+      )
       return
     }
 
@@ -245,9 +252,7 @@ const checkStoreScope = ({ rel, root }) => {
   /* 分層時,那一層都算數:子資料夾有時是把同一個資源的幾支聚在一起(檔名對第二層),
      有時只是分類(檔名仍對第一層)。只認其中一層的話,另一種擺法會整批誤報,
      而它們都對得上某一個畫面 —— 這條要的就是那件事。 */
-  const candidates = isNested
-    ? new Set([...folders, ...(listViewSubFolders(root) ?? [])])
-    : folders
+  const candidates = isNested ? new Set([...folders, ...(listViewSubFolders(root) ?? [])]) : folders
 
   if (candidates.has(name)) return []
 
@@ -283,7 +288,6 @@ const checkActionsNaming = ({ rel }) => {
     ),
   ]
 }
-
 
 // --- 規則 storeLayer:store 的結構跟著頁面分層 -------------------------------
 //
@@ -390,7 +394,6 @@ const layerBodyOf = (text, name) => {
   const start = text.indexOf('{', m.index + m[0].length - 1)
   return start === -1 ? '' : bodyRangeOf(text, start)
 }
-
 
 const checkStoreLayer = ({ rel, text, root }) => {
   if (!isStoreFile(rel)) return []
@@ -502,10 +505,15 @@ const checkStoreLayer = ({ rel, text, root }) => {
 // 後綴只在需要分辨時才加 —— 一支 api 只有一個 action 在用的話,
 // 名字維持最短的 `on` + api 名。
 
-const ACTION_FN_RE = /const\s+(\w+)\s*=\s*(?:async\s*)?\([^)]*\)\s*=>\s*\{/g
-
-/** 這個 action 把結果寫進 store 的哪幾層 —— storeToRefs 取出來的變數才有 .value */
-const LAYER_WRITE_RE = /\b(\w+)\.value\b/g
+/**
+ * 這個 action 把結果寫進哪裡 —— storeToRefs 取出來的變數才有 `.value`。
+ *
+ * 連欄位一起收(`edit.value.options` → 層 edit、欄位 options),
+ * 因為同一支 api 的兩個 action 常常寫進**同一層的不同欄位**:
+ * 一個放那一頁的主資料,另一個放下拉選項。只取層名的話兩支算出同一個建議名,
+ * 其中一支必被報,而照建議改會直接撞名 —— 那個名字已經被另一支佔著。
+ */
+const LAYER_WRITE_RE = /\b(\w+)\.value(?:\.([A-Za-z_$][\w$]*))?/g
 
 const upperFirst = (s) => s.charAt(0).toUpperCase() + s.slice(1)
 
@@ -521,6 +529,35 @@ const upperFirst = (s) => s.charAt(0).toUpperCase() + s.slice(1)
  */
 const isSameActionName = (a, b) => a.replace(/_/g, '') === b.replace(/_/g, '')
 
+/**
+ * 同一支 api 有第二個 action 在用時,這一支可以叫什麼。
+ *
+ * 兩種都算數,因為兩種都分得開:
+ *
+ *   層名       `edit.value.apiData = …`  → onApiGetArticleCategoryEdit
+ *   層名 + 欄位 `edit.value.options = …`  → onApiGetArticleCategoryEditOptions
+ *
+ * **主資料的欄位不加後綴。** `apiData` 與 `data` 是那一層的主角
+ * (清單定義在 rules-api.mjs 的 API_DATA_CONTAINERS,兩邊讀同一份) ——
+ * 帶上去只會讓名字變長,而分辨用的資訊一點都沒有增加:
+ * 那一層的主資料本來就只有一份。
+ *
+ * 只寫進主資料的那一支維持層名,另一支帶欄位 —— 兩邊各自精確,也不會撞名。
+ */
+const expectedActionNames = (base, writes) => {
+  const names = new Set()
+
+  for (const { layer, field } of writes) {
+    names.add(`${base}${upperFirst(layer)}`)
+
+    if (field && !API_DATA_CONTAINERS.includes(field)) {
+      names.add(`${base}${upperFirst(layer)}${upperFirst(field)}`)
+    }
+  }
+
+  return [...names]
+}
+
 const checkActionApiNaming = ({ rel, text }) => {
   if (!isActionsFile(rel)) return []
 
@@ -530,7 +567,7 @@ const checkActionApiNaming = ({ rel, text }) => {
      「這支 api 有沒有第二個 action 在用」要看過整份檔案才知道。 */
   const actions = []
 
-  for (const m of text.matchAll(ACTION_FN_RE)) {
+  for (const m of text.matchAll(ARROW_FN_RE)) {
     const name = m[1]
 
     // useXxxActions 是外層的 composable 本身,不是 action —— 它的 body 當然含 api 呼叫
@@ -546,7 +583,7 @@ const checkActionApiNaming = ({ rel, text }) => {
       name,
       called,
       index: m.index,
-      layers: [...new Set([...body.matchAll(LAYER_WRITE_RE)].map((x) => x[1]))],
+      writes: [...body.matchAll(LAYER_WRITE_RE)].map((x) => ({ layer: x[1], field: x[2] })),
     })
   }
 
@@ -595,7 +632,7 @@ const checkActionApiNaming = ({ rel, text }) => {
     }
 
     // 兩個以上的 action 用同一支 api —— 各自要帶上自己寫進哪一層
-    const expected = a.layers.map((layer) => `${base}${upperFirst(layer)}`)
+    const expected = expectedActionNames(base, a.writes)
     if (expected.some((name) => isSameActionName(a.name, name))) continue
 
     const hint = expected.length
@@ -629,14 +666,12 @@ const checkActionApiNaming = ({ rel, text }) => {
 // 少了 config,錯誤處理時不知道是打哪一支、帶了什麼參數。
 // 每支 action 各自決定回傳什麼的話,使用端要為每一支記一種接法。
 
-const RETURN_FIELDS = ['config', 'status', 'data']
-
 const checkActionReturn = ({ rel, text }) => {
   if (!isActionsFile(rel)) return []
 
   const issues = []
 
-  for (const m of text.matchAll(ACTION_FN_RE)) {
+  for (const m of text.matchAll(ARROW_FN_RE)) {
     const name = m[1]
     if (/^use[A-Z]\w*Actions$/.test(name)) continue
 
@@ -652,7 +687,7 @@ const checkActionReturn = ({ rel, text }) => {
           rel,
           lineNoOf(text, m.index),
           'storeActionReturn',
-          `${name} 打了 api 卻沒有回傳 —— 一律 return { ${RETURN_FIELDS.join(', ')} },使用端才能用同一種寫法接`
+          `${name} 打了 api 卻沒有回傳 —— 一律 return { ${API_RETURN_FIELDS.join(', ')} },使用端才能用同一種寫法接`
         )
       )
       continue
@@ -660,12 +695,12 @@ const checkActionReturn = ({ rel, text }) => {
 
     // 任一個 return 物件湊齊三件就算通過(early-return 的分支可以只回部分)
     const complete = returns.some((body2) =>
-      RETURN_FIELDS.every((f) => new RegExp(`\\b${f}\\b`).test(body2))
+      API_RETURN_FIELDS.every((f) => new RegExp(`\\b${f}\\b`).test(body2))
     )
 
     if (complete) continue
 
-    const missing = RETURN_FIELDS.filter(
+    const missing = API_RETURN_FIELDS.filter(
       (f) => !returns.some((body2) => new RegExp(`\\b${f}\\b`).test(body2))
     )
 
@@ -674,14 +709,13 @@ const checkActionReturn = ({ rel, text }) => {
         rel,
         lineNoOf(text, m.index),
         'storeActionReturn',
-        `${name} 的回傳缺少 ${missing.join(' / ')} —— 一律 return { ${RETURN_FIELDS.join(', ')} }`
+        `${name} 的回傳缺少 ${missing.join(' / ')} —— 一律 return { ${API_RETURN_FIELDS.join(', ')} }`
       )
     )
   }
 
   return issues
 }
-
 
 // --- 規則 storeApiDefault:送出參數的預設值集中在 apiDefault -----------------
 //
@@ -708,9 +742,33 @@ const checkActionReturn = ({ rel, text }) => {
 // 陣列仍然是唯讀的那一個,還原之後寫不進去,而且正式版沒有任何徵兆。
 // 那種情況要深拷貝(專案自己的深拷貝工具,或 `structuredClone(toRaw(x))`)。
 
+/**
+ * 這個 store 裡有沒有哪一層的 `apiData` 帶了欄位結構。
+ *
+ * **`apiData` 這個名字有兩種用途,而只有其中一種需要 apiDefault:**
+ *
+ *   送出去的參數   `apiData: { Amount: 1, Id: null }` —— 預設值是前端定的,
+ *                  要集中成 apiDefault,reset 才能直接展開還原
+ *   收回來的資料   `apiData: null` —— 整份由後端給,前端沒有「預設值」這種東西,
+ *                  reset 就是設回 null
+ *
+ * 後者硬要有 apiDefault 的話,只能塞一個空物件進去 —— 而空的 apiDefault
+ * 正是這條規則本身在防的「多一份沒有人讀的東西」。
+ *
+ * 判準是「有沒有任何一層寫出欄位」:寫得出欄位就代表那些預設值是前端定的。
+ * 全部都是 `null` 或空陣列的 store,這條整個略過。
+ *
+ * **代價要講清楚:** 一個真的需要 apiDefault、而初始值又剛好都寫成 null 的
+ * store 不會被提醒。那是刻意讓的 —— 逼七支不需要的 store 各塞一個空物件,
+ * 比漏掉一支更糟:空物件看起來像「已經照規範做了」,而下一個人不會去查它是空的。
+ */
+const hasStructuredApiData = (text) =>
+  [...text.matchAll(/\bapiData\s*:\s*(.)/g)].some(([, first]) => first === '{')
+
 const checkStoreApiDefault = ({ rel, text }) => {
   if (!isStoreFile(rel)) return []
   if (!/\bapiData\b/.test(text)) return [] // 沒有送出參數的 store 不需要
+  if (!hasStructuredApiData(text)) return [] // 整份由後端給的 store 沒有「預設值」可集中
 
   const declared = /\bconst\s+apiDefault\s*=\s*(\w+)?\s*\(?/.exec(text)
 
@@ -835,7 +893,10 @@ const WHOLE_DEFAULT = '*'
 
 /** 被還原的是哪一層 —— `store.apiDefault.detail` 取 detail,整份展開取記號 */
 const restoredKeyOf = (expr) => {
-  const tail = expr.split('.').pop().replace(/\[|\]|['"]/g, '')
+  const tail = expr
+    .split('.')
+    .pop()
+    .replace(/\[|\]|['"]/g, '')
 
   return tail === 'apiDefault' ? WHOLE_DEFAULT : tail
 }
@@ -1016,6 +1077,47 @@ const checkResetDefault = ({ rel, text }) => {
 //   - `$` 開頭的 pinia API:$patch / $reset / $subscribe / $state
 //   - 寫入:`member.info = x` 是對的,只有「讀出來存成 const」才有問題
 //   - `use*Actions()` 不是 store,那是一般 composable,直接解構就好
+//   - 函式或 computed 主體裡的取值:那是「這一刻的值」,拿到就用掉,
+//     沒有「之後 store 變了要跟著變」的問題
+//
+// 最後那一種要展開說。這條規則真正在擋的是「取出來的值會被留下來,
+// 之後還有人讀它」—— 畫面 render 時讀、別的函式讀。寫在最外層的宣告是那種:
+//
+//   const data = json.member.tab          ← 最外層,畫面之後都讀這一份
+//
+// 而寫在函式裡的不是。取值那一行到函式結束之間就是它的全部壽命:
+//
+//   const onTabs = async () => {
+//     await onJsonMemberTab()
+//     const data = json.member.tab        ← 等 api 回來之後讀一次,當場用掉
+//   }
+//
+// 這一種照規則改反而會壞:提到最外層的話,取值發生在 await 之前,
+// 拿到的是還沒填的那一份。computed 主體裡的也一樣不必改 ——
+// computed 每次重算都會重讀,響應性是 computed 自己在管的。
+
+/**
+ * 這個位置在不在「最外層」—— 也就是這一份檔案自己的那一層宣告。
+ *
+ * 判斷方式是數大括號:從程式碼開頭數到這個位置,還沒閉合的有幾層。
+ * 門檻兩種檔案不同,因為兩者的「最外層」本來就長得不一樣:
+ *
+ *   .vue    `<script setup>` 裡面直接就是最外層,所以門檻是 0
+ *   .js     store 與 actions 整份包在一個函式裡(defineStore 的 setup、
+ *           actions 的 export default),所以那一層不算,門檻是 1
+ *
+ * 收到的 `code` 是已經把註解與畫面區段遮成空白的版本:註解裡舉例寫的大括號
+ * 不算數,而畫面區段的 `{{ }}` 與 `:class="{ … }"` 也有大括號,那不是程式的巢狀層。
+ *
+ * 字串裡的大括號沒有另外處理 —— 樣板字串的 `${ }` 本來就成對,
+ * 成對的東西不影響淨層數。
+ */
+const isAtOuterLevel = (rel, code, index) => {
+  const before = code.slice(0, index)
+  const depth = (before.match(/\{/g)?.length ?? 0) - (before.match(/\}/g)?.length ?? 0)
+
+  return depth <= (rel.endsWith('.vue') ? 0 : 1)
+}
 
 /** const <name> = useXxxStore() —— 找出這個檔案裡的 store 實例名 */
 const STORE_INSTANCE_RE = /const\s+(\w+)\s*=\s*(use\w+Store)\s*\(\s*\)/g
@@ -1044,9 +1146,17 @@ const checkStoreToRefs = ({ rel, text, root }) => {
   if (!isInSrc(rel)) return []
   if (!/\.(vue|js)$/.test(rel)) return []
 
+  /* 註解掉的程式碼是死的,拿規範去檢查它沒有意義 —— 報出來的那一行打開檔案
+     一看根本沒有作用。畫面區段一起遮掉,那裡的大括號不是程式的巢狀層。 */
+  const code = maskTemplateContent(maskComments(rel, text))
+
   const issues = []
 
-  for (const m of text.matchAll(STORE_DESTRUCTURE_RE)) {
+  for (const m of code.matchAll(STORE_DESTRUCTURE_RE)) {
+    /* 函式或 computed 主體裡的解構是「這一刻的值」,拿到就用掉 ——
+       最外層的宣告才會被畫面與別的函式一直讀。 */
+    if (!isAtOuterLevel(rel, code, m.index)) continue
+
     issues.push(
       issueOf(
         rel,
@@ -1060,16 +1170,20 @@ const checkStoreToRefs = ({ rel, text, root }) => {
 
   /* 實例名連同它是哪一支 store 一起收 —— 後面要回頭查那個屬性在 store 那一側
      是不是唯讀常數,只有實例名的話查不到。 */
-  const instances = new Map([...text.matchAll(STORE_INSTANCE_RE)].map((m) => [m[1], m[2]]))
+  const instances = new Map([...code.matchAll(STORE_INSTANCE_RE)].map((m) => [m[1], m[2]]))
   if (!instances.size) return issues
 
   for (const [name, storeName] of instances) {
     // const x = member.info  ← 讀出來存成 const;$ 開頭是 pinia API,不算取值
     const readRe = new RegExp(`const\\s+(\\w+)\\s*=\\s*${name}\\.(?!\\$)(\\w+)`, 'g')
 
-    for (const m of text.matchAll(readRe)) {
+    for (const m of code.matchAll(readRe)) {
       // storeToRefs(member).xxx 這種寫法本身是對的
-      if (/storeToRefs/.test(text.slice(Math.max(0, m.index - 40), m.index))) continue
+      if (/storeToRefs/.test(code.slice(Math.max(0, m.index - 40), m.index))) continue
+
+      /* 函式或 computed 主體裡的取值是「這一刻的值」,拿到就用掉 ——
+         提到最外層反而會在 await 之前就讀,拿到還沒填的那一份。 */
+      if (!isAtOuterLevel(rel, code, m.index)) continue
 
       // readonly({ … }) 包住的固定設定沒有響應性,改成 storeToRefs 反而會拿到 undefined
       if (isReadonlyConst(root, storeName, m[2])) continue

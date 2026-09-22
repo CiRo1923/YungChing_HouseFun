@@ -1,7 +1,7 @@
 ---
 name: tailwind-usage
 summary: utility class 怎麼用
-description: 本專案 utility class(tailwind 那類單一用途的 class)的使用規範。當在共用元件的 template 寫 class、在畫面上調整排版與尺寸、或修改建置工具的樣式設定檔(theme)時使用。規則:共用元件的 template 只留組件自身 class 與 --modifier,樣式寫進元件自己的 css;被 theme 整組覆寫掉的內建值不能再用(寫了不會報錯,但產不出任何 CSS);theme 重新定義的值不要用 sm / md / lg 這類尺寸縮寫,改用說得出用途的名字或實際數值。
+description: 本專案 utility class(tailwind 那類單一用途的 class)的使用規範。當在共用元件的 template 寫 class、在畫面上調整排版與尺寸、或修改建置工具的樣式設定檔(theme)時使用。規則:動手之前先讀這個專案的樣式設定(tailwind.config.js、tailwind.function.js、tailwind.theme.js,檔名固定但不一定都存在,位置在各自的專案根),認不出來的 class 先查設定再說 —— extend 底下的自訂沒有任何規則在守,看起來像拼錯的名字可能是專案自訂的;共用元件的 template 只留組件自身 class 與 --modifier,樣式寫進元件自己的 css;被 theme 整組覆寫掉的內建值不能再用(寫了不會報錯,但產不出任何 CSS);theme 重新定義的值不要用 sm / md / lg 這類尺寸縮寫,改用說得出用途的名字或實際數值。
 ---
 
 # utility class 怎麼用
@@ -21,6 +21,39 @@ description: 本專案 utility class(tailwind 那類單一用途的 class)的使
 `.tools/lint/project-config.mjs`(`COMPONENTS_DIR` 與 `STYLE_CONFIG_FILES`)。
 各專案的擺法不同,這份文件不另外抄一份路徑 —— 抄一份就會有對不上的一天,
 而對不上的時候規則會安靜地不再檢查任何東西。
+
+## 動手之前:先讀這個專案的樣式設定
+
+**要寫、改、或判斷任何一個 utility class 之前,先把這三支讀過。**
+每個專案自訂的東西都不一樣,憑 tailwind 的預設值去想,結論會是錯的。
+
+| 檔名 | 放什麼 |
+| --- | --- |
+| `tailwind.config.js` | `theme` 的整組覆寫與 `extend` 的自訂、斷點、外掛 |
+| `tailwind.function.js` | 設定檔用來算值的函式(例如依斷點算出一組寬度) |
+| `tailwind.theme.js` | theme 單獨拆出來的那一份 |
+
+**三支的檔名固定,但不一定都存在** —— 有的專案只有第一支。
+位置在專案根層,各專案的專案根不同(這個 repo 裝了兩個專案,
+所以是 `Project/Nuxt/` 與 `Project/Vite/` 各一份,不是 repo 根)。
+
+### 看到不認得的 class,先查設定再說
+
+`transition-opacitys` 看起來像把 `transition-opacity` 打錯多一個 s ——
+實際上它是這個專案在 `extend.transitionProperty` 自訂的,
+值是 `opacity, visibility`(同時過渡透明度與可見性,切換 `visibility` 的
+淡入淡出要用它)。把它「修正」成 `transition-opacity` 會讓可見性不再過渡,
+而畫面上只是元素消失的時機不對,不會報錯。
+
+**`extend` 底下的自訂沒有任何規則在守。** 規則只讀整組覆寫的那一段
+(見第二節),`extend` 那一段是整個挖掉的 —— 所以自訂的名字打錯了
+不會有人發現,認不出來的 class 也不會被提醒。只能靠讀設定。
+
+### 反過來也一樣:內建的值可能已經不存在
+
+這個專案的 `fontSize` 與 `screens` 都是**整組覆寫**,
+所以 `text-sm`、`text-base`、`sm:`、`md:` 這些內建的全部沒有了。
+程式裡到處寫 `text-[14px]` 不是沒照規範,是內建值真的不在了。
 
 ## 一、共用元件的 template 只留組件 class 與 --modifier
 

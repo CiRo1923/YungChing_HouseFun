@@ -38,7 +38,7 @@ const setClass = computed(() => {
     <template v-for="(item, index) in items">
       <li
         class="m-separator-item"
-        :class="setClass.item"
+        :class="[item.class, setClass.item]"
         :key="`${item.id}_${index}`"
         v-if="item.isHidden !== true || !config.isHiddenItem"
       >

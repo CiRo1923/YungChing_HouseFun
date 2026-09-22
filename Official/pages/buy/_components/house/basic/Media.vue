@@ -84,7 +84,7 @@ watch(
 
 <template>
   <div
-    class="relative w-full overflow-hidden bg-[--gray-999] m:mb-[6px] m:h-[270px] m:w-full t:h-[285px] pt:rounded-[10px] p:h-[570px]"
+    class="relative w-full overflow-hidden bg-[--gray-999] m:mb-[6px] m:h-[270px] t:h-[285px] pt:rounded-[10px] p:h-[570px]"
   >
     <!-- 黃金曝光 & NEW -->
     <PageBuyHouseBasicFlags :ids="ids" />

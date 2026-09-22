@@ -23,6 +23,16 @@ export const useBuyProjectStore = defineStore('buyProject', () => {
       icon: 'icon_map',
     },
   ])
+  // 登入彈窗的按鈕。這是本頻道自己的東西,不放共用的 popup store
+  const loginButtons = readonly([
+    {
+      id: 'sure',
+      label: '登入',
+      class: '--bg-orange-f74c --text-white',
+      type: 'sure',
+      isClose: false,
+    },
+  ])
   const apiDefault = readonly({
     message: {
       houseId: null,
@@ -52,6 +62,7 @@ export const useBuyProjectStore = defineStore('buyProject', () => {
     NAME,
     channel,
     channelTabs,
+    loginButtons,
     apiDefault,
     access,
     message,

@@ -13,16 +13,17 @@
 .m-separator-item {
   @apply relative;
 
-  /* 最後一項後面不畫線 */
-  &:not(:last-child) {
-    &:after {
-      @apply pointer-events-none absolute top-1/2 h-[--separator-divider-h] w-[--separator-divider-w] -translate-y-1/2 bg-[--separator-divider-bg-color] content-default;
-    }
+  /* 分隔線的外觀先備在這裡,但不給 content —— 沒有 content 的偽元素不會生成。
+     要不要出現由下面橫排那幾組補上 content 決定。 */
+  &:after {
+    @apply pointer-events-none absolute top-1/2 h-[--separator-divider-h] w-[--separator-divider-w] -translate-y-1/2 bg-[--separator-divider-bg-color];
   }
 }
 
 /* 橫向排列 —— 分隔線靠右定位,位移量是 gap 的一半(見 variables.css)。
-   直向排列時沒有 right 這條宣告,由 absolute 的預設位置決定。 */
+   這條線是插在兩項中間的直線,直向排列時沒有對象,所以只有這幾組給 content;
+   最後一項後面沒有東西可以隔,也不給。斷點限定的使用端(例如只有平板以上橫排)
+   在手機那一段就不會多出一條沒有對象的線。 */
 
 @screen p {
   .m-separator {
@@ -35,8 +36,10 @@
       @apply flex;
 
       .m-separator-item {
-        &:after {
-          @apply right-[--separator-divider-right];
+        &:not(:last-child) {
+          &:after {
+            @apply right-[--separator-divider-right] content-default;
+          }
         }
       }
     }
@@ -55,8 +58,10 @@
       @apply flex;
 
       .m-separator-item {
-        &:after {
-          @apply right-[--separator-divider-right];
+        &:not(:last-child) {
+          &:after {
+            @apply right-[--separator-divider-right] content-default;
+          }
         }
       }
     }
@@ -74,8 +79,10 @@
       @apply flex;
 
       .m-separator-item {
-        &:after {
-          @apply right-[--separator-divider-right];
+        &:not(:last-child) {
+          &:after {
+            @apply right-[--separator-divider-right] content-default;
+          }
         }
       }
     }

@@ -31,6 +31,7 @@ import {
   FORM_GROUP_VALIDATOR,
   FRAMEWORKS,
   PARALLEL_AWAIT_HELPER,
+  POPUP_TAGS,
   POPUP_DIR_NAME,
   PROJECT_FRAMEWORK,
   PLAIN_TEXT_EXCLUDED_DIRS,
@@ -46,7 +47,8 @@ const hasDir = (root, rel) => {
   return fs.existsSync(abs) && fs.statSync(abs).isDirectory()
 }
 
-const firstExistingFile = (root, names) => names.find((n) => fs.existsSync(path.join(root, n))) ?? null
+const firstExistingFile = (root, names) =>
+  names.find((n) => fs.existsSync(path.join(root, n))) ?? null
 
 /**
  * 專案裡所有的 css(相對路徑)。
@@ -88,7 +90,9 @@ const REQUIREMENTS = [
     rules: ['moduleVar', 'sharedVarScope'],
     check: (root) =>
       !SHARED_MODULE_VARIABLES ||
-      fs.existsSync(path.join(root, ...CSS_MODULES_DIR.split('/'), ...SHARED_MODULE_VARIABLES.split('/')))
+      fs.existsSync(
+        path.join(root, ...CSS_MODULES_DIR.split('/'), ...SHARED_MODULE_VARIABLES.split('/'))
+      )
         ? SHARED_MODULE_VARIABLES || '(留空)'
         : null,
     need: `設定的 SHARED_MODULE_VARIABLES 指到的檔案要真的存在,或把它留空`,
@@ -177,14 +181,35 @@ const REQUIREMENTS = [
   },
   {
     label: 'api 目錄',
-    rules: ['apiClient', 'apiScope', 'apiSource', 'apiNaming', 'apiReturn', 'apiTryCatch', 'apiPathParam'],
+    rules: [
+      'apiClient',
+      'apiScope',
+      'apiSource',
+      'apiNaming',
+      'apiReturn',
+      'apiTryCatch',
+      'apiPathParam',
+    ],
     check: (root) => (hasDir(root, API_DIR) ? API_DIR : null),
     need: `要有 api 目錄(目前設定為 ${API_DIR})`,
     why: 'api 的五條規則只看那個目錄底下的檔案。目錄位置不符時,api 寫法完全不會被檢查。',
   },
   {
     label: 'store 目錄',
-    rules: ['componentDeps', 'storeDeclare', 'storeNaming', 'storeScope', 'storeActions', 'storeActionNaming', 'storeActionReturn', 'storeApiDefault', 'storeDefaultClone', 'storeResetDefault', 'storeLayer', 'storeDir'],
+    rules: [
+      'componentDeps',
+      'storeDeclare',
+      'storeNaming',
+      'storeScope',
+      'storeActions',
+      'storeActionNaming',
+      'storeActionReturn',
+      'storeApiDefault',
+      'storeDefaultClone',
+      'storeResetDefault',
+      'storeLayer',
+      'storeDir',
+    ],
     check: (root) => (hasDir(root, STORE_DIR) ? STORE_DIR : null),
     need: `要有 store 目錄(目前設定為 ${STORE_DIR})`,
     why: 'store 與 actions 的規則以那個目錄為範圍。位置不符時,store 的寫法完全不會被檢查。',
@@ -218,7 +243,15 @@ const REQUIREMENTS = [
   },
   {
     label: '頁面目錄',
-    rules: ['apiScope', 'storeScope', 'storeLayer', 'pageApiData', 'pageActionNaming', 'pageApiImport', 'popupLocation'],
+    rules: [
+      'apiScope',
+      'storeScope',
+      'storeLayer',
+      'pageApiData',
+      'pageActionNaming',
+      'pageApiImport',
+      'popupLocation',
+    ],
     check: (root) => (hasDir(root, VIEWS_DIR) ? VIEWS_DIR : null),
     need: `要有頁面目錄(目前設定為 ${VIEWS_DIR})`,
     why: 'api 檔名、store 檔名與分層都是拿頁面目錄的第一層資料夾來對照。目錄不存在時,那些對照沒有比對基準,頁面規則也掃不到檔案。',
@@ -267,7 +300,9 @@ const REQUIREMENTS = [
   },
   {
     label: '斷點的前綴涵蓋關係',
-    rules: ['breakpointPrefix'],
+    /* breakpointOverride 也靠這份設定認出「哪些前綴是斷點」——
+       認不出來的話它分不出 m: 與 hover:,兩種都會被當成覆寫。 */
+    rules: ['breakpointPrefix', 'breakpointOverride'],
 
     /*
      * 不做響應式的專案留空物件是刻意的,不是缺東西 —— 那時整條略過。
@@ -277,6 +312,16 @@ const REQUIREMENTS = [
     check: () => !BREAKPOINTS.length || Object.keys(BREAKPOINT_SCREENS).length > 0,
     need: '設定裡要填 BREAKPOINT_SCREENS(每個 @screen 區塊該列出哪幾種前綴)',
     why: '這個專案有分斷點,但沒有填 @screen 與前綴的涵蓋關係 —— 「級距要在每個斷點列齊前綴」那條會整條略過,而少列一種的後果是使用端傳了級距卻在那個斷點沒有效果。',
+  },
+  {
+    label: '彈窗元件的標籤名',
+    rules: ['popupId'],
+    /* 沒有彈窗系統的專案留空陣列是刻意的 —— 那時整條略過。
+       有彈窗卻沒填的話要講出來:那條從此不檢查任何東西,
+       而 id 對不上的後果是彈窗打不開,畫面上沒有任何徵兆。 */
+    check: () => POPUP_TAGS.length > 0 || null,
+    need: '設定裡要填 POPUP_TAGS(彈窗元件在畫面上寫出來的標籤名)',
+    why: '這條比對「宣告端的 id」與「開啟時傳的 id」。不知道哪個標籤是彈窗就找不到宣告端 —— 規則整條略過,而 id 打錯時不會報錯,彈窗就是打不開。',
   },
   {
     label: '群組驗證的包裝元件',
@@ -326,9 +371,14 @@ export const NO_PREREQUISITE_RULES = [
   'componentClass',
   'componentFolder',
   'viewFolder',
-  /* 這兩條只看檔案內容怎麼寫(class、畫面區段的標籤),不必先有某個目錄或設定檔 */
+  /* 這三條只看檔案內容怎麼寫(class、畫面區段的標籤、有沒有定義轉場),
+     不必先有某個目錄或設定檔 */
   'truncateClass',
   'spacerElement',
+  'transitionShared',
+  /* 這條讀的是 package.json,那支每個專案都有 ——
+     沒有的話整個專案跑不起來,不是這條要提醒的事 */
+  'buildCommands',
   /* 這條自己掃全案收集「定義過哪些變數」,不依賴任何目錄或設定存在 ——
      專案沒有 css 變數時它一個引用都掃不到,結果就是通過,不是誤報。 */
   'unknownVar',

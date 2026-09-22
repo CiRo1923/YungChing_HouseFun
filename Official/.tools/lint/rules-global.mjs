@@ -13,6 +13,7 @@ import path from 'node:path'
 
 import {
   ABSOLUTE_PATH_SCOPE,
+  BUILD_CONFIG_FILES,
   WRITING_STYLE_SCOPE,
   PROJECT_NAMES,
   VIEWS_DIR,
@@ -115,9 +116,15 @@ const PROJECT_NAME_RE = PROJECT_NAMES.map(patternOf)
  */
 export const PROJECT_DIR_VALUES = [
   ...new Set(
-    [VIEWS_DIR, STORE_DIR, API_DIR, CSS_MODULES_DIR, COLOR_CSS_DIR, COMPONENTS_DIR, ...COMPONENT_DIRS].filter(
-      (dir) => dir.includes('/')
-    )
+    [
+      VIEWS_DIR,
+      STORE_DIR,
+      API_DIR,
+      CSS_MODULES_DIR,
+      COLOR_CSS_DIR,
+      COMPONENTS_DIR,
+      ...COMPONENT_DIRS,
+    ].filter((dir) => dir.includes('/'))
   ),
 ]
 
@@ -228,9 +235,7 @@ const RELATIVE_IMPORT_RE = /(?:import|require)\b[^'"\n]*['"](\.\.\/[^'"\n]*)['"]
  * 解析完仍以 `../` 開頭就是跳出去了,那個位置只在特定電腦上成立。
  */
 const isOutsideProject = (rel, importPath) =>
-  path.posix
-    .normalize(path.posix.join(path.posix.dirname(rel), importPath))
-    .startsWith('../')
+  path.posix.normalize(path.posix.join(path.posix.dirname(rel), importPath)).startsWith('../')
 
 /**
  * 這條規則**涵蓋原始碼與規範系統自身**,範圍比「不寫死專案名稱」那條大。
@@ -474,7 +479,6 @@ const CROSS_REFERENCE_RE = new RegExp(
   'g'
 )
 
-
 const checkSelfContained = ({ rel, text }) => {
   if (!WRITING_STYLE_SCOPE.some((prefix) => rel.startsWith(prefix))) return []
   if (hasExemptMark(text, 'self-contained')) return []
@@ -658,6 +662,130 @@ const checkRuleTampered = ({ rel }) => {
   ]
 }
 
+// --- 規則 buildCommands:三個環境各有固定的指令名 ------------------------------
+//
+// **一個專案有三個環境,每一個對應一個固定的指令名:**
+//
+//    dev      開發 —— 本機起 dev server
+//    deploy   測試機 —— 建置並送上測試環境
+//    build    正式機 —— 建置並送上正式環境
+//
+// **名字固定,是為了讓「送去哪裡」不必每次確認。** 交接的人、剛進專案的人、
+// 半年後回來的自己,打 `npm run build` 的時候要能確定那是正式機而不是測試機。
+// 每個專案各取各的名字(publish / release / prod / stage)的話,
+// 唯一的辦法是每次先打開 package.json 讀一遍 —— 而漏讀一次的代價是送錯環境,
+// 那件事不會報錯,要等有人發現正式站變成測試資料才知道。
+//
+// 三個名字之外還可以有別的指令(檢查、排序、安裝掛鉤那些),這條不管它們。
+//
+// **建置工具用哪一套不在這條的範圍內。** 有的專案用 `--mode`,有的靠環境變數,
+// 有的兩者都不用 —— 所以只有專案自己已經在用那一套時,才檢查它對不對得上:
+//
+//    指令裡有 --mode    那個值要與指令名相同
+//    專案有 .env.* 檔    三個環境各要有一份
+//
+// 都沒有的專案只檢查「三個指令在不在」,不會為了一套它沒在用的慣例報一堆違規。
+
+const BUILD_COMMANDS = [
+  { name: 'dev', label: '開發' },
+  { name: 'deploy', label: '測試機' },
+  { name: 'build', label: '正式機' },
+]
+
+const PACKAGE_FILE = 'package.json'
+
+/** package.json 的 scripts —— 讀不到或解析不了就回 null(壞掉的 json 不是這條要管的事) */
+const scriptsOf = (root) => {
+  try {
+    return JSON.parse(fs.readFileSync(path.join(root, PACKAGE_FILE), 'utf8')).scripts ?? {}
+  } catch {
+    return null
+  }
+}
+
+/**
+ * 判準本身,與「去哪裡讀檔」分開 —— 驗證案例直接餵這一份。
+ *
+ * 讀檔那一半沒辦法用探測檔驗:這條看的是專案根的 package.json,
+ * 而案例不可能去覆蓋真的那一支。
+ *
+ * @param   {object}   scripts  package.json 的 scripts
+ * @param   {string[]} envNames 專案裡實際存在的環境檔對應的環境名
+ * @returns {string[]} 每一筆違規的訊息
+ */
+export const buildCommandProblemsOf = (scripts, envNames) => {
+  const problems = []
+  const missing = BUILD_COMMANDS.filter(({ name }) => !scripts[name])
+
+  if (missing.length) {
+    problems.push(
+      `${PACKAGE_FILE} 少了 ${missing.map(({ name, label }) => `${name}(${label})`).join('、')} —— ` +
+        '三個環境各有固定的指令名(dev 開發、deploy 測試機、build 正式機),' +
+        '名字固定才不必每次打開那支檔案確認這個指令送去哪裡,而送錯環境不會報錯'
+    )
+  }
+
+  /* 有用 --mode 的專案才比對。沒用的專案(靠環境變數、或建置工具沒有這個旗標)
+     不該被報 —— 那是它的建置方式,不是違規。 */
+  for (const { name, label } of BUILD_COMMANDS) {
+    const script = scripts[name]
+    if (!script) continue
+
+    const mode = /--mode[= ]+(\S+)/.exec(script)
+    if (!mode || mode[1] === name) continue
+
+    problems.push(
+      `${PACKAGE_FILE} 的 ${name}(${label})用 --mode ${mode[1]},與指令名對不上 —— ` +
+        '兩邊同名才看得出這個指令讀的是哪一份環境設定;' +
+        `不同名的話,改了 ${name} 的設定卻沒有生效時沒有人會想到是這裡`
+    )
+  }
+
+  /* 環境檔同理:專案已經在用 .env.<環境> 這套慣例時,才檢查三份齊不齊。
+     一份都沒有的專案(靠別的方式帶設定)整項略過。 */
+  if (envNames.length) {
+    const lack = BUILD_COMMANDS.filter(({ name }) => !envNames.includes(name))
+
+    if (lack.length) {
+      problems.push(
+        `這個專案用 .env.<環境> 放設定,但少了 ${lack.map(({ name }) => `.env.${name}`).join('、')} —— ` +
+          '缺的那一份不會報錯,建置時讀到的是空的,' +
+          '結果是網域或金鑰變成預設值而畫面看起來一切正常'
+      )
+    }
+  }
+
+  return problems
+}
+
+/**
+ * 掛在建置設定檔上報,而不是 package.json 自己。
+ *
+ * `.json` 不在可掃描的副檔名裡,而加進去會出事:package.json 的 `name` 欄位
+ * 本來就是專案名稱,「不寫死專案名稱」那條會把它報成違規,而那個名字非寫不可。
+ *
+ * 建置設定檔是最接近的一支:它與指令講的是同一件事(這個專案怎麼建置),
+ * 而且每個專案都有、也在掃描範圍裡。候選檔名的清單只有一份,
+ * 定義在 project-config.mjs 的 BUILD_CONFIG_FILES。
+ *
+ * 行號一律是第一行 —— 要改的內容在另一支檔案,指向這支檔案的某一行
+ * 只會讓人找錯地方,所以訊息裡直接寫出檔名。
+ */
+const checkBuildCommands = ({ root, rel }) => {
+  if (!BUILD_CONFIG_FILES.includes(rel)) return []
+
+  const scripts = scriptsOf(root)
+  if (!scripts) return []
+
+  const envNames = BUILD_COMMANDS.map(({ name }) => name).filter((name) =>
+    fs.existsSync(path.join(root, `.env.${name}`))
+  )
+
+  return buildCommandProblemsOf(scripts, envNames).map((detail) =>
+    issueOf(rel, 1, 'buildCommands', detail)
+  )
+}
+
 export const GLOBAL_CHECKS = [
   checkProjectName,
   checkAbsolutePath,
@@ -665,6 +793,7 @@ export const GLOBAL_CHECKS = [
   checkSelfContained,
   checkConfigItem,
   checkRuleTampered,
+  checkBuildCommands,
 ]
 
 export const GLOBAL_RULE_TITLE = {
@@ -674,6 +803,7 @@ export const GLOBAL_RULE_TITLE = {
   plainText: '用了 emoji 或裝飾符號',
   selfContained: '把讀者送去別處的寫法(同上 / 參考第幾節)',
   configItem: '專案設定檔多了沒有規則讀的項目',
+  buildCommands: '三個環境的指令名對不上',
 }
 
 export const GLOBAL_RULE_HINT = {
@@ -685,4 +815,5 @@ export const GLOBAL_RULE_HINT = {
   selfContained: '把那段要講的在這裡再寫一次 —— 內容重複沒關係,重複遠比讓讀者跳頁好',
   configItem:
     '專案設定檔只把既有項目改成自己的值 —— 需要新的一項代表規則本身要改,回到規範工具的來源去加',
+  buildCommands: 'dev 開發、deploy 測試機、build 正式機 —— 名字固定才不必每次確認送去哪裡',
 }
