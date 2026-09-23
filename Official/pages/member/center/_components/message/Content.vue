@@ -48,12 +48,8 @@ const onDelete = async (ids) => {
       />
     </li>
   </PageMemberCenterBatch>
-  <ul class="mt-[10px]">
-    <li
-      class="border-b-[1px] border-b-[--gray-e5] last:border-b-0"
-      v-for="item in items"
-      :key="item.id"
-    >
+  <ul class="mt-[10px] m:space-y-[12px] pt:divide-y-[1px] pt:divide-[--gray-e5]">
+    <li v-for="item in items" :key="item.id">
       <PageMemberCenterMessageContentCard
         :item="item"
         v-model="selectedIds"

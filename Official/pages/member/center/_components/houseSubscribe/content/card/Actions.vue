@@ -9,7 +9,7 @@ const props = defineProps({
 </script>
 
 <template>
-  <div class="flex gap-[10px] tm:w-full tm:justify-between p:shrink-0 p:flex-col">
+  <div class="flex gap-[10px] m:w-full pt:shrink-0 pt:flex-col">
     <!-- 留言要開留言燈箱,那一支目前綁在買屋頻道;接上之前先不掛行為。 -->
     <CommonMAnchor
       text="留言"
@@ -20,9 +20,9 @@ const props = defineProps({
         },
       }"
       :setClass="{
-        main: '--oval --border-orange-f74c --h-35 --px-15 --text-orange-e646 gap-x-[5px]',
+        main: '--oval --border-orange-f74c --h-35 --px-15 --text-orange-e646 --text-center gap-x-[5px] m:flex-1',
         text: 'text-[14px]',
-        icon: 'h-[16px] w-[16px] p-[1px]',
+        icon: 'h-[16px] w-[16px] p-[2px]',
       }"
     />
     <!-- icon 暫用側欄那一支;設計稿是文件加放大鏡,現有的是房子造型。 -->
@@ -36,9 +36,9 @@ const props = defineProps({
         },
       }"
       :setClass="{
-        main: '--oval --border-gray-e5 --h-35 --px-15 --text-gray-666 gap-x-[5px]',
+        main: '--oval --border-gray-e5 --h-35 --px-15 --text-gray-666 --text-center gap-x-[5px] m:flex-1',
         text: 'text-[14px]',
-        icon: 'h-[16px] w-[16px]',
+        icon: 'h-[16px] w-[16px] p-[2px]',
       }"
       @click="emits('compare')"
     />
@@ -51,9 +51,9 @@ const props = defineProps({
         },
       }"
       :setClass="{
-        main: '--oval --border-gray-e5 --h-35 --px-15 --text-gray-666 gap-x-[5px]',
+        main: '--oval --border-gray-e5 --h-35 --px-15 --text-gray-666 --text-center gap-x-[5px] m:flex-1',
         text: 'text-[14px]',
-        icon: 'h-[16px] w-[16px]',
+        icon: 'h-[16px] w-[16px] p-[2px]',
       }"
       @click="emits('delete')"
     />

@@ -20,9 +20,7 @@ const onMemberSubscriptionsBuyObjects = async () => {
   await onApiGetMemberSubscriptionsBuyObjects()
 }
 
-// api 目前回的是空清單,取回來會把假資料蓋掉,所以初次載入先不取 ——
-// 畫面吃 stores/member/center.js 的 houseSubscribe.data。
-// api 有資料之後這裡要加回 await onMemberSubscriptionsBuyObjects(),那一份假資料也改回 null。
+await onMemberSubscriptionsBuyObjects()
 
 watch(() => route.query.pg, onMemberSubscriptionsBuyObjects)
 
