@@ -60,6 +60,10 @@
     --tag-bg-color: var(--gray-f2);
   }
 
+  &.\-\-bg-white {
+    --tag-bg-color: var(--white);
+  }
+
   &.\-\-border-blue-69c1 {
     --tag-border-color: var(--blue-69c1);
   }
@@ -78,6 +82,10 @@
 
   &.\-\-text-blue-26e1 {
     --tag-text-color: var(--blue-26e1);
+  }
+
+  &.\-\-text-gray-333 {
+    --tag-text-color: var(--gray-333);
   }
 
   &.\-\-text-gray-666 {
@@ -135,6 +143,12 @@
     &.p\:\-\-px-6,
     &.pt\:\-\-px-6 {
       --tag-px: 6px;
+    }
+
+    &.\-\-py-5,
+    &.p\:\-\-py-5,
+    &.pt\:\-\-py-5 {
+      --tag-py: 5px;
     }
 
     &.\-\-py-4,
@@ -207,6 +221,13 @@
       --tag-px: 6px;
     }
 
+    &.\-\-py-5,
+    &.pt\:\-\-py-5,
+    &.tm\:\-\-py-5,
+    &.t\:\-\-py-5 {
+      --tag-py: 5px;
+    }
+
     &.\-\-py-4,
     &.pt\:\-\-py-4,
     &.tm\:\-\-py-4,
@@ -273,6 +294,12 @@
     &.tm\:\-\-px-6,
     &.m\:\-\-px-6 {
       --tag-px: 6px;
+    }
+
+    &.\-\-py-5,
+    &.tm\:\-\-py-5,
+    &.m\:\-\-py-5 {
+      --tag-py: 5px;
     }
 
     &.\-\-py-4,

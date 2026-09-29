@@ -44,7 +44,7 @@ onUnmounted(() => {
   <ul class="absolute left-[5px] top-[5px] z-[1] flex items-center gap-x-[3px]">
     <template v-for="(item, index) in items" :key="`${item.id}_${index}`">
       <li v-if="!item.isHidden">
-        <BuyMTagDefault
+        <CommonMTagDefault
           :label="item.label"
           :setClass="{
             main: ['--rounded-3 --px-6 --py-4', item.class],

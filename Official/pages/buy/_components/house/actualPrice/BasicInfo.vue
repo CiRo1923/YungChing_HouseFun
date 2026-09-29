@@ -43,7 +43,7 @@ const infoItems = computed(() =>
   <div class="m:space-y-[5px] pt:flex pt:items-center pt:gap-x-[6px]">
     <ul class="flex items-center gap-x-[6px]">
       <li v-for="(data, index) in typeItems" :key="`${data.label}_${index}`">
-        <BuyMTagDefault
+        <CommonMTagDefault
           :label="data.label"
           :setClass="{
             main: ['--rounded-3 --px-6 --h-20', data.class],
@@ -54,7 +54,7 @@ const infoItems = computed(() =>
     </ul>
     <ul class="flex items-center gap-x-[6px]">
       <li v-for="(data, index) in infoItems" :key="`${data.label}_${index}`">
-        <BuyMTagDefault
+        <CommonMTagDefault
           :label="data.label"
           :setClass="{
             main: ['--rounded-3 --px-6 --h-20', data.class],

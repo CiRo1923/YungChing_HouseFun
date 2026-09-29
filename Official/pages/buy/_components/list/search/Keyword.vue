@@ -63,7 +63,7 @@ const onChange = (data) => {
     <template #option="{ item }">
       <div class="space-y-[2px] text-[14px]">
         <div class="flex items-center gap-x-[5px]">
-          <BuyMTagDefault
+          <CommonMTagDefault
             :label="tag[item.type]?.name"
             :setClass="{
               main: ['--oval --px-8 --h-20 shrinl-0', tag[item.type]?.color],

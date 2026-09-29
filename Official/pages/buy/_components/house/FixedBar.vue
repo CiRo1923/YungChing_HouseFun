@@ -104,7 +104,7 @@ onUnmounted(() => {
     <div class="min-w-0 grow">
       <p class="flex items-center gap-x-[8px]">
         <span class="line-clamp-1 text-[16px] leading-[1]">{{ broker.name }}</span>
-        <BuyMTagDefault
+        <CommonMTagDefault
           label="社區達人"
           :setClass="{
             main: 'fixed-bar-tag --oval --text-white --px-10 --py-2 shrink-0',

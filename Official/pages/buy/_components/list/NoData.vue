@@ -46,7 +46,7 @@ const onRemove = (item) => {
         <p class="text-[16px]">您也可以調整搜尋條件再試試</p>
         <ul class="flex flex-wrap items-center gap-[10px]">
           <li v-for="(item, index) in condition" :key="`${item.label}_${item.key}_${index}`">
-            <BuyMTagClearButton
+            <CommonMTagClearButton
               :label="item.label"
               :setClass="{
                 main: '--bg-gray-f2 --rounded-4 --h-30 --px-10 --hover-border-green-9c33 --hover-text-green-6a2d',

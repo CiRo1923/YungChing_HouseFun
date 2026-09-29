@@ -32,7 +32,7 @@ const setClass = computed(() => {
 <template>
   <ul class="absolute z-[1] flex items-center" :class="setClass.main">
     <li v-for="(item, index) in items" :key="`${item.id}_${index}`">
-      <BuyMTagDefault
+      <CommonMTagDefault
         :label="item.label"
         :setClass="{
           main: ['--rounded-3 --px-6 --py-4', item.class],

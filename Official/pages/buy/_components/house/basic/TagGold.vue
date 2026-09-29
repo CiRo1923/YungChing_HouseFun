@@ -4,7 +4,7 @@ const { badges } = storeToRefs(buyHouse)
 </script>
 
 <template>
-  <BuyMTagDefault
+  <CommonMTagDefault
     label="黃金曝光"
     :setClass="{
       main: '--rounded-3 --bg-red-e45c --text-white --text-shadow --px-6 --py-4 shrink-0',
