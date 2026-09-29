@@ -5,7 +5,7 @@ definePageMeta({
   middleware: 'buy-house',
 })
 
-const { onUseMeta } = useCommonActions()
+const { onUseMeta } = useProjectActions()
 const { onApiGetBuyHouseHfidPoi } = useBuyHouseActions()
 const { onApiGETRealEstateTypeSelectOptions } = useManageActions()
 const { onRestoreChannel } = useBuyProjectActions()

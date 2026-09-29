@@ -3,7 +3,7 @@ import { apiGetBuyHouseHfid, apiGetBuyHouseHfidPoi } from '@js/_api/buy/house.js
 export default () => {
   const buyHouseStores = useBuyHouseStore()
   const { lifeMap } = storeToRefs(buyHouseStores)
-  const { onSetSeo } = useCommonActions()
+  const { onSetSeo } = useProjectActions()
   // 路由一律由呼叫端傳進來,這裡不自己取 —— 換頁守衛跑在導航完成之前,
   // 那時的「當前路由」還是上一頁,取到的會是上一筆物件。
   // 守衛要傳它拿到的 to,頁面傳自己的 route。

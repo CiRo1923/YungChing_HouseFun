@@ -1,5 +1,5 @@
 <script setup>
-const { onUseMeta } = useCommonActions()
+const { onUseMeta } = useProjectActions()
 const { onCustom, onApiErrorServerToClient } = usePopupActions()
 const router = useRouter()
 

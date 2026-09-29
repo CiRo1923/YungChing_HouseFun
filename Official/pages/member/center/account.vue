@@ -1,5 +1,5 @@
 <script setup>
-const { onUseMeta } = useCommonActions()
+const { onUseMeta } = useProjectActions()
 const { onApiGetMemberProfile } = useMemberCenterActions()
 const { onCustom, onApiErrorServerToClient } = usePopupActions()
 
@@ -11,7 +11,13 @@ definePageMeta({
 })
 
 
-await onApiGetMemberProfile()
+// 包 callOnce:頁面的 setup 在 SSR 跑一次、hydration 在瀏覽器再跑一次,
+// 直接 await 的話同一支 api 會發兩次。callOnce 把「已經取過」寫進 SSR payload,
+// hydration 讀得到就整段跳過;資料本身跟著 pinia 的 state 一起還原。
+//
+// mode 要 navigation:預設的 render 模式記號永遠留著,換去別頁再回來會跳過,
+// 那一頁就停在離開前的資料。
+await callOnce('member-account', onApiGetMemberProfile, { mode: 'navigation' })
 
 onUseMeta({
   title: '會員中心 | 好房 HouseFun',

@@ -1,7 +1,7 @@
 <script setup>
 import { Form } from 'vee-validate'
 
-const { onUseMeta } = useCommonActions()
+const { onUseMeta } = useProjectActions()
 const { onApiGetCommonServerTime } = useProjectActions()
 const {
   onApiGETCitySelectOptions,

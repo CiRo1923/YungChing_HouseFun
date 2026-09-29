@@ -1,5 +1,5 @@
 <script setup>
-const { onUseMeta } = useCommonActions()
+const { onUseMeta } = useProjectActions()
 const { onApiPostMemberAuthToken, onReset: onMemberAuthReset } = useMemberAuthProjectActions()
 const { onApiPostAuthTokenExchange, onApiGetAuthMe, onClearCookies, onReset } = useMemberProjectActions()
 const { onApiPromise } = usePopupActions()

@@ -31,7 +31,7 @@ export default () => {
     pagination,
   } = storeToRefs(buyListStore)
   const { onApiError } = usePopupActions()
-  const { onSetSeo } = useCommonActions()
+  const { onSetSeo } = useProjectActions()
   const { isChannelRegion, isChannelMrt, onSaveChannel } = useBuyProjectActions()
   const { onValueGetText } = useManageActions()
   const commonParams = computed(() => {

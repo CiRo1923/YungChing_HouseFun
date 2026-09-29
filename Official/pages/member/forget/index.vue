@@ -1,5 +1,5 @@
 <script setup>
-const { onUseMeta } = useCommonActions()
+const { onUseMeta } = useProjectActions()
 const memberAuthProject = useMemberAuthProjectStore()
 const memberForget = useMemberAuthForgetStore()
 const { userData } = storeToRefs(memberAuthProject)

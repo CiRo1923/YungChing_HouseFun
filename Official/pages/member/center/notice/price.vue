@@ -1,5 +1,5 @@
 <script setup>
-const { onUseMeta } = useCommonActions()
+const { onUseMeta } = useProjectActions()
 const { onNoticeSummary, onApiGetMemberNotificationsPrice } = useMemberCenterActions()
 const { onApiErrorServerToClient } = usePopupActions()
 

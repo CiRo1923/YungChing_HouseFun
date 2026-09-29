@@ -2,7 +2,7 @@
 import { FORGETRESET } from '@js/_storage.js'
 import { deCrypto } from '@js/.crypto/index.js'
 
-const { onUseMeta } = useCommonActions()
+const { onUseMeta } = useProjectActions()
 const memberForget = useMemberAuthForgetStore()
 const { verify } = storeToRefs(memberForget)
 const { onGetCookie, onApiPostMemberAuthPasswordResetConfirm, reset } = useMemberAuthForgetActions()

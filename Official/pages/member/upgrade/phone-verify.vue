@@ -3,7 +3,7 @@ import { EMAILVERIFYTOKEN, PHONE, PHONEEXCEEDED } from '@js/_storage.js'
 import { onMaskPhone } from '@js/_projectPrototype.js'
 import { deCrypto } from '@js/.crypto/index.js'
 
-const { onUseMeta } = useCommonActions()
+const { onUseMeta } = useProjectActions()
 const memberUpgrade = useMemberAuthUpgradeStore()
 const { phone, phoneVerify } = storeToRefs(memberUpgrade)
 const {

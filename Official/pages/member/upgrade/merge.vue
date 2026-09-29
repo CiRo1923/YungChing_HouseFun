@@ -3,7 +3,7 @@ import { EMAILVERIFYTOKEN, PHONE } from '@js/_storage.js'
 import { onMaskPhone } from '@js/_projectPrototype.js'
 import { deCrypto } from '@js/.crypto/index.js'
 
-const { onUseMeta } = useCommonActions()
+const { onUseMeta } = useProjectActions()
 const memberUpgrade = useMemberAuthUpgradeStore()
 const { phone } = storeToRefs(memberUpgrade)
 const {
@@ -109,6 +109,10 @@ const onBack = () => {
   })
 }
 
+// 每一顆自己帶要做什麼,這裡只負責轉交 —— 畫面區段留一個函式名,
+// 之後兩顆要加共同的行為(送出前先關掉上一則錯誤訊息)時有地方可以放。
+const onClick = (item) => item.onClick?.()
+
 const btns = readonly([
   {
     label: '合併帳號 (推薦)',
@@ -150,7 +154,7 @@ const btns = readonly([
           :setClass="{
             main: ['--py-15 --px-20 --rounded-10 w-full text-[14px]', item.setClass?.main],
           }"
-          @click="item.onClick()"
+          @click="onClick(item)"
         >
           <div class="space-y-[5px] text-left text-[--gray-666]">
             <p class="text-[16px]" :class="item.setClass?.text">{{ item.label }}</p>

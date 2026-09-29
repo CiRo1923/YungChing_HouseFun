@@ -3,7 +3,7 @@ import { EMAILVALUE, EMAILVERIFY, EMAILEXCEEDED } from '@js/_storage.js'
 import { onMaskEmail } from '@js/_projectPrototype.js'
 import { deCrypto } from '@js/.crypto/index.js'
 
-const { onUseMeta } = useCommonActions()
+const { onUseMeta } = useProjectActions()
 const memberUpgrade = useMemberAuthUpgradeStore()
 const { email, emailVerify } = storeToRefs(memberUpgrade)
 const {

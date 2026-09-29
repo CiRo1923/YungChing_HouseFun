@@ -55,7 +55,7 @@ export default () => {
   // 登入彈窗是買屋頻道自己的流程,不是共用 popup 的一種型別,所以留在這一層
   const onLogin = (data) =>
     onCustom({
-      id: 'loginSystem',
+      id: 'popupLoginSystem',
       title: data?.title || '會員登入',
       btns: onDeepMerge(loginButtons, data?.btns),
     })

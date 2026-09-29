@@ -3,8 +3,8 @@ import { awaitAllPromise } from '@js/_prototype.js'
 
 const common = useCommonStore()
 const { device } = storeToRefs(common)
-const { onUseMeta, onIsLoading, onResize } = useCommonActions()
-const { onApiGetCommonServerTime } = useProjectActions()
+const { onIsLoading, onResize } = useCommonActions()
+const { onApiGetCommonServerTime, onUseMeta } = useProjectActions()
 const buyList = useBuyListStore()
 const { region, mrt, pagination, content, keyword } = storeToRefs(buyList)
 // H1 由共用 Header 讀 project.seo.h1 輸出。列表本身(含 seo)在 middleware/buyList

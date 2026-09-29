@@ -1,10 +1,10 @@
 <script setup>
 import { EMAILEXCEEDED } from '@js/_storage.js'
 
-const { onUseMeta } = useCommonActions()
-const { onApiPromise } = usePopupActions()
+const { onUseMeta } = useProjectActions()
 const memberUpgrade = useMemberAuthUpgradeStore()
 const { email } = storeToRefs(memberUpgrade)
+const { onApiPromise } = usePopupActions()
 const { onGetCookie, onClearCookie, onApiPostMemberAuthEmailUpgradeEmailVerificationCode, reset } =
   useMemberAuthUpgradeActions()
 const router = useRouter()
