@@ -58,7 +58,19 @@ export const usePopupStore = defineStore('popup', () => {
     messageWidth: 'p:--w-600 t:--w-460',
     // 彈窗底部那一排按鈕
     button: '--oval --h-45 --text-center w-full',
-    // 內容區(訊息文字)的預設樣式;開啟時傳 setClass.body 就整包換掉
+    // 那一排按鈕怎麼排(手機一行、桌機並排)
+    buttonList:
+      'm:flex m:justify-center m:gap-[8px] t:gap-x-[8px] pt:inline-flex pt:items-center p:gap-x-[16px]',
+    // 每一顆按鈕佔多寬
+    buttonItem: 'm:max-w-[50%] m:flex-1 t:w-[150px] p:w-[200px]',
+    // 按鈕上的文字
+    buttonText: 'font-normal',
+
+    /* 內容區(訊息文字)的預設樣式。
+
+      這是四種彈窗共用的那一份;某一種要不一樣時,
+      在下面的 byType 填它自己的 content,容器會優先用那一個。
+      開啟彈窗時傳的 setClass.body 又比兩者都優先。 */
     content: 'text-center leading-[1.7] m:text-[14px] pt:text-[20px]',
 
     /* 各種彈窗要另外加的 class,**鍵名與彈窗元件的 setClass 相同**,原樣交給它。
@@ -76,6 +88,14 @@ export const usePopupStore = defineStore('popup', () => {
       apiPromise: {},
     },
   })
+
+  /* 彈窗掛在版面上的哪一個容器裡。
+
+    那個容器由各專案的進入點自己放(名字、位置都可能不一樣),
+    所以是設定值而不是寫在容器的畫面區段裡 ——
+    **找不到目標時什麼都不會報**,彈窗就是不出現,
+    而畫面上看起來像是「這個彈窗沒有被打開」。 */
+  const teleportTarget = '#teleports'
 
   const alertData = reactive({
     id: null,
@@ -131,6 +151,7 @@ export const usePopupStore = defineStore('popup', () => {
     promise,
     buttons,
     defaultSetClass,
+    teleportTarget,
     alertData,
     confirmData,
     customData,

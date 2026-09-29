@@ -51,8 +51,9 @@ const onClose = (item) => {
 
 <template>
   <!--
-    傳送目標是框架自己渲染的那個容器(#teleports,位置在應用程式根節點之後)——
-    不必在版型裡自己放一個。自己放的那種要先確認它真的存在:
+    傳送目標由彈窗那支 store 決定(teleportTarget)—— 各專案掛的容器
+    名字與位置都可能不一樣。這個框架自己會渲染一個在應用程式根節點之後,
+    不必在版型裡自己放;自己放的那種要先確認它真的存在。
     目標找不到時 Teleport 不會報錯,彈窗就是不出現。
 
     用 ClientOnly 包起來:popup 純由互動驅動、不需 SSR。
@@ -65,7 +66,7 @@ const onClose = (item) => {
     平常點不出來,而它一出現就是整個彈窗系統壞掉。
   -->
   <ClientOnly>
-    <Teleport to="#teleports">
+    <Teleport :to="popup.teleportTarget">
       <CommonMPopup
         :id="props.id"
         :config="props.config"
@@ -86,24 +87,26 @@ const onClose = (item) => {
           <slot name="headerTools" />
         </template>
         <slot>
-          <div :class="popup.defaultSetClass.content" v-html="custom.content" />
+          <div
+            :class="popup.defaultSetClass.byType.custom.content || popup.defaultSetClass.content"
+            v-html="custom.content"
+          />
         </slot>
         <template #footer v-if="$slots.footer || footerBtns">
           <slot name="footer">
             <div class="text-center">
-              <ul
-                class="m:flex m:justify-center m:gap-[8px] t:gap-x-[8px] pt:inline-flex pt:items-center p:gap-x-[16px]"
-              >
+              <ul :class="popup.defaultSetClass.buttonList">
                 <li
-                  class="m:max-w-[50%] m:flex-1 t:w-[150px] p:w-[200px]"
+                  :class="popup.defaultSetClass.buttonItem"
                   v-for="(item, index) in footerBtns"
                   :key="`custom_${item.label}_${index}`"
                 >
                   <CommonMAnchor
                     :text="item.label"
+                    :config="{ isDisabled: item.isDisabled }"
                     :setClass="{
                       main: [item.class, popup.defaultSetClass.button],
-                      text: 'font-normal',
+                      text: popup.defaultSetClass.buttonText,
                     }"
                     @click="onClose(item)"
                   />

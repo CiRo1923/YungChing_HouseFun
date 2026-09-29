@@ -18,7 +18,7 @@
 //      moveGroupAttrsToElems / collapseGroups —— 這三個會破壞 symbol 結構。
 //
 // 注意:輸出檔名不帶 hash:mSvgIcon 以固定路徑加 ?v=appHash 破快取(見 nuxt.config.ts
-//    的 runtimeConfig.public.spritePath / spriteVersion)。加上 hash 會讓該路徑失效。
+//    的 runtimeConfig.public.spritePath)。加上 hash 會讓該路徑失效。
 
 import { readdir, readFile } from 'node:fs/promises'
 import { basename, resolve } from 'node:path'
@@ -27,6 +27,14 @@ import { optimize } from 'svgo'
 
 const clientEvent = 'project:svg-spritemap-update'
 const spritemapRoute = '/__project_svg_spritemap'
+
+/* 認得帶與不帶部署前綴的兩種寫法。
+
+   這支 middleware 掛在開發伺服器自己那幾層之前,看到的網址還沒被去掉前綴 ——
+   站台掛在子目錄時(設定的 baseURL),請求進來是 `/子目錄/__project_svg_spritemap`,
+   用開頭比對就對不上,而那個請求最後拿到的是首頁的 HTML;
+   瀏覽器拿它當 svg 解析,畫面上只是圖示全部不見,沒有任何錯誤訊息。 */
+const isSpritemapRequest = (url) => (url || '').split('?')[0].endsWith(spritemapRoute)
 
 const SVGO_CONFIG = {
   plugins: [
@@ -179,7 +187,7 @@ export default function SvgSpritemapDevPlugin(svgDirName = '_svg') {
       server.watcher.add(resolve(svgDir, '*.svg'))
 
       server.middlewares.use(async (req, res, next) => {
-        if (!req.url?.startsWith(spritemapRoute)) {
+        if (!isSpritemapRequest(req.url)) {
           next()
           return
         }

@@ -22,22 +22,26 @@ const onClose = (item) => {
       ],
     }"
   >
-    <div :class="setClass.body || popup.defaultSetClass.content" v-html="alert.content" />
+    <div
+      :class="
+        setClass.body || popup.defaultSetClass.byType.alert.content || popup.defaultSetClass.content
+      "
+      v-html="alert.content"
+    />
     <template #footer>
       <div class="text-center">
-        <ul
-          class="m:flex m:justify-center m:gap-[8px] t:gap-x-[8px] pt:inline-flex pt:items-center p:gap-x-[16px]"
-        >
+        <ul :class="popup.defaultSetClass.buttonList">
           <li
-            class="m:max-w-[50%] m:flex-1 t:w-[150px] p:w-[200px]"
+            :class="popup.defaultSetClass.buttonItem"
             v-for="(item, index) in alert.btns"
             :key="`alert_${item.label}_${index}`"
           >
             <CommonMAnchor
               :text="item.label"
+              :config="{ isDisabled: item.isDisabled }"
               :setClass="{
                 main: [item.class, popup.defaultSetClass.button],
-                text: 'font-normal',
+                text: popup.defaultSetClass.buttonText,
               }"
               @click="onClose(item)"
             />

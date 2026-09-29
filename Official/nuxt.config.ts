@@ -51,8 +51,8 @@ export default defineNuxtConfig({
       ...Object.fromEntries(
         Object.entries(process.env).filter(([k]) => k.startsWith('NUXT_PUBLIC_'))
       ),
+      // CommonMFigure 用它給圖片網址帶版號;CommonMSvgIcon 用它讓 sprite 快取失效
       appHash: APP_HASH,
-      spriteVersion: APP_HASH,
       spritePath:
         process.env.NODE_ENV === 'development'
           ? devSpritemapRoute

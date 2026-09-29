@@ -5,6 +5,7 @@
    assets/imgs/common/no_image.svg
      找不到圖時顯示的那一張。
    少了任何一支,這支元件編譯不過(Could not load …)。 */
+
 import './.css/variables.css'
 import './.css/common.css'
 
@@ -50,7 +51,7 @@ const resolveBundledImg = (raw) => {
   const hit = MAP[toKey(raw)]
   if (hit) return bust(hit)
 
-  console.warn('[mFigure] not found:', toKey(raw))
+  console.warn('[CommonMFigure] not found:', toKey(raw))
   return encodeURI(raw)
 }
 
