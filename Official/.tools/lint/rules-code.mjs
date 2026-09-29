@@ -19,6 +19,7 @@ import {
   COMPONENT_DIRS,
   STORE_DIR,
   SRC_DIR,
+  VENDOR_DIRS,
   classPrefixOf,
   componentClassOf,
   listFiles,
@@ -30,6 +31,7 @@ import {
   hasExemptMark,
   isComponentFile,
   isInActionsDir,
+  isUnderAny,
   isInSrc,
   toRel,
   VIEWS_DIR,
@@ -805,6 +807,13 @@ const SVG_COORD_RE = /\d[.,]\d/
 
 const checkSvgIconSource = ({ rel, text, root }) => {
   if (!isSourceFile(rel)) return []
+
+  /* 外來的那幾層跳過 —— 整包複製進來的工具、產生器吐出來的檔案。
+     它們的圖示怎麼放不是這個團隊決定的,照著改要動別人的檔案,
+     而改了下一次整包更新就消失。一條一直報「改不了的東西」的規則,
+     最後會連同真正該改的那幾筆一起被略過。 */
+  if (isUnderAny(rel, VENDOR_DIRS)) return []
+
   if (hasExemptMark(text, 'svg-inline')) return []
 
   const code = maskComments(rel, text)

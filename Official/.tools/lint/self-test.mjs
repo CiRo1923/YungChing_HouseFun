@@ -3872,6 +3872,19 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
     expect: 0,
   },
   {
+    /* 外來的那幾層跳過(設定 VENDOR_DIRS)—— 整包複製進來的工具、
+       產生器吐出來的檔案,它們的圖示怎麼放不是這個團隊決定的。
+
+       這一則用「設定留空時不排除任何東西」來驗:設定是空的,
+       所以這支檔案照樣要報 —— 排除那一段若寫成無條件跳過,
+       這則就會變成 0,而整條規則從此對每一支檔案都放行。 */
+    name: 'svgIconSource 沒有設定外來目錄時照樣報',
+    rule: 'svgIconSource',
+    file: `${C}/SvgVendorProbe.vue`,
+    code: `<script setup>\nconst SHAPE = 'M10,10c-.5-.5-1.18-.78-1.89-.78h-2.67v-1.33c0-.35-.14-.69-.39-.94-.25-.25-.59-.39-.94-.39s-.69.14-.94.39Z'\n</script>\n\n<template>\n  <div class="m-probe">{{ SHAPE.length }}</div>\n</template>\n`,
+    expect: 1,
+  },
+  {
     // 隨資料變形的圖表那種必須寫在程式碼裡,檔頭標一行放行
     name: 'svgIconSource 檔頭標了豁免就放行',
     rule: 'svgIconSource',

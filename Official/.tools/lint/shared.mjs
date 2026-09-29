@@ -57,7 +57,7 @@ export {
   POPUP_TAGS,
   POPUP_DIR_NAME,
   WRITING_STYLE_SCOPE,
-  PLAIN_TEXT_EXCLUDED_DIRS,
+  VENDOR_DIRS,
   PROJECT_CONFIG_FILES,
   PROJECT_DOCS_DIR,
   PROJECT_NAMES,
@@ -513,8 +513,14 @@ export const isComponentFile = (rel) => {
  * (畫面、樣式、變數)在同一個資料夾,複製到別的專案時不會漏掉半邊,
  * 刪掉元件時也不會在別的目錄留下沒有人用的樣式。
  *
- * 判斷只看位置,不看檔名 —— 一個模組拆幾支、各自叫什麼是那個模組自己的事
+ * **這個判斷只看位置**,不看檔名 —— 一個模組拆幾支是那個模組自己的事
  * (版型一支、變數一支、子元件各一支都可以)。
+ *
+ * **但檔名不是完全自由的:變數檔一律以 `variables.css` 結尾。**
+ * 那不是這裡管的,是載入順序那條規則(moduleOrder)靠這個名字認出
+ * 「哪幾支是變數檔」—— 名字不對的話它會被當成版型檔,
+ * 而「變數要先定義完、版型才取用」這件事對它就不再檢查。
+ * 取用當下變數還沒定義,吃到的是空值,而畫面上只是那一段樣式沒有生效。
  */
 export const isModuleCss = (rel) =>
   rel.endsWith('.css') &&

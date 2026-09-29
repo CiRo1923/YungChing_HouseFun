@@ -35,7 +35,7 @@ import {
   POPUP_TAGS,
   POPUP_DIR_NAME,
   PROJECT_FRAMEWORK,
-  PLAIN_TEXT_EXCLUDED_DIRS,
+  VENDOR_DIRS,
   SHARED_MODULE_VARIABLES,
   STORE_DIR,
   STYLE_CONFIG_FILES,
@@ -453,10 +453,10 @@ export const onReportPreflight = (root, { print = console.error } = {}) => {
 
   /* 專案自己關掉的範圍要講出來 —— 那不是「缺了什麼」,是設定裡填的,
      但結果一樣是有一塊沒有被檢查過。不講的話,那幾層看起來與通過沒有兩樣。 */
-  if (PLAIN_TEXT_EXCLUDED_DIRS.length) {
+  if (VENDOR_DIRS.length) {
     print('')
-    print(`「不用 emoji 與裝飾符號」這條不檢查以下目錄(設定 PLAIN_TEXT_EXCLUDED_DIRS):`)
-    for (const dir of PLAIN_TEXT_EXCLUDED_DIRS) print(`  ${dir}`)
+    print(`「不用 emoji 與裝飾符號」這條不檢查以下目錄(設定 VENDOR_DIRS):`)
+    for (const dir of VENDOR_DIRS) print(`  ${dir}`)
     print('  那幾層的其他檢查照常適用。')
   }
 

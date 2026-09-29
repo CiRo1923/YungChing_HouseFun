@@ -23,7 +23,7 @@ import {
   COLOR_CSS_DIR,
   COMPONENTS_DIR,
   COMPONENT_DIRS,
-  PLAIN_TEXT_EXCLUDED_DIRS,
+  VENDOR_DIRS,
   PROJECT_NAME_SCOPE,
   SOURCE_PROJECT_NAME,
   TOOLING_PREFIXES,
@@ -382,7 +382,7 @@ const checkPlainText = ({ rel, text }) => {
      (整包複製進來的元件、產生器吐出來的檔案)。報出來也沒有人能改,
      而一條一直報「改不了的東西」的規則會連同真正該改的一起被略過。
      排除的範圍會列在檢查結果的開頭,不會安靜地少檢查一塊。 */
-  if (isUnderAny(rel, PLAIN_TEXT_EXCLUDED_DIRS)) return []
+  if (isUnderAny(rel, VENDOR_DIRS)) return []
 
   if (!WRITING_STYLE_SCOPE.some((prefix) => rel.startsWith(prefix))) return []
 

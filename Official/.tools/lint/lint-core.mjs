@@ -2451,7 +2451,9 @@ const checkModuleLocation = ({ rel, text: raw, root }) => {
         1,
         'moduleLocation',
         `這支樣式屬於元件 ${moduleName} —— 搬進 ${target}/${MODULE_CSS_DIR_NAME}/,` +
-          `留在集中目錄的話「模組 css 只能寫自己那組 class」那條不會檢查它,而且沒有任何訊息`
+          `留在集中目錄的話「模組 css 只能寫自己那組 class」那條不會檢查它,而且沒有任何訊息。` +
+          `搬過去的檔名:版型檔叫什麼都可以,變數檔一律以 variables.css 結尾 ——` +
+          `載入順序那條靠這個名字認出它,名字不對就不再檢查「變數要先定義完」`
       ),
     ]
   }
