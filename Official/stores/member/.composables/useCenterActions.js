@@ -11,6 +11,8 @@ import {
   apiPostMemberCompareBuyObjectsItems,
   apiGetMemberSubscriptionsSearch,
   apiDeleteMemberSubscriptionsSearch,
+  apiGetMemberSubscriptionsRealPrice,
+  apiDeleteMemberSubscriptionsRealPrice,
 } from '@js/_api/member/center.js'
 
 // 會員中心各頁的行為。auth 三支在同層的 useProjectActions.js。
@@ -28,6 +30,7 @@ export default () => {
     message,
     houseSubscribe,
     searchSubscribe,
+    actualSubscribe,
   } = storeToRefs(memberCenter)
   const { onApiError } = usePopupActions()
 
@@ -251,6 +254,32 @@ export default () => {
     return { config, status, data }
   }
 
+  const onApiGetMemberSubscriptionsRealPrice = async () => {
+    const { config, status, data } = await apiGetMemberSubscriptionsRealPrice(
+      actualSubscribe.value.apiData
+    )
+
+    if (status !== 200) {
+      onApiError(config, status, data)
+
+      return { config, status, data }
+    }
+
+    actualSubscribe.value.data = data
+
+    return { config, status, data }
+  }
+
+  const onApiDeleteMemberSubscriptionsRealPrice = async (ids) => {
+    const { config, status, data } = await apiDeleteMemberSubscriptionsRealPrice({ ids })
+
+    if (status !== 200) {
+      onApiError(config, status, data)
+    }
+
+    return { config, status, data }
+  }
+
   // 五個通知分頁共用同一份未讀數:SSR 取過之後 client 不重打,換分頁時重取。
   const onNoticeSummary = async () =>
     await callOnce('member-notice-summary', onApiGetMemberNotificationsSummary, {
@@ -274,6 +303,8 @@ export default () => {
     onApiPostMemberCompareBuyObjectsItems,
     onApiGetMemberSubscriptionsSearch,
     onApiDeleteMemberSubscriptionsSearch,
+    onApiGetMemberSubscriptionsRealPrice,
+    onApiDeleteMemberSubscriptionsRealPrice,
     onNoticeSummary,
   }
 }

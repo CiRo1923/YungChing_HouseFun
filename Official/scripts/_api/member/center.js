@@ -43,3 +43,11 @@ export const apiGetMemberSubscriptionsSearch = async (data) =>
 
 export const apiDeleteMemberSubscriptionsSearch = async (data) =>
   await fetchApi.delete(`member/subscriptions/search`, data)
+
+// 實登訂閱條件。與上面那一組同形狀:訂閱一組實價登錄的搜尋條件,
+// 那組條件有新的成交行情時通知,刪除同樣收 ids 陣列。
+export const apiGetMemberSubscriptionsRealPrice = async (data) =>
+  await fetchApi.get(`member/subscriptions/realprice`, data)
+
+export const apiDeleteMemberSubscriptionsRealPrice = async (data) =>
+  await fetchApi.delete(`member/subscriptions/realprice`, data)

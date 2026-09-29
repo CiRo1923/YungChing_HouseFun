@@ -1,6 +1,10 @@
 <script setup>
 const { onUseMeta } = useProjectActions()
+const memberCenter = useMemberCenterStore()
+const { actualSubscribe } = storeToRefs(memberCenter)
+const { onApiGetMemberSubscriptionsRealPrice } = useMemberCenterActions()
 const { onApiErrorServerToClient } = usePopupActions()
+const route = useRoute()
 
 definePageMeta({
   layout: 'member',
@@ -9,6 +13,24 @@ definePageMeta({
   requiresAuth: true,
 })
 
+// 分頁器是 router-link,頁碼跟著網址走 —— 重整與分享都會停在同一頁。
+const onMemberSubscriptionsRealPrice = async () => {
+  actualSubscribe.value.apiData.page = Number(route.query.pg) || 1
+
+  await onApiGetMemberSubscriptionsRealPrice()
+}
+
+// api 目前回的是空清單,取回來會把假資料蓋掉,所以初次載入先不取 ——
+// 畫面吃 stores/member/center.js 的 actualSubscribe.data。api 有資料之後這裡要加回
+// 下面這一行,那一份假資料也改回 null:
+//
+//   await callOnce('member-actual-subscribe', onMemberSubscriptionsRealPrice, { mode: 'navigation' })
+//
+// 包 callOnce 的原因:頁面的 setup 在 SSR 跑一次、hydration 在瀏覽器再跑一次,
+// 直接 await 的話同一支 api 會發兩次。mode 要 navigation,預設的 render 模式記號永遠留著,
+// 換去別頁再回來會跳過,那一頁就停在離開前的資料。
+
+watch(() => route.query.pg, onMemberSubscriptionsRealPrice)
 
 onUseMeta({
   title: '會員中心 | 好房 HouseFun',
@@ -29,6 +51,7 @@ onMounted(() => {
       class="p:--hasBgColor pt:--rounded-20 p:--py-25 t:--py-20 p:--px-40 m:--pb-20 tm:--px-16 grow t:mx-[10px]"
     >
       <PageMemberCenterHeader title="實登訂閱管理" />
+      <PageMemberCenterActualSubscribeContent @deleted="onMemberSubscriptionsRealPrice" />
     </CommonMContent>
   </CommonMContainer>
 </template>

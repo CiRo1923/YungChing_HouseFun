@@ -89,6 +89,10 @@ export const useMemberCenterStore = defineStore('memberCenter', () => {
       page: 1,
       pageSize: LIST_PAGE_SIZE,
     },
+    actualSubscribe: {
+      page: 1,
+      pageSize: LIST_PAGE_SIZE,
+    },
     password: {
       currentPassword: null,
       newPassword: null,
@@ -360,6 +364,69 @@ export const useMemberCenterStore = defineStore('memberCenter', () => {
     },
     apiData: { ...apiDefault.searchSubscribe },
   })
+  /* 實登訂閱管理:data 放清單與分頁資訊。
+
+    api 目前回不到資料,所以先帶一份假的把版面撐起來。三筆分別是
+    「設計稿上的四個標籤」「標籤只有兩個」「標籤多到換行」。
+
+    **有四個欄位是設計稿要、swagger 的 RealPriceSubscriptionItem 沒有的**:
+    加入時間、權狀坪數、總價,以及「查看」要帶去的實登搜尋頁網址。
+    照設計稿把版面做出來,那四個名字是暫定的 —— 三個成交數字照 latestUnitPrice
+    的形狀取名,時間與網址照搜尋訂閱那一層的 createdAt / conditionPath。
+    api 定案之後這幾個名字要跟著改,元件那邊也要一起改。
+
+    反過來 swagger 有、設計稿沒畫的是 regionName、keyword、latestTradeDate,
+    畫面上沒有它們的位置,所以不取用。
+
+    api 通了之後這一份改回 null,頁面那一支也要把初次載入加回去。 */
+  const actualSubscribe = ref({
+    data: {
+      paging: {
+        page: 1,
+        pageSize: LIST_PAGE_SIZE,
+        total: 3,
+      },
+      items: [
+        {
+          id: '1',
+          conditionPath: '/actual-price/list/1_region',
+          conditionTags: ['台北市大安區', '捷運大安森林公園站', '房間都有窗', '管理室代收'],
+          latestBuildPing: 29.8,
+          latestTotalPrice: 3000,
+          latestUnitPrice: 100.05,
+          createdAt: '2026-01-01T00:00:00',
+        },
+        {
+          id: '2',
+          conditionPath: '/actual-price/list/2_region',
+          conditionTags: ['新北市板橋區', '總價1000-2000萬'],
+          latestBuildPing: 45.2,
+          latestTotalPrice: 1680,
+          latestUnitPrice: 37.17,
+          createdAt: '2026-01-05T00:00:00',
+        },
+        {
+          id: '3',
+          conditionPath: '/actual-price/list/3_region',
+          conditionTags: [
+            '台北市信義區',
+            '台北市松山區',
+            '捷運市政府站',
+            '捷運國父紀念館站',
+            '電梯大樓',
+            '三房以上',
+            '屋齡十年內',
+            '有平面車位',
+          ],
+          latestBuildPing: 68.4,
+          latestTotalPrice: 12480,
+          latestUnitPrice: 182.45,
+          createdAt: '2026-01-10T00:00:00',
+        },
+      ],
+    },
+    apiData: { ...apiDefault.actualSubscribe },
+  })
   const navs = readonly([
     {
       label: '通知總覽',
@@ -527,5 +594,6 @@ export const useMemberCenterStore = defineStore('memberCenter', () => {
     message,
     houseSubscribe,
     searchSubscribe,
+    actualSubscribe,
   }
 })
