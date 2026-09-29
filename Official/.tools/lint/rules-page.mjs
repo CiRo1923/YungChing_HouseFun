@@ -19,6 +19,9 @@ import {
   POPUP_TAGS,
   SCAN_TARGETS,
   VIEWS_DIR,
+  DUAL_TYPE_UTILITIES,
+  utilityBodyOf,
+  utilityNameFrom,
   bodyRangeOf,
   isComponentFile,
   isInSrc,
@@ -595,26 +598,9 @@ const isCoveredBy = (base, scoped) =>
    只看前綴的話,上面每一組都會被判成「同一個屬性被蓋掉」,
    而顏色與字級本來就該分開寫 —— 那是整批誤報。
 
-   分辨的依據與 css-module-variables 那份規範裡「要標 length:」的判準是同一個:
-   帶單位的數字與標了 length: 的是長度,變數與色碼是顏色。 */
-const DUAL_TYPE_UTILITIES = new Set(['text', 'border', 'outline', 'ring', 'divide'])
-
-/**
- * 去掉 class 前面那幾層前綴(`m:`、`hover:`),值原樣留著。
- *
- * **只切方括號之前的冒號** —— 值裡面也會有一個(`text-[length:--x]` 的型別提示)。
- * 連值一起切的話,那個 class 會被切成 `--x]`,認不出 utility 是什麼,
- * 於是標了型別的那些整批不被檢查 —— 而那正是規範要求的寫法。
- *
- * 判準只寫這一份,前綴與名稱兩處都用它。
- */
-const withoutPrefixes = (token) => {
-  const at = token.indexOf('[')
-  const head = at === -1 ? token : token.slice(0, at)
-  const cut = head.lastIndexOf(':')
-
-  return cut === -1 ? token : token.slice(cut + 1)
-}
+   哪幾個 utility 有這兩種版本,取共用的那一份名單(DUAL_TYPE_UTILITIES)——
+   「這個值該不該標 length:」問的是同一件事,名單分成兩份的話,
+   加了一個而另一邊沒加,那一個會在其中一條規則裡開始判錯。 */
 
 const LENGTH_VALUE_RE = /^\[(?:length:|\d)/
 
@@ -634,12 +620,10 @@ const valueTypeOf = (token) => {
  * 不接的話 text-[--紅色] 與 text-[18px] 會被當成同一個屬性。
  */
 const utilityNameOf = (token) => {
-  const noPrefix = withoutPrefixes(token)
-  const m = noPrefix.match(/^(-?[a-z]+(?:-[a-z]+)*?)-(?:\[|\d|auto|full|px|screen)/)
+  const noPrefix = utilityBodyOf(token)
+  const name = utilityNameFrom(noPrefix)
 
-  if (!m) return null
-
-  const name = m[1]
+  if (!name) return null
   if (!DUAL_TYPE_UTILITIES.has(name)) return name
 
   const type = valueTypeOf(noPrefix)
@@ -655,10 +639,10 @@ const utilityNameOf = (token) => {
  * 那些本來就是「某個狀態下才蓋掉」,是它們的用途)。
  */
 const breakpointOf = (token, prefixes) => {
-  /* 「前綴到哪裡為止」取 withoutPrefixes 的那一份判準,不在這裡重算 ——
+  /* 「前綴到哪裡為止」取共用的那一份判準,不在這裡重算 ——
      值裡面也會有冒號(text-[length:--x] 的型別提示),兩處各算一次的話,
      其中一邊修好了另一邊還是舊的。 */
-  const body = withoutPrefixes(token)
+  const body = utilityBodyOf(token)
   if (body === token) return ''
 
   const prefix = token.slice(0, token.length - body.length - 1)
@@ -773,11 +757,32 @@ const openedIdsIn = (text) =>
     index: m.index,
   }))
 
+/**
+ * 有沒有「開了一個算不出名字的彈窗」——`onCustom({ id: 變數 })`。
+ *
+ * 那種寫法很正常:兩種情境的差異集中在一個物件裡
+ * (`const popup = isSingle ? { id: 'a', title: … } : { id: 'b', title: … }`),
+ * 後面的按鈕與導頁只寫一份;拆成 if/else 會讓那幾段各寫一遍。
+ *
+ * 但靜態算不出那個值 —— 所以「全案開了哪些 id」這份清單不完整,
+ * 而不完整的清單不能拿來反推「沒有人開它」。
+ */
+const hasUnresolvableOpen = (text) =>
+  [...text.matchAll(/onCustom\s*\(\s*\{[^}]*?\bid\s*:\s*([^,}]+)/g)].some(
+    (m) => !m[1].trim().startsWith("'")
+  )
+
 const popupIdIndexOf = (root) => {
   if (popupIdCache?.root === root) return popupIdCache.index
 
   const declared = new Map() // id → 宣告它的檔案
   const opened = new Map() // id → 開啟它的檔案
+
+  /* 這兩份清單完不完整 —— 有任何一處算不出名字,那一份就是不完整的。
+     不完整的清單只能用來回答「有」,不能用來回答「沒有」:
+     查得到就是真的有,查不到只代表「我沒看到」,不代表它不存在。 */
+  let openedComplete = true
+  let declaredComplete = true
 
   for (const dir of SCAN_TARGETS) {
     for (const abs of listFiles(root, dir)) {
@@ -790,25 +795,50 @@ const popupIdIndexOf = (root) => {
 
         for (const one of declaredIdsIn(text, POPUP_TAGS)) {
           if (one.id) declared.set(one.id, rel)
+          // 動態綁的:那支彈窗的 id 由使用端傳進來,靜態看不出是哪一個
+          if (one.dynamic) declaredComplete = false
         }
         for (const one of openedIdsIn(text)) opened.set(one.id, rel)
+        if (hasUnresolvableOpen(text)) openedComplete = false
       } catch {
         // 讀不到某一支就跳過,不要因此讓整條規則失效
       }
     }
   }
 
-  popupIdCache = { root, index: { declared, opened } }
+  popupIdCache = { root, index: { declared, opened, openedComplete, declaredComplete } }
 
   return popupIdCache.index
 }
+
+/**
+ * 這個專案的宣告端清單完不完整 —— 給規則自己的驗證用。
+ *
+ * 有轉手元件(使用端指定 id、版面共用一份)的專案一定是不完整的,
+ * 那時「開了一個查不到的 id」整條不作用,驗它的案例也就驗不到東西。
+ * 驗證那邊不另寫一份判斷:兩邊各判一次的話,規則改了條件而驗證沒跟上,
+ * 那一則會變成必定失敗的雜訊,而失敗的原因與規則無關。
+ */
+export const isPopupDeclaredComplete = (root) => popupIdIndexOf(root).declaredComplete
+
+/**
+ * 這個專案「全案開了哪些 id」這份清單完不完整 —— 給規則自己的驗證用。
+ *
+ * 有 `onCustom({ id: 變數 })` 那種寫法的專案一定是不完整的,
+ * 那時「宣告了卻沒有人開它」整條不作用,驗它的案例也就驗不到東西。
+ *
+ * 與上面那一支分開:兩條規則看的是不同的那一半清單,
+ * 共用一個旗標的話,其中一邊的寫法會讓另一邊也跟著跳過,
+ * 而那一條其實好好的。
+ */
+export const isPopupOpenedComplete = (root) => popupIdIndexOf(root).openedComplete
 
 const checkPopupId = ({ rel, text: raw, root }) => {
   if (!POPUP_TAGS.length) return [] // 沒有彈窗元件的專案整條略過
   if (!isInSrc(rel) || !(rel.endsWith('.vue') || rel.endsWith('.js'))) return []
 
   const text = maskComments(rel, raw)
-  const { declared, opened } = popupIdIndexOf(root)
+  const { declared, declaredComplete } = popupIdIndexOf(root)
   const issues = []
 
   /* 這支檔案的宣告只算一次 —— 下面兩種違規看的是同一批。
@@ -830,33 +860,114 @@ const checkPopupId = ({ rel, text: raw, root }) => {
     )
   }
 
-  // 二、開了一個沒有人宣告的 id
-  for (const one of openedIdsIn(text)) {
-    if (declared.has(one.id)) continue
+  /* 二、開了一個沒有人宣告的 id。
 
-    issues.push(
-      issueOf(
-        rel,
-        lineNoOf(text, one.index),
-        'popupId',
-        `開的是 '${one.id}',但全案沒有任何彈窗宣告這個 id —— ` +
-          `按下去不會有任何反應,也不會報錯;` +
-          `確認宣告端那一支的 id 有沒有拼錯、或改名時漏掉了一邊`
+     **宣告端清單完整時才問得出這件事。** 有轉手元件的專案(使用端指定 id、
+     版面共用一份)那份清單一定不完整 —— 那時「查不到」只代表我沒看到,
+     不代表它不存在,而報出來的每一筆都是誤報。 */
+  if (declaredComplete) {
+    for (const one of openedIdsIn(text)) {
+      if (declared.has(one.id)) continue
+
+      issues.push(
+        issueOf(
+          rel,
+          lineNoOf(text, one.index),
+          'popupId',
+          `開的是 '${one.id}',但全案沒有任何彈窗宣告這個 id —— ` +
+            `按下去不會有任何反應,也不會報錯;` +
+            `確認宣告端那一支的 id 有沒有拼錯、或改名時漏掉了一邊`
+        )
       )
-    )
+    }
   }
 
-  // 三、宣告了卻沒有人會開它
-  for (const one of declaredHere) {
-    if (!one.id || opened.has(one.id) || BUILTIN_POPUP_IDS.includes(one.id)) continue
+  return issues
+}
+
+// --- 規則 popupIdOrphan:宣告了卻沒有人會開它 --------------------------------
+//
+// 與 popupId 分開是因為**它問的問題不一樣**:
+//
+//   popupId        這一行本身對不對(沒寫 id、開了一個查得到查不到的 id)
+//   popupIdOrphan  從全案反推「沒有人開過它」
+//
+// 反推有個前提:**那份「誰開了什麼」的清單要完整。** 而它常常不完整 ——
+// 開啟端寫成變數是正常做法(兩種情境的差異集中在一個物件,後面的按鈕與導頁
+// 只寫一份),那種靜態算不出名字。
+//
+// 清單不完整時查不到只代表「我沒看到」,不代表它不存在。
+// 照樣報的話,每一支用了那種寫法的彈窗都會被說成「打不開」——
+// 而誤報累積起來,真正拼錯的那一筆就被淹沒了,那正是這條規則要擋的事。
+//
+// 所以清單不完整就整條不做,並在前提清單裡講出來(見 preflight.mjs)。
+
+const checkPopupIdOrphan = ({ rel, text: raw, root }) => {
+  if (!POPUP_TAGS.length) return []
+  if (!isInSrc(rel) || !(rel.endsWith('.vue') || rel.endsWith('.js'))) return []
+
+  const { opened, openedComplete } = popupIdIndexOf(root)
+
+  // 清單不完整 —— 反推的前提不成立,整條不做
+  if (!openedComplete) return []
+
+  const text = maskComments(rel, raw)
+
+  return declaredIdsIn(text, POPUP_TAGS)
+    .filter((one) => one.id && !opened.has(one.id) && !BUILTIN_POPUP_IDS.includes(one.id))
+    .map((one) =>
+      issueOf(
+        rel,
+        lineNoOf(text, one.index),
+        'popupIdOrphan',
+        `宣告了 '${one.id}',但全案沒有任何地方會開它 —— ` +
+          `多半是改名時漏掉這一邊,或這支彈窗已經不用了(不用的話連同它的內容一起刪掉)`
+      )
+    )
+}
+
+// --- 規則 popupIdNaming:彈窗的 id 用 popup 開頭 ------------------------------
+//
+// 那個字串會同時出現在兩個地方(宣告彈窗的那一支、開啟它的那一支),
+// 而且散在不同的檔案裡。名字一致才搜尋得到「這個彈窗總共牽涉到哪幾支檔案」——
+// 改一個彈窗的內容時,要先找齊它的宣告端、開啟端與關閉端。
+//
+// **與 popupId 分開是刻意的。** 那一條管的是「兩邊的 id 對不對得起來」,
+// 這一條管的是「那個名字長什麼樣子」—— 兩件事,兩個代號。
+// 同一個代號底下放兩種判準的話,案例分不出抓到的是哪一件,
+// 而修其中一件會讓另一件的案例跟著變。
+//
+// 開啟函式內建的那幾個豁免:它們是系統級的外框(提示、確認、請求中),
+// 不屬於任何一頁,名字在開啟函式裡寫死,改名會動到每一支使用端。
+
+const checkPopupIdNaming = ({ rel, text: raw }) => {
+  if (!POPUP_TAGS.length) return []
+  if (!isInSrc(rel) || !(rel.endsWith('.vue') || rel.endsWith('.js'))) return []
+
+  const text = maskComments(rel, raw)
+  const issues = []
+
+  // 同一個名字在一支檔案裡出現好幾次時只報一筆 —— 要改的是同一個字串
+  const seen = new Set()
+
+  /* 宣告端與開啟端都看 —— 兩邊寫的是同一個字串,只驗一邊的話,
+     另一邊改了名字不會被發現(而那時兩邊對不上,彈窗直接打不開)。 */
+  for (const one of [...declaredIdsIn(text, POPUP_TAGS), ...openedIdsIn(text)]) {
+    if (!one.id || BUILTIN_POPUP_IDS.includes(one.id)) continue
+    if (/^popup[A-Z]/.test(one.id)) continue
+    if (seen.has(one.id)) continue
+
+    seen.add(one.id)
 
     issues.push(
       issueOf(
         rel,
         lineNoOf(text, one.index),
-        'popupId',
-        `宣告了 '${one.id}',但全案沒有任何地方會開它 —— ` +
-          `多半是改名時漏掉這一邊,或這支彈窗已經不用了(不用的話連同它的內容一起刪掉)`
+        'popupIdNaming',
+        `彈窗的 id '${one.id}' 要用 popup 開頭 —— 建議 ` +
+          `popup${one.id.replace(/^./, (c) => c.toUpperCase())};` +
+          `那個字串會同時出現在宣告端與開啟端、而且散在不同的檔案裡,` +
+          `名字一致才搜尋得到這個彈窗總共牽涉到哪幾支`
       )
     )
   }
@@ -865,6 +976,8 @@ const checkPopupId = ({ rel, text: raw, root }) => {
 }
 
 export const PAGE_CHECKS = [
+  checkPopupIdNaming,
+  checkPopupIdOrphan,
   checkPopupLocation,
   checkPageApiData,
   checkPageActionNaming,
@@ -883,6 +996,8 @@ export const PAGE_RULE_TITLE = {
   pageAwaitAll: '進入頁面時的請求沒有一起發出',
   breakpointOverride: '頁面的 class 靠斷點蓋掉基底',
   popupId: '彈窗的 id 對不起來',
+  popupIdNaming: '彈窗的 id 沒有 popup 開頭',
+  popupIdOrphan: '宣告了彈窗卻沒有人會開它',
 }
 
 export const PAGE_RULE_HINT = {
@@ -894,4 +1009,6 @@ export const PAGE_RULE_HINT = {
   pageAwaitAll: `onMounted 裡的請求用 ${PARALLEL_AWAIT_HELPER.name}([ … ]) 一起發出 —— 存檔時自動包好`,
   breakpointOverride: '每個斷點各寫一次,不要先寫一個基底再用斷點蓋掉它',
   popupId: '宣告端的 id 與開啟時傳的 id 要一模一樣 —— 對不上時不會報錯,彈窗就是打不開',
+  popupIdNaming: '一律 popup 開頭 —— 那個字串散在宣告端與開啟端,名字一致才搜尋得到整組',
+  popupIdOrphan: '改名時兩邊都要改 —— 只改一邊的話那支彈窗從此打不開,而且不會報錯',
 }

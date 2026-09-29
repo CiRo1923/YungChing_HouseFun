@@ -45,6 +45,36 @@ description: 本專案的 import 路徑規範。當需要在原始碼新增或�
 這種路徑必須是寫死的字面字串(建置工具要在編譯期展開它,不接受變數),
 所以它綁著檔案當下的位置 —— 用 alias 才不會因為搬檔案而失效。
 
+**寫成「專案根的絕對路徑」也不行**(`/某個目錄/**/*`)。那種寫法看起來很穩,
+但它把目錄名寫死了:
+
+```js
+// 不要 —— 圖片目錄改叫別的名字,這裡就收到一批空的
+const MAP = import.meta.glob('/src/assets/imgs/**/*', { eager: true })
+
+// 要 —— alias 指到哪裡由建置設定決定
+const MAP = import.meta.glob('@imgs/**/*', { eager: true })
+```
+
+**glob 的 key 仍然是解析後的絕對路徑**,所以查詢那一側也要跟著改 ——
+光把 pattern 換成 alias 而查詢還在組原本的字面前綴,結果是永遠對不上、
+每一項都找不到。前綴可以從「一定存在的那一支」反推:
+
+```js
+/* 前綴從 blank.svg 反推,不必知道圖片目錄叫什麼 ——
+  那一支是這支元件本來就相依的檔案(上面 import 了它,少了它編譯不過),
+  所以它一定在 glob 的結果裡。 */
+const KNOWN_IMG = 'common/blank.svg'
+
+const IMG_PREFIX =
+  Object.keys(MAP)
+    .find((key) => key.endsWith(`/${KNOWN_IMG}`))
+    ?.slice(0, -KNOWN_IMG.length) ?? ''
+```
+
+指向專案根的那種泛用 alias(`@`)不算改善 —— `@/某個目錄/**/*` 一樣把目錄名
+寫死了,所以規則不會拿它來建議。
+
 ## 範例
 
 ```js

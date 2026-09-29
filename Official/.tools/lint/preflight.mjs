@@ -12,6 +12,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { CHECKSUM_FILE, recordedFingerprints } from './checksum.mjs'
+import { COMPONENT_API_FILE, recordedComponentApi } from './component-api.mjs'
 import { isColorNamingConfigFit, isHueSourceFit } from './color-order.mjs'
 import { hasBreakpointVars, hasResponsiveStyles } from './lint-core.mjs'
 import { IS_SOURCE_PROJECT } from './rules-global.mjs'
@@ -80,6 +81,14 @@ const REQUIREMENTS = [
     why: '沒有清單就沒有東西可以比對,這條會整條略過。在這個專案改了共用規則的話,不會有人發現,而改動會在下一次整套更新時被蓋掉。',
   },
   {
+    /* 與上面那一項同一種形狀:來源那邊不比對自己,所以不算缺前提。 */
+    label: '元件介面的名單',
+    rules: ['componentApiAdded'],
+    check: () => (IS_SOURCE_PROJECT || recordedComponentApi() ? COMPONENT_API_FILE : null),
+    need: `要有 ${COMPONENT_API_FILE} —— 那份名單由元件庫的來源跑 npm run rules:seal 產生,跟著元件一起複製過來`,
+    why: '沒有名單就沒有東西可以比對,這條會整條略過。這個專案在元件的變數檔裡多加了變數的話,不會有人發現 —— 元件內部不讀它,而下一次整套更新會把它覆蓋掉。',
+  },
+  {
     /* 這個值只用來組提示訊息,不做路徑檢查 —— 所以它指錯位置時不會有任何徵兆:
        規則照常通過,只有訊息悄悄指向一個不存在的地方,而照著做的人
        會建出一支沒有人知道為什麼在那裡的檔案。
@@ -110,10 +119,10 @@ const REQUIREMENTS = [
   },
   {
     label: '建置設定檔',
-    rules: ['importAlias'],
+    rules: ['importAlias', 'componentAutoImport'],
     check: (root) => firstExistingFile(root, BUILD_CONFIG_FILES),
     need: `專案根目錄要有這幾支其中一支:${BUILD_CONFIG_FILES.join(' / ')}`,
-    why: 'alias 有哪些只有建置設定知道。讀不到就無法判斷相對路徑該改成哪一個 alias,這條會整條略過。',
+    why: 'alias 有哪些只有建置設定知道。讀不到的話,「相對路徑該改成哪一個 alias」判斷不出來,而「這一行 import 指到的是不是元件」也解不開 —— 實際專案裡那幾乎每一行都是用 alias 寫的,兩條都會整條略過。',
   },
   {
     label: '樣式設定檔',
@@ -315,13 +324,13 @@ const REQUIREMENTS = [
   },
   {
     label: '彈窗元件的標籤名',
-    rules: ['popupId'],
+    rules: ['popupId', 'popupIdOrphan', 'popupIdNaming'],
     /* 沒有彈窗系統的專案留空陣列是刻意的 —— 那時整條略過。
-       有彈窗卻沒填的話要講出來:那條從此不檢查任何東西,
+       有彈窗卻沒填的話要講出來:那三條從此不檢查任何東西,
        而 id 對不上的後果是彈窗打不開,畫面上沒有任何徵兆。 */
     check: () => POPUP_TAGS.length > 0 || null,
     need: '設定裡要填 POPUP_TAGS(彈窗元件在畫面上寫出來的標籤名)',
-    why: '這條比對「宣告端的 id」與「開啟時傳的 id」。不知道哪個標籤是彈窗就找不到宣告端 —— 規則整條略過,而 id 打錯時不會報錯,彈窗就是打不開。',
+    why: '這三條都要先認得出哪個標籤是彈窗:比對宣告端與開啟端的 id、反推「宣告了卻沒有人開」、檢查 id 有沒有 popup 開頭。找不到宣告端的話三條一起整條略過,而 id 打錯時不會報錯,彈窗就是打不開。',
   },
   {
     label: '群組驗證的包裝元件',
@@ -339,7 +348,7 @@ const REQUIREMENTS = [
   },
   {
     label: '共用元件目錄',
-    rules: ['tailwind', 'importOrder', 'componentApiImport', 'vueFileName'],
+    rules: ['tailwind', 'importOrder', 'componentApiImport', 'vueFileName', 'componentEmits'],
     check: (root) => (hasDir(root, COMPONENTS_DIR) ? COMPONENTS_DIR : null),
     need: `要有共用元件目錄(目前設定為 ${COMPONENTS_DIR})`,
     why: '這三條只針對共用元件:template 不寫 utility class、元件要自己載入樣式、元件不能直接 import api。目錄不存在時都不會有結果。',
@@ -370,6 +379,9 @@ export const NO_PREREQUISITE_RULES = [
   'storeToRefs',
   'componentClass',
   'componentFolder',
+  /* 只看檔案內容裡有沒有整串圖形座標,不必先有 _svg 目錄 —— 沒有那個目錄的專案,
+     這條照樣要擋(它擋的正是「沒有把圖示放進去」這件事) */
+  'svgIconSource',
   'viewFolder',
   /* 這三條只看檔案內容怎麼寫(class、畫面區段的標籤、有沒有定義轉場),
      不必先有某個目錄或設定檔 */
@@ -382,6 +394,28 @@ export const NO_PREREQUISITE_RULES = [
   /* 這條自己掃全案收集「定義過哪些變數」,不依賴任何目錄或設定存在 ——
      專案沒有 css 變數時它一個引用都掃不到,結果就是通過,不是誤報。 */
   'unknownVar',
+  /* 這條只看畫面區段裡 @事件 綁的值是不是一支 onXxx,
+     不必先有某個目錄或設定 —— 每個專案的 .vue 都適用。 */
+  'eventHandler',
+  /* 這兩條看的是 class 值怎麼寫(有沒有標型別、標了有沒有包 var())。
+     值是變數時會自己掃全案收集「那個變數裝什麼」,
+     專案沒有 css 變數時它一個都追不到,結果就是通過,不是誤報。 */
+  'lengthTypeHint',
+  'lengthTypeVar',
+  /* 這條問「這個豁免標記有沒有人讀」,合法名單是從規則自己的程式碼裡看出來的 ——
+     不依賴任何目錄或設定,規則目錄讀不到時整條不做。 */
+  'unknownExemptMark',
+  /* 這條只看檔名與「有沒有人 import 它」,不必先有某個目錄或設定 ——
+     專案沒有那種檔案時它一支都掃不到,結果就是通過,不是誤報。 */
+  'projectStyleFile',
+  /* 這條只看 setClass 的預設物件裡有沒有帶 class 的值,不必先有某個目錄或設定。 */
+  'setClassDefault',
+  /* 這條只問「同一層的 .vue 有沒有人 import 這支 css」,不必先有某個設定。
+     元件資料夾底下沒有樣式的專案,它一支都掃不到,結果就是通過。 */
+  'moduleCssUnused',
+  /* 這條只看「有沒有 @screen 區塊、裡面有沒有覆蓋基底的字面值」——
+     不讀斷點設定。不做響應式的專案一個 @screen 都沒有,自然掃不到東西。 */
+  'breakpointVarOverride',
 ]
 
 /** 每一項前提涵蓋到的規則(全部項目的聯集)—— 規則自己的驗證拿它比對完整性 */

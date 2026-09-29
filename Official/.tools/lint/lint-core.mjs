@@ -72,6 +72,12 @@ import {
   maskCssComments,
   maskHtmlComments,
   isProjectDocs,
+  DUAL_TYPE_UTILITIES,
+  IMPORT_RE,
+  VAR_DEFINE_RE,
+  stripVariants,
+  utilityBodyOf,
+  utilityNameFrom,
   hasExemptMark,
   isModuleCss,
   isModuleStyle,
@@ -476,25 +482,6 @@ const TW_PREFIX = [
 const isProjectClass = (name) =>
   name.startsWith('--') || /^m-[a-z]/.test(name) || /^j[A-Z]/.test(name)
 
-/** 去掉 variant 前綴(p: / t: / m: / hover: / group-hover: …),回傳 utility 本體 */
-const stripVariants = (cls) => {
-  // arbitrary value 內可能含冒號(例如 bg-[url(a:b)]),只切中括號外的冒號
-  let depth = 0
-  let last = 0
-
-  for (let i = 0; i < cls.length; i += 1) {
-    const c = cls[i]
-    if (c === '[') depth += 1
-    else if (c === ']') depth -= 1
-    else if (c === ':' && depth === 0) last = i + 1
-  }
-
-  return cls.slice(last)
-}
-
-/** 去掉 variant 前綴與 `!` 重要標記,回傳 utility 本體 */
-const utilityBodyOf = (rawClass) => stripVariants(rawClass.replace(/^!/, '')).replace(/^!/, '')
-
 const isTailwindUtility = (rawClass) => {
   const body = utilityBodyOf(rawClass)
   if (!body) return false
@@ -528,9 +515,15 @@ const templateClassTokensOf = (text) => {
     const isDynamic = /^(?::|v-bind:)/.test(m[0].trimStart())
     const chunks = isDynamic ? [...raw.matchAll(/['"]([^'"]+)['"]/g)].map((x) => x[1]) : [raw]
 
-    for (const chunk of chunks) {
+    /* group 認的是「這幾個 class 寫在同一個字串字面值裡」。
+
+       動態綁定常常是互斥的分支(`:class="isError ? 'text-[--red]' : 'text-[--gray]'"`)——
+       那兩個永遠不會同時出現在元素上,不能當成「同一段裡的兩個」。
+       只靠屬性的位置分組的話,互斥的兩個會被湊成一組,
+       而「同一段裡有兩個同樣的 utility」那類檢查就會對著它們誤報。 */
+    for (const [at, chunk] of chunks.entries()) {
       for (const cls of chunk.split(/\s+/)) {
-        if (cls) tokens.push({ cls, index: tpl.offset + m.index })
+        if (cls) tokens.push({ cls, index: tpl.offset + m.index, group: `${m.index}:${at}` })
       }
     }
   }
@@ -1163,9 +1156,6 @@ const LONG_NAME_RE = new RegExp(
 // 只看色票目錄),這裡問「這個**名字**有沒有被定義過」(名字 → 有或沒有,要看全案
 // —— 模組變數、元件動態綁的也算)。兩個問題不同,所以各自收集,不共用同一份索引。
 
-/** 變數的定義:`--x:` 與 `'--x':` 兩種形狀 */
-const VAR_DEFINE_RE = /(--[\w-]+)['"]?\s*:/g
-
 /** 變數的引用;第二個捕獲是 `,` 時代表有後備值 */
 const VAR_USE_RE = /var\(\s*(--[\w-]+)\s*([,)])/g
 
@@ -1239,15 +1229,22 @@ const paletteVarsOf = (root) => {
 }
 
 /**
- * 全案定義過的 css 變數。
+ * 全案定義過的 css 變數 —— 名字對到它的值。
  *
  * 一支一支檔案各自掃全案的話會慢得離譜,所以整份建一次索引 ——
  * 與「誰被定義過」那一類的判斷同一個做法。
+ *
+ * 兩條規則問這一份:「這個名字有沒有被定義過」只看名字,
+ * 「這個變數裝的是長度還是顏色」要看值。收兩份索引的話同一批檔案掃兩次,
+ * 而且有一天會出現「一邊看得到、另一邊看不到」的差異。
+ *
+ * 同一個名字在好幾個斷點各定義一次時留最後一個 ——
+ * 那幾份的形狀是一樣的(都是長度或都是顏色),問型別時取哪一個都相同。
  */
 const definedVarsOf = (root) => {
   if (definedVarCache?.root === root) return definedVarCache.set
 
-  const set = new Set()
+  const set = new Map()
 
   for (const dir of SCAN_TARGETS) {
     for (const abs of listFiles(root, dir)) {
@@ -1255,7 +1252,7 @@ const definedVarsOf = (root) => {
 
       try {
         const text = maskComments(toRel(root, abs), fs.readFileSync(abs, 'utf8'))
-        for (const m of text.matchAll(VAR_DEFINE_RE)) set.add(m[1])
+        for (const m of text.matchAll(VAR_DEFINE_RE)) set.set(m[1], m[2].trim())
       } catch {
         // 讀不到某一支就跳過,不要因此讓整條規則失效
       }
@@ -1414,6 +1411,232 @@ const checkTShirtSizing = ({ rel, text: raw }) => {
   for (const m of text.matchAll(T_SHIRT_VAR_RE)) add(m.index, `${m[1]}-${m[2]}`)
 
   return issues
+}
+
+// --- 規則 lengthTypeHint:長度值要標 length: ----------------------------------
+//
+// text- / border- / outline- / ring- 這四個同時有「長度」與「顏色」兩種版本。
+// 值寫成變數時建置工具分不出是哪一種,**一律當成顏色**:
+//
+//   text-[--nav-description-text-size]    產出 color,字級完全沒有生效
+//   text-[length:--nav-description-text-size]  產出 font-size,這才是要的
+//
+// 這是最難發現的一類:編譯通過、瀏覽器不報錯、檢查也是綠的,
+// 畫面上只是那個字級或框線寬度沒有作用,要拿設計稿逐項比對才看得出來。
+//
+// 兩條路徑各自判定,誰先成立就報誰:
+//
+//   一、同一個宣告裡同一個 utility 出現兩次,而且至少一個沒標型別。
+//      那一定有一個不會產出 —— 兩個都是同一個 CSS 屬性,後面的蓋掉前面的。
+//      不必知道變數裝什麼就判得出來,零誤判。
+//
+//   二、單獨出現時,追那個變數的值。是長度就要標。
+//      追不到、或值的形狀認不出來的一律不報 —— 這一段本來就是推測,
+//      誤報一次之後整條規則就會被當成雜訊。
+
+/** 數字開頭(帶不帶單位都算)或 calc(:這是長度 */
+const LENGTH_LITERAL_RE = /^(?:-?\.?\d|calc\(|clamp\(|min\(|max\()/
+
+/** 色碼與顏色函式:這是顏色 */
+const COLOR_LITERAL_RE = /^(?:#|rgba?\(|hsla?\(|color\(|transparent\b|currentColor\b)/
+
+/** 值只是「指向另一個變數」時,要追到那一個去問 */
+const SINGLE_VAR_RE = /^var\(\s*(--[\w-]+)\s*\)$/
+
+/**
+ * 這個變數裝的是長度還是顏色 —— 認不出來時回 `''`。
+ *
+ * 值只是指向另一個變數時(斷點那一套就是這樣寫的:
+ * `--popup-header-text-size: var(--popup-header-pc-text-size)`)要追過去,
+ * 不追的話整個斷點機制底下的變數全部都答不出來。
+ *
+ * 追的深度有上限,而且走過的名字不再走第二次 ——
+ * 兩個變數互相指向對方時(改壞的時候會出現)會一直追下去,
+ * 那會讓整個檢查停在那裡,看起來像當掉。
+ */
+const varValueTypeOf = (name, vars, seen = new Set()) => {
+  if (seen.has(name) || seen.size > 10) return ''
+  seen.add(name)
+
+  const value = vars.get(name)
+  if (!value) return ''
+
+  if (LENGTH_LITERAL_RE.test(value)) return 'length'
+  if (COLOR_LITERAL_RE.test(value)) return 'color'
+
+  const next = value.match(SINGLE_VAR_RE)?.[1]
+  if (next) return varValueTypeOf(next, vars, seen)
+
+  // 關鍵字(auto、inherit)、多段的值、認不得的寫法 —— 問不出來就不回答
+  return ''
+}
+
+/**
+ * 一個 class 的前綴、utility 名字與方括號裡的值;不是方括號寫法的回 null。
+ *
+ * 前綴要留著 —— `text-[--a]` 與 `hover:text-[--b]` 是兩個不同的狀態,
+ * 不會互相蓋掉。把前綴剝掉之後分組的話,
+ * 「常態一個顏色、滑過去換一個顏色」這種最普通的寫法會整批被報。
+ */
+const arbitraryClassOf = (cls) => {
+  const body = utilityBodyOf(cls)
+  const name = utilityNameFrom(body)
+  if (!name) return null
+
+  // 整個本體就是「名字 + 方括號值」才算;後面還跟著別的東西的不是
+  const value = body.slice(name.length).match(/^-\[([^\]]*)\]$/)?.[1]
+  if (value === undefined) return null
+
+  return { name, value, prefix: cls.slice(0, cls.length - body.length) }
+}
+
+const TYPE_HINT_TAIL =
+  '建置工具分不出方括號裡的變數是長度還是顏色,一律當成顏色 —— ' +
+  '不標的話產出的是顏色那一種,畫面上那個值完全沒有生效,而且不會有任何錯誤訊息'
+
+/**
+ * 一段 class 清單裡該標而沒標型別的那幾個。
+ *
+ * `@apply` 後面那一串與畫面區段的 class 屬性是同一種東西(空白隔開的 class),
+ * 所以兩個位置共用這一份判斷,不各寫一次。
+ */
+const missingTypeHintsIn = (classes, vars) => {
+  const parsed = classes
+    .map(arbitraryClassOf)
+    .filter((one) => one && DUAL_TYPE_UTILITIES.has(one.name))
+
+  /* **只看值是變數、而且沒標型別的那些。**
+
+     字面值不在這條的範圍內:`text-[14px]` 產出 font-size、`text-[#fff]` 產出 color ——
+     建置工具看得出帶單位的數字是長度、色碼是顏色,自己就分對了。
+     所以 `text-[14px] text-[--gray-6b]` 兩個都會產出,那是正確的寫法。
+     把字面值也算進來的話,那種寫法整批被報,而照著改成 text-[length:14px] 沒有任何意義。
+
+     標了型別的(`length:` 開頭)本來就不是 `--` 開頭,一起被這一行濾掉。 */
+  const untyped = parsed.filter((one) => one.value.startsWith('--'))
+
+  const found = []
+
+  /* 一、同一個 utility 有兩個以上「沒標型別的變數」。
+
+     那幾個會全部被當成顏色 —— 同一個 CSS 屬性,後面的蓋掉前面的,
+     其中至少一個不會產出。變數裝什麼不必知道就判得出來,這一段不會誤報。 */
+  const byName = new Map()
+
+  for (const one of untyped) {
+    // 前綴一起當分組的依據 —— 不同前綴是不同狀態,不會互相蓋掉
+    const key = `${one.prefix}${one.name}`
+    byName.set(key, [...(byName.get(key) ?? []), one])
+  }
+
+  const reported = new Set()
+
+  for (const group of byName.values()) {
+    if (group.length < 2) continue
+
+    for (const one of group) reported.add(one)
+
+    const { name, prefix } = group[0]
+    const list = group.map((one) => `${prefix}${name}-[${one.value}]`).join('、')
+
+    found.push({
+      detail:
+        `同一段裡有 ${group.length} 個沒標型別的 ${prefix}${name}-(${list})—— ` +
+        `${TYPE_HINT_TAIL};` +
+        `這幾個會被當成同一個屬性,只有最後一個產得出來。` +
+        `其中管長度的那一個要標成 ${prefix}${name}-[length:--變數名]`,
+    })
+  }
+
+  /* 二、單獨出現的那些,追變數的值。
+     追不出來的不報 —— 這一段是推測,誤報一次整條規則就會被當成雜訊。 */
+  for (const one of untyped) {
+    if (reported.has(one)) continue
+    if (varValueTypeOf(one.value, vars) !== 'length') continue
+
+    found.push({
+      detail:
+        `${one.name}-[${one.value}] 的值是長度(${vars.get(one.value)}),` +
+        `要寫成 ${one.name}-[length:${one.value}] —— ${TYPE_HINT_TAIL}`,
+    })
+  }
+
+  return found
+}
+
+const checkLengthTypeHint = ({ rel, text: raw, root }) => {
+  /* 只看樣式檔與 .vue —— class 名稱只會寫在這兩種檔案裡。
+     不限範圍的話,規則自己的驗證案例(程式碼裡寫著違規長相的字串)
+     會被當成違規報出來,而那正是它該有的樣子。 */
+  if (!rel.endsWith('.css') && !rel.endsWith('.vue')) return []
+
+  const text = maskComments(rel, raw)
+  const vars = definedVarsOf(root)
+
+  /* 這支檔案自己定義的要另外算 —— 索引是整份建好之後快取的,
+     而存檔守門拿到的是還沒寫進磁碟的內容:剛加的變數不在索引裡。 */
+  const own = new Map(vars)
+  for (const m of text.matchAll(VAR_DEFINE_RE)) own.set(m[1], m[2].trim())
+
+  const issues = []
+
+  for (const m of text.matchAll(APPLY_RE)) {
+    for (const { detail } of missingTypeHintsIn(m[1].split(/\s+/).filter(Boolean), own)) {
+      issues.push(issueOf(rel, lineNoOf(text, m.index), 'lengthTypeHint', detail))
+    }
+  }
+
+  if (rel.endsWith('.vue')) {
+    /* 畫面區段的 class 一個一個來 —— 那一份拿到的是單一 class 與它的位置,
+       而「同一段裡出現兩次」要看整組。
+
+       分組看的是「寫在同一個字串字面值裡」,不是「同一個屬性」——
+       動態綁定常常是互斥的分支(`:class="isError ? 'text-[--紅]' : 'text-[--灰]'"`),
+       那兩個永遠不會同時出現在元素上,湊成一組就會對著它們誤報。 */
+    const byChunk = new Map()
+
+    for (const { cls, index, group } of templateClassTokensOf(raw)) {
+      const at = byChunk.get(group) ?? { line: lineNoOf(raw, index), classes: [] }
+
+      at.classes.push(cls)
+      byChunk.set(group, at)
+    }
+
+    for (const { line, classes } of byChunk.values()) {
+      for (const { detail } of missingTypeHintsIn(classes, own)) {
+        issues.push(issueOf(rel, line, 'lengthTypeHint', detail))
+      }
+    }
+  }
+
+  return issues
+}
+
+// --- 規則 lengthTypeVar:標型別時不要包 var() --------------------------------
+//
+// `text-[length:--x]` 與 `text-[length:var(--x)]` 產出的 CSS 完全相同,
+// 所以這條不是「會壞掉」,是**同一件事只能有一種寫法**:
+//
+//   要找出全站哪些地方標了型別時,兩種寫法得搜兩次,而搜的人不會知道要搜第二種。
+//   規範寫的是變數名直接接在冒號後面,照著寫的人看到另一種會以為那是別的東西。
+
+const LENGTH_VAR_WRAP_RE = /\[length:\s*var\(\s*(--[\w-]+)\s*\)\s*\]/g
+
+const checkLengthTypeVar = ({ rel, text: raw }) => {
+  if (!rel.endsWith('.css') && !rel.endsWith('.vue')) return []
+
+  const text = maskComments(rel, raw)
+
+  return [...text.matchAll(LENGTH_VAR_WRAP_RE)].map((m) =>
+    issueOf(
+      rel,
+      lineNoOf(text, m.index),
+      'lengthTypeVar',
+      `[length:var(${m[1]})] 把變數包在 var() 裡 —— 寫成 [length:${m[1]}],變數名直接接在冒號後面;` +
+        `兩種寫法產出的 CSS 一樣,但同一件事有兩種長相時,` +
+        `要找出全站哪些地方標了型別就得搜兩次,而搜的人不會知道還有第二種`
+    )
+  )
 }
 
 // --- 規則 themeNaming:tailwind theme 自己定義的值也不用 sm / md / lg --------
@@ -1619,29 +1842,158 @@ export const hasResponsiveStyles = (root) => someModuleCss(root, (text) => RESPO
  */
 const isTextSizeVar = (name) => name.endsWith('-text-size')
 
+// --- 規則 breakpointVarOverride:斷點不要用覆蓋的 -----------------------------
+//
+// 同一條選擇器鏈裡的同一個變數,在基底與 `@screen` 區塊**各寫一次字面值**:
+//
+//    .home-index-header { --home-header-mt: -56px; }
+//    @screen p { .home-index-header { --home-header-mt: -84px; } }
+//
+// 那是覆蓋 —— 值寫死在兩個地方,而畫面上看不出哪一個才是這個斷點在用的。
+// 要改的時候得先找齊所有寫過它的位置,漏掉一個就是某個斷點停在舊值,不會報錯。
+//
+// 這一套本來的做法是「各斷點的值各有名字,斷點區塊只做指派」:
+//
+//    .home-index-header {
+//      --home-header-mt: 0;
+//      --home-header-pc-mt: -84px;
+//      --home-header-tablet-mt: -56px;
+//      --home-header-mobile-mt: -56px;
+//    }
+//    @screen p { .home-index-header { --home-header-mt: var(--home-header-pc-mt); } }
+//
+// 值集中在一處、斷點區塊看得出「這個斷點用哪一份」。
+//
+// 兩種寫法不算違規:
+//
+//    右邊是 var(…)        那正是上面那套機制,不是覆蓋
+//    選擇器鏈不一樣       modifier 底下的級距(`&.--px-30`)是使用端傳 class 選的,
+//                         與基底那一個本來就不是同一個東西
+
+/**
+ * 每一個變數宣告,連同它所在的選擇器鏈與「在不在 @screen 裡」。
+ *
+ * 逐字掃括號而不是用比對式:巢狀(`&.--x { … }`)與 `@screen` 包在一起時,
+ * 比對式分不出某一行屬於哪一層,而分錯層的結果是把不同的東西當成同一個。
+ */
+const varDeclarationsOf = (text) => {
+  const out = []
+  const stack = []
+  let buf = ''
+
+  for (let i = 0; i < text.length; i += 1) {
+    const c = text[i]
+
+    if (c === '{') {
+      stack.push(buf.trim().replace(/\s+/g, ' '))
+      buf = ''
+      continue
+    }
+
+    if (c === '}') {
+      stack.pop()
+      buf = ''
+      continue
+    }
+
+    if (c === ';') {
+      const m = buf.trim().match(/^(--[\w-]+)\s*:\s*(.+)$/)
+
+      if (m) {
+        out.push({
+          name: m[1],
+          value: m[2].trim(),
+          chain: stack.filter((s) => !s.startsWith('@')).join(' '),
+          inScreen: stack.some((s) => s.startsWith('@screen')),
+          index: i,
+        })
+      }
+
+      buf = ''
+      continue
+    }
+
+    buf += c
+  }
+
+  return out
+}
+
+const checkBreakpointVarOverride = ({ rel, text: raw }) => {
+  if (!rel.endsWith('.css') && !rel.endsWith('.vue')) return []
+
+  const text = maskCssComments(raw)
+  const byKey = new Map()
+
+  for (const one of varDeclarationsOf(text)) {
+    // 指派另一個變數就是那套機制本身,不是覆蓋
+    if (one.value.startsWith('var(')) continue
+
+    const key = `${one.chain}|${one.name}`
+    const at = byKey.get(key) ?? { base: null, screen: null }
+
+    if (one.inScreen) at.screen ??= one
+    else at.base ??= one
+
+    byKey.set(key, at)
+  }
+
+  const issues = []
+
+  for (const { base, screen } of byKey.values()) {
+    if (!base || !screen) continue
+
+    issues.push(
+      issueOf(
+        rel,
+        lineNoOf(text, screen.index),
+        'breakpointVarOverride',
+        `${screen.name} 在基底與斷點各寫了一次值(${base.value} → ${screen.value})—— ` +
+          `那是覆蓋,值散在兩個地方,改的時候漏掉一處就是某個斷點停在舊值,不會報錯;` +
+          `把各斷點的值各給一個名字(-pc- / -tablet- / -mobile-),斷點區塊只寫 ` +
+          `${screen.name}: var(…) 做指派`
+      )
+    )
+  }
+
+  return issues
+}
+
 const checkBreakpointSet = ({ rel, text: raw }) => {
   if (!BREAKPOINTS.length) return []
   if (!isModuleStyle(rel)) return []
 
-  // 豁免標記寫在註解裡,所以要先判斷,再把註解遮掉
-  const exempt = hasExemptMark(raw, 'breakpoint')
+  /* 豁免看的是**這一組自己的那幾行**:這一組裡任何一行標了,就當成這一組刻意不成套
+    (桌機平板用 mx、手機用 mt 那種,三行分屬兩個名字,標在哪一行都是在講同一件事)。
+
+    整支檔案問一次的話,只要任何一處標了,那支檔案的每一組都不檢查了 ——
+    而寫標記的人以為自己只豁免了那一組。一支變數檔通常有好幾十組,
+    其餘的會安靜地失去檢查,之後漏掉一個斷點也不會有人發現。
+
+    標記寫在註解裡,所以要拿還沒遮掉註解的那一份來看。 */
+  const rawLines = raw.split(/\r?\n/)
 
   const text = maskCssComments(raw)
   const groups = new Map()
 
   for (const m of text.matchAll(BREAKPOINT_VAR_RE)) {
     const key = `${m[1]}|${m[3]}`
-    if (!groups.has(key)) groups.set(key, { found: new Set(), line: lineNoOf(text, m.index) })
+    const line = lineNoOf(text, m.index)
+
+    if (!groups.has(key)) groups.set(key, { found: new Set(), line, lines: [] })
     groups.get(key).found.add(m[2])
+    groups.get(key).lines.push(line)
   }
 
   const issues = []
 
-  for (const [key, { found, line }] of groups) {
+  for (const [key, { found, line, lines }] of groups) {
     const missing = BREAKPOINTS.filter((b) => !found.has(b))
     if (!missing.length) continue
 
     const [prefix, suffix] = key.split('|')
+    const exempt = lines.some((n) => hasExemptMark(rawLines[n - 1] ?? '', 'breakpoint'))
+
     if (exempt && !isTextSizeVar(`${prefix}-${suffix}`)) continue
     issues.push(
       issueOf(
@@ -1688,8 +2040,15 @@ const NEUTRAL_VALUE = new Set([
 const checkBreakpointNeeded = ({ rel, text: raw }) => {
   if (!isModuleStyle(rel) || !/variables\.css$/i.test(rel)) return []
 
-  // 豁免標記寫在註解裡,所以要先判斷,再把註解遮掉
-  const exempt = hasExemptMark(raw, 'breakpoint')
+  /* 豁免是**一行一個**:標記寫在哪一行,就只放行那一行的變數。
+
+    整支檔案問一次的話,只要任何一處標了,那支檔案的所有尺寸變數就都不檢查了 ——
+    而寫標記的人以為自己只豁免了那一行。一支變數檔通常有好幾十個值,
+    其中一個合理的例外會讓其餘全部安靜地失去檢查,之後新加的變數漏了斷點也不會有人發現。
+
+    標記寫在註解裡,所以要拿還沒遮掉註解的那一份來看。
+    遮掉之後註解變成空白,每一行都會被判成沒有標記。 */
+  const rawLines = raw.split(/\r?\n/)
 
   const text = maskCssComments(raw)
   const root = text.match(/:root\s*\{([\s\S]*?)\n\}/)
@@ -1709,8 +2068,10 @@ const checkBreakpointNeeded = ({ rel, text: raw }) => {
     if (NEUTRAL_VALUE.has(value.trim())) return
     if (!SIZE_VALUE_RE.test(value.trim())) return
 
+    /* 字級不受豁免 —— 使用端要能傳字級,那是這條規則的重點,
+       標了也照樣要分斷點。 */
     const isTextSize = isTextSizeVar(name)
-    if (exempt && !isTextSize) return
+    if (!isTextSize && hasExemptMark(rawLines[baseLine + i - 1] ?? '', 'breakpoint')) return
 
     issues.push(
       issueOf(
@@ -1920,7 +2281,153 @@ const findComponentFolder = (dir, name) => {
   return null
 }
 
-const checkModuleLocation = ({ rel, root }) => {
+/**
+ * 這支樣式有沒有版型規則 —— class 的定義,或 `@apply`。
+ *
+ * 集中目錄那一層的定位是「跨模組共用的**變數**」,所以有沒有版型規則
+ * 就是「位置對不對」的判準,與「對應的元件存不存在」無關。
+ *
+ * 只看元件在不在的話,還沒建元件就先寫樣式的那一種完全抓不到 ——
+ * 規則一筆都不報,檢查顯示通過,而那支樣式從此不會被
+ * 「模組 css 只能寫自己那組 class」檢查,也沒有任何訊息。
+ *
+ * `:root` 與 `@screen` 底下純粹指派變數的不算版型 —— 那正是這一層該放的東西。
+ */
+const hasLayoutRules = (text) => /@apply\b/.test(text) || /^[^@\n]*\.[\w\\-]+[^{}\n]*\{/m.test(text)
+
+// --- 規則 projectStyleFile:專案自己加的樣式要另外開一支 ----------------------
+//
+// 元件是整套從元件庫複製過來的,下一次更新也是整套覆蓋。
+// 這個專案自己要的樣式(某一頁才有的變體、品牌自己的那一種外框)
+// **寫進來源同名的那幾支檔案裡的話,每一次更新都會衝突** ——
+// 要嘛手動合併,要嘛被蓋掉,而被蓋掉的當下沒有任何訊息。
+//
+// 所以專案自己加的另外開一支,檔名帶 Project:
+//
+//    selection.css                  來源的,整套更新時直接覆蓋
+//    selectionProject.css           這個專案自己加的,更新時不會被碰到
+//    selectionProjectVariables.css  自己加的那些變數
+//
+// 元件要多兩行 import,那兩行也是來源沒有的 —— 但**只有那兩行**會衝突,
+// 而且一看就知道是這個專案自己接上去的。
+//
+// 這條守得住的是命名與接線:名字對不對得上來源那一支、有沒有真的被載入。
+// 「有沒有偷偷寫進來源的檔案」它看不出來(規則不知道來源長什麼樣),
+// 那一半靠規範文件與複製流程。
+
+/** `selectionProject.css` → selection.css;`selectionProjectVariables.css` → selectionVariables.css */
+const projectStyleBaseOf = (fileName) => {
+  const m = path.basename(fileName, '.css').match(/^(.+?)Project(Variables)?$/)
+
+  return m ? `${m[1]}${m[2] ?? ''}.css` : null
+}
+
+const checkProjectStyleFile = ({ rel, root }) => {
+  if (!isModuleCss(rel)) return []
+
+  const base = projectStyleBaseOf(rel)
+  if (!base) return []
+
+  const cssDir = path.dirname(path.join(root, ...rel.split('/')))
+
+  /* 名字要對得上來源那一支。
+
+     對不上的話多半是打錯字(`selctionProject.css`),或是把一支全新的樣式
+     取成這個名字 —— 前者接不上任何東西,後者則是「這不是附加,是新的元件」,
+     那該走元件自己的資料夾。
+
+     **「有沒有被載入」不在這一條**:那件事每一支模組 css 都適用,
+     由 moduleCssUnused 檢查。混在這裡的話,那一半只會看 Project 那幾支,
+     而一般的樣式檔沒人 import 也不會被發現。 */
+  if (fs.existsSync(path.join(cssDir, base))) return []
+
+  return [
+    issueOf(
+      rel,
+      1,
+      'projectStyleFile',
+      `這支是專案自己加的樣式,但同一層找不到它要附加的 ${base} —— ` +
+        `名字要寫成「來源那一支的檔名 + Project」;` +
+        `如果它其實是一支全新的樣式,那就不是附加,該放進它自己元件的資料夾`
+    ),
+  ]
+}
+
+// --- 規則 moduleCssUnused:樣式檔要有人載入 -----------------------------------
+//
+// 樣式檔不會自己生效 —— 沒有任何元件 import 它的話,**整支一行都不會輸出**。
+//
+// 那是完全沒有徵狀的一種壞法:檔案還在、語法正確、全案檢查通過,
+// 只有畫面上少了那一整批樣式。而「少了樣式」看起來常常像設計本來就長那樣。
+//
+// 兩種情況都是它在抓:
+//
+//   新加了一支卻忘了 import        最容易發生的一步
+//   元件改寫時把 import 拿掉了     整支樣式從此靜靜地沒有作用
+//
+// 範圍是元件自己的樣式目錄裡每一支 css,不限檔名 ——
+// 只看其中幾種的話,其餘那些沒人 import 也不會被發現。
+
+const checkModuleCssUnused = ({ rel, root }) => {
+  if (!isModuleCss(rel)) return []
+
+  const cssDir = path.dirname(path.join(root, ...rel.split('/')))
+  const issues = []
+
+  const componentDir = path.dirname(cssDir)
+  const fileName = path.basename(rel)
+
+  let imported = false
+  let items = []
+
+  /* try 只包「讀檔」這一件事。
+
+     把整段邏輯都包進去的話,程式本身的錯誤(少 import 一個名字那種)
+     也會被這個 catch 接走,而接走之後規則安靜地不再檢查任何東西 ——
+     引擎本來會把它報成 ruleCrashed,包太大就等於把那道保護關掉。 */
+  try {
+    items = fs.readdirSync(componentDir, { withFileTypes: true })
+  } catch {
+    return issues // 讀不到元件那一層時問不出來,不報 —— 報了也指不出要改哪裡
+  }
+
+  for (const item of items) {
+    if (!item.isFile() || !item.name.endsWith('.vue')) continue
+
+    let text = ''
+
+    try {
+      text = fs.readFileSync(path.join(componentDir, item.name), 'utf8')
+    } catch {
+      continue // 這一支讀不到就跳過它,別的還是要看
+    }
+
+    for (const m of text.matchAll(IMPORT_RE)) {
+      const spec = m[1] ?? m[2] ?? m[3] ?? ''
+      if (path.basename(spec) === fileName) imported = true
+    }
+
+    if (imported) break
+  }
+
+  if (!imported) {
+    issues.push(
+      issueOf(
+        rel,
+        1,
+        'moduleCssUnused',
+        `沒有任何元件 import 這支 —— 樣式檔不會自己生效,整支一行都不會輸出,` +
+          `而畫面上少了那一整批樣式看起來常常像設計本來就長那樣;` +
+          `在用得到它的那幾支 .vue 裡加上 import './${MODULE_CSS_DIR_NAME}/${fileName}',` +
+          `真的用不到了就把這支刪掉`
+      )
+    )
+  }
+
+  return issues
+}
+
+const checkModuleLocation = ({ rel, text: raw, root }) => {
   if (!isSharedCss(rel)) return []
 
   /* 名字從路徑推:`<集中目錄>/mForm/common.css` 的模組名是 mForm,
@@ -1949,7 +2456,30 @@ const checkModuleLocation = ({ rel, root }) => {
     ]
   }
 
-  return []
+  /* 對不上任何現成的元件,但**名字是元件的命名**而且寫了版型規則 ——
+     那是「元件還沒建,樣式先寫」。
+
+     只認得出已存在的元件的話,這一種一筆都不會報:檢查顯示通過,
+     而那支樣式從此不被「模組 css 只能寫自己那組 class」檢查,也沒有任何訊息。
+
+     名字要像元件才報 —— 這一層本來就允許放跨模組共用的東西,
+     不看名字的話,那些共用的會被逼著搬進某一個元件的資料夾,
+     而另一個元件就得去 import 別人的檔案。 */
+  const moduleName = candidates.find((name) => classPrefixOf(name))
+  if (!moduleName) return []
+  if (!hasLayoutRules(maskCssComments(raw))) return []
+
+  return [
+    issueOf(
+      rel,
+      1,
+      'moduleLocation',
+      `集中目錄只放跨模組共用的變數,這支寫了版型規則(class 的定義或 @apply)—— ` +
+        `它屬於某一個元件,建 ${COMPONENTS_DIR}/${moduleName}/ 並把樣式收進那裡的 ` +
+        `${MODULE_CSS_DIR_NAME}/;留在這裡的話「模組 css 只能寫自己那組 class」那條不會檢查它,` +
+        `而且沒有任何訊息`
+    ),
+  ]
 }
 
 // --- 自動修正用的工具 -------------------------------------------------------
@@ -2208,15 +2738,20 @@ const CHECKS = [
   checkModuleImportOrder,
   checkModuleScope,
   checkModuleLocation,
+  checkProjectStyleFile,
+  checkModuleCssUnused,
   checkModuleVariables,
   checkTruncateClass,
   checkSharedVarScope,
   checkBreakpointPrefix,
   checkVariableNaming,
   checkUnknownVar,
+  checkLengthTypeHint,
+  checkLengthTypeVar,
   checkTShirtSizing,
   checkThemeNaming,
   checkBreakpointSet,
+  checkBreakpointVarOverride,
   checkBreakpointNeeded,
   // 全站規範(不限 CSS)接在後面 —— 判斷寫在 rules-global.mjs
   ...GLOBAL_CHECKS,
@@ -2311,6 +2846,11 @@ export const RULE_TITLE = {
   breakpointPrefix: '級距在某個斷點少列了前綴',
   variable: '模組變數的命名或斷點',
   unknownVar: '用到沒有定義的 css 變數',
+  breakpointVarOverride: '斷點用覆蓋的,值散在兩個地方',
+  projectStyleFile: '專案自己加的樣式檔名對不上來源',
+  moduleCssUnused: '樣式檔沒有任何元件 import 它',
+  lengthTypeHint: '長度值沒有標 length:,會被當成顏色',
+  lengthTypeVar: '標型別時把變數包在 var() 裡',
   ...GLOBAL_RULE_TITLE,
   ...API_RULE_TITLE,
   ...STORE_RULE_TITLE,
@@ -2340,6 +2880,15 @@ export const RULE_HINT = {
     '命名對齊 tailwind(w / h / p / rounded / leading);尺寸值要三個斷點成套,級距用實際數值不用 sm / md / lg',
   unknownVar:
     'var(--x) 引用的變數全案要找得到定義 —— 找不到時瀏覽器會把整條宣告丟掉,樣式安靜地消失',
+  lengthTypeHint:
+    'text- / border- / outline- / ring- 的值是長度時要標 text-[length:--x] —— 不標的話產出的是顏色,那個值完全沒有生效',
+  lengthTypeVar: '標型別時變數名直接接在冒號後面(text-[length:--x]),不要包 var()',
+  breakpointVarOverride:
+    '各斷點的值各給一個名字,斷點區塊只做指派 —— 基底與斷點各寫一次字面值的話,改的時候漏掉一處就是某個斷點停在舊值',
+  moduleCssUnused:
+    '樣式檔要有人 import —— 沒有的話整支一行都不會輸出,而畫面上少了一整批樣式看起來像設計本來就長那樣',
+  projectStyleFile:
+    '這個專案自己加的樣式另外開一支 <來源檔名>Project.css —— 寫進來源同名的檔案裡,每次整套更新都會衝突或被蓋掉',
   ...GLOBAL_RULE_HINT,
   ...API_RULE_HINT,
   ...STORE_RULE_HINT,

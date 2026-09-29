@@ -28,12 +28,15 @@ import {
   SOURCE_PROJECT_NAME,
   TOOLING_PREFIXES,
   hasExemptMark,
+  isInSrc,
   isInsideString,
   isUnderAny,
   issueOf,
   lineNoOf,
   listFiles,
+  maskComments,
   maskTemplateContent,
+  registerScanCache,
   toRel,
   warnOf,
 } from './shared.mjs'
@@ -41,6 +44,15 @@ import {
 /* 指紋的產生與比對都在 checksum.mjs —— 規則只問「對不對得上」,
    怎麼算指紋是那一支的事,兩邊各寫一份的話會有一天算出不同的值。 */
 import { fingerprintDiff } from './checksum.mjs'
+
+/* 元件變數的名單同樣是「來源封存、專案比對」—— 產生與比對都在那一支,
+   規則只問「有沒有多出來的」。 */
+import {
+  API_KIND_LABEL,
+  COMPONENT_API_FILE,
+  addedComponentApi,
+  isStaleComponentApi,
+} from './component-api.mjs'
 
 // --- 規則 projectName:不得寫死專案名稱、不得跨專案引用 -----------------------
 //
@@ -662,6 +674,201 @@ const checkRuleTampered = ({ rel }) => {
   ]
 }
 
+// --- 規則 unknownExemptMark:豁免標記要真的有規則在讀 -------------------------
+//
+// 豁免標記(`lint-xxx-exempt`)是「這一項我想過了,刻意這樣做」的宣告。
+// 但標記名打錯、或整條規則後來被拿掉時,那行字就只是一句註解 ——
+// **沒有任何作用,讀起來卻像審過了。**
+//
+// 實際發生過:有 8 處寫著一個從來不存在的標記名,
+// 而它宣稱豁免的那件事正好是規範明文要擋的。看的人以為那裡決定過了,
+// 所以沒有人再去想那個值該由誰定,直到有人問起才發現。
+//
+// 合法的名字不另外維護一份清單,直接從規則自己的程式碼裡看
+// 「哪些名字真的有人在讀」—— 清單交給人維護的話,
+// 加了規則忘了加清單,那個真標記會被報成假的;
+// 而拿掉規則忘了拿掉清單,假標記會一直被當成真的。
+
+/**
+ * 規則檔裡 `hasExemptMark(某某, '名字')` 的那個名字。
+ *
+ * 共用的那支判斷是標準寫法,但**不是唯一的讀法** ——
+ * 只有這個專案要的規則(rules-project.mjs)常常用自己的比對式去看註解,
+ * 那時標記名是以 `lint-…-exempt` 的字面出現在規則檔裡,不會經過這支函式。
+ * 只認這一種的話,那幾條規則的標記會整批被報成「沒有人在讀」。
+ */
+const EXEMPT_NAME_RE = /hasExemptMark\([^,]+,\s*'([\w-]+)'\s*\)/g
+
+/** 原始碼裡寫出來的標記 */
+const EXEMPT_MARK_RE = /lint-([\w-]+?)-exempt/g
+
+let exemptNameCache = null
+
+registerScanCache(() => {
+  exemptNameCache = null
+})
+
+/**
+ * 這套規則裡「有人在讀」的豁免標記名。
+ *
+ * 對外提供是為了讓規則自己的驗證直接驗這一份 ——
+ * 那邊另外寫一次掃描的話,驗的就不是真正在跑的那段程式碼。
+ */
+export const knownExemptNamesOf = (root) => {
+  if (exemptNameCache?.root === root) return exemptNameCache.names
+
+  const names = new Set()
+  const dir = path.join(root, '.tools', 'lint')
+
+  try {
+    for (const name of fs.readdirSync(dir)) {
+      if (!name.endsWith('.mjs')) continue
+
+      const text = fs.readFileSync(path.join(dir, name), 'utf8')
+
+      for (const m of text.matchAll(EXEMPT_NAME_RE)) names.add(m[1])
+
+      /* 規則自己寫比對式讀註解的那一種 —— 標記名以字面出現在程式碼裡
+         (`const MARK = /lint-某某-exempt/`)。只認共用那支判斷的話,
+         那幾條規則的標記會整批被報成「沒有人在讀」。
+
+         **字串裡的不算。** 規則自己的驗證(那一支也在這個目錄底下)
+         會把假標記寫成案例資料,訊息裡也會舉例告訴人「例外請標某某」——
+         那些是資料與說明,不是讀取。算進來的話,驗證用的那個假名字
+         會變成合法的,而這條規則就再也抓不到打錯字的標記。
+
+         判準取既有的那一份(isInsideString),不在這裡重寫一次。 */
+      text.split('\n').forEach((line) => {
+        for (const m of line.matchAll(EXEMPT_MARK_RE)) {
+          if (!isInsideString(line, m.index)) names.add(m[1])
+        }
+      })
+    }
+  } catch {
+    /* 讀不到規則目錄時當成「問不出來」,回空集合 ——
+       下面看到空集合就整條不做,不會把每一個標記都報成假的。 */
+  }
+
+  exemptNameCache = { root, names }
+
+  return names
+}
+
+const checkUnknownExemptMark = ({ rel, text: raw, root }) => {
+  if (!isInSrc(rel)) return []
+
+  const known = knownExemptNamesOf(root)
+  if (!known.size) return [] // 問不出有哪些合法的名字時整條不做
+
+  const text = maskComments(rel, raw)
+  const issues = []
+  const seen = new Set()
+
+  /* 標記寫在註解裡,所以要看還沒遮掉註解的那一份。
+     遮掉之後註解變成空白,一個標記都找不到。 */
+  for (const m of raw.matchAll(EXEMPT_MARK_RE)) {
+    const name = m[1]
+
+    if (known.has(name)) continue
+    if (seen.has(name)) continue
+
+    /* 被遮掉的位置代表它在註解裡 —— 那才是宣告。
+       程式碼或字串裡出現同一串字的是資料(規則自己的驗證案例就是這樣寫的)。 */
+    if (text[m.index] === raw[m.index]) continue
+
+    seen.add(name)
+
+    issues.push(
+      issueOf(
+        rel,
+        lineNoOf(raw, m.index),
+        'unknownExemptMark',
+        `lint-${name}-exempt 沒有任何規則在讀 —— 那一行不會放行任何東西,` +
+          `但讀起來像「這裡已經想過了」;` +
+          `名字打錯的話改成正確的,那條規則已經不在了的話把整行拿掉,` +
+          `理由本身值得留就改寫成一般的註解`
+      )
+    )
+  }
+
+  return issues
+}
+
+// --- 規則 componentApiAdded:元件的介面只能改值,不能多加 ----------------------
+//
+// 元件有兩個對外的介面,規矩相同:
+//
+//    css 變數   使用端照著那幾個名字傳值,元件內部照著取值
+//    config     使用端照著那幾個鍵傳設定,元件內部照著讀
+//
+// 每個專案都可以把值改成自己的(那正是它們存在的理由),但不可以自己多加 ——
+//
+//   多加的那一個只有這個專案有,元件內部不會讀它:寫了不會報錯,什麼都不會發生,
+//   而下一個人會以為某個地方吃那個值。下一次整套更新時它會被覆蓋掉,
+//   而覆蓋的當下沒有任何訊息。
+//
+// **改結構也算多加。** 把一個扁平的設定改成巢狀(`position` 變成
+// `position: { x, y }`)時,底下那幾個鍵在來源不存在 —— 而元件內部讀的是原本
+// 那一個,改完之後它拿到的是一個物件,行為靜靜地變了。
+//
+// 真的需要一個新的變數或設定項時,那代表**元件本身要改**,回到來源去加 ——
+// 加在那裡,每個專案都拿得到,而且元件內部真的會讀它。
+//
+// 只有這個專案要的樣式另外開一支(檔名帶 Project,見規則 projectStyleFile),
+// 那一支裡面愛加什麼變數都可以 —— 它本來就不屬於來源,所以不在這條的範圍。
+//
+// **來源那邊不比對** —— 那些本來就在那裡長,每加一個都報一次等於不能工作。
+// 來源改完元件後跑 `npm run rules:seal` 更新名單,新的名單跟著元件一起複製出去。
+
+const checkComponentApiAdded = ({ rel }) => {
+  /* 掛在設定檔上報 —— 那是每個專案都會打開的一支,
+     而多加東西的檔案可能有好幾支,逐支報只會讓同一件事洗版。 */
+  if (rel !== CONFIG_FILE) return []
+  if (IS_SOURCE_PROJECT) return []
+
+  /* 名單是舊算法產的:每一支都對不上,一條都比不出來。
+     那與「沒有多加東西」在結果上一模一樣,所以要自己講出來 ——
+     不講的話,半套更新(規則換新的、名單還是舊的)會顯示通過。 */
+  if (isStaleComponentApi()) {
+    return [
+      issueOf(
+        rel,
+        1,
+        'componentApiAdded',
+        `${COMPONENT_API_FILE} 是舊算法產的名單,這次一支都沒有比對 —— ` +
+          `元件的介面現在可以隨便多加,不會有人發現;` +
+          `跟著元件更新一份新的名單(由規範工具的來源跑 npm run rules:seal 產生)`
+      ),
+    ]
+  }
+
+  const added = addedComponentApi()
+  if (!added.length) return []
+
+  const detail = added
+    .map(({ kind, rel: file, added: names }) => {
+      const what = API_KIND_LABEL[kind]
+
+      return `${file} 的${what}(${names.join('、')})`
+    })
+    .join(';')
+
+  return [
+    issueOf(
+      rel,
+      1,
+      'componentApiAdded',
+      `元件的介面多了來源沒有的項目:${detail} —— ` +
+        `元件內部不會讀它們,寫了什麼都不會發生,而下一次整套更新會把它們覆蓋掉;` +
+        `把一個設定改成巢狀也算(底下那幾個鍵在來源不存在,而元件讀的是原本那一個)。` +
+        `對外呼叫的名字那一種連值都不能改 —— 使用端拿著 ref 照那個名字呼叫,` +
+        `改了名字,那一行就呼叫一個不存在的東西,而且不報錯。` +
+        `真的需要新的項目就回到元件庫去加,只有這個專案要的樣式則另外開一支 ` +
+        `<來源檔名>Project.css`
+    ),
+  ]
+}
+
 // --- 規則 buildCommands:三個環境各有固定的指令名 ------------------------------
 //
 // **一個專案有三個環境,每一個對應一個固定的指令名:**
@@ -793,6 +1000,8 @@ export const GLOBAL_CHECKS = [
   checkSelfContained,
   checkConfigItem,
   checkRuleTampered,
+  checkUnknownExemptMark,
+  checkComponentApiAdded,
   checkBuildCommands,
 ]
 
@@ -803,6 +1012,8 @@ export const GLOBAL_RULE_TITLE = {
   plainText: '用了 emoji 或裝飾符號',
   selfContained: '把讀者送去別處的寫法(同上 / 參考第幾節)',
   configItem: '專案設定檔多了沒有規則讀的項目',
+  unknownExemptMark: '用了沒有任何規則在讀的豁免標記',
+  componentApiAdded: '元件的介面多了來源沒有的變數或設定',
   buildCommands: '三個環境的指令名對不上',
 }
 
@@ -815,5 +1026,9 @@ export const GLOBAL_RULE_HINT = {
   selfContained: '把那段要講的在這裡再寫一次 —— 內容重複沒關係,重複遠比讓讀者跳頁好',
   configItem:
     '專案設定檔只把既有項目改成自己的值 —— 需要新的一項代表規則本身要改,回到規範工具的來源去加',
+  componentApiAdded:
+    '元件的變數與 config 只能改值 —— 要多一個代表元件本身要改,回元件庫去加;改成巢狀也算多加;只有這個專案要的樣式另外開一支 <來源檔名>Project.css',
+  unknownExemptMark:
+    '豁免標記的名字要對得上真的在讀它的那條規則 —— 沒人讀的標記不會放行任何東西,卻讀起來像這裡已經想過了',
   buildCommands: 'dev 開發、deploy 測試機、build 正式機 —— 名字固定才不必每次確認送去哪裡',
 }

@@ -566,8 +566,117 @@ export const moduleFolderOf = (rel) => {
   return at > 0 ? segments[at - 1] : null
 }
 
+/**
+ * 變數的定義:`--x:` 與 `'--x':` 兩種形狀。
+ *
+ * 第二個捕獲是它的值(到分號或區塊結尾為止)。
+ *
+ * 三個地方問這一件事:哪些變數被定義過、某個變數裝的是長度還是顏色、
+ * 以及「這個專案在來源的變數檔裡多加了什麼」。各寫一份比對式的話,
+ * 多認一種寫法時只會改到其中一邊,而漏掉的那幾支從此不被算進去。
+ */
+export const VAR_DEFINE_RE = /(--[\w-]+)['"]?\s*:\s*([^;}]*)/g
+
+/**
+ * 讀一份封存下來的清單(來源產生、跟著複製出去的那種 json)。
+ *
+ * 檔案不在、或內容壞掉時一律回 null —— 呼叫端看到 null 就整條不比對。
+ * 那是刻意的:還沒封存過的專案(剛接手的舊專案)一律報「每一項都不一致」
+ * 只會讓人把整條規則關掉,而清單壞掉時報出來的每一筆也都是假的。
+ *
+ * 兩種清單都走這一份(共用規則的指紋、元件介面的名單)——
+ * 各寫一次的話,其中一邊改了「壞掉時怎麼辦」,另一邊還是舊的,
+ * 而兩條規則會在同一種情況下表現不一樣。
+ */
+export const readSealedJson = (root, relFile) => {
+  const abs = path.join(root, ...relFile.split('/'))
+  if (!fs.existsSync(abs)) return null
+
+  try {
+    return JSON.parse(fs.readFileSync(abs, 'utf8'))
+  } catch {
+    return null
+  }
+}
+
+/** 寫一份封存清單,格式與上面那支讀的一致(尾端留一個換行,diff 才乾淨) */
+export const writeSealedJson = (root, relFile, data) => {
+  const abs = path.join(root, ...relFile.split('/'))
+
+  fs.writeFileSync(abs, `${JSON.stringify(data, null, 2)}\n`, 'utf8')
+}
+
 /** mForm → m-form;mDatePicker → m-date-picker */
 export const toKebab = (name) => name.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase()
+
+/**
+ * 方括號寫法同時有「長度」與「顏色」兩種版本的那幾個 utility。
+ *
+ *   text-[--gray-6b]   color        text-[16px]    font-size
+ *   border-[--white]   border-color border-[2px]   border-width
+ *   outline-[--white]  outline-color outline-[2px] outline-width
+ *   ring-[--white]     ring-color   ring-[2px]     ring-width
+ *
+ * **值寫成變數時建置工具分不出是哪一種,一律當成顏色**,
+ * 所以長度那一邊要在值前面標出型別(`text-[length:--x]`)。
+ *
+ * 這份名單有兩個地方在問:「這個值該不該標型別」,
+ * 以及「同一個斷點下這兩個 class 是不是蓋掉同一個屬性」
+ * (`text-[--紅色]` 與 `text-[18px]` 是兩個屬性,不是覆寫)。
+ * 名單只有這一份 —— 兩邊各列一次的話,加了一個而另一邊沒加,
+ * 那一個在其中一條規則裡會開始判錯,而兩種判錯都沒有徵兆。
+ *
+ * **`divide-` 不在名單裡。** 它只有顏色版本:`divide-[2px]` 產出的是
+ * `border-color: 2px`(無效的值),標了 `divide-[length:--x]` 也一樣是
+ * `border-color` —— 寬度要寫成 `divide-x-[2px]`,那是另一個 utility 名。
+ * 放進來的話會報「這裡該標 length:」,而照著標了完全沒有作用。
+ */
+export const DUAL_TYPE_UTILITIES = new Set(['text', 'border', 'outline', 'ring'])
+
+/**
+ * 去掉 variant 前綴(`p:` / `m:` / `hover:` / `group-hover:` …),回傳 utility 本體。
+ *
+ * **只切方括號外的冒號** —— 值裡面也會有:`text-[length:--x]` 的型別提示、
+ * `bg-[url(a:b)]` 的網址。連值一起切的話那個 class 會被切成 `--x]`,
+ * 認不出 utility 是什麼,於是**照著規範標了型別的那些整批不被檢查**。
+ *
+ * 好幾條規則都要問「這個 class 的前綴到哪裡為止」:是不是 tailwind 的 utility、
+ * 斷點有沒有蓋掉基底、該不該標型別。判準只有這一份 ——
+ * 各寫一次的話,其中一邊修好了另一邊還是舊的,而兩種判錯都沒有徵兆。
+ */
+export const stripVariants = (cls) => {
+  let depth = 0
+  let last = 0
+
+  for (let i = 0; i < cls.length; i += 1) {
+    const c = cls[i]
+
+    if (c === '[') depth += 1
+    else if (c === ']') depth -= 1
+    else if (c === ':' && depth === 0) last = i + 1
+  }
+
+  return cls.slice(last)
+}
+
+/** 去掉 variant 前綴與 `!` 重要標記,回傳 utility 本體 */
+export const utilityBodyOf = (rawClass) =>
+  stripVariants(rawClass.replace(/^!/, '')).replace(/^!/, '')
+
+/**
+ * utility 本體裡「名字」是哪一段 —— `px-[20px]` → `px`、`inset-x-0` → `inset-x`。
+ *
+ * 名字與值的交界靠值的開頭認:方括號、數字,或 `auto` / `full` / `px` / `screen`
+ * 那幾個固定字。名字本身也含連字號(`inset-x`、`gap-y`),
+ * 所以不能只切第一個連字號。
+ *
+ * 切不出來的回 null —— `flex`、`items-center` 那種沒有「值」的 utility。
+ *
+ * 兩條規則問這一段:「這兩個 class 是不是同一個屬性」與「這個值該不該標型別」。
+ * 各寫一份比對式的話,名字帶連字號的那些會在其中一條裡開始切錯,而切錯沒有徵兆。
+ */
+export const utilityNameFrom = (body) =>
+  body.match(/^(-?[a-z]+(?:-[a-z]+)*?)-(?:\[|\d|auto|full|px|screen)/)?.[1] ?? null
 
 /** 畫面區段裡第一個帶前綴的靜態 class */
 const COMPONENT_CLASS_RE = /class="([^"]*\bm-[a-z0-9-]+[^"]*)"/
@@ -935,6 +1044,96 @@ export const transitionStyleIndexOf = (root) => {
   }
 
   transitionStyleCache = { root, index }
+
+  return index
+}
+
+/**
+ * 一支元件被自動註冊成什麼標籤名。
+ *
+ * 名字由「資料夾 + 檔名」接起來,`Index` 那一層不算:
+ *
+ *   <元件目錄>/mPopup/Index.vue      MPopup
+ *   <元件目錄>/mForm/CheckBox.vue    MFormCheckBox
+ *   <元件目錄>/common/mPopup/…       CommonMPopup
+ *
+ * 這一份與建置設定裡那一份是同一套規則,但沒有辦法共用 ——
+ * 那一份是建置工具的設定(每個專案的建置工具還不一樣),這一份是檢查工具的。
+ * 兩邊哪天不一致的話,這裡算出來的標籤名會對不上任何使用端,
+ * 於是靠它的檢查一條都命中不了,而畫面上顯示通過。
+ */
+export const componentTagOf = (rel) => {
+  const dir = COMPONENT_DIRS.find((one) => rel.startsWith(`${one}/`))
+  if (!dir || !rel.endsWith('.vue')) return null
+
+  const segments = rel
+    .slice(dir.length + 1)
+    .replace(/\.vue$/, '')
+    .split('/')
+
+  // 資料夾名就是它的名字,Index 不進標籤名
+  if (segments.at(-1) === 'Index') segments.pop()
+  if (!segments.length) return null
+
+  /* 字母與數字以外的一律當成分隔:資料夾名可能帶連字號或底線(`my-thing`),
+     只把首字轉大寫的話會留下那些符號,而標籤名裡不會有它們 ——
+     算出來的名字對不上任何使用端,靠它的檢查從此一條都命中不了。 */
+  const pascal = (one) =>
+    one
+      .replace(/[^a-zA-Z0-9]+/g, ' ')
+      .replace(/(?:^|\s)([a-zA-Z0-9])/g, (_, char) => char.toUpperCase())
+      .replace(/\s+/g, '')
+
+  return segments.map(pascal).join('')
+}
+
+/** 一支 .vue 宣告了哪些事件;沒有 defineEmits 的回 null(那與「宣告了空的」不同) */
+export const declaredEmitsOf = (text) => {
+  const at = /defineEmits\s*\(\s*\[/.exec(text)
+  if (!at) return null
+
+  const body = text.slice(at.index + at[0].length)
+  const end = body.indexOf(']')
+  if (end < 0) return null
+
+  return [...body.slice(0, end).matchAll(/['"]([^'"]+)['"]/g)].map((m) => m[1])
+}
+
+let componentEmitsCache = null
+
+registerScanCache(() => {
+  componentEmitsCache = null
+})
+
+/**
+ * 全案的元件各自宣告了哪些事件 —— 標籤名對到那份清單。
+ *
+ * 只收「有寫 defineEmits」的那些。沒寫的元件不進這份索引,
+ * 而不是記成空清單:那種元件把所有事件都往根元素透傳(fallthrough),
+ * 使用端綁什麼都是正當的,記成空的會讓每一個綁定都變成違規。
+ */
+export const componentEmitsIndexOf = (root) => {
+  if (componentEmitsCache?.root === root) return componentEmitsCache.index
+
+  const index = new Map()
+
+  for (const dir of COMPONENT_DIRS) {
+    for (const abs of listFiles(root, dir)) {
+      if (!abs.endsWith('.vue')) continue
+
+      const tag = componentTagOf(toRel(root, abs))
+      if (!tag || index.has(tag)) continue
+
+      try {
+        const emits = declaredEmitsOf(fs.readFileSync(abs, 'utf8'))
+        if (emits) index.set(tag, emits)
+      } catch {
+        // 讀不到某一支就跳過,不要因此讓整條規則失效
+      }
+    }
+  }
+
+  componentEmitsCache = { root, index }
 
   return index
 }

@@ -44,6 +44,51 @@ export const useExchangeStore = defineStore('exchange', () => {
 - 資料夾一律叫 `stores`(規則 `storeDir`),store 命名 `use{名稱}Store`(規則 `storeNaming`),
   actions 檔名 `use{名稱}Actions.js`(規則 `storeActions`)。
 
+### 全站共用的元件,它的「這個專案長什麼樣」也放 store
+
+有幾支元件不是放在畫面上就好,它要先掛在版面上才會顯示 ——
+彈窗、全域載入那一類。那種元件的樣貌(內距、預設寬度、按鈕外觀、
+按鈕上的文字)**每個專案都不一樣**,而那些值要放在它的 store 裡,
+用 `readonly` 包起來,不要寫在那幾支容器的畫面區段。
+
+```js
+/* 這一組是給各專案改成自己的值的 */
+const defaultSetClass = readonly({
+  main: '--py-24 --px-20',
+  messageWidth: 'p:--w-600 t:--w-460',
+  button: '--oval --h-45 --text-center w-full',
+})
+```
+
+兩個理由:
+
+- **那幾支容器是整套覆蓋的對象。** 值寫在容器的畫面區段裡的話,
+  改過的那一行會在下一次更新時消失,而消失的當下沒有任何訊息 ——
+  只是彈窗的內距突然變成別的專案的值。
+- **同一組值好幾支容器共用**(提示、確認、自訂、處理中各一支)。
+  各寫一次的話,調整版面要記得每一支都改,漏掉的那一支與其他幾支長得不一樣,
+  一樣不會報錯,要開到那一種彈窗才看得出來。
+
+使用端開啟時傳進來的 `setClass` 接在這一組後面,不是取代它 ——
+某一次要不一樣的那個彈窗,由開啟它的地方自己傳。
+
+**取用這種值不要走 `storeToRefs`。** 直接寫 `<store 實例>.<名字>`:
+
+```js
+const popup = usePopupStore()
+const { alertData } = storeToRefs(popup)   // 會變的那些走這裡
+
+// 固定設定直接讀 —— popup.defaultSetClass.main
+```
+
+`storeToRefs` 只收 `ref` 與 `reactive`,而 `readonly({ … })` 底下是一個普通物件,
+兩者都不是 —— 它會被**靜默跳過**:解構出來是 `undefined`,
+而讀它的那一行在執行時整個炸開,錯誤訊息還指向元件內部。
+
+不必擔心「直接讀會斷掉響應」:那一組永遠不變,本來就沒有響應性可言。
+規則 `storeToRefs`(擋)兩個方向都看 —— 會變的值直接讀要報,
+不會變的值放進 `storeToRefs` 也要報。
+
 ## 2. 分層跟著頁面
 
 規則 `storeScope`(檔名)與 `storeLayer`(分層),都會擋。

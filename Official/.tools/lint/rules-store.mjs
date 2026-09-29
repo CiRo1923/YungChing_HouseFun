@@ -1125,6 +1125,11 @@ const STORE_INSTANCE_RE = /const\s+(\w+)\s*=\s*(use\w+Store)\s*\(\s*\)/g
 /** const { a, b } = useXxxStore() —— 直接解構,一定失去響應 */
 const STORE_DESTRUCTURE_RE = /const\s*\{[^}]*\}\s*=\s*use(\w+)Store\s*\(\s*\)/g
 
+/* const { a, b } = storeToRefs(來源) —— 來源可能是實例名,也可能是直接呼叫。
+   兩種都要認:只認實例名的話,`storeToRefs(useXxxStore())` 那種寫法
+   完全不被檢查,而它一樣會把 readonly 的設定靜默地變成 undefined。 */
+const STORE_TO_REFS_RE = /const\s*\{([^}]*)\}\s*=\s*storeToRefs\(\s*(\w+\s*\(|\w+)\s*\)?\s*\)/g
+
 /**
  * 這個屬性在 store 那一側是不是「唯讀常數」—— `readonly({ … })` 包住的固定設定。
  *
@@ -1195,6 +1200,42 @@ const checkStoreToRefs = ({ rel, text, root }) => {
           'storeToRefs',
           `${m[1]} 直接讀了 ${name}.${m[2]} —— 取出來就跟 store 斷了,之後 store 變了這裡不會更新;` +
             `改成 const { ${m[2]} } = storeToRefs(${name})`
+        )
+      )
+    }
+  }
+
+  /* 反方向也要擋:`readonly({ … })` 包住的固定設定**不能**走 storeToRefs。
+
+     那一支只收 ref 與 reactive,而 readonly 底下是一個普通物件 ——
+     兩者都不是,於是它被**靜默跳過**:解構出來是 undefined,
+     而畫面上是讀它的那一行整個炸開,錯誤訊息還指向元件內部。
+
+     上面那一段對這種東西是放行的(它沒有響應性,直接讀沒問題)——
+     少了這一段的話,規則等於在說「直接讀可以」卻不擋「改成 storeToRefs」,
+     而照著改的人會把原本好的程式碼改壞。 */
+  for (const m of code.matchAll(STORE_TO_REFS_RE)) {
+    const source = m[2].trim()
+    const storeName = /^use\w+Store\s*\($/.test(source)
+      ? source.replace(/\s*\($/, '')
+      : instances.get(source)
+
+    if (!storeName) continue
+
+    for (const raw of m[1].split(',')) {
+      // 可能寫成 `{ a: b }` 改名的形式,冒號前那一個才是 store 那側的名字
+      const prop = raw.split(':')[0].trim()
+
+      if (!prop || !isReadonlyConst(root, storeName, prop)) continue
+
+      issues.push(
+        issueOf(
+          rel,
+          lineNoOf(text, m.index),
+          'storeToRefs',
+          `${prop} 是 readonly 包住的固定設定,不能走 storeToRefs —— ` +
+            `那一支只收 ref 與 reactive,這種會被靜默跳過,解構出來是 undefined,` +
+            `而讀它的那一行會在執行時整個炸開;直接寫 ${source.replace(/\($/, '()')}.${prop}`
         )
       )
     }

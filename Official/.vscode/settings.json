@@ -87,7 +87,7 @@
   "//4b-autoImports": [
     "四之二、關掉 Volar 的自動 import 建議。",
     "",
-    "store、actions、元件都由自動注入提供（見 .vite/autoImport/)——",
+    "store、actions、元件都由框架的自動注入提供 ——",
     "程式裡本來就不寫 import。Volar 不知道這件事,會建議補一行,",
     "而它猜的路徑多半是錯的（相對路徑、或指到 .nuxt 底下的暫存檔)。",
     "補下去之後規範檢查會報 importAlias,而寫的人以為是編輯器幫的忙。"
@@ -109,7 +109,7 @@
         "cmd": "node .tools/lint/guard-file.mjs \"${file}\""
       },
       {
-        "//": "色票檔的排列可以自動處理,存檔時直接調整（只搬動位置,不改色值)",
+        "//": "色票檔的排列可以自動處理,存檔時直接調整（只搬動位置,不改色值)。這個路徑的唯一來源是 .tools/lint/project-config.mjs 的 COLOR_CSS_DIR 與 COLOR_CSS_PREFIX,那份改動時要記得同步這一行 —— 對不上的話存檔時排序不再發生,而檔案照樣存檔成功",
         "match": "assets[/\\\\]css[/\\\\]_common[/\\\\]color\\.css$",
         "isAsync": true,
         "cmd": "node .tools/lint/guard-file.mjs --write \"${file}\""

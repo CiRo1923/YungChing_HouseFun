@@ -149,6 +149,34 @@ const LINE_CLAMP = {
 放行的話,那個標記會讓「還沒決定這個值由誰定」看起來像「決定過了」,
 而它蓋掉的正是唯一會提醒人去想這件事的那一筆。
 
+### 豁免標記的名字要真的有規則在讀
+
+規則 `unknownExemptMark`(擋)。`lint-xxx-exempt` 的名字打錯、
+或那條規則後來被拿掉時,那一行**不會放行任何東西**,
+讀起來卻像「這裡已經想過了」—— 而它蓋住的正是會提醒人去想的那一筆。
+
+實際發生過:有 8 處寫著一個從來不存在的標記名,
+而它宣稱豁免的那件事正好是規範明文要擋的。看的人以為那裡決定過了,
+所以沒有人再去想那個值該由誰定,直到有人問起才發現。
+
+合法的名字不另外維護清單 —— 規則直接從自己的程式碼裡看
+「哪些名字真的有人在讀」。所以標記名打錯會當場被擋下來,
+而一條規則被拿掉時,原本標著它的那幾行也會一起被報出來。
+
+**豁免是一行一個。** 標在檔頭不會讓整支檔案都不檢查:
+
+```css
+:root {
+  /* 這一行放行 */
+  --popup-tools-pc-mx: 24px; /* lint-breakpoint-exempt: 手機改用 mt */
+  /* 這一行照常檢查 */
+  --popup-body-px: 8px;
+}
+```
+
+整支放行的話,一個合理的例外會讓其餘幾十個變數安靜地失去檢查,
+而寫標記的人以為自己只豁免了那一行。
+
 ## 二、作用域:依實際共用範圍決定
 
 跟色票的分層邏輯一致 —— **共用的放共用檔,專屬的放專屬檔**:
@@ -158,8 +186,8 @@ const LINE_CLAMP = {
   例:`--form-element-px`(`--px-20` / `--px-15` / `--px-10`)、`--form-element-h`、
   `--form-element-rounded`,input / select / textarea 都吃同一組。
 - **模組專屬** → 該模組的 `***Variables.css`。
-  例:`--form-selection-box-px` / `-py` 只有 checkbox / radio 的 `isBox` 用得到,
-  input / select 沒有盒狀樣式,所以定義在 `selectionVariables.css`,不放共用檔。
+  例:`--form-selection-icon-size` 只有勾選框與單選的那個圖示用得到,
+  輸入框與下拉沒有那個圖示,所以定義在 `selectionVariables.css`,不放共用檔。
 
 判斷方式:先看這組級距是否真的會被其他模組使用。**只有一個模組用就放模組專屬**,
 不要為了「以後可能會用」提前放進共用檔。
@@ -178,26 +206,24 @@ const LINE_CLAMP = {
 ```css
 /* selectionVariables.css —— 原始值 + 級距覆寫 */
 :root {
-  --form-selection-box-pc-px: 0px;
-  --form-selection-box-tablet-px: 0px;
-  --form-selection-box-mobile-px: 0px;
+  --form-selection-icon-pc-size: 18px;
+  --form-selection-icon-tablet-size: 18px;
+  --form-selection-icon-mobile-size: 18px;
 }
 
+/* modifier 只設變數,套用寫在 selection.css —— 變數檔不放版型宣告 */
 @screen p {
-  .m-form-element {
-    &.\-\-checkbox,
-    &.\-\-radio {
-      &.\-\-px-24,
-      &.p\:\-\-px-24,
-      &.pt\:\-\-px-24 {
-        --form-selection-box-px: 24px;
-      }
+  .m-form {
+    &.\-\-icon-size-25,
+    &.p\:\-\-icon-size-25,
+    &.pt\:\-\-icon-size-25 {
+      --form-selection-icon-size: 25px;
+    }
 
-      &.\-\-px-15,
-      &.p\:\-\-px-15,
-      &.pt\:\-\-px-15 {
-        --form-selection-box-px: 15px;
-      }
+    &.\-\-icon-size-20,
+    &.p\:\-\-icon-size-20,
+    &.pt\:\-\-icon-size-20 {
+      --form-selection-icon-size: 20px;
     }
   }
 }
@@ -205,24 +231,56 @@ const LINE_CLAMP = {
 
 ```css
 /* selection.css —— 樣式 + 斷點對應 */
-.m-form-element {
-  &.\-\-checkbox,
-  &.\-\-radio {
-    &.\-\-box {
-      @apply w-full rounded-[--form-selection-box-rounded] px-[--form-selection-box-px] py-[--form-selection-box-py];
-    }
-  }
+.m-form-icon {
+  @apply h-[--form-selection-icon-size] w-[--form-selection-icon-size] shrink-0;
 }
 
 @screen p {
-  .m-form-element {
-    &.\-\-checkbox,
-    &.\-\-radio {
-      --form-selection-box-px: var(--form-selection-box-pc-px);
-    }
+  .m-form {
+    --form-selection-icon-size: var(--form-selection-icon-pc-size);
   }
 }
 ```
+
+### 斷點區塊只做指派,不要在那裡覆蓋基底的值
+
+規則 `breakpointVarOverride`(擋)。上面那段斷點對應的右邊是 `var(…)`,
+那是刻意的 —— **值集中在一處,斷點區塊只回答「這個斷點用哪一份」。**
+
+```css
+/* 不要 —— 同一個變數在基底與斷點各寫一次值 */
+.home-index-header {
+  --home-header-mt: -56px;
+}
+
+@screen p {
+  .home-index-header {
+    --home-header-mt: -84px;
+  }
+}
+
+/* 要 —— 各斷點的值各有名字,斷點區塊只做指派 */
+.home-index-header {
+  --home-header-mt: 0;
+  --home-header-pc-mt: -84px;
+  --home-header-tablet-mt: -56px;
+  --home-header-mobile-mt: -56px;
+}
+
+@screen p {
+  .home-index-header {
+    --home-header-mt: var(--home-header-pc-mt);
+  }
+}
+```
+
+覆蓋的那一種,值散在兩個地方:要改的時候得先找齊所有寫過它的位置,
+漏掉一個就是某個斷點停在舊值 —— **不會報錯,畫面上也只有那個尺寸下才看得出來。**
+
+級距 modifier 不在這條的範圍(`&.--px-30` 那種)。那是使用端傳 class 選的,
+選擇器不一樣,與基底那一個本來就不是同一個東西。
+
+這一條與頁面、元件、集中目錄都有關 —— 哪一層寫出這種覆蓋都是同一個問題。
 
 ### 值改成變數之後:有顏色版本的 utility 要標 `length:`
 
@@ -238,7 +296,10 @@ const LINE_CLAMP = {
 @apply border-[length:--step-card-question-border] border-[--white];
 ```
 
-**寫法是 `[length:--x]`,變數名直接接在冒號後面,不要包 `var()`。**
+**寫法是 `[length:--x]`,變數名直接接在冒號後面,不要包 `var()`**
+(規則 `lengthTypeVar`,擋)。`[length:var(--x)]` 產出的 CSS 其實一模一樣,
+擋的理由不是它會壞,是同一件事只能有一種長相 ——
+要找出全站哪些地方標了型別時,兩種寫法得搜兩次,而搜的人不會知道有第二種。
 
 要標型別的有這幾個(都是同時有顏色版本的):
 
@@ -249,9 +310,45 @@ const LINE_CLAMP = {
 | `outline-` | `outline-[length:--x]` |
 | `ring-` | `ring-[length:--x]` |
 
-**不標不會報錯** —— 編譯通過、規範檢查也通過,畫面上只是那個框線寬度
-或字級沒有生效。而且 `gap`、`margin`、`width` 這類不受影響,
-所以把值收進變數的頭幾次都不會踩到,要改到 `border-` 或 `text-` 才出事。
+**`divide-` 不在名單裡。** 它只有顏色版本:`divide-[length:--x]` 產出的還是
+`border-color`,標了完全沒有作用 —— 分隔線的寬度要寫成 `divide-x-[2px]`,
+那是另一個 utility 名。
+
+**值寫成字面值的不必標。** `text-[14px]` 產出 `font-size`、`text-[#fff]` 產出
+`color` —— 帶單位的數字與色碼建置工具自己分得出來,所以
+`text-[14px] text-[--gray-6b]` 兩個都會產出,那是正確的寫法。
+分不出來的只有變數:`text-[--x]` 看不出 `--x` 裝的是 `16px` 還是 `#6b6b6b`。
+
+### 漏標的兩種抓法
+
+規則 `lengthTypeHint`(擋)。這是最難靠肉眼發現的一類 ——
+編譯通過、瀏覽器不報錯,畫面上只是那個字級或框線寬度沒有作用,
+要拿設計稿逐項比對才看得出來。兩種判定,誰先成立就報誰:
+
+**一、同一段裡同一個前綴有兩個以上沒標型別的變數。**
+
+```css
+/* 兩個 text- 都被當成 color —— 字級那一個不會產出 */
+@apply block font-light text-[--gray-9e] text-[--nav-description-text-size];
+```
+
+不必知道變數裝什麼就判得出來:兩個都是同一個 CSS 屬性,後面的蓋掉前面的。
+
+前綴不同的不算(`text-[--a] hover:text-[--b]` 是常態與滑過去兩個狀態,
+本來就不會互相蓋掉)。
+
+**二、單獨出現時,追那個變數的值。**
+
+```css
+@apply text-[--datepicker-type-size];   /* 值是 16px → 要標 length: */
+@apply text-[--datepicker-color];       /* 值是 var(--gray-999) → 顏色,不用標 */
+```
+
+值只是指向另一個變數時會追過去(斷點那一套就是這樣寫的)。
+追不到定義、或值的形狀認不出來的一律不報 ——
+那一段本來就是推測,誤報一次之後整條規則就會被當成雜訊。
+
+`gap`、`margin`、`width` 這類只有長度一種版本,不受這兩條約束。
 
 ### 斷點前綴的完整寫法
 
@@ -439,6 +536,121 @@ const LINE_CLAMP = {
 只放著其他資料夾的是分類層。
 
 檢查:規則 `moduleLocation`(擋)。
+
+### 每一支樣式都要有人 import
+
+規則 `moduleCssUnused`(擋)。**樣式檔不會自己生效** ——
+沒有任何元件 import 它的話,整支一行都不會輸出。
+
+那是完全沒有徵狀的一種壞法:檔案還在、語法正確、全案檢查通過,
+只有畫面上少了那一整批樣式。而「少了樣式」看起來常常像設計本來就長那樣。
+
+兩種情況都是它在抓:
+
+- **新加了一支卻忘了 import** —— 加樣式時最容易漏掉的一步
+- **元件改寫時把 import 拿掉了** —— 整支樣式從此靜靜地沒有作用
+
+真的用不到那一支了就把它刪掉,不要留著 —— 留著的話,
+下一個人看到那些變數與 class 會以為它們有效。
+
+### 元件的樣式目錄底下有哪幾種檔案
+
+一支元件常常不只一種樣子(表單的 select、checkbox、radio 是同一個模組的變體)。
+那一層的檔案分成四種,**兩兩成對**:
+
+| 檔案 | 放什麼 | 誰在讀 |
+| --- | --- | --- |
+| `variables.css` | 整個模組共用的變數 | 底下每一支樣式 |
+| `common.css` | 整個模組共用的版型 | — |
+| `<變體>Variables.css` | 那一個變體自己的變數 | 同名的那一支版型 |
+| `<變體>.css` | 那一個變體自己的版型 | — |
+
+變數檔與版型檔分開,是因為兩者的改動頻率完全不同:
+換一個專案時改的幾乎都是值,版型那一半原封不動。
+
+元件自己 import 它要的那幾支,而且**變數檔排在版型檔之前**(見下一節)。
+
+### 每個專案可以改值,但不可以多加變數
+
+規則 `componentApiAdded`(擋)。**元件的變數是它對外的介面之一** ——
+使用端照著那幾個名字傳值,元件內部照著那幾個名字取值。
+
+| 做什麼 | 可以嗎 |
+| --- | --- |
+| 把值改成這個專案的 | 可以,那正是變數存在的理由 |
+| 刪掉用不到的 | 可以,元件讀不到時走它自己的預設 |
+| **多加一個變數** | **不行** |
+
+多加的那一個只有這個專案有,**元件內部不會讀它** ——
+寫了不會報錯,什麼都不會發生,而下一個人會以為某個地方吃那個值。
+下一次整套更新時它會被覆蓋掉,而覆蓋的當下沒有任何訊息。
+
+真的需要一個新的變數時,那代表**元件本身要改**:回到元件庫去加 ——
+加在那裡,每個專案都拿得到,而且元件內部真的會讀它。
+
+只有這個專案要的樣式另外開一支(往下一段),那一支裡面愛加什麼變數都可以 ——
+它本來就不屬於來源。
+
+規則靠一份名單比對(`.tools/lint/.component-api.json`)——
+來源跑 `npm run rules:seal` 產生,跟著元件一起複製過來。
+記的是**名字**不是內容:改值不會被報,只有多出來的名字會。
+
+**同一條規則也管元件的另外三種介面**(設定、對外呼叫的名字、會發出的事件),
+那幾種的規矩與這裡一樣,完整的對照在元件寫法的那一份規範裡 ——
+css 這一側只要記得:變數是介面,名字只能少不能多。
+
+### 這個專案自己加的樣式,另外開一支
+
+元件是整套從元件庫複製過來的,下一次更新也是整套覆蓋。
+**這個專案自己要的樣式寫進來源同名的那幾支檔案裡的話,每一次更新都會衝突** ——
+要嘛手動合併,要嘛被蓋掉,而被蓋掉的當下沒有任何訊息。
+
+所以自己加的另外開一支,檔名是「來源那一支的檔名 + `Project`」:
+
+| 檔案 | 誰的 | 更新時 |
+| --- | --- | --- |
+| `selection.css` | 來源 | 直接覆蓋 |
+| `selectionProject.css` | 這個專案自己加的 | 不會被碰到 |
+| `selectionProjectVariables.css` | 自己加的那些變數 | 不會被碰到 |
+
+元件要多兩行 import,那兩行也是來源沒有的 —— 但**只有那兩行**會衝突,
+而且一看就知道是這個專案自己接上去的。載入順序與一般的一樣:
+變數檔排在版型檔之前(見下一節)。
+
+```js
+import './.css/selectionVariables.css'
+import './.css/selectionProjectVariables.css'
+import './.css/selection.css'
+import './.css/selectionProject.css'
+```
+
+規則 `projectStyleFile`(擋)看兩件事:
+
+- **名字要對得上來源那一支** —— 對不上多半是打錯字,接不上任何東西;
+  如果它其實是一支全新的樣式,那就不是附加,該放進它自己元件的資料夾
+- **要真的被元件 import** —— 樣式檔不會自己生效,沒有人載入的話整支一行都不會輸出,
+  而畫面上是「自己加的樣式沒有作用」,不會報錯
+
+### 哪一支能動、動到什麼程度
+
+元件樣式目錄底下的檔案分兩種,**判準是檔名帶不帶 `Project`**,
+不是帶不帶 `Variables`:
+
+| 這一支 | 新增變數 | 改值、改樣式、加 class | 下一次整套更新 |
+| --- | --- | --- | --- |
+| 來源的那幾支(`common.css`、`variables.css`、`selection.css`、`selectionVariables.css`) | **會被擋** | 規則不管 | 整支覆蓋,改過的都不見 |
+| 自己加的那兩支(`selectionProject.css`、`selectionProjectVariables.css`) | 可以 | 可以 | 不會被碰到 |
+
+兩件事常被弄混:
+
+**「不能新增變數」對四種來源檔案都成立。** 版型檔(`common.css`、`selection.css`)
+裡也有變數 —— 斷點指派那幾行(`--popup-pb: var(--popup-pc-pb)`)就是。
+多一個新的變數,代表元件本身要多一個介面,那要回元件庫去加。
+規則 `componentApiAdded`(擋)靠一份名單比對,那份名單記的是**來源有哪些名字**。
+
+**「規則不擋」不等於「可以改」。** 改值與改樣式不會被報,因為名單只記名字;
+但那幾支在下一次更新時整支覆蓋 —— 改過的東西安靜地消失,
+而畫面上只是「那個樣式怎麼變回去了」。要留得住就寫進帶 `Project` 的那兩支。
 
 ## 九、變數檔要排在版型檔之前
 
