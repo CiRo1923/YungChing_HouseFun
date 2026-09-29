@@ -73,6 +73,10 @@ export const useMemberCenterStore = defineStore('memberCenter', () => {
       page: 1,
       pageSize: LIST_PAGE_SIZE,
     },
+    searchSubscribe: {
+      page: 1,
+      pageSize: LIST_PAGE_SIZE,
+    },
     password: {
       currentPassword: null,
       newPassword: null,
@@ -124,6 +128,61 @@ export const useMemberCenterStore = defineStore('memberCenter', () => {
   const houseSubscribe = ref({
     data: null,
     apiData: { ...apiDefault.houseSubscribe },
+  })
+  // 搜尋訂閱管理:data 放清單與分頁資訊。
+  //
+  // api 目前回不到資料,所以先帶一份假的把版面撐起來 —— 欄位與 swagger 的
+  // SearchSubscriptionItem 一致,三筆分別是「設計稿上的五個標籤」「標籤只有兩個」
+  // 「標籤多到換行、配對數破萬」。conditionPath 的形狀還沒確認,這裡先照買屋清單的網址擺。
+  // api 通了之後這一份改回 null,頁面那一支也要把初次載入加回去。
+  const searchSubscribe = ref({
+    data: {
+      paging: {
+        page: 1,
+        pageSize: LIST_PAGE_SIZE,
+        total: 3,
+      },
+      items: [
+        {
+          id: '1',
+          conditionPath: '/buy/list/1_region',
+          conditionTags: [
+            '台北市大安區',
+            '捷運大安森林公園站',
+            '房間都有窗',
+            '管理室代收',
+            '總價2000-3000萬',
+          ],
+          matchedHouseCount: 9999,
+          createdAt: '2026-01-01T00:00:00',
+        },
+        {
+          id: '2',
+          conditionPath: '/buy/list/2_region',
+          conditionTags: ['新北市板橋區', '總價1000-2000萬'],
+          matchedHouseCount: 0,
+          createdAt: '2026-01-01T00:00:00',
+        },
+        {
+          id: '3',
+          conditionPath: '/buy/list/3_region',
+          conditionTags: [
+            '台北市信義區',
+            '台北市松山區',
+            '捷運市政府站',
+            '捷運國父紀念館站',
+            '電梯大樓',
+            '三房以上',
+            '屋齡十年內',
+            '有平面車位',
+            '總價3000-5000萬',
+          ],
+          matchedHouseCount: 12480,
+          createdAt: '2026-01-01T00:00:00',
+        },
+      ],
+    },
+    apiData: { ...apiDefault.searchSubscribe },
   })
   const navs = readonly([
     {
@@ -291,5 +350,6 @@ export const useMemberCenterStore = defineStore('memberCenter', () => {
     account,
     message,
     houseSubscribe,
+    searchSubscribe,
   }
 })

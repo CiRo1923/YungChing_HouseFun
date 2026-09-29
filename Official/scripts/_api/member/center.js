@@ -36,3 +36,10 @@ export const apiDeleteMemberSubscriptionsBuyObjects = async (data) =>
 // 加進物件比一比。一次可加多筆,上限由訂閱清單回的 compareLimit 給。
 export const apiPostMemberCompareBuyObjectsItems = async (data) =>
   await fetchApi.post(`member/compare/buy-objects/items`, data)
+
+// 搜尋訂閱條件。訂閱的是一組搜尋條件,有新物件符合時通知,刪除同樣收 ids 陣列。
+export const apiGetMemberSubscriptionsSearch = async (data) =>
+  await fetchApi.get(`member/subscriptions/search`, data)
+
+export const apiDeleteMemberSubscriptionsSearch = async (data) =>
+  await fetchApi.delete(`member/subscriptions/search`, data)
