@@ -7,7 +7,8 @@ const { apiPromiseData } = storeToRefs(popup)
   <CommonMPopup
     id="apiPromiseSystem"
     :setClass="{
-      main: 'p:--py-40 tm:--py-24 p:--px-60 tm:--px-30',
+      ...popup.defaultSetClass.byType.apiPromise,
+      main: [popup.defaultSetClass.main, popup.defaultSetClass.byType.apiPromise.main],
     }"
   >
     <CommonMLoadingContainer>

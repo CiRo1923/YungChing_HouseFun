@@ -14,14 +14,15 @@ const onClose = (item) => {
   <CommonMPopup
     id="confirmSystem"
     :setClass="{
-      main: [setClass.main || 'p:--w-600 t:--w-460', 'p:--py-40 tm:--py-24 p:--px-60 tm:--px-30'],
+      ...popup.defaultSetClass.byType.confirm,
+      main: [
+        setClass.main || popup.defaultSetClass.messageWidth,
+        popup.defaultSetClass.main,
+        popup.defaultSetClass.byType.confirm.main,
+      ],
     }"
   >
-    <div
-      class="text-center leading-[1.7]"
-      :class="setClass.content || 'm:text-[14px] pt:text-[20px]'"
-      v-html="confirm.content"
-    />
+    <div :class="setClass.body || popup.defaultSetClass.content" v-html="confirm.content" />
     <template #footer>
       <div class="text-center">
         <ul
@@ -30,12 +31,12 @@ const onClose = (item) => {
           <li
             class="m:max-w-[50%] m:flex-1 t:w-[150px] p:w-[200px]"
             v-for="(item, index) in confirm.btns"
-            :key="`custom_${item.label}_${index}`"
+            :key="`confirm_${item.label}_${index}`"
           >
             <CommonMAnchor
               :text="item.label"
               :setClass="{
-                main: [item.class, '--oval --h-45 --text-center w-full'],
+                main: [item.class, popup.defaultSetClass.button],
                 text: 'font-normal',
               }"
               @click="onClose(item)"

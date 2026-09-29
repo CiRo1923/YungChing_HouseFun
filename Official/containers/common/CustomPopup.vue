@@ -1,9 +1,6 @@
 <script setup>
 const popup = usePopupStore()
 const { customData } = storeToRefs(popup)
-// buttons 直接從 store 取:它是 readonly 常數,既不是 ref 也不是 reactive,
-// storeToRefs 不會為它建立 ref —— 解構出來會是 undefined。
-const { buttons } = popup
 const { onMergeBtns, onCustomClose, onCustomSettle } = usePopupActions()
 const emits = defineEmits(['sure'])
 const props = defineProps({
@@ -26,9 +23,9 @@ const isConfirmBtns = computed(() => !!(customData.value.btns === 'confirm'))
 
 const footerBtns = computed(() => {
   return isAlertBtns.value
-    ? buttons.alert
+    ? popup.buttons.alert
     : isConfirmBtns.value
-      ? buttons.confirm
+      ? popup.buttons.confirm
       : onMergeBtns(customData.value.btns)
 })
 
@@ -73,10 +70,13 @@ const onClose = (item) => {
         :id="props.id"
         :config="props.config"
         :setClass="{
+          ...popup.defaultSetClass.byType.custom,
           ...props.setClass,
-          ...{
-            main: ['p:--py-40 tm:--py-24 p:--px-60 tm:--px-30', props.setClass.main],
-          },
+          main: [
+            popup.defaultSetClass.main,
+            popup.defaultSetClass.byType.custom.main,
+            props.setClass.main,
+          ],
         }"
       >
         <template #header v-if="$slots.header">
@@ -86,10 +86,7 @@ const onClose = (item) => {
           <slot name="headerTools" />
         </template>
         <slot>
-          <div
-            class="text-center leading-[1.7] m:text-[14px] pt:text-[20px]"
-            v-html="custom.content"
-          />
+          <div :class="popup.defaultSetClass.content" v-html="custom.content" />
         </slot>
         <template #footer v-if="$slots.footer || footerBtns">
           <slot name="footer">
@@ -105,7 +102,7 @@ const onClose = (item) => {
                   <CommonMAnchor
                     :text="item.label"
                     :setClass="{
-                      main: [item.class, '--oval --h-45 --text-center w-full'],
+                      main: [item.class, popup.defaultSetClass.button],
                       text: 'font-normal',
                     }"
                     @click="onClose(item)"

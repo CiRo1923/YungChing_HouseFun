@@ -118,7 +118,7 @@ export default () => {
   const onCustom = async (data) => {
     // 若已有「不同 id」的 custom popup 開著,先關掉並等一個 flush 再開新的。
     // 否則舊 popup 的 leave 與新 popup 的 enter 會擠在同一個同步 flush,
-    // 兩個 <Teleport to="#box"> 同時 patch 會搶錨點,
+    // 兩個 Teleport 指向同一個容器、同時 patch 會搶錨點,
     // 觸發 "Cannot read properties of null (reading 'insertBefore')"。
     if (customData.value.id && customData.value.id !== data.id) {
       onCustomClose()

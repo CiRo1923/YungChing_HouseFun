@@ -1,9 +1,9 @@
 <script setup>
 /* component-deps —— 複製這支元件時要一起帶走:
-   stores/.composables/useCommonActions.js
    stores/common.js
-   stores/.composables/usePopupActions.js
+   stores/.composables/useCommonActions.js
    stores/popup.js
+   stores/.composables/usePopupActions.js
    assets/css/_common/vueTransition.css
      彈窗的進出場動畫定義在這裡。沒有它不會報錯也不會少畫面,只是開關的當下直接跳、沒有漸變。
    containers/common/AlertSystem.vue
@@ -12,6 +12,51 @@
    containers/common/ApiPromiseSystem.vue */
 import './.css/variables.css'
 import './.css/common.css'
+
+/* 設定項可以依裝置各給一種值:{ p, pt, tm, t, m },寫法與 css 的前綴同一組語彙。
+
+  **這一份刻意寫在元件自己的資料夾裡,不抽到共用工具。**
+  元件庫的元件要能單獨複製走 —— 抽出去之後,複製的人少帶那一支就整組設定失效,
+  而失效的樣子是「設定寫了卻沒有反應」,不會報錯。
+  同樣的判斷在別的元件裡也有一份,那是刻意的重複。 */
+const BREAKPOINT_KEYS = ['p', 'pt', 'tm', 't', 'm']
+
+/* 目前是哪一種裝置,就對應到哪幾個 key。
+  device 只會是 p | t | m 三種,而範圍型的前綴(pt 涵蓋桌機與平板、
+  tm 涵蓋平板與手機)也會命中其中幾種。
+
+  順序就是優先序:**單一裝置寫在前面,範圍寫在後面** ——
+  同時寫了 { t: 'a', tm: 'b' } 時,平板取 'a'。
+  指名那一個比涵蓋一片的更明確;反過來的話,寫了單一裝置的值會被範圍值蓋掉,
+  看起來像是那一行沒有作用。 */
+const BREAKPOINT_DEVICE_KEYS = {
+  p: ['p', 'pt'],
+  t: ['t', 'pt', 'tm'],
+  m: ['m', 'tm'],
+}
+
+/* 依目前的裝置取出該用哪一個值。
+
+  不是斷點物件的原樣回傳 —— 那種寫法代表「所有斷點都是這個值」。
+  是斷點物件但這個裝置沒有對應的 key 時回 null,呼叫端自己決定那時候用什麼。
+
+  先排除 ref 與 DOM 元素:它們也是物件,不先排掉的話會被當成斷點物件拆開,
+  取出來的是 undefined,而那個設定從此無聲地失效。 */
+const onResolveByDevice = (value, device) => {
+  const isBreakpointObject =
+    value != null &&
+    typeof value === 'object' &&
+    !('value' in value) &&
+    !(typeof Element !== 'undefined' && value instanceof Element) &&
+    BREAKPOINT_KEYS.some((key) => key in value)
+
+  if (!isBreakpointObject) return value
+
+  const keys = BREAKPOINT_DEVICE_KEYS[device] || []
+  const matched = keys.find((key) => value[key] != null && value[key] !== false)
+
+  return matched === undefined ? null : value[matched]
+}
 
 const common = useCommonStore()
 const { device } = storeToRefs(common)
@@ -34,6 +79,9 @@ const props = defineProps({
     default: () => ({}),
   },
 })
+
+/* container 有沒有真的在畫面上 —— 關閉時要靠它判斷等不等得到退場(見下面的 watch) */
+const containerRef = ref(null)
 
 const isShowOverlay = ref(false)
 const isShowPopup = ref(false)
@@ -70,11 +118,13 @@ const config = computed(() => {
   }
 })
 
-// 依 config.mode 解析當前模式；mode 為物件時用 device (p | t | m) 取值
-const mode = computed(() => {
-  const { mode } = config.value
-  return typeof mode === 'object' && mode !== null ? mode[device.value] || 'zoom' : mode
-})
+/* 依 config.mode 解析當前模式。
+
+  寫成斷點物件時依目前的裝置取值({ m: 'bottomSheet' } 就是手機才用抽屜式)。
+  判斷寫在這支檔案上面 —— 它認得範圍型的前綴(pt、tm);
+  改寫成 mode[device] 的話,{ tm: … } 這種寫法讀不到值,
+  設定看起來寫了而畫面上沒有反應。 */
+const mode = computed(() => onResolveByDevice(config.value.mode, device.value) || 'zoom')
 
 /* 每一種開闔模式配一種進出的動畫。
 
@@ -92,12 +142,13 @@ const MODE_ANIMATIONS = {
 
 const transitionName = computed(() => MODE_ANIMATIONS[mode.value] || MODE_ANIMATIONS.zoom)
 
-// container className：--bomb | --zoom | --bottomSheet
+// container className:--zoom | --bomb | --bottomSheet
 const modeClass = computed(() => `--${mode.value}`)
 
 const setClass = computed(() => {
   return {
     main: '',
+    container: '',
     header: '',
     icon: '',
     headerTitle: '',
@@ -129,6 +180,20 @@ watch(
     if (!open) {
       // 先收 container,遮罩等它的 @afterLeave
       isShowPopup.value = false
+
+      await nextTick()
+
+      /* 保底:container 從來沒有進到畫面上時,等不到它的退場。
+
+        開啟時 isShowPopup 轉 true 之後,container 還要再等一次 flush 才掛上去。
+        在那之間就被關掉的話(載入中的遮罩在別的彈窗關閉的瞬間短暫接手又立刻關),
+        它一次都沒有渲染過 —— 沒有退場、@afterLeave 不會來,
+        而遮罩正是等那一下才收。遮罩留在畫面上之後,那支彈窗就再也打不開。
+
+        正常退場中的不會被這裡收掉:退場期間它還留在 DOM 上,ref 仍然有值,
+        所以「內容先縮、遮罩後淡」的順序完整保留。 */
+      if (!isOpen.value && !containerRef.value) isShowOverlay.value = false
+
       return
     }
 
@@ -158,10 +223,21 @@ onUnmounted(() => {
   <Transition name="anim-fade-out-late">
     <div class="m-popup" :class="[modeClass, setClass.main]" v-if="isShowOverlay">
       <Transition :name="transitionName" @afterLeave="onAfterLeave">
-        <div class="m-popup-container" :class="setClass.container" v-if="isShowPopup">
-          <div class="m-popup-header" :class="setClass.header" v-if="title || $slots.headerTools">
+        <div
+          class="m-popup-container"
+          :class="setClass.container"
+          ref="containerRef"
+          v-if="isShowPopup"
+        >
+          <div
+            class="m-popup-header"
+            :class="[setClass.header, { '--has-close': hasExistClose }]"
+            v-if="title || $slots.headerTools"
+          >
             <slot name="header">
-              <p class="m-popup-title" :class="setClass.headerTitle">
+              <!-- 標題佔滿整行寬,所以沒有標題時不能留一個空的在這裡 ——
+                留著的話,只有工具列的彈窗會被它推到第二行。 -->
+              <p class="m-popup-title" :class="setClass.headerTitle" v-if="title || icon">
                 <CommonMSvgIcon
                   :icon="icon"
                   class="m-popup-icon"
@@ -185,7 +261,7 @@ onUnmounted(() => {
               <slot name="headerTools" />
             </div>
           </div>
-          <div class="m-popup-body scrollbar --y" :class="setClass.body">
+          <div class="m-popup-body" :class="setClass.body">
             <slot />
           </div>
           <footer class="m-popup-footer" :class="setClass.footer" v-if="$slots.footer">
