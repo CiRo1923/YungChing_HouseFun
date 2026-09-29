@@ -15,6 +15,10 @@ const props = defineProps({
 
 const house = computed(() => props.item.house || {})
 const isSelected = computed(() => selectedIds.value.includes(props.item.id))
+
+const onCompare = () => emits('compare')
+
+const onDelete = () => emits('delete')
 </script>
 
 <template>
@@ -59,8 +63,8 @@ const isSelected = computed(() => selectedIds.value.includes(props.item.id))
     <PageMemberCenterHouseSubscribeContentCardPriceInfo :item="props.item" />
     <PageMemberCenterHouseSubscribeContentCardActions
       :item="props.item"
-      @compare="emits('compare')"
-      @delete="emits('delete')"
+      @compare="onCompare"
+      @delete="onDelete"
     />
   </div>
 </template>

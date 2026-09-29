@@ -5,10 +5,10 @@ const common = useCommonStore()
 const { device } = storeToRefs(common)
 const { onResize } = useCommonActions()
 const manage = useManageStore()
-const { options } = storeToRefs(manage)
-const { onValueGetText } = useManageActions()
 const buyList = useBuyListStore()
+const { options } = storeToRefs(manage)
 const { content, purpose } = storeToRefs(buyList)
+const { onValueGetText } = useManageActions()
 
 const componentsName = 'Purpose'
 
@@ -66,7 +66,7 @@ onUnmounted(() => {
       target: {
         m: '.search-mode',
       },
-      isDropdwonFull: {
+      isDropdownFull: {
         m: true,
       },
     }"

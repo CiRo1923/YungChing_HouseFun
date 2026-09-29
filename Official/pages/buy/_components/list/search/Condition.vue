@@ -12,7 +12,7 @@ const buttons = readonly([
   {
     label: '重置搜尋條件',
     icon: 'icon_arrows_rotate',
-    onClcik: onClearAll,
+    onClick: onClearAll,
   },
   {
     label: '訂閱搜尋條件',
@@ -23,6 +23,10 @@ const buttons = readonly([
 const isDeviceP = computed(() => device.value === 'p')
 const condition = computed(() => onCondition(route))
 const conditionsLabel = computed(() => condition.value.map((item) => item.label).join('、'))
+
+// 每一項自己帶要做什麼,這裡只負責轉交。「訂閱搜尋條件」那一顆還沒有行為,
+// 所以用 ?. —— 沒帶 onClick 的項目點了不做事,不會丟錯。
+const onClick = (item) => item.onClick?.()
 
 function onClearAll() {
   // 清空 store 所有篩選,再導回預設縣市列表(觸發重新查詢)
@@ -67,7 +71,7 @@ onUnmounted(() => {
             text: 'text-[14px]',
             icon: 'h-[16px] w-[16px] p-[1px]',
           }"
-          @click="item.onClcik"
+          @click="onClick(item)"
         />
       </li>
     </ul>

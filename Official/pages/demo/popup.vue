@@ -76,7 +76,7 @@ const onFlowTest = async () => {
     log(`開啟 A(第 ${round} 次)`)
 
     const a = await onCustom({
-      id: 'demoPopupA',
+      id: 'popupDemoA',
       title: `步驟 A(第 ${round} 次)`,
       btns: btnsA,
     })
@@ -91,7 +91,7 @@ const onFlowTest = async () => {
     log('開啟 B')
 
     const b = await onCustom({
-      id: 'demoPopupB',
+      id: 'popupDemoB',
       title: '步驟 B',
       btns: btnsB,
     })
@@ -121,7 +121,7 @@ const onQuickReopenTest = async () => {
   isRunning.value = true
   log('=== 測試 2 開始 ===')
 
-  const first = onCustom({ id: 'demoPopupA', title: 'A 第 1 次(等它完整出現)', btns: btnsA })
+  const first = onCustom({ id: 'popupDemoA', title: 'A 第 1 次(等它完整出現)', btns: btnsA })
 
   await sleep(400)
   log('第 1 次已完整顯示 → 關閉')
@@ -134,7 +134,7 @@ const onQuickReopenTest = async () => {
   log('退場動畫進行中 → 立刻重開第 2 次')
 
   const r2 = await onCustom({
-    id: 'demoPopupA',
+    id: 'popupDemoA',
     title: 'A 第 2 次(內容應正常顯示)',
     btns: btnsA,
   })
@@ -149,7 +149,7 @@ const onRapidTest = async () => {
   log('=== 測試 3 開始:連續 3 輪,每輪都在退場動畫中重開 ===')
 
   for (let i = 1; i <= 3; i += 1) {
-    const pending = onCustom({ id: 'demoPopupA', title: `A 第 ${i} 輪`, btns: btnsA })
+    const pending = onCustom({ id: 'popupDemoA', title: `A 第 ${i} 輪`, btns: btnsA })
 
     await sleep(300)
     onCustomClose()
@@ -161,7 +161,7 @@ const onRapidTest = async () => {
   log('最後再開一次 → 內容應正常顯示')
 
   const last = await onCustom({
-    id: 'demoPopupA',
+    id: 'popupDemoA',
     title: 'A 最終(內容應正常顯示)',
     btns: btnsA,
   })
@@ -177,7 +177,7 @@ const onStepB = async (depth) => {
   log(`[遞迴] 開啟 B(堆疊深度 ${depth})`)
 
   const b = await onCustom({
-    id: 'demoPopupB',
+    id: 'popupDemoB',
     title: '步驟 B(遞迴版)',
     btns: btnsB,
   })
@@ -203,7 +203,7 @@ const onStepA = async (depth = 1) => {
   log(`[遞迴] 開啟 A(第 ${depth} 次,堆疊深度 ${depth})`)
 
   const a = await onCustom({
-    id: 'demoPopupA',
+    id: 'popupDemoA',
     title: `步驟 A(遞迴版 第 ${depth} 次)`,
     btns: btnsA,
   })
@@ -316,7 +316,7 @@ const onClearLog = () => {
   </CommonMContainer>
 
   <CommonCustomPopup
-    id="demoPopupA"
+    id="popupDemoA"
     :config="{
       mode: {
         m: 'bottomSheet',
@@ -333,7 +333,7 @@ const onClearLog = () => {
   </CommonCustomPopup>
 
   <CommonCustomPopup
-    id="demoPopupB"
+    id="popupDemoB"
     :config="{
       mode: {
         m: 'bottomSheet',

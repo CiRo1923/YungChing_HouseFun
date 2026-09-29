@@ -16,6 +16,10 @@ const items = computed(() => {
   ]
 })
 
+// 每一項自己帶要做什麼,這裡只負責轉交 —— 畫面區段留一個函式名,
+// 之後這一排按鈕要加共同的行為(記錄點了哪一顆、點完收起選單)時有地方可以放。
+const onClick = (item) => item.onClick?.()
+
 function onShare() {
   console.log('onShare')
 }
@@ -44,7 +48,7 @@ function onSubscription() {
           :setClass="{
             icon: 'text-[--gray-999] tm:h-[20px] tm:w-[20px] tm:p-[1px] p:h-[24px] p:w-[24px] p:p-[3px]',
           }"
-          @click="item.onClick"
+          @click="onClick(item)"
         />
       </li>
     </ul>

@@ -52,7 +52,7 @@ onUnmounted(() => {
       target: {
         m: '.search-mode',
       },
-      isDropdwonFull: {
+      isDropdownFull: {
         m: true,
       },
     }"

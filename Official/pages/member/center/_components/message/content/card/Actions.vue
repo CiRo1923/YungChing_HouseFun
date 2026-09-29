@@ -1,5 +1,7 @@
 <script setup>
 const emits = defineEmits(['delete'])
+
+const onDelete = () => emits('delete')
 </script>
 
 <template>
@@ -19,7 +21,7 @@ const emits = defineEmits(['delete'])
         text: 'text-[14px]',
         icon: 'h-[16px] w-[16px] p-[2px]',
       }"
-      @click="emits('delete')"
+      @click="onDelete"
     />
   </div>
 </template>

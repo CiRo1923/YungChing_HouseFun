@@ -6,6 +6,10 @@ const props = defineProps({
     default: () => ({}),
   },
 })
+
+const onCompare = () => emits('compare')
+
+const onDelete = () => emits('delete')
 </script>
 
 <template>
@@ -40,7 +44,7 @@ const props = defineProps({
         text: 'text-[14px]',
         icon: 'h-[16px] w-[16px] p-[2px]',
       }"
-      @click="emits('compare')"
+      @click="onCompare"
     />
     <CommonMAnchor
       text="刪除"
@@ -55,7 +59,7 @@ const props = defineProps({
         text: 'text-[14px]',
         icon: 'h-[16px] w-[16px] p-[2px]',
       }"
-      @click="emits('delete')"
+      @click="onDelete"
     />
   </div>
 </template>

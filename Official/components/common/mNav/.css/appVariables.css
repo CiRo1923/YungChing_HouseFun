@@ -11,7 +11,7 @@
   --nav-app-anchor-tablet-gap-x: 10px;
   --nav-app-anchor-mobile-gap-x: 10px;
 
-  /* lint-text-size-exempt: 側邊選單是固定位置的元件,字級全站長一樣 */
+  /* 側邊選單是固定位置的元件,字級全站長一樣 */
   --nav-app-text-pc-text-size: 18px;
   --nav-app-text-tablet-text-size: 18px;
   --nav-app-text-mobile-text-size: 18px;

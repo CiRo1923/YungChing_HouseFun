@@ -61,7 +61,11 @@ const onTimeout = (expireTime) => {
   })
 }
 
+// 倒數還沒結束時不送出。按鈕在那段期間是 disabled 的外觀,這裡是同一件事的行為面 ——
+// 兩者都讀 isTimeout,所以擋與不擋跟畫面看起來能不能按一定一致。
 const onClick = () => {
+  if (!isTimeout.value) return
+
   emits('click')
 }
 
@@ -98,6 +102,6 @@ onUnmounted(() => {
       ],
       text: 'text-[14px]',
     }"
-    @click="isTimeout ? onClick() : null"
+    @click="onClick"
   />
 </template>

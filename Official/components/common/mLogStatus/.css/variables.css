@@ -19,7 +19,7 @@
   --log-status-anchor-tablet-gap-x: 3px;
   --log-status-anchor-mobile-gap-x: 0;
 
-  /* lint-text-size-exempt: header 的登入狀態是固定位置的元件,字級全站長一樣 */
+  /* header 的登入狀態是固定位置的元件,字級全站長一樣 */
   --log-status-text-pc-text-size: 14px;
   --log-status-text-tablet-text-size: 14px;
   --log-status-text-mobile-text-size: 18px;

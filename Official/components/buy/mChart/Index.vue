@@ -377,26 +377,26 @@ const activeIndex = ref(null)
 // interactive 模式：滑出 band 後延遲關閉，讓游標能移進 tooltip 點擊內容
 const HIDE_DELAY = 200
 let hideTimer = null
-const cancelHide = () => {
+const onCancelHide = () => {
   if (hideTimer) clearTimeout(hideTimer)
   hideTimer = null
 }
-const showTip = (i) => {
-  cancelHide()
+const onShowTip = (i) => {
+  onCancelHide()
   activeIndex.value = i
 }
-const hideTip = () => {
+const onHideTip = () => {
   if (!tip.value.interactive) {
     activeIndex.value = null
     return
   }
-  cancelHide()
+  onCancelHide()
   hideTimer = setTimeout(() => {
     activeIndex.value = null
     hideTimer = null
   }, HIDE_DELAY)
 }
-onUnmounted(cancelHide)
+onUnmounted(onCancelHide)
 
 const bandWidth = computed(() => {
   const inner = xRange.value[1] - xRange.value[0]
@@ -470,7 +470,7 @@ const tipPos = computed(() => {
         '^height': height,
         '^viewBox': `0 0 ${width} ${height}`,
       }"
-      @mouseleave="hideTip"
+      @mouseleave="onHideTip"
     >
       <!-- 直角座標：格線 + y 軸文字（line/spline/column/bar） -->
       <g v-if="isCartesian" class="m-chart-grid">
@@ -584,8 +584,8 @@ const tipPos = computed(() => {
             '^height': innerBottom - innerTop,
           }"
           fill="transparent"
-          @mouseenter="showTip(b.index)"
-          @mouseleave="hideTip"
+          @mouseenter="onShowTip(b.index)"
+          @mouseleave="onHideTip"
         />
       </template>
     </svg>
@@ -597,8 +597,8 @@ const tipPos = computed(() => {
       :class="{ '--interactive': tip.interactive }"
       :style="{ left: `${tipPos.x}px`, top: `${tipPos.y - 12 + (cfg.title ? 31 : 0)}px` }"
       v-html="tipContent"
-      @mouseenter="cancelHide"
-      @mouseleave="hideTip"
+      @mouseenter="onCancelHide"
+      @mouseleave="onHideTip"
     />
   </div>
 </template>

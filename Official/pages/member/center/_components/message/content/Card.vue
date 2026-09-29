@@ -15,6 +15,8 @@ const props = defineProps({
 
 const house = computed(() => props.item.house || {})
 const isSelected = computed(() => selectedIds.value.includes(props.item.id))
+
+const onDelete = () => emits('delete')
 </script>
 
 <template>
@@ -57,6 +59,6 @@ const isSelected = computed(() => selectedIds.value.includes(props.item.id))
       </div>
     </div>
     <PageMemberCenterMessageContentCardPriceInfo :item="props.item" />
-    <PageMemberCenterMessageContentCardActions @delete="emits('delete')" />
+    <PageMemberCenterMessageContentCardActions @delete="onDelete" />
   </div>
 </template>

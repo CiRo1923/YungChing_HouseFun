@@ -37,7 +37,7 @@ const onClose = async (item) => {
 
 <template>
   <CommonMPopup
-    id="loginSystem"
+    id="popupLoginSystem"
     :config="{
       mode: {
         m: 'bottomSheet',
