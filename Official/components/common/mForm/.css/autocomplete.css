@@ -2,22 +2,22 @@
   &.\-\-autocomplete {
     &:not(.\-\-disabled) {
       &.\-\-focus {
-        --form-autocomplete-elment-icon-color: var(--form-autocomplete-elment-focus-icon-color);
+        --form-autocomplete-element-icon-color: var(--form-autocomplete-element-focus-icon-color);
       }
 
       &.\-\-error {
-        --form-autocomplete-elment-icon-color: var(--form-autocomplete-elment-error-icon-color);
+        --form-autocomplete-element-icon-color: var(--form-autocomplete-element-error-icon-color);
       }
     }
 
     &.\-\-disabled {
-      --form-autocomplete-elment-icon-color: var(--form-autocomplete-elment-disabled-icon-color);
+      --form-autocomplete-element-icon-color: var(--form-autocomplete-element-disabled-icon-color);
     }
   }
 }
 
 .m-form-autocomplete-icon {
-  @apply pointer-events-none h-[--form-autocomplete-icon-size] w-[--form-autocomplete-icon-size] shrink-0 p-[--form-autocomplete-icon-p] text-[--form-autocomplete-elment-icon-color] transition-colors duration-300;
+  @apply pointer-events-none h-[--form-autocomplete-icon-size] w-[--form-autocomplete-icon-size] shrink-0 p-[--form-autocomplete-icon-p] text-[--form-autocomplete-element-icon-color] transition-colors duration-300;
 }
 
 .m-form-autocomplete-dropdown {
@@ -31,7 +31,8 @@
 }
 
 .m-form-autocomplete-dropdown-body {
-  @apply max-h-full;
+  /* 捲動由這裡自己負責。橫向照樣裁掉 —— 選項文字該截斷,不該橫著捲 */
+  @apply max-h-full overflow-y-auto overflow-x-hidden;
 }
 
 .m-form-autocomplete-dropdown-no-data,
@@ -90,6 +91,29 @@
     --form-autocomplete-dropdown-button-border: var(--form-autocomplete-dropdown-button-pc-border);
     --form-autocomplete-dropdown-label-px: var(--form-autocomplete-dropdown-label-pc-px);
     --form-autocomplete-dropdown-label-py: var(--form-autocomplete-dropdown-label-pc-py);
+  }
+
+  /* 捲軸只在桌機畫出來。
+    手機與平板的是覆蓋在內容上、不用時會自己隱藏的那種,
+    換成自訂的會變成一條常駐的軌道,把內容往內擠一截。 */
+  .m-form-autocomplete-dropdown-body {
+    scrollbar-width: thin;
+    scrollbar-color: var(--form-autocomplete-dropdown-scrollbar-thumb-color)
+      var(--form-autocomplete-dropdown-scrollbar-track-color);
+
+    &::-webkit-scrollbar {
+      width: var(--form-autocomplete-dropdown-scrollbar-w);
+    }
+
+    &::-webkit-scrollbar-track {
+      border-radius: var(--form-autocomplete-dropdown-scrollbar-rounded);
+      background-color: var(--form-autocomplete-dropdown-scrollbar-track-color);
+    }
+
+    &::-webkit-scrollbar-thumb {
+      border-radius: var(--form-autocomplete-dropdown-scrollbar-rounded);
+      background-color: var(--form-autocomplete-dropdown-scrollbar-thumb-color);
+    }
   }
 }
 

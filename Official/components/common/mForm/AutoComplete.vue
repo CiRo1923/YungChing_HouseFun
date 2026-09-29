@@ -107,19 +107,44 @@ const validateOn = useValidateEvents(
   () => props.name
 )
 
+/* 選項清單 —— 篩選、比對、選取都是從這裡拿到資料。
+
+  **壞掉的元素在這裡一次濾掉,不在各個使用端各加一道。**
+  讀 item[schema.…] 的地方有六處,各自加防護的話那就是六份判斷,
+  而往後新增第七處的人不會知道要補。
+
+  為什麼會有壞元素:選項常常來自非同步資料,還沒回來的那幾筆是 null。
+  不濾掉的話,第一個讀到它的地方就丟例外 —— 而那多半發生在 setup 裡,
+  結果是整個路由導航失敗,使用端看到的是一片白畫面。 */
 const resolvedOptions = computed(() => {
-  if (Array.isArray(inputOptions.value)) {
-    return inputOptions.value
+  const { schema } = config.value
+
+  const raw = Array.isArray(inputOptions.value)
+    ? inputOptions.value
+    : Array.isArray(props.options)
+      ? props.options
+      : []
+
+  const options = raw.filter((item) => item !== null && typeof item === 'object')
+
+  /* 濾掉了就要講出來 —— 靜靜拿掉的話,傳錯資料的人永遠不知道自己傳了什麼,
+     只會看到選項少了幾個。這裡是唯一知道「原本有幾筆、留下幾筆」的位置。 */
+  if (import.meta.env.DEV && options.length !== raw.length) {
+    console.warn(
+      `[mForm] AutoComplete${props.name ? `(${props.name})` : ''} 的 options 有 ` +
+        `${raw.length - options.length} 筆不是物件(多半是非同步資料還沒回來),已略過。` +
+        `每一筆都要帶 ${schema.model} 與 ${schema.label}`
+    )
   }
 
-  return Array.isArray(props.options) ? props.options : []
+  return options
 })
 
 // dropdown 定位 / 開關 / 捲動關閉統一交給 useDropdownCore(與 Select 共用)
 const {
   isFocus,
   isActive,
-  elenemtRef,
+  elementRef,
   dropdownRef,
   dropdownContainerRef,
   dropdownItemRef,
@@ -429,7 +454,7 @@ onUnmounted(() => {
             { '--disabled': config.isDisabled },
             { '--error': errorMessage || config.isError },
           ]"
-          ref="elenemtRef"
+          ref="elementRef"
         >
           <input
             :name="`${props.name}_type`"
@@ -487,7 +512,7 @@ onUnmounted(() => {
           <div class="m-form-autocomplete-dropdown-no-data" v-if="dropdownItems.length === 0">
             <p>{{ isWaiting ? config.waitMessage : config.noResult }}</p>
           </div>
-          <ul class="m-form-autocomplete-dropdown-body scrollbar --y" v-else>
+          <ul class="m-form-autocomplete-dropdown-body" v-else>
             <li
               class="m-form-autocomplete-dropdown-item"
               v-for="(item, index) in dropdownItems"

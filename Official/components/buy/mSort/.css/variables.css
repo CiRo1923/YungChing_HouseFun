@@ -64,6 +64,9 @@
   --sort-dropdown-scrollbar-tablet-pr: 2px;
   --sort-dropdown-scrollbar-mobile-pr: 2px;
 
+  --sort-dropdown-scrollbar-w: 4px; /* lint-breakpoint-exempt: 捲軸只在桌機畫,另外兩個斷點沒有套用這組樣式 */
+  --sort-dropdown-scrollbar-rounded: 8px; /* lint-breakpoint-exempt: 捲軸只在桌機畫,另外兩個斷點沒有套用這組樣式 */
+
   --sort-dropdown-anchor-pc-border-b: 0;
   --sort-dropdown-anchor-tablet-border-b: 0;
   --sort-dropdown-anchor-mobile-border-b: 0;
@@ -92,4 +95,6 @@
   --sort-dropdown-anchor-hover-bg-color: var(--gray-f7);
   --sort-dropdown-anchor-active-bg-color: var(--green-8b0d);
   --sort-dropdown-anchor-border-b-color: var(--gray-e5);
+  --sort-dropdown-scrollbar-thumb-color: var(--green-8b0d);
+  --sort-dropdown-scrollbar-track-color: var(--gray-e5);
 }

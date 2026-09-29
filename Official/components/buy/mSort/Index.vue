@@ -234,7 +234,7 @@ const onDropdownOpen = async () => {
   $dropdown.style.minWidth = `${rect.width}px`
   $dropdown.style.height = `${itemHeight}px`
 
-  // 捲動交給內層 container（它才有 .scrollbar 樣式）。
+  // 捲動交給內層 container，外層只負責定位與高度動畫。
   // 動畫期間先維持 hidden，避免 height 動畫過程中閃出原生捲軸，
   // 待 enter 動畫結束後（onDropdownAfterEnter）才開啟 auto。
   if ($container) {
@@ -437,7 +437,7 @@ onUnmounted(() => {
           ref="dropdownRef"
           v-if="isActive && sortOptions.length > 0"
         >
-          <div class="m-sort-dropdown-container scrollbar --y" ref="dropdownContainerRef">
+          <div class="m-sort-dropdown-container" ref="dropdownContainerRef">
             <ul class="m-sort-dropdown-list">
               <li
                 class="m-sort-dropdown-item"

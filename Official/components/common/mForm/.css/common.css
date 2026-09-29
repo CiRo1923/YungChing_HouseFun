@@ -110,7 +110,13 @@
 }
 
 .m-form-error {
-  @apply mt-[--form-error-mt] block text-[length:--form-error-text-size];
+  /* 外層只管定位 —— 字級、顏色與圖示都由裡面那支 mErrorMessage 決定,
+     全站的錯誤訊息才會長得一樣。
+
+     在這裡寫字級的話會蓋掉裡層那一份,而且那是多做的:
+     它填的值與別處的錯誤訊息一樣,等於同一個值有了兩份定義 ——
+     改字級要記得兩處都改,漏一處就是這裡的訊息與別處不一樣,而且不會報錯。 */
+  @apply mt-[--form-error-mt] block;
 }
 
 @screen p {
@@ -120,7 +126,6 @@
     --form-clear-icon-size: var(--form-clear-icon-pc-size);
     --form-clear-icon-p: var(--form-clear-icon-pc-p);
     --form-error-mt: var(--form-error-pc-mt);
-    --form-error-text-size: var(--form-error-pc-text-size);
   }
 }
 
@@ -131,7 +136,6 @@
     --form-clear-icon-size: var(--form-clear-icon-tablet-size);
     --form-clear-icon-p: var(--form-clear-icon-tablet-p);
     --form-error-mt: var(--form-error-tablet-mt);
-    --form-error-text-size: var(--form-error-tablet-text-size);
   }
 }
 
@@ -142,6 +146,5 @@
     --form-clear-icon-size: var(--form-clear-icon-mobile-size);
     --form-clear-icon-p: var(--form-clear-icon-mobile-p);
     --form-error-mt: var(--form-error-mobile-mt);
-    --form-error-text-size: var(--form-error-mobile-text-size);
   }
 }

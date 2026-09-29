@@ -1,11 +1,5 @@
-/* mErrorMessage(components/common/mErrorMessageElem.vue)的變數。
-   資料夾名跟著 class 前綴 .m-error-message 走,不是組件檔名。
-
-   顏色由組件決定 —— 錯誤訊息全站都是同一個紅,不開 modifier。 */
-
 :root {
-  --error-message-color: var(--red-d111);
-
+  /* 圖示與訊息文字的間隔 */
   --error-message-pc-gap-x: 4px;
   --error-message-tablet-gap-x: 4px;
   --error-message-mobile-gap-x: 4px;
@@ -13,4 +7,19 @@
   --error-message-icon-pc-size: 18px;
   --error-message-icon-tablet-size: 18px;
   --error-message-icon-mobile-size: 18px;
+
+  /* 字級由元件決定,要分斷點所以定義成變數。
+
+    全站的錯誤訊息就該長得一樣 —— 問「第二個地方用它的時候,這個值會不會不一樣?」
+    答案是不會:沒有人會想為每一種欄位各指定一次錯誤訊息的字級。
+    交給使用端的話,每放一個欄位都要傳同一組值,而漏傳的那次沒有預設可用。
+
+    某一處真的要不一樣時,那一處用 setClass 覆寫 —— 那是例外,不是常態。 */
+  --error-message-pc-text-size: 14px;
+  --error-message-tablet-text-size: 14px;
+  --error-message-mobile-text-size: 14px;
+
+  /* 顏色由元件決定 —— 錯誤訊息全站都是同一個紅。
+    字級相反,那個跟著使用端的欄位走,不在這支裡面(見 common.css 的說明)。 */
+  --error-message-color: var(--red-d111);
 }

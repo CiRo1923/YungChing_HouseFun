@@ -107,6 +107,12 @@ const onChange = () => {
           class="m-form-element --radio"
           :class="[
             { '--align-top': config.align === 'top' },
+            /* 選中狀態掛在這一層,使用端的樣式才接得到 ——
+              勾選狀態在 <input> 上,而它是這個 <label> 的子元素:
+              css 沒有辦法讓父層對子層的狀態有反應(`:has()` 以外沒有第二種寫法,
+              而那個在比較舊的內嵌瀏覽器上不成立)。使用端也算不出來,
+              那要比對 modelValue,是元件內部才有的資訊。 */
+            { '--checked': isChecked },
             { '--disabled': config.isDisabled },
             { '--has-label': config.label || $slots.default },
             { '--error': errorMessage },

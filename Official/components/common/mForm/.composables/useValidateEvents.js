@@ -11,7 +11,6 @@
 //    想保留原本行為只拿掉一項,要把其餘項目寫出來,例如清空值不想跳紅字就用
 //    ['blur', 'change'](把 modelUpdate 拿掉)。
 
-import { computed, inject, toValue } from 'vue'
 import { FormContextKey } from 'vee-validate'
 
 // token → Field 的對應 prop。要開放新的驗證時機,在這裡加一組即可。
@@ -83,7 +82,11 @@ export default function useValidateEvents(source, fieldName) {
     // 傳 null 會被它的 Boolean 型別檢查警告,所以是「不給」而不是「給 null」。
     if (!Array.isArray(events)) return {}
 
-    if (import.meta.dev) {
+    /* 開發時才提醒。判斷用 import.meta.env.DEV ——
+       有框架的那一份另外提供了 import.meta.dev,但純建置工具那邊沒有這個屬性:
+       寫成那一種的話,條件永遠是 undefined,整段提醒從來不會出現,
+       而程式碼還留在產物裡。env.DEV 兩邊都成立。 */
+    if (import.meta.env.DEV) {
       const unknown = events.filter((event) => !KNOWN_EVENTS.has(event))
 
       // 字串 token 沒有型別保護,打錯只會靜默失效 —— 那是最難查的一種

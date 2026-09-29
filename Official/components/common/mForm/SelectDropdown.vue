@@ -14,6 +14,7 @@ import '@js/_validation.js'
 
 import { Field, ErrorMessage } from 'vee-validate'
 
+const emits = defineEmits(['update:modelValue'])
 const props = defineProps({
   name: {
     type: String,
@@ -90,7 +91,7 @@ const placeholder = computed(() => {
 })
 
 const {
-  elenemtRef,
+  elementRef,
   dropdownRef,
   dropdownContainerRef,
   isFocus,
@@ -154,7 +155,7 @@ defineExpose({
             { '--error': errorMessage || config.isError },
           ]"
           :disabled="config.isDisabled"
-          ref="elenemtRef"
+          ref="elementRef"
           @click="onElementClick()"
           @keypress.enter="onDropdownEnter"
         >

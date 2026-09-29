@@ -116,13 +116,42 @@ const placeholder = computed(() => {
       }
 })
 
+/* 選項清單 —— 底下每一個讀 item[schema.…] 的地方都是從這裡拿到資料。
+
+  **壞掉的元素在這裡一次濾掉,不在各個使用端各加一道。**
+  讀屬性的地方有五、六處,各自加防護的話那就是五、六份判斷,
+  而往後新增第七處的人不會知道要補 —— 漏掉的那一處照樣會爆。
+
+  為什麼會有壞元素:選項常常來自非同步資料,還沒回來的那幾筆是 null。
+  不濾掉的話,第一個讀到它的地方就丟例外,而那發生在 setup 的同步呼叫裡
+  (見下面的 onSetSelectedIndex)—— 整個路由導航會失敗,
+  使用端看到的是一片白畫面,看不出是哪個欄位、哪一筆資料的問題。 */
 const options = computed(() => {
   const { schema } = config.value
   const { value, isToOption } = placeholder.value
-  const options = props.options ? onDeepClone(props.options) : []
-  const placeholderItem = onEmptyData(onDeepClone(options[0]))
+
+  const raw = props.options ? onDeepClone(props.options) : []
+  const options = raw.filter((item) => item !== null && typeof item === 'object')
+
+  /* 濾掉了就要講出來 —— 靜靜拿掉的話,傳錯資料的人永遠不知道自己傳了什麼,
+     只會看到選項少了幾個。這裡是唯一知道「原本有幾筆、留下幾筆」的位置。 */
+  if (import.meta.env.DEV && options.length !== raw.length) {
+    console.warn(
+      `[mForm] Select${props.name ? `(${props.name})` : ''} 的 options 有 ` +
+        `${raw.length - options.length} 筆不是物件(多半是非同步資料還沒回來),已略過。` +
+        `每一筆都要帶 ${schema.value} 與 ${schema.label}`
+    )
+  }
 
   if (isToOption) {
+    /* 提示項照第一筆的形狀做出來,其餘欄位清空 —— 使用端的選項常常帶著
+       額外欄位(分類、圖示),提示項少了那些的話,畫面上它會長得跟別人不一樣。
+
+       一筆都沒有的時候沒有形狀可以照,就只放這一項自己要用的兩個欄位。
+       直接對 options[0] 做的話,空清單時拿到的是 undefined,
+       下面兩行賦值當場丟例外 —— 而這裡在 setup 裡算,結果是整頁空白。 */
+    const placeholderItem = options.length ? onEmptyData(onDeepClone(options[0])) : {}
+
     placeholderItem[schema.label] = value
     placeholderItem[schema.value] = ''
 
@@ -153,7 +182,7 @@ const onSetSelectedIndex = () => {
 }
 
 const {
-  elenemtRef,
+  elementRef,
   dropdownRef,
   dropdownContainerRef,
   dropdownBodyRef,
@@ -307,7 +336,7 @@ onUnmounted(() => {
             { '--error': errorMessage || config.isError },
           ]"
           :disabled="config.isDisabled"
-          ref="elenemtRef"
+          ref="elementRef"
           @click="onElementClick()"
           @keydown.up="onDropdownArrow($event)"
           @keydown.down="onDropdownArrow($event)"
@@ -370,7 +399,7 @@ onUnmounted(() => {
           ref="dropdownContainerRef"
         >
           <ul
-            class="m-form-select-dropdown-body scrollbar --y"
+            class="m-form-select-dropdown-body"
             :class="setClass.dropdownBody"
             ref="dropdownBodyRef"
           >

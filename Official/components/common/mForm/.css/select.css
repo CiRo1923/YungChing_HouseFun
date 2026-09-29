@@ -3,7 +3,7 @@
     @apply grow overflow-hidden text-left;
 
     &.\-\-focus {
-      --form-select-elment-icon-color: var(--form-select-elment-focus-icon-color);
+      --form-select-element-icon-color: var(--form-select-element-focus-icon-color);
 
       .m-form-icon {
         @apply -rotate-180;
@@ -12,22 +12,22 @@
 
     /* &:not(:disabled):not(.\-\-focus):not(.\-\-error) {
       .m-form-icon {
-        @apply text-[--form-select-elment-icon-color];
+        @apply text-[--form-select-element-icon-color];
       }
     } */
 
     /* &.\-\-focus {
       .m-form-icon {
-        @apply text-[--form-select-elment-focus-icon-color];
+        @apply text-[--form-select-element-focus-icon-color];
       }
     } */
 
     &.\-\-error {
-      --form-select-elment-icon-color: var(--form-select-elment-error-icon-color);
+      --form-select-element-icon-color: var(--form-select-element-error-icon-color);
     }
 
     &:disabled {
-      --form-select-elment-icon-color: var(--form-select-elment-disabled-icon-color);
+      --form-select-element-icon-color: var(--form-select-element-disabled-icon-color);
     }
 
     .m-form-type {
@@ -35,7 +35,7 @@
     }
 
     .m-form-icon {
-      @apply h-[--form-select-icon-size] w-[--form-select-icon-size] shrink-0 p-[--form-select-icon-p] text-[--form-select-elment-icon-color] transition-transform duration-300;
+      @apply h-[--form-select-icon-size] w-[--form-select-icon-size] shrink-0 p-[--form-select-icon-p] text-[--form-select-element-icon-color] transition-transform duration-300;
     }
   }
 }
@@ -57,7 +57,8 @@
 }
 
 .m-form-select-dropdown-body {
-  @apply max-h-full;
+  /* 捲動由這裡自己負責。橫向照樣裁掉 —— 選項文字該截斷,不該橫著捲 */
+  @apply max-h-full overflow-y-auto overflow-x-hidden;
 }
 
 /* dropdown 的選項 —— 原本在 Select.vue 的 <style> 區塊裡 */
@@ -104,6 +105,29 @@
     --form-select-dropdown-button-px: var(--form-select-dropdown-button-pc-px);
     --form-select-dropdown-button-border: var(--form-select-dropdown-button-pc-border);
     --form-select-dropdown-label-py: var(--form-select-dropdown-label-pc-py);
+  }
+
+  /* 捲軸只在桌機畫出來。
+    手機與平板的是覆蓋在內容上、不用時會自己隱藏的那種,
+    換成自訂的會變成一條常駐的軌道,把內容往內擠一截。 */
+  .m-form-select-dropdown-body {
+    scrollbar-width: thin;
+    scrollbar-color: var(--form-select-dropdown-scrollbar-thumb-color)
+      var(--form-select-dropdown-scrollbar-track-color);
+
+    &::-webkit-scrollbar {
+      width: var(--form-select-dropdown-scrollbar-w);
+    }
+
+    &::-webkit-scrollbar-track {
+      border-radius: var(--form-select-dropdown-scrollbar-rounded);
+      background-color: var(--form-select-dropdown-scrollbar-track-color);
+    }
+
+    &::-webkit-scrollbar-thumb {
+      border-radius: var(--form-select-dropdown-scrollbar-rounded);
+      background-color: var(--form-select-dropdown-scrollbar-thumb-color);
+    }
   }
 }
 

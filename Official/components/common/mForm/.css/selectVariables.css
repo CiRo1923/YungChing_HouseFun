@@ -28,6 +28,11 @@
 
   --form-select-dropdown-container-bg-color: var(--white);
 
+  --form-select-dropdown-scrollbar-w: 4px; /* lint-breakpoint-exempt: 捲軸只在桌機畫,另外兩個斷點沒有套用這組樣式 */
+  --form-select-dropdown-scrollbar-rounded: 8px; /* lint-breakpoint-exempt: 捲軸只在桌機畫,另外兩個斷點沒有套用這組樣式 */
+  --form-select-dropdown-scrollbar-thumb-color: var(--green-8b0d);
+  --form-select-dropdown-scrollbar-track-color: var(--gray-e5);
+
   /* dropdown 的選項按鈕 —— 命名對齊 autocompleteVariables.css 那組 */
   --form-select-dropdown-button-pc-px: 8px;
   --form-select-dropdown-button-tablet-px: 8px;
@@ -46,10 +51,10 @@
   --form-select-dropdown-label-tablet-py: 8px;
   --form-select-dropdown-label-mobile-py: 8px;
 
-  --form-select-elment-icon-color: var(--gray-999);
-  --form-select-elment-focus-icon-color: var(--green-8b0d);
-  --form-select-elment-disabled-icon-color: var(--gray-ccce);
-  --form-select-elment-error-icon-color: var(--red-d111);
+  --form-select-element-icon-color: var(--gray-999);
+  --form-select-element-focus-icon-color: var(--green-8b0d);
+  --form-select-element-disabled-icon-color: var(--gray-ccce);
+  --form-select-element-error-icon-color: var(--red-d111);
 }
 
 @screen p {

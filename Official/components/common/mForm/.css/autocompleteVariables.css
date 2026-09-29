@@ -26,6 +26,11 @@
   --form-autocomplete-dropdown-container-tablet-py: 0;
   --form-autocomplete-dropdown-container-mobile-py: 0;
 
+  --form-autocomplete-dropdown-scrollbar-w: 4px; /* lint-breakpoint-exempt: 捲軸只在桌機畫,另外兩個斷點沒有套用這組樣式 */
+  --form-autocomplete-dropdown-scrollbar-rounded: 8px; /* lint-breakpoint-exempt: 捲軸只在桌機畫,另外兩個斷點沒有套用這組樣式 */
+  --form-autocomplete-dropdown-scrollbar-thumb-color: var(--green-8b0d);
+  --form-autocomplete-dropdown-scrollbar-track-color: var(--gray-e5);
+
   --form-autocomplete-dropdown-common-pc-mx: 11px;
   --form-autocomplete-dropdown-common-tablet-mx: 11px;
   --form-autocomplete-dropdown-common-mobile-mx: 11px;
@@ -46,10 +51,10 @@
   --form-autocomplete-dropdown-label-tablet-py: 0;
   --form-autocomplete-dropdown-label-mobile-py: 0;
 
-  --form-autocomplete-elment-icon-color: var(--gray-999);
-  --form-autocomplete-elment-focus-icon-color: var(--green-8b0d);
-  --form-autocomplete-elment-disabled-icon-color: var(--gray-ccce);
-  --form-autocomplete-elment-error-icon-color: var(--red-d111);
+  --form-autocomplete-element-icon-color: var(--gray-999);
+  --form-autocomplete-element-focus-icon-color: var(--green-8b0d);
+  --form-autocomplete-element-disabled-icon-color: var(--gray-ccce);
+  --form-autocomplete-element-error-icon-color: var(--red-d111);
 
   --form-autocomplete-dropdown-container-bg-color: var(--white);
 

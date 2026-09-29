@@ -1,4 +1,3 @@
-import { computed, ref } from 'vue'
 import { onDeepMerge } from '@js/_prototype.js'
 
 // Input / AutoComplete 共用的文字輸入樣板:聚焦狀態、config 合併、setClass 合併。

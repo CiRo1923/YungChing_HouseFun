@@ -1,16 +1,36 @@
-/* mErrorMessage(components/common/mErrorMessageElem.vue)版型。
-   值定義在 variables.css。字級不定在這裡 —— 由使用端(mForm 的 .m-form-error 等)決定。 */
+/* 錯誤訊息的版型。
+
+  **字級、顏色與圖示都在這裡定,而且是刻意的** —— 全站的錯誤訊息要長得一樣,
+  調整一次即全站生效。
+
+  字級為什麼不留給使用端:判準是問「第二個地方用它的時候,這個值會不會不一樣?」
+  錯誤訊息的答案是不會 —— 它到處都在用,但到處都該長一樣,
+  那與「同一支元件在不同頁面本來就該不一樣」的那種通用元件(錨點、頁籤)不同。
+  交出去的話,每一種欄位都要傳同一組值,而那幾份遲早會各自飄移:
+  改字級要記得每一處都改,漏掉的那一處不會報錯,只是它的訊息比別人大一號。
+
+  某一個地方真的要不一樣時,那一處用 setClass 覆寫。 */
 
 .m-error-message {
-  @apply flex items-center gap-x-[--error-message-gap-x] text-[--error-message-color];
+  @apply flex items-center gap-x-[--error-message-gap-x] text-[length:--error-message-text-size] text-[--error-message-color];
 }
 
+/* 訊息文字自成一個項目,圖示才不會跟著文字一起被壓縮。
+
+  用 em 是因為它的語意就是強調,而錯誤訊息確實是。
+  斜體不是這裡要的 —— 中文沒有對應的斜體字形,瀏覽器是把方塊字硬拉歪。 */
+.m-error-message-text {
+  @apply not-italic;
+}
+
+/* 圖示固定大小,不跟著訊息一起縮 —— 長訊息會把它壓成一條 */
 .m-error-message-icon {
-  @apply h-[--error-message-icon-size] w-[--error-message-icon-size];
+  @apply h-[--error-message-icon-size] w-[--error-message-icon-size] shrink-0;
 }
 
 @screen p {
   .m-error-message {
+    --error-message-text-size: var(--error-message-pc-text-size);
     --error-message-gap-x: var(--error-message-pc-gap-x);
     --error-message-icon-size: var(--error-message-icon-pc-size);
   }
@@ -18,6 +38,7 @@
 
 @screen t {
   .m-error-message {
+    --error-message-text-size: var(--error-message-tablet-text-size);
     --error-message-gap-x: var(--error-message-tablet-gap-x);
     --error-message-icon-size: var(--error-message-icon-tablet-size);
   }
@@ -25,6 +46,7 @@
 
 @screen m {
   .m-error-message {
+    --error-message-text-size: var(--error-message-mobile-text-size);
     --error-message-gap-x: var(--error-message-mobile-gap-x);
     --error-message-icon-size: var(--error-message-icon-mobile-size);
   }

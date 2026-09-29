@@ -1,28 +1,48 @@
-import { nextTick, onUnmounted, ref } from 'vue'
-import { storeToRefs } from 'pinia'
 import { onDeepMerge } from '@js/_prototype.js'
-import { useCommonStore } from '@stores/common.js'
-import useCommonActions from '@stores/.composables/useCommonActions.js'
 
 export const defaultDropdownConfig = {
   arrowType: 'caret',
   isDisabled: false,
   position: 'auto',
-  // 下拉定位的對象：未設定時抓 elenemtRef，設定時為 CSS selector（.element / #elem）
+  // 下拉定位的對象：未設定時抓 elementRef，設定時為 CSS selector（.element / #elem）
   target: null,
   // 是否滿版（靠螢幕最左到最右）。可為 boolean 或各斷點設定 { p, pt, tm, t, m }
-  isDropdwonFull: false,
+  isDropdownFull: false,
 }
 
-// 斷點物件可用的 key
-const breakpointKeys = ['p', 'pt', 'tm', 't', 'm']
+/* 設定項可以依裝置各給一種值:{ p, pt, tm, t, m },寫法與 css 的前綴同一組語彙。
 
-// device 只會回傳 p | t | m，這裡對應各 device 命中的斷點 key（依優先序：單一裝置 > 範圍）
-const breakpointDeviceKeys = {
+  **這一份刻意寫在元件自己的檔案裡,不抽到共用工具。**
+  元件庫的元件要能單獨複製走 —— 抽出去之後,複製的人少帶那一支就整組設定失效,
+  而失效的樣子是「設定寫了卻沒有反應」,不會報錯。
+  同樣的判斷在別的元件裡也有一份,那是刻意的重複。 */
+const BREAKPOINT_KEYS = ['p', 'pt', 'tm', 't', 'm']
+
+/* 目前是哪一種裝置,就對應到哪幾個 key。
+  device 只會是 p | t | m 三種,而範圍型的前綴(pt 涵蓋桌機與平板、
+  tm 涵蓋平板與手機)也會命中其中幾種。
+
+  順序就是優先序:**單一裝置寫在前面,範圍寫在後面** ——
+  同時寫了 { t: 'a', tm: 'b' } 時,平板取 'a'。
+  指名那一個比涵蓋一片的更明確;反過來的話,寫了單一裝置的值會被範圍值蓋掉,
+  看起來像是那一行沒有作用。 */
+const BREAKPOINT_DEVICE_KEYS = {
   p: ['p', 'pt'],
   t: ['t', 'pt', 'tm'],
   m: ['m', 'tm'],
 }
+
+/* 這個值是不是斷點物件。
+
+  排除掉 ref 與 DOM 元素 —— 設定項的值本來就可能是那兩種(定位要貼著哪個元素),
+  它們也是物件,不先排掉的話會被當成斷點物件拆開,取出來的是 undefined,
+  而那個設定從此無聲地失效。 */
+const onIsBreakpointObject = (value) =>
+  value != null &&
+  typeof value === 'object' &&
+  !('value' in value) &&
+  !(typeof Element !== 'undefined' && value instanceof Element) &&
+  BREAKPOINT_KEYS.some((key) => key in value)
 
 export const onMergeDropdownConfig = (config = {}, extendConfig = {}) => {
   return onDeepMerge({}, defaultDropdownConfig, extendConfig, config)
@@ -61,7 +81,7 @@ export const useDropdownCore = ({ config, model = ref(null), options, selectedIn
   const { onResize } = useCommonActions()
 
   const borderWidth = 0
-  const elenemtRef = ref(null)
+  const elementRef = ref(null)
   const dropdownRef = ref(null)
   const dropdownContainerRef = ref(null)
   const dropdownBodyRef = ref(null)
@@ -76,7 +96,7 @@ export const useDropdownCore = ({ config, model = ref(null), options, selectedIn
   const onBindScroll = () => {
     onUnbindScroll()
 
-    scrollTargets = onGetScrollParents(elenemtRef.value)
+    scrollTargets = onGetScrollParents(elementRef.value)
     scrollTargets.forEach((target) => {
       target.addEventListener('scroll', onScrollClose, { passive: true })
     })
@@ -106,25 +126,19 @@ export const useDropdownCore = ({ config, model = ref(null), options, selectedIn
     onSwitchActive(false)
   }
 
-  // 判斷是否為斷點物件 { p / pt / tm / t / m }（排除 ref 與 DOM element）
-  const onIsBreakpointObject = (value) =>
-    value != null &&
-    typeof value === 'object' &&
-    !('value' in value) &&
-    !(typeof Element !== 'undefined' && value instanceof Element) &&
-    breakpointKeys.some((key) => key in value)
-
-  // 依目前 device（p | t | m）解析值；非斷點物件則原樣回傳
+  /* 依目前的裝置解析斷點物件;不是斷點物件的原樣回傳
+     (那種寫法代表「所有斷點都是這個值」)。
+     這個裝置沒有對應的 key 時回 null,呼叫端自己決定那時候用什麼。 */
   const onResolveByDevice = (value) => {
     if (!onIsBreakpointObject(value)) return value
 
-    const keys = breakpointDeviceKeys[device.value] || []
-    const matchedKey = keys.find((key) => value[key] != null && value[key] !== false)
+    const keys = BREAKPOINT_DEVICE_KEYS[device.value] || []
+    const matched = keys.find((key) => value[key] != null && value[key] !== false)
 
-    return matchedKey !== undefined ? value[matchedKey] : null
+    return matched === undefined ? null : value[matched]
   }
 
-  // 取得定位對象：config.target（.element / #elem，支援斷點物件）優先，否則 fallback 回 elenemtRef
+  // 取得定位對象：config.target（.element / #elem，支援斷點物件）優先，否則 fallback 回 elementRef
   const onGetAnchorElement = () => {
     const target = onResolveByDevice(config.value.target)
 
@@ -135,16 +149,16 @@ export const useDropdownCore = ({ config, model = ref(null), options, selectedIn
       if ($target) return $target
     }
 
-    return elenemtRef.value
+    return elementRef.value
   }
 
   // 依目前 device（p | t | m）判斷此斷點是否滿版
-  const onIsDropdownFull = () => Boolean(onResolveByDevice(config.value.isDropdwonFull))
+  const onIsDropdownFull = () => Boolean(onResolveByDevice(config.value.isDropdownFull))
 
   const onDropdownOpen = ({ bodyHeight: bodyHeightOverride = null } = {}) => {
     const { maxItems } = config.value
     const maxItemsNumber = Number(maxItems)
-    const $elenemt = onGetAnchorElement()
+    const $element = onGetAnchorElement()
     const $dropdown = dropdownRef.value
     const $dropdownContainer = dropdownContainerRef.value
     const $dropdownBody = dropdownBodyRef.value || $dropdownContainer
@@ -153,7 +167,7 @@ export const useDropdownCore = ({ config, model = ref(null), options, selectedIn
       ? refItems.filter(Boolean)
       : Array.from($dropdownContainer?.children || [])
 
-    if ($elenemt && $dropdown && $dropdownContainer) {
+    if ($element && $dropdown && $dropdownContainer) {
       $dropdown.style.height = ''
       $dropdown.style.width = ''
       $dropdown.style.minWidth = ''
@@ -171,7 +185,7 @@ export const useDropdownCore = ({ config, model = ref(null), options, selectedIn
       }
 
       const element = {
-        rect: $elenemt.getBoundingClientRect(),
+        rect: $element.getBoundingClientRect(),
       }
       const hasMaxItems = Number.isFinite(maxItemsNumber) && maxItemsNumber > 0
       const hasItemsThanMax = hasMaxItems && items.length > maxItemsNumber
@@ -315,7 +329,7 @@ export const useDropdownCore = ({ config, model = ref(null), options, selectedIn
 
     if (!isActive.value) return
 
-    // 開啟中才重新定位；onDropdownOpen 內會依最新 device 重算 target / isDropdwonFull 邏輯
+    // 開啟中才重新定位；onDropdownOpen 內會依最新 device 重算 target / isDropdownFull 邏輯
     onDropdownOpen()
   }
 
@@ -340,16 +354,16 @@ export const useDropdownCore = ({ config, model = ref(null), options, selectedIn
   })
 
   const isDropdownOutside = (e) => {
-    const $elenemt = elenemtRef.value
+    const $element = elementRef.value
     const $dropdown = dropdownRef.value
-    const isElenemtContains = $elenemt ? !$elenemt.contains(e.target) : true
+    const isElementContains = $element ? !$element.contains(e.target) : true
     const isDropdownContains = $dropdown ? !$dropdown.contains(e.target) : true
 
-    return isElenemtContains && isDropdownContains
+    return isElementContains && isDropdownContains
   }
 
   return {
-    elenemtRef,
+    elementRef,
     dropdownRef,
     dropdownContainerRef,
     dropdownBodyRef,

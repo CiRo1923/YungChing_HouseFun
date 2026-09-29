@@ -124,6 +124,32 @@
     --sort-dropdown-anchor-icon-p: var(--sort-dropdown-anchor-icon-pc-p);
     --sort-dropdown-anchor-icon-size: var(--sort-dropdown-anchor-icon-pc-size);
   }
+
+  /* 捲軸只在桌機畫出來。
+    手機與平板的是覆蓋在內容上、不用時會自己隱藏的那種,
+    換成自訂的會變成一條常駐的軌道,把內容往內擠一截。
+
+    這裡只管捲軸長什麼樣子。要不要捲由 Index.vue 依選項數量決定,
+    而且開闔動畫期間要先關掉(高度變化中會閃出捲軸),所以那一邊用的是行內樣式。 */
+  .m-sort-dropdown-container {
+    scrollbar-width: thin;
+    scrollbar-color: var(--sort-dropdown-scrollbar-thumb-color)
+      var(--sort-dropdown-scrollbar-track-color);
+
+    &::-webkit-scrollbar {
+      width: var(--sort-dropdown-scrollbar-w);
+    }
+
+    &::-webkit-scrollbar-track {
+      border-radius: var(--sort-dropdown-scrollbar-rounded);
+      background-color: var(--sort-dropdown-scrollbar-track-color);
+    }
+
+    &::-webkit-scrollbar-thumb {
+      border-radius: var(--sort-dropdown-scrollbar-rounded);
+      background-color: var(--sort-dropdown-scrollbar-thumb-color);
+    }
+  }
 }
 
 @screen t {

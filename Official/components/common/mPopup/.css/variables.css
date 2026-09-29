@@ -18,7 +18,14 @@
   --popup-header-tablet-border: 2px;
   --popup-header-mobile-border: 2px;
 
-  /* lint-text-size-exempt: 彈窗標題由元件自己排版,全站長一樣 */
+  /* 標題的寬度。預設佔滿整行 —— 關閉鈕浮在它上面,不跟它搶同一條線。
+
+    留成變數是為了讓「標題只佔內容寬」這件事在各專案是調值就好:
+    改成 auto 即可,不必去動 common.css 的版型 ——
+    動了版型的那一份會在下一次整套更新時被蓋掉,而蓋掉的當下沒有訊息。 */
+  --popup-header-title-w: 100%;
+
+  /* 彈窗標題由元件自己排版,全站長一樣 */
   --popup-header-pc-text-size: 24px;
   --popup-header-tablet-text-size: 20px;
   --popup-header-mobile-text-size: 20px;
@@ -60,6 +67,9 @@
   --popup-footer-tablet-mt: 30px;
   --popup-footer-mobile-mt: 30px;
 
+  --popup-scrollbar-w: 4px; /* lint-breakpoint-exempt: 捲軸只在桌機畫,另外兩個斷點沒有套用這組樣式 */
+  --popup-scrollbar-rounded: 8px; /* lint-breakpoint-exempt: 捲軸只在桌機畫,另外兩個斷點沒有套用這組樣式 */
+
   /* 遮罩與全域 loading(mLoading 的 --fixed)一致 —— 兩者會在「動作結束就導頁」時
      短暫交疊,深淺或模糊不同就會露出是兩層。改這裡要連 mLoading 一起改。 */
   --popup-overlay-pc-blur: 2px;
@@ -69,8 +79,15 @@
   --popup-overlay-bg-color: var(--black-33);
   --popup-container-bg-color: var(--white);
   --popup-header-border-color: var(--green-8b0d);
+  /* 標題顏色走變數,全站的彈窗標題才會一致。不設的話它繼承容器的文字色,
+     想換成品牌色就得每一支彈窗各自用 setClass.headerTitle 傳一次,
+     而漏掉一支不會有任何徵兆 —— 只是那一支的標題顏色與別人不同。
+     個別彈窗要不一樣時仍然用 setClass.headerTitle 蓋掉,兩者不衝突。 */
+  --popup-header-title-color: var(--gray-666);
   --popup-header-icon-color: var(--gray-666);
   --popup-header-anchor-color: var(--gray-666);
+  --popup-scrollbar-thumb-color: var(--green-8b0d);
+  --popup-scrollbar-track-color: var(--gray-e5);
 }
 
 @screen p {
