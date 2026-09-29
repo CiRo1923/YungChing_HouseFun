@@ -11,8 +11,20 @@ export const useMemberCenterStore = defineStore('memberCenter', () => {
   })
   // 通知總覽五個分頁的未讀數與保留規則。五頁共用同一份,不屬於其中任何一頁,
   // 所以層名不對應頁面 —— 各分頁自己的清單另外分層。
+  //
+  // api 目前回不到資料,所以先帶一份假的把版面撐起來 —— tabs 的 category 對應下面
+  // noticeTabs 的那五個值。未讀數刻意給三種:兩位數、破百(徽章要放得下)、0(不顯示徽章)。
+  // api 通了之後這一份改回 null。
   const noticeSummary = ref({
-    data: null,
+    data: {
+      tabs: [
+        { category: 0, unreadCount: 12 },
+        { category: 1, unreadCount: 128 },
+        { category: 2, unreadCount: 0 },
+        { category: 3, unreadCount: 3 },
+        { category: 4, unreadCount: 0 },
+      ],
+    },
   })
   // 通知總覽的五個分頁,每一個都是獨立頁面(tab 是 router-link)。
   const noticeTabs = readonly([
@@ -115,18 +127,182 @@ export const useMemberCenterStore = defineStore('memberCenter', () => {
     apiResult: null,
   })
   // 帳號管理:data 放 profile 回來的整份(手機帳號要顯示),apiData 只有可改的那三個欄位。
+  // api 目前回不到資料,所以先帶一份假的把版面撐起來 —— 畫面只讀 mobilePhone
+  // (手機就是帳號,只能看不能改)。api 通了之後這一份改回 null。
   const account = ref({
-    data: null,
+    data: {
+      mobilePhone: '0912345678',
+    },
     apiData: { ...apiDefault.account },
   })
   // 留言紀錄:data 放清單與分頁資訊。
+  //
+  // api 目前回不到資料,所以先帶一份假的把版面撐起來。三筆各自撐一種情況:
+  // 標題長到要截斷、沒有降價紀錄(時間顯示 --、價格欄只有總價)、欄位缺得最多
+  // (沒有經紀人、沒有社區、沒有坪數)。imageUrl 給 null 走找不到圖的那一張,
+  // api 通了之後這一份改回 null。
   const message = ref({
-    data: null,
+    data: {
+      paging: {
+        page: 1,
+        pageSize: LIST_PAGE_SIZE,
+        total: 3,
+      },
+      items: [
+        {
+          id: '1',
+          caseType: '公寓',
+          messageSentAt: '2026-01-01T00:00:00',
+          priceDropAt: '2026-01-15T00:00:00',
+          priceDropAmount: 120,
+          broker: {
+            name: '郝惠邁',
+            shopName: '永慶房屋(股)公司',
+            mobilePhone: '02-12345678 # 1234',
+          },
+          house: {
+            id: '1',
+            title: '忠誠四房車大降價屋主急售低於行情隨時可看',
+            imageUrl: null,
+            address: '台北市北投區泉源路華南巷',
+            communityName: '嘩啦啦美之城社區',
+            buildPing: 20,
+            roomText: '2房(室)',
+            totalPrice: 21088,
+            lastPrice: 13980,
+          },
+        },
+        {
+          id: '2',
+          caseType: '電梯大樓',
+          messageSentAt: '2026-01-05T00:00:00',
+          priceDropAt: null,
+          priceDropAmount: null,
+          broker: {
+            name: '王大明',
+            shopName: '信義房屋',
+            mobilePhone: '02-87654321',
+          },
+          house: {
+            id: '2',
+            title: '捷運三分鐘電梯兩房',
+            imageUrl: null,
+            address: '新北市板橋區文化路一段',
+            communityName: '文化名邸',
+            buildPing: 32,
+            roomText: '2房(室)',
+            totalPrice: 1680,
+            lastPrice: null,
+          },
+        },
+        {
+          id: '3',
+          caseType: null,
+          messageSentAt: '2026-01-10T00:00:00',
+          priceDropAt: null,
+          priceDropAmount: null,
+          broker: null,
+          house: {
+            id: '3',
+            title: '南港軟體園區旁透天',
+            imageUrl: null,
+            address: '台北市南港區三重路',
+            communityName: null,
+            buildPing: null,
+            roomText: '4房(室)',
+            totalPrice: 5680,
+            lastPrice: null,
+          },
+        },
+      ],
+    },
     apiData: { ...apiDefault.message },
   })
   // 物件訂閱管理:data 放清單、分頁資訊,以及一次最多能比較幾筆(compareLimit)。
+  //
+  // api 目前回不到資料,所以先帶一份假的把版面撐起來。時間欄位是 subscribedAt
+  // (留言紀錄那一頁是 messageSentAt),另外每一筆多一個 canCompare ——
+  // 第三筆給 false,勾選方塊要停用。compareLimit 給 3,勾超過就不能比。
+  // api 通了之後這一份改回 null。
   const houseSubscribe = ref({
-    data: null,
+    data: {
+      paging: {
+        page: 1,
+        pageSize: LIST_PAGE_SIZE,
+        total: 3,
+      },
+      compareLimit: 3,
+      items: [
+        {
+          id: '1',
+          caseType: '公寓',
+          subscribedAt: '2026-01-01T00:00:00',
+          priceDropAt: '2026-01-15T00:00:00',
+          priceDropAmount: 120,
+          canCompare: true,
+          broker: {
+            name: '郝惠邁',
+            shopName: '永慶房屋(股)公司',
+            mobilePhone: '02-12345678 # 1234',
+          },
+          house: {
+            id: '1',
+            title: '忠誠四房車大降價屋主急售低於行情隨時可看',
+            imageUrl: null,
+            address: '台北市北投區泉源路華南巷',
+            communityName: '嘩啦啦美之城社區',
+            buildPing: 20,
+            roomText: '2房(室)',
+            totalPrice: 21088,
+            lastPrice: 13980,
+          },
+        },
+        {
+          id: '2',
+          caseType: '電梯大樓',
+          subscribedAt: '2026-01-05T00:00:00',
+          priceDropAt: null,
+          priceDropAmount: null,
+          canCompare: true,
+          broker: {
+            name: '王大明',
+            shopName: '信義房屋',
+            mobilePhone: '02-87654321',
+          },
+          house: {
+            id: '2',
+            title: '捷運三分鐘電梯兩房',
+            imageUrl: null,
+            address: '新北市板橋區文化路一段',
+            communityName: '文化名邸',
+            buildPing: 32,
+            roomText: '2房(室)',
+            totalPrice: 1680,
+            lastPrice: null,
+          },
+        },
+        {
+          id: '3',
+          caseType: null,
+          subscribedAt: '2026-01-10T00:00:00',
+          priceDropAt: null,
+          priceDropAmount: null,
+          canCompare: false,
+          broker: null,
+          house: {
+            id: '3',
+            title: '南港軟體園區旁透天',
+            imageUrl: null,
+            address: '台北市南港區三重路',
+            communityName: null,
+            buildPing: null,
+            roomText: '4房(室)',
+            totalPrice: 5680,
+            lastPrice: null,
+          },
+        },
+      ],
+    },
     apiData: { ...apiDefault.houseSubscribe },
   })
   // 搜尋訂閱管理:data 放清單與分頁資訊。

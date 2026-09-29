@@ -1,6 +1,5 @@
 <script setup>
 const { onUseMeta } = useProjectActions()
-const { onNoticeSummary, onApiGetMemberNotificationsCommunityNew } = useMemberCenterActions()
 const { onApiErrorServerToClient } = usePopupActions()
 
 definePageMeta({
@@ -10,8 +9,13 @@ definePageMeta({
   requiresAuth: true,
 })
 
-await onNoticeSummary()
-await onApiGetMemberNotificationsCommunityNew()
+// api 目前回不到資料,取回來會把假資料蓋掉,所以初次載入先不取 ——
+// 分頁籤的未讀數吃 stores/member/center.js 的 noticeSummary.data。
+// api 有資料之後這裡要加回下面三行,那一份假資料也改回 null:
+//
+//   const { onNoticeSummary, onApiGetMemberNotificationsCommunityNew } = useMemberCenterActions()
+//   await onNoticeSummary()
+//   await onApiGetMemberNotificationsCommunityNew()
 
 onUseMeta({
   title: '會員中心 | 好房 HouseFun',

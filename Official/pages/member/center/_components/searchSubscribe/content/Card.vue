@@ -20,7 +20,7 @@ const onDelete = () => emits('delete')
 
 <template>
   <div
-    class="flex flex-wrap items-center transition-colors duration-300 tm:gap-[10px] tm:rounded-[10px] tm:border-[1px] tm:p-[15px] p:flex-nowrap p:gap-[20px] p:px-[10px] p:py-[20px]"
+    class="flex flex-wrap items-center transition-colors duration-300 tm:gap-[10px] tm:rounded-[10px] tm:border-[1px] tm:p-[15px] p:flex-nowrap p:gap-x-[20px] p:px-[10px] p:py-[20px]"
     :class="[
       { 'bg-[--green-ffe9] tm:border-[--green-8b0d]': isSelected },
       { 'bg-[--white] tm:border-transparent': !isSelected },
@@ -37,14 +37,11 @@ const onDelete = () => emits('delete')
       }"
     />
     <!-- 條件標籤與加入時間收在同一欄:手機整行、桌機與平板吃掉中間剩下的寬度。 -->
-    <div class="min-w-0 space-y-[10px] m:w-full pt:grow">
-      <PageMemberCenterSearchSubscribeContentCardTags :item="props.item" />
+    <div class="min-w-0 m:w-full m:space-y-[15px] pt:grow pt:space-y-[10px]">
+      <PageMemberCenterSearchSubscribeContentCardTags :item="props.item" :isSelected="isSelected" />
       <PageMemberCenterSearchSubscribeContentCardTimeInfo :item="props.item" />
     </div>
     <PageMemberCenterSearchSubscribeContentCardMatchedInfo :item="props.item" />
-    <PageMemberCenterSearchSubscribeContentCardActions
-      :item="props.item"
-      @delete="onDelete"
-    />
+    <PageMemberCenterSearchSubscribeContentCardActions :item="props.item" @delete="onDelete" />
   </div>
 </template>

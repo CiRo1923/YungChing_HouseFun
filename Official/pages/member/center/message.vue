@@ -20,14 +20,15 @@ const onMemberMessages = async () => {
   await onApiGetMemberMessages()
 }
 
-// 包 callOnce:頁面的 setup 在 SSR 跑一次、hydration 在瀏覽器再跑一次,
-// 直接 await 的話同一支 api 會發兩次。callOnce 把「已經取過」寫進 SSR payload,
-// hydration 讀得到就整段跳過;資料本身跟著 pinia 的 state 一起還原。
+// api 目前回的是空清單,取回來會把假資料蓋掉,所以初次載入先不取 ——
+// 畫面吃 stores/member/center.js 的 message.data。api 有資料之後這裡要加回
+// 下面這一行,那一份假資料也改回 null:
 //
-// mode 要 navigation:預設的 render 模式記號永遠留著,換去別頁再回來會跳過,
-// 那一頁就停在離開前的資料。翻頁不會重複 —— 同一個路由只有 query 變,setup 不重跑,
-// 重取由下面那個 watch 負責。
-await callOnce('member-message', onMemberMessages, { mode: 'navigation' })
+//   await callOnce('member-message', onMemberMessages, { mode: 'navigation' })
+//
+// 包 callOnce 的原因:頁面的 setup 在 SSR 跑一次、hydration 在瀏覽器再跑一次,
+// 直接 await 的話同一支 api 會發兩次。mode 要 navigation,預設的 render 模式記號永遠留著,
+// 換去別頁再回來會跳過,那一頁就停在離開前的資料。
 
 watch(() => route.query.pg, onMemberMessages)
 

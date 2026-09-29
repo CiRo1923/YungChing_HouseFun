@@ -24,7 +24,7 @@ const onDelete = () => emits('delete')
         },
       }"
       :setClass="{
-        main: '--oval --border-orange-f74c --h-35 --px-15 --text-orange-e646 --text-center gap-x-[5px] m:flex-1',
+        main: '--oval --bg-white --border-orange-f74c --h-35 --px-15 --text-orange-e646 --text-center gap-x-[5px] m:flex-1',
         text: 'text-[14px]',
         icon: 'h-[16px] w-[16px] p-[2px]',
       }"
@@ -40,7 +40,7 @@ const onDelete = () => emits('delete')
         },
       }"
       :setClass="{
-        main: '--oval --border-gray-e5 --h-35 --px-15 --text-gray-666 --text-center gap-x-[5px] m:flex-1',
+        main: '--oval --bg-white --border-gray-e5 --h-35 --px-15 --text-gray-666 --text-center gap-x-[5px] m:flex-1',
         text: 'text-[14px]',
         icon: 'h-[16px] w-[16px] p-[2px]',
       }"
@@ -55,7 +55,7 @@ const onDelete = () => emits('delete')
         },
       }"
       :setClass="{
-        main: '--oval --border-gray-e5 --h-35 --px-15 --text-gray-666 --text-center gap-x-[5px] m:flex-1',
+        main: '--oval --bg-white --border-gray-e5 --h-35 --px-15 --text-gray-666 --text-center gap-x-[5px] m:flex-1',
         text: 'text-[14px]',
         icon: 'h-[16px] w-[16px] p-[2px]',
       }"
