@@ -123,6 +123,17 @@ const model = computed({
   },
 })
 
+/* 這一格現在是不是選中的。
+
+  兩種模式的答案不在同一個地方:整組共用一個名字時,選中的是一份清單,
+  要問「這一格的值在不在裡面」;只有一格時,值本身就是答案。
+  只認其中一種的話,另一種模式永遠算成沒選中,而畫面上看得到它是勾著的。 */
+const isChecked = computed(() => {
+  if (config.value.mode !== 'group') return model.value === true
+
+  return Array.isArray(model.value) && model.value.includes(config.value.value)
+})
+
 const joinSep = computed(() => {
   if (config.value.mode !== 'group') return null
 
@@ -243,10 +254,42 @@ const onChange = async () => {
     }
   }
 
+  /* 這次動作之後的狀態,以及把它改回去的手段。
+
+    使用端有時要在「算數」之前先問一句:勾選後比對各列資料,不一致時跳確認彈窗,
+    確認了才真的套用。少了這兩樣的話,使用端讀不出這次是勾還是取消
+    (通知裡只有那一格的值,不是整組的狀態),也沒有辦法把它退回去。
+
+    **這是還原,不是攔截。** 通知在畫面更新之後才發 ——
+    要等值回流才讀得到清空邏輯的結果,所以 onChecked(false) 是
+    「勾起來之後退回去」。要在畫面更新前就攔住的話,得在原生的點擊事件上
+    preventDefault 並自己接管整個狀態,那是另一種形狀,不是這支現在的做法。 */
+  const checked =
+    mode === 'group' ? Array.isArray(model.value) && model.value.includes(value) : !!model.value
+
+  const onChecked = (next) => {
+    if (mode !== 'group') {
+      model.value = Boolean(next)
+      return
+    }
+
+    const list = Array.isArray(model.value) ? [...model.value] : []
+    const at = list.indexOf(value)
+
+    /* 已經是那個狀態就不動它 —— 重複加會讓同一個值出現兩次,
+       而那一組的值之後會被接成字串送出去。 */
+    if (next && at < 0) list.push(value)
+    if (!next && at >= 0) list.splice(at, 1)
+
+    model.value = list
+  }
+
   emits('change', {
     mode,
     label,
     value,
+    checked,
+    onChecked,
   })
 }
 </script>
@@ -268,6 +311,12 @@ const onChange = async () => {
           class="m-form-element --checkbox"
           :class="[
             { '--align-top': config.align === 'top' },
+            /* 選中狀態掛在這一層,使用端的樣式才接得到 ——
+              勾選狀態在 <input> 上,而它是這個 <label> 的子元素:
+              css 沒有辦法讓父層對子層的狀態有反應(`:has()` 以外沒有第二種寫法,
+              而那個在比較舊的內嵌瀏覽器上不成立)。使用端也算不出來,
+              那要比對 modelValue,是元件內部才有的資訊。 */
+            { '--checked': isChecked },
             { '--disabled': config.isDisabled },
             { '--has-label': config.label || $slots.default },
             { '--error': errorMessage || config.isError },
