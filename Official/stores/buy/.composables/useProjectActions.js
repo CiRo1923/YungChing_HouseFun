@@ -11,7 +11,7 @@ import { onDeepClone, onDeepMerge, onFormatDate } from '@js/_prototype.js'
 import { BUYACCESSDATA, BUYCHANNEL } from '@js/_storage.js'
 import { enCrypto, deCrypto, enCryptoShort, deCryptoShort } from '@js/.crypto/index.js'
 
-export default () => {
+const useProjectActions = () => {
   const project = useProjectStore()
   const { serverTime } = storeToRefs(project)
   const { onApiGetCommonServerTime } = useProjectActions()
@@ -369,3 +369,5 @@ export default () => {
     reset,
   }
 }
+
+export default useProjectActions

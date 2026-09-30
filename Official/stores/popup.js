@@ -1,3 +1,10 @@
+/* starter —— 這一支是起手樣板:複製一次,之後歸接手的專案所有。
+
+  整套更新時**不要覆蓋它**。這個站有哪幾種彈窗、各自的版面與預設 class
+  都收在這裡,蓋過去等於把已經接好的那一套換成別人的 ——
+  而那不會報錯,要開啟那個彈窗才看得出來。
+
+  版面那幾個值(defaultSetClass)本來就是給各專案改的,更不該被蓋回去。 */
 export const usePopupStore = defineStore('popup', () => {
   const alertCheck = ref(null)
   const confirmCheck = ref(null)

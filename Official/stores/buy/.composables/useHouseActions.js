@@ -1,6 +1,6 @@
 import { apiGetBuyHouseHfid, apiGetBuyHouseHfidPoi } from '@js/_api/buy/house.js'
 
-export default () => {
+const useHouseActions = () => {
   const buyHouseStores = useBuyHouseStore()
   const { lifeMap } = storeToRefs(buyHouseStores)
   const { onSetSeo } = useProjectActions()
@@ -67,3 +67,5 @@ export default () => {
     onApiGetBuyHouseHfidPoi,
   }
 }
+
+export default useHouseActions

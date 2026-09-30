@@ -17,8 +17,9 @@ import {
   PHONEEXCEEDED,
   UPGRADECOMPLETE,
 } from '@js/_storage.js'
+import { onDeepClone } from '@js/_prototype.js'
 
-export default () => {
+const useUpgradeActions = () => {
   const memberUpgrade = useMemberAuthUpgradeStore()
   const { email, emailVerify, phone, phoneVerify, bind, merge } = storeToRefs(memberUpgrade)
   const { onApiError, onAlert, onCustom } = usePopupActions()
@@ -28,7 +29,8 @@ export default () => {
 
   const onApiPostMemberAuthEmailUpgradeEmailVerificationCode = async () => {
     const { apiData } = email.value
-    const { config, status, data } = await apiPostMemberAuthEmailUpgradeEmailVerificationCode(apiData)
+    const { config, status, data } =
+      await apiPostMemberAuthEmailUpgradeEmailVerificationCode(apiData)
 
     email.value.apiResult = null
 
@@ -103,7 +105,8 @@ export default () => {
   }
   const onApiPostMemberAuthEmailUpgradeEmailVerificationCodeVerify = async () => {
     const { apiData } = emailVerify.value
-    const { config, status, data } = await apiPostMemberAuthEmailUpgradeEmailVerificationCodeVerify(apiData)
+    const { config, status, data } =
+      await apiPostMemberAuthEmailUpgradeEmailVerificationCodeVerify(apiData)
 
     emailVerify.value.apiResult = null
 
@@ -253,10 +256,11 @@ export default () => {
     if (!onCheckUpgradeToken()) return memberUpgrade.apiTokenInvalid
 
     const { apiData } = phoneVerify.value
-    const { config, status, data } = await apiPostMemberAuthEmailUpgradeMobileVerificationCodeVerify(
-      apiData,
-      onUpgradeTokenConfig()
-    )
+    const { config, status, data } =
+      await apiPostMemberAuthEmailUpgradeMobileVerificationCodeVerify(
+        apiData,
+        onUpgradeTokenConfig()
+      )
 
     phoneVerify.value.apiResult = null
 
@@ -296,7 +300,10 @@ export default () => {
     if (!onCheckUpgradeToken()) return memberUpgrade.apiTokenInvalid
 
     const { apiData } = bind.value
-    const { config, status, data } = await apiPostMemberAuthEmailUpgradeBind(apiData, onUpgradeTokenConfig())
+    const { config, status, data } = await apiPostMemberAuthEmailUpgradeBind(
+      apiData,
+      onUpgradeTokenConfig()
+    )
 
     if (status === 200) {
       onUpgradeCompleted(data)
@@ -326,7 +333,10 @@ export default () => {
     if (!onCheckUpgradeToken()) return memberUpgrade.apiTokenInvalid
 
     const { apiData } = merge.value
-    const { config, status, data } = await apiPostMemberAuthEmailUpgradeMerge(apiData, onUpgradeTokenConfig())
+    const { config, status, data } = await apiPostMemberAuthEmailUpgradeMerge(
+      apiData,
+      onUpgradeTokenConfig()
+    )
 
     if (status === 200) {
       onUpgradeCompleted(data)
@@ -477,24 +487,24 @@ export default () => {
 
   const reset = {
     onEmail() {
-      email.value.apiData = { ...memberUpgrade.apiDefault.email }
+      email.value.apiData = onDeepClone(memberUpgrade.apiDefault.email)
     },
     onEmailVerify() {
-      emailVerify.value.apiData = { ...memberUpgrade.apiDefault.emailVerify }
+      emailVerify.value.apiData = onDeepClone(memberUpgrade.apiDefault.emailVerify)
 
       // apiResult 也要一起清:store 是單例,上一次進頁面留下的 remainingAttempts
       // 會被這次的畫面判斷沿用
       emailVerify.value.apiResult = null
     },
     onPhoneVerify() {
-      phoneVerify.value.apiData = { ...memberUpgrade.apiDefault.phoneVerify }
+      phoneVerify.value.apiData = onDeepClone(memberUpgrade.apiDefault.phoneVerify)
 
       // apiResult 也要一起清:store 是單例,上一次進頁面留下的 remainingAttempts
       // 會被這次的畫面判斷沿用
       phoneVerify.value.apiResult = null
     },
     onPhone() {
-      phone.value.apiData = { ...memberUpgrade.apiDefault.phone }
+      phone.value.apiData = onDeepClone(memberUpgrade.apiDefault.phone)
 
       // token 一併清掉:store 是單例,重設後才由頁面從 EMAILVERIFYTOKEN cookie 還原,
       // 避免上一輪的舊 token 殘留下來被當成這次的
@@ -520,3 +530,5 @@ export default () => {
     reset,
   }
 }
+
+export default useUpgradeActions

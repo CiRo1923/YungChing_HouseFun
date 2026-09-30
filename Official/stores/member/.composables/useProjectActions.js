@@ -1,4 +1,8 @@
-import { apiPostAuthTokenExchange, apiGetAuthMe, apiPostAuthLogout } from '@js/_api/member/common.js'
+import {
+  apiPostAuthTokenExchange,
+  apiGetAuthMe,
+  apiPostAuthLogout,
+} from '@js/_api/member/common.js'
 
 import { onFormatDate } from '@js/_prototype.js'
 import { MEMBERACCESSDATA } from '@js/_storage.js'
@@ -8,7 +12,7 @@ import { enCrypto, deCrypto } from '@js/.crypto/index.js'
 //   token/exchange  用 Member Auth 的 handoff token 換這個服務的 bearer token
 //   me              取會員資料
 //   logout          撤銷 Member Auth 的全域 session(其他頻道的 token 也會一起失效)
-export default () => {
+const useProjectActions = () => {
   const project = useProjectStore()
   const { serverTime } = storeToRefs(project)
   const { onApiGetCommonServerTime } = useProjectActions()
@@ -146,3 +150,5 @@ export default () => {
     onReset,
   }
 }
+
+export default useProjectActions

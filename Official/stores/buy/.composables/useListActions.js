@@ -3,7 +3,7 @@ import { apiGetBuyList, apiGetBuyListFocus, apiGetBuySuggest } from '@js/_api/bu
 import { onDeepClone } from '@js/_prototype.js'
 import { onResolveByDevice } from '@js/_projectPrototype.js'
 
-export default () => {
+const useListActions = () => {
   const commonStore = useCommonStore()
   const { device } = storeToRefs(commonStore)
   const buyProjectStores = useBuyProjectStore()
@@ -525,3 +525,5 @@ export default () => {
     onRemoveCondition,
   }
 }
+
+export default useListActions

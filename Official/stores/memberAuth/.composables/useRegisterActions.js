@@ -1,6 +1,10 @@
-import { apiPostMemberAuthRegisterVerificationCode, apiPostMemberAuthRegister } from '@js/_api/memberAuth/register.js'
+import {
+  apiPostMemberAuthRegisterVerificationCode,
+  apiPostMemberAuthRegister,
+} from '@js/_api/memberAuth/register.js'
+import { onDeepClone } from '@js/_prototype.js'
 
-export default () => {
+const useRegisterActions = () => {
   const memberRegister = useMemberAuthRegisterStore()
   const { type } = storeToRefs(memberRegister)
   const { onApiError } = usePopupActions()
@@ -38,7 +42,7 @@ export default () => {
   }
   const reset = {
     onType() {
-      type.value.apiData = { ...memberRegister.apiDefault.type }
+      type.value.apiData = onDeepClone(memberRegister.apiDefault.type)
     },
   }
 
@@ -48,3 +52,5 @@ export default () => {
     reset,
   }
 }
+
+export default useRegisterActions

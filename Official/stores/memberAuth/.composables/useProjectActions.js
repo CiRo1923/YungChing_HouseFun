@@ -1,10 +1,10 @@
 import { apiPostMemberAuthToken, apiGetMemberAuthHandoffToken } from '@js/_api/memberAuth/common.js'
 
-import { onFormatDate } from '@js/_prototype.js'
+import { onDeepClone, onFormatDate } from '@js/_prototype.js'
 import { AUTHTOKEN } from '@js/_storage.js'
 import { enCrypto, deCrypto } from '@js/.crypto/index.js'
 
-export default () => {
+const useProjectActions = () => {
   const project = useProjectStore()
   const { serverTime } = storeToRefs(project)
   const { onApiGetCommonServerTime } = useProjectActions()
@@ -118,8 +118,8 @@ export default () => {
     authToken.value = null
     access.value.data = null
     userData.value = null
-    login.value.auth.apiData = { ...memberProject.apiDefault.auth }
-    login.value.verify.apiData = { ...memberProject.apiDefault.verify }
+    login.value.auth.apiData = onDeepClone(memberProject.apiDefault.auth)
+    login.value.verify.apiData = onDeepClone(memberProject.apiDefault.verify)
   }
 
   return {
@@ -131,3 +131,5 @@ export default () => {
     onReset,
   }
 }
+
+export default useProjectActions

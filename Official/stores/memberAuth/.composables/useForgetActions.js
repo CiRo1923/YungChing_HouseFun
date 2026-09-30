@@ -1,12 +1,16 @@
-import { apiPostMemberAuthPasswordResetRequest, apiPostMemberAuthPasswordResetConfirm } from '@js/_api/memberAuth/forget.js'
+import {
+  apiPostMemberAuthPasswordResetRequest,
+  apiPostMemberAuthPasswordResetConfirm,
+} from '@js/_api/memberAuth/forget.js'
 import { enCrypto, deCrypto } from '@js/.crypto/index.js'
 import { FORGETRESET, FORGETCOMPLETE } from '@js/_storage.js'
+import { onDeepClone } from '@js/_prototype.js'
 
 // 忘記密碼流程的執行事件。
 //
 // 這條流程只有兩支 API,而驗證碼是 confirm 才驗的 —— 步驟 1 的「下一步」沒有東西可打,
 // 只檢查格式並確認已經發過碼。驗證碼錯誤要到步驟 2 送出才會知道,那時導回步驟 1。
-export default () => {
+const useForgetActions = () => {
   const memberForget = useMemberAuthForgetStore()
   const { verify, resetPassword } = storeToRefs(memberForget)
   const { onApiError, onAlert } = usePopupActions()
@@ -216,14 +220,14 @@ export default () => {
 
   const reset = {
     onVerify() {
-      verify.value.apiData = { ...memberForget.apiDefault.verify }
+      verify.value.apiData = onDeepClone(memberForget.apiDefault.verify)
       verify.value.countdownData.expires = null
 
       // apiResult 也要一起清:store 是單例,上一次進頁面留下的結果會被這次沿用
       verify.value.apiResult = null
     },
     onResetPassword() {
-      resetPassword.value.apiData = { ...memberForget.apiDefault.resetPassword }
+      resetPassword.value.apiData = onDeepClone(memberForget.apiDefault.resetPassword)
       resetPassword.value.apiResult = null
     },
   }
@@ -238,3 +242,5 @@ export default () => {
     reset,
   }
 }
+
+export default useForgetActions

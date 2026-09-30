@@ -51,7 +51,21 @@ const resolveBundledImg = (raw) => {
   const hit = MAP[toKey(raw)]
   if (hit) return bust(hit)
 
-  console.warn('[CommonMFigure] not found:', toKey(raw))
+  /* 找不到就要講出是哪一個路徑、該放在哪裡。
+
+    只印解析後的那個 key 沒有用:那串是這個專案的目錄擺法算出來的絕對路徑,
+    拿去搜尋搜不到任何東西,而使用端手上的是自己寫的那個相對路徑。
+
+    標籤用這個專案實際的元件名 —— 看到警告的人要能拿它去搜使用端,
+    而使用端寫的是標籤名(這裡是 CommonMFigure,自動註冊的名字跟著目錄走)。 */
+  if (import.meta.env.DEV) {
+    console.warn(
+      `[CommonMFigure] 找不到圖片 ${raw} —— 這支元件只認打包進來的圖,` +
+        `路徑相對圖片目錄寫(這個專案解析到 ${IMG_PREFIX || '空字串:glob 一個檔案都沒對到'})。` +
+        `外部圖片要寫完整的 http(s):// 或 data:。`
+    )
+  }
+
   return encodeURI(raw)
 }
 

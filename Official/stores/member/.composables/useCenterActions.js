@@ -16,7 +16,7 @@ import {
 } from '@js/_api/member/center.js'
 
 // 會員中心各頁的行為。auth 三支在同層的 useProjectActions.js。
-export default () => {
+const useCenterActions = () => {
   const memberCenter = useMemberCenterStore()
   const {
     noticeSummary,
@@ -308,3 +308,5 @@ export default () => {
     onNoticeSummary,
   }
 }
+
+export default useCenterActions
