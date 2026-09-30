@@ -7,6 +7,7 @@ import './.css/variables.css'
 import './.css/promiseVariables.css'
 import './.css/common.css'
 import './.css/promise.css'
+import './.css/styleProject.css'
 
 const popup = usePopupStore()
 const { promise } = storeToRefs(popup)

@@ -8,6 +8,7 @@
 
 import './.css/variables.css'
 import './.css/common.css'
+import './.css/styleProject.css'
 
 import blankUrl from '@imgs/common/blank.svg'
 import noImageUrl from '@imgs/common/no_image.svg'
@@ -53,14 +54,18 @@ const resolveBundledImg = (raw) => {
 
   /* 找不到就要講出是哪一個路徑、該放在哪裡。
 
-    只印解析後的那個 key 沒有用:那串是這個專案的目錄擺法算出來的絕對路徑,
-    拿去搜尋搜不到任何東西,而使用端手上的是自己寫的那個相對路徑。
+    **要找是誰傳了這個值,搜訊息裡那個原始路徑**(下面的 raw)——
+    那是使用端自己寫的字串,全案搜得到。
 
-    標籤用這個專案實際的元件名 —— 看到警告的人要能拿它去搜使用端,
-    而使用端寫的是標籤名(這裡是 CommonMFigure,自動註冊的名字跟著目錄走)。 */
+    前面那個方括號只是讓人一眼認出是哪一組元件發的訊息,不是拿來搜使用端的:
+    使用端寫的是自動註冊的標籤名,而那個名字由元件在專案裡的擺法決定
+    (多包一層分類資料夾,名字就多一段),同一支元件在各專案叫不同名字。
+
+    解析後的那個 key 也不印 —— 那串是這個專案的目錄擺法算出來的絕對路徑,
+    使用端手上沒有那個東西。 */
   if (import.meta.env.DEV) {
     console.warn(
-      `[CommonMFigure] 找不到圖片 ${raw} —— 這支元件只認打包進來的圖,` +
+      `[mFigure] 找不到圖片 ${raw} —— 這支元件只認打包進來的圖,` +
         `路徑相對圖片目錄寫(這個專案解析到 ${IMG_PREFIX || '空字串:glob 一個檔案都沒對到'})。` +
         `外部圖片要寫完整的 http(s):// 或 data:。`
     )

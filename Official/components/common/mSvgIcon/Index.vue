@@ -20,6 +20,7 @@
   版本號取自建置識別碼,內容有更新時網址才會跟著變。 */
 
 import './.css/common.css'
+import './.css/styleProject.css'
 
 /* 產生 sprite 的那支建置外掛在每次更新後會送一個事件過來,名字是這個。
 

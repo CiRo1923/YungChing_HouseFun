@@ -5,6 +5,7 @@ import './.css/radioVariables.css'
 import './.css/common.css'
 import './.css/selection.css'
 import './.css/radio.css'
+import './.css/styleProject.css'
 
 import useValidateEvents from './.composables/useValidateEvents.js'
 

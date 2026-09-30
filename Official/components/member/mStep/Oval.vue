@@ -3,6 +3,7 @@ import './.css/variables.css'
 import './.css/ovalVariables.css'
 import './.css/common.css'
 import './.css/oval.css'
+import './.css/styleProject.css'
 
 const props = defineProps({
   // 每一步的 { icon, text } —— 步驟的內容與數量都由使用端決定

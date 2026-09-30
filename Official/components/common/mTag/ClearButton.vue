@@ -3,6 +3,7 @@ import './.css/variables.css'
 import './.css/clearButtonVariables.css'
 import './.css/common.css'
 import './.css/clearButton.css'
+import './.css/styleProject.css'
 
 const emits = defineEmits(['click'])
 const props = defineProps({

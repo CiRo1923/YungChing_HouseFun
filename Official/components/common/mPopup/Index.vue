@@ -12,6 +12,7 @@
    containers/common/ApiPromiseSystem.vue */
 import './.css/variables.css'
 import './.css/common.css'
+import './.css/styleProject.css'
 
 /* 設定項可以依裝置各給一種值:{ p, pt, tm, t, m },寫法與 css 的前綴同一組語彙。
 

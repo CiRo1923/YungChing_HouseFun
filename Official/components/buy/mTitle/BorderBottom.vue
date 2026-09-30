@@ -3,6 +3,7 @@ import './.css/variables.css'
 import './.css/borderBottomVariables.css'
 import './.css/common.css'
 import './.css/borderBottom.css'
+import './.css/styleProject.css'
 
 const props = defineProps({
   title: {

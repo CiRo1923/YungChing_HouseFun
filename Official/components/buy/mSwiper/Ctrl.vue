@@ -4,6 +4,7 @@
    stores/common.js */
 import './.css/variables.css'
 import './.css/common.css'
+import './.css/styleProject.css'
 
 import useCommonActions from '@stores/.composables/useCommonActions.js'
 import { useCommonStore } from '@stores/common.js'

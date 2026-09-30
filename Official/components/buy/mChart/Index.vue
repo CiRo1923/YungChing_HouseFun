@@ -1,6 +1,7 @@
 <script setup>
 import './.css/variables.css'
 import './.css/common.css'
+import './.css/styleProject.css'
 
 import useChartScale from './.composables/useChartScale.js'
 import useChartPath from './.composables/useChartPath.js'

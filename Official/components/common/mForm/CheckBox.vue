@@ -5,6 +5,7 @@ import './.css/checkboxVariables.css'
 import './.css/common.css'
 import './.css/selection.css'
 import './.css/checkbox.css'
+import './.css/styleProject.css'
 
 import useValidateEvents from './.composables/useValidateEvents.js'
 

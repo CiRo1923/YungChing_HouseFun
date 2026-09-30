@@ -6,6 +6,7 @@ import './.css/variables.css'
 import './.css/borderBottomVariables.css'
 import './.css/common.css'
 import './.css/borderBottom.css'
+import './.css/styleProject.css'
 
 import { onMergeTabConfig, onResolveByDevice, useTabCore } from './.composables/useCore.js'
 

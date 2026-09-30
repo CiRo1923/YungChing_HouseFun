@@ -6,6 +6,7 @@ import './.css/variables.css'
 import './.css/autocompleteVariables.css'
 import './.css/common.css'
 import './.css/autocomplete.css'
+import './.css/styleProject.css'
 
 import { useInputTextCore } from './.composables/useInputTextCore.js'
 import useValidateEvents from './.composables/useValidateEvents.js'

@@ -6,6 +6,7 @@ import './.css/variables.css'
 import './.css/selectVariables.css'
 import './.css/common.css'
 import './.css/select.css'
+import './.css/styleProject.css'
 
 import { onMergeDropdownConfig, useDropdownCore } from './.composables/useDropdownCore.js'
 import useValidateEvents from './.composables/useValidateEvents.js'

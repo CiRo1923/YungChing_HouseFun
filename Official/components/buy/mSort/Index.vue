@@ -6,6 +6,7 @@
      轉場動畫定義在這裡。沒有它不會報錯也不會少畫面,只是切換的當下直接跳、沒有漸變。 */
 import './.css/variables.css'
 import './.css/common.css'
+import './.css/styleProject.css'
 
 const common = useCommonStore()
 const { device } = storeToRefs(common)
