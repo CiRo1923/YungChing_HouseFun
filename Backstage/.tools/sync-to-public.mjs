@@ -119,8 +119,10 @@ function runCommand(command, args, options = {}) {
   })
 }
 
+// 用 symbolic-ref 而不是 rev-parse:發布用的 repo 剛 clone 下來時可能一個 commit 都沒有,
+// rev-parse 在那種 repo 會失敗,而 symbolic-ref 讀的是 HEAD 指向哪條分支,不需要有 commit。
 async function getBranch(cwd) {
-  const { code, stdout } = await runCommand('git', ['rev-parse', '--abbrev-ref', 'HEAD'], { cwd })
+  const { code, stdout } = await runCommand('git', ['symbolic-ref', '--short', 'HEAD'], { cwd })
 
   return code === 0 ? stdout : null
 }
