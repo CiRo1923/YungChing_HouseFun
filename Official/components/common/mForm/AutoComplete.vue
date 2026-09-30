@@ -65,16 +65,42 @@ const model = computed({
 })
 
 const defaultConfig = {
+  /* 要掛在元素上的屬性,依位置各一組 —— 位置名與 setClass 同一套
+        (能傳 class 的地方就能傳屬性),例如 { type: { 'data-x': 'y' } }。
+
+        有些東西只能靠元素上的屬性做到:難字的造字對照、無障礙的標記、
+        第三方套件用屬性認元素 —— 那幾種沒辦法用 class 或 slot 代替。
+
+        預設是空的,傳進來才掛。 */
+  attr: {},
   placeholder: '',
   // 驗證時機。blur / change 一律驗;值一動就驗只在「碰過之後」才生效
   // (touchedModelUpdate 的用意見 .composables/useValidateEvents.js)。
   // 傳陣列為「完整指定」,沒列到的一律關閉。
   validateEvents: ['blur', 'change', 'touchedModelUpdate'],
+  /* 什麼時候把值寫回 v-model。
+
+      'input'   打字的當下就寫(預設,維持原本的行為)
+      'select'  只有從清單選了一項才寫
+
+    用 v-model 做「完全相等」篩選的頁面要用 'select':打到一半的那幾個字
+    也會被寫回去,而那不是任何一筆資料的值 —— 清單當場變空,
+    離開欄位之後還是空的,要重新選一次或清掉才會恢復。
+
+    noMatchClearLabel 管的是另一件事(畫面上的文字),它不碰 v-model。 */
+  modelUpdateOn: 'input',
   noMatchClearLabel: false,
   waitMessage: '資料讀取中',
   noResult: '無任何選項。',
   isDisabled: false,
   isExistClose: true,
+  /* 清除鈕與搜尋那兩支圖示叫什麼 —— 各站的 _svg 裡名字不一樣。
+
+    寫死在畫面區段裡的話,換一個專案要改元件本身,而那一段跟著來源覆蓋:
+    改完下一次更新就被蓋回去,而找不到那個名字的圖示時不會報錯,
+    只是那個位置什麼都不畫。 */
+  clearIcon: 'icon_xmark',
+  searchIcon: 'icon_search',
   isError: false,
   position: 'auto',
   input: {
@@ -292,7 +318,9 @@ const onFocus = async () => {
 const onInput = async () => {
   if (isComposing.value) return
 
-  model.value = label.value
+  if (config.value.modelUpdateOn === 'input') {
+    model.value = label.value
+  }
 
   await emitInputWithWait()
 
@@ -309,7 +337,9 @@ const onInput = async () => {
 const onCompositionEnd = async () => {
   onIsComposingChange(false)
 
-  model.value = label.value
+  if (config.value.modelUpdateOn === 'input') {
+    model.value = label.value
+  }
 
   await emitInputWithWait()
 
@@ -444,7 +474,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="m-form" :class="setClass.main">
+  <div class="m-form" :class="setClass.main" v-bind="config.attr.main">
     <Field
       :name="props.name"
       :rules="props.rules"
@@ -453,7 +483,7 @@ onUnmounted(() => {
       v-slot="{ field, errorMessage }"
     >
       <input type="hidden" v-bind="field" />
-      <div class="m-form-container" :class="setClass.container">
+      <div class="m-form-container" :class="setClass.container" v-bind="config.attr.container">
         <div
           class="m-form-element --autocomplete"
           :class="[
@@ -463,6 +493,7 @@ onUnmounted(() => {
             { '--disabled': config.isDisabled },
             { '--error': errorMessage || config.isError },
           ]"
+          v-bind="config.attr.element"
           ref="elementRef"
         >
           <input
@@ -489,9 +520,9 @@ onUnmounted(() => {
             @click="onClear"
             v-if="config.isExistClose && !config.isDisabled"
           >
-            <CommonMSvgIcon icon="icon_xmark" class="m-form-clear-icon" />
+            <CommonMSvgIcon :icon="config.clearIcon" class="m-form-clear-icon" />
           </button>
-          <CommonMSvgIcon icon="icon_search" class="m-form-autocomplete-icon" />
+          <CommonMSvgIcon :icon="config.searchIcon" class="m-form-autocomplete-icon" />
         </div>
       </div>
     </Field>
@@ -499,6 +530,7 @@ onUnmounted(() => {
       as="span"
       class="m-form-autocomplete-error"
       :class="setClass.error"
+      v-bind="config.attr.error"
       :name="props.name"
       v-slot="{ message }"
     >
@@ -510,12 +542,14 @@ onUnmounted(() => {
       <div
         class="m-form-autocomplete-dropdown"
         :class="setClass.dropdown"
+        v-bind="config.attr.dropdown"
         ref="dropdownRef"
         v-if="isActive && dropdownItems && !config.isDisabled"
       >
         <div
           class="m-form-autocomplete-dropdown-container"
           :class="setClass.dropdownContainer"
+          v-bind="config.attr.dropdownContainer"
           ref="dropdownContainerRef"
         >
           <div class="m-form-autocomplete-dropdown-no-data" v-if="dropdownItems.length === 0">
@@ -537,7 +571,11 @@ onUnmounted(() => {
                 @mousedown="onDropdownItemMousedown"
                 @click="onDropdownItemClick(item)"
               >
-                <em class="m-form-autocomplete-dropdown-label" :class="setClass.dropdownLabel">
+                <em
+                  class="m-form-autocomplete-dropdown-label"
+                  :class="setClass.dropdownLabel"
+                  v-bind="config.attr.dropdownLabel"
+                >
                   <slot name="option" :item="item">
                     {{ item[config.schema.label] }}
                   </slot>

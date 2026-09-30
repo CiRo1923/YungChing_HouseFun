@@ -17,6 +17,8 @@ import {
   VIEW_UNDERSCORE_FOLDERS,
   CSS_MODULES_DIR,
   COMPONENT_DIRS,
+  componentTagOf,
+  componentTagIndexOf,
   STORE_DIR,
   SRC_DIR,
   VENDOR_DIRS,
@@ -627,6 +629,15 @@ const checkImportAlias = ({ rel, text, root }) => {
 // 那裡面的元件本來就得自己 import —— 判斷用的是「這支檔案算不算元件」
 // 那一份共用判準(元件目錄底下,或頁面目錄底下那幾個元件資料夾),
 // 不在這裡自己認一次:兩份判準有一天會不一樣,而不一樣的那天沒有人會發現。
+//
+// 這一條**認的是規範那一側的元件層清單,而真正有沒有被自動註冊由建置設定決定** ——
+// 兩邊指的不是同一份東西。某一層被規範算成元件層、建置那邊卻沒掃到的時候,
+// 使用端非手寫 import 不可(不寫的話標籤解析不到,而那不會報錯:
+// 畫面上就是那個元件不出現),而這條規則會把那一行報成違規 —— 兩邊都走不通。
+//
+// 所以在檔頭標 `lint-component-auto-import-exempt: 理由` 可以整支放行。
+// 那是應急的出口,不是常態:兩邊對不上本身要修(見元檢查
+// 「規範認定的元件層都有被自動註冊」),標記只是讓人在修好之前送得出 commit。
 
 /**
  * 一段 import 路徑指向專案裡的哪一支檔案;推不出來回 null。
@@ -655,6 +666,7 @@ const importTargetOf = (spec, { dir, root, aliases }) => {
 
 const checkComponentAutoImport = ({ rel, text, root }) => {
   if (!isSourceFile(rel)) return []
+  if (hasExemptMark(text, 'component-auto-import')) return []
 
   const aliases = buildAliasMap(root)
   const dir = path.dirname(path.resolve(root, rel))
@@ -1833,9 +1845,39 @@ export const onSortImports = (text, rel) => {
 // 這一類算得準,所以工具自己算:名字是寫在畫面區段裡的,樣式那一側定義的
 // 就是同一個名字接上框架的後綴,兩邊對得起來,沒有「是搭檔還是剛好用到」的模糊地帶。
 
-/** 檔頭清單的起頭;後面接的每一個看起來像檔案路徑的字都算一項 */
+/** 檔頭清單的起頭;後面那幾行裡,每一個以這些副檔名結尾的字都算一項 */
 const DEP_MARK = 'component-deps'
-const DEP_PATH_RE = /[\w.@/-]+\.(?:m?js|cjs|ts|vue|css)/g
+
+/**
+ * 刻意不要動畫時,轉場名寫這個字 —— 規則不會要求它有對應的樣式。
+ *
+ * 「換一個對應不到樣式的名字」是取消動畫的慣用手法:那一刻 Vue 找不到
+ * 任何一組 class,所以不等待、直接切換。拖曳中的清單就要這樣 ——
+ * 列的增減是拖曳本身,再加動畫會讓退場中的列還留在畫面上,量測落點時多算一列。
+ *
+ * 但規則分不出「刻意找不到」與「名字打錯」:兩者長得一模一樣。
+ * 沒有這個保留字的話,那種寫法會被報成「全案找不到那一組的定義」,
+ * 而規則給的兩條路(補進樣式檔、改成已經有的名字)**都會把動畫裝回去** ——
+ * 照著做就是把原本要修掉的那個問題再放一次。
+ *
+ * 用保留字而不是在檔頭標豁免:意圖寫在使用端那一行,看到 `'none'` 就知道
+ * 那是刻意的;而檔頭的標記會把整支元件的相依檢查一起放行,範圍太寬,
+ * 也看不出是哪一個轉場刻意這樣。
+ */
+const NO_TRANSITION_NAME = 'none'
+
+/**
+ * 一個字是不是這份清單裡的一項 —— 看它**以什麼結尾**,不列舉路徑裡准許哪些字元。
+ *
+ * 先前是用字元類去撈(`[\w.@/-]+\.副檔名`),而那份清單漏掉的每一種字元
+ * 都會變成同一種災情:算「應該列哪幾支」的那一側讀的是 import 裡的字串,
+ * 什麼字元都認得,於是它要求列出 `_j$.js`;而讀檔頭的這一側撈不到那個字,
+ * 照著寫進去之後仍然被報成「少列了」—— **那一筆怎麼改都消不掉**。
+ *
+ * 同一個路徑,兩側用不同的方式解析,就是有兩份判準。改成看結尾之後,
+ * 檔名裡有什麼字元都不影響,兩側對得起來。
+ */
+const DEP_EXT_RE = /\.(?:m?js|cjs|ts|vue|css)$/
 
 /** use{名稱}Store / use{名稱}Actions 的呼叫 */
 const STORE_CALL_RE = /\b(use[A-Z]\w*(?:Store|Actions))\s*\(/g
@@ -1875,12 +1917,16 @@ const transitionNamesOf = (text) => {
 }
 
 /**
- * 這支元件複製的時候要一起帶走哪幾支檔案 —— 兩類:
+ * 這支元件複製的時候要一起帶走哪幾支檔案 —— 三類:
  *
  *   store / actions   它自己讀的那幾支,不帶走的話資料永遠是空的
  *   轉場樣式          它用到的轉場定義在哪,不帶走的話切換沒有漸變
+ *   共用函式          它 import 的那幾支,不帶走的話**建置直接失敗**
  *
- * 兩份索引都收在 shared.mjs 各一份 —— 取值那條規則也要問 store 那一側的事,
+ * 第三類壞得最早也最明白(`Missing export`),但訊息只說某個名字不存在 ——
+ * 看的人不知道那是元件帶來的相依,而元件的資料夾看起來已經整個複製過來了。
+ *
+ * 前兩類的索引收在 shared.mjs 各一份 —— 取值那條規則也要問 store 那一側的事,
  * 各建一份的話同一個專案會被走訪兩次,而且其中一份改了判準另一份不會跟著。
  *
  * 回傳排序過的相對路徑,規則與指令印的是同一份。
@@ -1902,7 +1948,73 @@ export const componentDepsOf = (root, rel, text) => {
     if (file && !file.startsWith(`${path.dirname(rel)}/`)) deps.add(file)
   }
 
+  /* 它 import 的共用函式 —— 那一層不在元件的資料夾底下,不會跟著複製。
+
+     只收「解得開的 alias 路徑」:相對路徑指的是元件自己旁邊那幾支
+     (composable、樣式),本來就跟著走;解不開的 alias 代表建置設定讀不到,
+     那時整條跳過,不要猜一個路徑出來。 */
+  const ownDir = path.dirname(rel)
+
+  for (const m of maskComments(rel, text).matchAll(IMPORT_RE)) {
+    const spec = m[1] ?? m[2] ?? m[3] ?? ''
+
+    if (!spec.startsWith('@')) continue
+
+    const hit = aliasListOf(root).find(({ alias }) => spec === alias || spec.startsWith(`${alias}/`))
+
+    if (!hit) continue
+
+    const abs = path.resolve(hit.root, spec.slice(hit.alias.length).replace(/^\/+/, ''))
+    const target = toRel(root, abs)
+
+    /* 只收程式檔。樣式那一類由上面的轉場那一段負責;
+       圖片那一類是資產,列在這裡會與檔頭原本就有的那幾行重複。 */
+    if (!/\.(js|mjs|cjs|ts)$/.test(target)) continue
+
+    /* 指回元件自己那一層的不算(有些專案用 alias 寫自己的元件路徑)。
+
+       **屬於別支元件的那幾支也不算** —— 那一支要整個資料夾帶走,
+       由「它用到的別支元件」那一份答(見 componentUsesOf)。
+       在這裡也列一次的話,同一件事會出現在兩個清單裡,
+       而檔頭那一份會長出一串別人資料夾底下的路徑。 */
+    if (target.startsWith(`${ownDir}/`)) continue
+    if (COMPONENT_DIRS.some((dir) => target.startsWith(`${dir}/`))) continue
+
+    if (fs.existsSync(abs)) deps.add(target)
+  }
+
   return [...deps].sort()
+}
+
+/**
+ * 這支元件的畫面裡用到哪幾支**別的**元件 —— 複製它的時候那幾支也要在。
+ *
+ * **這一份不進 componentDeps 那條規則的範圍。** 那條要求把清單寫進檔頭,
+ * 而元件相依幾乎每一支都有(圖示那一支被全部的元件用到),
+ * 列進去只是在每個檔頭重複同一行。這一份是給 `npm run deps` 印的:
+ * 要搬一支元件過去的人問的是「還要帶什麼」,那時才需要完整答案。
+ *
+ * 少帶的後果不會報錯:標籤解析不到時 Vue 只在開發模式印一行警告,
+ * 正式站是那個位置什麼都不畫 —— 圖示、箭頭、錯誤訊息就這樣安靜地消失。
+ *
+ * 同一個資料夾底下的子元件不算(mDatepicker 用它自己的 Calendar)——
+ * 那些本來就跟著資料夾一起走。
+ */
+export const componentUsesOf = (root, rel, text) => {
+  const tpl = templateRangeOf(text)
+  if (!tpl) return []
+
+  const index = componentTagIndexOf(root)
+  const own = path.dirname(rel)
+  const used = new Set()
+
+  for (const m of maskHtmlComments(tpl.body).matchAll(/<([A-Z][A-Za-z0-9]*)/g)) {
+    const dir = index.get(m[1])
+
+    if (dir && dir !== own) used.add(dir)
+  }
+
+  return [...used].sort()
 }
 
 /** 檔頭清單列了哪幾支;沒有那個標記回 null(與「列了但是空的」分開) */
@@ -1914,8 +2026,12 @@ const declaredDepsOf = (text) => {
      那個方向只會多讀幾行,而漏讀會把清單截斷、報成「少列了」。 */
   const end = text.indexOf('*/', at)
 
-  return [...text.slice(at + DEP_MARK.length, end === -1 ? undefined : end).matchAll(DEP_PATH_RE)]
-    .map((m) => m[0])
+  /* 按空白切開再逐個看結尾 —— 清單的寫法是一行一支,說明寫在它下一行。
+     說明那幾行是句子,裡面的詞不會以副檔名結尾,所以不會被收進來。 */
+  return text
+    .slice(at + DEP_MARK.length, end === -1 ? undefined : end)
+    .split(/\s+/)
+    .filter((one) => DEP_EXT_RE.test(one))
     .sort()
 }
 
@@ -1925,12 +2041,49 @@ const checkComponentDeps = ({ rel, text, root }) => {
   const actual = componentDepsOf(root, rel, text)
   const listed = declaredDepsOf(text) ?? []
 
+  /* 元件用到的轉場,全案找不到那一組的定義。
+
+     這要先問,而且要單獨報 —— 不然會被下面那一段判成「清單過期」,
+     方向正好相反:接手的專案常常有自己的轉場樣式檔(檔名對得上),
+     但裡面沒有這支元件用的那一組(名字不同)。那時檔案在、檔頭也列對了,
+     缺的是檔案**裡面**那一段。
+
+     報成「列了但已經不用,拿掉那幾行」的話,照著做會把正確的宣告刪掉,
+     而真正的問題還在:切換的當下直接跳、沒有漸變 —— 那個症狀不報錯,
+     看起來像本來就沒做動畫。 */
+  const transitionIndex = transitionStyleIndexOf(root)
+  const unknownTransitions = [...transitionNamesOf(text)].filter(
+    (name) => name !== NO_TRANSITION_NAME && !transitionIndex.has(name)
+  )
+
+  /* 前提是「檔頭已經列了一支轉場樣式檔」—— 那才是這個情境:
+     檔案帶過來了、清單也列對了,缺的是檔案裡面那一組。
+
+     檔頭還沒列的話,要處理的是清單本身(下面那一段會報),
+     先報這一條會把那件事蓋掉。 */
+  if (unknownTransitions.length && listed.some((file) => file.endsWith('.css'))) {
+    return [
+      issueOf(
+        rel,
+        lineNoOf(text, text.indexOf(DEP_MARK) >= 0 ? text.indexOf(DEP_MARK) : 0),
+        'componentDeps',
+        `這支元件用了轉場 ${unknownTransitions.join('、')},但全案找不到那幾組的定義 —— ` +
+          `檔案可能在(檔名對得上),缺的是裡面那一段。` +
+          `把那幾組補進轉場樣式檔,或改成這個專案已經有的名字;` +
+          `**不要拿掉檔頭的清單** —— 元件確實需要那一支,` +
+          `少了那幾組不會報錯,只是切換的當下直接跳、沒有漸變。` +
+          `如果那個名字是**刻意**找不到的(用它來取消動畫),` +
+          `把它改成 '${NO_TRANSITION_NAME}' —— 那是保留字,這條規則不會要求它有定義`
+      ),
+    ]
+  }
+
   const missing = actual.filter((file) => !listed.includes(file))
 
   /* 多列的只看工具自己算得準的那兩類:store 與轉場樣式檔。列了一支已經不讀的
      store、或已經不用的轉場,就是過期。其他項目(掛載用的容器、要一起搬的版型)
      是人自己補的,工具沒有立場說它多餘。 */
-  const transitionFiles = new Set(transitionStyleIndexOf(root).values())
+  const transitionFiles = new Set(transitionIndex.values())
 
   const stale = listed.filter(
     (file) =>

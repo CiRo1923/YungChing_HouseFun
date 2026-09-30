@@ -35,6 +35,7 @@ import {
   lineNoOf,
   listFiles,
   maskComments,
+  readTextCached,
   maskTemplateContent,
   registerScanCache,
   toRel,
@@ -550,7 +551,7 @@ const CONFIG_EXPORT_RE = /^export const ([A-Za-z_$][\w$]*)/gm
  * 文件不算讀者:文件提到某個設定的名字是在說明它,不是在用它。
  * 把文件算進來的話,一個沒有任何規則讀、只有文件寫過的設定會被判成有人用。
  */
-const toolingSourcesOf = (root) =>
+export const toolingSourcesOf = (root) =>
   TOOLING_PREFIXES.flatMap((prefix) => listFiles(root, prefix.replace(/\/$/, '')))
     .map((abs) => toRel(root, abs))
     .filter((rel) => rel !== CONFIG_FILE && !rel.endsWith('.md'))
@@ -669,7 +670,10 @@ const checkRuleTampered = ({ rel }) => {
       'ruleTampered',
       `共用規則與來源不一致(${diff.map((d) => `${d.name} ${d.state}`).join('、')})—— ` +
         `那幾支下次整套更新時會被蓋掉;要調整檢查行為的話,設定值改 project-config.mjs,` +
-        `只有這個專案要的規範寫進 rules-project.mjs`
+        `只有這個專案要的規範寫進 rules-project.mjs。` +
+        `**如果你沒有動過它們**,那多半是同步時沒帶到那幾支 —— ` +
+        `跟著來源的檔案不只規範工具那幾層(共用函式與表單規則在原始碼底下),` +
+        `跑 npm run rules:files 看完整清單`
     ),
   ]
 }
@@ -724,7 +728,7 @@ export const knownExemptNamesOf = (root) => {
     for (const name of fs.readdirSync(dir)) {
       if (!name.endsWith('.mjs')) continue
 
-      const text = fs.readFileSync(path.join(dir, name), 'utf8')
+      const text = readTextCached(path.join(dir, name)) ?? ''
 
       for (const m of text.matchAll(EXEMPT_NAME_RE)) names.add(m[1])
 

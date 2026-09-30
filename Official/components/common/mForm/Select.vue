@@ -1,7 +1,11 @@
 <script setup>
 /* component-deps —— 複製這支元件的時候這幾支要一起帶走:
    assets/css/_common/vueTransition.css
-     轉場動畫定義在這裡。沒有它不會報錯也不會少畫面,只是切換的當下直接跳、沒有漸變。 */
+     轉場動畫定義在這裡。沒有它不會報錯也不會少畫面,只是切換的當下直接跳、沒有漸變。
+   scripts/_prototype.js
+     這支元件用到的共用函式。少了它**建置直接失敗**,而訊息只說某個名字不存在 —— 看不出那是元件帶來的相依。
+   scripts/_validation.js
+     這支元件用到的共用函式。少了它**建置直接失敗**,而訊息只說某個名字不存在 —— 看不出那是元件帶來的相依。 */
 import './.css/variables.css'
 import './.css/selectVariables.css'
 import './.css/common.css'
@@ -71,6 +75,14 @@ const config = computed(() => {
     // 驗證時機。blur / change 一律驗;值一動就驗只在「碰過之後」才生效
     // (touchedModelUpdate 的用意見 .composables/useValidateEvents.js)。
     // 傳陣列為「完整指定」,沒列到的一律關閉。
+    /* 要掛在元素上的屬性,依位置各一組 —— 位置名與 setClass 同一套
+        (能傳 class 的地方就能傳屬性),例如 { type: { 'data-x': 'y' } }。
+
+        有些東西只能靠元素上的屬性做到:難字的造字對照、無障礙的標記、
+        第三方套件用屬性認元素 —— 那幾種沒辦法用 class 或 slot 代替。
+
+        預設是空的,傳進來才掛。 */
+    attr: {},
     validateEvents: ['blur', 'change', 'touchedModelUpdate'],
     startOption: null,
     placeholder: null,
@@ -328,7 +340,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="m-form" :class="setClass.main">
+  <div class="m-form" :class="setClass.main" v-bind="config.attr.main">
     <Field
       :name="props.name"
       v-model="model"
@@ -337,7 +349,7 @@ onUnmounted(() => {
       v-slot="{ field, errorMessage }"
     >
       <input type="hidden" :id="props.name" v-bind="field" />
-      <div class="m-form-container" :class="setClass.container">
+      <div class="m-form-container" :class="setClass.container" v-bind="config.attr.container">
         <button
           type="button"
           class="m-form-element --select"
@@ -346,6 +358,7 @@ onUnmounted(() => {
             { '--focus': isFocus },
             { '--error': errorMessage || config.isError },
           ]"
+          v-bind="config.attr.element"
           :disabled="config.isDisabled"
           ref="elementRef"
           @click="onElementClick()"
@@ -361,6 +374,7 @@ onUnmounted(() => {
                 '--placeholder': !label || !model,
               },
             ]"
+            v-bind="config.attr.type"
             ref="selectRef"
           >
             <template v-if="label">
@@ -371,17 +385,19 @@ onUnmounted(() => {
             </template>
           </div>
           <CommonMSvgIcon
-            icon="caret_large_down"
+            :icon="config.arrowIcon"
             class="m-form-icon"
             :class="setClass.icon"
-            v-if="config.arrowType === 'caret'"
+            v-bind="config.attr.icon"
+            v-if="config.arrowIcon"
           />
-          <!-- <i
-            class="m-form-icon-arrow h-[16px] w-[16px] shrink-0"
-            v-if="config.arrowType === 'arrow'"
-          /> -->
         </button>
-        <small class="m-form-suffix" :class="setClass.suffix" v-if="$slots.suffix">
+        <small
+          class="m-form-suffix"
+          :class="setClass.suffix"
+          v-bind="config.attr.suffix"
+          v-if="$slots.suffix"
+        >
           <slot name="suffix" />
         </small>
       </div>
@@ -391,6 +407,7 @@ onUnmounted(() => {
       :name="props.name"
       class="m-form-error"
       :class="setClass.error"
+      v-bind="config.attr.error"
       v-slot="{ message }"
     >
       <CommonMErrorMessage :message="message" />
@@ -401,17 +418,20 @@ onUnmounted(() => {
       <div
         class="m-form-select-dropdown"
         :class="[setClass.dropdown, { '--open': isOpen }]"
+        v-bind="config.attr.dropdown"
         ref="dropdownRef"
         v-if="isActive && options && options.length !== 0 && !config.isDisabled"
       >
         <div
           class="m-form-select-dropdown-container"
           :class="setClass.dropdownContainer"
+          v-bind="config.attr.dropdownContainer"
           ref="dropdownContainerRef"
         >
           <ul
             class="m-form-select-dropdown-body"
             :class="setClass.dropdownBody"
+            v-bind="config.attr.dropdownBody"
             ref="dropdownBodyRef"
           >
             <li
@@ -429,7 +449,11 @@ onUnmounted(() => {
                 :disabled="item[config.schema.isDisabled] === true"
                 @click="onDropdownItemClick(index)"
               >
-                <em class="m-form-select-dropdown-label" :class="setClass.dropdownLabel">
+                <em
+                  class="m-form-select-dropdown-label"
+                  :class="setClass.dropdownLabel"
+                  v-bind="config.attr.dropdownLabel"
+                >
                   <slot name="option" :item="item">
                     {{ item[config.schema.label] }}
                   </slot>

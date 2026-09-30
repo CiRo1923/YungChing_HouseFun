@@ -1,4 +1,8 @@
 <script setup>
+/* component-deps —— 複製這支元件的時候這幾支要一起帶走:
+   scripts/_prototype.js
+     這支元件用到的共用函式。少了它**建置直接失敗**,而訊息只說某個名字不存在 —— 看不出那是元件帶來的相依。 */
+
 import './.css/variables.css'
 import './.css/selectionVariables.css'
 import './.css/checkboxVariables.css'
@@ -8,6 +12,7 @@ import './.css/checkbox.css'
 import './.css/styleProject.css'
 
 import useValidateEvents from './.composables/useValidateEvents.js'
+import { useConfigOptions } from './.composables/useConfigOptions.js'
 
 import { onDeepMerge } from '@js/_prototype.js'
 
@@ -49,12 +54,41 @@ const config = computed(() => {
         是誤報;但 handleBlur 仍會標記 touched)、也不吃 change(change 就是
         「使用者剛選了它」,那時跳紅字等於一選就罵人)。
         只留 touchedModelUpdate,詳見 .composables/useValidateEvents.js */
+      /* 要掛在元素上的屬性,依位置各一組 —— 位置名與 setClass 同一套
+        (能傳 class 的地方就能傳屬性),例如 { type: { 'data-x': 'y' } }。
+
+        有些東西只能靠元素上的屬性做到:難字的造字對照、無障礙的標記、
+        第三方套件用屬性認元素 —— 那幾種沒辦法用 class 或 slot 代替。
+
+        預設是空的,傳進來才掛。 */
+      attr: {},
       validateEvents: ['touchedModelUpdate'],
-      mode: 'group', // 'group' | 'boolean'
+      /* 這個欄位是一組多選,還是單獨一格。
+
+        名字講的是**幾個選項**,不是值長什麼樣 —— 單獨一格送什麼值
+        由下面那兩個設定決定,true / false 只是它的預設。
+        (先前這個值叫 boolean,那把值的型別寫進了模式名:
+        自訂成 'Y' / 'N' 之後,設定讀起來就與行為對不上了。) */
+      mode: 'group', // 'group' | 'single'
+      /* 單一勾選框(boolean 模式)勾起來與取消時,各送什麼值出去。
+
+        預設是 true / false。後端收的是 'Y' / 'N' 那種欄位時填成那兩個值 ——
+        不然轉換只能寫在每一個使用端,而同一份資料就存了兩種形狀,
+        要靠人記得兩邊一致。
+
+        group 模式不看這兩個:那一種送的是選中的那幾格的值本身。 */
+      checkedValue: true,
+      uncheckedValue: false,
       sort: null, // null | 'desc' (大到小) | 'asc' (小到大)
       label: null,
       value: null, // group 用
       align: 'top',
+      /* 勾起來的時候畫哪一支圖示,**留空就不畫**。
+
+        圖示的名字每個專案都不一樣(各站的 _svg 裡叫什麼由那個站決定),
+        所以是設定而不是寫死在畫面區段裡 —— 寫死的話換一個專案要改元件本身,
+        而那一段跟著來源覆蓋:改完下一次更新就被蓋回去。 */
+      checkIcon: 'icon_check',
       isDisabled: false,
       isError: false,
       isJoin: null, // 只有 group 用
@@ -67,6 +101,13 @@ const validateOn = useValidateEvents(
   () => config.value.validateEvents,
   () => props.name
 )
+
+/* 這幾個設定只能填固定的值 —— 填了別的不會報錯,
+   而元件每一條分支都對不上,那一段就靜靜地不作用。 */
+useConfigOptions(config, {
+  mode: ['group', 'single'],
+  sort: [null, 'desc', 'asc'],
+})
 
 const model = computed({
   get() {
@@ -98,7 +139,9 @@ const model = computed({
       return currentValue === '' ? [''] : []
     }
 
-    return typeof props.modelValue === 'boolean' ? props.modelValue : false
+    /* 原樣回傳 —— 勾起來送什麼由 checkedValue 決定,不一定是布林。
+      轉成布林的話,'N' 這種「取消」的值會被當成勾起來。 */
+    return props.modelValue
   },
   set(value) {
     if (config.value.mode === 'group') {
@@ -130,7 +173,7 @@ const model = computed({
   要問「這一格的值在不在裡面」;只有一格時,值本身就是答案。
   只認其中一種的話,另一種模式永遠算成沒選中,而畫面上看得到它是勾著的。 */
 const isChecked = computed(() => {
-  if (config.value.mode !== 'group') return model.value === true
+  if (config.value.mode !== 'group') return model.value === config.value.checkedValue
 
   return Array.isArray(model.value) && model.value.includes(config.value.value)
 })
@@ -266,11 +309,13 @@ const onChange = async () => {
     「勾起來之後退回去」。要在畫面更新前就攔住的話,得在原生的點擊事件上
     preventDefault 並自己接管整個狀態,那是另一種形狀,不是這支現在的做法。 */
   const checked =
-    mode === 'group' ? Array.isArray(model.value) && model.value.includes(value) : !!model.value
+    mode === 'group'
+      ? Array.isArray(model.value) && model.value.includes(value)
+      : model.value === config.value.checkedValue
 
   const onChecked = (next) => {
     if (mode !== 'group') {
-      model.value = Boolean(next)
+      model.value = next ? config.value.checkedValue : config.value.uncheckedValue
       return
     }
 
@@ -296,18 +341,22 @@ const onChange = async () => {
 </script>
 
 <template>
-  <div class="m-form" :class="setClass.main">
+  <div class="m-form" :class="setClass.main" v-bind="config.attr.main">
     <Field
       :name="props.name"
       type="checkbox"
-      :value="config.mode === 'group' ? config.value : true"
-      :uncheckedValue="config.mode === 'boolean' ? false : undefined"
+      :value="config.mode === 'group' ? config.value : config.checkedValue"
+      :uncheckedValue="config.mode === 'boolean' ? config.uncheckedValue : undefined"
       v-model="model"
       :rules="config.isDisabled ? '' : props.rules"
       v-bind="validateOn"
       v-slot="{ field, errorMessage }"
     >
-      <div class="m-form-container" :class="[{ '--no-label': !config.label }, setClass.container]">
+      <div
+        class="m-form-container"
+        :class="[{ '--no-label': !config.label }, setClass.container]"
+        v-bind="config.attr.container"
+      >
         <label
           class="m-form-element --checkbox"
           :class="[
@@ -323,6 +372,7 @@ const onChange = async () => {
             { '--error': errorMessage || config.isError },
             setClass.element,
           ]"
+          v-bind="config.attr.element"
         >
           <input
             type="checkbox"
@@ -345,10 +395,21 @@ const onChange = async () => {
             v-else
           />
 
-          <CommonMSvgIcon icon="icon_check_solid" class="m-form-icon" :class="setClass.icon" />
+          <CommonMSvgIcon
+            :icon="config.checkIcon"
+            class="m-form-icon"
+            :class="setClass.icon"
+            v-bind="config.attr.icon"
+            v-if="config.checkIcon"
+          />
 
           <slot>
-            <em class="m-form-label" :class="setClass.label" v-if="config.label">
+            <em
+              class="m-form-label"
+              :class="setClass.label"
+              v-bind="config.attr.label"
+              v-if="config.label"
+            >
               {{ config.label }}
             </em>
           </slot>
@@ -361,6 +422,7 @@ const onChange = async () => {
       :name="props.name"
       class="m-form-error"
       :class="setClass.error"
+      v-bind="config.attr.error"
       v-slot="{ message }"
     >
       <CommonMErrorMessage :message="message" />

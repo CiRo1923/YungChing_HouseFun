@@ -3,7 +3,6 @@ import './.css/variables.css'
 import './.css/ovalResponsiveVariables.css'
 import './.css/common.css'
 import './.css/ovalResponsive.css'
-import './.css/styleProject.css'
 
 import { onMergeTabConfig, useTabCore } from './.composables/useCore.js'
 

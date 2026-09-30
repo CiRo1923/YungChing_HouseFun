@@ -91,10 +91,10 @@ const readJson = (file, fallback) => {
  * 會出現「存檔時被檢查、但改動列進對話時卻被略過」這種落差,
  * 而且沒有任何徵兆,那類檔案只是從此不再出現在提醒裡。
  */
-const onListChangedFiles = (isScannable) => {
+const onListChangedFiles = (isScannablePath) => {
   /* -uall:未追蹤的檔案要逐支列出。
      預設會把「整個新資料夾」彙總成一行目錄名(components/mThing/),
-     底下的檔案一支都不出現 —— 那一行過不了 isScannable(沒有副檔名),
+     底下的檔案一支都不出現 —— 那一行過不了 isScannablePath(沒有副檔名),
      於是整個新元件在這一層完全不存在。新增一支元件正是最需要提醒的時候。 */
   const status = run('git', ['status', '--porcelain', '-uall', '--', '.'])
   if (!status.ok) return []
@@ -111,7 +111,7 @@ const onListChangedFiles = (isScannable) => {
     .split('\n')
     .map((line) => line.slice(3).trim().replace(/^"|"$/g, ''))
     .map((p) => (base && p.startsWith(base) ? p.slice(base.length) : p))
-    .filter((p) => isScannable(p))
+    .filter((p) => isScannablePath(p))
     .filter((p) => fs.existsSync(path.join(ROOT, p)))
 }
 
@@ -125,7 +125,7 @@ const main = async () => {
   const CACHE_DIR = path.dirname(PENDING_FILE)
 
   const pending = readJson(PENDING_FILE, [])
-  const files = [...new Set([...onListChangedFiles(core.isScannable), ...pending])].filter((p) =>
+  const files = [...new Set([...onListChangedFiles(core.isScannablePath), ...pending])].filter((p) =>
     existsExactly(p)
   )
 

@@ -3,7 +3,20 @@ import { FormContextKey } from 'vee-validate'
 import { onDeepMerge } from '@js/_prototype.js'
 
 export const defaultDropdownConfig = {
-  arrowType: 'caret',
+  /* 箭頭用哪一支圖示,**留空就不畫箭頭**。
+
+    圖示的名字每個專案都不一樣(各站的 _svg 裡叫什麼由那個站決定),
+    所以這裡是設定而不是寫死在畫面區段裡 —— 寫死的話換一個專案要改元件本身,
+    而那一段跟著來源覆蓋:改完下一次更新就被蓋回去。
+
+    **先前還有一個 arrowType,決定「用圖示還是用 css 畫」。**
+    那個設定只有一個值(圖示)有實作,另一個值的畫面與樣式都被註解掉了 ——
+    傳那個值進來不會報錯,箭頭直接不見。一個設定項只有一種值走得通,
+    它就不是設定,是誤導。要換形狀就換這裡的圖示名。
+
+    **來源沒有預設的箭頭圖示** —— 箭頭的形狀各站不同(粗細、大小、實心空心),
+    放一支進來只會變成每個專案都要換掉的那一支。填你們 _svg 裡有的名字。 */
+  arrowIcon: null,
   isDisabled: false,
   position: 'auto',
   // 下拉定位的對象：未設定時抓 elementRef，設定時為 CSS selector（.element / #elem）

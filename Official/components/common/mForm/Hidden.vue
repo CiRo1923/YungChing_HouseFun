@@ -1,4 +1,8 @@
 <script setup>
+/* component-deps —— 複製這支元件的時候這幾支要一起帶走:
+   scripts/_validation.js
+     這支元件用到的共用函式。少了它**建置直接失敗**,而訊息只說某個名字不存在 —— 看不出那是元件帶來的相依。 */
+
 import './.css/variables.css'
 import './.css/common.css'
 import './.css/styleProject.css'
@@ -49,6 +53,14 @@ const config = computed(() => {
 
       注意:傳陣列是「完整指定」,沒列到的一律不驗 —— 不是在預設值上疊加。
          詳見 .composables/useValidateEvents.js */
+    /* 要掛在元素上的屬性,依位置各一組 —— 位置名與 setClass 同一套
+        (能傳 class 的地方就能傳屬性),例如 { type: { 'data-x': 'y' } }。
+
+        有些東西只能靠元素上的屬性做到:難字的造字對照、無障礙的標記、
+        第三方套件用屬性認元素 —— 那幾種沒辦法用 class 或 slot 代替。
+
+        預設是空的,傳進來才掛。 */
+    attr: {},
     validateEvents: ['blur', 'change', 'touchedModelUpdate'],
     ...props.config,
   }
@@ -76,7 +88,7 @@ defineExpose({
 </script>
 
 <template>
-  <div class="m-form-hidden" :class="setClass.main">
+  <div class="m-form-hidden" :class="setClass.main" v-bind="config.attr.main">
     <Field
       :name="`${props.name}_hidden`"
       :modelValue="props.modelValue"
@@ -91,7 +103,11 @@ defineExpose({
         :maxlength="config.maxlength || config.length"
         v-bind="field"
       />
-      <div class="m-form-hidden-container" :class="setClass.container">
+      <div
+        class="m-form-hidden-container"
+        :class="setClass.container"
+        v-bind="config.attr.container"
+      >
         <slot :isError="!!errorMessage" />
       </div>
     </Field>
@@ -100,9 +116,14 @@ defineExpose({
       :name="`${props.name}_hidden`"
       class="m-form-error"
       :class="setClass.error"
+      v-bind="config.attr.error"
       v-slot="{ message }"
     >
-      <CommonMErrorMessage :class="setClass.errorMessage" :message="message" />
+      <CommonMErrorMessage
+        :class="setClass.errorMessage"
+        v-bind="config.attr.errorMessage"
+        :message="message"
+      />
     </ErrorMessage>
   </div>
 </template>

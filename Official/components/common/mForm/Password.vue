@@ -1,4 +1,10 @@
 <script setup>
+/* component-deps —— 複製這支元件的時候這幾支要一起帶走:
+   scripts/_prototype.js
+     這支元件用到的共用函式。少了它**建置直接失敗**,而訊息只說某個名字不存在 —— 看不出那是元件帶來的相依。
+   scripts/_validation.js
+     這支元件用到的共用函式。少了它**建置直接失敗**,而訊息只說某個名字不存在 —— 看不出那是元件帶來的相依。 */
+
 import './.css/variables.css'
 import './.css/passwordVariables.css'
 import './.css/common.css'
@@ -47,6 +53,14 @@ const isVisible = ref(false) // 密碼是否顯示為明碼
 const config = computed(() => {
   return onDeepMerge(
     {
+      /* 要掛在元素上的屬性,依位置各一組 —— 位置名與 setClass 同一套
+        (能傳 class 的地方就能傳屬性),例如 { type: { 'data-x': 'y' } }。
+
+        有些東西只能靠元素上的屬性做到:難字的造字對照、無障礙的標記、
+        第三方套件用屬性認元素 —— 那幾種沒辦法用 class 或 slot 代替。
+
+        預設是空的,傳進來才掛。 */
+      attr: {},
       placeholder: '',
       // 驗證時機。blur / change 一律驗;值一動就驗只在「碰過之後」才生效
       // (touchedModelUpdate 的用意見 .composables/useValidateEvents.js)。
@@ -84,6 +98,9 @@ const setClass = computed(() => {
     ...props.setClass,
   }
 })
+/* 這個欄位與表單的連動(名稱、事件、值)—— 畫面那一行把它接在
+   使用端掛的屬性**後面**:順序反過來的話,使用端傳了同名的屬性就會蓋掉它,
+   而那個欄位從此不再跟著表單走,不會報錯,只是驗證與送出都收不到它。 */
 const onBind = (field) => {
   const value =
     !props.modelValue && props.value
@@ -153,7 +170,7 @@ watch(
 </script>
 
 <template>
-  <div class="m-form" :class="setClass.main">
+  <div class="m-form" :class="setClass.main" v-bind="config.attr.main">
     <Field
       v-slot="{ field, errorMessage }"
       v-model="model"
@@ -162,7 +179,7 @@ watch(
       :rules="config.isDisabled ? '' : props.rules"
       v-bind="validateOn"
     >
-      <div class="m-form-container" :class="setClass.container">
+      <div class="m-form-container" :class="setClass.container" v-bind="config.attr.container">
         <div
           class="m-form-element --password"
           :class="[
@@ -172,8 +189,14 @@ watch(
             { '--disabled': config.isDisabled },
             { '--error': errorMessage || config.isError },
           ]"
+          v-bind="config.attr.element"
         >
-          <div v-if="$slots.frontAssist" class="m-form-assist" :class="setClass.frontAssist">
+          <div
+            v-if="$slots.frontAssist"
+            class="m-form-assist"
+            :class="setClass.frontAssist"
+            v-bind="config.attr.frontAssist"
+          >
             <slot name="frontAssist" />
           </div>
           <input
@@ -181,7 +204,7 @@ watch(
             :type="inputType"
             class="m-form-type"
             :class="setClass.type"
-            v-bind="onBind(field)"
+            v-bind="{ ...config.attr.type, ...onBind(field) }"
             :minlength="config.minlength || config.length"
             :maxlength="config.maxlength || config.length"
             :placeholder="config.placeholder"
@@ -217,11 +240,21 @@ watch(
             />
           </button>
 
-          <div v-if="$slots.rearAssist" class="m-form-assist" :class="setClass.rearAssist">
+          <div
+            v-if="$slots.rearAssist"
+            class="m-form-assist"
+            :class="setClass.rearAssist"
+            v-bind="config.attr.rearAssist"
+          >
             <slot name="rearAssist" />
           </div>
         </div>
-        <small v-if="$slots.suffix" class="m-form-suffix" :class="setClass.suffix">
+        <small
+          v-if="$slots.suffix"
+          class="m-form-suffix"
+          :class="setClass.suffix"
+          v-bind="config.attr.suffix"
+        >
           <slot
             name="suffix"
             :maxlength="config.length || config.maxlength"
@@ -236,6 +269,7 @@ watch(
       :name="props.name"
       class="m-form-error"
       :class="setClass.error"
+      v-bind="config.attr.error"
     >
       <CommonMErrorMessage :message="message" />
     </ErrorMessage>

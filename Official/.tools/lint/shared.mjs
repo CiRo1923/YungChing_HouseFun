@@ -45,6 +45,7 @@ export const IMPORT_ORDER_GROUPS = configOf('IMPORT_ORDER_GROUPS')
 export const COMPONENT_DIRS = configOf('COMPONENT_DIRS')
 export const COMPONENT_FOLDERS = configOf('COMPONENT_FOLDERS')
 export const VIEW_UNDERSCORE_FOLDERS = configOf('VIEW_UNDERSCORE_FOLDERS')
+export const VIEW_COMPONENT_MARKERS = configOf('VIEW_COMPONENT_MARKERS')
 export const POPUP_DIR_NAME = configOf('POPUP_DIR_NAME')
 export const CSS_MODULES_DIR = configOf('CSS_MODULES_DIR')
 export const SHARED_MODULE_VARIABLES = configOf('SHARED_MODULE_VARIABLES')
@@ -771,6 +772,22 @@ const SKIP_DIR = new RegExp(
 )
 
 /**
+ * 這個路徑(相對專案根)要不要檢查 —— 副檔名在範圍內,**而且不在跳過的目錄底下**。
+ *
+ * 給「自己拿到一串路徑」的那幾層用(對話提醒那層讀的是 git 列出來的改動)。
+ * 整份掃描那一支走的是目錄樹,在進到資料夾之前就剪掉了,不必再問一次。
+ *
+ * **只問副檔名是不夠的。** 建置產物與靜態檔的副檔名與原始碼一樣,
+ * 而那些不是人寫的,或是規則本來就管不到:`public/` 底下的東西
+ * 吃不到專案的 css 變數(iframe 載進去的樣式),色碼只能寫死 ——
+ * 那幾筆改不掉也標不掉,每次動到就報一次。
+ *
+ * **兩條路徑讀同一份判斷。** 各寫一次的話,同一份違規在全專案掃描是 0 筆、
+ * 在存檔或送出訊息時卻報出來,而看到的人無從判斷哪一邊才對。
+ */
+export const isScannablePath = (rel) => isScannable(rel) && !SKIP_DIR.test(rel)
+
+/**
  * 專案自己的文件目錄底下的檔案 —— 每一條規則都不檢查。
  *
  * 兩個理由:
@@ -879,13 +896,81 @@ export const listConventionSkills = (root) => {
 // 副檔名範圍定義在 project-config.mjs,五層守門共用同一份
 export const isScannable = (abs) => SCANNABLE_RE.test(abs)
 
+/*
+ * 同一支檔案在一次執行裡會被讀很多遍 —— 跨檔的索引各建各的,
+ * 而規則自己的驗證每跑完一則案例就把索引全部清掉(專案裡的檔案剛被改寫,
+ * 上一則建好的索引對下一則就是舊的)。清掉之後下一則又整份重掃。
+ *
+ * **但那幾百次重掃讀到的內容幾乎都一樣** —— 變的只有驗證自己寫出去的探測檔,
+ * 專案本身那一百多支從頭到尾沒有動過。重讀一遍磁碟佔掉整趟執行的四分之三。
+ *
+ * 所以這裡記下「讀過的內容」與「列過的目錄」,用檔案的修改時間與大小認出它變了沒有。
+ * 時間戳的精度在同一毫秒內連寫兩次時分不出來,所以寫檔的那一方
+ * 要主動讓它失效(invalidateFileCache)—— 兩道一起才不會讀到上一則的內容。
+ */
+const contentCache = new Map()
+const dirCache = new Map()
+
+/**
+ * 剛寫過這一支檔案,讓它與它所在目錄的快取失效。
+ *
+ * 目錄也要:新增一支檔案會改變那個目錄的清單,
+ * 而只清內容的話,新建的檔案不會出現在掃描結果裡。
+ */
+export const invalidateFileCache = (abs) => {
+  contentCache.delete(abs)
+  dirCache.delete(path.dirname(abs))
+}
+
+/** 讀檔;內容沒變就用上一次讀到的。讀不到回 null */
+export const readTextCached = (abs) => {
+  let stat
+
+  try {
+    stat = fs.statSync(abs)
+  } catch {
+    return null
+  }
+
+  const hit = contentCache.get(abs)
+
+  if (hit && hit.mtimeMs === stat.mtimeMs && hit.size === stat.size) return hit.text
+
+  const text = fs.readFileSync(abs, 'utf8')
+
+  contentCache.set(abs, { mtimeMs: stat.mtimeMs, size: stat.size, text })
+
+  return text
+}
+
+/** 列目錄;那個目錄沒有增減檔案就用上一次列到的 */
+const readdirCached = (abs) => {
+  let stat
+
+  try {
+    stat = fs.statSync(abs)
+  } catch {
+    return []
+  }
+
+  const hit = dirCache.get(abs)
+
+  if (hit && hit.mtimeMs === stat.mtimeMs) return hit.entries
+
+  const entries = fs.readdirSync(abs, { withFileTypes: true })
+
+  dirCache.set(abs, { mtimeMs: stat.mtimeMs, entries })
+
+  return entries
+}
+
 /** 遞迴列出可檢查的檔案(絕對路徑) */
 export const listFiles = (root, target) => {
   const abs = path.resolve(root, target)
   if (!fs.existsSync(abs)) return []
   if (fs.statSync(abs).isFile()) return isScannable(abs) ? [abs] : []
 
-  return fs.readdirSync(abs, { withFileTypes: true }).flatMap((entry) => {
+  return readdirCached(abs).flatMap((entry) => {
     const next = path.join(abs, entry.name)
     const rel = toRel(root, next)
     if (SKIP_DIR.test(rel) || isProjectDocs(rel)) return []
@@ -947,7 +1032,7 @@ export const storeIndexOf = (root) => {
     if (/^use[A-Z]/.test(base)) files.set(base, rel)
 
     try {
-      const text = fs.readFileSync(abs, 'utf8')
+      const text = readTextCached(abs)
 
       for (const m of text.matchAll(/export\s+const\s+(use\w+)/g)) files.set(m[1], rel)
 
@@ -1050,7 +1135,7 @@ export const transitionStyleIndexOf = (root) => {
       const rel = toRel(root, abs)
 
       try {
-        for (const name of transitionNamesInCss(fs.readFileSync(abs, 'utf8'))) {
+        for (const name of transitionNamesInCss(readTextCached(abs) ?? '')) {
           if (!index.has(name)) index.set(name, rel)
         }
       } catch {
@@ -1141,7 +1226,7 @@ export const componentEmitsIndexOf = (root) => {
       if (!tag || index.has(tag)) continue
 
       try {
-        const emits = declaredEmitsOf(fs.readFileSync(abs, 'utf8'))
+        const emits = declaredEmitsOf(readTextCached(abs) ?? '')
         if (emits) index.set(tag, emits)
       } catch {
         // 讀不到某一支就跳過,不要因此讓整條規則失效
@@ -1150,6 +1235,48 @@ export const componentEmitsIndexOf = (root) => {
   }
 
   componentEmitsCache = { root, index }
+
+  return index
+}
+
+let componentTagCache = null
+
+registerScanCache(() => {
+  componentTagCache = null
+})
+
+/**
+ * 全案的標籤名 → 那支元件的資料夾。
+ *
+ * 「畫面上寫的這個標籤是誰」只能由這份索引回答,**不能從資料夾反推**:
+ * 一個資料夾底下不只一支 .vue,而子檔各有自己的標籤名
+ * (`mForm/` 底下的 `Radio.vue` 在畫面上是 `MFormRadio`,不是 `MForm`)。
+ * 拿資料夾接上 `Index.vue` 去算的話,只還原得出母體那一個名字,
+ * 用到子元件的每一支都會被判成「這個標籤不屬於任何相依」——
+ * 而那全是誤報,清單其實是對的。
+ *
+ * 值是資料夾,因為要帶走的單位是整個資料夾,不是那一支檔案。
+ *
+ * 同名時第一支贏 —— 兩支算出同一個標籤的話,畫面上那個名字本來就有歧義,
+ * 這裡挑哪一支都不會比較對。
+ */
+export const componentTagIndexOf = (root) => {
+  if (componentTagCache?.root === root) return componentTagCache.index
+
+  const index = new Map()
+
+  for (const dir of COMPONENT_DIRS) {
+    for (const abs of listFiles(root, dir)) {
+      if (!abs.endsWith('.vue')) continue
+
+      const rel = toRel(root, abs)
+      const tag = componentTagOf(rel)
+
+      if (tag && !index.has(tag)) index.set(tag, path.dirname(rel))
+    }
+  }
+
+  componentTagCache = { root, index }
 
   return index
 }

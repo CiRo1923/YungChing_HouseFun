@@ -15,7 +15,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { componentDepsOf } from './lint/rules-code.mjs'
+import { componentDepsOf, componentUsesOf } from './lint/rules-code.mjs'
 import { COMPONENTS_DIR, listFiles, toRel } from './lint/shared.mjs'
 import { BOLD, DIM, RED, RESET, YELLOW } from './lint/colors.mjs'
 
@@ -48,21 +48,41 @@ if (!targets.length) {
 }
 
 let found = false
+let hasListed = false
+
+/* 用到的別支元件整組收在一起 —— 同一個資料夾底下好幾支 .vue 常常用到同一支,
+   逐支印的話同一行會出現好幾次。 */
+const usedComponents = new Set()
 
 for (const rel of targets) {
-  const deps = componentDepsOf(root, rel, fs.readFileSync(path.join(root, rel), 'utf8'))
+  const text = fs.readFileSync(path.join(root, rel), 'utf8')
+  const deps = componentDepsOf(root, rel, text)
+
+  componentUsesOf(root, rel, text).forEach((dir) => usedComponents.add(dir))
+
   if (!deps.length) continue
 
   found = true
+  hasListed = true
   console.log(`\n${BOLD}${rel}${RESET}`)
-  console.log(`${DIM}複製這支元件時,下面這幾支要一起帶走:${RESET}`)
+  console.log(`${DIM}複製這支元件時,下面這幾支要一起帶走(這份要寫進檔頭):${RESET}`)
   deps.forEach((file) => console.log(`  ${file}`))
+}
+
+/* 用到的別支元件也要帶,但**不寫進檔頭** —— 那幾乎每一支都有
+   (圖示那一支被全部的元件用到),寫進去只是在每個檔頭重複同一行。
+   少帶的話不會報錯:標籤解析不到時,正式站是那個位置什麼都不畫。 */
+if (usedComponents.size) {
+  found = true
+  console.log(`\n${BOLD}它用到的別支元件${RESET}`)
+  console.log(`${DIM}那幾個資料夾也要在,少帶的話畫面上那個位置什麼都不畫:${RESET}`)
+  ;[...usedComponents].sort().forEach((dir) => console.log(`  ${dir}/`))
 }
 
 if (!found) {
   console.log(`${target} 是自足的 —— 複製它的資料夾就完整了`)
-} else {
+} else if (hasListed) {
   console.log(
-    `\n${YELLOW}這份清單也要寫在元件主檔的檔頭(component-deps),複製過去的人才看得到${RESET}`
+    `\n${YELLOW}上面那份「要一起帶走」的清單也要寫在元件主檔的檔頭(component-deps),複製過去的人才看得到${RESET}`
   )
 }

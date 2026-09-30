@@ -1,6 +1,5 @@
 <script setup>
 import './.css/common.css'
-import './.css/styleProject.css'
 
 /* 固定在畫面底部的常駐列。固定的那一刻它就脫離文檔流了,底下的東西會被蓋住 ——
   所以這裡把量到的高度寫進 --fixed-bottom-height,由版型那一層讓位:

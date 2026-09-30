@@ -32,6 +32,7 @@ import {
   IMPORT_RE,
   listFiles,
   maskComments,
+  readTextCached,
   registerScanCache,
   toRel,
   withNamedImport,
@@ -791,7 +792,7 @@ const popupIdIndexOf = (root) => {
       const rel = toRel(root, abs)
 
       try {
-        const text = maskComments(rel, fs.readFileSync(abs, 'utf8'))
+        const text = maskComments(rel, readTextCached(abs) ?? '')
 
         for (const one of declaredIdsIn(text, POPUP_TAGS)) {
           if (one.id) declared.set(one.id, rel)

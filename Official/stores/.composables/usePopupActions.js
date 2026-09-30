@@ -69,7 +69,10 @@ const usePopupActions = () => {
     alertData.value.icon = data.icon
     alertData.value.content = data.content
     alertData.value.btns = onMergeBtns(data.btns, alertBtns)
-    alertData.value.hasExistClose = data.hasExistClose !== undefined ? data.hasExistClose : true
+    alertData.value.hasExistClose =
+      data.hasExistClose !== undefined
+        ? data.hasExistClose
+        : popup.defaultOptions.alert.hasExistClose
     alertData.value.setClass = data.setClass
 
     onBodyOverflowHiddenToggle(true)
@@ -101,7 +104,10 @@ const usePopupActions = () => {
     confirmData.value.icon = data.icon
     confirmData.value.content = data.content
     confirmData.value.btns = onMergeBtns(data.btns, confirmBtns)
-    confirmData.value.hasExistClose = data.hasExistClose !== undefined ? data.hasExistClose : true
+    confirmData.value.hasExistClose =
+      data.hasExistClose !== undefined
+        ? data.hasExistClose
+        : popup.defaultOptions.confirm.hasExistClose
     confirmData.value.setClass = data.setClass
 
     onBodyOverflowHiddenToggle(true)
@@ -140,7 +146,10 @@ const usePopupActions = () => {
     customData.value.content = data.content
     customData.value.data = data.data
     customData.value.btns = data.btns
-    customData.value.hasExistClose = data.hasExistClose !== undefined ? data.hasExistClose : true
+    customData.value.hasExistClose =
+      data.hasExistClose !== undefined
+        ? data.hasExistClose
+        : popup.defaultOptions.custom.hasExistClose
 
     onBodyOverflowHiddenToggle(true)
 

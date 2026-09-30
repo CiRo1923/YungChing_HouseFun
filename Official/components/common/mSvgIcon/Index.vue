@@ -54,6 +54,28 @@ const props = defineProps({
   },
 })
 
+/* 引用的名字在不在 —— 只在開發時看。
+
+  不在的話 `<use>` 找不到對應的 symbol,畫面上那個位置就是空的:
+  **不報錯,而且從畫面上看不出是名字的問題** —— 看起來像那個圖示本來就沒做。
+  名字打錯、或照抄了別的專案才有的那一支,都是這樣失效的。
+
+  清單由建置流程掃 _svg 產生(見 nuxt.config.ts 的 spriteIcons)。
+  那個目錄不存在時清單是空的,那時不檢查 —— 不然每一個名字都會被報成不存在。 */
+if (import.meta.env.DEV) {
+  watchEffect(() => {
+    const icons = runtimeConfig.public.spriteIcons
+
+    if (!props.icon || !Array.isArray(icons) || !icons.length) return
+    if (icons.includes(props.icon)) return
+
+    console.warn(
+      `[mSvgIcon] 找不到圖示 ${props.icon} —— 圖示的原始檔放在 _svg/,` +
+        `那裡沒有這個名字。現有的:${icons.join('、')}`
+    )
+  })
+}
+
 const spriteHref = computed(() => {
   const baseURL = runtimeConfig.app.baseURL.replace(/\/$/, '')
   const buildAssetsDir = runtimeConfig.app.buildAssetsDir.replace(/^\/*/, '/')
