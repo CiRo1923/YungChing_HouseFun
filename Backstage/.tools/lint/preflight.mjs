@@ -12,6 +12,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { CHECKSUM_FILE, recordedFingerprints } from './checksum.mjs'
+import { COMPONENT_API_FILE, recordedComponentApi } from './component-api.mjs'
 import { isColorNamingConfigFit, isHueSourceFit } from './color-order.mjs'
 import { hasBreakpointVars, hasResponsiveStyles } from './lint-core.mjs'
 import { IS_SOURCE_PROJECT } from './rules-global.mjs'
@@ -31,22 +32,25 @@ import {
   FORM_GROUP_VALIDATOR,
   FRAMEWORKS,
   PARALLEL_AWAIT_HELPER,
+  POPUP_TAGS,
   POPUP_DIR_NAME,
   PROJECT_FRAMEWORK,
-  PLAIN_TEXT_EXCLUDED_DIRS,
+  VENDOR_DIRS,
   SHARED_MODULE_VARIABLES,
   STORE_DIR,
   STYLE_CONFIG_FILES,
   VIEW_RESOURCE_DEPTH,
   VIEWS_DIR,
-} from './project-config.mjs'
+  MISSING_CONFIG_ITEMS,
+} from './shared.mjs'
 
 const hasDir = (root, rel) => {
   const abs = path.join(root, ...rel.split('/'))
   return fs.existsSync(abs) && fs.statSync(abs).isDirectory()
 }
 
-const firstExistingFile = (root, names) => names.find((n) => fs.existsSync(path.join(root, n))) ?? null
+const firstExistingFile = (root, names) =>
+  names.find((n) => fs.existsSync(path.join(root, n))) ?? null
 
 /**
  * 專案裡所有的 css(相對路徑)。
@@ -78,6 +82,14 @@ const REQUIREMENTS = [
     why: '沒有清單就沒有東西可以比對,這條會整條略過。在這個專案改了共用規則的話,不會有人發現,而改動會在下一次整套更新時被蓋掉。',
   },
   {
+    /* 與上面那一項同一種形狀:來源那邊不比對自己,所以不算缺前提。 */
+    label: '元件介面的名單',
+    rules: ['componentApiAdded'],
+    check: () => (IS_SOURCE_PROJECT || recordedComponentApi() ? COMPONENT_API_FILE : null),
+    need: `要有 ${COMPONENT_API_FILE} —— 那份名單由元件庫的來源跑 npm run rules:seal 產生,跟著元件一起複製過來`,
+    why: '沒有名單就沒有東西可以比對,這條會整條略過。這個專案在元件的設定裡多加了一個鍵的話,不會有人發現 —— 元件內部不讀它,而下一次整套更新會把它覆蓋掉。',
+  },
+  {
     /* 這個值只用來組提示訊息,不做路徑檢查 —— 所以它指錯位置時不會有任何徵兆:
        規則照常通過,只有訊息悄悄指向一個不存在的地方,而照著做的人
        會建出一支沒有人知道為什麼在那裡的檔案。
@@ -88,7 +100,9 @@ const REQUIREMENTS = [
     rules: ['moduleVar', 'sharedVarScope'],
     check: (root) =>
       !SHARED_MODULE_VARIABLES ||
-      fs.existsSync(path.join(root, ...CSS_MODULES_DIR.split('/'), ...SHARED_MODULE_VARIABLES.split('/')))
+      fs.existsSync(
+        path.join(root, ...CSS_MODULES_DIR.split('/'), ...SHARED_MODULE_VARIABLES.split('/'))
+      )
         ? SHARED_MODULE_VARIABLES || '(留空)'
         : null,
     need: `設定的 SHARED_MODULE_VARIABLES 指到的檔案要真的存在,或把它留空`,
@@ -106,10 +120,10 @@ const REQUIREMENTS = [
   },
   {
     label: '建置設定檔',
-    rules: ['importAlias'],
+    rules: ['importAlias', 'componentAutoImport'],
     check: (root) => firstExistingFile(root, BUILD_CONFIG_FILES),
     need: `專案根目錄要有這幾支其中一支:${BUILD_CONFIG_FILES.join(' / ')}`,
-    why: 'alias 有哪些只有建置設定知道。讀不到就無法判斷相對路徑該改成哪一個 alias,這條會整條略過。',
+    why: 'alias 有哪些只有建置設定知道。讀不到的話,「相對路徑該改成哪一個 alias」判斷不出來,而「這一行 import 指到的是不是元件」也解不開 —— 實際專案裡那幾乎每一行都是用 alias 寫的,兩條都會整條略過。',
   },
   {
     label: '樣式設定檔',
@@ -177,14 +191,36 @@ const REQUIREMENTS = [
   },
   {
     label: 'api 目錄',
-    rules: ['apiClient', 'apiScope', 'apiSource', 'apiNaming', 'apiReturn', 'apiTryCatch', 'apiPathParam'],
+    rules: [
+      'apiClient',
+      'apiScope',
+      'apiSource',
+      'apiNaming',
+      'apiReturn',
+      'apiTryCatch',
+      'apiPathParam',
+    ],
     check: (root) => (hasDir(root, API_DIR) ? API_DIR : null),
     need: `要有 api 目錄(目前設定為 ${API_DIR})`,
     why: 'api 的五條規則只看那個目錄底下的檔案。目錄位置不符時,api 寫法完全不會被檢查。',
   },
   {
     label: 'store 目錄',
-    rules: ['componentDeps', 'storeDeclare', 'storeNaming', 'storeScope', 'storeActions', 'storeActionNaming', 'storeActionReturn', 'storeApiDefault', 'storeDefaultClone', 'storeResetDefault', 'storeLayer', 'storeDir'],
+    rules: [
+      'componentDeps',
+      'storeDeclare',
+      'storeNaming',
+      'storeScope',
+      'storeActions',
+      'storeActionsExport',
+      'storeActionNaming',
+      'storeActionReturn',
+      'storeApiDefault',
+      'storeDefaultClone',
+      'storeResetDefault',
+      'storeLayer',
+      'storeDir',
+    ],
     check: (root) => (hasDir(root, STORE_DIR) ? STORE_DIR : null),
     need: `要有 store 目錄(目前設定為 ${STORE_DIR})`,
     why: 'store 與 actions 的規則以那個目錄為範圍。位置不符時,store 的寫法完全不會被檢查。',
@@ -218,7 +254,15 @@ const REQUIREMENTS = [
   },
   {
     label: '頁面目錄',
-    rules: ['apiScope', 'storeScope', 'storeLayer', 'pageApiData', 'pageActionNaming', 'pageApiImport', 'popupLocation'],
+    rules: [
+      'apiScope',
+      'storeScope',
+      'storeLayer',
+      'pageApiData',
+      'pageActionNaming',
+      'pageApiImport',
+      'popupLocation',
+    ],
     check: (root) => (hasDir(root, VIEWS_DIR) ? VIEWS_DIR : null),
     need: `要有頁面目錄(目前設定為 ${VIEWS_DIR})`,
     why: 'api 檔名、store 檔名與分層都是拿頁面目錄的第一層資料夾來對照。目錄不存在時,那些對照沒有比對基準,頁面規則也掃不到檔案。',
@@ -267,7 +311,9 @@ const REQUIREMENTS = [
   },
   {
     label: '斷點的前綴涵蓋關係',
-    rules: ['breakpointPrefix'],
+    /* breakpointOverride 也靠這份設定認出「哪些前綴是斷點」——
+       認不出來的話它分不出 m: 與 hover:,兩種都會被當成覆寫。 */
+    rules: ['breakpointPrefix', 'breakpointOverride'],
 
     /*
      * 不做響應式的專案留空物件是刻意的,不是缺東西 —— 那時整條略過。
@@ -277,6 +323,16 @@ const REQUIREMENTS = [
     check: () => !BREAKPOINTS.length || Object.keys(BREAKPOINT_SCREENS).length > 0,
     need: '設定裡要填 BREAKPOINT_SCREENS(每個 @screen 區塊該列出哪幾種前綴)',
     why: '這個專案有分斷點,但沒有填 @screen 與前綴的涵蓋關係 —— 「級距要在每個斷點列齊前綴」那條會整條略過,而少列一種的後果是使用端傳了級距卻在那個斷點沒有效果。',
+  },
+  {
+    label: '彈窗元件的標籤名',
+    rules: ['popupId', 'popupIdOrphan', 'popupIdNaming'],
+    /* 沒有彈窗系統的專案留空陣列是刻意的 —— 那時整條略過。
+       有彈窗卻沒填的話要講出來:那三條從此不檢查任何東西,
+       而 id 對不上的後果是彈窗打不開,畫面上沒有任何徵兆。 */
+    check: () => POPUP_TAGS.length > 0 || null,
+    need: '設定裡要填 POPUP_TAGS(彈窗元件在畫面上寫出來的標籤名)',
+    why: '這三條都要先認得出哪個標籤是彈窗:比對宣告端與開啟端的 id、反推「宣告了卻沒有人開」、檢查 id 有沒有 popup 開頭。找不到宣告端的話三條一起整條略過,而 id 打錯時不會報錯,彈窗就是打不開。',
   },
   {
     label: '群組驗證的包裝元件',
@@ -294,7 +350,7 @@ const REQUIREMENTS = [
   },
   {
     label: '共用元件目錄',
-    rules: ['tailwind', 'importOrder', 'componentApiImport', 'vueFileName'],
+    rules: ['tailwind', 'importOrder', 'componentApiImport', 'vueFileName', 'componentEmits'],
     check: (root) => (hasDir(root, COMPONENTS_DIR) ? COMPONENTS_DIR : null),
     need: `要有共用元件目錄(目前設定為 ${COMPONENTS_DIR})`,
     why: '這三條只針對共用元件:template 不寫 utility class、元件要自己載入樣式、元件不能直接 import api。目錄不存在時都不會有結果。',
@@ -325,13 +381,42 @@ export const NO_PREREQUISITE_RULES = [
   'storeToRefs',
   'componentClass',
   'componentFolder',
+  /* 只看檔案內容裡有沒有整串圖形座標,不必先有 _svg 目錄 —— 沒有那個目錄的專案,
+     這條照樣要擋(它擋的正是「沒有把圖示放進去」這件事) */
+  'svgIconSource',
   'viewFolder',
-  /* 這兩條只看檔案內容怎麼寫(class、畫面區段的標籤),不必先有某個目錄或設定檔 */
+  /* 這三條只看檔案內容怎麼寫(class、畫面區段的標籤、有沒有定義轉場),
+     不必先有某個目錄或設定檔 */
   'truncateClass',
   'spacerElement',
+  'transitionShared',
+  /* 這條讀的是 package.json,那支每個專案都有 ——
+     沒有的話整個專案跑不起來,不是這條要提醒的事 */
+  'buildCommands',
   /* 這條自己掃全案收集「定義過哪些變數」,不依賴任何目錄或設定存在 ——
      專案沒有 css 變數時它一個引用都掃不到,結果就是通過,不是誤報。 */
   'unknownVar',
+  /* 這條只看畫面區段裡 @事件 綁的值是不是一支 onXxx,
+     不必先有某個目錄或設定 —— 每個專案的 .vue 都適用。 */
+  'eventHandler',
+  /* 這兩條看的是 class 值怎麼寫(有沒有標型別、標了有沒有包 var())。
+     值是變數時會自己掃全案收集「那個變數裝什麼」,
+     專案沒有 css 變數時它一個都追不到,結果就是通過,不是誤報。 */
+  'lengthTypeHint',
+  'lengthTypeVar',
+  /* 這條問「這個豁免標記有沒有人讀」,合法名單是從規則自己的程式碼裡看出來的 ——
+     不依賴任何目錄或設定,規則目錄讀不到時整條不做。 */
+  'unknownExemptMark',
+  /* 這條只看檔名與「有沒有人 import 它」,不必先有某個目錄或設定 ——
+     專案沒有那種檔案時它一支都掃不到,結果就是通過,不是誤報。 */
+  /* 這條只看 setClass 的預設物件裡有沒有帶 class 的值,不必先有某個目錄或設定。 */
+  'setClassDefault',
+  /* 這條只問「同一層的 .vue 有沒有人 import 這支 css」,不必先有某個設定。
+     元件資料夾底下沒有樣式的專案,它一支都掃不到,結果就是通過。 */
+  'moduleCssUnused',
+  /* 這條只看「有沒有 @screen 區塊、裡面有沒有覆蓋基底的字面值」——
+     不讀斷點設定。不做響應式的專案一個 @screen 都沒有,自然掃不到東西。 */
+  'breakpointVarOverride',
 ]
 
 /** 每一項前提涵蓋到的規則(全部項目的聯集)—— 規則自己的驗證拿它比對完整性 */
@@ -367,12 +452,29 @@ export const onReportPreflight = (root, { print = console.error } = {}) => {
     print('  改完規則要跑 npm run rules:seal 重新封存,新的清單才跟著規則複製出去。')
   }
 
+  /* 設定檔少了規則要讀的項目 —— 第一件要講的事。
+
+     少了那幾項,讀它們的規則拿到的是 undefined:有的整條靜靜略過,
+     有的把 undefined 當成路徑去比對,結果是那一塊完全沒有被檢查,
+     而畫面上顯示通過。
+
+     這裡報得出來的前提是「工具載得起來」—— 所以設定是整包取進來的,
+     不是逐項 named import(那樣會在模組解析階段就死,見 shared.mjs)。 */
+  if (MISSING_CONFIG_ITEMS.length) {
+    print('')
+    print(`✗ 設定檔(.tools/lint/project-config.mjs)缺少 ${MISSING_CONFIG_ITEMS.length} 項:`)
+    for (const name of MISSING_CONFIG_ITEMS) print(`    ${name}`)
+    print('')
+    print('  這幾項是規則要讀的。跟規範工具的來源要同一版的設定檔,')
+    print('  把缺的那幾項補上(值填成這個專案自己的)—— 只補名字、值照抄來源是不對的。')
+  }
+
   /* 專案自己關掉的範圍要講出來 —— 那不是「缺了什麼」,是設定裡填的,
      但結果一樣是有一塊沒有被檢查過。不講的話,那幾層看起來與通過沒有兩樣。 */
-  if (PLAIN_TEXT_EXCLUDED_DIRS.length) {
+  if (VENDOR_DIRS.length) {
     print('')
-    print(`「不用 emoji 與裝飾符號」這條不檢查以下目錄(設定 PLAIN_TEXT_EXCLUDED_DIRS):`)
-    for (const dir of PLAIN_TEXT_EXCLUDED_DIRS) print(`  ${dir}`)
+    print(`「不用 emoji 與裝飾符號」這條不檢查以下目錄(設定 VENDOR_DIRS):`)
+    for (const dir of VENDOR_DIRS) print(`  ${dir}`)
     print('  那幾層的其他檢查照常適用。')
   }
 

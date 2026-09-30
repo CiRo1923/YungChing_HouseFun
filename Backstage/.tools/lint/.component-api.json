@@ -1,0 +1,283 @@
+{
+  "keyStyle": "component",
+  "config": {
+    "mAnchor/Index.vue": [
+      "as",
+      "icon",
+      "isDisabled",
+      "target"
+    ],
+    "mDatepicker/.composables/useConfig.js": [
+      "altInput",
+      "days",
+      "defaultIsNow",
+      "defaultIsToday",
+      "format",
+      "headerMode",
+      "icon",
+      "lang",
+      "length",
+      "maxDate",
+      "maxTime",
+      "maximumYear",
+      "minDate",
+      "minTime",
+      "mobileSupport",
+      "placeholder",
+      "position",
+      "rangeSeparator",
+      "step.hour",
+      "step.minute",
+      "today",
+      "validateEvents",
+      "weeks"
+    ],
+    "mErrorMessage/Index.vue": [
+      "icon"
+    ],
+    "mFigure/Index.vue": [
+      "lazy"
+    ],
+    "mForm/.composables/useDropdownCore.js": [
+      "arrowType",
+      "isDisabled",
+      "isDropdownFull",
+      "position",
+      "target"
+    ],
+    "mForm/AutoComplete.vue": [
+      "input.minChars",
+      "input.wait",
+      "isDisabled",
+      "isError",
+      "isExistClose",
+      "keyboard",
+      "maxItems",
+      "noMatchClearLabel",
+      "noResult",
+      "placeholder",
+      "position",
+      "schema.label",
+      "schema.model",
+      "schema.value",
+      "validateEvents",
+      "waitMessage"
+    ],
+    "mForm/CheckBox.vue": [
+      "align",
+      "isDisabled",
+      "isError",
+      "isJoin",
+      "label",
+      "mode",
+      "sort",
+      "validateEvents",
+      "value",
+      "valueClickClear"
+    ],
+    "mForm/Continuous.vue": [
+      "isDisabled",
+      "isError",
+      "isReadonly",
+      "length",
+      "validateEvents"
+    ],
+    "mForm/Hidden.vue": [
+      "length",
+      "maxlength",
+      "minlength",
+      "validateEvents"
+    ],
+    "mForm/Input.vue": [
+      "allowNegative",
+      "checkNotIsZero",
+      "comma",
+      "formatLength",
+      "hasClearButton",
+      "inputChinese",
+      "inputMode",
+      "integer",
+      "isDisabled",
+      "isError",
+      "isReadonly",
+      "length",
+      "maxlength",
+      "minlength",
+      "placeholder",
+      "toFixed",
+      "validateEvents"
+    ],
+    "mForm/Password.vue": [
+      "hasClearButton",
+      "isDisabled",
+      "isError",
+      "isReadonly",
+      "length",
+      "maxlength",
+      "minlength",
+      "placeholder",
+      "validateEvents"
+    ],
+    "mForm/Radio.vue": [
+      "align",
+      "isDisabled",
+      "label",
+      "validateEvents",
+      "value"
+    ],
+    "mForm/Select.vue": [
+      "isError",
+      "keyboard",
+      "maxItems",
+      "placeholder",
+      "schema.label",
+      "schema.value",
+      "startOption",
+      "validateEvents"
+    ],
+    "mForm/SelectDropdown.vue": [
+      "isError",
+      "placeholder",
+      "validateEvents"
+    ],
+    "mForm/TextArea.vue": [
+      "formatLength",
+      "hasClearButton",
+      "inputChinese",
+      "isDisabled",
+      "isError",
+      "isReadonly",
+      "length",
+      "maxlength",
+      "minlength",
+      "placeholder",
+      "rows",
+      "validateEvents"
+    ],
+    "mLoading/Index.vue": [
+      "isFixed"
+    ],
+    "mPopup/Index.vue": [
+      "mode"
+    ]
+  },
+  "expose": {
+    "mForm/Continuous.vue": [
+      "config",
+      "name"
+    ],
+    "mForm/Hidden.vue": [
+      "name"
+    ],
+    "mForm/Input.vue": [
+      "blur",
+      "focus",
+      "inputRef",
+      "select"
+    ],
+    "mForm/SelectDropdown.vue": [
+      "onClose",
+      "onDropdownHeight"
+    ]
+  },
+  "emits": {
+    "mAnchor/Index.vue": [
+      "click"
+    ],
+    "mDatepicker/Calendar.vue": [
+      "select",
+      "selectYMD"
+    ],
+    "mDatepicker/HeaderPanel.vue": [
+      "next",
+      "prev",
+      "toggle"
+    ],
+    "mDatepicker/HeaderSelect.vue": [
+      "next",
+      "prev",
+      "select"
+    ],
+    "mDatepicker/HeaderString.vue": [
+      "next",
+      "prev"
+    ],
+    "mDatepicker/PanelMonth.vue": [
+      "select"
+    ],
+    "mDatepicker/PanelYear.vue": [
+      "select"
+    ],
+    "mDatepicker/Range.vue": [
+      "focusin",
+      "focusout",
+      "selected",
+      "update:modelValue"
+    ],
+    "mDatepicker/Single.vue": [
+      "focusin",
+      "focusout",
+      "input",
+      "keydown.enter",
+      "selected",
+      "update:modelValue"
+    ],
+    "mDatepicker/Time.vue": [
+      "focusin",
+      "focusout",
+      "input",
+      "keydown.enter",
+      "selected",
+      "update:modelValue"
+    ],
+    "mDatepicker/TimePanel.vue": [
+      "select"
+    ],
+    "mForm/AutoComplete.vue": [
+      "change",
+      "input",
+      "update:modelValue"
+    ],
+    "mForm/CheckBox.vue": [
+      "change",
+      "update:modelValue"
+    ],
+    "mForm/Continuous.vue": [
+      "complete",
+      "update:modelValue"
+    ],
+    "mForm/Input.vue": [
+      "blur",
+      "enter",
+      "focusin",
+      "focusout",
+      "input",
+      "update:modelValue"
+    ],
+    "mForm/Password.vue": [
+      "blur",
+      "enter",
+      "focusin",
+      "input",
+      "update:modelValue"
+    ],
+    "mForm/Radio.vue": [
+      "change",
+      "update:modelValue"
+    ],
+    "mForm/Select.vue": [
+      "change",
+      "update:modelValue"
+    ],
+    "mForm/SelectDropdown.vue": [
+      "update:modelValue"
+    ],
+    "mForm/TextArea.vue": [
+      "blur",
+      "focusin",
+      "focusout",
+      "input",
+      "update:modelValue"
+    ]
+  }
+}

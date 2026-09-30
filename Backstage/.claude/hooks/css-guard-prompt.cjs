@@ -46,6 +46,36 @@ const run = (cmd, args) => {
   }
 }
 
+/**
+ * 這個路徑存在,而且**大小寫一模一樣**。
+ *
+ * Windows 與 macOS 的檔案系統預設對大小寫不敏感:把 `views/Common/` 改名成
+ * `views/common/` 之後,待處理清單裡留著的舊路徑用 existsSync 查仍然是「存在」
+ * (實際開到的是改名後那一支)。於是舊路徑被原樣送去檢查,而規則看的就是
+ * 傳進來的字串 —— 報出「資料夾首字要小寫」,指著一個已經改好的檔案。
+ *
+ * 看到的樣子是:對話每一輪都列出同一批違規,而全案掃描說通過。
+ * 兩邊對不上,訊息裡也看不出原因 —— 改的人會以為「我明明改好了,它還在報」。
+ * (全案掃描是從磁碟列目錄,拿到的是真正的檔名,所以那邊一直正常。)
+ *
+ * 用系統回報的真實路徑再比對一次,對不上就當作不存在,從清單剔除。
+ * Linux 上 existsSync 本來就會回 false,這一層不影響它。
+ */
+const existsExactly = (rel) => {
+  const full = path.join(ROOT, rel)
+
+  if (!fs.existsSync(full)) return false
+
+  try {
+    const real = fs.realpathSync.native(full)
+
+    return path.relative(ROOT, real).split(path.sep).join('/') === rel
+  } catch {
+    // 取不到真實路徑就按原本的判斷走,不要因此讓整層失效
+    return true
+  }
+}
+
 const readJson = (file, fallback) => {
   try {
     return JSON.parse(fs.readFileSync(file, 'utf8'))
@@ -62,12 +92,25 @@ const readJson = (file, fallback) => {
  * 而且沒有任何徵兆,那類檔案只是從此不再出現在提醒裡。
  */
 const onListChangedFiles = (isScannable) => {
-  const status = run('git', ['status', '--porcelain', '--', '.'])
+  /* -uall:未追蹤的檔案要逐支列出。
+     預設會把「整個新資料夾」彙總成一行目錄名(components/mThing/),
+     底下的檔案一支都不出現 —— 那一行過不了 isScannable(沒有副檔名),
+     於是整個新元件在這一層完全不存在。新增一支元件正是最需要提醒的時候。 */
+  const status = run('git', ['status', '--porcelain', '-uall', '--', '.'])
   if (!status.ok) return []
+
+  /* git status 回的路徑一律相對 **repo 根**,不是相對這個專案 ——
+     一個 repo 裝了不只一個專案時(Project/Nuxt、Project/Vite 各一套規範工具),
+     那兩個基準不一樣。直接拿去接 ROOT 會組出 Project/Vite/Project/Vite/…
+     這種不存在的路徑,然後整批被 existsSync 過濾掉 ——
+     不會報錯、不會少畫面,只是這一層從此什麼都掃不到。 */
+  const prefix = run('git', ['rev-parse', '--show-prefix'])
+  const base = prefix.ok ? prefix.out.trim() : ''
 
   return status.out
     .split('\n')
     .map((line) => line.slice(3).trim().replace(/^"|"$/g, ''))
+    .map((p) => (base && p.startsWith(base) ? p.slice(base.length) : p))
     .filter((p) => isScannable(p))
     .filter((p) => fs.existsSync(path.join(ROOT, p)))
 }
@@ -83,7 +126,7 @@ const main = async () => {
 
   const pending = readJson(PENDING_FILE, [])
   const files = [...new Set([...onListChangedFiles(core.isScannable), ...pending])].filter((p) =>
-    fs.existsSync(path.join(ROOT, p))
+    existsExactly(p)
   )
 
   if (!files.length) ok()

@@ -44,6 +44,72 @@ export const useExchangeStore = defineStore('exchange', () => {
 - 資料夾一律叫 `stores`(規則 `storeDir`),store 命名 `use{名稱}Store`(規則 `storeNaming`),
   actions 檔名 `use{名稱}Actions.js`(規則 `storeActions`)。
 
+### 全站共用的元件,它的「這個專案長什麼樣」也放 store
+
+有幾支元件不是放在畫面上就好,它要先掛在版面上才會顯示 ——
+彈窗、全域載入那一類。那種元件的樣貌(內距、預設寬度、按鈕外觀、
+按鈕上的文字)**每個專案都不一樣**,而那些值要放在它的 store 裡,
+用 `readonly` 包起來,不要寫在那幾支容器的畫面區段。
+
+```js
+/* 這一組是給各專案改成自己的值的 */
+const defaultSetClass = readonly({
+  main: '--py-24 --px-20',
+  messageWidth: 'p:--w-600 t:--w-460',
+  button: '--oval --h-45 --text-center w-full',
+})
+```
+
+兩個理由:
+
+- **那幾支容器是整套覆蓋的對象。** 值寫在容器的畫面區段裡的話,
+  改過的那一行會在下一次更新時消失,而消失的當下沒有任何訊息 ——
+  只是彈窗的內距突然變成別的專案的值。
+- **同一組值好幾支容器共用**(提示、確認、自訂、處理中各一支)。
+  各寫一次的話,調整版面要記得每一支都改,漏掉的那一支與其他幾支長得不一樣,
+  一樣不會報錯,要開到那一種彈窗才看得出來。
+
+使用端開啟時傳進來的 `setClass` 接在這一組後面,不是取代它 ——
+某一次要不一樣的那個彈窗,由開啟它的地方自己傳。
+
+**取用這種值不要走 `storeToRefs`。** 直接寫 `<store 實例>.<名字>`:
+
+```js
+const popup = usePopupStore()
+const { alertData } = storeToRefs(popup)   // 會變的那些走這裡
+
+// 固定設定直接讀 —— popup.defaultSetClass.main
+```
+
+`storeToRefs` 只收 `ref` 與 `reactive`,而 `readonly({ … })` 底下是一個普通物件,
+兩者都不是 —— 它會被**靜默跳過**:解構出來是 `undefined`,
+而讀它的那一行在執行時整個炸開,錯誤訊息還指向元件內部。
+
+不必擔心「直接讀會斷掉響應」:那一組永遠不變,本來就沒有響應性可言。
+規則 `storeToRefs`(擋)兩個方向都看 —— 會變的值直接讀要報,
+不會變的值放進 `storeToRefs` 也要報。
+
+### 每個站自己的規格不要放進共用的那一支行為
+
+SEO 那一組最典型:寫 head 的 meta、canonical、og、robots、結構化資料。
+**那幾件事每個站的規格都不一樣** —— canonical 要不要補結尾斜線、
+og 的圖片尺寸怎麼取、robots 的預設值、要不要吐結構化資料,
+而且它們讀的是專案自己的狀態(站台設定、當前頁的資料)。
+
+放進共用的那一支(`useCommonActions`)的話,每個專案拿到的是同一套輸出,
+要改就得動那支檔案 —— **而它是整套覆蓋的對象**:改完下一次更新就消失,
+而消失的當下沒有訊息,只是搜尋引擎看到的東西變回別人的設定。
+
+放進這個專案自己的那一支(`useProjectActions`)才是對的位置:
+那支本來就是「這個站自己的事」,不會被整套覆蓋。
+
+判準是問:**換一個站,這段邏輯還會一模一樣嗎?**
+
+| 這段邏輯 | 放哪 |
+| --- | --- |
+| 載入狀態的開關、視窗尺寸換算成斷點 | 共用那一支 —— 每個站都一樣 |
+| SEO、站台設定、這個站特有的流程 | 專案自己那一支 |
+
 ## 2. 分層跟著頁面
 
 規則 `storeScope`(檔名)與 `storeLayer`(分層),都會擋。
@@ -313,12 +379,39 @@ pinia 的 store 實例是 reactive 物件,值一旦「取出來」就跟 store �
 - **`use*Actions()`**:那是一般 composable,不是 store,直接解構就好
 - **`readonly({ … })` 包住的固定設定**:那種東西沒有響應性可言 ——
   沒有人會改它,所以「取出來就跟 store 斷了」的前提不成立
+- **函式或 computed 主體裡的取值**:那是「這一刻的值」,拿到就用掉
 
-最後那一種規則會自己認出來:它到 store 那一側看那個屬性的宣告,
-是 `readonly({ … })`(不是 `readonly(ref(…))`)就跳過,不必標豁免。
+最後兩種規則會自己認出來,不必標豁免。
 
+`readonly({ … })` 那一種是到 store 那一側看那個屬性的宣告,
+是 `readonly({ … })`(不是 `readonly(ref(…))`)就跳過。
 **而且那種情況照這條改會壞掉** —— `storeToRefs` 只收 ref 與 reactive,
 `readonly({ … })` 兩者皆非,拿到的是 `undefined`,下一行取值就丟錯。
+
+### 為什麼函式裡的取值不算
+
+這條擋的是「取出來的值會被留下來,之後還有人讀它」—— 畫面 render 時讀、
+別的函式讀。寫在最外層的宣告是那種,寫在函式裡的不是:
+取值那一行到函式結束之間就是它的全部壽命。
+
+```js
+const data = json.member.tab            // 最外層：畫面之後都讀這一份，要走 storeToRefs
+
+const onTabs = async () => {
+  await onJsonMemberTab()
+  const data = json.member.tab          // 函式裡：等 api 回來之後讀一次，當場用掉
+}
+```
+
+**函式裡那一種照這條改反而會壞** —— 提到最外層的話,取值發生在 `await` 之前,
+拿到的是還沒填的那一份。computed 主體裡的也不必改:computed 每次重算都會重讀,
+響應性是 computed 自己在管的。
+
+規則數大括號來分辨:`.vue` 的 `<script setup>` 裡面直接就是最外層,
+而 store 與 actions 的 `.js` 整份包在一個函式裡(`defineStore` 的 setup、
+actions 的 `export default`),所以那一層不算。
+
+註解掉的程式碼不檢查 —— 那是死的,報出來的那一行打開檔案一看根本沒有作用。
 
 ## 5. action 命名:onApi + api 函式名
 
@@ -379,6 +472,26 @@ const onApiGetVoucherListDetail = async () => {
 名字相同但在不同檔案裡,本來就分得開。
 
 ## 6. action 的寫法
+
+### 那一支檔案的外殼
+
+規則 `storeActionsExport`(擋):**具名寫完再 `export default`**,不要直接 `export default () => { … }`。
+
+```js
+const useMemberActions = () => {
+  const onReset = () => {}
+
+  return { onReset }
+}
+
+export default useMemberActions
+```
+
+匿名的也跑得起來 —— 自動引入是照檔名掛上去的,函式自己有沒有名字不影響。
+差別在出事的時候:堆疊追蹤、效能面板與 devtools 顯示的是函式自己的名字,
+匿名的那幾支全部印成 `default`,看不出是哪一層的行為在呼叫誰。
+
+### 回傳的形狀
 
 規則 `storeActionReturn`(擋):打了 api 的 action **一律 `return { config, status, data }`**。
 

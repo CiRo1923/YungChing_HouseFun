@@ -17,6 +17,8 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import { readSealedJson, writeSealedJson } from './shared.mjs'
+
 const root = path.resolve(fileURLToPath(import.meta.url), '../../..')
 const dir = path.join(root, '.tools', 'lint')
 
@@ -77,16 +79,10 @@ export const currentFingerprints = () =>
   )
 
 /** 清單裡記的指紋;沒有清單時回 null(那時不比對,見 rules-global 的說明) */
-export const recordedFingerprints = () => {
-  const file = path.join(root, ...CHECKSUM_FILE.split('/'))
-  if (!fs.existsSync(file)) return null
-
-  try {
-    return JSON.parse(fs.readFileSync(file, 'utf8'))
-  } catch {
-    return null // 清單壞掉等同沒有 —— 寧可不比對,也不要每一支檔案都報一次
-  }
-}
+/* 讀取與寫入走共用的那一份 —— 兩種封存清單(這一份指紋、元件介面的名單)
+   對「檔案不在或壞掉時怎麼辦」的答案必須一樣:一律不比對。
+   各寫一次的話,其中一邊改了做法,另一邊還是舊的。 */
+export const recordedFingerprints = () => readSealedJson(root, CHECKSUM_FILE)
 
 /** 對不上的那幾支:改過的、多出來的、少掉的 */
 export const fingerprintDiff = () => {
@@ -111,8 +107,7 @@ export const fingerprintDiff = () => {
 const isMain = process.argv[1]?.endsWith('checksum.mjs')
 
 if (isMain && process.argv.includes('--write')) {
-  const file = path.join(root, ...CHECKSUM_FILE.split('/'))
-  fs.writeFileSync(file, `${JSON.stringify(currentFingerprints(), null, 2)}\n`, 'utf8')
+  writeSealedJson(root, CHECKSUM_FILE, currentFingerprints())
   console.log(`已更新 ${CHECKSUM_FILE}(${Object.keys(currentFingerprints()).length} 支規則檔)`)
 } else if (isMain) {
   const diff = fingerprintDiff()

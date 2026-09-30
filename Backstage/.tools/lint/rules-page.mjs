@@ -4,27 +4,40 @@
 // 這支管的是「頁面怎麼使用它們」。範圍不同(一個看 stores/,一個看頁面的 .vue),
 // 混在一起之後,要找某條規則得先猜它算 store 還是頁面的事。
 
+import fs from 'node:fs'
 import path from 'node:path'
 import { aliasListOf } from './rules-code.mjs'
 import {
-  ACTIONS_DIR_NAME,
+  ACTIONS_DIR_PATH,
   API_DIR,
   PARALLEL_AWAIT_HELPER,
   POPUP_DIR_NAME,
   STORE_DIR,
   VIEW_UNDERSCORE_FOLDERS,
+  BREAKPOINT_SCREENS,
+  BUILTIN_POPUP_IDS,
+  POPUP_TAGS,
+  SCAN_TARGETS,
   VIEWS_DIR,
+  DUAL_TYPE_UTILITIES,
+  utilityBodyOf,
+  utilityNameFrom,
   bodyRangeOf,
   isComponentFile,
   isInSrc,
   hasExemptMark,
   issueOf,
   lineNoOf,
+  ARROW_FN_RE,
+  IMPORT_RE,
+  listFiles,
   maskComments,
+  registerScanCache,
+  toRel,
   withNamedImport,
 } from './shared.mjs'
 
-const ACTIONS_DIR = `${STORE_DIR}/${ACTIONS_DIR_NAME}`
+const ACTIONS_DIR = ACTIONS_DIR_PATH
 
 const isPageFile = (rel) => rel.startsWith(`${VIEWS_DIR}/`) && rel.endsWith('.vue')
 
@@ -94,8 +107,6 @@ const METHOD_SEGMENT_RE = /^(?:Get|Post|Put|Patch|Delete)(?:Form)?/
 /** 不是 api 包裝的通用工具 —— 名字剛好也是 onApi 開頭,但不對應任何一支 api */
 const ACTION_UTILS = new Set(['onApiPromise', 'onApiError'])
 
-const PAGE_FN_RE = /const\s+(\w+)\s*=\s*(?:async\s*)?\([^)]*\)\s*=>\s*\{/g
-
 /**
  * 這個函式是不是「單純包裝那一支 action」。
  *
@@ -149,7 +160,7 @@ const checkPageActionNaming = ({ rel, text }) => {
      「去掉 method 之後會不會與別支撞名」要看過整份檔案才知道。 */
   const wrappers = []
 
-  for (const m of text.matchAll(PAGE_FN_RE)) {
+  for (const m of text.matchAll(ARROW_FN_RE)) {
     const body = bodyRangeOf(text, m.index + m[0].length - 1)
 
     const called = [
@@ -242,10 +253,6 @@ const checkPageActionNaming = ({ rel, text }) => {
 //
 // 兩者的判斷完全相同,只有代號與能不能豁免不同 —— 判斷寫成兩份的話,
 // 修好一邊的誤報,另一邊還在報。
-
-/** 所有 import 寫法:具名匯入、整包匯入、動態 import */
-const IMPORT_RE =
-  /(?:import|export)\s[^'"]*?from\s*['"]([^'"]+)['"]|import\s*['"]([^'"]+)['"]|import\s*\(\s*['"]([^'"]+)['"]\s*\)/g
 
 /**
  * 把 import 寫的路徑還原成實際指到的位置。
@@ -536,12 +543,448 @@ const checkPopupLocation = ({ rel }) => {
   ]
 }
 
+// --- 規則 breakpointOverride:頁面的 class 不要靠斷點去蓋掉基底 -------------
+//
+// `p-[15px] m:px-[20px]` —— 先給四邊 15px,再用手機那一段蓋掉左右。
+// 畫面上是對的,但要知道手機的左右間距是多少,得先看基底寫了什麼、
+// 再看哪一個斷點蓋了它、蓋的是哪幾邊。改一個值要同時想兩處,
+// 而漏掉一處不會報錯 —— 只是某個斷點的間距悄悄變成另一個值。
+//
+// **該分斷點就每個斷點各寫一次**:`p:--px-15 m:--px-20`,一行看完。
+//
+// 只管頁面 —— 共用元件的 template 本來就不寫 utility class(規則 tailwind),
+// 那一層由那條管。
+
+/* 間距這一家有包含關係:短的蓋得住長的(p 蓋掉 px / py / pt…)。
+   只比對同名的話,`p-[15px] m:px-[20px]` 這種最常見的寫法會被放行。 */
+const UTILITY_COVERS = {
+  p: ['px', 'py', 'pt', 'pr', 'pb', 'pl', 'ps', 'pe'],
+  px: ['pl', 'pr', 'ps', 'pe'],
+  py: ['pt', 'pb'],
+  m: ['mx', 'my', 'mt', 'mr', 'mb', 'ml', 'ms', 'me'],
+  mx: ['ml', 'mr', 'ms', 'me'],
+  my: ['mt', 'mb'],
+  gap: ['gap-x', 'gap-y'],
+  border: ['border-x', 'border-y', 'border-t', 'border-r', 'border-b', 'border-l'],
+  'border-x': ['border-l', 'border-r'],
+  'border-y': ['border-t', 'border-b'],
+  rounded: [
+    'rounded-t',
+    'rounded-r',
+    'rounded-b',
+    'rounded-l',
+    'rounded-tl',
+    'rounded-tr',
+    'rounded-br',
+    'rounded-bl',
+  ],
+  inset: ['top', 'right', 'bottom', 'left', 'inset-x', 'inset-y'],
+  'inset-x': ['left', 'right'],
+  'inset-y': ['top', 'bottom'],
+}
+
+const isCoveredBy = (base, scoped) =>
+  base === scoped ||
+  (UTILITY_COVERS[base] ?? []).includes(scoped) ||
+  (UTILITY_COVERS[scoped] ?? []).includes(base)
+
+/* 同一個 utility 前綴會產出兩種不同的 CSS 屬性 —— 它們不互相覆蓋。
+
+   text-[--gray-6b]   color
+   text-[18px]        font-size
+   border-[--white]   border-color
+   border-[2px]       border-width
+
+   只看前綴的話,上面每一組都會被判成「同一個屬性被蓋掉」,
+   而顏色與字級本來就該分開寫 —— 那是整批誤報。
+
+   哪幾個 utility 有這兩種版本,取共用的那一份名單(DUAL_TYPE_UTILITIES)——
+   「這個值該不該標 length:」問的是同一件事,名單分成兩份的話,
+   加了一個而另一邊沒加,那一個會在其中一條規則裡開始判錯。 */
+
+const LENGTH_VALUE_RE = /^\[(?:length:|\d)/
+
+const valueTypeOf = (token) => {
+  const value = token.match(/(\[[^\]]*\])/)?.[1]
+
+  // 不是方括號寫法(text-center、border-solid 那種)沒有型別之分
+  if (!value) return ''
+
+  return LENGTH_VALUE_RE.test(value) ? 'length' : 'color'
+}
+
+/**
+ * 一個 class 的 utility 名字 —— 前綴與值都去掉。
+ *
+ * 同時有長度與顏色兩種版本的那幾個(text- / border- / …),名字後面接上型別 ——
+ * 不接的話 text-[--紅色] 與 text-[18px] 會被當成同一個屬性。
+ */
+const utilityNameOf = (token) => {
+  const noPrefix = utilityBodyOf(token)
+  const name = utilityNameFrom(noPrefix)
+
+  if (!name) return null
+  if (!DUAL_TYPE_UTILITIES.has(name)) return name
+
+  const type = valueTypeOf(noPrefix)
+
+  return type ? `${name}:${type}` : name
+}
+
+/**
+ * 這個 class 掛在哪個斷點下。
+ *
+ * 回傳空字串代表沒有前綴(基底),null 代表前綴不是斷點
+ * (`hover:`、`focus-within:` 那種狀態前綴不在這條的範圍內 ——
+ * 那些本來就是「某個狀態下才蓋掉」,是它們的用途)。
+ */
+const breakpointOf = (token, prefixes) => {
+  /* 「前綴到哪裡為止」取共用的那一份判準,不在這裡重算 ——
+     值裡面也會有冒號(text-[length:--x] 的型別提示),兩處各算一次的話,
+     其中一邊修好了另一邊還是舊的。 */
+  const body = utilityBodyOf(token)
+  if (body === token) return ''
+
+  const prefix = token.slice(0, token.length - body.length - 1)
+
+  return prefixes.has(prefix) ? prefix : null
+}
+
+const checkBreakpointOverride = ({ rel, text: raw }) => {
+  if (!isPageFile(rel)) return []
+
+  const prefixes = new Set(Object.values(BREAKPOINT_SCREENS).flat())
+  if (!prefixes.size) return [] // 不做響應式的專案整條略過
+
+  const text = maskComments(rel, raw)
+  const issues = []
+
+  for (const m of text.matchAll(/class="([^"]*)"/g)) {
+    const base = new Map()
+    const scoped = []
+
+    for (const token of m[1].split(/\s+/).filter(Boolean)) {
+      const at = breakpointOf(token, prefixes)
+      if (at === null) continue
+
+      const utility = utilityNameOf(token)
+      if (!utility) continue
+
+      if (at === '') base.set(utility, token)
+      else scoped.push({ utility, token })
+    }
+
+    for (const one of scoped) {
+      for (const [baseUtility, baseToken] of base) {
+        if (!isCoveredBy(baseUtility, one.utility)) continue
+
+        issues.push(
+          issueOf(
+            rel,
+            lineNoOf(text, m.index),
+            'breakpointOverride',
+            `${baseToken} 被 ${one.token} 蓋掉 —— 每個斷點各寫一次,` +
+              `不要先寫一個基底再用斷點覆蓋;` +
+              `各斷點的值本來就相同的話,只留基底那一個就好(不必拆成每個斷點各一份)。` +
+              `維持現在這樣的話,要知道某個斷點的實際值得先看基底、再找哪一段蓋了它,` +
+              `而改動時漏掉一處不會報錯,只是那個斷點悄悄變成另一個值`
+          )
+        )
+      }
+    }
+  }
+
+  return issues
+}
+
+// --- 規則 popupId:彈窗的 id 要配對得起來 ------------------------------------
+//
+// 全站同一時間只有一個彈窗可見:每個實例拿自己的 id 與「現在開著的是誰」比對,
+// 相同才顯示。所以宣告端寫的 id 與開啟時傳的 id 必須一模一樣。
+//
+// **對不上時沒有任何人會出聲。** 畫面不會報錯 —— 不認得的屬性框架就是靜靜
+// 忽略(曾經有一支把 id 寫成別的字,那個彈窗從此打不開);建置不檢查;
+// 程式的靜態檢查也管不到畫面區段裡的屬性名。要真的按下那個按鈕才會發現卡住。
+//
+// 三種對不上,分開報 —— 成因與要改的地方都不同:
+//
+//   宣告端沒寫 id            那個實例永遠不會顯示
+//   開了一個沒人宣告的 id    按鈕按下去什麼都不會發生
+//   宣告了卻沒有人會開它     多半是改名時漏掉一邊,或那支彈窗已經不用了
+//
+// 這條要看過整個原始碼才判斷得出來(宣告在元件、開啟在頁面),所以建一次索引。
+
+let popupIdCache = null
+
+registerScanCache(() => {
+  popupIdCache = null
+})
+
+/** 畫面區段裡 `<標籤 … id="值">` 的那個值;動態綁定(`:id`)的算不出來,不收 */
+const declaredIdsIn = (text, tags) => {
+  const ids = []
+
+  for (const tag of tags) {
+    const re = new RegExp(`<${tag}\\b([^>]*)>`, 'g')
+
+    for (const m of text.matchAll(re)) {
+      const attrs = m[1]
+      // 動態綁的值是變數,靜態算不出來 —— 那種跳過,不當成「沒寫 id」
+      if (/\s:id\s*=/.test(attrs) || /\sv-bind:id\s*=/.test(attrs)) {
+        ids.push({ id: null, dynamic: true, index: m.index })
+        continue
+      }
+
+      const id = attrs.match(/\sid\s*=\s*"([^"]*)"/)?.[1]
+
+      ids.push({ id: id ?? null, dynamic: false, index: m.index })
+    }
+  }
+
+  return ids
+}
+
+/**
+ * 開啟彈窗時傳的 id —— `onCustom({ id: 'xxx' })` 那個字面值,連同它在檔案裡的位置。
+ *
+ * **建索引與逐檔報違規都用這一支。** 兩邊各寫一次比對式的話,
+ * 改了其中一邊(例如多認一種開啟函式)另一邊還是舊的 ——
+ * 結果是索引裡有的 id,報違規那一輪卻認不出來,反過來也一樣。
+ */
+const openedIdsIn = (text) =>
+  [...text.matchAll(/onCustom\s*\(\s*\{[^}]*?\bid\s*:\s*'([^']+)'/g)].map((m) => ({
+    id: m[1],
+    index: m.index,
+  }))
+
+/**
+ * 有沒有「開了一個算不出名字的彈窗」——`onCustom({ id: 變數 })`。
+ *
+ * 那種寫法很正常:兩種情境的差異集中在一個物件裡
+ * (`const popup = isSingle ? { id: 'a', title: … } : { id: 'b', title: … }`),
+ * 後面的按鈕與導頁只寫一份;拆成 if/else 會讓那幾段各寫一遍。
+ *
+ * 但靜態算不出那個值 —— 所以「全案開了哪些 id」這份清單不完整,
+ * 而不完整的清單不能拿來反推「沒有人開它」。
+ */
+const hasUnresolvableOpen = (text) =>
+  [...text.matchAll(/onCustom\s*\(\s*\{[^}]*?\bid\s*:\s*([^,}]+)/g)].some(
+    (m) => !m[1].trim().startsWith("'")
+  )
+
+const popupIdIndexOf = (root) => {
+  if (popupIdCache?.root === root) return popupIdCache.index
+
+  const declared = new Map() // id → 宣告它的檔案
+  const opened = new Map() // id → 開啟它的檔案
+
+  /* 這兩份清單完不完整 —— 有任何一處算不出名字,那一份就是不完整的。
+     不完整的清單只能用來回答「有」,不能用來回答「沒有」:
+     查得到就是真的有,查不到只代表「我沒看到」,不代表它不存在。 */
+  let openedComplete = true
+  let declaredComplete = true
+
+  for (const dir of SCAN_TARGETS) {
+    for (const abs of listFiles(root, dir)) {
+      if (!abs.endsWith('.vue') && !abs.endsWith('.js')) continue
+
+      const rel = toRel(root, abs)
+
+      try {
+        const text = maskComments(rel, fs.readFileSync(abs, 'utf8'))
+
+        for (const one of declaredIdsIn(text, POPUP_TAGS)) {
+          if (one.id) declared.set(one.id, rel)
+          // 動態綁的:那支彈窗的 id 由使用端傳進來,靜態看不出是哪一個
+          if (one.dynamic) declaredComplete = false
+        }
+        for (const one of openedIdsIn(text)) opened.set(one.id, rel)
+        if (hasUnresolvableOpen(text)) openedComplete = false
+      } catch {
+        // 讀不到某一支就跳過,不要因此讓整條規則失效
+      }
+    }
+  }
+
+  popupIdCache = { root, index: { declared, opened, openedComplete, declaredComplete } }
+
+  return popupIdCache.index
+}
+
+/**
+ * 這個專案的宣告端清單完不完整 —— 給規則自己的驗證用。
+ *
+ * 有轉手元件(使用端指定 id、版面共用一份)的專案一定是不完整的,
+ * 那時「開了一個查不到的 id」整條不作用,驗它的案例也就驗不到東西。
+ * 驗證那邊不另寫一份判斷:兩邊各判一次的話,規則改了條件而驗證沒跟上,
+ * 那一則會變成必定失敗的雜訊,而失敗的原因與規則無關。
+ */
+export const isPopupDeclaredComplete = (root) => popupIdIndexOf(root).declaredComplete
+
+/**
+ * 這個專案「全案開了哪些 id」這份清單完不完整 —— 給規則自己的驗證用。
+ *
+ * 有 `onCustom({ id: 變數 })` 那種寫法的專案一定是不完整的,
+ * 那時「宣告了卻沒有人開它」整條不作用,驗它的案例也就驗不到東西。
+ *
+ * 與上面那一支分開:兩條規則看的是不同的那一半清單,
+ * 共用一個旗標的話,其中一邊的寫法會讓另一邊也跟著跳過,
+ * 而那一條其實好好的。
+ */
+export const isPopupOpenedComplete = (root) => popupIdIndexOf(root).openedComplete
+
+const checkPopupId = ({ rel, text: raw, root }) => {
+  if (!POPUP_TAGS.length) return [] // 沒有彈窗元件的專案整條略過
+  if (!isInSrc(rel) || !(rel.endsWith('.vue') || rel.endsWith('.js'))) return []
+
+  const text = maskComments(rel, raw)
+  const { declared, declaredComplete } = popupIdIndexOf(root)
+  const issues = []
+
+  /* 這支檔案的宣告只算一次 —— 下面兩種違規看的是同一批。
+     各算一次的話,比對式改了其中一邊,兩種違規就開始用不同的判準。 */
+  const declaredHere = declaredIdsIn(text, POPUP_TAGS)
+
+  // 一、宣告端沒寫 id
+  for (const one of declaredHere) {
+    if (one.dynamic || one.id) continue
+
+    issues.push(
+      issueOf(
+        rel,
+        lineNoOf(text, one.index),
+        'popupId',
+        '彈窗沒有寫 id —— 每個實例靠 id 判斷自己要不要顯示,' +
+          '沒有 id 的話它永遠不會出現,而且不會有任何錯誤訊息'
+      )
+    )
+  }
+
+  /* 二、開了一個沒有人宣告的 id。
+
+     **宣告端清單完整時才問得出這件事。** 有轉手元件的專案(使用端指定 id、
+     版面共用一份)那份清單一定不完整 —— 那時「查不到」只代表我沒看到,
+     不代表它不存在,而報出來的每一筆都是誤報。 */
+  if (declaredComplete) {
+    for (const one of openedIdsIn(text)) {
+      if (declared.has(one.id)) continue
+
+      issues.push(
+        issueOf(
+          rel,
+          lineNoOf(text, one.index),
+          'popupId',
+          `開的是 '${one.id}',但全案沒有任何彈窗宣告這個 id —— ` +
+            `按下去不會有任何反應,也不會報錯;` +
+            `確認宣告端那一支的 id 有沒有拼錯、或改名時漏掉了一邊`
+        )
+      )
+    }
+  }
+
+  return issues
+}
+
+// --- 規則 popupIdOrphan:宣告了卻沒有人會開它 --------------------------------
+//
+// 與 popupId 分開是因為**它問的問題不一樣**:
+//
+//   popupId        這一行本身對不對(沒寫 id、開了一個查得到查不到的 id)
+//   popupIdOrphan  從全案反推「沒有人開過它」
+//
+// 反推有個前提:**那份「誰開了什麼」的清單要完整。** 而它常常不完整 ——
+// 開啟端寫成變數是正常做法(兩種情境的差異集中在一個物件,後面的按鈕與導頁
+// 只寫一份),那種靜態算不出名字。
+//
+// 清單不完整時查不到只代表「我沒看到」,不代表它不存在。
+// 照樣報的話,每一支用了那種寫法的彈窗都會被說成「打不開」——
+// 而誤報累積起來,真正拼錯的那一筆就被淹沒了,那正是這條規則要擋的事。
+//
+// 所以清單不完整就整條不做,並在前提清單裡講出來(見 preflight.mjs)。
+
+const checkPopupIdOrphan = ({ rel, text: raw, root }) => {
+  if (!POPUP_TAGS.length) return []
+  if (!isInSrc(rel) || !(rel.endsWith('.vue') || rel.endsWith('.js'))) return []
+
+  const { opened, openedComplete } = popupIdIndexOf(root)
+
+  // 清單不完整 —— 反推的前提不成立,整條不做
+  if (!openedComplete) return []
+
+  const text = maskComments(rel, raw)
+
+  return declaredIdsIn(text, POPUP_TAGS)
+    .filter((one) => one.id && !opened.has(one.id) && !BUILTIN_POPUP_IDS.includes(one.id))
+    .map((one) =>
+      issueOf(
+        rel,
+        lineNoOf(text, one.index),
+        'popupIdOrphan',
+        `宣告了 '${one.id}',但全案沒有任何地方會開它 —— ` +
+          `多半是改名時漏掉這一邊,或這支彈窗已經不用了(不用的話連同它的內容一起刪掉)`
+      )
+    )
+}
+
+// --- 規則 popupIdNaming:彈窗的 id 用 popup 開頭 ------------------------------
+//
+// 那個字串會同時出現在兩個地方(宣告彈窗的那一支、開啟它的那一支),
+// 而且散在不同的檔案裡。名字一致才搜尋得到「這個彈窗總共牽涉到哪幾支檔案」——
+// 改一個彈窗的內容時,要先找齊它的宣告端、開啟端與關閉端。
+//
+// **與 popupId 分開是刻意的。** 那一條管的是「兩邊的 id 對不對得起來」,
+// 這一條管的是「那個名字長什麼樣子」—— 兩件事,兩個代號。
+// 同一個代號底下放兩種判準的話,案例分不出抓到的是哪一件,
+// 而修其中一件會讓另一件的案例跟著變。
+//
+// 開啟函式內建的那幾個豁免:它們是系統級的外框(提示、確認、請求中),
+// 不屬於任何一頁,名字在開啟函式裡寫死,改名會動到每一支使用端。
+
+const checkPopupIdNaming = ({ rel, text: raw }) => {
+  if (!POPUP_TAGS.length) return []
+  if (!isInSrc(rel) || !(rel.endsWith('.vue') || rel.endsWith('.js'))) return []
+
+  const text = maskComments(rel, raw)
+  const issues = []
+
+  // 同一個名字在一支檔案裡出現好幾次時只報一筆 —— 要改的是同一個字串
+  const seen = new Set()
+
+  /* 宣告端與開啟端都看 —— 兩邊寫的是同一個字串,只驗一邊的話,
+     另一邊改了名字不會被發現(而那時兩邊對不上,彈窗直接打不開)。 */
+  for (const one of [...declaredIdsIn(text, POPUP_TAGS), ...openedIdsIn(text)]) {
+    if (!one.id || BUILTIN_POPUP_IDS.includes(one.id)) continue
+    if (/^popup[A-Z]/.test(one.id)) continue
+    if (seen.has(one.id)) continue
+
+    seen.add(one.id)
+
+    issues.push(
+      issueOf(
+        rel,
+        lineNoOf(text, one.index),
+        'popupIdNaming',
+        `彈窗的 id '${one.id}' 要用 popup 開頭 —— 建議 ` +
+          `popup${one.id.replace(/^./, (c) => c.toUpperCase())};` +
+          `那個字串會同時出現在宣告端與開啟端、而且散在不同的檔案裡,` +
+          `名字一致才搜尋得到這個彈窗總共牽涉到哪幾支`
+      )
+    )
+  }
+
+  return issues
+}
+
 export const PAGE_CHECKS = [
+  checkPopupIdNaming,
+  checkPopupIdOrphan,
   checkPopupLocation,
   checkPageApiData,
   checkPageActionNaming,
   checkPageApiImport,
   checkPageAwaitAll,
+  checkBreakpointOverride,
+  checkPopupId,
 ]
 
 export const PAGE_RULE_TITLE = {
@@ -551,6 +994,10 @@ export const PAGE_RULE_TITLE = {
   pageApiImport: '頁面直接 import api',
   componentApiImport: '元件直接 import api',
   pageAwaitAll: '進入頁面時的請求沒有一起發出',
+  breakpointOverride: '頁面的 class 靠斷點蓋掉基底',
+  popupId: '彈窗的 id 對不起來',
+  popupIdNaming: '彈窗的 id 沒有 popup 開頭',
+  popupIdOrphan: '宣告了彈窗卻沒有人會開它',
 }
 
 export const PAGE_RULE_HINT = {
@@ -560,4 +1007,8 @@ export const PAGE_RULE_HINT = {
   pageApiImport: `api 走 ${ACTIONS_DIR} 進 store,頁面讀 store`,
   componentApiImport: '元件不去要資料 —— 由使用它的頁面傳進來,或頁面寫進 store 之後元件讀 store',
   pageAwaitAll: `onMounted 裡的請求用 ${PARALLEL_AWAIT_HELPER.name}([ … ]) 一起發出 —— 存檔時自動包好`,
+  breakpointOverride: '每個斷點各寫一次,不要先寫一個基底再用斷點蓋掉它',
+  popupId: '宣告端的 id 與開啟時傳的 id 要一模一樣 —— 對不上時不會報錯,彈窗就是打不開',
+  popupIdNaming: '一律 popup 開頭 —— 那個字串散在宣告端與開啟端,名字一致才搜尋得到整組',
+  popupIdOrphan: '改名時兩邊都要改 —— 只改一邊的話那支彈窗從此打不開,而且不會報錯',
 }

@@ -6,8 +6,10 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import {
+  API_DATA_CONTAINERS,
   API_DIR,
   API_NAMING_IGNORED_SEGMENTS,
+  API_RETURN_FIELDS,
   API_SPEC_DIR,
   SHARED_API_FILE,
   STANDALONE_APIS,
@@ -205,18 +207,13 @@ const checkApiSource = ({ rel, text }) => {
     )
   }
 
-  const hasConfigImport = new RegExp(`from\\s+['"][^'"]*${CONFIG_FILE.replace('.', '\\.')}['"]`).test(
-    text
-  )
+  const hasConfigImport = new RegExp(
+    `from\\s+['"][^'"]*${CONFIG_FILE.replace('.', '\\.')}['"]`
+  ).test(text)
 
   if (!hasConfigImport && /\bfetchApi\b/.test(text)) {
     issues.push(
-      issueOf(
-        rel,
-        1,
-        'apiSource',
-        `請求要用 ${CONFIG_FILE} 匯出的實例 —— import 它再呼叫,不要自建`
-      )
+      issueOf(rel, 1, 'apiSource', `請求要用 ${CONFIG_FILE} 匯出的實例 —— import 它再呼叫,不要自建`)
     )
   }
 
@@ -414,8 +411,6 @@ const checkApiNaming = ({ rel, text }) => {
 // 要驗的是**自己組了一份回傳**的:`=> ({ status, data })`。那種寫法一旦少一欄,
 // 使用端就得為這一支寫特例 —— 而那個特例通常是在出事的時候才被發現。
 
-const RETURN_FIELDS = ['config', 'status', 'data']
-
 /**
  * export const apiX = (...) => ({ … })  ← 自己組物件回傳的那種
  *
@@ -433,7 +428,7 @@ const checkApiReturn = ({ rel, text }) => {
     const [, name] = m
     const body = bodyRangeOf(text, text.indexOf('{', m.index + m[0].length - 1))
 
-    const missing = RETURN_FIELDS.filter((f) => !new RegExp(`\\b${f}\\b`).test(body))
+    const missing = API_RETURN_FIELDS.filter((f) => !new RegExp(`\\b${f}\\b`).test(body))
     if (!missing.length) continue
 
     issues.push(
@@ -441,7 +436,7 @@ const checkApiReturn = ({ rel, text }) => {
         rel,
         lineNoOf(text, m.index),
         'apiReturn',
-        `${name} 少了 ${missing.join(' / ')} —— 每支 api 一律回 { ${RETURN_FIELDS.join(', ')} },使用端才不必為某一支寫特例`
+        `${name} 少了 ${missing.join(' / ')} —— 每支 api 一律回 { ${API_RETURN_FIELDS.join(', ')} },使用端才不必為某一支寫特例`
       )
     )
   }
@@ -469,7 +464,7 @@ const checkApiTryCatch = ({ rel, text: raw }) => {
       rel,
       lineNoOf(text, m.index),
       'apiTryCatch',
-      `api 不要自己包 try/catch —— ${EXPORT_FILE} 已經把失敗也轉成 { ${RETURN_FIELDS.join(', ')} },` +
+      `api 不要自己包 try/catch —— ${EXPORT_FILE} 已經把失敗也轉成 { ${API_RETURN_FIELDS.join(', ')} },` +
         `再包一層會把錯誤吞掉,使用端的 status 判斷就失效了,而畫面上看起來只是這一支永遠成功`
     )
   )
@@ -514,9 +509,6 @@ const checkApiPathParam = ({ rel, text: raw }) => {
 // **「這個名字是不是後端給的」靠 api 規格文件認**(設定的 API_SPEC_DIR)——
 // 沒有那份文件就分不出來,規則整條略過。文件過期的徵狀是「後端新加的欄位
 // 被要求加底線」,那時要重新匯出文件,不是照著加。
-
-/** api 回來的資料放在層裡的這兩個欄位 —— 名字由 store 規範決定 */
-const API_DATA_CONTAINERS = ['apiData', 'data']
 
 /** <容器>.<路徑>.<key> = —— 取最後那一段 key,那是這次要掛上去的名字 */
 const CONTAINER_ASSIGN_RE = new RegExp(
@@ -584,7 +576,9 @@ export const specFieldsIn = (dir) => {
 
   for (const name of files) {
     try {
-      for (const field of apiFieldNamesOf(JSON.parse(fs.readFileSync(path.join(dir, name), 'utf8')))) {
+      for (const field of apiFieldNamesOf(
+        JSON.parse(fs.readFileSync(path.join(dir, name), 'utf8'))
+      )) {
         names.add(field)
       }
     } catch {
@@ -674,7 +668,6 @@ export const API_RULE_HINT = {
   apiNaming: 'api + Method + endpoint 各段(method 寫在前面,GET 也要寫)',
   apiTryCatch: `錯誤由 ${EXPORT_FILE} 統一處理,api 自己包會把它吞掉`,
   apiPathParam: '路徑參數寫成 {key},值由呼叫端帶在參數物件裡',
-  customField:
-    '規格文件裡沒有這個欄位名 —— 前端自己掛的加底線;真的是後端給的就重新匯出那份文件',
-  apiReturn: `一律回 { ${RETURN_FIELDS.join(', ')} }`,
+  customField: '規格文件裡沒有這個欄位名 —— 前端自己掛的加底線;真的是後端給的就重新匯出那份文件',
+  apiReturn: `一律回 { ${API_RETURN_FIELDS.join(', ')} }`,
 }

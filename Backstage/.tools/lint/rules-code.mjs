@@ -18,16 +18,27 @@ import {
   CSS_MODULES_DIR,
   COMPONENT_DIRS,
   STORE_DIR,
+  SRC_DIR,
+  VENDOR_DIRS,
   classPrefixOf,
   componentClassOf,
   listFiles,
   storeIndexOf,
+  transitionNamesInCss,
+  transitionStyleIndexOf,
   selectorClassesOf,
+  componentEmitsIndexOf,
+  hasExemptMark,
+  isComponentFile,
   isInActionsDir,
+  isUnderAny,
   isInSrc,
+  toRel,
   VIEWS_DIR,
   issueOf,
   lineNoOf,
+  IMPORT_RE,
+  maskComments,
   maskHtmlComments,
   templateRangeOf,
 } from './shared.mjs'
@@ -62,18 +73,55 @@ const isCommentLine = (line) => /^\s*(?:\/\/|\/\*|\*)/.test(line.trim() ? line :
 // 一支都沒有時這條規則會被略過,並在啟動檢查時列出來,不會安靜地失效。
 
 /**
- * resolve.alias 的兩種常見寫法,都要認:
+ * resolve.alias 的兩種形式,都要認。
+ *
+ * **物件形式** —— 鍵是 alias 名:
  *
  *   '@x': fileURLToPath(new URL('要對應的路徑', import.meta.url))
  *   '@x': path.resolve(process.cwd(), `要對應的路徑`)
  *
- * 路徑裡可能帶 ${CONFIG.xxx},那些值在專案設定檔裡,取出來替換掉。
+ * **陣列形式** —— 每一項是 { find, replacement }:
+ *
+ *   { find: '@x', replacement: fileURLToPath(new URL('要對應的路徑', …)) }
+ *
+ * 陣列形式存在的理由是「要換掉某個套件的入口」:那種比對必須是正則,
+ * 而物件形式的鍵只能是字串,字串比對是開頭比對 ——
+ * 換過去的新路徑開頭也對得上,於是會被再換一次。
+ *
+ * **只認一種的話,另一種形式的專案整條規則安靜地失效**:
+ * alias 一條都讀不到,那幾條靠它的規則就對每一行都放行,而畫面上顯示通過。
+ *
+ * `find` 寫成正則的那幾項讀不到是對的 —— 那指的是套件入口,不是專案的路徑別名,
+ * 拿去比對 import 只會建議一個不存在的寫法。
  *
  * 冒號到路徑之間允許有逗號 —— path.resolve(process.cwd(), '…') 這種寫法
  *    中間就隔著一個逗號,不允許的話這幾條 alias 全部讀不到,
  *    規則會改而建議比較淺的那一個(例如該用 @js 卻建議 @)。
+ *
+ * 路徑裡可能帶 ${CONFIG.xxx},那些值在專案設定檔裡,取出來替換掉。
  */
-const ALIAS_ENTRY_RE = /['"](@[\w-]*)['"]\s*:\s*[^\n]*?['"`]([^'"`\n]+)['"`]/g
+const ALIAS_ENTRY_PATTERNS = [
+  /['"](@[\w-]*)['"]\s*:\s*[^\n]*?['"`]([^'"`\n]+)['"`]/g,
+  /find\s*:\s*['"](@[\w-]*)['"]\s*,\s*replacement\s*:\s*[^\n]*?['"`]([^'"`\n]+)['"`]/g,
+]
+
+/**
+ * 建置設定裡宣告了哪幾條 alias。
+ *
+ * 對外提供是為了讓自我驗證直接把兩種形式餵進來 ——
+ * 靠專案自己的建置設定驗不到:每個專案只會用其中一種寫法,
+ * 另一種永遠驗不到,而漏掉的那一種不會報錯,只是那些專案的規則整條失效。
+ */
+export const aliasEntriesOf = (text) => {
+  const entries = []
+
+  for (const pattern of ALIAS_ENTRY_PATTERNS) {
+    for (const m of text.matchAll(pattern)) entries.push({ alias: m[1], target: m[2] })
+  }
+
+  return entries
+}
+
 const CONFIG_VALUE_RE = /\$\{\s*CONFIG\.(\w+)\s*\}/g
 
 let aliasCache = null
@@ -134,19 +182,19 @@ const buildAliasMap = (root) => {
       const text = fs.readFileSync(buildConfig, 'utf8')
       const configValues = readConfigValues(root)
 
-      for (const m of text.matchAll(ALIAS_ENTRY_RE)) {
+      for (const entry of aliasEntriesOf(text)) {
         let resolved = true
 
         /* 設定檔裡查不到值的就整條跳過 —— 硬換成空字串會讓路徑往上縮一層
           (例如 `src/${CONFIG.fonts}` 變成 `src/`),那條 alias 就變成指向
           原始碼根目錄,規則會拿它去比對每一個 import。 */
-        const target = m[2].replace(CONFIG_VALUE_RE, (_, key) => {
+        const target = entry.target.replace(CONFIG_VALUE_RE, (_, key) => {
           if (configValues[key]) return configValues[key]
           resolved = false
           return ''
         })
 
-        if (resolved && target) map[m[1]] = target
+        if (resolved && target) map[entry.alias] = target
       }
     } catch {
       // 讀不到建置設定就不做這條檢查,不要因此讓整支規則失效
@@ -226,7 +274,16 @@ export const objectBodyAfter = (text, name) => {
  * 巢狀物件、陣列、字串裡的內容都要跳過 —— `screens` 底下每個斷點自己
  * 又是一個物件,不跳過的話 `raw` `min` `max` 會被當成斷點名。
  */
-export const topLevelKeysOf = (body) => {
+export const topLevelKeysOf = (rawBody) => {
+  /* 註解先遮掉 —— 裡面的大括號、冒號、引號會把下面這個狀態機帶偏,
+     而帶偏的結果是「一個 key 都認不出來」,不是報錯。
+     設定檔裡本來就會寫註解說明每一組值是什麼,不處理的話,
+     寫了註解的專案整份設定就讀成空的,而依賴它的規則從此不報任何東西。
+
+     兩種註解都要遮:設定檔是 JS,區塊註解與 `//` 行註解都會出現。
+     副檔名固定給 .js —— 這個函式拿到的是一段物件內容,不是整支檔案。 */
+  const body = maskComments('.js', rawBody)
+
   const keys = []
   let depth = 0
   let quote = null
@@ -298,29 +355,11 @@ export const tailwindThemeOf = (root) => {
 
   try {
     const text = fs.readFileSync(file, 'utf8')
-    const themeBody = objectBodyAfter(text, 'theme')
+    const found = themeBodyOf(root, file, text)
 
-    if (themeBody === null) return theme
+    if (found === null) return theme
 
-    // extend 底下是補充,不是整組覆寫 —— 整段挖掉再看剩下的
-    const extendBody = objectBodyAfter(themeBody, 'extend')
-    const overrideBody = extendBody === null ? themeBody : themeBody.replace(extendBody, '')
-
-    for (const group of topLevelKeysOf(overrideBody)) {
-      if (group === 'extend') continue
-
-      const body = objectBodyAfter(overrideBody, group)
-
-      if (body !== null) {
-        theme[group] = topLevelKeysOf(body)
-        continue
-      }
-
-      /* 簡寫:值從別的檔案 import 進來。找那支檔案裡的 `export const 名字 = {…}`。
-         追不到就記成空陣列 —— 那一類確實被覆寫了(規則要照樣提醒內建值消失),
-         只是列不出可用的值。 */
-      theme[group] = importedObjectKeysOf(root, file, text, group)
-    }
+    Object.assign(theme, overridesIn(root, found.file, found.text, found.body))
   } catch {
     // 讀不到就讓依賴它的規則自己跳過,不要因此讓整支工具失效
   }
@@ -330,11 +369,110 @@ export const tailwindThemeOf = (root) => {
   return theme
 }
 
+/**
+ * theme 的物件本體在哪 —— 可能就寫在設定檔裡,也可能拆到另一支再 import 進來。
+ *
+ * 回傳 `{ body, file, text }`:body 是那個物件的內容,file 與 text 是它所在的
+ * 那一支檔案(theme 底下某一類又是從第三支 import 進來時,要從**它**的位置去追)。
+ *
+ * **拆出去是常見的擺法**(tailwind.theme.js 就是為此存在)。
+ * 只認寫在設定檔裡那一種的話,拆過的專案會讀成空的 ——
+ * 而讀成空的不會報錯,只是「用到已經消失的 class」那條規則從此不報任何東西。
+ */
+const themeBodyOf = (root, file, text) => {
+  const inline = objectBodyAfter(text, 'theme')
+  if (inline !== null) return { body: inline, file, text }
+
+  /* 不是物件字面值,那就是個名字:`theme,`(簡寫)或 `theme: 別的名字`。
+     取那個名字,再去找它從哪一支檔案 import 進來。 */
+  const named = /\btheme\s*:\s*([A-Za-z_$][\w$]*)/.exec(text)
+  const name = named ? named[1] : /\btheme\s*,/.test(text) ? 'theme' : null
+
+  if (!name) return null
+
+  const spec = importSpecOf(text, name)
+  if (!spec) return null
+
+  for (const candidate of resolveCandidates(file, spec)) {
+    if (!fs.existsSync(candidate) || !fs.statSync(candidate).isFile()) continue
+
+    try {
+      const sub = fs.readFileSync(candidate, 'utf8')
+      /* 那一支可能寫成 `export default { … }`,也可能是
+         `export const theme = { … }` 再 default 出去 —— 兩種都要認。 */
+      const body = braceBodyAfterDefault(sub) ?? objectBodyAfter(sub, name)
+
+      if (body !== null) return { body, file: candidate, text: sub }
+    } catch {
+      // 讀不到就當作追不到,交給呼叫端回空的
+    }
+  }
+
+  return null
+}
+
+/** `export default {` 後面那個物件的內容 */
+const braceBodyAfterDefault = (text) => {
+  const m = /export\s+default\s*\{/.exec(text)
+
+  return m ? braceBodyOf(text, m.index + m[0].length - 1) : null
+}
+
+/** 這個名字是從哪一支檔案 import 進來的 —— 預設匯入與具名匯入都認 */
+const importSpecOf = (text, name) => {
+  const def = new RegExp(`import\\s+${name}\\s+from\\s*['"]([^'"]+)['"]`).exec(text)
+  if (def) return def[1]
+
+  const named = new RegExp(
+    `import\\s*\\{[^}]*\\b${name}\\b[^}]*\\}\\s*from\\s*['"]([^'"]+)['"]`
+  ).exec(text)
+
+  return named ? named[1] : null
+}
+
+/** 相對路徑要補副檔名才找得到檔案 */
+const resolveCandidates = (fromFile, spec) => {
+  if (!spec.startsWith('.')) return [] // 套件裡的,不是這個專案定義的
+
+  const target = path.resolve(path.dirname(fromFile), spec)
+
+  return [target, `${target}.js`, `${target}.mjs`, `${target}.ts`]
+}
+
+/**
+ * 一段 theme 本體裡,哪幾類是「整組覆寫」、各類有哪些值。
+ *
+ * extend 底下的是補充(內建值都還在),不算覆寫,所以整段挖掉再看剩下的。
+ */
+const overridesIn = (root, file, text, themeBody) => {
+  const out = {}
+  const extendBody = objectBodyAfter(themeBody, 'extend')
+  const overrideBody = extendBody === null ? themeBody : themeBody.replace(extendBody, '')
+
+  for (const group of topLevelKeysOf(overrideBody)) {
+    if (group === 'extend') continue
+
+    const body = objectBodyAfter(overrideBody, group)
+
+    if (body !== null) {
+      out[group] = topLevelKeysOf(body)
+      continue
+    }
+
+    /* 簡寫:值從別的檔案 import 進來。找那支檔案裡的 `export const 名字 = {…}`。
+       追不到就記成空陣列 —— 那一類確實被覆寫了(規則要照樣提醒內建值消失),
+       只是列不出可用的值。 */
+    out[group] = importedObjectKeysOf(root, file, text, group)
+  }
+
+  return out
+}
+
 /** 追 import 來源檔案裡的 `export const 名字 = { … }`,取第一層 key */
 const importedObjectKeysOf = (root, configFile, configText, name) => {
-  const m = new RegExp(
-    `import\\s*\\{[^}]*\\b${name}\\b[^}]*\\}\\s*from\\s*['"]([^'"]+)['"]`
-  ).exec(configText)
+  const m = new RegExp(`import\\s*\\{[^}]*\\b${name}\\b[^}]*\\}\\s*from\\s*['"]([^'"]+)['"]`).exec(
+    configText
+  )
 
   if (!m) return []
 
@@ -356,9 +494,6 @@ const importedObjectKeysOf = (root, configFile, configText, name) => {
 
   return []
 }
-
-const IMPORT_RE =
-  /(?:import|export)\s[^'"]*?from\s*['"]([^'"]+)['"]|import\s*['"]([^'"]+)['"]|import\s*\(\s*['"]([^'"]+)['"]\s*\)/g
 
 /**
  * 建置工具的「一次收一整批檔案」那種呼叫。
@@ -404,30 +539,313 @@ const checkImportAlias = ({ rel, text, root }) => {
   const seen = new Set()
 
   for (const { spec, index } of pathSpecsOf(text)) {
-    if (!spec || spec[0] !== '.') continue // 只看相對路徑
-    if (!spec.includes('..')) continue // 同層 ./ 是正常寫法
-    if (seen.has(spec)) continue
+    if (!spec || seen.has(spec)) continue
 
-    const target = path.resolve(dir, spec)
-    const hit = aliases.find((a) => target === a.root || target.startsWith(a.root + path.sep))
+    /* 兩種寫法都要改用 alias,理由不同:
+
+         相對路徑含 ..      離開自己資料夾了,搬檔案時要一層層重算
+         專案根的絕對路徑   批次載入那種寫法把目錄名寫死了
+
+       後者壞掉的方式更難發現:換一個目錄擺法不同的專案,那一批會**收到空的**,
+       不報錯,只是用它的地方全部拿不到東西,而程式看起來完全正常。
+
+       其餘的(alias、套件名、同層的 ./)本來就是正常寫法,擋了只會製造噪音。 */
+    const isRelative = spec[0] === '.'
+
+    if (isRelative && !spec.includes('..')) continue
+    if (!isRelative && spec[0] !== '/') continue
+
+    /* 批次載入的路徑帶著比對樣式(`/<目錄>/**\/*`),樣式那一段切掉只留目錄 ——
+       連樣式一起拿去解析的話,算出來的是一個不存在的位置,對不上任何 alias。 */
+    const dirPart = isRelative ? spec : spec.split('*')[0].replace(/\/+$/, '')
+    if (!dirPart) continue
+
+    const target = isRelative
+      ? path.resolve(dir, spec)
+      : path.resolve(root, dirPart.replace(/^\/+/, ''))
+
+    /* 指向專案根(或原始碼根)的那種泛用 alias,不拿來建議給絕對路徑。
+
+       任何 `/某某` 都會「命中」它,而建議出來的 `@/某某` 與原路徑一樣長、
+       一樣把目錄名寫死 —— 照著改一點幫助也沒有,還會讓每一條絕對路徑
+       (連家目錄那種、node_modules 那種)都被報一次。
+
+       相對路徑那一半不受這道限制:`../../x` 改成 `@/x` 是真的有差,
+       它拿掉的是「要數幾層」那件事。 */
+    const isBroadAlias = (a) => a.root === root || a.root === path.join(root, SRC_DIR)
+
+    const hit = aliases.find(
+      (a) =>
+        (isRelative || !isBroadAlias(a)) &&
+        (target === a.root || target.startsWith(a.root + path.sep))
+    )
+
     if (!hit) continue
 
     seen.add(spec)
 
     const rest = path.relative(hit.root, target).split(path.sep).join('/')
-    const suggestion = rest ? `${hit.alias}/${rest}` : hit.alias
+    const base = rest ? `${hit.alias}/${rest}` : hit.alias
+    // 絕對路徑那種要把切掉的樣式接回去
+    const suggestion = isRelative ? base : `${base}${spec.slice(dirPart.length)}`
+
+    const why = isRelative
+      ? '離開自己資料夾的相對路徑改用 alias,搬檔案時才不必重算層數'
+      : '批次載入的路徑寫死目錄名的話,換一個目錄擺法不同的專案會收到空的一批,不報錯,只是那一整批全部拿不到'
 
     issues.push(
       issueOf(
         rel,
         lineNoOf(text, index),
         'importAlias',
-        `'${spec}' 要改成 '${suggestion}' —— 離開自己資料夾的相對路徑改用 alias,搬檔案時才不必重算層數`
+        `'${spec}' 要改成 '${suggestion}' —— ${why}`
       )
     )
   }
 
   return issues
+}
+
+// --- 規則 componentAutoImport:元件不必自己 import ---------------------------
+//
+// 元件由建置工具自動註冊 —— 標籤直接寫 `<MPopup>`,檔案頂端不寫那一行 import。
+//
+// 為什麼不要手寫:
+//
+//   **名字會分岔。** 自動註冊的名字由「資料夾 + 檔名」推出來,是固定的;
+//   手寫的那一行可以取任何名字。同一支元件在這一頁叫 Popup、在那一頁叫 MPopup,
+//   搜尋使用端時會漏掉一半,而兩邊都能跑。
+//
+//   **搬動檔案時斷的方式不一樣。** 自動註冊是照著檔案現在的位置算的,
+//   搬完就跟著變;手寫的那一行會指向一個不存在的位置,而且是在建置時才發現。
+//
+//   **兩份範本無法逐字對照。** 有框架的那一份本來就自動註冊,
+//   另一份靠外掛做到同一件事(名稱規則刻意做成一樣)。一邊寫 import、
+//   一邊不寫的話,同一支元件的兩個版本永遠對不起來。
+//
+// **掃描範圍外的不在此列。** 點開頭的資料夾(示範檔那種)不會被自動註冊,
+// 那裡面的元件本來就得自己 import —— 判斷用的是「這支檔案算不算元件」
+// 那一份共用判準(元件目錄底下,或頁面目錄底下那幾個元件資料夾),
+// 不在這裡自己認一次:兩份判準有一天會不一樣,而不一樣的那天沒有人會發現。
+
+/**
+ * 一段 import 路徑指向專案裡的哪一支檔案;推不出來回 null。
+ *
+ * 三種寫法:相對路徑、專案根的絕對路徑、alias。
+ * alias 先查建置設定那一份(每個專案自己定的),查不到才退回框架內建的
+ * `~` 與 `@` —— 那兩個在設定檔裡不會出現,少了這一層,
+ * 用它們寫的那幾行永遠解析不出來,而這條規則對那幾行等於不存在。
+ */
+const importTargetOf = (spec, { dir, root, aliases }) => {
+  if (spec[0] === '.') return path.resolve(dir, spec)
+  if (spec[0] === '/') return path.resolve(root, `.${spec}`)
+
+  const hit = aliases.find((one) => spec === one.alias || spec.startsWith(`${one.alias}/`))
+
+  if (hit) {
+    const rest = spec.slice(hit.alias.length).replace(/^\//, '')
+    return rest ? path.resolve(hit.root, rest) : hit.root
+  }
+
+  const builtin = /^[~@](?=\/)/.exec(spec)
+  if (!builtin) return null
+
+  return path.resolve(root, SRC_DIR, spec.slice(2))
+}
+
+const checkComponentAutoImport = ({ rel, text, root }) => {
+  if (!isSourceFile(rel)) return []
+
+  const aliases = buildAliasMap(root)
+  const dir = path.dirname(path.resolve(root, rel))
+  const issues = []
+
+  for (const { spec, index } of pathSpecsOf(text)) {
+    if (!spec?.endsWith('.vue')) continue
+
+    const target = importTargetOf(spec, { dir, root, aliases })
+    if (!target) continue
+
+    const targetRel = toRel(root, target)
+    if (!isComponentFile(targetRel)) continue
+
+    issues.push(
+      issueOf(
+        rel,
+        lineNoOf(text, index),
+        'componentAutoImport',
+        `元件不必自己 import('${spec}')—— 標籤直接寫就好,` +
+          `名字由資料夾與檔名推出來;手寫的那一行可以取任何名字,` +
+          `同一支元件在各處叫不同名字時,搜尋使用端會漏掉一半,而兩邊都能跑`
+      )
+    )
+  }
+
+  return issues
+}
+
+// --- 規則 componentEmits:綁了元件不會發的事件 -------------------------------
+//
+// 使用端 `@某事件="…"`,而那支元件的 defineEmits 裡沒有這個名字。
+//
+// **Vue 對這種情況完全不出聲。** 綁上去的東西變成一個永遠不會被呼叫的監聽器,
+// 畫面正常、建置通過、規範檢查也通過 —— 只有那個功能不動。
+//
+// 最常發生在元件改版之後:來源把 `changed` 改名成 `change`,
+// 使用端那一行還是舊名字。那不是「壞掉」,是「從此什麼都不做」,
+// 而要到有人實際點下去、發現沒反應,才會開始找原因。
+//
+// **沒寫 defineEmits 的元件整支跳過。** 那種元件把所有事件都往根元素透傳,
+// 使用端綁什麼都是正當的,報了每一個綁定都是誤報。
+//
+// **原生 DOM 事件也放行。** 綁在元件上的 `@click` 會掛到它的根元素,
+// 那是 Vue 的正常行為,而且很常用 —— 擋了會逼人把規則關掉。
+//
+// 整支要透傳事件給更內層的(轉手型元件)在檔頭標
+// `lint-component-emits-exempt: 理由` 放行。
+
+/** 綁在元件上會掛到根元素的那些 —— 它們不必出現在 defineEmits 裡 */
+const NATIVE_EVENTS = new Set([
+  'click', 'dblclick', 'contextmenu', 'mousedown', 'mouseup', 'mouseenter', 'mouseleave',
+  'mouseover', 'mouseout', 'mousemove',
+  'keydown', 'keyup', 'keypress',
+  'focus', 'blur', 'focusin', 'focusout',
+  'input', 'change', 'submit', 'reset', 'select',
+  'touchstart', 'touchend', 'touchmove', 'touchcancel',
+  'pointerdown', 'pointerup', 'pointerenter', 'pointerleave', 'pointermove', 'pointercancel',
+  'scroll', 'wheel', 'resize',
+  'dragstart', 'drag', 'dragend', 'dragenter', 'dragover', 'dragleave', 'drop',
+  'copy', 'cut', 'paste',
+  'load', 'error', 'animationend', 'transitionend',
+])
+
+/* 標籤連同它的屬性 —— 另一條規則那裡有一個只抓標籤名的,這裡需要屬性,
+   所以是兩個比對式。屬性值用引號包住的部分整段吃掉:
+   不這樣的話,`v-if="a > b"` 裡的那個大於號會被當成標籤結束。 */
+const TAG_WITH_ATTRS_RE = /<([A-Z]\w*)((?:"[^"]*"|'[^']*'|[^>])*)>/g
+const EVENT_ATTR_RE = /(?:@|v-on:)([\w:-]+(?:\.[\w-]+)*)/g
+
+const checkComponentEmits = ({ rel, text, root }) => {
+  if (!isSourceFile(rel) || !rel.endsWith('.vue')) return []
+  if (hasExemptMark(text, 'component-emits')) return []
+
+  const index = componentEmitsIndexOf(root)
+  if (!index.size) return []
+
+  const tpl = templateRangeOf(text)
+  if (!tpl) return []
+
+  const body = maskHtmlComments(tpl.body)
+  const issues = []
+
+  for (const tag of body.matchAll(TAG_WITH_ATTRS_RE)) {
+    const emits = index.get(tag[1])
+
+    /* 這個標籤不是全案認得的元件,或它沒寫 defineEmits —— 兩種都跳過。
+       這份索引只回答得了「有」:查得到就是真的有,查不到只代表沒看到
+       (第三方元件、專案自己新增的、透傳型的都在此列)。 */
+    if (!emits) continue
+
+    for (const attr of tag[2].matchAll(EVENT_ATTR_RE)) {
+      // 修飾詞(@click.stop)不是名字的一部分
+      const name = attr[1].split('.')[0]
+
+      if (emits.includes(name) || NATIVE_EVENTS.has(name)) continue
+
+      issues.push(
+        issueOf(
+          rel,
+          lineNoOf(text, tpl.offset + tag.index + tag[0].indexOf(attr[0])),
+          'componentEmits',
+          `<${tag[1]}> 不會發出 ${name} —— 它宣告的是:${emits.join('、')}。` +
+            `綁一個元件不會發的事件,Vue 不會有任何警告:那一行從此不會被呼叫,` +
+            `而畫面一切正常。元件改版把事件改名時,使用端就是這樣靜靜失效的`
+        )
+      )
+    }
+  }
+
+  return issues
+}
+
+// --- 規則 svgIconSource:圖示的來源是 svg 檔,不是抄進程式碼的座標 -----------
+//
+// 圖示的原始檔一律放 `_svg/`(原始碼根底下那一層),由建置流程掃它、
+// 產生一份 sprite,元件只引用名字(`<MSvgIcon icon="icon_calendar" />`)。
+//
+// **把圖形座標抄進 .vue 或 .js 裡的代價,要到第二次才看得到:**
+//
+//   加一個圖示要手抄一次那一長串座標,而那串東西沒有人讀得懂、也校對不了。
+//   設計改了圖之後要同時改原始檔與抄過去的那一份,漏掉一邊不會報錯 ——
+//   畫面上的圖形與設計稿對不起來,而兩邊的檔案看起來都是「有改到」。
+//   圖示一多,那支元件會膨脹成幾千行,每一次開啟都要捲過它們。
+//
+// **怎麼產生 sprite 兩種專案不一樣,但圖示放哪裡是一樣的。**
+// 有框架的那一份靠框架的設定取得 sprite 路徑與版本號;
+// 純建置工具那一份要自己掛外掛與提供路徑。差別在那一層,不在 `_svg/`。
+//
+// 真的必須把圖形寫進程式碼時(隨資料變形的圖表、一次性的裝飾),
+// 在檔頭標 `lint-svg-inline-exempt: 理由` 放行。
+
+/* svg 的 path 資料長什麼樣 —— 三個條件一起看,少了任何一個都會誤傷:
+
+     夠長             真正的圖示路徑都遠超過這個長度
+     以指令字母開頭   M 或 m
+     整串只有 path 的字元
+                      指令字母、數字、小數點、逗號、正負號、指數、空白。
+                      class 字串一定含別的字母(text、border、gray、px),
+                      這一條把它們整批排除掉
+     真的有座標       至少一組「數字接小數點或逗號再接數字」。
+                      少了這個,一串剛好只由 m、a、c 那幾個字母組成的英文也會中
+
+   只看長度與開頭是不夠的:色票的 class 字串也是 m 開頭、也夠長
+   (`m-auto --border-gray-d9 --text-green-2752 …`),而那正是實際踩到的誤報。
+   色相加取碼的命名本來就長得像座標 —— 長、有數字、有連字號。 */
+const LONG_STRING_RE = /['"]([^'"\n]{80,})['"]/g
+const SVG_PATH_ONLY_RE = /^[MmLlHhVvCcSsQqTtAaZz0-9.,\-+eE\s]+$/
+const SVG_COORD_RE = /\d[.,]\d/
+
+const checkSvgIconSource = ({ rel, text, root }) => {
+  if (!isSourceFile(rel)) return []
+
+  /* 外來的那幾層跳過 —— 整包複製進來的工具、產生器吐出來的檔案。
+     它們的圖示怎麼放不是這個團隊決定的,照著改要動別人的檔案,
+     而改了下一次整包更新就消失。一條一直報「改不了的東西」的規則,
+     最後會連同真正該改的那幾筆一起被略過。 */
+  if (isUnderAny(rel, VENDOR_DIRS)) return []
+
+  if (hasExemptMark(text, 'svg-inline')) return []
+
+  const code = maskComments(rel, text)
+
+  for (const m of code.matchAll(LONG_STRING_RE)) {
+    const value = m[1]
+
+    if (!/^[Mm]/.test(value)) continue
+    if (!SVG_PATH_ONLY_RE.test(value)) continue
+    if (!SVG_COORD_RE.test(value)) continue
+
+    /* 目錄名取專案設定裡的那一個 —— 訊息要能照著做,
+       寫死一個別的專案用不到的名字,照著做的人會建錯位置。
+       讀不到設定時退回通則的說法,不要猜一個。 */
+    const dir = readConfigValues(root).svg
+
+    /* 一支元件裡通常是一整批,逐筆報會洗掉畫面上其他的違規 ——
+       報第一筆就夠了,那一支要做的是整支換掉,不是改某一行。 */
+    return [
+      issueOf(
+        rel,
+        lineNoOf(text, m.index),
+        'svgIconSource',
+        `內嵌了 svg 的圖形座標 —— 圖示的原始檔放${dir ? ` ${dir}/` : '圖示的原始檔目錄'},` +
+          `由建置流程產生一份 sprite,元件只引用名字。抄進程式碼的話,` +
+          `加一支圖示要手抄一次那一長串座標,而設計改圖之後要兩邊都改 ——` +
+          `漏掉一邊不會報錯,只是畫面上的圖形與設計稿對不起來`
+      ),
+    ]
+  }
+
+  return []
 }
 
 // --- 規則 deprecated:已淘汰的寫法 -------------------------------------------
@@ -456,7 +874,12 @@ const checkDeprecated = ({ rel, text }) => {
     // route / router 一律用 useRoute() / useRouter()
     if (/\binject\s*\(\s*['"]rout(?:e|er)['"]\s*\)/.test(line)) {
       issues.push(
-        issueOf(rel, i + 1, 'deprecated', `inject('route' / 'router') 已淘汰 —— 改用 useRoute() / useRouter()`)
+        issueOf(
+          rel,
+          i + 1,
+          'deprecated',
+          `inject('route' / 'router') 已淘汰 —— 改用 useRoute() / useRouter()`
+        )
       )
     }
 
@@ -1340,7 +1763,9 @@ export const onSortImports = (text, rel) => {
   const flush = (items, from, to) => {
     if (items.length < 2) return
 
-    const sorted = [...items].sort((a, b) => a.group - b.group || items.indexOf(a) - items.indexOf(b))
+    const sorted = [...items].sort(
+      (a, b) => a.group - b.group || items.indexOf(a) - items.indexOf(b)
+    )
     if (sorted.every((item, i) => item === items[i])) return
 
     const rebuilt = sorted.flatMap((item) => lines.slice(item.start, item.end + 1))
@@ -1399,30 +1824,82 @@ export const onSortImports = (text, rel) => {
 // (通用的錨點、圖片被十幾個地方用),而「為了驅動這支元件而存在的容器」
 // 與「剛好用到它的容器」從程式碼上分不出來。猜錯的方向是把一堆使用端
 // 寫進搬移清單,照著複製會把不相干的檔案一起搬走,比漏掉更難收拾。
+//
+// **轉場的樣式檔算,而且是漏掉最不容易發現的那一種。** 元件寫
+// `<Transition name="popup-fade">`,而那個名字的樣式常常收在一支共用檔案裡,
+// 由進入點一次載入,不在元件的資料夾底下。沒有一起複製過去的話,
+// 元件**不會報錯也不會少畫面** —— 只是切換的當下沒有漸變,直接跳。
+//
+// 這一類算得準,所以工具自己算:名字是寫在畫面區段裡的,樣式那一側定義的
+// 就是同一個名字接上框架的後綴,兩邊對得起來,沒有「是搭檔還是剛好用到」的模糊地帶。
 
 /** 檔頭清單的起頭;後面接的每一個看起來像檔案路徑的字都算一項 */
 const DEP_MARK = 'component-deps'
-const DEP_PATH_RE = /[\w.@/-]+\.(?:m?js|cjs|ts|vue)/g
+const DEP_PATH_RE = /[\w.@/-]+\.(?:m?js|cjs|ts|vue|css)/g
 
 /** use{名稱}Store / use{名稱}Actions 的呼叫 */
 const STORE_CALL_RE = /\b(use[A-Z]\w*(?:Store|Actions))\s*\(/g
 
 /**
- * 這支元件自己讀了哪幾支 store / actions —— 複製它的時候那幾支要一起帶走。
+ * `<Transition>` 與 `<TransitionGroup>` 用到的轉場名字。
  *
- * 「匯出名 → 它在哪一支檔案」的索引收在 shared.mjs 一份 ——
- * 取值那條規則也要問同一件事(這個屬性在 store 那一側長什麼樣子),
+ * 兩種寫法都讀:直接寫死的 `name="popup-fade"`,以及動態綁定裡引號內的字面
+ * (`:name="isPopup ? 'a' : 'b'"` 讀得出 a 與 b 兩個)。後者一樣要算 ——
+ * 一支元件的轉場全部寫在三元裡是常見的,只認寫死的話那種元件一個都算不到。
+ *
+ * 動態綁定裡**算出來的**名字(接變數、用樣板字串拼)讀不出來,那種就跳過;
+ * 猜一個的話會把不相干的樣式檔寫進搬移清單。
+ */
+const TRANSITION_TAG_RE = /<Transition(?:Group)?\b[^>]*?>/g
+const NAME_ATTR_RE = /(:?)name="([^"]*)"/
+const NAME_LITERAL_RE = /'([\w-]+)'/g
+
+const transitionNamesOf = (text) => {
+  const names = new Set()
+
+  for (const [tag] of text.matchAll(TRANSITION_TAG_RE)) {
+    const attr = NAME_ATTR_RE.exec(tag)
+    if (!attr) continue
+
+    const [, dynamic, value] = attr
+
+    if (!dynamic) {
+      if (/^[\w-]+$/.test(value)) names.add(value)
+      continue
+    }
+
+    for (const m of value.matchAll(NAME_LITERAL_RE)) names.add(m[1])
+  }
+
+  return names
+}
+
+/**
+ * 這支元件複製的時候要一起帶走哪幾支檔案 —— 兩類:
+ *
+ *   store / actions   它自己讀的那幾支,不帶走的話資料永遠是空的
+ *   轉場樣式          它用到的轉場定義在哪,不帶走的話切換沒有漸變
+ *
+ * 兩份索引都收在 shared.mjs 各一份 —— 取值那條規則也要問 store 那一側的事,
  * 各建一份的話同一個專案會被走訪兩次,而且其中一份改了判準另一份不會跟著。
  *
  * 回傳排序過的相對路徑,規則與指令印的是同一份。
  */
 export const componentDepsOf = (root, rel, text) => {
   const { files: stores } = storeIndexOf(root)
+  const transitions = transitionStyleIndexOf(root)
   const deps = new Set()
 
   for (const m of text.matchAll(STORE_CALL_RE)) {
     const file = stores.get(m[1])
     if (file) deps.add(file)
+  }
+
+  for (const name of transitionNamesOf(text)) {
+    const file = transitions.get(name)
+
+    /* 定義在這支元件自己的樣式裡時索引查不到,那本來就跟著元件走,不必列。 */
+    if (file && !file.startsWith(`${path.dirname(rel)}/`)) deps.add(file)
   }
 
   return [...deps].sort()
@@ -1450,9 +1927,15 @@ const checkComponentDeps = ({ rel, text, root }) => {
 
   const missing = actual.filter((file) => !listed.includes(file))
 
-  /* 多列的只看 store 這一類 —— 那一類工具算得準,列了一支已經不讀的就是過期。
-     其他項目(掛載用的容器、要一起搬的版型)是人自己補的,工具沒有立場說它多餘。 */
-  const stale = listed.filter((file) => file.startsWith(`${STORE_DIR}/`) && !actual.includes(file))
+  /* 多列的只看工具自己算得準的那兩類:store 與轉場樣式檔。列了一支已經不讀的
+     store、或已經不用的轉場,就是過期。其他項目(掛載用的容器、要一起搬的版型)
+     是人自己補的,工具沒有立場說它多餘。 */
+  const transitionFiles = new Set(transitionStyleIndexOf(root).values())
+
+  const stale = listed.filter(
+    (file) =>
+      (file.startsWith(`${STORE_DIR}/`) || transitionFiles.has(file)) && !actual.includes(file)
+  )
 
   if (!missing.length && !stale.length) return []
 
@@ -1464,7 +1947,7 @@ const checkComponentDeps = ({ rel, text, root }) => {
         rel,
         line,
         'componentDeps',
-        `檔頭的 ${DEP_MARK} 列了 ${stale.join('、')},但這支元件已經不讀它了 —— 清單過期,拿掉那幾行`
+        `檔頭的 ${DEP_MARK} 列了 ${stale.join('、')},但這支元件已經不用它了 —— 清單過期,拿掉那幾行`
       ),
     ]
   }
@@ -1474,9 +1957,54 @@ const checkComponentDeps = ({ rel, text, root }) => {
       rel,
       line,
       'componentDeps',
-      `這支元件讀了 store,複製它的時候那幾支要一起帶走 —— 檔頭寫一段 ${DEP_MARK} 註解,列出:${actual.join('、')}` +
-        (stale.length ? `(${stale.join('、')} 已經不讀了,拿掉)` : '') +
-        ';只複製元件資料夾的話,搬過去不會報錯,只是那個 store 不存在,資料永遠是空的'
+      `複製這支元件的時候有幾支檔案要一起帶走 —— 檔頭寫一段 ${DEP_MARK} 註解,列出:${actual.join('、')}` +
+        (stale.length ? `(${stale.join('、')} 已經不用了,拿掉)` : '') +
+        ';只複製元件資料夾的話搬過去不會報錯,而是 store 不存在、資料永遠是空的,' +
+        '或是轉場的樣式沒跟過去、切換的當下直接跳沒有漸變'
+    ),
+  ]
+}
+
+// --- 規則 transitionShared:轉場的樣式一律放共用檔 ----------------------------
+//
+// **寫轉場之前先去共用的轉場樣式檔看有沒有現成的。** 淡入淡出、縮放、滑入、
+// 高度展開 —— 這幾種每個專案都會用到好幾次,而寫在自己元件裡的那一份,
+// 別人找不到也不會想到要找。於是同一種動畫被實作第二次、第三次,
+// 秒數各差一點,畫面上就出現「明明都是淡入,這裡比較快」的不一致。
+//
+// **沒有適合的就在共用檔新增一組,而且名字要取得夠通用。** 名字照效果取
+// (fade / zoom / slide-up),不照元件或位置取(popup-fade / tooltip-content /
+// backdrop)—— 綁了元件或角色的名字,下一個人即使看到了也不敢用:
+// 他要做的不是彈窗,而那個名字寫著 popup。
+//
+// 這條與「元件的樣式放在元件自己的資料夾」不衝突,兩者分的是不同的東西:
+// 長相(顏色、間距、字級)屬於那支元件,而動作(怎麼進場、怎麼離場)是跨元件的詞彙。
+//
+// 判準只看「這份樣式有沒有定義轉場」,不看它長什麼樣 ——
+// 動畫內容是人要決定的,工具只認得出位置放錯了。
+
+const checkTransitionShared = ({ rel, text }) => {
+  if (!rel.startsWith(`${COMPONENTS_DIR}/`)) return []
+  if (!/\.(css|vue)$/.test(rel)) return []
+
+  /* .vue 只看樣式區段 —— 畫面區段寫的 name 是「用」不是「定義」,
+     而那正是這條要人去做的事。 */
+  const styles = rel.endsWith('.vue')
+    ? [...text.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join('\n')
+    : text
+
+  const names = [...transitionNamesInCss(styles)].sort()
+  if (!names.length) return []
+
+  return [
+    issueOf(
+      rel,
+      lineNoOf(text, text.indexOf(names[0])),
+      'transitionShared',
+      `這裡定義了轉場(${names.join('、')})—— 搬到共用的轉場樣式檔,` +
+        '別的元件才找得到、也才不會有人把同一種動畫再實作一次;' +
+        '共用檔裡已經有同樣效果的話直接用那一組,名字照效果取(fade / zoom / slide-up),' +
+        '不要取成 popup-fade 這種綁元件、或 backdrop 這種綁位置的名字'
     ),
   ]
 }
@@ -1533,13 +2061,139 @@ const checkSpacerElement = ({ rel, text }) => {
 
   return [...empty, ...between]
     .sort((a, b) => a.index - b.index)
-    .map(({ index, detail }) => issueOf(rel, lineNoOf(text, tpl.offset + index), 'spacerElement', detail))
+    .map(({ index, detail }) =>
+      issueOf(rel, lineNoOf(text, tpl.offset + index), 'spacerElement', detail)
+    )
+}
+
+// --- 規則 setClassDefault:setClass 不給預設值 --------------------------------
+//
+// `setClass` 是使用端用來加 class 的入口 —— **樣式由使用端決定,元件不先替它決定**。
+//
+// 元件給了預設值的話,使用端傳進來的那一份是「附加在後面」,不是取代:
+// 兩份 class 同時存在,誰贏要看產出的先後順序。想拿掉元件那一份的人
+// 會發現怎麼傳都蓋不掉,最後只能寫一個更強的選擇器或加 `!` —— 那是往上疊,
+// 而不是把決定權交回去。
+//
+// **列出鍵、值留空字串是可以的**,那是在告訴使用端「這支元件有哪幾個位置
+// 可以傳 class」—— 介面說明,不是樣式決定。拿掉的話模板裡的 `setClass.header`
+// 會變成 undefined:畫面不會壞,但從程式上看不出有哪幾個位置。
+//
+// 元件自己的版型寫在它的樣式模組裡(那是 `.m-xxx` 那一組 class),
+// 不是寫進 setClass 的預設值。
+
+/** `setClass` 的預設物件 —— `computed` 裡那一段 */
+const SET_CLASS_BLOCK_RE = /setClass\s*=\s*computed\([\s\S]{0,800}?\n\}\)/g
+
+/** 物件裡的 `鍵: '值'`;值是空字串的不算(那是介面說明) */
+const SET_CLASS_ENTRY_RE = /^\s{2,}(\w+):\s*(['"])([^'"]+)\2/gm
+
+const checkSetClassDefault = ({ rel, text }) => {
+  if (!isSourceFile(rel)) return []
+
+  const issues = []
+
+  for (const block of text.matchAll(SET_CLASS_BLOCK_RE)) {
+    for (const m of block[0].matchAll(SET_CLASS_ENTRY_RE)) {
+      issues.push(
+        issueOf(
+          rel,
+          lineNoOf(text, block.index + m.index),
+          'setClassDefault',
+          `setClass 的 ${m[1]} 給了預設值('${m[3]}')—— 樣式由使用端決定;` +
+            `元件先給一份的話,使用端傳進來的是附加在後面,想拿掉那一份會發現怎麼傳都蓋不掉。` +
+            `元件自己的版型寫進它的樣式模組,這裡留空字串就好(那是在列出有哪幾個位置可以傳)`
+        )
+      )
+    }
+  }
+
+  return issues
+}
+
+// --- 規則 eventHandler:事件一律接一支 onXxx 函式 -----------------------------
+//
+// 畫面區段的事件綁定,值只能是一支 onXxx 函式(可以帶參數)。
+//
+//   合規   @delete="onDelete"
+//   合規   @click="onFieldPointerdown($event)"    帶參數也可以,位置資訊得傳進去
+//
+//   不合規 @delete="emits('delete')"              邏輯寫在畫面上
+//   不合規 @click="keyword = ''"                  邏輯寫在畫面上
+//   不合規 @click.self="isPopup ? onX() : null"   邏輯寫在畫面上
+//
+// **畫面區段是「長什麼樣子」,不是「做什麼事」。** 把行為寫在屬性值裡的話:
+//
+//   要知道這個按鈕做了什麼,得在一行 html 屬性裡讀一段程式
+//   那段邏輯長出第二步時(送出前先驗證、關閉前先確認)沒有地方可以加
+//   同一件事在兩個地方各寫一次,改的時候會漏掉一邊
+//
+// 收進 script 之後,畫面區段只剩「這個事件接到哪一支函式」,一眼看完;
+// 而那支函式要加第二步、要被第二個地方呼叫,都有地方放。
+//
+// 這條只看「是不是一支 onXxx」,不管那支函式裡寫了什麼 ——
+// 只有一行 emit 的包裝也算合規,那正是它要的形狀。
+
+/** 事件綁定:`@事件="值"` 與 `v-on:事件="值"`,含修飾詞(`@click.self`) */
+const EVENT_BINDING_RE = /(?:@|v-on:)([\w.-]+)\s*=\s*"([^"]*)"/g
+
+/** 合規的值:一支 onXxx,後面可以接參數 */
+const HANDLER_NAME_RE = /^on[A-Z]\w*(\s*\([^)]*\))?$/
+
+const checkEventHandler = ({ rel, text }) => {
+  if (!rel.endsWith('.vue')) return []
+
+  const tpl = templateRangeOf(text)
+  if (!tpl) return []
+
+  const body = maskHtmlComments(tpl.body)
+  const issues = []
+
+  for (const m of body.matchAll(EVENT_BINDING_RE)) {
+    const [, event, raw] = m
+    const value = raw.trim()
+
+    // 空值(`@click=""`)不在這條的範圍 —— 那是別的問題
+    if (!value) continue
+    if (HANDLER_NAME_RE.test(value)) continue
+
+    /* 建議的名字優先取「它實際做的事」——`$emit('toggle')` 建議 onToggle,
+       而不是跟著 @click 取 onClick。同一個元素上好幾個 @click 各做不同的事時,
+       全部建議 onClick 的話,照著改會撞出一堆同名的函式。 */
+    const emitted = value.match(/^\$?emits?\s*\(\s*'([^']+)'/)?.[1]
+
+    /* 修飾詞不進函式名 —— `@keydown.enter="emits('keydown.enter')"` 取到的
+       事件名帶著那一段,照著組會建議 onKeydown.enter,那不是合法的函式名。
+       事件名本身也可能含點(emit 的名字就叫 keydown.enter),一起只取第一段。 */
+    const from = (emitted ?? event).split('.')[0]
+    const suggested = `on${from.replace(/^./, (c) => c.toUpperCase())}`
+
+    issues.push(
+      issueOf(
+        rel,
+        lineNoOf(text, tpl.offset + m.index),
+        'eventHandler',
+        `@${event} 接的不是一支函式(${value.length > 40 ? `${value.slice(0, 40)}…` : value})—— ` +
+          `把它收進 script 寫成 ${suggested},畫面區段只留函式名;` +
+          `寫在屬性值裡的話,要知道這裡做了什麼得在一行屬性中讀程式,` +
+          `而那段邏輯長出第二步時沒有地方可以加`
+      )
+    )
+  }
+
+  return issues
 }
 
 export const CODE_CHECKS = [
+  checkEventHandler,
+  checkSetClassDefault,
   checkComponentDeps,
+  checkTransitionShared,
   checkSpacerElement,
   checkImportAlias,
+  checkComponentAutoImport,
+  checkComponentEmits,
+  checkSvgIconSource,
   checkDeprecated,
   checkImportOrder,
   checkVueFileName,
@@ -1560,9 +2214,15 @@ export const CODE_RULE_TITLE = {
   componentFolder: '元件沒有自己的資料夾',
   viewFolder: '頁面目錄的資料夾命名',
   importAlias: 'import 沒有使用 alias',
+  componentAutoImport: '元件自己寫了 import',
+  componentEmits: '綁了元件不會發的事件',
+  svgIconSource: '圖示的座標抄進了程式碼',
   deprecated: '已淘汰的寫法',
   spacerElement: '用空元素當間隔',
   componentDeps: '元件的搭檔沒有列在檔頭',
+  eventHandler: '事件沒有接一支函式',
+  setClassDefault: 'setClass 給了預設值',
+  transitionShared: '轉場的樣式寫在元件裡',
 }
 
 export const CODE_RULE_HINT = {
@@ -1573,7 +2233,17 @@ export const CODE_RULE_HINT = {
   componentFolder: '分類資料夾底下不要直接放 .vue,建一個自己的資料夾',
   viewFolder: '資料夾首字小寫(那是網址的一段);底線資料夾只能用設定裡列的那幾個名字',
   importAlias: '離開自己資料夾的相對路徑改用 @ alias',
+  componentAutoImport:
+    '元件由建置工具自動註冊,標籤直接寫就好 —— 名字由資料夾與檔名推出來,手寫的那一行可以取任何名字,同一支元件在各處叫不同名字時搜尋會漏掉一半;掃描範圍外的(點開頭資料夾)不在此列',
+  componentEmits:
+    '綁的事件要在那支元件的 defineEmits 裡 —— 綁一個它不發的,Vue 一聲都不吭,那一行從此不會被呼叫而畫面正常;原生事件與沒宣告 emits 的元件不在此列',
+  svgIconSource:
+    '圖示的原始檔放 _svg/,由建置流程產生 sprite,元件只引用名字 —— 抄進程式碼的話,加一支要手抄一次座標,改圖要兩邊都改而漏掉不會報錯;必須內嵌時檔頭標 lint-svg-inline-exempt',
   deprecated: 'apiParams / inject(route) 已淘汰;actions 不留 console.log、不 bare 透傳',
   spacerElement: '空白在編譯時就被移除了 —— 間隔用 css 的 gap 或 margin',
   componentDeps: '複製這支元件時要一起帶走的東西,列在它的檔頭(npm run deps 印得出來)',
+  transitionShared: '轉場放共用的轉場樣式檔,先看有沒有現成的;要新增就照效果命名,別人才用得到',
+  eventHandler: '畫面區段只留函式名,行為收進 script —— 那段邏輯長出第二步時才有地方可以加',
+  setClassDefault:
+    'setClass 只列鍵、值留空 —— 樣式由使用端決定;元件先給一份的話,使用端傳的是附加在後面,想拿掉會發現怎麼傳都蓋不掉',
 }

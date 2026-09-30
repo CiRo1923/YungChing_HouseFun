@@ -20,7 +20,7 @@ import { execFile } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import fs from 'node:fs'
 import path from 'node:path'
-import { SCANNABLE_RE } from './project-config.mjs'
+import { SCANNABLE_RE } from './shared.mjs'
 
 /**
  * 一次存檔常常會觸發好幾個 watcher 事件 —— prettier 的 formatOnSave、eslint 的

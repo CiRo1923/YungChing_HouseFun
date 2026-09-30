@@ -8,77 +8,91 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
-// re-export 不會在這支檔案的作用域產生綁定 —— 這裡自己要用到的常數必須另外 import
-import {
-  ACTIONS_DIR_NAME,
-  COMPONENT_DIRS,
-  COMPONENT_FOLDERS,
-  CONVENTION_RULES_DIR,
-  CONVENTION_SKILLS_DIR,
-  CSS_MODULES_DIR,
-  MODULE_CSS_DIR_NAME,
-  PROJECT_DOCS_DIR,
-  SCANNABLE_RE,
-  SKIP_DIRS,
-  SRC_PREFIX,
-  STORE_DIR,
-  TOOLING_PREFIXES,
-  VIEW_RESOURCE_DEPTH,
-  VIEWS_DIR,
-} from './project-config.mjs'
+/* 設定整包取進來,一項一項轉出去 —— **不要逐項 named import**。
+ *
+ * 逐項寫的話,來源改了一個設定項的名字(或新增一項而某個專案的設定檔還沒有),
+ * 拿到這套工具的專案會在**模組解析階段**就失敗:
+ * `SyntaxError: does not provide an export named …`,一行程式碼都還沒執行。
+ *
+ * 那個失敗會讓整套檢查一條都跑不了 —— 包括「設定檔少了什麼」那一條規則
+ * (configItem)自己,而錯誤訊息看不出是設定檔的問題,
+ * 看到的人只知道工具壞了。
+ *
+ * 整包取值不會這樣:缺的那一項拿到 undefined,名字先記下來,
+ * 由前提檢查那一層講出「設定檔缺少哪幾項」。
+ */
+import * as projectConfig from './project-config.mjs'
 
-export {
-  ABSOLUTE_PATH_SCOPE,
-  ACTIONS_DIR_NAME,
-  API_DIR,
-  API_SPEC_DIR,
-  DEEP_CLONE_HELPER,
-  API_NAMING_IGNORED_SEGMENTS,
-  BREAKPOINTS,
-  BREAKPOINT_SCREENS,
-  BUILD_CONFIG_FILES,
-  COLOR_CSS_DIR,
-  COMPONENTS_DIR,
-  COMPONENT_DIRS,
-  COMPONENT_FOLDERS,
-  CONVENTION_DOCS_DIR,
-  CONVENTION_RULES_DIR,
-  CONVENTION_SKILLS_DIR,
-  CSS_MODULES_DIR,
-  FORM_GROUP_VALIDATOR,
-  FRAMEWORKS,
-  GENERATED_FILES,
-  IMPORT_ORDER_GROUPS,
-  IS_FILE_BASED_ROUTING,
-  MODULE_CSS_DIR_NAME,
-  PARALLEL_AWAIT_HELPER,
-  POPUP_DIR_NAME,
-  WRITING_STYLE_SCOPE,
-  PLAIN_TEXT_EXCLUDED_DIRS,
-  PROJECT_CONFIG_FILES,
-  PROJECT_DOCS_DIR,
-  PROJECT_NAMES,
-  PROJECT_NAME_SCOPE,
-  SCANNABLE_EXTENSIONS,
-  SCANNABLE_RE,
-  SCAN_TARGETS,
-  SHARED_API_FILE,
-  SHARED_MODULE_VARIABLES,
-  SKIP_DIRS,
-  SOURCE_PROJECT_NAME,
-  STYLE_CONFIG_FILES,
-  SRC_DIR,
-  STANDALONE_APIS,
-  STANDALONE_STORES,
-  STORE_DIR,
-  STORE_SETUP_CALLS,
-  TAILWIND_THEME_OVERRIDES,
-  TOOLING_PREFIXES,
-  VIEW_RESOURCE_DEPTH,
-  VIEW_UNDERSCORE_FOLDERS,
-  VIEWS_DIR,
-} from './project-config.mjs'
+/** 這個專案的設定檔少了哪幾項 —— 由前提檢查讀它 */
+export const MISSING_CONFIG_ITEMS = []
 
+const configOf = (name) => {
+  if (!(name in projectConfig)) MISSING_CONFIG_ITEMS.push(name)
+
+  return projectConfig[name]
+}
+
+export const PROJECT_FRAMEWORK = configOf('PROJECT_FRAMEWORK')
+export const VIEWS_DIR = configOf('VIEWS_DIR')
+export const VIEW_RESOURCE_DEPTH = configOf('VIEW_RESOURCE_DEPTH')
+export const STORE_DIR = configOf('STORE_DIR')
+export const ACTIONS_DIR_NAME = configOf('ACTIONS_DIR_NAME')
+export const MODULE_CSS_DIR_NAME = configOf('MODULE_CSS_DIR_NAME')
+export const API_DIR = configOf('API_DIR')
+export const API_SPEC_DIR = configOf('API_SPEC_DIR')
+export const COMPONENTS_DIR = configOf('COMPONENTS_DIR')
+export const IMPORT_ORDER_GROUPS = configOf('IMPORT_ORDER_GROUPS')
+export const COMPONENT_DIRS = configOf('COMPONENT_DIRS')
+export const COMPONENT_FOLDERS = configOf('COMPONENT_FOLDERS')
+export const VIEW_UNDERSCORE_FOLDERS = configOf('VIEW_UNDERSCORE_FOLDERS')
+export const POPUP_DIR_NAME = configOf('POPUP_DIR_NAME')
+export const CSS_MODULES_DIR = configOf('CSS_MODULES_DIR')
+export const SHARED_MODULE_VARIABLES = configOf('SHARED_MODULE_VARIABLES')
+export const COLOR_CSS_DIR = configOf('COLOR_CSS_DIR')
+export const BREAKPOINTS = configOf('BREAKPOINTS')
+export const BREAKPOINT_SCREENS = configOf('BREAKPOINT_SCREENS')
+export const SRC_DIR = configOf('SRC_DIR')
+export const SKIP_DIRS = configOf('SKIP_DIRS')
+export const STORE_SETUP_CALLS = configOf('STORE_SETUP_CALLS')
+export const STORE_INSTANCE_FILE = configOf('STORE_INSTANCE_FILE')
+export const STANDALONE_STORES = configOf('STANDALONE_STORES')
+export const STANDALONE_APIS = configOf('STANDALONE_APIS')
+export const SHARED_API_FILE = configOf('SHARED_API_FILE')
+export const API_NAMING_IGNORED_SEGMENTS = configOf('API_NAMING_IGNORED_SEGMENTS')
+export const PARALLEL_AWAIT_HELPER = configOf('PARALLEL_AWAIT_HELPER')
+export const FORM_GROUP_VALIDATOR = configOf('FORM_GROUP_VALIDATOR')
+export const POPUP_TAGS = configOf('POPUP_TAGS')
+export const BUILTIN_POPUP_IDS = configOf('BUILTIN_POPUP_IDS')
+export const DEEP_CLONE_HELPER = configOf('DEEP_CLONE_HELPER')
+export const PROJECT_NAMES = configOf('PROJECT_NAMES')
+export const SOURCE_PROJECT_NAME = configOf('SOURCE_PROJECT_NAME')
+export const COLOR_CSS_PREFIX = configOf('COLOR_CSS_PREFIX')
+export const COLOR_HUE_SOURCE = configOf('COLOR_HUE_SOURCE')
+export const COLOR_HUES = configOf('COLOR_HUES')
+export const COLOR_NAME_SEPARATOR = configOf('COLOR_NAME_SEPARATOR')
+export const COLOR_RGB_SUFFIX = configOf('COLOR_RGB_SUFFIX')
+export const COLOR_SUFFIX_PICK = configOf('COLOR_SUFFIX_PICK')
+export const STYLE_CONFIG_FILES = configOf('STYLE_CONFIG_FILES')
+export const TAILWIND_THEME_OVERRIDES = configOf('TAILWIND_THEME_OVERRIDES')
+export const SCANNABLE_EXTENSIONS = configOf('SCANNABLE_EXTENSIONS')
+export const SCANNABLE_RE = configOf('SCANNABLE_RE')
+export const PROJECT_DOCS_DIR = configOf('PROJECT_DOCS_DIR')
+export const GENERATED_FILES = configOf('GENERATED_FILES')
+export const VENDOR_DIRS = configOf('VENDOR_DIRS')
+export const CONVENTION_RULES_DIR = configOf('CONVENTION_RULES_DIR')
+export const CONVENTION_SKILLS_DIR = configOf('CONVENTION_SKILLS_DIR')
+export const CONVENTION_DOCS_DIR = configOf('CONVENTION_DOCS_DIR')
+export const FRAMEWORKS = configOf('FRAMEWORKS')
+export const IS_FILE_BASED_ROUTING = configOf('IS_FILE_BASED_ROUTING')
+export const IS_SRC_PROJECT_ROOT = configOf('IS_SRC_PROJECT_ROOT')
+export const SRC_PREFIX = configOf('SRC_PREFIX')
+export const TOOLING_PREFIXES = configOf('TOOLING_PREFIXES')
+export const SCAN_TARGETS = configOf('SCAN_TARGETS')
+export const PROJECT_NAME_SCOPE = configOf('PROJECT_NAME_SCOPE')
+export const ABSOLUTE_PATH_SCOPE = configOf('ABSOLUTE_PATH_SCOPE')
+export const WRITING_STYLE_SCOPE = configOf('WRITING_STYLE_SCOPE')
+export const BUILD_CONFIG_FILES = configOf('BUILD_CONFIG_FILES')
+export const PROJECT_CONFIG_FILES = configOf('PROJECT_CONFIG_FILES')
 /**
  * 統一的違規格式 —— 五層守門共用同一份輸出邏輯,靠的就是這個形狀。
  *
@@ -151,6 +165,26 @@ const maskBy = (text, re) => text.replace(re, (m) => m.replace(/[^\n]/g, ' '))
  * 文字寫法那幾條檢查的正是註解本身)。
  */
 export const maskCssComments = (text) => maskBy(text, /\/\*[\s\S]*?\*\//g)
+
+/**
+ * 所有 import 寫法:具名匯入、整包匯入、動態 import。
+ *
+ * **放在這裡是因為有兩條規則要用**(哪些檔案不可以 import api、
+ * 相對路徑該不該改成 alias)。各自寫一份的話,多認一種寫法時只會改到其中一邊 ——
+ * 另一條從此漏掉那種寫法,而漏掉不會報錯,只是那種 import 再也不被檢查。
+ *
+ * 比對式帶 g,用之前要注意 lastIndex(用 matchAll 或每次重新建立)。
+ */
+export const IMPORT_RE =
+  /(?:import|export)\s[^'"]*?from\s*['"]([^'"]+)['"]|import\s*['"]([^'"]+)['"]|import\s*\(\s*['"]([^'"]+)['"]\s*\)/g
+
+/**
+ * 箭頭函式的宣告:`const 名字 = (參數) => {`。
+ *
+ * **放在這裡是因為有兩條規則要用**(頁面包裝 action 的命名、action 自己的形狀)。
+ * 兩邊各寫一份的話,函式的寫法多一種變化時只會補到其中一邊。
+ */
+export const ARROW_FN_RE = /const\s+(\w+)\s*=\s*(?:async\s*)?\([^)]*\)\s*=>\s*\{/g
 
 /** 遮蔽 template 的 HTML 註解 */
 export const maskHtmlComments = (text) => maskBy(text, /<!--[\s\S]*?-->/g)
@@ -489,8 +523,14 @@ export const isComponentFile = (rel) => {
  * (畫面、樣式、變數)在同一個資料夾,複製到別的專案時不會漏掉半邊,
  * 刪掉元件時也不會在別的目錄留下沒有人用的樣式。
  *
- * 判斷只看位置,不看檔名 —— 一個模組拆幾支、各自叫什麼是那個模組自己的事
+ * **這個判斷只看位置**,不看檔名 —— 一個模組拆幾支是那個模組自己的事
  * (版型一支、變數一支、子元件各一支都可以)。
+ *
+ * **但檔名不是完全自由的:變數檔一律以 `variables.css` 結尾。**
+ * 那不是這裡管的,是載入順序那條規則(moduleOrder)靠這個名字認出
+ * 「哪幾支是變數檔」—— 名字不對的話它會被當成版型檔,
+ * 而「變數要先定義完、版型才取用」這件事對它就不再檢查。
+ * 取用當下變數還沒定義,吃到的是空值,而畫面上只是那一段樣式沒有生效。
  */
 export const isModuleCss = (rel) =>
   rel.endsWith('.css') &&
@@ -542,8 +582,117 @@ export const moduleFolderOf = (rel) => {
   return at > 0 ? segments[at - 1] : null
 }
 
+/**
+ * 變數的定義:`--x:` 與 `'--x':` 兩種形狀。
+ *
+ * 第二個捕獲是它的值(到分號或區塊結尾為止)。
+ *
+ * 三個地方問這一件事:哪些變數被定義過、某個變數裝的是長度還是顏色、
+ * 以及「這個專案在來源的變數檔裡多加了什麼」。各寫一份比對式的話,
+ * 多認一種寫法時只會改到其中一邊,而漏掉的那幾支從此不被算進去。
+ */
+export const VAR_DEFINE_RE = /(--[\w-]+)['"]?\s*:\s*([^;}]*)/g
+
+/**
+ * 讀一份封存下來的清單(來源產生、跟著複製出去的那種 json)。
+ *
+ * 檔案不在、或內容壞掉時一律回 null —— 呼叫端看到 null 就整條不比對。
+ * 那是刻意的:還沒封存過的專案(剛接手的舊專案)一律報「每一項都不一致」
+ * 只會讓人把整條規則關掉,而清單壞掉時報出來的每一筆也都是假的。
+ *
+ * 兩種清單都走這一份(共用規則的指紋、元件介面的名單)——
+ * 各寫一次的話,其中一邊改了「壞掉時怎麼辦」,另一邊還是舊的,
+ * 而兩條規則會在同一種情況下表現不一樣。
+ */
+export const readSealedJson = (root, relFile) => {
+  const abs = path.join(root, ...relFile.split('/'))
+  if (!fs.existsSync(abs)) return null
+
+  try {
+    return JSON.parse(fs.readFileSync(abs, 'utf8'))
+  } catch {
+    return null
+  }
+}
+
+/** 寫一份封存清單,格式與上面那支讀的一致(尾端留一個換行,diff 才乾淨) */
+export const writeSealedJson = (root, relFile, data) => {
+  const abs = path.join(root, ...relFile.split('/'))
+
+  fs.writeFileSync(abs, `${JSON.stringify(data, null, 2)}\n`, 'utf8')
+}
+
 /** mForm → m-form;mDatePicker → m-date-picker */
 export const toKebab = (name) => name.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase()
+
+/**
+ * 方括號寫法同時有「長度」與「顏色」兩種版本的那幾個 utility。
+ *
+ *   text-[--gray-6b]   color        text-[16px]    font-size
+ *   border-[--white]   border-color border-[2px]   border-width
+ *   outline-[--white]  outline-color outline-[2px] outline-width
+ *   ring-[--white]     ring-color   ring-[2px]     ring-width
+ *
+ * **值寫成變數時建置工具分不出是哪一種,一律當成顏色**,
+ * 所以長度那一邊要在值前面標出型別(`text-[length:--x]`)。
+ *
+ * 這份名單有兩個地方在問:「這個值該不該標型別」,
+ * 以及「同一個斷點下這兩個 class 是不是蓋掉同一個屬性」
+ * (`text-[--紅色]` 與 `text-[18px]` 是兩個屬性,不是覆寫)。
+ * 名單只有這一份 —— 兩邊各列一次的話,加了一個而另一邊沒加,
+ * 那一個在其中一條規則裡會開始判錯,而兩種判錯都沒有徵兆。
+ *
+ * **`divide-` 不在名單裡。** 它只有顏色版本:`divide-[2px]` 產出的是
+ * `border-color: 2px`(無效的值),標了 `divide-[length:--x]` 也一樣是
+ * `border-color` —— 寬度要寫成 `divide-x-[2px]`,那是另一個 utility 名。
+ * 放進來的話會報「這裡該標 length:」,而照著標了完全沒有作用。
+ */
+export const DUAL_TYPE_UTILITIES = new Set(['text', 'border', 'outline', 'ring'])
+
+/**
+ * 去掉 variant 前綴(`p:` / `m:` / `hover:` / `group-hover:` …),回傳 utility 本體。
+ *
+ * **只切方括號外的冒號** —— 值裡面也會有:`text-[length:--x]` 的型別提示、
+ * `bg-[url(a:b)]` 的網址。連值一起切的話那個 class 會被切成 `--x]`,
+ * 認不出 utility 是什麼,於是**照著規範標了型別的那些整批不被檢查**。
+ *
+ * 好幾條規則都要問「這個 class 的前綴到哪裡為止」:是不是 tailwind 的 utility、
+ * 斷點有沒有蓋掉基底、該不該標型別。判準只有這一份 ——
+ * 各寫一次的話,其中一邊修好了另一邊還是舊的,而兩種判錯都沒有徵兆。
+ */
+export const stripVariants = (cls) => {
+  let depth = 0
+  let last = 0
+
+  for (let i = 0; i < cls.length; i += 1) {
+    const c = cls[i]
+
+    if (c === '[') depth += 1
+    else if (c === ']') depth -= 1
+    else if (c === ':' && depth === 0) last = i + 1
+  }
+
+  return cls.slice(last)
+}
+
+/** 去掉 variant 前綴與 `!` 重要標記,回傳 utility 本體 */
+export const utilityBodyOf = (rawClass) =>
+  stripVariants(rawClass.replace(/^!/, '')).replace(/^!/, '')
+
+/**
+ * utility 本體裡「名字」是哪一段 —— `px-[20px]` → `px`、`inset-x-0` → `inset-x`。
+ *
+ * 名字與值的交界靠值的開頭認:方括號、數字,或 `auto` / `full` / `px` / `screen`
+ * 那幾個固定字。名字本身也含連字號(`inset-x`、`gap-y`),
+ * 所以不能只切第一個連字號。
+ *
+ * 切不出來的回 null —— `flex`、`items-center` 那種沒有「值」的 utility。
+ *
+ * 兩條規則問這一段:「這兩個 class 是不是同一個屬性」與「這個值該不該標型別」。
+ * 各寫一份比對式的話,名字帶連字號的那些會在其中一條裡開始切錯,而切錯沒有徵兆。
+ */
+export const utilityNameFrom = (body) =>
+  body.match(/^(-?[a-z]+(?:-[a-z]+)*?)-(?:\[|\d|auto|full|px|screen)/)?.[1] ?? null
 
 /** 畫面區段裡第一個帶前綴的靜態 class */
 const COMPONENT_CLASS_RE = /class="([^"]*\bm-[a-z0-9-]+[^"]*)"/
@@ -593,6 +742,14 @@ export const classPrefixOf = (folderName) =>
  * 其餘幾條靜靜地不再命中任何檔案。
  */
 export const isInActionsDir = (rel) => rel.includes(`/${ACTIONS_DIR_NAME}/`)
+
+/**
+ * 放行為的那一層在哪 —— 兩個設定值組出來的路徑。
+ *
+ * 組出來的結果收在這裡一份:兩條規則的訊息都要寫出這個位置,
+ * 各組一次的話,兩個設定值的關係(誰在誰底下)就變成兩個地方各記一遍。
+ */
+export const ACTIONS_DIR_PATH = `${STORE_DIR}/${ACTIONS_DIR_NAME}`
 
 /**
  * 存檔時記下「這個檔案還有違規」的清單檔位置(相對專案根)。
@@ -803,6 +960,196 @@ export const storeIndexOf = (root) => {
 
   const index = { files, readonly: readonlyConsts }
   storeIndexCache = { root, index }
+
+  return index
+}
+
+let transitionStyleCache = null
+
+registerScanCache(() => {
+  transitionStyleCache = null
+})
+
+/**
+ * 打了 api 之後一律回傳的三件。
+ *
+ * api 那一層與 action 那一層問的是同一件事(這三件在不在),所以只留這一份 ——
+ * 兩邊各寫一次的話,有一天其中一邊加了第四件,而另一邊的訊息還在說三件。
+ *
+ * 三件都要:少了 status 使用端得自己判斷成功失敗,少了 data 拿不到內容,
+ * 少了 config 錯誤處理時不知道是打哪一支、帶了什麼參數。
+ */
+export const API_RETURN_FIELDS = ['config', 'status', 'data']
+
+/**
+ * 一層裡放「那一層的主資料」的兩個欄位名 —— 名字由 store 規範決定。
+ *
+ * 兩條規則都要問同一件事,所以只留這一份:一條要知道「哪些欄位裡的名字是
+ * 後端給的」,另一條要知道「哪個欄位是主角、不必寫進 action 名字裡」。
+ */
+export const API_DATA_CONTAINERS = ['apiData', 'data']
+
+/**
+ * 轉場的那六個後綴 —— 畫面區段寫 `<Transition name="…">`,
+ * 框架自動在名字後面接這幾個,樣式那一側定義的就是接好的名字。
+ *
+ * 它們不能收斂成模組前綴:名字與畫面區段寫的那個 name 是一組的,
+ * 改了樣式這一側就對不上,而轉場失效不會報錯,只是動畫沒了。
+ *
+ * 後綴由框架定義,與專案無關,所以寫在這裡,不進專案設定。
+ */
+export const TRANSITION_SUFFIXES = [
+  '-enter-from',
+  '-enter-active',
+  '-enter-to',
+  '-leave-from',
+  '-leave-active',
+  '-leave-to',
+]
+
+/** 這個 class 是不是轉場的其中一個狀態 */
+export const isTransitionClass = (cls) => TRANSITION_SUFFIXES.some((s) => cls.endsWith(s))
+
+/* 後綴清單組出來的比對式 —— 清單改了這裡跟著改,不會有第二份要同步 */
+const TRANSITION_CLASS_RE = new RegExp(
+  `\\.([\\w-]+)(?:${TRANSITION_SUFFIXES.map((s) => s.replace(/-/g, '\\-')).join('|')})\\b`,
+  'g'
+)
+
+/**
+ * 這份樣式定義了哪幾組轉場 —— 回傳的是名字(不含後綴)。
+ *
+ * 判斷「元件自己寫了轉場」與「建立轉場名到檔案的索引」都問同一件事,
+ * 所以只留這一份。
+ */
+export const transitionNamesInCss = (text) =>
+  new Set([...maskCssComments(text).matchAll(TRANSITION_CLASS_RE)].map((m) => m[1]))
+
+/**
+ * 轉場名 → 定義它的樣式檔,掃全專案的 `.css` 建一份。
+ *
+ * 轉場的樣式常常收在一支共用檔案裡,由進入點一次載入,而不是跟著元件的資料夾走。
+ * 那支檔案沒有一起複製過去的話,元件搬過去**不會報錯也不會少畫面** ——
+ * 只是切換的當下沒有漸變,直接跳。要找原因得先想到「動畫是 css 在做的」,
+ * 再想到那支 css 根本不在這個專案裡。
+ *
+ * 只掃 `.css`:定義在元件自己 `<style>` 裡的轉場本來就跟著元件走,不必列。
+ *
+ * 路徑是掃出來的,所以是那個專案自己的擺法 —— 目錄層數不同的專案
+ * (有沒有 `src/` 那一層)各自算各自的,規則這一側不寫死。
+ */
+export const transitionStyleIndexOf = (root) => {
+  if (transitionStyleCache?.root === root) return transitionStyleCache.index
+
+  const index = new Map()
+
+  for (const target of SCAN_TARGETS) {
+    for (const abs of listFiles(root, target)) {
+      if (!abs.endsWith('.css')) continue
+
+      const rel = toRel(root, abs)
+
+      try {
+        for (const name of transitionNamesInCss(fs.readFileSync(abs, 'utf8'))) {
+          if (!index.has(name)) index.set(name, rel)
+        }
+      } catch {
+        // 讀不到某一支就跳過,不要因此讓整條規則失效
+      }
+    }
+  }
+
+  transitionStyleCache = { root, index }
+
+  return index
+}
+
+/**
+ * 一支元件被自動註冊成什麼標籤名。
+ *
+ * 名字由「資料夾 + 檔名」接起來,`Index` 那一層不算:
+ *
+ *   <元件目錄>/mPopup/Index.vue      MPopup
+ *   <元件目錄>/mForm/CheckBox.vue    MFormCheckBox
+ *   <元件目錄>/common/mPopup/…       CommonMPopup
+ *
+ * 這一份與建置設定裡那一份是同一套規則,但沒有辦法共用 ——
+ * 那一份是建置工具的設定(每個專案的建置工具還不一樣),這一份是檢查工具的。
+ * 兩邊哪天不一致的話,這裡算出來的標籤名會對不上任何使用端,
+ * 於是靠它的檢查一條都命中不了,而畫面上顯示通過。
+ */
+export const componentTagOf = (rel) => {
+  const dir = COMPONENT_DIRS.find((one) => rel.startsWith(`${one}/`))
+  if (!dir || !rel.endsWith('.vue')) return null
+
+  const segments = rel
+    .slice(dir.length + 1)
+    .replace(/\.vue$/, '')
+    .split('/')
+
+  // 資料夾名就是它的名字,Index 不進標籤名
+  if (segments.at(-1) === 'Index') segments.pop()
+  if (!segments.length) return null
+
+  /* 字母與數字以外的一律當成分隔:資料夾名可能帶連字號或底線(`my-thing`),
+     只把首字轉大寫的話會留下那些符號,而標籤名裡不會有它們 ——
+     算出來的名字對不上任何使用端,靠它的檢查從此一條都命中不了。 */
+  const pascal = (one) =>
+    one
+      .replace(/[^a-zA-Z0-9]+/g, ' ')
+      .replace(/(?:^|\s)([a-zA-Z0-9])/g, (_, char) => char.toUpperCase())
+      .replace(/\s+/g, '')
+
+  return segments.map(pascal).join('')
+}
+
+/** 一支 .vue 宣告了哪些事件;沒有 defineEmits 的回 null(那與「宣告了空的」不同) */
+export const declaredEmitsOf = (text) => {
+  const at = /defineEmits\s*\(\s*\[/.exec(text)
+  if (!at) return null
+
+  const body = text.slice(at.index + at[0].length)
+  const end = body.indexOf(']')
+  if (end < 0) return null
+
+  return [...body.slice(0, end).matchAll(/['"]([^'"]+)['"]/g)].map((m) => m[1])
+}
+
+let componentEmitsCache = null
+
+registerScanCache(() => {
+  componentEmitsCache = null
+})
+
+/**
+ * 全案的元件各自宣告了哪些事件 —— 標籤名對到那份清單。
+ *
+ * 只收「有寫 defineEmits」的那些。沒寫的元件不進這份索引,
+ * 而不是記成空清單:那種元件把所有事件都往根元素透傳(fallthrough),
+ * 使用端綁什麼都是正當的,記成空的會讓每一個綁定都變成違規。
+ */
+export const componentEmitsIndexOf = (root) => {
+  if (componentEmitsCache?.root === root) return componentEmitsCache.index
+
+  const index = new Map()
+
+  for (const dir of COMPONENT_DIRS) {
+    for (const abs of listFiles(root, dir)) {
+      if (!abs.endsWith('.vue')) continue
+
+      const tag = componentTagOf(toRel(root, abs))
+      if (!tag || index.has(tag)) continue
+
+      try {
+        const emits = declaredEmitsOf(fs.readFileSync(abs, 'utf8'))
+        if (emits) index.set(tag, emits)
+      } catch {
+        // 讀不到某一支就跳過,不要因此讓整條規則失效
+      }
+    }
+  }
+
+  componentEmitsCache = { root, index }
 
   return index
 }
