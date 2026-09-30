@@ -1,6 +1,6 @@
 import * as prototype from '@js/_prototype.js'
 
-export default () => {
+const useCommonActions = () => {
   const common = useCommonStore()
   const { isLoading, device } = storeToRefs(common)
   const onDevice = () => {
@@ -48,3 +48,5 @@ export default () => {
     onResize,
   }
 }
+
+export default useCommonActions

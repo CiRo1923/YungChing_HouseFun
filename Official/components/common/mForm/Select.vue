@@ -7,7 +7,11 @@ import './.css/selectVariables.css'
 import './.css/common.css'
 import './.css/select.css'
 
-import { onMergeDropdownConfig, useDropdownCore } from './.composables/useDropdownCore.js'
+import {
+  isUnselected,
+  onMergeDropdownConfig,
+  useDropdownCore,
+} from './.composables/useDropdownCore.js'
 import useValidateEvents from './.composables/useValidateEvents.js'
 
 import { onDeepClone, onEmptyData } from '@js/_prototype.js'
@@ -166,11 +170,15 @@ const onSetSelectedIndex = () => {
   let index = -1
 
   if (options.value) {
+    /* 兩邊都用寬鬆比對(==):選項的值常常是數字,而回填進來的是字串,
+      用嚴格比對會全部對不上('1' !== 1)。
+
+      未填的情況要先擋掉再比 —— 寬鬆比對底下 '' == 0 是成立的,
+      選項裡有值為 0 的那一項時,「還沒選」會顯示成它的文字,
+      而使用者沒有選過任何東西(判斷收在 useDropdownCore 的 isUnselected)。 */
     if (startOption) {
-      // item.value == startOption 用 == 會有形態別問題 '1' (string) !== 1 (int)
       index = options.value.findIndex((item) => item.value == startOption)
-    } else {
-      // item[config.value.schema.value] == model.value 用 == 會有形態別問題 '1' (string) !== 1 (int)
+    } else if (!isUnselected(model.value)) {
       index = options.value.findIndex((item) => item[config.value.schema.value] == model.value)
     }
 
@@ -200,6 +208,8 @@ const {
   model,
   options,
   selectedIndex,
+  // 收起下拉時標記「碰過」—— 綁 Field 的那個隱藏欄位永遠不會 blur
+  fieldName: () => props.name,
 })
 
 const onDropdownArrow = (e) => {

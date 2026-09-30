@@ -1,6 +1,12 @@
+/* starter —— 這一支是起手樣板:複製一次,之後歸接手的專案所有。
+
+  整套更新時**不要覆蓋它**。它與彈窗那支 store 是一組:那邊有哪幾種彈窗,
+  這邊就有對應的開關行為。單獨蓋這一支的話,兩邊對不上的那幾種
+  開了沒有反應,而且不會報錯。 */
+
 import { onDeepMerge, onBodyOverflowHiddenToggle } from '@js/_prototype.js'
 
-export default () => {
+const usePopupActions = () => {
   const popup = usePopupStore()
   // buttons 直接從 store 取:它是 readonly 常數,既不是 ref 也不是 reactive,
   // storeToRefs 不會為它建立 ref —— 解構出來會是 undefined。
@@ -220,3 +226,5 @@ export default () => {
     onReset,
   }
 }
+
+export default usePopupActions

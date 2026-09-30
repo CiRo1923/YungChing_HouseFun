@@ -11,7 +11,7 @@ import {
   apiGETBranchStoreSelectOptions,
 } from '@js/_api/manage.js'
 
-export default () => {
+const useManageActions = () => {
   const manage = useManageStore()
   const { options } = storeToRefs(manage)
   const { onApiError } = usePopupActions()
@@ -248,3 +248,5 @@ export default () => {
     onValueGetText,
   }
 }
+
+export default useManageActions

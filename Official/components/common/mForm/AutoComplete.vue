@@ -9,7 +9,7 @@ import './.css/autocomplete.css'
 
 import { useInputTextCore } from './.composables/useInputTextCore.js'
 import useValidateEvents from './.composables/useValidateEvents.js'
-import { useDropdownCore } from './.composables/useDropdownCore.js'
+import { isUnselected, useDropdownCore } from './.composables/useDropdownCore.js'
 
 import { Field, ErrorMessage } from 'vee-validate'
 
@@ -153,11 +153,17 @@ const {
   onDropdownActive,
   onSelectResize,
   isDropdownOutside,
+  onMarkTouched,
 } = useDropdownCore({
   config,
   model,
   options: resolvedOptions,
   selectedIndex,
+  fieldName: () => props.name,
+  /* 這一支可以打字,輸入途中也會收起下拉 —— 跟著標記的話,
+     打第一個字就算碰過,之後每打一個字都驗一次。
+     改成選了某一項的時候才標記(見下面的 onDropdownItemClick)。 */
+  touchOnClose: false,
 })
 
 const isMinCharsReached = computed(() => {
@@ -257,9 +263,7 @@ const onFilter = () => {
 }
 
 const onGetInputLabel = () => {
-  const hasModel = model.value !== null && model.value !== ''
-
-  if (!hasModel) {
+  if (isUnselected(model.value)) {
     return
   }
 
@@ -343,6 +347,10 @@ const onDropdownItemClick = (item) => {
   model.value = item[schema.model]
   label.value = item[schema.label]
   isSelectingOption.value = false
+
+  /* 選了一項就算碰過這個欄位 —— 綁 <Field> 的那個隱藏欄位永遠不會 blur,
+     少了這一行,這支要等到按下送出才算碰過(見 useDropdownCore 的 onMarkTouched)。 */
+  onMarkTouched()
 
   onSwitchActive(false)
   emitInput()

@@ -104,6 +104,8 @@ const {
   isDropdownOutside,
 } = useDropdownCore({
   config,
+  // 收起下拉時標記「碰過」—— 綁 Field 的那個隱藏欄位永遠不會 blur
+  fieldName: () => props.name,
 })
 
 const onDropdownEnter = () => {

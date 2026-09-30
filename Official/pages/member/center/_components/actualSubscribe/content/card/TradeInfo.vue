@@ -33,7 +33,7 @@ const tradeInfo = computed(() => {
       id: 'latestUnitPrice',
       label: '單價',
       value: numberComma.add(latestUnitPrice),
-      unit: '萬/坪',
+      unit: '萬 / 坪',
     },
   ]
 })
@@ -43,9 +43,9 @@ const tradeInfo = computed(() => {
   <!-- 手機放在分隔線下方、整行靠左,桌機與平板是右側獨立一欄。
     兩個斷點的內容與對齊相同,只有外框的位置不一樣。 -->
   <div
-    class="text-[14px] text-[--gray-333] m:w-full m:border-t-[1px] m:border-t-[--gray-e5] m:pt-[10px] t:px-[15px] pt:min-w-[160px] pt:shrink-0"
+    class="text-[14px] text-[--gray-666] m:w-full m:border-t-[1px] m:border-t-[--gray-e5] m:pt-[10px] t:px-[15px] pt:min-w-[160px] pt:shrink-0"
   >
-    <p class="text-[12px] text-[--gray-999]">最新成交記錄</p>
+    <p class="text-[--gray-999]">最新成交記錄</p>
     <p v-for="{ id, label, value, unit } in tradeInfo" :key="id">
       {{ label }}
       <b class="font-medium text-[--orange-e646]">{{ value }}</b>

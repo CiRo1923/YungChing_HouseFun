@@ -1,3 +1,5 @@
+import { FormContextKey } from 'vee-validate'
+
 import { onDeepMerge } from '@js/_prototype.js'
 
 export const defaultDropdownConfig = {
@@ -75,10 +77,66 @@ const onGetScrollParents = (el) => {
   return parents
 }
 
-export const useDropdownCore = ({ config, model = ref(null), options, selectedIndex }) => {
+/**
+ * 這個值算不算「還沒選」。
+ *
+ * 拿 model 去比對選項的地方用的是寬鬆比對(`==`)——選項的值常常是數字,
+ * 而回填進來的 model 多半是字串,用嚴格比對會全部對不上。
+ *
+ * 但寬鬆比對底下 **`'' == 0` 是成立的**:選項裡有值為 0 的那一項時,
+ * 「還沒選」會對到它,畫面上顯示成那一項的文字 —— 使用者沒有選過任何東西,
+ * 送出去的卻是 0,而且不會有任何徵兆。
+ *
+ * `undefined == null` 也是成立的,所以值為 null 的那一項會被沒有綁定過的
+ * model 對上,結果一樣。
+ *
+ * 所以每一處比對之前都要先把未填擋掉。收成一份是因為這件事有三個地方在做,
+ * 各寫一次就會像先前那樣:兩處寫了、一處沒寫,而且寫了的那兩處都漏掉 undefined。
+ */
+export const isUnselected = (value) => value === null || value === undefined || value === ''
+
+export const useDropdownCore = ({
+  config,
+  model = ref(null),
+  options,
+  selectedIndex,
+  fieldName = null,
+  touchOnClose = true,
+}) => {
   const common = useCommonStore()
   const { device } = storeToRefs(common)
   const { onResize } = useCommonActions()
+
+  /* 元件不在 <Form> 底下時是 null —— 那時沒有欄位狀態可以標記 */
+  const form = inject(FormContextKey, null)
+
+  /**
+   * 使用者把下拉收起來的時候,標記這個欄位「碰過了」。
+   *
+   * 這幾支元件的 <Field> 綁在 <input type="hidden"> 上:使用者操作的是旁邊
+   * 那個自訂的下拉,**那個隱藏欄位永遠不會 blur,也永遠不會 change**。
+   * 而「碰過」在 vee-validate 裡只有 blur 與送出會設。
+   *
+   * 少了這一段,這幾支要等到按下送出才算碰過 —— 在那之前「碰過之後值一動就驗」
+   * 完全沒有作用:使用者選了又清空,畫面上不會有任何提示,而且不報錯。
+   *
+   * 用「收起來」而不是「打開」:那才對應一般欄位的 blur(離開這個欄位),
+   * 打開的當下人還在選,那時開始驗等於一選就罵人。
+   *
+   * **可以打字的那一種要把 touchOnClose 關掉**(AutoComplete):它在輸入途中
+   * 也會收起下拉(字數不夠時),跟著標記的話,使用者打第一個字就算碰過,
+   * 之後每打一個字都驗一次 —— 打到一半跳紅字,正是這個機制要避免的事。
+   * 那一種自己在「選了某一項」的時候呼叫這支。
+   */
+  const onMarkTouched = () => {
+    if (!form) return
+
+    const names = toValue(fieldName)
+
+    for (const name of Array.isArray(names) ? names : [names]) {
+      if (name) form.setFieldTouched?.(name, true)
+    }
+  }
 
   const borderWidth = 0
   const elementRef = ref(null)
@@ -121,9 +179,13 @@ export const useDropdownCore = ({ config, model = ref(null), options, selectedIn
     }
   }
 
+  /* 收合動畫結束時走這裡 —— 收起來的路徑不只一條(選完、點外面、捲動、按 Esc),
+     全部匯流到這一個點,標記在這裡才每一條都涵蓋到。 */
   const onCloseDropdown = () => {
     isOpen.value = false
     onSwitchActive(false)
+
+    if (touchOnClose) onMarkTouched()
   }
 
   /* 依目前的裝置解析斷點物件;不是斷點物件的原樣回傳
@@ -276,7 +338,7 @@ export const useDropdownCore = ({ config, model = ref(null), options, selectedIn
 
       isOpen.value = true
 
-      if (model.value !== null && model.value !== '' && Array.isArray(options.value)) {
+      if (!isUnselected(model.value) && Array.isArray(options.value)) {
         // 選中比對欄位:優先 schema.model(AutoComplete 用),沒有則 fallback schema.value(Select 用)
         const valueKey = config.value.schema.model ?? config.value.schema.value
         const idx = options.value.findIndex((item) => item?.[valueKey] == model.value)
@@ -379,5 +441,6 @@ export const useDropdownCore = ({ config, model = ref(null), options, selectedIn
     onDropdownActive,
     onSelectResize,
     isDropdownOutside,
+    onMarkTouched,
   }
 }

@@ -2,7 +2,7 @@ import { apiGetCommonServerTime } from '@js/_api/manage.js'
 
 import { onFormatDate } from '@js/_prototype.js'
 
-export default () => {
+const useProjectActions = () => {
   const project = useProjectStore()
   const { serverTime, serverTimeBase } = storeToRefs(project)
   const { onApiError } = usePopupActions()
@@ -177,3 +177,5 @@ export default () => {
     onUseMeta,
   }
 }
+
+export default useProjectActions

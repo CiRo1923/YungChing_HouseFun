@@ -1,4 +1,4 @@
-export default () => {
+const useNavActions = () => {
   const buyListStore = useBuyListStore()
   const { region, mrt } = storeToRefs(buyListStore)
   const menu = computed(() => {
@@ -77,3 +77,5 @@ export default () => {
     menu,
   }
 }
+
+export default useNavActions
