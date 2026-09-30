@@ -1,6 +1,7 @@
 <script setup>
 import './.css/variables.css'
 import './.css/common.css'
+import './.css/styleProject.css'
 
 /* 單一時間選擇。與 Single(日期)是兩支獨立元件,共用 .composables 與同一份樣式。
 

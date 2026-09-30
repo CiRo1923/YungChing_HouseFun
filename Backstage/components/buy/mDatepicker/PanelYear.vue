@@ -1,6 +1,7 @@
 <script setup>
 import './.css/variables.css'
 import './.css/common.css'
+import './.css/styleProject.css'
 
 // 年份面板。headerMode: 'panel' 時點年份會展開這個。
 

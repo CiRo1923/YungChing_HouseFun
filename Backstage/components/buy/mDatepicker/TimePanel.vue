@@ -1,6 +1,7 @@
 <script setup>
 import './.css/variables.css'
 import './.css/common.css'
+import './.css/styleProject.css'
 
 /* 時間面板:時 / 分 / 秒的滾動欄。
 

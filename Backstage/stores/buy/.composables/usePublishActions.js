@@ -16,7 +16,7 @@ import { useBuyPublishStore } from '@stores/buy/publish.js'
 import useBuyProjectActions from '@stores/buy/.composables/useProjectActions.js'
 import usePopupActions from '@stores/.composables/usePopupActions.js'
 
-export default () => {
+const usePublishActions = () => {
   const buyProject = useBuyProjectStore()
   const { options } = storeToRefs(buyProject)
   const {
@@ -361,3 +361,5 @@ export default () => {
     onAllPromise,
   }
 }
+
+export default usePublishActions

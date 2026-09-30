@@ -1,6 +1,7 @@
 <script setup>
 import './.css/variables.css'
 import './.css/common.css'
+import './.css/styleProject.css'
 
 import { useTextCore } from './.composables/useTextCore.js'
 import useValidateEvents from './.composables/useValidateEvents.js'
@@ -10,7 +11,7 @@ import '@js/_validation.js'
 
 import { Field, ErrorMessage } from 'vee-validate'
 
-const emits = defineEmits(['update:modelValue', 'focusin', 'blur', 'input', 'keydown.enter'])
+const emits = defineEmits(['update:modelValue', 'focusin', 'blur', 'input', 'enter'])
 
 const props = defineProps({
   name: {

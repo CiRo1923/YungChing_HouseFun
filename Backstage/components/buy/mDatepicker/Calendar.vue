@@ -1,6 +1,7 @@
 <script setup>
 import './.css/variables.css'
 import './.css/common.css'
+import './.css/styleProject.css'
 
 /* 日曆面板本體:header + 星期列 + 日期格。
   header 依 config.headerMode 換一支元件('string' 純文字 / 'panel' 點年月展開面板),

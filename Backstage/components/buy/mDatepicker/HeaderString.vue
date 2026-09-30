@@ -1,6 +1,7 @@
 <script setup>
 import './.css/variables.css'
 import './.css/common.css'
+import './.css/styleProject.css'
 
 // headerMode: 'string' —— 年月只顯示文字(2026-08),換月靠左右箭頭。
 const props = defineProps({

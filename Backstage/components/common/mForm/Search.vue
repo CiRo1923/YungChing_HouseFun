@@ -3,10 +3,11 @@ import './.css/variables.css'
 import './.css/searchVariables.css'
 import './.css/common.css'
 import './.css/search.css'
+import './.css/styleProject.css'
 
 import { useTextCore } from './.composables/useTextCore.js'
 
-const emits = defineEmits(['update:modelValue', 'input', 'keydown.enter', 'enter'])
+const emits = defineEmits(['update:modelValue', 'input', 'enter'])
 
 const props = defineProps({
   name: {

@@ -3,6 +3,7 @@ import './.css/variables.css'
 import './.css/dropdownVariables.css'
 import './.css/common.css'
 import './.css/dropdown.css'
+import './.css/styleProject.css'
 
 import { onMergeDropdownConfig, useDropdownCore } from './.composables/useDropdownCore.js'
 import SelectDropdownOptions from './SelectDropdownOptions.vue'

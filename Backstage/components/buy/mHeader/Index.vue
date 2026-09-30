@@ -4,6 +4,7 @@
    stores/common.js */
 import './.css/variables.css'
 import './.css/common.css'
+import './.css/styleProject.css'
 
 const common = useCommonStore()
 const { device } = storeToRefs(common)

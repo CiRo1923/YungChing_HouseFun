@@ -2,6 +2,7 @@
 import './.css/arrowVariables.css'
 import './.css/common.css'
 import './.css/arrow.css'
+import './.css/styleProject.css'
 
 const props = defineProps({
   options: {

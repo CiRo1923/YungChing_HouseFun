@@ -3,6 +3,7 @@ import './.css/variables.css'
 import './.css/autocompleteVariables.css'
 import './.css/common.css'
 import './.css/autocomplete.css'
+import './.css/styleProject.css'
 
 import useValidateEvents from './.composables/useValidateEvents.js'
 

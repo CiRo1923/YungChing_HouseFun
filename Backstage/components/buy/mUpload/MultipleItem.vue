@@ -3,6 +3,7 @@ import './.css/variables.css'
 import './.css/multipleVariables.css'
 import './.css/common.css'
 import './.css/multiple.css'
+import './.css/styleProject.css'
 
 const emit = defineEmits(['remove', 'check'])
 const props = defineProps({

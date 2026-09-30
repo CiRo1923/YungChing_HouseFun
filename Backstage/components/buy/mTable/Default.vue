@@ -3,6 +3,7 @@ import './.css/variables.css'
 import './.css/defaultVariables.css'
 import './.css/common.css'
 import './.css/default.css'
+import './.css/styleProject.css'
 
 import useTableCore from './.composables/useTableCore'
 

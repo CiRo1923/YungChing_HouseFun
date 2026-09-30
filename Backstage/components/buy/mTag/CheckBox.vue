@@ -3,6 +3,7 @@ import './.css/variables.css'
 import './.css/checkboxVariables.css'
 import './.css/common.css'
 import './.css/checkbox.css'
+import './.css/styleProject.css'
 
 import { onDeepMerge } from '@js/_prototype.js'
 

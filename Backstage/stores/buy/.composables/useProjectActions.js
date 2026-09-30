@@ -58,7 +58,7 @@ import usePopupActions from '@stores/.composables/usePopupActions.js'
 // 故以模組層級保存，讓編輯後重新進入流程仍能於成功後刷新頁面。
 let autoRefreshTemplateUpdate = null
 
-export default () => {
+const useProjectActions = () => {
   const projectStores = useBuyProjectStore()
   const { onAlert, onCustom, onApiPromise, onApiError } = usePopupActions()
   const { serverTime, renewal, autoRefresh, golden, options } = storeToRefs(projectStores)
@@ -1194,3 +1194,5 @@ export default () => {
     onReplaceImageSize,
   }
 }
+
+export default useProjectActions

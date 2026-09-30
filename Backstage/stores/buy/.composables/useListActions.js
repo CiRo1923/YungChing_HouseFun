@@ -17,7 +17,7 @@ import { useBuyListStore } from '@stores/buy/list.js'
 import useBuyProjectActions from '@stores/buy/.composables/useProjectActions.js'
 import usePopupActions from '@stores/.composables/usePopupActions.js'
 
-export default () => {
+const useListActions = () => {
   // const buyProject = useBuyProjectStore()
   // const { renewal } = storeToRefs(buyProject)
   const { onReplaceImageSize } = useBuyProjectActions()
@@ -390,3 +390,5 @@ export default () => {
     onCommentsReset,
   }
 }
+
+export default useListActions

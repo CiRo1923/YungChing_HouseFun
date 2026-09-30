@@ -1,6 +1,6 @@
 import { onDeepMerge, onBodyOverflowHiddenToggle } from '@js/_prototype.js'
 
-export default () => {
+const usePopupActions = () => {
   const popup = usePopupStore()
   // buttons 直接從 store 取:它是 readonly 常數,既不是 ref 也不是 reactive,
   // storeToRefs 不會為它建立 ref —— 解構出來會是 undefined。
@@ -225,3 +225,5 @@ export default () => {
     onReset,
   }
 }
+
+export default usePopupActions

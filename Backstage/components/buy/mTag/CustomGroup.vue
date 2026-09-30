@@ -1,6 +1,7 @@
 <script setup>
 import './.css/customGroupVariables.css'
 import './.css/customGroup.css'
+import './.css/styleProject.css'
 
 const emits = defineEmits(['update:modelValue'])
 const props = defineProps({

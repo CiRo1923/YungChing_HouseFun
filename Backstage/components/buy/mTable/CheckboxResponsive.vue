@@ -6,6 +6,7 @@ import './.css/variables.css'
 import './.css/checkboxResponsiveVariables.css'
 import './.css/common.css'
 import './.css/checkboxResponsive.css'
+import './.css/styleProject.css'
 
 import useTableCore from './.composables/useTableCore'
 

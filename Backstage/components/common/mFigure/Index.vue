@@ -1,6 +1,7 @@
 <script setup>
 import './.css/variables.css'
 import './.css/common.css'
+import './.css/styleProject.css'
 
 import blankUrl from '@imgs/common/blank.svg'
 import noImageUrl from '@imgs/common/no_image.svg'

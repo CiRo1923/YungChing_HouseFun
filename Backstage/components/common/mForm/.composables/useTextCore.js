@@ -54,7 +54,7 @@ export const useTextCore = ({
 
   const onEnter = (e) => {
     e.preventDefault()
-    emits('keydown.enter', e)
+    emits('enter', e)
   }
 
   const onClear = () => {

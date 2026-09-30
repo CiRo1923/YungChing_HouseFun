@@ -1,5 +1,6 @@
 <script setup>
 import './.css/common.css'
+import './.css/styleProject.css'
 
 const props = defineProps({
   message: {
