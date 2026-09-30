@@ -61,6 +61,7 @@
 | `storeNaming` | 匯出名不是 `use{名稱}Store` | store 目錄 | ✗ |
 | `storeScope` | 檔名對不上頁面目錄第一層的資料夾 | store 目錄 | ✗ |
 | `storeActions` | `.composables` 檔名不是 `use{名稱}Actions.js` | actions 目錄 | ✗ |
+| `storeActionsExport` | `.composables` 的 `export default` 直接接匿名函式（堆疊追蹤裡全部印成 `default`） | actions 目錄 | ✗ |
 | `storeLayer` | 有向後端要資料的頁面，store 沒有對應的層 | store 目錄 | ✗ |
 | `popupLocation` | 彈窗放在對應網址的那幾層裡（該收在元件層底下）。資料夾名由設定 `POPUP_DIR_NAME` 決定，留空就整條略過。「放元件層的哪一層」看它被誰用，那一半沒有工具檢查 | 頁面目錄的 `.vue` | ✗ |
 | `pageApiData` | 頁面自建 `apiData` / `apiResult` / `apiList` / `apiInfo` | 頁面目錄的 `.vue` | ✗ |
@@ -93,8 +94,7 @@
 | `importOrder` | 元件沒有載入樣式（樣式要由元件自己 import；自己完全不寫 class 的轉手元件不在此列） | 元件目錄的 `.vue` | ✗（工具看不出該載哪一支） |
 | `configItem` | 專案設定檔多了沒有任何規則讀的項目 | `.tools/lint/project-config.mjs` | ✗（來源專案只提醒，見下方說明） |
 | `unknownExemptMark` | 註解裡寫了 `lint-xxx-exempt`，但沒有任何規則在讀那個名字 —— 那一行不會放行任何東西，讀起來卻像「這裡已經想過了」。合法的名字直接從規則的程式碼裡看出來，不另外維護清單；程式碼與字串裡的同一串字是資料，不算宣告 | 原始碼 | ✗ |
-| `projectStyleFile` | 專案自己加的樣式（檔名帶 `Project`）名字對不上它要附加的來源檔，或是沒有任何元件 import 它 —— 後者整支一行都不會輸出，畫面上是「自己加的樣式沒有作用」，不會報錯 | 元件自己的樣式目錄 | ✗ |
-| `componentApiAdded` | 元件的兩個對外介面（css 變數、config）多了來源沒有的項目。值可以改（那正是它們存在的理由），但多加的那一個元件內部不會讀，寫了什麼都不會發生，而下一次整套更新會把它覆蓋掉。**把一個設定改成巢狀也算** —— 底下那幾個鍵在來源不存在，而元件讀的是原本那一個。名單由來源 `npm run rules:seal` 產生、跟著元件複製過來；來源專案不比對自己 | 元件目錄（樣式檔名帶 `Project` 的不算） | ✗ |
+| `componentApiAdded` | 元件的三個對外介面（config、defineExpose、defineEmits）多了來源沒有的項目。css 變數不算 —— 元件的樣式那一層歸接手的專案，變數本來就會增減。值可以改（那正是它們存在的理由），但多加的那一個元件內部不會讀，寫了什麼都不會發生，而下一次整套更新會把它覆蓋掉。**把一個設定改成巢狀也算** —— 底下那幾個鍵在來源不存在，而元件讀的是原本那一個。名單由來源 `npm run rules:seal` 產生、跟著元件複製過來；來源專案不比對自己 | 元件目錄底下的 .vue 與 .js | ✗ |
 | `setClassDefault` | `setClass` 給了帶 class 的預設值 —— 樣式由使用端決定；元件先給一份的話，使用端傳的是附加在後面，想拿掉會發現怎麼傳都蓋不掉。列出鍵、值留空字串不算（那是在說明有哪幾個位置可以傳） | 原始碼的 `.js` 與 `.vue` | ✗ |
 | `breakpointVarOverride` | 同一條選擇器鏈裡的同一個變數，在基底與 `@screen` 區塊**各寫一次字面值** —— 那是覆蓋，值散在兩個地方，改的時候漏掉一處就是某個斷點停在舊值。斷點區塊裡寫 `var(…)` 做指派不算（那是這一套本來的機制）；modifier 底下的級距（`&.--px-30`）選擇器鏈不同，也不算 | 所有 `.css` 與 `.vue` | ✗ |
 | `buildCommands` | 三個環境的指令名對不上（`dev` 開發、`deploy` 測試機、`build` 正式機）、`--mode` 與指令名不同名、或 `.env.<環境>` 沒成套。讀的是 `package.json`，掛在建置設定檔上報（`.json` 不在掃描範圍，加進去的話 `package.json` 的 `name` 會被「不寫死專案名稱」誤報） | 建置設定檔（`BUILD_CONFIG_FILES` 列的那幾支） | ✗ |

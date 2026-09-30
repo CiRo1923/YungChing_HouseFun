@@ -473,6 +473,26 @@ const onApiGetVoucherListDetail = async () => {
 
 ## 6. action 的寫法
 
+### 那一支檔案的外殼
+
+規則 `storeActionsExport`(擋):**具名寫完再 `export default`**,不要直接 `export default () => { … }`。
+
+```js
+const useMemberActions = () => {
+  const onReset = () => {}
+
+  return { onReset }
+}
+
+export default useMemberActions
+```
+
+匿名的也跑得起來 —— 自動引入是照檔名掛上去的,函式自己有沒有名字不影響。
+差別在出事的時候:堆疊追蹤、效能面板與 devtools 顯示的是函式自己的名字,
+匿名的那幾支全部印成 `default`,看不出是哪一層的行為在呼叫誰。
+
+### 回傳的形狀
+
 規則 `storeActionReturn`(擋):打了 api 的 action **一律 `return { config, status, data }`**。
 
 **(a) 非 200 即錯誤(多數情況)**

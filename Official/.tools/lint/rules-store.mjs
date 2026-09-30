@@ -289,6 +289,34 @@ const checkActionsNaming = ({ rel }) => {
   ]
 }
 
+// --- 規則 storeActionsExport:行為那一支的 default 匯出要具名 -----------------
+//
+// 匿名的也跑得起來 —— 自動引入是照檔名掛上去的,函式自己有沒有名字都一樣。
+// 差別在出事的時候:堆疊追蹤、效能面板與 devtools 顯示的是函式自己的名字,
+// 匿名的那幾支全部印成 default,看不出是哪一層的行為在呼叫誰。
+//
+// 而且同一層裡混著兩種寫法時,下一個人得先把整層看過才知道慣例是哪一種。
+const ANONYMOUS_DEFAULT_RE = /^export\s+default\s+(?:async\s+)?(?:\(|function\s*\()/m
+
+const checkActionsExport = ({ rel, text }) => {
+  if (!isActionsFile(rel)) return []
+
+  const at = ANONYMOUS_DEFAULT_RE.exec(maskComments(rel, text))
+
+  if (!at) return []
+
+  const name = path.basename(rel, '.js')
+
+  return [
+    issueOf(
+      rel,
+      lineNoOf(text, at.index),
+      'storeActionsExport',
+      `default 匯出的函式要具名 —— const ${name} = () => { … } 寫完再 export default ${name}`
+    ),
+  ]
+}
+
 // --- 規則 storeLayer:store 的結構跟著頁面分層 -------------------------------
 //
 // **一個頁面一層,層名就是頁面名(首字小寫)。**
@@ -1256,6 +1284,7 @@ export const STORE_CHECKS = [
   checkStoreNaming,
   checkStoreScope,
   checkActionsNaming,
+  checkActionsExport,
   checkStoreLayer,
 ]
 
@@ -1265,6 +1294,7 @@ export const STORE_RULE_TITLE = {
   storeNaming: 'store 的命名',
   storeScope: 'store 檔名對不上頁面資料夾',
   storeActions: 'actions 檔名',
+  storeActionsExport: 'actions 的 default 匯出是匿名的',
   storeActionNaming: '呼叫 api 的 action 命名',
   storeActionReturn: 'action 的回傳形狀',
   storeApiDefault: '缺少 apiDefault',
@@ -1280,6 +1310,8 @@ export const STORE_RULE_HINT = {
   storeNaming: 'export const use{名稱}Store = defineStore(…)',
   storeScope: `${STORE_DIR} 的檔名要對得上 ${VIEWS_DIR} 的第一層資料夾`,
   storeActions: '檔名為 use{名稱}Actions.js',
+  storeActionsExport:
+    'const use{名稱}Actions = () => { … } 之後 export default use{名稱}Actions —— 匿名的在堆疊裡全部印成 default',
   storeActionNaming: 'onApi + api 函式名 —— 從 action 名字看得出它打哪一支 api',
   storeActionReturn: '打了 api 的 action 一律 return { config, status, data }',
   storeApiDefault: '送出參數的預設值集中成 const apiDefault = readonly({ … })',

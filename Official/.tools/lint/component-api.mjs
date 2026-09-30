@@ -4,14 +4,13 @@
 //   node .tools/lint/component-api.mjs --write   重新產生(只有來源專案要做)
 //   node .tools/lint/component-api.mjs           比對,多出來的列出來
 //
-// 元件是整套從元件庫複製過來的,它有四個對外的介面:
+// 元件的 <template> 與 <script> 是整套從元件庫複製過來的,那兩段裡有三個對外的介面:
 //
-//   css 變數        使用端照著那幾個名字傳值,元件內部照著取值
 //   config          使用端照著那幾個鍵傳設定,元件內部照著讀
 //   defineExpose    使用端拿著它的 ref,照著那幾個名字直接呼叫
 //   defineEmits     使用端照著那幾個名字綁 @事件
 //
-// **每個專案都可以把值改成自己的,但不可以自己多加。**
+// **每個專案都可以把 config 的值改成自己的,但不可以自己多加一個鍵。**
 //
 // 後兩種連值都沒得改:那兩份是名字本身 —— 改了名字、少了一個,
 // 使用端那一行就對不上,而且 Vue 一聲都不會吭。
@@ -20,11 +19,13 @@
 //   什麼都不會發生,而下一個人會以為某個地方吃那個值。
 //   下一次整套更新時它會被覆蓋掉,而覆蓋的當下沒有任何訊息。
 //
-// 真的需要一個新的變數或設定項時,那代表**元件本身要改**,回到元件庫去加 ——
+// 真的需要一個新的設定項時,那代表**元件本身要改**,回到元件庫去加 ——
 // 加在那裡,每個專案都拿得到,而且元件內部真的會讀它。
 //
-// 只有這個專案要的樣式另外開一支(檔名帶 Project,見規則 projectStyleFile),
-// 那一支裡面愛加什麼變數都可以 —— 它本來就不屬於來源。
+// **css 變數不在這份名單裡。** 元件的樣式整層歸接手的專案(那一層不跟著更新),
+// 所以變數名也是那個專案的東西,本來就會增減。
+// 「元件讀的變數有沒有人定義」由規則 unknownVar 在看 —— 改了名字而
+// 某一處還在讀舊的,那條會報「找不到定義」,不必在這裡再比一次。
 //
 // 為什麼記的是名單而不是雜湊:改值是允許的,所以雜湊一定對不上 ——
 // 那會變成每個專案一裝上去就整片報,而一直報改不了的東西會讓整條被關掉。
@@ -36,8 +37,6 @@ import { fileURLToPath } from 'node:url'
 
 import {
   COMPONENT_DIRS,
-  MODULE_CSS_DIR_NAME,
-  VAR_DEFINE_RE,
   classPrefixOf,
   declaredEmitsOf,
   listFiles,
@@ -81,24 +80,6 @@ export const apiKeyOf = (rel) => {
 
   return at < 0 ? rel : segments.slice(at).join('/')
 }
-
-/**
- * 這支 css 要不要列入名單。
- *
- * 只看元件自己的樣式目錄 —— 那一層是元件的介面。
- * 頁面與集中目錄的變數是各專案自己的東西,本來就該各自增減。
- *
- * 檔名帶 `Project` 的不列入:那是專案自己加的那一支,
- * 它的存在本身就是「這裡可以加東西」的意思(見規則 projectStyleFile)。
- */
-export const isComponentVarFile = (rel) =>
-  rel.endsWith('.css') &&
-  rel.includes(`/${MODULE_CSS_DIR_NAME}/`) &&
-  COMPONENT_DIRS.some((dir) => rel.startsWith(`${dir}/`)) &&
-  !/Project(Variables)?\.css$/.test(rel)
-
-/** 一支 css 裡定義了哪些變數(排序過,兩次產生的結果才比得出差異) */
-const varNamesOf = (text) => [...new Set([...text.matchAll(VAR_DEFINE_RE)].map((m) => m[1]))].sort()
 
 /**
  * config 的預設值寫在哪裡 —— 兩種形狀都要認。
@@ -199,14 +180,14 @@ const keyPathsOf = (text, start) => {
 /**
  * 元件交給使用端直接呼叫的那幾樣東西。
  *
- * 前面兩種介面是「傳進去」的(變數、設定),這一種是「拿出來用」的:
+ * 設定那一種是「傳進去」的,這一種是「拿出來用」的:
  * 使用端拿著元件的 ref,照著這幾個名字呼叫(`inputRef.value.focus()`)。
  *
  * 規矩與前兩種一樣,理由也一樣:專案在自己這一份多開一個,
  * 只有這個專案有 —— 下一次整套更新會把它覆蓋掉,而覆蓋的當下沒有訊息,
  * 使用端那一行從此呼叫一個不存在的東西。
  *
- * **與前兩種的差別是這一種連值都不能改。** 變數與設定留著讓各專案調,
+ * **與設定的差別是這一種連值都不能改。** 設定留著讓各專案調,
  * 而這一種沒有「值」可調:名字改了、少了,使用端那一行就跟著壞。
  */
 const EXPOSE_BLOCK_RE = /defineExpose\s*\(\s*\{/g
@@ -231,7 +212,6 @@ const blockKeysOf = (rel, raw, pattern) => {
  * 而報違規時要指得到檔案,那時才需要路徑,所以另外回一份對照。
  */
 const scanComponentApi = () => {
-  const vars = {}
   const config = {}
   const expose = {}
   const emits = {}
@@ -242,17 +222,7 @@ const scanComponentApi = () => {
       const rel = toRel(root, abs)
       const key = apiKeyOf(rel)
 
-      if (isComponentVarFile(rel)) {
-        const names = varNamesOf(fs.readFileSync(abs, 'utf8'))
-
-        if (names.length) {
-          vars[key] = names
-          files[key] = rel
-        }
-
-        continue
-      }
-
+      /* 樣式不看 —— 那一層歸接手的專案,變數本來就會增減(見檔頭) */
       if (!/\.(vue|js)$/.test(rel)) continue
 
       const raw = fs.readFileSync(abs, 'utf8')
@@ -271,7 +241,7 @@ const scanComponentApi = () => {
     }
   }
 
-  return { api: { vars, config, expose, emits }, files }
+  return { api: { config, expose, emits }, files }
 }
 
 /** 現在這些元件的介面長什麼樣 */
@@ -285,10 +255,11 @@ export const recordedComponentApi = () => {
   const json = readSealedJson(root, COMPONENT_API_FILE)
   if (!json) return null
 
-  // 舊版的名單只有變數那一半,缺的那一邊當成空的,不要讓整個檢查停擺
+  /* 缺的那幾類當成空的,不要讓整個檢查停擺 —— 舊版的名單形狀與現在不同
+     (早先有 css 變數那一類,現在樣式整層歸專案,那一類拿掉了)。
+     舊名單裡的 vars 讀進來也沒有人比對,直接忽略。 */
   return {
     keyStyle: json.keyStyle ?? null,
-    vars: json.vars ?? {},
     config: json.config ?? {},
     expose: json.expose ?? {},
     emits: json.emits ?? {},
@@ -325,7 +296,6 @@ export const isStaleComponentApi = () => {
  * 只會改到其中一邊,而另一邊會把新的那一種講成「設定」。
  */
 export const API_KIND_LABEL = {
-  vars: '變數',
   config: '設定',
   expose: '對外呼叫的名字',
   emits: '會發出的事件',

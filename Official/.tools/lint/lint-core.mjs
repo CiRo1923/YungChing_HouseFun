@@ -2295,64 +2295,6 @@ const findComponentFolder = (dir, name) => {
  */
 const hasLayoutRules = (text) => /@apply\b/.test(text) || /^[^@\n]*\.[\w\\-]+[^{}\n]*\{/m.test(text)
 
-// --- 規則 projectStyleFile:專案自己加的樣式要另外開一支 ----------------------
-//
-// 元件是整套從元件庫複製過來的,下一次更新也是整套覆蓋。
-// 這個專案自己要的樣式(某一頁才有的變體、品牌自己的那一種外框)
-// **寫進來源同名的那幾支檔案裡的話,每一次更新都會衝突** ——
-// 要嘛手動合併,要嘛被蓋掉,而被蓋掉的當下沒有任何訊息。
-//
-// 所以專案自己加的另外開一支,檔名帶 Project:
-//
-//    selection.css                  來源的,整套更新時直接覆蓋
-//    selectionProject.css           這個專案自己加的,更新時不會被碰到
-//    selectionProjectVariables.css  自己加的那些變數
-//
-// 元件要多兩行 import,那兩行也是來源沒有的 —— 但**只有那兩行**會衝突,
-// 而且一看就知道是這個專案自己接上去的。
-//
-// 這條守得住的是命名與接線:名字對不對得上來源那一支、有沒有真的被載入。
-// 「有沒有偷偷寫進來源的檔案」它看不出來(規則不知道來源長什麼樣),
-// 那一半靠規範文件與複製流程。
-
-/** `selectionProject.css` → selection.css;`selectionProjectVariables.css` → selectionVariables.css */
-const projectStyleBaseOf = (fileName) => {
-  const m = path.basename(fileName, '.css').match(/^(.+?)Project(Variables)?$/)
-
-  return m ? `${m[1]}${m[2] ?? ''}.css` : null
-}
-
-const checkProjectStyleFile = ({ rel, root }) => {
-  if (!isModuleCss(rel)) return []
-
-  const base = projectStyleBaseOf(rel)
-  if (!base) return []
-
-  const cssDir = path.dirname(path.join(root, ...rel.split('/')))
-
-  /* 名字要對得上來源那一支。
-
-     對不上的話多半是打錯字(`selctionProject.css`),或是把一支全新的樣式
-     取成這個名字 —— 前者接不上任何東西,後者則是「這不是附加,是新的元件」,
-     那該走元件自己的資料夾。
-
-     **「有沒有被載入」不在這一條**:那件事每一支模組 css 都適用,
-     由 moduleCssUnused 檢查。混在這裡的話,那一半只會看 Project 那幾支,
-     而一般的樣式檔沒人 import 也不會被發現。 */
-  if (fs.existsSync(path.join(cssDir, base))) return []
-
-  return [
-    issueOf(
-      rel,
-      1,
-      'projectStyleFile',
-      `這支是專案自己加的樣式,但同一層找不到它要附加的 ${base} —— ` +
-        `名字要寫成「來源那一支的檔名 + Project」;` +
-        `如果它其實是一支全新的樣式,那就不是附加,該放進它自己元件的資料夾`
-    ),
-  ]
-}
-
 // --- 規則 moduleCssUnused:樣式檔要有人載入 -----------------------------------
 //
 // 樣式檔不會自己生效 —— 沒有任何元件 import 它的話,**整支一行都不會輸出**。
@@ -2740,7 +2682,6 @@ const CHECKS = [
   checkModuleImportOrder,
   checkModuleScope,
   checkModuleLocation,
-  checkProjectStyleFile,
   checkModuleCssUnused,
   checkModuleVariables,
   checkTruncateClass,
@@ -2849,7 +2790,6 @@ export const RULE_TITLE = {
   variable: '模組變數的命名或斷點',
   unknownVar: '用到沒有定義的 css 變數',
   breakpointVarOverride: '斷點用覆蓋的,值散在兩個地方',
-  projectStyleFile: '專案自己加的樣式檔名對不上來源',
   moduleCssUnused: '樣式檔沒有任何元件 import 它',
   lengthTypeHint: '長度值沒有標 length:,會被當成顏色',
   lengthTypeVar: '標型別時把變數包在 var() 裡',
@@ -2889,8 +2829,6 @@ export const RULE_HINT = {
     '各斷點的值各給一個名字,斷點區塊只做指派 —— 基底與斷點各寫一次字面值的話,改的時候漏掉一處就是某個斷點停在舊值',
   moduleCssUnused:
     '樣式檔要有人 import —— 沒有的話整支一行都不會輸出,而畫面上少了一整批樣式看起來像設計本來就長那樣',
-  projectStyleFile:
-    '這個專案自己加的樣式另外開一支 <來源檔名>Project.css —— 寫進來源同名的檔案裡,每次整套更新都會衝突或被蓋掉',
   ...GLOBAL_RULE_HINT,
   ...API_RULE_HINT,
   ...STORE_RULE_HINT,

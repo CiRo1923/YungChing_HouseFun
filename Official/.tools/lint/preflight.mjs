@@ -86,7 +86,7 @@ const REQUIREMENTS = [
     rules: ['componentApiAdded'],
     check: () => (IS_SOURCE_PROJECT || recordedComponentApi() ? COMPONENT_API_FILE : null),
     need: `要有 ${COMPONENT_API_FILE} —— 那份名單由元件庫的來源跑 npm run rules:seal 產生,跟著元件一起複製過來`,
-    why: '沒有名單就沒有東西可以比對,這條會整條略過。這個專案在元件的變數檔裡多加了變數的話,不會有人發現 —— 元件內部不讀它,而下一次整套更新會把它覆蓋掉。',
+    why: '沒有名單就沒有東西可以比對,這條會整條略過。這個專案在元件的設定裡多加了一個鍵的話,不會有人發現 —— 元件內部不讀它,而下一次整套更新會把它覆蓋掉。',
   },
   {
     /* 這個值只用來組提示訊息,不做路徑檢查 —— 所以它指錯位置時不會有任何徵兆:
@@ -211,6 +211,7 @@ const REQUIREMENTS = [
       'storeNaming',
       'storeScope',
       'storeActions',
+      'storeActionsExport',
       'storeActionNaming',
       'storeActionReturn',
       'storeApiDefault',
@@ -407,7 +408,6 @@ export const NO_PREREQUISITE_RULES = [
   'unknownExemptMark',
   /* 這條只看檔名與「有沒有人 import 它」,不必先有某個目錄或設定 ——
      專案沒有那種檔案時它一支都掃不到,結果就是通過,不是誤報。 */
-  'projectStyleFile',
   /* 這條只看 setClass 的預設物件裡有沒有帶 class 的值,不必先有某個目錄或設定。 */
   'setClassDefault',
   /* 這條只問「同一層的 .vue 有沒有人 import 這支 css」,不必先有某個設定。

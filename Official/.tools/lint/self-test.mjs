@@ -2032,30 +2032,13 @@ const CSS_CASES = [
     expect: 0,
   },
 
-  // ---------- 規則 projectStyleFile ----------
-  {
-    /* 名字要對得上來源那一支 —— 對不上多半是打錯字,接不上任何東西。
-       這一則刻意不建 probeMissing.css,所以那個附加對象不存在。 */
-    rule: 'projectStyleFile',
-    name: 'projectStyleFile 找不到要附加的來源檔要報',
-    file: `${S}/probeMissingProject.css`,
-    code: `.${classPrefixOf(PROBE_MODULE)} {\n  @apply flex;\n}`,
-    expect: 1,
-    keyword: '找不到它要附加的',
-    /* 元件先載入它 —— 這一則只驗命名。
-       不載入的話會同時報「沒有人 import」,那是另一則在驗的事。 */
-    context: {
-      [`${SC}/Index.vue`]:
-        `<script setup>\nimport './${MODULE_CSS_DIR_NAME}/probeMissingProject.css'\n</script>\n\n` +
-        `<template>\n  <div class="${classPrefixOf(PROBE_MODULE)}"></div>\n</template>\n`,
-    },
-  },
+  // ---------- 規則 moduleCssUnused ----------
   {
     /* 沒有人 import 的話整支一行都不會輸出,而畫面上是
        「這個專案自己加的樣式沒有作用」,不會報錯。 */
     rule: 'moduleCssUnused',
     name: 'moduleCssUnused 沒有元件 import 要報',
-    file: `${S}/commonProject.css`,
+    file: `${S}/probeUnimported.css`,
     code: `.${classPrefixOf(PROBE_MODULE)} {\n  @apply flex;\n}`,
     expect: 1,
     keyword: '沒有任何元件 import',
@@ -2085,30 +2068,6 @@ const CSS_CASES = [
         `<script setup>\nimport './${MODULE_CSS_DIR_NAME}/probeImported.css'\n</script>\n\n` +
         `<template>\n  <div class="${classPrefixOf(PROBE_MODULE)}"></div>\n</template>\n`,
     },
-  },
-  {
-    // 名字對得上、而且元件確實載入了 —— 那就是這個慣例要的樣子
-    rule: 'projectStyleFile',
-    name: 'projectStyleFile 對得上又被載入就不報',
-    file: `${S}/variablesProject.css`,
-    code: `:root {\n  --probe-project-only: 1px;\n}`,
-    expect: 0,
-    context: {
-      // 來源那一支要在,附加才有對象
-      [`${S}/variables.css`]: ':root {\n  --probe-base-only: 1px;\n}',
-      // 元件確實載入了它
-      [`${SC}/Index.vue`]:
-        `<script setup>\nimport './${MODULE_CSS_DIR_NAME}/variablesProject.css'\n</script>\n\n` +
-        `<template>\n  <div class="${classPrefixOf(PROBE_MODULE)}"></div>\n</template>\n`,
-    },
-  },
-  {
-    // 一般的模組樣式不帶那個後綴,不受這條約束
-    rule: 'projectStyleFile',
-    name: 'projectStyleFile 一般的模組樣式不受約束',
-    file: `${S}/common.css`,
-    code: `.${classPrefixOf(PROBE_MODULE)} {\n  @apply flex;\n}`,
-    expect: 0,
   },
 
   // ---------- 規則 moduleLocation ----------
@@ -3102,6 +3061,47 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
     name: 'storeActions 正確檔名不誤報，且 actions 裡可以有 function',
     file: `${T}/.composables/useSelfTestAlphaActions.js`,
     code: `export const useHomeActions = () => {\n  const onReset = () => {}\n\n  return { onReset }\n}\n`,
+    expect: 0,
+  },
+
+  // ---------- 規則 storeActionsExport ----------
+  //
+  // 匿名的 default 匯出跑得起來（自動引入照檔名掛），所以沒有工具擋的話
+  // 同一層會長出兩種寫法，而堆疊追蹤裡那幾支全部印成 default。
+  {
+    name: 'storeActionsExport default 直接接匿名函式要報',
+    file: `${T}/.composables/useSelfTestBetaActions.js`,
+    code: `export default () => {\n  const onReset = () => {}\n\n  return { onReset }\n}\n`,
+    expect: 1,
+    keyword: '具名',
+  },
+  {
+    name: 'storeActionsExport 匿名 async 函式一樣要報',
+    file: `${T}/.composables/useSelfTestBetaActions.js`,
+    code: `export default async () => ({})\n`,
+    expect: 1,
+    keyword: '具名',
+  },
+  {
+    name: 'storeActionsExport 具名之後再 export default 不誤報',
+    file: `${T}/.composables/useSelfTestBetaActions.js`,
+    code:
+      `const useSelfTestBetaActions = () => {\n  const onReset = () => {}\n\n  return { onReset }\n}\n\n` +
+      `export default useSelfTestBetaActions\n`,
+    expect: 0,
+  },
+  {
+    name: 'storeActionsExport 具名的 function 宣告不誤報',
+    file: `${T}/.composables/useSelfTestBetaActions.js`,
+    code: `export default function useSelfTestBetaActions() {\n  return {}\n}\n`,
+    expect: 0,
+  },
+  {
+    name: 'storeActionsExport 註解裡的匿名寫法不誤報',
+    file: `${T}/.composables/useSelfTestBetaActions.js`,
+    code:
+      `/* 不要寫成 export default () => ({}) —— 具名才看得出是誰 */\n` +
+      `const useSelfTestBetaActions = () => ({})\n\nexport default useSelfTestBetaActions\n`,
     expect: 0,
   },
 
@@ -5795,25 +5795,26 @@ const onCheckComponentApiDiff = () => {
   const diffOf = diffComponentApi
 
   const recorded = {
-    vars: { 'a/.css/variables.css': ['--a-x', '--a-y'] },
     config: { 'a/Index.vue': ['mode', 'step.hour'] },
     expose: { 'a/Index.vue': ['focus', 'inputRef'] },
     emits: { 'a/Index.vue': ['change', 'update:modelValue'] },
   }
 
   {
+    /* 樣式整層歸接手的專案,變數本來就會增減 —— 名單裡沒有那一類,
+       就算硬塞一份進來也不可以被當成違規。
+       擋在這裡是因為那一類曾經在名單裡:留著的話,
+       每個專案一加自己的樣式變數就被報一次,而那全是誤報。 */
     const got = diffOf(recorded, {
       vars: { 'a/.css/variables.css': ['--a-x', '--a-y', '--a-new'] },
       config: {},
     })
 
-    if (got.length !== 1 || got[0].added[0] !== '--a-new') problems.push('多了一個變數時沒有講出來')
-    if (got[0]?.kind !== 'vars') problems.push('多出來的變數沒有標成 vars')
+    if (got.length) problems.push('樣式的變數不該被當成元件的介面')
   }
 
   {
     const got = diffOf(recorded, {
-      vars: {},
       config: { 'a/Index.vue': ['mode', 'step.hour', 'probeNew'] },
     })
 
@@ -5825,7 +5826,6 @@ const onCheckComponentApiDiff = () => {
   {
     // 扁平改成巢狀:底下那幾個鍵在來源不存在,而元件讀的是原本那一個
     const got = diffOf(recorded, {
-      vars: {},
       config: { 'a/Index.vue': ['mode.x', 'mode.y', 'step.hour'] },
     })
 
@@ -5835,7 +5835,6 @@ const onCheckComponentApiDiff = () => {
   {
     // 值不一樣不影響名單 —— 名單裡只有名字
     const got = diffOf(recorded, {
-      vars: { 'a/.css/variables.css': ['--a-x', '--a-y'] },
       config: { 'a/Index.vue': ['mode', 'step.hour'] },
     })
 
@@ -5844,7 +5843,6 @@ const onCheckComponentApiDiff = () => {
 
   {
     const got = diffOf(recorded, {
-      vars: { 'b/.css/variables.css': ['--b-new'] },
       config: { 'b/Index.vue': ['whatever'] },
     })
 
@@ -5856,7 +5854,6 @@ const onCheckComponentApiDiff = () => {
        使用端拿著 ref 照名字呼叫,多開一個只有這個專案有 ——
        下一次整套更新會把它蓋掉,而那一行從此呼叫一個不存在的東西。 */
     const got = diffOf(recorded, {
-      vars: {},
       config: {},
       expose: { 'a/Index.vue': ['focus', 'inputRef', 'onProbeNew'] },
     })
@@ -5870,7 +5867,6 @@ const onCheckComponentApiDiff = () => {
     /* 第四種:會發出的事件。專案自己多發一個,使用端綁了它 ——
        下一次整套更新把它蓋掉之後,那一行從此不會被呼叫,而 Vue 一聲都不吭。 */
     const got = diffOf(recorded, {
-      vars: {},
       config: {},
       expose: {},
       emits: { 'a/Index.vue': ['change', 'probeNew', 'update:modelValue'] },
@@ -7570,6 +7566,188 @@ const onCheckThemeParsing = () => {
   }
 }
 
+/**
+ * 「碰過之後值一動就驗」實際上會不會驗 —— 把表單跑起來操作一遍。
+ *
+ * 讀原始碼檢查不出這件事:它曾經寫成「把 touched 換算成 <Field> 的
+ * validateOnModelUpdate」,那樣看起來完全正確,而且從來沒有生效過 ——
+ * 那個 prop 只在元件建立的當下被讀一次,而那一刻誰都還沒碰過。
+ * 失效的時候不報錯,畫面上只是送出後補填,紅字不會消失。
+ *
+ * 用自訂的 renderer 而不是 SSR:那個環境不執行 watch,而要驗的正是 watch。
+ * 畫面長什麼樣不重要,但父子與前後關係要是真的 —— 回 null 的話元素一多
+ * 就 patch 不動,掛載那一步會停住而且不報錯。
+ */
+const onCheckTouchedValidate = async () => {
+  let vue = null
+  let veeValidate = null
+
+  try {
+    vue = await import('vue')
+    veeValidate = await import('vee-validate')
+  } catch {
+    vue = null
+  }
+
+  const composablePath = path.join(root, COMPONENTS_DIR, 'mForm/.composables/useValidateEvents.js')
+
+  if (!vue?.createRenderer || !veeValidate?.Form || !fs.existsSync(composablePath)) {
+    skipped.push({ name: '碰過之後值一動就驗', need: 'formValidateEvents' })
+    return
+  }
+
+  const { computed, createRenderer, defineComponent, h, inject, nextTick, ref, toValue, watch } =
+    vue
+  const { Form, Field, FormContextKey, defineRule } = veeValidate
+
+  // 元件庫走自動引入,那幾個名字在檔案裡沒有 import —— 這裡要自己補上
+  Object.assign(globalThis, { computed, inject, ref, toValue, watch })
+
+  /* 建置工具會把 import.meta.env 換成實際的值,直接載入沒有那一步,
+     而 import.meta 是每個模組自己的,從這裡設不到被載入的那一支。
+     所以照原始碼複製一份、只把那個判斷換成 false —— 驗的仍是同一段邏輯。 */
+  const copyDir = path.join(root, `${PROBE}form`)
+
+  onMakeDirTracked(copyDir)
+
+  const copyPath = path.join(copyDir, 'useValidateEvents.mjs')
+
+  fs.writeFileSync(
+    copyPath,
+    fs.readFileSync(composablePath, 'utf8').replaceAll('import.meta.env.DEV', 'false')
+  )
+
+  const { default: useValidateEvents } = await import(pathToFileURL(copyPath).href)
+
+  defineRule('selfTestRequired', (value) => (value === null || value === '' ? '必填' : true))
+
+  const noop = () => {}
+  const onCreateNode = (type) => ({ type, children: [], parent: null })
+  const { createApp } = createRenderer({
+    createElement: onCreateNode,
+    createText: () => onCreateNode('#text'),
+    createComment: () => onCreateNode('#comment'),
+    setText: noop,
+    setElementText: noop,
+    insert: (child, parent, anchor) => {
+      if (!parent) return
+
+      child.parent = parent
+      parent.children ||= []
+
+      const at = anchor ? parent.children.indexOf(anchor) : -1
+
+      if (at < 0) parent.children.push(child)
+      else parent.children.splice(at, 0, child)
+    },
+    remove: (child) => {
+      const list = child.parent?.children
+      const at = list ? list.indexOf(child) : -1
+
+      if (at >= 0) list.splice(at, 1)
+    },
+    parentNode: (node) => node.parent ?? null,
+    nextSibling: (node) => {
+      const list = node.parent?.children
+
+      return list ? (list[list.indexOf(node) + 1] ?? null) : null
+    },
+    patchProp: noop,
+  })
+
+  let form = null
+  const isShown = ref(true)
+
+  const Child = defineComponent({
+    setup() {
+      const validateOn = useValidateEvents(
+        () => ['touchedModelUpdate'],
+        () => 'probe'
+      )
+
+      return () =>
+        h(
+          Field,
+          { name: 'probe', rules: 'selfTestRequired', ...validateOn.value },
+          { default: ({ errorMessage }) => h('span', errorMessage || '') }
+        )
+    },
+  })
+
+  const Inner = defineComponent({
+    setup() {
+      form = inject(FormContextKey)
+
+      return () => h('div', isShown.value ? [h(Child)] : [])
+    },
+  })
+
+  createApp(
+    defineComponent({ setup: () => () => h(Form, null, { default: () => h(Inner) }) })
+  ).mount({ type: 'root', children: [] })
+
+  const errorOf = () => form.errors.value.probe ?? null
+  const isTouched = () => !!form.getPathState?.('probe')?.touched
+  const settle = async () => {
+    await nextTick()
+    await nextTick()
+    await new Promise((resolve) => setTimeout(resolve, 0))
+  }
+
+  /* 改值一律傳第三個參數 false:那個 API 自己預設會驗一次,
+     不關掉的話驗到的是它,不是要測的這一段。 */
+  form.setFieldValue('probe', '', false)
+  await settle()
+  report(errorOf() === null, '碰過之後值一動就驗 還沒碰過時不驗', [])
+
+  form.setFieldTouched('probe', true)
+  await form.validate()
+  await settle()
+  report(errorOf() !== null, '碰過之後值一動就驗 送出之後要有紅字', [])
+
+  // 這是失效時看得到的症狀:補填之後紅字不會消失,要再按一次送出
+  form.setFieldValue('probe', '填好了', false)
+  await settle()
+  report(errorOf() === null, '碰過之後值一動就驗 補填之後紅字要消失', [])
+
+  form.setFieldValue('probe', '', false)
+  await settle()
+  report(errorOf() !== null, '碰過之後值一動就驗 再清空紅字要回來', [])
+
+  /* 送出的路徑不只一條:走 <Form @submit> 會經過那個把全部標成碰過的流程,
+     而自己拿 slot 的 validate() 來驗的不經過它 —— 那條只設「驗過」。
+     只看碰過的話,用後面那種寫法的頁面完全不會即時驗,而且沒有任何線索。 */
+  form.resetForm()
+  await settle()
+
+  form.setFieldValue('probe', '', false)
+  await form.validate()
+  await settle()
+  report(errorOf() !== null, '碰過之後值一動就驗 只呼叫 validate() 也要有紅字', [])
+
+  form.setFieldValue('probe', '填好了', false)
+  await settle()
+  report(
+    errorOf() === null,
+    '碰過之後值一動就驗 只呼叫 validate() 的路徑,補填之後紅字也要消失',
+    []
+  )
+
+  /* 反方向:欄位被收起來再放回來(v-if 切換的那種),不可以一出現就跳紅字 ——
+     使用者什麼都還沒做,而那正是這個時機要避開的情況。 */
+  isShown.value = false
+  await settle()
+  isShown.value = true
+  await settle()
+
+  report(!isTouched(), '碰過之後值一動就驗 重新出現的欄位不算碰過', [])
+  report(errorOf() === null, '碰過之後值一動就驗 重新出現時不跳紅字', [])
+
+  form.setFieldValue('probe', '', false)
+  await settle()
+  report(errorOf() === null, '碰過之後值一動就驗 重新出現後回填也不跳紅字', [])
+}
+
 const onCheckThemeBlocks = () => {
   const light = '&.\\-\\-light'
   const dark = '&.\\-\\-dark'
@@ -8031,6 +8209,13 @@ const SKIP_REASON = {
   apiSpec:
     '這個專案沒有 api 規格文件(設定的 API_SPEC_DIR 留空或檔案不在),' +
     '「前端自己掛的欄位要加底線」那條分不出哪些名字是後端給的,本來就整條略過。',
+  formValidateEvents:
+    '這個專案沒有那支表單驗證時機的共用檔(mForm/.composables/useValidateEvents.js),' +
+    '或它要用的套件沒裝 —— 「碰過之後值一動就驗」就沒有東西可以驗。',
+  svgSpritemap:
+    '這個專案沒有接圖示合成(.vite/svg-spritemap.mjs 不在,或它要用的套件沒裝),' +
+    '「開發時那個路由認不認得帶前綴的請求」就沒有東西可以驗。' +
+    '沒接圖示的專案本來就不需要那一段。',
   popupIdDeclared:
     '這個專案有「轉手元件」(彈窗的 id 由使用端傳進來,寫成 :id="props.id"),' +
     '所以「全案宣告了哪些 id」這份清單不完整。不完整的清單只回答得了「有」——' +
@@ -8403,6 +8588,61 @@ try {
 
     report(!problems.length, c.name, problems)
   }
+
+  /* 開發時提供圖示的那個路由,判斷「這個請求是不是要拿它」。
+
+     這一段在來源這邊驗不到:它只有開發伺服器跑起來、而且站台掛在子目錄時才走得到,
+     錯了也不報錯 —— 那個請求會一路落到框架自己的處理,拿回來的是首頁的 HTML,
+     瀏覽器拿它當 svg 解析,畫面上只是圖示全部不見。
+
+     所以直接拿那支判斷來驗。沒接圖示的專案(檔案不在,或它要用的套件沒裝)
+     就跳過並講明原因,不讓整份檢查因為載入失敗而停擺。 */
+  let spritemapModule = null
+
+  try {
+    spritemapModule = await import('../../.vite/svg-spritemap.mjs')
+  } catch {
+    spritemapModule = null
+  }
+
+  if (!spritemapModule?.isSpritemapRequest) {
+    skipped.push({ name: '圖示路由認得帶部署前綴的請求', need: 'svgSpritemap' })
+  } else {
+    const { isSpritemapRequest, spritemapRoute } = spritemapModule
+
+    const routeCases = [
+      { name: '掛在網域根目錄的請求要認得', url: spritemapRoute, expect: true },
+      {
+        name: '掛在子目錄的請求也要認得(開頭比對會漏掉它)',
+        url: `/Sub/Path${spritemapRoute}`,
+        expect: true,
+      },
+      { name: '帶版本號的一樣要認得', url: `${spritemapRoute}?v=1234`, expect: true },
+      { name: '別的路徑不可以被認成圖示', url: '/api/user', expect: false },
+      { name: '首頁不可以被認成圖示', url: '/', expect: false },
+      { name: '沒有網址時不可以認成圖示', url: undefined, expect: false },
+    ]
+
+    for (const one of routeCases) {
+      const actual = isSpritemapRequest(one.url)
+
+      report(
+        actual === one.expect,
+        `圖示路由 ${one.name}`,
+        actual === one.expect ? [] : [`預期 ${one.expect},實際 ${actual}(網址 ${one.url})`]
+      )
+    }
+  }
+
+  /* 「碰過之後值一動就驗」這個驗證時機,實際上會不會驗。
+
+     這一段沒有辦法用讀原始碼的方式檢查:它曾經寫成「把 touched 換算成
+     <Field> 的 validateOnModelUpdate」,那樣看起來完全正確,而且**從來沒有生效過**
+     —— 那個 prop 只在元件建立的當下被讀一次,而那一刻誰都還沒碰過。
+     失效的時候不報錯,畫面上只是送出後補填,紅字不會消失。
+
+     所以真的把表單跑起來操作一遍。沒有那幾個套件的專案就跳過並講明原因。 */
+  await onCheckTouchedValidate()
 
   for (const c of EMPTY_CLASS_CASES) {
     const result = onRemoveEmptyClassAttr(c.code, { rel: c.rel })
