@@ -8,81 +8,91 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
-// re-export 不會在這支檔案的作用域產生綁定 —— 這裡自己要用到的常數必須另外 import
-import {
-  ACTIONS_DIR_NAME,
-  COMPONENT_DIRS,
-  COMPONENT_FOLDERS,
-  CONVENTION_RULES_DIR,
-  CONVENTION_SKILLS_DIR,
-  CSS_MODULES_DIR,
-  MODULE_CSS_DIR_NAME,
-  PROJECT_DOCS_DIR,
-  SCAN_TARGETS,
-  SCANNABLE_RE,
-  SKIP_DIRS,
-  SRC_PREFIX,
-  STORE_DIR,
-  TOOLING_PREFIXES,
-  VIEW_RESOURCE_DEPTH,
-  VIEWS_DIR,
-} from './project-config.mjs'
+/* 設定整包取進來,一項一項轉出去 —— **不要逐項 named import**。
+ *
+ * 逐項寫的話,來源改了一個設定項的名字(或新增一項而某個專案的設定檔還沒有),
+ * 拿到這套工具的專案會在**模組解析階段**就失敗:
+ * `SyntaxError: does not provide an export named …`,一行程式碼都還沒執行。
+ *
+ * 那個失敗會讓整套檢查一條都跑不了 —— 包括「設定檔少了什麼」那一條規則
+ * (configItem)自己,而錯誤訊息看不出是設定檔的問題,
+ * 看到的人只知道工具壞了。
+ *
+ * 整包取值不會這樣:缺的那一項拿到 undefined,名字先記下來,
+ * 由前提檢查那一層講出「設定檔缺少哪幾項」。
+ */
+import * as projectConfig from './project-config.mjs'
 
-export {
-  ABSOLUTE_PATH_SCOPE,
-  ACTIONS_DIR_NAME,
-  API_DIR,
-  API_SPEC_DIR,
-  DEEP_CLONE_HELPER,
-  API_NAMING_IGNORED_SEGMENTS,
-  BREAKPOINTS,
-  BREAKPOINT_SCREENS,
-  BUILD_CONFIG_FILES,
-  COLOR_CSS_DIR,
-  COMPONENTS_DIR,
-  COMPONENT_DIRS,
-  COMPONENT_FOLDERS,
-  CONVENTION_DOCS_DIR,
-  CONVENTION_RULES_DIR,
-  CONVENTION_SKILLS_DIR,
-  BUILTIN_POPUP_IDS,
-  CSS_MODULES_DIR,
-  FORM_GROUP_VALIDATOR,
-  FRAMEWORKS,
-  GENERATED_FILES,
-  IMPORT_ORDER_GROUPS,
-  IS_FILE_BASED_ROUTING,
-  MODULE_CSS_DIR_NAME,
-  PARALLEL_AWAIT_HELPER,
-  POPUP_TAGS,
-  POPUP_DIR_NAME,
-  WRITING_STYLE_SCOPE,
-  VENDOR_DIRS,
-  PROJECT_CONFIG_FILES,
-  PROJECT_DOCS_DIR,
-  PROJECT_NAMES,
-  PROJECT_NAME_SCOPE,
-  SCANNABLE_EXTENSIONS,
-  SCANNABLE_RE,
-  SCAN_TARGETS,
-  SHARED_API_FILE,
-  SHARED_MODULE_VARIABLES,
-  SKIP_DIRS,
-  SOURCE_PROJECT_NAME,
-  STYLE_CONFIG_FILES,
-  SRC_DIR,
-  STANDALONE_APIS,
-  STANDALONE_STORES,
-  STORE_INSTANCE_FILE,
-  STORE_DIR,
-  STORE_SETUP_CALLS,
-  TAILWIND_THEME_OVERRIDES,
-  TOOLING_PREFIXES,
-  VIEW_RESOURCE_DEPTH,
-  VIEW_UNDERSCORE_FOLDERS,
-  VIEWS_DIR,
-} from './project-config.mjs'
+/** 這個專案的設定檔少了哪幾項 —— 由前提檢查讀它 */
+export const MISSING_CONFIG_ITEMS = []
 
+const configOf = (name) => {
+  if (!(name in projectConfig)) MISSING_CONFIG_ITEMS.push(name)
+
+  return projectConfig[name]
+}
+
+export const PROJECT_FRAMEWORK = configOf('PROJECT_FRAMEWORK')
+export const VIEWS_DIR = configOf('VIEWS_DIR')
+export const VIEW_RESOURCE_DEPTH = configOf('VIEW_RESOURCE_DEPTH')
+export const STORE_DIR = configOf('STORE_DIR')
+export const ACTIONS_DIR_NAME = configOf('ACTIONS_DIR_NAME')
+export const MODULE_CSS_DIR_NAME = configOf('MODULE_CSS_DIR_NAME')
+export const API_DIR = configOf('API_DIR')
+export const API_SPEC_DIR = configOf('API_SPEC_DIR')
+export const COMPONENTS_DIR = configOf('COMPONENTS_DIR')
+export const IMPORT_ORDER_GROUPS = configOf('IMPORT_ORDER_GROUPS')
+export const COMPONENT_DIRS = configOf('COMPONENT_DIRS')
+export const COMPONENT_FOLDERS = configOf('COMPONENT_FOLDERS')
+export const VIEW_UNDERSCORE_FOLDERS = configOf('VIEW_UNDERSCORE_FOLDERS')
+export const POPUP_DIR_NAME = configOf('POPUP_DIR_NAME')
+export const CSS_MODULES_DIR = configOf('CSS_MODULES_DIR')
+export const SHARED_MODULE_VARIABLES = configOf('SHARED_MODULE_VARIABLES')
+export const COLOR_CSS_DIR = configOf('COLOR_CSS_DIR')
+export const BREAKPOINTS = configOf('BREAKPOINTS')
+export const BREAKPOINT_SCREENS = configOf('BREAKPOINT_SCREENS')
+export const SRC_DIR = configOf('SRC_DIR')
+export const SKIP_DIRS = configOf('SKIP_DIRS')
+export const STORE_SETUP_CALLS = configOf('STORE_SETUP_CALLS')
+export const STORE_INSTANCE_FILE = configOf('STORE_INSTANCE_FILE')
+export const STANDALONE_STORES = configOf('STANDALONE_STORES')
+export const STANDALONE_APIS = configOf('STANDALONE_APIS')
+export const SHARED_API_FILE = configOf('SHARED_API_FILE')
+export const API_NAMING_IGNORED_SEGMENTS = configOf('API_NAMING_IGNORED_SEGMENTS')
+export const PARALLEL_AWAIT_HELPER = configOf('PARALLEL_AWAIT_HELPER')
+export const FORM_GROUP_VALIDATOR = configOf('FORM_GROUP_VALIDATOR')
+export const POPUP_TAGS = configOf('POPUP_TAGS')
+export const BUILTIN_POPUP_IDS = configOf('BUILTIN_POPUP_IDS')
+export const DEEP_CLONE_HELPER = configOf('DEEP_CLONE_HELPER')
+export const PROJECT_NAMES = configOf('PROJECT_NAMES')
+export const SOURCE_PROJECT_NAME = configOf('SOURCE_PROJECT_NAME')
+export const COLOR_CSS_PREFIX = configOf('COLOR_CSS_PREFIX')
+export const COLOR_HUE_SOURCE = configOf('COLOR_HUE_SOURCE')
+export const COLOR_HUES = configOf('COLOR_HUES')
+export const COLOR_NAME_SEPARATOR = configOf('COLOR_NAME_SEPARATOR')
+export const COLOR_RGB_SUFFIX = configOf('COLOR_RGB_SUFFIX')
+export const COLOR_SUFFIX_PICK = configOf('COLOR_SUFFIX_PICK')
+export const STYLE_CONFIG_FILES = configOf('STYLE_CONFIG_FILES')
+export const TAILWIND_THEME_OVERRIDES = configOf('TAILWIND_THEME_OVERRIDES')
+export const SCANNABLE_EXTENSIONS = configOf('SCANNABLE_EXTENSIONS')
+export const SCANNABLE_RE = configOf('SCANNABLE_RE')
+export const PROJECT_DOCS_DIR = configOf('PROJECT_DOCS_DIR')
+export const GENERATED_FILES = configOf('GENERATED_FILES')
+export const VENDOR_DIRS = configOf('VENDOR_DIRS')
+export const CONVENTION_RULES_DIR = configOf('CONVENTION_RULES_DIR')
+export const CONVENTION_SKILLS_DIR = configOf('CONVENTION_SKILLS_DIR')
+export const CONVENTION_DOCS_DIR = configOf('CONVENTION_DOCS_DIR')
+export const FRAMEWORKS = configOf('FRAMEWORKS')
+export const IS_FILE_BASED_ROUTING = configOf('IS_FILE_BASED_ROUTING')
+export const IS_SRC_PROJECT_ROOT = configOf('IS_SRC_PROJECT_ROOT')
+export const SRC_PREFIX = configOf('SRC_PREFIX')
+export const TOOLING_PREFIXES = configOf('TOOLING_PREFIXES')
+export const SCAN_TARGETS = configOf('SCAN_TARGETS')
+export const PROJECT_NAME_SCOPE = configOf('PROJECT_NAME_SCOPE')
+export const ABSOLUTE_PATH_SCOPE = configOf('ABSOLUTE_PATH_SCOPE')
+export const WRITING_STYLE_SCOPE = configOf('WRITING_STYLE_SCOPE')
+export const BUILD_CONFIG_FILES = configOf('BUILD_CONFIG_FILES')
+export const PROJECT_CONFIG_FILES = configOf('PROJECT_CONFIG_FILES')
 /**
  * 統一的違規格式 —— 五層守門共用同一份輸出邏輯,靠的就是這個形狀。
  *

@@ -2309,6 +2309,12 @@ const hasLayoutRules = (text) => /@apply\b/.test(text) || /^[^@\n]*\.[\w\\-]+[^{
 //
 // 範圍是元件自己的樣式目錄裡每一支 css,不限檔名 ——
 // 只看其中幾種的話,其餘那些沒人 import 也不會被發現。
+//
+// **載入的方式有兩種,兩種都算。** 元件在 <script> 裡 import 是一種;
+// 另一種是接手的專案把自己拆出去的那幾支,用 css 的 `@import` 從
+// styleProject.css(或別的已經被載入的樣式)接進來 —— 那一支照樣會輸出。
+// 只認前者的話,照著規範接的人會被報一筆違規,而照訊息去 .vue 加一行,
+// 又違反「不要自己多加 import」那一條:兩邊都過不了。
 
 const checkModuleCssUnused = ({ rel, root }) => {
   if (!isModuleCss(rel)) return []
@@ -2321,6 +2327,29 @@ const checkModuleCssUnused = ({ rel, root }) => {
 
   let imported = false
   let items = []
+
+  /* 先看同一層的樣式有沒有用 @import 接它。
+
+     接進來的那一支自己有沒有人載入是它自己的事 —— 這裡只回答
+     「有沒有人接這一支」。整條鏈都沒人載入的話,鏈頭那一支會被報,
+     訊息指的就是真正要處理的位置。 */
+  try {
+    for (const item of fs.readdirSync(cssDir, { withFileTypes: true })) {
+      if (!item.isFile() || !item.name.endsWith('.css') || item.name === fileName) continue
+
+      const text = fs.readFileSync(path.join(cssDir, item.name), 'utf8')
+
+      for (const m of text.matchAll(/@import\s+(?:url\()?['"]([^'"]+)['"]/g)) {
+        if (path.basename(m[1]) === fileName) imported = true
+      }
+
+      if (imported) break
+    }
+  } catch {
+    // 讀不到樣式那一層時問不出來,交給下面那一段看 .vue
+  }
+
+  if (imported) return issues
 
   /* try 只包「讀檔」這一件事。
 
@@ -2358,9 +2387,10 @@ const checkModuleCssUnused = ({ rel, root }) => {
         rel,
         1,
         'moduleCssUnused',
-        `沒有任何元件 import 這支 —— 樣式檔不會自己生效,整支一行都不會輸出,` +
-          `而畫面上少了那一整批樣式看起來常常像設計本來就長那樣;` +
-          `在用得到它的那幾支 .vue 裡加上 import './${MODULE_CSS_DIR_NAME}/${fileName}',` +
+        `沒有人載入這支 —— 樣式檔不會自己生效,整支一行都不會輸出,` +
+          `而畫面上少了那一整批樣式看起來常常像設計本來就長那樣。` +
+          `接手的專案自己拆出去的樣式,從 styleProject.css 用 @import './${fileName}' 接;` +
+          `元件本身要載的才寫進 .vue(import './${MODULE_CSS_DIR_NAME}/${fileName}')。` +
           `真的用不到了就把這支刪掉`
       )
     )

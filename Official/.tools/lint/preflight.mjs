@@ -41,7 +41,8 @@ import {
   STYLE_CONFIG_FILES,
   VIEW_RESOURCE_DEPTH,
   VIEWS_DIR,
-} from './project-config.mjs'
+  MISSING_CONFIG_ITEMS,
+} from './shared.mjs'
 
 const hasDir = (root, rel) => {
   const abs = path.join(root, ...rel.split('/'))
@@ -449,6 +450,23 @@ export const onReportPreflight = (root, { print = console.error } = {}) => {
     print('  設定檔多出沒有人讀的項目時只提醒,不擋;其他專案則是一律擋。')
     print('  共用規則的指紋不比對(規則在這裡長,每改一行都報一次等於不能工作);')
     print('  改完規則要跑 npm run rules:seal 重新封存,新的清單才跟著規則複製出去。')
+  }
+
+  /* 設定檔少了規則要讀的項目 —— 第一件要講的事。
+
+     少了那幾項,讀它們的規則拿到的是 undefined:有的整條靜靜略過,
+     有的把 undefined 當成路徑去比對,結果是那一塊完全沒有被檢查,
+     而畫面上顯示通過。
+
+     這裡報得出來的前提是「工具載得起來」—— 所以設定是整包取進來的,
+     不是逐項 named import(那樣會在模組解析階段就死,見 shared.mjs)。 */
+  if (MISSING_CONFIG_ITEMS.length) {
+    print('')
+    print(`✗ 設定檔(.tools/lint/project-config.mjs)缺少 ${MISSING_CONFIG_ITEMS.length} 項:`)
+    for (const name of MISSING_CONFIG_ITEMS) print(`    ${name}`)
+    print('')
+    print('  這幾項是規則要讀的。跟規範工具的來源要同一版的設定檔,')
+    print('  把缺的那幾項補上(值填成這個專案自己的)—— 只補名字、值照抄來源是不對的。')
   }
 
   /* 專案自己關掉的範圍要講出來 —— 那不是「缺了什麼」,是設定裡填的,

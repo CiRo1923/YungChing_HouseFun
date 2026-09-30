@@ -1,19 +1,19 @@
 {
   "checksum.mjs": "f70f03220dbdd642",
-  "color-order.mjs": "6838239f001e25ba",
+  "color-order.mjs": "ea82612032005a07",
   "colors.mjs": "569d6edb931b66c2",
   "component-api.mjs": "2ff9ab8bae0afbda",
-  "dev-server-plugin.mjs": "fa66bb85c0c3ecf4",
+  "dev-server-plugin.mjs": "ea8d6608eac496c5",
   "guard-file.mjs": "7bba73a74b428edc",
-  "lint-core.mjs": "9b4039fc1c80b702",
-  "lint.mjs": "93731b18031291be",
-  "preflight.mjs": "8637bb017c3dcf14",
+  "lint-core.mjs": "aef15ac9df9c9984",
+  "lint.mjs": "ab8c2fb97d8bf237",
+  "preflight.mjs": "80cae94fd04e2441",
   "rules-api.mjs": "6e2e923cfd48bfab",
   "rules-code.mjs": "c83d59aae73df2b7",
   "rules-global.mjs": "13200b6d2f9b59c6",
   "rules-page.mjs": "0cfdc8e6497343c4",
   "rules-store.mjs": "83da5429d2b92ae1",
-  "self-test.mjs": "c16be598151b75aa",
-  "shared.mjs": "5d0d6e0301b6fc59",
-  "test-shapes.mjs": "30bfe267d9d232af"
+  "self-test.mjs": "84c5cd2832c92455",
+  "shared.mjs": "152b9b0e87eca607",
+  "test-shapes.mjs": "34582a7c99fe0807"
 }

@@ -141,7 +141,7 @@ import {
   VIEW_RESOURCE_DEPTH,
   VIEWS_DIR,
   VIEW_UNDERSCORE_FOLDERS,
-} from './project-config.mjs'
+} from './shared.mjs'
 import {
   classPrefixOf,
   componentTagOf,
@@ -150,6 +150,7 @@ import {
   isUnderAny,
   listConventionRules,
   listConventionSkills,
+  listFiles,
   listViewFolders,
   listViewSubFolders,
   maskComments,
@@ -2041,7 +2042,7 @@ const CSS_CASES = [
     file: `${S}/probeUnimported.css`,
     code: `.${classPrefixOf(PROBE_MODULE)} {\n  @apply flex;\n}`,
     expect: 1,
-    keyword: '沒有任何元件 import',
+    keyword: '沒有人載入這支',
   },
   {
     /* **一般的模組樣式也要看**,不只檔名帶 Project 的那幾支。
@@ -2054,7 +2055,7 @@ const CSS_CASES = [
     file: `${S}/probeNobodyImports.css`,
     code: `.${classPrefixOf(PROBE_MODULE)} {\n  @apply flex;\n}`,
     expect: 1,
-    keyword: '沒有任何元件 import',
+    keyword: '沒有人載入這支',
   },
   {
     // 有人載入就是它要的樣子
@@ -2068,6 +2069,31 @@ const CSS_CASES = [
         `<script setup>\nimport './${MODULE_CSS_DIR_NAME}/probeImported.css'\n</script>\n\n` +
         `<template>\n  <div class="${classPrefixOf(PROBE_MODULE)}"></div>\n</template>\n`,
     },
+  },
+  {
+    /* 接手的專案拆出去的樣式,是從 styleProject.css 用 css 的 @import 接的 ——
+       那一支照樣會輸出。只認 .vue 裡的 import 的話,照著規範接的人會被報一筆,
+       而照訊息去 .vue 加一行又違反「不要自己多加 import」:兩邊都過不了。 */
+    rule: 'moduleCssUnused',
+    name: 'moduleCssUnused 用 @import 接進來的也算有人載入',
+    file: `${S}/probeViaAtImport.css`,
+    code: `.${classPrefixOf(PROBE_MODULE)} {\n  @apply flex;\n}`,
+    expect: 0,
+    context: {
+      [`${S}/styleProject.css`]: `@import './probeViaAtImport.css';\n`,
+      [`${SC}/Index.vue`]:
+        `<script setup>\nimport './${MODULE_CSS_DIR_NAME}/styleProject.css'\n</script>\n\n` +
+        `<template>\n  <div class="${classPrefixOf(PROBE_MODULE)}"></div>\n</template>\n`,
+    },
+  },
+  {
+    // 接的那一支自己也沒人載入時,鏈頭那一支要被報 —— 訊息指的才是真正要處理的位置
+    rule: 'moduleCssUnused',
+    name: 'moduleCssUnused 只是放在那裡、沒有人 @import 也沒人 import,照樣要報',
+    file: `${S}/probeNoOneTakes.css`,
+    code: `.${classPrefixOf(PROBE_MODULE)} {\n  @apply flex;\n}`,
+    expect: 1,
+    keyword: '沒有人載入這支',
   },
 
   // ---------- 規則 moduleLocation ----------
@@ -5891,6 +5917,73 @@ const onCheckComponentApiDiff = () => {
  * 上面那則案例驗的是「兩份名單怎麼比」,它拿到的已經是算好的 key。
  * 「路徑怎麼變成 key」是中間那一段,沒有人看著的就是它。
  */
+/**
+ * 每一支載入樣式的元件,都要有那個給專案接自己樣式的接點。
+ *
+ * 那一支(styleProject.css)是空的,而且排在元件載入的最後 ——
+ * 接手的專案在裡面寫自己的樣式,蓋得過來源的值,而且不會被整套更新覆蓋。
+ *
+ * **漏掉的元件沒有任何徵兆。** 它照樣跑得起來、檢查照樣通過,
+ * 只是那支元件在每個專案都沒有地方可以改樣式 ——
+ * 接手的人只能改來源那幾支,而那幾支下一次更新就被蓋回去。
+ *
+ * 反方向也要看:有檔案卻沒有人載入的話,寫在裡面的東西一行都不會輸出
+ * (那一半由規則 moduleCssUnused 在擋,這裡只確認接點本身都在)。
+ */
+const onCheckStyleProjectHook = () => {
+  /* **只在來源驗。** 接點是跟著元件一起複製出去的,拿到這套工具的專案
+     不必自己維護它;而那些專案還有自己寫的元件(來源沒有的那幾支),
+     那些本來就不需要接點 —— 在那邊驗的話,每一支自己的元件都被報一筆,
+     而那全是誤報。 */
+  if (!IS_SOURCE_PROJECT) {
+    skipped.push({ name: '每一支元件都有給專案接樣式的那個接點', need: 'sourceProject' })
+    return
+  }
+
+  const problems = []
+  const hookFile = 'styleProject.css'
+  const hookImport = `./${MODULE_CSS_DIR_NAME}/${hookFile}`
+
+  for (const dir of COMPONENT_DIRS) {
+    for (const abs of listFiles(root, dir)) {
+      const rel = toRel(root, abs)
+
+      if (!rel.endsWith('.vue')) continue
+
+      const text = fs.readFileSync(abs, 'utf8')
+
+      // 自己完全不載入樣式的(轉手型元件)本來就沒有接點可言
+      if (!new RegExp(`import '\\./${MODULE_CSS_DIR_NAME}/`).test(text)) continue
+
+      if (!text.includes(`'${hookImport}'`)) {
+        problems.push(`${rel} 沒有載入 ${hookFile}`)
+        continue
+      }
+
+      /* 位置也要對:接點要排在所有樣式的最後,不然它蓋不過來源那幾支。
+         排錯位置不會報錯,只是專案寫在裡面的值被來源蓋掉。 */
+      const lines = text.split('\n')
+      const styleLines = lines
+        .map((line, at) => ({ line: line.trim(), at }))
+        .filter(({ line }) => new RegExp(`^import '\\./${MODULE_CSS_DIR_NAME}/`).test(line))
+
+      const last = styleLines[styleLines.length - 1]
+
+      if (last && !last.line.includes(hookFile)) {
+        problems.push(`${rel} 的 ${hookFile} 沒有排在樣式的最後`)
+      }
+
+      const cssDir = path.join(path.dirname(abs), MODULE_CSS_DIR_NAME)
+
+      if (!fs.existsSync(path.join(cssDir, hookFile))) {
+        problems.push(`${rel} 載入了 ${hookFile},但那一支不在`)
+      }
+    }
+  }
+
+  report(!problems.length, '每一支元件都有給專案接樣式的那個接點', problems)
+}
+
 const onCheckComponentApiKey = () => {
   const problems = []
 
@@ -8474,6 +8567,7 @@ try {
   onCheckPreCommitFilter()
   onCheckExemptNameReaders()
   onCheckComponentApiDiff()
+  onCheckStyleProjectHook()
   onCheckComponentApiKey()
   onCheckCaseFilesInProbeDirs()
   onCheckGeneratedCleanup()

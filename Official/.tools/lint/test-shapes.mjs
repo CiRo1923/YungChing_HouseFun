@@ -38,7 +38,7 @@ import {
   CONVENTION_RULES_DIR,
   CONVENTION_SKILLS_DIR,
   STYLE_CONFIG_FILES,
-} from './project-config.mjs'
+} from './shared.mjs'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 const root = path.resolve(here, '../..')

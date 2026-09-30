@@ -22,10 +22,31 @@ import {
   toRel,
 } from './lint-core.mjs'
 import { onReportPreflight, preflight } from './preflight.mjs'
-import { isWarn } from './shared.mjs'
+import { MISSING_CONFIG_ITEMS, isWarn } from './shared.mjs'
 import { BOLD, CYAN, DIM, GREEN, RED, RESET, YELLOW } from './colors.mjs'
 
 const root = path.resolve(fileURLToPath(import.meta.url), '../../..')
+
+/* 設定檔少了規則要讀的項目 —— 在跑任何檢查之前就停下來。
+
+  那幾項拿到的是 undefined,而規則拿 undefined 去比對路徑、去 some()、
+  去展開陣列,結果是一整片「規則執行失敗」—— 幾百筆訊息,
+  每一筆都在講症狀,沒有一筆講得出原因。
+
+  所以這裡先問一次:缺了就只講這一件事,不往下跑。 */
+if (MISSING_CONFIG_ITEMS.length) {
+  console.error('')
+  console.error(
+    `${RED}✗ 設定檔(.tools/lint/project-config.mjs)缺少 ${MISSING_CONFIG_ITEMS.length} 項,檢查沒有跑${RESET}`
+  )
+  console.error('')
+  for (const name of MISSING_CONFIG_ITEMS) console.error(`    ${name}`)
+  console.error('')
+  console.error('  這幾項是規則要讀的。跟規範工具的來源要同一版的設定檔,')
+  console.error('  把缺的那幾項補進去 —— 名字照來源,值填這個專案自己的。')
+  console.error('')
+  process.exit(1)
+}
 
 const args = process.argv.slice(2)
 const jsonOut = args.includes('--json')

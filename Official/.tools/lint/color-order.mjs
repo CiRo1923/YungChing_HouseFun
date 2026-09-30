@@ -17,7 +17,7 @@ import {
   COLOR_NAME_SEPARATOR,
   COLOR_RGB_SUFFIX,
   COLOR_SUFFIX_PICK,
-} from './project-config.mjs'
+} from './shared.mjs'
 
 /* 註解遮蔽與行號換算走 shared.mjs 的那一份 —— 找大括號配對時,
    註解裡的括號不能算數,而那個判斷已經有實作了,不要再寫第二份。 */
