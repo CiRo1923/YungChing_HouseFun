@@ -5,7 +5,7 @@ import './.css/styleProject.css'
 
 /* 時間面板:時 / 分 / 秒的滾動欄。
 
-  注意:有哪幾欄不是這裡決定的,是 config.format —— 見 .composables/useTimeCore.js。
+  注意：有哪幾欄不是這裡決定的,是 config.format —— 見 .composables/useTimeCore.js。
       format 裡寫 token(hh / mm / ss)的才會變成可選的欄,寫數字字面(00)的
       只是輸出時補上去,不會出現在畫面上。 */
 
@@ -41,6 +41,10 @@ const props = defineProps({
 
 const emits = defineEmits(['select'])
 
+const onSelect = (type, key) => {
+  emits('select', type, key)
+}
+
 const listRefs = ref({})
 
 const columns = computed(() =>
@@ -59,7 +63,7 @@ const onDisabled = (type, value) =>
     { minTime: props.minTime, maxTime: props.maxTime }
   )
 
-/* 注意:用 offsetTop 算而不用 scrollIntoView —— 面板是 Teleport 到 body 的,
+/* 注意：用 offsetTop 算而不用 scrollIntoView —— 面板是 Teleport 到 body 的,
     scrollIntoView 會連整個頁面一起捲,面板位置就跑掉了。 */
 const onScrollToCurrent = () => {
   nextTick(() => {
@@ -76,10 +80,10 @@ const onSetRef = (type) => (el) => {
   if (el) listRefs.value[type] = el
 }
 
-onMounted(onScrollToCurrent)
-
 // 換 format(欄位增減)時重新對位,不然新出現的那欄會停在最上面
 watch(() => props.format, onScrollToCurrent)
+
+onMounted(onScrollToCurrent)
 </script>
 
 <template>
@@ -95,7 +99,7 @@ watch(() => props.format, onScrollToCurrent)
               '--disabled': onDisabled(column.type, item.key),
             }"
             :disabled="onDisabled(column.type, item.key)"
-            @click="emits('select', column.type, item.key)"
+            @click="onSelect(column.type, item.key)"
           >
             {{ item.value }}
           </button>

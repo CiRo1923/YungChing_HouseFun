@@ -19,7 +19,14 @@ const props = defineProps({
   },
 })
 
-defineEmits(['prev', 'next'])
+const emits = defineEmits(['prev', 'next'])
+
+const onPrev = () => {
+  emits('prev')
+}
+const onNext = () => {
+  emits('next')
+}
 </script>
 
 <template>
@@ -29,7 +36,7 @@ defineEmits(['prev', 'next'])
         type="button"
         class="m-datepicker-calendar-arrow"
         :disabled="props.prevDisabled"
-        @click="$emit('prev')"
+        @click="onPrev"
       >
         <CommonMSvgIcon icon="chevron_left" class="m-datepicker-calendar-arrow-icon" />
       </button>
@@ -44,7 +51,7 @@ defineEmits(['prev', 'next'])
         type="button"
         class="m-datepicker-calendar-arrow"
         :disabled="props.nextDisabled"
-        @click="$emit('next')"
+        @click="onNext"
       >
         <CommonMSvgIcon icon="chevron_right" class="m-datepicker-calendar-arrow-icon" />
       </button>

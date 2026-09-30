@@ -3,7 +3,6 @@ import './.css/variables.css'
 import './.css/singleVariables.css'
 import './.css/common.css'
 import './.css/single.css'
-import './.css/styleProject.css'
 
 import useValidateEvents from '@components/common/mForm/.composables/useValidateEvents.js'
 

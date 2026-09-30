@@ -1,7 +1,7 @@
 /* mDatepicker 的預設設定。Single(日期)與 Time(時間)各一份,
   合併方式對齊 mForm 的 defaultDropdownConfig / onMergeDropdownConfig。
 
-  注意:這些鍵是對外契約 —— 呼叫端(pages)傳進來的 config 就是照這份,不要改名。 */
+  注意：這些鍵是對外契約 —— 呼叫端(pages)傳進來的 config 就是照這份,不要改名。 */
 
 import { onNormalizeFormat } from './useDateCore.js'
 
@@ -46,13 +46,23 @@ export const monthLabels = {
 
 export const defaultDateConfig = {
   altInput: false, // true 才能手打,false 只能點日曆
-  mobileSupport: true, // 手機改用置中的 popup;false 則交給原生 <input type="date">
+  /* 手機要不要用這支自己畫的日曆。false 則整個交給原生的 <input type="date">,
+    面板完全不出場 —— 那與「彈窗或浮層」是不同層次的選擇,
+    要哪一種面板由 position 決定。 */
+  mobileSupport: true,
   maximumYear: 0, // 年份清單可往後多顯示幾年
   days: 42, // 42 或 'auto';auto 會依當月週數決定列數
   lang: 'ch',
-  position: 'auto', // auto | popup | 上下左右組合(如 'left-top')
+  /* auto | popup | 上下左右組合(如 'left-top')。
+    也可以依裝置各給一種:{ m: 'popup' } 只有手機用置中彈窗,其餘是浮層;
+    範圍型的前綴也認得({ tm: 'popup' } 是平板與手機)。 */
+  position: 'auto',
   format: 'YYYY-MM-DD', // 字串,或 { model, datePicker } 分開指定
-  headerMode: 'string', // 'string' 純文字 | 'panel' 點年月展開面板
+  /* 日曆標題列的年月怎麼操作:
+      'string'  純文字,換月只能按左右箭頭
+      'select'  年月各一個下拉,選完日曆留在原地
+      'panel'   點年月把整片日曆換成年 / 月清單,選完才回到日曆 */
+  headerMode: 'string',
   weeks: weekLabels,
   defaultIsToday: true,
   today: null, // 指定「今天」(通常餵 server 時間)
@@ -93,7 +103,7 @@ export const defaultTimeConfig = {
   validateEvents: ['blur', 'change', 'touchedModelUpdate'],
 }
 
-/* 注意:format 要在合併「之後」再正規化一次 —— 呼叫端只給 { model: 'YYYYMMDD' } 時,
+/* 注意：format 要在合併「之後」再正規化一次 —— 呼叫端只給 { model: 'YYYYMMDD' } 時,
     正規化會把 datePicker 補上,漏做的話輸入框那邊會拿到 undefined。 */
 export const onMergeDateConfig = (config = {}) => {
   const merged = { ...defaultDateConfig, ...config }

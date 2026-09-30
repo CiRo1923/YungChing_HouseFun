@@ -1,7 +1,6 @@
 <script setup>
 import './.css/variables.css'
 import './.css/common.css'
-import './.css/styleProject.css'
 
 // 自己遞迴呼叫自己(<m-item-container>),要有 name 才找得到
 defineOptions({

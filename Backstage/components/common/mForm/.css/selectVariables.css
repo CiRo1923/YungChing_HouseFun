@@ -1,0 +1,149 @@
+:root {
+  --form-select-icon-pc-p: 2px;
+  --form-select-icon-tablet-p: 2px;
+  --form-select-icon-mobile-p: 2px;
+
+  --form-select-icon-pc-size: 14px;
+  --form-select-icon-tablet-size: 12px;
+  --form-select-icon-mobile-size: 12px;
+
+  --form-select-dropdown-pc-my: 10px;
+
+  /* 清單的捲軸。樣式收在這支元件自己的資料夾裡,不靠專案的全域樣式 ——
+    只複製元件資料夾的時候,全域那一份不會跟著走,
+    而少了它連「內容超出要能捲」都沒有,超出的部分直接被裁掉,沒有任何徵兆。 */
+  --form-select-dropdown-scrollbar-w: 4px; /* lint-breakpoint-exempt: 捲軸只在桌機畫,另外兩個斷點沒有套用這組樣式 */
+  --form-select-dropdown-scrollbar-rounded: 8px; /* lint-breakpoint-exempt: 捲軸只在桌機畫,另外兩個斷點沒有套用這組樣式 */
+  --form-select-dropdown-scrollbar-thumb-color: var(--gray-ccce);
+  --form-select-dropdown-scrollbar-track-color: var(--gray-f2);
+  --form-select-dropdown-tablet-my: 5px;
+  --form-select-dropdown-mobile-my: 1px;
+
+  --form-select-dropdown-pc-shadow:
+    0px 4px 24px 0px var(--black-66), 0px 2px 16px -8px var(--black-66);
+  --form-select-dropdown-tablet-shadow:
+    0px 4px 24px 0px var(--black-66), 0px 2px 16px -8px var(--black-66);
+  --form-select-dropdown-mobile-shadow:
+    0px 4px 24px 0px var(--black-66), 0px 2px 16px -8px var(--black-66);
+
+  --form-select-dropdown-container-pc-px: 1px;
+  --form-select-dropdown-container-tablet-px: 1px;
+  --form-select-dropdown-container-mobile-px: 1px;
+
+  --form-select-dropdown-container-pc-py: 0;
+  --form-select-dropdown-container-tablet-py: 0;
+  --form-select-dropdown-container-mobile-py: 0;
+
+  --form-select-dropdown-container-bg-color: var(--white);
+
+  /* dropdown 的選項按鈕 —— 命名對齊 autocompleteVariables.css 那組 */
+  --form-select-dropdown-button-pc-px: 8px;
+  --form-select-dropdown-button-tablet-px: 8px;
+  --form-select-dropdown-button-mobile-px: 8px;
+
+  /* 選項之間的分隔線(畫在 button 的 ::after) */
+  --form-select-dropdown-button-pc-border: 1px;
+  --form-select-dropdown-button-tablet-border: 1px;
+  --form-select-dropdown-button-mobile-border: 1px;
+
+  --form-select-dropdown-button-bg-color: var(--gray-f2);
+  --form-select-dropdown-button-active-bg-color: var(--orange-feea);
+  --form-select-dropdown-button-disabled-color: var(--black-66);
+
+  --form-select-dropdown-label-pc-py: 8px;
+  --form-select-dropdown-label-tablet-py: 8px;
+  --form-select-dropdown-label-mobile-py: 8px;
+
+  --form-select-element-icon-color: var(--gray-999);
+  --form-select-element-focus-icon-color: var(--green-6a2d);
+  --form-select-element-disabled-icon-color: var(--gray-ccce);
+  --form-select-element-error-icon-color: var(--red-f00);
+}
+
+@screen p {
+  .m-form-select-dropdown {
+    &.\-\-rounded,
+    &.p\:\-\-rounded,
+    &.pt\:\-\-rounded {
+      --form-select-dropdown-rounded: 4px;
+    }
+
+    &.\-\-px-30,
+    &.p\:\-\-px-30,
+    &.pt\:\-\-px-30 {
+      --form-select-dropdown-container-px: 30px;
+    }
+
+    &.\-\-px-20,
+    &.p\:\-\-px-20,
+    &.pt\:\-\-px-20 {
+      --form-select-dropdown-container-px: 20px;
+    }
+
+    &.\-\-py-20,
+    &.p\:\-\-py-20,
+    &.pt\:\-\-py-20 {
+      --form-select-dropdown-container-py: 20px;
+    }
+  }
+}
+
+@screen t {
+  .m-form-select-dropdown {
+    &.\-\-rounded,
+    &.pt\:\-\-rounded,
+    &.tm\:\-\-rounded,
+    &.t\:\-\-rounded {
+      --form-select-dropdown-rounded: 4px;
+    }
+
+    &.\-\-px-30,
+    &.pt\:\-\-px-30,
+    &.tm\:\-\-px-30,
+    &.t\:\-\-px-30 {
+      --form-select-dropdown-container-px: 30px;
+    }
+
+    &.\-\-px-20,
+    &.pt\:\-\-px-20,
+    &.tm\:\-\-px-20,
+    &.t\:\-\-px-20 {
+      --form-select-dropdown-container-px: 20px;
+    }
+
+    &.\-\-py-20,
+    &.pt\:\-\-py-20,
+    &.tm\:\-\-py-20,
+    &.t\:\-\-py-20 {
+      --form-select-dropdown-container-py: 20px;
+    }
+  }
+}
+
+@screen m {
+  .m-form-select-dropdown {
+    &.\-\-rounded,
+    &.tm\:\-\-rounded,
+    &.m\:\-\-rounded {
+      --form-select-dropdown-rounded: 4px;
+    }
+
+    &.\-\-px-30,
+    &.tm\:\-\-px-30,
+    &.m\:\-\-px-30 {
+      --form-select-dropdown-container-px: 30px;
+    }
+
+    &.\-\-px-20,
+    &.tm\:\-\-px-20,
+    &.m\:\-\-px-20 {
+      --form-select-dropdown-container-px: 20px;
+    }
+
+    &.\-\-py-20,
+    &.tm\:\-\-py-20,
+    &.m\:\-\-py-20 {
+      --form-select-dropdown-container-py: 20px;
+    }
+  }
+}

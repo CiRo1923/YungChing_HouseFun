@@ -1,4 +1,10 @@
 <script setup>
+/* component-deps —— 複製這支元件的時候這幾支要一起帶走:
+   assets/css/_common/vueTransition.css
+     轉場動畫定義在這裡。沒有它不會報錯也不會少畫面,只是切換的當下直接跳、沒有漸變。
+   scripts/_validation.js
+     這支元件用到的共用函式。少了它**建置直接失敗**,而訊息只說某個名字不存在 —— 看不出那是元件帶來的相依。 */
+
 import './.css/variables.css'
 import './.css/common.css'
 import './.css/styleProject.css'
@@ -17,7 +23,7 @@ import './.css/styleProject.css'
 
   config 的鍵見 .composables/useConfig.js —— 那份是對外契約,不要改名。 */
 
-import useValidateEvents from '@components/common/mForm/.composables/useValidateEvents.js'
+import useValidateEvents from '@components/mForm/.composables/useValidateEvents.js'
 import {
   onDateOnlyMs,
   onGetYMD,
@@ -166,9 +172,23 @@ const setClass = computed(() => ({
 }))
 
 /* 點欄位就從那一端開始選。
-  注意:這裡不清任何值 —— 清了 draft 卻沒清 model 的話,欄位還顯示舊日期、
+  注意：這裡不清任何值 —— 清了 draft 卻沒清 model 的話,欄位還顯示舊日期、
       日曆卻沒有區間色,兩邊對不上。「舊的訖要不要作廢」在選到新的起始日時才判斷
       (見 onSelect:新的起始日晚於原本的訖才作廢)。 */
+const onFocusin = (e) => {
+  emits('focusin', e)
+}
+
+const onFocusout = (e) => {
+  emits('focusout', e)
+}
+
+/* 浮層外的區域點下去要收起來,但只有彈窗模式才收 ——
+  貼在欄位下方的那種本來就靠失焦收合,這裡再收一次會與它打架。 */
+const onOverlayClick = () => {
+  if (isPopup.value) onToggle(false)
+}
+
 const onFieldPointerdown = (e, field) => {
   e.preventDefault()
   e.stopPropagation()
@@ -188,7 +208,7 @@ const onFormatDate = (value) => {
 /* 每選一次就寫回,不等整個區間選完 —— 點了起始日,那個值要立刻出現在起的欄位上。
   兩端都有值才收合。
 
-  注意:走 onEmitPair 而不是直接 emit —— 它只覆蓋日期那半,
+  注意：走 onEmitPair 而不是直接 emit —— 它只覆蓋日期那半,
       兩個時間欄位已經填的值不會被日期的選取洗掉。 */
 const onCommit = () => {
   const { start, end } = draft.value
@@ -297,8 +317,8 @@ onMounted(() => {
                 readonly
                 autocomplete="off"
                 @pointerdown="onFieldPointerdown($event, 'start')"
-                @focusin="emits('focusin', $event)"
-                @focusout="emits('focusout', $event)"
+                @focusin="onFocusin"
+                @focusout="onFocusout"
               />
               <div class="m-datepicker-ctrl">
                 <!-- 浮層的定位基準綁在「起」這一顆 —— 兩顆都綁的話 ref 會變陣列 -->
@@ -363,8 +383,8 @@ onMounted(() => {
                 readonly
                 autocomplete="off"
                 @pointerdown="onFieldPointerdown($event, 'end')"
-                @focusin="emits('focusin', $event)"
-                @focusout="emits('focusout', $event)"
+                @focusin="onFocusin"
+                @focusout="onFocusout"
               />
               <div class="m-datepicker-ctrl">
                 <!-- 點訖的圖示就從訖開始選 —— 與點訖的輸入框一致 -->
@@ -418,7 +438,7 @@ onMounted(() => {
         :class="{ '--popup': isPopup }"
         ref="panelRef"
         v-if="isActive"
-        @click.self="isPopup ? onToggle(false) : null"
+        @click.self="onOverlayClick"
       >
         <Transition name="anim-zoom-soft" appear>
           <BuyMDatepickerCalendar

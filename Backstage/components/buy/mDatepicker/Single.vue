@@ -1,4 +1,10 @@
 <script setup>
+/* component-deps —— 複製這支元件的時候這幾支要一起帶走:
+   assets/css/_common/vueTransition.css
+     轉場動畫定義在這裡。沒有它不會報錯也不會少畫面,只是切換的當下直接跳、沒有漸變。
+   scripts/_validation.js
+     這支元件用到的共用函式。少了它**建置直接失敗**,而訊息只說某個名字不存在 —— 看不出那是元件帶來的相依。 */
+
 import './.css/variables.css'
 import './.css/common.css'
 import './.css/styleProject.css'
@@ -10,7 +16,7 @@ import './.css/styleProject.css'
 
   config 的鍵見 .composables/useConfig.js —— 那份是對外契約,不要改名。 */
 
-import useValidateEvents from '@components/common/mForm/.composables/useValidateEvents.js'
+import useValidateEvents from '@components/mForm/.composables/useValidateEvents.js'
 import {
   onGetYMDByFormat,
   onPickFormat,
@@ -225,6 +231,20 @@ const onFocusin = (e) => {
 }
 
 // 手打到一半離開時,把補完的合法日期寫回 model
+/* 浮層外的區域點下去要收起來,但只有彈窗模式才收 ——
+  貼在欄位下方的那種本來就靠失焦收合,這裡再收一次會與它打架。 */
+const onOverlayClick = () => {
+  if (isPopup.value) onToggle(false)
+}
+
+const onInput = (e) => {
+  emits('input', e)
+}
+
+const onKeydown = () => {
+  emits('keydown.enter')
+}
+
 const onFocusout = (e) => {
   calendar.onSyncFromModel()
 
@@ -238,7 +258,7 @@ const onFocusout = (e) => {
 }
 
 /* 選定的統一出口:收合 → 回報值 → 下一輪再發 selected。
-  注意:走 dateModel 而不是直接 emit —— 它的 setter 會把現有的時間接回去,
+  注意：走 dateModel 而不是直接 emit —— 它的 setter 會把現有的時間接回去,
       直接 emit 會把時間那半整個蓋掉。 */
 const onCommit = (value) => {
   if (!value) return
@@ -299,8 +319,8 @@ onMounted(() => {
               @focusin="onFocusin($event)"
               @click="onInputClick()"
               @focusout="onFocusout($event)"
-              @input="emits('input', $event)"
-              @keydown.enter="emits('keydown.enter')"
+              @input="onInput($event)"
+              @keydown.enter="onKeydown"
             />
             <div class="m-datepicker-ctrl">
               <button
@@ -354,7 +374,7 @@ onMounted(() => {
         :class="{ '--popup': isPopup }"
         ref="panelRef"
         v-if="isActive"
-        @click.self="isPopup ? onToggle(false) : null"
+        @click.self="onOverlayClick"
       >
         <Transition name="anim-zoom-soft" appear>
           <BuyMDatepickerCalendar

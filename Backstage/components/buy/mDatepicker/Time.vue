@@ -1,4 +1,10 @@
 <script setup>
+/* component-deps —— 複製這支元件的時候這幾支要一起帶走:
+   assets/css/_common/vueTransition.css
+     轉場動畫定義在這裡。沒有它不會報錯也不會少畫面,只是切換的當下直接跳、沒有漸變。
+   scripts/_validation.js
+     這支元件用到的共用函式。少了它**建置直接失敗**,而訊息只說某個名字不存在 —— 看不出那是元件帶來的相依。 */
+
 import './.css/variables.css'
 import './.css/common.css'
 import './.css/styleProject.css'
@@ -14,7 +20,7 @@ import './.css/styleProject.css'
 
   config 的鍵見 .composables/useConfig.js。 */
 
-import useValidateEvents from '@components/common/mForm/.composables/useValidateEvents.js'
+import useValidateEvents from '@components/mForm/.composables/useValidateEvents.js'
 import { onFormatTime, onParseTime, onParseTimeFormat } from './.composables/useTimeCore.js'
 import { onMergeTimeConfig } from './.composables/useConfig.js'
 import { usePosition } from './.composables/usePosition.js'
@@ -175,6 +181,16 @@ const onSelect = (type, value) => {
   nextTick(() => emits('selected'))
 }
 
+/* 浮層外的區域點下去要收起來,但只有彈窗模式才收 ——
+  貼在欄位下方的那種本來就靠失焦收合,這裡再收一次會與它打架。 */
+const onOverlayClick = () => {
+  if (isPopup.value) onToggle(false)
+}
+
+const onKeydown = () => {
+  emits('keydown.enter')
+}
+
 const onInput = (e) => {
   const parsed = onParseTime(e.target.value)
   if (parsed) time.value = parsed
@@ -246,7 +262,7 @@ onMounted(() => {
             @click="onInputClick()"
             @focusout="onFocusout($event)"
             @input="onInput($event)"
-            @keydown.enter="emits('keydown.enter')"
+            @keydown.enter="onKeydown"
           />
           <div class="m-datepicker-ctrl">
             <!-- 圖示可換 —— 預設是 icon_time,要別的就傳 config.icon -->
@@ -282,7 +298,7 @@ onMounted(() => {
         :class="{ '--popup': isPopup }"
         ref="panelRef"
         v-if="isActive"
-        @click.self="isPopup ? onToggle(false) : null"
+        @click.self="onOverlayClick"
       >
         <Transition name="anim-zoom-soft" appear>
           <div class="m-datepicker-calendar-container" v-if="isActive">

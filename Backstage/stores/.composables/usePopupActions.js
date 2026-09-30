@@ -1,3 +1,9 @@
+/* starter —— 這一支是起手樣板:複製一次,之後歸接手的專案所有。
+
+  整套更新時**不要覆蓋它**。它與彈窗那支 store 是一組:那邊有哪幾種彈窗,
+  這邊就有對應的開關行為。單獨蓋這一支的話,兩邊對不上的那幾種
+  開了沒有反應,而且不會報錯。 */
+
 import { onDeepMerge, onBodyOverflowHiddenToggle } from '@js/_prototype.js'
 
 const usePopupActions = () => {
@@ -63,7 +69,10 @@ const usePopupActions = () => {
     alertData.value.icon = data.icon
     alertData.value.content = data.content
     alertData.value.btns = onMergeBtns(data.btns, alertBtns)
-    alertData.value.hasExistClose = data.hasExistClose !== undefined ? data.hasExistClose : true
+    alertData.value.hasExistClose =
+      data.hasExistClose !== undefined
+        ? data.hasExistClose
+        : popup.defaultOptions.alert.hasExistClose
     alertData.value.setClass = data.setClass
 
     onBodyOverflowHiddenToggle(true)
@@ -95,7 +104,10 @@ const usePopupActions = () => {
     confirmData.value.icon = data.icon
     confirmData.value.content = data.content
     confirmData.value.btns = onMergeBtns(data.btns, confirmBtns)
-    confirmData.value.hasExistClose = data.hasExistClose !== undefined ? data.hasExistClose : true
+    confirmData.value.hasExistClose =
+      data.hasExistClose !== undefined
+        ? data.hasExistClose
+        : popup.defaultOptions.confirm.hasExistClose
     confirmData.value.setClass = data.setClass
 
     onBodyOverflowHiddenToggle(true)
@@ -118,7 +130,7 @@ const usePopupActions = () => {
   const onCustom = async (data) => {
     // 若已有「不同 id」的 custom popup 開著,先關掉並等一個 flush 再開新的。
     // 否則舊 popup 的 leave 與新 popup 的 enter 會擠在同一個同步 flush,
-    // 兩個 <Teleport to="#box"> 同時 patch 會搶錨點,
+    // 兩個 Teleport 指向同一個容器、同時 patch 會搶錨點,
     // 觸發 "Cannot read properties of null (reading 'insertBefore')"。
     if (customData.value.id && customData.value.id !== data.id) {
       onCustomClose()
@@ -134,7 +146,10 @@ const usePopupActions = () => {
     customData.value.content = data.content
     customData.value.data = data.data
     customData.value.btns = data.btns
-    customData.value.hasExistClose = data.hasExistClose !== undefined ? data.hasExistClose : true
+    customData.value.hasExistClose =
+      data.hasExistClose !== undefined
+        ? data.hasExistClose
+        : popup.defaultOptions.custom.hasExistClose
 
     onBodyOverflowHiddenToggle(true)
 

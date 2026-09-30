@@ -1,4 +1,8 @@
 <script setup>
+/* component-deps —— 複製這支元件的時候這幾支要一起帶走:
+   scripts/_validation.js
+     這支元件用到的共用函式。少了它**建置直接失敗**,而訊息只說某個名字不存在 —— 看不出那是元件帶來的相依。 */
+
 import './.css/variables.css'
 import './.css/common.css'
 import './.css/styleProject.css'
@@ -32,23 +36,36 @@ const props = defineProps({
   },
 })
 
-// length 是 minlength / maxlength 的簡寫，兩者沒指定時才吃它
 const config = computed(() => {
   return {
     length: null,
     minlength: null,
     maxlength: null,
-    /* 驗證時機。注意:這支渲染的是 <input type="hidden"> —— 使用者碰不到它,
-      **永遠不會 blur / change**,所以那兩個時機在這裡等於沒有:
-      實際生效的只有 touchedModelUpdate,而它要靠送出時的 setTouched(true) 才會開。
+    /* 這個欄位要在哪些時機自動驗證。
+
+      注意:這支渲染的是 <input type="hidden"> —— 使用者碰不到它,**永遠不會 blur / change**,
+          所以那兩個時機在這裡等於沒有:實際生效的只有 touchedModelUpdate,
+          而它從按下送出的那一刻起開始作用(送出流程會把所有欄位標成碰過,
+          使用端不必自己做什麼)。
 
       這正是它需要的行為 —— Hidden 幾乎都綁「一組欄位的合格旗標」(多欄位的 computed),
       填到一半或程式自己連動清值時不該跳紅字,送出後才即時反映。
-      詳見 .composables/useValidateEvents.js。 */
+
+      注意:傳陣列是「完整指定」,沒列到的一律不驗 —— 不是在預設值上疊加。
+         詳見 .composables/useValidateEvents.js */
+    /* 要掛在元素上的屬性,依位置各一組 —— 位置名與 setClass 同一套
+        (能傳 class 的地方就能傳屬性),例如 { type: { 'data-x': 'y' } }。
+
+        有些東西只能靠元素上的屬性做到:難字的造字對照、無障礙的標記、
+        第三方套件用屬性認元素 —— 那幾種沒辦法用 class 或 slot 代替。
+
+        預設是空的,傳進來才掛。 */
+    attr: {},
     validateEvents: ['blur', 'change', 'touchedModelUpdate'],
     ...props.config,
   }
 })
+
 // Field 註冊的名稱帶 _hidden 後綴,查 touched 要用同一個名字
 const validateOn = useValidateEvents(
   () => config.value.validateEvents,
@@ -57,24 +74,21 @@ const validateOn = useValidateEvents(
 
 const setClass = computed(() => {
   return {
-    ...{
-      main: '',
-      container: '',
-      error: '',
-      errorMessage: '',
-    },
+    main: '',
+    container: '',
+    error: '',
+    errorMessage: '',
     ...props.setClass,
   }
 })
 
-// 父層要捲到出錯的欄位時，得知道 Field 實際註冊的名稱（帶 _hidden 後綴）
 defineExpose({
   name: `${props.name}_hidden`,
 })
 </script>
 
 <template>
-  <div class="m-form-hidden" :class="setClass.main">
+  <div class="m-form-hidden" :class="setClass.main" v-bind="config.attr.main">
     <Field
       :name="`${props.name}_hidden`"
       :modelValue="props.modelValue"
@@ -89,7 +103,11 @@ defineExpose({
         :maxlength="config.maxlength || config.length"
         v-bind="field"
       />
-      <div class="m-form-hidden-container" :class="setClass.container">
+      <div
+        class="m-form-hidden-container"
+        :class="setClass.container"
+        v-bind="config.attr.container"
+      >
         <slot :isError="!!errorMessage" />
       </div>
     </Field>
@@ -98,9 +116,14 @@ defineExpose({
       :name="`${props.name}_hidden`"
       class="m-form-error"
       :class="setClass.error"
+      v-bind="config.attr.error"
       v-slot="{ message }"
     >
-      <CommonMErrorMessage :class="setClass.errorMessage" :message="message" />
+      <CommonMErrorMessage
+        :class="setClass.errorMessage"
+        v-bind="config.attr.errorMessage"
+        :message="message"
+      />
     </ErrorMessage>
   </div>
 </template>

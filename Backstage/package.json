@@ -19,6 +19,8 @@
     "lint:css": "node .tools/lint/lint.mjs",
     "diff:css": "node ./.tools/lint/diff-output-project.mjs",
     "test:css": "node .tools/lint/self-test.mjs",
+    "test:prototype": "node .tools/lint/test-prototype.mjs",
+    "test:validation": "node .tools/lint/test-validation.mjs",
     "test:shapes": "node .tools/lint/test-shapes.mjs",
     "sort:color": "node .tools/lint/guard-file.mjs --write",
     "deps": "node .tools/component-deps.mjs",

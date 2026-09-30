@@ -83,6 +83,7 @@ import { NO_PREREQUISITE_RULES, PREFLIGHT_RULES } from './preflight.mjs'
 import {
   aliasEntriesOf,
   aliasListOf,
+  componentUsesOf,
   importGroupOf,
   tailwindThemeOf,
   topLevelKeysOf,
@@ -95,12 +96,21 @@ import {
   buildCommandProblemsOf,
   configItemIssueOf,
   unusedConfigNames,
+  toolingSourcesOf,
 } from './rules-global.mjs'
 import { apiFieldNamesOf, specFieldsIn } from './rules-api.mjs'
 import { isPopupDeclaredComplete, isPopupOpenedComplete } from './rules-page.mjs'
 import { isStoreDeclareCall } from './rules-store.mjs'
-import { CHECKSUM_FILE, currentFingerprints, fingerprintDiff, isSkipped } from './checksum.mjs'
-import { apiKeyOf, diffComponentApi } from './component-api.mjs'
+import {
+  CHECKSUM_FILE,
+  currentFingerprints,
+  fingerprintDiff,
+  isSkipped,
+  SHARED_SOURCE_FILES,
+  sharedSourceFiles,
+  trackedFiles,
+} from './checksum.mjs'
+import { API_KIND_LABEL, COMPONENT_API_FILE, apiKeyOf, diffComponentApi } from './component-api.mjs'
 import {
   ACTIONS_DIR_NAME,
   API_DIR,
@@ -134,18 +144,24 @@ import {
   SHARED_API_FILE,
   SHARED_MODULE_VARIABLES,
   SOURCE_PROJECT_NAME,
+  SKIP_DIRS,
   SRC_DIR,
   STANDALONE_STORES,
   STORE_DIR,
   TAILWIND_THEME_OVERRIDES,
   VIEW_RESOURCE_DEPTH,
   VIEWS_DIR,
+  VIEW_COMPONENT_MARKERS,
   VIEW_UNDERSCORE_FOLDERS,
 } from './shared.mjs'
 import {
   classPrefixOf,
   componentTagOf,
+  componentTagIndexOf,
   detectViewResourceDepth,
+  isScannablePath,
+  readTextCached,
+  invalidateFileCache,
   isInsideString,
   isUnderAny,
   listConventionRules,
@@ -154,7 +170,9 @@ import {
   listViewFolders,
   listViewSubFolders,
   maskComments,
+  maskHtmlComments,
   resetScanCaches,
+  templateRangeOf,
   toRel,
 } from './shared.mjs'
 import { BOLD, GREEN, RED, RESET, YELLOW } from './colors.mjs'
@@ -881,10 +899,23 @@ const aliveThemeCaseOf = (file) => {
     }
   }
 
+  /* 退化的那一種:內容要**一條規則都不會碰到**,而且只計 theme 自己那一條。
+
+    先前這裡寫的是 `color: var(--black)` —— 那個變數是借來的,
+    它在這個專案的色票裡剛好有,在別的專案沒有:那邊「引用不到定義的變數」
+    會報一筆,而這一則沒有限定只計 theme,於是整則失敗,
+    訊息寫的是「theme 沒有可用的值時不會無中生有」—— 看起來像 theme 壞了。
+
+    更麻煩的是這條路徑**在這裡走不到**:上面那個迴圈只要找得到一個
+    實際定義的值就回去了,而這個專案找得到。所以這種綁死在來源驗不出來,
+    要到 theme 什麼都沒覆寫的專案才會出現。
+
+    所以內容改成不碰色票、不碰 tailwind 的一行。 */
   return {
     name: 'theme 沒有可用的值時不會無中生有',
+    rule: 'theme',
     file,
-    code: `.m-probe {\n  color: var(--black);\n}`,
+    code: `.m-probe {\n  display: block;\n}`,
     expect: 0,
   }
 }
@@ -3795,6 +3826,20 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
     keyword: '元件不必自己 import',
   },
   {
+    /* 檔頭標了就整支放行。
+
+       這條規則認的是規範那一側的元件層清單,而**真正有沒有被自動註冊
+       由建置設定決定** —— 兩邊對不上的時候,使用端非手寫 import 不可
+       (不寫的話標籤解析不到,而那不報錯:畫面上就是那個元件不出現),
+       而這條規則會把那一行報成違規。沒有出口的話那個專案兩邊都走不通,
+       commit 也送不出去。 */
+    name: 'componentAutoImport 檔頭標了豁免就放行',
+    rule: 'componentAutoImport',
+    file: `${P}/autoImportExempt.vue`,
+    code: `<script setup>\n/* lint-component-auto-import-exempt: 這一層沒有被自動註冊 */\nimport MProbeThing from '@components/mProbeThing/Index.vue'\n</script>\n\n<template>\n  <MProbeThing />\n</template>\n`,
+    expect: 0,
+  },
+  {
     /* 同一層的 .vue 不是元件 —— 頁面目錄底下那些本來就不會被自動註冊,
        報了的話,每一支把子畫面拆出去的頁面都是違規,而那是正當寫法。 */
     name: 'componentAutoImport 不是元件的 .vue 不誤報',
@@ -4301,6 +4346,23 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
     keyword: '清單過期',
   },
   {
+    /* 檔名裡有特殊字元的也要讀得到。
+
+       驗法是借「清單過期」那一條:檔頭列了一支而實際沒用到,讀得到才會報 ——
+       讀不到的話清單是空的,那一條反而不成立,所以這一則問的就是「讀到了沒有」。
+
+       先前用字元類去撈路徑,而那份清單漏掉的每一種字元都是同一種災情:
+       算「應該列哪幾支」的那一側讀的是 import 裡的字串,什麼字元都認得,
+       於是它要求列出來;而讀檔頭的那一側撈不到,照著寫進去仍然被報成少列了
+       —— 那一筆怎麼改都消不掉。 */
+    rule: 'componentDeps',
+    name: 'componentDeps 檔名帶特殊字元的路徑也讀得到',
+    file: `${C}/DepsDollar.vue`,
+    code: `<script setup>\n/* component-deps: ${T}/probe$.js */\nconst props = defineProps({ text: { type: String, default: '' } })\n</script>\n\n<template>\n  <div class="m-probe">{{ props.text }}</div>\n</template>\n`,
+    expect: 1,
+    keyword: '清單過期',
+  },
+  {
     /* 轉場的樣式常常收在共用檔案裡,由進入點一次載入 —— 沒跟著複製過去的話
        不會報錯也不會少畫面,只是切換的當下直接跳。 */
     rule: 'componentDeps',
@@ -4322,6 +4384,37 @@ export const use${pascalOf(PROBE_PAGE_ALPHA)}Store = null\n`,
       [`${CSS_MODULES_DIR}/${PROBE}Transition.css`]: `.${PROBE}-fade-enter-active,\n.${PROBE}-fade-leave-active {\n  transition: opacity 0.2s ease;\n}\n`,
     },
     expect: 0,
+  },
+  {
+    /* 刻意取消動畫的那個保留字不必有定義。
+
+       「換一個對應不到樣式的名字」是取消動畫的慣用手法:那一刻找不到任何一組
+       class,所以不等待、直接切換。拖曳中的清單就要這樣 ——
+       再加動畫的話,退場中的列還留在畫面上,量測落點時會多算一列。
+
+       規則分不出「刻意找不到」與「名字打錯」,兩者長得一模一樣。
+       沒有這個保留字的話,那種寫法被報成「找不到那一組的定義」,
+       而規則給的兩條路都會把動畫裝回去 —— 照著做等於把 bug 再放一次。 */
+    rule: 'componentDeps',
+    name: 'componentDeps 取消動畫的保留字不必有定義',
+    file: `${C}/DepsNoTransition.vue`,
+    code: `<script setup>\n/* component-deps —— 複製這支元件時要一起帶走:\n   ${CSS_MODULES_DIR}/${PROBE}Transition.css */\nconst props = defineProps({ show: { type: Boolean, default: false }, isDragging: { type: Boolean, default: false } })\n</script>\n\n<template>\n  <Transition :name="props.isDragging ? 'none' : '${PROBE}-fade'">\n    <div v-if="props.show" class="m-probe"></div>\n  </Transition>\n</template>\n`,
+    context: {
+      [`${CSS_MODULES_DIR}/${PROBE}Transition.css`]: `.${PROBE}-fade-enter-active,\n.${PROBE}-fade-leave-active {\n  transition: opacity 0.2s ease;\n}\n`,
+    },
+    expect: 0,
+  },
+  {
+    /* 保留字之外的、真的找不到的名字照樣要報 —— 不然打錯字從此沒有人管。 */
+    rule: 'componentDeps',
+    name: 'componentDeps 保留字以外找不到的名字照樣報',
+    file: `${C}/DepsTypoTransition.vue`,
+    code: `<script setup>\n/* component-deps —— 複製這支元件時要一起帶走:\n   ${CSS_MODULES_DIR}/${PROBE}Transition.css */\nconst props = defineProps({ show: { type: Boolean, default: false } })\n</script>\n\n<template>\n  <Transition name="${PROBE}-faed">\n    <div v-if="props.show" class="m-probe"></div>\n  </Transition>\n</template>\n`,
+    context: {
+      [`${CSS_MODULES_DIR}/${PROBE}Transition.css`]: `.${PROBE}-fade-enter-active,\n.${PROBE}-fade-leave-active {\n  transition: opacity 0.2s ease;\n}\n`,
+    },
+    expect: 1,
+    keyword: '找不到那幾組的定義',
   },
   {
     /* 接變數的名字要執行起來才知道是什麼 —— 猜一個會把不相干的樣式檔列進去。 */
@@ -5354,14 +5447,15 @@ const onCheckConfigItem = () => {
   )
 
   const configText = fs.readFileSync(path.join(root, ...CONFIG_FILE.split('/')), 'utf8')
-  const toolingDir = path.dirname(CONFIG_FILE)
-  const configName = path.basename(CONFIG_FILE)
-  const sources = fs
-    .readdirSync(path.join(root, ...toolingDir.split('/')))
-    .filter((name) => name.endsWith('.mjs') && name !== configName)
-    .map((name) => fs.readFileSync(path.join(root, ...toolingDir.split('/'), name), 'utf8'))
 
-  const extras = unusedConfigNames(configText, sources).map((i) => i.name)
+  /* 「誰算是讀設定的程式碼」取規則那一份,**不在這裡自己組一次**。
+
+     自己組的那一版只讀規範工具自己的目錄,而規則讀的是所有工具目錄
+     (建置外掛、hooks、skills 那幾層都算)。於是只被建置外掛讀的設定項
+     在這裡被判成「沒有人讀」,而實際的規則判定是正常的 ——
+     同一個問題兩份答案,而報出來的那一筆怎麼查都查不出原因:
+     去看規則,規則是對的。 */
+  const extras = unusedConfigNames(configText, toolingSourcesOf(root)).map((i) => i.name)
 
   report(
     !extras.length,
@@ -5930,6 +6024,257 @@ const onCheckComponentApiDiff = () => {
  * 反方向也要看:有檔案卻沒有人載入的話,寫在裡面的東西一行都不會輸出
  * (那一半由規則 moduleCssUnused 在擋,這裡只確認接點本身都在)。
  */
+/**
+ * 「要搬這支元件過去,還要帶哪幾支元件」算得出來。
+ *
+ * 規範說「只帶這個專案用得到的那幾支」,而執行那句話要先答得出連帶關係 ——
+ * `npm run deps` 印的就是它。
+ *
+ * **這是算錯了不會有人發現的一種。** 少算一支的話,指令會說「是自足的」,
+ * 照著搬的人少帶一個資料夾 —— 而 Vue 對解析不到的標籤只在開發模式印一行警告,
+ * 正式站是那個位置什麼都不畫。那個指令曾經就是這樣:
+ * 圖示那一支被幾乎每一支元件用到,而它一支都沒算出來。
+ */
+const onCheckComponentUses = () => {
+  const problems = []
+
+  const usesOf = (rel) => {
+    const abs = path.join(root, ...rel.split('/'))
+
+    return fs.existsSync(abs) ? componentUsesOf(root, rel, fs.readFileSync(abs, 'utf8')) : null
+  }
+
+  /* 拿真的檔案驗:探測檔沒有辦法驗這件事 ——
+     它要的是「全案有哪些元件」那份索引,而探測用的元件本來就不在裡面。 */
+  const tagIndex = componentTagIndexOf(root)
+
+  /* 整件事的前提:**一個資料夾底下的子檔各有自己的標籤名。**
+     用假路徑驗,不靠這個專案剛好有哪幾支元件 ——
+     「A 元件用到 B 資料夾底下的子元件」這種組合不是每個專案都有,
+     而那正是先前誤報的那一種,在沒有那種組合的專案身上看不出來。 */
+  const probeDir = COMPONENT_DIRS[0]
+
+  if (componentTagOf(`${probeDir}/mProbeForm/Radio.vue`) !== 'MProbeFormRadio') {
+    problems.push('資料夾底下的子檔算不出自己的標籤名')
+  }
+
+  if (componentTagOf(`${probeDir}/mProbeForm/Index.vue`) !== 'MProbeForm') {
+    problems.push('資料夾的主檔算出來的標籤名不對')
+  }
+
+  let checked = 0
+
+  for (const dir of COMPONENT_DIRS) {
+    for (const abs of listFiles(root, dir)) {
+      if (!abs.endsWith('.vue')) continue
+
+      const rel = toRel(root, abs)
+      const text = fs.readFileSync(abs, 'utf8')
+      const tpl = templateRangeOf(text)
+
+      if (!tpl) continue
+
+      const uses = componentUsesOf(root, rel, text)
+      const own = path.dirname(rel)
+
+      // 自己資料夾底下的子元件不該被算進去 —— 那些本來就跟著資料夾走
+      if (uses.includes(own)) problems.push(`${rel} 把自己資料夾底下的子元件也算成相依`)
+
+      /* 畫面裡寫了別的元件標籤,就一定要算得出來。
+
+         「這個標籤是誰」一律查索引,**不從資料夾反推** ——
+         先前是拿 `資料夾/Index.vue` 去算標籤名再比對,而那只還原得出
+         母體那一個名字:一個資料夾底下的子檔各有自己的標籤
+         (`mForm/Radio.vue` 在畫面上是 `MFormRadio`,不是 `MForm`)。
+         於是每一支用到子元件的都被報成「沒有被算進相依」,而清單其實是對的。
+         那種誤報在來源看不到 —— 這裡的元件剛好都是整支一個資料夾。 */
+      for (const m of maskHtmlComments(tpl.body).matchAll(/<(M[A-Z][A-Za-z0-9]*)/g)) {
+        const owner = tagIndex.get(m[1])
+
+        /* 名字對不上任何元件 —— 標籤打錯,或是照抄了別的專案才有的那一支。
+           Vue 不會報錯:那個位置什麼都不畫。 */
+        if (!owner) {
+          problems.push(`${rel} 用了 ${m[1]},而全案沒有叫這個名字的元件`)
+          continue
+        }
+
+        // 自己資料夾底下的本來就跟著走,不必列
+        if (owner === own) continue
+
+        if (!uses.includes(owner)) problems.push(`${rel} 用了 ${m[1]} 卻沒有被算進相依`)
+      }
+
+      checked += 1
+    }
+  }
+
+  if (!checked) problems.push('一支有畫面的元件都沒有驗到 —— 索引可能是空的')
+
+  report(!problems.length, '要帶哪幾支元件一起走,算得出來', problems)
+}
+
+/**
+ * 規範認定的元件層,建置那一側真的有在自動註冊。
+ *
+ * **同一個「哪些算元件」,兩邊各有一份答案。** 規範這邊是 COMPONENT_DIRS,
+ * 建置那邊是自動註冊掃的目錄 —— 兩份設定不在同一個地方,改了其中一邊
+ * 不會有任何徵兆。某一層只有規範算數而建置沒掃到的時候:
+ *
+ *   使用端照規範寫標籤(不手寫 import)→ 標籤解析不到 →
+ *   **不會報錯**,編譯器把它留到執行時才找,找不到就是那個位置什麼都不畫。
+ *   彈窗掛在版面上卻叫不出來就是這樣來的,console 只有一行警告。
+ *
+ *   改成手寫 import → componentAutoImport 報違規,commit 被擋。
+ *
+ * 兩邊都走不通,而且從哪一邊都看不出成因在另一邊。
+ *
+ * **驗的是結果,不是設定。** 自動註冊會產生一份元件宣告檔,
+ * 裡面是它實際註冊了哪幾支。解析建置設定的話,每種建置工具的寫法都不一樣,
+ * 而且寫法一改就跟著失效;宣告檔是兩邊共通的產物。
+ *
+ * 判準是「整層一支都沒有」,不是「少了某一支」——
+ * 剛加的元件在下一次啟動之前本來就不在那份清單裡,
+ * 逐支比對的話每次新增元件都會被報一筆,而那全是誤報。
+ */
+const onCheckComponentDirsRegistered = () => {
+  /* 那份宣告檔放哪由建置工具決定,所以逐個位置找,**並且取最新的那一份**。
+
+     舊的位置會留下過期的殘留:框架換過暫存目錄之後,專案根的舊資料夾
+     還在(而且被 gitignore,不會有人注意到它)。讀到那一份的話,
+     這一則問的就是上一個版本的註冊結果 —— 而它多半仍然含有幾支元件,
+     所以**看起來是通過的**,實際上什麼都沒驗到。
+
+     自動註冊每次執行都會重寫這份檔案,所以最新的那一份就是最後一次的結果。 */
+  const dts = [
+    'components.d.ts',
+    'node_modules/.cache/nuxt/.nuxt/components.d.ts',
+    '.nuxt/components.d.ts',
+  ]
+    .map((one) => path.join(root, ...one.split('/')))
+    .filter((abs) => fs.existsSync(abs))
+    .sort((a, b) => fs.statSync(b).mtimeMs - fs.statSync(a).mtimeMs)[0]
+
+  if (!dts) {
+    skipped.push({ name: '規範認定的元件層都有被自動註冊', need: 'componentsDts' })
+    return
+  }
+
+  const text = fs.readFileSync(dts, 'utf8')
+  const problems = []
+
+  for (const dir of COMPONENT_DIRS) {
+    const files = listFiles(root, dir).filter((abs) => abs.endsWith('.vue'))
+
+    // 那一層還沒有元件時沒有東西可以問
+    if (!files.length) continue
+
+    if (!files.some((abs) => text.includes(toRel(root, abs)))) {
+      problems.push(
+        `${dir} 底下一支元件都沒有被自動註冊 —— ` +
+          `規範把它算成元件層,建置那邊沒掃到它。` +
+          `那一層的標籤在畫面上會解析不到,而且不報錯`
+      )
+    }
+  }
+
+  report(!problems.length, '規範認定的元件層都有被自動註冊', problems)
+}
+
+/**
+ * 頁面旁邊那幾種資料夾,兩份設定的鍵一致。
+ *
+ * 同一組資料夾被問了兩個問題:**合不合法**(VIEW_UNDERSCORE_FOLDERS)、
+ * **標籤名怎麼組**(VIEW_COMPONENT_MARKERS)。答案的形狀不同所以分成兩份,
+ * 但問的是同一組東西 —— 鍵對不上就是有一邊漏了。
+ *
+ * 漏在標籤那一份:那一層的元件不會被自動註冊,標籤寫了沒反應而且不報錯。
+ * 漏在合法清單那一份:那個資料夾名會被規則報成「不在清單裡」,
+ * 而它其實正常運作著。兩種都看不出成因在另一份設定。
+ */
+const onCheckViewFolderSettings = () => {
+  const problems = []
+
+  /* 設定缺了那一項時,這裡拿到的是 undefined —— 檢查那一步會當場丟例外,
+     而訊息指的是這一行,看不出是「設定少填了一項」。
+     缺設定項本來就由跑檢查前的那道守門列出來(見 lint.mjs),這裡只要不炸。 */
+  const markerKeys = Object.keys(VIEW_COMPONENT_MARKERS ?? {})
+
+  for (const name of VIEW_UNDERSCORE_FOLDERS) {
+    if (!markerKeys.includes(name))
+      problems.push(
+        `${name} 在合法清單裡,而標籤那一份沒有它 —— ` +
+          `那一層的元件不會被自動註冊,標籤寫了沒反應而且不報錯`
+      )
+  }
+
+  for (const name of markerKeys) {
+    if (!VIEW_UNDERSCORE_FOLDERS.includes(name))
+      problems.push(
+        `${name} 在標籤那一份裡,而合法清單沒有它 —— ` +
+          `那個資料夾名會被報成「不在清單裡」,而它其實正常運作著`
+      )
+  }
+
+  report(!problems.length, '頁面旁邊那幾種資料夾,兩份設定的鍵一致', problems)
+}
+
+/**
+ * 標了 starter 的檔案,安裝文件那張表也要講到。
+ *
+ * 那個標記是同步工具的判準(標了就排除),而那張表是人在設定同步時看的 ——
+ * 兩邊對不上的兩種後果都不會報錯:
+ *
+ *   檔案標了、表沒列   設定同步的人不知道要排除它,整套更新時蓋掉這個站的內容
+ *   表列了、檔案沒標   打開那支檔案看不出它是起手樣板,下一個人照著改共用檔
+ *
+ * 只在來源驗:拿到這套工具的專案有自己的起手樣板(他們的頁面、他們的元件),
+ * 那些不在來源的文件裡,在那邊驗的話每一支都被報一筆,而那全是誤報。
+ */
+const onCheckStarterDocumented = () => {
+  if (!IS_SOURCE_PROJECT) {
+    skipped.push({ name: '標了 starter 的檔案,文件那張表都有講到', need: 'sourceProject' })
+    return
+  }
+
+  const docs = path.join(root, ...CONVENTION_DOCS_DIR.split('/'))
+
+  if (!fs.existsSync(docs)) {
+    skipped.push({ name: '標了 starter 的檔案,文件那張表都有講到', need: 'conventionDocs' })
+    return
+  }
+
+  const docText = fs
+    .readdirSync(docs)
+    .filter((name) => name.endsWith('.md'))
+    .map((name) => readTextCached(path.join(docs, name)) ?? '')
+    .join('\n')
+
+  const problems = []
+
+  for (const dir of [...COMPONENT_DIRS, STORE_DIR]) {
+    for (const abs of listFiles(root, dir)) {
+      if (!/\.(vue|js)$/.test(abs)) continue
+
+      const text = readTextCached(abs) ?? ''
+
+      if (!/^\/\*\s*starter\s/m.test(text)) continue
+
+      /* 用檔名找,不用完整路徑 —— 文件講的是「哪一支」,
+         而各專案的目錄擺法不同,寫完整路徑的話那張表一換專案就對不上。 */
+      const name = path.basename(abs)
+      const stem = name === 'Index.vue' ? path.basename(path.dirname(abs)) : name
+
+      if (!docText.includes(stem))
+        problems.push(
+          `${toRel(root, abs)} 標了 starter,而安裝文件那張表沒有提到 ${stem} —— ` +
+            `設定同步的人不會知道要排除它`
+        )
+    }
+  }
+
+  report(!problems.length, '標了 starter 的檔案,文件那張表都有講到', problems)
+}
+
 const onCheckStyleProjectHook = () => {
   /* **只在來源驗。** 接點是跟著元件一起複製出去的,拿到這套工具的專案
      不必自己維護它;而那些專案還有自己寫的元件(來源沒有的那幾支),
@@ -6194,12 +6539,21 @@ const onCheckDocRuleNames = () => {
     text.split(/\r?\n/).forEach((line, i) => {
       /* 只認「規則 `代號`」這一種寫法 —— 反引號包起來的東西還有檔名、
          設定項、class 名,全部拿來比對的話,每一份文件都會報一整片。 */
-      for (const m of line.matchAll(/規則\s+`(\w+)`/g)) {
+      for (const m of line.matchAll(/規則\s+`([\w:]+)`/g)) {
         if (known.has(m[1])) continue
 
         /* 專案自己的規則不在這份清單裡(它們寫在 rules-project.mjs),
-           代號以約定的前綴開頭,那種跳過。 */
-        if (m[1].startsWith('project')) continue
+           代號一律帶那個前綴,那種跳過。
+
+           **比對要用完整的前綴(含冒號)。** 只比 `project` 的話,
+           projectStyleFile 這種駝峰代號也會被當成專案規則放行 ——
+           而那其實是一條早就不存在的規則,文件指著它,
+           照著找的人找不到,而這一則顯示通過。
+
+           代號裡的冒號也要抓得到:比對式只收 \w 的話,
+           真正的專案規則代號(project:xxx)根本不會進到這裡,
+           於是這個例外從來沒有作用過,只是在誤放行別的東西。 */
+        if (m[1].startsWith(PROJECT_RULE_PREFIX)) continue
 
         problems.push(`${rel}:${i + 1} 提到的 ${m[1]} 已經不是任何一條規則的代號`)
       }
@@ -7145,6 +7499,93 @@ const onCheckIgnoredSegments = () => {
  * 比對範圍取 checksum 那邊的那一份判準(isSkipped)——
  * 設定與專案自己的規則本來就該不同,列進來會每次都報。
  */
+/**
+ * 兩份範本的**元件介面**要一致。
+ *
+ * 上面那一則比的是規則檔,元件不在它的範圍 —— 而元件才是兩份範本各改一次、
+ * 最容易漏掉一邊的地方。
+ *
+ * **這是漏過一次的那個洞。** 有一次改元件的設定項時,指令只切到其中一份的
+ * 目錄底下執行,另一份整個沒改;兩端的檢查與建置都照常通過(各自都是自洽的),
+ * 而提交說明寫的是「拿掉了」—— 對其中一份成立,對另一份不成立。
+ * 拿到另一份的專案照著說明找,找到的是還在的那個設定。
+ *
+ * 比的是封存下來的那份介面名單(config / defineExpose / defineEmits):
+ * 逐字比對整支元件不可行 —— 兩份範本本來就有刻意的差異
+ * (樣式的路徑、有沒有伺服器端那一段),那些不是漏同步。
+ * 而介面名單只記名字,那一層兩份必須一樣。
+ */
+const onCheckComponentApiInSync = () => {
+  if (!IS_SOURCE_PROJECT) {
+    skipped.push({ name: '兩份範本的元件介面一致', need: 'sourceProject' })
+    return
+  }
+
+  const siblingRoot = path.dirname(root)
+
+  let siblings = []
+
+  try {
+    siblings = fs
+      .readdirSync(siblingRoot, { withFileTypes: true })
+      .filter((item) => item.isDirectory())
+      .map((item) => path.join(siblingRoot, item.name))
+      .filter((dir) => dir !== root && fs.existsSync(path.join(dir, COMPONENT_API_FILE)))
+  } catch {
+    // 讀不到上一層時當成「只有這一份」
+  }
+
+  if (!siblings.length) {
+    report(false, '兩份範本的元件介面一致', [
+      '找不到另一份範本的介面名單 —— 這裡是元件庫的來源,理當有兩份。' +
+        '兩份都要跑過 npm run rules:seal,名單才會在。',
+    ])
+    return
+  }
+
+  const readApi = (dir) => {
+    try {
+      return JSON.parse(fs.readFileSync(path.join(dir, COMPONENT_API_FILE), 'utf8'))
+    } catch {
+      return null
+    }
+  }
+
+  const here = readApi(root)
+  const problems = []
+
+  if (!here) {
+    problems.push('這一份的介面名單讀不到 —— 跑 npm run rules:seal 重新產生')
+  }
+
+  for (const sibling of siblings) {
+    const there = readApi(sibling)
+    const name = path.basename(sibling)
+
+    if (!here || !there) continue
+
+    for (const kind of ['config', 'expose', 'emits']) {
+      const keys = new Set([
+        ...Object.keys(here[kind] ?? {}),
+        ...Object.keys(there[kind] ?? {}),
+      ])
+
+      for (const key of keys) {
+        const mine = (here[kind]?.[key] ?? []).join('、')
+        const yours = (there[kind]?.[key] ?? []).join('、')
+
+        if (mine === yours) continue
+
+        problems.push(
+          `${key} 的${API_KIND_LABEL[kind]}兩份不一樣 —— 這裡是「${mine || '(沒有)'}」,${name} 是「${yours || '(沒有)'}」`
+        )
+      }
+    }
+  }
+
+  report(!problems.length, '兩份範本的元件介面一致', problems)
+}
+
 const onCheckTemplatesInSync = () => {
   if (!IS_SOURCE_PROJECT) {
     skipped.push({ name: '每一份範本的共用規則都一致', need: 'sourceProject' })
@@ -7230,6 +7671,40 @@ const onCheckRuleFingerprints = () => {
 
     for (const shared of ['rules-global.mjs', 'lint-core.mjs', 'checksum.mjs']) {
       if (isSkipped(shared)) problems.push(`${shared} 不該被排除 —— 那是每個專案拿到的同一套`)
+    }
+
+    /* 「跟著來源的檔案有哪幾支」列得出來,而且與指紋涵蓋的是同一批。
+
+       同步工具各專案自己寫,而它要知道帶哪幾支 —— 自己維護一份目錄清單的話,
+       與這裡對不上的那幾支每次檢查都被報成「內容被改過」,
+       **而那個專案一個字都沒動**。訊息寫的是「被改過」,
+       看的人會先去查自己是不是動了手腳,查完才發現是同步範圍的問題。
+
+       共用的產品程式碼散在原始碼底下,那一層還有這個專案自己的東西
+       (api 定義就在那裡)—— 所以同步的單位是「檔案」不是「目錄」,
+       這份清單才是答案。 */
+    {
+      const tracked = trackedFiles()
+
+      for (const name of covered) {
+        if (!tracked.some((one) => one.endsWith(`/${name}`) || one === name))
+          problems.push(`${name} 有指紋,而「跟著來源的檔案」清單沒有列它 —— 同步時會被漏掉`)
+      }
+    }
+
+    /* 共用的**產品程式碼**也要在裡面 —— 那幾支與規則檔是同一種東西:
+       整支跟著來源。少收了不會有任何徵兆:專案就地加了自己的函式進去,
+       檢查照樣通過,而下一次整套更新把它們蓋掉。
+
+       這個專案實際上有哪幾支由擺法決定,所以只驗「找得到的那幾支有被收進來」,
+       不要求一定要有(沒有表單的專案就沒有 _validation.js)。 */
+    for (const [name] of sharedSourceFiles().found) {
+      if (!covered.includes(name))
+        problems.push(`${name} 沒有列入指紋 —— 那一支是整支跟著來源的`)
+    }
+
+    for (const [name, list] of sharedSourceFiles().clashes) {
+      problems.push(`找到 ${list.length} 支 ${name},指紋只守得了其中一支`)
     }
 
     report(!problems.length, '共用規則的指紋涵蓋範圍正確', problems)
@@ -7423,6 +7898,36 @@ const onCheckGuardWiring = () => {
       else if (!fs.existsSync(path.join(root, guard)))
         problems.push(`它指向 ${guard},而那支檔案不存在 —— 存檔時會靜靜地什麼都不做`)
 
+      /* **監看存檔,不是聽模組圖的更新事件。**
+
+         那個事件只對「已經進到模組圖」的檔案觸發 —— 目前這一頁實際載入的那些。
+         存到別頁才用的元件、或剛新增的檔案時它完全不會被呼叫,
+         而這一層的沉默**與「檢查通過」長得一模一樣**:
+         看到終端機沒訊息的人會以為沒問題。
+
+         這件事規範文件早就寫著要用監看器,而實作沒跟上 ——
+         兩邊對不上的時候沒有任何徵兆,所以在這裡比對。 */
+      /* 比對前先把註解遮掉 —— 說明那幾行本來就會寫出這串字,
+         連註解一起比對的話,那一行被註解掉之後這一則照樣通過。 */
+      const code = maskComments('.tools/lint/dev-server-plugin.mjs', text)
+
+      /* 兩種事件分開問。只問「有沒有用監看器」的話,接了其中一種就算通過 ——
+         而少掉的那一種,後果與完全沒接監看器一樣:存檔(或新增)沒有任何反應。 */
+      if (!/server\.watcher\.on\(\s*'change'/.test(code))
+        problems.push(
+          '它沒有監看存檔(watcher 的 change)—— ' +
+            '只聽模組圖的更新事件的話,那一頁沒載入的檔案存檔時不會有任何訊息'
+        )
+
+      if (!/server\.watcher\.on\(\s*'add'/.test(code))
+        problems.push('它沒有監看新增(watcher 的 add)—— 剛建好一支元件時不會有任何訊息')
+
+      if (/handleHotUpdate\s*\(/.test(code))
+        problems.push(
+          '它還留著模組圖的更新事件(handleHotUpdate)—— ' +
+            '與監看器並存的話,同一次存檔會被檢查兩次'
+        )
+
       report(!problems.length, '開發伺服器外掛指向的守門入口存在', problems)
     }
 
@@ -7475,6 +7980,41 @@ const onCheckGuardWiring = () => {
           )
 
         report(!problems.length, '送出訊息那層(css-guard-prompt)掃得到工作區', problems)
+
+        /* 跳過的目錄底下的檔案不可以被撈進來。
+
+           這一層拿的是 git 列出來的改動,要自己過濾;整份掃描那一支走目錄樹,
+           在進到資料夾之前就剪掉了。**兩邊要讀同一份判斷** ——
+           各寫一次的話,同一份違規在全案掃描是 0 筆、在對話提醒裡卻每一輪都出現,
+           而看到的人無從判斷哪一邊才對。
+
+           實際踩過:public/ 底下給 iframe 用的樣式(那裡吃不到專案的 css 變數,
+           色碼只能寫死)每次動到就報一次 —— 那種違規改不掉也標不掉。 */
+        {
+          const problems = []
+          const skipDir = SKIP_DIRS.find((one) => !one.startsWith('.')) ?? 'public'
+
+          if (isScannablePath(`${skipDir}/probe.css`))
+            problems.push(`${skipDir}/ 底下的檔案沒有被剔除 —— 那一層不該進提醒`)
+
+          if (!isScannablePath(`${SRC_DIR}/probe.css`))
+            problems.push(`${SRC_DIR}/ 底下的檔案被剔除了 —— 原始碼要照常檢查`)
+
+          if (isScannablePath(`${SRC_DIR}/probe.txt`))
+            problems.push('副檔名不在範圍內的沒有被剔除')
+
+          /* 那一層有沒有真的用這支判斷 —— 用回只看副檔名的那一支的話,
+             上面那幾則照樣通過(它們驗的是函式,不是呼叫端)。 */
+          const hookText = fs.readFileSync(hook, 'utf8')
+
+          if (!hookText.includes('core.isScannablePath'))
+            problems.push(
+              'css-guard-prompt 沒有用 isScannablePath —— ' +
+                '只看副檔名的那一支不會剔除跳過的目錄'
+            )
+
+          report(!problems.length, '送出訊息那層剔除掉跳過的目錄', problems)
+        }
 
         /* 待處理清單裡留著一個「只差大小寫」的舊路徑時要剔除。
 
@@ -7553,6 +8093,43 @@ const onCheckGuardWiring = () => {
           )
         else if (!/exit 1/.test(text))
           problems.push('它跑了規則的驗證卻不擋 —— 沒過照樣 commit 的話,那一段等於只是印字')
+
+        /* 被指紋保護的共用產品程式碼,改到它們的時候也要驗指紋。
+
+           那幾支不在 .tools/lint/ 底下,所以「動到規則檔」那一段不會被觸發 ——
+           改了內容而忘了重新封存的話,這裡一點徵兆都沒有,
+           而別的專案同步到最新內容之後會整批被報「被改過」,那邊一個字都沒動。
+
+           shell 沒辦法 import 那份清單,只能人工同步,所以在這裡比對:
+           checksum 那邊加了一支而 hook 沒跟上的話,那一支改了就不會被檢查。 */
+        const verifyAt = text.indexOf('rules:verify')
+
+        if (verifyAt === -1) {
+          problems.push(
+            '動到那幾支共用檔時它沒有驗指紋(npm run rules:verify)—— ' +
+              '忘了重新封存的話,別的專案會整批被報「被改過」'
+          )
+        } else {
+          /* 比對的是**那一段自己的條件**,不是整份檔案有沒有出現那個名字 ——
+             那幾支在別的段落(跑行為測試那兩段)本來就會出現,
+             拿整份去比對的話,這一則永遠通過,而漏列的那一支照樣沒人檢查。 */
+          const condition =
+            text
+              .slice(0, verifyAt)
+              .split('\n')
+              .reverse()
+              .find((line) => line.includes('grep -qE')) ?? ''
+
+          for (const name of SHARED_SOURCE_FILES) {
+            const stem = name.replace(/\.js$/, '')
+
+            if (!condition.includes(stem))
+              problems.push(
+                `驗指紋那一段沒有涵蓋 ${name} —— ` +
+                  `那一支改了之後忘記重新封存,commit 當下不會有任何徵兆`
+              )
+          }
+        }
       }
 
       report(!problems.length, 'commit 前那層(pre-commit)的篩選與設定一致', problems)
@@ -7671,6 +8248,203 @@ const onCheckThemeParsing = () => {
  * 畫面長什麼樣不重要,但父子與前後關係要是真的 —— 回 null 的話元素一多
  * 就 patch 不動,掛載那一步會停住而且不報錯。
  */
+/**
+ * 設定填了範圍外的值,會不會當場講出來。
+ *
+ * 那種填錯**不報錯,而且看不出原因**:元件拿那個值去比對,每一條分支都不成立,
+ * 於是那一段畫面什麼都不畫、或那個行為靜靜地不發生,而設定看起來是有填的。
+ *
+ * 這則守著兩個方向。誤報那一邊更要緊:填對的被報一次,
+ * 下一個人就會把整條檢查關掉,而那時真的填錯也不會有人知道。
+ */
+/**
+ * 每一支元件都編譯得過 —— **包括沒有人用到的那幾支**。
+ *
+ * 建置只編譯「被引用到的」檔案。元件庫裡多數元件沒有對應的示範頁,
+ * 所以 `npm run build` 通過不代表每一支都編譯得過 ——
+ * 那幾支要等接手的專案真的用到它才會爆,而那時看到的是
+ * 「整個專案打包不出來」,不是某個功能壞掉。
+ *
+ * **這是漏過一次的那個洞。** 有三支元件的同一個標籤上被寫進了兩個 v-bind
+ * (Vue 編譯器直接 SyntaxError),而來源這邊兩種建置都通過 ——
+ * 因為那三支沒有示範頁。拿到那一版的專案是整包建置不了。
+ */
+const onCheckComponentsCompile = async () => {
+  let compiler = null
+  let parseJs = null
+
+  try {
+    compiler = await import('@vue/compiler-sfc')
+    parseJs = (await import('@babel/parser')).parse
+  } catch {
+    compiler = null
+  }
+
+  if (!compiler?.parse || !parseJs) {
+    skipped.push({ name: '每一支元件都編譯得過', need: 'vueCompiler' })
+    return
+  }
+
+  const problems = []
+  let compiled = 0
+
+  for (const dir of COMPONENT_DIRS) {
+    for (const abs of listFiles(root, dir)) {
+      const rel = toRel(root, abs)
+
+      /* 元件旁邊那幾支 .js(composable、共用設定)也要看。
+
+         **它們更容易被漏掉**:整支只被元件 import,而元件不一定有示範頁 ——
+         兩端的建置都通過,壞掉的那一支卻已經送出去了。
+         實際發生過:一支共用設定的物件宣告被改掉了開頭那一行,
+         整支是語法錯誤,而兩端建置與檢查全部通過。 */
+      if (rel.endsWith('.js') || rel.endsWith('.mjs')) {
+        /* **解析,不執行。** 執行會去碰 DOM 與框架的東西,而且把 import 拿掉
+           再塞進 new Function 那種做法會誤報:那裡不認得 ESM 與 import.meta,
+           照樣寫著的檔案會被報成壞的 —— 而誤報一次,下一個人就把整條關掉了。 */
+        try {
+          parseJs(fs.readFileSync(abs, 'utf8'), {
+            sourceType: 'module',
+            plugins: ['topLevelAwait'],
+          })
+        } catch (error) {
+          problems.push(`${rel} —— ${error.message}`)
+        }
+
+        compiled += 1
+        continue
+      }
+
+      if (!abs.endsWith('.vue')) continue
+
+      const source = fs.readFileSync(abs, 'utf8')
+
+      /* 先拆 SFC(這一步就會抓到標籤本身的語法問題),
+         再單獨編譯畫面區段 —— 屬性寫錯、重複綁定都在那一步報。 */
+      const { descriptor, errors } = compiler.parse(source, { filename: rel })
+
+      for (const error of errors) problems.push(`${rel} —— ${error.message}`)
+
+      if (!descriptor?.template?.content) continue
+
+      const result = compiler.compileTemplate({
+        source: descriptor.template.content,
+        filename: rel,
+        id: rel,
+      })
+
+      for (const error of result.errors) {
+        problems.push(`${rel} —— ${typeof error === 'string' ? error : error.message}`)
+      }
+
+      compiled += 1
+    }
+  }
+
+  if (!compiled) problems.push('一支元件都沒有編譯到 —— 元件目錄的設定可能不對')
+
+  report(!problems.length, '每一支元件都編譯得過', problems)
+}
+
+/**
+ * 表單那組共用檔在哪 —— **往下找,不假設它在元件目錄正下方**。
+ *
+ * 元件再分一層分類的專案(`components/common/mForm/`、`components/buy/mForm/`)
+ * 用固定路徑永遠對不上,而對不上的時候這幾則會被列進「這個專案的設定
+ * 讓它沒有東西可以驗」—— 訊息讀起來像是那個專案沒接這套共用檔,
+ * 實際上檔案就在,只是路徑猜錯了。
+ *
+ * 元件目錄那一項不能改填分類層繞過:其他規則要掃的是整個元件目錄,
+ * 改了之後別的分類底下的元件會全部不再被檢查,而且不會報錯。
+ */
+const formComposableOf = (name) =>
+  listFiles(root, COMPONENTS_DIR).find((abs) =>
+    toRel(root, abs).endsWith(`/mForm/.composables/${name}`)
+  ) ?? null
+
+const onCheckConfigOptions = async () => {
+  const source = formComposableOf('useConfigOptions.js')
+
+  if (!source) {
+    skipped.push({ name: '設定填了範圍外的值會講出來', need: 'formConfigOptions' })
+    return
+  }
+
+  let vue = null
+
+  try {
+    vue = await import('vue')
+  } catch {
+    vue = null
+  }
+
+  if (!vue?.effectScope) {
+    skipped.push({ name: '設定填了範圍外的值會講出來', need: 'formConfigOptions' })
+    return
+  }
+
+  const { computed, effectScope, ref, toValue, watchEffect } = vue
+
+  Object.assign(globalThis, { computed, ref, toValue, watchEffect })
+
+  /* 照原始碼複製一份,只把「只在開發時看」那個判斷換成永遠成立 ——
+     import.meta 是每個模組自己的,從這裡設不到被載入的那一支,
+     而要驗的正是開發時的行為。 */
+  const copyDir = path.join(root, `${PROBE}config`)
+
+  onMakeDirTracked(copyDir)
+
+  const copyPath = path.join(copyDir, 'useConfigOptions.mjs')
+
+  fs.writeFileSync(
+    copyPath,
+    fs.readFileSync(source, 'utf8').replaceAll('import.meta.env.DEV', 'true')
+  )
+
+  const { useConfigOptions } = await import(pathToFileURL(copyPath).href)
+
+  const warnings = []
+  const realWarn = console.warn
+
+  console.warn = (...args) => warnings.push(args.join(' '))
+
+  const runWith = (config) => {
+    warnings.length = 0
+
+    const scope = effectScope()
+
+    scope.run(() => {
+      useConfigOptions(
+        computed(() => config),
+        { mode: ['group', 'single'], sort: [null, 'desc', 'asc'] }
+      )
+    })
+
+    scope.stop()
+
+    return [...warnings]
+  }
+
+  const problems = []
+
+  if (runWith({ mode: 'group', sort: null }).length) problems.push('填對的被報了')
+  if (runWith({ mode: 'single', sort: 'asc' }).length) problems.push('另一個合法值被報了')
+
+  const renamed = runWith({ mode: 'boolean', sort: null })
+
+  if (renamed.length !== 1) problems.push('填了範圍外的值沒有被報出來')
+  if (!renamed[0]?.includes("'group' / 'single'")) problems.push('訊息裡沒有可用值')
+  if (!renamed[0]?.includes('"boolean"')) problems.push('訊息裡沒有填錯的那個值')
+
+  if (runWith({ mode: 'nope', sort: 'sideways' }).length !== 2) {
+    problems.push('兩個都填錯時沒有各報一筆')
+  }
+
+  console.warn = realWarn
+
+  report(!problems.length, '設定填了範圍外的值會講出來', problems)
+}
+
 const onCheckTouchedValidate = async () => {
   let vue = null
   let veeValidate = null
@@ -7682,9 +8456,9 @@ const onCheckTouchedValidate = async () => {
     vue = null
   }
 
-  const composablePath = path.join(root, COMPONENTS_DIR, 'mForm/.composables/useValidateEvents.js')
+  const composablePath = formComposableOf('useValidateEvents.js')
 
-  if (!vue?.createRenderer || !veeValidate?.Form || !fs.existsSync(composablePath)) {
+  if (!vue?.createRenderer || !veeValidate?.Form || !composablePath) {
     skipped.push({ name: '碰過之後值一動就驗', need: 'formValidateEvents' })
     return
   }
@@ -8302,9 +9076,18 @@ const SKIP_REASON = {
   apiSpec:
     '這個專案沒有 api 規格文件(設定的 API_SPEC_DIR 留空或檔案不在),' +
     '「前端自己掛的欄位要加底線」那條分不出哪些名字是後端給的,本來就整條略過。',
+  vueCompiler:
+    '這個專案沒有裝 Vue 的單檔元件編譯器(@vue/compiler-sfc)—— 「每一支元件都編譯得過」沒有東西可以驗。',
+  formConfigOptions:
+    '元件目錄底下找不到 mForm/.composables/useConfigOptions.js(再分幾層分類都找得到),' +
+    '或它要用的套件沒裝 —— 「設定填了範圍外的值會講出來」就沒有東西可以驗。',
   formValidateEvents:
-    '這個專案沒有那支表單驗證時機的共用檔(mForm/.composables/useValidateEvents.js),' +
+    '元件目錄底下找不到 mForm/.composables/useValidateEvents.js(再分幾層分類都找得到),' +
     '或它要用的套件沒裝 —— 「碰過之後值一動就驗」就沒有東西可以驗。',
+  componentsDts:
+    '這個專案還沒有產生過元件宣告檔(components.d.ts / .nuxt/components.d.ts)——' +
+    '那一份由自動註冊在跑開發伺服器或建置時寫出來。' +
+    '沒有它就問不出「建置那邊實際註冊了哪幾層」,跑一次 dev 或 build 之後這條就會驗。',
   svgSpritemap:
     '這個專案沒有接圖示合成(.vite/svg-spritemap.mjs 不在,或它要用的套件沒裝),' +
     '「開發時那個路由認不認得帶前綴的請求」就沒有東西可以驗。' +
@@ -8381,6 +9164,12 @@ try {
     onMakeDirTracked(path.dirname(abs))
     fs.writeFileSync(abs, c.code, 'utf8')
 
+    /* 剛改寫的那一支要讓讀檔快取失效。快取本來是看修改時間與大小認出內容變了沒有,
+       而這裡是連續寫同一批檔案 —— 兩次寫入落在同一毫秒、大小又剛好一樣的時候,
+       那兩個依據都分不出來,下一則案例就讀到上一則的內容。
+       那種失敗看起來會像是「規則莫名其妙地不過」。 */
+    invalidateFileCache(abs)
+
     /* 跨檔的規則要看別的檔案寫了什麼(誰從 apiDefault 還原、誰定義了這個變數),
        那種案例用 context 把情境鋪出來,再檢查 c.file 那一支。 */
     for (const [file, code] of Object.entries(c.context ?? {})) {
@@ -8388,6 +9177,7 @@ try {
 
       onMakeDirTracked(path.dirname(at))
       fs.writeFileSync(at, code, 'utf8')
+      invalidateFileCache(at)
     }
 
     /* 上一則案例建好的跨檔索引,對這一則就是舊的 —— 專案裡的檔案剛剛才被改寫。
@@ -8567,6 +9357,10 @@ try {
   onCheckPreCommitFilter()
   onCheckExemptNameReaders()
   onCheckComponentApiDiff()
+  onCheckComponentUses()
+  onCheckComponentDirsRegistered()
+  onCheckStarterDocumented()
+  onCheckViewFolderSettings()
   onCheckStyleProjectHook()
   onCheckComponentApiKey()
   onCheckCaseFilesInProbeDirs()
@@ -8581,6 +9375,7 @@ try {
   onCheckRuleCrash()
   onCheckGuardWiring()
   onCheckProjectRules()
+  onCheckComponentApiInSync()
   onCheckTemplatesInSync()
   onCheckRuleFingerprints()
   onCheckApiLayers()
@@ -8736,6 +9531,8 @@ try {
      失效的時候不報錯,畫面上只是送出後補填,紅字不會消失。
 
      所以真的把表單跑起來操作一遍。沒有那幾個套件的專案就跳過並講明原因。 */
+  await onCheckComponentsCompile()
+  await onCheckConfigOptions()
   await onCheckTouchedValidate()
 
   for (const c of EMPTY_CLASS_CASES) {

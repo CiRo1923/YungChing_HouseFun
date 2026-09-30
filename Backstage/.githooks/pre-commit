@@ -3,11 +3,16 @@
 #
 #   1. 色票檔排序不對 → 自動排序並重新 git add(無害的純順序調整)
 #   2. 本次 staged 的檔案 → 跑規範檢查(css / api / store / page 四類都在內),印提醒
-#   3. 這次動到規則檔的話 → 跑規則自己的驗證,沒過就**擋下 commit**
+#   3. 動到規則檔      → 跑規則自己的驗證
+#   4. 動到 _prototype.js  → 驗共用函式的行為沒有變
+#   5. 動到 _validation.js → 驗表單格式規則的行為沒有變
+#   6. 動到上面那兩支      → 驗指紋有沒有跟著重新封存
 #
-# **規範違規只提醒,規則自己壞掉才擋。** 差別在於「擋下來之後做得到嗎」:
-#   既有的違規存量清不完,擋下來只會逼人加 --no-verify,反而讓守門形同虛設;
-#   規則壞掉是一兩行的事,當場修得完,而且放過去的代價大得多(見第 3 段)。
+# **規範違規只提醒,第 3 到 6 項沒過就擋下 commit。** 差別在於
+# 「擋下來之後做得到嗎」:既有的違規存量清不完,擋下來只會逼人加 --no-verify,
+#   反而讓守門形同虛設;而那四項都是一兩行的事,當場修得完,
+#   放過去的代價卻大得多 —— 壞掉的東西會一路複製到別的專案,
+#   而那邊看到的現象與成因完全對不起來(見各段自己的說明)。
 #
 # 此 hook 由 .githooks/ 進版控,經 core.hooksPath 生效(npm run hooks:install,
 # postinstall 會自動跑)。
@@ -110,6 +115,73 @@ for root in $ROOTS; do
       printf "${RED}  規則壞掉而放過去的話,那份對不上的指紋會一路複製到別的專案,${RESET}\n"
       printf "${RED}  那邊會整批報「規則被改過」,而他們一個字都沒動。${RESET}\n"
       printf "${RED}  本機覆核:cd %s 之後跑 npm run test:css${RESET}\n\n" "$root"
+      exit 1
+    fi
+  fi
+
+  # --- 4. 共用函式的行為有沒有變(這次動到 _prototype.js 才跑)-----------------
+  #
+  # 那一支裡的函式產出的是**畫面上的字**,不是會丟例外的東西 ——
+  # 日期算錯只是顯示成別的日期,建置照樣過,上面第 2 段也照樣過
+  # (規範檢查看的是寫法,看不出一個純函式算出來的值對不對)。
+  #
+  # 而它是來源共用的:跟著元件一起複製到各專案,改壞了會一路帶過去,
+  # 那邊要等到有人盯著某一筆日期看,才會發現顯示的不是那個時間。
+  #
+  # 與第 3 段一樣會擋 —— 純函式當場修得完,放過去的代價大得多。
+
+  if echo "$FILES" | grep -qE '_prototype\.js$'; then
+    if ! (cd "$root" && npm run test:prototype --silent); then
+      printf "\n${RED}共用函式的行為變了,這次 commit 停下來。${RESET}\n"
+      printf "${RED}  上面列出來的是哪一則案例、得到什麼、預期什麼。${RESET}\n"
+      printf "${RED}  這幾則問的是「行為有沒有變」,不是「這個專案要不要這樣」——${RESET}\n"
+      printf "${RED}  那一支是跟著元件複製過來的,行為改了就與來源分岔了。${RESET}\n"
+      printf "${RED}  本機覆核:cd %s 之後跑 npm run test:prototype${RESET}\n\n" "$root"
+      exit 1
+    fi
+  fi
+
+  # --- 5. 表單格式規則的行為(這次動到 _validation.js 才跑)---------------------
+  #
+  # 與第 4 段同一種:判斷錯了不會報錯,只是安靜地走錯邊 ——
+  # 該擋的放行(錯的資料送到後端才被退),或是該放行的擋下
+  # (使用者填了正確的值卻送不出去,而畫面上只說格式不對)。
+  #
+  # 一個比對式裡少寫或多寫一個字元就會這樣,而那一行看起來完全正常。
+
+  if echo "$FILES" | grep -qE '_validation\.js$'; then
+    if ! (cd "$root" && npm run test:validation --silent); then
+      printf "\n${RED}表單格式規則的行為變了,這次 commit 停下來。${RESET}\n"
+      printf "${RED}  上面列出來的是哪一筆、被放行還是被擋下、預期是哪一種。${RESET}\n"
+      printf "${RED}  那一支是跟著元件複製過來的,行為改了就與來源分岔了。${RESET}\n"
+      printf "${RED}  本機覆核:cd %s 之後跑 npm run test:validation${RESET}\n\n" "$root"
+      exit 1
+    fi
+  fi
+
+  # --- 6. 指紋有沒有跟著更新(這次動到被指紋保護的共用檔才跑)------------------
+  #
+  # 那幾支檔案的內容封存在指紋清單裡。改了內容而忘了重新封存的話,
+  # **這裡不會有任何徵兆** —— 清單是給別的專案比對用的,
+  # 而它們同步到最新內容之後,每一支都被報成「被改過」,
+  # 那邊其實一個字都沒動。
+  #
+  # 第 3 段在動到規則檔時已經涵蓋這件事(test:css 裡有那一則)。
+  # 這一段補的是**共用的產品程式碼** —— 那幾支後來才納進指紋,
+  # 改它們的時候不會動到 .tools/lint/,所以第 3 段不會被觸發。
+  #
+  # 下面那份清單要與 .tools/lint/checksum.mjs 的 SHARED_SOURCE_FILES 一致。
+  #    shell 沒辦法 import 那份設定,只能人工同步 —— 那邊加了一支而這裡沒跟上,
+  #    那一支改了就不會被檢查,而且不會有任何徵兆。
+  #    規則自己的驗證有一則在比對這兩份。
+
+  if echo "$FILES" | grep -qE '(^|/)(_prototype|_validation)\.js$'; then
+    if ! (cd "$root" && npm run rules:verify --silent); then
+      printf "\n${RED}指紋清單沒有跟著更新,這次 commit 停下來。${RESET}\n"
+      printf "${RED}  那幾支共用檔的內容封存在指紋清單裡,改了要重新封存。${RESET}\n"
+      printf "${RED}  不封存的話,別的專案同步到最新內容之後會整批被報「被改過」,${RESET}\n"
+      printf "${RED}  而那邊一個字都沒動。${RESET}\n"
+      printf "${RED}  修法:cd %s 之後跑 npm run rules:seal,再把清單一起 commit${RESET}\n\n" "$root"
       exit 1
     fi
   fi

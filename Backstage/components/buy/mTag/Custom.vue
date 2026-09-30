@@ -3,7 +3,6 @@ import './.css/variables.css'
 import './.css/customVariables.css'
 import './.css/common.css'
 import './.css/custom.css'
-import './.css/styleProject.css'
 
 const emits = defineEmits(['update:modelValue', 'blur', 'remove'])
 const props = defineProps({

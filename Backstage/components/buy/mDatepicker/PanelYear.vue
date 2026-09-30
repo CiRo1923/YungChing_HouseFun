@@ -27,11 +27,15 @@ const props = defineProps({
 
 /* 區間選擇時,這一格要標哪些 class(--range-start / --in-range / --range-end)。
   由 useCalendar 算好傳進來 —— 這支只負責畫,不知道區間是什麼。 */
-defineEmits(['select'])
+const emits = defineEmits(['select'])
+
+const onSelect = (value) => {
+  emits('select', value)
+}
 
 const listRef = ref(null)
 
-/* 注意:年份清單通常上百筆(1911 起跳),不捲到選中的那年等於每次都要自己滑很久。
+/* 注意：年份清單通常上百筆(1911 起跳),不捲到選中的那年等於每次都要自己滑很久。
     用 offsetTop 算而不用 scrollIntoView —— 後者會連帶把整個頁面捲動,
     面板是 Teleport 到 body 的,一捲位置就跑掉了。 */
 onMounted(() => {
@@ -57,7 +61,7 @@ onMounted(() => {
           { '--disabled': props.disabledOf(item.value) },
         ]"
         :disabled="props.disabledOf(item.value)"
-        @click="$emit('select', item.value)"
+        @click="onSelect(item.value)"
       >
         {{ item.value }}
       </button>

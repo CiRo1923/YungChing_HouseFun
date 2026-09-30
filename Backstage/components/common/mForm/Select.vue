@@ -1,22 +1,28 @@
 <script setup>
-/* component-deps —— 複製這支元件時要一起帶走:
-   stores/.composables/useCommonActions.js */
+/* component-deps —— 複製這支元件的時候這幾支要一起帶走:
+   assets/css/_common/vueTransition.css
+     轉場動畫定義在這裡。沒有它不會報錯也不會少畫面,只是切換的當下直接跳、沒有漸變。
+   scripts/_prototype.js
+     這支元件用到的共用函式。少了它**建置直接失敗**,而訊息只說某個名字不存在 —— 看不出那是元件帶來的相依。
+   scripts/_validation.js
+     這支元件用到的共用函式。少了它**建置直接失敗**,而訊息只說某個名字不存在 —— 看不出那是元件帶來的相依。 */
 import './.css/variables.css'
-import './.css/dropdownVariables.css'
+import './.css/selectVariables.css'
 import './.css/common.css'
-import './.css/dropdown.css'
+import './.css/select.css'
 import './.css/styleProject.css'
 
-import { onMergeDropdownConfig, useDropdownCore } from './.composables/useDropdownCore.js'
+import {
+  isUnselected,
+  onMergeDropdownConfig,
+  useDropdownCore,
+} from './.composables/useDropdownCore.js'
 import useValidateEvents from './.composables/useValidateEvents.js'
-import SelectDropdownOptions from './SelectDropdownOptions.vue'
 
 import { onDeepClone, onEmptyData } from '@js/_prototype.js'
 import '@js/_validation.js'
 
 import { Field, ErrorMessage } from 'vee-validate'
-
-const { onResize } = useCommonActions()
 
 const emits = defineEmits(['update:modelValue', 'change'])
 const props = defineProps({
@@ -51,6 +57,7 @@ const props = defineProps({
 })
 const selectRef = ref(null)
 const selectedIndex = ref(-1)
+const label = ref(null)
 const model = computed({
   get: () => props.modelValue,
   set: (value) => {
@@ -63,12 +70,19 @@ const model = computed({
     emits('update:modelValue', result)
   },
 })
-
 const config = computed(() => {
   const defaultConfig = {
     // 驗證時機。blur / change 一律驗;值一動就驗只在「碰過之後」才生效
     // (touchedModelUpdate 的用意見 .composables/useValidateEvents.js)。
     // 傳陣列為「完整指定」,沒列到的一律關閉。
+    /* 要掛在元素上的屬性,依位置各一組 —— 位置名與 setClass 同一套
+        (能傳 class 的地方就能傳屬性),例如 { type: { 'data-x': 'y' } }。
+
+        有些東西只能靠元素上的屬性做到:難字的造字對照、無障礙的標記、
+        第三方套件用屬性認元素 —— 那幾種沒辦法用 class 或 slot 代替。
+
+        預設是空的,傳進來才掛。 */
+    attr: {},
     validateEvents: ['blur', 'change', 'touchedModelUpdate'],
     startOption: null,
     placeholder: null,
@@ -101,8 +115,7 @@ const setClass = computed(() => {
       dropdown: '',
       dropdownContainer: '',
       dropdownBody: '',
-      dropdownOptions: '',
-      dropdownButton: '',
+      dropdownLabel: '',
     },
     ...props.setClass,
   }
@@ -120,15 +133,42 @@ const placeholder = computed(() => {
       }
 })
 
+/* 選項清單 —— 底下每一個讀 item[schema.…] 的地方都是從這裡拿到資料。
+
+  **壞掉的元素在這裡一次濾掉,不在各個使用端各加一道。**
+  讀屬性的地方有五、六處,各自加防護的話那就是五、六份判斷,
+  而往後新增第七處的人不會知道要補 —— 漏掉的那一處照樣會爆。
+
+  為什麼會有壞元素:選項常常來自非同步資料,還沒回來的那幾筆是 null。
+  不濾掉的話,第一個讀到它的地方就丟例外,而那發生在 setup 的同步呼叫裡
+  (見下面的 onSetSelectedIndex)—— 整個路由導航會失敗,
+  使用端看到的是一片白畫面,看不出是哪個欄位、哪一筆資料的問題。 */
 const options = computed(() => {
   const { schema } = config.value
   const { value, isToOption } = placeholder.value
-  const options = props.options ? onDeepClone(props.options) : []
-  // When API fails or returns empty options, keep placeholder construction safe.
-  const placeholderBase = options[0] ? onDeepClone(options[0]) : {}
-  const placeholderItem = onEmptyData(placeholderBase) || {}
+
+  const raw = props.options ? onDeepClone(props.options) : []
+  const options = raw.filter((item) => item !== null && typeof item === 'object')
+
+  /* 濾掉了就要講出來 —— 靜靜拿掉的話,傳錯資料的人永遠不知道自己傳了什麼,
+     只會看到選項少了幾個。這裡是唯一知道「原本有幾筆、留下幾筆」的位置。 */
+  if (import.meta.env.DEV && options.length !== raw.length) {
+    console.warn(
+      `[mForm] Select${props.name ? `(${props.name})` : ''} 的 options 有 ` +
+        `${raw.length - options.length} 筆不是物件(多半是非同步資料還沒回來),已略過。` +
+        `每一筆都要帶 ${schema.value} 與 ${schema.label}`
+    )
+  }
 
   if (isToOption) {
+    /* 提示項照第一筆的形狀做出來,其餘欄位清空 —— 使用端的選項常常帶著
+       額外欄位(分類、圖示),提示項少了那些的話,畫面上它會長得跟別人不一樣。
+
+       一筆都沒有的時候沒有形狀可以照,就只放這一項自己要用的兩個欄位。
+       直接對 options[0] 做的話,空清單時拿到的是 undefined,
+       下面兩行賦值當場丟例外 —— 而這裡在 setup 裡算,結果是整頁空白。 */
+    const placeholderItem = options.length ? onEmptyData(onDeepClone(options[0])) : {}
+
     placeholderItem[schema.label] = value
     placeholderItem[schema.value] = ''
 
@@ -138,41 +178,32 @@ const options = computed(() => {
   return options
 })
 
-const selectedOption = computed(() => {
-  const { schema, startOption } = config.value
-  const targetValue = startOption ?? model.value
-  const optionList = Array.isArray(options.value) ? options.value : []
-
-  return optionList.find((item) => {
-    return item[schema.value] == targetValue
-  })
-})
-
-const label = computed(() => {
-  const { schema } = config.value
-
-  return selectedOption.value?.[schema.label] || null
-})
-
-const displayLabel = computed(() => {
-  return label.value || placeholder.value?.value || null
-})
-
-const isPlaceholder = computed(() => {
-  return !label.value || !model.value
-})
-
 const onSetSelectedIndex = () => {
-  const { startOption, schema } = config.value
-  const targetValue = startOption ?? model.value
+  const { startOption } = config.value
+  let index = -1
 
-  selectedIndex.value = options.value.findIndex((item) => {
-    return item[schema.value] == targetValue
-  })
+  if (options.value) {
+    /* 兩邊都用寬鬆比對(==):選項的值常常是數字,而回填進來的是字串,
+      用嚴格比對會全部對不上('1' !== 1)。
+
+      未填的情況要先擋掉再比 —— 寬鬆比對底下 '' == 0 是成立的,
+      選項裡有值為 0 的那一項時,「還沒選」會顯示成它的文字,
+      而使用者沒有選過任何東西(判斷收在 useDropdownCore 的 isUnselected)。 */
+    if (startOption) {
+      index = options.value.findIndex((item) => item.value == startOption)
+    } else if (!isUnselected(model.value)) {
+      index = options.value.findIndex((item) => item[config.value.schema.value] == model.value)
+    }
+
+    // index = index === -1 ? 0 : index
+    label.value = index !== -1 ? options.value[index][config.value.schema.label] : null
+  }
+
+  selectedIndex.value = index
 }
 
 const {
-  elenemtRef,
+  elementRef,
   dropdownRef,
   dropdownContainerRef,
   dropdownBodyRef,
@@ -190,6 +221,8 @@ const {
   model,
   options,
   selectedIndex,
+  // 收起下拉時標記「碰過」—— 綁 Field 的那個隱藏欄位永遠不會 blur
+  fieldName: () => props.name,
 })
 
 const onDropdownArrow = (e) => {
@@ -237,6 +270,7 @@ const onDropdownArrow = (e) => {
     }
     const result = options.value[selectedIndex.value]
     model.value = result[config.value.schema.value]
+    label.value = result[config.value.schema.label]
 
     // emits('change', result)
   }
@@ -246,7 +280,7 @@ const onDropdownEnter = () => {
   const $selectRef = selectRef.value
 
   onSwitchActive(false)
-  $selectRef?.blur()
+  $selectRef.blur()
 }
 
 const onDropdownItemClick = (index) => {
@@ -255,29 +289,10 @@ const onDropdownItemClick = (index) => {
 
   selectedIndex.value = index
   model.value = option[schema.value]
+  label.value = option[schema.label]
 
   onSwitchActive(false)
   emits('change', option)
-}
-
-const onSetDropdownItemRef = (el, index) => {
-  if (!Array.isArray(dropdownItemRef.value)) {
-    dropdownItemRef.value = []
-  }
-
-  dropdownItemRef.value[index] = el
-}
-
-const onIsDropdownOptionActive = (_item, index) => {
-  return index === selectedIndex.value
-}
-
-const onGetDropdownOptionKey = (item, index) => {
-  return `${item}_${index}`
-}
-
-const onDropdownOptionClick = (_item, index) => {
-  onDropdownItemClick(index)
 }
 
 const onOutSide = (e) => {
@@ -303,8 +318,6 @@ watch(
   }
 )
 
-onResize()
-
 /* 在 setup 就算一次 —— label 與 selectedIndex 是從 model + options 推導出來的,
   但它們是 ref、靠上面兩個 watch 與下面的 onMounted 手動同步。那三個點
   **沒有一個會在 SSR 期間跑到**(watch 沒有 immediate、onMounted 只在 client),
@@ -317,19 +330,17 @@ onSetSelectedIndex()
 onMounted(() => {
   onSetSelectedIndex()
   document.addEventListener('click', onOutSide, true)
-  window.addEventListener('resize', onResize)
   window.addEventListener('resize', onSelectResize)
 })
 
 onUnmounted(() => {
   document.removeEventListener('click', onOutSide, true)
-  window.removeEventListener('resize', onResize)
   window.removeEventListener('resize', onSelectResize)
 })
 </script>
 
 <template>
-  <div class="m-form" :class="setClass.main">
+  <div class="m-form" :class="setClass.main" v-bind="config.attr.main">
     <Field
       :name="props.name"
       v-model="model"
@@ -338,7 +349,7 @@ onUnmounted(() => {
       v-slot="{ field, errorMessage }"
     >
       <input type="hidden" :id="props.name" v-bind="field" />
-      <div class="m-form-container" :class="setClass.container">
+      <div class="m-form-container" :class="setClass.container" v-bind="config.attr.container">
         <button
           type="button"
           class="m-form-element --select"
@@ -347,8 +358,9 @@ onUnmounted(() => {
             { '--focus': isFocus },
             { '--error': errorMessage || config.isError },
           ]"
+          v-bind="config.attr.element"
           :disabled="config.isDisabled"
-          ref="elenemtRef"
+          ref="elementRef"
           @click="onElementClick()"
           @keydown.up="onDropdownArrow($event)"
           @keydown.down="onDropdownArrow($event)"
@@ -359,24 +371,33 @@ onUnmounted(() => {
             :class="[
               setClass.type,
               {
-                '--placeholder': isPlaceholder,
+                '--placeholder': !label || !model,
               },
             ]"
+            v-bind="config.attr.type"
             ref="selectRef"
           >
-            <template v-if="displayLabel">
-              {{ displayLabel }}
+            <template v-if="label">
+              {{ label }}
+            </template>
+            <template v-else-if="!label && placeholder.value">
+              {{ placeholder.value }}
             </template>
           </div>
           <CommonMSvgIcon
-            icon="caret_large_down"
+            :icon="config.arrowIcon"
             class="m-form-icon"
             :class="setClass.icon"
-            v-if="config.arrowType === 'caret'"
+            v-bind="config.attr.icon"
+            v-if="config.arrowIcon"
           />
-          <i class="m-form-icon-arrow" v-if="config.arrowType === 'arrow'" />
         </button>
-        <small class="m-form-suffix" :class="setClass.suffix" v-if="$slots.suffix">
+        <small
+          class="m-form-suffix"
+          :class="setClass.suffix"
+          v-bind="config.attr.suffix"
+          v-if="$slots.suffix"
+        >
           <slot name="suffix" />
         </small>
       </div>
@@ -386,51 +407,60 @@ onUnmounted(() => {
       :name="props.name"
       class="m-form-error"
       :class="setClass.error"
+      v-bind="config.attr.error"
       v-slot="{ message }"
     >
       <CommonMErrorMessage :message="message" />
     </ErrorMessage>
   </div>
   <Teleport to="body">
-    <Transition name="anim-collapse" @beforeLeave="onCloseDropdown" appear>
+    <Transition name="anim-collapse" @afterLeave="onCloseDropdown" appear>
       <div
-        class="m-form-dropdown --select"
+        class="m-form-select-dropdown"
         :class="[setClass.dropdown, { '--open': isOpen }]"
+        v-bind="config.attr.dropdown"
         ref="dropdownRef"
         v-if="isActive && options && options.length !== 0 && !config.isDisabled"
       >
         <div
-          class="m-form-dropdown-container"
+          class="m-form-select-dropdown-container"
           :class="setClass.dropdownContainer"
+          v-bind="config.attr.dropdownContainer"
           ref="dropdownContainerRef"
         >
-          <div class="m-form-dropdown-header" v-if="$slots.dropdownHeader">
-            <slot name="dropdownHeader" />
-          </div>
-          <div
-            class="m-form-dropdown-body scrollbar --y"
+          <ul
+            class="m-form-select-dropdown-body"
             :class="setClass.dropdownBody"
+            v-bind="config.attr.dropdownBody"
             ref="dropdownBodyRef"
           >
-            <SelectDropdownOptions
-              :options="options"
-              :config="config"
-              :setClass="setClass"
-              :isActiveOption="onIsDropdownOptionActive"
-              :onItemClick="onDropdownOptionClick"
-              :itemRef="onSetDropdownItemRef"
-              :getKey="onGetDropdownOptionKey"
+            <li
+              class="m-form-select-dropdown-item"
+              v-for="(item, index) in options"
+              :key="`${item}_${index}`"
+              ref="dropdownItemRef"
             >
-              <template #option="{ item, index, isOptionActive }">
-                <slot name="option" :item="item" :index="index" :isOptionActive="isOptionActive">
-                  {{ item[config.schema.label] }}
-                </slot>
-              </template>
-            </SelectDropdownOptions>
-          </div>
-          <footer class="m-form-dropdown-footer" v-if="$slots.dropdownFooter">
-            <slot name="dropdownFooter" />
-          </footer>
+              <button
+                type="button"
+                class="m-form-select-dropdown-button"
+                :class="{
+                  '--active': index === selectedIndex,
+                }"
+                :disabled="item[config.schema.isDisabled] === true"
+                @click="onDropdownItemClick(index)"
+              >
+                <em
+                  class="m-form-select-dropdown-label"
+                  :class="setClass.dropdownLabel"
+                  v-bind="config.attr.dropdownLabel"
+                >
+                  <slot name="option" :item="item">
+                    {{ item[config.schema.label] }}
+                  </slot>
+                </em>
+              </button>
+            </li>
+          </ul>
         </div>
       </div>
     </Transition>

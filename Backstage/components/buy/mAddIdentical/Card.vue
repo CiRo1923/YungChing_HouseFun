@@ -3,7 +3,6 @@ import './.css/variables.css'
 import './.css/cardVariables.css'
 import './.css/common.css'
 import './.css/card.css'
-import './.css/styleProject.css'
 
 import { useAddIdenticalCore } from './.composables/useAddIdenticalCore.js'
 

@@ -1,17 +1,33 @@
 <script setup>
+/* component-deps —— 複製這支元件的時候這幾支要一起帶走:
+   scripts/_prototype.js
+     這支元件用到的共用函式。少了它**建置直接失敗**,而訊息只說某個名字不存在 —— 看不出那是元件帶來的相依。
+   scripts/_validation.js
+     這支元件用到的共用函式。少了它**建置直接失敗**,而訊息只說某個名字不存在 —— 看不出那是元件帶來的相依。 */
+
 import './.css/variables.css'
 import './.css/common.css'
+import './.css/inputText.css'
 import './.css/styleProject.css'
 
-import { useTextCore } from './.composables/useTextCore.js'
+import { useInputTextCore } from './.composables/useInputTextCore.js'
 import useValidateEvents from './.composables/useValidateEvents.js'
 
-import { numberComma, onToFixed, onUnicodLength, onUnicodSlice } from '@js/_prototype.js'
+import { numberComma, onToFixed } from '@js/_prototype.js'
 import '@js/_validation.js'
+// import { userStore } from '@store/user.js'
 
 import { Field, ErrorMessage } from 'vee-validate'
 
-const emits = defineEmits(['update:modelValue', 'focusin', 'blur', 'input', 'enter'])
+// const user = userStore()
+const emits = defineEmits([
+  'update:modelValue',
+  'focusin',
+  // 'focusout',
+  'blur',
+  'input',
+  'enter',
+])
 
 const props = defineProps({
   name: {
@@ -30,115 +46,110 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
+  value: {
+    type: [String, Number],
+    default: null,
+  },
   rules: {
     type: Object,
     default: null,
   },
   config: {
     type: Object,
-    default: () => ({}),
+    default: () => {},
   },
   setClass: {
     type: Object,
-    default: () => ({}),
+    default: () => {},
   },
 })
-
+// const isOnComposition = ref(false)
 const model = ref(null)
-const isFocus = ref(false)
-const isComposing = ref(false)
+// 供外層操作原生 input(例如 mFormContinuous 要在填完一格後 focus 下一格)
+const inputRef = ref(null)
 
-const { config, setClass, onEnter } = useTextCore({
-  props,
-  emits,
-  model,
-  config: {
-    // 驗證時機。blur / change 一律驗;值一動就驗只在「碰過之後」才生效
-    // (touchedModelUpdate 的用意見 .composables/useValidateEvents.js)。
-    // 傳陣列為「完整指定」,沒列到的一律關閉。
-    validateEvents: ['blur', 'change', 'touchedModelUpdate'],
-    length: null,
-    minlength: null,
-    maxlength: null,
-    formatLength: null,
-    isReadonly: false,
-    isDisabled: false,
-    isError: false,
-    inputMode: null,
-    inputChinese: true,
-    comma: false,
-    checkNotIsZero: false,
-    integer: false,
-    // 數字欄位預設連負號都剝掉(integer 只管小數點,不管正負)。
-    // 需要收負數的欄位才打開,負號不計入 maxlength。
-    allowNegative: false,
-    toFixed: null,
-  },
-  setClass: {
-    frontAssist: '',
-    length: '',
-    rearAssist: '',
-    suffix: '',
-    error: '',
-  },
+const defaultConfig = {
+  /* 要掛在元素上的屬性,依位置各一組 —— 位置名與 setClass 同一套
+        (能傳 class 的地方就能傳屬性),例如 { type: { 'data-x': 'y' } }。
+
+        有些東西只能靠元素上的屬性做到:難字的造字對照、無障礙的標記、
+        第三方套件用屬性認元素 —— 那幾種沒辦法用 class 或 slot 代替。
+
+        預設是空的,傳進來才掛。 */
+  attr: {},
+  placeholder: '',
+  // 驗證時機。blur / change 一律驗;值一動就驗只在「碰過之後」才生效
+  // (touchedModelUpdate 的用意見 .composables/useValidateEvents.js)。
+  // 傳陣列為「完整指定」,沒列到的一律關閉。
+  validateEvents: ['blur', 'change', 'touchedModelUpdate'],
+  length: null,
+  minlength: null,
+  maxlength: null,
+  formatLength: null,
+  isReadonly: false,
+  isDisabled: false,
+  isError: false,
+  inputMode: null,
+  hasClearButton: true, // 輸入後開啟 X 清除
+  inputChinese: true, // 開啟關閉輸入中文
+  comma: false, // 啟用千分位功能
+  checkNotIsZero: false, // 輸入欄位致不能為 0
+  integer: false, // 整數功能 (不可使用小數點)
+  allowNegative: false, // 允許輸入負數（inputMode 為 tel 時不適用）
+  toFixed: null, // 取得小數點第幾位
+}
+const defaultSetClass = {
+  main: '',
+  container: '',
+  element: '',
+  type: '',
+  formatLength: '',
+  frontAssist: '',
+  rearAssist: '',
+  suffix: '',
+  error: '',
+}
+const { isFocus, config, setClass } = useInputTextCore(props, {
+  defaultConfig,
+  defaultSetClass,
 })
 const validateOn = useValidateEvents(
   () => config.value.validateEvents,
   () => props.name
 )
-
-const isNumeric = computed(() => /^(decimal|numeric)$/.test(config.value.inputMode))
-
-// decimal 欄位：maxlength 只算小數點前位數，toFixed 算小數點後位數，
-// 但原生 <input> maxlength 會計算整串，所以這裡換算成「整數位 + 小數點 + 小數位」的總長度
+const isNumeric = computed(() => /^(decimal|numeric|tel)$/.test(config.value.inputMode))
+const isTel = computed(() => config.value.inputMode === 'tel')
+// 電話號碼不會是負的，tel 一律不吃 allowNegative
+const canNegative = computed(() => config.value.allowNegative && !isTel.value)
+// 負號會多佔一個字元，maxlength 要跟著多留一位，否則實際能填的位數會少一位
 const fieldMaxlength = computed(() => {
-  const { maxlength, length, toFixed, integer, allowNegative } = config.value
-  const base = maxlength || length
+  const { maxlength, length } = config.value
+  const max = maxlength || length
 
-  if (!base) return base
+  if (!max) return null
 
-  // 負號不該吃掉一位數字的額度
-  const sign = allowNegative && isNumeric.value ? 1 : 0
-
-  if (integer || !isNumeric.value) return sign ? Number(base) + sign : base
-
-  const decimals = toFixed != null && toFixed !== '' ? Number(toFixed) : 0
-
-  return Number(base) + (decimals > 0 ? decimals + 1 : 0) + sign
+  return canNegative.value ? Number(max) + 1 : max
 })
-
-// 依 maxlength（小數點前）與 toFixed（小數點後）限制 decimal 字串長度
-const onLimitDecimal = (number, maxlength, toFixed) => {
-  const firstDot = number.indexOf('.')
-  let intPart = firstDot === -1 ? number : number.slice(0, firstDot)
-
-  if (maxlength) intPart = intPart.slice(0, Number(maxlength))
-
-  if (firstDot === -1) return intPart
-
-  let decPart = number.slice(firstDot + 1).replace(/\./g, '')
-  const decimals = toFixed != null && toFixed !== '' ? Number(toFixed) : null
-
-  if (decimals != null && Number.isFinite(decimals)) {
-    if (decimals === 0) return intPart
-    decPart = decPart.slice(0, decimals)
-  }
-
-  return `${intPart}.${decPart}`
-}
-
 const formatLength = computed(() => {
   const { formatLength, maxlength } = config.value
 
   return formatLength && maxlength
     ? formatLength.replace(/\{\s*(length|maxlength)\s*\}/g, (_, key) => {
-        return key === 'length' ? String(onUnicodLength(model.value)) : String(maxlength)
+        return key === 'length' ? (model.value ? String(model.value.length) : 0) : String(maxlength)
       })
     : null
 })
-
+/* 這個欄位與表單的連動(名稱、事件、值)—— 畫面那一行把它接在
+   使用端掛的屬性**後面**:順序反過來的話,使用端傳了同名的屬性就會蓋掉它,
+   而那個欄位從此不再跟著表單走,不會報錯,只是驗證與送出都收不到它。 */
 const onBind = (field) => {
   const { inputMode } = config.value
+  const value =
+    !props.modelValue && props.value
+      ? {
+          value: props.value,
+        }
+      : {}
   const inputmode = isNumeric.value
     ? {
         inputmode: inputMode,
@@ -147,17 +158,23 @@ const onBind = (field) => {
 
   return {
     ...field,
+    ...value,
     ...inputmode,
   }
 }
 
 const onInput = async (e) => {
   const value = e.target.value
-  const { inputMode, checkNotIsZero, integer, inputChinese, maxlength, toFixed, allowNegative } =
-    config.value
+  const { inputMode, checkNotIsZero, integer, inputChinese } = config.value
   const regex = {
     chinese: /[\u4e00-\u9fa5０-９Ａ-Ｚａ-ｚ～！＠＃＄％︿＆＊（）＿｜｛｝［］＜＞？／＊＼＋－]/g,
-    number: allowNegative ? (integer ? /[^0-9-]/g : /[^0-9.-]/g) : integer ? /[^0-9]/g : /[^0-9.]/g,
+    number: canNegative.value
+      ? integer
+        ? /[^0-9-]/g
+        : /[^0-9.-]/g
+      : integer || isTel.value
+        ? /[^0-9]/g
+        : /[^0-9.]/g,
   }
 
   const isRemoveChinese =
@@ -167,14 +184,10 @@ const onInput = async (e) => {
 
   if (isNumeric.value) {
     let number = regex.number.test(value) ? value.replace(regex.number, '') : value
+    // 負號只有放在最前面才有意義，先抽出來，中間打的 '-' 一律砍掉，處理完再接回去
+    const sign = canNegative.value && number.startsWith('-') ? '-' : ''
 
-    // 負號先抽出來:只保留開頭一個(-1-2 → -12),且不佔 maxlength 與前導零判斷的額度,
-    // 處理完再接回去
-    const sign = allowNegative && number.startsWith('-') ? '-' : ''
-
-    if (allowNegative) number = number.replace(/-/g, '')
-
-    if (!integer) number = onLimitDecimal(number, maxlength, toFixed)
+    if (canNegative.value) number = number.replace(/-/g, '')
 
     const digits =
       (checkNotIsZero && integer && /^0/.test(number)) || (checkNotIsZero && /^0\d/.test(number))
@@ -182,28 +195,28 @@ const onInput = async (e) => {
         : number
 
     model.value = `${sign}${digits}`
-  } else if (!isComposing.value) {
-    // 原生 maxlength 以 UTF-16 計算，emoji、罕用字（surrogate pair）會佔 2 格，
-    // 這裡改以字素叢集截斷，讓「幾個字」與畫面計數、驗證規則三者一致
-    const text = isRemoveChinese ? value.replace(regex.chinese, '') : value
-    const limited = fieldMaxlength.value ? onUnicodSlice(text, Number(fieldMaxlength.value)) : text
-
-    if (limited !== value) model.value = limited
+  } else if (isRemoveChinese) {
+    model.value = value.replace(regex.chinese, '')
   }
 
   emits('input', e)
 }
 
-// IME 組字中不截斷，避免把注音／拼音打到一半的字砍掉，等 compositionend 再處理
-const onComposition = (e) => {
-  const isEnd = e.type === 'compositionend'
+// 事件名用 enter 而非 keydown.enter:在元件上寫 @keydown.enter,Vue 會編成
+// onKeydown + withKeys(.enter 是 key modifier),接不到名為 'keydown.enter' 的 emit,
+// 只會靠原生事件冒泡到根元素才誤打誤撞觸發(且時序早於下面的回寫)。
+const onEnter = async (e) => {
+  e.preventDefault()
 
-  isComposing.value = !isEnd
+  // update:modelValue 只在 blur 時回寫(見 onEvent),而 enter 不會觸發 blur →
+  // 先主動 blur 走完既有的正規化與回寫,父層在 enter 事件裡才讀得到最新值
+  e.target.blur()
+  await nextTick()
 
-  if (isEnd) onInput(e)
+  emits('enter', e)
 }
 
-const onEvent = (e, errorMessage) => {
+const onEvent = async (e, errorMessage) => {
   const { comma, integer, checkNotIsZero } = config.value
   const { type } = e
   const isError = !!errorMessage
@@ -211,12 +224,8 @@ const onEvent = (e, errorMessage) => {
   const isBlur = type === 'blur'
   const isComma = comma && (model.value !== '' || model.value != null)
 
-  if (isFocusIn) {
-    isFocus.value = true
-  }
-
-  if (isBlur) {
-    isFocus.value = false
+  if (isFocusIn || isBlur) {
+    isFocus.value = !isFocus.value
   }
 
   if (isFocusIn && isComma) {
@@ -225,47 +234,80 @@ const onEvent = (e, errorMessage) => {
 
   if (isBlur) {
     const raw = model.value
+
+    // 如果有 comma 顯示，先用「去逗號後」的值來判斷
     const plain = isComma ? numberComma.remove(raw, false) : raw
 
-    if (isNumeric.value) {
+    if (isTel.value) {
+      // tel：只留數字、不可有小數點，且保留前導 0（電話號碼）
+      const normalized = String(plain ?? '').replace(/[^0-9]/g, '')
+
+      emits('update:modelValue', normalized)
+      model.value = isComma ? numberComma.add(normalized, false) : normalized
+    } else if (isNumeric.value) {
+      // 1) 先把暫態輸入修正：'.' -> ''、'0.' -> '0'（或 ''，看你規則）
+      //    你需求是 checkNotIsZero 時不能是 0，所以 '0.' 這種 blur 最後也不能留下
       let normalized = String(plain ?? '').trim()
 
+      // 空值直接送出
       if (normalized === '') {
         emits('update:modelValue', '')
         model.value = isComma ? numberComma.add('', false) : ''
+        // 等 update:modelValue 回填到上層 props 後再 emit blur，父層 onBlur 才讀得到最新值
+        await nextTick()
         emits(type, e, isError)
         return
       }
 
+      // 只打一個 '.' 的狀況
       if (normalized === '.') normalized = ''
 
+      // 負號先抽掉，後面的前導 0 修剪、checkNotIsZero 判斷都只針對數字本身
+      // （'-0123' 的前導 0 修剪原本會因為開頭是 '-' 而失效）
+      const sign = canNegative.value && normalized.startsWith('-') ? '-' : ''
+
+      if (canNegative.value) normalized = normalized.replace(/-/g, '')
+
+      // 2) 若 integer：禁止小數點（blur 時直接砍掉小數部分）
+      //    例：'12.34' -> '12'
       if (integer && normalized.includes('.')) {
         normalized = normalized.split('.')[0]
       }
 
+      // 3) 去掉多餘前導 0（單獨 0 要保留；小數模式保留 0.x 的 0）
       if (normalized) {
         if (integer) {
           normalized = normalized.replace(/^0+(?=\d)/, '')
-        } else if (!normalized.startsWith('0.')) {
-          normalized = normalized.replace(/^0+(?=\d)/, '')
-          if (normalized.startsWith('.')) normalized = '0' + normalized
+        } else {
+          // 非整數：保留 "0.xxx"
+          if (!normalized.startsWith('0.')) {
+            normalized = normalized.replace(/^0+(?=\d)/, '')
+            if (normalized.startsWith('.')) normalized = '0' + normalized
+          }
         }
       }
 
+      // 4) checkNotIsZero：最終值不能是 0
+      //    這裡用 Number 判斷，比正則安全（0.0、0.00 都會變 0）
       if (checkNotIsZero) {
         const n = Number(normalized)
-        const isTransient = normalized === '' || normalized === '0.' || normalized === '.'
 
+        // normalized 可能變成 ''，或是 '0.'（如果你前面沒清掉），這裡一起處理
+        const isTransient = normalized === '' || normalized === '0.' || normalized === '.'
         if (!isTransient && Number.isFinite(n) && n === 0) {
-          normalized = ''
+          normalized = '' // 你也可以改成 '1' 或回復成上一個值
         }
 
+        // '0.' blur 時清掉
         if (/^0\.$/.test(normalized)) normalized = ''
       }
 
+      // 負號接回去，讓 toFixed / Number 直接處理帶號的值
+      if (sign && normalized !== '') normalized = `${sign}${normalized}`
+
+      // 5) toFixed
       if (!integer && config.value.toFixed != null && config.value.toFixed !== '') {
         const d = Number(config.value.toFixed)
-
         if (Number.isFinite(d) && normalized !== '') {
           normalized = props.modelModifiers.number
             ? Number(onToFixed(Number(normalized), d))
@@ -273,12 +315,21 @@ const onEvent = (e, errorMessage) => {
         }
       }
 
+      // 6) 最終送出（注意：送出要送「無逗號」值）
       emits('update:modelValue', normalized)
+
+      // 顯示用的 model.value 再套 comma
       model.value = isComma ? numberComma.add(normalized, false) : normalized
     } else {
+      // 非 numeric 就照舊：送出 plain（有 comma 的話也去逗號）
       emits('update:modelValue', plain)
       model.value = isComma ? numberComma.add(plain, false) : plain
     }
+  }
+
+  // blur 時等 update:modelValue 回填到上層 props 後再 emit，父層 onBlur 才讀得到最新值
+  if (isBlur) {
+    await nextTick()
   }
 
   emits(type, e, isError)
@@ -305,10 +356,17 @@ watch(
     immediate: true,
   }
 )
+
+defineExpose({
+  inputRef,
+  focus: () => inputRef.value?.focus(),
+  select: () => inputRef.value?.select(),
+  blur: () => inputRef.value?.blur(),
+})
 </script>
 
 <template>
-  <div class="m-form" :class="setClass.main">
+  <div class="m-form" :class="setClass.main" v-bind="config.attr.main">
     <Field
       v-slot="{ field, errorMessage }"
       v-model="model"
@@ -317,7 +375,7 @@ watch(
       :rules="config.isDisabled ? '' : props.rules"
       v-bind="validateOn"
     >
-      <div class="m-form-container" :class="setClass.container">
+      <div class="m-form-container" :class="setClass.container" v-bind="config.attr.container">
         <div
           class="m-form-element"
           :class="[
@@ -327,19 +385,26 @@ watch(
             { '--disabled': config.isDisabled },
             { '--error': errorMessage || config.isError },
           ]"
+          v-bind="config.attr.element"
         >
-          <div v-if="$slots.frontAssist" class="m-form-assist" :class="setClass.frontAssist">
+          <div
+            v-if="$slots.frontAssist"
+            class="m-form-assist"
+            :class="setClass.frontAssist"
+            v-bind="config.attr.frontAssist"
+          >
             <slot name="frontAssist" />
           </div>
           <input
+            ref="inputRef"
             :id="props.name"
             :type="props.type"
             class="m-form-type"
             :class="setClass.type"
-            v-bind="onBind(field)"
+            v-bind="{ ...config.attr.type, ...onBind(field) }"
             :inputMode="config.inputMode"
             :minlength="config.minlength || config.length"
-            :maxlength="isNumeric ? fieldMaxlength : null"
+            :maxlength="fieldMaxlength"
             :placeholder="config.placeholder"
             :readonly="config.isReadonly"
             :disabled="config.isDisabled"
@@ -347,8 +412,6 @@ watch(
             @focusin="onEvent($event)"
             @blur="onEvent($event, errorMessage)"
             @input="onInput($event)"
-            @compositionstart="onComposition($event)"
-            @compositionend="onComposition($event)"
             @keydown.enter="onEnter($event)"
           />
           <button
@@ -363,18 +426,33 @@ watch(
           >
             <CommonMSvgIcon icon="icon_xmark" class="m-form-clear-icon" />
           </button>
-          <span v-if="formatLength" class="m-form-length" :class="setClass.length">
+          <span
+            v-if="formatLength"
+            class="m-form-length"
+            :class="setClass.length"
+            v-bind="config.attr.length"
+          >
             {{ formatLength }}
           </span>
-          <div v-if="$slots.rearAssist" class="m-form-assist" :class="setClass.rearAssist">
+          <div
+            v-if="$slots.rearAssist"
+            class="m-form-assist"
+            :class="setClass.rearAssist"
+            v-bind="config.attr.rearAssist"
+          >
             <slot name="rearAssist" />
           </div>
         </div>
-        <small v-if="$slots.suffix" class="m-form-suffix" :class="setClass.suffix">
+        <small
+          v-if="$slots.suffix"
+          class="m-form-suffix"
+          :class="setClass.suffix"
+          v-bind="config.attr.suffix"
+        >
           <slot
             name="suffix"
             :maxlength="config.length || config.maxlength"
-            :length="onUnicodLength(model)"
+            :length="model ? model.length : 0"
           />
         </small>
       </div>
@@ -385,6 +463,7 @@ watch(
       :name="props.name"
       class="m-form-error"
       :class="setClass.error"
+      v-bind="config.attr.error"
     >
       <CommonMErrorMessage :message="message" />
     </ErrorMessage>

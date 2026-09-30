@@ -1,6 +1,5 @@
 <script setup>
 import './.css/common.css'
-import './.css/styleProject.css'
 
 import { setOptions, importLibrary } from '@googlemaps/js-api-loader'
 

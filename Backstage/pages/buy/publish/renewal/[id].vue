@@ -2,7 +2,7 @@
 import { Form } from 'vee-validate'
 
 // const common = useCommonStore()
-const { onUseMeta } = useCommonActions()
+const { onUseMeta } = useProjectActions()
 const buyProject = useBuyProjectStore()
 const buyPublish = useBuyPublishStore()
 const { renewal } = storeToRefs(buyProject)

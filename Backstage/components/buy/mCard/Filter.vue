@@ -3,7 +3,6 @@ import './.css/variables.css'
 import './.css/filterVariables.css'
 import './.css/common.css'
 import './.css/filter.css'
-import './.css/styleProject.css'
 
 const props = defineProps({
   title: {

@@ -3,7 +3,6 @@ import './.css/variables.css'
 import './.css/checkVariables.css'
 import './.css/common.css'
 import './.css/check.css'
-import './.css/styleProject.css'
 
 const props = defineProps({
   options: {

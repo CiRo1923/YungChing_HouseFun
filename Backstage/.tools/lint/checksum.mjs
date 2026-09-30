@@ -17,7 +17,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { readSealedJson, writeSealedJson } from './shared.mjs'
+import { listFiles, readSealedJson, writeSealedJson } from './shared.mjs'
 
 const root = path.resolve(fileURLToPath(import.meta.url), '../../..')
 const dir = path.join(root, '.tools', 'lint')
@@ -56,6 +56,48 @@ const PROJECT_OWN_SUFFIX = '-project.mjs'
 export const isSkipped = (name) => name === CONFIG || name.endsWith(PROJECT_OWN_SUFFIX)
 
 /**
+ * 來源共用的**產品程式碼** —— 與規則檔是同一種東西:整支跟著來源。
+ *
+ * 那幾支是元件在用的共用函式,以及表單的格式規則。
+ * 在某個專案就地加了自己的函式進去**不會報錯**,而下一次整套更新
+ * 會把整支覆蓋掉 —— 那幾個函式安靜地消失,使用端變成「某個名字不存在」,
+ * 而訊息不會說那是被覆蓋掉的。改了既有函式的行為更難發現:
+ * 那個專案的日期、驗證從此與別人不同,而畫面上看不出來。
+ *
+ * 專案自己的另外開一支,檔名接 `Project`(`_prototypeProject.js`)——
+ * 那幾支不列入指紋,與規則檔的 `-project.mjs` 是同一條路。
+ *
+ * 位置不寫死:這幾支在哪一層由專案的擺法決定,所以用找的。
+ */
+export const SHARED_SOURCE_FILES = ['_prototype.js', '_validation.js']
+
+/**
+ * 找出這個專案實際有的那幾支,以及同名撞在一起的。
+ *
+ * 撞名時**不安靜地挑一支** —— 挑到哪一支決定了守的是誰,
+ * 而從結果完全看不出來:比對照樣通過,只是守錯了檔案。
+ */
+export const sharedSourceFiles = () => {
+  const found = new Map()
+  const clashes = new Map()
+
+  for (const abs of listFiles(root, '.')) {
+    const name = path.basename(abs)
+
+    if (!SHARED_SOURCE_FILES.includes(name)) continue
+
+    if (found.has(name)) {
+      clashes.set(name, [...(clashes.get(name) ?? [found.get(name)]), abs])
+      continue
+    }
+
+    found.set(name, abs)
+  }
+
+  return { found, clashes }
+}
+
+/**
  * 一支檔案的指紋。
  *
  * 換行先正規化成 \n —— 同一份內容在 Windows 與 macOS 取出來的位元組不同,
@@ -68,15 +110,44 @@ const fingerprintOf = (file) =>
     .digest('hex')
     .slice(0, 16)
 
-/** 現在這些共用規則檔的指紋 */
-export const currentFingerprints = () =>
-  Object.fromEntries(
-    fs
-      .readdirSync(dir)
-      .filter((name) => name.endsWith('.mjs') && !isSkipped(name))
-      .sort()
-      .map((name) => [name, fingerprintOf(path.join(dir, name))])
+/** 現在這些共用規則檔與共用產品程式碼的指紋 */
+export const currentFingerprints = () => {
+  const rules = fs
+    .readdirSync(dir)
+    .filter((name) => name.endsWith('.mjs') && !isSkipped(name))
+    .sort()
+    .map((name) => [name, fingerprintOf(path.join(dir, name))])
+
+  const shared = [...sharedSourceFiles().found]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([name, abs]) => [name, fingerprintOf(abs)])
+
+  return Object.fromEntries([...rules, ...shared])
+}
+
+/**
+ * 跟著來源的檔案有哪幾支(路徑相對專案根)—— 同步時要帶的就是這一份。
+ *
+ * **不是「那幾層目錄」。** 規範工具那幾層整層跟著來源,而共用的產品程式碼
+ * 散在原始碼底下:同一層裡還有這個專案自己的東西(api 定義就在那一層),
+ * 整層同步會把專案自己的檔案蓋掉。
+ *
+ * 同步工具各專案自己寫(它要知道來源在哪、怎麼取),但「要帶哪幾支」
+ * 不該由它自己維護一份 —— 那份清單與這裡對不上的時候,
+ * 少帶的那幾支每次檢查都被報成「內容被改過」,而那個專案一個字都沒動。
+ */
+export const trackedFiles = () => {
+  const rules = fs
+    .readdirSync(dir)
+    .filter((name) => name.endsWith('.mjs') && !isSkipped(name))
+    .map((name) => `${path.relative(root, dir).split(path.sep).join('/')}/${name}`)
+
+  const shared = [...sharedSourceFiles().found.values()].map((abs) =>
+    path.relative(root, abs).split(path.sep).join('/')
   )
+
+  return [...rules, ...shared].sort()
+}
 
 /** 清單裡記的指紋;沒有清單時回 null(那時不比對,見 rules-global 的說明) */
 /* 讀取與寫入走共用的那一份 —— 兩種封存清單(這一份指紋、元件介面的名單)
@@ -92,12 +163,18 @@ export const fingerprintDiff = () => {
   const current = currentFingerprints()
   const names = [...new Set([...Object.keys(recorded), ...Object.keys(current)])].sort()
 
-  return names
-    .filter((name) => recorded[name] !== current[name])
-    .map((name) => ({
-      name,
-      state: !current[name] ? '被刪掉了' : !recorded[name] ? '是多出來的' : '內容被改過',
-    }))
+  return (
+    names
+      .filter((name) => recorded[name] !== current[name])
+      /* 共用的產品程式碼**不是每個專案都要有**(沒有表單的專案就沒有那一支),
+         所以那幾支「這裡沒有」不算少掉 —— 報的話那種專案每次都看到一筆,
+         而他們一點問題也沒有。規則檔少一支則是真的有問題:那條規則被拿掉了。 */
+      .filter((name) => !(SHARED_SOURCE_FILES.includes(name) && !current[name]))
+      .map((name) => ({
+        name,
+        state: !current[name] ? '被刪掉了' : !recorded[name] ? '是多出來的' : '內容被改過',
+      }))
+  )
 }
 
 /* 只有「直接執行這一支」才動指紋清單。
@@ -106,9 +183,32 @@ export const fingerprintDiff = () => {
    下一次比對當然一致,而保護就這樣安靜地失效了。 */
 const isMain = process.argv[1]?.endsWith('checksum.mjs')
 
-if (isMain && process.argv.includes('--write')) {
-  writeSealedJson(root, CHECKSUM_FILE, currentFingerprints())
-  console.log(`已更新 ${CHECKSUM_FILE}(${Object.keys(currentFingerprints()).length} 支規則檔)`)
+/* 同名撞在一起時一律講出來 —— 封存與比對都講。
+   只在其中一邊講的話,封存時守的是 A、比對時守的是 B,而兩邊都顯示正常。 */
+if (isMain) {
+  for (const [name, list] of sharedSourceFiles().clashes) {
+    console.error(`找到不只一支 ${name},指紋只守得了其中一支:`)
+    for (const abs of list) console.error(`  ${path.relative(root, abs)}`)
+  }
+}
+
+if (isMain && process.argv.includes('--list')) {
+  const files = trackedFiles()
+
+  console.log(`跟著來源的檔案共 ${files.length} 支 —— 同步時要帶的就是這幾支:`)
+  for (const one of files) console.log(`  ${one}`)
+  console.log('\n這份清單以外的檔案歸這個專案所有,同步不要碰它們。')
+} else if (isMain && process.argv.includes('--write')) {
+  const sealed = currentFingerprints()
+  const shared = Object.keys(sealed).filter((name) => SHARED_SOURCE_FILES.includes(name))
+
+  writeSealedJson(root, CHECKSUM_FILE, sealed)
+
+  /* 兩類分開數 —— 合成一個數字的話,共用程式碼有沒有被收進來看不出來,
+     而那幾支正是「少收了也不會有任何徵兆」的那一種。 */
+  console.log(
+    `已更新 ${CHECKSUM_FILE}(${Object.keys(sealed).length - shared.length} 支規則檔、${shared.length} 支共用程式碼)`
+  )
 } else if (isMain) {
   const diff = fingerprintDiff()
 

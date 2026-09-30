@@ -1,6 +1,8 @@
 <script setup>
 /* component-deps —— 複製這支元件時要一起帶走:
-   stores/popup.js */
+   stores/popup.js
+   assets/css/_common/vueTransition.css
+     進出場動畫定義在這裡。沒有它不會報錯也不會少畫面,只是開關的當下直接跳、沒有漸變。 */
 import './.css/variables.css'
 import './.css/promiseVariables.css'
 import './.css/common.css'

@@ -1,6 +1,6 @@
 <script setup>
 // const common = useCommonStore()
-const { onUseMeta } = useCommonActions()
+const { onUseMeta } = useProjectActions()
 const buyProject = useBuyProjectStore()
 // const { renewal } = storeToRefs(buyProject)
 const {

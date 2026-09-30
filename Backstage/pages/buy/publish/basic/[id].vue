@@ -14,7 +14,7 @@ definePageMeta({
 })
 
 // const common = useCommonStore()
-const { onUseMeta } = useCommonActions()
+const { onUseMeta } = useProjectActions()
 const buyProject = useBuyProjectStore()
 const buyPublish = useBuyPublishStore()
 const { apiData, pingData, statusData } = storeToRefs(buyPublish)

@@ -27,7 +27,11 @@ const props = defineProps({
 
 /* 區間選擇時,這一格要標哪些 class(--range-start / --in-range / --range-end)。
   由 useCalendar 算好傳進來 —— 這支只負責畫,不知道區間是什麼。 */
-defineEmits(['select'])
+const emits = defineEmits(['select'])
+
+const onSelect = (key) => {
+  emits('select', key)
+}
 </script>
 
 <template>
@@ -42,7 +46,7 @@ defineEmits(['select'])
           { '--disabled': props.disabledOf(item.key) },
         ]"
         :disabled="props.disabledOf(item.key)"
-        @click="$emit('select', item.key)"
+        @click="onSelect(item.key)"
       >
         {{ item.value }}
       </button>

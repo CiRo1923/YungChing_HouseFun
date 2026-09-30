@@ -20,7 +20,7 @@ import { execFile } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import fs from 'node:fs'
 import path from 'node:path'
-import { SCANNABLE_RE } from './shared.mjs'
+import { isScannablePath, toRel } from './shared.mjs'
 
 /**
  * 一次存檔常常會觸發好幾個 watcher 事件 —— prettier 的 formatOnSave、eslint 的
@@ -74,18 +74,36 @@ export const cssGuard = () => {
     configResolved(config) {
       root = config.root ?? root
     },
-    handleHotUpdate({ file }) {
-      // 副檔名範圍定義在 .tools/lint/project-config.mjs,五層守門共用同一份
-      if (!SCANNABLE_RE.test(file)) return
+    /* **監看存檔,不是聽模組圖的更新事件。**
 
-      clearTimeout(timers.get(file))
-      timers.set(
-        file,
-        setTimeout(() => {
-          timers.delete(file)
-          onCheck(file)
-        }, DEBOUNCE_MS)
-      )
+      那個事件只對「已經進到模組圖」的檔案觸發 —— 也就是目前這一頁實際載入的那些。
+      存到別頁才用的元件、或剛新增的檔案時,它完全不會被呼叫:
+      終端機一個字都沒有,而那看起來與「檢查通過」一模一樣。
+      (其他幾層照樣會報,所以不是漏檢;但這一層的沉默會讓人以為沒問題。)
+
+      監看器看的是磁碟,與那個檔案有沒有被載入無關。 */
+    configureServer(server) {
+      const onFileChange = (file) => {
+        /* 範圍與整份掃描同一份判準:副檔名要在範圍內,而且不在跳過的目錄底下。
+           只問副檔名的話,建置產物與靜態檔也會被撈進來 ——
+           那幾筆改不掉也標不掉,每次動到就報一次。 */
+        if (!isScannablePath(toRel(root, file))) return
+
+        /* 一次存檔會觸發好幾個事件(格式化、自動修正、編輯器的原子替換各寫一次檔),
+           不去抖的話同一份警告連印三四次。 */
+        clearTimeout(timers.get(file))
+        timers.set(
+          file,
+          setTimeout(() => {
+            timers.delete(file)
+            onCheck(file)
+          }, DEBOUNCE_MS)
+        )
+      }
+
+      // 新增也要:剛建好一支元件正是最需要提醒的時候
+      server.watcher.on('change', onFileChange)
+      server.watcher.on('add', onFileChange)
     },
   }
 }

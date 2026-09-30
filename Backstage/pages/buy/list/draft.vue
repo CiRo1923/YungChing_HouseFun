@@ -11,7 +11,8 @@ definePageMeta({
 const buyProject = useBuyProjectStore()
 // 成交彈窗的日期上限要用,由這一頁取一次,彈窗裡的元件只讀 store
 const { onApiGetCommonServerTime } = useBuyProjectActions()
-const { onUseMeta, onIsLoading } = useCommonActions()
+const { onIsLoading } = useCommonActions()
+const { onUseMeta } = useProjectActions()
 const { onApiGetVasPublishAvailablePlans, onApiGetVasGoldenGetPlanList } = useBuyProjectActions()
 const {
   onApiGetVasCommonPlanAggregate,

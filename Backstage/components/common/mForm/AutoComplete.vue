@@ -1,13 +1,16 @@
 <script setup>
+/* component-deps —— 複製這支元件的時候這幾支要一起帶走:
+   assets/css/_common/vueTransition.css
+     轉場動畫定義在這裡。沒有它不會報錯也不會少畫面,只是切換的當下直接跳、沒有漸變。 */
 import './.css/variables.css'
 import './.css/autocompleteVariables.css'
 import './.css/common.css'
 import './.css/autocomplete.css'
 import './.css/styleProject.css'
 
+import { useInputTextCore } from './.composables/useInputTextCore.js'
 import useValidateEvents from './.composables/useValidateEvents.js'
-
-import { onDeepMerge } from '@js/_prototype.js'
+import { isUnselected, useDropdownCore } from './.composables/useDropdownCore.js'
 
 import { Field, ErrorMessage } from 'vee-validate'
 
@@ -39,26 +42,16 @@ const props = defineProps({
   },
 })
 
-const elenemtRef = ref(null)
-const dropdownRef = ref(null)
-const dropdownNoDataRef = ref(null)
-const dropdownContainerRef = ref(null)
-const dropdownItemRef = ref(null)
-const isActive = ref(false)
-const isFocus = ref(false)
 const isComposing = ref(false)
 const isSelectingOption = ref(false)
-const inputLabel = ref(null)
-const selected = ref({
-  index: null,
-})
+const label = ref(null)
+const selectedIndex = ref(-1)
 const dropdownItems = ref(null)
 const inputOptions = ref(null)
 const inputWaitRafId = ref(null)
 const inputWaitToken = ref(0)
-// 等待外部把選項餵回來的期間顯示 waitMessage,而不是先閃一下「無任何選項」
 const isWaiting = ref(false)
-// 只有掛了 @input 的呼叫端才會有人回填選項;沒掛就不該進入等待狀態(會永遠等下去)
+
 const instance = getCurrentInstance()
 const hasInputListener = computed(() => !!instance?.vnode?.props?.onInput)
 
@@ -71,67 +64,137 @@ const model = computed({
   },
 })
 
-const config = computed(() => {
-  const defaultConfig = {
-    placeholder: '',
-    // 驗證時機。blur / change 一律驗;值一動就驗只在「碰過之後」才生效
-    // (touchedModelUpdate 的用意見 common/mForm/.composables/useValidateEvents.js)。
-    // 傳陣列為「完整指定」,沒列到的一律關閉。
-    validateEvents: ['blur', 'change', 'touchedModelUpdate'],
-    noMatchClearLabel: false,
-    noResult: '無任何選項。',
-    waitMessage: '資料讀取中',
-    isDisabled: false,
-    isExistClose: true,
-    isError: false,
-    position: 'auto',
-    input: {
-      wait: 0,
-      minChars: 0,
-    },
-    schema: {
-      label: 'label',
-      value: 'value',
-      model: 'label',
-    },
-    keyboard: false,
-    maxItems: 5,
-  }
+const defaultConfig = {
+  /* 要掛在元素上的屬性,依位置各一組 —— 位置名與 setClass 同一套
+        (能傳 class 的地方就能傳屬性),例如 { type: { 'data-x': 'y' } }。
 
-  return onDeepMerge(defaultConfig, props.config)
+        有些東西只能靠元素上的屬性做到:難字的造字對照、無障礙的標記、
+        第三方套件用屬性認元素 —— 那幾種沒辦法用 class 或 slot 代替。
+
+        預設是空的,傳進來才掛。 */
+  attr: {},
+  placeholder: '',
+  // 驗證時機。blur / change 一律驗;值一動就驗只在「碰過之後」才生效
+  // (touchedModelUpdate 的用意見 .composables/useValidateEvents.js)。
+  // 傳陣列為「完整指定」,沒列到的一律關閉。
+  validateEvents: ['blur', 'change', 'touchedModelUpdate'],
+  /* 什麼時候把值寫回 v-model。
+
+      'input'   打字的當下就寫(預設,維持原本的行為)
+      'select'  只有從清單選了一項才寫
+
+    用 v-model 做「完全相等」篩選的頁面要用 'select':打到一半的那幾個字
+    也會被寫回去,而那不是任何一筆資料的值 —— 清單當場變空,
+    離開欄位之後還是空的,要重新選一次或清掉才會恢復。
+
+    noMatchClearLabel 管的是另一件事(畫面上的文字),它不碰 v-model。 */
+  modelUpdateOn: 'input',
+  noMatchClearLabel: false,
+  waitMessage: '資料讀取中',
+  noResult: '無任何選項。',
+  isDisabled: false,
+  isExistClose: true,
+  /* 清除鈕與搜尋那兩支圖示叫什麼 —— 各站的 _svg 裡名字不一樣。
+
+    寫死在畫面區段裡的話,換一個專案要改元件本身,而那一段跟著來源覆蓋:
+    改完下一次更新就被蓋回去,而找不到那個名字的圖示時不會報錯,
+    只是那個位置什麼都不畫。 */
+  clearIcon: 'icon_xmark',
+  searchIcon: 'icon_search',
+  isError: false,
+  position: 'auto',
+  input: {
+    wait: 0,
+    minChars: 0,
+  },
+  schema: {
+    label: 'label',
+    value: 'value',
+    model: 'label',
+  },
+  keyboard: false,
+  maxItems: 5,
+}
+const defaultSetClass = {
+  main: '',
+  container: '',
+  element: '',
+  type: '',
+  error: '',
+  dropdown: '',
+  dropdownContainer: '',
+  dropdownLabel: '',
+}
+const { config, setClass } = useInputTextCore(props, {
+  defaultConfig,
+  defaultSetClass,
 })
 const validateOn = useValidateEvents(
   () => config.value.validateEvents,
   () => props.name
 )
 
-const setClass = computed(() => {
-  return {
-    ...{
-      main: '',
-      container: '',
-      element: '',
-      type: '',
-      error: '',
-      dropdown: '',
-      dropdownContainer: '',
-      // 字級由使用端決定 —— mForm 是複用型元件,module 不定 text-*
-      dropdownLabel: '',
-    },
-    ...props.setClass,
+/* 選項清單 —— 篩選、比對、選取都是從這裡拿到資料。
+
+  **壞掉的元素在這裡一次濾掉,不在各個使用端各加一道。**
+  讀 item[schema.…] 的地方有六處,各自加防護的話那就是六份判斷,
+  而往後新增第七處的人不會知道要補。
+
+  為什麼會有壞元素:選項常常來自非同步資料,還沒回來的那幾筆是 null。
+  不濾掉的話,第一個讀到它的地方就丟例外 —— 而那多半發生在 setup 裡,
+  結果是整個路由導航失敗,使用端看到的是一片白畫面。 */
+const resolvedOptions = computed(() => {
+  const { schema } = config.value
+
+  const raw = Array.isArray(inputOptions.value)
+    ? inputOptions.value
+    : Array.isArray(props.options)
+      ? props.options
+      : []
+
+  const options = raw.filter((item) => item !== null && typeof item === 'object')
+
+  /* 濾掉了就要講出來 —— 靜靜拿掉的話,傳錯資料的人永遠不知道自己傳了什麼,
+     只會看到選項少了幾個。這裡是唯一知道「原本有幾筆、留下幾筆」的位置。 */
+  if (import.meta.env.DEV && options.length !== raw.length) {
+    console.warn(
+      `[mForm] AutoComplete${props.name ? `(${props.name})` : ''} 的 options 有 ` +
+        `${raw.length - options.length} 筆不是物件(多半是非同步資料還沒回來),已略過。` +
+        `每一筆都要帶 ${schema.model} 與 ${schema.label}`
+    )
   }
+
+  return options
 })
 
-const resolvedOptions = computed(() => {
-  if (Array.isArray(inputOptions.value)) {
-    return inputOptions.value
-  }
-
-  return Array.isArray(props.options) ? props.options : []
+// dropdown 定位 / 開關 / 捲動關閉統一交給 useDropdownCore(與 Select 共用)
+const {
+  isFocus,
+  isActive,
+  elementRef,
+  dropdownRef,
+  dropdownContainerRef,
+  dropdownItemRef,
+  onSwitchActive,
+  onCloseDropdown,
+  onDropdownActive,
+  onSelectResize,
+  isDropdownOutside,
+  onMarkTouched,
+} = useDropdownCore({
+  config,
+  model,
+  options: resolvedOptions,
+  selectedIndex,
+  fieldName: () => props.name,
+  /* 這一支可以打字,輸入途中也會收起下拉 —— 跟著標記的話,
+     打第一個字就算碰過,之後每打一個字都驗一次。
+     改成選了某一項的時候才標記(見下面的 onDropdownItemClick)。 */
+  touchOnClose: false,
 })
 
 const isMinCharsReached = computed(() => {
-  return (inputLabel.value?.trim()?.length || 0) >= config.value.input.minChars
+  return (label.value?.trim()?.length || 0) >= config.value.input.minChars
 })
 
 const onSetInputOptions = (options) => {
@@ -187,7 +250,7 @@ const emitInput = () => {
     isWaiting.value = true
   }
 
-  emits('input', inputLabel.value, onSetInputOptions)
+  emits('input', label.value, onSetInputOptions)
 }
 
 const emitInputWithWait = async () => {
@@ -217,8 +280,8 @@ const onFilter = () => {
   const { schema } = config.value
   const sourceOptions = resolvedOptions.value
 
-  const escapeRegExp = () => (inputLabel.value || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-  const regex = inputLabel.value ? new RegExp(escapeRegExp()) : null
+  const escapeRegExp = () => (label.value || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const regex = label.value ? new RegExp(escapeRegExp()) : null
   const matches = regex
     ? sourceOptions.filter((item) => regex.test(item[schema.label]))
     : sourceOptions
@@ -226,29 +289,15 @@ const onFilter = () => {
   dropdownItems.value = matches
 }
 
-const onSwitchActive = (value) => {
-  isFocus.value = value !== undefined ? value : !isFocus.value
-  isActive.value = value !== undefined ? value : !isActive.value
-}
-
-const onCloseDropdown = () => {
-  onSwitchActive(false)
-}
-
 const onGetInputLabel = () => {
-  const hasModel = model.value !== null && model.value !== ''
-
-  if (!hasModel) {
+  if (isUnselected(model.value)) {
     return
   }
 
-  // model 存的是 schema.model 的值,不一定等於要顯示的文字 —— 兩者不同名時
-  // (例:model 存 id、label 顯示名稱)直接拿 model 當顯示值會在輸入框看到 id。
-  // 先回查 options 取對應的 label,查不到才退回 model 本身。
   const { schema } = config.value
   const matchData = resolvedOptions.value.find((item) => item[schema.model] == model.value)
 
-  inputLabel.value = matchData ? matchData[schema.label] : model.value
+  label.value = matchData ? matchData[schema.label] : model.value
 }
 
 const onResetDropdownItems = () => {
@@ -263,18 +312,15 @@ const onIsComposingChange = (boolean) => {
 const onFocus = async () => {
   onResetDropdownItems()
 
-  onSwitchActive(true)
-
-  await nextTick()
-  onDropdownOpen()
+  await onDropdownActive()
 }
 
 const onInput = async () => {
   if (isComposing.value) return
 
-  // 邊打邊同步到 v-model:使用者可能自由輸入而不從清單選,少了這行時
-  // 只有「點選項目」才會寫回 model,直接送出會拿到空值。
-  model.value = inputLabel.value
+  if (config.value.modelUpdateOn === 'input') {
+    model.value = label.value
+  }
 
   await emitInputWithWait()
 
@@ -285,15 +331,15 @@ const onInput = async () => {
     return
   }
 
-  await nextTick()
-  onDropdownOpen()
+  await onDropdownActive()
 }
 
 const onCompositionEnd = async () => {
   onIsComposingChange(false)
 
-  // 同 onInput —— 注音/日文等組字結束才算真正輸入完成,這裡補一次同步
-  model.value = inputLabel.value
+  if (config.value.modelUpdateOn === 'input') {
+    model.value = label.value
+  }
 
   await emitInputWithWait()
 
@@ -304,8 +350,7 @@ const onCompositionEnd = async () => {
     return
   }
 
-  await nextTick()
-  onDropdownOpen()
+  await onDropdownActive()
 }
 
 const onBlur = () => {
@@ -319,95 +364,24 @@ const onBlur = () => {
 
   const sourceOptions = resolvedOptions.value
 
-  const hasMatch = inputLabel.value
-    ? !!sourceOptions.find((item) => item[schema.label] === inputLabel.value)
+  const hasMatch = label.value
+    ? !!sourceOptions.find((item) => item[schema.label] === label.value)
     : false
 
   if (!hasMatch) {
-    inputLabel.value = ''
-  }
-}
-
-const onDropdownOpen = () => {
-  const { maxItems, isDisabled, schema, position } = config.value
-  const $elenemt = elenemtRef.value
-  const $dropdown = dropdownRef.value
-  const $dropdownContainer = dropdownContainerRef.value
-  const element = {
-    rect: elenemtRef.value.getBoundingClientRect(),
-  }
-  const offsetTop = element.rect.height + element.rect.top + window.scrollY
-
-  if ($elenemt && $dropdown) {
-    if ($dropdownContainer) {
-      const hasItemsThanMax = dropdownItemRef.value.length > maxItems
-
-      if (hasItemsThanMax) {
-        $dropdownContainer.style.overflowY = 'auto'
-      }
-
-      const index = hasItemsThanMax ? maxItems - 1 : dropdownItemRef.value.length - 1
-      const $item = dropdownItemRef.value[index]
-      const dropdown = {
-        rect: dropdownRef.value.getBoundingClientRect(),
-      }
-
-      const itemHeight = $item
-        ? hasItemsThanMax
-          ? $item.offsetTop
-          : $item.offsetTop + $item.offsetHeight
-        : 0
-
-      const offsetLeftMin = dropdown.rect.width + element.rect.left
-      const dropdownWidth =
-        dropdown.rect.width < element.rect.width ? element.rect.width : dropdown.rect.width
-      const offsetLeftMax = element.rect.width + element.rect.left - dropdownWidth
-      const bodyWidth = document.body.scrollWidth
-      const left =
-        ((offsetLeftMin > bodyWidth && offsetLeftMax < 0) || offsetLeftMin < bodyWidth) &&
-        position !== 'right'
-          ? element.rect.left
-          : offsetLeftMax
-      const maxHeight = itemHeight
-
-      $dropdown.style.height = `${maxHeight}px`
-      $dropdown.style.top = `${offsetTop}px`
-      $dropdown.style.left = `${left}px`
-
-      if (dropdown.rect.width < element.rect.width) {
-        $dropdown.style.minWidth = `${element.rect.width}px`
-      }
-
-      if (model.value !== null && model.value !== '') {
-        selected.value.index = resolvedOptions.value.findIndex(
-          (item) => item[schema.model] === model.value
-        )
-
-        const $selectedItem = dropdownItemRef.value[selected.value.index]
-
-        if ($selectedItem) {
-          const selectedItem = {
-            rect: $selectedItem.getBoundingClientRect(),
-          }
-
-          $dropdownContainer.scrollTop =
-            $selectedItem.offsetTop + selectedItem.rect.height / 2 - maxHeight / 2
-        }
-      }
-    } else if (!isDisabled) {
-      $dropdown.style.height = `${dropdownNoDataRef.value.offsetHeight}px`
-      $dropdown.style.top = `${offsetTop}px`
-      $dropdown.style.left = `${element.rect.left}px`
-      $dropdown.style.minWidth = `${element.rect.width}px`
-    }
+    label.value = ''
   }
 }
 
 const onDropdownItemClick = (item) => {
   const { schema } = config.value
   model.value = item[schema.model]
-  inputLabel.value = item[schema.label]
+  label.value = item[schema.label]
   isSelectingOption.value = false
+
+  /* 選了一項就算碰過這個欄位 —— 綁 <Field> 的那個隱藏欄位永遠不會 blur,
+     少了這一行,這支要等到按下送出才算碰過(見 useDropdownCore 的 onMarkTouched)。 */
+  onMarkTouched()
 
   onSwitchActive(false)
   emitInput()
@@ -421,12 +395,11 @@ const onDropdownItemMousedown = () => {
 const onClear = () => {
   cancelInputWait()
   model.value = ''
-  inputLabel.value = null
+  label.value = null
   inputOptions.value = null
-  selected.value.index = null
+  selectedIndex.value = -1
   dropdownItems.value = null
   emitInput()
-  // emitInput 會把 isWaiting 打開,但清空是使用者主動取消、不該卡在讀取中
   isWaiting.value = false
   emits('change', null)
 }
@@ -436,19 +409,9 @@ const onInit = () => {
 }
 
 const onOutSide = (e) => {
-  const $elenemt = elenemtRef.value
-  const $dropdown = dropdownRef.value
-  const isElenemtContains = $elenemt ? !$elenemt.contains(e.target) : true
-  const isDropdownContains = $dropdown ? !$dropdown.contains(e.target) : true
-  const isOutSide = isElenemtContains && isDropdownContains
-
-  if (isOutSide) {
+  if (isDropdownOutside(e)) {
     onSwitchActive(false)
   }
-}
-
-const onResize = () => {
-  onDropdownOpen()
 }
 
 watch(
@@ -457,7 +420,7 @@ watch(
     const hasModel = props.modelValue !== null && props.modelValue !== ''
 
     if (!hasModel) {
-      inputLabel.value = null
+      label.value = null
       return
     }
 
@@ -479,12 +442,9 @@ watch(
   async () => {
     onFilter()
 
-    // 非同步選項回來時清單長度變了,dropdown 的高度與位置是開啟當下算的 ——
-    // 不重算的話會停在舊高度(選項變多被裁切、變少則留一段空白)。
     if (!isActive.value || !isMinCharsReached.value) return
 
-    await nextTick()
-    onDropdownOpen()
+    await onDropdownActive()
   },
   { deep: true }
 )
@@ -503,43 +463,44 @@ onMounted(() => {
   onInit()
 
   document.addEventListener('click', onOutSide, true)
-  window.addEventListener('resize', onResize)
+  window.addEventListener('resize', onSelectResize)
 })
 
 onUnmounted(() => {
   cancelInputWait()
   document.removeEventListener('click', onOutSide, true)
-  window.removeEventListener('resize', onResize)
+  window.removeEventListener('resize', onSelectResize)
 })
 </script>
 
 <template>
-  <div class="m-form" :class="setClass.main">
-    <div class="m-form-container" :class="setClass.container">
-      <Field
-        :name="props.name"
-        :rules="config.isDisabled ? '' : props.rules"
-        v-model="model"
-        v-bind="validateOn"
-        v-slot="{ field, errorMessage }"
-      >
-        <input type="hidden" v-bind="field" />
+  <div class="m-form" :class="setClass.main" v-bind="config.attr.main">
+    <Field
+      :name="props.name"
+      :rules="props.rules"
+      v-model="model"
+      v-bind="validateOn"
+      v-slot="{ field, errorMessage }"
+    >
+      <input type="hidden" v-bind="field" />
+      <div class="m-form-container" :class="setClass.container" v-bind="config.attr.container">
         <div
           class="m-form-element --autocomplete"
           :class="[
             setClass.element,
             { '--focus': isFocus },
+            { '--readonly': config.isReadonly },
             { '--disabled': config.isDisabled },
             { '--error': errorMessage || config.isError },
           ]"
-          ref="elenemtRef"
+          v-bind="config.attr.element"
+          ref="elementRef"
         >
           <input
             :name="`${props.name}_type`"
             type="text"
-            v-model="inputLabel"
+            v-model="label"
             class="m-form-type"
-            :class="setClass.type"
             autocomplete="off"
             :placeholder="config.placeholder"
             :disabled="config.isDisabled"
@@ -553,22 +514,23 @@ onUnmounted(() => {
             type="button"
             class="m-form-clear-button"
             :class="{
-              '--show': inputLabel,
+              '--show': label,
             }"
             tabindex="-1"
             @click="onClear"
             v-if="config.isExistClose && !config.isDisabled"
           >
-            <CommonMSvgIcon icon="icon_xmark" class="m-form-clear-icon" />
+            <CommonMSvgIcon :icon="config.clearIcon" class="m-form-clear-icon" />
           </button>
-          <CommonMSvgIcon icon="icon_search" class="m-form-autocomplete-icon" />
+          <CommonMSvgIcon :icon="config.searchIcon" class="m-form-autocomplete-icon" />
         </div>
-      </Field>
-    </div>
+      </div>
+    </Field>
     <ErrorMessage
       as="span"
       class="m-form-autocomplete-error"
       :class="setClass.error"
+      v-bind="config.attr.error"
       :name="props.name"
       v-slot="{ message }"
     >
@@ -580,45 +542,48 @@ onUnmounted(() => {
       <div
         class="m-form-autocomplete-dropdown"
         :class="setClass.dropdown"
+        v-bind="config.attr.dropdown"
         ref="dropdownRef"
         v-if="isActive && dropdownItems && !config.isDisabled"
       >
         <div
-          class="m-form-autocomplete-dropdown-no-data"
-          v-if="dropdownItems.length === 0"
-          ref="dropdownNoDataRef"
-        >
-          <p>{{ isWaiting ? config.waitMessage : config.noResult }}</p>
-        </div>
-        <ul
           class="m-form-autocomplete-dropdown-container"
           :class="setClass.dropdownContainer"
+          v-bind="config.attr.dropdownContainer"
           ref="dropdownContainerRef"
-          v-else
         >
-          <li
-            class="m-form-autocomplete-dropdown-item"
-            v-for="(item, index) in dropdownItems"
-            :key="`${item}_${index}`"
-            ref="dropdownItemRef"
-          >
-            <button
-              type="button"
-              class="m-form-autocomplete-dropdown-button"
-              :class="{
-                '--active': index === selected.index,
-              }"
-              @mousedown="onDropdownItemMousedown"
-              @click="onDropdownItemClick(item)"
+          <div class="m-form-autocomplete-dropdown-no-data" v-if="dropdownItems.length === 0">
+            <p>{{ isWaiting ? config.waitMessage : config.noResult }}</p>
+          </div>
+          <ul class="m-form-autocomplete-dropdown-body" v-else>
+            <li
+              class="m-form-autocomplete-dropdown-item"
+              v-for="(item, index) in dropdownItems"
+              :key="`${item}_${index}`"
+              ref="dropdownItemRef"
             >
-              <em class="m-form-autocomplete-dropdown-label" :class="setClass.dropdownLabel">
-                <slot name="option" :item="item">
-                  {{ item[config.schema.label] }}
-                </slot>
-              </em>
-            </button>
-          </li>
-        </ul>
+              <button
+                type="button"
+                class="m-form-autocomplete-dropdown-button"
+                :class="{
+                  '--active': index === selectedIndex,
+                }"
+                @mousedown="onDropdownItemMousedown"
+                @click="onDropdownItemClick(item)"
+              >
+                <em
+                  class="m-form-autocomplete-dropdown-label"
+                  :class="setClass.dropdownLabel"
+                  v-bind="config.attr.dropdownLabel"
+                >
+                  <slot name="option" :item="item">
+                    {{ item[config.schema.label] }}
+                  </slot>
+                </em>
+              </button>
+            </li>
+          </ul>
+        </div>
       </div>
     </Transition>
   </Teleport>

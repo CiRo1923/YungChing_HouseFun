@@ -10,7 +10,13 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath, pathToFileURL } from 'node:url'
+import { createRequire } from 'node:module'
+import { fileURLToPath } from 'node:url'
+
+/* 同步載入專案自己的規則 —— 見下方 PROJECT_RULES 那一段的說明。
+   這個載法要 node 22.12 以上;更舊的版本會丟 ERR_REQUIRE_ESM,
+   那時會印出訊息而不是安靜略過。 */
+const require = createRequire(import.meta.url)
 import {
   baseNameOf,
   bodyOf,
@@ -71,6 +77,7 @@ import {
   maskComments,
   maskCssComments,
   maskHtmlComments,
+  readTextCached,
   isProjectDocs,
   DUAL_TYPE_UTILITIES,
   IMPORT_RE,
@@ -104,6 +111,7 @@ export {
   PENDING_CACHE_FILE,
   SCAN_TARGETS,
   isScannable,
+  isScannablePath,
   isWarn,
   listConventionRules,
   listConventionSkills,
@@ -1014,7 +1022,7 @@ const varUsersOf = (root) => {
       if (!owner) continue
 
       try {
-        const text = maskCssComments(fs.readFileSync(abs, 'utf8'))
+        const text = maskCssComments(readTextCached(abs) ?? '')
 
         for (const m of [...text.matchAll(VAR_USE_RE), ...text.matchAll(ARBITRARY_VAR_RE)]) {
           if (!usedBy.has(m[1])) usedBy.set(m[1], new Set())
@@ -1215,7 +1223,7 @@ const paletteVarsOf = (root) => {
       if (!isColorCssPath(rel)) continue
 
       try {
-        const text = maskComments(rel, fs.readFileSync(abs, 'utf8'))
+        const text = maskComments(rel, readTextCached(abs) ?? '')
         for (const m of text.matchAll(VAR_DEFINE_RE)) set.add(m[1])
       } catch {
         // 讀不到某一支就跳過,不要因此讓整條規則失效
@@ -1251,7 +1259,7 @@ const definedVarsOf = (root) => {
       if (!/\.(css|vue|js)$/i.test(abs)) continue
 
       try {
-        const text = maskComments(toRel(root, abs), fs.readFileSync(abs, 'utf8'))
+        const text = maskComments(toRel(root, abs), readTextCached(abs) ?? '')
         for (const m of text.matchAll(VAR_DEFINE_RE)) set.set(m[1], m[2].trim())
       } catch {
         // 讀不到某一支就跳過,不要因此讓整條規則失效
@@ -1793,7 +1801,7 @@ const someModuleCss = (root, test) => {
         continue
       }
       if (!entry.name.endsWith('.css')) continue
-      if (test(fs.readFileSync(full, 'utf8'))) return true
+      if (test(readTextCached(full) ?? '')) return true
     }
 
     return false
@@ -2238,7 +2246,7 @@ const findComponentByClass = (dir, prefix, name) => {
     }
 
     if (!item.name.endsWith('.vue')) continue
-    if (componentClassOf(fs.readFileSync(full, 'utf8')) !== prefix) continue
+    if (componentClassOf(readTextCached(full) ?? '') !== prefix) continue
 
     return classPrefixOf(path.basename(dir)) === prefix ? dir : path.join(dir, name)
   }
@@ -2676,11 +2684,25 @@ export const onRemoveEmptyRules = (text, { rel = '' } = {}) => {
  * 反過來,這支檔案裡的東西也不該複製回來源 —— 那是這個專案的需求,
  * 每個專案都拿到的話,不需要的那幾個會被迫標例外。
  */
-const loadProjectRules = async () => {
+const loadProjectRules = () => {
   const file = path.join(root, '.tools', 'lint', 'rules-project.mjs')
   if (!fs.existsSync(file)) return { checks: [], title: {}, hint: {} }
 
-  const mod = await import(pathToFileURL(file))
+  let mod
+
+  try {
+    mod = require(file)
+  } catch (err) {
+    /* 載不起來時**講出來**,不要安靜地當作沒有這些規則 ——
+       那個專案自己的規範會從此完全不檢查,而檢查結果顯示通過。 */
+    console.error(
+      `[lint] .tools/lint/rules-project.mjs 載不起來,這個專案自己的規則這次沒有跑:\n` +
+        `    ${err.message}`
+    )
+
+    return { checks: [], title: {}, hint: {} }
+  }
+
   const checks = mod.PROJECT_CHECKS ?? []
   const title = mod.PROJECT_RULE_TITLE ?? {}
   const hint = mod.PROJECT_RULE_HINT ?? {}
@@ -2702,7 +2724,15 @@ export const PROJECT_RULE_PREFIX = 'project:'
 
 const root = path.resolve(fileURLToPath(import.meta.url), '../../..')
 
-const PROJECT_RULES = await loadProjectRules()
+/* **同步載入,這一支不可以有 top-level await。**
+
+  這支引擎會被接進開發伺服器,而建置設定檔是先被打包起來才執行的 ——
+  打包出來的格式不支援 top-level await,於是建置在「打包設定檔」那一步就失敗,
+  錯誤訊息指向引擎內部,從訊息看不出原因其實出在設定檔的打包格式。
+
+  來源這邊的外掛是開子行程跑檢查(見 dev-server-plugin),不會把引擎拉進去 ——
+  所以這件事在這裡永遠不會發生,要到別的專案改用直接 import 才會炸。 */
+const PROJECT_RULES = loadProjectRules()
 
 const CHECKS = [
   checkLiteralColor,

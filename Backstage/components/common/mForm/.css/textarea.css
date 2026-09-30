@@ -1,0 +1,9 @@
+/* mForm 的 textarea 變體 —— 原本在 TextArea.vue 的 <style> 區塊裡。
+
+   2026-08-31 刪掉 --resize-x / --resize-y 兩個 modifier(三個斷點各一組)——
+   全案沒有任何使用端,而 TextArea.vue 本身也沒有相關的 props 或 class 綁定。
+   要重新支援拉伸時從 git 歷史撈回來,不要重寫。 */
+
+textarea.m-form-type {
+  @apply resize-none;
+}

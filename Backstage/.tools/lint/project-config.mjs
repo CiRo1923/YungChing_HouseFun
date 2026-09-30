@@ -144,7 +144,7 @@ export const IMPORT_ORDER_GROUPS = [
  * 目前列的三種都是「被放進畫面裡、自己不是網址」:共用元件、
  * 彈窗與廣告這類系統元件、版型。
  */
-export const COMPONENT_DIRS = ['components', 'containers', 'layouts']
+export const COMPONENT_DIRS = ['components', 'containers']
 
 /**
  * 頁面目錄底下,這幾個資料夾裡的 .vue 也視為元件。
@@ -176,6 +176,23 @@ export const COMPONENT_FOLDERS = ['_components']
  * **清單留空代表不做這項檢查**,那條規則會整條略過。
  */
 export const VIEW_UNDERSCORE_FOLDERS = ['_components']
+
+/**
+ * 上面那幾個資料夾,各自要在標籤名裡變成什麼。
+ *
+ * 那幾層不是網址的一段,是頁面旁邊的元件,而它們會被自動註冊成標籤 ——
+ * 這一份回答的是「那一層在標籤名裡留不留、留的話叫什麼」:
+ *
+ *   值是空字串 → 那一層移除    member/_components/Card → MemberCard
+ *   值是其他字 → 換成那個字    member/_pages/Card      → MemberPageCard
+ *
+ * **鍵要與上面那份清單一模一樣。** 兩份是同一組資料夾的兩個問題
+ * (合不合法、標籤名怎麼組),分開列是因為答案的形狀不同。
+ * 少一項的話,那一層的元件不會被自動註冊 —— 標籤寫了沒反應,而且不報錯:
+ * 編譯器把它留到執行時才找,找不到就是那個位置什麼都不畫。
+ * 規則自己的驗證有一則在比對這兩份的鍵。
+ */
+export const VIEW_COMPONENT_MARKERS = { _components: '' }
 
 /**
  * 彈窗收在哪個資料夾名底下 —— 各專案的慣例用語不同(popup、modal、dialog)。

@@ -1,7 +1,5 @@
 import * as prototype from '@js/_prototype.js'
 
-import { useCommonStore } from '@stores/common.js'
-
 const useCommonActions = () => {
   const common = useCommonStore()
   const { isLoading, device } = storeToRefs(common)
@@ -25,37 +23,16 @@ const useCommonActions = () => {
     if (import.meta.server) return onServer()
     if (import.meta.client) return prototype.onDevice()
   }
-  const onUseMeta = (meta) => {
-    const { title, description, url } = meta
+  /* SEO 那一組(寫 head 的 meta、canonical、og、結構化資料)不放在這裡,
+    放各專案自己的那一支行為(useProjectActions)。
 
-    useHead(() => ({
-      title: title,
-      meta: [
-        {
-          property: 'og:title',
-          itemprop: 'name',
-          content: title,
-        },
-        {
-          name: 'description',
-          property: 'og:description',
-          itemprop: 'description',
-          content: description,
-        },
-        {
-          property: 'og:url',
-          itemprop: 'url',
-          content: url.href,
-        },
-      ],
-      link: [
-        {
-          rel: 'canonical',
-          href: url.href,
-        },
-      ],
-    }))
-  }
+    那幾件事每個站的規格都不一樣:canonical 要不要補結尾斜線、
+    og 的圖片尺寸怎麼取、robots 的預設值、要不要吐結構化資料 ——
+    而且它們讀的是專案自己的狀態(站台設定、當前頁的資料)。
+
+    放在這一支共用的行為裡,每個專案拿到的是同一套輸出,要改就得動這支檔案 ——
+    而它是整套覆蓋的對象:改完下一次更新就消失,而消失的當下沒有訊息,
+    只是搜尋引擎看到的東西變回別人的設定。 */
 
   const onIsLoading = (boolean) => {
     isLoading.value = boolean
@@ -67,7 +44,6 @@ const useCommonActions = () => {
 
   return {
     onDevice,
-    onUseMeta,
     onIsLoading,
     onResize,
   }

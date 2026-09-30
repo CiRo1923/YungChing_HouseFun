@@ -9,7 +9,7 @@ definePageMeta({
 })
 
 // const common = useCommonStore()
-const { onUseMeta } = useCommonActions()
+const { onUseMeta } = useProjectActions()
 const buyProject = useBuyProjectStore()
 // const { options } = storeToRefs(buyProject)
 // const buyPublish = useBuyPublishStore()

@@ -39,13 +39,14 @@
       "lazy"
     ],
     "mForm/.composables/useDropdownCore.js": [
-      "arrowType",
+      "arrowIcon",
       "isDisabled",
       "isDropdownFull",
       "position",
       "target"
     ],
     "mForm/AutoComplete.vue": [
+      "clearIcon",
       "input.minChars",
       "input.wait",
       "isDisabled",
@@ -53,6 +54,7 @@
       "isExistClose",
       "keyboard",
       "maxItems",
+      "modelUpdateOn",
       "noMatchClearLabel",
       "noResult",
       "placeholder",
@@ -60,17 +62,21 @@
       "schema.label",
       "schema.model",
       "schema.value",
+      "searchIcon",
       "validateEvents",
       "waitMessage"
     ],
     "mForm/CheckBox.vue": [
       "align",
+      "checkIcon",
+      "checkedValue",
       "isDisabled",
       "isError",
       "isJoin",
       "label",
       "mode",
       "sort",
+      "uncheckedValue",
       "validateEvents",
       "value",
       "valueClickClear"
@@ -120,7 +126,9 @@
     ],
     "mForm/Radio.vue": [
       "align",
+      "checkIcon",
       "isDisabled",
+      "isError",
       "label",
       "validateEvents",
       "value"

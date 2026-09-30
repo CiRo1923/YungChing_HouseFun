@@ -37,7 +37,7 @@ export const useCalendar = (config, model, options = {}) => {
 
   const onFormat = (type = 'datePicker') => onPickFormat(config.value.format, type)
 
-  /* 注意:一定要先把 format 的時間段切掉再組字 —— onFormatYMD 只認得 YYYY / MM / DD,
+  /* 注意：一定要先把 format 的時間段切掉再組字 —— onFormatYMD 只認得 YYYY / MM / DD,
       直接餵 'YYYY-MM-DD hh:mm' 給它,時間那半會原封不動留在輸出裡
       (得到 '2026-09-04 hh:mm')。
 
@@ -86,11 +86,11 @@ export const useCalendar = (config, model, options = {}) => {
 
   /* 一段日期區間與 min / max 完全沒有交集 → 這段整個不能選。
 
-    注意:判斷的是「有沒有交集」,不是「兩個端點各自合不合格」——
+    注意：判斷的是「有沒有交集」,不是「兩個端點各自合不合格」——
         min 是 3 月、max 是 10 月時,年初早於 min、年末晚於 max,
         **兩端都不合格但中間 8 個月都選得到**。拿兩個端點各自 disabled 再 `&&`
-        會把整年停掉。月清單也是一樣的道理:min 與 max 落在同一個月內時,
-        月初與月末都不合格,但中間那幾天是可選的。 */
+        會把整年停掉,那是實際踩過的 bug(月清單也是這樣:min / max 落在同一個月內時,
+        月初與月末都不合格,但中間那幾天是可選的)。 */
   const onRangeDisabled = (startDate, endDate) => {
     const startMs = onDateOnlyMs(startDate)
     const endMs = onDateOnlyMs(endDate)
@@ -111,7 +111,7 @@ export const useCalendar = (config, model, options = {}) => {
   /* 年 / 月清單一律列出完整範圍,超出 min / max 的由 onYearDisabled / onMonthDisabled
     標成不能點 —— 與日曆格子的行為一致(那邊也是照樣顯示、只給 --disabled)。
 
-    注意:不要改回「不列出」:清單少了幾格看起來像資料壞了,而且使用者無法從畫面上
+    注意：不要改回「不列出」:清單少了幾格看起來像資料壞了,而且使用者無法從畫面上
         知道那些月份是被上限擋掉的。 */
   const yearOptions = computed(() => {
     /* 上限取「今年」與 maxDate 的年較晚的那個 —— maxDate 落在未來時要選得到,
@@ -297,7 +297,7 @@ export const useCalendar = (config, model, options = {}) => {
       ? onRangeClassOf(Number(currYear.value) * 100 + Number(monthIndex) + 1)
       : []
 
-  /* 注意:狀態那幾個維持「互斥、只回一個」的優先鏈 —— 原本就是這個行為,
+  /* 注意：狀態那幾個維持「互斥、只回一個」的優先鏈 —— 原本就是這個行為,
       改成全部並存會讓「今天且被選中」的格子同時吃到 --curr 與 --today,
       畫面會變。區間的 class 是**附加**上去的,不影響那條鏈。 */
   const onBindStateClass = (item) => {

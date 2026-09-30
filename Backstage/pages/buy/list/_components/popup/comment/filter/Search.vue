@@ -20,6 +20,6 @@ const onEnter = () => {
       type: 'text-[16px]',
       main: '--h-40 --px-12 --py-8 pt:flex-1',
     }"
-    @keydown.enter="onEnter"
+    @enter="onEnter"
   />
 </template>

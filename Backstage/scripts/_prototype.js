@@ -33,6 +33,12 @@ export const onRecursive = (obj, key, exec, finish) => {
   const foeEach = (object, parentPath) => {
     recursiveIndex++
 
+    /* 沒有東西可以走就停 —— 直接讀 constructor 的話,傳 null 進來會當場丟例外。
+
+      使用端常常把 store 的欄位直接傳進來,而那些欄位在後端回來之前就是 null:
+      那一刻整個畫面會掛掉,而訊息指的是這一行,看不出是「資料還沒到」。 */
+    if (!object) return false
+
     if (object.constructor === Object) {
       visit(object, parentPath, 0)
     } else {
@@ -202,18 +208,25 @@ export const onFormatDate = (date, format) => {
   // ---- helpers ----
   const pad2 = (n) => String(n).padStart(2, '0')
 
-  const parseTimeFromDateString = (input) => {
-    // 原本邏輯是「format 需要 hh/mm/ss 且 date 字串含有時間」才抓，不然補 00
-    // 這邊一樣：只抓 "HH:MM:SS" 形式
-    const m = typeof input === 'string' ? /(\d{1,2}):(\d{1,2}):(\d{1,2})/.exec(input) : null
-    if (!m) return null
+  /* 時分秒取自**解析出來的那個時間點**,與年月日同一個來源。
+
+    先前是拿原始輸入去撈 `HH:MM:SS` 那串字 —— 而時間戳與 Date 物件裡
+    本來就沒有那串字,所以格式寫了 hh:mm:ss 也只會拿到 00:00:00。
+    那不會報錯:畫面上就是每一筆的時間都是午夜。
+
+    沒有寫時間的日期字串(`2026-09-30`)解析出來就是當天的 00:00:00,
+    所以那一種的輸出與先前一樣 —— 那也是對的:
+    那個字串講的是一整天,補上當下的時分秒等於無中生有。 */
+  const timeOf = (ms) => {
+    const d = new Date(ms)
+
     return {
-      hh: pad2(Number(m[1])),
-      h: String(Number(m[1])),
-      mm: pad2(Number(m[2])),
-      m: String(Number(m[2])),
-      ss: pad2(Number(m[3])),
-      s: String(Number(m[3])),
+      hh: pad2(d.getHours()),
+      h: String(d.getHours()),
+      mm: pad2(d.getMinutes()),
+      m: String(d.getMinutes()),
+      ss: pad2(d.getSeconds()),
+      s: String(d.getSeconds()),
     }
   }
 
@@ -226,15 +239,18 @@ export const onFormatDate = (date, format) => {
     return { YYYY: String(y), MM: m, DD: day }
   }
 
+  /* 手動組出 Date(year, monthIndex, day, …),避開各家瀏覽器對字串解析的差異。
+
+    沒有寫時間的那一種用 00:00:00。**先前用的是 12:00,為了避開時區切日** ——
+    但那個風險來自 `new Date('2026-09-30')` 那種寫法(它按 UTC 解析,
+    在台灣會變成前一天早上八點);這裡是用本地時間的參數建構,本來就不會切日。
+    留著 12:00 的話,時分秒改成取自這個時間點之後,
+    純日期的欄位會突然顯示成中午。 */
   const safeMsFromYMD = (y, mo, d, hh, mm, ss) => {
-    // 手動組出 Date(year, monthIndex, day, ...) 避開 iOS 對字串解析
-    // 若沒有時間，固定用 12:00:00 避免時區切日
     const hasTime = hh != null && mm != null && ss != null
-    const H = hasTime ? hh : 12
-    const M = hasTime ? mm : 0
-    const S = hasTime ? ss : 0
-    const dt = new Date(y, mo - 1, d, H, M, S, 0)
+    const dt = new Date(y, mo - 1, d, hasTime ? hh : 0, hasTime ? mm : 0, hasTime ? ss : 0, 0)
     const ms = dt.getTime()
+
     return Number.isNaN(ms) ? null : ms
   }
 
@@ -249,9 +265,23 @@ export const onFormatDate = (date, format) => {
     const m = String(s)
       .trim()
       .match(
-        /^(\d{4})-(\d{2})-(\d{2})[T\s](\d{2}):(\d{2}):(\d{2})(?:\.(\d+))?(?:Z|([+-])(\d{2}):?(\d{2}))$/
+        /^(\d{4})-(\d{2})-(\d{2})[T\s](\d{2}):(\d{2}):(\d{2})(?:\.(\d+))?(?:Z|([+-])(\d{2}):?(\d{2}))?$/
       )
     if (!m) return null
+
+    /* **時區是可選的。** 沒有帶時區的那一種(`2026-09-30T14:05:09.9170000`)
+      是 .NET 後端很常見的輸出,先前的比對式要求一定要有 Z 或 +08:00,
+      所以那一種整個解析不了 —— 那類日期欄位在畫面上是空白的,而且不報錯。
+
+      沒有時區就當本地時間:那個字串沒有說它是哪一區的,
+      而它多半來自同一個時區的後端。用本地時間建構,顯示出來與字串上的一樣。 */
+    const hasZone = String(s).trim().endsWith('Z') || Boolean(m[8])
+
+    if (!hasZone) {
+      const localMs = new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]).getTime()
+
+      return Number.isNaN(localMs) ? null : localMs
+    }
 
     const y = +m[1]
     const mo = +m[2]
@@ -349,10 +379,16 @@ export const onFormatDate = (date, format) => {
   const ms = parseToMs(date)
   if (ms == null) return ''
 
-  // format 沒帶值：回傳計算好的日期 timestamp（轉成字串，與其他分支型別一致）
-  // (+new Date(ms) === ms，但寫清楚符合需求)
+  /* 沒給格式時回傳那個時間點本身(數字)。
+
+    **先前回傳的是字串。** 那個字串誰都解析不回來 —— 再傳進這一支會得到空字串,
+    日期選擇器的解析回 null,`new Date()` 是 Invalid Date。
+    於是「先算成時間點,之後再格式化或拿去比大小」那種寫法整條失效,
+    而且不報錯:畫面上是日期空白、日期選擇器沒有上下限。
+
+    回傳數字的話,上面那三種都認得。 */
   if (!format || !String(format).trim()) {
-    return String(+new Date(ms))
+    return ms
   }
 
   const fmt = String(format).trim()
@@ -378,14 +414,7 @@ export const onFormatDate = (date, format) => {
   const needsTime = /hh|h|mm|m|ss|s/.test(fmt)
 
   if (needsTime) {
-    const t = parseTimeFromDateString(date) || {
-      hh: '00',
-      h: '0',
-      mm: '00',
-      m: '0',
-      ss: '00',
-      s: '0',
-    }
+    const t = timeOf(ms)
 
     // 最穩方式：直接用原 fmt 的時間部分（從第一個 h/m/s token 開始）
     const idx = timeTokenIndex
@@ -422,7 +451,7 @@ export const onValueToDateRange = (today, date, format) => {
   const calendarDateOf = (d0) =>
     makeUtcDate(d0.getUTCFullYear(), d0.getUTCMonth() + 1, d0.getUTCDate())
 
-  // 取某個瞬間在 UTC 的年月日、轉成「日曆日期」(UTC noon)，無效日期回 null
+  // 取某個瞬間在 UTC 的年月日，轉成「日曆日期」(UTC noon)；無效日期回 null
   const safeCalendarDate = (d0) => (isNaN(d0.getTime()) ? null : calendarDateOf(d0))
 
   const parseUtcDateString = (s) => {
@@ -700,7 +729,7 @@ export const timeFormat = {
    * 把各種 input 轉成「毫秒 ms」
    * 支援：
    * - number：預設視為 ms（也可開 auto 判斷秒/毫秒）
-   * - '300'：純數字字串，同樣預設視為 ms
+   * - '300'：純數字字串，同樣視為 ms
    * - '1500ms' / '30s' / '5m' / '2h'
    * - 'mm:ss' 例如 '03:15'
    * - 'hh:mm:ss' 例如 '01:02:03'
@@ -855,7 +884,7 @@ export const countdown = {
    * 嘗試把各種輸入轉成毫秒時間戳 (ms)
    * 支援：
    * - number：視為 ms（也支援秒，會自動判斷）
-   * - numeric string：同樣視為 ms，一樣會自動判斷秒
+   * - numeric string：同樣視為 ms（也支援秒，會自動判斷）
    * - ISO string：2026-02-05T11:32:45.5052229+08:00
    * - YYYY-MM-DD / YYYY/MM/DD / YYYY.MM.DD
    * - YYYY-MM-DD HH:mm:ss / YYYY/MM/DD HH:mm:ss / YYYY.MM.DD HH:mm:ss
