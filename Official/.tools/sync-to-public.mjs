@@ -17,11 +17,14 @@ import { spawn } from 'node:child_process'
 
 // 兩邊都不要的項目:AI 工具設定與對內資料,對發布與備份都沒有意義。
 // .acceptance 是驗收測試報告(含規格比對與缺陷清單),屬對內資料,不隨原始碼出去。
-// .api.json 是後端的 swagger 規格,只給開發時查 API 用 —— 同樣屬對內資料,
+// .api.swagger 是後端的 swagger 規格,只給開發時查 API 用 —— 同樣屬對內資料,
 // 而且它在專案根目錄、不經任何建置,漏掉就會原樣被同步與打包出去。
 // .specifications 是客戶的規格書(.docx),同樣是對內資料,不隨原始碼出去。
+// .dev 是本機開發用的除錯面板,nuxt.config.ts 裡的載入進入點預設是註解掉的,
+// 少了它建置照常通過。
 // 注意:docs/ 不在這裡 —— 元件的文件與範例頁對協作方有用,照樣送出去。
-const TOOLING_NAMES = ['.claude', '.agents', '.acceptance', '.api.json', '.specifications']
+// .claude 也不在這裡 —— 裡面是這個專案的寫法規範與檢查掛鉤,協作方要照同一套規範開發。
+const TOOLING_NAMES = ['.agents', '.acceptance', '.api.swagger', '.specifications', '.dev']
 
 /* 只排除同步、壓縮檔仍要收的項目 —— 那份是自己的備份,要能還原成完整可跑的專案。
 
