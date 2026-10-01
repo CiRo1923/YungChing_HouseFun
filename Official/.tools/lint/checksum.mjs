@@ -17,7 +17,14 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { listFiles, readSealedJson, writeSealedJson } from './shared.mjs'
+import {
+  ACTIONS_DIR_NAME,
+  STORE_DIR,
+  listFiles,
+  readSealedJson,
+  toRel,
+  writeSealedJson,
+} from './shared.mjs'
 
 const root = path.resolve(fileURLToPath(import.meta.url), '../../..')
 const dir = path.join(root, '.tools', 'lint')
@@ -58,7 +65,7 @@ export const isSkipped = (name) => name === CONFIG || name.endsWith(PROJECT_OWN_
 /**
  * 來源共用的**產品程式碼** —— 與規則檔是同一種東西:整支跟著來源。
  *
- * 那幾支是元件在用的共用函式,以及表單的格式規則。
+ * 那幾支是元件在用的共用函式、表單的格式規則,以及共用的那一組狀態與行為。
  * 在某個專案就地加了自己的函式進去**不會報錯**,而下一次整套更新
  * 會把整支覆蓋掉 —— 那幾個函式安靜地消失,使用端變成「某個名字不存在」,
  * 而訊息不會說那是被覆蓋掉的。改了既有函式的行為更難發現:
@@ -69,7 +76,30 @@ export const isSkipped = (name) => name === CONFIG || name.endsWith(PROJECT_OWN_
  *
  * 位置不寫死:這幾支在哪一層由專案的擺法決定,所以用找的。
  */
-export const SHARED_SOURCE_FILES = ['_prototype.js', '_validation.js']
+export const SHARED_SOURCE_FILES = [
+  '_prototype.js',
+  '_validation.js',
+  /* 共用的那一組狀態與行為。每個專案的載入中、斷點都讀它們,
+     而三種「關掉載入中」的做法也定義在那裡 —— 各專案挑一種用,
+     但那幾支函式本身不各自長一份。
+
+     這兩項寫完整路徑(其餘兩項只寫檔名):`common.js` 是個通用的名字,
+     只比檔名的話,專案裡別處一支同名的檔案會被當成它。 */
+  `${STORE_DIR}/common.js`,
+  `${STORE_DIR}/${ACTIONS_DIR_NAME}/useCommonActions.js`,
+]
+
+/**
+ * 這個相對路徑是不是清單裡的那一支。
+ *
+ * 只寫檔名的那幾項比對路徑的結尾(位置隨專案的擺法不同),
+ * 寫了路徑的則要整段對上。
+ */
+const isSharedSource = (rel, item) => rel === item || rel.endsWith(`/${item}`)
+
+/* 指紋清單的 key 是檔名(那幾支在全案唯一,撞名時另外會講出來),
+   所以判斷「這個 key 是不是共用的產品程式碼」要拿檔名比對。 */
+const SHARED_SOURCE_NAMES = new Set(SHARED_SOURCE_FILES.map((one) => path.basename(one)))
 
 /**
  * 找出這個專案實際有的那幾支,以及同名撞在一起的。
@@ -82,9 +112,11 @@ export const sharedSourceFiles = () => {
   const clashes = new Map()
 
   for (const abs of listFiles(root, '.')) {
-    const name = path.basename(abs)
+    const rel = toRel(root, abs)
 
-    if (!SHARED_SOURCE_FILES.includes(name)) continue
+    if (!SHARED_SOURCE_FILES.some((one) => isSharedSource(rel, one))) continue
+
+    const name = path.basename(abs)
 
     if (found.has(name)) {
       clashes.set(name, [...(clashes.get(name) ?? [found.get(name)]), abs])
@@ -169,7 +201,7 @@ export const fingerprintDiff = () => {
       /* 共用的產品程式碼**不是每個專案都要有**(沒有表單的專案就沒有那一支),
          所以那幾支「這裡沒有」不算少掉 —— 報的話那種專案每次都看到一筆,
          而他們一點問題也沒有。規則檔少一支則是真的有問題:那條規則被拿掉了。 */
-      .filter((name) => !(SHARED_SOURCE_FILES.includes(name) && !current[name]))
+      .filter((name) => !(SHARED_SOURCE_NAMES.has(name) && !current[name]))
       .map((name) => ({
         name,
         state: !current[name] ? '被刪掉了' : !recorded[name] ? '是多出來的' : '內容被改過',
@@ -200,7 +232,7 @@ if (isMain && process.argv.includes('--list')) {
   console.log('\n這份清單以外的檔案歸這個專案所有,同步不要碰它們。')
 } else if (isMain && process.argv.includes('--write')) {
   const sealed = currentFingerprints()
-  const shared = Object.keys(sealed).filter((name) => SHARED_SOURCE_FILES.includes(name))
+  const shared = Object.keys(sealed).filter((name) => SHARED_SOURCE_NAMES.has(name))
 
   writeSealedJson(root, CHECKSUM_FILE, sealed)
 

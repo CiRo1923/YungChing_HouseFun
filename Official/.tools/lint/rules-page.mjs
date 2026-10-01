@@ -4,7 +4,6 @@
 // 這支管的是「頁面怎麼使用它們」。範圍不同(一個看 stores/,一個看頁面的 .vue),
 // 混在一起之後,要找某條規則得先猜它算 store 還是頁面的事。
 
-import fs from 'node:fs'
 import path from 'node:path'
 import { aliasListOf } from './rules-code.mjs'
 import {

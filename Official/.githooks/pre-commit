@@ -175,7 +175,7 @@ for root in $ROOTS; do
   #    那一支改了就不會被檢查,而且不會有任何徵兆。
   #    規則自己的驗證有一則在比對這兩份。
 
-  if echo "$FILES" | grep -qE '(^|/)(_prototype|_validation)\.js$'; then
+  if echo "$FILES" | grep -qE '(^|/)(_prototype|_validation|common|useCommonActions)\.js$'; then
     if ! (cd "$root" && npm run rules:verify --silent); then
       printf "\n${RED}指紋清單沒有跟著更新,這次 commit 停下來。${RESET}\n"
       printf "${RED}  那幾支共用檔的內容封存在指紋清單裡,改了要重新封存。${RESET}\n"

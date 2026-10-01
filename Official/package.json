@@ -26,6 +26,7 @@
     "deps": "node .tools/component-deps.mjs",
     "rules:seal": "node .tools/lint/checksum.mjs --write && node .tools/lint/component-api.mjs --write",
     "rules:verify": "node .tools/lint/checksum.mjs && node .tools/lint/component-api.mjs",
+    "rules:files": "node .tools/lint/checksum.mjs --list",
     "rules:sync": "node .tools/lint/sync-rules-project.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

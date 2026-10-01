@@ -564,7 +564,7 @@ export const apiFieldNamesOf = (spec) => {
  * 那條規則整條略過(前提清單會講出這件事)。
  */
 export const specFieldsIn = (dir) => {
-  let files = []
+  let files
 
   try {
     files = fs.readdirSync(dir).filter((name) => name.toLowerCase().endsWith('.json'))

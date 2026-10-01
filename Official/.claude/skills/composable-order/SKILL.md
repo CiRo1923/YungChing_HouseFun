@@ -73,12 +73,12 @@ const { onApiGetMemberInfo } = useMemberActions()  // 3 取行為
 
 ```js
 // 改前
-const { onLoaded } = useCommonActions()
+const { onIsLoading } = useCommonActions()
 
 const popup = usePopupActions()
 
 // 改後
-const { onLoaded } = useCommonActions()
+const { onIsLoading } = useCommonActions()
 const popup = usePopupActions()
 ```
 
@@ -92,7 +92,7 @@ const popup = usePopupActions()
 ```js
 const common = useCommonStore()                     // 1 common
 const { device } = storeToRefs(common)
-const { onLoaded } = useCommonActions()
+const { onIsLoading } = useCommonActions()
 const { userData } = storeToRefs(useProjectStore()) // 2 project
 const { onApiXxx } = useProjectActions()
 const nav = useNavStore()                           // 3 nav
@@ -144,7 +144,7 @@ const router = useRouter()                          // 再 router
 
 ```js
 const props = defineProps({ ... })          // 1
-const { onLoaded } = useCommonActions()      // 2 stores/actions
+const { onIsLoading } = useCommonActions()      // 2 stores/actions
 const member = useMemberStore()
 const { onApiMemberPets } = useMemberActions()
 const route = useRoute()                     // 3 緊接最後一個 stores/actions

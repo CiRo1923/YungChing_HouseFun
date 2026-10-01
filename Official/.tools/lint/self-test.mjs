@@ -196,7 +196,9 @@ const root = path.resolve(fileURLToPath(import.meta.url), '../../..')
 const isSharedRule = (rule) => !rule.startsWith(PROJECT_RULE_PREFIX)
 
 // 探測用的色票要等 onPrepare 建好才讀得到,所以這裡先放著,執行時再更新
-let definedVars = loadDefinedColorVars(root)
+/* 真正的值在每一輪開始前重新載入(見下方的 resetScanCaches 那一段)——
+   這裡只宣告,不先給一份會過期的。 */
+let definedVars
 
 /**
  * 探測檔的資料夾名 —— 取得夠特別,誤留下來也一眼看得出是什麼。
@@ -1531,8 +1533,6 @@ const CSS_CASES = [
     expect: 0,
   },
   {
-    // 畫面區段的 class 屬性也是同一種東西,兩個位置都要看
-    rule: 'lengthTypeHint',
     /* 動態綁定的兩個分支是互斥的 —— 那兩個永遠不會同時出現在元素上,
        不是「同一段裡的兩個」。只靠屬性的位置分組的話,
        「有錯誤就紅、否則灰」這種最普通的寫法會被報成衝突。 */
@@ -5721,7 +5721,7 @@ const onCheckEditorSaveWiring = () => {
     return
   }
 
-  let commands = []
+  let commands
 
   try {
     commands = JSON.parse(fs.readFileSync(abs, 'utf8'))['emeraldwalk.runonsave']?.commands ?? []
@@ -6038,12 +6038,6 @@ const onCheckComponentApiDiff = () => {
 const onCheckComponentUses = () => {
   const problems = []
 
-  const usesOf = (rel) => {
-    const abs = path.join(root, ...rel.split('/'))
-
-    return fs.existsSync(abs) ? componentUsesOf(root, rel, fs.readFileSync(abs, 'utf8')) : null
-  }
-
   /* 拿真的檔案驗:探測檔沒有辦法驗這件事 ——
      它要的是「全案有哪些元件」那份索引,而探測用的元件本來就不在裡面。 */
   const tagIndex = componentTagIndexOf(root)
@@ -6230,6 +6224,58 @@ const onCheckViewFolderSettings = () => {
  * 只在來源驗:拿到這套工具的專案有自己的起手樣板(他們的頁面、他們的元件),
  * 那些不在來源的文件裡,在那邊驗的話每一支都被報一筆,而那全是誤報。
  */
+/**
+ * 圖示那一組三邊的接點對得上 —— 元件、建置外掛、建置設定。
+ *
+ * 那支元件標著 starter(整套更新時不要覆蓋),而它**同時**與建置外掛是一組:
+ * 外掛送的事件名、定義的常數名,元件那邊要接得到。兩件事湊在一起會走到
+ * 一個照規範做就會發生的狀態 —— **外掛跟著來源更新了,而元件沒有**。
+ *
+ * 那時外掛備好的東西安靜失效:開發時新增圖示不會自動重整、
+ * 圖示名打錯完全沒有警告。三邊都在、都沒報錯,只是接不起來。
+ *
+ * 所以比對那幾個名字。只在來源驗 —— 接手的專案可能整支重寫那個元件
+ * (圖示怎麼來的每個站不一樣),在那邊比對會把正當的改寫報成錯。
+ */
+const onCheckSpriteWiring = () => {
+  if (!IS_SOURCE_PROJECT) {
+    skipped.push({ name: '圖示那一組三邊的接點對得上', need: 'sourceProject' })
+    return
+  }
+
+  const plugin = path.join(root, '.vite', 'svg-spritemap.mjs')
+  const icon = listFiles(root, COMPONENTS_DIR).find((abs) =>
+    toRel(root, abs).endsWith('/mSvgIcon/Index.vue')
+  )
+
+  if (!fs.existsSync(plugin) || !icon) {
+    skipped.push({ name: '圖示那一組三邊的接點對得上', need: 'svgSpritemap' })
+    return
+  }
+
+  const pluginText = readTextCached(plugin) ?? ''
+  const iconText = readTextCached(icon) ?? ''
+  const problems = []
+
+  /* 事件名:外掛用它推送「圖示換了」,元件監聽同一個名字。
+     對不上的話開發時新增圖示要手動重整,而那看起來像是熱更新本來就不管這個。 */
+  const event = /const clientEvent = '([^']+)'/.exec(pluginText)?.[1]
+
+  if (!event) problems.push('外掛裡找不到事件名(const clientEvent)')
+  else if (!iconText.includes(event))
+    problems.push(`外掛送的事件是 ${event},而元件沒有接它 —— 開發時新增圖示不會自動更新`)
+
+  /* 常數名:建置時定義,元件用它檢查「這個圖示名在不在」。
+     對不上的話元件那一行會是未定義 —— 名字打錯從此沒有警告。 */
+  for (const name of ['__SPRITEMAP_ICONS__', '__SPRITEMAP_URL__']) {
+    if (!iconText.includes(name)) continue
+    if (!pluginText.includes(name) && !readTextCached(path.join(root, 'vite.config.js'))?.includes(name))
+      problems.push(`元件用了 ${name},而建置那一側沒有定義它`)
+  }
+
+  report(!problems.length, '圖示那一組三邊的接點對得上', problems)
+}
+
 const onCheckStarterDocumented = () => {
   if (!IS_SOURCE_PROJECT) {
     skipped.push({ name: '標了 starter 的檔案,文件那張表都有講到', need: 'sourceProject' })
@@ -8121,7 +8167,9 @@ const onCheckGuardWiring = () => {
               .find((line) => line.includes('grep -qE')) ?? ''
 
           for (const name of SHARED_SOURCE_FILES) {
-            const stem = name.replace(/\.js$/, '')
+            /* 清單裡有些項目寫的是完整路徑(名字太通用的那幾支),
+               而 hook 那一行比的是檔名 —— 拿完整路徑去找永遠找不到。 */
+            const stem = path.basename(name).replace(/\.js$/, '')
 
             if (!condition.includes(stem))
               problems.push(
@@ -8142,7 +8190,7 @@ const onCheckGuardWiring = () => {
 }
 
 const onCheckRuleCrash = () => {
-  let issues = []
+  let issues
 
   try {
     issues = lintText(root, `${M}/probeCrash.css`, null)
@@ -8270,8 +8318,8 @@ const onCheckThemeParsing = () => {
  * 因為那三支沒有示範頁。拿到那一版的專案是整包建置不了。
  */
 const onCheckComponentsCompile = async () => {
-  let compiler = null
-  let parseJs = null
+  let compiler
+  let parseJs
 
   try {
     compiler = await import('@vue/compiler-sfc')
@@ -8370,7 +8418,7 @@ const onCheckConfigOptions = async () => {
     return
   }
 
-  let vue = null
+  let vue
 
   try {
     vue = await import('vue')
@@ -8446,8 +8494,8 @@ const onCheckConfigOptions = async () => {
 }
 
 const onCheckTouchedValidate = async () => {
-  let vue = null
-  let veeValidate = null
+  let vue
+  let veeValidate
 
   try {
     vue = await import('vue')
@@ -8786,11 +8834,11 @@ const SORT_COMPOSABLE_CASES = [
     rel: `${VIEWS_DIR}/selfTestAlpha/Index.vue`,
     code:
       '<script setup>\n' +
-      'const { onLoaded } = useCommonActions()\n' +
+      'const { onIsLoading } = useCommonActions()\n' +
       '\n' +
       'const popup = usePopupActions()\n' +
       '</script>\n',
-    expect: ['const { onLoaded } = useCommonActions()', 'const popup = usePopupActions()'],
+    expect: ['const { onIsLoading } = useCommonActions()', 'const popup = usePopupActions()'],
   },
   {
     /* 順序本來就對、但中間有空行 —— 仍然要處理。
@@ -8822,8 +8870,8 @@ const SORT_COMPOSABLE_CASES = [
   {
     name: '順序倒置會被排回去',
     rel: `${VIEWS_DIR}/selfTestAlpha/Index.vue`,
-    code: `<script setup>\nconst popup = usePopupActions()\nconst { onLoaded } = useCommonActions()\n</script>\n`,
-    expect: ['const { onLoaded } = useCommonActions()', 'const popup = usePopupActions()'],
+    code: `<script setup>\nconst popup = usePopupActions()\nconst { onIsLoading } = useCommonActions()\n</script>\n`,
+    expect: ['const { onIsLoading } = useCommonActions()', 'const popup = usePopupActions()'],
   },
   {
     /* computed 一律是屏障,連依賴前一行的 pageJson 也不例外 ——
@@ -8847,10 +8895,10 @@ const SORT_COMPOSABLE_CASES = [
   {
     name: '註解跟著宣告一起搬',
     rel: `${VIEWS_DIR}/selfTestAlpha/Index.vue`,
-    code: `<script setup>\n// 靜態文案\nconst json = useJsonStore()\n// 全站共用\nconst { onLoaded } = useCommonActions()\n</script>\n`,
+    code: `<script setup>\n// 靜態文案\nconst json = useJsonStore()\n// 全站共用\nconst { onIsLoading } = useCommonActions()\n</script>\n`,
     expect: [
       '// 全站共用',
-      'const { onLoaded } = useCommonActions()',
+      'const { onIsLoading } = useCommonActions()',
       '// 靜態文案',
       'const json = useJsonStore()',
     ],
@@ -8860,20 +8908,20 @@ const SORT_COMPOSABLE_CASES = [
       storeToRefs 靠參數的變數名認出自己屬於哪一組。 */
     name: '分類內部 Store → storeToRefs → Actions',
     rel: `${VIEWS_DIR}/selfTestAlpha/Index.vue`,
-    code: `<script setup>\nconst { onLoaded } = useCommonActions()\nconst { device } = storeToRefs(common)\nconst common = useCommonStore()\n</script>\n`,
+    code: `<script setup>\nconst { onIsLoading } = useCommonActions()\nconst { device } = storeToRefs(common)\nconst common = useCommonStore()\n</script>\n`,
     expect: [
       'const common = useCommonStore()',
       'const { device } = storeToRefs(common)',
-      'const { onLoaded } = useCommonActions()',
+      'const { onIsLoading } = useCommonActions()',
     ],
   },
   {
     // storeToRefs 是它那一組的成員,不是屏障 —— common 那一組要整組排到前面
     name: 'storeToRefs 跟著自己那一組移動',
     rel: `${VIEWS_DIR}/selfTestAlpha/Index.vue`,
-    code: `<script setup>\nconst json = useJsonStore()\nconst { list } = storeToRefs(json)\nconst { onLoaded } = useCommonActions()\n</script>\n`,
+    code: `<script setup>\nconst json = useJsonStore()\nconst { list } = storeToRefs(json)\nconst { onIsLoading } = useCommonActions()\n</script>\n`,
     expect: [
-      'const { onLoaded } = useCommonActions()',
+      'const { onIsLoading } = useCommonActions()',
       'const json = useJsonStore()',
       'const { list } = storeToRefs(json)',
     ],
@@ -8912,8 +8960,8 @@ const SORT_COMPOSABLE_CASES = [
   {
     name: '同一項 Store 在前 Actions 在後',
     rel: `${VIEWS_DIR}/selfTestAlpha/Index.vue`,
-    code: `<script setup>\nconst { onLoaded } = useCommonActions()\nconst common = useCommonStore()\n</script>\n`,
-    expect: ['const common = useCommonStore()', 'const { onLoaded } = useCommonActions()'],
+    code: `<script setup>\nconst { onIsLoading } = useCommonActions()\nconst common = useCommonStore()\n</script>\n`,
+    expect: ['const common = useCommonStore()', 'const { onIsLoading } = useCommonActions()'],
   },
   {
     name: '已經是正確順序就不動',
@@ -9359,6 +9407,7 @@ try {
   onCheckComponentApiDiff()
   onCheckComponentUses()
   onCheckComponentDirsRegistered()
+  onCheckSpriteWiring()
   onCheckStarterDocumented()
   onCheckViewFolderSettings()
   onCheckStyleProjectHook()
