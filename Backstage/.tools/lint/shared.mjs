@@ -94,6 +94,25 @@ export const ABSOLUTE_PATH_SCOPE = configOf('ABSOLUTE_PATH_SCOPE')
 export const WRITING_STYLE_SCOPE = configOf('WRITING_STYLE_SCOPE')
 export const BUILD_CONFIG_FILES = configOf('BUILD_CONFIG_FILES')
 export const PROJECT_CONFIG_FILES = configOf('PROJECT_CONFIG_FILES')
+
+/**
+ * commit 前遇到違規要不要擋 —— **每個專案的目標是把它打開**。
+ *
+ * 接手一個專案時往往已經有幾百筆存量,那時一律擋的話任何人碰到那些檔案
+ * 都動不了,結果一定是有人去繞過整個 hook —— 那時連真正嚴重的問題也不再被擋。
+ * 所以預設只提醒,存量清完之後把這一項改成 true,那時它擋不到任何人,
+ * 卻讓「新寫的程式碼一律合規」變成事實。
+ *
+ * 開關放在設定檔而不是 hook 裡:`.githooks/pre-commit` 整支跟著來源,
+ * 在那裡改的話下一次同步就被蓋回去,**而且沒有任何提示** ——
+ * 擋了幾個月的專案會安靜地變回只提醒。設定檔是這個專案自己的,不在指紋清單裡。
+ *
+ * **不走 configOf。** 那一條會把沒填的項目算成「設定檔缺項」而讓整個檢查停住,
+ * 而這一項是後來才加的 —— 舊專案的設定檔本來就沒有它,
+ * 那些專案一更新就會整套檢查停擺,而他們什麼都沒做錯。
+ * 後來加的設定項一律這樣寫:**給得出安全的預設值才加,給不出就不是設定項。**
+ */
+export const LINT_BLOCKS_COMMIT = projectConfig.LINT_BLOCKS_COMMIT ?? false
 /**
  * 統一的違規格式 —— 五層守門共用同一份輸出邏輯,靠的就是這個形狀。
  *

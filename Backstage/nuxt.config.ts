@@ -5,7 +5,8 @@ import POSTCSSFUNCTIONS from './postcss.function.js'
 
 import SvgSpritemapDevPlugin, {
   SvgSpritemapBuildPlugin,
-  spritemapRoute as devSpritemapRoute,
+  spritePathOf,
+  listSpritemapIcons,
 } from './.vite/svg-spritemap.mjs'
 import CssGuardPlugin from './.tools/lint/dev-server-plugin.mjs'
 import { getPageComponentDirs } from './.tools/page-component-dirs'
@@ -37,10 +38,11 @@ export default defineNuxtConfig({
       appHash:
         process.env.NUXT_PUBLIC_APP_HASH ||
         execSync('git rev-parse --short HEAD').toString().trim(),
-      spritePath:
-        process.env.NODE_ENV === 'development'
-          ? devSpritemapRoute
-          : `${CONFIG.imgs}/svg/spritemap.svg`,
+      // 怎麼組收在那支外掛裡 —— 這裡只給模式與圖片資產的資料夾名
+      spritePath: spritePathOf(process.env.NODE_ENV === 'development', CONFIG.imgs),
+      /* 這個專案有哪幾支圖示 —— CommonMSvgIcon 拿它檢查引用的名字在不在。
+        名字打錯時畫面上那個位置就是空的,不會報錯,所以要在開發時講出來。 */
+      spriteIcons: listSpritemapIcons(fileURLToPath(new URL(`./${CONFIG.svg}`, import.meta.url))),
       googleMapsApiKey: process.env.NUXT_PUBLIC_GOOGLE_MAPS_API_KEY,
     },
   },
