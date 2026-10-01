@@ -5,7 +5,13 @@
 //   node .tools/lint/lint.mjs <file> [file..] # 只檢查指定檔案 / 目錄
 //   node .tools/lint/lint.mjs --json          # 以 JSON 輸出,供程式解析
 //
-// 一律只回報、不改動任何檔案。有違規時 exit 1。
+// 一律只回報、不改動任何檔案。
+//
+// 有違規時的離開碼看專案的設定(LINT_BLOCKS_COMMIT):
+//   1  只提醒 —— commit 前那一層印出來就放行(預設)
+//   2  要擋   —— 存量清完的專案把設定改成 true 之後是這個
+// commit 前那一層靠這個碼分辨,自己不必再讀一次設定(省一次 node 啟動)。
+// `--json` 那條路不受影響:機器讀的,沒有「擋不擋」的問題。
 
 import fs from 'node:fs'
 import path from 'node:path'
@@ -22,7 +28,7 @@ import {
   toRel,
 } from './lint-core.mjs'
 import { onReportPreflight, preflight } from './preflight.mjs'
-import { MISSING_CONFIG_ITEMS, isWarn } from './shared.mjs'
+import { LINT_BLOCKS_COMMIT, MISSING_CONFIG_ITEMS, isWarn } from './shared.mjs'
 import { BOLD, CYAN, DIM, GREEN, RED, RESET, YELLOW } from './colors.mjs'
 
 const root = path.resolve(fileURLToPath(import.meta.url), '../../..')
@@ -160,4 +166,7 @@ if (warns.length) console.error(`${DIM}另有 ${warns.length} 筆建議 —— �
 
 onCheckPreflight()
 
-process.exit(errors.length ? 1 : 0)
+/* 2 = 這個專案已經把「違規就擋」打開了(存量清完之後的狀態)。
+  commit 前那一層看碼決定要印黃字放行還是紅字停下來 —— 判斷在設定檔那一份,
+  不在 hook 裡(hook 整支跟著來源,在那裡改會被同步蓋回去)。 */
+process.exit(errors.length ? (LINT_BLOCKS_COMMIT ? 2 : 1) : 0)

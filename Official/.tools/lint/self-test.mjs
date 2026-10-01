@@ -6237,12 +6237,18 @@ const onCheckViewFolderSettings = () => {
  * 所以比對那幾個名字。只在來源驗 —— 接手的專案可能整支重寫那個元件
  * (圖示怎麼來的每個站不一樣),在那邊比對會把正當的改寫報成錯。
  */
-const onCheckSpriteWiring = () => {
-  if (!IS_SOURCE_PROJECT) {
-    skipped.push({ name: '圖示那一組三邊的接點對得上', need: 'sourceProject' })
-    return
-  }
+/* 這一則**每個專案都要跑**,不是只有來源。
 
+  那三邊(元件、建置外掛、建置設定)在各專案是分開更新的:
+  元件標了 starter 所以不跟著來源走,外掛那一層是整支跟著來源的,
+  而建置設定是各專案自己的 —— 三者對不上時**不報錯**,
+  元件那幾段都有防呆、靜靜地跳過,畫面正常、建置正常、檢查全過,
+  只是那個功能從來沒有運作過,而接手的人以為它在運作。
+
+  會誤報嗎?不會 —— 沒有那支外掛的專案、沒有那支元件的專案,
+  以及把元件整支重寫成不接任何一邊的專案,下面都各自跳過了。
+  報出來的一定是「元件接了某個名字,而另一邊沒有提供」。 */
+const onCheckSpriteWiring = () => {
   const plugin = path.join(root, '.vite', 'svg-spritemap.mjs')
   const icon = listFiles(root, COMPONENTS_DIR).find((abs) =>
     toRel(root, abs).endsWith('/mSvgIcon/Index.vue')
@@ -6255,6 +6261,14 @@ const onCheckSpriteWiring = () => {
 
   const pluginText = readTextCached(plugin) ?? ''
   const iconText = readTextCached(icon) ?? ''
+
+  /* 建置設定的檔名不寫死 —— 這一套同時給有框架與沒框架的專案用,
+     那兩邊的設定檔名字不同(nuxt.config.ts / vite.config.js…)。
+     寫死一種的話,另一種的專案這一條永遠查不到東西,而結果顯示通過。 */
+  const buildConfigText = BUILD_CONFIG_FILES.map(
+    (name) => readTextCached(path.join(root, name)) ?? ''
+  ).join('\n')
+
   const problems = []
 
   /* 事件名:外掛用它推送「圖示換了」,元件監聽同一個名字。
@@ -6269,9 +6283,22 @@ const onCheckSpriteWiring = () => {
      對不上的話元件那一行會是未定義 —— 名字打錯從此沒有警告。 */
   for (const name of ['__SPRITEMAP_ICONS__', '__SPRITEMAP_URL__']) {
     if (!iconText.includes(name)) continue
-    if (!pluginText.includes(name) && !readTextCached(path.join(root, 'vite.config.js'))?.includes(name))
+    if (!pluginText.includes(name) && !buildConfigText.includes(name))
       problems.push(`元件用了 ${name},而建置那一側沒有定義它`)
   }
+
+  /* 執行期設定那條路(有框架的那一份走這裡):建置設定掃圖示資料夾算出名字清單,
+     放進執行期設定,元件讀它來檢查「這個圖示名在不在」。
+
+     這條接點斷掉的樣子最難看出來:元件那一段讀到 undefined,
+     而它有防呆(不是陣列就跳過),所以什麼都不會發生 ——
+     圖示照常顯示、建置照常通過,只是「名字打錯時會警告」這件事從來沒有運作過。 */
+  const configKey = /runtimeConfig\.public\.(\w+)/.exec(iconText)?.[1]
+
+  if (configKey && !buildConfigText.includes(configKey))
+    problems.push(
+      `元件讀執行期設定的 ${configKey},而建置設定沒有提供它 —— 圖示名打錯不會有警告`
+    )
 
   report(!problems.length, '圖示那一組三邊的接點對得上', problems)
 }
@@ -8168,8 +8195,12 @@ const onCheckGuardWiring = () => {
 
           for (const name of SHARED_SOURCE_FILES) {
             /* 清單裡有些項目寫的是完整路徑(名字太通用的那幾支),
-               而 hook 那一行比的是檔名 —— 拿完整路徑去找永遠找不到。 */
-            const stem = path.basename(name).replace(/\.js$/, '')
+               而 hook 那一行比的是檔名 —— 拿完整路徑去找永遠找不到。
+
+               去副檔名用 extname,不要自己比 `.js` 結尾:`.mjs` 的結尾正好也是 `.js`,
+               那樣切出來的是 `svg-spritemap.m`,**而這一則會因此永遠報錯** ——
+               hook 那一行怎麼寫都不可能含有那個字串,看起來像是 hook 漏列了。 */
+            const stem = path.basename(name, path.extname(name))
 
             if (!condition.includes(stem))
               problems.push(

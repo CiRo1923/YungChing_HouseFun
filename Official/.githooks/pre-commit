@@ -91,9 +91,25 @@ for root in $ROOTS; do
   done
 
   # --- 2. 規範檢查(只看 staged 的檔案)--------------------------------------
+  #
+  # 擋不擋由專案的設定決定(project-config.mjs 的 LINT_BLOCKS_COMMIT),
+  # 而這支 hook 整支跟著來源 —— 所以判斷不寫在這裡,靠離開碼分辨:
+  #   1  有違規,只提醒(預設)
+  #   2  有違規,而且這個專案已經把「違規就擋」打開了
+  # 在這支檔案裡改成擋的話,下一次同步會把它蓋回只提醒,而且沒有任何提示。
 
   # shellcheck disable=SC2086
-  if ! (cd "$root" && node .tools/lint/lint.mjs $FILES); then
+  (cd "$root" && node .tools/lint/lint.mjs $FILES)
+  LINT_STATUS=$?
+
+  if [ "$LINT_STATUS" -eq 2 ]; then
+    printf "\n${RED}這次 commit 有規範違規,停下來。${RESET}\n"
+    printf "${RED}  這個專案已經把「違規就擋」打開了(存量清完之後的狀態)。${RESET}\n"
+    printf "${RED}  需要協助時,在 Claude Code 對話框輸入「修正」或「好」,Claude Code 會接手處理${RESET}\n"
+    printf "${RED}     (它已經知道是哪個檔案、哪幾行)。${RESET}\n"
+    printf "${RED}  本機覆核:cd %s 之後跑 npm run lint:css${RESET}\n\n" "$root"
+    exit 1
+  elif [ "$LINT_STATUS" -ne 0 ]; then
     printf "\n${YELLOW}以上是本次 commit 檔案的規範提醒,commit 照常完成。${RESET}\n"
     printf "${YELLOW}  需要協助時,在 Claude Code 對話框輸入「修正」或「好」,Claude Code 會接手處理${RESET}\n"
     printf "${YELLOW}     (它已經知道是哪個檔案、哪幾行)。${RESET}\n"
@@ -167,15 +183,16 @@ for root in $ROOTS; do
   # 那邊其實一個字都沒動。
   #
   # 第 3 段在動到規則檔時已經涵蓋這件事(test:css 裡有那一則)。
-  # 這一段補的是**共用的產品程式碼** —— 那幾支後來才納進指紋,
-  # 改它們的時候不會動到 .tools/lint/,所以第 3 段不會被觸發。
+  # 這一段補的是**規則檔以外、同樣跟著來源的那幾支**:共用的產品程式碼,
+  # 以及建置那一層的工具(.vite/)—— 改它們的時候不會動到 .tools/lint/,
+  # 所以第 3 段不會被觸發。
   #
   # 下面那份清單要與 .tools/lint/checksum.mjs 的 SHARED_SOURCE_FILES 一致。
   #    shell 沒辦法 import 那份設定,只能人工同步 —— 那邊加了一支而這裡沒跟上,
   #    那一支改了就不會被檢查,而且不會有任何徵兆。
   #    規則自己的驗證有一則在比對這兩份。
 
-  if echo "$FILES" | grep -qE '(^|/)(_prototype|_validation|common|useCommonActions)\.js$'; then
+  if echo "$FILES" | grep -qE '(^|/)(_prototype|_validation|common|useCommonActions)\.js$|(^|/)(auto-import|pinia-auto-hmr|svg-spritemap)\.mjs$'; then
     if ! (cd "$root" && npm run rules:verify --silent); then
       printf "\n${RED}指紋清單沒有跟著更新,這次 commit 停下來。${RESET}\n"
       printf "${RED}  那幾支共用檔的內容封存在指紋清單裡,改了要重新封存。${RESET}\n"
