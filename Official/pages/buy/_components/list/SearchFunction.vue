@@ -1,4 +1,4 @@
-﻿<script setup>
+<script setup>
 import { onResolveByDevice } from '@js/_projectPrototype.js'
 
 const common = useCommonStore()
