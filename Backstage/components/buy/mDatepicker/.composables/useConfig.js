@@ -81,6 +81,28 @@ export const defaultDateConfig = {
   // (touchedModelUpdate 的用意見 components/common/mForm/.composables/useValidateEvents.js)。
   // 傳陣列為「完整指定」,沒列到的一律關閉。
   validateEvents: ['blur', 'change', 'touchedModelUpdate'],
+  /* 整個選擇器唯讀 —— 點不開、也改不了值。
+
+    表單控制項普遍需要這個狀態(送出中、沒有權限改、依別的欄位決定),
+    而表單那幾支都有這一項。少了它的話,唯讀只剩下在外面蓋一層擋住點擊,
+    而那一層擋不住鍵盤。
+
+    打開時:輸入框與那顆日曆鈕都掛上 disabled(擋住點擊與鍵盤)、
+    驗證規則也一起停掉(鎖住的欄位不該因為沒填而擋下整張表單),
+    外層再掛一個 `--disabled` 的標記。
+
+    外觀走 `--datepicker-disabled-*` 那一組變數(與表單那幾支用同一支灰 ——
+    同一張表單裡兩種控制項不該是兩種灰)。樣式那一層歸接手的專案,
+    要換成別的樣子就改那幾個變數,不必動這一支。 */
+  isDisabled: false,
+  /* 這個欄位要不要顯示成錯誤 —— **由外面告訴它**。
+
+    驗證掛在包住整組的那支元件上時(跨欄位的判斷:選了某個選項才要填日期),
+    這一欄自己沒有驗證,紅框只能由外面傳進來。
+    少了這一項的話,照規範那樣寫的那一組裡,日期欄的紅框不會亮,
+    **而且不報錯** —— 傳一個元件不認得的設定項就是靜靜地沒有作用。
+    同一組裡的單選會亮、日期欄不會,看起來像是日期欄的驗證壞了。 */
+  isError: false,
 }
 
 export const defaultTimeConfig = {
@@ -101,6 +123,9 @@ export const defaultTimeConfig = {
   // (touchedModelUpdate 的用意見 components/common/mForm/.composables/useValidateEvents.js)。
   // 傳陣列為「完整指定」,沒列到的一律關閉。
   validateEvents: ['blur', 'change', 'touchedModelUpdate'],
+  // 語意與日期那一份的同名鍵完全一致 —— 時間欄位並排在日期旁邊,兩邊要同進同退
+  isDisabled: false,
+  isError: false,
 }
 
 /* 注意：format 要在合併「之後」再正規化一次 —— 呼叫端只給 { model: 'YYYYMMDD' } 時,

@@ -17,7 +17,6 @@ import {
   VIEW_UNDERSCORE_FOLDERS,
   CSS_MODULES_DIR,
   COMPONENT_DIRS,
-  componentTagOf,
   componentTagIndexOf,
   STORE_DIR,
   SRC_DIR,

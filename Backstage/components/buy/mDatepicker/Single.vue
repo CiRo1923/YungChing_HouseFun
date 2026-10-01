@@ -289,7 +289,7 @@ onMounted(() => {
     <div class="m-datepicker-datetime-group" @pointerdown.capture="onClickTimeField">
       <Field
         :name="props.name"
-        :rules="props.rules"
+        :rules="config.isDisabled ? '' : props.rules"
         v-model="datePickerModel"
         v-bind="validateOn"
         v-slot="{ field, errorMessage }"
@@ -301,7 +301,8 @@ onMounted(() => {
               setClass.label,
               { '--required': model },
               { '--focus': isFocus },
-              { '--error': errorMessage },
+              { '--error': errorMessage || config.isError },
+              { '--disabled': config.isDisabled },
             ]"
           >
             <input
@@ -312,6 +313,7 @@ onMounted(() => {
               :maxlength="config.length"
               :placeholder="config.placeholder"
               :readonly="!config.altInput"
+              :disabled="config.isDisabled"
               :value="datePickerModel"
               autocomplete="off"
               @pointerdown="onInputPointerdown($event)"
@@ -326,6 +328,7 @@ onMounted(() => {
               <button
                 type="button"
                 class="m-datepicker-icon"
+                :disabled="config.isDisabled"
                 @pointerdown="onCalendarButtonPointerdown($event)"
                 ref="iconRef"
               >
@@ -347,6 +350,10 @@ onMounted(() => {
           maxTime: config.maxTime,
           mobileSupport: config.mobileSupport,
           position: config.position,
+          /* 唯讀與錯誤外觀要一起傳下去 —— 這兩欄在畫面上是同一個欄位。
+            不傳的話日期鎖住了而時間還改得動,紅框也只亮一半。 */
+          isDisabled: config.isDisabled,
+          isError: config.isError,
         }"
         :setClass="{
           main: setClass.time,

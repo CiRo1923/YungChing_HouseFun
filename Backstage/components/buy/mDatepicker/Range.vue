@@ -294,7 +294,7 @@ onMounted(() => {
         <div class="m-datepicker-datetime-group" @pointerdown.capture="onClickTimeField">
           <Field
             :name="`${props.name}Start`"
-            :rules="props.rules"
+            :rules="config.isDisabled ? '' : props.rules"
             :modelValue="displayStart"
             v-bind="validateOn"
             v-slot="{ field, errorMessage }"
@@ -305,7 +305,8 @@ onMounted(() => {
                 setClass.start,
                 { '--required': modelStart },
                 { '--focus': isFocus && activeField === 'start' },
-                { '--error': errorMessage },
+                { '--error': errorMessage || config.isError },
+                { '--disabled': config.isDisabled },
               ]"
             >
               <input
@@ -315,6 +316,7 @@ onMounted(() => {
                 :placeholder="config.placeholder"
                 :value="displayStart"
                 readonly
+                :disabled="config.isDisabled"
                 autocomplete="off"
                 @pointerdown="onFieldPointerdown($event, 'start')"
                 @focusin="onFocusin"
@@ -325,6 +327,7 @@ onMounted(() => {
                 <button
                   type="button"
                   class="m-datepicker-icon"
+                  :disabled="config.isDisabled"
                   @pointerdown="onFieldPointerdown($event, 'start')"
                   ref="iconRef"
                 >
@@ -360,7 +363,7 @@ onMounted(() => {
         <div class="m-datepicker-datetime-group" @pointerdown.capture="onClickTimeField">
           <Field
             :name="`${props.name}End`"
-            :rules="props.rules"
+            :rules="config.isDisabled ? '' : props.rules"
             :modelValue="displayEnd"
             v-bind="validateOn"
             v-slot="{ field, errorMessage }"
@@ -371,7 +374,8 @@ onMounted(() => {
                 setClass.end,
                 { '--required': modelEnd },
                 { '--focus': isFocus && activeField === 'end' },
-                { '--error': errorMessage },
+                { '--error': errorMessage || config.isError },
+                { '--disabled': config.isDisabled },
               ]"
             >
               <input
@@ -381,6 +385,7 @@ onMounted(() => {
                 :placeholder="config.placeholder"
                 :value="displayEnd"
                 readonly
+                :disabled="config.isDisabled"
                 autocomplete="off"
                 @pointerdown="onFieldPointerdown($event, 'end')"
                 @focusin="onFocusin"
@@ -391,6 +396,7 @@ onMounted(() => {
                 <button
                   type="button"
                   class="m-datepicker-icon"
+                  :disabled="config.isDisabled"
                   @pointerdown="onFieldPointerdown($event, 'end')"
                 >
                   <CommonMSvgIcon icon="icon_calendar" class="m-datepicker-icon-svg" />

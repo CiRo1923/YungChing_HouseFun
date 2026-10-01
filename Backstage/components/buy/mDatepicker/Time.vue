@@ -231,7 +231,7 @@ onMounted(() => {
   <div class="m-datepicker --time" :class="setClass.main">
     <Field
       :name="props.name"
-      :rules="props.rules"
+      :rules="config.isDisabled ? '' : props.rules"
       v-model="timeModel"
       v-bind="validateOn"
       v-slot="{ errorMessage }"
@@ -243,7 +243,8 @@ onMounted(() => {
             setClass.label,
             { '--required': model },
             { '--focus': isFocus },
-            { '--error': errorMessage },
+            { '--error': errorMessage || config.isError },
+            { '--disabled': config.isDisabled },
           ]"
         >
           <input
@@ -254,6 +255,7 @@ onMounted(() => {
             :maxlength="config.length"
             :placeholder="config.placeholder"
             :readonly="!config.altInput"
+            :disabled="config.isDisabled"
             :value="timeModel"
             autocomplete="off"
             @pointerdown="onInputPointerdown($event)"
@@ -269,6 +271,7 @@ onMounted(() => {
             <button
               type="button"
               class="m-datepicker-icon"
+              :disabled="config.isDisabled"
               @pointerdown="onIconPointerdown($event)"
               ref="iconRef"
             >

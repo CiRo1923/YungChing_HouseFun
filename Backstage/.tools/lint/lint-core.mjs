@@ -2334,7 +2334,7 @@ const checkModuleCssUnused = ({ rel, root }) => {
   const fileName = path.basename(rel)
 
   let imported = false
-  let items = []
+  let items
 
   /* 先看同一層的樣式有沒有用 @import 接它。
 
@@ -2373,7 +2373,7 @@ const checkModuleCssUnused = ({ rel, root }) => {
   for (const item of items) {
     if (!item.isFile() || !item.name.endsWith('.vue')) continue
 
-    let text = ''
+    let text
 
     try {
       text = fs.readFileSync(path.join(componentDir, item.name), 'utf8')
