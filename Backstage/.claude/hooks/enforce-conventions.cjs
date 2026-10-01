@@ -39,7 +39,9 @@ const ok = (extra) => {
 
 /** Edit:讀磁碟現況,套用 old_string → new_string 後重建完整內容 */
 const reconstructForEdit = (abs, ti) => {
-  let current = ''
+  /* 不給初值 —— 讀得到就被賦值,讀不到就直接離開,那個初值永遠沒有人讀。
+    給了的話 eslint 的 no-useless-assignment 會報,而那一條是對的。 */
+  let current
 
   try {
     current = fs.readFileSync(abs, 'utf8')
@@ -91,8 +93,10 @@ const main = async () => {
   const core = await import(pathToFileURL(path.join(ROOT, '.tools/lint/lint-core.mjs')).href)
   if (!core.isScannable(rel)) ok()
 
-  let before = ''
-  let after = ''
+  /* 不給初值 —— 下面兩條路各自賦值,而重建失敗那一條直接離開程序,
+    所以初值永遠沒有人讀。給了的話 eslint 的 no-useless-assignment 會報,而那一條是對的。 */
+  let before
+  let after
   /* 新檔案沒有「既有的違規」可言 —— 這件事要單獨記住,不能靠 before 是不是空字串來推。
      有幾條規則只看路徑(檔名怎麼取、資料夾怎麼命名),那種違規在空內容上照樣會報:
      把它算進「既有」的話,新檔案永遠不會因為放錯位置或取錯名字而被擋下來,

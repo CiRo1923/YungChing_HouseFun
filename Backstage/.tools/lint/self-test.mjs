@@ -2601,6 +2601,37 @@ const RULE_CASES = [
     expect: 0,
   },
 
+  // ---------- 規則 fileBom ----------
+  //
+  // 檔案開頭那三個看不見的位元組。不影響建置與執行 —— 壞的是比對:
+  // 每個接手的專案拿自己這一支跟來源比時,第一行都被報成差異,
+  // 而那一行通常是 <script setup>,看起來像「這支被改過」。
+  {
+    name: 'fileBom 檔案開頭有 BOM 要報',
+    rule: 'fileBom',
+    file: `${P}/probeBom.vue`,
+    code: `\u{feff}<script setup>\nconst probe = 1\n</script>\n`,
+    expect: 1,
+    keyword: 'BOM',
+  },
+  {
+    name: 'fileBom 乾淨的開頭不報',
+    rule: 'fileBom',
+    file: `${P}/probeBomClean.vue`,
+    code: `<script setup>\nconst probe = 1\n</script>\n`,
+    expect: 0,
+  },
+  {
+    /* 只看第一個字元。檔案中間出現那個字元是內容的一部分
+       (講這條規則的文件就會寫出它),報出來的話,說明自己這件事的檔案
+       每一份都被報一筆 —— 而那正是最需要寫清楚的地方。 */
+    name: 'fileBom 只看開頭,出現在中間不算',
+    rule: 'fileBom',
+    file: `${P}/probeBomMiddle.js`,
+    code: `const mark = '\u{feff}'\n`,
+    expect: 0,
+  },
+
   // ---------- 規則 plainText ----------
   //
   // 寫給人讀的文字裡不放 emoji 與裝飾符號 —— 客戶會看到,那是正式的工作文件。

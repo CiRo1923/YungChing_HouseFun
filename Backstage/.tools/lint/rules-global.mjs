@@ -378,6 +378,35 @@ const isViewFile = (rel) =>
   /\.vue$/i.test(rel) &&
   (rel.startsWith(`${VIEWS_DIR}/`) || COMPONENT_DIRS.some((dir) => rel.startsWith(`${dir}/`)))
 
+/**
+ * 檔案開頭那三個看不見的位元組(UTF-8 BOM)。
+ *
+ * **不影響建置也不影響執行** —— 編譯器會自己處理掉。壞的是「比對」:
+ * 每一個接手的專案拿自己這一支跟來源比對時,第一行都被報成差異,
+ * 而那一行通常是 `<script setup>` 或第一行 import —— 看起來像「這支被改過」。
+ * 真正的更新混在這個雜訊裡,而查到最後發現是三個看不見的位元組。
+ *
+ * 為什麼要讓工具守:某些編輯器的「另存為 UTF-8」預設帶 BOM,
+ * 換一台機器、換一個人就又出現一支,而看畫面、看 diff 都看不出來。
+ * 靠人記得是守不住的 —— 這種錯誤的特徵就是「肉眼不可見」。
+ *
+ * 不分副檔名、不分目錄:帶 BOM 在哪一種檔案裡都沒有好處。
+ */
+const checkFileBom = ({ rel, text }) => {
+  if (text.charCodeAt(0) !== 0xfeff) return []
+
+  return [
+    issueOf(
+      rel,
+      1,
+      'fileBom',
+      '檔案開頭有 UTF-8 BOM(三個看不見的位元組)—— ' +
+        '不影響執行,但每個接手的專案比對來源時都會把第一行報成差異。' +
+        '用編輯器另存為「UTF-8 無 BOM」(VS Code:右下角點編碼 → Save with Encoding)'
+    ),
+  ]
+}
+
 const checkPlainText = ({ rel, text }) => {
   /* 專案指定不檢查的那幾層 —— 文字不是這個團隊在寫的地方
      (整包複製進來的元件、產生器吐出來的檔案)。報出來也沒有人能改,
@@ -1008,6 +1037,7 @@ export const GLOBAL_CHECKS = [
   checkUnknownExemptMark,
   checkComponentApiAdded,
   checkBuildCommands,
+  checkFileBom,
 ]
 
 export const GLOBAL_RULE_TITLE = {
@@ -1020,6 +1050,7 @@ export const GLOBAL_RULE_TITLE = {
   unknownExemptMark: '用了沒有任何規則在讀的豁免標記',
   componentApiAdded: '元件的介面多了來源沒有的變數或設定',
   buildCommands: '三個環境的指令名對不上',
+  fileBom: '檔案開頭有看不見的 BOM',
 }
 
 export const GLOBAL_RULE_HINT = {
@@ -1036,4 +1067,6 @@ export const GLOBAL_RULE_HINT = {
   unknownExemptMark:
     '豁免標記的名字要對得上真的在讀它的那條規則 —— 沒人讀的標記不會放行任何東西,卻讀起來像這裡已經想過了',
   buildCommands: 'dev 開發、deploy 測試機、build 正式機 —— 名字固定才不必每次確認送去哪裡',
+  fileBom:
+    '檔案開頭不要有 BOM —— 不影響執行,但每個接手的專案比對來源時都會把第一行報成差異',
 }

@@ -377,6 +377,8 @@ export const NO_PREREQUISITE_RULES = [
   'absolutePath',
   'plainText',
   'selfContained',
+  /* 只看檔案的第一個字元,不必先有任何目錄或設定 —— 每一種檢查得到的檔案都適用 */
+  'fileBom',
   'deprecated',
   'storeToRefs',
   'componentClass',
