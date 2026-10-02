@@ -82,7 +82,7 @@ const onClick = async () => {
     <BuyMAnchor
       text="修改時間"
       :setClass="{
-        main: '--border-gray-e5 --bg-white --oval --h-30 --px-15 --text-gray-666',
+        main: '--text-center --border-gray-e5 --bg-white --oval --h-30 --px-15 --text-gray-666',
         text: 'text-[14px]',
       }"
       @click="onClick"

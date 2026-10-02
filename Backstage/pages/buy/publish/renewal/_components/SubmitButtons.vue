@@ -42,7 +42,7 @@ const items = shallowReadonly([
           :text="item.label"
           :to="item.to"
           :setClass="{
-            main: [item.class.main, '--oval --h-45 --px-30 --py-8 w-full shrink-0'],
+            main: [item.class.main, '--text-center --oval --h-45 --px-30 --py-8 w-full shrink-0'],
             text: 'font-semibold',
           }"
           @click="item.onClick"

@@ -89,7 +89,7 @@ onUnmounted(() => {
                 target: 'housefunOfficial',
               }"
               :setClass="{
-                main: 'text-left tracking-wider',
+                main: '--text-center text-left tracking-wider',
               }"
               v-if="officialHref"
             />

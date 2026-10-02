@@ -38,7 +38,7 @@ const onSearchClick = (onToggle) => {
           <BuyMAnchor
             :text="toggleText"
             :setClass="{
-              main: '--border-gray-e5 --bg-white --oval --h-30 --px-20 --text-gray-666',
+              main: '--text-center --border-gray-e5 --bg-white --oval --h-30 --px-20 --text-gray-666',
             }"
             @click="onToggle"
           />
@@ -47,7 +47,7 @@ const onSearchClick = (onToggle) => {
           <BuyMAnchor
             text="搜尋"
             :setClass="{
-              main: '--bg-green-6a2d --oval --h-35 --px-20 --text-white',
+              main: '--text-center --bg-green-6a2d --oval --h-35 --px-20 --text-white',
             }"
             @click="onSearchClick(onToggle)"
           />

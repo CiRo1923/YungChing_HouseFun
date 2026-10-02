@@ -164,7 +164,7 @@ onUnmounted(() => {
       <BuyMAnchor
         :text="item.label"
         :setClass="{
-          main: `p:--h-35 p:--px-20 --oval --text-white ${activeId === item.id ? '--bg-orange-e646' : '--bg-green-6a2d'}`,
+          main: `--text-center p:--h-35 p:--px-20 --oval --text-white ${activeId === item.id ? '--bg-orange-e646' : '--bg-green-6a2d'}`,
         }"
         @click="onClick(item.id)"
       />

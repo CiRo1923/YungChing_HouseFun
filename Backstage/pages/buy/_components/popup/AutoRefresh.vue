@@ -54,7 +54,7 @@ const publishInfo = computed(() => {
           },
         }"
         :setClass="{
-          main: '--text-green-6a2d ml-auto underline',
+          main: '--text-center --text-green-6a2d ml-auto underline',
           text: 'text-[14px]',
           icon: 'h-[16px] w-[16px] text-[--gray-666]',
         }"

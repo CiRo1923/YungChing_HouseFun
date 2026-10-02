@@ -254,7 +254,7 @@ const onPopupAddressGoogleMap = async () => {
         },
       }"
       :setClass="{
-        main: '--text-green-6a2d shrink-0 underline',
+        main: '--text-center --text-green-6a2d shrink-0 underline',
         icon: 'h-[16px] w-[16px] text-[--gray-666]',
       }"
       @click="onPopupAddressGoogleMap"

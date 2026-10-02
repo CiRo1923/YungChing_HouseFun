@@ -30,7 +30,7 @@ const onClose = (item) => {
             <BuyMAnchor
               :text="item.label"
               :setClass="{
-                main: [item.class, '--oval --h-45 --px-20 w-full'],
+                main: [item.class, '--text-center --oval --h-45 --px-20 w-full'],
               }"
               @click="onClose(item)"
             />

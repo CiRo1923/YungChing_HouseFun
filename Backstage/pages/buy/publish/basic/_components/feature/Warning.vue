@@ -43,7 +43,7 @@ const onPopupFeature = async () => {
         },
       }"
       :setClass="{
-        main: '--text-green-6a2d underline',
+        main: '--text-center --text-green-6a2d underline',
         icon: 'h-[18px] w-[18px] text-[--gray-666]',
       }"
       @click="onPopupFeature"

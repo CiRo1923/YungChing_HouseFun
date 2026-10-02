@@ -121,7 +121,7 @@ const items = shallowReadonly([
             <BuyMAnchor
               :text="item.button.text"
               :setClass="{
-                main: '--oval --h-35 --px-20 --py-5 --bg-green-6a2d --text-white',
+                main: '--text-center --oval --h-35 --px-20 --py-5 --bg-green-6a2d --text-white',
               }"
               @click="item.button.onClick"
             />

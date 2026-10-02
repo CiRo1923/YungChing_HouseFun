@@ -33,7 +33,7 @@ const onClick = () => {
       <BuyMAnchor
         text="成交設定"
         :setClass="{
-          main: '--h-35 --px-20 --oval --bg-green-6a2d --text-white',
+          main: '--text-center --h-35 --px-20 --oval --bg-green-6a2d --text-white',
         }"
         @click="onClick"
       />

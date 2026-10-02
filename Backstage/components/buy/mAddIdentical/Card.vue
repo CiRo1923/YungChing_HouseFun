@@ -60,7 +60,7 @@ const { model, config, setClass, onAddClick, onRemoveClick } = useAddIdenticalCo
         icon: config.anchor.icon,
       }"
       :setClass="{
-        main: ['m-add-identical-anchor --text-green-6a2d', setClass.anchor],
+        main: ['--text-center m-add-identical-anchor --text-green-6a2d', setClass.anchor],
         text: ['m-add-identical-anchor-text', setClass.anchorText],
         icon: 'm-add-identical-anchor-icon',
       }"

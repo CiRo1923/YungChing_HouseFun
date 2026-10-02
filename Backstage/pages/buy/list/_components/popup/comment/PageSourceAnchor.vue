@@ -12,7 +12,7 @@ const props = defineProps({
     :text="`HF${props.data.hfID}`"
     :href="'javascript:;'"
     :setClass="{
-      main: 'underline',
+      main: '--text-center underline',
     }"
   />
 </template>

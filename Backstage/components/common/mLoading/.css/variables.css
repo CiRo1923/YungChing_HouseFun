@@ -5,14 +5,14 @@
   --loading-overlay-mobile-blur: 2px;
 
   --loading-overlay-bg-color: var(--black-33);
-  --loading-container-color: var(--gray-999);
+  --loading-color: var(--gray-999);
   --loading-container-bg-color: inherit;
 
-  /* lint-text-size-exempt: 讀取提示是元件自己疊出來的圖層,使用端沒有管道可傳 */
-  --loading-container-text-size: inherit;
-  --loading-container-pc-text-size: 14px;
-  --loading-container-tablet-text-size: 14px;
-  --loading-container-mobile-text-size: 14px;
+  /* 讀取提示是元件自己疊出來的圖層,字級由元件決定並分斷點 */
+  --loading-text-size: inherit;
+  --loading-pc-text-size: 14px;
+  --loading-tablet-text-size: 14px;
+  --loading-mobile-text-size: 14px;
 
   /*
    * --card 是「浮在遮罩上的卡片」外觀(Main.vue 用),

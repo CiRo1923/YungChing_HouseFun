@@ -349,7 +349,7 @@ onUnmounted(() => {
       v-slot="{ field, errorMessage }"
     >
       <input type="hidden" :id="props.name" v-bind="field" />
-      <div class="m-form-container" :class="setClass.container" v-bind="config.attr.container">
+      <div class="m-form-container --select" :class="setClass.container" v-bind="config.attr.container">
         <button
           type="button"
           class="m-form-element --select"

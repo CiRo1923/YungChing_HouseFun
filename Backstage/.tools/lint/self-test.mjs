@@ -5932,11 +5932,12 @@ const onCheckExemptNameReaders = () => {
  *
  * 要對的幾件事:
  *
- *   變數多了一個       要講出是哪一支檔案的哪一個
- *   設定多了一個       同一份比對要認得兩種介面,不是只看變數
- *   把設定改成巢狀     底下那幾個鍵在來源不存在,算多加
- *   只是值不一樣       不算(那正是它們存在的理由)
- *   來源沒有那支檔案   整支跳過(專案自己新增的元件,介面本來就全是新的)
+ *   設定多了一個          要講出是哪一支檔案的哪一個
+ *   變數檔 :root 多了一個  同一份比對要認得每一種介面,不是只看設定
+ *   把設定改成巢狀        底下那幾個鍵在來源不存在,算多加
+ *   只是值不一樣          不算(那正是它們存在的理由)
+ *   來源沒有那支檔案      整支跳過 —— 專案自己新增的元件、自己新開的變數檔,
+ *                         介面本來就全是新的,報出來每一筆都是誤報
  */
 const onCheckComponentApiDiff = () => {
   const problems = []
@@ -5949,19 +5950,30 @@ const onCheckComponentApiDiff = () => {
     config: { 'a/Index.vue': ['mode', 'step.hour'] },
     expose: { 'a/Index.vue': ['focus', 'inputRef'] },
     emits: { 'a/Index.vue': ['change', 'update:modelValue'] },
+    cssVar: { 'a/.css/variables.css': ['--a-x', '--a-y'] },
   }
 
   {
-    /* 樣式整層歸接手的專案,變數本來就會增減 —— 名單裡沒有那一類,
-       就算硬塞一份進來也不可以被當成違規。
-       擋在這裡是因為那一類曾經在名單裡:留著的話,
-       每個專案一加自己的樣式變數就被報一次,而那全是誤報。 */
+    /* 變數檔 :root 裡多一個名字要報 —— 那一份是元件的版型檔實際讀的名單,
+       而版型檔跟著來源走:下一次更新之後那個變數沒有人讀,
+       畫面上是那一段樣式消失,而且不報錯。 */
     const got = diffOf(recorded, {
-      vars: { 'a/.css/variables.css': ['--a-x', '--a-y', '--a-new'] },
-      config: {},
+      cssVar: { 'a/.css/variables.css': ['--a-x', '--a-y', '--a-new'] },
     })
 
-    if (got.length) problems.push('樣式的變數不該被當成元件的介面')
+    if (got.length !== 1 || got[0].added[0] !== '--a-new')
+      problems.push('變數檔多了一個 :root 變數時沒有講出來')
+    if (got[0]?.kind !== 'cssVar') problems.push('多出來的變數沒有標成 cssVar')
+  }
+
+  {
+    /* 專案自己新開的變數檔整支跳過 —— 來源名單裡沒有那個 key。
+       報出來的話,每個專案一開自己的樣式檔就被報一整串,而那全是誤報。 */
+    const got = diffOf(recorded, {
+      cssVar: { 'a/.css/myOwnVariables.css': ['--a-own-1', '--a-own-2'] },
+    })
+
+    if (got.length) problems.push('專案自己新開的變數檔不該被報')
   }
 
   {
@@ -6963,6 +6975,9 @@ const onCheckBuildCommands = () => {
     build: 'vite build --mode build',
   }
   const envs = ['dev', 'deploy', 'build']
+  /* 測試機與正式機同一套設定的專案,deploy 要擋下來並說清楚該用哪一個。
+     規則認的是「以非零離開」這件事,不是某一句固定的話。 */
+  const BLOCKED_DEPLOY = "echo '只有一個環境,請用 npm run build' && exit 1"
 
   const cases = [
     {
@@ -6987,12 +7002,81 @@ const onCheckBuildCommands = () => {
       want: 0,
     },
     {
-      name: '不用 --mode 的專案只看指令在不在',
+      name: '兩種旗標都不用的專案只看指令在不在',
       got: buildCommandProblemsOf(
         { dev: 'nuxt dev', deploy: 'nuxt build', build: 'nuxt generate' },
         []
       ),
       want: 0,
+    },
+    /* --dotenv 那一組。有框架的那一份用的就是這種寫法,而這條規則本來只認 --mode ——
+       於是「這個指令讀哪一份設定」在那種專案從來沒有被看過。
+       漏掉的後果不是報錯:deploy 帶著正式機的網域與金鑰送上測試機,
+       要等有人發現測試站在打正式的 API 才知道。 */
+    {
+      name: 'dotenv 指到的環境與指令名對不上要報',
+      got: buildCommandProblemsOf(
+        {
+          dev: 'nuxt dev --dotenv .env.dev',
+          deploy: 'nuxt build --dotenv .env.build',
+          build: 'nuxt build --dotenv .env.build',
+        },
+        envs
+      ),
+      want: 1,
+    },
+    {
+      name: 'dotenv 三個都對得上就不報',
+      got: buildCommandProblemsOf(
+        {
+          dev: 'nuxt dev --dotenv .env.dev',
+          deploy: 'nuxt build --dotenv .env.deploy',
+          build: 'nuxt build --dotenv .env.build',
+        },
+        envs
+      ),
+      want: 0,
+    },
+    /* 帶後綴的環境檔(.env.deploy.local)指的仍然是 deploy 那個環境。
+       整串拿去比對的話每一次都對不上 —— 那種誤報會讓人把整條關掉。 */
+    {
+      name: 'dotenv 帶後綴的環境檔仍算同一個環境',
+      got: buildCommandProblemsOf(
+        {
+          dev: 'nuxt dev --dotenv .env.dev',
+          deploy: 'nuxt build --dotenv .env.deploy.local',
+          build: 'nuxt build --dotenv .env.build',
+        },
+        envs
+      ),
+      want: 0,
+    },
+    /* 測試機與正式機同一套設定的專案。
+
+       這一組要驗的是「同源給專門訊息」,而不是通用的那句「與指令名對不上」——
+       照通用那句做要再建一份內容相同的環境檔,等於把同一套設定抄兩份,
+       之後各自漂移而沒有人會發現。 */
+    {
+      name: 'deploy 與 build 指到同一個環境時,給的是專門訊息而且只報一筆',
+      got: buildCommandProblemsOf({ ...full, deploy: 'vite build --mode build' }, envs),
+      want: 1,
+    },
+    {
+      name: 'deploy 擋下來、沒有 .env.deploy 的專案不報',
+      got: buildCommandProblemsOf({ ...full, deploy: BLOCKED_DEPLOY }, ['dev', 'build']),
+      want: 0,
+    },
+    /* 擋下來了卻留著那份設定 —— 沒有任何指令讀它,而下一個人會以為這裡有測試機,
+       照著改完卻怎麼都不生效。 */
+    {
+      name: 'deploy 擋下來但 .env.deploy 還在要報',
+      got: buildCommandProblemsOf({ ...full, deploy: BLOCKED_DEPLOY }, envs),
+      want: 1,
+    },
+    {
+      name: 'deploy 指到不相干的名字仍走通用訊息',
+      got: buildCommandProblemsOf({ ...full, deploy: 'vite build --mode staging' }, envs),
+      want: 1,
     },
   ]
 

@@ -96,7 +96,7 @@ const items = computed(() => {
           <BuyMAnchor
             :text="item.button.text"
             :setClass="{
-              main: ['--oval --h-30 --px-15', item.class.button.main],
+              main: ['--text-center --oval --h-30 --px-15', item.class.button.main],
               text: item.class.button.text,
             }"
             @click="item.button.onClick"

@@ -135,7 +135,7 @@ const onClick = async (validate, setTouched) => {
       <BuyMAnchor
         text="匯入資料"
         :setClass="{
-          main: '--oval --h-40 --px-20 --py-5 --bg-green-6a2d --text-white shrink-0',
+          main: '--text-center --oval --h-40 --px-20 --py-5 --bg-green-6a2d --text-white shrink-0',
           text: 'font-semibold',
         }"
         @click="onClick(validate, setTouched)"

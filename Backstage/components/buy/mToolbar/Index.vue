@@ -52,7 +52,7 @@ onUnmounted(() => {
             icon: anchor.icon,
           }"
           :setClass="{
-            main: '--border-gray-e5 --bg-white --oval --h-30 --px-15 --text-gray-666',
+            main: '--text-center --border-gray-e5 --bg-white --oval --h-30 --px-15 --text-gray-666',
             text: 'm-toolbar-anchor-text',
             icon: 'm-toolbar-anchor-icon',
           }"

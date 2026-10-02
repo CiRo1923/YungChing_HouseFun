@@ -13,7 +13,7 @@
 
 .m-loading-container {
   @apply relative;
-  @apply text-[length:--loading-container-text-size] text-[--loading-container-color];
+  @apply text-[length:--loading-text-size] text-[--loading-color];
 
   /* 卡片外觀只有帶 --card 時才輸出,否則 container 是裸的(直接放在 popup 裡的情境) */
   &.\-\-card {
@@ -30,7 +30,7 @@
   }
 
   .m-loading-container {
-    --loading-container-text-size: var(--loading-container-pc-text-size);
+    --loading-text-size: var(--loading-pc-text-size);
 
     &.\-\-card {
       --loading-container-rounded: var(--loading-container-pc-rounded);
@@ -48,7 +48,7 @@
   }
 
   .m-loading-container {
-    --loading-container-text-size: var(--loading-container-tablet-text-size);
+    --loading-text-size: var(--loading-tablet-text-size);
 
     &.\-\-card {
       --loading-container-rounded: var(--loading-container-tablet-rounded);
@@ -66,7 +66,7 @@
   }
 
   .m-loading-container {
-    --loading-container-text-size: var(--loading-container-mobile-text-size);
+    --loading-text-size: var(--loading-mobile-text-size);
 
     &.\-\-card {
       --loading-container-rounded: var(--loading-container-mobile-rounded);

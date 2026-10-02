@@ -168,7 +168,7 @@ const onAreaClick = (item) => {
           },
         }"
         :setClass="{
-          main: '--text-gray-666',
+          main: '--text-center --text-gray-666',
           text: 'text-[16px] underline',
           icon: 'h-[16px] w-[16px] p-[2px]',
         }"

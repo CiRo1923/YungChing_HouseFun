@@ -63,7 +63,7 @@ const onClick = async () => {
       },
     }"
     :setClass="{
-      main: '--border-gray-e5 --bg-white --oval --h-30 p:--px-15 tm:--px-8 --text-gray-666',
+      main: '--text-center --border-gray-e5 --bg-white --oval --h-30 p:--px-15 tm:--px-8 --text-gray-666',
       text: 'tm:text-[14px] p:text-[16px]',
       icon: 'h-[16px] w-[16px] text-[--gray-999]',
     }"

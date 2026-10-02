@@ -146,7 +146,7 @@ const onActionClick = (item) => {
         <BuyMAnchor
           :text="item.statueToken === 1 ? '設為未回覆' : '設為已回覆'"
           :setClass="{
-            main: '--oval --border-gray-e5 --bg-white --text-gray-666 --h-35 --px-20',
+            main: '--text-center --oval --border-gray-e5 --bg-white --text-gray-666 --h-35 --px-20',
             text: 'text-[16px]',
           }"
           @click="onActionClick(item)"

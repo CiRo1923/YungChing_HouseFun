@@ -91,7 +91,7 @@ onInit()
         <BuyMAnchor
           href="javascript:;"
           :setClass="{
-            main: '--text-green-6a2d underline',
+            main: '--text-center --text-green-6a2d underline',
           }"
         >
           成交實績

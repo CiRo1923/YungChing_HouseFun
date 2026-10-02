@@ -483,7 +483,7 @@ onUnmounted(() => {
       v-slot="{ field, errorMessage }"
     >
       <input type="hidden" v-bind="field" />
-      <div class="m-form-container" :class="setClass.container" v-bind="config.attr.container">
+      <div class="m-form-container --autocomplete" :class="setClass.container" v-bind="config.attr.container">
         <div
           class="m-form-element --autocomplete"
           :class="[

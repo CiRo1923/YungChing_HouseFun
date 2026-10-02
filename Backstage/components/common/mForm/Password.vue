@@ -179,7 +179,7 @@ watch(
       :rules="config.isDisabled ? '' : props.rules"
       v-bind="validateOn"
     >
-      <div class="m-form-container" :class="setClass.container" v-bind="config.attr.container">
+      <div class="m-form-container --password" :class="setClass.container" v-bind="config.attr.container">
         <div
           class="m-form-element --password"
           :class="[
