@@ -3,35 +3,50 @@
  * 它是「API 等待中」的全屏遮罩 + 訊息框,不吃 .m-popup 的尺寸 modifier。
  */
 :root {
+  /* 三個斷點各自指派的那幾個,base 也要給一份。
+
+    斷點是 raw 查詢,不是連續的範圍 —— 哪天某個尺寸三個都不命中,
+    沒有 base 的那幾個就讀到未定義的變數,瀏覽器把整條宣告丟掉,而且不報錯。
+    (那種縫出現過一次:寬 1000 到 1023、高度不足 428 的視窗,
+    後來在 tailwind.theme.js 的 t 與 pt 各補了一條。)
+
+    值取平板那一份 —— 三檔之中它在中間,拿不到斷點時最不容易出錯。 */
+  --popup-promise-message-pb: 0;
+  --popup-promise-message-pl: 0;
+  --popup-promise-message-pr: 0;
+  --popup-promise-message-pt: 0;
+  --popup-promise-message-rounded: 0;
+  --popup-promise-message-text-size: inherit;
+
+  --popup-promise-overlay-bg-color: var(--black-33);
+
+  /* 遮罩的模糊 —— 與一般彈窗、載入中那兩個遮罩同一套做法。
+
+    三個遮罩做的是同一件事(蓋住底下的內容,把注意力留在上層),
+    只有這一個沒有模糊的話,同一個站裡會出現兩種遮罩,
+    而那個差別看得出來卻說不出理由。
+
+    base 與三個斷點都給:斷點那三個是 raw 查詢、中間有縫
+    (寬 1000 到 1023、而且高度不足 428 的橫向視窗,三個都不成立),
+    那時沒有 base 就讀到未定義的變數,整條 backdrop-filter 被丟掉。 */
+  --popup-promise-overlay-blur: var(--popup-promise-overlay-tablet-blur);
   --popup-promise-overlay-pc-blur: 2px;
   --popup-promise-overlay-tablet-blur: 2px;
   --popup-promise-overlay-mobile-blur: 2px;
 
-  --popup-promise-overlay-bg-color: var(--black-33);
-
   --popup-promise-message-bg-color: var(--white);
   --popup-promise-message-color: var(--gray-999);
 
-  --popup-promise-message-rounded: 0;
-  --popup-promise-message-pc-rounded: 15px;
-  --popup-promise-message-tablet-rounded: 15px;
-  --popup-promise-message-mobile-rounded: 15px;
-
-  /* lint-text-size-exempt: 訊息文字由元件產生(Promise 版沒有 slot),使用端沒有管道可傳 */
-  --popup-promise-message-text-size: inherit;
+  /* 訊息文字由元件產生(Promise 版沒有 slot),字級由元件決定並分斷點 */
   --popup-promise-message-pc-text-size: 14px;
   --popup-promise-message-tablet-text-size: 14px;
   --popup-promise-message-mobile-text-size: 14px;
 
-  /*
-   * 內距在 pc 是上下 30 / 左右 72,tablet 與 mobile 則是四邊都 32 ——
-   * 兩個層級併存,所以拆到四個方向,common 也用 pt / pr / pb / pl 分開取。
-   */
-  --popup-promise-message-pt: 0;
-  --popup-promise-message-pr: 0;
-  --popup-promise-message-pb: 0;
-  --popup-promise-message-pl: 0;
+  --popup-promise-message-pc-rounded: 15px;
+  --popup-promise-message-tablet-rounded: 15px;
+  --popup-promise-message-mobile-rounded: 15px;
 
+  /* 內距四個方向 —— pc 是左右 72px / 上下 30px,tablet 與 mobile 四邊都 32px */
   --popup-promise-message-pc-pt: 30px;
   --popup-promise-message-pc-pr: 72px;
   --popup-promise-message-pc-pb: 30px;

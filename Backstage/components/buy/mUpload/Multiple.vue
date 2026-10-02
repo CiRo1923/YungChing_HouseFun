@@ -244,7 +244,7 @@ const getPreviewUrl = (item) => {
   )
 }
 
-const openFileDialog = () => {
+const onOpenFileDialog = () => {
   inputRef.value?.click()
 }
 
@@ -894,7 +894,7 @@ watch(
       @dragenter="onUploadDragEnter"
       @dragover="onUploadDragOver"
       @dragleave="onUploadDragLeave"
-      @drop="(event) => onUploadDrop(event, handleChange, validate)"
+      @drop="onUploadDrop($event, handleChange, validate)"
     >
       <input
         v-bind="field"
@@ -910,7 +910,7 @@ watch(
         class="m-upload-multiple-input"
         :accept="config.accept"
         :multiple="!isSingleMode"
-        @change="(event) => onFileChange(event, handleChange, validate)"
+        @change="onFileChange($event, handleChange, validate)"
       />
 
       <div class="m-upload-multiple-list">
@@ -920,11 +920,11 @@ watch(
           :draggable="config.draggableSort"
           @dragstart="onSortDragStart($event, index)"
           @dragover="onSortDragOverItem($event)"
-          @drop="(event) => onSortDropItem(event, index, handleChange)"
+          @drop="onSortDropItem($event, index, handleChange)"
           @dragend="onSortDragEnd"
           @pointerdown="onSortPointerDown($event, index)"
           @pointermove="onSortPointerMove($event)"
-          @pointerup="(event) => onSortPointerUp(event, handleChange)"
+          @pointerup="onSortPointerUp($event, handleChange)"
           @pointercancel="onSortPointerCancel($event)"
           v-for="(item, index) in innerList"
           :key="item.id"
@@ -952,7 +952,7 @@ watch(
               :setClass="setClass"
               :style="getSortPreviewStyle(index)"
               @remove="onRemoveItem(index, handleChange)"
-              @check="(event) => onCheckItemChange(event, item, handleChange)"
+              @check="onCheckItemChange($event, item, handleChange)"
             />
           </div>
         </div>
@@ -965,9 +965,9 @@ watch(
             '--filled': hasImages,
             '--dragging': isUploadDragging,
           }"
-          @click="openFileDialog"
+          @click="onOpenFileDialog"
           @dragover="onAppendButtonDragOver"
-          @drop="(event) => onAppendButtonDrop(event, handleChange, validate)"
+          @drop="onAppendButtonDrop($event, handleChange, validate)"
           v-if="hasAppendButton"
         >
           <div class="m-upload-multiple-append-body" :class="setClass.appendBody">

@@ -25,9 +25,9 @@
 // **css 那一層只收變數檔 `:root` 裡的變數名**,樣式的其餘部分不收。
 // 分界在於「要不要動元件的版型檔」:
 //
-//   :root 的變數      版型檔實際讀的那一份名單。多一個名字要有人讀它才有作用,
-//                     而版型檔跟著來源走 —— 下一次更新之後那個變數沒有人讀,
-//                     畫面上是那一段樣式消失,而且不報錯
+//   :root 的變數      版型檔實際讀的那一份名單。多一個名字要有人讀它才有作用 ——
+//                     收進來是為了問那件事,不是為了禁止增減
+//                     (接手的專案自己加、自己的樣式也讀了,那是成立的用法)
 //   級距(.--px-12)    只是把既有的變數換成另一個值,版型檔照樣讀同一個名字。
 //                     要幾段由接手的專案決定,所以不收
 //   版型與變體的樣式   整層歸接手的專案,不收
@@ -47,6 +47,7 @@ import {
   COMPONENT_DIRS,
   classPrefixOf,
   declaredEmitsOf,
+  isStarterFile,
   listFiles,
   maskComments,
   readSealedJson,
@@ -226,9 +227,12 @@ const blockKeysOf = (rel, raw, pattern) => {
  * 底下把變數換成另一個值),那一種接手的專案本來就可以增減 ——
  * 它只是把既有的變數換成別的值,元件的版型檔照樣讀同一個名字。
  *
- * `:root` 裡的變數則是版型檔實際讀的那一份名單:多一個名字要有人讀它才有作用,
- * 而讀它的版型檔跟著來源走 —— 下一次整套更新之後,那個變數沒有人讀,
- * 畫面上是那一段樣式消失,而且不報錯。
+ * `:root` 裡的變數則是版型檔實際讀的那一份名單。多一個名字要有人讀它才有作用 ——
+ * 沒有人讀的那一個放在那裡什麼都不會發生,而下一個人會以為某個地方吃它。
+ *
+ * **「有沒有人讀」是比對的時候才問的**(見 addedComponentApi),不是這裡 ——
+ * 這一支只負責把名單取出來。接手的專案自己加變數、自己的樣式也讀了,
+ * 那是成立的用法:樣式那一層整層歸它,不在 rules:files 的清單裡。
  */
 const rootVarsOf = (text) => {
   const names = new Set()
@@ -250,12 +254,37 @@ const scanComponentApi = () => {
   const cssVar = {}
   const files = {}
 
+  /* 起手樣板那幾支整個不收 —— 它們複製一次之後歸接手的專案所有,
+     多半會被整支重寫(載入動畫長什麼樣、圖示怎麼來的,每個站都不一樣)。
+     收進名單的話,重寫過的那幾支每一個名字都對不上來源,整批被報成違規。
+
+     **連同那支元件的樣式一起排除。** 標記寫在 `Index.vue` 的檔頭,
+     而變數檔是同一個元件的另一支檔案 —— 只看檔案自己有沒有標記的話,
+     元件本體跳過了而它的變數檔照樣被比,等於只排除了一半。 */
+  const starterComponents = new Set()
+
+  for (const dir of COMPONENT_DIRS) {
+    for (const abs of listFiles(root, dir)) {
+      if (!/\.vue$/i.test(abs)) continue
+      if (!isStarterFile(fs.readFileSync(abs, 'utf8'))) continue
+
+      starterComponents.add(apiKeyOf(toRel(root, abs)).split('/')[0])
+    }
+  }
+
   for (const dir of COMPONENT_DIRS) {
     for (const abs of listFiles(root, dir)) {
       const rel = toRel(root, abs)
       const key = apiKeyOf(rel)
 
-      /* 樣式只看變數檔的 :root —— 版型與級距那兩層歸接手的專案(見檔頭) */
+      if (starterComponents.has(key.split('/')[0])) continue
+
+      /* 樣式只看變數檔的 :root —— 版型與級距那兩層歸接手的專案(見檔頭)。
+
+        **這裡只認來源那一層的命名,不要換成 lint-core 的 isVariablesFile** ——
+        那一支連 `***VariablesProject.css` 也算變數檔(規則要檢查它的斷點),
+        而這份名單比對的是「元件對外的介面」。把接手的專案自己拆出去的變數
+        收進名單的話,它們每一個都會被報成「介面多出來的名字」。 */
       if (/\.css$/i.test(rel)) {
         if (!/variables\.css$/i.test(rel)) continue
 
@@ -383,7 +412,10 @@ export const addedComponentApi = () => {
 
   /* 補上真實路徑 —— key 是來源那份的名字,少了專案自己的那幾層,
      報違規時照著它找不到檔案。 */
-  return diffComponentApi(recorded, api).map((one) => ({ ...one, rel: files[one.file] ?? one.file }))
+  return diffComponentApi(recorded, api).map((one) => ({
+    ...one,
+    rel: files[one.file] ?? one.file,
+  }))
 }
 
 /* 直接執行才寫檔或比對 —— 被 import 時只提供上面那幾支,

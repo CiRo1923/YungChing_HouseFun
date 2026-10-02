@@ -182,24 +182,18 @@ const usePopupActions = () => {
     if (import.meta.server) {
       apiError.value = { config, status, data }
     } else {
-      const title = '錯誤訊息'
-      const statusMessages = {
-        404: '存取的對應的資料已被刪除、移動或從未存在',
-        503: '服務無法使用',
-      }
+      /* 錯誤窗的長相與文案在 store 的 defaultOptions.apiError ——
+        標題、圖示、版面都是**值**,而值歸 store,這一支只放函式。
+        寫在這裡的話,要換一個圖示就得動這段邏輯。
+
+        除了 statusMessages 之外原樣交給 onAlert,所以那一組的鍵名
+        與開啟彈窗能傳的那幾項相同。 */
+      const { statusMessages, ...options } = popup.defaultOptions.apiError
       const apiMessage = data.Message || data.message || data.title
       const message = statusMessages[status] || apiMessage
       const content = `${config.url}<br />${status} 錯誤:<br />${message}`
 
-      onAlert({
-        title,
-        icon: 'icon_circle_exclamation',
-        content,
-        setClass: {
-          main: 'p:--w-450 t:--w-300',
-          content: 'text-center',
-        },
-      })
+      onAlert({ ...options, content })
     }
   }
   // SSR 期間存下的錯誤在 client 補跳一次。重播完一定要清掉 ——

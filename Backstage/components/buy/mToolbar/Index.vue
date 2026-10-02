@@ -38,6 +38,10 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('resize', onResize)
 })
+
+/* 每一顆按鈕要做的事由使用端在 config.anchors 裡給,這裡只負責把它叫起來。
+  沒給的話預設是 null,所以要用可選呼叫。 */
+const onAnchorClick = (anchor) => anchor.onClick?.()
 </script>
 
 <template>
@@ -56,7 +60,7 @@ onUnmounted(() => {
             text: 'm-toolbar-anchor-text',
             icon: 'm-toolbar-anchor-icon',
           }"
-          @click="anchor.onClick"
+          @click="onAnchorClick(anchor)"
         />
       </li>
       <li class="m-toolbar-content">

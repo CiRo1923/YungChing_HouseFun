@@ -3,25 +3,31 @@
  * 兩者都是「打勾圖示疊在方框 / 圓框上,選中才顯示」的結構,只有外框樣式不同。
  */
 :root {
-  /* icon 的淡入淡出:選中才顯示 */
-  --form-selection-icon-opacity: 0;
-  --form-selection-icon-checked-opacity: 1;
+  /* 三個斷點各自指派的那幾個,base 也要給一份。
 
-  /* 兩個變體的圖示大小、線寬一致,只有圓角不同(方框 vs 圓框) */
+    斷點是 raw 查詢,不是連續的範圍 —— 哪天某個尺寸三個都不命中,
+    沒有 base 的那幾個就讀到未定義的變數,瀏覽器把整條宣告丟掉,而且不報錯。
+    (那種縫出現過一次:寬 1000 到 1023、高度不足 428 的視窗,
+    後來在 tailwind.theme.js 的 t 與 pt 各補了一條。)
+
+    值取平板那一份 —— 三檔之中它在中間,拿不到斷點時最不容易出錯。 */
+  --form-selection-gap-x: 0;
+  --form-selection-icon-mt: var(--form-selection-icon-tablet-mt);
   --form-selection-icon-size: 0;
+
+  /* 勾選框尺寸 —— 沒帶 --icon-size-XX modifier 時的預設。
+     18px 是原本寫死在 Radio.vue template 裡的值。 */
   --form-selection-icon-pc-size: 18px;
   --form-selection-icon-tablet-size: 18px;
   --form-selection-icon-mobile-size: 18px;
 
-  --form-selection-icon-border: 0;
-  --form-selection-icon-pc-border: 1px;
-  --form-selection-icon-tablet-border: 1px;
-  --form-selection-icon-mobile-border: 1px;
-
-  --form-selection-icon-color: var(--orange-e646);
-
-  --form-selection-gap-x: 0;
+  /* 勾選框與文字的間距 */
   --form-selection-pc-gap-x: 8px;
   --form-selection-tablet-gap-x: 8px;
   --form-selection-mobile-gap-x: 8px;
+
+  /* 有文字時,勾選框往下對齊字身(單獨一個框時不用) */
+  --form-selection-icon-pc-mt: 2px;
+  --form-selection-icon-tablet-mt: 2px;
+  --form-selection-icon-mobile-mt: 2px;
 }

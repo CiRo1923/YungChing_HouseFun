@@ -1,9 +1,10 @@
-/* radioItem 變體的版型 —— 整塊可點的選項卡;打勾圖示的顯示切換在 selection.css。 */
+/* radioItem 變體的版型 —— 整塊可點的選項卡。 */
 .m-form-element {
   &.\-\-radio-item {
     @apply flex items-center;
     @apply transition-colors duration-300;
     @apply rounded-[--form-radio-item-rounded];
+    @apply gap-x-[--form-selection-gap-x];
 
     /* 標籤可能折行,行高比預設鬆一點 */
     @apply leading-[1.35];
@@ -13,7 +14,31 @@
 
     /* radio 是圓框,checkbox 是方框 —— 差別只在圓角 */
     .m-form-icon {
-      @apply rounded-full;
+      @apply relative shrink-0 rounded-full transition-colors duration-300;
+      @apply h-[--form-selection-icon-size] w-[--form-selection-icon-size];
+      @apply text-[--form-radio-item-icon-color];
+
+      border-width: var(--form-radio-item-icon-border);
+
+      /* 打勾圖示淡入淡出 —— 選中才顯示,但位置一直佔著,
+         換成 display 的話切換的當下會跳一下。 */
+      > use {
+        opacity: var(--form-radio-item-icon-opacity);
+
+        @apply transition-opacity duration-300;
+      }
+    }
+
+    .m-form-type {
+      &:checked {
+        & + .m-form-icon {
+          @apply border-transparent;
+
+          > use {
+            opacity: var(--form-radio-item-icon-checked-opacity);
+          }
+        }
+      }
     }
 
     /* --align-top:標籤是多行時,圖示要對齊第一行文字而不是整塊置中 */
@@ -69,6 +94,7 @@
       --form-radio-item-icon-baseline-mt: var(--form-radio-item-icon-pc-baseline-mt);
       --form-radio-item-rounded: var(--form-radio-item-pc-rounded);
       --form-radio-item-border: var(--form-radio-item-pc-border);
+      --form-radio-item-icon-border: var(--form-radio-item-icon-pc-border);
     }
   }
 }
@@ -79,6 +105,7 @@
       --form-radio-item-icon-baseline-mt: var(--form-radio-item-icon-tablet-baseline-mt);
       --form-radio-item-rounded: var(--form-radio-item-tablet-rounded);
       --form-radio-item-border: var(--form-radio-item-tablet-border);
+      --form-radio-item-icon-border: var(--form-radio-item-icon-tablet-border);
     }
   }
 }
@@ -89,6 +116,7 @@
       --form-radio-item-icon-baseline-mt: var(--form-radio-item-icon-mobile-baseline-mt);
       --form-radio-item-rounded: var(--form-radio-item-mobile-rounded);
       --form-radio-item-border: var(--form-radio-item-mobile-border);
+      --form-radio-item-icon-border: var(--form-radio-item-icon-mobile-border);
     }
   }
 }

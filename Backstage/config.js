@@ -7,6 +7,15 @@ module.exports = {
   port: 26021,
   https: true,
   ieVersion: 11,
+
+  /* 用 tailwind 內建的那一份 reset(它叫 preflight)。
+
+     true    用 tailwind 的,跟著版本更新
+     false   關掉它,改走 assets/css/_common/reset.css ——
+             那一份是內建的抄本,可以照這個專案的需要改;
+             nuxt.config.ts 的 css 清單跟著這個設定載入它 */
+  useTailwindCssReset: true,
+
   desktopMinWidth: 1366,
   mobileMaxWidth: 740,
   basicMobileWidth: 375,

@@ -65,6 +65,9 @@ const datas = shallowReadonly([
 ])
 
 const result = computed(() => datas.filter((item) => props.items.includes(item.id)))
+
+// 每一筆自己帶著要做的事,這裡只負責把它叫起來
+const onItemClick = (item) => item.onClick?.()
 </script>
 
 <template>
@@ -85,7 +88,7 @@ const result = computed(() => datas.filter((item) => props.items.includes(item.i
           main: '--text-center',
           icon: 'h-[16px] w-[16px]',
         }"
-        @click="item.onClick"
+        @click="onItemClick(item)"
       />
     </li>
   </ul>

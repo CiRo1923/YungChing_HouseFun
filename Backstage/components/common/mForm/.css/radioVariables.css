@@ -11,10 +11,13 @@
   --form-radio-dot-mobile-size: 10px;
 
   --form-radio-icon-border-color: var(--gray-ccce);
-  --form-radio-icon-border-checked-color: var(--green-bc2a);
-  --form-radio-dot-bg-color: var(--green-bc2a);
+  --form-radio-icon-border-checked-color: var(--green-6a2d);
 
-  /* 文字顏色 —— 平常跟著父系走,選中後轉綠 */
+  /* 這個站選取後畫的是打勾圖示(Radio 的 config.checkIcon),不是框內的圓點,
+     所以圓點給透明 —— 那個偽元素照樣存在、照樣淡入,只是看不見。 */
+  --form-radio-dot-bg-color: transparent;
+
+  /* 文字顏色 —— 平常跟著父系走,選中後不變色 */
   --form-radio-label-color: inherit;
-  --form-radio-label-checked-color: var(--green-bc2a);
+  --form-radio-label-checked-color: inherit;
 }

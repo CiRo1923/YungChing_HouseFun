@@ -1,87 +1,92 @@
-/* checkbox 變體的版型 —— 方框的配色;打勾圖示的顯示切換在 selection.css。 */
-.m-form-container {
-  /* checkbox 是行內元素,容器的行高要收掉才不會多出一條空隙 */
-  &.\-\-checkbox {
-    @apply leading-none;
-  }
-}
+/* checkbox 專屬樣式 —— 方框 + 勾號。
+   共用結構(排列、間距、隱藏原生 input、勾選框尺寸)在 selection.css。 */
 
 .m-form-element {
   &.\-\-checkbox {
-    @apply inline-flex items-center;
-    @apply text-[--form-checkbox-color];
+    &.\-\-error {
+      --form-checkbox-label-color: var(--form-checkbox-label-error-color);
+      --form-checkbox-icon-border-color: var(--form-checkbox-icon-border-error-color);
+    }
 
-    /* 標籤文字可能折行,行高比預設鬆一點才不會擠在一起 */
-    @apply leading-[1.35];
+    /* 鎖住時的外觀。
 
-    @apply cursor-pointer;
+      勾選框整塊是一個 <label>(點文字也要能勾),而共用那一份的 disabled
+      寫在 `&:not(label)` 底下 —— 顏色要在這裡換。
 
+      勾選狀態那幾個值要再壓一次:它們設在子層(.m-form-label / .m-form-icon)上,
+      這一層設的傳不過去,否則已經勾選又鎖住的欄位,文字與勾號仍是原色。 */
     &.\-\-disabled {
-      @apply cursor-not-allowed;
-    }
+      --form-checkbox-label-color: var(--form-checkbox-label-disabled-color);
+      --form-checkbox-icon-border-color: var(--form-checkbox-icon-border-disabled-color);
 
-    /*
-     * --align-top:標籤是多行時,方框要對齊第一行文字而不是整塊置中。
-     *
-     * 注意:容器是 items-baseline 不是 items-start —— 拆 module 前的 template 寫的是
-     * `config.align === 'top' && config.label ? 'items-baseline' : 'items-center'`,
-     * 基線對齊才會讓方框跟文字的視覺中線對上。
-     */
-    &.\-\-align-top {
-      @apply items-baseline;
+      .m-form-type {
+        &:checked {
+          & ~ .m-form-label {
+            --form-checkbox-label-color: var(--form-checkbox-label-disabled-color);
+          }
 
-      .m-form-icon {
-        @apply self-start;
+          & + .m-form-icon {
+            --form-checkbox-icon-border-color: var(--form-checkbox-icon-border-disabled-color);
+            --form-checkbox-mark-color: var(--form-checkbox-mark-disabled-color);
+          }
+        }
       }
-    }
-
-    /* 有標籤時方框要往下對齊文字的視覺中線 */
-    &.\-\-has-label {
-      .m-form-icon {
-        @apply mt-[--form-checkbox-icon-mt];
-      }
-    }
-
-    .m-form-icon {
-      @apply rounded-[--form-checkbox-icon-rounded];
-
-      /* 圖示是 svg,行高留著會讓它多佔一點高度 */
-      @apply leading-[0];
     }
 
     .m-form-type {
-      &:not(:disabled):not(:checked) {
-        & + .m-form-icon {
-          @apply border-[--form-checkbox-icon-border-color] bg-[--form-checkbox-icon-bg-color];
+      &:checked {
+        /* 文字用兄弟選擇器 —— 變數設在 .m-form-icon 上的話,旁邊的 label 取不到 */
+        & ~ .m-form-label {
+          --form-checkbox-label-color: var(--form-checkbox-label-checked-color);
         }
-      }
 
-      &:disabled {
         & + .m-form-icon {
-          @apply border-[--form-checkbox-icon-disabled-border-color] bg-[--form-checkbox-icon-disabled-bg-color];
+          --form-checkbox-icon-border-color: var(--form-checkbox-icon-border-checked-color);
+          --form-checkbox-mark-color: var(--form-checkbox-icon-color);
         }
       }
+    }
+
+    .m-form-label {
+      @apply text-[--form-checkbox-label-color] transition-colors duration-300;
+    }
+
+    /* 勾號預設是透明的,:checked 時把顏色換上去(見上面那一段)。
+
+      用顏色而不是去選 svg 裡面的元素 —— 那一層是 mSvgIcon 的內部結構,
+      換一種實作之後選擇器就選不到東西,沒勾選也看得到勾號,而且不會報錯。 */
+    .m-form-icon {
+      border-width: var(--form-checkbox-icon-border);
+
+      @apply rounded-[--form-checkbox-icon-rounded] border-[--form-checkbox-icon-border-color];
+      @apply text-[--form-checkbox-mark-color] transition-colors duration-300;
     }
   }
 }
 
 @screen p {
-  .m-form {
-    --form-checkbox-icon-rounded: var(--form-checkbox-icon-pc-rounded);
-    --form-checkbox-icon-mt: var(--form-checkbox-icon-pc-mt);
+  .m-form-element {
+    &.\-\-checkbox {
+      --form-checkbox-icon-rounded: var(--form-checkbox-icon-pc-rounded);
+      --form-checkbox-icon-border: var(--form-checkbox-icon-pc-border);
+    }
   }
 }
 
 @screen t {
-  .m-form {
-    --form-checkbox-icon-rounded: var(--form-checkbox-icon-tablet-rounded);
-    --form-checkbox-icon-mt: var(--form-checkbox-icon-tablet-mt);
+  .m-form-element {
+    &.\-\-checkbox {
+      --form-checkbox-icon-rounded: var(--form-checkbox-icon-tablet-rounded);
+      --form-checkbox-icon-border: var(--form-checkbox-icon-tablet-border);
+    }
   }
 }
 
 @screen m {
-  .m-form {
-    --form-checkbox-icon-rounded: var(--form-checkbox-icon-mobile-rounded);
-    --form-checkbox-icon-mt: var(--form-checkbox-icon-mobile-mt);
+  .m-form-element {
+    &.\-\-checkbox {
+      --form-checkbox-icon-rounded: var(--form-checkbox-icon-mobile-rounded);
+      --form-checkbox-icon-border: var(--form-checkbox-icon-mobile-border);
+    }
   }
 }

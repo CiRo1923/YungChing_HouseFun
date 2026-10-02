@@ -1,128 +1,181 @@
-/*
- * autocomplete 變體的版型,以及 @screen 的斷點對應。
- *
- * 輸入框本身走 mForm 的共用層(.m-form-element)—— 邊框、底色、文字色與
- * disabled / focus / error 的狀態切換都在 common.css,這裡不重複一份。
- */
+/* 欄位與後綴橫向並排 —— 排列方式各變體自己給,共用那一層不設。 */
+.m-form-container.\-\-autocomplete {
+  @apply flex;
+}
+
 .m-form-element {
   &.\-\-autocomplete {
-    &.\-\-error {
-      --form-autocomplete-icon-color: var(--form-autocomplete-error-icon-color);
+    &:not(.\-\-disabled) {
+      &.\-\-focus {
+        --form-autocomplete-element-icon-color: var(--form-autocomplete-element-focus-icon-color);
+      }
+
+      &.\-\-error {
+        --form-autocomplete-element-icon-color: var(--form-autocomplete-element-error-icon-color);
+      }
+    }
+
+    &.\-\-disabled {
+      --form-autocomplete-element-icon-color: var(--form-autocomplete-element-disabled-icon-color);
     }
   }
 }
 
 .m-form-autocomplete-icon {
-  @apply pointer-events-none shrink-0 transition-colors duration-300;
-  @apply h-[--form-autocomplete-icon-size] w-[--form-autocomplete-icon-size] p-[--form-autocomplete-icon-p];
-  @apply text-[--form-autocomplete-icon-color];
+  @apply pointer-events-none h-[--form-autocomplete-icon-size] w-[--form-autocomplete-icon-size] shrink-0 p-[--form-autocomplete-icon-p] text-[--form-autocomplete-element-icon-color] transition-colors duration-300;
 }
 
-.m-form-autocomplete-error {
-  @apply flex text-left;
-  @apply mt-[--form-autocomplete-error-mt] text-[--form-autocomplete-error-color];
-}
-
-/* Teleport to="body" —— DOM 上不在 .m-form 內,斷點對應要自己再掛一份(見下面 @screen) */
 .m-form-autocomplete-dropdown {
   box-shadow: var(--form-autocomplete-dropdown-shadow);
 
-  @apply absolute z-[5] overflow-hidden;
-  @apply mt-[--form-autocomplete-dropdown-mt];
-}
-
-.m-form-autocomplete-dropdown-no-data {
-  @apply bg-[--form-autocomplete-dropdown-bg-color];
-  @apply p-[--form-autocomplete-dropdown-no-data-p];
-  @apply text-[--form-autocomplete-dropdown-no-data-color];
+  @apply absolute z-[2] my-[--form-autocomplete-dropdown-my] overflow-hidden rounded-[--form-autocomplete-dropdown-rounded];
 }
 
 .m-form-autocomplete-dropdown-container {
-  @apply max-h-full bg-[--form-autocomplete-dropdown-bg-color];
+  @apply h-full bg-[--form-autocomplete-dropdown-container-bg-color] px-[--form-autocomplete-dropdown-container-px] py-[--form-autocomplete-dropdown-container-py];
+}
+
+/* 捲動由這裡自己負責。橫向照樣裁掉 —— 選項應該省略或換行,不該橫著捲 */
+.m-form-autocomplete-dropdown-body {
+  @apply max-h-full overflow-y-auto overflow-x-hidden;
+}
+
+.m-form-autocomplete-dropdown-no-data,
+.m-form-autocomplete-dropdown-item {
+  @apply mx-[--form-autocomplete-dropdown-common-mx];
 }
 
 .m-form-autocomplete-dropdown-item {
+  @apply relative;
+
   &:not(:last-child) {
     .m-form-autocomplete-dropdown-button {
       &:after {
-        @apply block w-full content-default;
-        @apply h-[--form-autocomplete-dropdown-item-border] bg-[--form-autocomplete-dropdown-item-border-color];
-
-        opacity: var(--form-autocomplete-dropdown-item-border-opacity);
+        @apply absolute bottom-0 left-0 block h-[--form-autocomplete-dropdown-button-border] w-full bg-[--form-autocomplete-dropdown-button-bg-color] content-default;
       }
     }
   }
 }
 
+.m-form-autocomplete-dropdown-no-data,
+.m-form-autocomplete-dropdown-button {
+  @apply px-[--form-autocomplete-dropdown-item-px] py-[--form-autocomplete-dropdown-item-py];
+}
+
 .m-form-autocomplete-dropdown-button {
   @apply block w-full text-left transition-colors duration-300;
-  @apply px-[--form-autocomplete-dropdown-button-px];
 
   &:not(:disabled) {
-    @apply text-[--form-autocomplete-dropdown-button-color];
-
     &.\-\-active {
-      @apply bg-[--form-autocomplete-dropdown-button-active-bg-color];
+      --form-autocomplete-dropdown-button-bg-color: var(
+        --form-autocomplete-dropdown-button-active-bg-color
+      );
     }
   }
 
   &:disabled {
-    @apply text-[--form-autocomplete-dropdown-button-disabled-color];
+    --form-autocomplete-dropdown-button-bg-color: var(
+      --form-autocomplete-dropdown-button-disbaled-bg-color
+    );
   }
 }
 
+/* 字級不定在這裡 —— 由使用端 setClass.dropdownLabel 傳 */
 .m-form-autocomplete-dropdown-label {
-  @apply relative block grow;
-  @apply py-[--form-autocomplete-dropdown-label-py];
+  @apply block grow px-[--form-autocomplete-dropdown-label-px] py-[--form-autocomplete-dropdown-label-py];
 }
 
 @screen p {
   .m-form {
-    --form-autocomplete-icon-size: var(--form-autocomplete-icon-pc-size);
     --form-autocomplete-icon-p: var(--form-autocomplete-icon-pc-p);
-    --form-autocomplete-error-mt: var(--form-autocomplete-error-pc-mt);
+    --form-autocomplete-icon-size: var(--form-autocomplete-icon-pc-size);
   }
 
   .m-form-autocomplete-dropdown {
-    --form-autocomplete-dropdown-mt: var(--form-autocomplete-dropdown-pc-mt);
+    --form-autocomplete-dropdown-my: var(--form-autocomplete-dropdown-pc-my);
     --form-autocomplete-dropdown-shadow: var(--form-autocomplete-dropdown-pc-shadow);
-    --form-autocomplete-dropdown-no-data-p: var(--form-autocomplete-dropdown-no-data-pc-p);
-    --form-autocomplete-dropdown-item-border: var(--form-autocomplete-dropdown-item-pc-border);
-    --form-autocomplete-dropdown-button-px: var(--form-autocomplete-dropdown-button-pc-px);
+    --form-autocomplete-dropdown-container-px: var(--form-autocomplete-dropdown-container-pc-px);
+    --form-autocomplete-dropdown-container-py: var(--form-autocomplete-dropdown-container-pc-py);
+    --form-autocomplete-dropdown-common-mx: var(--form-autocomplete-dropdown-common-pc-mx);
+    --form-autocomplete-dropdown-item-px: var(--form-autocomplete-dropdown-item-pc-px);
+    --form-autocomplete-dropdown-item-py: var(--form-autocomplete-dropdown-item-pc-py);
+    --form-autocomplete-dropdown-button-border: var(--form-autocomplete-dropdown-button-pc-border);
+    --form-autocomplete-dropdown-label-px: var(--form-autocomplete-dropdown-label-pc-px);
     --form-autocomplete-dropdown-label-py: var(--form-autocomplete-dropdown-label-pc-py);
+  }
+
+  /* 捲軸只在桌機畫出來。
+    手機與平板的是覆蓋在內容上、不用時會自己隱藏的那種,
+    換成自訂的會變成一條常駐的軌道,把內容往內擠一截。 */
+  .m-form-autocomplete-dropdown-body {
+    scrollbar-width: thin;
+    scrollbar-color: var(--form-autocomplete-dropdown-scrollbar-thumb-color)
+      var(--form-autocomplete-dropdown-scrollbar-track-color);
+
+    &::-webkit-scrollbar {
+      width: var(--form-autocomplete-dropdown-scrollbar-w);
+    }
+
+    &::-webkit-scrollbar-track {
+      border-radius: var(--form-autocomplete-dropdown-scrollbar-rounded);
+      background-color: var(--form-autocomplete-dropdown-scrollbar-track-color);
+    }
+
+    &::-webkit-scrollbar-thumb {
+      border-radius: var(--form-autocomplete-dropdown-scrollbar-rounded);
+      background-color: var(--form-autocomplete-dropdown-scrollbar-thumb-color);
+    }
   }
 }
 
 @screen t {
   .m-form {
-    --form-autocomplete-icon-size: var(--form-autocomplete-icon-tablet-size);
     --form-autocomplete-icon-p: var(--form-autocomplete-icon-tablet-p);
-    --form-autocomplete-error-mt: var(--form-autocomplete-error-tablet-mt);
+    --form-autocomplete-icon-size: var(--form-autocomplete-icon-tablet-size);
   }
 
   .m-form-autocomplete-dropdown {
-    --form-autocomplete-dropdown-mt: var(--form-autocomplete-dropdown-tablet-mt);
+    --form-autocomplete-dropdown-my: var(--form-autocomplete-dropdown-tablet-my);
     --form-autocomplete-dropdown-shadow: var(--form-autocomplete-dropdown-tablet-shadow);
-    --form-autocomplete-dropdown-no-data-p: var(--form-autocomplete-dropdown-no-data-tablet-p);
-    --form-autocomplete-dropdown-item-border: var(--form-autocomplete-dropdown-item-tablet-border);
-    --form-autocomplete-dropdown-button-px: var(--form-autocomplete-dropdown-button-tablet-px);
+    --form-autocomplete-dropdown-container-px: var(
+      --form-autocomplete-dropdown-container-tablet-px
+    );
+    --form-autocomplete-dropdown-container-py: var(
+      --form-autocomplete-dropdown-container-tablet-py
+    );
+    --form-autocomplete-dropdown-common-mx: var(--form-autocomplete-dropdown-common-tablet-mx);
+    --form-autocomplete-dropdown-item-px: var(--form-autocomplete-dropdown-item-tablet-px);
+    --form-autocomplete-dropdown-item-py: var(--form-autocomplete-dropdown-item-tablet-py);
+    --form-autocomplete-dropdown-button-border: var(
+      --form-autocomplete-dropdown-button-tablet-border
+    );
+    --form-autocomplete-dropdown-label-px: var(--form-autocomplete-dropdown-label-tablet-px);
     --form-autocomplete-dropdown-label-py: var(--form-autocomplete-dropdown-label-tablet-py);
   }
 }
 
 @screen m {
   .m-form {
-    --form-autocomplete-icon-size: var(--form-autocomplete-icon-mobile-size);
     --form-autocomplete-icon-p: var(--form-autocomplete-icon-mobile-p);
-    --form-autocomplete-error-mt: var(--form-autocomplete-error-mobile-mt);
+    --form-autocomplete-icon-size: var(--form-autocomplete-icon-mobile-size);
   }
 
   .m-form-autocomplete-dropdown {
-    --form-autocomplete-dropdown-mt: var(--form-autocomplete-dropdown-mobile-mt);
+    --form-autocomplete-dropdown-my: var(--form-autocomplete-dropdown-mobile-my);
     --form-autocomplete-dropdown-shadow: var(--form-autocomplete-dropdown-mobile-shadow);
-    --form-autocomplete-dropdown-no-data-p: var(--form-autocomplete-dropdown-no-data-mobile-p);
-    --form-autocomplete-dropdown-item-border: var(--form-autocomplete-dropdown-item-mobile-border);
-    --form-autocomplete-dropdown-button-px: var(--form-autocomplete-dropdown-button-mobile-px);
+    --form-autocomplete-dropdown-container-px: var(
+      --form-autocomplete-dropdown-container-mobile-px
+    );
+    --form-autocomplete-dropdown-container-py: var(
+      --form-autocomplete-dropdown-container-mobile-py
+    );
+    --form-autocomplete-dropdown-common-mx: var(--form-autocomplete-dropdown-common-mobile-mx);
+    --form-autocomplete-dropdown-item-px: var(--form-autocomplete-dropdown-item-mobile-px);
+    --form-autocomplete-dropdown-item-py: var(--form-autocomplete-dropdown-item-mobile-py);
+    --form-autocomplete-dropdown-button-border: var(
+      --form-autocomplete-dropdown-button-mobile-border
+    );
+    --form-autocomplete-dropdown-label-px: var(--form-autocomplete-dropdown-label-mobile-px);
     --form-autocomplete-dropdown-label-py: var(--form-autocomplete-dropdown-label-mobile-py);
   }
 }

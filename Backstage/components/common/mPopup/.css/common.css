@@ -1,5 +1,5 @@
 .m-popup {
-  @apply fixed inset-0 z-[3] flex m:px-[16px];
+  @apply fixed inset-0 z-[5] flex;
 
   &:before {
     @apply absolute inset-0 bg-[--popup-overlay-bg-color] backdrop-blur-[--popup-overlay-blur] content-default;
@@ -11,7 +11,7 @@
     @apply items-center justify-center;
 
     .m-popup-container {
-      @apply max-w-full rounded-[--popup-container-rounded];
+      @apply rounded-b-[--popup-container-rounded-b] rounded-t-[--popup-container-rounded-t] max-w-[--popup-container-max-w];
     }
   }
 
@@ -28,37 +28,68 @@
   @apply relative flex max-h-[92%] w-[--popup-w] flex-col overflow-hidden bg-[--popup-container-bg-color] px-[--popup-px] py-[--popup-py];
 }
 
+/* 關閉鈕的定位基準 —— 它不排進 flex 流,見 .m-popup-anchor-close。
+
+  基準放在 header 而不是 container:container 有自己的 padding,
+  以它為基準的話關閉鈕會貼齊彈窗外緣,而不是與標題同一條上緣。 */
 .m-popup-header {
   border-bottom-width: var(--popup-header-border);
+  @apply relative flex shrink-0 items-center border-b-[--popup-header-border-color] pb-[--popup-header-pb] m:flex-wrap;
 
-  @apply flex shrink-0 items-center border-b-[--popup-header-border-color] pb-[--popup-header-pb] text-[--gray-333] m:flex-wrap;
-}
+  /* 右側留出關閉鈕的位置。少了這一段,長標題與工具列會滑到關閉鈕底下 ——
+    文字疊在一起,而且被蓋住的那一塊點不到關閉鈕。
+    有關閉鈕時才留,否則右邊會空出一截沒有來由的空白。
 
-.m-popup-title {
-  @apply order-1 flex shrink-0 items-center gap-x-[--popup-header-gap-x];
-  @apply text-[length:--popup-header-text-size];
-
-  /*
-   * 標題裡的粗體字。用後代選擇器而不給 class 是刻意的 ——
-   * 全站 popup 標題的字重一致,由 module 全權決定。
-   * 注意:這條是 (0,1,1),使用端 setClass 的 utility 是 (0,1,0),蓋不過它。
-   */
-  > b {
-    @apply font-medium;
+    寬度用算的而不是另記一個值:專案調了關閉鈕的尺寸時,讓位的寬度自己跟著變。
+    各記一份的話,只調其中一邊不會有任何徵兆,只是又疊在一起。 */
+  &.\-\-has-close {
+    padding-right: calc(var(--popup-header-anchor-size) + var(--popup-header-gap-x));
   }
 }
 
+/* 標題預設佔滿整行寬(寬度見 --popup-header-title-w),
+  關閉鈕浮在它上面,不跟它搶同一條 flex 線。
+
+  標題要能收縮,裡面的文字才換得了行。不收縮的話,長標題會把整條標題列撐寬
+  —— 換行不會發生,而是整個彈窗變得比設定的寬度還寬。
+
+  min-w-0 是必要的:flex 項目預設不會縮到比內容窄(min-width: auto),
+  只把 shrink-0 拿掉還是縮不下去,長標題照樣撐寬。 */
+.m-popup-title {
+  width: var(--popup-header-title-w);
+  @apply order-1 flex min-w-0 items-center gap-x-[--popup-header-gap-x] text-[length:--popup-header-text-size];
+}
+
+/* 標題文字 —— 字重與顏色都是固定的,不隨斷點調整。
+
+  顏色走變數是為了讓全站的彈窗標題一致:不設的話它繼承容器的文字色,
+  想換成品牌色就得每一支彈窗各自用 setClass.headerTitle 傳一次,
+  而漏掉一支不會有任何徵兆 —— 只是那一支的標題是黑的。
+  個別彈窗要不一樣時仍然用 setClass.headerTitle 蓋掉,兩者不衝突。 */
+/* 文字自己也要能縮(同樣是 flex 項目),而且長字串要斷得開 ——
+  網址或沒有空白的英文字沒有可換行的位置,不斷的話它一個字就把整行撐寬。 */
+.m-popup-title-text {
+  @apply min-w-0 break-words font-medium text-[--popup-header-title-color];
+}
+
+/* 圖示固定大小,不跟著標題一起收縮 ——
+  標題改成可收縮之後,沒有這一道的話,長標題會把圖示壓成一條。 */
 .m-popup-icon {
-  @apply h-[--popup-header-icon-size] w-[--popup-header-icon-size] p-[--popup-header-icon-p];
+  @apply h-[--popup-header-icon-size] w-[--popup-header-icon-size] shrink-0 p-[--popup-header-icon-p];
 
   &.\-\-defaule-color {
     @apply text-[--popup-header-icon-color];
   }
 }
 
-.m-popup-anchor-close {
-  @apply ml-auto flex h-[--popup-header-anchor-size] w-[--popup-header-anchor-size] shrink-0 items-center justify-center p-[--popup-header-anchor-p] text-[--popup-header-anchor-color] m:order-2 pt:order-3;
+/* 關閉鈕不排進 flex 流 —— 標題佔滿整行寬,兩者在同一條線上會互相排擠:
+  header 在手機版會換行,標題滿寬就把關閉鈕推到了下一行。
+  讓位的那一段 padding 在 .m-popup-header 的 --has-close。
 
+  對齊上緣而不是垂直置中:標題換行之後 header 會變高,
+  置中的話關閉鈕會落到兩行文字中間,而它對齊的應該是第一行。 */
+.m-popup-anchor-close {
+  @apply absolute right-0 top-0 flex h-[--popup-header-anchor-size] w-[--popup-header-anchor-size] items-center justify-center p-[--popup-header-anchor-p] text-[--popup-header-anchor-color];
 }
 
 /* 關閉鈕的圖示撐滿按鈕(尺寸由 .m-popup-anchor-close 決定) */
@@ -66,8 +97,10 @@
   @apply h-full w-full;
 }
 
+/* 排在標題後面。原本桌機與手機的 order 互換,是為了跟關閉鈕交換左右 ——
+  關閉鈕已經不在這條線上,剩下的兩個在哪個斷點都是同一個順序。 */
 .m-popup-tools {
-  @apply flex grow items-center m:order-3 m:mt-[--popup-tools-mt] pt:order-2 pt:mx-[--popup-tools-mx];
+  @apply order-2 flex grow items-center m:mt-[--popup-tools-mt] pt:mx-[--popup-tools-mx];
 }
 
 .m-popup-body {
@@ -79,9 +112,10 @@
   */
   margin-inline: calc(var(--popup-body-px) * -1);
 
-  @apply grow overflow-hidden px-[--popup-body-px];
+  /* 捲動由這裡自己負責。橫向照樣裁掉 —— 內容應該換行,不該橫著捲 */
+  @apply grow overflow-y-auto overflow-x-hidden px-[--popup-body-px];
 
-  &:not(:only-child) {
+  &:not(:first-child) {
     @apply mt-[--popup-body-mt];
   }
 }
@@ -93,10 +127,8 @@
 @screen p {
   .m-popup {
     --popup-overlay-blur: var(--popup-overlay-pc-blur);
-    --popup-container-rounded: var(--popup-container-pc-rounded);
-    --popup-container-rounded-t: var(--popup-container-pc-rounded-t);
-    --popup-px: var(--popup-container-pc-px);
-    --popup-py: var(--popup-container-pc-py);
+    --popup-container-rounded-t: var(--popup-container-pc-rounded);
+    --popup-container-rounded-b: var(--popup-container-pc-rounded);
     --popup-header-pb: var(--popup-header-pc-pb);
     --popup-header-border: var(--popup-header-pc-border);
     --popup-header-text-size: var(--popup-header-pc-text-size);
@@ -105,20 +137,40 @@
     --popup-header-icon-size: var(--popup-header-icon-pc-size);
     --popup-header-anchor-p: var(--popup-header-anchor-pc-p);
     --popup-header-anchor-size: var(--popup-header-anchor-pc-size);
-    --popup-tools-mx: var(--popup-tools-pc-mx);
     --popup-body-mt: var(--popup-body-pc-mt);
     --popup-body-px: var(--popup-body-pc-px);
+    --popup-tools-mx: var(--popup-tools-pc-mx);
     --popup-footer-mt: var(--popup-footer-pc-mt);
+  }
+
+  /* 捲軸只在桌機畫出來。
+    手機與平板的是覆蓋在內容上、不用時會自己隱藏的那種,
+    換成自訂的會變成一條常駐的軌道,把內容往內擠一截。 */
+  .m-popup-body {
+    scrollbar-width: thin;
+    scrollbar-color: var(--popup-scrollbar-thumb-color) var(--popup-scrollbar-track-color);
+
+    &::-webkit-scrollbar {
+      width: var(--popup-scrollbar-w);
+    }
+
+    &::-webkit-scrollbar-track {
+      border-radius: var(--popup-scrollbar-rounded);
+      background-color: var(--popup-scrollbar-track-color);
+    }
+
+    &::-webkit-scrollbar-thumb {
+      border-radius: var(--popup-scrollbar-rounded);
+      background-color: var(--popup-scrollbar-thumb-color);
+    }
   }
 }
 
 @screen t {
   .m-popup {
     --popup-overlay-blur: var(--popup-overlay-tablet-blur);
-    --popup-container-rounded: var(--popup-container-tablet-rounded);
-    --popup-container-rounded-t: var(--popup-container-tablet-rounded-t);
-    --popup-px: var(--popup-container-tablet-px);
-    --popup-py: var(--popup-container-tablet-py);
+    --popup-container-rounded-t: var(--popup-container-tablet-rounded);
+    --popup-container-rounded-b: var(--popup-container-tablet-rounded);
     --popup-header-pb: var(--popup-header-tablet-pb);
     --popup-header-border: var(--popup-header-tablet-border);
     --popup-header-text-size: var(--popup-header-tablet-text-size);
@@ -127,9 +179,9 @@
     --popup-header-icon-size: var(--popup-header-icon-tablet-size);
     --popup-header-anchor-p: var(--popup-header-anchor-tablet-p);
     --popup-header-anchor-size: var(--popup-header-anchor-tablet-size);
-    --popup-tools-mx: var(--popup-tools-tablet-mx);
     --popup-body-mt: var(--popup-body-tablet-mt);
     --popup-body-px: var(--popup-body-tablet-px);
+    --popup-tools-mx: var(--popup-tools-tablet-mx);
     --popup-footer-mt: var(--popup-footer-tablet-mt);
   }
 }
@@ -137,10 +189,8 @@
 @screen m {
   .m-popup {
     --popup-overlay-blur: var(--popup-overlay-mobile-blur);
-    --popup-container-rounded: var(--popup-container-mobile-rounded);
-    --popup-container-rounded-t: var(--popup-container-mobile-rounded-t);
-    --popup-px: var(--popup-container-mobile-px);
-    --popup-py: var(--popup-container-mobile-py);
+    --popup-container-rounded-t: var(--popup-container-mobile-rounded);
+    --popup-container-rounded-b: var(--popup-container-mobile-rounded);
     --popup-header-pb: var(--popup-header-mobile-pb);
     --popup-header-border: var(--popup-header-mobile-border);
     --popup-header-text-size: var(--popup-header-mobile-text-size);
@@ -149,8 +199,7 @@
     --popup-header-icon-size: var(--popup-header-icon-mobile-size);
     --popup-header-anchor-p: var(--popup-header-anchor-mobile-p);
     --popup-header-anchor-size: var(--popup-header-anchor-mobile-size);
-    --popup-w: var(--popup-mobile-w);
-    --popup-tools-mt: var(--popup-tools-mobile-mt);
+    --popup-tools-mx: var(--popup-tools-mobile-mx);
     --popup-body-mt: var(--popup-body-mobile-mt);
     --popup-body-px: var(--popup-body-mobile-px);
     --popup-footer-mt: var(--popup-footer-mobile-mt);

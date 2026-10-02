@@ -4,77 +4,107 @@
  * 斷點對應與狀態切換屬於「行為」,寫在 common.css。
  */
 :root {
-  --form-clear-button-pc-p: 4px;
-  --form-clear-button-tablet-p: 4px;
-  --form-clear-button-mobile-p: 4px;
+  /* 三個斷點各自指派的那幾個,base 也要給一份。
 
-  --form-clear-button-pc-size: 18px;
-  --form-clear-button-tablet-size: 18px;
-  --form-clear-button-mobile-size: 18px;
+    斷點是 raw 查詢,不是連續的範圍 —— 哪天某個尺寸三個都不命中,
+    沒有 base 的那幾個就讀到未定義的變數,瀏覽器把整條宣告丟掉,而且不報錯。
+    (那種縫出現過一次:寬 1000 到 1023、高度不足 428 的視窗,
+    後來在 tailwind.theme.js 的 t 與 pt 各補了一條。)
 
-  --form-element-border-color: var(--gray-e5);
-  --form-element-focus-border-color: var(--green-6a2d);
-  --form-element-disbaled-border-color: var(--gray-e5);
-  --form-element-error-border-color: var(--orange-e646);
-
-  --form-element-color: var(--gray-666);
-  --form-element-focus-color: var(--gray-666);
-  --form-element-disbaled-color: var(--gray-666);
-  --form-element-error-color: var(--orange-e646);
-
-  --form-clear-button-color: var(--gray-999);
-
-  /* 停用與 placeholder 的灰,原本寫死在 common.css 的狀態區塊裡 */
-  --form-element-placeholder-color: var(--gray-999);
-  --form-element-disabled-bg-color: var(--gray-f2);
-  --form-element-disabled-text-color: var(--gray-ccce);
-  --form-element-error-assist-color: var(--orange-e646);
-
-  /* 輸入框本身的外框 */
-  --form-element-bg-color: var(--white);
-
-  --form-element-gap-x: 0;
-  --form-element-pc-gap-x: 8px;
-  --form-element-tablet-gap-x: 8px;
-  --form-element-mobile-gap-x: 8px;
-
-  --form-element-rounded: 0;
-  --form-element-pc-rounded: 5px;
-  --form-element-tablet-rounded: 5px;
-  --form-element-mobile-rounded: 5px;
-
+    值取平板那一份 —— 三檔之中它在中間,拿不到斷點時最不容易出錯。 */
+  --form-clear-icon-p: var(--form-clear-icon-tablet-p);
+  --form-clear-icon-size: var(--form-clear-icon-tablet-size);
   --form-element-border: 0;
+  --form-element-gap-x: 0;
+  --form-error-mt: 0;
+
+  /* padding 變數 base 預設:production 壓縮會把 padding-* 合併成 shorthand
+     `padding: var(--anchor-py) var(--anchor-px)`,shorthand 內任一 var() 未定義
+     (元素只帶 --px-XX、沒帶 --py-XX)就會使整條 padding 失效歸零。base 給 0 → 沒對應
+     modifier 時等同無 padding,且 shorthand 永遠有有效值;modifier(.--px-XX / .--py-XX)再覆蓋。 */
+  --form-element-px: 0;
+  --form-element-py: 0;
+
+  /* 圓角的 base 給 0(等同無圓角),`.--rounded` 再覆蓋成實際值。
+     沒有 base 的話,沒掛那個 class 的欄位讀到的是未定義的變數 ——
+     瀏覽器把整條 rounded 丟掉,結果看起來一樣是直角,但那是碰巧。 */
+  --form-element-rounded: 0;
+
+  /* 高度的 base 給 auto(由內容撐開),.--h-XX 再覆蓋成固定值。
+
+     **不能給 0**:那會讓沒帶 `--h-XX` 的欄位整個塌掉 ——
+     多行輸入本來就不指定高度,它的高度來自 rows。
+
+     也不能不給。沒有 base 的話,那幾支讀到的是未定義的變數,
+     瀏覽器把整條 height 丟掉 —— 結果看起來正常,但那是碰巧:
+     哪天有人在別處替這個名字補了一個值,那一批欄位會同時變高,
+     而畫面上看不出是從哪裡來的。 */
+  --form-element-h: auto;
+
   --form-element-pc-border: 1px;
   --form-element-tablet-border: 1px;
   --form-element-mobile-border: 1px;
 
-  /*
-   * 輸入框的字級沒有變數 —— mForm 是到處複用的組件,字級由使用端 setClass.type 傳。
-   * 這裡若建了變數,common.css 會 @apply 它,一輸出就蓋掉使用端傳的 text-*。
-   *
-   * 錯誤訊息是這條規則的特例:.m-form-error 全系列統一,而且它是 module 自己
-   * 渲染的節點、使用端不見得碰得到,所以字級留在 module。
-   */
-  --form-error-color: var(--orange-e646);
+  /* 元素內各區塊(前後綴 / 輸入區 / 清除鈕 / 字數)之間的間距 */
+  --form-element-pc-gap-x: 8px;
+  --form-element-tablet-gap-x: 8px;
+  --form-element-mobile-gap-x: 8px;
 
-  --form-error-mt: 0;
+  --form-clear-icon-pc-size: 18px;
+  --form-clear-icon-tablet-size: 18px;
+  --form-clear-icon-mobile-size: 18px;
+
+  --form-clear-icon-pc-p: 4px;
+  --form-clear-icon-tablet-p: 4px;
+  --form-clear-icon-mobile-p: 4px;
+
   --form-error-pc-mt: 4px;
   --form-error-tablet-mt: 4px;
   --form-error-mobile-mt: 4px;
 
-  /* lint-text-size-exempt: 錯誤訊息全站長一樣,不隨使用位置變化,由 module 統一決定 */
+  --form-element-color: var(--gray-666);
+  --form-element-focus-color: var(--gray-666);
+  --form-element-disabled-color: var(--gray-ccce);
+  --form-element-error-color: var(--orange-e646);
+
+  --form-element-placeholder-color: var(--gray-999);
+  --form-element-placeholder-focus-color: var(--gray-999);
+  --form-element-placeholder-disabled-color: var(--gray-ccce);
+  --form-element-placeholder-error-color: var(--gray-999);
+
+  --form-element-border-color: var(--gray-e5);
+  --form-element-border-focus-color: var(--green-6a2d);
+  --form-element-border-disabled-color: var(--gray-e5);
+  --form-element-border-error-color: var(--red-f00);
+
+  --form-element-bg-color: var(--white);
+  --form-element-bg-focus-color: var(--green-6a2d);
+  --form-element-bg-disabled-color: var(--gray-f2);
+  --form-element-bg-error-color: var(--white);
+
+  /* 這個站自己加的,來源沒有這幾個名字。 */
+  --form-clear-button-pc-p: 4px;
+  --form-clear-button-tablet-p: 4px;
+  --form-clear-button-mobile-p: 4px;
+  --form-clear-button-pc-size: 18px;
+  --form-clear-button-tablet-size: 18px;
+  --form-clear-button-mobile-size: 18px;
+  --form-element-focus-border-color: var(--green-6a2d);
+  --form-element-disbaled-border-color: var(--gray-e5);
+  --form-element-error-border-color: var(--orange-e646);
+  --form-element-disbaled-color: var(--gray-666);
+  --form-clear-button-color: var(--gray-999);
+  --form-element-disabled-bg-color: var(--gray-f2);
+  --form-element-disabled-text-color: var(--gray-ccce);
+  --form-element-error-assist-color: var(--orange-e646);
+  --form-element-pc-rounded: 5px;
+  --form-element-tablet-rounded: 5px;
+  --form-element-mobile-rounded: 5px;
+  --form-error-color: var(--orange-e646);
   --form-error-text-size: inherit;
   --form-error-pc-text-size: 14px;
   --form-error-tablet-text-size: 14px;
   --form-error-mobile-text-size: 14px;
-
-  /*
-   * 內距與高度的 base。
-   *
-   * --p-16 是四邊、--px-* 只有左右、--py-* 只有上下 —— 三個層級併存,
-   * 所以拆到 pt / pr / pb / pl 四個方向,組合時才不會互相蓋掉
-   * (使用端常常同時帶 --px-12 --py-8)。
-   */
   --form-element-pt: 0;
   --form-element-pr: 0;
   --form-element-pb: 0;

@@ -1,71 +1,78 @@
-/*
- * selection 群組的版型 —— CheckBox 與 RadioItem 共用。
- *
- * 兩者的差別在外框(方 / 圓)與各自的狀態配色,那些留在 checkbox.css / radioItem.css;
- * 這裡只放「選中就顯示打勾圖示」這段共通行為。
- */
+/* checkbox / radio 的**群組共用版型**。
+   值定義在 selectionVariables.css;各自的外框造型(圓角 / 圓形、勾號 / 圓點)在
+   checkbox.css 與 radio.css。 */
+
+.m-form-container {
+  /* 勾選框與它的文字橫向並排 —— 排列方式各變體自己給,共用那一層不設。 */
+  &.\-\-checkbox,
+  &.\-\-radio {
+    @apply flex;
+  }
+
+  /* 沒有文字時不撐行高 */
+  &.\-\-no-label {
+    @apply leading-none;
+  }
+}
+
 .m-form-element {
   &.\-\-checkbox,
-  &.\-\-radio-item {
+  &.\-\-radio {
+    @apply relative inline-flex items-center gap-x-[--form-selection-gap-x] leading-[1.4];
+
+    /* 文字採上緣對齊(多行文字時勾選框跟第一行對齊) */
+    &.\-\-align-top {
+      @apply items-baseline;
+    }
+
+    &.\-\-disabled {
+      @apply cursor-not-allowed;
+    }
+
+    &:not(.\-\-disabled) {
+      @apply cursor-pointer;
+    }
+
+    /* 原生 input 只留給鍵盤與螢幕閱讀器,外觀由 .m-form-icon 畫 */
     .m-form-type {
-      &:checked {
-        & + .m-form-icon {
-          @apply border-transparent;
-
-          > use {
-            opacity: var(--form-selection-icon-checked-opacity);
-          }
-        }
-      }
+      @apply sr-only;
     }
 
     .m-form-icon {
-      > use {
-        opacity: var(--form-selection-icon-opacity);
+      @apply relative h-[--form-selection-icon-size] w-[--form-selection-icon-size] shrink-0 self-start transition-colors duration-300;
+    }
 
-        @apply transition-opacity duration-300;
+    /* 有文字時勾選框往下對齊字身;單獨一個框時不用 */
+    &.\-\-has-label {
+      .m-form-icon {
+        @apply mt-[--form-selection-icon-mt];
       }
     }
   }
 }
 
-/* 兩個變體共用的排版與圖示尺寸 */
-.m-form-element {
-  &.\-\-checkbox,
-  &.\-\-radio-item {
-    @apply relative align-middle;
-    @apply gap-x-[--form-selection-gap-x];
-
-    .m-form-icon {
-      @apply relative shrink-0 transition-colors duration-300;
-      @apply h-[--form-selection-icon-size] w-[--form-selection-icon-size];
-      @apply text-[--form-selection-icon-color];
-
-      border-width: var(--form-selection-icon-border);
-    }
-  }
-}
+/* 斷點對應 —— 掛在 .m-form 上,底下的 element / icon 靠繼承取值 */
 
 @screen p {
   .m-form {
     --form-selection-icon-size: var(--form-selection-icon-pc-size);
-    --form-selection-icon-border: var(--form-selection-icon-pc-border);
     --form-selection-gap-x: var(--form-selection-pc-gap-x);
+    --form-selection-icon-mt: var(--form-selection-icon-pc-mt);
   }
 }
 
 @screen t {
   .m-form {
     --form-selection-icon-size: var(--form-selection-icon-tablet-size);
-    --form-selection-icon-border: var(--form-selection-icon-tablet-border);
     --form-selection-gap-x: var(--form-selection-tablet-gap-x);
+    --form-selection-icon-mt: var(--form-selection-icon-tablet-mt);
   }
 }
 
 @screen m {
   .m-form {
     --form-selection-icon-size: var(--form-selection-icon-mobile-size);
-    --form-selection-icon-border: var(--form-selection-icon-mobile-border);
     --form-selection-gap-x: var(--form-selection-mobile-gap-x);
+    --form-selection-icon-mt: var(--form-selection-icon-mobile-mt);
   }
 }

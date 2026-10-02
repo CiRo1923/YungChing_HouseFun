@@ -28,9 +28,9 @@ const onSearchClick = (onToggle) => {
     }"
   >
     <slot />
-    <!-- searchFun 讓插槽內容（例如搜尋欄按 Enter）觸發與「搜尋」按鈕完全相同的行為 -->
+    <!-- onSearch 讓插槽內容（例如搜尋欄按 Enter）觸發與「搜尋」按鈕完全相同的行為 -->
     <template #hide="{ onToggle }">
-      <slot name="hide" :searchFun="() => onSearchClick(onToggle)" />
+      <slot name="hide" :onSearch="() => onSearchClick(onToggle)" />
     </template>
     <template #footer="{ isAccordion, toggleText, onToggle }">
       <ul class="flex items-center justify-between">

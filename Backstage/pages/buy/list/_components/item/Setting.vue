@@ -79,6 +79,9 @@ const items = computed(() => {
     },
   ]
 })
+
+// 每一筆自己帶著要做的事,這裡只負責把它叫起來
+const onButtonClick = (button) => button.onClick?.()
 </script>
 
 <template>
@@ -99,7 +102,7 @@ const items = computed(() => {
               main: ['--text-center --oval --h-30 --px-15', item.class.button.main],
               text: item.class.button.text,
             }"
-            @click="item.button.onClick"
+            @click="onButtonClick(item.button)"
           />
         </template>
       </PageBuyListItemSettingItem>

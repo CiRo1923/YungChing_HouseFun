@@ -75,7 +75,7 @@ const config = computed(() => {
 
         單選與複選的選取指示是同一支打勾圖示、只有外框形狀不同(圓框 vs 方框)
         的站,填了它就共用同一支元件;不填的維持圓點,一行都不用改。 */
-      checkIcon: null,
+      checkIcon: 'icon_check_solid',
       isDisabled: false,
       /* 這一顆自己沒有驗證,而是整組共用一個 —— 紅框由包住整組的那支元件傳下來。
 

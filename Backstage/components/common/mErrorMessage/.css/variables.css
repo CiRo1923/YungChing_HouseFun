@@ -1,4 +1,16 @@
 :root {
+  /* 三個斷點各自指派的那幾個,base 也要給一份。
+
+    斷點是 raw 查詢,不是連續的範圍 —— 哪天某個尺寸三個都不命中,
+    沒有 base 的那幾個就讀到未定義的變數,瀏覽器把整條宣告丟掉,而且不報錯。
+    (那種縫出現過一次:寬 1000 到 1023、高度不足 428 的視窗,
+    後來在 tailwind.theme.js 的 t 與 pt 各補了一條。)
+
+    值取平板那一份 —— 三檔之中它在中間,拿不到斷點時最不容易出錯。 */
+  --error-message-gap-x: var(--error-message-tablet-gap-x);
+  --error-message-icon-size: var(--error-message-icon-tablet-size);
+  --error-message-text-size: var(--error-message-tablet-text-size);
+
   /* 圖示與訊息文字的間隔 */
   --error-message-pc-gap-x: 4px;
   --error-message-tablet-gap-x: 4px;

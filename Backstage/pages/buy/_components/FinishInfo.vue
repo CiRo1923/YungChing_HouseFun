@@ -73,6 +73,9 @@ const items = shallowReadonly([
     },
   },
 ])
+
+// 每一筆自己帶著要做的事,這裡只負責把它叫起來
+const onButtonClick = (button) => button.onClick?.()
 </script>
 
 <template>
@@ -123,7 +126,7 @@ const items = shallowReadonly([
               :setClass="{
                 main: '--text-center --oval --h-35 --px-20 --py-5 --bg-green-6a2d --text-white',
               }"
-              @click="item.button.onClick"
+              @click="onButtonClick(item.button)"
             />
           </div>
         </div>

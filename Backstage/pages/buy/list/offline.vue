@@ -112,8 +112,8 @@ onMounted(() => {
       :contentEventsItem="contentEventsItem"
       @update="onBuyRealEstateSearch"
     >
-      <template #sort="{ sortFun }">
-        <PageBuyListFunctionsSort :options="options" @update="sortFun" />
+      <template #sort="{ onSort }">
+        <PageBuyListFunctionsSort :options="options" @update="onSort" />
       </template>
       <template #tools="{ item, publishFun }">
         <PageBuyListItemOfflineInfo :data="item" @click:publish="publishFun" class="m:mt-[24px]" />

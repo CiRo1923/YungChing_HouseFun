@@ -1,4 +1,13 @@
 <script setup>
+/* starter —— 這一支是起手樣板:複製一次,之後歸接手的專案所有。
+
+  整套更新時**不要覆蓋它**。掛在版面上的這幾支容器決定這個站有哪幾種彈窗、
+  各自的版面與預設 class,而那是每個站自己的事;它們與彈窗那支 store
+  是一組(那邊有哪幾種,這邊就有對應的容器)。
+
+  蓋過去等於把已經接好的那一套換成別人的 —— 不會報錯,
+  要開啟那個彈窗才看得出來。 */
+
 const popup = usePopupStore()
 const { customData } = storeToRefs(popup)
 const { onMergeBtns, onCustomClose, onCustomSettle } = usePopupActions()
@@ -50,8 +59,9 @@ const onClose = (item) => {
 
 <template>
   <!--
-    傳送目標是框架自己渲染的那個容器(#teleports,位置在應用程式根節點之後)——
-    不必在版型裡自己放一個。自己放的那種要先確認它真的存在:
+    傳送目標由彈窗那支 store 決定(teleportTarget)—— 掛的容器名字與位置
+    每個專案都可能不一樣。這個框架自己會渲染一個在應用程式根節點之後,
+    不必在版型裡自己放;自己放的那種要先確認它真的存在:
     目標找不到時 Teleport 不會報錯,彈窗就是不出現。
 
     用 ClientOnly 包起來:popup 純由互動驅動、不需 SSR。
@@ -60,7 +70,7 @@ const onClose = (item) => {
     ClientOnly 讓 teleport 只在 client 端全新掛載,錨點乾淨。
   -->
   <ClientOnly>
-    <Teleport to="#teleports">
+    <Teleport :to="popup.teleportTarget">
       <CommonMPopup :id="props.id" :config="props.config" :setClass="props.setClass">
         <template #header v-if="$slots.header">
           <slot name="header" />
@@ -87,6 +97,7 @@ const onClose = (item) => {
                 >
                   <BuyMAnchor
                     :text="item.label"
+                    :config="{ isDisabled: item.isDisabled }"
                     :setClass="{
                       main: [item.class, '--text-center --oval --h-45 --px-20 w-full'],
                     }"

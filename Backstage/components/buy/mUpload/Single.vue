@@ -268,7 +268,7 @@ const syncInnerItemFromModel = (value) => {
   innerItem.value = nextItem
 }
 
-const openFileDialog = () => {
+const onOpenFileDialog = () => {
   if (config.value.isDisabled) return
 
   inputRef.value?.click()
@@ -514,7 +514,7 @@ watch(
         class="m-upload-single-input"
         :accept="config.accept"
         :disabled="config.isDisabled"
-        @change="(event) => onFileChange(event, handleChange, validate)"
+        @change="onFileChange($event, handleChange, validate)"
       />
 
       <div
@@ -525,11 +525,11 @@ watch(
         }"
         role="button"
         :disabled="config.isDisabled"
-        @click="openFileDialog"
+        @click="onOpenFileDialog"
         @dragenter="onUploadDragEnter"
         @dragover="onUploadDragOver"
         @dragleave="onUploadDragLeave"
-        @drop="(event) => onUploadDrop(event, handleChange, validate)"
+        @drop="onUploadDrop($event, handleChange, validate)"
       >
         <template v-if="hasImage">
           <div class="m-upload-single-preview">

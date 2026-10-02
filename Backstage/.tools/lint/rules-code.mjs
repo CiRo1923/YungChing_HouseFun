@@ -717,17 +717,55 @@ const checkComponentAutoImport = ({ rel, text, root }) => {
 
 /** 綁在元件上會掛到根元素的那些 —— 它們不必出現在 defineEmits 裡 */
 const NATIVE_EVENTS = new Set([
-  'click', 'dblclick', 'contextmenu', 'mousedown', 'mouseup', 'mouseenter', 'mouseleave',
-  'mouseover', 'mouseout', 'mousemove',
-  'keydown', 'keyup', 'keypress',
-  'focus', 'blur', 'focusin', 'focusout',
-  'input', 'change', 'submit', 'reset', 'select',
-  'touchstart', 'touchend', 'touchmove', 'touchcancel',
-  'pointerdown', 'pointerup', 'pointerenter', 'pointerleave', 'pointermove', 'pointercancel',
-  'scroll', 'wheel', 'resize',
-  'dragstart', 'drag', 'dragend', 'dragenter', 'dragover', 'dragleave', 'drop',
-  'copy', 'cut', 'paste',
-  'load', 'error', 'animationend', 'transitionend',
+  'click',
+  'dblclick',
+  'contextmenu',
+  'mousedown',
+  'mouseup',
+  'mouseenter',
+  'mouseleave',
+  'mouseover',
+  'mouseout',
+  'mousemove',
+  'keydown',
+  'keyup',
+  'keypress',
+  'focus',
+  'blur',
+  'focusin',
+  'focusout',
+  'input',
+  'change',
+  'submit',
+  'reset',
+  'select',
+  'touchstart',
+  'touchend',
+  'touchmove',
+  'touchcancel',
+  'pointerdown',
+  'pointerup',
+  'pointerenter',
+  'pointerleave',
+  'pointermove',
+  'pointercancel',
+  'scroll',
+  'wheel',
+  'resize',
+  'dragstart',
+  'drag',
+  'dragend',
+  'dragenter',
+  'dragover',
+  'dragleave',
+  'drop',
+  'copy',
+  'cut',
+  'paste',
+  'load',
+  'error',
+  'animationend',
+  'transitionend',
 ])
 
 /* 標籤連同它的屬性 —— 另一條規則那裡有一個只抓標籤名的,這裡需要屬性,
@@ -1959,7 +1997,9 @@ export const componentDepsOf = (root, rel, text) => {
 
     if (!spec.startsWith('@')) continue
 
-    const hit = aliasListOf(root).find(({ alias }) => spec === alias || spec.startsWith(`${alias}/`))
+    const hit = aliasListOf(root).find(
+      ({ alias }) => spec === alias || spec.startsWith(`${alias}/`)
+    )
 
     if (!hit) continue
 

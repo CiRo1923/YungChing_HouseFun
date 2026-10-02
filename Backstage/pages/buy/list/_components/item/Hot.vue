@@ -39,6 +39,9 @@ const items = computed(() => {
     },
   ]
 })
+
+// 每一筆自己帶著要做的事,這裡只負責把它叫起來
+const onItemClick = (item) => item.onClick?.()
 </script>
 <template>
   <ul
@@ -58,7 +61,7 @@ const items = computed(() => {
             main: '--text-center',
             icon: 'h-[16px] w-[16px]',
           }"
-          @click="item.onClick"
+          @click="onItemClick(item)"
           v-if="item.as === 'button'"
         />
         <div class="flex items-center gap-x-[4px]" v-else>

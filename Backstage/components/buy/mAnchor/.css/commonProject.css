@@ -1,0 +1,29 @@
+/* 這個站自己加的版型,從 styleProject.css 接進來。值在 variablesProject.css。 */
+
+/* 圖示與文字之間的間距給並排的那一層,不要給其中一邊 ——
+  圖示可以在文字左邊也可以在右邊(config.icon.position),
+  而 ml- / mr- 只對其中一種位置是對的:另一種位置時那段距離跑到外緣去,
+  文字與圖示反而貼在一起。gap 由容器給,兩種位置都成立。
+
+  某一處要不一樣時用 setClass.icon 蓋過去。 */
+.m-anchor {
+  @apply gap-x-[--anchor-gap-x];
+}
+
+@screen p {
+  .m-anchor {
+    --anchor-gap-x: var(--anchor-pc-gap-x);
+  }
+}
+
+@screen t {
+  .m-anchor {
+    --anchor-gap-x: var(--anchor-tablet-gap-x);
+  }
+}
+
+@screen m {
+  .m-anchor {
+    --anchor-gap-x: var(--anchor-mobile-gap-x);
+  }
+}

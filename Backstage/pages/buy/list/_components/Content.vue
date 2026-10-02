@@ -389,7 +389,7 @@ const onCommentClick = async (objectData) => {
         v-if="hasFunEventsItem"
       >
         <template #sort>
-          <slot name="sort" :sortFun="onSortUpdate" />
+          <slot name="sort" :onSort="onSortUpdate" />
         </template>
       </PageBuyListFunctions>
       <ul class="divide-y-[1px] divide-[--gray-e5] border-b-[1px] border-b-[--gray-e5]">

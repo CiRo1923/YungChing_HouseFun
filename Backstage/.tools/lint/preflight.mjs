@@ -416,6 +416,12 @@ export const NO_PREREQUISITE_RULES = [
   /* 這條只問「同一層的 .vue 有沒有人 import 這支 css」,不必先有某個設定。
      元件資料夾底下沒有樣式的專案,它一支都掃不到,結果就是通過。 */
   'moduleCssUnused',
+  /* 這條只看 styleProject.css 裡的 @import 接到什麼檔名,不必先有某個設定 ——
+     接手的專案還沒拆出自己的樣式時,它一個 @import 都掃不到,結果就是通過。 */
+  'styleProjectImport',
+  /* 這條只看 ***Project.css 裡方括號的值,不必先有某個設定 ——
+     接手的專案還沒拆出自己的版型時,它一支都掃不到,結果就是通過。 */
+  'styleProjectValue',
   /* 這條只看「有沒有 @screen 區塊、裡面有沒有覆蓋基底的字面值」——
      不讀斷點設定。不做響應式的專案一個 @screen 都沒有,自然掃不到東西。 */
   'breakpointVarOverride',

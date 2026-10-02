@@ -184,6 +184,43 @@ for (const rule of FORMAT_RULES) {
   await onCheck(`${rule} 空值不歸這條管`, rule, '', true)
 }
 
+// ---- 欄位不在畫面上時,規則仍然要回答得出來 ----
+
+/* 那幾條規則會去 DOM 取欄位,讀它身上的屬性(maxlength、disabled,
+  以及訊息裡 `{maxlength}` 這類佔位符要換上去的值)。
+
+  **而驗證跑的時機與欄位在 DOM 裡的時機不一定對得上**:
+  欄位還沒掛載就被讀 `meta.valid`、或它已經被 `v-if` 收掉而驗證才跑完。
+  那時取到的是 null,少一道防護就會對它取屬性而讓那一次驗證整個中斷 ——
+  該出現的必填紅字不會出現,而 console 一直有紅字。
+  那是 Uncaught (in promise),畫面照常渲染,所以看起來只是「驗證偶爾失靈」。
+
+  這裡給一個「永遠找不到元素」的 document —— 那正是要驗的那個狀態。
+  規則那幾支是在瀏覽器裡跑的,node 沒有 document,不給的話連呼叫都到不了。 */
+globalThis.document = { querySelector: () => null }
+
+for (const [name, rule, value] of [
+  ['required 必填', 'required:這一欄要填', ''],
+  ['maxlength 上限', 'maxlength:太長了', '12345'],
+  ['minlength 下限', 'minlength:太短了', '1'],
+  ['custom 自訂', 'custom:不符合', ''],
+]) {
+  let crashed = null
+
+  try {
+    await validate(value, rule, { name: 'probeFieldNotInDom' })
+  } catch (error) {
+    crashed = error?.message ?? String(error)
+  }
+
+  log.push([
+    `${name}:欄位不在畫面上時不會中斷`,
+    crashed === null,
+    crashed === null ? '正常回答' : `中斷(${crashed})`,
+    '正常回答',
+  ])
+}
+
 let failed = 0
 
 for (const [name, ok, actual, expected] of log) {

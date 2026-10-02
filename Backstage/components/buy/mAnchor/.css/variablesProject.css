@@ -1,0 +1,16 @@
+/* 這個站自己加的值,從 styleProject.css 接進來。 */
+
+:root {
+  /* 圖示與文字之間的水平間距。
+
+    元件把圖示與文字並排,但沒有定義它們之間的距離 ——
+    那個值由使用端用 setClass.icon 傳,因為每個按鈕要的距離不一定一樣。
+    這個站全站都是同一個間距,而且沒有任何一個使用端自己傳,所以在這裡設一次。
+
+    base 給 0:三個斷點都不命中時等同沒有間距,與沒有這一段時的樣子相同。 */
+  --anchor-gap-x: 0;
+
+  --anchor-pc-gap-x: 4px;
+  --anchor-tablet-gap-x: 4px;
+  --anchor-mobile-gap-x: 4px;
+}

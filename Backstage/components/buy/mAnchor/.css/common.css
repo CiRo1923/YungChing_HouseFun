@@ -3,7 +3,7 @@
      shorthand,值是 var() 時整條失效。 */
   border-width: var(--anchor-border);
 
-  @apply relative inline-flex h-[--anchor-h] items-center rounded-[--anchor-rounded] px-[--anchor-px] py-[--anchor-py] tracking-[0.06em] transition-colors duration-300;
+  @apply inline-flex h-[--anchor-h] items-center rounded-[--anchor-rounded] px-[--anchor-px] py-[--anchor-py] tracking-[0.06em] transition-colors duration-300;
 
   &:not(:disabled) {
     @apply border-[--anchor-border-color] bg-[--anchor-bg-color] text-[--anchor-color];

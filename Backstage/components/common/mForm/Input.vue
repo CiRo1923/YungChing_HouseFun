@@ -398,7 +398,11 @@ defineExpose({
       :rules="config.isDisabled ? '' : props.rules"
       v-bind="validateOn"
     >
-      <div class="m-form-container --input" :class="setClass.container" v-bind="config.attr.container">
+      <div
+        class="m-form-container --input"
+        :class="setClass.container"
+        v-bind="config.attr.container"
+      >
         <div
           class="m-form-element --input"
           :class="[

@@ -3,39 +3,48 @@
  * 資料夾名跟著 class(m-figure)走,不是組件檔名。
  */
 :root {
+  /* 三個斷點各自指派的那幾個,base 也要給一份。
+
+    斷點是 raw 查詢,不是連續的範圍 —— 哪天某個尺寸三個都不命中,
+    沒有 base 的那幾個就讀到未定義的變數,瀏覽器把整條宣告丟掉,而且不報錯。
+    (那種縫出現過一次:寬 1000 到 1023、高度不足 428 的視窗,
+    後來在 tailwind.theme.js 的 t 與 pt 各補了一條。)
+
+    值取平板那一份 —— 三檔之中它在中間,拿不到斷點時最不容易出錯。 */
+  --figure-404-icon-max-size: var(--figure-404-icon-tablet-max-size);
+  --figure-404-icon-size: var(--figure-404-icon-tablet-size);
+  --figure-image-scale: var(--figure-image-tablet-scale);
+  --figure-no-image-img-max-w: none;
+  --figure-no-image-img-w: auto;
+
+  /* 圖片載入失敗(status 404)的佔位 ------------------------------------- */
+
+  --figure-404-color: var(--white);
+
+  /* 圖示是正方形,寬高同值,所以用 size 一個變數帶兩個屬性。 */
+  --figure-404-icon-pc-size: 30%;
+  --figure-404-icon-tablet-size: 30%;
+  --figure-404-icon-mobile-size: 30%;
+
+  --figure-404-icon-pc-max-size: 120px;
+  --figure-404-icon-tablet-max-size: 120px;
+  --figure-404-icon-mobile-max-size: 120px;
+
+  /* 沒有圖片來源的佔位 --------------------------------------------------- */
+
   --figure-no-image-bg-color: var(--gray-f2);
 
-  /* 404 佔位圖:等比縮在容器中間,不要撐滿 */
-  --figure-no-image-img-w: auto;
   --figure-no-image-img-pc-w: 50%;
   --figure-no-image-img-tablet-w: 50%;
   --figure-no-image-img-mobile-w: 50%;
 
-  --figure-no-image-img-max-w: none;
   --figure-no-image-img-pc-max-w: 250px;
   --figure-no-image-img-tablet-max-w: 250px;
   --figure-no-image-img-mobile-max-w: 250px;
 
-  /* 圖片載入失敗時的外框 */
-  --figure-error-border-color: var(--gray-e5);
-  --figure-error-icon-color: var(--gray-999);
+  /* 外層 .group hover 時的圖片放大倍率 ----------------------------------- */
 
-  --figure-error-rounded: 0;
-  --figure-error-pc-rounded: 10px;
-  --figure-error-tablet-rounded: 10px;
-  --figure-error-mobile-rounded: 10px;
-
-  --figure-error-border: 0;
-  --figure-error-pc-border: 1px;
-  --figure-error-tablet-border: 1px;
-  --figure-error-mobile-border: 1px;
-
-  /*
-   * 失敗圖示佔容器的 30%(比例不分斷點,直接寫在版型檔),
-   * 但容器很大時要有上限 —— 寬高同值所以只開一個 -size。
-   */
-  --figure-error-icon-max-size: none;
-  --figure-error-icon-pc-max-size: 120px;
-  --figure-error-icon-tablet-max-size: 120px;
-  --figure-error-icon-mobile-max-size: 120px;
+  --figure-image-pc-scale: 1.1;
+  --figure-image-tablet-scale: 1.1;
+  --figure-image-mobile-scale: 1.1;
 }

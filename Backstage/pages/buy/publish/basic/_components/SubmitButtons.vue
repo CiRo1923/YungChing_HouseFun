@@ -55,6 +55,9 @@ const items = computed(() => {
     },
   ]
 })
+
+// 每一筆自己帶著要做的事,這裡只負責把它叫起來
+const onItemClick = (item) => item.onClick?.()
 </script>
 
 <template>
@@ -69,7 +72,7 @@ const items = computed(() => {
               main: [item.class.main, '--text-center --oval --h-45 --px-30 --py-8 w-full shrink-0'],
               text: 'font-semibold',
             }"
-            @click="item.onClick"
+            @click="onItemClick(item)"
           />
         </li>
       </template>

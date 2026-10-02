@@ -15,10 +15,10 @@ const onSearchClick = async () => {
 <template>
   <PageBuyListFilterCommonAccordion @search="onSearchClick">
     <PageBuyListFilterCommonPurpose />
-    <template #hide="{ searchFun }">
+    <template #hide="{ onSearch }">
       <PageBuyListFilterCommonArea />
       <PageBuyListFilterCommonMore />
-      <PageBuyListFilterCommonSearch @search="searchFun" />
+      <PageBuyListFilterCommonSearch @search="onSearch" />
     </template>
   </PageBuyListFilterCommonAccordion>
 </template>

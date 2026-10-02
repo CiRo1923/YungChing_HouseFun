@@ -1,6 +1,18 @@
-/* radioItem 變體的變數 —— 整塊可點的選項卡,打勾圖示的行為在 selection 群組。 */
+/* radioItem 變體的變數 —— 整塊可點的選項卡。 */
 :root {
   --form-radio-item-icon-border-color: var(--gray-ccce);
+  --form-radio-item-icon-color: var(--orange-e646);
+
+  /* 打勾圖示用透明度切換,不用 display —— 要讓它淡入淡出。
+     沒選的時候是 0(看不見但佔著位置),選了換成 1。 */
+  --form-radio-item-icon-opacity: 0;
+  --form-radio-item-icon-checked-opacity: 1;
+
+  /* 圖示自己的外框(圓框) */
+  --form-radio-item-icon-border: 0;
+  --form-radio-item-icon-pc-border: 1px;
+  --form-radio-item-icon-tablet-border: 1px;
+  --form-radio-item-icon-mobile-border: 1px;
 
   --form-radio-item-checked-bg-color: var(--orange-feea);
   --form-radio-item-error-border-color: var(--orange-e646);

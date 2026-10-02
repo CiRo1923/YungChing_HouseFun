@@ -1,26 +1,37 @@
 :root {
-  --popup-w: auto;
+  /* 三個斷點各自指派的那幾個,base 也要給一份。
 
-  /* lint-breakpoint-exempt: 手機版寬度固定,桌機 / 平板的寬度由 --w-1200 ~ --w-300 modifier 決定 */
-  --popup-mobile-w: 343px;
+    斷點是 raw 查詢,不是連續的範圍 —— 哪天某個尺寸三個都不命中,
+    沒有 base 的那幾個就讀到未定義的變數,瀏覽器把整條宣告丟掉,而且不報錯。
+    (那種縫出現過一次:寬 1000 到 1023、高度不足 428 的視窗,
+    後來在 tailwind.theme.js 的 t 與 pt 各補了一條。)
 
+    值取平板那一份 —— 三檔之中它在中間,拿不到斷點時最不容易出錯。 */
+  --popup-body-mt: var(--popup-body-tablet-mt);
+  --popup-body-px: var(--popup-body-tablet-px);
+  --popup-container-rounded-b: var(--popup-container-tablet-rounded);
   --popup-container-rounded-t: 0;
+  --popup-footer-mt: var(--popup-footer-tablet-mt);
+  --popup-header-anchor-p: var(--popup-header-anchor-tablet-p);
+  --popup-header-anchor-size: var(--popup-header-anchor-tablet-size);
+  --popup-header-border: var(--popup-header-tablet-border);
+  --popup-header-gap-x: var(--popup-header-tablet-gap-x);
+  --popup-header-icon-p: var(--popup-header-icon-tablet-p);
+  --popup-header-icon-size: var(--popup-header-icon-tablet-size);
+  --popup-header-pb: var(--popup-header-tablet-pb);
+  --popup-header-text-size: var(--popup-header-tablet-text-size);
+  --popup-overlay-blur: var(--popup-overlay-tablet-blur);
+  --popup-tools-mx: 0;
+
+  --popup-px: 0;
+  --popup-py: 0;
+  --popup-w: auto;
+  --popup-container-max-w: none;
+  --popup-tools-mt: 0;
+
   --popup-container-pc-rounded: 15px;
   --popup-container-tablet-rounded: 15px;
   --popup-container-mobile-rounded: 15px;
-
-  /* --bottomSheet 變體只圓上緣(目前保留未啟用),值同整體圓角 */
-  --popup-container-pc-rounded-t: 15px;
-  --popup-container-tablet-rounded-t: 15px;
-  --popup-container-mobile-rounded-t: 15px;
-
-  --popup-container-pc-px: 72px;
-  --popup-container-tablet-px: 32px;
-  --popup-container-mobile-px: 32px;
-
-  --popup-container-pc-py: 40px;
-  --popup-container-tablet-py: 32px;
-  --popup-container-mobile-py: 32px;
 
   --popup-header-pc-pb: 24px;
   --popup-header-tablet-pb: 24px;
@@ -30,10 +41,19 @@
   --popup-header-tablet-border: 2px;
   --popup-header-mobile-border: 2px;
 
+  /* 標題的寬度。預設佔滿整行 —— 關閉鈕浮在它上面,不跟它搶同一條線。
+
+    留成變數是為了讓「標題只佔內容寬」這件事在各專案是調值就好:
+    改成 auto 即可,不必去動 common.css 的版型 ——
+    動了版型的那一份會在下一次整套更新時被蓋掉,而蓋掉的當下沒有訊息。 */
+  --popup-header-title-w: 100%;
+
+  /* 彈窗標題由元件自己排版、全站長一樣,字級由元件決定並分斷點 */
   --popup-header-pc-text-size: 24px;
   --popup-header-tablet-text-size: 24px;
   --popup-header-mobile-text-size: 24px;
 
+  /* 標題列裡圖示與文字的間隔 */
   --popup-header-pc-gap-x: 10px;
   --popup-header-tablet-gap-x: 10px;
   --popup-header-mobile-gap-x: 10px;
@@ -54,30 +74,35 @@
   --popup-header-anchor-tablet-size: 30px;
   --popup-header-anchor-mobile-size: 30px;
 
-  /* 工具列手機排到下方(推上外距)、桌機與平板排到側邊(推開左右),兩端各只有一個方向 */
-  --popup-tools-mt: 0;
-  --popup-tools-mx: 0;
-
-  /* lint-breakpoint-exempt: 桌機 / 平板的工具列在側邊,只推左右,手機沒有這個方向 */
-  --popup-tools-pc-mx: 24px;
-  --popup-tools-tablet-mx: 12px;
-
-  /* lint-breakpoint-exempt: 手機的工具列在下方,只推上方,桌機 / 平板沒有這個方向 */
-  --popup-tools-mobile-mt: 12px;
+  /* 工具列:手機是上下排(用 mt)、桌機平板是左右排(用 mx),兩組刻意不成套 */
+  /* 手機那一份是 0 —— 工具列在手機改用上間距(--popup-tools-mt),
+     左右不留白。版型那一側用 pt: 前綴,所以這個 0 實際上套不到,
+     但三份要成套:缺一份的話,那個名字看起來像成套結構的一員而其實不是。 */
+  --popup-tools-pc-mx: 24px; /* lint-breakpoint-exempt: 桌機 / 平板的工具列在側邊,只推左右,手機沒有這個方向 */
+  --popup-tools-tablet-mx: 12px; /* lint-breakpoint-exempt: 手機改用 mt */
+  --popup-tools-mobile-mx: 0;
 
   --popup-body-pc-mt: 24px;
   --popup-body-tablet-mt: 24px;
   --popup-body-mobile-mt: 24px;
-
-  /* 捲軸與內容之間的間距(捲軸本身 4px,見 _common/basic.css 的 .scrollbar.--y) */
   --popup-body-pc-px: 8px;
   --popup-body-tablet-px: 8px;
   --popup-body-mobile-px: 8px;
+
+  /* 內容區的捲軸。樣式收在這支元件自己的資料夾裡,不靠專案的全域樣式 ——
+    只複製元件資料夾的時候,全域那一份不會跟著走,
+    而少了它連「內容超出要能捲」都沒有,超出的部分直接被裁掉,沒有任何徵兆。 */
+  --popup-scrollbar-w: 4px; /* lint-breakpoint-exempt: 捲軸只在桌機畫,另外兩個斷點沒有套用這組樣式 */
+  --popup-scrollbar-rounded: 8px; /* lint-breakpoint-exempt: 捲軸只在桌機畫,另外兩個斷點沒有套用這組樣式 */
+  --popup-scrollbar-thumb-color: var(--green-6a2d);
+  --popup-scrollbar-track-color: var(--gray-f2);
 
   --popup-footer-pc-mt: 24px;
   --popup-footer-tablet-mt: 24px;
   --popup-footer-mobile-mt: 24px;
 
+  /* 遮罩與全域 loading(mLoading 的 --fixed)一致 —— 兩者會在「動作結束就導頁」時
+     短暫交疊,深淺或模糊不同就會露出是兩層。改這裡要連 mLoading 一起改。 */
   --popup-overlay-pc-blur: 2px;
   --popup-overlay-tablet-blur: 2px;
   --popup-overlay-mobile-blur: 2px;
@@ -85,6 +110,7 @@
   --popup-overlay-bg-color: var(--black-33);
   --popup-container-bg-color: var(--white);
   --popup-header-border-color: var(--orange-e646);
+  --popup-header-title-color: var(--gray-666);
   --popup-header-icon-color: var(--gray-666);
   --popup-header-anchor-color: var(--gray-ccce);
 }
