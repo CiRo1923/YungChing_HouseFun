@@ -1,3 +1,4 @@
-.m-form-length {
-  @apply shrink-0 transition-colors duration-300;
+/* 欄位與後綴橫向並排 —— 排列方式各變體自己給,共用那一層不設。 */
+.m-form-container.\-\-input {
+  @apply flex;
 }

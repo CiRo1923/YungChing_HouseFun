@@ -1,4 +1,27 @@
 :root {
+  /* 三個斷點各自指派的那幾個,base 也要給一份。
+
+    斷點是 raw 查詢,不是連續的範圍 —— 哪天某個尺寸三個都不命中,
+    沒有 base 的那幾個就讀到未定義的變數,瀏覽器把整條宣告丟掉,而且不報錯。
+    (那種縫出現過一次:寬 1000 到 1023、高度不足 428 的視窗,
+    後來在 tailwind.theme.js 的 t 與 pt 各補了一條。)
+
+    值取平板那一份 —— 三檔之中它在中間,拿不到斷點時最不容易出錯。 */
+  --form-select-dropdown-button-border: var(--form-select-dropdown-button-tablet-border);
+  --form-select-dropdown-button-px: var(--form-select-dropdown-button-tablet-px);
+  --form-select-dropdown-container-px: var(--form-select-dropdown-container-tablet-px);
+  --form-select-dropdown-container-py: var(--form-select-dropdown-container-tablet-py);
+  --form-select-dropdown-label-py: var(--form-select-dropdown-label-tablet-py);
+  --form-select-dropdown-my: var(--form-select-dropdown-tablet-my);
+  --form-select-dropdown-shadow: var(--form-select-dropdown-tablet-shadow);
+  --form-select-icon-p: var(--form-select-icon-tablet-p);
+  --form-select-icon-size: var(--form-select-icon-tablet-size);
+
+  /* 浮層圓角的 base 給 0(等同無圓角),`.--rounded` 再覆蓋成實際值。
+     沒有 base 的話,沒掛那個 class 時讀到的是未定義的變數 ——
+     瀏覽器把整條 rounded 丟掉,結果看起來一樣是直角,但那是碰巧。 */
+  --form-select-dropdown-rounded: 0;
+
   --form-select-icon-pc-p: 2px;
   --form-select-icon-tablet-p: 2px;
   --form-select-icon-mobile-p: 2px;

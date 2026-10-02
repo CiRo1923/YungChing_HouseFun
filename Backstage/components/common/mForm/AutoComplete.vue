@@ -532,7 +532,7 @@ onUnmounted(() => {
     </Field>
     <ErrorMessage
       as="span"
-      class="m-form-autocomplete-error"
+      class="m-form-error"
       :class="setClass.error"
       v-bind="config.attr.error"
       :name="props.name"

@@ -1,43 +1,49 @@
 :root {
   /* 三個斷點各自指派的那幾個,base 也要給一份。
 
-     斷點是 raw 查詢,不是連續的範圍 —— 某個尺寸三個都不命中時,
-     沒有 base 的那幾個就讀到未定義的變數,瀏覽器把整條宣告丟掉,而且不報錯。
+    斷點是 raw 查詢,不是連續的範圍 —— 哪天某個尺寸三個都不命中,
+    沒有 base 的那幾個就讀到未定義的變數,瀏覽器把整條宣告丟掉,而且不報錯。
+    (那種縫出現過一次:寬 1000 到 1023、高度不足 428 的視窗,
+    後來在 tailwind.theme.js 的 t 與 pt 各補了一條。)
 
-     值取平板那一份 —— 三檔之中它在中間,拿不到斷點時最不容易出錯。 */
+    值取平板那一份 —— 三檔之中它在中間,拿不到斷點時最不容易出錯。 */
   --anchor-border: var(--anchor-tablet-border);
 
-  /* padding 的 base 給 0 —— px-[--x] / py-[--x] 各自展開成兩條宣告,
-     變數未定義時兩條一起失效,畫面沒效果也不報錯。
-     給 0 等同「沒有 padding」,modifier 再覆蓋成實際值。 */
+  /* padding 變數 base 預設:production 壓縮會把 padding-* 合併成 shorthand
+     `padding: var(--anchor-py) var(--anchor-px)`,shorthand 內任一 var() 未定義
+     (元素只帶 --px-XX、沒帶 --py-XX)就會使整條 padding 失效歸零。base 給 0 → 沒對應
+     modifier 時等同無 padding,且 shorthand 永遠有有效值;modifier(.--px-XX / .--py-XX)再覆蓋。 */
   --anchor-px: 0;
   --anchor-py: 0;
-
-  /* 高度的 base 不能給 0,否則沒帶 --h-XX 的按鈕會整個塌掉 */
-  --anchor-h: auto;
 
   /* rounded 的 base 給 0(等同無圓角),.--rounded-XX 再覆蓋成實際值。
      直接寫在 base 而不綁一個 .--rounded 開關 —— 圓角大小已由 modifier 決定,
      沒帶 modifier 就是 0,不需要額外的「要不要圓角」旗標。 */
   --anchor-rounded: 0;
 
+  /* 高度的 base 給 auto(由內容撐開),.--h-XX 再覆蓋成固定值。
+
+     **不能給 0**:那會讓沒帶 `--h-XX` 的按鈕整個塌掉 ——
+     文字連結那種樣式本來就不指定高度,它們要的就是「跟著內容」。
+
+     也不能不給。沒有 base 的話,那幾個按鈕讀到的是未定義的變數,
+     瀏覽器把整條 height 丟掉 —— 結果看起來正常,但那是碰巧:
+     哪天有人在別處替這個名字補了一個值,那一批按鈕會同時變高,
+     而畫面上看不出是從哪裡來的。 */
+  --anchor-h: auto;
+
   --anchor-pc-border: 1px;
   --anchor-tablet-border: 1px;
   --anchor-mobile-border: 1px;
 
-  /* 沒帶 --text-XX 時繼承父層字色 —— 拆 module 前的行為就是這樣,
-     全案有一半以上的使用端沒帶顏色 modifier,靠的就是繼承。
-     這裡不能用 initial,那是黑色而不是繼承。 */
+  /* 沒帶 --text-* modifier 時跟父層走 —— 不要寫 initial */
   --anchor-color: inherit;
-  --anchor-bg-color: transparent;
-  --anchor-border-color: transparent;
-
   --anchor-disabled-color: var(--white);
+
+  --anchor-bg-color: transparent;
   --anchor-disabled-bg-color: var(--gray-e5);
 
-  /* 停用狀態的框線色 base 給 transparent —— border-width 是無條件給的,
-     沒帶 --border-XX 顏色 modifier 的按鈕要看不見那 1px。
-     灰底白字本身已經表達停用,不需要再多一條框線。 */
+  --anchor-border-color: transparent;
   --anchor-disabled-border-color: transparent;
 }
 

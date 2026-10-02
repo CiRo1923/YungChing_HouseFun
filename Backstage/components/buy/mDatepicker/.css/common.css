@@ -1,10 +1,14 @@
 /* mDatepicker(Single 日期 / Time 時間)共用的版型,以及 @screen 的斷點對應。
 
-  注意:元件的 template 只掛語意 class,樣式一律收在這裡。 */
+  注意：元件的 template 只掛語意 class,樣式一律收在這裡。 */
 /* ===== 輸入框 ===== */
 
+/* 高度由變數決定,不讓裡面的文字撐開 ——
+  撐開的話改字級會連整列版面一起動,而且與並排的一般輸入框對不齊。 */
 .m-datepicker-element {
-  @apply flex items-center rounded-[--datepicker-rounded] border-[1px] leading-[1];
+  border-width: var(--datepicker-border);
+
+  @apply flex h-[--datepicker-h] items-center rounded-[--datepicker-rounded] leading-[1];
   @apply border-[--datepicker-border-color] bg-[--datepicker-bg-color] text-[--datepicker-color];
   @apply px-[--datepicker-px] transition-colors duration-300;
 
@@ -18,24 +22,38 @@
     --datepicker-color: var(--datepicker-focus-color);
     --datepicker-border-color: var(--datepicker-focus-border-color);
   }
+
+  &.\-\-disabled {
+    --datepicker-color: var(--datepicker-disabled-color);
+    --datepicker-border-color: var(--datepicker-disabled-border-color);
+    --datepicker-bg-color: var(--datepicker-disabled-bg-color);
+  }
 }
 
+/* 字級要寫 length: —— 少了它,框架推斷不出型別會當成顏色,
+  產出 color 而不是 font-size,字級靜默失效。 */
 .m-datepicker-type {
-  @apply h-full w-full bg-transparent text-[--datepicker-type-size];
+  @apply h-full w-full bg-transparent text-[length:--datepicker-type-size];
 }
 
 .m-datepicker-icon {
   @apply h-[--datepicker-icon-size] w-[--datepicker-icon-size];
+  @apply px-[--datepicker-icon-px] py-[--datepicker-icon-py];
 
-}
-
-/* 圖示撐滿按鈕(尺寸由 .m-datepicker-icon 的變數決定) */
-.m-datepicker-icon-svg {
-  @apply h-full w-full;
+  /* 圖示撐滿按鈕 —— 尺寸由上面那個變數決定,svg 只是跟著長 */
+  > .m-datepicker-icon-svg {
+    @apply h-full w-full;
+  }
 }
 
 .m-datepicker-error {
-  @apply mt-[2px] flex items-center text-left text-[--red-f00];
+  /* 外層只管定位 —— 字級、顏色與圖示都由裡面那支 MErrorMessage 決定,
+     全站的錯誤訊息才會長得一樣。
+
+     在這裡寫字級的話會蓋掉裡層那一份,而且那是多做的:
+     它填的值與別處的錯誤訊息一樣,等於同一個值有了兩份定義 ——
+     改字級要記得兩處都改,漏一處就是這裡的訊息與別處不一樣,而且不會報錯。 */
+  @apply mt-[--datepicker-error-mt] flex items-center text-left;
 }
 
 /* ===== 日期 + 時間並排 ===== */
@@ -78,24 +96,34 @@
     @apply fixed inset-0 flex items-center justify-center;
 
     &:before {
-      @apply absolute inset-0 bg-[--black] opacity-40 content-default;
+      @apply absolute inset-0 content-default;
+      @apply bg-[--datepicker-calendar-overlay-bg-color] opacity-[--datepicker-calendar-overlay-opacity];
     }
   }
 }
 
 .m-datepicker-calendar-container {
-  box-shadow: 0 0 8px 0 var(--black-33);
+  box-shadow: var(--datepicker-calendar-shadow);
+
+  border-width: var(--datepicker-calendar-border);
 
   @apply relative z-[1] my-[--datepicker-calendar-my] overflow-hidden;
-  @apply rounded-[--datepicker-calendar-rounded] border-[1px] border-[--datepicker-calendar-border-color];
-  @apply bg-[--white] px-[--datepicker-calendar-px] py-[--datepicker-calendar-py];
+  @apply rounded-[--datepicker-calendar-rounded] border-[--datepicker-calendar-border-color];
+  @apply bg-[--datepicker-calendar-bg-color] px-[--datepicker-calendar-px] py-[--datepicker-calendar-py];
   @apply transition-colors duration-300;
+
+  /* headerMode: 'select' 的年月清單會往下超出這個容器。
+    裁掉的話清單只看得到上半截,捲到下面的項目在被裁的那一塊裡 —— 選不到也看不見。 */
+  &.\-\-select {
+    @apply overflow-visible;
+  }
 }
 
 /* ===== header ===== */
 
 .m-datepicker-calendar-header {
   @apply relative flex items-center;
+  @apply px-[--datepicker-calendar-header-px] py-[--datepicker-calendar-header-py];
 }
 
 .m-datepicker-calendar-header-container {
@@ -129,6 +157,76 @@
   @apply h-[--datepicker-arrow-icon-size] w-[--datepicker-arrow-icon-size];
 }
 
+/* headerMode: 'select' 的年 / 月下拉。
+
+  兩個下拉並排在標題列中間,清單往下展開蓋住日曆的上緣 ——
+  日曆本身留在原地(那正是這個模式與 'panel' 的差別)。 */
+.m-datepicker-calendar-select-group {
+  @apply flex items-center justify-center;
+  @apply gap-x-[--datepicker-calendar-header-group-gap-x];
+}
+
+.m-datepicker-calendar-select {
+  @apply relative;
+}
+
+/* 收合時顯示的那一顆 —— 圓角與內距沿用 'panel' 那兩顆年月按鈕的值,
+  兩種模式的標題列看起來才是同一個元件。 */
+.m-datepicker-calendar-select-label {
+  @apply flex items-center gap-x-[--datepicker-calendar-header-group-gap-x];
+  @apply rounded-[--datepicker-panel-label-rounded] px-[--datepicker-panel-label-px];
+  @apply transition-colors duration-300;
+
+  &:hover,
+  &.\-\-active {
+    @apply bg-[--datepicker-panel-label-active-bg-color];
+  }
+
+  /* 展開時箭頭翻上去 —— 收合的朝下、展開的朝上,
+    不看清單也知道現在是哪一種狀態。 */
+  &.\-\-active > .m-datepicker-calendar-select-icon {
+    @apply -rotate-90;
+  }
+}
+
+/* 右向的箭頭轉成朝下 —— 不必為了下拉再多一個圖示 */
+.m-datepicker-calendar-select-icon {
+  @apply h-[--datepicker-arrow-icon-size] w-[--datepicker-arrow-icon-size];
+  @apply rotate-90 transition-transform duration-300;
+}
+
+/* 清單比觸發鈕寬(四位數的年份放不下),但不能比它窄 ——
+  窄的話清單會浮在按鈕中間,看起來不像是從那一顆展開的。 */
+.m-datepicker-calendar-select-list {
+  @apply absolute left-0 top-full z-[2];
+  @apply max-h-[--datepicker-panel-h] w-max min-w-full overflow-y-auto;
+  border-width: var(--datepicker-calendar-border);
+
+  @apply rounded-[--datepicker-calendar-rounded];
+  @apply border-[--datepicker-calendar-border-color] bg-[--datepicker-calendar-bg-color];
+  @apply py-[--datepicker-calendar-py];
+
+  box-shadow: var(--datepicker-calendar-shadow);
+}
+
+.m-datepicker-calendar-select-option {
+  @apply flex w-full items-center justify-center;
+  @apply h-[--datepicker-panel-ctrl-h] px-[--datepicker-panel-label-px];
+  @apply text-[--datepicker-panel-color] transition-colors duration-300;
+
+  &:hover:not(.\-\-disabled) {
+    @apply bg-[--datepicker-panel-hover-bg-color];
+  }
+
+  &.\-\-curr {
+    @apply bg-[--datepicker-panel-curr-bg-color] text-[--datepicker-panel-curr-color];
+  }
+
+  &.\-\-disabled {
+    @apply opacity-30;
+  }
+}
+
 /* headerMode: 'panel' 的年 / 月按鈕 */
 .m-datepicker-calendar-label {
   @apply rounded-[--datepicker-panel-label-rounded] px-[--datepicker-panel-label-px];
@@ -143,27 +241,34 @@
 /* ===== 星期列與日期格 ===== */
 
 .m-datepicker-calendar-weeks {
+  @apply px-[--datepicker-calendar-body-px];
   @apply flex items-center bg-[--datepicker-calendar-week-bg-color] text-[--datepicker-calendar-week-color];
 }
 
+/* 格子決定欄寬與列高,並把裡面那顆圓鈕置中。
+  圓鈕自己的大小是另一個變數 —— 圓鈕比格子小的時候,差額就是四周的留白。 */
 .m-datepicker-calendar-cell {
+  @apply isolate flex items-center justify-center;
+  @apply h-[--datepicker-calendar-cell-h] w-[--datepicker-calendar-cell-w];
   @apply p-[--datepicker-calendar-cell-p];
 }
 
 .m-datepicker-calendar-week {
   font-size: var(--datepicker-calendar-week-text-size);
 
-  @apply flex h-[--datepicker-calendar-cell-size] w-[--datepicker-calendar-cell-size] items-center justify-center;
+  @apply flex h-[--datepicker-calendar-ctrl-size] w-[--datepicker-calendar-cell-w] items-center justify-center;
 }
 
 .m-datepicker-calendar-dates {
   @apply grid grid-cols-7 items-center;
+  @apply px-[--datepicker-calendar-body-px];
+  @apply mt-[--datepicker-calendar-dates-mt] pb-[--datepicker-calendar-dates-pb];
 }
 
 .m-datepicker-calendar-ctrl {
   font-size: var(--datepicker-calendar-date-text-size);
 
-  @apply flex h-[--datepicker-calendar-cell-size] w-[--datepicker-calendar-cell-size] items-center justify-center;
+  @apply relative flex h-[--datepicker-calendar-ctrl-size] w-[--datepicker-calendar-ctrl-size] items-center justify-center;
   @apply rounded-[--datepicker-calendar-date-rounded] border-solid leading-[1];
   @apply text-[--datepicker-calendar-date-color] transition-colors duration-300;
 
@@ -189,17 +294,65 @@
     border-width: var(--datepicker-calendar-today-border);
 
     @apply border-[--datepicker-calendar-today-border-color] bg-[--datepicker-calendar-today-bg-color] text-[--datepicker-calendar-today-color];
+
+    /* 日期底下那一顆小圓點。大小預設 0 —— 那時它在畫面上不佔任何位置。 */
+    &:after {
+      @apply absolute bottom-[--datepicker-calendar-today-dot-mb] left-1/2 -translate-x-1/2;
+      @apply h-[--datepicker-calendar-today-dot-size] w-[--datepicker-calendar-today-dot-size];
+      @apply rounded-full bg-[--datepicker-calendar-today-dot-bg-color] content-default;
+    }
   }
 
   /*
    * 區間選擇(Range 變體)。放在 --today 之後 —— 區間色要贏過今天的底色,
    * 否則區間中間剛好是今天時會看起來斷成兩段。要反過來就把這幾組移到 --today 前面。
    *
-   * 注意:圓角用四個 longhand 而不是 shorthand:起訖落在同一天時(只選了頭、還沒選尾)
+   * 注意：圓角用四個 longhand 而不是 shorthand:起訖落在同一天時(只選了頭、還沒選尾)
    *    兩組規則都會套用,shorthand 會整個覆蓋掉對方那一側。
    */
+  /* 區間的背景條。
+
+    它畫在圓鈕的 :before,左右各往外伸出「格子寬減圓鈕寬」的一半 ——
+    相鄰兩格的條子才接得成一條。格子與圓鈕同寬時伸出 0,
+    看起來就是整格鋪滿。
+
+    中間那幾天只有這條(圓鈕本身不上色);起訖兩天的圓鈕照舊上色、維持正圓,
+    條子只接向區間內側的那一半。
+
+    格子那一層有 isolate —— 沒有的話,這個負的層級會穿到浮層背景底下,
+    整條看不見,而且不會有任何錯誤訊息。 */
+  &.\-\-in-range,
+  &.\-\-range-start,
+  &.\-\-range-end {
+    &:before {
+      @apply absolute top-1/2 -z-10 h-[--datepicker-calendar-range-bar-h] -translate-y-1/2;
+      @apply bg-[--datepicker-calendar-range-bar-bg-color] content-default;
+
+      left: calc(
+        -1 * (var(--datepicker-calendar-cell-w) - var(--datepicker-calendar-ctrl-size)) / 2
+      );
+      right: calc(
+        -1 * (var(--datepicker-calendar-cell-w) - var(--datepicker-calendar-ctrl-size)) / 2
+      );
+    }
+  }
+
+  /* 起點只接右半邊、終點只接左半邊 */
+  &.\-\-range-start:before {
+    @apply left-1/2;
+  }
+
+  &.\-\-range-end:before {
+    @apply right-1/2;
+  }
+
+  /* 起訖落在同一天(只選了頭、還沒選尾)—— 沒有區間,不畫 */
+  &.\-\-range-start.\-\-range-end:before {
+    @apply hidden;
+  }
+
   &.\-\-in-range {
-    @apply rounded-none bg-[--datepicker-calendar-in-range-bg-color];
+    @apply rounded-none;
   }
 
   &.\-\-range-start {
@@ -237,7 +390,7 @@
 
 /* ===== 年 / 月面板 ===== */
 
-/* 注意:高度寫死是刻意的 —— 年份有上百筆,不給高度面板會整個撐爆畫面,
+/* 注意：高度寫死是刻意的 —— 年份有上百筆,不給高度面板會整個撐爆畫面,
     而且切換年月時面板高度要與日曆一致,否則每點一次都會跳一下。 */
 .m-datepicker-panel {
   @apply grid gap-[--datepicker-panel-gap] overflow-y-auto;
@@ -246,11 +399,11 @@
   /*
    * 與日曆同寬 —— 一週七格的總寬。
    *
-   * 注意:只到年 / 月的精度下,面板就是主畫面(沒有日曆可以撐寬度),不給寬度的話
+   * 注意：只到年 / 月的精度下,面板就是主畫面(沒有日曆可以撐寬度),不給寬度的話
    *    浮層會比 YYYY-MM-DD 那種窄一截,同一頁並排時看起來像兩種元件。
    *    7 是一週的天數,不是尺寸,所以直接寫在算式裡。
    */
-  @apply w-[calc(7*var(--datepicker-calendar-cell-size))];
+  @apply w-[calc(7*var(--datepicker-calendar-cell-w)+2*var(--datepicker-calendar-body-px))];
 
   &.\-\-year {
     @apply grid-cols-3;
@@ -260,7 +413,7 @@
    * 月清單固定 12 格(4 列),高度讓內容決定 ——
    * 上面那個寫死的高度是為了年清單(上百筆要捲動),月清單吃到會在下方空出一大塊。
    *
-   * 注意:代價是「月清單 ↔ 年清單」切換時高度會變。相較於只到月的精度下永遠空一大塊,
+   * 注意：代價是「月清單 ↔ 年清單」切換時高度會變。相較於只到月的精度下永遠空一大塊,
    *    這個取捨比較好;要改回等高就把 h-auto 拿掉。
    */
   &.\-\-month {
@@ -359,22 +512,38 @@
 @screen p {
   .m-datepicker {
     --datepicker-px: var(--datepicker-pc-px);
+    --datepicker-h: var(--datepicker-pc-h);
     --datepicker-rounded: var(--datepicker-pc-rounded);
+    --datepicker-border: var(--datepicker-pc-border);
     --datepicker-type-size: var(--datepicker-type-pc-size);
     --datepicker-icon-size: var(--datepicker-icon-pc-size);
+    --datepicker-icon-px: var(--datepicker-icon-pc-px);
+    --datepicker-icon-py: var(--datepicker-icon-pc-py);
     --datepicker-datetime-gap-x: var(--datepicker-datetime-pc-gap-x);
     --datepicker-range-gap-x: var(--datepicker-range-pc-gap-x);
   }
   .m-datepicker-calendar {
     --datepicker-calendar-my: var(--datepicker-calendar-pc-my);
     --datepicker-calendar-px: var(--datepicker-calendar-pc-px);
+    --datepicker-calendar-border: var(--datepicker-calendar-pc-border);
     --datepicker-calendar-py: var(--datepicker-calendar-pc-py);
     --datepicker-calendar-rounded: var(--datepicker-calendar-pc-rounded);
     --datepicker-arrow-size: var(--datepicker-arrow-pc-size);
     --datepicker-arrow-rounded: var(--datepicker-arrow-pc-rounded);
     --datepicker-arrow-icon-size: var(--datepicker-arrow-icon-pc-size);
-    --datepicker-calendar-cell-size: var(--datepicker-calendar-cell-pc-size);
+    --datepicker-calendar-cell-w: var(--datepicker-calendar-cell-pc-w);
+    --datepicker-calendar-today-dot-size: var(--datepicker-calendar-today-dot-pc-size);
+    --datepicker-calendar-today-dot-mb: var(--datepicker-calendar-today-dot-pc-mb);
+    --datepicker-calendar-range-bar-h: var(--datepicker-calendar-range-bar-pc-h);
+    --datepicker-calendar-cell-h: var(--datepicker-calendar-cell-pc-h);
+    --datepicker-calendar-body-px: var(--datepicker-calendar-body-pc-px);
+    --datepicker-calendar-cell-p: var(--datepicker-calendar-cell-pc-p);
+    --datepicker-calendar-ctrl-size: var(--datepicker-calendar-ctrl-pc-size);
     --datepicker-calendar-header-text-size: var(--datepicker-calendar-header-text-pc-size);
+    --datepicker-calendar-header-px: var(--datepicker-calendar-header-pc-px);
+    --datepicker-calendar-header-py: var(--datepicker-calendar-header-pc-py);
+    --datepicker-calendar-dates-mt: var(--datepicker-calendar-dates-pc-mt);
+    --datepicker-calendar-dates-pb: var(--datepicker-calendar-dates-pc-pb);
     --datepicker-calendar-header-group-gap-x: var(--datepicker-calendar-header-group-pc-gap-x);
     --datepicker-calendar-week-text-size: var(--datepicker-calendar-week-text-pc-size);
     --datepicker-calendar-date-text-size: var(--datepicker-calendar-date-text-pc-size);
@@ -394,7 +563,7 @@
     --datepicker-time-rounded: var(--datepicker-time-pc-rounded);
   }
   .m-datepicker-error {
-    @apply text-[14px];
+    --datepicker-error-mt: var(--datepicker-error-pc-mt);
   }
 
   .m-datepicker {
@@ -411,22 +580,38 @@
 @screen t {
   .m-datepicker {
     --datepicker-px: var(--datepicker-tablet-px);
+    --datepicker-h: var(--datepicker-tablet-h);
     --datepicker-rounded: var(--datepicker-tablet-rounded);
+    --datepicker-border: var(--datepicker-tablet-border);
     --datepicker-type-size: var(--datepicker-type-tablet-size);
     --datepicker-icon-size: var(--datepicker-icon-tablet-size);
+    --datepicker-icon-px: var(--datepicker-icon-tablet-px);
+    --datepicker-icon-py: var(--datepicker-icon-tablet-py);
     --datepicker-datetime-gap-x: var(--datepicker-datetime-tablet-gap-x);
     --datepicker-range-gap-x: var(--datepicker-range-tablet-gap-x);
   }
   .m-datepicker-calendar {
     --datepicker-calendar-my: var(--datepicker-calendar-tablet-my);
     --datepicker-calendar-px: var(--datepicker-calendar-tablet-px);
+    --datepicker-calendar-border: var(--datepicker-calendar-tablet-border);
     --datepicker-calendar-py: var(--datepicker-calendar-tablet-py);
     --datepicker-calendar-rounded: var(--datepicker-calendar-tablet-rounded);
     --datepicker-arrow-size: var(--datepicker-arrow-tablet-size);
     --datepicker-arrow-rounded: var(--datepicker-arrow-tablet-rounded);
     --datepicker-arrow-icon-size: var(--datepicker-arrow-icon-tablet-size);
-    --datepicker-calendar-cell-size: var(--datepicker-calendar-cell-tablet-size);
+    --datepicker-calendar-cell-w: var(--datepicker-calendar-cell-tablet-w);
+    --datepicker-calendar-today-dot-size: var(--datepicker-calendar-today-dot-tablet-size);
+    --datepicker-calendar-today-dot-mb: var(--datepicker-calendar-today-dot-tablet-mb);
+    --datepicker-calendar-range-bar-h: var(--datepicker-calendar-range-bar-tablet-h);
+    --datepicker-calendar-cell-h: var(--datepicker-calendar-cell-tablet-h);
+    --datepicker-calendar-body-px: var(--datepicker-calendar-body-tablet-px);
+    --datepicker-calendar-cell-p: var(--datepicker-calendar-cell-tablet-p);
+    --datepicker-calendar-ctrl-size: var(--datepicker-calendar-ctrl-tablet-size);
     --datepicker-calendar-header-text-size: var(--datepicker-calendar-header-text-tablet-size);
+    --datepicker-calendar-header-px: var(--datepicker-calendar-header-tablet-px);
+    --datepicker-calendar-header-py: var(--datepicker-calendar-header-tablet-py);
+    --datepicker-calendar-dates-mt: var(--datepicker-calendar-dates-tablet-mt);
+    --datepicker-calendar-dates-pb: var(--datepicker-calendar-dates-tablet-pb);
     --datepicker-calendar-header-group-gap-x: var(--datepicker-calendar-header-group-tablet-gap-x);
     --datepicker-calendar-week-text-size: var(--datepicker-calendar-week-text-tablet-size);
     --datepicker-calendar-date-text-size: var(--datepicker-calendar-date-text-tablet-size);
@@ -448,7 +633,7 @@
     --datepicker-time-rounded: var(--datepicker-time-tablet-rounded);
   }
   .m-datepicker-error {
-    @apply text-[14px];
+    --datepicker-error-mt: var(--datepicker-error-tablet-mt);
   }
 
   .m-datepicker {
@@ -467,22 +652,38 @@
 @screen m {
   .m-datepicker {
     --datepicker-px: var(--datepicker-mobile-px);
+    --datepicker-h: var(--datepicker-mobile-h);
     --datepicker-rounded: var(--datepicker-mobile-rounded);
+    --datepicker-border: var(--datepicker-mobile-border);
     --datepicker-type-size: var(--datepicker-type-mobile-size);
     --datepicker-icon-size: var(--datepicker-icon-mobile-size);
+    --datepicker-icon-px: var(--datepicker-icon-mobile-px);
+    --datepicker-icon-py: var(--datepicker-icon-mobile-py);
     --datepicker-datetime-gap-x: var(--datepicker-datetime-mobile-gap-x);
     --datepicker-range-gap-x: var(--datepicker-range-mobile-gap-x);
   }
   .m-datepicker-calendar {
     --datepicker-calendar-my: var(--datepicker-calendar-mobile-my);
     --datepicker-calendar-px: var(--datepicker-calendar-mobile-px);
+    --datepicker-calendar-border: var(--datepicker-calendar-mobile-border);
     --datepicker-calendar-py: var(--datepicker-calendar-mobile-py);
     --datepicker-calendar-rounded: var(--datepicker-calendar-mobile-rounded);
     --datepicker-arrow-size: var(--datepicker-arrow-mobile-size);
     --datepicker-arrow-rounded: var(--datepicker-arrow-mobile-rounded);
     --datepicker-arrow-icon-size: var(--datepicker-arrow-icon-mobile-size);
-    --datepicker-calendar-cell-size: var(--datepicker-calendar-cell-mobile-size);
+    --datepicker-calendar-cell-w: var(--datepicker-calendar-cell-mobile-w);
+    --datepicker-calendar-today-dot-size: var(--datepicker-calendar-today-dot-mobile-size);
+    --datepicker-calendar-today-dot-mb: var(--datepicker-calendar-today-dot-mobile-mb);
+    --datepicker-calendar-range-bar-h: var(--datepicker-calendar-range-bar-mobile-h);
+    --datepicker-calendar-cell-h: var(--datepicker-calendar-cell-mobile-h);
+    --datepicker-calendar-body-px: var(--datepicker-calendar-body-mobile-px);
+    --datepicker-calendar-cell-p: var(--datepicker-calendar-cell-mobile-p);
+    --datepicker-calendar-ctrl-size: var(--datepicker-calendar-ctrl-mobile-size);
     --datepicker-calendar-header-text-size: var(--datepicker-calendar-header-text-mobile-size);
+    --datepicker-calendar-header-px: var(--datepicker-calendar-header-mobile-px);
+    --datepicker-calendar-header-py: var(--datepicker-calendar-header-mobile-py);
+    --datepicker-calendar-dates-mt: var(--datepicker-calendar-dates-mobile-mt);
+    --datepicker-calendar-dates-pb: var(--datepicker-calendar-dates-mobile-pb);
     --datepicker-calendar-header-group-gap-x: var(--datepicker-calendar-header-group-mobile-gap-x);
     --datepicker-calendar-week-text-size: var(--datepicker-calendar-week-text-mobile-size);
     --datepicker-calendar-date-text-size: var(--datepicker-calendar-date-text-mobile-size);
@@ -504,7 +705,7 @@
     --datepicker-time-rounded: var(--datepicker-time-mobile-rounded);
   }
   .m-datepicker-error {
-    @apply text-[13px];
+    --datepicker-error-mt: var(--datepicker-error-mobile-mt);
   }
 
   .m-datepicker {

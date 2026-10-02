@@ -786,6 +786,8 @@
       "--form-select-icon-tablet-size"
     ],
     "mForm/.css/variables.css": [
+      "--form-assist-error-color",
+      "--form-clear-icon-color",
       "--form-clear-icon-mobile-p",
       "--form-clear-icon-mobile-size",
       "--form-clear-icon-p",

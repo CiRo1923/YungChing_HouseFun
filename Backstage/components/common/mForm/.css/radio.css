@@ -3,6 +3,31 @@
 
 .m-form-element {
   &.\-\-radio {
+    /* 鎖住時的外觀。
+
+      單選鈕整塊是一個 <label>(點文字也要能選),而共用那一份的 disabled
+      寫在 `&:not(label)` 底下 —— 顏色要在這裡換。
+
+      選中狀態那幾個值要再壓一次:它們設在子層(.m-form-label / .m-form-icon)上,
+      這一層設的傳不過去,否則已經選中又鎖住的欄位,文字與圓點仍是原色。 */
+    &.\-\-disabled {
+      --form-radio-label-color: var(--form-radio-label-disabled-color);
+      --form-radio-icon-border-color: var(--form-radio-icon-border-disabled-color);
+
+      .m-form-type {
+        &:checked {
+          & ~ .m-form-label {
+            --form-radio-label-color: var(--form-radio-label-disabled-color);
+          }
+
+          & + .m-form-icon {
+            --form-radio-icon-border-color: var(--form-radio-icon-border-disabled-color);
+            --form-radio-dot-bg-color: var(--form-radio-dot-disabled-bg-color);
+          }
+        }
+      }
+    }
+
     .m-form-type {
       &:checked {
         & ~ .m-form-label {

@@ -1,196 +1,158 @@
-/*
- * mForm 的共用版型 —— 全系列共通的結構,以及 @screen 的斷點對應。
- * modifier 的值在 variables.css,這裡只負責「怎麼用」。
- */
-
-/* 根與容器:各變體的 template 都是 class="m-form" / "m-form-container",外溢一律裁掉 */
 .m-form,
 .m-form-container {
   @apply overflow-hidden;
 }
 
+/* 排列方式由各變體自己決定,這裡不給 —— 單行的那幾支是橫向(欄位與後綴並排),
+  多行輸入是縱向(字數排在欄位底下)。共用一個 flex 的話,
+  其中一種一定要再寫一條去推翻它,而推翻的那一條與這裡相隔很遠。
+
+  各變體的規則寫在自己那一支樣式裡,選擇器是 `.m-form-container.--<變體>` ——
+  變體標記同時掛在這一層與 .m-form-element 上:
+  css 沒有辦法從子層選父層(`:has()` 在內嵌瀏覽器不成立),
+  只看 .m-form-element 的話,這一層選不到。 */
+
 .m-form-element {
-  @apply overflow-hidden;
-  @apply pb-[--form-element-pb] pl-[--form-element-pl] pr-[--form-element-pr] pt-[--form-element-pt];
-
-  min-height: var(--form-element-min-h);
-
   &:not(label) {
-    @apply flex items-center transition-colors duration-300;
-    @apply gap-x-[--form-element-gap-x] rounded-[--form-element-rounded] bg-[--form-element-bg-color];
-
-    /* border-width 走原生 CSS —— production 會壓成 border shorthand,var() 讓整條失效 */
     border-width: var(--form-element-border);
 
-    &:not(:disabled):not(.\-\-disabled):not(.\-\-focus):not(.\-\-error) {
-      @apply border-[--form-element-border-color];
-
-      .m-form-type {
-        @apply text-[--form-element-color];
-      }
-    }
+    @apply flex h-[--form-element-h] grow items-center gap-x-[--form-element-gap-x] overflow-hidden rounded-[--form-element-rounded] border-[--form-element-border-color] bg-[--form-element-bg-color] px-[--form-element-px] py-[--form-element-py] transition-colors duration-300;
 
     &:not(:disabled):not(.\-\-disabled) {
-      .m-form-type {
-        &::placeholder,
-        &.\-\-placeholder {
-          @apply text-[--form-element-placeholder-color];
+      &.\-\-focus {
+        --form-element-color: var(--form-element-focus-color);
+        --form-element-placeholder-color: var(--form-element-placeholder-focus-color);
+        --form-element-border-color: var(--form-element-border-focus-color);
+        --form-element-bg-color: var(--form-element-bg-focus-color);
+      }
+
+      &.\-\-error {
+        --form-element-color: var(--form-element-error-color);
+        --form-element-placeholder-color: var(--form-element-placeholder-error-color);
+        --form-element-border-color: var(--form-element-border-error-color);
+        --form-element-bg-color: var(--form-element-bg-error-color);
+
+        .m-form-length,
+        .m-form-assist {
+          @apply text-[--form-assist-error-color];
         }
       }
     }
 
     &:disabled,
     &.\-\-disabled {
+      --form-element-color: var(--form-element-disabled-color);
+      --form-element-placeholder-color: var(--form-element-placeholder-disabled-color);
+      --form-element-border-color: var(--form-element-border-disabled-color);
+      --form-element-bg-color: var(--form-element-bg-disabled-color);
+
       @apply cursor-not-allowed;
-      @apply border-[--form-element-disbaled-border-color] bg-[--form-element-disabled-bg-color];
 
       .m-form-type {
         @apply pointer-events-none;
-
-        &,
-        &::placeholder,
-        &.\-\-placeholder {
-          @apply text-[--form-element-disabled-text-color];
-        }
       }
     }
+  }
+}
 
-    &.\-\-focus {
-      @apply border-[--form-element-focus-border-color];
+.m-form-hidden-container {
+  &.\-\-flex {
+    @apply flex;
+  }
 
-      .m-form-type {
-        @apply text-[--form-element-focus-color];
-      }
-    }
+  &.\-\-items-center {
+    @apply items-center;
+  }
 
-    &.\-\-error {
-      @apply border-[--form-element-error-border-color];
-
-      .m-form-type {
-        @apply text-[--form-element-error-color];
-      }
-
-      .m-form-length,
-      .m-form-assist {
-        @apply text-[--form-element-error-assist-color];
-      }
-    }
+  &.\-\-justify-center {
+    @apply justify-center;
   }
 }
 
 .m-form-type {
-  /* 字級不在這裡 —— 由使用端 setClass.type 傳(見 variables.css 的說明) */
-  &:not([type='checkbox']):not([type='radio']) {
-    @apply h-full bg-transparent transition-colors duration-300;
+  @apply bg-transparent;
+
+  /* 文字置中由使用端決定(驗證碼那種一格一字的輸入框要),不分斷點 */
+  &.\-\-text-center {
+    @apply text-center;
   }
 
-  /* checkbox / radio 的真 input 藏起來但留給輔助技術,視覺上由旁邊的圖示代表它 */
-  &.\-\-visually-hidden {
-    @apply sr-only;
-  }
-}
-
-/*
- * 真的可以打字的輸入框(Input / Search)。
- *
- * 注意:限定 input 元素是刻意的 —— Select / Dropdown / SelectMultiple 的 .m-form-type
- * 是顯示選中值的 div,它們不需要 grow(寬度由外層 flex 決定),
- * 加上去會改變那三支的版面。checkbox / radio 的 input 則已經是 sr-only,排除掉更明確。
- */
-input.m-form-type {
   &:not([type='checkbox']):not([type='radio']) {
-    /* min-w-0:flex 子元素的預設 min-width 是 auto,不歸零的話長字串會把輸入框撐爆 */
-    @apply min-w-0 grow leading-[1];
+    @apply flex h-full min-w-0 grow items-center text-[--form-element-color];
+
+    &::placeholder,
+    &.\-\-placeholder {
+      @apply text-[--form-element-placeholder-color];
+    }
   }
 }
 
 .m-form-clear-button {
-  @apply h-[--form-clear-button-size] p-[--form-clear-button-p];
+  @apply transition-opacitys duration-300;
 
   &:not(.\-\-show) {
-    transition:
-      opacity 0.3s,
-      visibility 0.3s,
-      width 0s 0.3s;
-
-    @apply pointer-events-none invisible w-0 opacity-0;
+    @apply pointer-events-none invisible opacity-0;
   }
 
   &.\-\-show {
-    transition:
-      opacity 0.3s,
-      visibility 0.3s,
-      width 0s;
-
-    @apply visible w-[--form-clear-button-size] opacity-100;
+    @apply visible opacity-100;
   }
 }
 
 .m-form-clear-icon {
-  @apply h-full w-full text-[--form-clear-button-color];
+  @apply h-[--form-clear-icon-size] w-[--form-clear-icon-size] p-[--form-clear-icon-p] text-[--form-clear-icon-color];
 }
 
-/* 輸入框旁的附屬文字 —— 輸入內容變長時它們不縮,寬度讓給 input */
-.m-form-length,
+/* 字數計數與前後綴不參與壓縮 —— 空間不夠時要擠的是輸入區(.m-form-type 有 grow) */
 .m-form-assist,
-.m-form-suffix {
-  @apply shrink-0 transition-colors duration-300;
+.m-form-suffix,
+.m-form-length {
+  @apply shrink-0;
 }
 
-/* 錯誤訊息的顏色由「嵌入 mErrorMessage 的組件」決定 ——
-   .m-error-message 自己不設 color,靠這裡繼承下去 */
+/* 顏色會跟著狀態變的那兩個要過渡 —— 錯誤狀態下字數與提示文字轉成警示色,
+  少了過渡就是當場跳色。 */
+.m-form-assist,
+.m-form-length {
+  @apply transition-colors duration-300;
+}
+
 .m-form-error {
-  @apply mt-[--form-error-mt] block text-[length:--form-error-text-size] text-[--form-error-color];
+  /* 外層只管定位 —— 字級、顏色與圖示都由裡面那支 MErrorMessage 決定,
+     全站的錯誤訊息才會長得一樣。
+
+     在這裡寫字級的話會蓋掉裡層那一份,而且那是多做的:
+     它填的值與別處的錯誤訊息一樣,等於同一個值有了兩份定義 ——
+     改字級要記得兩處都改,漏一處就是這裡的訊息與別處不一樣,而且不會報錯。 */
+  @apply mt-[--form-error-mt] block;
 }
 
 @screen p {
   .m-form {
-    --form-clear-button-p: var(--form-clear-button-pc-p);
-    --form-clear-button-size: var(--form-clear-button-pc-size);
-    --form-element-gap-x: var(--form-element-pc-gap-x);
-    --form-element-rounded: var(--form-element-pc-rounded);
     --form-element-border: var(--form-element-pc-border);
+    --form-element-gap-x: var(--form-element-pc-gap-x);
+    --form-clear-icon-size: var(--form-clear-icon-pc-size);
+    --form-clear-icon-p: var(--form-clear-icon-pc-p);
     --form-error-mt: var(--form-error-pc-mt);
-    --form-error-text-size: var(--form-error-pc-text-size);
-  }
-
-  /* .m-form-hidden 的錯誤訊息不在 .m-form 底下,要自己拿一份 */
-  .m-form-hidden {
-    --form-error-mt: var(--form-error-pc-mt);
-    --form-error-text-size: var(--form-error-pc-text-size);
   }
 }
 
 @screen t {
   .m-form {
-    --form-clear-button-p: var(--form-clear-button-tablet-p);
-    --form-clear-button-size: var(--form-clear-button-tablet-size);
-    --form-element-gap-x: var(--form-element-tablet-gap-x);
-    --form-element-rounded: var(--form-element-tablet-rounded);
     --form-element-border: var(--form-element-tablet-border);
+    --form-element-gap-x: var(--form-element-tablet-gap-x);
+    --form-clear-icon-size: var(--form-clear-icon-tablet-size);
+    --form-clear-icon-p: var(--form-clear-icon-tablet-p);
     --form-error-mt: var(--form-error-tablet-mt);
-    --form-error-text-size: var(--form-error-tablet-text-size);
-  }
-
-  .m-form-hidden {
-    --form-error-mt: var(--form-error-tablet-mt);
-    --form-error-text-size: var(--form-error-tablet-text-size);
   }
 }
 
 @screen m {
   .m-form {
-    --form-clear-button-p: var(--form-clear-button-mobile-p);
-    --form-clear-button-size: var(--form-clear-button-mobile-size);
-    --form-element-gap-x: var(--form-element-mobile-gap-x);
-    --form-element-rounded: var(--form-element-mobile-rounded);
     --form-element-border: var(--form-element-mobile-border);
+    --form-element-gap-x: var(--form-element-mobile-gap-x);
+    --form-clear-icon-size: var(--form-clear-icon-mobile-size);
+    --form-clear-icon-p: var(--form-clear-icon-mobile-p);
     --form-error-mt: var(--form-error-mobile-mt);
-    --form-error-text-size: var(--form-error-mobile-text-size);
-  }
-
-  .m-form-hidden {
-    --form-error-mt: var(--form-error-mobile-mt);
-    --form-error-text-size: var(--form-error-mobile-text-size);
   }
 }

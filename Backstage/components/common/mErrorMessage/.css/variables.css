@@ -9,6 +9,7 @@
     值取平板那一份 —— 三檔之中它在中間,拿不到斷點時最不容易出錯。 */
   --error-message-gap-x: var(--error-message-tablet-gap-x);
   --error-message-icon-size: var(--error-message-icon-tablet-size);
+  --error-message-icon-my: var(--error-message-icon-tablet-my);
   --error-message-text-size: var(--error-message-tablet-text-size);
 
   /* 圖示與訊息文字的間隔 */
@@ -19,6 +20,12 @@
   --error-message-icon-pc-size: 18px;
   --error-message-icon-tablet-size: 18px;
   --error-message-icon-mobile-size: 18px;
+
+  /* 圖示的上下外距。圖形本身比文字矮的時候,用它把那一行撐到與文字同高,
+    圖示才對得齊第一行文字 —— 來源的圖示與文字等高,所以是 0。 */
+  --error-message-icon-pc-my: 0;
+  --error-message-icon-tablet-my: 0;
+  --error-message-icon-mobile-my: 0;
 
   /* 字級由元件決定,要分斷點所以定義成變數。
 

@@ -11,7 +11,7 @@
     @apply items-center justify-center;
 
     .m-popup-container {
-      @apply rounded-b-[--popup-container-rounded-b] rounded-t-[--popup-container-rounded-t] max-w-[--popup-container-max-w];
+      @apply max-w-[--popup-container-max-w] rounded-b-[--popup-container-rounded-b] rounded-t-[--popup-container-rounded-t];
     }
   }
 

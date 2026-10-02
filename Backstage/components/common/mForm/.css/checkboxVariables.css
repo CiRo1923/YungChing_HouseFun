@@ -9,11 +9,18 @@
 
     值取平板那一份 —— 三檔之中它在中間,拿不到斷點時最不容易出錯。 */
   --form-checkbox-icon-border: var(--form-checkbox-icon-tablet-border);
+  --form-checkbox-icon-p: var(--form-checkbox-icon-tablet-p);
   --form-checkbox-icon-rounded: 0;
 
   --form-checkbox-icon-pc-rounded: 2px;
   --form-checkbox-icon-tablet-rounded: 2px;
   --form-checkbox-icon-mobile-rounded: 2px;
+
+  /* 勾號與方框之間的留白 —— 方框填滿底色的設計才用得到,
+    來源的方框只有外框,所以是 0。 */
+  --form-checkbox-icon-pc-p: 0;
+  --form-checkbox-icon-tablet-p: 0;
+  --form-checkbox-icon-mobile-p: 0;
 
   --form-checkbox-icon-pc-border: 1px;
   --form-checkbox-icon-tablet-border: 1px;
@@ -30,6 +37,11 @@
 
   /* 勾號本身的顏色 —— 方框內那一筆,不是外框。勾選時才會被畫出來 */
   --form-checkbox-icon-color: inherit;
+  /* 方框自己的底色。來源的方框不填色(只有外框與勾號),所以是透明;
+    勾選與鎖住時各指派一次 —— 要填色的站改那兩個值。 */
+  --form-checkbox-bg-color: transparent;
+  --form-checkbox-bg-checked-color: transparent;
+  --form-checkbox-bg-disabled-color: transparent;
   --form-checkbox-icon-border-color: var(--gray-ccce);
   --form-checkbox-icon-border-checked-color: transparent;
   --form-checkbox-icon-border-error-color: var(--red-f00);

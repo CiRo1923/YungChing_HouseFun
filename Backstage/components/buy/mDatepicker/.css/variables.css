@@ -28,8 +28,21 @@
   --datepicker-icon-pc-size: 16px;
   --datepicker-icon-tablet-size: 16px;
   --datepicker-icon-mobile-size: 16px;
+  /* 圖示按鈕的內距 —— 來源不留白(圖示撐滿),要擴大點擊範圍的站自己填 */
+  --datepicker-icon-px: 0;
+  --datepicker-icon-pc-px: 0;
+  --datepicker-icon-tablet-px: 0;
+  --datepicker-icon-mobile-px: 0;
+  --datepicker-icon-py: 0;
+  --datepicker-icon-pc-py: 0;
+  --datepicker-icon-tablet-py: 0;
+  --datepicker-icon-mobile-py: 0;
   --datepicker-bg-color: var(--white);
   --datepicker-color: var(--gray-999);
+  --datepicker-border: var(--datepicker-tablet-border);
+  --datepicker-pc-border: 1px;
+  --datepicker-tablet-border: 1px;
+  --datepicker-mobile-border: 1px;
   --datepicker-border-color: var(--gray-e5);
   --datepicker-focus-color: var(--green-6a2d);
   --datepicker-focus-border-color: var(--green-6a2d);
@@ -58,7 +71,16 @@
   --datepicker-calendar-pc-py: 24px;
   --datepicker-calendar-tablet-py: 24px;
   --datepicker-calendar-mobile-py: 24px;
+  --datepicker-calendar-border: var(--datepicker-calendar-tablet-border);
+  --datepicker-calendar-pc-border: 1px;
+  --datepicker-calendar-tablet-border: 1px;
+  --datepicker-calendar-mobile-border: 1px;
   --datepicker-calendar-border-color: var(--green-6a2d);
+  /* 浮層與它的下拉清單同一個底色 —— 兩者是同一片面板的兩段 */
+  --datepicker-calendar-bg-color: var(--white);
+  /* 手機整頁浮出時那層遮罩。透明度不分斷點(它不是尺寸) */
+  --datepicker-calendar-overlay-bg-color: var(--black);
+  --datepicker-calendar-overlay-opacity: 0.4;
   /* 日曆浮層的陰影。整組寫在這裡(不只顏色)——
     設計稿的陰影常常是兩層以上,層數與偏移量都不一樣,
     只開放顏色的話還是得改元件的樣式檔,而那支是整套複製的共用檔。 */
@@ -83,11 +105,27 @@
   --datepicker-arrow-icon-tablet-size: 18px;
   --datepicker-arrow-icon-mobile-size: 18px;
 
-  /* 日期格子的大小 —— 一排七格,面板的寬度就是它乘以七。 */
-  --datepicker-calendar-cell-size: 0;
-  --datepicker-calendar-cell-pc-size: 35px;
-  --datepicker-calendar-cell-tablet-size: 35px;
-  --datepicker-calendar-cell-mobile-size: 35px;
+  /* 日期格子的大小 —— 一排七格,面板的寬度就是它乘以七,再加兩側的內距。
+
+    **寬與高是分開的兩個變數**:格子比圓鈕寬、而高度要與圓鈕相同的設計,
+    列與列之間才不會留白。兩者同值時就是正方形的格子。 */
+  --datepicker-calendar-cell-w: 0;
+  --datepicker-calendar-cell-h: 0;
+  --datepicker-calendar-body-px: 0;
+  --datepicker-calendar-today-dot-size: 0;
+  --datepicker-calendar-today-dot-mb: 0;
+  --datepicker-calendar-range-bar-h: var(--datepicker-calendar-range-bar-tablet-h);
+  --datepicker-calendar-cell-pc-w: 35px;
+  --datepicker-calendar-cell-tablet-w: 35px;
+  --datepicker-calendar-cell-mobile-w: 35px;
+  --datepicker-calendar-cell-pc-h: 35px;
+  --datepicker-calendar-cell-tablet-h: 35px;
+  --datepicker-calendar-cell-mobile-h: 35px;
+  /* 星期列與日期格共用的左右內距 —— 兩者共用同一個值,欄位才對得齊。
+    日期格的總寬是七格再加兩側的內距,所以這個值一改,整片日曆就變寬。 */
+  --datepicker-calendar-body-pc-px: 0;
+  --datepicker-calendar-body-tablet-px: 0;
+  --datepicker-calendar-body-mobile-px: 0;
   /* 格子內縮多少 —— 圓鈕與格子邊緣之間的留白。 */
   --datepicker-calendar-cell-p: 0;
   --datepicker-calendar-cell-pc-p: 0;
@@ -106,6 +144,25 @@
   --datepicker-calendar-header-text-tablet-size: 14px;
   --datepicker-calendar-header-text-mobile-size: 14px;
   --datepicker-calendar-header-color: var(--gray-333);
+  /* 日曆標題列自己的內距 —— 與整個浮層的 --datepicker-calendar-px / -py 是兩層:
+    那一組管浮層的外圈,這一組只管標題列。來源兩層都不留白。 */
+  --datepicker-calendar-header-px: 0;
+  --datepicker-calendar-header-pc-px: 0;
+  --datepicker-calendar-header-tablet-px: 0;
+  --datepicker-calendar-header-mobile-px: 0;
+  --datepicker-calendar-header-py: 0;
+  --datepicker-calendar-header-pc-py: 0;
+  --datepicker-calendar-header-tablet-py: 0;
+  --datepicker-calendar-header-mobile-py: 0;
+  /* 星期列與日期格之間、以及日期格與浮層下緣之間 */
+  --datepicker-calendar-dates-mt: 0;
+  --datepicker-calendar-dates-pc-mt: 0;
+  --datepicker-calendar-dates-tablet-mt: 0;
+  --datepicker-calendar-dates-mobile-mt: 0;
+  --datepicker-calendar-dates-pb: 0;
+  --datepicker-calendar-dates-pc-pb: 0;
+  --datepicker-calendar-dates-tablet-pb: 0;
+  --datepicker-calendar-dates-mobile-pb: 0;
   /* 日曆是元件自己疊出來的浮層,字級由元件決定並分斷點 */
   --datepicker-calendar-week-text-size: 0;
   --datepicker-calendar-week-text-pc-size: 14px;
@@ -124,6 +181,14 @@
   --datepicker-calendar-date-tablet-rounded: 10px;
   --datepicker-calendar-date-mobile-rounded: 10px;
 
+  /* 日期底下那一顆小圓點 —— 大小預設 0,等於不顯示。要的站填值。 */
+  --datepicker-calendar-today-dot-pc-size: 0;
+  --datepicker-calendar-today-dot-tablet-size: 0;
+  --datepicker-calendar-today-dot-mobile-size: 0;
+  --datepicker-calendar-today-dot-pc-mb: 0;
+  --datepicker-calendar-today-dot-tablet-mb: 0;
+  --datepicker-calendar-today-dot-mobile-mb: 0;
+  --datepicker-calendar-today-dot-bg-color: currentColor;
   --datepicker-calendar-today-bg-color: var(--green-8b0d);
   --datepicker-calendar-today-color: var(--white);
   --datepicker-calendar-today-border: 0;
@@ -148,6 +213,12 @@
   --datepicker-calendar-range-bg-color: var(--orange-e646);
   --datepicker-calendar-range-color: var(--white);
   --datepicker-calendar-in-range-bg-color: var(--orange-feea);
+  /* 區間的背景條。高度預設跟著圓鈕 —— 那時它看起來就是整格鋪滿,
+    要一條比較細的橫條就把這三份改小。 */
+  --datepicker-calendar-range-bar-pc-h: var(--datepicker-calendar-ctrl-pc-size);
+  --datepicker-calendar-range-bar-tablet-h: var(--datepicker-calendar-ctrl-tablet-size);
+  --datepicker-calendar-range-bar-mobile-h: var(--datepicker-calendar-ctrl-mobile-size);
+  --datepicker-calendar-range-bar-bg-color: var(--datepicker-calendar-in-range-bg-color);
 
   /*
    * 區間最頭 / 最尾的圓角 —— 兩端各自一組,要方角就把值改成 0。

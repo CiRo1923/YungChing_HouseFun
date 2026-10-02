@@ -1,3 +1,8 @@
+/* 欄位與後綴橫向並排 —— 排列方式各變體自己給,共用那一層不設。 */
+.m-form-container.\-\-select {
+  @apply flex;
+}
+
 .m-form-element {
   &.\-\-select {
     @apply grow overflow-hidden text-left;
@@ -107,13 +112,13 @@
     --form-select-dropdown-label-py: var(--form-select-dropdown-label-pc-py);
   }
 
-
   /* 捲軸只在桌機畫出來。
     手機與平板的是覆蓋在內容上、不用時會自己隱藏的那種,
     換成自訂的會變成一條常駐的軌道,把內容往內擠一截。 */
   .m-form-select-dropdown-body {
     scrollbar-width: thin;
-    scrollbar-color: var(--form-select-dropdown-scrollbar-thumb-color) var(--form-select-dropdown-scrollbar-track-color);
+    scrollbar-color: var(--form-select-dropdown-scrollbar-thumb-color)
+      var(--form-select-dropdown-scrollbar-track-color);
 
     &::-webkit-scrollbar {
       width: var(--form-select-dropdown-scrollbar-w);

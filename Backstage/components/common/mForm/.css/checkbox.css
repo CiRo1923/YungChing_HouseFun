@@ -28,6 +28,7 @@
           & + .m-form-icon {
             --form-checkbox-icon-border-color: var(--form-checkbox-icon-border-disabled-color);
             --form-checkbox-mark-color: var(--form-checkbox-mark-disabled-color);
+            --form-checkbox-bg-color: var(--form-checkbox-bg-disabled-color);
           }
         }
       }
@@ -43,6 +44,7 @@
         & + .m-form-icon {
           --form-checkbox-icon-border-color: var(--form-checkbox-icon-border-checked-color);
           --form-checkbox-mark-color: var(--form-checkbox-icon-color);
+          --form-checkbox-bg-color: var(--form-checkbox-bg-checked-color);
         }
       }
     }
@@ -59,6 +61,7 @@
       border-width: var(--form-checkbox-icon-border);
 
       @apply rounded-[--form-checkbox-icon-rounded] border-[--form-checkbox-icon-border-color];
+      @apply bg-[--form-checkbox-bg-color] p-[--form-checkbox-icon-p];
       @apply text-[--form-checkbox-mark-color] transition-colors duration-300;
     }
   }
@@ -69,6 +72,7 @@
     &.\-\-checkbox {
       --form-checkbox-icon-rounded: var(--form-checkbox-icon-pc-rounded);
       --form-checkbox-icon-border: var(--form-checkbox-icon-pc-border);
+      --form-checkbox-icon-p: var(--form-checkbox-icon-pc-p);
     }
   }
 }
@@ -78,6 +82,7 @@
     &.\-\-checkbox {
       --form-checkbox-icon-rounded: var(--form-checkbox-icon-tablet-rounded);
       --form-checkbox-icon-border: var(--form-checkbox-icon-tablet-border);
+      --form-checkbox-icon-p: var(--form-checkbox-icon-tablet-p);
     }
   }
 }
@@ -87,6 +92,7 @@
     &.\-\-checkbox {
       --form-checkbox-icon-rounded: var(--form-checkbox-icon-mobile-rounded);
       --form-checkbox-icon-border: var(--form-checkbox-icon-mobile-border);
+      --form-checkbox-icon-p: var(--form-checkbox-icon-mobile-p);
     }
   }
 }

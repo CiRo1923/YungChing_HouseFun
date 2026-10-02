@@ -1,17 +1,18 @@
-/* apiPromise 變體的版型,以及 @screen 的斷點對應。 */
+/* mPopup 的 promise 變體版型。值定義在 promiseVariables.css。 */
+
 .m-popup-promise {
   @apply absolute inset-0 z-[2] flex items-center justify-center;
 
+  /* 遮罩 —— 底色加模糊,與一般彈窗、載入中那兩個遮罩同一套。
+    三個遮罩做的是同一件事,少了模糊的那一個會在同一個站裡長得不一樣。 */
   &::before {
     @apply absolute inset-0 z-0 bg-[--popup-promise-overlay-bg-color] backdrop-blur-[--popup-promise-overlay-blur] content-default;
   }
 }
 
 .m-popup-promise-message {
-  @apply relative z-[1] text-center;
-  @apply rounded-[--popup-promise-message-rounded] bg-[--popup-promise-message-bg-color];
-  @apply text-[length:--popup-promise-message-text-size] text-[--popup-promise-message-color];
-  @apply pb-[--popup-promise-message-pb] pl-[--popup-promise-message-pl] pr-[--popup-promise-message-pr] pt-[--popup-promise-message-pt];
+  /* text-[--var] 會被 tailwind 當成 color,字級一定要加 length: 型別提示 */
+  @apply relative z-[1] rounded-[--popup-promise-message-rounded] bg-[--popup-promise-message-bg-color] pb-[--popup-promise-message-pb] pl-[--popup-promise-message-pl] pr-[--popup-promise-message-pr] pt-[--popup-promise-message-pt] text-center text-[length:--popup-promise-message-text-size] text-[--popup-promise-message-color];
 }
 
 @screen p {
@@ -20,8 +21,8 @@
   }
 
   .m-popup-promise-message {
-    --popup-promise-message-rounded: var(--popup-promise-message-pc-rounded);
     --popup-promise-message-text-size: var(--popup-promise-message-pc-text-size);
+    --popup-promise-message-rounded: var(--popup-promise-message-pc-rounded);
     --popup-promise-message-pt: var(--popup-promise-message-pc-pt);
     --popup-promise-message-pr: var(--popup-promise-message-pc-pr);
     --popup-promise-message-pb: var(--popup-promise-message-pc-pb);
@@ -35,8 +36,8 @@
   }
 
   .m-popup-promise-message {
-    --popup-promise-message-rounded: var(--popup-promise-message-tablet-rounded);
     --popup-promise-message-text-size: var(--popup-promise-message-tablet-text-size);
+    --popup-promise-message-rounded: var(--popup-promise-message-tablet-rounded);
     --popup-promise-message-pt: var(--popup-promise-message-tablet-pt);
     --popup-promise-message-pr: var(--popup-promise-message-tablet-pr);
     --popup-promise-message-pb: var(--popup-promise-message-tablet-pb);
@@ -50,8 +51,8 @@
   }
 
   .m-popup-promise-message {
-    --popup-promise-message-rounded: var(--popup-promise-message-mobile-rounded);
     --popup-promise-message-text-size: var(--popup-promise-message-mobile-text-size);
+    --popup-promise-message-rounded: var(--popup-promise-message-mobile-rounded);
     --popup-promise-message-pt: var(--popup-promise-message-mobile-pt);
     --popup-promise-message-pr: var(--popup-promise-message-mobile-pr);
     --popup-promise-message-pb: var(--popup-promise-message-mobile-pb);

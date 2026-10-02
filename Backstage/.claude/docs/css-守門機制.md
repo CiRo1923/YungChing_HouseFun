@@ -374,6 +374,8 @@ class 前綴由**元件的資料夾名**推出（`mForm/` → `m-form`、`mDateP
 
 commit 那層另外會跑 prettier：排版不符的自動排好、加回這次 commit（不擋）。排版與這份規範是兩套工具，設定在 `.prettierrc.json` 與 `.prettierignore`。
 
+utility class 的順序也歸 prettier（`prettier-plugin-tailwindcss`），不是這份規範在管。它只排得到畫面區段裡的那一半——寫在 `<script>` 或 store 裡的 `setClass` 不會被排。
+
 **唯一會擋下違規的是 AI 寫檔那層，而它只對 AI 助理生效。** 用助理的人寫錯會被擋下來，手動改的人只看到提醒——同一份規範，兩種人的強制力不一樣。
 
 那一層擋的也只是**這次改動新增的違規**，既有存量照樣放行，否則 AI 連碰都不能碰既有檔案。
