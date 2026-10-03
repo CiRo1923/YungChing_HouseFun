@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+  <head>
+    <meta charset="utf-8" />
+    <title>會員中心 api 待確認</title>
+    <style>
+      @page {
+        size: A4;
+        margin: 18mm 16mm;
+      }
+
+      body {
+        margin: 0;
+        color: #333;
+        font-family: 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+        font-size: 13px;
+        line-height: 1.7;
+      }
+
+      h1 {
+        margin: 0 0 4px;
+        font-size: 22px;
+      }
+
+      h2 {
+        margin: 28px 0 10px;
+        padding-bottom: 4px;
+        border-bottom: 2px solid #8bb00d;
+        font-size: 16px;
+      }
+
+      h3 {
+        margin: 0 0 6px;
+        font-size: 14px;
+      }
+
+      .meta {
+        margin: 0 0 16px;
+        color: #666;
+      }
+
+      .lead {
+        margin: 0 0 8px;
+      }
+
+      .item {
+        margin: 0 0 14px;
+        padding: 10px 14px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        break-inside: avoid;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        padding: 4px 8px;
+        border-top: 1px solid #eee;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        width: 72px;
+        color: #666;
+        font-weight: normal;
+        white-space: nowrap;
+      }
+
+      code {
+        padding: 0 3px;
+        border-radius: 3px;
+        background: #f3f3f3;
+        font-family: Consolas, monospace;
+        font-size: 12px;
+      }
+
+      .summary td:first-child {
+        width: 28px;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>會員中心 api 待確認</h1>
+    <p class="meta">比對日期:2026-10-03 ・ 依據:專案內 <code>.api.swagger/</code> 當下的 swagger</p>
+
+    <p class="lead">
+      以下六項是前端在串接時,從 swagger 判斷不出來、或缺少欄位的地方。
+      每一項列出位置、目前的狀況、對畫面的影響,以及需要後端提供什麼。
+      欄位能補說明的,請直接寫進 swagger 的 <code>description</code> 與 <code>example</code>,
+      之後接手的人也查得到。
+    </p>
+
+    <table class="summary">
+      <tr>
+        <th>#</th>
+        <th style="width: auto">項目</th>
+        <th style="width: auto">需要的是</th>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td>搜尋訂閱 <code>conditionPath</code> 的格式</td>
+        <td>說明 + 一筆範例</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>搜尋訂閱清單的 <code>limit</code></td>
+        <td>說明</td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td>通知 <code>NotificationItem</code> 的欄位內容</td>
+        <td>兩筆範例 response</td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td>物件卡 <code>HouseCard</code> 沒有 <code>hfid</code></td>
+        <td>補欄位,或說明 <code>id</code> 能否直接使用</td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td>各清單的 <code>actions</code>(<code>ActionLink</code>)</td>
+        <td>說明值域,或確認前端可不使用</td>
+      </tr>
+      <tr>
+        <td>6</td>
+        <td>忘記密碼沒有可重送時間</td>
+        <td>補 <code>resendAvailableAt</code></td>
+      </tr>
+    </table>
+
+    <h2>會員中心服務(member)</h2>
+
+    <div class="item">
+      <h3>1. 搜尋訂閱的 <code>conditionPath</code> 是什麼格式</h3>
+      <table>
+        <tr>
+          <th>位置</th>
+          <td>
+            <code>GET /api/{version}/member/subscriptions/search</code> 回應的
+            <code>SearchSubscriptionItem.conditionPath</code>(string)
+          </td>
+        </tr>
+        <tr>
+          <th>狀況</th>
+          <td>
+            沒有說明也沒有範例。看不出它是完整網址、只有篩選條件那一段路徑,還是查詢字串。
+          </td>
+        </tr>
+        <tr>
+          <th>影響</th>
+          <td>
+            卡片上的「查看」要帶使用者回到當時的買屋搜尋結果。前端目前直接把這個欄位當網址使用;
+            格式不對的話,按鈕會連到不存在的頁面,而且要實際點下去才會發現。
+          </td>
+        </tr>
+        <tr>
+          <th>需要</th>
+          <td>說明格式,並提供一筆實際的值(例如一組含縣市、總價、房數的條件)。</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="item">
+      <h3>2. 搜尋訂閱清單的 <code>limit</code> 代表什麼</h3>
+      <table>
+        <tr>
+          <th>位置</th>
+          <td>
+            <code>GET /api/{version}/member/subscriptions/search</code> 回應的
+            <code>SearchSubscriptionListResponse.limit</code>(integer)
+          </td>
+        </tr>
+        <tr>
+          <th>狀況</th>
+          <td>
+            沒有說明。分頁資訊另外在 <code>paging</code> 裡,所以它不是每頁筆數。
+            物件訂閱那支的對應欄位是 <code>compareLimit</code>(一次最多比較幾筆),
+            但搜尋訂閱沒有比較功能,推測可能是訂閱數上限。
+          </td>
+        </tr>
+        <tr>
+          <th>影響</th>
+          <td>前端目前沒有使用。若是訂閱上限,畫面可能需要顯示或在達到上限時提示。</td>
+        </tr>
+        <tr>
+          <th>需要</th>
+          <td>說明這個數字的意思。</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="item">
+      <h3>3. 通知的欄位裝的是什麼</h3>
+      <table>
+        <tr>
+          <th>位置</th>
+          <td>
+            <code>GET /api/{version}/member/notifications</code> 回應的
+            <code>NotificationItem</code>
+          </td>
+        </tr>
+        <tr>
+          <th>狀況</th>
+          <td>
+            五個分頁共用同一個形狀,差別靠哪幾個欄位有值。除了 <code>newListingCount</code>
+            之外,其餘欄位都沒有說明與範例。判斷不出來的是:
+            <code>title</code> 是不是整句標題、<code>subtitle</code> 放什麼、
+            <code>tags</code> 是哪一類的標籤。
+          </td>
+        </tr>
+        <tr>
+          <th>影響</th>
+          <td>通知卡片的主體(標題、副標、標籤那幾行)還沒辦法做。</td>
+        </tr>
+        <tr>
+          <th>需要</th>
+          <td>
+            兩筆實際的 response:一筆 <code>category=0</code>、一筆 <code>category=2</code>。
+            有了範例,上面三個欄位前端可以自己判斷,不必再逐一確認。
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="item">
+      <h3>4. 物件卡 <code>HouseCard</code> 沒有 <code>hfid</code></h3>
+      <table>
+        <tr>
+          <th>位置</th>
+          <td>
+            <code>HouseCard</code>,用在 <code>BuyObjectSubscriptionItem.house</code>(物件訂閱管理)
+            與 <code>MessageRecordItem.house</code>(留言紀錄)
+          </td>
+        </tr>
+        <tr>
+          <th>狀況</th>
+          <td>
+            <code>HouseCard</code> 只有 <code>id</code>。通知那支用的 <code>BuyListItem</code>
+            同時有 <code>id</code> 與 <code>hfid</code>,兩者是不同的值。
+          </td>
+        </tr>
+        <tr>
+          <th>影響</th>
+          <td>
+            物件訂閱管理的「留言」要沿用買屋頻道的留言流程
+            (<code>POST /api/{version}/buy/messages</code>),它的 <code>houseId</code> 吃的是
+            <code>hfid</code>。<code>HouseCard</code> 給不出這個值,所以留言按鈕目前沒有接功能。
+          </td>
+        </tr>
+        <tr>
+          <th>需要</th>
+          <td>
+            在 <code>HouseCard</code> 補上 <code>hfid</code>;或說明 <code>HouseCard.id</code>
+            能不能直接當作買屋留言的 <code>houseId</code>。
+            <code>CreateMessageRequest.houseId</code> 本身也沒有說明,一併補上會更清楚。
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="item">
+      <h3>5. 清單上的 <code>actions</code> 值域沒有定義</h3>
+      <table>
+        <tr>
+          <th>位置</th>
+          <td>
+            <code>ActionLink</code>(<code>key</code>、<code>title</code>、<code>target</code>,
+            皆為 string),出現在通知、留言紀錄、各種訂閱清單的每一筆資料
+          </td>
+        </tr>
+        <tr>
+          <th>狀況</th>
+          <td>三個欄位都沒有說明,<code>key</code> 會有哪些值也沒有列出。</td>
+        </tr>
+        <tr>
+          <th>影響</th>
+          <td>
+            前端目前不使用:每張卡片有哪些按鈕、文字與順序,都照規格書寫在畫面上,
+            需要網址的按鈕由前端的路由組出來。這樣同一個畫面在不同環境不會長得不一樣。
+          </td>
+        </tr>
+        <tr>
+          <th>需要</th>
+          <td>
+            若這組欄位有預期的用途,請說明 <code>key</code> 的值域與 <code>target</code> 的格式;
+            若沒有,請確認前端可以不使用。
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <h2>會員登入服務(member auth)</h2>
+
+    <div class="item">
+      <h3>6. 忘記密碼的驗證碼沒有「可重送時間」</h3>
+      <table>
+        <tr>
+          <th>位置</th>
+          <td>
+            <code>POST /api/{version}/member/auth/password-reset/request</code> 回應的
+            <code>MemberAuthPasswordResetRequestResponse</code>
+          </td>
+        </tr>
+        <tr>
+          <th>狀況</th>
+          <td>
+            回應只有 <code>expireAt</code>(重設用 token 的到期時間)。
+            註冊與會員升級那幾支發送驗證碼的 api,回應都有 <code>resendAvailableAt</code>。
+          </td>
+        </tr>
+        <tr>
+          <th>影響</th>
+          <td>
+            「重新發送」的倒數現在只能拿 <code>expireAt</code> 來算,
+            倒數的長度是 token 的效期,不是重送的冷卻時間,與另外兩條流程的行為不一致。
+          </td>
+        </tr>
+        <tr>
+          <th>需要</th>
+          <td>在這支的回應補上 <code>resendAvailableAt</code>,格式與註冊、升級那幾支相同。</td>
+        </tr>
+      </table>
+    </div>
+  </body>
+</html>
