@@ -28,6 +28,7 @@ export default {
     './layouts/**/*.vue',
     './pages/**/*.vue',
     './static/**/*.{js,json,ts}',
+    './stores/**/*.js',
     './app.vue',
     './error.vue',
   ],
