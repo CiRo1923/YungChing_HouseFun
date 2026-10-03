@@ -324,8 +324,78 @@ export const useMemberCenterStore = defineStore('memberCenter', () => {
     },
     apiData: { ...apiDefault.match },
   })
+  // api 目前回不到資料,所以先帶一份假的把版面撐起來,api 通了之後這一份改回 null。
+  //
+  // 句子由前端組:社區名取 community.name、筆數取 newListingCount、時間取 sentAt ——
+  // 照 swagger 的名字推的,拿到範例 response 之後要照實際的值再對一次。
+  //
+  // 時間用「現在往前推」算;另外刻意放了已讀、社區名很長(要換行)、筆數破千各一筆。
   const communityNew = ref({
-    data: null,
+    data: {
+      category: 2,
+      paging: {
+        page: 1,
+        pageSize: LIST_PAGE_SIZE,
+        total: 5,
+      },
+      items: [
+        {
+          id: '1',
+          isRead: false,
+          category: 2,
+          title: '大自然社區',
+          sentAt: new Date(Date.now() - 20 * 1000).toISOString(),
+          newListingCount: 1,
+          tags: [],
+          community: { id: '1', name: '大自然社區' },
+          actions: [],
+        },
+        {
+          id: '2',
+          isRead: false,
+          category: 2,
+          title: '遠雄未來家城市花園二期國際觀光生活特區社區',
+          sentAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+          newListingCount: 3,
+          tags: [],
+          community: { id: '2', name: '遠雄未來家城市花園二期國際觀光生活特區社區' },
+          actions: [],
+        },
+        {
+          id: '3',
+          isRead: true,
+          category: 2,
+          title: '美之城社區',
+          sentAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
+          newListingCount: 1280,
+          tags: [],
+          community: { id: '3', name: '美之城社區' },
+          actions: [],
+        },
+        {
+          id: '4',
+          isRead: true,
+          category: 2,
+          title: '森林苑',
+          sentAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
+          newListingCount: 2,
+          tags: [],
+          community: { id: '4', name: '森林苑' },
+          actions: [],
+        },
+        {
+          id: '5',
+          isRead: true,
+          category: 2,
+          title: '民生之星',
+          sentAt: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString(),
+          newListingCount: 5,
+          tags: [],
+          community: { id: '5', name: '民生之星' },
+          actions: [],
+        },
+      ],
+    },
     apiData: { ...apiDefault.communityNew },
   })
   const communityPrice = ref({
