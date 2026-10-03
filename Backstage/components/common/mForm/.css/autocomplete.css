@@ -75,7 +75,7 @@
 
   &:disabled {
     --form-autocomplete-dropdown-button-bg-color: var(
-      --form-autocomplete-dropdown-button-disbaled-bg-color
+      --form-autocomplete-dropdown-button-disabled-bg-color
     );
   }
 }

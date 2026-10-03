@@ -3,35 +3,34 @@
   --table-checkbox-responsive-thtd-first-last-pl: 0;
   --table-checkbox-responsive-thtd-first-last-pr: 0;
 
+  --table-checkbox-responsive-thtd-first-last-pc-px: 16px; /* lint-breakpoint-exempt: 手機改成一列一卡的排版,沒有表格欄位也就沒有首末欄內距 */
+  --table-checkbox-responsive-thtd-first-last-tablet-px: 10px; /* lint-breakpoint-exempt: 手機改成一列一卡的排版,沒有表格欄位也就沒有首末欄內距 */
   /* lint-breakpoint-exempt: 手機改成一列一卡的排版,沒有表格欄位也就沒有首末欄內距 */
-  --table-checkbox-responsive-thtd-first-last-pc-px: 16px;
-  --table-checkbox-responsive-thtd-first-last-tablet-px: 10px;
 
   --table-checkbox-responsive-thtd-pl: 0;
   --table-checkbox-responsive-thtd-pr: 0;
 
+  --table-checkbox-responsive-thtd-pc-px: 5px; /* lint-breakpoint-exempt: 手機改成一列一卡的排版,這些表格欄位的間距用不到 */
+  --table-checkbox-responsive-thtd-tablet-px: 4px; /* lint-breakpoint-exempt: 手機改成一列一卡的排版,這些表格欄位的間距用不到 */
   /* lint-breakpoint-exempt: 手機改成一列一卡的排版,這些表格欄位的間距用不到 */
-  --table-checkbox-responsive-thtd-pc-px: 5px;
-  --table-checkbox-responsive-thtd-tablet-px: 4px;
 
-  /* lint-breakpoint-exempt: 手機改成一列一卡的排版,這些表格欄位的間距用不到 */
-  --table-checkbox-responsive-thead-th-pc-py: 8px;
-  --table-checkbox-responsive-thead-th-tablet-py: 5px;
+  --table-checkbox-responsive-thead-th-pc-py: 8px; /* lint-breakpoint-exempt: 手機改成一列一卡的排版,這些表格欄位的間距用不到 */
+  --table-checkbox-responsive-thead-th-tablet-py: 5px; /* lint-breakpoint-exempt: 手機改成一列一卡的排版,這些表格欄位的間距用不到 */
   /* lint-breakpoint-exempt: 手機改成一列一卡的排版,這些表格欄位的間距用不到 */
 
   --table-checkbox-responsive-tbody-tr-pc-border-b: 1px;
   --table-checkbox-responsive-tbody-tr-tablet-border-b: 1px;
   --table-checkbox-responsive-tbody-tr-mobile-border-b: 1px;
 
+  --table-checkbox-responsive-tbody-tr-mobile-py: 24px; /* lint-breakpoint-exempt: 只有手機是一列一卡,桌機 / 平板走表格排版沒有這個間距 */
   /* lint-breakpoint-exempt: 只有手機是一列一卡,桌機 / 平板走表格排版沒有這個間距 */
-  --table-checkbox-responsive-tbody-tr-mobile-py: 24px;
 
+  --table-checkbox-responsive-tbody-tr-mobile-px: 16px; /* lint-breakpoint-exempt: 只有手機是一列一卡,桌機 / 平板走表格排版沒有這個間距 */
   /* lint-breakpoint-exempt: 只有手機是一列一卡,桌機 / 平板走表格排版沒有這個間距 */
-  --table-checkbox-responsive-tbody-tr-mobile-px: 16px;
 
+  --table-checkbox-responsive-tbody-td-pc-py: 15px; /* lint-breakpoint-exempt: 手機改成一列一卡的排版,這些表格欄位的間距用不到 */
+  --table-checkbox-responsive-tbody-td-tablet-py: 10px; /* lint-breakpoint-exempt: 手機改成一列一卡的排版,這些表格欄位的間距用不到 */
   /* lint-breakpoint-exempt: 手機改成一列一卡的排版,這些表格欄位的間距用不到 */
-  --table-checkbox-responsive-tbody-td-pc-py: 15px;
-  --table-checkbox-responsive-tbody-td-tablet-py: 10px;
 
   --table-checkbox-responsive-thead-th-color: var(--gray-333);
   --table-checkbox-responsive-tbody-tr-border-color: var(--gray-e5);

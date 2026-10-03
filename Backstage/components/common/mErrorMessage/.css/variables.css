@@ -1,3 +1,19 @@
+/* mErrorMessage(欄位底下那一行紅字)的變數。
+
+  只放「值」:root 預設值與各斷點的值;斷點對應寫在 common.css。
+
+  ===== 名字怎麼讀 =====
+
+  `--error-message-<部位>-<斷點>-<屬性>`。這支元件只有三個元素:
+
+    (無部位)   .m-error-message        整行 —— 文字顏色
+    icon       .m-error-message-icon   左邊那顆圖示 —— 大小、上下外距
+    text       .m-error-message-text   訊息文字 —— 字級
+    gap        圖示與文字之間的間隔
+
+  圖示的上下外距(`icon-my`)是給「圖形比文字矮」的站用的:
+  用它把那一行撐到與文字同高,圖示才對得齊第一行文字。
+*/
 :root {
   /* 三個斷點各自指派的那幾個,base 也要給一份。
 

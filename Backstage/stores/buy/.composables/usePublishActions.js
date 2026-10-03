@@ -44,14 +44,14 @@ const usePublishActions = () => {
     onReplaceImageSize,
   } = useBuyProjectActions()
   const publishStores = useBuyPublishStore()
-  const { apiData, statusData, pingData, options: publishOptions } = storeToRefs(publishStores)
+  const { apiData, statusData, pingData } = storeToRefs(publishStores)
   const { onAlert, onConfirm, onApiError } = usePopupActions()
   const currentUnit = computed(() =>
-    publishOptions.value.unit.find((item) => item.value === apiData.value.caseInfo.isCaseSqUnitPin)
+    publishStores.options.unit.find((item) => item.value === apiData.value.caseInfo.isCaseSqUnitPin)
   )
   const pingUnitLabel = computed(
     () =>
-      publishOptions.value.unit.find(
+      publishStores.options.unit.find(
         (item) => item.value === apiData.value.caseInfo.isCaseSqUnitPin
       ).label
   )
@@ -159,8 +159,8 @@ const usePublishActions = () => {
     const mKey = `${key}M`
     const isPin = unit.id === 'pin'
     const isSqMeters = unit.id === 'sqMeters'
-    const pinConf = publishOptions.value.unit.find((u) => u.id === 'pin')
-    const mConf = publishOptions.value.unit.find((u) => u.id === 'sqMeters')
+    const pinConf = publishStores.options.unit.find((u) => u.id === 'pin')
+    const mConf = publishStores.options.unit.find((u) => u.id === 'sqMeters')
     const onConvert = (value, conf) => Number(onToFixed(Number(value) * conf.convert, conf.toFixed))
 
     if (!pinConf || !mConf) return

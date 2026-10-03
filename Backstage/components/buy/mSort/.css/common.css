@@ -3,7 +3,7 @@
 }
 
 .m-sort-anchor {
-  @apply flex items-center gap-x-[--sort-anchor-gap-x] text-[length:--sort-anchor-text-size];
+  @apply flex items-center gap-x-[--sort-anchor-gap-x];
   @apply transition-colors duration-300;
 
   &:hover {

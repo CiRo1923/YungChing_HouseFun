@@ -1,4 +1,23 @@
-/* mLoading 的共用變數 —— 只放「值」,斷點對應與狀態切換寫在 common.css。 */
+/* mLoading(components/common/mLoading/)的變數。
+   Main 是外層容器(可切成全螢幕遮罩),Container 是裡面的文字區塊。
+
+   字級定在這裡而不是交給使用端 —— 讀取提示全站長一樣,屬於「固定位置」的組件。
+   卡片外觀(圓角 / 底色 / 內距)才由使用端 setClass.container 傳,
+   因為全螢幕遮罩與內嵌兩種情境長得不一樣。 */
+
+/* **這一支是起手樣板**(檔頭標了 starter 的是 Index.vue 與 Container.vue)——
+  動畫長什麼樣每個站都不一樣,複製一次之後整組歸那個專案,
+  連這份變數清單都可以整個換掉。下面那張表是來源這一份的長相。
+
+  ===== 名字怎麼讀 =====
+
+  `--loading-<部位>-<斷點>-<屬性>`:
+
+    overlay    .m-loading / .m-loading-container  底下那層遮罩 —— 底色、模糊
+    spinner    .m-loading-spinner                 轉圈那個圖形 —— 大小、顏色、框線寬
+    text       讀取中那行文字 —— 字級、顏色、與圖形之間的距離
+*/
+
 :root {
   /* 三個斷點各自指派的那幾個,base 也要給一份。
 

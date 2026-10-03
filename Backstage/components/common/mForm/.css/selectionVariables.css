@@ -1,7 +1,6 @@
-/*
- * selection 群組的變數 —— CheckBox 與 RadioItem 共用。
- * 兩者都是「打勾圖示疊在方框 / 圓框上,選中才顯示」的結構,只有外框樣式不同。
- */
+/* checkbox / radio 的**群組共用變數**(兩者都要,但 Input / Select / TextArea 用不到)。
+   版型在 selection.css —— 這裡只放值與 modifier。 */
+
 :root {
   /* 三個斷點各自指派的那幾個,base 也要給一份。
 
@@ -13,6 +12,8 @@
     值取平板那一份 —— 三檔之中它在中間,拿不到斷點時最不容易出錯。 */
   --form-selection-gap-x: 0;
   --form-selection-icon-mt: var(--form-selection-icon-tablet-mt);
+  --form-selection-icon-mb: var(--form-selection-icon-tablet-mb);
+  --form-selection-icon-mx: var(--form-selection-icon-tablet-mx);
   --form-selection-icon-size: 0;
 
   /* 勾選框尺寸 —— 沒帶 --icon-size-XX modifier 時的預設。
@@ -27,7 +28,20 @@
   --form-selection-mobile-gap-x: 8px;
 
   /* 有文字時,勾選框往下對齊字身(單獨一個框時不用) */
+  /* 上外距與下外距分開兩個名字,不要合成一個 my ——
+    上面那一個管的是「有文字時往下對齊字身」(所以只在 --has-label 底下套用),
+    下面這兩個是圓鈕四周的留白,無條件套用。合成一個的話,
+    同一個 margin-top 由兩個名字管,改的時候一定會漏掉一處。
+
+    右邊那一段外距會疊在圓鈕與文字的間隔(--form-selection-gap-x)上。 */
   --form-selection-icon-pc-mt: 2px;
   --form-selection-icon-tablet-mt: 2px;
   --form-selection-icon-mobile-mt: 2px;
+
+  --form-selection-icon-pc-mb: 0;
+  --form-selection-icon-tablet-mb: 0;
+  --form-selection-icon-mobile-mb: 0;
+  --form-selection-icon-pc-mx: 0;
+  --form-selection-icon-tablet-mx: 0;
+  --form-selection-icon-mobile-mx: 0;
 }

@@ -1,3 +1,37 @@
+/* mPopup(提示 / 確認 / 自訂 / 處理中,四種共用)的變數。
+
+  只放「值」:root 預設值與各斷點的值;斷點對應與狀態切換屬於「行為」,寫在 common.css。
+
+  ===== 名字怎麼讀 =====
+
+  `--popup-<區塊>-<部位>-<斷點>-<屬性>`,例如 `--popup-header-pc-gap-x`
+  是「標題那一列,桌機,左右間隔」。
+
+  **要改某個東西時照下面這張表找名字,不要靠相似度猜** ——
+  名字接近的是不同的東西:`--popup-px / -py` 是整個浮層的內距
+  (使用端掛 --px-XX / --py-XX 選),而 `--popup-container-pt` 只蓋上緣那一邊。
+
+  版面那幾層,由外到內:
+
+    overlay         整頁的遮罩(畫在 .m-popup 的 :before)
+    (無區塊)        .m-popup                 浮層本身 —— 寬、內距(px / py 由使用端用級距選)
+    container       .m-popup-container       白底那一塊 —— 圓角、底色、最大寬、上內距
+    header          .m-popup-header          標題那一列
+    header-title    .m-popup-title           標題
+    header-text     標題的字級
+    header-icon     .m-popup-icon            標題左邊那顆圖示
+    header-gap      標題與圖示之間
+    header-anchor   .m-popup-anchor-close    右上角的關閉鈕
+    tools           .m-popup-tools           標題下方那一列工具
+    body            .m-popup-body            內容區(會捲動的那一塊)
+    footer          .m-popup-footer          底部那一排按鈕
+
+  處理中那一種(apiPromise)自己一套:
+
+    promise-overlay       .m-popup-promise           它自己的遮罩
+    promise-message       .m-popup-promise-message   中間那塊訊息
+    promise-message-text  訊息的字級
+*/
 :root {
   /* 三個斷點各自指派的那幾個,base 也要給一份。
 
@@ -28,6 +62,11 @@
   --popup-w: auto;
   --popup-container-max-w: none;
   --popup-tools-mt: 0;
+  --popup-tools-px: var(--popup-tools-tablet-px);
+  --popup-body-mb: var(--popup-body-tablet-mb);
+  /* 浮層上內距的預設**跟著 --popup-py**(使用端掛 --py-XX 選的那個)——
+    給 0 的話一接上去上緣就貼死了。上下要不一樣時才改下面那三份。 */
+  --popup-container-pt: var(--popup-container-tablet-pt);
 
   --popup-container-pc-rounded: 15px;
   --popup-container-tablet-rounded: 15px;
@@ -81,6 +120,28 @@
   --popup-tools-pc-mx: 24px; /* lint-breakpoint-exempt: 桌機 / 平板的工具列在側邊,只推左右,手機沒有這個方向 */
   --popup-tools-tablet-mx: 12px; /* lint-breakpoint-exempt: 手機改用 mt */
   --popup-tools-mobile-mx: 0;
+
+  /* 工具列的上外距 —— 來源只有手機用得到(桌機平板走左右外距),
+    三份都列出來是為了那三個斷點各自調得動。 */
+  --popup-tools-pc-mt: 0;
+  --popup-tools-tablet-mt: 0;
+  --popup-tools-mobile-mt: 12px;
+
+  /* 工具列的左右內距 —— 與上面那組外距是兩件事:
+    外距把工具列推離旁邊的東西,內距把它自己的內容推離邊緣。 */
+  --popup-tools-pc-px: 0;
+  --popup-tools-tablet-px: 0;
+  --popup-tools-mobile-px: 0;
+
+  /* 內容區的下外距 */
+  --popup-body-pc-mb: 0;
+  --popup-body-tablet-mb: 0;
+  --popup-body-mobile-mb: 0;
+
+  /* 浮層的上內距,三份預設都跟著 --popup-py */
+  --popup-container-pc-pt: var(--popup-py);
+  --popup-container-tablet-pt: var(--popup-py);
+  --popup-container-mobile-pt: var(--popup-py);
 
   --popup-body-pc-mt: 24px;
   --popup-body-tablet-mt: 24px;

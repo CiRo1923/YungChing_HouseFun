@@ -1,21 +1,21 @@
 ---
 name: scrollbar-spacing
-description: 調整捲軸與內容之間的間距前必須先讀。說明 .scrollbar 的分層原則(basic.css 只管外觀,間距歸元件自己的 CSS 模組)、mPopup 與 mTable 兩種已實作的做法與各自的取捨,以及尚未實測 / 尚未處理的部分。觸發時機 - 要改 assets/css/_common/basic.css 的 .scrollbar、assets/css/_modules/common/mPopup/*.css、assets/css/_modules/buy/mTable.css、components/buy/mTable/.composables/useTableCore.js 的 isContainerScroll;或使用者回報「捲軸貼著內容 / 太擠 / 表格右邊縮排怪怪的 / 內容沒對齊」。
+description: 調整捲軸與內容之間的間距前必須先讀。說明 .scrollbar 的分層原則(basic.css 只管外觀,間距歸元件自己的 CSS 模組)、mPopup 與 mTable 兩種已實作的做法與各自的取捨,以及尚未實測 / 尚未處理的部分。觸發時機 - 要改 assets/css/_common/basic.css 的 .scrollbar、components/common/mPopup/.css/common.css、components/buy/mTable/.css/common.css、components/buy/mTable/.composables/useTableCore.js 的 isContainerScroll;或使用者回報「捲軸貼著內容 / 太擠 / 表格右邊縮排怪怪的 / 內容沒對齊」。
 ---
 
 <!-- lint-project-name-exempt: 這支只有本專案有,不會複製到別的專案;內容是捲軸間距寫在哪幾支檔案,路徑是要記錄的資料本身 -->
 
 # 捲軸與內容的間距
 
-驗收條目 **C-07**(手機版留言管理燈箱,篩選項目和捲軸太近)引出的一套處理方式。
+手機版留言管理燈箱的篩選項目與捲軸太近,引出的一套處理方式。
 PC 版的留言管理與瀏覽數燈箱也有同樣問題(捲軸貼著表格最後一欄)。
 
 ## 分層原則(不可違反)
 
-| 檔案                                           | 負責                                                                                        |
-| ---------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `assets/css/_common/basic.css` 的 `.scrollbar` | **只管捲軸外觀** —— 顏色、圓角、寬度(`--y` 4px / `--x` 4px),以及 `--x` / `--y` 決定捲動方向 |
-| 各元件自己的 CSS 模組                          | **間距屬於版面,歸元件自己管**。不得為了某個元件的間距去動 `basic.css`                       |
+| 檔案 | 負責 |
+| --- | --- |
+| `assets/css/_common/basic.css` 的 `.scrollbar` | **只管捲軸外觀** —— 顏色、圓角、寬度,以及 `--x` / `--y` 決定捲動方向 |
+| 各元件自己的 CSS 模組 | **間距屬於版面,歸元件自己管**。不得為了某個元件的間距去動 `basic.css` |
 
 曾經試過在 `basic.css` 加一個 `--scroll` 修飾符讓各處選用,**已否決** ——
 間距是元件的版面問題,不該進通用的捲軸樣式。基於同一個理由,也不要為此新造 class 名稱,
@@ -27,7 +27,7 @@ PC 版的留言管理與瀏覽數燈箱也有同樣問題(捲軸貼著表格最�
 
 ### 1. mPopup —— 負 margin 外擴,再 padding 推回
 
-`assets/css/_modules/common/mPopup/common.css` 的 `.m-popup-body`:
+`components/common/mPopup/.css/common.css` 的 `.m-popup-body`:
 
 ```css
 margin-inline: calc(var(--popup-body-px) * -1);
@@ -35,7 +35,8 @@ margin-inline: calc(var(--popup-body-px) * -1);
 @apply grow overflow-hidden px-[--popup-body-px];
 ```
 
-值在 `variables.css`,PC / 平板 / 手機各一支(`--popup-body-{pc,tablet,mobile}-px`,目前都是 8px)。
+值在同一層的 `variables.css`,PC / 平板 / 手機各一支
+(`--popup-body-{pc,tablet,mobile}-px`,目前都是 8px)。
 
 **為什麼不直接改 container 的 padding**:`.m-popup-header` 的 `border-b` 底線寬度等於
 container 的內容寬度,動 container 的 px 會把底線一起拉寬。改用負 margin 後:
@@ -47,18 +48,21 @@ container 的內容寬度,動 container 的 px 會把底線一起拉寬。改用
 
 ### 2. mTable —— padding-right,但只在真的捲得動時
 
-`assets/css/_modules/buy/mTable.css`:
+`components/buy/mTable/.css/common.css`:
 
 ```css
 .m-table-container {
   &.scrollbar.\-\-y.\-\-scrolling {
-    @apply pr-[--table-scroll-px];
+    @apply pr-[--table-scroll-pr];
   }
 }
 ```
 
-值 `--table-scroll-px: 8px` 在同檔 `:root`(單一值,沒有分裝置)。
-`mTable.css` 由 `components/buy/mTable/{CheckboxResponsive,Default}.vue` 各自 `<style src>` 引入。
+值在同一層的 `variables.css`:`--table-scroll-pr` 的 base 是 `0`,
+三個斷點各一支(`--table-scroll-{pc,tablet,mobile}-pr`,目前都是 8px),
+由 `common.css` 的三個 `@screen` 區塊各自指派。
+
+`common.css` 由 `components/buy/mTable/{CheckboxResponsive,Default}.vue` 各自 import。
 
 **`--scrolling` 是必要的,不能拿掉**:`m-table-container scrollbar --y` 是寫死在兩個表格元件裡的,
 若只用 `.scrollbar.--y` 當條件,**全站每個表格都會吃到這 8px 右內距** —— 包含根本不會捲動的表格,
@@ -74,23 +78,25 @@ container 的內容寬度,動 container 的 px 會把底線一起拉寬。改用
 **不會來回震盪**:padding 只在已經有捲軸時才加,而加了 padding 只會讓內容更窄更高、更容易捲動,
 不會反過來讓捲軸消失。
 
-**一個看得出來的變化**:有捲軸時表頭灰底(`--thead-gray-f2` / `--thead-gray-f7`)會跟著往左退 8px,
-捲軸落在退出來的白色區。
+**一個看得出來的變化**:有捲軸時表頭灰底會跟著往左退 8px,捲軸落在退出來的白色區。
 
 ---
 
 ## 全專案只有這些地方會真的捲動
 
-| 位置                                                     | 容器                                                         | 狀態                                                                                                 |
-| -------------------------------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
-| `pages/buy/list/_components/popup/comment/Datas.vue`     | `container: 'p:max-h-[365px]'`(留言管理)                     | 已由 mTable 規則覆蓋                                                                                 |
-| `pages/buy/list/_components/popup/View.vue`              | `container: 'p:max-h-[365px]'`(瀏覽數)                       | 已由 mTable 規則覆蓋                                                                                 |
+| 位置 | 容器 | 狀態 |
+| --- | --- | --- |
+| `pages/buy/list/_components/popup/comment/Datas.vue` | `container: 'p:max-h-[365px]'`(留言管理) | 已由 mTable 規則覆蓋 |
+| `pages/buy/list/_components/popup/View.vue` | `container: 'p:max-h-[365px]'`(瀏覽數) | 已由 mTable 規則覆蓋 |
 | `pages/buy/publish/basic/_components/terms/Items.vue:61` | `container: 'scrollbar --y m:max-h-[220px] pt:max-h-[90px]'` | **尚未處理** —— 那是 mAccordion 的 container,不歸 mTable 管,要比照辦理得寫在 mAccordion 自己的樣式裡 |
 
 其他既有寫法可參考:
 
-- `pages/buy/_components/AutoRefrshInfo.vue:48`、`AutoRefreshTemplateInfo.vue:47` —— 直接 `p:px-[6px]`,而且只在 PC(手機沒補,正是 C-07 抱怨的情境)
-- `assets/css/_modules/buy/mFormDropdown.css:192` —— `.m-form-dropdown-body` 用 `calc(container-px - default-px)`,讓內容右緣與 header 對齊、捲軸落在外框留的 4px 帶子裡。左側會因此比 header 少 4px(捲軸寬),是既有實作接受的誤差
+- `pages/buy/_components/AutoRefrshInfo.vue:48`、`AutoRefreshTemplateInfo.vue:47` ——
+  直接 `p:px-[6px]`,而且只在 PC(手機沒補,正是手機版燈箱被抱怨的那個情境)
+- `components/common/mForm/.css/dropdown.css:108` —— `.m-form-dropdown-body` 用
+  `calc(container-px - default-px)`,讓內容右緣與 header 對齊、捲軸落在外框留的帶子裡。
+  左側會因此比 header 少一個捲軸的寬度,是既有實作接受的誤差
 
 ---
 
@@ -104,5 +110,5 @@ container 的內容寬度,動 container 的 px 會把底線一起拉寬。改用
 - [ ] `terms/Items.vue` 的條款捲動區要不要比照處理
 - [ ] 表頭灰底右退 8px,確認 PM 能接受
 
-調整時**只改數值**:`--popup-body-{pc,tablet,mobile}-px` 與 `--table-scroll-px`,
-不要把數值寫回元件的 template。
+調整時**只改值**:`--popup-body-{pc,tablet,mobile}-px` 與
+`--table-scroll-{pc,tablet,mobile}-pr`,不要把數值寫死回元件的 template。

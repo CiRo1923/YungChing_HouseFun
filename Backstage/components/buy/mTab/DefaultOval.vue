@@ -1,7 +1,11 @@
 <script setup>
-/* component-deps —— 複製這支元件時要一起帶走:
+/* component-deps —— 複製這支元件的時候這幾支要一起帶走:
+   scripts/_prototype.js
+     這支元件用到的共用函式。少了它**建置直接失敗**,而訊息只說某個名字不存在 —— 看不出那是元件帶來的相依。
    stores/.composables/useCommonActions.js
-   stores/common.js */
+     這支元件讀的那個 store 的行為。少了它畫面編譯得過,只是資料永遠是空的。
+   stores/common.js
+     這支元件讀的 store。少了它畫面編譯得過,只是資料永遠是空的。 */
 import './.css/variables.css'
 import './.css/defaultOvalVariables.css'
 import './.css/common.css'

@@ -7,8 +7,8 @@
   --upload-single-dragging-bg-color: var(--blue-efff);
   --upload-single-dragging-border-color: var(--blue-6afa);
 
+  --upload-single-dropzone-pc-w: 200px; /* lint-breakpoint-exempt: 沒有圖時撐滿容器,寬度只在桌機需要收斂 */
   /* lint-breakpoint-exempt: 沒有圖時撐滿容器,寬度只在桌機需要收斂 */
-  --upload-single-dropzone-pc-w: 200px;
 
   --upload-single-dropzone-min-h: 0;
   --upload-single-dropzone-pc-min-h: 130px;

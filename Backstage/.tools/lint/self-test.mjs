@@ -153,8 +153,8 @@ import {
   VIEWS_DIR,
   VIEW_COMPONENT_MARKERS,
   VIEW_UNDERSCORE_FOLDERS,
-} from './shared.mjs'
-import {
+
+  // 以下是函式(上面那一段是設定值)
   classPrefixOf,
   componentTagOf,
   componentTagIndexOf,
@@ -7042,6 +7042,139 @@ const onCheckNoDuplicateMatchers = () => {
   )
 }
 
+/**
+ * 規則那一層的 import 有沒有重複、有沒有寫在程式碼之後。
+ *
+ * **這兩件事來源自己的 eslint 看不到。** 這個 repo 的設定沒有帶 import 那一組規則
+ * (`eslint-plugin-import` 與 eslint 9 的 peer 版本對不上,裝不起來),
+ * 而**接手的專案多半帶著** —— 於是他們一跑 lint 就看到一批來源的問題,
+ * 而規則那一層他們不能改(指紋守著)。改不了又一直報的東西,
+ * 結果是整個檢查被關掉,那時連真正該擋的也沒有人看。
+ *
+ * 所以這一則自己做:判斷只問兩件事,與那兩條 eslint 規則同一個意思 ——
+ *
+ *   同一支被 import 兩次以上   改的時候容易只改其中一處
+ *   import 寫在程式碼之後      讀的人以為上面那一段就是全部的相依
+ */
+const onCheckImportShape = () => {
+  const dir = path.join(root, '.tools/lint')
+  const problems = []
+
+  for (const name of fs.readdirSync(dir)) {
+    if (!name.endsWith('.mjs')) continue
+
+    const lines = fs.readFileSync(path.join(dir, name), 'utf8').split(/\r?\n/)
+    const sources = new Map()
+    let firstCodeLine = -1
+    let inImport = false
+
+    lines.forEach((raw, i) => {
+      const line = raw.trim()
+      if (!line || line.startsWith('//') || line.startsWith('/*') || line.startsWith('*')) return
+
+      if (!inImport && /^import[\s{]/.test(line)) inImport = true
+
+      if (inImport) {
+        const from = /from\s+'([^']+)'/.exec(line)
+        if (!from) return
+
+        inImport = false
+        if (!sources.has(from[1])) sources.set(from[1], [])
+        sources.get(from[1]).push(i + 1)
+
+        if (firstCodeLine !== -1)
+          problems.push(
+            `${name}:${i + 1} 的 import 寫在程式碼之後(第一行程式碼在 ${firstCodeLine})`
+          )
+
+        return
+      }
+
+      /* `export … from` 也算 —— 它是一個語句,夾在 import 中間的話
+         後面每一行 import 都違反「import 要排在最前面」。
+         只看宣告的話抓不到那一種,而那正是這一則漏掉過的。 */
+      if (
+        firstCodeLine === -1 &&
+        /^(export\s+)?(const|let|var|function|class)\s|^export\s+[{*]/.test(line)
+      )
+        firstCodeLine = i + 1
+    })
+
+    for (const [src, at] of sources)
+      if (at.length > 1)
+        problems.push(`${name} 把 ${src} import 了 ${at.length} 次(第 ${at.join('、')} 行)`)
+  }
+
+  report(!problems.length, '規則那一層的 import 沒有重複、也沒有寫在程式碼之後', problems)
+}
+
+/**
+ * 變數檔檔頭那張對照表,列的 class 在版型檔裡都還在。
+ *
+ * **那張表是給接手的專案找名字用的** —— 一支元件有兩三百個變數,
+ * 逐一註解沒有人讀得完,所以檔頭用「名字的哪一段 → 哪個元素」收斂成幾十組。
+ *
+ * 問題是它靠人維護:class 改名之後,表還指著舊名字。
+ * 而**過期的對照表比沒有更糟** —— 沒有的話人會去翻版型檔,
+ * 有而且是錯的,人會照著找一個不存在的東西,找不到之後改在別的地方。
+ *
+ * 只比對檔頭註解裡出現的 `.m-xxx`:那幾個是表在指路的對象。
+ * 註解以外的部分不看(變數值裡不會寫 class)。
+ */
+const onCheckVariableGuide = () => {
+  /* **全案的 class 建成一份索引,不是只看這支元件自己那幾支。**
+
+    對照表的職責是「讓人找得到」,而指向別的元件的 class 是正當的用法 ——
+    例如欄位標題那支元件的檔頭提 `.m-form-label`,正是要講清楚
+    「表單裡那個是選項文字,與欄位標題不是同一個東西」。
+
+    只在自己的資料夾裡找的話,那種說明會被報成「指著不存在的東西」——
+    而那是誤報,接手的專案改不掉(檔頭是對的),commit 前那一層又會因為它停下來。
+    結果是整則被關掉,連真正過期的對照表也沒有人看。
+
+    **變數檔那幾支不算進索引**:這張表就寫在它們的檔頭裡,
+    算進去的話每一個名字都找得到自己,這一則永遠通過。 */
+  const known = new Set()
+
+  for (const dir of COMPONENT_DIRS) {
+    for (const abs of listFiles(root, dir)) {
+      if (/variables\.css$/i.test(abs)) continue
+
+      const text = fs.readFileSync(abs, 'utf8')
+
+      if (abs.endsWith('.css')) for (const m of text.matchAll(/\.(m-[a-z0-9-]+)/g)) known.add(m[1])
+
+      /* 畫面區段裡的 class 不帶點 —— 有些 class 只掛在 template 上、
+         沒有自己的樣式規則,而對照表照樣指得到它們。 */
+      if (abs.endsWith('.vue'))
+        for (const m of text.matchAll(/class="([^"]*)"/g))
+          for (const one of m[1].split(/\s+/)) if (one.startsWith('m-')) known.add(one)
+    }
+  }
+
+  const problems = []
+
+  for (const dir of COMPONENT_DIRS) {
+    for (const abs of listFiles(root, dir)) {
+      if (!/variables\.css$/i.test(abs)) continue
+
+      const head = (/^\/\*[\s\S]*?\*\//.exec(fs.readFileSync(abs, 'utf8')) ?? [''])[0]
+      if (!head) continue
+
+      const missing = [...new Set([...head.matchAll(/\.(m-[a-z0-9-]+)/g)].map((m) => m[1]))].filter(
+        (one) => !known.has(one)
+      )
+
+      if (missing.length)
+        problems.push(
+          `${toRel(root, abs)} 的檔頭指著 ${missing.map((one) => `.${one}`).join('、')},全案的樣式與畫面區段裡都找不到`
+        )
+    }
+  }
+
+  report(!problems.length, '變數檔檔頭那張對照表指的 class 都還在', problems)
+}
+
 const onCheckEveryCheckRuns = () => {
   const text = fs.readFileSync(fileURLToPath(import.meta.url), 'utf8')
 
@@ -9737,6 +9870,8 @@ try {
   onCheckApiLayers()
   onCheckIgnoredSegments()
   onCheckNoDuplicateMatchers()
+  onCheckImportShape()
+  onCheckVariableGuide()
   onCheckEveryCheckRuns()
 
   for (const c of MAJORITY_CASES) {

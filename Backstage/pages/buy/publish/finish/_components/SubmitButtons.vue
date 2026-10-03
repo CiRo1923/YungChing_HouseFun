@@ -26,7 +26,6 @@ const items = shallowReadonly([
             main: [item.class.main, '--text-center --oval --h-45 --px-30 --py-8 w-full shrink-0'],
             text: 'font-semibold',
           }"
-          @click="item.onClick"
         />
       </li>
     </ul>

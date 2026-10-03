@@ -2,7 +2,64 @@
 
   只放「值」:root 預設值與各斷點的值;斷點對應與狀態切換屬於「行為」,寫在 common.css。
 
-  注意:原本變數名是 --datepacker-(拼錯),class 也 datapicker / datepicker 混用,
+  ===== 名字怎麼讀 =====
+
+  `--datepicker-<區塊>-<部位>-<斷點>-<屬性>`,例如
+  `--datepicker-calendar-cell-pc-w` 是「浮層裡的日期格子,桌機,寬」。
+
+  **要改某個東西時照下面這張表找名字,不要靠相似度猜** ——
+  名字接近的常常是不同的東西:`calendar-cell` 是格子(決定欄寬列高)、
+  `calendar-ctrl` 是格子裡那顆圓鈕(選取的底色畫在它身上),改錯了日期會對不齊。
+
+  輸入框那一層:
+
+    (無區塊)        .m-datepicker 本身 —— 高度、圓角、左右內距、框線與底色
+    type            .m-datepicker-type        真正的 <input>
+    icon            .m-datepicker-icon        右側那顆日曆圖示
+    error           .m-datepicker-error       底下的錯誤訊息
+    range-gap       .m-datepicker-range-group 起訖兩個輸入框之間
+    datetime-gap    .m-datepicker-datetime-group 日期與時間兩欄之間
+
+  浮層(點開之後那一片):
+
+    calendar              .m-datepicker-calendar          浮層本體 —— 圓角、框線、底色、陰影、外距
+    calendar-overlay      手機整頁浮出時那層遮罩
+    calendar-header       .m-datepicker-calendar-header   頂端那一列(年月 + 左右箭頭)
+    calendar-header-text  頂端那一列的文字(年月那幾個字)
+    calendar-header-group .m-datepicker-calendar-header-group 年與月兩塊之間
+    arrow                 .m-datepicker-calendar-arrow    左右兩顆箭頭鈕
+    arrow-icon            箭頭裡的圖示
+    calendar-body         星期列與日期格共用的左右內距
+    calendar-weeks        .m-datepicker-calendar-weeks    星期名那一列
+    calendar-week         .m-datepicker-calendar-week     單一個星期名
+    calendar-dates        .m-datepicker-calendar-dates    日期格那一片(七欄)
+    calendar-cell         .m-datepicker-calendar-cell     日期格子 —— 欄寬與列高
+    calendar-ctrl         .m-datepicker-calendar-ctrl     格子裡那顆圓鈕
+    calendar-date         圓鈕上的日期數字
+
+  日期格的狀態(都掛在 .m-datepicker-calendar-ctrl 上):
+
+    calendar-curr         選中的那一天
+    calendar-today        今天
+    calendar-today-dot    今天底下那顆小圓點
+    calendar-last / next  上個月 / 下個月那幾格
+    calendar-disabled     不能選的
+    calendar-range-start  區間的起點
+    calendar-range-end    區間的終點
+    calendar-in-range     區間中間那幾天
+    calendar-range-bar    區間的背景條(畫在圓鈕的 :before)
+
+  年 / 月面板與時間欄:
+
+    panel          .m-datepicker-panel       年 / 月的格子那一片
+    panel-ctrl     .m-datepicker-panel-ctrl  面板裡的每一格
+    panel-label    年 / 月的切換標籤
+    time           .m-datepicker-time-list   時間欄本體
+    time-column    .m-datepicker-time-column 時 / 分 / 秒各一欄
+    time-ctrl      .m-datepicker-time-ctrl   欄裡的每一個選項
+    time-gap       三欄之間
+
+  注意：原本變數名是 --datepacker-(拼錯),class 也 datapicker / datepicker 混用,
       重構時一併正名為 datepicker;外部沒有任何地方引用舊名。 */
 :root {
   --datepicker-px: 0;

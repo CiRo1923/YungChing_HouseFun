@@ -1,4 +1,5 @@
-/* checkbox 變體的變數 —— 方框本身的配色,打勾圖示的行為在 selection 群組。 */
+/* checkbox 專屬變數。勾選框尺寸 / 間距 / 對齊在 selectionVariables.css(與 radio 共用)。 */
+
 :root {
   /* 三個斷點各自指派的那幾個,base 也要給一份。
 

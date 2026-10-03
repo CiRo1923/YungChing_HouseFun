@@ -40,6 +40,7 @@
 
     .m-form-icon {
       @apply relative h-[--form-selection-icon-size] w-[--form-selection-icon-size] shrink-0 self-start transition-colors duration-300;
+      @apply mx-[--form-selection-icon-mx] mb-[--form-selection-icon-mb];
     }
 
     /* 有文字時勾選框往下對齊字身;單獨一個框時不用 */
@@ -58,6 +59,8 @@
     --form-selection-icon-size: var(--form-selection-icon-pc-size);
     --form-selection-gap-x: var(--form-selection-pc-gap-x);
     --form-selection-icon-mt: var(--form-selection-icon-pc-mt);
+    --form-selection-icon-mb: var(--form-selection-icon-pc-mb);
+    --form-selection-icon-mx: var(--form-selection-icon-pc-mx);
   }
 }
 
@@ -66,6 +69,8 @@
     --form-selection-icon-size: var(--form-selection-icon-tablet-size);
     --form-selection-gap-x: var(--form-selection-tablet-gap-x);
     --form-selection-icon-mt: var(--form-selection-icon-tablet-mt);
+    --form-selection-icon-mb: var(--form-selection-icon-tablet-mb);
+    --form-selection-icon-mx: var(--form-selection-icon-tablet-mx);
   }
 }
 
@@ -74,5 +79,7 @@
     --form-selection-icon-size: var(--form-selection-icon-mobile-size);
     --form-selection-gap-x: var(--form-selection-mobile-gap-x);
     --form-selection-icon-mt: var(--form-selection-icon-mobile-mt);
+    --form-selection-icon-mb: var(--form-selection-icon-mobile-mb);
+    --form-selection-icon-mx: var(--form-selection-icon-mobile-mx);
   }
 }

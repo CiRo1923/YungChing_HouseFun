@@ -16,7 +16,6 @@ import { COMPONENT_API_FILE, recordedComponentApi } from './component-api.mjs'
 import { isColorNamingConfigFit, isHueSourceFit } from './color-order.mjs'
 import { hasBreakpointVars, hasResponsiveStyles } from './lint-core.mjs'
 import { IS_SOURCE_PROJECT } from './rules-global.mjs'
-import { detectViewResourceDepth, isModuleCss, isModuleStyle, listFiles, toRel } from './shared.mjs'
 import {
   API_DIR,
   API_SPEC_DIR,
@@ -42,6 +41,13 @@ import {
   VIEW_RESOURCE_DEPTH,
   VIEWS_DIR,
   MISSING_CONFIG_ITEMS,
+
+  // 走訪與判斷用的那幾支
+  detectViewResourceDepth,
+  isModuleCss,
+  isModuleStyle,
+  listFiles,
+  toRel,
 } from './shared.mjs'
 
 const hasDir = (root, rel) => {

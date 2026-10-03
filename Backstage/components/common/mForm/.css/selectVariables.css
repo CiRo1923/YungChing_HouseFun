@@ -1,3 +1,20 @@
+/* mForm 的 Select(下拉選單)變體變數。
+
+  只放「值」;斷點對應與狀態切換寫在 select.css。
+  輸入框本身那一層(框線、底色、高度)走共用的 --form-element-*。
+
+  ===== 名字怎麼讀 =====
+
+  `--form-select-<部位>-<狀態>-<斷點>-<屬性>`:
+
+    element-icon       收合 / 展開的那顆箭頭(在輸入框右側)
+    dropdown           .m-form-select-dropdown            展開的那片清單 —— 圓角、陰影、外距
+    dropdown-container .m-form-select-dropdown-container  清單的捲動區 —— 上下內距
+    dropdown-item      .m-form-select-dropdown-item       每一個選項(外層)
+    dropdown-button    .m-form-select-dropdown-button     選項的按鈕 —— 反白的底色畫在它身上
+    dropdown-label     .m-form-select-dropdown-label      選項的文字
+    dropdown-scrollbar 清單自己的捲軸(只有桌機畫)
+*/
 :root {
   /* 三個斷點各自指派的那幾個,base 也要給一份。
 
@@ -11,7 +28,10 @@
   --form-select-dropdown-button-px: var(--form-select-dropdown-button-tablet-px);
   --form-select-dropdown-container-px: var(--form-select-dropdown-container-tablet-px);
   --form-select-dropdown-container-py: var(--form-select-dropdown-container-tablet-py);
-  --form-select-dropdown-label-py: var(--form-select-dropdown-label-tablet-py);
+  --form-select-dropdown-item-pt: var(--form-select-dropdown-item-tablet-pt);
+  --form-select-dropdown-item-pb: var(--form-select-dropdown-item-tablet-pb);
+  --form-select-dropdown-item-edge-pt: var(--form-select-dropdown-item-tablet-edge-pt);
+  --form-select-dropdown-item-edge-pb: var(--form-select-dropdown-item-tablet-edge-pb);
   --form-select-dropdown-my: var(--form-select-dropdown-tablet-my);
   --form-select-dropdown-shadow: var(--form-select-dropdown-tablet-shadow);
   --form-select-icon-p: var(--form-select-icon-tablet-p);
@@ -73,9 +93,24 @@
   --form-select-dropdown-button-active-bg-color: var(--orange-feea);
   --form-select-dropdown-button-disabled-color: var(--black-66);
 
-  --form-select-dropdown-label-pc-py: 8px;
-  --form-select-dropdown-label-tablet-py: 8px;
-  --form-select-dropdown-label-mobile-py: 8px;
+  /* 選項的上下內距 **掛在按鈕上**,不是掛在裡面那段文字:
+    選中與 hover 的反白畫在按鈕身上,內距在文字上的話那一圈反白就少一截。
+
+    edge 那一組是第一個與最後一個選項的 —— 清單自己的上下內距
+    (--form-select-dropdown-container-py,使用端用級距選)不屬於任何一個按鈕,
+    頭尾兩個的反白蓋不到那一塊;把那段距離改成這兩個值,反白才連到邊緣。 */
+  --form-select-dropdown-item-pc-pt: 8px;
+  --form-select-dropdown-item-tablet-pt: 8px;
+  --form-select-dropdown-item-mobile-pt: 8px;
+  --form-select-dropdown-item-pc-pb: 8px;
+  --form-select-dropdown-item-tablet-pb: 8px;
+  --form-select-dropdown-item-mobile-pb: 8px;
+  --form-select-dropdown-item-pc-edge-pt: 8px;
+  --form-select-dropdown-item-tablet-edge-pt: 8px;
+  --form-select-dropdown-item-mobile-edge-pt: 8px;
+  --form-select-dropdown-item-pc-edge-pb: 8px;
+  --form-select-dropdown-item-tablet-edge-pb: 8px;
+  --form-select-dropdown-item-mobile-edge-pb: 8px;
 
   --form-select-element-icon-color: var(--gray-999);
   --form-select-element-focus-icon-color: var(--green-6a2d);

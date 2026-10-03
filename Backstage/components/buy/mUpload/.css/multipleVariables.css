@@ -35,12 +35,12 @@
 
   /* 勾選框的位置:手機疊在圖片左下角,桌機與平板排到圖片下方 —— 兩端是不同的定位方式 */
 
+  --upload-multiple-check-mobile-inset: 5px; /* lint-breakpoint-exempt: 只有手機是絕對定位疊在圖上,桌機 / 平板沒有這個 inset */
   /* lint-breakpoint-exempt: 只有手機是絕對定位疊在圖上,桌機 / 平板沒有這個 inset */
-  --upload-multiple-check-mobile-inset: 5px;
 
+  --upload-multiple-check-pc-mt: 6px; /* lint-breakpoint-exempt: 只有桌機 / 平板排在圖片下方需要推開,手機是疊上去的 */
+  --upload-multiple-check-tablet-mt: 6px; /* lint-breakpoint-exempt: 只有桌機 / 平板排在圖片下方需要推開,手機是疊上去的 */
   /* lint-breakpoint-exempt: 只有桌機 / 平板排在圖片下方需要推開,手機是疊上去的 */
-  --upload-multiple-check-pc-mt: 6px;
-  --upload-multiple-check-tablet-mt: 6px;
 
   /* 勾選框本身 */
   --upload-multiple-check-icon-bg-color: var(--white);
@@ -84,8 +84,8 @@
   --upload-multiple-list-tablet-gap-y: 16px;
   --upload-multiple-list-mobile-gap-y: 16px;
 
+  --upload-multiple-slot-pc-w: 200px; /* lint-breakpoint-exempt: 卡片寬度只在桌機收斂,平板與手機是網格自動撐開 */
   /* lint-breakpoint-exempt: 卡片寬度只在桌機收斂,平板與手機是網格自動撐開 */
-  --upload-multiple-slot-pc-w: 200px;
 
   --upload-multiple-append-bg-color: var(--gray-f7);
   --upload-multiple-append-border-color: var(--gray-e5);

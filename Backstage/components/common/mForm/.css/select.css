@@ -68,6 +68,19 @@
 
 /* dropdown 的選項 —— 原本在 Select.vue 的 <style> 區塊裡 */
 .m-form-select-dropdown-item {
+  /* 頭尾兩個的內距另外給 —— 反白要連到清單的邊緣 */
+  &:first-child {
+    .m-form-select-dropdown-button {
+      @apply pt-[--form-select-dropdown-item-edge-pt];
+    }
+  }
+
+  &:last-child {
+    .m-form-select-dropdown-button {
+      @apply pb-[--form-select-dropdown-item-edge-pb];
+    }
+  }
+
   &:not(:last-child) {
     .m-form-select-dropdown-button {
       &:after {
@@ -79,6 +92,7 @@
 
 .m-form-select-dropdown-button {
   @apply block w-full px-[--form-select-dropdown-button-px] text-left transition-colors duration-300;
+  @apply pb-[--form-select-dropdown-item-pb] pt-[--form-select-dropdown-item-pt];
 
   &:not(:disabled) {
     &.\-\-active {
@@ -93,7 +107,7 @@
 
 /* 字級不定在這裡 —— 由使用端 setClass.dropdownLabel 傳 */
 .m-form-select-dropdown-label {
-  @apply relative block grow py-[--form-select-dropdown-label-py];
+  @apply relative block grow;
 }
 
 @screen p {
@@ -109,7 +123,10 @@
     --form-select-dropdown-container-py: var(--form-select-dropdown-container-pc-py);
     --form-select-dropdown-button-px: var(--form-select-dropdown-button-pc-px);
     --form-select-dropdown-button-border: var(--form-select-dropdown-button-pc-border);
-    --form-select-dropdown-label-py: var(--form-select-dropdown-label-pc-py);
+    --form-select-dropdown-item-pt: var(--form-select-dropdown-item-pc-pt);
+    --form-select-dropdown-item-pb: var(--form-select-dropdown-item-pc-pb);
+    --form-select-dropdown-item-edge-pt: var(--form-select-dropdown-item-pc-edge-pt);
+    --form-select-dropdown-item-edge-pb: var(--form-select-dropdown-item-pc-edge-pb);
   }
 
   /* 捲軸只在桌機畫出來。
@@ -149,7 +166,10 @@
     --form-select-dropdown-container-py: var(--form-select-dropdown-container-tablet-py);
     --form-select-dropdown-button-px: var(--form-select-dropdown-button-tablet-px);
     --form-select-dropdown-button-border: var(--form-select-dropdown-button-tablet-border);
-    --form-select-dropdown-label-py: var(--form-select-dropdown-label-tablet-py);
+    --form-select-dropdown-item-pt: var(--form-select-dropdown-item-tablet-pt);
+    --form-select-dropdown-item-pb: var(--form-select-dropdown-item-tablet-pb);
+    --form-select-dropdown-item-edge-pt: var(--form-select-dropdown-item-tablet-edge-pt);
+    --form-select-dropdown-item-edge-pb: var(--form-select-dropdown-item-tablet-edge-pb);
   }
 }
 
@@ -166,6 +186,9 @@
     --form-select-dropdown-container-py: var(--form-select-dropdown-container-mobile-py);
     --form-select-dropdown-button-px: var(--form-select-dropdown-button-mobile-px);
     --form-select-dropdown-button-border: var(--form-select-dropdown-button-mobile-border);
-    --form-select-dropdown-label-py: var(--form-select-dropdown-label-mobile-py);
+    --form-select-dropdown-item-pt: var(--form-select-dropdown-item-mobile-pt);
+    --form-select-dropdown-item-pb: var(--form-select-dropdown-item-mobile-pb);
+    --form-select-dropdown-item-edge-pt: var(--form-select-dropdown-item-mobile-edge-pt);
+    --form-select-dropdown-item-edge-pb: var(--form-select-dropdown-item-mobile-edge-pb);
   }
 }

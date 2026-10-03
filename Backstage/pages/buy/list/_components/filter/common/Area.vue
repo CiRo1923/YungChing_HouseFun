@@ -1,6 +1,4 @@
 <script setup>
-import SelectDropdownOptions from '@components/common/mForm/SelectDropdownOptions.vue'
-
 const buyList = useBuyListStore()
 const { apiSearchData, serachOptions } = storeToRefs(buyList)
 
@@ -185,7 +183,7 @@ const onAreaClick = (item) => {
       <div class="area-dropdown relative overflow-hidden">
         <Transition :name="`area-slide-${direction}`">
           <div key="city" ref="cityPanelRef" v-if="activePanel === 'city'">
-            <SelectDropdownOptions
+            <CommonMFormSelectDropdownOptions
               :options="cityOptions"
               :config="{
                 schema: {
@@ -202,7 +200,7 @@ const onAreaClick = (item) => {
             />
           </div>
           <div key="district" ref="districtPanelRef" v-else>
-            <SelectDropdownOptions
+            <CommonMFormSelectDropdownOptions
               :options="districtOptions"
               :config="{
                 schema: {

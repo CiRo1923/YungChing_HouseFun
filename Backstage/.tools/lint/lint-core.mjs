@@ -13,10 +13,6 @@ import path from 'node:path'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 
-/* 同步載入專案自己的規則 —— 見下方 PROJECT_RULES 那一段的說明。
-   這個載法要 node 22.12 以上;更舊的版本會丟 ERR_REQUIRE_ESM,
-   那時會印出訊息而不是安靜略過。 */
-const require = createRequire(import.meta.url)
 import {
   baseNameOf,
   bodyOf,
@@ -51,13 +47,6 @@ import {
   tailwindThemeOf,
   topLevelKeysOf,
 } from './rules-code.mjs'
-
-// 存檔時的自動排序 —— 判斷與修正都在 rules-code.mjs,這裡只轉出去
-export { onSortComposables, onSortImports } from './rules-code.mjs'
-
-// 存檔時把進入頁面要拿的資料包成一起發出 —— 判斷與修正都在 rules-page.mjs
-export { onWrapMountedCalls } from './rules-page.mjs'
-export { onCloneApiDefault } from './rules-store.mjs'
 import { GLOBAL_CHECKS, GLOBAL_RULE_HINT, GLOBAL_RULE_TITLE } from './rules-global.mjs'
 import { PAGE_CHECKS, PAGE_RULE_HINT, PAGE_RULE_TITLE } from './rules-page.mjs'
 import { STORE_CHECKS, STORE_RULE_HINT, STORE_RULE_TITLE } from './rules-store.mjs'
@@ -104,6 +93,13 @@ import {
   toRel,
 } from './shared.mjs'
 
+// 存檔時的自動排序 —— 判斷與修正都在 rules-code.mjs,這裡只轉出去
+export { onSortComposables, onSortImports } from './rules-code.mjs'
+
+// 存檔時把進入頁面要拿的資料包成一起發出 —— 判斷與修正都在 rules-page.mjs
+export { onWrapMountedCalls } from './rules-page.mjs'
+export { onCloneApiDefault } from './rules-store.mjs'
+
 // 走訪與共用工具都在 shared.mjs —— 全站規範那支也要用,擺這裡會變成循環相依
 // isWarn 也轉出去 —— 「哪些違規只是建議、不擋」的判斷五層守門共用同一份,
 // 各層自己比對 level 字串的話,level 一旦增加新的值,各層的行為就開始不一致
@@ -120,6 +116,15 @@ export {
   listFiles,
   toRel,
 } from './shared.mjs'
+
+/* 同步載入專案自己的規則 —— 見下方 PROJECT_RULES 那一段的說明。
+   這個載法要 node 22.12 以上;更舊的版本會丟 ERR_REQUIRE_ESM,
+   那時會印出訊息而不是安靜略過。
+
+   **要放在 import 全部結束之後**:夾在中間的話,
+   接手的專案那一側(他們的 eslint 開著 import 那一組規則)
+   會把後面每一行 import 都報成 import/first,而那一層他們不能改。 */
+const require = createRequire(import.meta.url)
 
 /* 註解遮蔽(maskCssComments / maskHtmlComments)定義在 shared.mjs ——
    色票的解析也要用它找區塊邊界,各寫一份的話,兩邊對註解的認定會開始不一樣。 */

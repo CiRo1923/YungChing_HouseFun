@@ -1,4 +1,9 @@
 <script setup>
+/* component-deps —— 複製這支元件的時候這幾支要一起帶走:
+   assets/css/_common/vueTransition.css
+     轉場動畫定義在這裡。沒有它不會報錯也不會少畫面,只是切換的當下直接跳、沒有漸變。
+   scripts/_validation.js
+     這支元件用到的共用函式。少了它**建置直接失敗**,而訊息只說某個名字不存在 —— 看不出那是元件帶來的相依。 */
 import './.css/variables.css'
 import './.css/dropdownVariables.css'
 import './.css/common.css'

@@ -4,26 +4,26 @@
  * 不是漏寫。判斷方式:另一端根本沒有那條宣告(不是有宣告但值不同)。
  */
 :root {
+  --card-filter-pc-gap-x: 40px; /* lint-breakpoint-exempt: 只有 pc 是 flex 橫排,tablet / mobile 沒有 flex 也就沒有 gap */
   /* lint-breakpoint-exempt: 只有 pc 是 flex 橫排,tablet / mobile 沒有 flex 也就沒有 gap */
-  --card-filter-pc-gap-x: 40px;
 
+  --card-filter-header-pc-pr: 44px; /* lint-breakpoint-exempt: 標題欄在 pc 靠右留白,直排時改成靠下 */
   /* lint-breakpoint-exempt: 標題欄在 pc 靠右留白,直排時改成靠下 */
-  --card-filter-header-pc-pr: 44px;
 
+  --card-filter-header-tablet-pb: 16px; /* lint-breakpoint-exempt: 直排時才要靠下留白,pc 是靠右 */
+  --card-filter-header-mobile-pb: 16px; /* lint-breakpoint-exempt: 直排時才要靠下留白,pc 是靠右 */
   /* lint-breakpoint-exempt: 直排時才要靠下留白,pc 是靠右 */
-  --card-filter-header-tablet-pb: 16px;
-  --card-filter-header-mobile-pb: 16px;
 
+  --card-filter-header-pc-border-r: 2px; /* lint-breakpoint-exempt: 分隔線 pc 在右邊 */
   /* lint-breakpoint-exempt: 分隔線 pc 在右邊 */
-  --card-filter-header-pc-border-r: 2px;
 
+  --card-filter-header-tablet-border-b: 1px; /* lint-breakpoint-exempt: 分隔線直排時改到下方 */
+  --card-filter-header-mobile-border-b: 1px; /* lint-breakpoint-exempt: 分隔線直排時改到下方 */
   /* lint-breakpoint-exempt: 分隔線直排時改到下方 */
-  --card-filter-header-tablet-border-b: 1px;
-  --card-filter-header-mobile-border-b: 1px;
 
+  --card-filter-body-tablet-pt: 32px; /* lint-breakpoint-exempt: pc 靠 flex 撐開不需要間距,只有直排時才要推開標題 */
+  --card-filter-body-mobile-pt: 32px; /* lint-breakpoint-exempt: pc 靠 flex 撐開不需要間距,只有直排時才要推開標題 */
   /* lint-breakpoint-exempt: pc 靠 flex 撐開不需要間距,只有直排時才要推開標題 */
-  --card-filter-body-tablet-pt: 32px;
-  --card-filter-body-mobile-pt: 32px;
 
   --card-filter-header-border-color: var(--orange-e646);
   --card-filter-title-color: var(--gray-333);

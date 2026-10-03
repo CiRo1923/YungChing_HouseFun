@@ -11,27 +11,27 @@
   --form-radios-oval-color: var(--gray-666);
   --form-radios-oval-icon-color: var(--orange-e646);
 
+  --form-radios-oval-list-pc-bg-color: var(--gray-f2); /* lint-breakpoint-exempt: 只有桌機的外層是一條連在一起的膠囊,才需要底色 */
   /* lint-breakpoint-exempt: 只有桌機的外層是一條連在一起的膠囊,才需要底色 */
-  --form-radios-oval-list-pc-bg-color: var(--gray-f2);
 
+  --form-radios-oval-list-pc-rounded: 5px; /* lint-breakpoint-exempt: 只有桌機的外層是一條連在一起的膠囊,才需要圓角 */
   /* lint-breakpoint-exempt: 只有桌機的外層是一條連在一起的膠囊,才需要圓角 */
-  --form-radios-oval-list-pc-rounded: 5px;
 
+  --form-radios-oval-list-tablet-gap-x: 9px; /* lint-breakpoint-exempt: 只有平板 / 手機會換行,才需要欄距 */
+  --form-radios-oval-list-mobile-gap-x: 9px; /* lint-breakpoint-exempt: 只有平板 / 手機會換行,才需要欄距 */
   /* lint-breakpoint-exempt: 只有平板 / 手機會換行,才需要欄距 */
-  --form-radios-oval-list-tablet-gap-x: 9px;
-  --form-radios-oval-list-mobile-gap-x: 9px;
 
+  --form-radios-oval-list-tablet-gap-y: 12px; /* lint-breakpoint-exempt: 只有平板 / 手機會換行,才需要行距 */
+  --form-radios-oval-list-mobile-gap-y: 12px; /* lint-breakpoint-exempt: 只有平板 / 手機會換行,才需要行距 */
   /* lint-breakpoint-exempt: 只有平板 / 手機會換行,才需要行距 */
-  --form-radios-oval-list-tablet-gap-y: 12px;
-  --form-radios-oval-list-mobile-gap-y: 12px;
 
+  --form-radios-oval-item-tablet-bg-color: var(--gray-f2); /* lint-breakpoint-exempt: 平板 / 手機的底色改掛在每一顆上(桌機在外層) */
+  --form-radios-oval-item-mobile-bg-color: var(--gray-f2); /* lint-breakpoint-exempt: 平板 / 手機的底色改掛在每一顆上(桌機在外層) */
   /* lint-breakpoint-exempt: 平板 / 手機的底色改掛在每一顆上(桌機在外層) */
-  --form-radios-oval-item-tablet-bg-color: var(--gray-f2);
-  --form-radios-oval-item-mobile-bg-color: var(--gray-f2);
 
+  --form-radios-oval-item-tablet-rounded: 5px; /* lint-breakpoint-exempt: 平板 / 手機的圓角改掛在每一顆上(桌機在外層) */
+  --form-radios-oval-item-mobile-rounded: 5px; /* lint-breakpoint-exempt: 平板 / 手機的圓角改掛在每一顆上(桌機在外層) */
   /* lint-breakpoint-exempt: 平板 / 手機的圓角改掛在每一顆上(桌機在外層) */
-  --form-radios-oval-item-tablet-rounded: 5px;
-  --form-radios-oval-item-mobile-rounded: 5px;
 
   --form-radios-oval-item-h: auto;
   --form-radios-oval-item-pc-h: 35px;
