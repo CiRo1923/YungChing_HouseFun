@@ -18,8 +18,10 @@ const props = defineProps({
   >
     <span class="pt:block">本日新上架</span>
     <span class="text-[--orange-e646]">
-      <b class="text-[16px] font-medium">{{ numberComma.add(props.item.newListingCount ?? 0) }}</b
-      >戶
+      <b class="text-[16px] font-medium">
+        {{ numberComma.add(props.item.newListingCount ?? 0) }}
+      </b>
+      戶
     </span>
   </p>
 </template>
