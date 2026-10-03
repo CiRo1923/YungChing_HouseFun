@@ -12,7 +12,9 @@ import { enCrypto, deCrypto } from '@js/.crypto/index.js'
 //   token/exchange  用 Member Auth 的 handoff token 換這個服務的 bearer token
 //   me              取會員資料
 //   logout          撤銷 Member Auth 的全域 session(其他頻道的 token 也會一起失效)
-const useProjectActions = () => {
+// 名字取自動引入給的那一個,不取檔名 —— 檔名與共用那支同名,
+// 取成 useProjectActions 會把下面呼叫的共用 useProjectActions 遮掉,變成呼叫自己。
+const useMemberProjectActions = () => {
   const project = useProjectStore()
   const { serverTime } = storeToRefs(project)
   const { onApiGetCommonServerTime } = useProjectActions()
@@ -151,4 +153,4 @@ const useProjectActions = () => {
   }
 }
 
-export default useProjectActions
+export default useMemberProjectActions

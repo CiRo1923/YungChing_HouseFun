@@ -4,7 +4,9 @@ import { onDeepClone, onFormatDate } from '@js/_prototype.js'
 import { AUTHTOKEN } from '@js/_storage.js'
 import { enCrypto, deCrypto } from '@js/.crypto/index.js'
 
-const useProjectActions = () => {
+// 名字取自動引入給的那一個,不取檔名 —— 檔名與共用那支同名,
+// 取成 useProjectActions 會把下面呼叫的共用 useProjectActions 遮掉,變成呼叫自己。
+const useMemberAuthProjectActions = () => {
   const project = useProjectStore()
   const { serverTime } = storeToRefs(project)
   const { onApiGetCommonServerTime } = useProjectActions()
@@ -132,4 +134,4 @@ const useProjectActions = () => {
   }
 }
 
-export default useProjectActions
+export default useMemberAuthProjectActions
