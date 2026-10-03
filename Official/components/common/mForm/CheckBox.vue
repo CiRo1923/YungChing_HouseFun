@@ -88,7 +88,7 @@ const config = computed(() => {
         圖示的名字每個專案都不一樣(各站的 _svg 裡叫什麼由那個站決定),
         所以是設定而不是寫死在畫面區段裡 —— 寫死的話換一個專案要改元件本身,
         而那一段跟著來源覆蓋:改完下一次更新就被蓋回去。 */
-      checkIcon: 'icon_check',
+      checkIcon: 'icon_check_solid',
       isDisabled: false,
       isError: false,
       isJoin: null, // 只有 group 用
