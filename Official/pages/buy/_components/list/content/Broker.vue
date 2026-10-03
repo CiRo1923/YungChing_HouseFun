@@ -1,5 +1,6 @@
 <script setup>
 import { onFormatDate } from '@js/_prototype.js'
+import { onTimeAgo } from '@js/_projectPrototype.js'
 
 const common = useCommonStore()
 const { device } = storeToRefs(common)
@@ -22,12 +23,8 @@ const broker = computed(() => props.item.broker || {})
 const serverFull = computed(() =>
   serverTime.value?.full ? `${serverTime.value.full.replace(' ', 'T')}+08:00` : null
 )
-// 刷新時間:不設上限,依時距顯示「N 分鐘前 / N 小時前 / N 天前」
-const lastUpdateTime = computed(() => {
-  if (!serverFull.value) return null
-
-  return onTimeAgo(props.item.lastUpdateTime, serverFull.value)
-})
+// 刷新時間:相對時間的規則見 onTimeAgo(全站共用一套)
+const lastUpdateTime = computed(() => onTimeAgo(props.item.lastUpdateTime, serverTime.value?.full))
 const latestMessageTime = computed(() => {
   if (!serverFull.value) return 0
 
@@ -36,26 +33,6 @@ const latestMessageTime = computed(() => {
   const maxMinute = Math.max(0, Math.floor(minute))
   return maxMinute <= showMinute ? maxMinute : 0
 })
-
-// 相對時間:回傳「N 分鐘前 / N 小時前 / N 天前」(target 相對於 base)。
-// 無效日期或 target 晚於 base 時回傳 null。僅此檔使用,故從 _prototype.js 搬回本地。
-const onTimeAgo = (target, base) => {
-  const targetMs = Number(onFormatDate(target))
-  const baseMs = Number(onFormatDate(base))
-
-  if (!targetMs || !baseMs) return null
-
-  const diffMinute = Math.floor((baseMs - targetMs) / 60000)
-
-  if (diffMinute < 0) return null
-  if (diffMinute < 60) return `${diffMinute} 分鐘前`
-
-  const diffHour = Math.floor(diffMinute / 60)
-
-  if (diffHour < 24) return `${diffHour} 小時前`
-
-  return `${Math.floor(diffHour / 24)} 天前`
-}
 
 onResize()
 

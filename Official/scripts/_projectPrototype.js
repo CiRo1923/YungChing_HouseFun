@@ -137,3 +137,54 @@ export const onResolveByDevice = (value, device) => {
 
   return matchedKey !== undefined ? value[matchedKey] : null
 }
+
+/* 相對時間:target 距離 base 多久,依序換成秒、分、時、天,超過 TIME_AGO_DAYS 天改顯示日期。
+  例:30秒前、5分鐘前、3小時前、2天前、2026/01/01。全站的「多久前」都走這一支。
+
+  規格書沒有定義這套規則 —— 天數的上限是目前的做法,
+  已列進給 PM / UI 的待確認文件,確認後改這個值即可。
+
+  base 傳伺服器時間(project store 的 serverTime.full),不用瀏覽器的時間:
+  伺服器端與瀏覽器各算一次時,兩邊的基準要相同,畫面接手時才不會跳一下。
+
+  serverTime.full 是台北時間但沒有時區(2026-08-03 03:25:07),
+  依當地時區解析的話,伺服器(UTC)與瀏覽器(+8)會差 8 小時 ——
+  所以沒有時區的字串一律補上 +08:00 再解析。
+
+  任一邊解析不了、或 target 比 base 還晚,回 null。 */
+export const TIME_AGO_DAYS = 7
+
+export const onTimeAgo = (target, base) => {
+  const onParse = (value) => {
+    const text =
+      typeof value === 'string' && /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(:\d{2})?$/.test(value)
+        ? `${value.replace(' ', 'T')}+08:00`
+        : value
+
+    return value ? new Date(text) : null
+  }
+
+  const targetDate = onParse(target)
+  const baseDate = onParse(base)
+
+  if (!targetDate || !baseDate || Number.isNaN(+targetDate) || Number.isNaN(+baseDate)) return null
+
+  const seconds = Math.floor((baseDate - targetDate) / 1000)
+
+  if (seconds < 0) return null
+
+  const minutes = Math.floor(seconds / 60)
+  const hours = Math.floor(minutes / 60)
+  const days = Math.floor(hours / 24)
+
+  if (seconds < 60) return `${seconds}秒前`
+  if (minutes < 60) return `${minutes}分鐘前`
+  if (hours < 24) return `${hours}小時前`
+  if (days <= TIME_AGO_DAYS) return `${days}天前`
+
+  // 日期依台北時間顯示,伺服器端(UTC)與瀏覽器算出來才會是同一天
+  const taipei = new Date(+targetDate + 8 * 60 * 60 * 1000)
+  const pad2 = (n) => String(n).padStart(2, '0')
+
+  return `${taipei.getUTCFullYear()}/${pad2(taipei.getUTCMonth() + 1)}/${pad2(taipei.getUTCDate())}`
+}

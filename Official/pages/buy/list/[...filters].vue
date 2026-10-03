@@ -78,7 +78,7 @@ const onBuySuggest = async (setOptions) => {
 // 失敗要往上拋,伺服器端才會回 500。吞掉的話會送出一個內容是空的、狀態卻是 200 的頁面。
 // 換頁之後的重取在下面的 onBeforeRouteUpdate,那裡用的是相反的做法,理由寫在那一段。
 await Promise.all([
-  // server time 只用於「天」級距相對時間,初次載入抓一次即可,換頁不需重打
+  // server time 只用於相對時間(刷新時間的「N分鐘前」那類),初次載入抓一次即可,換頁不需重打
   callOnce('common-server-time', () => onApiGetCommonServerTime()),
   // 縣市與捷運的選項:middleware/buyList 驗證網址代碼時會先取,
   // 但只在網址真的帶了那一種代碼時才取 —— 畫面上的兩個下拉一律要有選項,所以這裡補齊。
