@@ -104,8 +104,155 @@ export const useMemberCenterStore = defineStore('memberCenter', () => {
       email: null,
     },
   })
+  // api 目前回不到資料,所以先帶一份假的把版面撐起來,api 通了之後這一份改回 null。
+  //
+  // 欄位怎麼對是照 swagger 的名字推的(NotificationItem 沒有說明與範例):
+  // 物件資料取 house(BuyListItem)、降價金額取 priceDropAmount、時間取 sentAt。
+  // 拿到範例 response 之後要照實際的值再對一次。
+  //
+  // 時間用「現在往前推」算,秒、分、時、天、日期五種顯示各有一筆;
+  // 另外刻意放了已讀、沒有社區、沒有降價金額、沒有分機各一筆。
   const price = ref({
-    data: null,
+    data: {
+      category: 0,
+      paging: {
+        page: 1,
+        pageSize: LIST_PAGE_SIZE,
+        total: 5,
+      },
+      items: [
+        {
+          id: '1',
+          isRead: false,
+          category: 0,
+          title: '百忍邊間黃金三樓新店琪琪',
+          sentAt: new Date(Date.now() - 30 * 1000).toISOString(),
+          priceDropAmount: 120,
+          tags: [],
+          house: {
+            id: '1',
+            hfid: 'H0000001',
+            title: '百忍邊間黃金三樓新店琪琪',
+            address: '台北市北投區泉源路華南巷',
+            community: { id: '1', name: '美之城社區' },
+            price: 21088,
+            lastPrice: 21208,
+            media: { images: [] },
+            broker: {
+              name: '郝惠邁',
+              brand: '永慶房屋(股)公司',
+              phone: '02-12345678',
+              extension: '1234',
+            },
+          },
+          actions: [],
+        },
+        {
+          id: '2',
+          isRead: false,
+          category: 0,
+          title: '正義車站 × 文山特區｜綠廳院',
+          sentAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+          priceDropAmount: 300,
+          tags: [],
+          house: {
+            id: '2',
+            hfid: 'H0000002',
+            title: '正義車站 × 文山特區｜綠廳院',
+            address: '台北市北投區泉源路華南巷',
+            community: { id: '2', name: '嘩啦啦美之城社區' },
+            price: 3280,
+            lastPrice: 3580,
+            media: { images: [] },
+            broker: {
+              name: '王大明',
+              brand: '信義房屋',
+              phone: '02-87654321',
+              extension: null,
+            },
+          },
+          actions: [],
+        },
+        {
+          id: '3',
+          isRead: true,
+          category: 0,
+          title: '忠誠四房車大降價屋主急售低於行情隨時可看',
+          sentAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
+          priceDropAmount: 80,
+          tags: [],
+          house: {
+            id: '3',
+            hfid: 'H0000003',
+            title: '忠誠四房車大降價屋主急售低於行情隨時可看',
+            address: '新北市新店區北新路三段',
+            community: null,
+            price: 1580,
+            lastPrice: 1660,
+            media: { images: [] },
+            broker: {
+              name: '林小美',
+              brand: '永慶不動產',
+              phone: '02-22223333',
+              extension: '88',
+            },
+          },
+          actions: [],
+        },
+        {
+          id: '4',
+          isRead: true,
+          category: 0,
+          title: '大安森林公園景觀三房',
+          sentAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+          priceDropAmount: null,
+          tags: [],
+          house: {
+            id: '4',
+            hfid: 'H0000004',
+            title: '大安森林公園景觀三房',
+            address: '台北市大安區新生南路二段',
+            community: { id: '4', name: '森林苑' },
+            price: 5680,
+            lastPrice: null,
+            media: { images: [] },
+            broker: {
+              name: '陳志明',
+              brand: '有巢氏房屋',
+              phone: '02-27001234',
+              extension: null,
+            },
+          },
+          actions: [],
+        },
+        {
+          id: '5',
+          isRead: true,
+          category: 0,
+          title: '捷運站旁電梯兩房',
+          sentAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
+          priceDropAmount: 50,
+          tags: [],
+          house: {
+            id: '5',
+            hfid: 'H0000005',
+            title: '捷運站旁電梯兩房',
+            address: '台北市中山區民生東路一段',
+            community: { id: '5', name: '民生之星' },
+            price: 1950,
+            lastPrice: 2000,
+            media: { images: [] },
+            broker: {
+              name: '張雅婷',
+              brand: '住商不動產',
+              phone: '02-25001234',
+              extension: '5',
+            },
+          },
+          actions: [],
+        },
+      ],
+    },
     apiData: { ...apiDefault.price },
   })
   const match = ref({
