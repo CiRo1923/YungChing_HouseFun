@@ -139,7 +139,8 @@ export const onResolveByDevice = (value, device) => {
 }
 
 /* 相對時間:target 距離 base 多久,依序換成秒、分、時、天,超過 TIME_AGO_DAYS 天改顯示日期。
-  例:30秒前、5分鐘前、3小時前、2天前、2026/01/01。全站的「多久前」都走這一支。
+  例:30秒前、5分鐘前、3小時前、2天前、2026-01-01。全站的「多久前」都走這一支。
+  日期與全站其他地方同一種格式(YYYY-MM-DD)。
 
   規格書沒有定義這套規則 —— 天數的上限是目前的做法,
   已列進給 PM / UI 的待確認文件,確認後改這個值即可。
@@ -186,5 +187,5 @@ export const onTimeAgo = (target, base) => {
   const taipei = new Date(+targetDate + 8 * 60 * 60 * 1000)
   const pad2 = (n) => String(n).padStart(2, '0')
 
-  return `${taipei.getUTCFullYear()}/${pad2(taipei.getUTCMonth() + 1)}/${pad2(taipei.getUTCDate())}`
+  return `${taipei.getUTCFullYear()}-${pad2(taipei.getUTCMonth() + 1)}-${pad2(taipei.getUTCDate())}`
 }
