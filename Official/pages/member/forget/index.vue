@@ -59,7 +59,7 @@ onInit()
 
 <template>
   <CommonMContainer
-    class="p:--max-w-400 space-y-[30px]"
+    class="space-y-[30px]"
     :config="{
       as: 'section',
     }"

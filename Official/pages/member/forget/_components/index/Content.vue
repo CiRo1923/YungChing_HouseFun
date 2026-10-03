@@ -36,7 +36,11 @@ const onSumit = async (validate, setFieldError) => {
 </script>
 
 <template>
-  <Form as="div" class="space-y-[15px]" v-slot="{ validate, validateField, setFieldError }">
+  <Form
+    as="div"
+    class="mx-auto space-y-[15px] p:max-w-[400px]"
+    v-slot="{ validate, validateField, setFieldError }"
+  >
     <CommonMFormInput
       name="mobilePhone"
       v-model="apiData.mobilePhone"
