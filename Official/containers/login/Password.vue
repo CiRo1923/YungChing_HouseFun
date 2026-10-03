@@ -1,6 +1,21 @@
 <script setup>
 const memberProjct = useMemberAuthProjectStore()
 const { login } = storeToRefs(memberProjct)
+const popup = usePopupStore()
+const { customData } = storeToRefs(popup)
+const { onCustomClose } = usePopupActions()
+const router = useRouter()
+
+// 登入頁與登入 popup 共用這一支。在 popup 裡時先關掉 popup 再換頁 ——
+// popup 掛在買屋的 layout 上,直接換頁的話它隨 layout 消失,
+// 但開著的狀態與鎖住捲動的 body 樣式會留到忘記密碼那一頁。
+const onForget = () => {
+  if (customData.value.id === 'popupLoginSystem') onCustomClose()
+
+  router.push({
+    name: 'member-forget',
+  })
+}
 </script>
 
 <template>
@@ -42,6 +57,15 @@ const { login } = storeToRefs(memberProjct)
           main: '--h-55 --px-12 --py-5 --border --rounded',
         }"
       />
+      <div class="mt-[10px] text-right">
+        <CommonMAnchor
+          text="忘記密碼"
+          :setClass="{
+            main: 'text-[14px] underline',
+          }"
+          @click="onForget"
+        />
+      </div>
     </li>
   </ul>
 </template>
