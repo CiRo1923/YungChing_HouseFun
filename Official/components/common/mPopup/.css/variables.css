@@ -138,10 +138,10 @@
   --popup-body-tablet-mb: 0;
   --popup-body-mobile-mb: 0;
 
-  /* 浮層的上內距,三份預設都跟著 --popup-py */
-  --popup-container-pc-pt: var(--popup-py);
-  --popup-container-tablet-pt: var(--popup-py);
-  --popup-container-mobile-pt: var(--popup-py);
+  /* 浮層的上內距,與外框的上下內距同值(桌機 --py-40、平板手機 --py-24) */
+  --popup-container-pc-pt: 40px;
+  --popup-container-tablet-pt: 24px;
+  --popup-container-mobile-pt: 24px;
 
   --popup-body-pc-mt: 30px;
   --popup-body-tablet-mt: 30px;
