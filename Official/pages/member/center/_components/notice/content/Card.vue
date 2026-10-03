@@ -26,5 +26,10 @@ const onDelete = () => emits('delete')
       @delete="onDelete"
       v-if="props.item.category === 0"
     />
+    <PageMemberCenterNoticeContentCardMatch
+      :item="props.item"
+      @delete="onDelete"
+      v-else-if="props.item.category === 1"
+    />
   </div>
 </template>

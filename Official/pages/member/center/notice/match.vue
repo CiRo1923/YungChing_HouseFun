@@ -1,5 +1,5 @@
 <script setup>
-const { onUseMeta } = useProjectActions()
+const { onUseMeta, onApiGetCommonServerTime } = useProjectActions()
 const { onApiErrorServerToClient } = usePopupActions()
 
 definePageMeta({
@@ -16,6 +16,10 @@ definePageMeta({
 //   const { onNoticeSummary, onApiGetMemberNotificationsMatch } = useMemberCenterActions()
 //   await onNoticeSummary()
 //   await onApiGetMemberNotificationsMatch()
+
+// 卡片上的「通知時間：N分鐘前」以伺服器時間為準(見 onTimeAgo),進來抓一次即可。
+// callOnce 的理由與買屋列表頁相同:setup 在伺服器與瀏覽器各跑一次,直接 await 會打兩次。
+await callOnce('common-server-time', () => onApiGetCommonServerTime())
 
 onUseMeta({
   title: '會員中心 | 好房 HouseFun',
@@ -37,6 +41,7 @@ onMounted(() => {
     >
       <PageMemberCenterHeader title="通知總覽" description="訊息保留 30 天，超過時限將會自動移除" />
       <PageMemberCenterNoticeTabs class="mt-[25px]" />
+      <PageMemberCenterNoticeContent id="match" />
     </CommonMContent>
   </CommonMContainer>
 </template>

@@ -255,8 +255,73 @@ export const useMemberCenterStore = defineStore('memberCenter', () => {
     },
     apiData: { ...apiDefault.price },
   })
+  // api 目前回不到資料,所以先帶一份假的把版面撐起來,api 通了之後這一份改回 null。
+  //
+  // 配對條件那一句取 title、本日新上架戶數取 newListingCount、時間取 sentAt ——
+  // 照 swagger 的名字推的,拿到範例 response 之後要照實際的值再對一次。
+  //
+  // 時間用「現在往前推」算;另外刻意放了已讀、條件很長(要換行)、戶數破千各一筆。
   const match = ref({
-    data: null,
+    data: {
+      category: 1,
+      paging: {
+        page: 1,
+        pageSize: LIST_PAGE_SIZE,
+        total: 5,
+      },
+      items: [
+        {
+          id: '1',
+          isRead: false,
+          category: 1,
+          title: '台北市中山區、總價2000-3000、3房、有車位',
+          sentAt: new Date(Date.now() - 45 * 1000).toISOString(),
+          newListingCount: 102,
+          tags: [],
+          actions: [],
+        },
+        {
+          id: '2',
+          isRead: false,
+          category: 1,
+          title: '新北市板橋區、新北市中和區、新北市永和區、總價1500-2500、2-3房、電梯大樓、屋齡10年內',
+          sentAt: new Date(Date.now() - 12 * 60 * 1000).toISOString(),
+          newListingCount: 8,
+          tags: [],
+          actions: [],
+        },
+        {
+          id: '3',
+          isRead: true,
+          category: 1,
+          title: '台北市大安區、總價3000以上、4房',
+          sentAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
+          newListingCount: 1280,
+          tags: [],
+          actions: [],
+        },
+        {
+          id: '4',
+          isRead: true,
+          category: 1,
+          title: '桃園市中壢區、總價1000以下',
+          sentAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
+          newListingCount: 1,
+          tags: [],
+          actions: [],
+        },
+        {
+          id: '5',
+          isRead: true,
+          category: 1,
+          title: '台中市西屯區、總價1500-2000、3房、有車位',
+          sentAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
+          newListingCount: 35,
+          tags: [],
+          actions: [],
+        },
+      ],
+    },
     apiData: { ...apiDefault.match },
   })
   const communityNew = ref({

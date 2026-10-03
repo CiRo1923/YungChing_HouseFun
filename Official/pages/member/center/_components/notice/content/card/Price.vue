@@ -29,12 +29,12 @@ const onDelete = () => emits('delete')
       <!-- flex-1 的基準寬度是 0,標題再長都不會把自己擠到縮圖下一行;
         min-w-0 讓它縮得到內容以下,line-clamp 才截得斷。 -->
       <div class="min-w-0 flex-1 space-y-[5px]">
-        <PageMemberCenterNoticeContentCardTitle :item="props.item" />
-        <PageMemberCenterNoticeContentCardAddressInfo :item="props.item" />
+        <PageMemberCenterNoticeContentCardPriceTitle :item="props.item" />
+        <PageMemberCenterNoticeContentCardPriceAddressInfo :item="props.item" />
       </div>
-      <PageMemberCenterNoticeContentCardBrokerInfo :item="props.item" class="m:w-full" />
+      <PageMemberCenterNoticeContentCardPriceBrokerInfo :item="props.item" class="m:w-full" />
     </div>
-    <PageMemberCenterNoticeContentCardPriceInfo :item="props.item" />
-    <PageMemberCenterNoticeContentCardActions @delete="onDelete" />
+    <PageMemberCenterNoticeContentCardPriceAmount :item="props.item" />
+    <PageMemberCenterNoticeContentCardPriceActions @delete="onDelete" />
   </div>
 </template>
