@@ -90,7 +90,7 @@
     <p class="meta">比對日期:2026-10-03 ・ 依據:專案內 <code>.api.swagger/</code> 當下的 swagger</p>
 
     <p class="lead">
-      以下六項是前端在串接時,從 swagger 判斷不出來、或缺少欄位的地方。
+      以下十一項是前端在串接時,從 swagger 判斷不出來、或缺少欄位的地方。
       每一項列出位置、目前的狀況、對畫面的影響,以及需要後端提供什麼。
       欄位能補說明的,請直接寫進 swagger 的 <code>description</code> 與 <code>example</code>,
       之後接手的人也查得到。
@@ -129,6 +129,31 @@
       </tr>
       <tr>
         <td>6</td>
+        <td>降價通知的降價金額取哪一個欄位</td>
+        <td>說明兩個欄位的差別</td>
+      </tr>
+      <tr>
+        <td>7</td>
+        <td>配對物件通知「查看」的網址</td>
+        <td>補欄位,或說明從哪裡取</td>
+      </tr>
+      <tr>
+        <td>8</td>
+        <td>通知分頁籤的未讀數上限 999</td>
+        <td>確認由後端處理</td>
+      </tr>
+      <tr>
+        <td>9</td>
+        <td>社區新上架通知的筆數</td>
+        <td>說明取哪一個欄位</td>
+      </tr>
+      <tr>
+        <td>10</td>
+        <td>買屋列表沒有「社區」這個篩選條件</td>
+        <td>確認能不能用社區篩選</td>
+      </tr>
+      <tr>
+        <td>11</td>
         <td>忘記密碼沒有可重送時間</td>
         <td>補 <code>resendAvailableAt</code></td>
       </tr>
@@ -295,10 +320,149 @@
       </table>
     </div>
 
-    <h2>會員登入服務(member auth)</h2>
+    <div class="item">
+      <h3>6. 降價通知的降價金額取哪一個欄位</h3>
+      <table>
+        <tr>
+          <th>位置</th>
+          <td>
+            <code>GET /api/{version}/member/notifications</code>(買屋降價通知,<code>category=0</code>)
+          </td>
+        </tr>
+        <tr>
+          <th>狀況</th>
+          <td>
+            有兩個欄位都像降價金額:通知本身的 <code>priceDropAmount</code>,
+            與物件卡 <code>house</code>(<code>BuyListItem</code>)的 <code>priceDrop</code>。
+            兩者都沒有說明。前端推測前者是「這一則通知發出時降了多少」,
+            後者是「物件現在比原價低多少」(之後再降價會跟著變)。
+          </td>
+        </tr>
+        <tr>
+          <th>影響</th>
+          <td>卡片上的「↓ 120萬」目前取 <code>priceDropAmount</code>。推測錯的話,顯示的金額與總價、原價對不起來。</td>
+        </tr>
+        <tr>
+          <th>需要</th>
+          <td>說明兩個欄位各自的意思,以及降價通知卡片該用哪一個。</td>
+        </tr>
+      </table>
+    </div>
 
     <div class="item">
-      <h3>6. 忘記密碼的驗證碼沒有「可重送時間」</h3>
+      <h3>7. 配對物件通知「查看」的網址</h3>
+      <table>
+        <tr>
+          <th>位置</th>
+          <td>
+            <code>GET /api/{version}/member/notifications</code>(配對物件新上架,<code>category=1</code>)
+          </td>
+        </tr>
+        <tr>
+          <th>狀況</th>
+          <td>
+            規格書寫「查看:另開該配對條件的搜尋結果頁」,但 <code>NotificationItem</code>
+            沒有條件或搜尋網址的欄位。搜尋訂閱管理那支對應的是 <code>conditionPath</code>(見第 1 項)。
+          </td>
+        </tr>
+        <tr>
+          <th>影響</th>
+          <td>「查看」按鈕目前沒有掛網址,點了沒有反應。</td>
+        </tr>
+        <tr>
+          <th>需要</th>
+          <td>
+            補一個欄位提供這組條件的搜尋網址(格式與 <code>conditionPath</code> 相同最好);
+            或說明前端該從哪裡取得。
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="item">
+      <h3>8. 通知分頁籤的未讀數上限 999</h3>
+      <table>
+        <tr>
+          <th>位置</th>
+          <td>
+            <code>GET /api/{version}/member/notifications/summary</code> 回應的各分頁未讀數
+          </td>
+        </tr>
+        <tr>
+          <th>狀況</th>
+          <td>規格書寫分頁籤的未讀提示「最多就是 999」。前端直接顯示回應的值,不自己截斷。</td>
+        </tr>
+        <tr>
+          <th>影響</th>
+          <td>後端回 1280 的話,畫面上就會顯示 1280。</td>
+        </tr>
+        <tr>
+          <th>需要</th>
+          <td>確認由後端處理上限:未讀數超過 999 時回 999。</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="item">
+      <h3>9. 社區新上架通知的筆數</h3>
+      <table>
+        <tr>
+          <th>位置</th>
+          <td>
+            <code>GET /api/{version}/member/notifications</code>(關注社區新上架,<code>category=2</code>)
+          </td>
+        </tr>
+        <tr>
+          <th>狀況</th>
+          <td>
+            卡片要顯示「您關注的社區 ○○社區 有 N 筆新物件上架了」。
+            <code>newListingCount</code> 的說明只寫了「配對物件通知在本次通知批次新增的物件數量」,
+            看不出社區新上架是不是也用它。
+          </td>
+        </tr>
+        <tr>
+          <th>影響</th>
+          <td>目前暫取 <code>newListingCount</code>。不是這個欄位的話,筆數會一直顯示 0。</td>
+        </tr>
+        <tr>
+          <th>需要</th>
+          <td>說明社區新上架的筆數取哪一個欄位;是 <code>newListingCount</code> 的話,把說明補上這一種。</td>
+        </tr>
+      </table>
+    </div>
+
+    <h2>買屋服務(buy)</h2>
+
+    <div class="item">
+      <h3>10. 買屋列表沒有「社區」這個篩選條件</h3>
+      <table>
+        <tr>
+          <th>位置</th>
+          <td><code>GET /api/{version}/buy/list</code> 的查詢參數</td>
+        </tr>
+        <tr>
+          <th>狀況</th>
+          <td>
+            規格書寫社區新上架通知的「立即查看」要「另開該社區待售物件明細列表(買屋頻道頁面)」。
+            買屋列表能篩選的有區域、捷運、總價、房數、型態、坪數、車位、屋齡、樓層、單價、
+            標籤、關鍵字等,沒有社區。用關鍵字帶社區名稱的話,
+            會比對到案名或地址裡有同樣文字的其他物件,結果不只這個社區。
+          </td>
+        </tr>
+        <tr>
+          <th>影響</th>
+          <td>「立即查看」目前沒有掛網址,點了沒有反應。</td>
+        </tr>
+        <tr>
+          <th>需要</th>
+          <td>確認買屋列表能不能用社區(例如社區 id)篩選;能的話,參數名稱與格式。</td>
+        </tr>
+      </table>
+    </div>
+
+    <h2>會員登入服務(member auth)</h2>
+    <div class="item">
+      <h3>11. 忘記密碼的驗證碼沒有「可重送時間」</h3>
       <table>
         <tr>
           <th>位置</th>
