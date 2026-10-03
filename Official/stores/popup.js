@@ -78,7 +78,7 @@ export const usePopupStore = defineStore('popup', () => {
       這是四種彈窗共用的那一份;某一種要不一樣時,
       在下面的 byType 填它自己的 content,容器會優先用那一個。
       開啟彈窗時傳的 setClass.body 又比兩者都優先。 */
-    content: 'text-center leading-[1.7] m:text-[14px] pt:text-[20px]',
+    content: 'text-center leading-[1.7] text-[18px] text-[--gray-666]',
 
     /* 各種彈窗要另外加的 class,**鍵名與彈窗元件的 setClass 相同**,原樣交給它。
 
