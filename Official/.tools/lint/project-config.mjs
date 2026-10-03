@@ -874,9 +874,7 @@ export const PROJECT_NAME_SCOPE = TOOLING_PREFIXES
  *
  * 原始碼就放在專案根時,範圍是整個專案(空字串前綴對任何路徑都成立)。
  */
-export const ABSOLUTE_PATH_SCOPE = IS_SRC_PROJECT_ROOT
-  ? ['']
-  : [SRC_PREFIX, ...TOOLING_PREFIXES]
+export const ABSOLUTE_PATH_SCOPE = IS_SRC_PROJECT_ROOT ? [''] : [SRC_PREFIX, ...TOOLING_PREFIXES]
 
 /**
  * 「文字怎麼寫」那幾條規則的適用範圍(路徑前綴)。
@@ -889,9 +887,7 @@ export const ABSOLUTE_PATH_SCOPE = IS_SRC_PROJECT_ROOT
  * 兩套工具掃同一層的話,判準會各自演化 —— 同一份文件被兩邊報不同的東西,
  * 而修好一邊另一邊還在報。
  */
-export const WRITING_STYLE_SCOPE = IS_SRC_PROJECT_ROOT
-  ? ['']
-  : [SRC_PREFIX, ...TOOLING_PREFIXES]
+export const WRITING_STYLE_SCOPE = IS_SRC_PROJECT_ROOT ? [''] : [SRC_PREFIX, ...TOOLING_PREFIXES]
 
 /**
  * 建置設定檔的候選檔名 —— 由前往後找,用第一個存在的那一支。

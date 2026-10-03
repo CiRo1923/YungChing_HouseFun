@@ -15,7 +15,7 @@
 
 .m-loading-container {
   /* text-[--var] 會被 tailwind 當成 color,字級一定要加 length: 型別提示 */
-  @apply relative text-[length:--loading-text-size] text-[--loading-color];
+  @apply relative flex flex-col items-center text-[length:--loading-text-size] text-[--loading-color];
 
   /* 浮在遮罩上的卡片。裸用(直接塞進別的容器)時不帶這個 modifier */
   &.\-\-card {
@@ -26,11 +26,32 @@
   }
 }
 
+/* 整圈同一個顏色,只有上緣透明 —— 沒有那個缺口的話,轉起來看不出在動 */
+.m-loading-spinner {
+  @apply block rounded-full border-solid border-[--loading-spinner-color] border-t-transparent;
+  @apply mb-[--loading-spinner-mb] h-[--loading-spinner-size] w-[--loading-spinner-size];
+
+  border-width: var(--loading-spinner-border);
+  animation: m-loading-spin 0.8s linear infinite;
+}
+
+@keyframes m-loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 @screen p {
   .m-loading,
   .m-loading-container {
     --loading-text-size: var(--loading-pc-text-size);
     --loading-overlay-blur: var(--loading-overlay-pc-blur);
+  }
+
+  .m-loading-spinner {
+    --loading-spinner-size: var(--loading-pc-spinner-size);
+    --loading-spinner-border: var(--loading-pc-spinner-border);
+    --loading-spinner-mb: var(--loading-pc-spinner-mb);
   }
 
   .m-loading-container {
@@ -51,6 +72,12 @@
     --loading-overlay-blur: var(--loading-overlay-tablet-blur);
   }
 
+  .m-loading-spinner {
+    --loading-spinner-size: var(--loading-tablet-spinner-size);
+    --loading-spinner-border: var(--loading-tablet-spinner-border);
+    --loading-spinner-mb: var(--loading-tablet-spinner-mb);
+  }
+
   .m-loading-container {
     &.\-\-card {
       --loading-container-rounded: var(--loading-container-tablet-rounded);
@@ -67,6 +94,12 @@
   .m-loading-container {
     --loading-text-size: var(--loading-mobile-text-size);
     --loading-overlay-blur: var(--loading-overlay-mobile-blur);
+  }
+
+  .m-loading-spinner {
+    --loading-spinner-size: var(--loading-mobile-spinner-size);
+    --loading-spinner-border: var(--loading-mobile-spinner-border);
+    --loading-spinner-mb: var(--loading-mobile-spinner-mb);
   }
 
   .m-loading-container {

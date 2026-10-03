@@ -2,7 +2,35 @@
    全專案都是同一種樣式、沒有逐頁指定的需求,所以不開 modifier,只分 pc / tablet / mobile。
    唯一的 modifier 是 group-hover:--image-scale(外層容器 hover 時放大圖片)。 */
 
+/* 只放「值」:root 預設值與各斷點的值;斷點對應寫在 common.css。
+
+  ===== 名字怎麼讀 =====
+
+  `--figure-<部位>-<斷點>-<屬性>`。分兩組:
+
+    image          .m-figure            正常顯示的圖
+    no-image-img   讀不到圖時那張替代圖的尺寸
+    404            .m-figure-error      404 那一種的替代畫面
+    404-icon       .m-figure-error-icon 替代畫面裡那顆圖示
+
+  `-max` 結尾的是上限(max-width / max-height),不是固定值。
+*/
+
 :root {
+  /* 三個斷點各自指派的那幾個,base 也要給一份。
+
+    斷點是 raw 查詢,不是連續的範圍 —— 哪天某個尺寸三個都不命中,
+    沒有 base 的那幾個就讀到未定義的變數,瀏覽器把整條宣告丟掉,而且不報錯。
+    (那種縫出現過一次:寬 1000 到 1023、高度不足 428 的視窗,
+    後來在 tailwind.theme.js 的 t 與 pt 各補了一條。)
+
+    值取平板那一份 —— 三檔之中它在中間,拿不到斷點時最不容易出錯。 */
+  --figure-404-icon-max-size: var(--figure-404-icon-tablet-max-size);
+  --figure-404-icon-size: var(--figure-404-icon-tablet-size);
+  --figure-image-scale: var(--figure-image-tablet-scale);
+  --figure-no-image-img-max-w: var(--figure-no-image-img-tablet-max-w);
+  --figure-no-image-img-w: var(--figure-no-image-img-tablet-w);
+
   /* 圖片載入失敗(status 404)的佔位 ------------------------------------- */
 
   --figure-404-color: var(--white);

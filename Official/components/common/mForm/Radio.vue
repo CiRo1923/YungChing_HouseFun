@@ -135,7 +135,7 @@ const onChange = () => {
       v-slot="{ field, errorMessage }"
     >
       <div
-        class="m-form-container"
+        class="m-form-container --radio"
         :class="[{ '--no-label': !config.label }, setClass.container]"
         v-bind="config.attr.container"
       >

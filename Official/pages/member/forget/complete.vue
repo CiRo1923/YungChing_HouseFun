@@ -27,7 +27,6 @@ definePageMeta({
   ],
 })
 
-
 onUseMeta({
   title: '密碼設定完成 | 好房 HouseFun',
   description:

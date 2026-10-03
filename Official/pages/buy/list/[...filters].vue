@@ -99,7 +99,6 @@ onUseMeta({
   url: useRequestURL(),
 })
 
-
 // 原地搜尋(不改 URL):以目前路由重打 buy-list
 const onBuyList = async () => {
   onIsLoading(true)
@@ -166,7 +165,9 @@ onUnmounted(() => {
   </div>
   <CommonMContainer class="p:--max-w-1220 p:--px-10 t:mt-[10px] p:mt-[20px]">
     <PageBuyListFocus />
-    <CommonMContent class="--hasBgColor pt:--rounded-20 pt:--py-20 p:--px-30 m:--pb-20 tm:--px-16 t:mx-[10px]">
+    <CommonMContent
+      class="--hasBgColor pt:--rounded-20 pt:--py-20 p:--px-30 m:--pb-20 tm:--px-16 t:mx-[10px]"
+    >
       <PageBuyListSearchFilter
         @click="onBuyList"
         @click:routePush="onRoutePush"

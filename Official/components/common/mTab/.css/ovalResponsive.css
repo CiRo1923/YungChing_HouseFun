@@ -99,7 +99,9 @@
         --tab-oval-responsive-body-tablet-border-visible
       );
       --tab-oval-responsive-border-h: var(--tab-oval-responsive-tablet-border-h);
-      --tab-oval-responsive-header-items-gap-x: var(--tab-oval-responsive-header-items-tablet-gap-x);
+      --tab-oval-responsive-header-items-gap-x: var(
+        --tab-oval-responsive-header-items-tablet-gap-x
+      );
       --tab-oval-responsive-icon-p: var(--tab-oval-responsive-icon-tablet-p);
       --tab-oval-responsive-icon-size: var(--tab-oval-responsive-icon-tablet-size);
     }

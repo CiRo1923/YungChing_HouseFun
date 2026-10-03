@@ -82,6 +82,18 @@ const defaultConfig = {
   // (touchedModelUpdate 的用意見 .composables/useValidateEvents.js)。
   // 傳陣列為「完整指定」,沒列到的一律關閉。
   validateEvents: ['blur', 'change', 'touchedModelUpdate'],
+  /* 長度限制 —— 四個名字很像,行為各不相同:
+
+       length        同時當下限與上限的捷徑(要求「剛好幾個字」時給這一個)
+       minlength     下限。給了就蓋過 length
+       maxlength     上限。給了就蓋過 length
+       formatLength  字數**怎麼顯示**的範本,例如 '{length} / {maxlength}' ——
+                     `{length}` 換成目前打了幾個字,`{maxlength}` 換成上限。
+                     沒給這一項就不顯示字數那一格
+
+     前三個是數字(限制本身),最後一個是字串(顯示方式)。
+     **字數要顯示得出來,得先有上限** —— 範本裡的 `{maxlength}` 沒有值可填的話,
+     那一格不會出現。上限來自 maxlength 或 length,給哪一個都算。 */
   length: null,
   minlength: null,
   maxlength: null,
@@ -98,12 +110,15 @@ const defaultConfig = {
   allowNegative: false, // 允許輸入負數（inputMode 為 tel 時不適用）
   toFixed: null, // 取得小數點第幾位
 }
+/* 每一個位置一個名字,而且要與畫面那一段實際讀的名字相同 ——
+  列了而畫面沒讀的那一個,使用端傳進來不會有任何作用,**也不會報錯**。
+  字數那一格的 class 畫面讀的是 `length`,與它的 class 名(`.m-form-length`)同一個字。 */
 const defaultSetClass = {
   main: '',
   container: '',
   element: '',
   type: '',
-  formatLength: '',
+  length: '',
   frontAssist: '',
   rearAssist: '',
   suffix: '',
@@ -121,21 +136,29 @@ const isNumeric = computed(() => /^(decimal|numeric|tel)$/.test(config.value.inp
 const isTel = computed(() => config.value.inputMode === 'tel')
 // 電話號碼不會是負的，tel 一律不吃 allowNegative
 const canNegative = computed(() => config.value.allowNegative && !isTel.value)
+/* 下限與上限各算一次 —— `length` 是兩者共用的捷徑,各自的那一個給了就蓋過它。
+
+  **算在同一個地方,是因為用到它的有好幾處**(輸入框的屬性、字數那一格、
+  往下傳給插槽的值)。各處自己寫一次 `maxlength || length` 的話,
+  其中一處漏掉 fallback 就會變成:只給 length 的欄位,輸入框擋得住字數,
+  而字數那一格不出現 —— 兩邊看起來像各自壞了一半。 */
+const minLength = computed(() => config.value.minlength || config.value.length)
+const maxLength = computed(() => config.value.maxlength || config.value.length)
 // 負號會多佔一個字元，maxlength 要跟著多留一位，否則實際能填的位數會少一位
 const fieldMaxlength = computed(() => {
-  const { maxlength, length } = config.value
-  const max = maxlength || length
+  const max = maxLength.value
 
   if (!max) return null
 
   return canNegative.value ? Number(max) + 1 : max
 })
 const formatLength = computed(() => {
-  const { formatLength, maxlength } = config.value
+  const { formatLength } = config.value
+  const max = maxLength.value
 
-  return formatLength && maxlength
+  return formatLength && max
     ? formatLength.replace(/\{\s*(length|maxlength)\s*\}/g, (_, key) => {
-        return key === 'length' ? (model.value ? String(model.value.length) : 0) : String(maxlength)
+        return key === 'length' ? (model.value ? String(model.value.length) : 0) : String(max)
       })
     : null
 })
@@ -375,9 +398,13 @@ defineExpose({
       :rules="config.isDisabled ? '' : props.rules"
       v-bind="validateOn"
     >
-      <div class="m-form-container" :class="setClass.container" v-bind="config.attr.container">
+      <div
+        class="m-form-container --input"
+        :class="setClass.container"
+        v-bind="config.attr.container"
+      >
         <div
-          class="m-form-element"
+          class="m-form-element --input"
           :class="[
             setClass.element,
             { '--focus': isFocus },
@@ -403,7 +430,7 @@ defineExpose({
             :class="setClass.type"
             v-bind="{ ...config.attr.type, ...onBind(field) }"
             :inputMode="config.inputMode"
-            :minlength="config.minlength || config.length"
+            :minlength="minLength"
             :maxlength="fieldMaxlength"
             :placeholder="config.placeholder"
             :readonly="config.isReadonly"
@@ -449,11 +476,9 @@ defineExpose({
           :class="setClass.suffix"
           v-bind="config.attr.suffix"
         >
-          <slot
-            name="suffix"
-            :maxlength="config.length || config.maxlength"
-            :length="model ? model.length : 0"
-          />
+          <!-- 上限走與別處同一份(maxLength)—— 這裡原本的順序是反的,
+            而兩個都給的時候,插槽拿到的會與輸入框實際擋的不一樣。 -->
+          <slot name="suffix" :maxlength="maxLength" :length="model ? model.length : 0" />
         </small>
       </div>
     </Field>

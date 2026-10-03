@@ -1,4 +1,33 @@
+/* mErrorMessage(欄位底下那一行紅字)的變數。
+
+  只放「值」:root 預設值與各斷點的值;斷點對應寫在 common.css。
+
+  ===== 名字怎麼讀 =====
+
+  `--error-message-<部位>-<斷點>-<屬性>`。這支元件只有三個元素:
+
+    (無部位)   .m-error-message        整行 —— 文字顏色
+    icon       .m-error-message-icon   左邊那顆圖示 —— 大小、上下外距
+    text       .m-error-message-text   訊息文字 —— 字級
+    gap        圖示與文字之間的間隔
+
+  圖示的上下外距(`icon-my`)是給「圖形比文字矮」的站用的:
+  用它把那一行撐到與文字同高,圖示才對得齊第一行文字。
+*/
 :root {
+  /* 三個斷點各自指派的那幾個,base 也要給一份。
+
+    斷點是 raw 查詢,不是連續的範圍 —— 哪天某個尺寸三個都不命中,
+    沒有 base 的那幾個就讀到未定義的變數,瀏覽器把整條宣告丟掉,而且不報錯。
+    (那種縫出現過一次:寬 1000 到 1023、高度不足 428 的視窗,
+    後來在 tailwind.theme.js 的 t 與 pt 各補了一條。)
+
+    值取平板那一份 —— 三檔之中它在中間,拿不到斷點時最不容易出錯。 */
+  --error-message-gap-x: var(--error-message-tablet-gap-x);
+  --error-message-icon-size: var(--error-message-icon-tablet-size);
+  --error-message-icon-my: var(--error-message-icon-tablet-my);
+  --error-message-text-size: var(--error-message-tablet-text-size);
+
   /* 圖示與訊息文字的間隔 */
   --error-message-pc-gap-x: 4px;
   --error-message-tablet-gap-x: 4px;
@@ -7,6 +36,12 @@
   --error-message-icon-pc-size: 18px;
   --error-message-icon-tablet-size: 18px;
   --error-message-icon-mobile-size: 18px;
+
+  /* 圖示的上下外距。圖形本身比文字矮的時候,用它把那一行撐到與文字同高,
+    圖示才對得齊第一行文字 —— 來源的圖示與文字等高,所以是 0。 */
+  --error-message-icon-pc-my: 0;
+  --error-message-icon-tablet-my: 0;
+  --error-message-icon-mobile-my: 0;
 
   /* 字級由元件決定,要分斷點所以定義成變數。
 
@@ -19,7 +54,6 @@
   --error-message-tablet-text-size: 14px;
   --error-message-mobile-text-size: 14px;
 
-  /* 顏色由元件決定 —— 錯誤訊息全站都是同一個紅。
-    字級相反,那個跟著使用端的欄位走,不在這支裡面(見 common.css 的說明)。 */
+  /* 顏色同樣由元件決定 —— 錯誤訊息全站都是同一個紅 */
   --error-message-color: var(--red-d111);
 }

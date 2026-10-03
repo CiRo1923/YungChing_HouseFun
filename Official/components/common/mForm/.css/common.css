@@ -3,9 +3,14 @@
   @apply overflow-hidden;
 }
 
-.m-form-container {
-  @apply flex;
-}
+/* 排列方式由各變體自己決定,這裡不給 —— 單行的那幾支是橫向(欄位與後綴並排),
+  多行輸入是縱向(字數排在欄位底下)。共用一個 flex 的話,
+  其中一種一定要再寫一條去推翻它,而推翻的那一條與這裡相隔很遠。
+
+  各變體的規則寫在自己那一支樣式裡,選擇器是 `.m-form-container.--<變體>` ——
+  變體標記同時掛在這一層與 .m-form-element 上:
+  css 沒有辦法從子層選父層(`:has()` 在內嵌瀏覽器不成立),
+  只看 .m-form-element 的話,這一層選不到。 */
 
 .m-form-element {
   &:not(label) {
@@ -29,7 +34,7 @@
 
         .m-form-length,
         .m-form-assist {
-          @apply text-[--orange-e646];
+          @apply text-[--form-assist-error-color];
         }
       }
     }
@@ -95,7 +100,7 @@
 }
 
 .m-form-clear-icon {
-  @apply h-[--form-clear-icon-size] w-[--form-clear-icon-size] p-[--form-clear-icon-p] text-[--gray-999];
+  @apply h-[--form-clear-icon-size] w-[--form-clear-icon-size] p-[--form-clear-icon-p] text-[--form-clear-icon-color];
 }
 
 /* 字數計數與前後綴不參與壓縮 —— 空間不夠時要擠的是輸入區(.m-form-type 有 grow) */
@@ -105,12 +110,15 @@
   @apply shrink-0;
 }
 
-.m-form-assist {
+/* 顏色會跟著狀態變的那兩個要過渡 —— 錯誤狀態下字數與提示文字轉成警示色,
+  少了過渡就是當場跳色。 */
+.m-form-assist,
+.m-form-length {
   @apply transition-colors duration-300;
 }
 
 .m-form-error {
-  /* 外層只管定位 —— 字級、顏色與圖示都由裡面那支 mErrorMessage 決定,
+  /* 外層只管定位 —— 字級、顏色與圖示都由裡面那支 MErrorMessage 決定,
      全站的錯誤訊息才會長得一樣。
 
      在這裡寫字級的話會蓋掉裡層那一份,而且那是多做的:

@@ -11,7 +11,7 @@
     @apply items-center justify-center;
 
     .m-popup-container {
-      @apply rounded-b-[--popup-container-rounded-b] rounded-t-[--popup-container-rounded-t] m:max-w-[--popup-container-mobile-max-w];
+      @apply max-w-[--popup-container-max-w] rounded-b-[--popup-container-rounded-b] rounded-t-[--popup-container-rounded-t];
     }
   }
 
@@ -25,7 +25,7 @@
 }
 
 .m-popup-container {
-  @apply relative flex max-h-[92%] w-[--popup-w] flex-col overflow-hidden bg-[--popup-container-bg-color] px-[--popup-px] py-[--popup-py];
+  @apply relative flex max-h-[92%] w-[--popup-w] flex-col overflow-hidden bg-[--popup-container-bg-color] px-[--popup-px] py-[--popup-py] pt-[--popup-container-pt];
 }
 
 /* 關閉鈕的定位基準 —— 它不排進 flex 流,見 .m-popup-anchor-close。
@@ -100,7 +100,8 @@
 /* 排在標題後面。原本桌機與手機的 order 互換,是為了跟關閉鈕交換左右 ——
   關閉鈕已經不在這條線上,剩下的兩個在哪個斷點都是同一個順序。 */
 .m-popup-tools {
-  @apply order-2 flex grow items-center m:mt-[--popup-tools-mt] pt:mx-[--popup-tools-mx];
+  @apply order-2 flex grow items-center px-[--popup-tools-px];
+  @apply mt-[--popup-tools-mt] pt:mx-[--popup-tools-mx];
 }
 
 .m-popup-body {
@@ -113,7 +114,7 @@
   margin-inline: calc(var(--popup-body-px) * -1);
 
   /* 捲動由這裡自己負責。橫向照樣裁掉 —— 內容應該換行,不該橫著捲 */
-  @apply grow overflow-y-auto overflow-x-hidden px-[--popup-body-px];
+  @apply mb-[--popup-body-mb] grow overflow-y-auto overflow-x-hidden px-[--popup-body-px];
 
   &:not(:first-child) {
     @apply mt-[--popup-body-mt];
@@ -140,6 +141,10 @@
     --popup-body-mt: var(--popup-body-pc-mt);
     --popup-body-px: var(--popup-body-pc-px);
     --popup-tools-mx: var(--popup-tools-pc-mx);
+    --popup-tools-mt: var(--popup-tools-pc-mt);
+    --popup-tools-px: var(--popup-tools-pc-px);
+    --popup-body-mb: var(--popup-body-pc-mb);
+    --popup-container-pt: var(--popup-container-pc-pt);
     --popup-footer-mt: var(--popup-footer-pc-mt);
   }
 
@@ -182,13 +187,16 @@
     --popup-body-mt: var(--popup-body-tablet-mt);
     --popup-body-px: var(--popup-body-tablet-px);
     --popup-tools-mx: var(--popup-tools-tablet-mx);
+    --popup-tools-mt: var(--popup-tools-tablet-mt);
+    --popup-tools-px: var(--popup-tools-tablet-px);
+    --popup-body-mb: var(--popup-body-tablet-mb);
+    --popup-container-pt: var(--popup-container-tablet-pt);
     --popup-footer-mt: var(--popup-footer-tablet-mt);
   }
 }
 
 @screen m {
   .m-popup {
-    --popup-w: var(--popup-mobile-w);
     --popup-overlay-blur: var(--popup-overlay-mobile-blur);
     --popup-container-rounded-t: var(--popup-container-mobile-rounded);
     --popup-container-rounded-b: var(--popup-container-mobile-rounded);
@@ -200,9 +208,13 @@
     --popup-header-icon-size: var(--popup-header-icon-mobile-size);
     --popup-header-anchor-p: var(--popup-header-anchor-mobile-p);
     --popup-header-anchor-size: var(--popup-header-anchor-mobile-size);
+    --popup-tools-mx: var(--popup-tools-mobile-mx);
+    --popup-tools-mt: var(--popup-tools-mobile-mt);
+    --popup-tools-px: var(--popup-tools-mobile-px);
+    --popup-body-mb: var(--popup-body-mobile-mb);
+    --popup-container-pt: var(--popup-container-mobile-pt);
     --popup-body-mt: var(--popup-body-mobile-mt);
     --popup-body-px: var(--popup-body-mobile-px);
-    --popup-tools-mt: var(--popup-tools-mobile-mt);
     --popup-footer-mt: var(--popup-footer-mobile-mt);
   }
 }

@@ -1,18 +1,47 @@
 /* mPopup 的 promise 變體(components/common/mPopup/Promise.vue)——
    API 等待時蓋在 popup 內部的提示。
 
-   遮罩比一般 popup 淡(--black-40 對 --black-b3)—— 它蓋的是自己的內容,
+   遮罩比一般 popup 淡—— 它蓋的是自己的內容,
    不是整個畫面,太暗會看不出底下還在。
 
    字級定在這裡:等待提示全站長一樣,屬於「固定位置」的組件。 */
 
 :root {
+  /* 三個斷點各自指派的那幾個,base 也要給一份。
+
+    斷點是 raw 查詢,不是連續的範圍 —— 哪天某個尺寸三個都不命中,
+    沒有 base 的那幾個就讀到未定義的變數,瀏覽器把整條宣告丟掉,而且不報錯。
+    (那種縫出現過一次:寬 1000 到 1023、高度不足 428 的視窗,
+    後來在 tailwind.theme.js 的 t 與 pt 各補了一條。)
+
+    值取平板那一份 —— 三檔之中它在中間,拿不到斷點時最不容易出錯。 */
+  --popup-promise-message-pb: var(--popup-promise-message-tablet-pb);
+  --popup-promise-message-pl: var(--popup-promise-message-tablet-pl);
+  --popup-promise-message-pr: var(--popup-promise-message-tablet-pr);
+  --popup-promise-message-pt: var(--popup-promise-message-tablet-pt);
+  --popup-promise-message-rounded: var(--popup-promise-message-tablet-rounded);
+  --popup-promise-message-text-size: var(--popup-promise-message-tablet-text-size);
+
   --popup-promise-overlay-bg-color: var(--black-40);
+
+  /* 遮罩的模糊 —— 與一般彈窗、載入中那兩個遮罩同一套做法。
+
+    三個遮罩做的是同一件事(蓋住底下的內容,把注意力留在上層),
+    只有這一個沒有模糊的話,同一個站裡會出現兩種遮罩,
+    而那個差別看得出來卻說不出理由。
+
+    base 與三個斷點都給:斷點那三個是 raw 查詢、中間有縫
+    (寬 1000 到 1023、而且高度不足 428 的橫向視窗,三個都不成立),
+    那時沒有 base 就讀到未定義的變數,整條 backdrop-filter 被丟掉。 */
+  --popup-promise-overlay-blur: var(--popup-promise-overlay-tablet-blur);
+  --popup-promise-overlay-pc-blur: 2px;
+  --popup-promise-overlay-tablet-blur: 2px;
+  --popup-promise-overlay-mobile-blur: 2px;
 
   --popup-promise-message-bg-color: var(--white);
   --popup-promise-message-color: var(--gray-999);
 
-  /* 訊息文字由元件產生(Promise 版沒有 slot),使用端沒有管道可傳 */
+  /* 訊息文字由元件產生(Promise 版沒有 slot),字級由元件決定並分斷點 */
   --popup-promise-message-pc-text-size: 14px;
   --popup-promise-message-tablet-text-size: 14px;
   --popup-promise-message-mobile-text-size: 14px;

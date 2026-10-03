@@ -125,8 +125,8 @@ const main = async () => {
   const CACHE_DIR = path.dirname(PENDING_FILE)
 
   const pending = readJson(PENDING_FILE, [])
-  const files = [...new Set([...onListChangedFiles(core.isScannablePath), ...pending])].filter((p) =>
-    existsExactly(p)
+  const files = [...new Set([...onListChangedFiles(core.isScannablePath), ...pending])].filter(
+    (p) => existsExactly(p)
   )
 
   if (!files.length) ok()

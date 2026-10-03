@@ -13,10 +13,6 @@ import path from 'node:path'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 
-/* 同步載入專案自己的規則 —— 見下方 PROJECT_RULES 那一段的說明。
-   這個載法要 node 22.12 以上;更舊的版本會丟 ERR_REQUIRE_ESM,
-   那時會印出訊息而不是安靜略過。 */
-const require = createRequire(import.meta.url)
 import {
   baseNameOf,
   bodyOf,
@@ -51,13 +47,6 @@ import {
   tailwindThemeOf,
   topLevelKeysOf,
 } from './rules-code.mjs'
-
-// 存檔時的自動排序 —— 判斷與修正都在 rules-code.mjs,這裡只轉出去
-export { onSortComposables, onSortImports } from './rules-code.mjs'
-
-// 存檔時把進入頁面要拿的資料包成一起發出 —— 判斷與修正都在 rules-page.mjs
-export { onWrapMountedCalls } from './rules-page.mjs'
-export { onCloneApiDefault } from './rules-store.mjs'
 import { GLOBAL_CHECKS, GLOBAL_RULE_HINT, GLOBAL_RULE_TITLE } from './rules-global.mjs'
 import { PAGE_CHECKS, PAGE_RULE_HINT, PAGE_RULE_TITLE } from './rules-page.mjs'
 import { STORE_CHECKS, STORE_RULE_HINT, STORE_RULE_TITLE } from './rules-store.mjs'
@@ -82,6 +71,8 @@ import {
   DUAL_TYPE_UTILITIES,
   IMPORT_RE,
   VAR_DEFINE_RE,
+  VAR_USE_RE,
+  ARBITRARY_VAR_RE,
   stripVariants,
   utilityBodyOf,
   utilityNameFrom,
@@ -102,6 +93,13 @@ import {
   toRel,
 } from './shared.mjs'
 
+// 存檔時的自動排序 —— 判斷與修正都在 rules-code.mjs,這裡只轉出去
+export { onSortComposables, onSortImports } from './rules-code.mjs'
+
+// 存檔時把進入頁面要拿的資料包成一起發出 —— 判斷與修正都在 rules-page.mjs
+export { onWrapMountedCalls } from './rules-page.mjs'
+export { onCloneApiDefault } from './rules-store.mjs'
+
 // 走訪與共用工具都在 shared.mjs —— 全站規範那支也要用,擺這裡會變成循環相依
 // isWarn 也轉出去 —— 「哪些違規只是建議、不擋」的判斷五層守門共用同一份,
 // 各層自己比對 level 字串的話,level 一旦增加新的值,各層的行為就開始不一致
@@ -118,6 +116,15 @@ export {
   listFiles,
   toRel,
 } from './shared.mjs'
+
+/* 同步載入專案自己的規則 —— 見下方 PROJECT_RULES 那一段的說明。
+   這個載法要 node 22.12 以上;更舊的版本會丟 ERR_REQUIRE_ESM,
+   那時會印出訊息而不是安靜略過。
+
+   **要放在 import 全部結束之後**:夾在中間的話,
+   接手的專案那一側(他們的 eslint 開著 import 那一組規則)
+   會把後面每一行 import 都報成 import/first,而那一層他們不能改。 */
+const require = createRequire(import.meta.url)
 
 /* 註解遮蔽(maskCssComments / maskHtmlComments)定義在 shared.mjs ——
    色票的解析也要用它找區塊邊界,各寫一份的話,兩邊對註解的認定會開始不一樣。 */
@@ -710,7 +717,7 @@ const checkModuleImportOrder = ({ rel, text, isVue }) => {
     .filter((m) => isModuleImportPath(m[1]))
     .map((m) => ({
       path: m[1],
-      isVariables: /variables\.css$/i.test(m[1]),
+      isVariables: isVariablesFile(m[1]),
       line: lineNoOf(text, m.index),
     }))
 
@@ -844,7 +851,17 @@ const OVERRIDE_CLASS_RE = /&\.(?:[a-z]{1,2}\\:)?\\-\\-([a-z]+)-([\w]+)\s*[,{]/g
 /** 級距值一律是數字(24 / 1.5 / 10px);start、end、top 這種是狀態,不是級距 */
 const isScaleValue = (value) => /^\d/.test(value)
 
-const isVariablesFile = (rel) => /variables\.css$/i.test(rel)
+/**
+ * 這支是不是變數檔。
+ *
+ * 兩種結尾都算:來源的 `***Variables.css`,以及接手的專案自己拆出去的
+ * `***VariablesProject.css`(歸屬看得出來的那一種命名,見規則 styleProjectImport)。
+ *
+ * **後面那種漏掉的話,整組變數規則對它都不作用** —— 斷點要成套、命名要對齊
+ * tailwind、不要用覆蓋寫斷點,全部跳過。而那幾條跳過時不會有任何訊息:
+ * 檢查照樣顯示通過,只是這個專案自己那幾支變數沒有人在看。
+ */
+const isVariablesFile = (rel) => /variables(project)?\.css$/i.test(rel)
 
 /**
  * 這支模組樣式的變數檔該叫什麼。
@@ -1164,25 +1181,8 @@ const LONG_NAME_RE = new RegExp(
 // 只看色票目錄),這裡問「這個**名字**有沒有被定義過」(名字 → 有或沒有,要看全案
 // —— 模組變數、元件動態綁的也算)。兩個問題不同,所以各自收集,不共用同一份索引。
 
-/** 變數的引用;第二個捕獲是 `,` 時代表有後備值 */
-const VAR_USE_RE = /var\(\s*(--[\w-]+)\s*([,)])/g
-
-/**
- * 建置工具那種把變數寫在方括號裡的引用(`text-[--x]`、`bg-[--x]`)。
- *
- * 它編譯出來就是 `var(--x)`,壞掉的方式一模一樣 ——
- * 少看這一種的話,元件的畫面區段與 `@apply` 那一大片引用全部不會被檢查,
- * 而那正是最常整批換名、最常漏掉的地方。
- *
- * 這種寫法沒有後備值可寫,所以不必像 `var()` 那樣分辨。
- *
- * **型別提示那種也要認:`text-[length:--x]`。**
- *    `border-` 與 `text-` 同時有長度與顏色兩種版本,建置工具分不出來,
- *    所以長度要標 `length:`(見 css-module-variables 那份規範)。
- *    少認這一種的話,凡是標了型別的引用全部不會被檢查 ——
- *    而字級與框線寬度幾乎都是那樣寫的,等於整類漏掉。
- */
-const ARBITRARY_VAR_RE = /\[(?:[a-z-]+:)?(--[\w-]+)\]/g
+/* 變數引用的那兩個比對式收在 shared.mjs —— 元件介面那份名單也要問同一件事
+  (「這個變數有沒有人讀」),而那一支不能反過來 import 這裡:會變成循環相依。 */
 
 /* 色票類的變數要另外看一眼 —— 見下方 paletteVarsOf。
 
@@ -2046,7 +2046,7 @@ const NEUTRAL_VALUE = new Set([
 ])
 
 const checkBreakpointNeeded = ({ rel, text: raw }) => {
-  if (!isModuleStyle(rel) || !/variables\.css$/i.test(rel)) return []
+  if (!isModuleStyle(rel) || !isVariablesFile(rel)) return []
 
   /* 豁免是**一行一個**:標記寫在哪一行,就只放行那一行的變數。
 
@@ -2071,7 +2071,7 @@ const checkBreakpointNeeded = ({ rel, text: raw }) => {
 
     const [, name, value] = m
 
-    if (new RegExp(`-(${BREAKPOINT_ALT})-`).test(name)) return // 已經分了
+    if (new RegExp(`-(${BREAKPOINT_ALT})-`).test(name)) return // 帶斷點名的那幾個由 checkBreakpointSet 看成不成套
     if (value.includes('var(')) return // 指向別的變數
     if (NEUTRAL_VALUE.has(value.trim())) return
     if (!SIZE_VALUE_RE.test(value.trim())) return
@@ -2324,6 +2324,10 @@ const hasLayoutRules = (text) => /@apply\b/.test(text) || /^[^@\n]*\.[\w\\-]+[^{
 // 只認前者的話,照著規範接的人會被報一筆違規,而照訊息去 .vue 加一行,
 // 又違反「不要自己多加 import」那一條:兩邊都過不了。
 
+/* css 自己的 @import。兩條規則都要認它:這一條問「有沒有人接這支」,
+  styleProjectImport 問「接進來的那幾支叫什麼名字」。 */
+const CSS_AT_IMPORT_RE = /@import\s+(?:url\()?['"]([^'"]+)['"]/g
+
 const checkModuleCssUnused = ({ rel, root }) => {
   if (!isModuleCss(rel)) return []
 
@@ -2347,7 +2351,7 @@ const checkModuleCssUnused = ({ rel, root }) => {
 
       const text = fs.readFileSync(path.join(cssDir, item.name), 'utf8')
 
-      for (const m of text.matchAll(/@import\s+(?:url\()?['"]([^'"]+)['"]/g)) {
+      for (const m of text.matchAll(CSS_AT_IMPORT_RE)) {
         if (path.basename(m[1]) === fileName) imported = true
       }
 
@@ -2403,6 +2407,192 @@ const checkModuleCssUnused = ({ rel, root }) => {
       )
     )
   }
+
+  return issues
+}
+
+// --- 規則 styleProjectImport:從接點拆出去的樣式要看得出歸屬 ----------------
+//
+// styleProject.css 是接手的專案往元件裡加東西的唯一接點。從它 @import 出去的
+// 那幾支與來源的樣式躺在同一個資料夾裡,檔名看不出歸屬的話,下一次整套更新時
+// 沒有人分得出哪幾支是來源的、哪幾支是這個站自己加的。
+//
+// 兩種結尾,各對應一層:
+//
+//   <自己那一組>VariablesProject.css   變數
+//   <自己那一組>Project.css            版型
+//
+// 變數那一種要分得出來還有第二個理由:整組變數規則靠檔名認它
+// (見 isVariablesFile)—— 名字不對的話它被當成版型檔,斷點要成套、
+// 命名要對齊 tailwind、斷點不要用覆蓋寫那幾條對它全部不作用,
+// 而那幾條不作用時不會有任何訊息,檢查照樣顯示通過。
+//
+// 接點只接同一層自己拆出去的那幾支。外部套件的樣式與全域那幾支走全域的
+// 進入點 —— 從元件的樣式接進來的話,每一支載入它的元件都會輸出一份。
+
+const STYLE_PROJECT_FILE = 'styleProject.css'
+
+const checkStyleProjectImport = ({ rel, text: raw }) => {
+  if (!isModuleStyle(rel) || path.basename(rel) !== STYLE_PROJECT_FILE) return []
+
+  /* 遮掉註解再找 —— 這一支的檔頭本來就寫著 @import 的示範,
+     照 raw 掃的話那幾行每次都被報成違規。 */
+  const text = maskCssComments(raw)
+  const issues = []
+
+  /* **這一支只放 @import,樣式本身寫在拆出去的那幾支裡。**
+
+    直接寫在這裡不會壞掉(它照樣輸出),所以單看畫面分不出來 ——
+    分得出來的是檔名:拆出去的那幾支一眼看得出哪些是這個站自己加的,
+    而全部堆在接點裡的話,這個站加了什麼要整支讀完才知道。
+
+    遮掉註解之後,每一行要嘛是 @import、要嘛是空白 —— 還剩別的東西,
+    那就是直接寫在接點裡的樣式。來源那一份只有檔頭註解,所以不會被報。 */
+  const strayLine = text
+    .split(/\r?\n/)
+    .findIndex((line) => line.trim() && !/^\s*@import\b/.test(line))
+
+  if (strayLine !== -1) {
+    issues.push(
+      issueOf(
+        rel,
+        strayLine + 1,
+        'styleProjectImport',
+        `樣式不要直接寫在這支接點裡 —— 它只放 @import,` +
+          `內容拆到 <自己的那一組>Project.css(版型)與 ` +
+          `<自己的那一組>VariablesProject.css(變數),再從這裡接。` +
+          `主樣式那一組沿用來源的名字:common.css 對 commonProject.css、` +
+          `variables.css 對 variablesProject.css。` +
+          `直接寫在這裡照樣會輸出,所以畫面上分不出來 —— ` +
+          `分得出來的是檔名:這個站自己加了什麼,看檔名就知道`
+      )
+    )
+  }
+
+  for (const m of text.matchAll(CSS_AT_IMPORT_RE)) {
+    const spec = m[1]
+    const name = path.basename(spec)
+    const line = lineNoOf(text, m.index)
+
+    if (!spec.startsWith('./') && !spec.startsWith('../')) {
+      issues.push(
+        issueOf(
+          rel,
+          line,
+          'styleProjectImport',
+          `${spec} 不是這個元件自己的樣式 —— 這支接點只接同一層拆出去的那幾支。` +
+            `外部套件與全域樣式從全域的進入點載入:接在這裡的話,` +
+            `每一支載入這個元件的地方都會再輸出一份`
+        )
+      )
+      continue
+    }
+
+    if (/variables\.css$/i.test(name)) {
+      issues.push(
+        issueOf(
+          rel,
+          line,
+          'styleProjectImport',
+          `${name} 是來源那一層的命名 —— 這個專案自己拆出去的變數檔叫 ***VariablesProject.css。` +
+            `沿用來源的名字,下一次整套更新時分不出這支是誰的`
+        )
+      )
+      continue
+    }
+
+    if (!/project\.css$/i.test(name)) {
+      issues.push(
+        issueOf(
+          rel,
+          line,
+          'styleProjectImport',
+          `${name} 看不出是這個專案自己加的 —— 變數檔叫 ***VariablesProject.css、` +
+            `版型檔叫 ***Project.css。變數那一種的名字還決定它受不受變數規則檢查` +
+            `(斷點要成套、命名要對齊 tailwind),名字不對的話那幾條對它完全不作用`
+        )
+      )
+    }
+  }
+
+  return issues
+}
+
+// --- 規則 styleProjectValue:接手的專案新加的版型不寫死尺寸 ------------------
+//
+// `***Project.css` 是接手的專案自己加上去的版型。尺寸寫死在這一層的話,
+// 那個值在三個斷點都一樣 —— 而手機與桌機要同一個間距是少數情況,
+// 多數是寫的當下只看了一個尺寸。要分斷點時得先把值搬進變數檔,
+// 那時這個值已經散在好幾個地方了。
+//
+// **只管接手的專案新加的那幾支。** 來源的版型檔與既有的樣式不在範圍內 ——
+// 那裡有十幾處單一值,而規則 moduleVar 明許「單一值可留在模組 css」。
+// 一起擋的話來源自己就報一整排,而一條一直報改不了的東西的規則,
+// 結果是整條被關掉。新加的東西照新規矩,存量不必先清。
+//
+// 判準與「變數該不該分斷點」同一份(SIZE_VALUE_RE / NEUTRAL_VALUE / 同一個豁免標記)——
+// 兩邊各寫一次的話,改了其中一邊,同一個值在變數檔與版型檔的待遇會開始不一樣。
+//
+// 只看方括號裡的值(`gap-x-[4px]`)。這一層的樣式幾乎都走 @apply,
+// 而純 css 宣告裡的字面值認起來誤報多(translateY(-50%) 那種位移不該分斷點)。
+
+/**
+ * 這幾個不必分斷點 —— 它們帶單位,但講的不是尺寸。
+ *
+ *   z        疊放順序。合法的值沒有單位,所以實際上掃不到它,
+ *            列著是為了把「哪幾種不必分」講完整
+ *   leading  行高。跟著字級走,而字級自己已經分斷點了
+ *   tracking 字距。同一份字體在每個尺寸是同一個視覺密度
+ *
+ * 其餘一律要分 —— 換一個斷點而那個值不用改,是少數情況,
+ * 多數是寫的當下只看了一個尺寸。
+ */
+const BREAKPOINT_FREE_UTILITIES = new Set(['z', 'leading', 'tracking'])
+
+const checkStyleProjectValue = ({ rel, text: raw }) => {
+  if (!isModuleStyle(rel)) return []
+  if (!/project\.css$/i.test(path.basename(rel))) return []
+  if (isVariablesFile(rel)) return [] // 變數檔那一種由 variable 那條看斷點
+
+  const rawLines = raw.split(/\r?\n/)
+  const issues = []
+
+  // 豁免一行一個 —— 標記寫在註解裡,所以看還沒遮掉註解的那一份
+  maskCssComments(raw)
+    .split(/\r?\n/)
+    .forEach((line, i) => {
+      if (hasExemptMark(rawLines[i] ?? '', 'breakpoint')) return
+
+      /* 分號先換成空白再切 —— 不換的話,每一行最後那一個 utility
+         帶著 `;`(`@apply … rounded-[4px];`),結尾就不是方括號,整個被跳過。
+         一行只有最後一個會漏,所以漏掉的那幾筆看起來像是規則認不得某些寫法。 */
+      for (const token of line.replace(/[;,]/g, ' ').split(/\s+/)) {
+        const value = /\[([^\]]+)\]$/.exec(token)?.[1]?.trim()
+
+        if (!value || NEUTRAL_VALUE.has(value)) continue
+        if (!SIZE_VALUE_RE.test(value)) continue
+
+        /* 「這個 class 是哪一個屬性」用共用的那一份判斷 ——
+           自己切一次的話,名字帶連字號的那幾個(gap-x、inset-x)會切錯。 */
+        const name = utilityNameFrom(utilityBodyOf(token))
+        if (BREAKPOINT_FREE_UTILITIES.has(name)) continue
+
+        issues.push(
+          issueOf(
+            rel,
+            i + 1,
+            'styleProjectValue',
+            `${token} 的值是寫死的 —— 值定義在同一組的 ***VariablesProject.css 的 :root` +
+              `(-pc- / -tablet- / -mobile- 三份,三個斷點值相同也要拆),` +
+              `這裡讀中性的那個名字。寫死的話三個斷點都是同一個值,` +
+              `而要分開時這個值已經散在好幾個地方了。` +
+              `不必分斷點的只有疊放順序、行高與字距 —— ` +
+              `其餘真的不必分的話,在**那一行的行尾**標 ` +
+              `/* lint-breakpoint-exempt: 理由 */(標在上一行不算,而且不會有訊息說它沒生效)`
+          )
+        )
+      }
+    })
 
   return issues
 }
@@ -2743,6 +2933,8 @@ const CHECKS = [
   checkModuleScope,
   checkModuleLocation,
   checkModuleCssUnused,
+  checkStyleProjectImport,
+  checkStyleProjectValue,
   checkModuleVariables,
   checkTruncateClass,
   checkSharedVarScope,
@@ -2851,6 +3043,8 @@ export const RULE_TITLE = {
   unknownVar: '用到沒有定義的 css 變數',
   breakpointVarOverride: '斷點用覆蓋的,值散在兩個地方',
   moduleCssUnused: '樣式檔沒有任何元件 import 它',
+  styleProjectImport: 'styleProject.css 接進來的檔名看不出歸屬,或樣式直接寫在接點裡',
+  styleProjectValue: '接手的專案新加的版型檔寫死了尺寸值',
   lengthTypeHint: '長度值沒有標 length:,會被當成顏色',
   lengthTypeVar: '標型別時把變數包在 var() 裡',
   ...GLOBAL_RULE_TITLE,
@@ -2889,6 +3083,10 @@ export const RULE_HINT = {
     '各斷點的值各給一個名字,斷點區塊只做指派 —— 基底與斷點各寫一次字面值的話,改的時候漏掉一處就是某個斷點停在舊值',
   moduleCssUnused:
     '樣式檔要有人 import —— 沒有的話整支一行都不會輸出,而畫面上少了一整批樣式看起來像設計本來就長那樣',
+  styleProjectImport:
+    '接點只放 @import —— 自己拆出去的變數檔叫 ***VariablesProject.css、版型檔叫 ***Project.css;變數那一種的名字還決定它受不受變數規則檢查',
+  styleProjectValue:
+    '自己新加的版型裡不寫死尺寸 —— 值放同一組的 ***VariablesProject.css,三個斷點各一份,版型檔讀中性的那個名字',
   ...GLOBAL_RULE_HINT,
   ...API_RULE_HINT,
   ...STORE_RULE_HINT,

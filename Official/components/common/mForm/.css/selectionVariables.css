@@ -2,6 +2,20 @@
    版型在 selection.css —— 這裡只放值與 modifier。 */
 
 :root {
+  /* 三個斷點各自指派的那幾個,base 也要給一份。
+
+    斷點是 raw 查詢,不是連續的範圍 —— 哪天某個尺寸三個都不命中,
+    沒有 base 的那幾個就讀到未定義的變數,瀏覽器把整條宣告丟掉,而且不報錯。
+    (那種縫出現過一次:寬 1000 到 1023、高度不足 428 的視窗,
+    後來在 tailwind.theme.js 的 t 與 pt 各補了一條。)
+
+    值取平板那一份 —— 三檔之中它在中間,拿不到斷點時最不容易出錯。 */
+  --form-selection-gap-x: var(--form-selection-tablet-gap-x);
+  --form-selection-icon-mt: var(--form-selection-icon-tablet-mt);
+  --form-selection-icon-mb: var(--form-selection-icon-tablet-mb);
+  --form-selection-icon-mx: var(--form-selection-icon-tablet-mx);
+  --form-selection-icon-size: var(--form-selection-icon-tablet-size);
+
   /* 勾選框尺寸 —— 沒帶 --icon-size-XX modifier 時的預設。
      18px 是原本寫死在 Radio.vue template 裡的值。 */
   --form-selection-icon-pc-size: 18px;
@@ -14,9 +28,22 @@
   --form-selection-mobile-gap-x: 6px;
 
   /* 有文字時,勾選框往下對齊字身(單獨一個框時不用) */
+  /* 上外距與下外距分開兩個名字,不要合成一個 my ——
+    上面那一個管的是「有文字時往下對齊字身」(所以只在 --has-label 底下套用),
+    下面這兩個是圓鈕四周的留白,無條件套用。合成一個的話,
+    同一個 margin-top 由兩個名字管,改的時候一定會漏掉一處。
+
+    右邊那一段外距會疊在圓鈕與文字的間隔(--form-selection-gap-x)上。 */
   --form-selection-icon-pc-mt: 2px;
   --form-selection-icon-tablet-mt: 2px;
   --form-selection-icon-mobile-mt: 2px;
+
+  --form-selection-icon-pc-mb: 0;
+  --form-selection-icon-tablet-mb: 0;
+  --form-selection-icon-mobile-mb: 0;
+  --form-selection-icon-pc-mx: 0;
+  --form-selection-icon-tablet-mx: 0;
+  --form-selection-icon-mobile-mx: 0;
 }
 
 /* modifier 只設變數,套用在 selection.css —— variables 檔不放版型宣告 */

@@ -34,6 +34,8 @@
 | `moduleScope` | 模組 css 混入別的模組或非 `m-` 開頭的 class（建置工具的關聯掛勾 group / peer 不算） | 元件的樣式子資料夾 | ✗ |
 | `moduleLocation` | 對得上某個元件的樣式留在集中目錄（該搬進那個元件的資料夾） | 共用變數目錄 | ✗ |
 | `moduleCssUnused` | 元件樣式目錄裡的 css 沒有任何元件 import 它 —— 整支一行都不會輸出，而畫面上少了那一整批樣式看起來常常像設計本來就長那樣。不限檔名：新加了忘了 import、或元件改寫時把 import 拿掉，兩種都抓得到 | 元件自己的樣式目錄 | ✗ |
+| `styleProjectImport` | `styleProject.css` 只放 `@import`，樣式直接寫在接點裡會被報；接進來的檔名要看得出歸屬 —— 這個專案自己拆出去的變數檔叫 `***VariablesProject.css`、版型檔叫 `***Project.css`（主樣式那一組沿用來源的名字：`commonProject.css` / `variablesProject.css`）。那幾支與來源的樣式躺在同一個資料夾，沿用來源的命名（或隨便取）的話，下一次整套更新時分不出哪幾支是誰的；變數那一種的名字還決定它受不受變數規則檢查。外部套件與全域樣式接在這裡也會被報（每一支載入該元件的地方都會再輸出一份） | 元件樣式目錄裡的 `styleProject.css` | ✗ |
+| `styleProjectValue` | 接手的專案新加的版型（`***Project.css`）裡寫死尺寸 —— 值要分三個斷點放進同一組的 `***VariablesProject.css`，版型檔讀中性的那個名字。只有疊放順序、行高、字距三種不必分（它們帶單位但講的不是尺寸）；無單位的值本來就不算。**只管新加的那幾支**，來源的版型檔與既有樣式不在範圍內（那裡的單一值由 `moduleVar` 明許留著）。例外在那一行的行尾標 `/* lint-breakpoint-exempt: 理由 */` | 元件樣式目錄裡的 `***Project.css` | ✗ |
 | `moduleVar` | 同屬性兩個以上級距值（該搬到 `***Variables.css`） | 元件的樣式子資料夾與共用變數目錄（Variables 檔除外） | ✗ |
 | `breakpointPrefix` | 父層可傳入的級距在某個 `@screen` 區塊少列了會命中該斷點的前綴變體 | 元件的樣式子資料夾與共用變數目錄 | ✗ |
 | `variable` | 命名沒對齊 tailwind、級距用 `sm`/`md`/`lg`、斷點沒三份成套 | 元件的樣式子資料夾與共用變數目錄 | ✗ |
@@ -94,10 +96,10 @@
 | `importOrder` | 元件沒有載入樣式（樣式要由元件自己 import；自己完全不寫 class 的轉手元件不在此列） | 元件目錄的 `.vue` | ✗（工具看不出該載哪一支） |
 | `configItem` | 專案設定檔多了沒有任何規則讀的項目 | `.tools/lint/project-config.mjs` | ✗（來源專案只提醒，見下方說明） |
 | `unknownExemptMark` | 註解裡寫了 `lint-xxx-exempt`，但沒有任何規則在讀那個名字 —— 那一行不會放行任何東西，讀起來卻像「這裡已經想過了」。合法的名字直接從規則的程式碼裡看出來，不另外維護清單；程式碼與字串裡的同一串字是資料，不算宣告 | 原始碼 | ✗ |
-| `componentApiAdded` | 元件的三個對外介面（config、defineExpose、defineEmits）多了來源沒有的項目。css 變數不算 —— 元件的樣式那一層歸接手的專案，變數本來就會增減。值可以改（那正是它們存在的理由），但多加的那一個元件內部不會讀，寫了什麼都不會發生，而下一次整套更新會把它覆蓋掉。**把一個設定改成巢狀也算** —— 底下那幾個鍵在來源不存在，而元件讀的是原本那一個。名單由來源 `npm run rules:seal` 產生、跟著元件複製過來；來源專案不比對自己 | 元件目錄底下的 .vue 與 .js | ✗ |
+| `componentApiAdded` | 元件的四種對外介面多了來源沒有的項目：config、defineExpose、defineEmits，以及**變數檔 `:root` 裡的 css 變數**。前三種是元件內部在讀的，多加的那一個它就是不會讀，寫了什麼都不會發生，而下一次整套更新會把它覆蓋掉；**把一個設定改成巢狀也算** —— 底下那幾個鍵在來源不存在，而元件讀的是原本那一個。**變數那一種報的是位置，不是「不能加」**：來源沒有的名字連同讀它的樣式要放 `<變體>VariablesProject.css` / `<變體>Project.css`，開之前先問設計者是不是該回報來源補。css 那一層只比 `:root` 的變數名：級距（三個 `@screen` 區塊裡的 `.--px-12`、`.--bg-green` 那組）與版型檔不比，它們歸接手的專案。名單由來源 `npm run rules:seal` 產生、跟著元件複製過來；來源專案不比對自己，來源名單裡沒有的檔案整支跳過（專案自己新增的元件與自己新開的變數檔） | 元件目錄底下的 .vue、.js 與 `*variables.css` | ✗ |
 | `setClassDefault` | `setClass` 給了帶 class 的預設值 —— 樣式由使用端決定；元件先給一份的話，使用端傳的是附加在後面，想拿掉會發現怎麼傳都蓋不掉。列出鍵、值留空字串不算（那是在說明有哪幾個位置可以傳） | 原始碼的 `.js` 與 `.vue` | ✗ |
 | `breakpointVarOverride` | 同一條選擇器鏈裡的同一個變數，在基底與 `@screen` 區塊**各寫一次字面值** —— 那是覆蓋，值散在兩個地方，改的時候漏掉一處就是某個斷點停在舊值。斷點區塊裡寫 `var(…)` 做指派不算（那是這一套本來的機制）；modifier 底下的級距（`&.--px-30`）選擇器鏈不同，也不算 | 所有 `.css` 與 `.vue` | ✗ |
-| `buildCommands` | 三個環境的指令名對不上（`dev` 開發、`deploy` 測試機、`build` 正式機）、`--mode` 與指令名不同名、或 `.env.<環境>` 沒成套。讀的是 `package.json`，掛在建置設定檔上報（`.json` 不在掃描範圍，加進去的話 `package.json` 的 `name` 會被「不寫死專案名稱」誤報） | 建置設定檔（`BUILD_CONFIG_FILES` 列的那幾支） | ✗ |
+| `buildCommands` | 三個環境的指令名對不上（`dev` 開發、`deploy` 測試機、`build` 正式機）、指令指到的環境與指令名不同名（`--mode <環境名>` 與 `--dotenv .env.<環境名>` 兩種寫法都比對）、或 `.env.<環境>` 沒成套。測試機與正式機同一套設定的專案，`deploy` 要印一句話說明該用 `build` 然後 `exit 1`（規則認「以非零離開」），並移除 `.env.deploy`——擋下來之後就不再要求那一份，但擋了卻留著會被報（沒有人讀它，而下一個人會以為這裡有測試機）。**這一條不依附任何一支檔案**，讀的是 `package.json` 也報在那裡；全專案掃描時一定跑，指定檔案時只在動到 `package.json` 或建置設定檔才跑（`package.json` 本身不進掃描範圍——它的 `name` 欄位就是專案名稱，進去的話「不寫死專案名稱」那條會把它報成違規） | 整個專案（不依附檔案） | ✗ |
 | `ruleCrashed` | 規則自己執行失敗（多半是漏了 import），那支檔案沒被那條規則檢查 | 全部 | ✗ |
 | `ruleTampered` | 共用規則與來源的指紋對不上（只有來源能改規則） | `.tools/lint/project-config.mjs`（只在非來源專案比對） | ✗ |
 | （宣告順序） | store / actions 的宣告順序 | 原始碼裡的 `.vue` | 排序 ✓（不報違規） |
@@ -369,6 +371,10 @@ class 前綴由**元件的資料夾名**推出（`mForm/` → `m-form`、`mDateP
 | AI 寫檔 | [.claude/hooks/enforce-conventions.cjs](../.claude/hooks/enforce-conventions.cjs)（PreToolUse，**阻擋式**） | AI 助理寫入前 | **只有 AI 助理** |
 | 對話 | [.claude/hooks/css-guard-prompt.cjs](../.claude/hooks/css-guard-prompt.cjs) | 每次送出訊息 | 只有 AI 助理 |
 | commit | [.githooks/pre-commit](../.githooks/pre-commit) | `git commit` | 所有人 |
+
+commit 那層另外會跑 prettier：排版不符的自動排好、加回這次 commit（不擋）。排版與這份規範是兩套工具，設定在 `.prettierrc.json` 與 `.prettierignore`。
+
+utility class 的順序也歸 prettier（`prettier-plugin-tailwindcss`），不是這份規範在管。它只排得到畫面區段裡的那一半——寫在 `<script>` 或 store 裡的 `setClass` 不會被排。
 
 **唯一會擋下違規的是 AI 寫檔那層，而它只對 AI 助理生效。** 用助理的人寫錯會被擋下來，手動改的人只看到提醒——同一份規範，兩種人的強制力不一樣。
 

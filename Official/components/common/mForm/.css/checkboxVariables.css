@@ -1,16 +1,48 @@
 /* checkbox 專屬變數。勾選框尺寸 / 間距 / 對齊在 selectionVariables.css(與 radio 共用)。 */
 
 :root {
+  /* 三個斷點各自指派的那幾個,base 也要給一份。
+
+    斷點是 raw 查詢,不是連續的範圍 —— 哪天某個尺寸三個都不命中,
+    沒有 base 的那幾個就讀到未定義的變數,瀏覽器把整條宣告丟掉,而且不報錯。
+    (那種縫出現過一次:寬 1000 到 1023、高度不足 428 的視窗,
+    後來在 tailwind.theme.js 的 t 與 pt 各補了一條。)
+
+    值取平板那一份 —— 三檔之中它在中間,拿不到斷點時最不容易出錯。 */
+  --form-checkbox-icon-border: var(--form-checkbox-icon-tablet-border);
+  --form-checkbox-icon-p: var(--form-checkbox-icon-tablet-p);
+  --form-checkbox-icon-rounded: var(--form-checkbox-icon-tablet-rounded);
+
   --form-checkbox-icon-pc-rounded: 2px;
   --form-checkbox-icon-tablet-rounded: 2px;
   --form-checkbox-icon-mobile-rounded: 2px;
+
+  /* 勾號與方框之間的留白 —— 方框填滿底色的設計才用得到,
+    來源的方框只有外框,所以是 0。 */
+  --form-checkbox-icon-pc-p: 0;
+  --form-checkbox-icon-tablet-p: 0;
+  --form-checkbox-icon-mobile-p: 0;
 
   --form-checkbox-icon-pc-border: 1px;
   --form-checkbox-icon-tablet-border: 1px;
   --form-checkbox-icon-mobile-border: 1px;
 
-  /* 勾號本身的顏色 —— 方框內那一筆,不是外框 */
+  /* 勾號實際畫出來的顏色 —— 沒勾選時是透明的。
+
+    顯示與否靠顏色,不靠去選 svg 裡面的元素:那一層是 mSvgIcon 的內部結構,
+    而它有好幾種實作(接上 sprite 的是 <use>、內嵌圖形的是 <path>)。
+    選內部結構等於綁死其中一種 —— 換一版之後選擇器選不到東西,
+    沒勾選也看得到勾號,而且不會有任何錯誤訊息。
+    兩種實作的 .m-svg-icon 都是 fill-current,所以文字色兩邊都吃。 */
+  --form-checkbox-mark-color: transparent;
+
+  /* 勾號本身的顏色 —— 方框內那一筆,不是外框。勾選時才會被畫出來 */
   --form-checkbox-icon-color: inherit;
+  /* 方框自己的底色。來源的方框不填色(只有外框與勾號),所以是透明;
+    勾選與鎖住時各指派一次 —— 要填色的站改那兩個值。 */
+  --form-checkbox-bg-color: transparent;
+  --form-checkbox-bg-checked-color: transparent;
+  --form-checkbox-bg-disabled-color: transparent;
   --form-checkbox-icon-border-color: var(--gray-999);
   --form-checkbox-icon-border-checked-color: transparent;
   --form-checkbox-icon-border-error-color: var(--red-d111);
@@ -19,6 +51,16 @@
   --form-checkbox-label-color: inherit;
   --form-checkbox-label-checked-color: var(--green-8b0d);
   --form-checkbox-label-error-color: inherit;
+
+  /* 鎖住時的外觀 —— 值指向表單那一組,不自己填一次:
+    同一張表單裡的輸入框與勾選框並排,兩種灰看起來像其中一個壞了。
+    要換成別的樣子就改 variables.css 的 --form-element-disabled-*,整組一起變。
+
+    勾號也要變灰 —— 鎖住的欄位常常是「已經選好、不給改」,
+    框線灰了而勾號仍是原色的話,看起來像沒鎖成功。 */
+  --form-checkbox-label-disabled-color: var(--form-element-disabled-color);
+  --form-checkbox-icon-border-disabled-color: var(--form-element-border-disabled-color);
+  --form-checkbox-mark-disabled-color: var(--form-element-disabled-color);
 }
 
 .m-form {

@@ -26,6 +26,7 @@
 /* 圖示固定大小,不跟著訊息一起縮 —— 長訊息會把它壓成一條 */
 .m-error-message-icon {
   @apply h-[--error-message-icon-size] w-[--error-message-icon-size] shrink-0;
+  @apply my-[--error-message-icon-my];
 }
 
 @screen p {
@@ -33,6 +34,7 @@
     --error-message-text-size: var(--error-message-pc-text-size);
     --error-message-gap-x: var(--error-message-pc-gap-x);
     --error-message-icon-size: var(--error-message-icon-pc-size);
+    --error-message-icon-my: var(--error-message-icon-pc-my);
   }
 }
 
@@ -41,6 +43,7 @@
     --error-message-text-size: var(--error-message-tablet-text-size);
     --error-message-gap-x: var(--error-message-tablet-gap-x);
     --error-message-icon-size: var(--error-message-icon-tablet-size);
+    --error-message-icon-my: var(--error-message-icon-tablet-my);
   }
 }
 
@@ -49,5 +52,6 @@
     --error-message-text-size: var(--error-message-mobile-text-size);
     --error-message-gap-x: var(--error-message-mobile-gap-x);
     --error-message-icon-size: var(--error-message-icon-mobile-size);
+    --error-message-icon-my: var(--error-message-icon-mobile-my);
   }
 }

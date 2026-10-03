@@ -55,7 +55,6 @@ const apiData = computed(() => phoneVerify.value.apiData)
 // 只用於顯示;要打 API 時請用未遮蔽的 apiData.mobilePhone
 const maskPhone = computed(() => onMaskPhone(phone.value.apiData.mobilePhone))
 
-
 onUseMeta({
   title: '會員中心 | 好房 HouseFun',
   description:
@@ -85,7 +84,9 @@ const onMemberAuthEmailUpgradeMobileVerificationCodeVerify = async () => {
 // 也省掉一份要跨頁維護的旗標。能走到本頁的組合只有 0/1(綁定)與 2(整併),兩者互斥。
 const onAuthEmailUpgradeComplete = async (availability) => {
   const { status } =
-    availability === 2 ? await onApiPostMemberAuthEmailUpgradeMerge() : await onApiPostMemberAuthEmailUpgradeBind()
+    availability === 2
+      ? await onApiPostMemberAuthEmailUpgradeMerge()
+      : await onApiPostMemberAuthEmailUpgradeBind()
 
   onApiPromise('close')
 

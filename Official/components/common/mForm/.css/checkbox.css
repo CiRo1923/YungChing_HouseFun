@@ -8,6 +8,32 @@
       --form-checkbox-icon-border-color: var(--form-checkbox-icon-border-error-color);
     }
 
+    /* 鎖住時的外觀。
+
+      勾選框整塊是一個 <label>(點文字也要能勾),而共用那一份的 disabled
+      寫在 `&:not(label)` 底下 —— 顏色要在這裡換。
+
+      勾選狀態那幾個值要再壓一次:它們設在子層(.m-form-label / .m-form-icon)上,
+      這一層設的傳不過去,否則已經勾選又鎖住的欄位,文字與勾號仍是原色。 */
+    &.\-\-disabled {
+      --form-checkbox-label-color: var(--form-checkbox-label-disabled-color);
+      --form-checkbox-icon-border-color: var(--form-checkbox-icon-border-disabled-color);
+
+      .m-form-type {
+        &:checked {
+          & ~ .m-form-label {
+            --form-checkbox-label-color: var(--form-checkbox-label-disabled-color);
+          }
+
+          & + .m-form-icon {
+            --form-checkbox-icon-border-color: var(--form-checkbox-icon-border-disabled-color);
+            --form-checkbox-mark-color: var(--form-checkbox-mark-disabled-color);
+            --form-checkbox-bg-color: var(--form-checkbox-bg-disabled-color);
+          }
+        }
+      }
+    }
+
     .m-form-type {
       &:checked {
         /* 文字用兄弟選擇器 —— 變數設在 .m-form-icon 上的話,旁邊的 label 取不到 */
@@ -17,10 +43,8 @@
 
         & + .m-form-icon {
           --form-checkbox-icon-border-color: var(--form-checkbox-icon-border-checked-color);
-
-          > use {
-            @apply opacity-100;
-          }
+          --form-checkbox-mark-color: var(--form-checkbox-icon-color);
+          --form-checkbox-bg-color: var(--form-checkbox-bg-checked-color);
         }
       }
     }
@@ -29,15 +53,16 @@
       @apply text-[--form-checkbox-label-color] transition-colors duration-300;
     }
 
+    /* 勾號預設是透明的,:checked 時把顏色換上去(見上面那一段)。
+
+      用顏色而不是去選 svg 裡面的元素 —— 那一層是 mSvgIcon 的內部結構,
+      換一種實作之後選擇器就選不到東西,沒勾選也看得到勾號,而且不會報錯。 */
     .m-form-icon {
       border-width: var(--form-checkbox-icon-border);
 
-      @apply rounded-[--form-checkbox-icon-rounded] border-[--form-checkbox-icon-border-color] text-[--form-checkbox-icon-color];
-
-      /* 勾號預設藏起來,:checked 時淡入 */
-      > use {
-        @apply opacity-0 transition-opacity duration-300;
-      }
+      @apply rounded-[--form-checkbox-icon-rounded] border-[--form-checkbox-icon-border-color];
+      @apply bg-[--form-checkbox-bg-color] p-[--form-checkbox-icon-p];
+      @apply text-[--form-checkbox-mark-color] transition-colors duration-300;
     }
   }
 }
@@ -47,6 +72,7 @@
     &.\-\-checkbox {
       --form-checkbox-icon-rounded: var(--form-checkbox-icon-pc-rounded);
       --form-checkbox-icon-border: var(--form-checkbox-icon-pc-border);
+      --form-checkbox-icon-p: var(--form-checkbox-icon-pc-p);
     }
   }
 }
@@ -56,6 +82,7 @@
     &.\-\-checkbox {
       --form-checkbox-icon-rounded: var(--form-checkbox-icon-tablet-rounded);
       --form-checkbox-icon-border: var(--form-checkbox-icon-tablet-border);
+      --form-checkbox-icon-p: var(--form-checkbox-icon-tablet-p);
     }
   }
 }
@@ -65,6 +92,7 @@
     &.\-\-checkbox {
       --form-checkbox-icon-rounded: var(--form-checkbox-icon-mobile-rounded);
       --form-checkbox-icon-border: var(--form-checkbox-icon-mobile-border);
+      --form-checkbox-icon-p: var(--form-checkbox-icon-mobile-p);
     }
   }
 }

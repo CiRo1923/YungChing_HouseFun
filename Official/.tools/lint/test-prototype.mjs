@@ -87,12 +87,20 @@ check('八碼數字', onFormatDate('20260930', 'YYYY-MM-DD'), '2026-09-30')
 check('民國年', onFormatDate('2026-09-30', 'YYY-MM-DD'), '115-09-30')
 check('不補零的月日', onFormatDate('2026-09-05', 'YYYY/M/D'), '2026/9/5')
 
-check('字串帶時間', onFormatDate('2026-09-30 14:05:09', 'YYYY-MM-DD hh:mm:ss'), '2026-09-30 14:05:09')
+check(
+  '字串帶時間',
+  onFormatDate('2026-09-30 14:05:09', 'YYYY-MM-DD hh:mm:ss'),
+  '2026-09-30 14:05:09'
+)
 check('字串帶時間但只要日期', onFormatDate('2026-09-30 14:05:09', 'YYYY-MM-DD'), '2026-09-30')
 
 /* 沒有時間的字串要求時間 —— 補 00:00:00。
    那個字串講的是一整天,補上當下的時分秒等於無中生有。 */
-check('純日期要求時間補零', onFormatDate('2026-09-30', 'YYYY-MM-DD hh:mm:ss'), '2026-09-30 00:00:00')
+check(
+  '純日期要求時間補零',
+  onFormatDate('2026-09-30', 'YYYY-MM-DD hh:mm:ss'),
+  '2026-09-30 00:00:00'
+)
 
 check('空值回空字串', onFormatDate('', 'YYYY-MM-DD'), '')
 check('null 回空字串', onFormatDate(null, 'YYYY-MM-DD'), '')
@@ -124,7 +132,11 @@ check(
   onFormatDate('2026-09-30T14:05:09.9170000', 'YYYY-MM-DD hh:mm:ss'),
   '2026-09-30 14:05:09'
 )
-check('帶時區的 ISO 仍然要正常', onFormatDate('2026-09-30T14:05:09+08:00', 'YYYY-MM-DD'), '2026-09-30')
+check(
+  '帶時區的 ISO 仍然要正常',
+  onFormatDate('2026-09-30T14:05:09+08:00', 'YYYY-MM-DD'),
+  '2026-09-30'
+)
 
 // ---- onRecursive ----
 
@@ -170,7 +182,9 @@ for (const [name, ok, actual, expected] of log) {
 }
 
 if (failed) {
-  console.error(`\n${RED}${failed} / ${log.length} 沒有通過 —— ${path.relative(root, target)}${RESET}`)
+  console.error(
+    `\n${RED}${failed} / ${log.length} 沒有通過 —— ${path.relative(root, target)}${RESET}`
+  )
   process.exit(1)
 }
 

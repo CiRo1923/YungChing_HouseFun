@@ -28,7 +28,8 @@ import {
   toRel,
 } from './lint-core.mjs'
 import { onReportPreflight, preflight } from './preflight.mjs'
-import { LINT_BLOCKS_COMMIT, MISSING_CONFIG_ITEMS, isWarn } from './shared.mjs'
+import { checkBuildCommandsOf } from './rules-global.mjs'
+import { BUILD_CONFIG_FILES, LINT_BLOCKS_COMMIT, MISSING_CONFIG_ITEMS, isWarn } from './shared.mjs'
 import { BOLD, CYAN, DIM, GREEN, RED, RESET, YELLOW } from './colors.mjs'
 
 const root = path.resolve(fileURLToPath(import.meta.url), '../../..')
@@ -75,6 +76,20 @@ const issues = files.flatMap((abs) => lintFile(root, abs, definedVars))
 // 分組色的收攏檢查是跨檔比對,只在「全專案掃描」或「有色票檔在範圍內」時做
 const touchedColorFile = files.some((abs) => isColorCssPath(toRel(root, abs)))
 if (!fileArgs.length || touchedColorFile) issues.push(...checkSharedColors(root))
+
+/* 建置指令那一條問的是「這個專案的指令設對了嗎」,答案在 package.json,
+  不屬於任何一支被掃描的檔案 —— 所以在這裡獨立跑一次,與色票收攏同一個模式。
+
+  **判斷用的是 fileArgs,不是 files。** files 已經濾掉不可掃描的副檔名了,
+  而 package.json 與有框架那一份的建置設定(.ts)正好都被濾掉 ——
+  拿 files 判斷的話,改了那兩支的 commit 這一條永遠不會跑,
+  而那正是最需要它的時候。 */
+const touchedBuildFile = fileArgs.some((one) => {
+  const rel = toRel(root, path.resolve(root, one))
+
+  return rel === 'package.json' || BUILD_CONFIG_FILES.includes(rel)
+})
+if (!fileArgs.length || touchedBuildFile) issues.push(...checkBuildCommandsOf(root))
 
 // --- 輸出 -------------------------------------------------------------------
 

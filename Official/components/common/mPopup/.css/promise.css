@@ -3,8 +3,10 @@
 .m-popup-promise {
   @apply absolute inset-0 z-[2] flex items-center justify-center;
 
+  /* 遮罩 —— 底色加模糊,與一般彈窗、載入中那兩個遮罩同一套。
+    三個遮罩做的是同一件事,少了模糊的那一個會在同一個站裡長得不一樣。 */
   &::before {
-    @apply absolute inset-0 z-0 bg-[--popup-promise-overlay-bg-color] content-default;
+    @apply absolute inset-0 z-0 bg-[--popup-promise-overlay-bg-color] backdrop-blur-[--popup-promise-overlay-blur] content-default;
   }
 }
 
@@ -14,6 +16,10 @@
 }
 
 @screen p {
+  .m-popup-promise {
+    --popup-promise-overlay-blur: var(--popup-promise-overlay-pc-blur);
+  }
+
   .m-popup-promise-message {
     --popup-promise-message-text-size: var(--popup-promise-message-pc-text-size);
     --popup-promise-message-rounded: var(--popup-promise-message-pc-rounded);
@@ -25,6 +31,10 @@
 }
 
 @screen t {
+  .m-popup-promise {
+    --popup-promise-overlay-blur: var(--popup-promise-overlay-tablet-blur);
+  }
+
   .m-popup-promise-message {
     --popup-promise-message-text-size: var(--popup-promise-message-tablet-text-size);
     --popup-promise-message-rounded: var(--popup-promise-message-tablet-rounded);
@@ -36,6 +46,10 @@
 }
 
 @screen m {
+  .m-popup-promise {
+    --popup-promise-overlay-blur: var(--popup-promise-overlay-mobile-blur);
+  }
+
   .m-popup-promise-message {
     --popup-promise-message-text-size: var(--popup-promise-message-mobile-text-size);
     --popup-promise-message-rounded: var(--popup-promise-message-mobile-rounded);

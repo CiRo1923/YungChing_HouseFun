@@ -70,6 +70,18 @@ const config = computed(() => {
       // 傳陣列為「完整指定」,沒列到的一律關閉。
       validateEvents: ['blur', 'change', 'touchedModelUpdate'],
       rows: null,
+      /* 長度限制 —— 四個名字很像,行為各不相同:
+
+           length        同時當下限與上限的捷徑(要求「剛好幾個字」時給這一個)
+           minlength     下限。給了就蓋過 length
+           maxlength     上限。給了就蓋過 length
+           formatLength  字數**怎麼顯示**的範本,例如 '{length} / {maxlength}' ——
+                         `{length}` 換成目前打了幾個字,`{maxlength}` 換成上限。
+                         沒給這一項就不顯示字數那一格
+
+         前三個是數字(限制本身),最後一個是字串(顯示方式)。
+         **字數要顯示得出來,得先有上限** —— 範本裡的 `{maxlength}` 沒有值可填的話,
+         那一格不會出現。上限來自 maxlength 或 length,給哪一個都算。 */
       length: null,
       minlength: null,
       maxlength: null,
@@ -87,8 +99,17 @@ const validateOn = useValidateEvents(
   () => config.value.validateEvents,
   () => props.name
 )
+/* 下限與上限各算一次 —— `length` 是兩者共用的捷徑,各自的那一個給了就蓋過它。
+
+  **算在同一個地方,是因為用到它的有好幾處**(輸入框的屬性、字數那一格)。
+  各處自己寫一次 `maxlength || length` 的話,其中一處漏掉 fallback 就會變成:
+  只給 length 的欄位,輸入框擋得住字數,而字數那一格不出現 ——
+  兩邊看起來像各自壞了一半。 */
+const minLength = computed(() => config.value.minlength || config.value.length)
+const maxLength = computed(() => config.value.maxlength || config.value.length)
 const formatLength = computed(() => {
-  const { formatLength, maxlength } = config.value
+  const { formatLength } = config.value
+  const maxlength = maxLength.value
 
   return formatLength && maxlength
     ? formatLength.replace(/\{\s*(length|maxlength)\s*\}/g, (_, key) => {
@@ -96,6 +117,12 @@ const formatLength = computed(() => {
       })
     : null
 })
+/* 每一個位置一個名字,而且要與畫面那一段實際讀的名字相同 ——
+  列了而畫面沒讀的那一個,使用端傳進來不會有任何作用,**也不會報錯**。
+
+  多行輸入沒有前後綴那幾個位置:它的內容是整塊文字,
+  旁邊放圖示或單位會擠掉本來就不多的寬度。要在欄位旁邊加東西的,
+  放在這支元件外面,那一層歸使用端自己排。 */
 const setClass = computed(() => {
   return {
     ...{
@@ -103,10 +130,7 @@ const setClass = computed(() => {
       container: '',
       element: '',
       type: '',
-      formatLength: '',
-      frontAssist: '',
-      rearAssist: '',
-      suffix: '',
+      length: '',
       error: '',
     },
     ...props.setClass,
@@ -182,7 +206,11 @@ watch(
       :rules="config.isDisabled ? '' : props.rules"
       v-bind="validateOn"
     >
-      <div class="m-form-container" :class="setClass.container" v-bind="config.attr.container">
+      <div
+        class="m-form-container --textarea"
+        :class="setClass.container"
+        v-bind="config.attr.container"
+      >
         <div
           class="m-form-element --textarea"
           :class="[
@@ -194,21 +222,13 @@ watch(
           ]"
           v-bind="config.attr.element"
         >
-          <div
-            v-if="$slots.frontAssist"
-            class="m-form-assist"
-            :class="setClass.frontAssist"
-            v-bind="config.attr.frontAssist"
-          >
-            <slot name="frontAssist" />
-          </div>
           <textarea
             class="m-form-type"
             :class="setClass.type"
             v-bind="{ ...config.attr.type, ...onBind(field) }"
             :rows="config.rows"
-            :minlength="config.minlength || config.length"
-            :maxlength="config.maxlength || config.length"
+            :minlength="minLength"
+            :maxlength="maxLength"
             :placeholder="config.placeholder"
             :readonly="config.isReadonly"
             :disabled="config.isDisabled"
@@ -217,7 +237,14 @@ watch(
             @blur="onEvent($event, errorMessage)"
             @input="onInput($event)"
           />
+          <!-- 字數在框線**裡面**的右下角 —— 框畫在外面這一層(.m-form-element),
+            所以字數要放在它裡面才落在框內。
 
+            要讓字數落在框外的站:把這一段移到 .m-form-element 外面,
+            並把框搬到 .m-form-container。框搬家時,內距、高度那幾組 modifier
+            (--px-XX / --py-XX / --h-XX)也要一起搬 ——
+            它們定義在 .m-form-element 底下,而 container 是它的父層,
+            變數傳不過去。 -->
           <span
             v-if="formatLength"
             class="m-form-length"
@@ -226,27 +253,7 @@ watch(
           >
             {{ formatLength }}
           </span>
-          <div
-            v-if="$slots.rearAssist"
-            class="m-form-assist"
-            :class="setClass.rearAssist"
-            v-bind="config.attr.rearAssist"
-          >
-            <slot name="rearAssist" />
-          </div>
         </div>
-        <small
-          v-if="$slots.suffix"
-          class="m-form-suffix"
-          :class="setClass.suffix"
-          v-bind="config.attr.suffix"
-        >
-          <slot
-            name="suffix"
-            :maxlength="config.length || config.maxlength"
-            :length="model ? model.length : 0"
-          />
-        </small>
       </div>
     </Field>
     <ErrorMessage

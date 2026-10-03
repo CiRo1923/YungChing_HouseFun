@@ -4,7 +4,8 @@ const memberAuthProject = useMemberAuthProjectStore()
 const memberForget = useMemberAuthForgetStore()
 const { userData } = storeToRefs(memberAuthProject)
 const { verify } = storeToRefs(memberForget)
-const { onApiPostMemberAuthPasswordResetRequest, onSaveVerify, reset } = useMemberAuthForgetActions()
+const { onApiPostMemberAuthPasswordResetRequest, onSaveVerify, reset } =
+  useMemberAuthForgetActions()
 const { onApiPromise } = usePopupActions()
 const router = useRouter()
 
@@ -12,7 +13,6 @@ definePageMeta({
   layout: 'member-auth',
   channel: 'memberAuth',
 })
-
 
 onUseMeta({
   title: '忘記密碼 | 好房 HouseFun',

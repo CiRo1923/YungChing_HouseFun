@@ -1,7 +1,8 @@
 <script setup>
 const { onUseMeta } = useProjectActions()
 const { onApiPostMemberAuthToken, onReset: onMemberAuthReset } = useMemberAuthProjectActions()
-const { onApiPostAuthTokenExchange, onApiGetAuthMe, onClearCookies, onReset } = useMemberProjectActions()
+const { onApiPostAuthTokenExchange, onApiGetAuthMe, onClearCookies, onReset } =
+  useMemberProjectActions()
 const { onApiPromise } = usePopupActions()
 const route = useRoute()
 const router = useRouter()
@@ -19,7 +20,6 @@ const loginContainerRef = ref(null)
 onMemberAuthReset()
 onReset()
 onClearCookies()
-
 
 onUseMeta({
   title: '會員中心 | 好房 HouseFun',

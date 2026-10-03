@@ -1,3 +1,19 @@
+/* 表單的格式規則。
+
+  **這裡每一處 `document.querySelector` 的結果都要當成可能是 null。**
+  那幾行去 DOM 取欄位,是為了讀它身上的屬性(`maxlength`、`disabled`,
+  以及訊息裡 `{maxlength}` 這類佔位符要換上去的值)——
+  而驗證跑的時機與欄位在 DOM 裡的時機不一定對得上:
+  欄位還沒掛載就被讀 `meta.valid`、或它已經被 `v-if` 收掉而驗證才跑完。
+
+  少一道防護的後果不是「少讀到一個屬性」,是**那一次驗證整個中斷**:
+  該出現的必填紅字不會出現,而 console 一直有紅字。
+  那是 Uncaught (in promise),畫面照常渲染、建置與檢查全過 ——
+  看起來只是「驗證偶爾失靈」,而要在特定的進場順序下才重現得出來。
+
+  取不到時各自該怎麼辦,寫在那幾行旁邊 —— 不是一律回 true:
+  那會讓必填欄位在那一瞬間變成可以空著送出。 */
+
 import { onUnicodLength } from '@js/_prototype.js'
 import { defineRule } from 'vee-validate'
 import { all as rules } from '@vee-validate/rules'
@@ -6,7 +22,12 @@ const onReplaceMessage = (elem, object) => {
   let message = object.errorMessage || object[0]
 
   if (object.value == null) {
-    const attributes = document.querySelector(`[name="${elem.name}"]`).attributes
+    const target = document.querySelector(`[name="${elem.name}"]`)
+
+    // 找不到那個欄位就把訊息原樣送回去 —— 沒有屬性可以替換,但訊息本身仍然要顯示
+    if (!target) return message
+
+    const { attributes } = target
 
     for (let i = 0; i < attributes.length; i += 1) {
       const { nodeName, nodeValue } = attributes[i]
@@ -64,7 +85,7 @@ defineRule('required', (value, object, elem) => {
 // 最大字元長度
 defineRule('maxlength', (value, object, elem) => {
   const $elem = document.querySelector(`[name="${elem.name}"]`)
-  const maxlength = object.value || Number($elem.getAttribute('maxlength'))
+  const maxlength = object.value || Number($elem?.getAttribute('maxlength'))
 
   return value && onUnicodLength(value) > maxlength ? onReplaceMessage(elem, object) : true
 })
@@ -72,7 +93,7 @@ defineRule('maxlength', (value, object, elem) => {
 // 最小字元長度
 defineRule('minlength', (value, object, elem) => {
   const $elem = document.querySelector(`[name="${elem.name}"]`)
-  const minlength = object.value || Number($elem.getAttribute('minlength'))
+  const minlength = object.value || Number($elem?.getAttribute('minlength'))
 
   return value && onUnicodLength(value) < minlength ? onReplaceMessage(elem, object) : true
 })
@@ -95,9 +116,7 @@ defineRule('chinese', (value, message) => {
   所以不會有人發現 —— 要到例外字元本身是全形的時候才看得出行為不同。 */
 defineRule('halfWidth', (value, object) => {
   const isObject = !!object.exception
-  const exception = isObject
-    ? value.replace(new RegExp(`\\${object.exception}`, 'g'), '')
-    : value
+  const exception = isObject ? value.replace(new RegExp(`\\${object.exception}`, 'g'), '') : value
 
   const message = isObject ? object.message : object[0]
 
@@ -224,7 +243,7 @@ defineRule('email', (value, message) => {
 defineRule('custom', (value, object, elem) => {
   const el = document.querySelector(`[name="${elem.name}"]`)
 
-  if (el.disabled) return true
+  if (el?.disabled) return true
 
   const isArray = Array.isArray(object)
   const result =

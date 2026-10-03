@@ -113,8 +113,12 @@ const icon = computed(() => activeData.value.icon)
 
 const config = computed(() => {
   return {
-    // 'bomb' | 'zoom' | 'bottomSheet',或用物件依裝置各給一種:{ p, pt, tm, t, m }
-    mode: 'zoom',
+    /* 'bomb' | 'zoom' | 'bottomSheet',或用物件依裝置各給一種:{ p, pt, tm, t, m }
+
+      這個站手機用抽屜式(從下緣滑上來、貼齊底部),其餘裝置置中縮放。
+      物件裡沒列到的裝置解析不到值,由下面那一行的 `|| 'zoom'` 接住 ——
+      所以只寫手機這一個 key 就夠,不必把每個斷點都列一次。 */
+    mode: { m: 'bottomSheet' },
     ...props.config,
   }
 })

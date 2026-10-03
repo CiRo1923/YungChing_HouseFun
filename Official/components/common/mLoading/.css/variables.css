@@ -5,10 +5,40 @@
    卡片外觀(圓角 / 底色 / 內距)才由使用端 setClass.container 傳,
    因為全螢幕遮罩與內嵌兩種情境長得不一樣。 */
 
+/* **這一支是起手樣板**(檔頭標了 starter 的是 Index.vue 與 Container.vue)——
+  動畫長什麼樣每個站都不一樣,複製一次之後整組歸那個專案,
+  連這份變數清單都可以整個換掉。下面那張表是來源這一份的長相。
+
+  ===== 名字怎麼讀 =====
+
+  `--loading-<部位>-<斷點>-<屬性>`:
+
+    overlay    .m-loading / .m-loading-container  底下那層遮罩 —— 底色、模糊
+    spinner    .m-loading-spinner                 轉圈那個圖形 —— 大小、顏色、框線寬
+    text       讀取中那行文字 —— 字級、顏色、與圖形之間的距離
+*/
+
 :root {
+  /* 三個斷點各自指派的那幾個,base 也要給一份。
+
+    斷點是 raw 查詢,不是連續的範圍 —— 哪天某個尺寸三個都不命中,
+    沒有 base 的那幾個就讀到未定義的變數,瀏覽器把整條宣告丟掉,而且不報錯。
+    (那種縫出現過一次:寬 1000 到 1023、高度不足 428 的視窗,
+    後來在 tailwind.theme.js 的 t 與 pt 各補了一條。)
+
+    值取平板那一份 —— 三檔之中它在中間,拿不到斷點時最不容易出錯。 */
+  --loading-spinner-border: var(--loading-tablet-spinner-border);
+  --loading-spinner-mb: var(--loading-tablet-spinner-mb);
+  --loading-spinner-size: var(--loading-tablet-spinner-size);
+
+  /* 這兩個不指向平板那一份,填「沒有任何斷點成立時該有的樣子」——
+    字級跟著外面走、背景不模糊。尺寸那幾個沒有這種中性值,所以才指向平板。 */
+  --loading-text-size: inherit;
+  --loading-overlay-blur: 0;
+
   --loading-color: var(--gray-999);
 
-  /* 讀取提示是元件自己疊出來的圖層,使用端沒有管道可傳 */
+  /* 讀取提示是元件自己疊出來的圖層,字級由元件決定並分斷點 */
   --loading-pc-text-size: 14px;
   --loading-tablet-text-size: 14px;
   --loading-mobile-text-size: 14px;
@@ -41,6 +71,23 @@
   --loading-container-mobile-pr: 32px;
   --loading-container-mobile-pb: 32px;
   --loading-container-mobile-pl: 32px;
+
+  /* 轉圈。只有文字的話,看的人分不出是還在跑還是已經卡住 ——
+     要一個會動的東西才看得出來。尺寸與線寬由元件自己定:
+     讀取提示全站長一樣,使用端沒有要傳不同值的情境。 */
+  --loading-spinner-color: var(--loading-color);
+
+  --loading-pc-spinner-size: 32px;
+  --loading-tablet-spinner-size: 32px;
+  --loading-mobile-spinner-size: 28px;
+
+  --loading-pc-spinner-border: 3px;
+  --loading-tablet-spinner-border: 3px;
+  --loading-mobile-spinner-border: 3px;
+
+  --loading-pc-spinner-mb: 12px;
+  --loading-tablet-spinner-mb: 12px;
+  --loading-mobile-spinner-mb: 10px;
 
   /* 全螢幕遮罩(--fixed) */
   --loading-overlay-bg-color: var(--black-33);

@@ -1,14 +1,43 @@
+# 建置產物與快取 —— 不是原始碼。
+#   這幾行要與 .gitignore 一致(prettier 不會去讀那一份)。
+#   漏一個的話,排版工具會去改打包後的程式碼 —— 每次建置又被改回來,
+#   而且掃描時間會拉長好幾倍。
+node_modules
 .output
 .nuxt
+.data
 dist
-node_modules
 coverage
+
+# 套件鎖定檔由 npm 產生,排版工具動它只會製造 diff
+package-lock.json
+
+# 規則自我驗證的探測檔(跑的時候才存在)
+.claude/__css-self-test__
+
+# 自動產生、又會進版控的清單(自動注入的 import 與元件登記)——
+# 產生它的工具有自己的格式,排版過的下次重新產生時又會被覆蓋
+auto-imports.d.ts
+components.d.ts
+
+# 封存出來的那兩份名單(規則的指紋、元件的介面)。
+#
+#   它們由 npm run rules:seal 產生,格式是那一支決定的 ——
+#   讓 prettier 也插手的話,兩邊會永久拉鋸:排版過一次,
+#   下一次封存又寫回原本的樣子,而每一次都是一整份的 diff。
+.tools/lint/.rules-checksum.json
+.tools/lint/.component-api.json
 
 # swagger 由後端產生,格式跟著來源走
 .api.swagger/
 
-# 文件不進 prettier —— 中文的 md 表格被重排後每一欄都會補到等寬,
-# 一行動輒兩三百字元,既難讀又製造大量假 diff(對齊變動而非內容變動)。
-# 涵蓋 docs/、**/.docs/、.acceptance/、.claude/ 的規範與 skill,以及 README。
-# .claude/hooks/ 底下的 .js 不受影響,照常格式化。
+# Markdown 一律不排版。
+#
+#   一、表格會被填滿空白去對齊,而它算的是字元數、不是顯示寬度 ——
+#      中文表格排完反而歪掉,而且每一列都進 diff。
+#   二、這幾份文件要整批複製到別的專案,排版動過就是一整份的差異。
+#   三、.md 的寫法本來就有規則在管(writingStyle、plainText 那幾條,
+#      在 .tools/lint 裡),再讓 prettier 插手等於同一件事有兩份判準。
+#
+# 編輯器那側也一致:.vscode/settings.json 沒有替 [markdown] 指定 prettier。
 *.md

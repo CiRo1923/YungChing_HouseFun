@@ -35,7 +35,7 @@ const onToggleAll = () => {
 
 <template>
   <CommonMFixedBar
-    class="flex items-center py-[12px] m:--fixed m:bg-[--green-8b0d] m:px-[16px] tm:gap-x-[10px] pt:rounded-[5px] pt:bg-[--gray-f7] pt:px-[15px] p:gap-x-[15px]"
+    class="m:--fixed flex items-center py-[12px] m:bg-[--green-8b0d] m:px-[16px] tm:gap-x-[10px] pt:rounded-[5px] pt:bg-[--gray-f7] pt:px-[15px] p:gap-x-[15px]"
   >
     <CommonMFormCheckBox
       name="batchAll"

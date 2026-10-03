@@ -1,10 +1,72 @@
+/* mForm 各種欄位**共用**的變數(輸入框本身、清除鈕、輔助文字)。
+
+  變體自己的值在旁邊那幾支:selectVariables / autocompleteVariables /
+  checkboxVariables / radioVariables / selectionVariables(勾選框與單選共用)/
+  passwordVariables。
+
+  只放「值」:root 預設值與各斷點的值;斷點對應與狀態切換寫在 common.css。
+
+  ===== 名字怎麼讀 =====
+
+  `--form-<部位>-<狀態>-<斷點>-<屬性>`,例如 `--form-element-bg-error-color`
+  是「輸入框,出錯時,底色」。
+
+  部位:
+
+    element       .m-form-element     輸入框那一塊(框線、底色、圓角、高度、內距)
+    (element-)    .m-form-type        真正的 <input> —— 字級與文字色走 element 那一組
+    clear-icon    .m-form-clear-icon  右側的清除鈕(叉叉)
+    assist        .m-form-assist      欄位旁邊的輔助說明
+    length        .m-form-length      字數計數
+    placeholder   提示文字
+
+  狀態(接在部位後面):
+
+    (無)        平常
+    focus       游標在裡面
+    error       驗證沒過
+    disabled    鎖住
+
+  **出錯時字數與輔助說明一起變色**,共用 `--form-assist-error-color` ——
+  兩段同時變才看得出是同一個欄位的事。
+*/
 :root {
+  /* 三個斷點各自指派的那幾個,base 也要給一份。
+
+    斷點是 raw 查詢,不是連續的範圍 —— 哪天某個尺寸三個都不命中,
+    沒有 base 的那幾個就讀到未定義的變數,瀏覽器把整條宣告丟掉,而且不報錯。
+    (那種縫出現過一次:寬 1000 到 1023、高度不足 428 的視窗,
+    後來在 tailwind.theme.js 的 t 與 pt 各補了一條。)
+
+    值取平板那一份 —— 三檔之中它在中間,拿不到斷點時最不容易出錯。 */
+  --form-clear-icon-p: var(--form-clear-icon-tablet-p);
+  --form-clear-icon-size: var(--form-clear-icon-tablet-size);
+  --form-element-border: var(--form-element-tablet-border);
+  --form-element-gap-x: var(--form-element-tablet-gap-x);
+  --form-error-mt: var(--form-error-tablet-mt);
+
   /* padding 變數 base 預設:production 壓縮會把 padding-* 合併成 shorthand
      `padding: var(--anchor-py) var(--anchor-px)`,shorthand 內任一 var() 未定義
      (元素只帶 --px-XX、沒帶 --py-XX)就會使整條 padding 失效歸零。base 給 0 → 沒對應
      modifier 時等同無 padding,且 shorthand 永遠有有效值;modifier(.--px-XX / .--py-XX)再覆蓋。 */
   --form-element-px: 0;
   --form-element-py: 0;
+
+  /* 圓角的 base 給 0(等同無圓角),`.--rounded` 再覆蓋成實際值。
+     沒有 base 的話,沒掛那個 class 的欄位讀到的是未定義的變數 ——
+     瀏覽器把整條 rounded 丟掉,結果看起來一樣是直角,但那是碰巧。 */
+  --form-element-rounded: 0;
+
+  /* 高度的 base 給 auto(由內容撐開),.--h-XX 再覆蓋成固定值。
+
+     **不能給 0**:那會讓沒帶 `--h-XX` 的欄位整個塌掉 ——
+     多行輸入本來就不指定高度,它的高度來自 rows。
+
+     也不能不給。沒有 base 的話,那幾支讀到的是未定義的變數,
+     瀏覽器把整條 height 丟掉 —— 結果看起來正常,但那是碰巧:
+     哪天有人在別處替這個名字補了一個值,那一批欄位會同時變高,
+     而畫面上看不出是從哪裡來的。 */
+  --form-element-h: auto;
 
   --form-element-pc-border: 1px;
   --form-element-tablet-border: 1px;
@@ -27,11 +89,15 @@
   --form-error-tablet-mt: 4px;
   --form-error-mobile-mt: 4px;
 
-
   --form-element-color: var(--gray-666);
   --form-element-focus-color: var(--green-8b0d);
   --form-element-disabled-color: var(--gray-999);
   --form-element-error-color: var(--gray-666);
+  /* 出錯時,欄位旁邊那兩段輔助資訊的文字色 ——
+    字數計數與輔助說明共用一個值,兩者同時變色才看得出是同一個欄位的事。 */
+  --form-assist-error-color: var(--orange-e646);
+  /* 清除鈕那顆叉叉 —— 尺寸與內距在上面,顏色在這裡 */
+  --form-clear-icon-color: var(--gray-999);
 
   --form-element-placeholder-color: var(--gray-999);
   --form-element-placeholder-focus-color: var(--gray-999);

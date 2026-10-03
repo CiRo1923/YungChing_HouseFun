@@ -34,9 +34,9 @@ const items = computed(() => {
       header: 'flex items-center',
       headerItems: 'pt:w-full',
       headerItem: 'pt:flex-1',
-      anchor: 'pt:w-full tm:text-[14px] p:text-[16px]',
+      anchor: 'tm:text-[14px] pt:w-full p:text-[16px]',
       select: {
-        main: 'w-full tm:--h-55',
+        main: 'tm:--h-55 w-full',
       },
     }"
   >

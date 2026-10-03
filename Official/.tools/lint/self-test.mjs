@@ -153,8 +153,8 @@ import {
   VIEWS_DIR,
   VIEW_COMPONENT_MARKERS,
   VIEW_UNDERSCORE_FOLDERS,
-} from './shared.mjs'
-import {
+
+  // 以下是函式(上面那一段是設定值)
   classPrefixOf,
   componentTagOf,
   componentTagIndexOf,
@@ -1864,6 +1864,19 @@ const CSS_CASES = [
     code: `:root {\n  --probe-h: 40px;\n}`,
     expect: 0,
   },
+  {
+    /* 接手的專案自己拆出去的變數檔(***VariablesProject.css)同樣要檢查。
+
+      漏掉的話這一層完全沒有人在看:斷點要成套、命名要對齊 tailwind
+      那幾條對它一條都不作用,而且不會有任何訊息 —— 檢查照樣顯示通過。
+      下游拆出去的變數正好是最容易漏斷點的那一批(來源的已經成套了)。 */
+    name: 'variable 專案自己拆出去的變數檔也要檢查',
+    needs: 'breakpoints',
+    file: `${M}/needOwnVariablesProject.css`,
+    code: `:root {\n  --probe-h: 40px;\n}`,
+    expect: 1,
+    keyword: '沒有分斷點',
+  },
 
   // ---------- 規則 moduleScope ----------
   {
@@ -2125,6 +2138,153 @@ const CSS_CASES = [
     code: `.${classPrefixOf(PROBE_MODULE)} {\n  @apply flex;\n}`,
     expect: 1,
     keyword: '沒有人載入這支',
+  },
+
+  // ---------- 規則 styleProjectImport ----------
+  //
+  // 接手的專案從 styleProject.css 拆出去的那幾支,與來源的樣式躺在同一個資料夾。
+  // 檔名看不出歸屬的話,下一次整套更新時沒有人分得出哪幾支是誰的 ——
+  // 而變數那一種的名字還決定它受不受變數規則檢查。
+  {
+    rule: 'styleProjectImport',
+    name: 'styleProjectImport 兩種歸屬看得出來的命名都放行',
+    file: `${S}/styleProject.css`,
+    code: `@import './probeOwnVariablesProject.css';\n@import './probeOwnProject.css';\n`,
+    expect: 0,
+  },
+  {
+    // 沿用來源的命名 —— 分不出這支是誰的
+    rule: 'styleProjectImport',
+    name: 'styleProjectImport 來源那一層的變數檔命名要報',
+    file: `${S}/styleProject.css`,
+    code: `@import './probeOwnVariables.css';\n`,
+    expect: 1,
+    keyword: '是來源那一層的命名',
+  },
+  {
+    rule: 'styleProjectImport',
+    name: 'styleProjectImport 看不出歸屬的版型檔要報',
+    file: `${S}/styleProject.css`,
+    code: `@import './probeOwn.css';\n`,
+    expect: 1,
+    keyword: '看不出是這個專案自己加的',
+  },
+  {
+    /* 外部套件與全域樣式接在這裡的話,每一支載入這個元件的地方都會再輸出一份 */
+    rule: 'styleProjectImport',
+    name: 'styleProjectImport 不是同一層的樣式要報',
+    file: `${S}/styleProject.css`,
+    code: `@import 'swiper/css';\n`,
+    expect: 1,
+    keyword: '不是這個元件自己的樣式',
+  },
+  {
+    /* **檔頭的示範不可以被當成實際的 @import。**
+       來源那一份 styleProject.css 的說明裡就寫著兩行示範 ——
+       照 raw 掃的話,每一個專案的每一支 styleProject.css 都會被報兩筆,
+       而那全是誤報。 */
+    rule: 'styleProjectImport',
+    name: 'styleProjectImport 註解裡的示範不報',
+    file: `${S}/styleProject.css`,
+    code: `/* 拆成好幾支的話從這裡接:\n\n    @import './<自己的那一組>Variables.css';\n    @import './<自己的那一組>.css';\n */\n`,
+    expect: 0,
+  },
+  {
+    // 只管這一支接點,別的樣式用什麼檔名接是它們自己的事
+    rule: 'styleProjectImport',
+    name: 'styleProjectImport 別的樣式檔不管',
+    file: `${S}/common.css`,
+    code: `@import './probeOwn.css';\n`,
+    expect: 0,
+  },
+  {
+    /* **接點只放 @import。** 直接寫在這裡照樣會輸出,所以單看畫面分不出來 ——
+       分得出來的是檔名:拆出去的那幾支一眼看得出哪些是這個站自己加的。 */
+    rule: 'styleProjectImport',
+    name: 'styleProjectImport 樣式直接寫在接點裡要報',
+    file: `${S}/styleProject.css`,
+    code: `.${classPrefixOf(PROBE_MODULE)} {\n  @apply flex;\n}\n`,
+    expect: 1,
+    keyword: '樣式不要直接寫在這支接點裡',
+  },
+  {
+    // 來源那一份只有檔頭註解 —— 註解不算內容,不然每個專案的每一支都被報
+    rule: 'styleProjectImport',
+    name: 'styleProjectImport 只有註解的空接點不報',
+    file: `${S}/styleProject.css`,
+    code: `/* 這個專案自己的樣式從這裡接進來。\n\n  拆出去的那幾支從這裡 @import。 */\n`,
+    expect: 0,
+  },
+
+  // ---------- 規則 styleProjectValue ----------
+  //
+  // 接手的專案新加的版型寫死尺寸的話,那個值在三個斷點都一樣 ——
+  // 而要分開時,它已經散在好幾個地方了。
+  {
+    rule: 'styleProjectValue',
+    name: 'styleProjectValue 寫死的尺寸要報',
+    file: `${S}/probeOwnProject.css`,
+    code: `.${classPrefixOf(PROBE_MODULE)} {\n  @apply gap-x-[4px];\n}\n`,
+    expect: 1,
+    keyword: '的值是寫死的',
+  },
+  {
+    // 行尾那一個帶著分號,切 token 時先換掉 —— 不然一行只有最後一個會漏
+    rule: 'styleProjectValue',
+    name: 'styleProjectValue 一行裡每一個都要看,包含行尾帶分號的那個',
+    file: `${S}/probeOwn2Project.css`,
+    code: `.${classPrefixOf(PROBE_MODULE)} {\n  @apply gap-x-[4px] rounded-[8px];\n}\n`,
+    expect: 2,
+  },
+  {
+    // 讀變數就是它要的樣子(值分三份放在變數檔)
+    rule: 'styleProjectValue',
+    name: 'styleProjectValue 讀變數不報',
+    file: `${S}/probeOwn3Project.css`,
+    code: `.${classPrefixOf(PROBE_MODULE)} {\n  @apply gap-x-[--probe-gap-x];\n}\n`,
+    expect: 0,
+  },
+  {
+    /* 這三種帶單位但講的不是尺寸:疊放順序、行高(跟著字級走)、
+       字距(同一份字體在每個尺寸是同一個視覺密度)。 */
+    rule: 'styleProjectValue',
+    name: 'styleProjectValue 疊放順序、行高、字距不必分斷點',
+    file: `${S}/probeOwn4Project.css`,
+    code: `.${classPrefixOf(PROBE_MODULE)} {\n  @apply z-[10] leading-[20px] tracking-[0.06em];\n}\n`,
+    expect: 0,
+  },
+  {
+    // 無單位的數值不是尺寸,本來就不必分
+    rule: 'styleProjectValue',
+    name: 'styleProjectValue 無單位的值不報',
+    file: `${S}/probeOwn5Project.css`,
+    code: `.${classPrefixOf(PROBE_MODULE)} {\n  @apply opacity-[0.5];\n}\n`,
+    expect: 0,
+  },
+  {
+    // 豁免一行一個,標在那一行的行尾
+    rule: 'styleProjectValue',
+    name: 'styleProjectValue 標了豁免就放行',
+    file: `${S}/probeOwn6Project.css`,
+    code: `.${classPrefixOf(PROBE_MODULE)} {\n  @apply border-[1px]; /* lint-breakpoint-exempt: 外框一律 1px */\n}\n`,
+    expect: 0,
+  },
+  {
+    /* 變數檔那一種不歸這條看 —— 它的斷點由 variable 那條管,
+       兩條都報的話同一件事會被講兩次,而修法不一樣。 */
+    rule: 'styleProjectValue',
+    name: 'styleProjectValue 變數檔那一種不管',
+    file: `${S}/probeOwnVariablesProject.css`,
+    code: `:root {\n  --probe-pc-gap: 4px;\n  --probe-tablet-gap: 4px;\n  --probe-mobile-gap: 4px;\n}\n`,
+    expect: 0,
+  },
+  {
+    // 來源的版型檔不在範圍 —— 那裡的單一值由 moduleVar 明許留著
+    rule: 'styleProjectValue',
+    name: 'styleProjectValue 來源的版型檔不管',
+    file: `${S}/common.css`,
+    code: `.${classPrefixOf(PROBE_MODULE)} {\n  @apply gap-x-[4px];\n}\n`,
+    expect: 0,
   },
 
   // ---------- 規則 moduleLocation ----------
@@ -5932,11 +6092,12 @@ const onCheckExemptNameReaders = () => {
  *
  * 要對的幾件事:
  *
- *   變數多了一個       要講出是哪一支檔案的哪一個
- *   設定多了一個       同一份比對要認得兩種介面,不是只看變數
- *   把設定改成巢狀     底下那幾個鍵在來源不存在,算多加
- *   只是值不一樣       不算(那正是它們存在的理由)
- *   來源沒有那支檔案   整支跳過(專案自己新增的元件,介面本來就全是新的)
+ *   設定多了一個          要講出是哪一支檔案的哪一個
+ *   變數檔 :root 多了一個  同一份比對要認得每一種介面,不是只看設定
+ *   把設定改成巢狀        底下那幾個鍵在來源不存在,算多加
+ *   只是值不一樣          不算(那正是它們存在的理由)
+ *   來源沒有那支檔案      整支跳過 —— 專案自己新增的元件、自己新開的變數檔,
+ *                         介面本來就全是新的,報出來每一筆都是誤報
  */
 const onCheckComponentApiDiff = () => {
   const problems = []
@@ -5949,19 +6110,43 @@ const onCheckComponentApiDiff = () => {
     config: { 'a/Index.vue': ['mode', 'step.hour'] },
     expose: { 'a/Index.vue': ['focus', 'inputRef'] },
     emits: { 'a/Index.vue': ['change', 'update:modelValue'] },
+    cssVar: { 'a/.css/variables.css': ['--a-x', '--a-y'] },
   }
 
   {
-    /* 樣式整層歸接手的專案,變數本來就會增減 —— 名單裡沒有那一類,
-       就算硬塞一份進來也不可以被當成違規。
-       擋在這裡是因為那一類曾經在名單裡:留著的話,
-       每個專案一加自己的樣式變數就被報一次,而那全是誤報。 */
+    /* **來源那幾支變數檔的 :root 多一個名字就要報 —— 報的是位置。**
+
+      自己開的名字可能與來源日後加的撞,而撞的時候兩邊語意不一定相同:
+      畫面不報錯,只是某個值變成另一件事。
+      來源沒有的變數連同讀它的樣式放 ***Project.css 那一層。 */
     const got = diffOf(recorded, {
-      vars: { 'a/.css/variables.css': ['--a-x', '--a-y', '--a-new'] },
-      config: {},
+      cssVar: { 'a/.css/variables.css': ['--a-x', '--a-y', '--a-new'] },
     })
 
-    if (got.length) problems.push('樣式的變數不該被當成元件的介面')
+    if (got.length !== 1 || got[0].added[0] !== '--a-new')
+      problems.push('變數檔多了一個 :root 變數時沒有講出來')
+    if (got[0]?.kind !== 'cssVar') problems.push('多出來的變數沒有標成 cssVar')
+  }
+
+  {
+    /* **級距不算多出來。** 它只是把來源既有的變數換成另一個值
+      (`&.--bg-green { --a-x: green }`),版型檔照樣讀同一個名字 ——
+      名單只收 :root 那一段,所以級距加多少組都不會被報。 */
+    const got = diffOf(recorded, {
+      cssVar: { 'a/.css/variables.css': ['--a-x', '--a-y'] },
+    })
+
+    if (got.length) problems.push('只加級距、沒有多開變數名時不該被報')
+  }
+
+  {
+    /* 專案自己新開的變數檔整支跳過 —— 來源名單裡沒有那個 key。
+       報出來的話,每個專案一開自己的樣式檔就被報一整串,而那全是誤報。 */
+    const got = diffOf(recorded, {
+      cssVar: { 'a/.css/myOwnVariables.css': ['--a-own-1', '--a-own-2'] },
+    })
+
+    if (got.length) problems.push('專案自己新開的變數檔不該被報')
   }
 
   {
@@ -6327,9 +6512,7 @@ const onCheckSpriteWiring = () => {
   const configKey = /runtimeConfig\.public\.(\w+)/.exec(iconText)?.[1]
 
   if (configKey && !buildConfigText.includes(configKey))
-    problems.push(
-      `元件讀執行期設定的 ${configKey},而建置設定沒有提供它 —— 圖示名打錯不會有警告`
-    )
+    problems.push(`元件讀執行期設定的 ${configKey},而建置設定沒有提供它 —— 圖示名打錯不會有警告`)
 
   report(!problems.length, '圖示那一組三邊的接點對得上', problems)
 }
@@ -6524,7 +6707,8 @@ const onCheckDocsGapOutcome = () => {
 
   if (docsGapOutcome([], true) !== 'ok') problems.push('文件齊全時不該有事')
   if (docsGapOutcome([], false) !== 'ok') problems.push('文件齊全時不該有事(非來源)')
-  if (docsGapOutcome(gap, true) !== 'fail') problems.push('來源缺文件要擋 —— 不擋就會發出規則比文件新的版本')
+  if (docsGapOutcome(gap, true) !== 'fail')
+    problems.push('來源缺文件要擋 —— 不擋就會發出規則比文件新的版本')
   if (docsGapOutcome(gap, false) !== 'skip')
     problems.push('不是來源的專案缺文件不該擋 —— 那一層它補不了,擋了就是讓它完全不能 commit')
 
@@ -6858,6 +7042,139 @@ const onCheckNoDuplicateMatchers = () => {
   )
 }
 
+/**
+ * 規則那一層的 import 有沒有重複、有沒有寫在程式碼之後。
+ *
+ * **這兩件事來源自己的 eslint 看不到。** 這個 repo 的設定沒有帶 import 那一組規則
+ * (`eslint-plugin-import` 與 eslint 9 的 peer 版本對不上,裝不起來),
+ * 而**接手的專案多半帶著** —— 於是他們一跑 lint 就看到一批來源的問題,
+ * 而規則那一層他們不能改(指紋守著)。改不了又一直報的東西,
+ * 結果是整個檢查被關掉,那時連真正該擋的也沒有人看。
+ *
+ * 所以這一則自己做:判斷只問兩件事,與那兩條 eslint 規則同一個意思 ——
+ *
+ *   同一支被 import 兩次以上   改的時候容易只改其中一處
+ *   import 寫在程式碼之後      讀的人以為上面那一段就是全部的相依
+ */
+const onCheckImportShape = () => {
+  const dir = path.join(root, '.tools/lint')
+  const problems = []
+
+  for (const name of fs.readdirSync(dir)) {
+    if (!name.endsWith('.mjs')) continue
+
+    const lines = fs.readFileSync(path.join(dir, name), 'utf8').split(/\r?\n/)
+    const sources = new Map()
+    let firstCodeLine = -1
+    let inImport = false
+
+    lines.forEach((raw, i) => {
+      const line = raw.trim()
+      if (!line || line.startsWith('//') || line.startsWith('/*') || line.startsWith('*')) return
+
+      if (!inImport && /^import[\s{]/.test(line)) inImport = true
+
+      if (inImport) {
+        const from = /from\s+'([^']+)'/.exec(line)
+        if (!from) return
+
+        inImport = false
+        if (!sources.has(from[1])) sources.set(from[1], [])
+        sources.get(from[1]).push(i + 1)
+
+        if (firstCodeLine !== -1)
+          problems.push(
+            `${name}:${i + 1} 的 import 寫在程式碼之後(第一行程式碼在 ${firstCodeLine})`
+          )
+
+        return
+      }
+
+      /* `export … from` 也算 —— 它是一個語句,夾在 import 中間的話
+         後面每一行 import 都違反「import 要排在最前面」。
+         只看宣告的話抓不到那一種,而那正是這一則漏掉過的。 */
+      if (
+        firstCodeLine === -1 &&
+        /^(export\s+)?(const|let|var|function|class)\s|^export\s+[{*]/.test(line)
+      )
+        firstCodeLine = i + 1
+    })
+
+    for (const [src, at] of sources)
+      if (at.length > 1)
+        problems.push(`${name} 把 ${src} import 了 ${at.length} 次(第 ${at.join('、')} 行)`)
+  }
+
+  report(!problems.length, '規則那一層的 import 沒有重複、也沒有寫在程式碼之後', problems)
+}
+
+/**
+ * 變數檔檔頭那張對照表,列的 class 在版型檔裡都還在。
+ *
+ * **那張表是給接手的專案找名字用的** —— 一支元件有兩三百個變數,
+ * 逐一註解沒有人讀得完,所以檔頭用「名字的哪一段 → 哪個元素」收斂成幾十組。
+ *
+ * 問題是它靠人維護:class 改名之後,表還指著舊名字。
+ * 而**過期的對照表比沒有更糟** —— 沒有的話人會去翻版型檔,
+ * 有而且是錯的,人會照著找一個不存在的東西,找不到之後改在別的地方。
+ *
+ * 只比對檔頭註解裡出現的 `.m-xxx`:那幾個是表在指路的對象。
+ * 註解以外的部分不看(變數值裡不會寫 class)。
+ */
+const onCheckVariableGuide = () => {
+  /* **全案的 class 建成一份索引,不是只看這支元件自己那幾支。**
+
+    對照表的職責是「讓人找得到」,而指向別的元件的 class 是正當的用法 ——
+    例如欄位標題那支元件的檔頭提 `.m-form-label`,正是要講清楚
+    「表單裡那個是選項文字,與欄位標題不是同一個東西」。
+
+    只在自己的資料夾裡找的話,那種說明會被報成「指著不存在的東西」——
+    而那是誤報,接手的專案改不掉(檔頭是對的),commit 前那一層又會因為它停下來。
+    結果是整則被關掉,連真正過期的對照表也沒有人看。
+
+    **變數檔那幾支不算進索引**:這張表就寫在它們的檔頭裡,
+    算進去的話每一個名字都找得到自己,這一則永遠通過。 */
+  const known = new Set()
+
+  for (const dir of COMPONENT_DIRS) {
+    for (const abs of listFiles(root, dir)) {
+      if (/variables\.css$/i.test(abs)) continue
+
+      const text = fs.readFileSync(abs, 'utf8')
+
+      if (abs.endsWith('.css')) for (const m of text.matchAll(/\.(m-[a-z0-9-]+)/g)) known.add(m[1])
+
+      /* 畫面區段裡的 class 不帶點 —— 有些 class 只掛在 template 上、
+         沒有自己的樣式規則,而對照表照樣指得到它們。 */
+      if (abs.endsWith('.vue'))
+        for (const m of text.matchAll(/class="([^"]*)"/g))
+          for (const one of m[1].split(/\s+/)) if (one.startsWith('m-')) known.add(one)
+    }
+  }
+
+  const problems = []
+
+  for (const dir of COMPONENT_DIRS) {
+    for (const abs of listFiles(root, dir)) {
+      if (!/variables\.css$/i.test(abs)) continue
+
+      const head = (/^\/\*[\s\S]*?\*\//.exec(fs.readFileSync(abs, 'utf8')) ?? [''])[0]
+      if (!head) continue
+
+      const missing = [...new Set([...head.matchAll(/\.(m-[a-z0-9-]+)/g)].map((m) => m[1]))].filter(
+        (one) => !known.has(one)
+      )
+
+      if (missing.length)
+        problems.push(
+          `${toRel(root, abs)} 的檔頭指著 ${missing.map((one) => `.${one}`).join('、')},全案的樣式與畫面區段裡都找不到`
+        )
+    }
+  }
+
+  report(!problems.length, '變數檔檔頭那張對照表指的 class 都還在', problems)
+}
+
 const onCheckEveryCheckRuns = () => {
   const text = fs.readFileSync(fileURLToPath(import.meta.url), 'utf8')
 
@@ -6963,6 +7280,9 @@ const onCheckBuildCommands = () => {
     build: 'vite build --mode build',
   }
   const envs = ['dev', 'deploy', 'build']
+  /* 測試機與正式機同一套設定的專案,deploy 要擋下來並說清楚該用哪一個。
+     規則認的是「以非零離開」這件事,不是某一句固定的話。 */
+  const BLOCKED_DEPLOY = "echo '只有一個環境,請用 npm run build' && exit 1"
 
   const cases = [
     {
@@ -6987,12 +7307,81 @@ const onCheckBuildCommands = () => {
       want: 0,
     },
     {
-      name: '不用 --mode 的專案只看指令在不在',
+      name: '兩種旗標都不用的專案只看指令在不在',
       got: buildCommandProblemsOf(
         { dev: 'nuxt dev', deploy: 'nuxt build', build: 'nuxt generate' },
         []
       ),
       want: 0,
+    },
+    /* --dotenv 那一組。有框架的那一份用的就是這種寫法,而這條規則本來只認 --mode ——
+       於是「這個指令讀哪一份設定」在那種專案從來沒有被看過。
+       漏掉的後果不是報錯:deploy 帶著正式機的網域與金鑰送上測試機,
+       要等有人發現測試站在打正式的 API 才知道。 */
+    {
+      name: 'dotenv 指到的環境與指令名對不上要報',
+      got: buildCommandProblemsOf(
+        {
+          dev: 'nuxt dev --dotenv .env.dev',
+          deploy: 'nuxt build --dotenv .env.build',
+          build: 'nuxt build --dotenv .env.build',
+        },
+        envs
+      ),
+      want: 1,
+    },
+    {
+      name: 'dotenv 三個都對得上就不報',
+      got: buildCommandProblemsOf(
+        {
+          dev: 'nuxt dev --dotenv .env.dev',
+          deploy: 'nuxt build --dotenv .env.deploy',
+          build: 'nuxt build --dotenv .env.build',
+        },
+        envs
+      ),
+      want: 0,
+    },
+    /* 帶後綴的環境檔(.env.deploy.local)指的仍然是 deploy 那個環境。
+       整串拿去比對的話每一次都對不上 —— 那種誤報會讓人把整條關掉。 */
+    {
+      name: 'dotenv 帶後綴的環境檔仍算同一個環境',
+      got: buildCommandProblemsOf(
+        {
+          dev: 'nuxt dev --dotenv .env.dev',
+          deploy: 'nuxt build --dotenv .env.deploy.local',
+          build: 'nuxt build --dotenv .env.build',
+        },
+        envs
+      ),
+      want: 0,
+    },
+    /* 測試機與正式機同一套設定的專案。
+
+       這一組要驗的是「同源給專門訊息」,而不是通用的那句「與指令名對不上」——
+       照通用那句做要再建一份內容相同的環境檔,等於把同一套設定抄兩份,
+       之後各自漂移而沒有人會發現。 */
+    {
+      name: 'deploy 與 build 指到同一個環境時,給的是專門訊息而且只報一筆',
+      got: buildCommandProblemsOf({ ...full, deploy: 'vite build --mode build' }, envs),
+      want: 1,
+    },
+    {
+      name: 'deploy 擋下來、沒有 .env.deploy 的專案不報',
+      got: buildCommandProblemsOf({ ...full, deploy: BLOCKED_DEPLOY }, ['dev', 'build']),
+      want: 0,
+    },
+    /* 擋下來了卻留著那份設定 —— 沒有任何指令讀它,而下一個人會以為這裡有測試機,
+       照著改完卻怎麼都不生效。 */
+    {
+      name: 'deploy 擋下來但 .env.deploy 還在要報',
+      got: buildCommandProblemsOf({ ...full, deploy: BLOCKED_DEPLOY }, envs),
+      want: 1,
+    },
+    {
+      name: 'deploy 指到不相干的名字仍走通用訊息',
+      got: buildCommandProblemsOf({ ...full, deploy: 'vite build --mode staging' }, envs),
+      want: 1,
     },
   ]
 
@@ -7669,10 +8058,7 @@ const onCheckComponentApiInSync = () => {
     if (!here || !there) continue
 
     for (const kind of ['config', 'expose', 'emits']) {
-      const keys = new Set([
-        ...Object.keys(here[kind] ?? {}),
-        ...Object.keys(there[kind] ?? {}),
-      ])
+      const keys = new Set([...Object.keys(here[kind] ?? {}), ...Object.keys(there[kind] ?? {})])
 
       for (const key of keys) {
         const mine = (here[kind]?.[key] ?? []).join('、')
@@ -7803,8 +8189,7 @@ const onCheckRuleFingerprints = () => {
        這個專案實際上有哪幾支由擺法決定,所以只驗「找得到的那幾支有被收進來」,
        不要求一定要有(沒有表單的專案就沒有 _validation.js)。 */
     for (const [name] of sharedSourceFiles().found) {
-      if (!covered.includes(name))
-        problems.push(`${name} 沒有列入指紋 —— 那一支是整支跟著來源的`)
+      if (!covered.includes(name)) problems.push(`${name} 沒有列入指紋 —— 那一支是整支跟著來源的`)
     }
 
     for (const [name, list] of sharedSourceFiles().clashes) {
@@ -8028,8 +8413,7 @@ const onCheckGuardWiring = () => {
 
       if (/handleHotUpdate\s*\(/.test(code))
         problems.push(
-          '它還留著模組圖的更新事件(handleHotUpdate)—— ' +
-            '與監看器並存的話,同一次存檔會被檢查兩次'
+          '它還留著模組圖的更新事件(handleHotUpdate)—— ' + '與監看器並存的話,同一次存檔會被檢查兩次'
         )
 
       report(!problems.length, '開發伺服器外掛指向的守門入口存在', problems)
@@ -8104,8 +8488,7 @@ const onCheckGuardWiring = () => {
           if (!isScannablePath(`${SRC_DIR}/probe.css`))
             problems.push(`${SRC_DIR}/ 底下的檔案被剔除了 —— 原始碼要照常檢查`)
 
-          if (isScannablePath(`${SRC_DIR}/probe.txt`))
-            problems.push('副檔名不在範圍內的沒有被剔除')
+          if (isScannablePath(`${SRC_DIR}/probe.txt`)) problems.push('副檔名不在範圍內的沒有被剔除')
 
           /* 那一層有沒有真的用這支判斷 —— 用回只看副檔名的那一支的話,
              上面那幾則照樣通過(它們驗的是函式,不是呼叫端)。 */
@@ -8113,8 +8496,7 @@ const onCheckGuardWiring = () => {
 
           if (!hookText.includes('core.isScannablePath'))
             problems.push(
-              'css-guard-prompt 沒有用 isScannablePath —— ' +
-                '只看副檔名的那一支不會剔除跳過的目錄'
+              'css-guard-prompt 沒有用 isScannablePath —— ' + '只看副檔名的那一支不會剔除跳過的目錄'
             )
 
           report(!problems.length, '送出訊息那層剔除掉跳過的目錄', problems)
@@ -8704,11 +9086,7 @@ const onCheckTouchedValidate = async () => {
 
   form.setFieldValue('probe', '填好了', false)
   await settle()
-  report(
-    errorOf() === null,
-    '碰過之後值一動就驗 只呼叫 validate() 的路徑,補填之後紅字也要消失',
-    []
-  )
+  report(errorOf() === null, '碰過之後值一動就驗 只呼叫 validate() 的路徑,補填之後紅字也要消失', [])
 
   /* 反方向:欄位被收起來再放回來(v-if 切換的那種),不可以一出現就跳紅字 ——
      使用者什麼都還沒做,而那正是這個時機要避開的情況。 */
@@ -9492,6 +9870,8 @@ try {
   onCheckApiLayers()
   onCheckIgnoredSegments()
   onCheckNoDuplicateMatchers()
+  onCheckImportShape()
+  onCheckVariableGuide()
   onCheckEveryCheckRuns()
 
   for (const c of MAJORITY_CASES) {

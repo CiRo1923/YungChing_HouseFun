@@ -1,3 +1,8 @@
+/* 欄位與後綴橫向並排 —— 排列方式各變體自己給,共用那一層不設。 */
+.m-form-container.\-\-autocomplete {
+  @apply flex;
+}
+
 .m-form-element {
   &.\-\-autocomplete {
     &:not(.\-\-disabled) {
@@ -30,14 +35,14 @@
   @apply h-full bg-[--form-autocomplete-dropdown-container-bg-color] px-[--form-autocomplete-dropdown-container-px] py-[--form-autocomplete-dropdown-container-py];
 }
 
+/* 捲動由這裡自己負責。橫向照樣裁掉 —— 選項應該省略或換行,不該橫著捲 */
 .m-form-autocomplete-dropdown-body {
-  /* 捲動由這裡自己負責。橫向照樣裁掉 —— 選項文字該截斷,不該橫著捲 */
   @apply max-h-full overflow-y-auto overflow-x-hidden;
 }
 
 .m-form-autocomplete-dropdown-no-data,
 .m-form-autocomplete-dropdown-item {
-  @apply mx-[--form-autocomplete-dropdown-common-mx] py-[--form-autocomplete-dropdown-common-py];
+  @apply mx-[--form-autocomplete-dropdown-common-mx];
 }
 
 .m-form-autocomplete-dropdown-item {
@@ -50,6 +55,11 @@
       }
     }
   }
+}
+
+.m-form-autocomplete-dropdown-no-data,
+.m-form-autocomplete-dropdown-button {
+  @apply px-[--form-autocomplete-dropdown-item-px] py-[--form-autocomplete-dropdown-item-py];
 }
 
 .m-form-autocomplete-dropdown-button {
@@ -65,7 +75,7 @@
 
   &:disabled {
     --form-autocomplete-dropdown-button-bg-color: var(
-      --form-autocomplete-dropdown-button-disbaled-bg-color
+      --form-autocomplete-dropdown-button-disabled-bg-color
     );
   }
 }
@@ -87,7 +97,8 @@
     --form-autocomplete-dropdown-container-px: var(--form-autocomplete-dropdown-container-pc-px);
     --form-autocomplete-dropdown-container-py: var(--form-autocomplete-dropdown-container-pc-py);
     --form-autocomplete-dropdown-common-mx: var(--form-autocomplete-dropdown-common-pc-mx);
-    --form-autocomplete-dropdown-common-py: var(--form-autocomplete-dropdown-common-pc-py);
+    --form-autocomplete-dropdown-item-px: var(--form-autocomplete-dropdown-item-pc-px);
+    --form-autocomplete-dropdown-item-py: var(--form-autocomplete-dropdown-item-pc-py);
     --form-autocomplete-dropdown-button-border: var(--form-autocomplete-dropdown-button-pc-border);
     --form-autocomplete-dropdown-label-px: var(--form-autocomplete-dropdown-label-pc-px);
     --form-autocomplete-dropdown-label-py: var(--form-autocomplete-dropdown-label-pc-py);
@@ -133,7 +144,8 @@
       --form-autocomplete-dropdown-container-tablet-py
     );
     --form-autocomplete-dropdown-common-mx: var(--form-autocomplete-dropdown-common-tablet-mx);
-    --form-autocomplete-dropdown-common-py: var(--form-autocomplete-dropdown-common-tablet-py);
+    --form-autocomplete-dropdown-item-px: var(--form-autocomplete-dropdown-item-tablet-px);
+    --form-autocomplete-dropdown-item-py: var(--form-autocomplete-dropdown-item-tablet-py);
     --form-autocomplete-dropdown-button-border: var(
       --form-autocomplete-dropdown-button-tablet-border
     );
@@ -158,7 +170,8 @@
       --form-autocomplete-dropdown-container-mobile-py
     );
     --form-autocomplete-dropdown-common-mx: var(--form-autocomplete-dropdown-common-mobile-mx);
-    --form-autocomplete-dropdown-common-py: var(--form-autocomplete-dropdown-common-mobile-py);
+    --form-autocomplete-dropdown-item-px: var(--form-autocomplete-dropdown-item-mobile-px);
+    --form-autocomplete-dropdown-item-py: var(--form-autocomplete-dropdown-item-mobile-py);
     --form-autocomplete-dropdown-button-border: var(
       --form-autocomplete-dropdown-button-mobile-border
     );

@@ -13,7 +13,6 @@ import path from 'node:path'
 
 import {
   ABSOLUTE_PATH_SCOPE,
-  BUILD_CONFIG_FILES,
   WRITING_STYLE_SCOPE,
   PROJECT_NAMES,
   VIEWS_DIR,
@@ -848,8 +847,22 @@ const checkUnknownExemptMark = ({ rel, text: raw, root }) => {
 // 真的需要一個新的設定項時,那代表**元件本身要改**,回到來源去加 ——
 // 加在那裡,每個專案都拿得到,而且元件內部真的會讀它。
 //
-// **css 變數不在這條的範圍。** 元件的樣式整層歸接手的專案(那一層不跟著更新),
-// 變數名也是那個專案的東西,本來就會增減。
+// **css 變數那一類不是不能加,是位置。** 上面三種多一個名字就是沒有人讀它,
+// 而變數加了之後自己的樣式讀得到 —— 樣式那一層整層歸接手的專案
+// (不在 rules:files 的清單裡,整套更新一支都不覆蓋)。
+//
+// 分界是**來源的元件有沒有這個變數**:
+//
+//   來源有(哪怕預設值是 transparent)  那是元件開給使用端的介面 ——
+//                                      把它換成另一個值(級距,
+//                                      `&.--bg-green { --x-bg-color: green }`)
+//                                      加在來源那一支變數檔就好,這條不報
+//   來源沒有                           那是這個站自己要的東西,整組
+//                                      (變數與讀它的樣式)放 ***Project.css 那一層
+//
+// 混在來源那幾支裡不會壞掉,所以畫面上分不出來 —— 分不出來的是人:
+// 下一個人讀那支變數檔,說不出哪幾個是元件本來就有的介面、哪幾個是這個站加的;
+// 來源改了那支檔案時,也說不出該合哪幾行。
 //
 // **來源那邊不比對** —— 那些本來就在那裡長,每加一個都報一次等於不能工作。
 // 來源改完元件後跑 `npm run rules:seal` 更新名單,新的名單跟著元件一起複製出去。
@@ -893,12 +906,17 @@ const checkComponentApiAdded = ({ rel }) => {
       1,
       'componentApiAdded',
       `元件的介面多了來源沒有的項目:${detail} —— ` +
-        `元件內部不會讀它們,寫了什麼都不會發生,而下一次整套更新會把它們覆蓋掉;` +
+        `設定、對外呼叫的名字、事件那三種是元件內部在讀的,多一個名字它就是不會讀,` +
+        `寫了什麼都不會發生,而下一次整套更新會把它們覆蓋掉;` +
         `把一個設定改成巢狀也算(底下那幾個鍵在來源不存在,而元件讀的是原本那一個)。` +
         `對外呼叫的名字那一種連值都不能改 —— 使用端拿著 ref 照那個名字呼叫,` +
         `改了名字,那一行就呼叫一個不存在的東西,而且不報錯。` +
-        `真的需要新的項目就回到元件庫去加,只有這個專案要的樣式則另外開一支 ` +
-        `<來源檔名>Project.css`
+        `**變數那一種不是不能加,是位置不對**:來源那幾支變數檔放的是這支元件開給` +
+        `使用端的介面,來源沒有的名字搬到 <變體>VariablesProject.css,` +
+        `讀它的那段樣式放 <變體>Project.css,兩支都從 styleProject.css 接。` +
+        `搬之前先問設計者:這是來源該補的缺口,還是只有這個站要。` +
+        `(把來源**既有**的變數換成另一個值不算多加 —— ` +
+        `那是級距,寫成 &.--bg-green { --x-bg-color: green } 加在來源那一支就好)`
     ),
   ]
 }
@@ -935,6 +953,56 @@ const BUILD_COMMANDS = [
 
 const PACKAGE_FILE = 'package.json'
 
+/**
+ * 「這個專案沒有測試機」的信號:deploy 被刻意擋下來。
+ *
+ * 有些專案的測試機與正式機本來就是同一套設定(同一台主機、同一組網域與金鑰)。
+ * 那時兩個指令做的是同一件事,而留著兩個的代價是:**打 deploy 的人以為送的是測試機**,
+ * 實際上送的是正式機,而這件事不會報錯。
+ *
+ * 處理方式不是把 deploy 刪掉 —— 打的人只會拿到 npm 的「找不到這個指令」,
+ * 看不出該改用哪一個,而他多半會自己加一個回來。
+ * 留著它、讓它印一句話然後以非零離開,**下一個打錯的人當場就知道要用哪一個**:
+ *
+ *   "deploy": "echo '這個專案的測試機與正式機同一套設定,請用 npm run build' && exit 1"
+ *
+ * 認的是「以非零離開」這件事,不是某一句固定的話 —— 訊息要怎麼寫由那個專案決定。
+ */
+const isBlockedCommand = (script = '') => /\bexit\s+[1-9]/.test(script)
+
+/**
+ * 指令裡「這一個指令讀哪一份環境設定」的兩種寫法。
+ *
+ *    --mode <環境名>          建置工具的模式旗標
+ *    --dotenv <路徑>.env.<環境名>  直接指定環境檔
+ *
+ * 兩種抓出來的都是同一個東西:這個指令指到的環境名。它要與指令名相同。
+ *
+ * **為什麼兩種都要列:** 不同的建置工具用不同的旗標,而只認其中一種的話,
+ * 用另一種的專案這一項永遠查不到東西 —— 結果會顯示通過,
+ * 看起來像「這個專案沒問題」,實際上是「沒有人在看」。
+ *
+ * 環境名只取第一段(`[\w-]+`):`.env.deploy.local` 那種帶後綴的檔案,
+ * 指的仍然是 deploy 這個環境,整串拿去比對的話每一次都對不上。
+ *
+ * 專案兩種都沒用(靠環境變數帶設定)時,兩條都不成立,整項自然略過。
+ */
+const ENV_POINTERS = [
+  { re: /--mode[= ]+(\S+)/, flag: '--mode' },
+  { re: /--dotenv[= ]+\S*\.env\.([\w-]+)/, flag: '--dotenv' },
+]
+
+/** 這個指令指到哪一個環境 —— 兩種寫法都認,都沒寫就回 null(靠環境變數帶設定的專案) */
+const envOf = (script = '') => {
+  for (const { re } of ENV_POINTERS) {
+    const found = re.exec(script)
+
+    if (found) return found[1]
+  }
+
+  return null
+}
+
 /** package.json 的 scripts —— 讀不到或解析不了就回 null(壞掉的 json 不是這條要管的事) */
 const scriptsOf = (root) => {
   try {
@@ -958,6 +1026,10 @@ export const buildCommandProblemsOf = (scripts, envNames) => {
   const problems = []
   const missing = BUILD_COMMANDS.filter(({ name }) => !scripts[name])
 
+  /* 這個專案的測試機與正式機是不是同一個環境 —— 下面好幾段都要問這件事。
+     被擋下來的 deploy 不指向任何環境,所以它在底下那些比對裡自然不成立。 */
+  const deployBlocked = isBlockedCommand(scripts.deploy)
+
   if (missing.length) {
     problems.push(
       `${PACKAGE_FILE} 少了 ${missing.map(({ name, label }) => `${name}(${label})`).join('、')} —— ` +
@@ -966,26 +1038,59 @@ export const buildCommandProblemsOf = (scripts, envNames) => {
     )
   }
 
-  /* 有用 --mode 的專案才比對。沒用的專案(靠環境變數、或建置工具沒有這個旗標)
-     不該被報 —— 那是它的建置方式,不是違規。 */
+  /* 指令裡有指到環境的才比對。沒指的專案(靠環境變數帶設定)不該被報 ——
+     那是它的建置方式,不是違規。
+
+     **兩種寫法都要認得。** 只認 --mode 的話,用另一種旗標的建置工具
+     整條少掉一半:三個指令在不在照樣檢查,但「這個指令讀的是哪一份設定」
+     從此沒有人在看 —— 而那正是這條規則存在的理由。
+     把 deploy 寫成讀正式機的設定,送測試機卻帶著正式機的網域與金鑰,
+     **不會報錯**,要等有人發現測試站在打正式的 API 才知道。 */
+  /* deploy 與 build 指到同一份設定 —— 這一種給專門的訊息,不走下面那條通用的。
+
+     通用的那一句會說「改成與指令名同名」,而照做要再建一份內容相同的環境檔:
+     同一套設定抄成兩份,之後各自漂移,而漂移的那一天沒有人會發現。
+
+     真正的選擇只有兩個,訊息要把兩個都說出來。 */
+  const deployEnv = envOf(scripts.deploy)
+  const sameSource = deployEnv !== null && deployEnv === envOf(scripts.build)
+
+  if (sameSource) {
+    problems.push(
+      `${PACKAGE_FILE} 的 deploy(測試機)與 build(正式機)讀的是同一份設定(${deployEnv})—— ` +
+        '兩個指令做的是同一件事,而打 deploy 的人以為送的是測試機。' +
+        '要嘛讓測試機有自己的那一份設定;要嘛這個專案本來就只有一個環境,' +
+        `那就把 deploy 改成擋下來(印一句話說明要用 build,然後 exit 1)並移除 .env.deploy`
+    )
+  }
+
   for (const { name, label } of BUILD_COMMANDS) {
     const script = scripts[name]
     if (!script) continue
 
-    const mode = /--mode[= ]+(\S+)/.exec(script)
-    if (!mode || mode[1] === name) continue
+    // 同源那一筆已經單獨講過了,再報一次「對不上」只是同一件事換個說法
+    if (sameSource && name === 'deploy') continue
 
-    problems.push(
-      `${PACKAGE_FILE} 的 ${name}(${label})用 --mode ${mode[1]},與指令名對不上 —— ` +
-        '兩邊同名才看得出這個指令讀的是哪一份環境設定;' +
-        `不同名的話,改了 ${name} 的設定卻沒有生效時沒有人會想到是這裡`
-    )
+    for (const { re, flag } of ENV_POINTERS) {
+      const found = re.exec(script)
+      if (!found || found[1] === name) continue
+
+      problems.push(
+        `${PACKAGE_FILE} 的 ${name}(${label})用 ${flag} 指到「${found[1]}」,與指令名對不上 —— ` +
+          '兩邊同名才看得出這個指令讀的是哪一份環境設定;' +
+          `不同名的話,改了 ${name} 的設定卻沒有生效時沒有人會想到是這裡`
+      )
+    }
   }
 
   /* 環境檔同理:專案已經在用 .env.<環境> 這套慣例時,才檢查三份齊不齊。
      一份都沒有的專案(靠別的方式帶設定)整項略過。 */
   if (envNames.length) {
-    const lack = BUILD_COMMANDS.filter(({ name }) => !envNames.includes(name))
+    /* **deploy 被擋下來的專案沒有測試機,那一份不該被要求,也不該存在。**
+       要求它的話,那個專案被迫留一份沒有人讀的設定 —— 而下一個人看到它
+       會以為這裡有測試機,照著改完卻怎麼都不生效。 */
+    const wanted = BUILD_COMMANDS.filter(({ name }) => !(deployBlocked && name === 'deploy'))
+    const lack = wanted.filter(({ name }) => !envNames.includes(name))
 
     if (lack.length) {
       problems.push(
@@ -994,27 +1099,45 @@ export const buildCommandProblemsOf = (scripts, envNames) => {
           '結果是網域或金鑰變成預設值而畫面看起來一切正常'
       )
     }
+
+    if (deployBlocked && envNames.includes('deploy')) {
+      problems.push(
+        '這個專案的 deploy 已經擋下來了(測試機與正式機同一套設定),而 .env.deploy 還在 —— ' +
+          '那一份沒有任何指令讀它,留著的話下一個人會以為這裡有測試機,' +
+          '照著改完卻怎麼都不生效,而且不報錯。把它移除'
+      )
+    }
   }
 
   return problems
 }
 
 /**
- * 掛在建置設定檔上報,而不是 package.json 自己。
+ * **這一條不依附任何一支檔案** —— 它問的是「這個專案的指令設對了嗎」,
+ * 答案在 package.json,與正在檢查哪一支檔案無關。
  *
- * `.json` 不在可掃描的副檔名裡,而加進去會出事:package.json 的 `name` 欄位
- * 本來就是專案名稱,「不寫死專案名稱」那條會把它報成違規,而那個名字非寫不可。
+ * **不掛在建置設定檔上報。** 那樣會多一個前提:那支檔案要在掃描範圍裡 ——
+ * 而有框架的那一份是 `nuxt.config.ts`,`.ts` 不是可掃描的副檔名。
+ * 掛上去的話,規則在那種專案一次都不會執行,而檢查結果顯示通過:
+ * 規則在、案例全過、沒有人在看。偏偏那正是它最該擋的情況 ——
+ * 送錯環境不會報錯,要等有人發現測試站在打正式的 API 才知道。
  *
- * 建置設定檔是最接近的一支:它與指令講的是同一件事(這個專案怎麼建置),
- * 而且每個專案都有、也在掃描範圍裡。候選檔名的清單只有一份,
- * 定義在 project-config.mjs 的 BUILD_CONFIG_FILES。
+ * 報在 package.json 上,要改的內容就在那一支;指向別的檔案只會讓人找錯地方。
+ * package.json 本身不進掃描範圍:它的 `name` 欄位就是專案名稱,
+ * 進去的話「不寫死專案名稱」那條會把它報成違規,而那個名字非寫不可。
  *
- * 行號一律是第一行 —— 要改的內容在另一支檔案,指向這支檔案的某一行
- * 只會讓人找錯地方,所以訊息裡直接寫出檔名。
+ * 行號一律是第一行 —— 指令在 json 的哪一行會隨著別人加指令而變,
+ * 指到舊的行號比不指還糟。
+ *
+ * 呼叫的時機見 lint.mjs:全專案掃描時一定跑,指定檔案時只在這次
+ * 動到 package.json 或建置設定檔才跑(與色票收攏那一條同一個模式)。
+ *
+ * **五層守門裡,寫檔前那一層不涵蓋這條。** 那一層只處理可掃描的副檔名,
+ * 而 package.json 不在裡面 —— AI 改了指令的當下不會被擋,要到 commit 前才報。
+ * 這是取捨:把 .json 放進掃描範圍會讓專案名稱那條整批誤報,
+ * 而誤報會讓人把整條關掉。
  */
-const checkBuildCommands = ({ root, rel }) => {
-  if (!BUILD_CONFIG_FILES.includes(rel)) return []
-
+export const checkBuildCommandsOf = (root) => {
   const scripts = scriptsOf(root)
   if (!scripts) return []
 
@@ -1023,7 +1146,7 @@ const checkBuildCommands = ({ root, rel }) => {
   )
 
   return buildCommandProblemsOf(scripts, envNames).map((detail) =>
-    issueOf(rel, 1, 'buildCommands', detail)
+    issueOf(PACKAGE_FILE, 1, 'buildCommands', detail)
   )
 }
 
@@ -1036,9 +1159,11 @@ export const GLOBAL_CHECKS = [
   checkRuleTampered,
   checkUnknownExemptMark,
   checkComponentApiAdded,
-  checkBuildCommands,
   checkFileBom,
 ]
+
+/* 建置指令那一條不在上面這份清單裡 —— 它不依附檔案,見 checkBuildCommandsOf 的說明。
+   列進來的話它會在每一支檔案上各跑一次,同一筆違規報幾百次。 */
 
 export const GLOBAL_RULE_TITLE = {
   ruleTampered: '共用規則被改過(只有來源能改)',
@@ -1048,7 +1173,7 @@ export const GLOBAL_RULE_TITLE = {
   selfContained: '把讀者送去別處的寫法(同上 / 參考第幾節)',
   configItem: '專案設定檔多了沒有規則讀的項目',
   unknownExemptMark: '用了沒有任何規則在讀的豁免標記',
-  componentApiAdded: '元件的介面多了來源沒有的變數或設定',
+  componentApiAdded: '元件的介面多了來源沒有的設定,或來源沒有的變數放錯了檔案',
   buildCommands: '三個環境的指令名對不上',
   fileBom: '檔案開頭有看不見的 BOM',
 }
@@ -1063,10 +1188,9 @@ export const GLOBAL_RULE_HINT = {
   configItem:
     '專案設定檔只把既有項目改成自己的值 —— 需要新的一項代表規則本身要改,回到規範工具的來源去加',
   componentApiAdded:
-    '元件的變數與 config 只能改值 —— 要多一個代表元件本身要改,回元件庫去加;改成巢狀也算多加;只有這個專案要的樣式另外開一支 <來源檔名>Project.css',
+    'config 與對外的名字只能改值 —— 要多一個代表元件本身要改,回元件庫去加(改成巢狀也算);變數不是不能加,是來源沒有的那幾個要放 <變體>VariablesProject.css,把來源既有的變數換值(級距)不算多加',
   unknownExemptMark:
     '豁免標記的名字要對得上真的在讀它的那條規則 —— 沒人讀的標記不會放行任何東西,卻讀起來像這裡已經想過了',
   buildCommands: 'dev 開發、deploy 測試機、build 正式機 —— 名字固定才不必每次確認送去哪裡',
-  fileBom:
-    '檔案開頭不要有 BOM —— 不影響執行,但每個接手的專案比對來源時都會把第一行報成差異',
+  fileBom: '檔案開頭不要有 BOM —— 不影響執行,但每個接手的專案比對來源時都會把第一行報成差異',
 }
